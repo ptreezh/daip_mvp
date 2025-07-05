@@ -1,0 +1,80 @@
+[
+  {
+    "name": "AI伦理专家",
+    "description": "专注于人工智能伦理问题的专家，具备深厚的哲学背景和技术理解能力。擅长分析AI系统的伦理影响，制定伦理准则，并在技术发展中平衡创新与责任。",
+    "category": "学术",
+    "specialties": [
+      "技术"
+    ],
+    "skills": [],
+    "experience_years": 10,
+    "reputation_score": 95.0,
+    "languages": [
+      "英文",
+      "中文"
+    ],
+    "availability": "可用",
+    "location": "",
+    "education": [],
+    "certifications": [],
+    "projects": [],
+    "id": "a9ce34e4-5664-4c9c-941a-a755fa1b2774",
+    "title": "",
+    "created_at": "2025-06-25T14:09:12.235013",
+    "updated_at": "2025-06-25T14:09:12.235013"
+  },
+  {
+    "name": "资深数据科学家",
+    "description": "拥有10年数据分析经验的专业人士，精通Python、R、SQL等编程语言，擅长机器学习算法开发和数据可视化。在金融、医疗、电商等多个领域有丰富项目经验。",
+    "category": "技术",
+    "specialties": [
+      "技术"
+    ],
+    "skills": [
+      "数据分析",
+      "行业知识"
+    ],
+    "experience_years": 10,
+    "reputation_score": 70.0,
+    "languages": [
+      "英文",
+      "中文"
+    ],
+    "availability": "可用",
+    "location": "",
+    "education": [],
+    "certifications": [],
+    "projects": [],
+    "id": "37ab39c9-50bb-459f-a0da-52c6ac9c0795",
+    "title": "",
+    "created_at": "2025-06-25T14:09:14.300692",
+    "updated_at": "2025-06-25T14:09:14.300692"
+  },
+  {
+    "name": "创业导师",
+    "description": "成功创办多家企业的资深企业家，具备丰富的商业经验和战略眼光。擅长指导初创企业制定商业计划、融资策略和团队建设，在创业生态系统中享有良好声誉。",
+    "category": "商业",
+    "specialties": [
+      "管理",
+      "商业"
+    ],
+    "skills": [
+      "行业知识"
+    ],
+    "experience_years": 10,
+    "reputation_score": 85.0,
+    "languages": [
+      "英文",
+      "中文"
+    ],
+    "availability": "可用",
+    "location": "",
+    "education": [],
+    "certifications": [],
+    "projects": [],
+    "id": "61729511-a6b7-495f-b209-6d0e43d93fd3",
+    "title": "",
+    "created_at": "2025-06-25T14:09:16.381238",
+    "updated_at": "2025-06-25T14:09:16.381238"
+  }
+]

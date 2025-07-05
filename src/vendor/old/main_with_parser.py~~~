@@ -1,0 +1,4829 @@
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import asyncio
+import glob
+import json
+import logging
+import random
+import subprocess
+import uuid
+from typing import Any, Optional
+
+import chromadb
+import numpy as np
+import uvicorn
+from dotenv import load_dotenv
+from fastapi import (
+    BackgroundTasks,
+    Body,
+    FastAPI,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+)
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+
+from src.tool_config import tool_config
+from src.unified_tool_manager import UnifiedToolManager
+
+# 加载环境变量
+load_dotenv()
+
+# 导入文档解析器
+try:
+    from src.document_parser import (
+        DocumentParser,
+        DocumentParserConfig,
+        ParsingResult,
+        TextChunk,
+    )
+
+    DOCUMENT_PARSER_AVAILABLE = True
+except ImportError as e:
+    DOCUMENT_PARSER_AVAILABLE = False
+    logging.warning(f"Document parser not available: {e}")
+
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# 创建FastAPI应用实例
+app = FastAPI(
+    title="DAIP Insight Engine", description="智能文档分析与报告生成器 - 集成文档解析器版本", version="1.0.0"
+)
+
+
+# 从环境变量获取CORS配置
+def get_cors_origins():
+    """从环境变量获取允许的CORS域名"""
+    allowed_origins = os.getenv(
+        "ALLOWED_ORIGINS",
+        "http://localhost:3000,http://localhost:8501,http://127.0.0.1:8501",
+    )
+    environment = os.getenv("ENVIRONMENT", "development")
+
+    if environment == "production":
+        # 生产环境严格限制域名
+        origins = [
+            origin.strip()
+            for origin in allowed_origins.split(",")
+            if origin.strip() and not origin.strip() == "*"
+        ]
+        if not origins:
+            origins = ["https://yourdomain.com"]  # 默认安全配置
+        return origins
+    else:
+        # 开发环境允许配置的域名
+        return [origin.strip() for origin in allowed_origins.split(",")]
+
+
+# 添加CORS中间件
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=get_cors_origins(),
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+# --- 全局变量和启动任务 ---
+
+# 全局变量存储解析任务
+parsing_tasks: dict[str, dict[str, Any]] = {}
+# 全局变量存储所有角色的详细信息 (name -> {desc, ...})
+ALL_ROLES_DETAILS: dict[str, dict[str, str]] = {}
+
+ROLES_DIR = os.path.join(os.path.dirname(__file__), "..", "roles")
+USER_ROLES_FILE = os.path.join(ROLES_DIR, "user_defined_roles.json")
+CHAT_LOG_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
+CHAT_LOG_FILE = os.path.join(CHAT_LOG_DIR, "chat_logs.jsonl")
+VECTOR_DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "role_vector_db")
+
+# 初始化Chroma向量库
+chroma_client = chromadb.PersistentClient(path=VECTOR_DB_PATH)
+
+# 使用统一的嵌入函数创建集合
+try:
+    role_collection = chroma_client.get_collection("roles")
+    print("✅ 加载现有角色集合")
+except:
+    role_collection = chroma_client.create_collection(name="roles")
+    print("✅ 创建新的角色集合")
+
+
+def load_all_roles():
+    """从文件加载所有角色的详细定义到全局变量中"""
+    global ALL_ROLES_DETAILS
+    roles_cache = {}
+    role_files = glob.glob(os.path.join(ROLES_DIR, "**", "*.json"), recursive=True)
+    for role_file in role_files:
+        try:
+            with open(role_file, encoding="utf-8") as f:
+                content = json.load(f)
+                if os.path.basename(role_file) == "user_defined_roles.json":
+                    if isinstance(content, list):
+                        for role_data in content:
+                            if isinstance(role_data, dict) and "name" in role_data:
+                                # 处理description字段，将其映射为desc
+                                if (
+                                    "description" in role_data
+                                    and "desc" not in role_data
+                                ):
+                                    role_data["desc"] = role_data["description"]
+                                if "desc" in role_data:
+                                    roles_cache[role_data["name"]] = role_data
+                else:
+                    if isinstance(content, dict) and "name" in content:
+                        # 处理description字段，将其映射为desc
+                        if "description" in content and "desc" not in content:
+                            content["desc"] = content["description"]
+                        if "desc" in content:
+                            roles_cache[content["name"]] = content
+        except (OSError, json.JSONDecodeError, TypeError) as e:
+            logger.warning(f"无法读取或解析角色文件 {role_file}: {e}")
+    ALL_ROLES_DETAILS = roles_cache
+    logger.info(f"加载了 {len(ALL_ROLES_DETAILS)} 个角色定义。")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """在应用启动时执行"""
+    os.makedirs(ROLES_DIR, exist_ok=True)
+    os.makedirs(CHAT_LOG_DIR, exist_ok=True)
+    load_all_roles()
+    build_role_embeddings()
+
+
+# -------------------------
+
+# 全局变量存储解析任务
+parsing_tasks: dict[str, dict[str, Any]] = {}
+
+
+# 请求模型
+class DocumentAnalysisRequest(BaseModel):
+    content: str
+    use_all_tools: bool = False
+
+
+# 新增的数据模型
+class Role(BaseModel):
+    name: str
+    desc: str
+
+
+class SmartRoleCreateRequest(BaseModel):
+    role_name: str
+    role_definition: str
+    category: Optional[str] = "通用"
+    specialties: Optional[list[str]] = []
+    skills: Optional[list[str]] = []
+    experience_years: Optional[int] = 5
+    reputation_score: Optional[float] = 80.0
+    languages: Optional[list[str]] = ["中文", "英文"]
+    availability: Optional[str] = "可用"
+    location: Optional[str] = ""
+    education: Optional[list[str]] = []
+    certifications: Optional[list[str]] = []
+    projects: Optional[list[str]] = []
+
+
+class ChatMessage(BaseModel):
+    sender_name: str = Field(..., description="发送者姓名")
+    content: str = Field(..., min_length=1, description="消息内容")
+    message_type: str = Field(default="text", description="消息类型")
+    metadata: Optional[dict[str, Any]] = Field(default_factory=dict, description="元数据")
+
+
+class MultiRoleChatRequest(BaseModel):
+    topic: str
+    roles: list[str]
+    messages: list[ChatMessage]
+
+
+class MultiRoleChatResponse(BaseModel):
+    new_message: ChatMessage
+
+
+# 响应模型
+class DocumentAnalysisResponse(BaseModel):
+    message_type: str
+    content: str
+    tool_calls: Optional[list] = None
+    task_id: Optional[str] = None
+
+
+class DocumentParsingResponse(BaseModel):
+    task_id: str
+    status: str
+    content: str
+    parsing_stats: Optional[dict[str, Any]] = None
+    chunks: Optional[list[dict[str, Any]]] = None
+
+
+class DocumentUploadResponse(BaseModel):
+    task_id: str
+    filename: str
+    file_size: int
+    status: str
+    content: str
+
+
+@app.get("/")
+async def root():
+    """根路径，返回服务状态"""
+    return {
+        "message": "DAIP Insight Engine API",
+        "version": "1.0.0",
+        "status": "running",
+        "features": ["Document Parser", "FastAPI Integration", "File Upload"],
+    }
+
+
+@app.get("/health")
+async def health_check():
+    """健康检查端点"""
+    return {
+        "status": "healthy",
+        "features": [
+            "FastAPI Integration",
+            "Document Parser Integration",
+            "File Upload Support",
+            "API Endpoints",
+        ],
+        "document_parser_available": DOCUMENT_PARSER_AVAILABLE,
+    }
+
+
+@app.post("/upload_document", response_model=DocumentUploadResponse)
+async def upload_document(
+    file: UploadFile = File(...),
+    chunk_strategy: str = Form("auto"),
+    chunk_size: int = Form(1000),
+    chunk_overlap: int = Form(200),
+):
+    """上传并解析文档"""
+    if not DOCUMENT_PARSER_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Document parser not available")
+
+    try:
+        # 生成任务ID
+        task_id = str(uuid.uuid4())
+
+        # 读取文件内容
+        file_content = await file.read()
+        file_size = len(file_content)
+
+        logger.info(f"开始解析文档: {file.filename}, 大小: {file_size} bytes")
+
+        # 获取文件类型
+        file_type = file.filename.split(".")[-1].lower()
+
+        # 如果使用自动配置
+        if chunk_strategy == "auto":
+            config = DocumentParserConfig.get_optimal_config(file_type, file_size)
+            chunk_strategy = config["chunk_strategy"]
+            chunk_size = config["chunk_size"]
+            chunk_overlap = config["chunk_overlap"]
+
+        # 创建解析器
+        parser = DocumentParser(
+            chunk_strategy=chunk_strategy,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+        )
+
+        # 解析文档
+        result = parser.parse_document(file.filename, file_content)
+
+        # 存储任务结果
+        parsing_tasks[task_id] = {
+            "filename": file.filename,
+            "file_size": file_size,
+            "status": "completed" if result.success else "failed",
+            "result": result,
+            "timestamp": asyncio.get_event_loop().time(),
+        }
+
+        if result.success:
+            logger.info(f"文档解析成功: {file.filename}, 创建了 {len(result.chunks)} 个文本块")
+            return DocumentUploadResponse(
+                task_id=task_id,
+                filename=file.filename,
+                file_size=file_size,
+                status="completed",
+                message=f"文档解析成功，创建了 {len(result.chunks)} 个文本块",
+            )
+        else:
+            logger.error(f"文档解析失败: {file.filename}, 错误: {result.error_message}")
+            return DocumentUploadResponse(
+                task_id=task_id,
+                filename=file.filename,
+                file_size=file_size,
+                status="failed",
+                message=f"文档解析失败: {result.error_message}",
+            )
+
+    except Exception as e:
+        logger.error(f"文档上传处理失败: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Document processing failed: {str(e)}"
+        )
+
+
+@app.get("/parsing/{task_id}", response_model=DocumentParsingResponse)
+async def get_parsing_result(task_id: str):
+    """获取文档解析结果"""
+    if task_id not in parsing_tasks:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    task = parsing_tasks[task_id]
+    result = task["result"]
+
+    if result.success:
+        # 转换文本块为可序列化的格式
+        chunks_data = []
+        for chunk in result.chunks:
+            chunks_data.append(
+                {
+                    "chunk_id": chunk.chunk_id,
+                    "content": chunk.content,
+                    "source_file": chunk.source_file,
+                    "chunk_index": chunk.chunk_index,
+                    "metadata": chunk.metadata,
+                }
+            )
+
+        return DocumentParsingResponse(
+            task_id=task_id,
+            status="completed",
+            message=f"解析成功，共 {len(result.chunks)} 个文本块",
+            parsing_stats=result.parsing_stats,
+            chunks=chunks_data,
+        )
+    else:
+        return DocumentParsingResponse(
+            task_id=task_id, status="failed", message=result.error_message
+        )
+
+
+@app.post("/analyze_document", response_model=DocumentAnalysisResponse)
+async def analyze_document(
+    request: DocumentAnalysisRequest, biz_type: str = Query("financial_report")
+):
+    """分析文档内容并生成结构化报告（集成文档解析器版本）"""
+    try:
+        print(f"收到文档分析请求，内容长度: {len(request.content)} 字符，业务类型: {biz_type}")
+
+        # 生成任务ID
+        task_id = str(uuid.uuid4())
+
+        # 如果内容很长，使用文档解析器进行分块
+        if len(request.content) > 1000 and DOCUMENT_PARSER_AVAILABLE:
+            # 创建临时解析器
+            parser = DocumentParser(
+                chunk_strategy="recursive", chunk_size=1000, chunk_overlap=200
+            )
+
+            # 创建临时文件内容
+            temp_content = request.content.encode("utf-8")
+
+            # 解析内容
+            result = parser.parse_document("temp_content.txt", temp_content)
+
+            if result.success:
+                # 使用解析后的文本块进行分析
+                chunks_text = "\n\n".join([chunk.content for chunk in result.chunks])
+
+                analysis_result = f"""
+# 文档分析报告 (使用文档解析器)
+
+## 分析类型
+{biz_type}
+
+## 文档内容摘要
+- 原始文档长度：{len(request.content)} 字符
+- 解析后文本块数：{len(result.chunks)} 个
+- 解析后总长度：{result.total_chars} 字符
+
+## 解析统计
+- 分块策略：{result.parsing_stats['chunk_strategy']}
+- 平均块大小：{result.parsing_stats['avg_chunk_size']:.0f} 字符
+- 解析库：{result.parsing_stats['parsing_library']}
+
+## 关键信息提取
+- 文档类型：{biz_type}
+- 内容长度：{len(request.content)} 字符
+- 分析时间：{asyncio.get_event_loop().time()}
+
+## 分析结果
+这是一个使用文档解析器增强的分析结果。
+
+### 主要特点
+1. 支持多种文档格式 (PDF, DOCX, TXT, MD)
+2. 智能内容分块和解析
+3. 结构化报告生成
+4. 溯源功能支持
+5. 可配置的分块策略
+
+### 技术架构
+- FastAPI后端服务
+- 文档解析器模块
+- Streamlit前端界面
+- 模块化设计
+- 可扩展架构
+
+### 文本块预览
+前3个文本块内容：
+{chr(10).join([f"块 {i+1}: {chunk.content[:100]}..." for i, chunk in enumerate(result.chunks[:3])])}
+                """
+            else:
+                # 如果解析失败，使用原始内容
+                analysis_result = f"""
+# 文档分析报告 (原始内容)
+
+## 分析类型
+{biz_type}
+
+## 文档内容摘要
+原始文档长度：{len(request.content)} 字符
+
+## 关键信息提取
+- 文档类型：{biz_type}
+- 内容长度：{len(request.content)} 字符
+- 分析时间：{asyncio.get_event_loop().time()}
+
+## 分析结果
+这是一个使用原始内容的分析结果。
+
+### 主要特点
+1. 支持多种文档格式
+2. 智能内容分析
+3. 结构化报告生成
+4. 溯源功能支持
+
+### 技术架构
+- FastAPI后端服务
+- Streamlit前端界面
+- 模块化设计
+- 可扩展架构
+                """
+        else:
+            # 对于短内容，使用简化分析
+            analysis_result = f"""
+# 文档分析报告
+
+## 分析类型
+{biz_type}
+
+## 文档内容摘要
+原始文档长度：{len(request.content)} 字符
+
+## 关键信息提取
+- 文档类型：{biz_type}
+- 内容长度：{len(request.content)} 字符
+- 分析时间：{asyncio.get_event_loop().time()}
+
+## 分析结果
+这是一个简化的分析结果，展示了DAIP Insight Engine的基本功能。
+
+### 主要特点
+1. 支持多种文档格式
+2. 智能内容分析
+3. 结构化报告生成
+4. 溯源功能支持
+
+### 技术架构
+- FastAPI后端服务
+- Streamlit前端界面
+- 模块化设计
+- 可扩展架构
+            """
+
+        response = DocumentAnalysisResponse(
+            message_type="text",
+            content=analysis_result,
+            tool_calls=[{"name": "document_analysis", "status": "completed"}],
+            task_id=task_id,
+        )
+
+        print(f"文档分析完成，响应类型: {response.message_type}")
+        return response
+
+    except Exception as e:
+        print(f"文档分析过程中发生错误: {e}")
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+
+# 全局统一工具管理器实例
+unified_tool_manager = UnifiedToolManager(config=tool_config.to_dict())
+
+
+@app.get("/tools")
+async def list_tools():
+    """获取所有可用工具列表（统一工具管理）"""
+    tool_defs = unified_tool_manager.get_tool_definitions()
+    return {
+        "total_tools": len(tool_defs),
+        "tools": [tool["function"]["name"] for tool in tool_defs],
+        "tool_definitions": tool_defs,
+    }
+
+
+@app.get("/analysis/{task_id}/status")
+async def get_analysis_status(task_id: str):
+    """获取分析任务状态"""
+    return {"task_id": task_id, "status": "completed", "progress": 100}
+
+
+@app.get("/analysis/{task_id}/sources")
+async def get_analysis_sources(task_id: str):
+    """获取分析结果的溯源信息"""
+    return {
+        "task_id": task_id,
+        "total_sources": 1,
+        "sources": [
+            {
+                "message_id": "demo_001",
+                "content": "这是示例溯源信息",
+                "source_chunks": ["示例原文片段"],
+                "timestamp": "2024-06-19T12:00:00Z",
+            }
+        ],
+    }
+
+
+@app.get("/tasks")
+async def list_tasks():
+    """列出所有解析任务"""
+    task_list = []
+    for task_id, task in parsing_tasks.items():
+        task_list.append(
+            {
+                "task_id": task_id,
+                "filename": task["filename"],
+                "file_size": task["file_size"],
+                "status": task["status"],
+                "timestamp": task["timestamp"],
+            }
+        )
+
+    return {"total_tasks": len(task_list), "tasks": task_list}
+
+
+# --- 新增的多角色聊天后端逻辑 ---
+
+
+@app.get("/roles", response_model=dict[str, list[str]])
+async def get_roles():
+    """获取所有可用的角色列表"""
+    return {"roles": sorted(list(ALL_ROLES_DETAILS.keys()))}
+
+
+@app.post("/roles/create", response_model=Role)
+async def create_role(role: Role):
+    """创建并保存一个新角色"""
+    # 检查角色是否已在全局角色列表中存在
+    if role.name in ALL_ROLES_DETAILS:
+        raise HTTPException(status_code=400, detail=f"角色 '{role.name}' 已存在。")
+
+    try:
+        from src.role_utils import standardize_role_dict
+
+        # 标准化角色数据
+        role_data = role.dict()
+        standardized_role = standardize_role_dict(role_data)
+
+        if os.path.exists(USER_ROLES_FILE):
+            with open(USER_ROLES_FILE, "r+", encoding="utf-8") as f:
+                try:
+                    roles_list = json.load(f)
+                    if not isinstance(roles_list, list):
+                        roles_list = []
+                except json.JSONDecodeError:
+                    roles_list = []
+        else:
+            roles_list = []
+
+        roles_list.append(standardized_role)
+
+        with open(USER_ROLES_FILE, "w", encoding="utf-8") as f:
+            json.dump(roles_list, f, ensure_ascii=False, indent=2)
+
+        # 创建成功后，重新加载所有角色到内存
+        load_all_roles()
+        return Role(**standardized_role)
+    except Exception as e:
+        logger.error(f"创建角色失败: {e}")
+        raise HTTPException(status_code=500, detail="创建角色时服务器内部发生错误。")
+
+
+@app.post("/roles/create_smart", response_model=dict[str, Any])
+async def create_smart_role(request: SmartRoleCreateRequest):
+    """智能创建并标准化角色"""
+    try:
+        from src.role_utils import analyze_role_definition, standardize_role_dict
+
+        # 智能分析角色定义
+        analysis_result = analyze_role_definition(
+            request.role_name, request.role_definition
+        )
+
+        # 构建基础角色数据，优先使用用户输入，如果没有则使用分析结果
+        role_data = {
+            "name": request.role_name,
+            "description": request.role_definition,
+            "category": request.category,
+            "specialties": request.specialties
+            if request.specialties
+            else analysis_result["specialties"],
+            "skills": request.skills if request.skills else analysis_result["skills"],
+            "experience_years": request.experience_years
+            if request.experience_years != 5
+            else analysis_result["experience_years"],
+            "reputation_score": request.reputation_score
+            if request.reputation_score != 80.0
+            else analysis_result["reputation_score"],
+            "languages": request.languages
+            if request.languages
+            else analysis_result["languages"],
+            "availability": request.availability,
+            "location": request.location,
+            "education": request.education,
+            "certifications": request.certifications,
+            "projects": request.projects,
+        }
+
+        # 使用标准化函数处理角色数据
+        standardized_role = standardize_role_dict(role_data)
+
+        # 检查角色是否已存在
+        if standardized_role["name"] in ALL_ROLES_DETAILS:
+            raise HTTPException(
+                status_code=400, detail=f"角色 '{standardized_role['name']}' 已存在。"
+            )
+
+        # 保存到用户角色文件
+        if os.path.exists(USER_ROLES_FILE):
+            with open(USER_ROLES_FILE, "r+", encoding="utf-8") as f:
+                try:
+                    roles_list = json.load(f)
+                    if not isinstance(roles_list, list):
+                        roles_list = []
+                except json.JSONDecodeError:
+                    roles_list = []
+        else:
+            roles_list = []
+
+        roles_list.append(standardized_role)
+
+        with open(USER_ROLES_FILE, "w", encoding="utf-8") as f:
+            json.dump(roles_list, f, ensure_ascii=False, indent=2)
+
+        # 重新加载所有角色到内存
+        load_all_roles()
+
+        return {
+            "success": True,
+            "role": standardized_role,
+            "analysis": analysis_result,
+            "message": f"角色 '{standardized_role['name']}' 创建成功，智能分析置信度: {analysis_result['analysis_confidence']:.1%}",
+        }
+
+    except Exception as e:
+        logger.error(f"智能创建角色失败: {e}")
+        raise HTTPException(status_code=500, detail=f"智能创建角色失败: {str(e)}")
+
+
+class BatchRoleImportRequest(BaseModel):
+    roles: list[dict[str, Any]]
+    overwrite_existing: bool = False
+    validate_only: bool = False
+
+
+@app.post("/roles/batch_import", response_model=dict[str, Any])
+async def batch_import_roles(request: BatchRoleImportRequest):
+    """批量导入角色数据（每个角色写为单文件）"""
+    try:
+        from src.role_utils import standardize_role_dict
+
+        results = {
+            "total": len(request.roles),
+            "success": 0,
+            "failed": 0,
+            "skipped": 0,
+            "details": [],
+        }
+        for i, role_data in enumerate(request.roles):
+            try:
+                standardized_role = standardize_role_dict(role_data)
+                role_name = standardized_role["name"]
+                role_id = standardized_role.get("id", "")
+                safe_name = "".join(
+                    c for c in role_name if c.isalnum() or c in ("_", "-")
+                ).strip()
+                filename = f"{safe_name}_{role_id}.json"
+                filepath = os.path.join(USER_DEFINED_DIR, filename)
+                # 检查是否已存在
+                if os.path.exists(filepath) and not request.overwrite_existing:
+                    results["skipped"] += 1
+                    results["details"].append(
+                        {
+                            "index": i,
+                            "name": role_name,
+                            "status": "skipped",
+                            "message": "角色已存在",
+                        }
+                    )
+                    continue
+                if not request.validate_only:
+                    with open(filepath, "w", encoding="utf-8") as f:
+                        json.dump(standardized_role, f, ensure_ascii=False, indent=2)
+                results["success"] += 1
+                results["details"].append(
+                    {
+                        "index": i,
+                        "name": role_name,
+                        "status": "success",
+                        "message": "导入成功" if not request.validate_only else "验证通过",
+                    }
+                )
+            except Exception as e:
+                results["failed"] += 1
+                results["details"].append(
+                    {
+                        "index": i,
+                        "name": role_data.get("name", f"角色{i}"),
+                        "status": "failed",
+                        "message": str(e),
+                    }
+                )
+        # 如果不是仅验证模式，重新加载所有角色到内存
+        if not request.validate_only and results["success"] > 0:
+            load_all_roles()
+        return results
+    except Exception as e:
+        logger.error(f"批量导入角色失败: {e}")
+        raise HTTPException(status_code=500, detail=f"批量导入角色失败: {str(e)}")
+
+
+async def call_llm_simulation(
+    role_name: str, topic: str, history: list[ChatMessage]
+) -> str:
+    """模拟LLM调用, 使用增强的、更具人格化的prompt。"""
+    await asyncio.sleep(1)  # 模拟网络延迟
+
+    # 从全局缓存获取角色描述
+    role_details = ALL_ROLES_DETAILS.get(role_name, {"desc": "一个普通的参与者"})
+    role_desc = role_details["desc"]
+
+    history_summary = "\n".join(
+        [f"- {msg.sender_name}: {msg.content}" for msg in history]
+    )
+
+    # 构建一个更复杂的、指示性的prompt，要求模型进行深度角色扮演和模仿人类行为
+    prompt_for_llm = f"""### 指令 ###
+你正在一个多角色聊天应用中扮演一个角色。请严格按照你的角色设定进行回应，并模仿真实人类的聊天行为。
+
+### 你的角色信息 ###
+- **角色名称:** {role_name}
+- **角色描述/人设:** {role_desc}
+
+### 扮演要求 ###
+1.  **深度角色扮演:** 你的每一句话都要完全符合你角ールの身份、性格和知识背景。
+2.  **模仿人类:**
+    *   **使用口语化、生活化的语言**，避免过于正式或书面化。
+    *   可以适当使用**网络用语、emoji表情（例如 😉, 🤔, 😂）**来表达情绪。
+    *   你的回应不一定总是完美无缺的，可以有**细微的逻辑跳跃或口误**，就像真人在快速聊天时那样。
+    *   回复可以简短，也可以很长，取决于情境。
+
+### 当前聊天情景 ###
+- **聊天主题:** {topic}
+- **最近的对话历史:**
+{history_summary}
+
+### 你的任务 ###
+根据以上设定和聊天历史，以 **{role_name}** 的身份，对最后一条消息进行回应。你的回应内容将直接展示给用户。不要在回应中包含 "好的"、"根据您的要求" 或任何提及你是一个AI模型的词语。直接开始你的角色扮演对话。"""
+
+    # 这是一个模拟的回复，旨在展示遵循新prompt可能产生的结果
+    last_user_message = history[-1].content
+    simulated_response = f"嗨，我是**{role_name}**！ 😉\n"
+    if len(last_user_message) < 10:
+        simulated_response += f'刚看到你说的"{last_user_message}"，这事儿有意思。'
+    else:
+        simulated_response += f'关于"{last_user_message[:20]}..."这个点，我插句话哈，从我们({role_name})的角度看，这事儿吧，可能没那么简单...🤔 感觉需要考虑XXX方面的问题。'
+
+    simulated_response += "\n\n(PS: 这是一个基于新prompt的模拟回复，实际效果取决于LLM。)"
+
+    # 在真实场景中，你会用 `prompt_for_llm` 去调用真正的LLM服务
+    # return real_llm_client.generate(prompt_for_llm)
+    return simulated_response
+
+
+@app.post("/multi_role_chat", response_model=MultiRoleChatResponse)
+async def multi_role_chat(request: MultiRoleChatRequest):
+    """处理多角色聊天逻辑"""
+    try:
+        # 记录完整对话历史
+        with open(CHAT_LOG_FILE, "a", encoding="utf-8") as f:
+            log_entry = {
+                "timestamp": asyncio.get_event_loop().time(),
+                "topic": request.topic,
+                "roles": request.roles,
+                "messages": [msg.model_dump() for msg in request.messages],
+            }
+            f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+
+        # 从请求的角色中移除'user'和'system'，只留下AI角色
+        ai_roles = [r for r in request.roles if r.lower() not in ["user", "system"]]
+        if not ai_roles:
+            raise HTTPException(status_code=400, detail="聊天中没有可用的AI角色。")
+
+        # 随机选择一个AI角色
+        selected_role = random.choice(ai_roles)
+
+        # 调用LLM（模拟）
+        # 选择最近的1-5条消息作为上下文
+        context_messages = request.messages[-random.randint(1, 5) :]
+        llm_response_content = await call_llm_simulation(
+            selected_role, request.topic, context_messages
+        )
+
+        # 构建新消息
+        new_message = ChatMessage(
+            sender_name=selected_role, content=llm_response_content
+        )
+
+        return MultiRoleChatResponse(new_message=new_message)
+
+    except Exception as e:
+        logger.error(f"多角色聊天失败: {e}")
+        raise HTTPException(status_code=500, detail="多角色聊天时服务器内部发生错误。")
+
+
+@app.post("/generate_protocol")
+async def generate_protocol(
+    nl_text: str = Body(..., embed=True, description="自然语言协议描述"),
+    biz_type: str = Body(..., embed=True, description="业务类型"),
+    output_name: str = Body(..., embed=True, description="输出协议文件名，如 my_protocol.yaml"),
+):
+    """用户输入自然语言协议描述，自动生成结构化协议并持久化保存到 protocols 目录"""
+    try:
+        # 临时保存输入文本
+        temp_txt = f"temp_protocol_{uuid.uuid4().hex}.txt"
+        with open(temp_txt, "w", encoding="utf-8") as f:
+            f.write(nl_text)
+        # 调用脚本生成协议
+        script_path = os.path.join(
+            os.path.dirname(__file__), "..", "scripts", "protocol_nl_to_yaml.py"
+        )
+        result = subprocess.run(
+            [sys.executable, script_path, temp_txt, biz_type, output_name],
+            capture_output=True,
+            text=True,
+        )
+        # 删除临时文件
+        os.remove(temp_txt)
+        if result.returncode != 0:
+            raise Exception(result.stderr)
+        protocol_path = os.path.join("protocols", biz_type, output_name)
+        if not os.path.exists(protocol_path):
+            raise Exception("协议文件未生成")
+        return {"success": True, "protocol_path": protocol_path}
+    except Exception as e:
+        logger.error(f"协议生成失败: {e}")
+        raise HTTPException(status_code=500, detail=f"协议生成失败: {str(e)}")
+
+
+# 智能协议生成相关API
+from src.intelligent_protocol_generator import intelligent_protocol_generator
+
+
+class IntelligentProtocolRequest(BaseModel):
+    user_request: str = Field(..., description="用户的自然语言需求")
+    use_analysis: bool = Field(True, description="是否使用任务分析增强")
+    validate: bool = Field(True, description="是否验证生成的协议")
+    save_to_file: bool = Field(False, description="是否保存到文件")
+    output_path: Optional[str] = Field(None, description="输出文件路径")
+
+
+@app.post("/intelligent_protocol/generate")
+async def generate_intelligent_protocol(req: IntelligentProtocolRequest):
+    """使用大模型智能生成DAIP协议
+    支持自然语言理解、多阶段分解、角色分工、schema推荐等功能
+    """
+    try:
+        if req.use_analysis:
+            result = (
+                await intelligent_protocol_generator.generate_protocol_with_analysis(
+                    req.user_request, validate=req.validate
+                )
+            )
+        else:
+            result = await intelligent_protocol_generator.generate_protocol(
+                req.user_request, validate=req.validate
+            )
+
+        # 如果需要保存到文件
+        if req.save_to_file and result["success"] and req.output_path:
+            os.makedirs(os.path.dirname(req.output_path), exist_ok=True)
+            with open(req.output_path, "w", encoding="utf-8") as f:
+                f.write(result["yaml_content"])
+            result["saved_path"] = req.output_path
+
+        return result
+    except Exception as e:
+        logger.error(f"智能协议生成失败: {e}")
+        raise HTTPException(status_code=500, detail=f"智能协议生成失败: {str(e)}")
+
+
+@app.post("/intelligent_protocol/generate_smart")
+async def generate_smart_protocol(req: IntelligentProtocolRequest):
+    """智能协议生成 - 自动任务分类版本
+    根据用户需求自动判断是内容创作还是文档分析，选择合适的生成器
+    """
+    try:
+        result = await intelligent_protocol_generator.generate_protocol_smart(
+            req.user_request, validate=req.validate
+        )
+
+        # 如果需要保存到文件
+        if req.save_to_file and result["success"] and req.output_path:
+            os.makedirs(os.path.dirname(req.output_path), exist_ok=True)
+            with open(req.output_path, "w", encoding="utf-8") as f:
+                f.write(result["yaml_content"])
+            result["saved_path"] = req.output_path
+
+        return result
+    except Exception as e:
+        logger.error(f"智能协议生成失败: {e}")
+        raise HTTPException(status_code=500, detail=f"智能协议生成失败: {str(e)}")
+
+
+# 任务分类相关API
+from src.task_classifier import task_classifier
+
+
+@app.post("/intelligent_protocol/classify")
+async def classify_task(user_request: str = Body(..., embed=True)):
+    """任务分类接口
+    判断用户需求是内容创作还是文档分析
+    """
+    try:
+        task_type, confidence, classification_info = task_classifier.classify_task(
+            user_request
+        )
+
+        # 获取推荐的工作流程
+        recommended_workflow = task_classifier.get_recommended_workflow(task_type)
+
+        return {
+            "success": True,
+            "task_type": task_type.value,
+            "confidence": confidence,
+            "classification_info": classification_info,
+            "recommended_workflow": recommended_workflow,
+            "message": f"任务分类完成: {task_type.value}",
+        }
+    except Exception as e:
+        logger.error(f"任务分类失败: {e}")
+        raise HTTPException(status_code=500, detail=f"任务分类失败: {str(e)}")
+
+
+@app.post("/intelligent_protocol/analyze")
+async def analyze_task_requirements(user_request: str = Body(..., embed=True)):
+    """分析用户任务需求，进行智能多阶段分解"""
+    try:
+        result = await intelligent_protocol_generator.analyze_and_decompose_task(
+            user_request
+        )
+        return result
+    except Exception as e:
+        logger.error(f"任务分析失败: {e}")
+        raise HTTPException(status_code=500, detail=f"任务分析失败: {str(e)}")
+
+
+@app.get("/intelligent_protocol/examples")
+async def get_protocol_examples():
+    """获取智能协议生成示例"""
+    examples = [
+        {
+            "title": "财务报告分析",
+            "request": "帮我创建一个分析财报的流程，先提取关键财务指标，然后生成摘要",
+            "description": "自动分析财务报告，提取关键指标并生成分析摘要",
+        },
+        {
+            "title": "学术论文分析",
+            "request": "我需要一个论文分析的协议，包括内容提取、关键点识别、摘要生成",
+            "description": "分析学术论文，提取主要观点和结论，生成结构化摘要",
+        },
+        {
+            "title": "市场调研分析",
+            "request": "创建一个市场调研报告分析流程，需要数据提取、趋势分析、竞争分析、建议生成",
+            "description": "全面分析市场调研报告，生成战略建议",
+        },
+        {
+            "title": "合同文档分析",
+            "request": "设计一个合同分析流程，提取关键条款、识别风险点、生成审查报告",
+            "description": "智能分析合同文档，识别风险并生成审查建议",
+        },
+        {
+            "title": "客户反馈分析",
+            "request": "建立客户反馈分析协议，包括情感分析、问题分类、改进建议生成",
+            "description": "分析客户反馈，识别问题并提供改进建议",
+        },
+    ]
+    return {"examples": examples}
+
+
+from tools.file_tools import list_files, make_dir, make_tree_dirs, read_file, write_file
+
+
+class FileOpRequest(BaseModel):
+    path: str
+    encoding: Optional[str] = "utf-8"
+    content: Optional[str] = None
+    tree: Optional[dict] = None
+
+
+@app.post("/tools/read_file")
+async def api_read_file(req: FileOpRequest):
+    try:
+        content = read_file(req.path, req.encoding)
+        return {"success": True, "content": content}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/tools/write_file")
+async def api_write_file(req: FileOpRequest):
+    try:
+        write_file(req.path, req.content or "", req.encoding)
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/tools/list_files")
+async def api_list_files(req: FileOpRequest):
+    try:
+        files = list_files(req.path)
+        return {"success": True, "files": files}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/tools/make_dir")
+async def api_make_dir(req: FileOpRequest):
+    try:
+        make_dir(req.path)
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/tools/make_tree_dirs")
+async def api_make_tree_dirs(req: FileOpRequest):
+    try:
+        make_tree_dirs(req.tree or {}, req.path)
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# 统一系统导入
+from src.interfaces import MemoryFilters
+
+
+class MemoryBankRequest(BaseModel):
+    role_name: str
+    content: Optional[str] = None
+
+
+@app.post("/tools/create_memory_bank")
+async def api_create_memory_bank(req: MemoryBankRequest):
+    try:
+        if memory_service:
+            # 使用统一记忆服务
+            role_service.create_role_identity(
+                {"id": req.role_name, "name": req.role_name}
+            )
+            return {"success": True, "path": f"unified_memory_bank/{req.role_name}"}
+        else:
+            # 回退到旧系统
+            path = create_memory_bank(req.role_name)
+            return {"success": True, "path": path}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/tools/write_memory")
+async def api_write_memory(req: MemoryBankRequest):
+    try:
+        if memory_service:
+            # 使用统一记忆服务
+            memory_id = memory_service.add_memory(
+                role_id=req.role_name,
+                content=req.content or "",
+                memory_type="dialogue",
+                importance=0.5,
+            )
+            return {"success": True, "file_path": f"unified_memory/{memory_id}"}
+        else:
+            # 回退到旧系统
+            file_path = write_memory(req.role_name, req.content or "")
+            return {"success": True, "file_path": file_path}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/tools/read_memory")
+async def api_read_memory(req: MemoryBankRequest):
+    try:
+        content = read_memory(req.role_name)
+        return {"success": True, "content": content}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/tools/list_memories")
+async def api_list_memories(req: MemoryBankRequest):
+    try:
+        if memory_service:
+            # 使用统一记忆服务
+            filters = MemoryFilters(limit=50)
+            memories = memory_service.retrieve_memories(req.role_name, filters)
+            memory_list = [
+                {"content": m.content, "timestamp": m.timestamp, "tags": m.tags}
+                for m in memories
+            ]
+            return {"success": True, "memories": memory_list}
+        else:
+            # 回退到旧系统
+            memories = list_memories(req.role_name)
+            return {"success": True, "memories": memories}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# ------------------------------------
+
+# 统一系统导入
+from src.interfaces import MemoryFilters
+
+
+class MemoryEntryRequest(BaseModel):
+    agent_id: str
+    content: Optional[str] = None
+    tags: Optional[list[str]] = None
+    source: Optional[str] = None
+    embedding: Optional[list[float]] = None
+    memory_id: Optional[str] = None
+    limit: Optional[int] = None
+    tag: Optional[str] = None
+    keyword: Optional[str] = None
+    after: Optional[float] = None
+    before: Optional[float] = None
+    top_k: Optional[int] = None
+
+
+@app.post("/memory/add")
+async def api_add_memory(req: MemoryEntryRequest):
+    try:
+        memory_id = add_memory(
+            req.agent_id, req.content or "", req.tags, req.source, req.embedding
+        )
+        return {"success": True, "memory_id": memory_id}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/memory/list")
+async def api_list_memories(req: MemoryEntryRequest):
+    try:
+        memories = list_memories(
+            req.agent_id, req.limit, req.tag, req.keyword, req.after, req.before
+        )
+        return {"success": True, "memories": memories}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/memory/get")
+async def api_get_memory(req: MemoryEntryRequest):
+    try:
+        memory = get_memory(req.agent_id, req.memory_id)
+        return {"success": True, "memory": memory}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/memory/delete")
+async def api_delete_memory(req: MemoryEntryRequest):
+    try:
+        ok = delete_memory(req.agent_id, req.memory_id)
+        return {"success": ok}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/memory/recent")
+async def api_recent_memories(req: MemoryEntryRequest):
+    try:
+        memories = get_recent_memories(req.agent_id, req.limit or 10)
+        return {"success": True, "memories": memories}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/memory/search_embedding")
+async def api_search_memory_by_embedding(req: MemoryEntryRequest):
+    try:
+        memories = search_memory_by_embedding(
+            req.agent_id, req.embedding or [], req.top_k or 5
+        )
+        return {"success": True, "memories": memories}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+import json
+import os
+import time
+
+
+def load_wiki_content(entry: str) -> str:
+    path = f"wiki_entries/{entry}.json"
+    if not os.path.exists(path):
+        return ""
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    return data.get("content", "")
+
+
+def load_wiki_history(entry: str) -> list:
+    path = f"wiki_entries/{entry}.json"
+    if not os.path.exists(path):
+        return []
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    return data.get("history", [])
+
+
+def save_wiki_version(entry: str, content: str, editor: str, timestamp: str = None):
+    path = f"wiki_entries/{entry}.json"
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        data = {"content": "", "history": []}
+    data["content"] = content
+    data["history"].append(
+        {
+            "version": max([v.get("version", 0) for v in data["history"]], default=0)
+            + 1,
+            "content": content,
+            "editor": editor,
+            "timestamp": timestamp or time.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+    )
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+class WikiEntryRequest(BaseModel):
+    entry: str
+    content: Optional[str] = None
+    editor: Optional[str] = None
+    timestamp: Optional[str] = None
+    version: Optional[int] = None
+
+
+@app.get("/wiki/content")
+async def api_get_wiki_content(entry: str):
+    content = load_wiki_content(entry)
+    return {"entry": entry, "content": content}
+
+
+@app.get("/wiki/history")
+async def api_get_wiki_history(entry: str):
+    history = load_wiki_history(entry)
+    return {"entry": entry, "history": history}
+
+
+@app.post("/wiki/save")
+async def api_save_wiki_version(req: WikiEntryRequest):
+    save_wiki_version(
+        req.entry, req.content or "", req.editor or "unknown", req.timestamp
+    )
+    return {"success": True}
+
+
+@app.get("/wiki/consensus")
+async def api_get_wiki_consensus(entry: str, round: int = 1):
+    result_path = f"protocols/{entry}_round{round}_result.json"
+    if not os.path.exists(result_path):
+        return {
+            "experts": [],
+            "revisions": [],
+            "votes": [],
+            "consensus": "",
+            "conflicts": [],
+        }
+    with open(result_path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+from fastapi import BackgroundTasks
+
+
+class AutoCollabEditRequest(BaseModel):
+    instruction: str
+
+
+class AutoCollabEditResponse(BaseModel):
+    entry: str
+    topic: str
+    experts: list
+    rounds: int
+    status: str
+    consensus_results: list
+
+
+# 增强的专家库管理系统
+class ExpertLibrary:
+    def __init__(self):
+        self.experts = self._load_default_experts()
+        self.expert_categories = self._load_expert_categories()
+
+    def _load_default_experts(self):
+        """加载默认专家库"""
+        return [
+            {
+                "id": "tech_expert_001",
+                "name": "技术专家",
+                "category": "技术",
+                "specialties": ["AI", "算法", "系统架构", "技术实现"],
+                "tags": ["技术", "AI", "算法", "实现"],
+                "description": "专注于技术方案设计和实现的资深专家",
+                "experience_years": 15,
+                "rating": 4.8,
+                "availability": "available",
+                "contact_info": {"email": "tech.expert@example.com"},
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-06-19T00:00:00Z",
+            },
+            {
+                "id": "ethics_expert_001",
+                "name": "伦理学家",
+                "category": "人文社科",
+                "specialties": ["AI伦理", "技术伦理", "社会影响评估"],
+                "tags": ["伦理", "道德", "社会", "AI伦理"],
+                "description": "专注于技术伦理和社会影响研究的专家",
+                "experience_years": 12,
+                "rating": 4.9,
+                "availability": "available",
+                "contact_info": {"email": "ethics.expert@example.com"},
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-06-19T00:00:00Z",
+            },
+            {
+                "id": "future_expert_001",
+                "name": "未来学家",
+                "category": "战略规划",
+                "specialties": ["趋势分析", "未来预测", "战略规划"],
+                "tags": ["未来", "趋势", "前景", "战略"],
+                "description": "专注于未来趋势分析和战略规划的专家",
+                "experience_years": 20,
+                "rating": 4.7,
+                "availability": "busy",
+                "contact_info": {"email": "future.expert@example.com"},
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-06-19T00:00:00Z",
+            },
+            {
+                "id": "financial_expert_001",
+                "name": "财务分析师",
+                "category": "金融财务",
+                "specialties": ["财务分析", "投资评估", "风险管理"],
+                "tags": ["财务", "投资", "风险", "分析"],
+                "description": "资深财务分析和投资评估专家",
+                "experience_years": 18,
+                "rating": 4.8,
+                "availability": "available",
+                "contact_info": {"email": "financial.expert@example.com"},
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-06-19T00:00:00Z",
+            },
+            {
+                "id": "legal_expert_001",
+                "name": "法律专家",
+                "category": "法律合规",
+                "specialties": ["合同法", "知识产权", "合规审查"],
+                "tags": ["法律", "合规", "合同", "知识产权"],
+                "description": "专注于法律合规和合同审查的资深律师",
+                "experience_years": 16,
+                "rating": 4.9,
+                "availability": "available",
+                "contact_info": {"email": "legal.expert@example.com"},
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-06-19T00:00:00Z",
+            },
+        ]
+
+    def _load_expert_categories(self):
+        """加载专家分类"""
+        return {
+            "技术": ["AI专家", "算法专家", "系统架构师", "数据科学家"],
+            "人文社科": ["伦理学家", "社会学家", "心理学家", "教育专家"],
+            "战略规划": ["未来学家", "战略顾问", "商业分析师", "市场专家"],
+            "金融财务": ["财务分析师", "投资顾问", "风险管理师", "会计师"],
+            "法律合规": ["律师", "合规专家", "知识产权专家", "法务顾问"],
+            "学术研究": ["研究员", "教授", "博士后", "学科专家"],
+            "创意设计": ["设计师", "创意总监", "用户体验专家", "产品经理"],
+        }
+
+
+# 全局专家库实例
+expert_library = ExpertLibrary()
+
+# 保持向后兼容的EXPERT_POOL
+EXPERT_POOL = [
+    {"name": expert["name"], "tags": expert["tags"]}
+    for expert in expert_library.experts
+]
+
+
+def parse_instruction(instruction: str):
+    # 简单规则/可扩展为大模型解析
+    import re
+
+    entry = ""
+    topic = ""
+    rounds = 3
+    m = re.search(r"协同编辑[“\"']?(.*?)[”\"']?词条|页面", instruction)
+    if m:
+        entry = m.group(1)
+    m2 = re.search(r"聚焦(.*?)(，|,|。|$)", instruction)
+    if m2:
+        topic = m2.group(1)
+    m3 = re.search(r"持续(\d+)轮", instruction)
+    if m3:
+        rounds = int(m3.group(1))
+    if not entry:
+        entry = "默认词条"
+    if not topic:
+        topic = "综合分析"
+    return entry, topic, rounds
+
+
+def match_experts(topic: str, n=3):
+    # 简单关键词匹配，可扩展为embedding
+    selected = []
+    for expert in EXPERT_POOL:
+        if any(tag in topic for tag in expert["tags"]):
+            selected.append({"name": expert["name"], "fit_score": 5})
+    if not selected:
+        selected = [{"name": e["name"], "fit_score": 5} for e in EXPERT_POOL[:n]]
+    return selected
+
+
+@app.post("/auto_collab_edit", response_model=AutoCollabEditResponse)
+async def auto_collab_edit(
+    req: AutoCollabEditRequest, background_tasks: BackgroundTasks
+):
+    entry, topic, rounds = parse_instruction(req.instruction)
+    experts = match_experts(topic, n=3)
+    consensus_results = []
+    status = "completed"
+    for round_id in range(1, rounds + 1):
+        # 构造协议
+        protocol = {
+            "entry": entry,
+            "topic": topic,
+            "experts": experts,
+            "workflow": [
+                {"step": "independent_edit"},
+                {"step": "conflict_detection"},
+                {"step": "voting"},
+                {"step": "consensus"},
+                {"step": "versioning"},
+            ],
+        }
+        protocol_path = f"protocols/{entry}_auto_round{round_id}.yaml"
+        import yaml
+
+        with open(protocol_path, "w", encoding="utf-8") as f:
+            yaml.dump(protocol, f, allow_unicode=True, sort_keys=False)
+        # 执行协议（直接调用已有执行函数）
+        from fastapi.testclient import TestClient
+
+        client = TestClient(app)
+        with open(protocol_path, "rb") as f:
+            resp = client.post(
+                "/execute_wiki_protocol",
+                files={
+                    "file": (os.path.basename(protocol_path), f, "application/x-yaml")
+                },
+            )
+        # 获取共识结果
+        result_path = f"protocols/{entry}_round{round_id}_result.json"
+        if os.path.exists(result_path):
+            with open(result_path, encoding="utf-8") as rf:
+                consensus_results.append(json.load(rf))
+    return {
+        "entry": entry,
+        "topic": topic,
+        "experts": experts,
+        "rounds": rounds,
+        "status": status,
+        "consensus_results": consensus_results,
+    }
+
+
+def get_text_embedding(text: str) -> list:
+    """使用本地Ollama模型生成文本嵌入向量"""
+    try:
+        import requests
+
+        from src.utils import load_config
+
+        config = load_config()
+        embedding_model = config.get("embedding_model", "nomic-embed-text:latest")
+        ollama_base_url = config.get("ollama_base_url", "http://localhost:11434")
+
+        url = f"{ollama_base_url}/api/embeddings"
+        payload = {"model": embedding_model, "prompt": text}
+
+        response = requests.post(url, json=payload, timeout=10)
+        response.raise_for_status()
+        return response.json()["embedding"]
+
+    except Exception as e:
+        print(f"Error generating embedding with Ollama: {e}")
+        # 降级到hash模拟（仅用于开发测试）
+        # 修复：使用768维以匹配nomic-embed-text模型
+        np.random.seed(abs(hash(text)) % (2**32))
+        return (np.random.rand(768) * 2 - 1).tolist()
+
+
+def build_role_embeddings():
+    """为所有角色生成embedding并缓存到ALL_ROLES_DETAILS['embedding']"""
+    for name, info in ALL_ROLES_DETAILS.items():
+        text = info.get("desc", "") + " " + name + " " + " ".join(info.get("tags", []))
+        info["embedding"] = get_text_embedding(text)
+        upsert_role_to_vector_db(info)  # 同步入库到向量数据库
+
+
+# 角色向量入库
+def upsert_role_to_vector_db(role: dict):
+    # 需保证role有name, desc, tags, embedding字段
+    doc_id = role["name"]
+    text = (
+        role.get("desc", "") + " " + role["name"] + " " + " ".join(role.get("tags", []))
+    )
+    # 这里用hash embedding，实际应替换为真实embedding
+    emb = get_text_embedding(text)
+    role_collection.upsert(
+        ids=[doc_id], embeddings=[emb], documents=[json.dumps(role, ensure_ascii=False)]
+    )
+
+
+# 检索最相关角色
+def search_roles_by_vector(query: str, top_k: int = 5):
+    emb = get_text_embedding(query)
+    results = role_collection.query(query_embeddings=[emb], n_results=top_k)
+    roles = [json.loads(doc) for doc in results["documents"][0]]
+    scores = results["distances"][0]
+    return [{"role": r, "score": float(s)} for r, s in zip(roles, scores)]
+
+
+@app.post("/roles/search_embedding")
+async def api_search_roles_by_embedding(query: str, top_k: int = 5):
+    """智能embedding检索角色，返回最相关top_k角色"""
+    query_emb = get_text_embedding(query)
+    scored = []
+    for name, info in ALL_ROLES_DETAILS.items():
+        emb = info.get("embedding")
+        if emb:
+            score = float(
+                np.dot(query_emb, emb)
+                / (np.linalg.norm(query_emb) * np.linalg.norm(emb) + 1e-8)
+            )
+            scored.append((score, name, info))
+    scored.sort(reverse=True, key=lambda x: x[0])
+    return {
+        "roles": [
+            {"name": n, "desc": i.get("desc", ""), "score": s}
+            for s, n, i in scored[:top_k]
+        ]
+    }
+
+
+# 工具向量库检索（假设已集成Chroma/embedding，见前述实现）
+def get_tools_for_context(context: str, top_k: int = 5):
+    # context: 当前对话内容、主题、角色描述等
+    # 返回最相关的工具schema列表
+    import json
+
+    import chromadb
+
+    VECTOR_DB_PATH = os.path.join(
+        os.path.dirname(__file__), "..", "data", "tool_vector_db"
+    )
+    chroma_client = chromadb.PersistentClient(path=VECTOR_DB_PATH)
+
+    # 使用统一的Ollama嵌入函数
+    from chromadb.utils import embedding_functions
+
+    ollama_embedding_function = embedding_functions.OllamaEmbeddingFunction(
+        model_name="nomic-embed-text", url="http://localhost:11434"
+    )
+
+    try:
+        tool_collection = chroma_client.get_collection("tools")
+    except:
+        tool_collection = chroma_client.create_collection(
+            name="tools", embedding_function=ollama_embedding_function
+        )
+
+    emb = get_text_embedding(context)
+    results = tool_collection.query(query_embeddings=[emb], n_results=top_k * 2)
+    tools = [json.loads(doc) for doc in results["documents"][0]]
+    # 按优先级排序，系统工具优先
+    tools.sort(key=get_tool_priority)
+    return tools[:top_k]
+
+
+USER_TOOLS_FILE = os.path.join(
+    os.path.dirname(__file__), "..", "tools", "user_defined_tools.json"
+)
+
+
+# 优先级设定：系统工具优先级高于用户自定义工具
+def get_tool_priority(tool: dict) -> int:
+    return tool.get("priority", 1 if tool.get("source") == "system" else 2)
+
+
+def optimize_prompt_with_llm(prompt: str) -> dict:
+    """用LLM优化用户自定义工具的提示词，生成精要命名和功能描述。"""
+    # 伪代码：实际应调用真实LLM服务
+    # 这里只做简单规则模拟
+    name = prompt[:16] + "..." if len(prompt) > 16 else prompt
+    desc = "精要描述: " + prompt[:32] + ("..." if len(prompt) > 32 else "")
+    return {"name": name, "desc": desc}
+
+
+@app.post("/user_tools/create")
+async def create_user_tool(tool: dict):
+    # 1. LLM优化命名和描述
+    optimized = optimize_prompt_with_llm(tool.get("prompt", ""))
+    tool["name"] = optimized["name"]
+    tool["desc"] = optimized["desc"]
+    tool["source"] = "user"
+    tool["priority"] = 2
+    # 2. 生成embedding
+    text = tool["desc"] + " " + tool["name"] + " " + tool.get("prompt", "")
+    tool["embedding"] = get_text_embedding(text)
+    # 3. 写入向量库
+    import chromadb
+
+    chroma_client = chromadb.PersistentClient(
+        path=os.path.join(os.path.dirname(__file__), "..", "data", "tool_vector_db")
+    )
+
+    # 使用统一的Ollama嵌入函数
+    from chromadb.utils import embedding_functions
+
+    ollama_embedding_function = embedding_functions.OllamaEmbeddingFunction(
+        model_name="nomic-embed-text", url="http://localhost:11434"
+    )
+
+    try:
+        tool_collection = chroma_client.get_collection("tools")
+    except:
+        tool_collection = chroma_client.create_collection(
+            name="tools", embedding_function=ollama_embedding_function
+        )
+
+    tool_collection.upsert(
+        ids=[tool["name"]],
+        embeddings=[tool["embedding"]],
+        documents=[json.dumps(tool, ensure_ascii=False)],
+    )
+    # 4. 保存到本地json
+    tools = []
+    if os.path.exists(USER_TOOLS_FILE):
+        with open(USER_TOOLS_FILE, encoding="utf-8") as f:
+            tools = json.load(f)
+    tools.append(tool)
+    with open(USER_TOOLS_FILE, "w", encoding="utf-8") as f:
+        json.dump(tools, f, ensure_ascii=False, indent=2)
+    return {"success": True, "tool": tool}
+
+
+# 工具调用嵌套深度控制
+
+MAX_TOOL_NESTING = 1
+
+
+async def call_prompt_tool(
+    tool: dict, input_args: dict, request: Request = None
+) -> str:
+    """调用自定义提示词工具，限制嵌套深度。"""
+    # 检查嵌套深度
+    nesting = 0
+    if request and hasattr(request.state, "tool_nesting"):
+        nesting = request.state.tool_nesting
+    if nesting >= MAX_TOOL_NESTING:
+        return "[错误] 工具调用嵌套超过最大深度，已被系统阻止。"
+    # 标记本次调用深度
+    if request:
+        request.state.tool_nesting = nesting + 1
+    # 构造prompt并调用大模型
+    prompt = tool.get("prompt", "").format(**input_args)
+    # 伪代码：实际应调用本地大模型API
+    result = fake_llm_infer(prompt)
+    # 恢复嵌套深度
+    if request:
+        request.state.tool_nesting = nesting
+    return result
+
+
+def fake_llm_infer(prompt: str) -> str:
+    # 这里仅为演示，实际应调用本地大模型
+    return f"[LLM回复] {prompt}"
+
+
+def clean_llm_response(response: str) -> str:
+    """移除大模型输出中的思考过程、JSON/MD格式，只保留简明自然语言回复。"""
+    import re
+
+    # 移除常见的思考过程前缀
+    response = re.sub(
+        r"(思考过程|推理过程|分析过程|Reasoning|Thoughts|Let's think step by step).*?\n",
+        "",
+        response,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    # 移除JSON代码块
+    response = re.sub(r"```json[\s\S]*?```", "", response)
+    # 移除Markdown代码块
+    response = re.sub(r"```[a-zA-Z]*[\s\S]*?```", "", response)
+    # 移除多余空行
+    response = re.sub(r"\n{2,}", "\n", response)
+    return response.strip()
+
+
+# 在虚拟角色对话输出前统一调用 clean_llm_response 处理
+# 例如：
+# final_output = clean_llm_response(llm_output)
+
+from datetime import datetime
+
+# ---- 协同任务/分工管理API ----
+
+
+class TaskStatus(str):
+    NOT_STARTED = "not_started"
+    IN_PROGRESS = "in_progress"
+    WAITING_REVIEW = "waiting_review"
+    COMPLETED = "completed"
+    REJECTED = "rejected"
+
+
+class TaskBase(BaseModel):
+    title: str
+    description: str = ""
+    stage: str
+    knowledge_point_id: str = ""
+    assigned_to: Optional[str] = None
+    due_time: Optional[datetime] = None
+
+
+class Task(TaskBase):
+    id: str
+    status: str = TaskStatus.NOT_STARTED
+    progress: int = 0
+    created_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now()
+    history: list[dict] = []
+    comments: list[dict] = []
+    signatures: list[dict] = []
+
+
+# 内存任务存储（可替换为DB）
+TASKS: dict[str, Task] = {}
+
+
+@app.post("/tasks/create")
+async def create_task(task: TaskBase):
+    """创建新任务（支持分阶段/知识点/章节）"""
+    task_id = str(uuid.uuid4())
+    new_task = Task(id=task_id, **task.dict())
+    TASKS[task_id] = new_task
+    return {"success": True, "task_id": task_id, "task": new_task}
+
+
+@app.get("/tasks/list")
+async def list_all_tasks(
+    stage: Optional[str] = None,
+    assigned_to: Optional[str] = None,
+    status: Optional[str] = None,
+):
+    """多条件筛选任务"""
+    result = []
+    for t in TASKS.values():
+        if stage and t.stage != stage:
+            continue
+        if assigned_to and t.assigned_to != assigned_to:
+            continue
+        if status and t.status != status:
+            continue
+        result.append(t)
+    return {"total": len(result), "tasks": result}
+
+
+@app.patch("/tasks/{task_id}/update")
+async def update_task(
+    task_id: str,
+    status: Optional[str] = None,
+    progress: Optional[int] = None,
+    assigned_to: Optional[str] = None,
+    comment: Optional[str] = None,
+):
+    """更新任务进度/分配/状态/添加评论"""
+    if task_id not in TASKS:
+        raise HTTPException(status_code=404, detail="Task not found")
+    task = TASKS[task_id]
+    if status:
+        task.status = status
+    if progress is not None:
+        task.progress = progress
+    if assigned_to:
+        task.assigned_to = assigned_to
+    if comment:
+        task.comments.append({"content": comment, "time": datetime.now().isoformat()})
+    task.updated_at = datetime.now()
+    task.history.append(
+        {
+            "status": task.status,
+            "progress": task.progress,
+            "time": task.updated_at.isoformat(),
+        }
+    )
+    return {"success": True, "task": task}
+
+
+@app.post("/tasks/{task_id}/comment")
+async def add_task_comment(
+    task_id: str, comment: str = Body(..., embed=True), user: str = Body("", embed=True)
+):
+    """任务下留言/协作记录"""
+    if task_id not in TASKS:
+        raise HTTPException(status_code=404, detail="Task not found")
+    TASKS[task_id].comments.append(
+        {"user": user, "content": comment, "time": datetime.now().isoformat()}
+    )
+    TASKS[task_id].updated_at = datetime.now()
+    return {"success": True}
+
+
+@app.post("/tasks/{task_id}/sign")
+async def sign_task(task_id: str, expert: str = Body(..., embed=True)):
+    """专家签名/审核"""
+    if task_id not in TASKS:
+        raise HTTPException(status_code=404, detail="Task not found")
+    TASKS[task_id].signatures.append(
+        {"expert": expert, "time": datetime.now().isoformat()}
+    )
+    TASKS[task_id].updated_at = datetime.now()
+    return {"success": True}
+
+
+@app.get("/tasks/{task_id}/history")
+async def get_task_history(task_id: str):
+    """获取任务历史版本/进度流转"""
+    if task_id not in TASKS:
+        raise HTTPException(status_code=404, detail="Task not found")
+    task = TASKS[task_id]
+    return {
+        "history": task.history,
+        "comments": task.comments,
+        "signatures": task.signatures,
+    }
+
+
+# ---- 专家库管理API ----
+
+
+@app.get("/experts")
+async def list_experts(
+    category: Optional[str] = None,
+    availability: Optional[str] = None,
+    search: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+):
+    """获取专家列表"""
+    experts = expert_library.experts.copy()
+
+    # 确保experts为list类型
+    if isinstance(experts, dict):
+        experts = list(experts.values())
+
+    # 按分类筛选
+    if category:
+        experts = [e for e in experts if e.get("category") == category]
+
+    # 按可用性筛选
+    if availability:
+        experts = [e for e in experts if e.get("availability") == availability]
+
+    # 搜索筛选
+    if search:
+        search_lower = search.lower()
+        experts = [
+            e
+            for e in experts
+            if search_lower in e.get("name", "").lower()
+            or search_lower in e.get("description", "").lower()
+            or any(search_lower in tag.lower() for tag in e.get("tags", []))
+        ]
+
+    # 分页
+    total = len(experts)
+    experts = experts[offset : offset + limit]
+
+    return {
+        "experts": experts,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "categories": list(expert_library.expert_categories.keys()),
+    }
+
+
+@app.get("/experts/{expert_id}")
+async def get_expert(expert_id: str):
+    """获取专家详细信息"""
+    expert = next((e for e in expert_library.experts if e["id"] == expert_id), None)
+    if not expert:
+        raise HTTPException(status_code=404, detail="Expert not found")
+    return expert
+
+
+@app.post("/experts")
+async def create_expert(expert_data: dict):
+    """创建新专家"""
+    import uuid
+    from datetime import datetime
+
+    # 生成专家ID
+    expert_id = f"expert_{str(uuid.uuid4())[:8]}"
+
+    # 验证必填字段
+    required_fields = ["name", "category", "specialties", "description"]
+    for field in required_fields:
+        if field not in expert_data:
+            raise HTTPException(
+                status_code=400, detail=f"Missing required field: {field}"
+            )
+
+    # 创建专家记录
+    new_expert = {
+        "id": expert_id,
+        "name": expert_data["name"],
+        "category": expert_data["category"],
+        "specialties": expert_data.get("specialties", []),
+        "tags": expert_data.get("tags", []),
+        "description": expert_data["description"],
+        "experience_years": expert_data.get("experience_years", 0),
+        "rating": expert_data.get("rating", 0.0),
+        "availability": expert_data.get("availability", "available"),
+        "contact_info": expert_data.get("contact_info", {}),
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat(),
+    }
+
+    # 添加到专家库
+    expert_library.experts.append(new_expert)
+
+    # 更新向量数据库
+    upsert_role_to_vector_db(
+        {
+            "name": new_expert["name"],
+            "desc": new_expert["description"],
+            "tags": new_expert["tags"],
+        }
+    )
+
+    return {"success": True, "expert_id": expert_id, "expert": new_expert}
+
+
+@app.put("/experts/{expert_id}")
+async def update_expert(expert_id: str, expert_data: dict):
+    """更新专家信息"""
+    from datetime import datetime
+
+    # 查找专家
+    expert_index = next(
+        (i for i, e in enumerate(expert_library.experts) if e["id"] == expert_id), None
+    )
+    if expert_index is None:
+        raise HTTPException(status_code=404, detail="Expert not found")
+
+    # 更新专家信息
+    expert = expert_library.experts[expert_index]
+    for key, value in expert_data.items():
+        if key != "id":  # 不允许修改ID
+            expert[key] = value
+
+    expert["updated_at"] = datetime.now().isoformat()
+
+    # 更新向量数据库
+    upsert_role_to_vector_db(
+        {"name": expert["name"], "desc": expert["description"], "tags": expert["tags"]}
+    )
+
+    return {"success": True, "expert": expert}
+
+
+@app.delete("/experts/{expert_id}")
+async def delete_expert(expert_id: str):
+    """删除专家"""
+    expert_index = next(
+        (i for i, e in enumerate(expert_library.experts) if e["id"] == expert_id), None
+    )
+    if expert_index is None:
+        raise HTTPException(status_code=404, detail="Expert not found")
+
+    # 删除专家
+    deleted_expert = expert_library.experts.pop(expert_index)
+
+    return {
+        "success": True,
+        "message": f"Expert {deleted_expert['name']} deleted successfully",
+    }
+
+
+@app.get("/experts/categories")
+async def get_expert_categories():
+    """获取专家分类"""
+    return {"categories": expert_library.expert_categories}
+
+
+@app.post("/experts/search")
+async def search_experts_by_vector(query: str, top_k: int = 5):
+    """基于向量相似度搜索专家"""
+    results = search_roles_by_vector(query, top_k)
+    return {"query": query, "results": results}
+
+
+# ---- Schema库管理API ----
+
+
+class SchemaLibrary:
+    def __init__(self):
+        self.schemas = self._load_schemas()
+        self.schema_categories = self._load_schema_categories()
+
+    def _load_schemas(self):
+        """加载现有schema库"""
+        import json
+        from pathlib import Path
+
+        schemas = []
+        schemas_dir = Path("schemas")
+
+        if schemas_dir.exists():
+            for domain_dir in schemas_dir.iterdir():
+                if domain_dir.is_dir() and domain_dir.name != "__pycache__":
+                    for schema_file in domain_dir.glob("*.json"):
+                        try:
+                            with open(schema_file, encoding="utf-8") as f:
+                                schema_content = json.load(f)
+
+                            schema_info = {
+                                "id": f"{domain_dir.name}_{schema_file.stem}",
+                                "name": schema_file.stem,
+                                "domain": domain_dir.name,
+                                "file_path": str(schema_file),
+                                "content": schema_content,
+                                "description": schema_content.get("description", ""),
+                                "version": "1.0",
+                                "created_at": "2024-01-01T00:00:00Z",
+                                "updated_at": "2024-06-19T00:00:00Z",
+                                "usage_count": 0,
+                                "tags": self._extract_tags_from_schema(schema_content),
+                            }
+                            schemas.append(schema_info)
+                        except Exception as e:
+                            logger.error(f"加载schema文件失败 {schema_file}: {e}")
+
+        return schemas
+
+    def _extract_tags_from_schema(self, schema_content):
+        """从schema内容中提取标签"""
+        tags = []
+        if isinstance(schema_content, dict):
+            # 从属性名称中提取标签
+            properties = schema_content.get("properties", {})
+            for prop_name in properties.keys():
+                tags.append(prop_name)
+
+            # 从描述中提取关键词
+            description = schema_content.get("description", "")
+            if description:
+                # 简单的关键词提取
+                keywords = [
+                    "financial",
+                    "report",
+                    "analysis",
+                    "summary",
+                    "data",
+                    "content",
+                    "academic",
+                    "research",
+                ]
+                for keyword in keywords:
+                    if keyword in description.lower():
+                        tags.append(keyword)
+
+        return list(set(tags))  # 去重
+
+    def _load_schema_categories(self):
+        """加载schema分类"""
+        return {
+            "financial_report": "财务报告",
+            "paper_writer": "学术论文",
+            "textbook_editor": "教材编辑",
+            "market_analysis": "市场分析",
+            "legal_document": "法律文档",
+            "technical_spec": "技术规范",
+            "business_plan": "商业计划",
+        }
+
+
+# 全局schema库实例
+schema_library = SchemaLibrary()
+
+
+@app.get("/schemas")
+async def list_schemas(
+    domain: Optional[str] = None,
+    search: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+):
+    """获取schema列表"""
+    schemas = schema_library.schemas.copy()
+
+    # 按领域筛选
+    if domain:
+        schemas = [s for s in schemas if s.get("domain") == domain]
+
+    # 搜索筛选
+    if search:
+        search_lower = search.lower()
+        schemas = [
+            s
+            for s in schemas
+            if search_lower in s.get("name", "").lower()
+            or search_lower in s.get("description", "").lower()
+            or any(search_lower in tag.lower() for tag in s.get("tags", []))
+        ]
+
+    # 分页
+    total = len(schemas)
+    schemas = schemas[offset : offset + limit]
+
+    return {
+        "schemas": schemas,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "domains": list(schema_library.schema_categories.keys()),
+    }
+
+
+@app.get("/schemas/{schema_id}")
+async def get_schema(schema_id: str):
+    """获取schema详细信息"""
+    schema = next((s for s in schema_library.schemas if s["id"] == schema_id), None)
+    if not schema:
+        raise HTTPException(status_code=404, detail="Schema not found")
+    return schema
+
+
+@app.post("/schemas")
+async def create_schema(schema_data: dict):
+    """创建新schema"""
+    import json
+    from datetime import datetime
+    from pathlib import Path
+
+    # 验证必填字段
+    required_fields = ["name", "domain", "content"]
+    for field in required_fields:
+        if field not in schema_data:
+            raise HTTPException(
+                status_code=400, detail=f"Missing required field: {field}"
+            )
+
+    # 生成schema ID
+    schema_id = f"{schema_data['domain']}_{schema_data['name']}"
+
+    # 创建schema记录
+    new_schema = {
+        "id": schema_id,
+        "name": schema_data["name"],
+        "domain": schema_data["domain"],
+        "content": schema_data["content"],
+        "description": schema_data.get("description", ""),
+        "version": schema_data.get("version", "1.0"),
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat(),
+        "usage_count": 0,
+        "tags": schema_library._extract_tags_from_schema(schema_data["content"]),
+    }
+
+    # 保存到文件系统
+    domain_dir = Path("schemas") / schema_data["domain"]
+    domain_dir.mkdir(parents=True, exist_ok=True)
+
+    schema_file = domain_dir / f"{schema_data['name']}.json"
+    with open(schema_file, "w", encoding="utf-8") as f:
+        json.dump(schema_data["content"], f, ensure_ascii=False, indent=2)
+
+    new_schema["file_path"] = str(schema_file)
+
+    # 添加到schema库
+    schema_library.schemas.append(new_schema)
+
+    return {"success": True, "schema_id": schema_id, "schema": new_schema}
+
+
+@app.put("/schemas/{schema_id}")
+async def update_schema(schema_id: str, schema_data: dict):
+    """更新schema"""
+    import json
+    from datetime import datetime
+
+    # 查找schema
+    schema_index = next(
+        (i for i, s in enumerate(schema_library.schemas) if s["id"] == schema_id), None
+    )
+    if schema_index is None:
+        raise HTTPException(status_code=404, detail="Schema not found")
+
+    schema = schema_library.schemas[schema_index]
+
+    # 更新schema信息
+    for key, value in schema_data.items():
+        if key != "id":  # 不允许修改ID
+            schema[key] = value
+
+    schema["updated_at"] = datetime.now().isoformat()
+    schema["tags"] = schema_library._extract_tags_from_schema(schema.get("content", {}))
+
+    # 更新文件
+    if "content" in schema_data and schema.get("file_path"):
+        try:
+            with open(schema["file_path"], "w", encoding="utf-8") as f:
+                json.dump(schema["content"], f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logger.error(f"更新schema文件失败: {e}")
+
+    return {"success": True, "schema": schema}
+
+
+@app.delete("/schemas/{schema_id}")
+async def delete_schema(schema_id: str):
+    """删除schema"""
+    import os
+
+    # 查找schema
+    schema_index = next(
+        (i for i, s in enumerate(schema_library.schemas) if s["id"] == schema_id), None
+    )
+    if schema_index is None:
+        raise HTTPException(status_code=404, detail="Schema not found")
+
+    schema = schema_library.schemas.pop(schema_index)
+
+    # 删除文件
+    if schema.get("file_path") and os.path.exists(schema["file_path"]):
+        try:
+            os.remove(schema["file_path"])
+        except Exception as e:
+            logger.error(f"删除schema文件失败: {e}")
+
+    return {"success": True, "message": f"Schema {schema['name']} deleted successfully"}
+
+
+@app.get("/schemas/domains")
+async def get_schema_domains():
+    """获取schema领域分类"""
+    return {"domains": schema_library.schema_categories}
+
+
+@app.post("/schemas/validate")
+async def validate_schema(schema_content: dict):
+    """验证schema格式"""
+    import jsonschema
+
+    try:
+        # 基本的JSON Schema验证
+        if not isinstance(schema_content, dict):
+            return {"valid": False, "error": "Schema must be a JSON object"}
+
+        # 检查必要字段
+        if "type" not in schema_content:
+            return {"valid": False, "error": "Schema must have a 'type' field"}
+
+        # 尝试验证schema结构
+        jsonschema.Draft7Validator.check_schema(schema_content)
+
+        return {"valid": True, "message": "Schema is valid"}
+
+    except jsonschema.SchemaError as e:
+        return {"valid": False, "error": f"Invalid schema: {str(e)}"}
+    except Exception as e:
+        return {"valid": False, "error": f"Validation error: {str(e)}"}
+
+
+@app.post("/schemas/recommend")
+async def recommend_schema(task_description: str, domain: Optional[str] = None):
+    """基于任务描述推荐合适的schema"""
+    from src.schema_recommender import schema_recommender
+
+    try:
+        # 使用schema推荐器
+        recommended_schema, confidence = schema_recommender.recommend_schema(
+            stage_name="analysis",
+            role="analyst",
+            prompt_template=task_description,
+            task_context=domain or "",
+        )
+
+        # 查找推荐的schema详情
+        schema_info = None
+        for schema in schema_library.schemas:
+            if recommended_schema in schema.get("file_path", ""):
+                schema_info = schema
+                break
+
+        return {
+            "recommended_schema": recommended_schema,
+            "confidence": confidence,
+            "schema_info": schema_info,
+            "alternatives": [],  # 可以添加备选方案
+        }
+
+    except Exception as e:
+        logger.error(f"Schema推荐失败: {e}")
+        return {"error": f"Schema recommendation failed: {str(e)}"}
+
+
+@app.get("/schemas/statistics")
+async def get_schema_statistics():
+    """获取schema库统计信息"""
+    schemas = schema_library.schemas
+
+    # 按领域统计
+    domain_stats = {}
+    for schema in schemas:
+        domain = schema.get("domain", "unknown")
+        if domain not in domain_stats:
+            domain_stats[domain] = 0
+        domain_stats[domain] += 1
+
+    # 使用频率统计
+    usage_stats = sorted(schemas, key=lambda x: x.get("usage_count", 0), reverse=True)[
+        :10
+    ]
+
+    return {
+        "total_schemas": len(schemas),
+        "domain_distribution": domain_stats,
+        "most_used_schemas": [
+            {"name": s["name"], "usage_count": s.get("usage_count", 0)}
+            for s in usage_stats
+        ],
+        "recent_schemas": sorted(
+            schemas, key=lambda x: x.get("created_at", ""), reverse=True
+        )[:5],
+    }
+
+
+# ---- 任务分类API ----
+
+
+class TaskClassificationRequest(BaseModel):
+    user_request: str
+
+
+@app.post("/intelligent_protocol/classify")
+async def classify_task(request: TaskClassificationRequest):
+    """智能任务分类API"""
+    user_request = request.user_request.lower()
+
+    # 内容创作关键词
+    creation_keywords = [
+        "撰写",
+        "写作",
+        "编编",
+        "创作",
+        "制作",
+        "生成",
+        "论文",
+        "报告",
+        "方案",
+        "教材",
+        "文章",
+        "内容",
+        "设计",
+        "规划",
+        "策划",
+        "开发",
+        "建立",
+        "构建",
+    ]
+
+    # 文档分析关键词
+    analysis_keywords = [
+        "分析",
+        "解析",
+        "提取",
+        "总结",
+        "归纳",
+        "审查",
+        "检查",
+        "评估",
+        "研究",
+        "理解",
+        "识别",
+        "发现",
+        "查找",
+        "搜索",
+        "比较",
+        "对比",
+        "评价",
+        "判断",
+    ]
+
+    # 计算匹配分数
+    creation_score = sum(1 for keyword in creation_keywords if keyword in user_request)
+    analysis_score = sum(1 for keyword in analysis_keywords if keyword in user_request)
+
+    # 匹配的关键词
+    matched_creation = [kw for kw in creation_keywords if kw in user_request]
+    matched_analysis = [kw for kw in analysis_keywords if kw in user_request]
+
+    # 决策逻辑
+    if creation_score > analysis_score:
+        task_type = "content_creation"
+        confidence = (
+            creation_score / (creation_score + analysis_score)
+            if (creation_score + analysis_score) > 0
+            else 0.5
+        )
+        decision_reason = f"检测到{creation_score}个创作关键词，{analysis_score}个分析关键词"
+
+        recommended_workflow = {
+            "stages": ["需求分析", "大纲设计", "内容创作", "专家评审", "修订完善", "最终发布"],
+            "features": ["多专家协作", "分阶段创作", "版本管理", "质量控制", "协作编辑"],
+        }
+    else:
+        task_type = "document_analysis"
+        confidence = (
+            analysis_score / (creation_score + analysis_score)
+            if (creation_score + analysis_score) > 0
+            else 0.5
+        )
+        decision_reason = f"检测到{analysis_score}个分析关键词，{creation_score}个创作关键词"
+
+        recommended_workflow = {
+            "stages": ["文档上传", "智能解析", "信息提取", "结构化输出", "结果验证", "报告生成"],
+            "features": ["智能信息提取", "结构化输出", "溯源支持", "多格式支持", "实时处理"],
+        }
+
+    # 如果分数相等，根据特定模式判断
+    if creation_score == analysis_score:
+        if any(word in user_request for word in ["论文", "报告", "方案", "教材"]):
+            task_type = "content_creation"
+            confidence = 0.6
+        elif any(word in user_request for word in ["财务", "合同", "数据", "文档"]):
+            task_type = "document_analysis"
+            confidence = 0.6
+        else:
+            confidence = 0.5
+
+    return {
+        "success": True,
+        "task_type": task_type,
+        "confidence": confidence,
+        "classification_info": {
+            "decision_reason": decision_reason,
+            "creation_score": creation_score,
+            "analysis_score": analysis_score,
+            "matched_keywords": {
+                "creation": matched_creation,
+                "analysis": matched_analysis,
+            },
+        },
+        "recommended_workflow": recommended_workflow,
+    }
+
+
+@app.get("/health")
+async def health_check():
+    """健康检查API"""
+    return {"status": "healthy", "message": "DAIP Insight Engine is running"}
+
+
+# ---- 协作功能API ----
+
+
+# 协作数据模型
+class CollaborationUser(BaseModel):
+    id: str
+    name: str
+    email: str
+    role: str
+    online: bool = False
+    last_activity: str = ""
+
+
+class CollaborationProject(BaseModel):
+    id: str
+    name: str
+    description: str
+    message_type: str
+    creator: str
+    participants: list[str] = []
+    status: str = "active"
+    created_at: str
+    updated_at: str
+
+
+# 内存存储（实际应用中应使用数据库）
+collaboration_users = [
+    {
+        "id": "user_001",
+        "name": "张三",
+        "email": "zhangsan@example.com",
+        "role": "expert",
+        "online": True,
+        "last_activity": "2024-06-19T10:30:00Z",
+    },
+    {
+        "id": "user_002",
+        "name": "李四",
+        "email": "lisi@example.com",
+        "role": "user",
+        "online": False,
+        "last_activity": "2024-06-19T09:15:00Z",
+    },
+    {
+        "id": "user_003",
+        "name": "王五",
+        "email": "wangwu@example.com",
+        "role": "admin",
+        "online": True,
+        "last_activity": "2024-06-19T11:00:00Z",
+    },
+]
+
+collaboration_projects = [
+    {
+        "id": "proj_001",
+        "name": "AI伦理研究项目",
+        "description": "研究AI技术的伦理问题和社会影响",
+        "type": "content_creation",
+        "creator": "user_001",
+        "participants": ["user_001", "user_002"],
+        "status": "active",
+        "created_at": "2024-06-01T00:00:00Z",
+        "updated_at": "2024-06-19T00:00:00Z",
+    },
+    {
+        "id": "proj_002",
+        "name": "财务报告分析",
+        "description": "分析公司Q2财务报告",
+        "type": "document_analysis",
+        "creator": "user_003",
+        "participants": ["user_003"],
+        "status": "completed",
+        "created_at": "2024-05-15T00:00:00Z",
+        "updated_at": "2024-06-10T00:00:00Z",
+    },
+]
+
+collaboration_permissions = [
+    {
+        "user_id": "user_001",
+        "user_name": "张三",
+        "role": "expert",
+        "permissions": [
+            "create_project",
+            "edit_content",
+            "review_content",
+            "comment",
+            "view_assigned",
+        ],
+    },
+    {
+        "user_id": "user_002",
+        "user_name": "李四",
+        "role": "user",
+        "permissions": ["view_assigned", "comment", "edit_own"],
+    },
+    {
+        "user_id": "user_003",
+        "user_name": "王五",
+        "role": "admin",
+        "permissions": [
+            "create_project",
+            "delete_project",
+            "manage_users",
+            "manage_permissions",
+            "view_all",
+        ],
+    },
+]
+
+
+@app.get("/collaboration/users")
+async def get_collaboration_users():
+    """获取协作用户列表"""
+    return {"users": collaboration_users}
+
+
+@app.post("/collaboration/users")
+async def create_collaboration_user(user_data: dict):
+    """创建协作用户"""
+    import uuid
+    from datetime import datetime
+
+    user_id = f"user_{str(uuid.uuid4())[:8]}"
+    new_user = {
+        "id": user_id,
+        "name": user_data["name"],
+        "email": user_data["email"],
+        "role": user_data.get("role", "user"),
+        "online": False,
+        "last_activity": datetime.now().isoformat(),
+    }
+
+    collaboration_users.append(new_user)
+
+    # 创建默认权限
+    default_permissions = {
+        "user": ["view_assigned", "comment", "edit_own"],
+        "expert": [
+            "create_project",
+            "edit_content",
+            "review_content",
+            "comment",
+            "view_assigned",
+        ],
+        "admin": [
+            "create_project",
+            "delete_project",
+            "manage_users",
+            "manage_permissions",
+            "view_all",
+        ],
+    }
+
+    user_permissions = {
+        "user_id": user_id,
+        "user_name": user_data["name"],
+        "role": user_data.get("role", "user"),
+        "permissions": default_permissions.get(
+            user_data.get("role", "user"), ["view_assigned"]
+        ),
+    }
+    collaboration_permissions.append(user_permissions)
+
+    return {"success": True, "user_id": user_id, "user": new_user}
+
+
+@app.delete("/collaboration/users/{user_id}")
+async def delete_collaboration_user(user_id: str):
+    """删除协作用户"""
+    global collaboration_users, collaboration_permissions
+
+    # 删除用户
+    collaboration_users = [u for u in collaboration_users if u["id"] != user_id]
+
+    # 删除权限
+    collaboration_permissions = [
+        p for p in collaboration_permissions if p["user_id"] != user_id
+    ]
+
+    return {"success": True, "message": f"User {user_id} deleted successfully"}
+
+
+@app.get("/collaboration/projects")
+async def get_collaboration_projects():
+    """获取协作项目列表"""
+    return {"projects": collaboration_projects}
+
+
+@app.post("/collaboration/projects")
+async def create_collaboration_project(project_data: dict):
+    """创建协作项目"""
+    import uuid
+    from datetime import datetime
+
+    project_id = f"proj_{str(uuid.uuid4())[:8]}"
+    new_project = {
+        "id": project_id,
+        "name": project_data["name"],
+        "description": project_data.get("description", ""),
+        "type": project_data.get("type", "mixed"),
+        "creator": project_data.get("creator", "unknown"),
+        "participants": [project_data.get("creator", "unknown")],
+        "status": "active",
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat(),
+    }
+
+    collaboration_projects.append(new_project)
+    return {"success": True, "project_id": project_id, "project": new_project}
+
+
+@app.delete("/collaboration/projects/{project_id}")
+async def delete_collaboration_project(project_id: str):
+    """删除协作项目"""
+    global collaboration_projects
+
+    collaboration_projects = [
+        p for p in collaboration_projects if p["id"] != project_id
+    ]
+    return {"success": True, "message": f"Project {project_id} deleted successfully"}
+
+
+@app.get("/collaboration/permissions")
+async def get_collaboration_permissions():
+    """获取协作权限列表"""
+    return {"permissions": collaboration_permissions}
+
+
+@app.post("/collaboration/permissions")
+async def set_collaboration_permissions(perm_data: dict):
+    """设置用户权限"""
+    user_id = perm_data["user_id"]
+    permissions = perm_data["permissions"]
+
+    # 查找并更新权限
+    for perm in collaboration_permissions:
+        if perm["user_id"] == user_id:
+            perm["permissions"] = permissions
+            return {"success": True, "message": "Permissions updated successfully"}
+
+    # 如果用户不存在，创建新权限记录
+    user = next((u for u in collaboration_users if u["id"] == user_id), None)
+    if user:
+        new_perm = {
+            "user_id": user_id,
+            "user_name": user["name"],
+            "role": user["role"],
+            "permissions": permissions,
+        }
+        collaboration_permissions.append(new_perm)
+        return {"success": True, "message": "Permissions created successfully"}
+
+    raise HTTPException(status_code=404, detail="User not found")
+
+
+@app.post("/collaboration/permissions/{user_id}/reset")
+async def reset_collaboration_permissions(user_id: str):
+    """重置用户权限"""
+    user = next((u for u in collaboration_users if u["id"] == user_id), None)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # 默认权限
+    default_permissions = {
+        "user": ["view_assigned", "comment", "edit_own"],
+        "expert": [
+            "create_project",
+            "edit_content",
+            "review_content",
+            "comment",
+            "view_assigned",
+        ],
+        "admin": [
+            "create_project",
+            "delete_project",
+            "manage_users",
+            "manage_permissions",
+            "view_all",
+        ],
+    }
+
+    # 重置权限
+    for perm in collaboration_permissions:
+        if perm["user_id"] == user_id:
+            perm["permissions"] = default_permissions.get(
+                user["role"], ["view_assigned"]
+            )
+            return {"success": True, "message": "Permissions reset successfully"}
+
+    return {"success": False, "message": "Permission record not found"}
+
+
+@app.get("/collaboration/statistics")
+async def get_collaboration_statistics():
+    """获取协作统计信息"""
+    # 基础统计
+    total_users = len(collaboration_users)
+    active_projects = len(
+        [p for p in collaboration_projects if p["status"] == "active"]
+    )
+    online_users = len([u for u in collaboration_users if u["online"]])
+
+    # 模拟统计数据
+    stats = {
+        "total_users": total_users,
+        "active_projects": active_projects,
+        "online_users": online_users,
+        "today_collaborations": 15,
+        "week_tasks": 42,
+        "user_activity": [
+            {"user": "张三", "activity_count": 25, "last_active": "2小时前"},
+            {"user": "李四", "activity_count": 18, "last_active": "1天前"},
+            {"user": "王五", "activity_count": 32, "last_active": "30分钟前"},
+        ],
+        "project_progress": [
+            {"project": "AI伦理研究项目", "progress": 65, "status": "进行中"},
+            {"project": "财务报告分析", "progress": 100, "status": "已完成"},
+        ],
+        "collaboration_heatmap": {
+            "Monday": 8,
+            "Tuesday": 12,
+            "Wednesday": 15,
+            "Thursday": 10,
+            "Friday": 18,
+            "Saturday": 5,
+            "Sunday": 3,
+        },
+        "recent_activities": [
+            {
+                "timestamp": "2024-06-19T11:30:00Z",
+                "user": "张三",
+                "action": "评论了",
+                "project": "AI伦理研究项目",
+            },
+            {
+                "timestamp": "2024-06-19T11:15:00Z",
+                "user": "王五",
+                "action": "创建了任务",
+                "project": "财务报告分析",
+            },
+            {
+                "timestamp": "2024-06-19T10:45:00Z",
+                "user": "李四",
+                "action": "更新了文档",
+                "project": "AI伦理研究项目",
+            },
+            {
+                "timestamp": "2024-06-19T10:30:00Z",
+                "user": "张三",
+                "action": "加入了项目",
+                "project": "新项目讨论",
+            },
+            {
+                "timestamp": "2024-06-19T10:00:00Z",
+                "user": "王五",
+                "action": "审核了内容",
+                "project": "AI伦理研究项目",
+            },
+        ],
+    }
+
+    return stats
+
+
+# ---- 区块链共识算法API ----
+
+from src.blockchain_consensus import (
+    BlockchainConsensusEngine,
+    ConsensusAlgorithm,
+    Expert,
+)
+
+# 全局共识引擎实例
+consensus_engines: dict[str, BlockchainConsensusEngine] = {}
+
+
+class ConsensusSessionRequest(BaseModel):
+    session_id: str
+    algorithm: str = "proof_of_authority"
+    topic: str
+    description: str = ""
+
+
+class ExpertRegistrationRequest(BaseModel):
+    session_id: str
+    expert_id: str
+    name: str
+    category: str
+    reputation_score: float = 80.0
+    stake_weight: float = 1.0
+    authority_level: int = 3
+    specialties: list[str] = []
+
+
+class OpinionSubmissionRequest(BaseModel):
+    session_id: str
+    expert_id: str
+    content: str
+    confidence: float
+    supporting_evidence: list[str] = []
+
+
+@app.post("/consensus/create_session")
+async def create_consensus_session(request: ConsensusSessionRequest):
+    """创建共识会话"""
+    try:
+        algorithm = ConsensusAlgorithm(request.algorithm)
+        engine = BlockchainConsensusEngine(algorithm)
+        consensus_engines[request.session_id] = engine
+
+        return {
+            "success": True,
+            "session_id": request.session_id,
+            "algorithm": request.algorithm,
+            "topic": request.topic,
+            "message": "Consensus session created successfully",
+        }
+    except ValueError:
+        raise HTTPException(
+            status_code=400, detail=f"Invalid algorithm: {request.algorithm}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to create session: {str(e)}"
+        )
+
+
+@app.post("/consensus/register_expert")
+async def register_expert_for_consensus(request: ExpertRegistrationRequest):
+    """为共识会话注册专家"""
+    if request.session_id not in consensus_engines:
+        raise HTTPException(status_code=404, detail="Consensus session not found")
+
+    try:
+        expert = Expert(
+            id=request.expert_id,
+            name=request.name,
+            category=request.category,
+            reputation_score=request.reputation_score,
+            stake_weight=request.stake_weight,
+            authority_level=request.authority_level,
+            specialties=request.specialties,
+        )
+
+        consensus_engines[request.session_id].register_expert(expert)
+
+        return {
+            "success": True,
+            "expert_id": request.expert_id,
+            "message": f"Expert {request.name} registered successfully",
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to register expert: {str(e)}"
+        )
+
+
+@app.post("/consensus/submit_opinion")
+async def submit_opinion_for_consensus(request: OpinionSubmissionRequest):
+    """提交专家意见"""
+    if request.session_id not in consensus_engines:
+        raise HTTPException(status_code=404, detail="Consensus session not found")
+
+    try:
+        engine = consensus_engines[request.session_id]
+        opinion = engine.submit_opinion(
+            expert_id=request.expert_id,
+            content=request.content,
+            confidence=request.confidence,
+            supporting_evidence=request.supporting_evidence,
+        )
+
+        return {
+            "success": True,
+            "opinion_hash": opinion.hash,
+            "expert_id": request.expert_id,
+            "timestamp": opinion.timestamp,
+            "message": "Opinion submitted successfully",
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to submit opinion: {str(e)}"
+        )
+
+
+@app.get("/consensus/{session_id}/conflicts")
+async def detect_opinion_conflicts(session_id: str):
+    """检测意见冲突"""
+    if session_id not in consensus_engines:
+        raise HTTPException(status_code=404, detail="Consensus session not found")
+
+    try:
+        engine = consensus_engines[session_id]
+        conflicts = engine.detect_conflicts()
+
+        conflict_data = []
+        for opinion1, opinion2, conflict_score in conflicts:
+            expert1 = engine.experts[opinion1.expert_id]
+            expert2 = engine.experts[opinion2.expert_id]
+
+            conflict_data.append(
+                {
+                    "conflict_score": conflict_score,
+                    "opinion1": {
+                        "expert_name": expert1.name,
+                        "content": opinion1.content,
+                        "confidence": opinion1.confidence,
+                    },
+                    "opinion2": {
+                        "expert_name": expert2.name,
+                        "content": opinion2.content,
+                        "confidence": opinion2.confidence,
+                    },
+                }
+            )
+
+        return {
+            "success": True,
+            "conflicts_count": len(conflicts),
+            "conflicts": conflict_data,
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to detect conflicts: {str(e)}"
+        )
+
+
+@app.post("/consensus/{session_id}/run")
+async def run_consensus_algorithm(session_id: str, topic: str = "General Discussion"):
+    """运行共识算法"""
+    if session_id not in consensus_engines:
+        raise HTTPException(status_code=404, detail="Consensus session not found")
+
+    try:
+        engine = consensus_engines[session_id]
+        result = engine.run_consensus(topic)
+
+        return {
+            "success": True,
+            "consensus_result": result,
+            "blockchain_valid": engine.validate_blockchain(),
+            "total_blocks": len(engine.blockchain),
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to run consensus: {str(e)}"
+        )
+
+
+@app.get("/consensus/{session_id}/history")
+async def get_consensus_history(session_id: str):
+    """获取共识历史"""
+    if session_id not in consensus_engines:
+        raise HTTPException(status_code=404, detail="Consensus session not found")
+
+    try:
+        engine = consensus_engines[session_id]
+        history = engine.get_consensus_history()
+
+        return {
+            "success": True,
+            "session_id": session_id,
+            "algorithm": engine.algorithm.value,
+            "total_consensus_rounds": len(history),
+            "history": history,
+            "blockchain_valid": engine.validate_blockchain(),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get history: {str(e)}")
+
+
+@app.get("/consensus/{session_id}/status")
+async def get_consensus_session_status(session_id: str):
+    """获取共识会话状态"""
+    if session_id not in consensus_engines:
+        raise HTTPException(status_code=404, detail="Consensus session not found")
+
+    try:
+        engine = consensus_engines[session_id]
+
+        return {
+            "success": True,
+            "session_id": session_id,
+            "algorithm": engine.algorithm.value,
+            "registered_experts": len(engine.experts),
+            "pending_opinions": len(engine.pending_opinions),
+            "total_blocks": len(engine.blockchain),
+            "consensus_threshold": engine.consensus_threshold,
+            "min_validators": engine.min_validators,
+            "blockchain_valid": engine.validate_blockchain(),
+            "experts": [
+                {
+                    "id": expert.id,
+                    "name": expert.name,
+                    "category": expert.category,
+                    "reputation_score": expert.reputation_score,
+                    "authority_level": expert.authority_level,
+                }
+                for expert in engine.experts.values()
+            ],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get status: {str(e)}")
+
+
+@app.delete("/consensus/{session_id}")
+async def delete_consensus_session(session_id: str):
+    """删除共识会话"""
+    if session_id not in consensus_engines:
+        raise HTTPException(status_code=404, detail="Consensus session not found")
+
+    try:
+        del consensus_engines[session_id]
+        return {
+            "success": True,
+            "message": f"Consensus session {session_id} deleted successfully",
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to delete session: {str(e)}"
+        )
+
+
+@app.get("/consensus/algorithms")
+async def get_available_consensus_algorithms():
+    """获取可用的共识算法"""
+    return {
+        "algorithms": [
+            {
+                "name": "proof_of_authority",
+                "display_name": "权威证明 (PoA)",
+                "description": "基于专家权威等级和声誉分数的共识算法，适合专家主导的决策场景",
+            },
+            {
+                "name": "proof_of_stake",
+                "display_name": "权益证明 (PoS)",
+                "description": "基于专家权益权重的共识算法，权益越高影响力越大",
+            },
+            {
+                "name": "delegated_proof_of_stake",
+                "display_name": "委托权益证明 (DPoS)",
+                "description": "选择权益最高的专家作为代表进行决策的共识算法",
+            },
+            {
+                "name": "pbft",
+                "display_name": "实用拜占庭容错 (PBFT)",
+                "description": "能够容忍1/3恶意节点的强一致性共识算法，适合高可靠性要求",
+            },
+        ]
+    }
+
+
+# ---- Shor算法任务分解引擎API ----
+
+from src.shor_task_decomposer import (
+    ShorTaskDecomposer,
+    TaskComplexity,
+    TaskNode,
+)
+
+# 全局任务分解器实例
+task_decomposer = ShorTaskDecomposer()
+
+
+class TaskDecompositionRequest(BaseModel):
+    task_name: str
+    description: str
+    complexity: str = "moderate"  # trivial, simple, moderate, complex, exponential
+    estimated_time: float = 10.0
+    required_skills: list[str] = []
+    priority: int = 5
+    dependencies: list[str] = []
+
+
+@app.post("/shor_decomposer/decompose")
+async def decompose_task_with_shor(request: TaskDecompositionRequest):
+    """使用Shor算法分解任务"""
+    try:
+        # 转换复杂度
+        complexity_mapping = {
+            "trivial": TaskComplexity.TRIVIAL,
+            "simple": TaskComplexity.SIMPLE,
+            "moderate": TaskComplexity.MODERATE,
+            "complex": TaskComplexity.COMPLEX,
+            "exponential": TaskComplexity.EXPONENTIAL,
+        }
+
+        complexity = complexity_mapping.get(
+            request.complexity.lower(), TaskComplexity.MODERATE
+        )
+
+        # 创建任务节点
+        import time
+
+        task = TaskNode(
+            id=f"task_{int(time.time())}",
+            name=request.task_name,
+            description=request.description,
+            complexity=complexity,
+            dependencies=request.dependencies,
+            estimated_time=request.estimated_time,
+            required_skills=request.required_skills,
+            priority=request.priority,
+        )
+
+        # 执行分解
+        result = task_decomposer.decompose_task(task)
+
+        # 转换结果为可序列化格式
+        response_data = {
+            "success": True,
+            "original_task": {
+                "id": result.original_task.id,
+                "name": result.original_task.name,
+                "description": result.original_task.description,
+                "complexity": result.original_task.complexity.name,
+                "estimated_time": result.original_task.estimated_time,
+            },
+            "subtasks": [
+                {
+                    "id": subtask.id,
+                    "name": subtask.name,
+                    "description": subtask.description,
+                    "complexity": subtask.complexity.name,
+                    "dependencies": subtask.dependencies,
+                    "estimated_time": subtask.estimated_time,
+                    "required_skills": subtask.required_skills,
+                    "priority": subtask.priority,
+                    "quantum_state": subtask.quantum_state,
+                }
+                for subtask in result.subtasks
+            ],
+            "decomposition_tree": result.decomposition_tree,
+            "parallel_groups": result.parallel_groups,
+            "critical_path": result.critical_path,
+            "total_estimated_time": result.total_estimated_time,
+            "decomposition_efficiency": result.decomposition_efficiency,
+            "quantum_entanglement_map": result.quantum_entanglement_map,
+        }
+
+        return response_data
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Task decomposition failed: {str(e)}"
+        )
+
+
+@app.get("/shor_decomposer/statistics")
+async def get_decomposition_statistics():
+    """获取分解统计信息"""
+    try:
+        stats = task_decomposer.get_decomposition_statistics()
+        return {"success": True, "statistics": stats}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get statistics: {str(e)}"
+        )
+
+
+@app.get("/shor_decomposer/complexity_levels")
+async def get_complexity_levels():
+    """获取任务复杂度级别"""
+    return {
+        "complexity_levels": [
+            {"name": "trivial", "value": 1, "description": "平凡任务，简单直接"},
+            {"name": "simple", "value": 2, "description": "简单任务，步骤清晰"},
+            {"name": "moderate", "value": 4, "description": "中等任务，需要一定规划"},
+            {"name": "complex", "value": 8, "description": "复杂任务，需要分层处理"},
+            {"name": "exponential", "value": 16, "description": "指数级任务，需要递归分解"},
+        ]
+    }
+
+
+# ---- 认知冲突GAN引擎API ----
+
+from src.cognitive_conflict_gan import (
+    CognitiveConflictGAN,
+    ConflictIntensity,
+)
+
+# 全局GAN实例
+conflict_gan_engines: dict[str, CognitiveConflictGAN] = {}
+
+
+class ConflictGenerationRequest(BaseModel):
+    session_id: str
+    context: dict[str, Any]
+    target_intensity: str = "moderate"  # subtle, moderate, strong, extreme
+    primary_concept: str
+    secondary_concept: str = ""
+
+
+class ContinuousConflictRequest(BaseModel):
+    session_id: str
+    context: dict[str, Any]
+    duration_minutes: int = 60
+    conflict_interval_minutes: int = 10
+
+
+class ConflictFeedbackRequest(BaseModel):
+    session_id: str
+    conflict_id: str
+    user_satisfaction: float  # 0-1
+    resolution_time: float  # minutes
+    creativity_boost: float  # 0-1
+
+
+@app.post("/cognitive_gan/create_session")
+async def create_conflict_gan_session(session_id: str):
+    """创建认知冲突GAN会话"""
+    try:
+        if session_id in conflict_gan_engines:
+            return {"success": False, "message": "Session already exists"}
+
+        conflict_gan_engines[session_id] = CognitiveConflictGAN()
+
+        return {
+            "success": True,
+            "session_id": session_id,
+            "message": "Cognitive conflict GAN session created successfully",
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to create session: {str(e)}"
+        )
+
+
+@app.post("/cognitive_gan/generate_conflict")
+async def generate_single_conflict(request: ConflictGenerationRequest):
+    """生成单个认知冲突"""
+    if request.session_id not in conflict_gan_engines:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    try:
+        # 转换强度
+        intensity_mapping = {
+            "subtle": ConflictIntensity.SUBTLE,
+            "moderate": ConflictIntensity.MODERATE,
+            "strong": ConflictIntensity.STRONG,
+            "extreme": ConflictIntensity.EXTREME,
+        }
+
+        target_intensity = intensity_mapping.get(
+            request.target_intensity.lower(), ConflictIntensity.MODERATE
+        )
+
+        # 准备上下文
+        context = request.context.copy()
+        context["primary_concept"] = request.primary_concept
+        if request.secondary_concept:
+            context["secondary_concept"] = request.secondary_concept
+
+        # 生成冲突
+        gan_engine = conflict_gan_engines[request.session_id]
+        conflict = gan_engine.generator.generate_conflict(context, target_intensity)
+
+        # 评估冲突
+        evaluation = gan_engine.discriminator.evaluate_conflict(conflict)
+
+        # 添加到数据库
+        gan_engine.discriminator.add_to_database(conflict)
+
+        return {
+            "success": True,
+            "conflict": {
+                "id": conflict.id,
+                "type": conflict.conflict_type.value,
+                "intensity": conflict.intensity.name,
+                "source_concept": conflict.source_concept,
+                "target_concept": conflict.target_concept,
+                "description": conflict.conflict_description,
+                "resolution_hints": conflict.resolution_hints,
+                "cognitive_load": conflict.cognitive_load,
+                "creativity_potential": conflict.creativity_potential,
+                "timestamp": conflict.timestamp,
+            },
+            "evaluation": evaluation,
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate conflict: {str(e)}"
+        )
+
+
+@app.post("/cognitive_gan/continuous_conflicts")
+async def generate_continuous_conflicts(request: ContinuousConflictRequest):
+    """生成持续的认知冲突"""
+    if request.session_id not in conflict_gan_engines:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    try:
+        gan_engine = conflict_gan_engines[request.session_id]
+
+        # 生成持续冲突
+        conflicts = gan_engine.generate_continuous_conflicts(
+            context=request.context,
+            duration_minutes=request.duration_minutes,
+            conflict_interval_minutes=request.conflict_interval_minutes,
+        )
+
+        # 转换结果
+        conflict_data = []
+        for conflict in conflicts:
+            conflict_data.append(
+                {
+                    "id": conflict.id,
+                    "type": conflict.conflict_type.value,
+                    "intensity": conflict.intensity.name,
+                    "description": conflict.conflict_description,
+                    "cognitive_load": conflict.cognitive_load,
+                    "creativity_potential": conflict.creativity_potential,
+                    "timestamp": conflict.timestamp,
+                }
+            )
+
+        return {
+            "success": True,
+            "total_conflicts": len(conflicts),
+            "conflicts": conflict_data,
+            "session_status": gan_engine.get_system_status(),
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate continuous conflicts: {str(e)}"
+        )
+
+
+@app.get("/cognitive_gan/conflict_types")
+async def get_conflict_types():
+    """获取冲突类型"""
+    return {
+        "conflict_types": [
+            {"name": "logical_paradox", "description": "逻辑悖论 - 自我引用的逻辑矛盾"},
+            {"name": "perspective_clash", "description": "视角冲突 - 不同维度的观点碰撞"},
+            {"name": "value_contradiction", "description": "价值观矛盾 - 核心价值观之间的冲突"},
+            {"name": "assumption_challenge", "description": "假设挑战 - 质疑基本假设"},
+            {"name": "paradigm_shift", "description": "范式转换 - 思维模式的根本改变"},
+            {"name": "temporal_inconsistency", "description": "时间不一致性 - 时间维度的逻辑冲突"},
+            {"name": "scale_mismatch", "description": "尺度错配 - 不同尺度下的矛盾表现"},
+            {"name": "context_inversion", "description": "语境反转 - 上下文环境的颠倒"},
+        ],
+        "intensity_levels": [
+            {"name": "subtle", "value": 1, "description": "微妙冲突 - 需要仔细思考才能发现"},
+            {"name": "moderate", "value": 2, "description": "中等冲突 - 明显但可处理的矛盾"},
+            {"name": "strong", "value": 3, "description": "强烈冲突 - 显著的认知挑战"},
+            {"name": "extreme", "value": 4, "description": "极端冲突 - 颠覆性的思维冲击"},
+        ],
+    }
+
+
+# ---- 智能聊天室系统API ----
+
+from src.intelligent_chatroom import IntelligentChatroom
+
+# 全局智能聊天室实例
+intelligent_chatroom = IntelligentChatroom()
+
+
+class ChatSessionRequest(BaseModel):
+    user_id: str
+
+
+class ChatMessageRequest(BaseModel):
+    session_id: str = Field(..., description="会话ID")
+    content: str = Field(..., min_length=1, max_length=5000, description="消息内容")
+    sender_name: str = Field(default="用户", max_length=100, description="发送者姓名")
+    message_type: str = Field(default="text", description="消息类型")
+    metadata: Optional[dict[str, Any]] = Field(default_factory=dict, description="元数据")
+
+
+@app.post("/chatroom/create_session")
+async def create_chat_session(request: ChatSessionRequest):
+    """创建智能聊天会话"""
+    try:
+        session_id = await intelligent_chatroom.create_session(request.user_id)
+        session_info = intelligent_chatroom.get_session_info(session_id)
+
+        return {
+            "success": True,
+            "session_id": session_id,
+            "session_info": session_info,
+            "message": "聊天会话创建成功",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"创建会话失败: {str(e)}")
+
+
+@app.post("/chatroom/send_message")
+async def send_chat_message(request: ChatMessageRequest):
+    """发送聊天消息"""
+    try:
+        result = await intelligent_chatroom.process_user_message(
+            request.session_id, request.content
+        )
+
+        if "error" in result:
+            raise HTTPException(status_code=400, detail=result["error"])
+
+        return {"success": True, "result": result}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"处理消息失败: {str(e)}")
+
+
+@app.get("/chatroom/session/{session_id}")
+async def get_chat_session_info(session_id: str):
+    """获取聊天会话信息"""
+    session_info = intelligent_chatroom.get_session_info(session_id)
+    if not session_info:
+        raise HTTPException(status_code=404, detail="会话不存在")
+
+    return {"success": True, "session_info": session_info}
+
+
+@app.get("/chatroom/history/{session_id}")
+async def get_chat_history(session_id: str, limit: int = 20):
+    """获取聊天历史"""
+    history = intelligent_chatroom.get_conversation_history(session_id, limit)
+
+    return {"success": True, "history": history, "count": len(history)}
+
+
+@app.delete("/chatroom/session/{session_id}")
+async def close_chat_session(session_id: str):
+    """关闭聊天会话"""
+    success = intelligent_chatroom.close_session(session_id)
+
+    if success:
+        return {"success": True, "message": "会话已关闭"}
+    else:
+        raise HTTPException(status_code=404, detail="会话不存在")
+
+
+@app.get("/chatroom/stats")
+async def get_chatroom_stats():
+    """获取聊天室统计信息"""
+    return {
+        "success": True,
+        "active_sessions": intelligent_chatroom.get_active_sessions_count(),
+        "system_status": "running",
+    }
+
+
+# ---- 智能专家库系统API ----
+
+from src.expert_library import ExpertLibrary
+
+# 全局专家库实例
+expert_library = ExpertLibrary()
+
+
+class ExpertSearchRequest(BaseModel):
+    query: str = ""
+    category: str = None
+    skills: list[str] = []
+    limit: int = 10
+
+
+class ExpertCreateRequest(BaseModel):
+    name: str
+    title: str = ""
+    category: str = "通用"
+    specialties: list[str] = []
+    description: str = ""
+    experience_years: int = 0
+    reputation_score: float = 80.0
+    contact_info: dict[str, str] = {}
+    skills: list[str] = []
+    languages: list[str] = ["中文"]
+    availability: str = "可用"
+    hourly_rate: Optional[float] = None
+    location: str = ""
+    education: list[str] = []
+    certifications: list[str] = []
+    projects: list[str] = []
+    bio: str = ""
+
+
+class ExpertUpdateRequest(BaseModel):
+    updates: dict[str, Any]
+
+
+@app.post("/expert_library/load")
+async def load_experts_from_directory(force_reload: bool = False):
+    """从角色目录加载专家"""
+    try:
+        stats = expert_library.load_experts_from_directory(force_reload)
+        return {"success": True, "message": "专家库加载完成", "statistics": stats}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"加载专家库失败: {str(e)}")
+
+
+@app.post("/expert_library/search")
+async def search_experts(request: ExpertSearchRequest):
+    """搜索专家"""
+    try:
+        if request.skills:
+            # 基于技能搜索
+            results = expert_library.get_experts_by_skills(request.skills)
+        else:
+            # 基于查询词搜索
+            results = expert_library.search_experts(
+                query=request.query, category=request.category, limit=request.limit
+            )
+
+        return {"success": True, "total_results": len(results), "experts": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"搜索专家失败: {str(e)}")
+
+
+@app.get("/expert_library/experts")
+async def get_all_experts(category: str = None, limit: int = None):
+    """获取所有专家"""
+    try:
+        experts = expert_library.get_all_experts(category, limit)
+        return {"success": True, "total_experts": len(experts), "experts": experts}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取专家列表失败: {str(e)}")
+
+
+@app.get("/expert_library/experts/{expert_id}")
+async def get_expert_by_id(expert_id: str):
+    """根据ID获取专家详情"""
+    try:
+        expert = expert_library.get_expert_by_id(expert_id)
+        if expert:
+            return {"success": True, "expert": expert}
+        else:
+            raise HTTPException(status_code=404, detail="专家不存在")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取专家详情失败: {str(e)}")
+
+
+@app.get("/expert_library/categories")
+async def get_expert_categories():
+    """获取专家分类"""
+    try:
+        categories = expert_library.get_categories()
+        return {
+            "success": True,
+            "categories": categories,
+            "total_categories": len(categories),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取分类失败: {str(e)}")
+
+
+@app.get("/expert_library/categories/{category}/experts")
+async def get_experts_by_category(category: str):
+    """根据分类获取专家"""
+    try:
+        experts = expert_library.get_experts_by_category(category)
+        return {
+            "success": True,
+            "category": category,
+            "total_experts": len(experts),
+            "experts": experts,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取分类专家失败: {str(e)}")
+
+
+@app.post("/expert_library/experts")
+async def create_expert(request: ExpertCreateRequest):
+    """创建新专家"""
+    try:
+        expert_data = request.dict()
+
+        # 验证数据
+        is_valid, errors = expert_library.validate_expert_data(expert_data)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=f"数据验证失败: {'; '.join(errors)}")
+
+        expert_id = expert_library.add_expert_manually(expert_data)
+
+        return {"success": True, "expert_id": expert_id, "message": "专家创建成功"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"创建专家失败: {str(e)}")
+
+
+@app.put("/expert_library/experts/{expert_id}")
+async def update_expert(expert_id: str, request: ExpertUpdateRequest):
+    """更新专家信息"""
+    try:
+        # 验证更新数据
+        is_valid, errors = expert_library.validate_expert_data(request.updates)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=f"数据验证失败: {'; '.join(errors)}")
+
+        success = expert_library.update_expert(expert_id, request.updates)
+
+        if success:
+            return {"success": True, "message": "专家信息更新成功"}
+        else:
+            raise HTTPException(status_code=404, detail="专家不存在")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"更新专家失败: {str(e)}")
+
+
+@app.delete("/expert_library/experts/{expert_id}")
+async def delete_expert(expert_id: str):
+    """删除专家"""
+    try:
+        success = expert_library.delete_expert(expert_id)
+
+        if success:
+            return {"success": True, "message": "专家删除成功"}
+        else:
+            raise HTTPException(status_code=404, detail="专家不存在")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"删除专家失败: {str(e)}")
+
+
+@app.get("/expert_library/statistics")
+async def get_expert_statistics():
+    """获取专家库统计信息"""
+    try:
+        stats = expert_library.get_statistics()
+        return {"success": True, "statistics": stats}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取统计信息失败: {str(e)}")
+
+
+@app.get("/expert_library/export")
+async def export_experts(format: str = "json", category: str = None):
+    """导出专家数据"""
+    try:
+        if format.lower() not in ["json", "csv"]:
+            raise HTTPException(status_code=400, detail="支持的格式: json, csv")
+
+        data = expert_library.export_experts(format, category)
+
+        if format.lower() == "json":
+            return {"success": True, "format": format, "data": json.loads(data)}
+        else:
+            return {"success": True, "format": format, "data": data}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"导出数据失败: {str(e)}")
+
+
+@app.get("/expert_library/conversion_log")
+async def get_conversion_log():
+    """获取文件转换日志"""
+    try:
+        log = expert_library.get_conversion_log()
+        return {"success": True, "total_conversions": len(log), "conversion_log": log}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取转换日志失败: {str(e)}")
+
+
+# ---- 真实多角色聊天系统API ----
+
+from src.chat_config import DEFAULT_CHAT_MODEL, get_available_models
+from src.multi_role_chat import MultiRoleChatEngine
+
+# 全局聊天引擎实例
+chat_engines: dict[str, MultiRoleChatEngine] = {}
+
+
+class CreateChatRoomRequest(BaseModel):
+    room_name: str
+    topic: str
+    initial_participants: list[str] = []
+    model_type: str = DEFAULT_CHAT_MODEL
+
+
+class SendMessageRequest(BaseModel):
+    room_id: str = Field(..., description="聊天室ID")
+    content: str = Field(..., min_length=1, max_length=5000, description="消息内容")
+    sender_name: str = Field(default="用户", max_length=100, description="发送者姓名")
+    message_type: str = Field(default="text", description="消息类型")
+    metadata: Optional[dict[str, Any]] = Field(default_factory=dict, description="元数据")
+
+
+class AddParticipantRequest(BaseModel):
+    room_id: str
+    role_id: str
+
+
+class GenerateResponseRequest(BaseModel):
+    room_id: str
+    target_roles: list[str] = []
+
+
+class RoleRecommendationRequest(BaseModel):
+    room_id: str = None
+    count: int = 6
+    category: str = None
+    topic: str = ""
+
+
+@app.post("/multi_chat/create_engine")
+async def create_chat_engine(engine_id: str, model_type: str = DEFAULT_CHAT_MODEL):
+    """创建聊天引擎实例"""
+    try:
+        if engine_id in chat_engines:
+            return {"success": False, "message": "聊天引擎已存在"}
+
+        # 确保专家库已加载
+        if not expert_library.experts:
+            expert_library.load_experts_from_directory()
+
+        if chat_service:
+            # 使用统一聊天服务
+            room_id = chat_service.create_room(f"Engine_{engine_id}", "General Chat")
+            chat_engines[engine_id] = {"type": "unified", "room_id": room_id}
+        else:
+            # 回退到旧系统
+            chat_engines[engine_id] = MultiRoleChatEngine(expert_library, model_type)
+
+        return {
+            "success": True,
+            "engine_id": engine_id,
+            "model_type": model_type,
+            "message": "聊天引擎创建成功",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"创建聊天引擎失败: {str(e)}")
+
+
+@app.post("/multi_chat/create_room")
+async def create_chat_room(request: CreateChatRoomRequest, engine_id: str = "default"):
+    """创建聊天室"""
+    try:
+        if engine_id not in chat_engines:
+            # 自动创建默认引擎
+            await create_chat_engine(engine_id, request.model_type)
+
+        chat_engine = chat_engines[engine_id]
+        room_id = chat_engine.create_chat_room(
+            room_name=request.room_name,
+            topic=request.topic,
+            initial_participants=request.initial_participants,
+        )
+
+        return {"success": True, "room_id": room_id, "message": "聊天室创建成功"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"创建聊天室失败: {str(e)}")
+
+
+@app.post("/multi_chat/send_message")
+async def send_message(request: SendMessageRequest, engine_id: str = "default"):
+    """发送用户消息"""
+    if engine_id not in chat_engines:
+        raise HTTPException(status_code=404, detail="聊天引擎不存在")
+
+    try:
+        chat_engine = chat_engines[engine_id]
+        success = await chat_engine.send_user_message(
+            room_id=request.room_id,
+            content=request.content,
+            sender_name=request.sender_name,
+        )
+
+        if success:
+            return {"success": True, "message": "消息发送成功"}
+        else:
+            raise HTTPException(status_code=404, detail="聊天室不存在")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"发送消息失败: {str(e)}")
+
+
+@app.post("/multi_chat/generate_responses")
+async def generate_role_responses(
+    request: GenerateResponseRequest, engine_id: str = "default"
+):
+    """生成角色响应"""
+    if engine_id not in chat_engines:
+        raise HTTPException(status_code=404, detail="聊天引擎不存在")
+
+    try:
+        chat_engine = chat_engines[engine_id]
+        responses = await chat_engine.generate_role_responses(
+            room_id=request.room_id,
+            target_roles=request.target_roles if request.target_roles else None,
+        )
+
+        response_data = []
+        for response in responses:
+            response_data.append(
+                {
+                    "id": response.id,
+                    "role_id": response.role_id,
+                    "role_name": response.role_name,
+                    "content": response.content,
+                    "timestamp": response.timestamp,
+                    "metadata": response.metadata,
+                }
+            )
+
+        return {"success": True, "responses": response_data, "count": len(responses)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"生成响应失败: {str(e)}")
+
+
+@app.post("/multi_chat/add_participant")
+async def add_participant(request: AddParticipantRequest, engine_id: str = "default"):
+    """添加参与者"""
+    if engine_id not in chat_engines:
+        raise HTTPException(status_code=404, detail="聊天引擎不存在")
+
+    try:
+        chat_engine = chat_engines[engine_id]
+        success = chat_engine.add_participant(request.room_id, request.role_id)
+
+        if success:
+            return {"success": True, "message": "参与者添加成功"}
+        else:
+            return {"success": False, "message": "添加失败，可能是聊天室不存在、角色已参与或达到人数上限"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"添加参与者失败: {str(e)}")
+
+
+@app.delete("/multi_chat/remove_participant")
+async def remove_participant(room_id: str, role_id: str, engine_id: str = "default"):
+    """移除参与者"""
+    if engine_id not in chat_engines:
+        raise HTTPException(status_code=404, detail="聊天引擎不存在")
+
+    try:
+        chat_engine = chat_engines[engine_id]
+        success = chat_engine.remove_participant(room_id, role_id)
+
+        if success:
+            return {"success": True, "message": "参与者移除成功"}
+        else:
+            return {"success": False, "message": "移除失败，可能是聊天室或参与者不存在"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"移除参与者失败: {str(e)}")
+
+
+@app.get("/multi_chat/room/{room_id}")
+async def get_chat_room(room_id: str, engine_id: str = "default"):
+    """获取聊天室信息"""
+    if engine_id not in chat_engines:
+        raise HTTPException(status_code=404, detail="聊天引擎不存在")
+
+    try:
+        chat_engine = chat_engines[engine_id]
+        room = chat_engine.get_chat_room(room_id)
+
+        if not room:
+            raise HTTPException(status_code=404, detail="聊天室不存在")
+
+        # 转换为可序列化格式
+        participants_data = []
+        for participant in room.participants:
+            participants_data.append(
+                {
+                    "role_id": participant.role_id,
+                    "role_name": participant.role_name,
+                    "is_active": participant.is_active,
+                    "message_count": participant.message_count,
+                    "last_activity": participant.last_activity,
+                    "role_category": participant.role_data.get("category", ""),
+                    "role_title": participant.role_data.get("title", ""),
+                }
+            )
+
+        messages_data = []
+        for message in room.messages:
+            messages_data.append(
+                {
+                    "id": message.id,
+                    "role_id": message.role_id,
+                    "role_name": message.role_name,
+                    "content": message.content,
+                    "timestamp": message.timestamp,
+                    "message_type": message.message_type,
+                    "metadata": message.metadata,
+                }
+            )
+
+        return {
+            "success": True,
+            "room": {
+                "room_id": room.room_id,
+                "room_name": room.room_name,
+                "topic": room.topic,
+                "participants": participants_data,
+                "messages": messages_data,
+                "created_at": room.created_at,
+                "last_activity": room.last_activity,
+                "is_active": room.is_active,
+            },
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取聊天室失败: {str(e)}")
+
+
+@app.get("/multi_chat/rooms")
+async def get_all_rooms(engine_id: str = "default"):
+    """获取所有聊天室"""
+    if engine_id not in chat_engines:
+        raise HTTPException(status_code=404, detail="聊天引擎不存在")
+
+    try:
+        chat_engine = chat_engines[engine_id]
+        rooms = chat_engine.get_all_rooms()
+
+        rooms_data = []
+        for room in rooms:
+            rooms_data.append(
+                {
+                    "room_id": room.room_id,
+                    "room_name": room.room_name,
+                    "topic": room.topic,
+                    "participant_count": len(room.participants),
+                    "message_count": len(room.messages),
+                    "created_at": room.created_at,
+                    "last_activity": room.last_activity,
+                    "is_active": room.is_active,
+                }
+            )
+
+        return {"success": True, "rooms": rooms_data, "total_rooms": len(rooms_data)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取聊天室列表失败: {str(e)}")
+
+
+@app.post("/multi_chat/recommend_roles")
+async def recommend_roles(
+    request: RoleRecommendationRequest, engine_id: str = "default"
+):
+    """推荐角色"""
+    if engine_id not in chat_engines:
+        raise HTTPException(status_code=404, detail="聊天引擎不存在")
+
+    try:
+        chat_engine = chat_engines[engine_id]
+
+        if request.room_id:
+            # 基于聊天室推荐
+            recommendations = chat_engine.get_room_recommendations(
+                request.room_id, request.count
+            )
+        else:
+            # 随机推荐
+            recommendations = chat_engine.get_random_recommendations(
+                request.count, request.category
+            )
+
+        return {
+            "success": True,
+            "recommendations": recommendations,
+            "count": len(recommendations),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"角色推荐失败: {str(e)}")
+
+
+@app.get("/multi_chat/available_models")
+async def get_available_chat_models():
+    """获取可用的聊天模型"""
+    try:
+        models = get_available_models()
+        return {
+            "success": True,
+            "available_models": models,
+            "default_model": DEFAULT_CHAT_MODEL,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取可用模型失败: {str(e)}")
+
+
+@app.get("/multi_chat/statistics")
+async def get_chat_statistics(engine_id: str = "default"):
+    """获取聊天统计信息"""
+    if engine_id not in chat_engines:
+        raise HTTPException(status_code=404, detail="聊天引擎不存在")
+
+    try:
+        chat_engine = chat_engines[engine_id]
+        stats = chat_engine.get_chat_statistics()
+
+        return {"success": True, "statistics": stats}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取统计信息失败: {str(e)}")
+
+
+# 添加缺失的聊天室API接口
+
+
+@app.get("/multi_chat/room/{room_id}/messages")
+async def get_room_messages(room_id: str, engine_id: str = "default"):
+    """获取聊天室消息"""
+    if engine_id not in chat_engines:
+        raise HTTPException(status_code=404, detail="聊天引擎不存在")
+
+    try:
+        chat_engine = chat_engines[engine_id]
+        room = chat_engine.get_chat_room(room_id)
+
+        if not room:
+            raise HTTPException(status_code=404, detail="聊天室不存在")
+
+        messages_data = []
+        for message in room.messages:
+            messages_data.append(
+                {
+                    "id": message.id,
+                    "role_id": message.role_id,
+                    "role_name": message.role_name,
+                    "content": message.content,
+                    "timestamp": message.timestamp,
+                    "message_type": message.message_type,
+                    "metadata": message.metadata,
+                }
+            )
+
+        return {
+            "success": True,
+            "messages": messages_data,
+            "total_messages": len(messages_data),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取聊天室消息失败: {str(e)}")
+
+
+@app.post("/multi_chat/generate_responses")
+async def generate_ai_responses(request: dict, engine_id: str = "default"):
+    """生成AI角色响应"""
+    if engine_id not in chat_engines:
+        raise HTTPException(status_code=404, detail="聊天引擎不存在")
+
+    try:
+        chat_engine = chat_engines[engine_id]
+        room_id = request.get("room_id")
+        target_roles = request.get("target_roles")
+
+        if not room_id:
+            raise HTTPException(status_code=400, detail="缺少room_id参数")
+
+        # 生成AI响应
+        responses = await chat_engine.generate_role_responses(room_id, target_roles)
+
+        response_data = []
+        for response in responses:
+            response_data.append(
+                {
+                    "id": response.id,
+                    "role_id": response.role_id,
+                    "role_name": response.role_name,
+                    "content": response.content,
+                    "timestamp": response.timestamp,
+                    "message_type": response.message_type,
+                    "metadata": response.metadata,
+                }
+            )
+
+        return {
+            "success": True,
+            "responses": response_data,
+            "count": len(response_data),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"生成AI响应失败: {str(e)}")
+
+
+@app.get("/multi_chat/room/{room_id}/recommendations")
+async def get_room_role_recommendations(
+    room_id: str,
+    count: int = 6,
+    side: str = None,
+    message_type: str = None,
+    engine_id: str = "default",
+):
+    """获取聊天室角色推荐"""
+    if engine_id not in chat_engines:
+        raise HTTPException(status_code=404, detail="聊天引擎不存在")
+
+    try:
+        chat_engine = chat_engines[engine_id]
+
+        # 获取基础推荐
+        recommendations = chat_engine.get_room_recommendations(room_id, count)
+
+        # 如果是辩论类型，进行特殊处理
+        if type == "debate" and side:
+            # 过滤出适合特定阵营的角色
+            filtered_recommendations = []
+            for rec in recommendations:
+                # 这里可以根据角色的特征判断是否适合特定阵营
+                # 为演示目的，简单处理
+                if side == "正方" and any(
+                    keyword in rec.get("specialties", [])
+                    for keyword in ["支持", "积极", "正面"]
+                ):
+                    filtered_recommendations.append(rec)
+                elif side == "反方" and any(
+                    keyword in rec.get("specialties", [])
+                    for keyword in ["批判", "质疑", "反对"]
+                ):
+                    filtered_recommendations.append(rec)
+                else:
+                    # 如果没有明确倾向，也可以加入
+                    filtered_recommendations.append(rec)
+
+            recommendations = filtered_recommendations[:count]
+
+        return {
+            "success": True,
+            "recommendations": recommendations,
+            "count": len(recommendations),
+            "room_id": room_id,
+            "criteria": {"side": side, "type": type, "count": count},
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取角色推荐失败: {str(e)}")
+
+
+@app.get("/multi_chat/models")
+async def get_chat_models():
+    """获取可用的聊天模型"""
+    try:
+        from src.chat_config import DEFAULT_CHAT_MODEL, get_available_models
+
+        models = get_available_models()
+
+        return {
+            "success": True,
+            "models": models,
+            "default_model": DEFAULT_CHAT_MODEL,
+            "total_models": len(models),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取聊天模型失败: {str(e)}")
+
+
+@app.post("/analyze_debate_materials")
+async def analyze_debate_materials(request: dict):
+    """分析辩论材料"""
+    try:
+        documents = request.get("documents", [])
+
+        if not documents:
+            raise HTTPException(status_code=400, detail="没有提供文档进行分析")
+
+        # 这里应该实现真正的文档分析逻辑
+        # 为演示目的，返回模拟的分析结果
+        analysis_result = {
+            "total_documents": len(documents),
+            "analysis_summary": {
+                "key_topics": ["人工智能", "技术发展", "社会影响"],
+                "sentiment_analysis": {
+                    "positive": 0.6,
+                    "negative": 0.3,
+                    "neutral": 0.1,
+                },
+                "main_arguments": ["AI技术能够提高工作效率", "AI可能导致就业问题", "需要建立AI伦理规范"],
+                "evidence_strength": "中等",
+                "credibility_score": 0.75,
+            },
+            "document_breakdown": [],
+        }
+
+        # 为每个文档添加分析结果
+        for i, doc in enumerate(documents):
+            doc_analysis = {
+                "filename": doc.get("filename", f"文档{i+1}"),
+                "type": doc.get("type", "中性材料"),
+                "key_points": [f"文档{i+1}的关键观点1", f"文档{i+1}的关键观点2"],
+                "stance": "中性"
+                if doc.get("type") == "中性材料"
+                else doc.get("type", "").replace("材料", ""),
+                "reliability": 0.8,
+            }
+            analysis_result["document_breakdown"].append(doc_analysis)
+
+        return {
+            "success": True,
+            "analysis": analysis_result,
+            "timestamp": datetime.now().isoformat(),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"辩论材料分析失败: {str(e)}")
+
+
+@app.delete("/multi_chat/room/{room_id}")
+async def delete_chat_room(room_id: str, engine_id: str = "default"):
+    """删除聊天室"""
+    if engine_id not in chat_engines:
+        raise HTTPException(status_code=404, detail="聊天引擎不存在")
+
+    try:
+        chat_engine = chat_engines[engine_id]
+        success = chat_engine.delete_chat_room(room_id)
+
+        if success:
+            return {"success": True, "message": "聊天室删除成功"}
+        else:
+            raise HTTPException(status_code=404, detail="聊天室不存在")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"删除聊天室失败: {str(e)}")
+
+
+class PromptOptimizationRequest(BaseModel):
+    user_input: str
+
+
+class PromptOptimizationResponse(BaseModel):
+    insights: list[dict[str, Any]]
+    structured_json: Optional[dict[str, Any]] = None
+    success: bool = True
+    error: Optional[str] = None
+
+
+@app.post("/tools/prompt_optimization", response_model=PromptOptimizationResponse)
+async def api_prompt_optimization(req: PromptOptimizationRequest):
+    """两步式提示词优化：
+    1. 洞察用户显性与潜在需求，按置信度高低排序（金字塔原则），不确定项放最后并加问号；
+    2. 对第一步结果进行面向大模型的结构化JSON优化，聚焦首要核心需求，原子化执行，任一步失败则整体失败。
+    """
+    try:
+        # 第一步：需求洞察与排序（可用LLM或规则，这里用简单模拟）
+        user_input = req.user_input.strip()
+        if not user_input:
+            return PromptOptimizationResponse(
+                insights=[], success=False, error="用户输入为空"
+            )
+        # 模拟洞察（实际可调用LLM）
+        insights = []
+        if "分析" in user_input:
+            insights.append({"need": "文档分析", "confidence": 0.95})
+        if "撰写" in user_input or "写" in user_input:
+            insights.append({"need": "内容创作", "confidence": 0.9})
+        if "协作" in user_input:
+            insights.append({"need": "多角色协作", "confidence": 0.8})
+        if not insights:
+            insights.append({"need": "需求不明确？", "confidence": 0.5})
+        # 按置信度排序，不确定的放最后
+        insights = (
+            sorted(insights, key=lambda x: -x["confidence"])
+            if len(insights) > 1
+            else insights
+        )
+        # 第二步：结构化JSON优化（聚焦首要需求）
+        try:
+            main_need = insights[0]["need"] if insights else "未知"
+            structured_json = {
+                "main_need": main_need,
+                "all_needs": [i["need"] for i in insights],
+                "confidence": [i["confidence"] for i in insights],
+                "raw": user_input,
+            }
+        except Exception as e:
+            return PromptOptimizationResponse(
+                insights=insights, success=False, error=f"结构化失败: {e}"
+            )
+        return PromptOptimizationResponse(
+            insights=insights, structured_json=structured_json, success=True
+        )
+    except Exception as e:
+        return PromptOptimizationResponse(insights=[], success=False, error=str(e))
+
+
+# 启动服务器
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# ---- 虚拟团队项目协作API ----
+
+from src.memory_bank_tools import MemoryBankTools
+from src.virtual_team_project_engine import VirtualTeamProjectEngine
+
+# 全局虚拟团队引擎实例
+virtual_team_engine: Optional[VirtualTeamProjectEngine] = None
+
+
+class CreateVirtualProjectRequest(BaseModel):
+    name: str
+    description: str
+    creator: str
+    initial_roles: Optional[list[str]] = []
+    config: Optional[dict[str, Any]] = {}
+
+
+class CreateVirtualTaskRequest(BaseModel):
+    project_id: str
+    title: str
+    description: str
+    assigned_role: str
+    priority: int = 5
+    dependencies: Optional[list[str]] = []
+
+
+class AssignRoleRequest(BaseModel):
+    project_id: str
+    role_id: str
+
+
+@app.on_event("startup")
+async def initialize_virtual_team_engine():
+    """Initialize the global Virtual Team Project Engine instance on FastAPI startup.
+    This sets up the memory bank tools and expert library for virtual team collaboration.
+    """
+    global virtual_team_engine
+    try:
+        memory_tools = MemoryBankTools()
+        expert_library = ExpertLibrary()
+        virtual_team_engine = VirtualTeamProjectEngine(memory_tools, expert_library)
+        logger.info("虚拟团队项目引擎初始化完成")
+    except Exception as e:
+        logger.error(f"虚拟团队引擎初始化失败: {e}")
+
+
+@app.post("/virtual_team/create_project")
+async def create_virtual_team_project(request: CreateVirtualProjectRequest):
+    """Create a new virtual team project.
+
+    Args:
+    ----
+        request: Project creation parameters (name, description, creator, initial_roles, config)
+
+    Returns:
+    -------
+        JSON with project_id and success message.
+    """
+    if not virtual_team_engine:
+        raise HTTPException(status_code=500, detail="虚拟团队引擎未初始化")
+    try:
+        project_id = await virtual_team_engine.create_project(
+            name=request.name,
+            description=request.description,
+            creator=request.creator,
+            initial_roles=request.initial_roles,
+            config=request.config,
+        )
+        return {"success": True, "project_id": project_id, "message": "虚拟团队项目创建成功"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"创建项目失败: {str(e)}")
+
+
+@app.post("/virtual_team/assign_role")
+async def assign_role_to_project(request: AssignRoleRequest):
+    """Assign an AI role to a virtual team project.
+
+    Args:
+    ----
+        request: Project ID and role ID to assign.
+
+    Returns:
+    -------
+        JSON with success message.
+    """
+    if not virtual_team_engine:
+        raise HTTPException(status_code=500, detail="虚拟团队引擎未初始化")
+    try:
+        success = await virtual_team_engine.assign_role(
+            project_id=request.project_id, role_id=request.role_id
+        )
+        if success:
+            return {"success": True, "message": f"角色 {request.role_id} 已分配到项目"}
+        else:
+            raise HTTPException(status_code=400, detail="分配角色失败")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"分配角色失败: {str(e)}")
+
+
+@app.post("/virtual_team/create_task")
+async def create_virtual_task(request: CreateVirtualTaskRequest):
+    """Create a new task for a virtual team project.
+
+    Args:
+    ----
+        request: Task creation parameters (project_id, title, description, assigned_role, priority, dependencies)
+
+    Returns:
+    -------
+        JSON with task_id and success message.
+    """
+    if not virtual_team_engine:
+        raise HTTPException(status_code=500, detail="虚拟团队引擎未初始化")
+    try:
+        task_id = await virtual_team_engine.create_task(
+            project_id=request.project_id,
+            title=request.title,
+            description=request.description,
+            assigned_role=request.assigned_role,
+            priority=request.priority,
+            dependencies=request.dependencies,
+        )
+        return {"success": True, "task_id": task_id, "message": "任务创建成功"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"创建任务失败: {str(e)}")
+
+
+@app.post("/virtual_team/execute_task/{task_id}")
+async def execute_virtual_task(task_id: str):
+    """Execute a task in a virtual team project by task ID.
+
+    Args:
+    ----
+        task_id: The ID of the task to execute.
+
+    Returns:
+    -------
+        JSON with execution result and status.
+    """
+    if not virtual_team_engine:
+        raise HTTPException(status_code=500, detail="虚拟团队引擎未初始化")
+    try:
+        result = await virtual_team_engine.execute_task(task_id)
+        return {"success": True, "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"执行任务失败: {str(e)}")
+
+
+@app.get("/virtual_team/project/{project_id}/status")
+async def get_virtual_project_status(project_id: str):
+    """Get the status of a virtual team project.
+
+    Args:
+    ----
+        project_id: The ID of the project.
+
+    Returns:
+    -------
+        JSON with project status and statistics.
+    """
+    if not virtual_team_engine:
+        raise HTTPException(status_code=500, detail="虚拟团队引擎未初始化")
+    try:
+        status = await virtual_team_engine.get_project_status(project_id)
+        return {"success": True, "status": status}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取项目状态失败: {str(e)}")
+
+
+@app.get("/virtual_team/project/{project_id}/memory")
+async def get_virtual_project_memory(project_id: str, filename: Optional[str] = None):
+    """Get the memory bank content of a virtual team project.
+
+    Args:
+    ----
+        project_id: The ID of the project.
+        filename: (Optional) Specific memory file to retrieve.
+
+    Returns:
+    -------
+        JSON with memory content.
+    """
+    if not virtual_team_engine:
+        raise HTTPException(status_code=500, detail="虚拟团队引擎未初始化")
+    try:
+        memory_content = await virtual_team_engine.get_memory_bank_content(
+            project_id, filename
+        )
+        return {"success": True, "memory": memory_content}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取记忆银行内容失败: {str(e)}")
+
+
+@app.get("/virtual_team/projects")
+async def list_virtual_projects():
+    """List all virtual team projects.
+
+    Returns
+    -------
+        JSON with a list of all projects and their metadata.
+    """
+    if not virtual_team_engine:
+        raise HTTPException(status_code=500, detail="虚拟团队引擎未初始化")
+    try:
+        projects = []
+        for project in virtual_team_engine.projects.values():
+            project_dict = {
+                "project_id": project.project_id,
+                "name": project.name,
+                "description": project.description,
+                "status": project.status.value,
+                "created_at": project.created_at,
+                "updated_at": project.updated_at,
+                "creator": project.creator,
+                "assigned_roles": project.assigned_roles,
+                "role_count": len(project.assigned_roles),
+            }
+            projects.append(project_dict)
+        return {"success": True, "projects": projects, "total": len(projects)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取项目列表失败: {str(e)}")
+
+
+@app.get("/virtual_team/tasks")
+async def list_virtual_tasks(project_id: Optional[str] = None):
+    """List all tasks for virtual team projects, optionally filtered by project_id.
+
+    Args:
+    ----
+        project_id: (Optional) Filter tasks by project ID.
+
+    Returns:
+    -------
+        JSON with a list of tasks and their metadata.
+    """
+    if not virtual_team_engine:
+        raise HTTPException(status_code=500, detail="虚拟团队引擎未初始化")
+    try:
+        tasks = []
+        for task in virtual_team_engine.tasks.values():
+            if project_id and task.project_id != project_id:
+                continue
+            task_dict = {
+                "task_id": task.task_id,
+                "project_id": task.project_id,
+                "title": task.title,
+                "description": task.description,
+                "assigned_role": task.assigned_role,
+                "status": task.status.value,
+                "priority": task.priority,
+                "progress": task.progress,
+                "created_at": task.created_at,
+                "updated_at": task.updated_at,
+                "dependencies": task.dependencies,
+            }
+            tasks.append(task_dict)
+        return {"success": True, "tasks": tasks, "total": len(tasks)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取任务列表失败: {str(e)}")
+
+
+@app.delete("/virtual_team/project/{project_id}")
+async def delete_virtual_project(project_id: str):
+    """Delete a virtual team project by project ID.
+
+    Args:
+    ----
+        project_id: The ID of the project to delete.
+
+    Returns:
+    -------
+        JSON with success message.
+    """
+    if not virtual_team_engine:
+        raise HTTPException(status_code=500, detail="虚拟团队引擎未初始化")
+    try:
+        if project_id in virtual_team_engine.projects:
+            # 删除项目相关的任务
+            tasks_to_delete = [
+                task_id
+                for task_id, task in virtual_team_engine.tasks.items()
+                if task.project_id == project_id
+            ]
+            for task_id in tasks_to_delete:
+                del virtual_team_engine.tasks[task_id]
+            # 删除项目
+            del virtual_team_engine.projects[project_id]
+            # 删除相关的角色上下文
+            contexts_to_delete = [
+                key
+                for key in virtual_team_engine.role_contexts.keys()
+                if key.startswith(f"{project_id}_")
+            ]
+            for key in contexts_to_delete:
+                del virtual_team_engine.role_contexts[key]
+            return {"success": True, "message": "项目删除成功"}
+        else:
+            raise HTTPException(status_code=404, detail="项目不存在")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"删除项目失败: {str(e)}")
+
+
+@app.get("/virtual_team/statistics")
+async def get_virtual_team_statistics():
+    """Get statistics for all virtual team projects, tasks, and roles.
+
+    Returns
+    -------
+        JSON with statistics including total projects, tasks, roles, and status distributions.
+    """
+    if not virtual_team_engine:
+        raise HTTPException(status_code=500, detail="虚拟团队引擎未初始化")
+    try:
+        total_projects = len(virtual_team_engine.projects)
+        total_tasks = len(virtual_team_engine.tasks)
+        total_roles = len(virtual_team_engine.role_contexts)
+        # 统计任务状态
+        task_status_stats = {}
+        for task in virtual_team_engine.tasks.values():
+            status = task.status.value
+            task_status_stats[status] = task_status_stats.get(status, 0) + 1
+        # 统计项目状态
+        project_status_stats = {}
+        for project in virtual_team_engine.projects.values():
+            status = project.status.value
+            project_status_stats[status] = project_status_stats.get(status, 0) + 1
+        return {
+            "success": True,
+            "statistics": {
+                "total_projects": total_projects,
+                "total_tasks": total_tasks,
+                "total_roles": total_roles,
+                "task_status_distribution": task_status_stats,
+                "project_status_distribution": project_status_stats,
+            },
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取统计信息失败: {str(e)}")
+
+
+# 协议执行相关导入
+from src.protocol_executor import protocol_executor
+
+
+# 协议执行请求模型
+class ProtocolExecutionRequest(BaseModel):
+    protocol_id: str = Field(..., description="协议ID")
+    inputs: dict[str, Any] = Field(default_factory=dict, description="输入参数")
+
+
+@app.post("/protocols/execute")
+async def execute_protocol(request: ProtocolExecutionRequest):
+    """执行协议"""
+    try:
+        result = await protocol_executor.execute_protocol(
+            request.protocol_id, request.inputs
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/protocols/{protocol_id}/status")
+async def get_protocol_status(protocol_id: str):
+    """获取协议执行状态"""
+    try:
+        status = protocol_executor.get_execution_status(protocol_id)
+        return status
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/protocols/{protocol_id}/history")
+async def get_protocol_history(protocol_id: str):
+    """获取协议执行历史"""
+    try:
+        history = protocol_executor.get_execution_history(protocol_id)
+        return {"history": [result.dict() for result in history]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -1,0 +1,26 @@
+{
+  "name": "产品经理",
+  "desc": "关注产品需求、用户体验和市场。",
+  "id": "7f683e2903aa5313",
+  "title": "",
+  "category": "通用",
+  "specialties": [],
+  "description": " - 专业角色，具备相关领域知识和经验。",
+  "experience_years": 0,
+  "reputation_score": 80.0,
+  "contact_info": {},
+  "skills": [],
+  "languages": [
+    "中文"
+  ],
+  "availability": "可用",
+  "hourly_rate": null,
+  "location": "",
+  "education": [],
+  "certifications": [],
+  "projects": [],
+  "bio": "",
+  "source_file": "roles\\product_manager.json",
+  "created_at": "2025-06-23T12:46:24.947484",
+  "updated_at": "2025-06-30T20:31:13.707419"
+}

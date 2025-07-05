@@ -1,0 +1,26 @@
+{
+  "name": "法务专家",
+  "desc": "关注合规、法律风险和合同条款。",
+  "id": "3b6abb8dd7edc570",
+  "title": "",
+  "category": "通用",
+  "specialties": [],
+  "description": " - 专业角色，具备相关领域知识和经验。",
+  "experience_years": 0,
+  "reputation_score": 80.0,
+  "contact_info": {},
+  "skills": [],
+  "languages": [
+    "中文"
+  ],
+  "availability": "可用",
+  "hourly_rate": null,
+  "location": "",
+  "education": [],
+  "certifications": [],
+  "projects": [],
+  "bio": "",
+  "source_file": "roles\\legal_expert.json",
+  "created_at": "2025-06-23T12:46:24.946412",
+  "updated_at": "2025-06-30T20:31:13.706836"
+}
