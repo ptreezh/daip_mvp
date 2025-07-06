@@ -9,15 +9,15 @@ import logging
 from enum import Enum, auto
 from typing import Any, Optional, Union
 
-from daip_mvp_project.src.core_services.memory_service import MemoryService
-from daip_mvp_project.src.core_services.role_manager import RoleManager
-from daip_mvp_project.src.core_services.synthesis_engine import SynthesisEngine
-from daip_mvp_project.src.core_services.task_manager import TaskManager
-from daip_mvp_project.src.core_services.wiki_service import WikiService
+from src.core_services.memory_service import MemoryService
+from src.core_services.role_manager import RoleManager
+from src.core_services.synthesis_engine import SynthesisEngine
+from src.core_services.task_manager import TaskManager
+from src.core_services.wiki_service import WikiService
 
 # 假设协议类已创建
-# from daip_mvp_project.src.protocols.agile_protocol import AgileProtocol
-# from daip_mvp_project.src.protocols.debate_protocol import DebateProtocol
+# from src.protocols.agile_protocol import AgileProtocol
+# from src.protocols.debate_protocol import DebateProtocol
 
 # Configure logging
 logging.basicConfig(

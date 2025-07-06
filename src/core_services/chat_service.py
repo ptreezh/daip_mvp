@@ -6,7 +6,10 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import HTTPException
 
-from src.app_state import AppState
+from typing import Any, Dict, List, Optional
+
+from fastapi import HTTPException
+
 from src.models import ChatMessage, MultiRoleChatRequest, MultiRoleChatResponse
 
 # Assuming MultiRoleChatEngine is available
@@ -26,7 +29,7 @@ class ChatService:
     including multi-role chat simulations and engine management.
     """
 
-    def __init__(self, app_state: AppState):
+    def __init__(self, app_state: Any): # Use Any to avoid circular import type hint
         self.app_state = app_state
         if not CHAT_ENGINE_AVAILABLE:
             logger.warning("MultiRoleChatEngine not available. Chat functionalities will be limited.")

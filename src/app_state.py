@@ -249,7 +249,7 @@ Task: As {role_name}, provide a response to the last message.
         if len(last_user_message) < 20:
             simulated_response += f'Regarding "{last_user_message}", that is an interesting point. From my perspective, we should also consider the implications on a broader scale. 🤔'
         else:
-            simulated_response += f'On the topic of "{last_user_message[:25]}...", my expertise suggests a different approach. Have you thought about the long-term effects? Let's brainstorm. 💡'
+            simulated_response += f'On the topic of "{last_user_message[:25]}...", my expertise suggests a different approach. Have you thought about the long-term effects? Let\'s brainstorm.'
 
         simulated_response += "\n\n*(This is a simulated LLM response for demonstration.)*"
         logger.info(f"Simulated LLM call for role '{role_name}'.")

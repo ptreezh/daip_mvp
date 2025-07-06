@@ -9,7 +9,8 @@
 import logging
 from typing import List, Optional
 
-from src.app_state import AppState
+from typing import List, Optional, Any
+
 from src.models import PendingFact
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ class FactValidationService:
     facts that have been staged by the FactExtractionService.
     """
 
-    def __init__(self, app_state: AppState):
+    def __init__(self, app_state: Any): # Use Any to avoid circular import type hint
         self.app_state = app_state
         self.memory_service = app_state.memory_service
 

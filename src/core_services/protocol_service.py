@@ -2,7 +2,6 @@ import logging
 import os
 from typing import Any, Dict, List
 
-from src.app_state import AppState
 from src.models import DebateConfig, DebateResult, IntelligentProtocolRequest
 from src.protocols.debate_protocol import DebateProtocol
 
@@ -14,7 +13,7 @@ class ProtocolService:
     Service layer for handling protocol generation, classification, and execution.
     """
 
-    def __init__(self, app_state: AppState):
+    def __init__(self, app_state: Any): # Use Any to avoid circular import type hint
         self.app_state = app_state
 
     async def generate_intelligent_protocol(self, req: IntelligentProtocolRequest) -> Dict[str, Any]:

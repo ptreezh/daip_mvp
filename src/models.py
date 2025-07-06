@@ -181,6 +181,18 @@ class CreateVirtualProjectRequest(BaseModel):
     initial_roles: Optional[list[str]] = []
     config: Optional[dict[str, Any]] = {}
 
+class VirtualProject(BaseModel):
+    project_id: str
+    name: str
+    description: str
+    status: Any # Will use ProjectStatus enum
+    created_at: str
+    updated_at: str
+    creator: str
+    assigned_roles: List[str] = Field(default_factory=list)
+    memory_bank_path: str
+    config: Dict[str, Any] = Field(default_factory=dict)
+
 class CreateVirtualTaskRequest(BaseModel):
     project_id: str
     title: str
@@ -188,6 +200,21 @@ class CreateVirtualTaskRequest(BaseModel):
     assigned_role: str
     priority: int = 5
     dependencies: Optional[list[str]] = []
+
+from enum import Enum
+
+class ProjectStatus(str, Enum):
+    CREATED = "created"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    ARCHIVED = "archived"
+    CANCELLED = "cancelled"
+
+class RoleContext(BaseModel):
+    role_id: str
+    project_id: str
+    context_data: dict[str, Any] = Field(default_factory=dict)
+    last_updated: datetime = Field(default_factory=datetime.now)
 
 class AssignRoleRequest(BaseModel):
     project_id: str

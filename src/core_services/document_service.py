@@ -5,7 +5,9 @@ from typing import Any, Dict
 
 from fastapi import HTTPException, UploadFile
 
-from src.app_state import AppState
+from typing import Any, Dict
+
+from fastapi import HTTPException, UploadFile
 
 try:
     from src.document_parser import (
@@ -27,7 +29,7 @@ class DocumentService:
     parsing, and retrieving task results.
     """
 
-    def __init__(self, app_state: AppState):
+    def __init__(self, app_state: Any): # Use Any to avoid circular import type hint
         self.app_state = app_state
         if not DOCUMENT_PARSER_AVAILABLE:
             logger.warning("Document parser is not available. Document processing will be disabled.")

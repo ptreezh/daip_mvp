@@ -14,12 +14,12 @@ from datetime import datetime
 from typing import Any, Optional
 
 from src.memory_bank_tools import MemoryBankTools
-from src.models.virtual_team import (
+from src.models import (
     ProjectStatus,
     RoleContext,
     TaskStatus,
     VirtualProject,
-    VirtualTask,
+    Task as VirtualTask, # Alias Task as VirtualTask
 )
 from src.core_services.expert_service import ExpertService
 
@@ -116,4 +116,11 @@ class VirtualTeamService:
 {project.description}
 
 ## 团队角色
-{chr(
+{", ".join(project.assigned_roles) if project.assigned_roles else "暂无"}
+"""
+            # Placeholder for saving the project brief
+            # self.memory_tools.save_document(project.memory_bank_path, "project_brief.md", project_brief)
+
+        except Exception as e:
+            logger.error(f"Failed to initialize project memory bank for {project_id}: {e}")
+            raise

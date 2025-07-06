@@ -4,7 +4,8 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from src.app_state import AppState
+from typing import Any, Dict, List, Optional
+
 from src.models import Task, TaskBase, WikiEntryRequest
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ class CollaborationService:
     Service layer for handling collaboration features like Wiki and Tasks.
     """
 
-    def __init__(self, app_state: AppState):
+    def __init__(self, app_state: Any): # Use Any to avoid circular import type hint
         self.app_state = app_state
 
     def get_wiki_content(self, entry: str) -> str:

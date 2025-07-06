@@ -3,7 +3,7 @@ import logging
 import os
 from typing import Any, Dict, List
 
-from src.app_state import AppState
+from typing import Any, Dict, List
 
 try:
     from src.role_utils import standardize_role_dict
@@ -22,7 +22,7 @@ class ExpertService:
     and batch operations, interacting with the AppState and underlying libraries.
     """
 
-    def __init__(self, app_state: AppState):
+    def __init__(self, app_state: Any): # Use Any to avoid circular import type hint
         self.app_state = app_state
         if not ROLE_UTILS_AVAILABLE:
             logger.warning("role_utils not available. Some functionalities will be disabled.")
