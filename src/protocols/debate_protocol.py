@@ -1,100 +1,119 @@
 # -*- coding: utf-8 -*-
 """
-@Time    : 2023-10-27 10:10:00
+@Time    : 2025-07-25 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : debate_protocol.py
 @Description:
-    Orchestrates a multi-role debate from configuration to result.
-    This protocol manages the debate flow, interacts with core services via
-    injected dependencies, and produces a structured outcome.
+    Orchestrates a structured debate between multiple AI roles.
 """
-
+import asyncio
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import List
 
-# Assume these are the interfaces for the services we depend on.
-# In a real scenario, these would be imported from src.core_services and src.kernel
-from src.kernel.tool_executor import ToolExecutor
+from src.kernel.core import Kernel
+from src.models import (
+    DebateConfig,
+    DebateTurn,
+    DebateResult,
+    DebateStartEvent,
+    NewTurnEvent,
+    TechLogEvent,
+    DebateEndEvent,
+    ErrorEvent,
+    UserInterventionCommand,
+)
 
-from .turn_manager import TurnManager
-from src.models import DebateConfig, DebateResult, DebateTurn
-
-if TYPE_CHECKING:
-    from src.core_services.synthesis_engine import SynthesisEngine
-    from src.kernel.interaction_manager import InteractionManager
+logger = logging.getLogger(__name__)
 
 
 class DebateProtocol:
     """
-    Implements the core logic for conducting a structured debate.
+    Orchestrates a structured debate between multiple AI roles using kernel components.
     """
 
-    def __init__(
-        self,
-        interaction_manager: "InteractionManager",
-        synthesis_engine: "SynthesisEngine",
-        tool_executor: ToolExecutor,
-    ):
+    def __init__(self, kernel: Kernel, event_queue: asyncio.Queue):
         """
-        Initializes the protocol with its dependencies.
+        Initializes the DebateProtocol.
 
         Args:
-            interaction_manager (InteractionManager): Service to get responses from roles.
-            synthesis_engine (SynthesisEngine): Service to synthesize final conclusions.
-            tool_executor (ToolExecutor): Service to execute tools, like consensus strategies.
+            kernel: An instance of the application kernel.
+            event_queue: An asyncio queue to emit events to the UI or other listeners.
         """
-        self.interaction_manager = interaction_manager
-        self.synthesis_engine = synthesis_engine
-        self.tool_executor = tool_executor
+        self.kernel = kernel
+        self.event_queue = event_queue
+        self.history: List[DebateTurn] = []
 
-    async def execute(self, config: DebateConfig) -> DebateResult:
-        """
-        Executes the full debate lifecycle.
+    async def _emit_event(self, event):
+        """Helper to put an event on the queue."""
+        await self.event_queue.put(event)
 
-        This method orchestrates the debate rounds, triggers the consensus mechanism,
-        invokes the synthesis engine, and returns the final result.
-        """
-        logging.info(f"Starting debate on topic: '{config.topic}'")
-        history: List[DebateTurn] = []
-        
-        turn_manager = TurnManager(config)
-        
-        while not turn_manager.is_finished():
-            current_round, role_id = turn_manager.get_current_turn()
-            logging.info(f"Round {current_round}, Turn: {role_id}")
-            
-            # Summarize the history to create a concise context for the next turn.
-            # For the very first turn, the context is the debate topic itself.
-            if not history:
-                context_for_llm = config.topic
-            else:
-                context_for_llm = await self.synthesis_engine.summarize_context(history=history)
-
-            opinion_text = await self.interaction_manager.get_response(
-                role_id=role_id, context=context_for_llm
+    async def handle_command(self, command: UserInterventionCommand):
+        """Handles commands, such as user interventions."""
+        if isinstance(command, UserInterventionCommand):
+            logger.info(f"Handling user intervention: {command.content}")
+            turn = DebateTurn(
+                role_id="User (Intervention)",
+                opinion=command.content,
+                round=self.history[-1].round if self.history else 1,
             )
-            
-            turn = DebateTurn(role_id=role_id, opinion=opinion_text, round=current_round)
-            history.append(turn)
-            
-            turn_manager.advance()
+            self.history.append(turn)
+            await self._emit_event(NewTurnEvent(turn=turn))
 
-        logging.info("Debate rounds complete. Executing consensus strategy.")
-        consensus_result = self.tool_executor.execute(config.consensus_strategy, history=history)
-        
-        if consensus_result.get("status") == "success":
+    async def run(self, config: DebateConfig):
+        """
+        Executes the entire debate flow based on the provided configuration.
+        """
+        try:
+            self.history = []
+            await self._emit_event(DebateStartEvent(config=config))
+
+            # Main debate loop
+            for i in range(config.rounds):
+                current_round = i + 1
+                await self._emit_event(
+                    TechLogEvent(source="DebateProtocol", message=f"Starting Round {current_round}...")
+                )
+                for role_id in config.roles:
+                    await self._emit_event(
+                        TechLogEvent(
+                            source="DebateProtocol",
+                            message=f"Turn for role: {role_id}",
+                            function="run",
+                        )
+                    )
+
+                    # 1. Summarize context for the current role
+                    context = await self.kernel.synthesis_engine.summarize_context(self.history)
+                    if context.startswith("Error:"):
+                        raise Exception(f"Synthesis engine failed: {context}")
+
+                    # 2. Get opinion from the current role
+                    opinion = await self.kernel.interaction_manager.get_response(role_id, context)
+                    if opinion.startswith("Error:"):
+                        raise Exception(f"Interaction manager failed: {opinion}")
+
+                    # 3. Record and broadcast the new turn
+                    turn = DebateTurn(role_id=role_id, opinion=opinion, round=current_round)
+                    self.history.append(turn)
+                    await self._emit_event(NewTurnEvent(turn=turn))
+
+            # Consensus phase
+            await self._emit_event(TechLogEvent(source="DebateProtocol", message="Debate rounds complete. Moving to consensus."))
+            consensus_result = self.kernel.tool_executor.execute(tool_name=config.consensus_strategy, history=self.history)
+            if consensus_result.get("status") == "error":
+                raise Exception(f"Consensus tool failed: {consensus_result.get('message')}")
             consensus_outcome = consensus_result.get("result")
-        else:
-            error_message = consensus_result.get("message", "Consensus execution failed")
-            logging.error(f"Consensus strategy failed: {error_message}")
-            consensus_outcome = {"error": error_message}
 
-        logging.info("Synthesizing final opinions.")
-        synthesis = await self.synthesis_engine.synthesize_opinions(config.topic, history)
+            # Synthesis phase
+            await self._emit_event(TechLogEvent(source="DebateProtocol", message="Consensus reached. Synthesizing final result."))
+            final_synthesis = await self.kernel.synthesis_engine.synthesize_opinions(topic=config.topic, history=self.history)
+            if final_synthesis.startswith("Error:"):
+                raise Exception(f"Final synthesis failed: {final_synthesis}")
 
-        return DebateResult(
-            topic=config.topic,
-            history=history,
-            consensus_outcome=consensus_outcome,
-            synthesis=synthesis,
-        )
+            # Final result
+            result = DebateResult(topic=config.topic, history=self.history, consensus_outcome=consensus_outcome, synthesis=final_synthesis)
+            await self._emit_event(DebateEndEvent(result=result))
+
+        except Exception as e:
+            logger.exception("A critical error occurred during the debate protocol.")
+            await self._emit_event(ErrorEvent(error_message="Debate protocol failed", details=str(e)))

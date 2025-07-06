@@ -1,5 +1,7 @@
+from __future__ import annotations
 from datetime import datetime
-from typing import Any, Literal, Optional, List
+from typing import Any, Literal, Optional, List, Union
+import uuid
 
 from pydantic import BaseModel, Field
 
@@ -72,7 +74,7 @@ class MultiRoleChatResponse(BaseModel):
 class IntelligentProtocolRequest(BaseModel):
     user_request: str = Field(..., description="用户的自然语言需求")
     use_analysis: bool = Field(True, description="是否使用任务分析增强")
-    validate: bool = Field(True, description="是否验证生成的协议")
+    should_validate: bool = Field(True, description="是否验证生成的协议")
     save_to_file: bool = Field(False, description="是否保存到文件")
     output_path: Optional[str] = Field(None, description="输出文件路径")
 
@@ -116,6 +118,22 @@ class PromptOptimizationResponse(BaseModel):
     structured_json: Optional[dict[str, Any]] = None
     success: bool = True
     error: Optional[str] = None
+
+# --- Fact & Memory Models ---
+class PendingFact(BaseModel):
+    """
+    Represents a fact that has been extracted but is pending verification and processing.
+    This model is used by services like FactExtractionService and MemoryService.
+    """
+    content: str = Field(..., description="The textual content of the extracted fact.")
+    source: str = Field(
+        ..., description="The origin of the fact (e.g., document name, agent message ID)."
+    )
+    confidence: float = Field(
+        default=0.5, ge=0.0, le=1.0, description="The confidence score of the extraction (0.0 to 1.0)."
+    )
+    metadata: Optional[dict[str, Any]] = Field(default_factory=dict, description="Additional metadata about the fact.")
+    created_at: datetime = Field(default_factory=datetime.now, description="Timestamp of when the fact was extracted.")
 
 # --- Collaboration Models ---
 class TaskStatus(str):
@@ -346,3 +364,84 @@ class DebateResult(BaseModel):
     synthesis: str = Field(
         ..., description="A final, synthesized summary of the entire debate."
     )
+
+# --- Debate Protocol Events & Commands ---
+# These models are used for communication between the debate engine and clients like the TUI.
+
+# --- Commands ---
+class UserInterventionCommand(BaseModel):
+    """Command sent when a user intervenes with their own input."""
+
+    command_type: Literal["user_intervention"] = "user_intervention"
+    content: str
+
+# A union of all possible commands
+commands = Union[
+    UserInterventionCommand,
+]
+
+
+# --- Events ---
+class Event(BaseModel):
+    """The base model for all events, containing common fields."""
+
+    event_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    event_type: str
+
+
+class DebateStartEvent(Event):
+    """Event fired when a debate officially begins."""
+
+    event_type: Literal["debate_start"] = "debate_start"
+    config: DebateConfig
+
+
+class NewTurnEvent(Event):
+    """Event fired when a new turn (AI or user) is added to the history."""
+
+    event_type: Literal["new_turn"] = "new_turn"
+    turn: DebateTurn
+
+
+class TechLogEvent(Event):
+    """
+    Event for displaying internal technical processes to the user.
+    Used for the --verbose mode. Contains structured information for better debugging.
+    """
+
+    event_type: Literal["tech_log"] = "tech_log"
+    source: str  # e.g., "SynthesisEngine", "MemoryService"
+    message: str
+    module: Optional[str] = None
+    function: Optional[str] = None
+
+
+class DebateEndEvent(Event):
+    """Event fired when the debate has concluded and results are available."""
+
+    event_type: Literal["debate_end"] = "debate_end"
+    result: DebateResult
+
+
+class ErrorEvent(Event):
+    """Event for reporting an error from the backend engine."""
+
+    event_type: Literal["error"] = "error"
+    error_message: str
+    details: str | None = None
+
+
+class ClearScreenEvent(Event):
+    """Event that signals the UI to clear the main output area."""
+    event_type: Literal["clear_screen"] = "clear_screen"
+
+
+DebateEvent = Union[
+    DebateStartEvent,
+    NewTurnEvent,
+    TechLogEvent,
+    DebateEndEvent,
+    ErrorEvent,
+    ClearScreenEvent,
+]

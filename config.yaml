@@ -1,0 +1,33 @@
+# DAIP MVP Project Configuration
+
+# LLM Provider Settings
+# This section configures the connection to your Large Language Model.
+llm:
+  # Currently, only 'ollama' is supported.
+  provider: ollama
+  ollama:
+    # Specify the model to use for generation (e.g., "llama3:instruct", "gemma:7b").
+    generation_model: "gemma3:latest"
+    # The host address for the Ollama API server.
+    host: "http://localhost:11434"
+    # Timeout for API requests in seconds.
+    timeout: 30
+    # Specify a dedicated, smaller model for generating embeddings.
+    embedding_model: "nomic-embed-text:latest"
+
+# Vector Store Configuration
+vector_store:
+  # Path for the persistent ChromaDB database.
+  chroma_db_path: "data/chroma_db"
+  # Name of the collection for roles.
+  role_collection_name: "roles"
+
+# Logging configuration
+logging:
+  # Log level for the application. Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+  # The format for log messages.
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Path to the file defining the AI roles.
+roles_config_path: "configs/roles.yaml"

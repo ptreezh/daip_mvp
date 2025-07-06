@@ -1,5 +1,7 @@
-"""聊天系统配置
-定义聊天模型和相关配置
+"""Chat System Configuration.
+
+This module defines configurations for chat models, system behavior,
+role recommendations, and other related settings.
 """
 
 import os
@@ -129,7 +131,15 @@ PROMPT_TEMPLATES = {
 
 
 def get_chat_model_config(model_type: str = None) -> dict[str, Any]:
-    """获取聊天模型配置"""
+    """Get the configuration for a specific chat model.
+
+    Args:
+        model_type (str, optional): The type of the model (e.g., 'local', 'openai').
+            If None, uses the DEFAULT_CHAT_MODEL. Defaults to None.
+
+    Returns:
+        dict[str, Any]: The configuration dictionary for the specified model.
+    """
     if model_type is None:
         model_type = DEFAULT_CHAT_MODEL
 
@@ -137,32 +147,63 @@ def get_chat_model_config(model_type: str = None) -> dict[str, Any]:
 
 
 def get_system_config() -> dict[str, Any]:
-    """获取系统配置"""
+    """Get the general chat system configuration.
+
+    Returns:
+        dict[str, Any]: The chat system configuration dictionary.
+    """
     return CHAT_SYSTEM_CONFIG
 
 
 def get_recommendation_config() -> dict[str, Any]:
-    """获取推荐配置"""
+    """Get the role recommendation system configuration.
+
+    Returns:
+        dict[str, Any]: The role recommendation configuration dictionary.
+    """
     return ROLE_RECOMMENDATION_CONFIG
 
 
 def get_vectorization_config() -> dict[str, Any]:
-    """获取向量化配置"""
+    """Get the vectorization and embedding configuration.
+
+    Returns:
+        dict[str, Any]: The vectorization configuration dictionary.
+    """
     return VECTORIZATION_CONFIG
 
 
 def get_chatroom_config() -> dict[str, Any]:
-    """获取聊天室配置"""
+    """Get the chatroom management configuration.
+
+    Returns:
+        dict[str, Any]: The chatroom configuration dictionary.
+    """
     return CHATROOM_CONFIG
 
 
 def get_prompt_template(template_name: str) -> str:
-    """获取提示词模板"""
+    """Get a specific prompt template by name.
+
+    Args:
+        template_name (str): The name of the template to retrieve.
+
+    Returns:
+        str: The prompt template string, or an empty string if not found.
+    """
     return PROMPT_TEMPLATES.get(template_name, "")
 
 
 def validate_model_availability(model_type: str = None) -> bool:
-    """验证模型可用性"""
+    """Validate if a given model type is available and configured correctly.
+
+    Args:
+        model_type (str, optional): The model type to validate.
+            If None, uses the DEFAULT_CHAT_MODEL. Defaults to None.
+
+    Returns:
+        bool: True if the model is available, False otherwise.
+    """
     if model_type is None:
         model_type = DEFAULT_CHAT_MODEL
 
@@ -174,7 +215,7 @@ def validate_model_availability(model_type: str = None) -> bool:
 
             response = requests.get(f"{config['base_url']}/api/tags", timeout=5)
             return response.status_code == 200
-        except:
+        except Exception:
             return False
     elif config["api_type"] == "openai":
         return bool(config.get("api_key"))
@@ -185,7 +226,11 @@ def validate_model_availability(model_type: str = None) -> bool:
 
 
 def get_available_models() -> list:
-    """获取可用的模型列表"""
+    """Get a list of all available and configured model types.
+
+    Returns:
+        list: A list of strings, where each string is an available model type.
+    """
     available = []
     for model_type in CHAT_MODEL_CONFIG.keys():
         if validate_model_availability(model_type):
@@ -194,20 +239,32 @@ def get_available_models() -> list:
 
 
 def get_cloud_model_config() -> dict[str, Any]:
-    """获取云端模型配置"""
+    """Get the configuration for cloud-based models.
+
+    Returns:
+        dict[str, Any]: The cloud model configuration dictionary.
+    """
     return CLOUD_MODEL_CONFIG
 
 
 def is_cloud_models_enabled() -> bool:
-    """检查是否启用云端模型"""
+    """Check if cloud-based models are enabled.
+
+    Returns:
+        bool: True if cloud models are enabled, False otherwise.
+    """
     return CLOUD_MODEL_CONFIG["enabled"]
 
 
 def is_cloud_fallback_enabled() -> bool:
-    """检查是否启用云端模型作为备用"""
+    """Check if falling back to cloud models is enabled when local models fail.
+
+    Returns:
+        bool: True if cloud fallback is enabled, False otherwise.
+    """
     return CLOUD_MODEL_CONFIG["fallback_enabled"]
 
 
 def get_preferred_cloud_provider() -> str:
-    """获取首选云端提供商"""
+    """Get the preferred cloud provider (e.g., 'openai', 'anthropic')."""
     return CLOUD_MODEL_CONFIG["preferred_provider"]

@@ -10,16 +10,13 @@
 """
 
 import logging
-from typing import Any, Dict, List
+from typing import Optional
 
+import ollama
 from .interaction_manager import InteractionManager
-from .llm_interface import LLMConfig, LLMFactory, LLMInterface
-from .llm_scheduler import LLMScheduler
 from .tool_executor import ToolExecutor
 from .tool_registry import tool_executor_instance
-from src.core_services.memory_service import MemoryService
 from src.core_services.synthesis_engine import SynthesisEngine
-from src.core_services.wiki_service import WikiService
 
 
 class Kernel:
@@ -30,54 +27,21 @@ class Kernel:
     providing a single, clean interface for the application layer to interact
     with the kernel.
     """
-    def __init__(self, llm_config: LLMConfig, context_token_threshold: int = 4096):
+
+    def __init__(self, model: str = "llama3:8b-instruct-q5_K_M"):
         """
         Initializes the complete kernel.
 
         Args:
-            llm_config: The configuration for the LLM to be used.
-            context_token_threshold: The token limit for the interaction manager.
+            model: The name of the Ollama model to be used by kernel components.
         """
-        # Instantiate all services required by the kernel components
-        wiki_service = WikiService()
-        memory_service = MemoryService()
-
-        self.llm_interface: LLMInterface = LLMFactory.create(llm_config)
-
-        # The SynthesisEngine needs an LLM interface to perform summarization
-        synthesis_engine = SynthesisEngine(llm_interface=self.llm_interface)
-
+        # Create a single, shared client for all LLM interactions
+        client = ollama.AsyncClient()
+        
+        # Instantiate all core components
+        self.synthesis_engine: SynthesisEngine = SynthesisEngine(client=client, model=model)
         self.tool_executor: ToolExecutor = tool_executor_instance
         self.interaction_manager: InteractionManager = InteractionManager(
-            wiki_service=wiki_service,
-            memory_service=memory_service,
-            synthesis_engine=synthesis_engine,
-            context_token_threshold=context_token_threshold,
-        )
-        self.scheduler: LLMScheduler = LLMScheduler(
-            llm_interface=self.llm_interface,
-            tool_executor=self.tool_executor,
-            interaction_manager=self.interaction_manager,
+            client=client, model=model
         )
         logging.info("Kernel initialized successfully.")
-
-    async def start(self) -> None:
-        """Starts the kernel's background services (e.g., the LLM scheduler)."""
-        logging.info("Starting kernel services...")
-        await self.scheduler.start()
-        logging.info("Kernel services started.")
-
-    async def stop(self) -> None:
-        """Stops the kernel's background services gracefully."""
-        logging.info("Stopping kernel services...")
-        await self.scheduler.stop()
-        logging.info("Kernel services stopped.")
-
-    async def submit_request(self, history: List[Dict[str, Any]]) -> str:
-        """
-        Submits a request for processing by the kernel.
-
-        This is the primary method for interaction. It queues the request
-        and returns the final response from the LLM after any tool calls.
-        """
-        return await self.scheduler.submit_request(history)

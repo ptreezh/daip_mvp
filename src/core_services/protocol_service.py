@@ -22,11 +22,11 @@ class ProtocolService:
         generator = self.app_state.intelligent_protocol_generator
         if req.use_analysis:
             result = await generator.generate_protocol_with_analysis(
-                req.user_request, validate=req.validate
+                req.user_request, validate=req.should_validate
             )
         else:
             result = await generator.generate_protocol(
-                req.user_request, validate=req.validate
+                req.user_request, validate=req.should_validate
             )
 
         if req.save_to_file and result.get("success") and req.output_path:

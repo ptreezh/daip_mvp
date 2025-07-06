@@ -1,48 +1,97 @@
-from unittest import TestCase, main
-
+import pytest
+from unittest.mock import MagicMock, AsyncMock
+from typing import List
+import ollama
+from ollama import ResponseError
 from src.core_services.synthesis_engine import SynthesisEngine
+from src.core_services import prompts
+from src.models import DebateTurn
+
+# Mark all tests in this file as asyncio
+pytestmark = pytest.mark.asyncio
 
 
-class TestSynthesisEngine(TestCase):
-    def setUp(self):
-        """Set up a new SynthesisEngine instance for each test."""
-        self.engine = SynthesisEngine()
-
-    def test_synthesize_opinions_with_multiple_opinions(self):
-        """
-        Tests that the engine correctly processes a list of opinions
-        and returns the expected mock synthesis string.
-        """
-        opinions = ["The market will go up.", "The market will go down."]
-        topic = "Market Outlook"
-        result = self.engine.synthesize_opinions(opinions, topic)
-        self.assertIn("mock synthesis of 2 opinions", result)
-        self.assertIn("on the given topic", result)
-
-    def test_synthesize_opinions_with_no_opinions(self):
-        """
-        Tests that the engine returns the correct message when an
-        empty list of opinions is provided.
-        """
-        result = self.engine.synthesize_opinions([], "Any Topic")
-        self.assertEqual(result, "No opinions were provided to synthesize.")
-
-    def test_build_synthesis_prompt_structure(self):
-        """
-        Tests the internal prompt building logic to ensure it constructs
-        a well-formed prompt for the (future) LLM.
-        """
-        opinions = ["First point of view.", "A contrasting second point."]
-        topic = "Test Topic"
-        # Accessing a private method for unit testing is acceptable here
-        # to isolate the logic of prompt construction.
-        prompt = self.engine._build_synthesis_prompt(opinions, topic)
-
-        self.assertIn(f"on the topic of '{topic}'", prompt)
-        self.assertIn('Opinion 1:\n"""\nFirst point of view.\n"""', prompt)
-        self.assertIn('Opinion 2:\n"""\nA contrasting second point.\n"""', prompt)
-        self.assertTrue(prompt.startswith("You are an expert synthesizer."))
+@pytest.fixture
+def mock_ollama_client() -> MagicMock:
+    """Fixture for a mocked Ollama async client."""
+    client = MagicMock(spec=ollama.AsyncClient)
+    # The response from client.chat is a dictionary
+    mock_response = {"message": {"content": "This is a summary of the discussion between role1 and role2."}}
+    client.chat = AsyncMock(return_value=mock_response)
+    return client
 
 
-if __name__ == "__main__":
-    main()
+@pytest.fixture
+def synthesis_engine(mock_ollama_client: MagicMock) -> SynthesisEngine:
+    """Fixture for the SynthesisEngine instance."""
+    # The engine expects the client and an optional model name
+    return SynthesisEngine(client=mock_ollama_client, model="test-model")
+
+
+async def test_summarize_conversation_with_correct_data_structure(
+    synthesis_engine: SynthesisEngine,
+    mock_ollama_client: MagicMock,
+) -> None:
+    """Test conversation summarization with correctly structured history data."""
+    messages: List[DebateTurn] = [
+        DebateTurn(round=1, role_id="role1", opinion="Point A"),
+        DebateTurn(round=2, role_id="role2", opinion="Point B"),
+    ]
+
+    summary = await synthesis_engine.summarize_context(messages)
+
+    # Assert the summary content is correct
+    assert "This is a summary" in summary
+
+    # Assert that the mocked client's chat method was called
+    mock_ollama_client.chat.assert_awaited_once()
+
+
+async def test_summarize_context_handles_response_error(
+    synthesis_engine: SynthesisEngine,
+    mock_ollama_client: MagicMock,
+) -> None:
+    """Tests that summarize_context returns a formatted error on ResponseError."""
+    # Arrange
+    # Configure the mock client to raise a ResponseError
+    mock_error_details = "The specified model could not be found."
+    mock_ollama_client.chat.side_effect = ResponseError(mock_error_details)
+
+    # Create some dummy history to pass to the function
+    messages: List[DebateTurn] = [
+        DebateTurn(round=1, role_id="role1", opinion="This will fail anyway."),
+    ]
+
+    # Act
+    summary = await synthesis_engine.summarize_context(messages)
+
+    # Assert
+    assert "Error: Could not summarize context." in summary
+    assert mock_error_details in summary
+    mock_ollama_client.chat.assert_awaited_once()
+
+
+async def test_synthesize_opinions_success(
+    synthesis_engine: SynthesisEngine,
+    mock_ollama_client: MagicMock,
+) -> None:
+    """Tests successful opinion synthesis."""
+    # Arrange
+    topic = "The future of AI"
+    history: List[DebateTurn] = [
+        DebateTurn(round=1, role_id="role1", opinion="AI is the future."),
+        DebateTurn(round=2, role_id="role2", opinion="AI has risks."),
+    ]
+    # Configure the mock for this specific test case
+    mock_synthesis_response = {"message": {"content": "A final synthesized conclusion."}}
+    mock_ollama_client.chat.return_value = mock_synthesis_response
+
+    # Act
+    synthesis = await synthesis_engine.synthesize_opinions(topic=topic, history=history)
+
+    # Assert
+    assert synthesis == "A final synthesized conclusion."
+    mock_ollama_client.chat.assert_awaited_once()
+    messages = mock_ollama_client.chat.call_args.kwargs['messages']
+    assert messages[0]['content'] == prompts.SYNTHESIS_SYSTEM_PROMPT
+    assert f"Debate Topic: {topic}" in messages[1]['content']

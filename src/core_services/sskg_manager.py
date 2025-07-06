@@ -42,7 +42,11 @@ class SSKGManager:
         if self.graph_path and self.graph_path.exists():
             try:
                 logger.info(f"Loading knowledge graph from {self.graph_path}")
-                return nx.read_graphml(self.graph_path)
+                # Load the graph from file. It might be loaded as a DiGraph if no
+                # parallel edges were present. We must convert it to a MultiDiGraph
+                # to ensure consistency with the query logic that expects edge keys.
+                loaded_graph = nx.read_graphml(self.graph_path)
+                return nx.MultiDiGraph(loaded_graph)
             except Exception as e:
                 logger.error(f"Failed to load graph from {self.graph_path}: {e}. Creating new graph.")
         return nx.MultiDiGraph()
@@ -65,7 +69,7 @@ class SSKGManager:
         """Queries the graph for facts related to a subject."""
         results = []
         if self.graph.has_node(subject):
-            for u, v, key, data in self.graph.edges(subject, data=True, keys=True):
+            for u, v, key, data in self.graph.out_edges(subject, data=True, keys=True):
                 if predicate is None or key == predicate:
                     results.append({"subject": u, "predicate": key, "object": v, "metadata": data})
         return results

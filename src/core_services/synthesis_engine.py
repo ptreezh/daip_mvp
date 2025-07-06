@@ -1,105 +1,87 @@
-"""Synthesizes multiple text inputs into a single, coherent summary."""
-
+# -*- coding: utf-8 -*-
+"""
+@Time    : 2025-07-24 11:00:00
+@Author  : DAIP-LIVE Team
+@File    : synthesis_engine.py
+@Description:
+    Implementation for the SynthesisEngine that uses an LLM to perform
+    summarization and synthesis.
+"""
 import logging
-from typing import TYPE_CHECKING, Dict, List
+from typing import List
 
-from src.kernel.llm_interface import LLMInterface
+import ollama
+from ollama import ResponseError
 
-if TYPE_CHECKING:
-    from src.models import DebateTurn
+from src.models import DebateTurn
+from . import prompts
+
+logger = logging.getLogger(__name__)
 
 
 class SynthesisEngine:
-    """
-    Synthesizes multiple opinions or text inputs into a single, coherent summary
-    by leveraging a large language model.
-    """
+    """Uses an LLM to summarize and synthesize debate content."""
 
-    def __init__(self, llm_interface: LLMInterface):
+    def __init__(self, client: ollama.AsyncClient, model: str):
         """
         Initializes the SynthesisEngine.
 
         Args:
-            llm_interface (LLMInterface): The interface to interact with the language model.
+            client (ollama.AsyncClient): An instance of the Ollama async client.
+            model (str): The name of the Ollama model to use for synthesis.
         """
-        self.llm_interface = llm_interface
-        logging.info("SynthesisEngine initialized with LLMInterface.")
+        self.client = client
+        self.model = model
 
-    async def synthesize_opinions(self, topic: str, history: List["DebateTurn"]) -> str:
-        """
-        Takes a list of debate turns and a topic, then generates a synthesized summary.
-
-        Args:
-            topic (str): The central topic of the opinions.
-            history (List[DebateTurn]): A list of debate turns, each representing an opinion.
-
-        Returns:
-            str: A synthesized text that summarizes and integrates the opinions.
-        """
+    async def summarize_context(self, history: List[DebateTurn]) -> str:
+        """Summarizes the debate history for context using an LLM."""
         if not history:
-            logging.warning("synthesize_opinions called with no history.")
-            return "No opinions were provided to synthesize."
+            return "The debate has just started."
 
-        logging.info(f"Synthesizing {len(history)} opinions on the topic: '{topic}'.")
+        history_text = "\n".join(
+            [f"Round {turn.round} - {turn.role_id}: {turn.opinion}" for turn in history]
+        )
 
-        prompt = self._build_synthesis_prompt(topic, history)
-
-        try:
-            response = await self.llm_interface.generate(
-                messages=[{"role": "user", "content": prompt}]
-            )
-            synthesized_text = response.get("content", "Failed to generate synthesis from LLM response.")
-            logging.info("Successfully synthesized opinions.")
-            return synthesized_text
-        except Exception as e:
-            logging.error(f"An error occurred during LLM call for synthesis: {e}", exc_info=True)
-            return f"Error: Could not generate synthesis due to an internal error. Details: {e}"
-
-    def _build_synthesis_prompt(self, topic: str, history: List["DebateTurn"]) -> str:
-        """Builds a detailed prompt for the LLM to synthesize opinions."""
-        prompt_parts = [
-            f"You are an expert synthesizer. Your task is to analyze the following debate history on the topic of '{topic}' and produce a coherent, neutral, and comprehensive summary.",
-            "The summary should identify common ground, highlight key disagreements, and present the overall spectrum of views without taking a side. Do not invent information. Base your synthesis strictly on the provided text.",
-            "\n--- Debate History to Synthesize ---\n",
+        messages = [
+            {"role": "system", "content": prompts.SUMMARIZATION_SYSTEM_PROMPT},
+            {"role": "user", "content": f"Debate History:\n---\n{history_text}\n---\nSummary:"},
         ]
 
-        for turn in history:
-            prompt_parts.append(f'Opinion from Role "{turn.role_id}" (Round {turn.round}):\n"""\n{turn.opinion}\n"""\n')
+        try:
+            logger.info(f"Requesting context summary from model '{self.model}'")
+            response = await self.client.chat(model=self.model, messages=messages)
+            return response.get("message", {}).get("content", "").strip()
+        except ResponseError as e:
+            logger.error(f"Ollama API error during summarization: {e.error}")
+            return f"Error: Could not summarize context. (Details: {e.error})"
+        except Exception:
+            logger.exception("An unexpected error occurred during context summarization.")
+            return "Error: An unexpected issue occurred during summarization."
 
-        prompt_parts.append("\n--- Synthesis Task ---\nPlease provide your synthesized summary below.")
-        return "\n".join(prompt_parts)
-
-    async def summarize_conversation(self, history: List[Dict[str, str]]) -> str:
-        """
-        Takes a conversation history and generates a concise summary.
-
-        Args:
-            history (List[Dict[str, str]]): A list of message dictionaries,
-                                            e.g., [{"role": "user", "content": "..."}].
-
-        Returns:
-            str: A concise summary of the conversation.
-        """
+    async def synthesize_opinions(self, topic: str, history: List[DebateTurn]) -> str:
+        """Synthesizes the final conclusion of the debate using an LLM."""
         if not history:
-            logging.warning("summarize_conversation called with no history.")
-            return "No conversation history was provided to summarize."
+            return "No debate history available to synthesize."
 
-        logging.info(f"Summarizing a conversation with {len(history)} turns.")
+        history_text = "\n".join(
+            [f"Round {turn.round} - {turn.role_id}: {turn.opinion}" for turn in history]
+        )
 
-        prompt_parts = [
-            "You are a summarization expert. Your task is to create a concise summary of the following conversation history.",
-            "The summary should capture the key points, decisions, and unanswered questions. It will be used as long-term memory for a continuing conversation.",
-            "\n--- Conversation to Summarize ---\n",
+        messages = [
+            {"role": "system", "content": prompts.SYNTHESIS_SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": f"Debate Topic: {topic}\n\nDebate History:\n---\n{history_text}\n---\nFinal Synthesized Conclusion:",
+            },
         ]
-        for turn in history:
-            prompt_parts.append(f"{turn.get('role', 'participant')}: {turn.get('content', '')}")
-
-        prompt_parts.append("\n--- Summary Task ---\nPlease provide your concise summary below.")
-        prompt = "\n".join(prompt_parts)
 
         try:
-            response = await self.llm_interface.generate(messages=[{"role": "user", "content": prompt}])
-            return response.get("content", "Failed to generate summary from LLM response.")
-        except Exception as e:
-            logging.error(f"An error occurred during LLM call for summarization: {e}", exc_info=True)
-            return f"Error: Could not generate summary due to an internal error. Details: {e}"
+            logger.info(f"Requesting final synthesis from model '{self.model}'")
+            response = await self.client.chat(model=self.model, messages=messages)
+            return response.get("message", {}).get("content", "").strip()
+        except ResponseError as e:
+            logger.error(f"Ollama API error during synthesis: {e.error}")
+            return f"Error: Could not synthesize a conclusion. (Details: {e.error})"
+        except Exception:
+            logger.exception("An unexpected error occurred during opinion synthesis.")
+            return "Error: An unexpected issue occurred during synthesis."

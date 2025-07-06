@@ -11,6 +11,8 @@
 import hashlib
 import json
 import logging
+import sqlite3
+import threading
 import asyncio
 import aiosqlite
 import time
@@ -95,6 +97,9 @@ class MemoryService:
     def __init__(self, data_dir: str = "data/memory_banks"):
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
+
+        # Thread-safe lock for database and graph operations
+        self.lock = threading.Lock()
 
         # Database connection
         self.db_path = self.data_dir / "memory_bank.db"

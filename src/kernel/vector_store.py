@@ -31,13 +31,14 @@ class VectorStore:
             logging.error(f"Failed to initialize ChromaDB client: {e}")
             raise
 
-    def add_entry(self, doc_id: str, content: str, metadata: Dict[str, Any]):
+    async def add_entry(self, doc_id: str, content: str, metadata: Dict[str, Any]):
         """
         Generates an embedding for a document and upserts it into the collection.
         'Upsert' will add the document if it's new or update it if it exists.
         """
         try:
-            embedding = ollama.embeddings(model=self.embedding_model, prompt=content)["embedding"]
+            response = await ollama.embeddings(model=self.embedding_model, prompt=content)
+            embedding = response["embedding"]
             self.collection.upsert(
                 ids=[doc_id],
                 embeddings=[embedding],
@@ -48,12 +49,13 @@ class VectorStore:
         except Exception as e:
             logging.error(f"Failed to add entry '{doc_id}' to vector store: {e}")
 
-    def search(self, query: str, n_results: int = 3) -> List[Dict[str, Any]]:
+    async def search(self, query: str, n_results: int = 3) -> List[Dict[str, Any]]:
         """
         Performs a semantic search for a given query.
         """
         try:
-            query_embedding = ollama.embeddings(model=self.embedding_model, prompt=query)["embedding"]
+            response = await ollama.embeddings(model=self.embedding_model, prompt=query)
+            query_embedding = response["embedding"]
             results = self.collection.query(
                 query_embeddings=[query_embedding], n_results=n_results
             )

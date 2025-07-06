@@ -1,94 +1,73 @@
 # -*- coding: utf-8 -*-
 """
-Unit tests for the InteractionManager class, focusing on context management.
+@Time    : 2025-07-25 10:00:00
+@Author  : DAIP-LIVE Team
+@File    : test_interaction_manager.py
+@Description:
+    Unit tests for the InteractionManager.
 """
-
-from unittest.mock import AsyncMock
-
 import pytest
+from unittest.mock import AsyncMock, MagicMock
+import ollama
+from ollama import ResponseError
 
 from src.kernel.interaction_manager import InteractionManager
 
-# Use pytest-asyncio for all async tests in this module
-pytestmark = pytest.mark.asyncio
-
 
 @pytest.fixture
-def mock_wiki_service() -> AsyncMock:
-    """Fixture for a mocked WikiService."""
-    service = AsyncMock()
-    service.search_entries.return_value = []
-    return service
+def mock_ollama_client():
+    """Fixture for a mocked Ollama async client."""
+    client = MagicMock(spec=ollama.AsyncClient)
+    client.chat = AsyncMock()
+    return client
 
 
-@pytest.fixture
-def mock_memory_service() -> AsyncMock:
-    """Fixture for a mocked MemoryService."""
-    service = AsyncMock()
-    service.get_all_summaries.return_value = []
-    return service
-
-
-@pytest.fixture
-def mock_synthesis_engine() -> AsyncMock:
-    """Fixture for a mocked SynthesisEngine."""
-    service = AsyncMock()
-    service.summarize_conversation.return_value = "This is a test summary."
-    return service
-
-
-@pytest.fixture
-def interaction_manager(
-    mock_wiki_service: AsyncMock,
-    mock_memory_service: AsyncMock,
-    mock_synthesis_engine: AsyncMock,
-) -> InteractionManager:
-    """Fixture to create an InteractionManager instance with mocked dependencies."""
-    return InteractionManager(
-        wiki_service=mock_wiki_service,
-        memory_service=mock_memory_service,
-        synthesis_engine=mock_synthesis_engine,
-    )
-
-
-def generate_history(num_messages: int, content: str) -> list[dict]:
-    """Helper to generate conversation history for testing."""
-    history = []
-    for i in range(num_messages):
-        role = "user" if i % 2 == 0 else "assistant"
-        history.append({"role": role, "content": content})
-    return history
-
-
-async def test_prepare_context_below_threshold(interaction_manager: InteractionManager, mock_synthesis_engine: AsyncMock):
-    """Tests that summarization is NOT triggered when token count is below the threshold."""
+@pytest.mark.asyncio
+async def test_get_response_success(mock_ollama_client):
+    """Tests that get_response successfully returns content from the LLM."""
     # Arrange
-    short_history = generate_history(5, "This is a short message.")
+    mock_response = {"message": {"content": "A clear opinion."}}
+    mock_ollama_client.chat.return_value = mock_response
+
+    manager = InteractionManager(client=mock_ollama_client, model="test-model")
 
     # Act
-    await interaction_manager.prepare_context(short_history)
+    response = await manager.get_response(role_id="TestRole", context="Some debate context.")
 
     # Assert
-    mock_synthesis_engine.summarize_conversation.assert_not_called()
+    assert response == "A clear opinion."
+    mock_ollama_client.chat.assert_awaited_once()
+    messages = mock_ollama_client.chat.call_args.kwargs['messages']
+    assert messages[0]['role'] == 'system'
+    assert "You are an AI assistant playing the role of 'TestRole'" in messages[0]['content']
+    assert messages[1]['role'] == 'user'
+    assert "Some debate context." in messages[1]['content']
 
 
-async def test_prepare_context_above_threshold_triggers_summarization(
-    interaction_manager: InteractionManager, mock_synthesis_engine: AsyncMock, mock_memory_service: AsyncMock
-):
-    """Tests that summarization IS triggered when token count is above the threshold."""
-    # Arrange: Create content long enough to be sure it exceeds the default token threshold.
-    threshold = interaction_manager.context_token_threshold
-    long_content = "a" * (threshold + 100)
-    long_history = generate_history(2, long_content)
-    long_history.append({"role": "user", "content": "Final question."})
+@pytest.mark.asyncio
+async def test_get_response_handles_response_error(mock_ollama_client):
+    """Tests that get_response handles Ollama ResponseError gracefully."""
+    # Arrange
+    mock_ollama_client.chat.side_effect = ResponseError("Model not found", 404)
+    manager = InteractionManager(client=mock_ollama_client, model="bad-model")
 
     # Act
-    result_messages = await interaction_manager.prepare_context(long_history)
+    response = await manager.get_response(role_id="TestRole", context="Some context.")
 
     # Assert
-    mock_synthesis_engine.summarize_conversation.assert_called_once_with(long_history[:-1])
-    expected_summary = await mock_synthesis_engine.summarize_conversation.return_value
-    mock_memory_service.save_summary.assert_called_once_with(expected_summary)
-    assert len(result_messages) == 2, "History should be pruned to system prompt and last message"
-    assert result_messages[0]["role"] == "system"
-    assert result_messages[1] == long_history[-1]
+    assert "Error: Could not get a response" in response
+    assert "Model not found" in response
+
+
+@pytest.mark.asyncio
+async def test_get_response_handles_unexpected_error(mock_ollama_client):
+    """Tests that get_response handles unexpected exceptions."""
+    # Arrange
+    mock_ollama_client.chat.side_effect = Exception("A network failure")
+    manager = InteractionManager(client=mock_ollama_client)
+
+    # Act
+    response = await manager.get_response(role_id="TestRole", context="Some context.")
+
+    # Assert
+    assert "Error: An unexpected issue occurred" in response

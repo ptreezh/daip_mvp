@@ -90,8 +90,8 @@ class TaskManager:
         del post.metadata["task_id"]  # task_id is the filename
 
         file_path = self._task_directory / f"{task_id}.md"
-        with open(file_path, "w", encoding="utf-8") as f:
-            frontmatter.dump(post, f)
+        with open(file_path, "wb") as f:
+            frontmatter.dump(post, f, encoding="utf-8")
 
         logging.info(f"Task '{task_id}' saved to {file_path}")
         return task
@@ -152,8 +152,8 @@ class TaskManager:
 
             post.metadata["status"] = new_status
 
-            with open(file_path, "w", encoding="utf-8") as f:
-                frontmatter.dump(post, f)
+            with open(file_path, "wb") as f:
+                frontmatter.dump(post, f, encoding="utf-8")
 
             logging.info(f"Successfully updated status for task '{task_id}'.")
             return True

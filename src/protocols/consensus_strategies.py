@@ -40,7 +40,8 @@ class SimpleMajorityVoteStrategy(ConsensusStrategy):
     their vote (e.g., 'agree' vs. 'disagree').
     """
 
-    def execute(self, history: List[DebateTurn]) -> Dict[str, Any]:
+    @staticmethod # Make it a static method
+    def execute(history: List[DebateTurn]) -> Dict[str, Any]:
         """
         Counts votes based on keywords in the last turn of each role.
         """

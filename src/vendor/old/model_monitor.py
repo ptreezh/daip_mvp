@@ -1,4 +1,7 @@
-"""模型监控服务 - 在系统启动和关闭时自动更新模型注册表
+"""Model Monitoring Service.
+
+This service automatically updates the model registry on system startup and shutdown.
+It can also be used to generate standalone scripts for checking model availability.
 """
 
 import asyncio
@@ -12,9 +15,15 @@ from src.model_registry import ModelRegistry
 
 
 class ModelMonitor:
-    """模型监控服务"""
+    """A service to monitor the availability of various models."""
 
     def __init__(self, config: Optional[dict[str, Any]] = None):
+        """Initialize the ModelMonitor.
+
+        Args:
+            config (Optional[dict[str, Any]], optional): A configuration dictionary.
+                This can contain settings for different model platforms. Defaults to None.
+        """
         self.config = config or {}
         self.registry = ModelRegistry()
         self.logger = logging.getLogger(__name__)
@@ -24,22 +33,29 @@ class ModelMonitor:
         self._setup_signal_handlers()
 
     def _setup_signal_handlers(self):
-        """设置信号处理器"""
+        """Set up signal handlers for graceful shutdown."""
         if sys.platform != "win32":
-            # Unix系统
+            # For Unix-based systems
             signal.signal(signal.SIGTERM, self._signal_handler)
             signal.signal(signal.SIGINT, self._signal_handler)
         else:
-            # Windows系统
+            # For Windows
             signal.signal(signal.SIGINT, self._signal_handler)
 
     def _signal_handler(self, signum, frame):
-        """信号处理器"""
+        """Handle termination signals to trigger a graceful shutdown."""
         self.logger.info(f"Received signal {signum}, shutting down...")
         asyncio.create_task(self.shutdown())
 
     async def startup(self):
-        """启动时的模型检测"""
+        """Perform model detection on application startup.
+
+        This method refreshes the model registry and logs a summary of
+        available models.
+
+        Raises:
+            Exception: If refreshing models fails.
+        """
         self.logger.info("🚀 Starting model monitor...")
         self.running = True
 
@@ -62,7 +78,14 @@ class ModelMonitor:
             self.logger.error(f"Failed to refresh models on startup: {e}")
 
     async def shutdown(self):
-        """关闭时的模型检测"""
+        """Perform final model detection on application shutdown.
+
+        This method ensures the final state of model availability is recorded
+        and saved to the registry file.
+
+        Raises:
+            Exception: If there's an error during the shutdown process.
+        """
         if not self.running:
             return
 
@@ -82,7 +105,12 @@ class ModelMonitor:
             self.logger.error(f"Error during model monitor shutdown: {e}")
 
     async def periodic_check(self, interval_minutes: int = 30):
-        """定期检查模型状态"""
+        """Periodically check the status of all models.
+
+        Args:
+            interval_minutes (int, optional): The interval in minutes between checks.
+                Defaults to 30.
+        """
         while self.running:
             try:
                 await asyncio.sleep(interval_minutes * 60)
@@ -97,11 +125,23 @@ class ModelMonitor:
                 self.logger.error(f"Error in periodic model check: {e}")
 
     def get_available_models(self, platform: Optional[str] = None):
-        """获取可用模型列表"""
+        """Get a list of available models.
+
+        Args:
+            platform (Optional[str], optional): The platform to filter by (e.g., 'ollama').
+                If None, returns all available models. Defaults to None.
+
+        Returns:
+            list: A list of available model details.
+        """
         return self.registry.get_available_models(platform)
 
     def get_registry_summary(self):
-        """获取注册表摘要"""
+        """Get a summary of the model registry.
+
+        Returns:
+            dict: A dictionary containing statistics about the models.
+        """
         return self.registry.get_registry_summary()
 
 
@@ -110,7 +150,12 @@ _model_monitor: Optional[ModelMonitor] = None
 
 
 def get_model_monitor(config: Optional[dict[str, Any]] = None) -> ModelMonitor:
-    """获取全局模型监控实例"""
+    """Get the global singleton instance of the ModelMonitor.
+
+    Args:
+        config (Optional[dict[str, Any]], optional): Configuration for the monitor.
+            Defaults to None.
+    """
     global _model_monitor
     if _model_monitor is None:
         _model_monitor = ModelMonitor(config)
@@ -118,21 +163,32 @@ def get_model_monitor(config: Optional[dict[str, Any]] = None) -> ModelMonitor:
 
 
 async def startup_model_monitor(config: Optional[dict[str, Any]] = None):
-    """启动模型监控"""
+    """Convenience function to start the global model monitor.
+
+    Args:
+        config (Optional[dict[str, Any]], optional): Configuration for the monitor.
+            Defaults to None.
+    """
     monitor = get_model_monitor(config)
     await monitor.startup()
     return monitor
 
 
 async def shutdown_model_monitor():
-    """关闭模型监控"""
+    """Convenience function to shut down the global model monitor."""
     global _model_monitor
     if _model_monitor:
         await _model_monitor.shutdown()
 
 
 def create_model_check_script():
-    """创建独立的模型检查脚本"""
+    """Create a standalone Python script to check model availability.
+
+    This script can be run independently of the main application.
+
+    Returns:
+        Path: The path to the created script.
+    """
     script_content = '''#!/usr/bin/env python3
 """
 独立的模型检查脚本
@@ -206,7 +262,7 @@ if __name__ == "__main__":
 
 # 创建Windows批处理脚本
 def create_windows_scripts():
-    """创建Windows启动/关闭脚本"""
+    """Create Windows batch scripts for startup and shutdown checks."""
     # 启动脚本
     startup_script = """@echo off
 echo Starting DAIP Insight Engine...
@@ -232,7 +288,7 @@ echo Final model check completed.
 
 # 创建Linux/Mac脚本
 def create_unix_scripts():
-    """创建Unix启动/关闭脚本"""
+    """Create Unix shell scripts for startup and shutdown checks."""
     # 启动脚本
     startup_script = """#!/bin/bash
 echo "Starting DAIP Insight Engine..."
@@ -261,7 +317,7 @@ echo "Final model check completed."
 
 
 def setup_model_monitoring():
-    """设置模型监控脚本"""
+    """Set up all necessary scripts for model monitoring."""
     print("🔧 Setting up model monitoring scripts...")
 
     # 创建独立检查脚本
