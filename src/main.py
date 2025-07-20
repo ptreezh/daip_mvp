@@ -96,9 +96,9 @@ async def startup_event():
     #    In the future, this could be automated to discover all strategy classes.
     consensus_factory.register("simple_majority_vote", SimpleMajorityVoteStrategy)
 
-    # 3. Use the factory to register those strategies as tools in the ToolExecutor,
+    # 3. Use the factory to register those strategies as tools in the UnifiedToolManager,
     #    which is managed by the central AppState.
-    dependencies.app_state.tool_executor.register_strategies_from_factory(consensus_factory)
+    dependencies.app_state.unified_tool_manager.register_strategies_from_factory(consensus_factory)
     logger.info("Consensus strategies successfully registered as executable tools.")
 
 # Include all API routers
@@ -116,3 +116,168 @@ async def read_root() -> dict[str, str]:
     """Root endpoint to check if the service is running.
     """
     return {"message": "DAIP-LIVE MVP API is running."}
+
+
+@app.get("/health")
+async def health_check() -> dict[str, str]:
+    """Basic health check endpoint that verifies the service is running.
+    
+    Returns:
+        dict: Simple health status message
+    """
+    return {"status": "healthy", "message": "Service is operational"}
+
+
+@app.get("/status")
+async def detailed_status():
+    """Detailed system status endpoint that provides comprehensive health information.
+    
+    Returns:
+        dict: Detailed status information about all system components
+    """
+    from datetime import datetime
+    import os
+    
+    status_info = {
+        "timestamp": datetime.now(datetime.timezone.utc).isoformat(),
+        "service": {
+            "name": "DAIP-LIVE MVP API",
+            "version": "0.1.0",
+            "status": "running"
+        },
+        "system": {},
+        "components": {}
+    }
+    
+    # Try to get system information if psutil is available
+    try:
+        import psutil
+        status_info["system"] = {
+            "cpu_percent": psutil.cpu_percent(interval=1),
+            "memory_percent": psutil.virtual_memory().percent,
+            "disk_percent": psutil.disk_usage('/').percent if os.name != 'nt' else psutil.disk_usage('C:\\').percent
+        }
+    except ImportError:
+        status_info["system"] = {
+            "note": "System metrics unavailable (psutil not installed)"
+        }
+    except Exception as e:
+        status_info["system"] = {
+            "error": f"System metrics error: {str(e)}"
+        }
+    
+    # Check application state
+    try:
+        if dependencies.app_state is not None:
+            status_info["components"]["app_state"] = {
+                "status": "healthy",
+                "details": "Application state initialized successfully"
+            }
+            
+            # Check core services
+            services_to_check = [
+                ("llm_interface", "LLM Interface"),
+                ("memory_service", "Memory Service"),
+                ("wiki_service", "Wiki Service"),
+                ("synthesis_engine", "Synthesis Engine"),
+                ("unified_tool_manager", "Tool Manager")
+            ]
+            
+            for service_attr, service_name in services_to_check:
+                try:
+                    service = getattr(dependencies.app_state, service_attr, None)
+                    if service is not None:
+                        status_info["components"][service_attr] = {
+                            "status": "healthy",
+                            "details": f"{service_name} is available"
+                        }
+                    else:
+                        status_info["components"][service_attr] = {
+                            "status": "unavailable",
+                            "details": f"{service_name} is not initialized"
+                        }
+                except Exception as e:
+                    status_info["components"][service_attr] = {
+                        "status": "error",
+                        "details": f"{service_name} check failed: {str(e)}"
+                    }
+            
+            # Check vector database
+            try:
+                if hasattr(dependencies.app_state, 'chroma_client') and dependencies.app_state.chroma_client:
+                    # Try to access the collection to verify it's working
+                    collection = dependencies.app_state.role_collection
+                    if collection:
+                        status_info["components"]["vector_db"] = {
+                            "status": "healthy",
+                            "details": "ChromaDB is accessible"
+                        }
+                    else:
+                        status_info["components"]["vector_db"] = {
+                            "status": "warning",
+                            "details": "ChromaDB client available but collection not found"
+                        }
+                else:
+                    status_info["components"]["vector_db"] = {
+                        "status": "unavailable",
+                        "details": "ChromaDB client not initialized"
+                    }
+            except Exception as e:
+                status_info["components"]["vector_db"] = {
+                    "status": "error",
+                    "details": f"ChromaDB check failed: {str(e)}"
+                }
+            
+            # Check roles loading
+            try:
+                roles_count = len(dependencies.app_state.all_roles_details)
+                if roles_count > 0:
+                    status_info["components"]["roles"] = {
+                        "status": "healthy",
+                        "details": f"{roles_count} roles loaded successfully"
+                    }
+                else:
+                    status_info["components"]["roles"] = {
+                        "status": "warning",
+                        "details": "No roles loaded"
+                    }
+            except Exception as e:
+                status_info["components"]["roles"] = {
+                    "status": "error",
+                    "details": f"Roles check failed: {str(e)}"
+                }
+                
+        else:
+            status_info["components"]["app_state"] = {
+                "status": "error",
+                "details": "Application state not initialized"
+            }
+            
+    except Exception as e:
+        status_info["components"]["app_state"] = {
+            "status": "error",
+            "details": f"Application state check failed: {str(e)}"
+        }
+    
+    # Check configuration
+    try:
+        status_info["components"]["configuration"] = {
+            "status": "healthy",
+            "details": f"Configuration loaded with log level: {settings.log_level}"
+        }
+    except Exception as e:
+        status_info["components"]["configuration"] = {
+            "status": "error",
+            "details": f"Configuration check failed: {str(e)}"
+        }
+    
+    # Determine overall health
+    component_statuses = [comp["status"] for comp in status_info["components"].values()]
+    if "error" in component_statuses:
+        status_info["overall_status"] = "unhealthy"
+    elif "warning" in component_statuses or "unavailable" in component_statuses:
+        status_info["overall_status"] = "degraded"
+    else:
+        status_info["overall_status"] = "healthy"
+    
+    return status_info

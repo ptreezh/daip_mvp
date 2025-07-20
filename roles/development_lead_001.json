@@ -17,7 +17,7 @@
   "bio": "拥有丰富的开发和管理经验，擅长协调团队资源，推动项目高效落地。",
   "id": "4f92253c8c112f1c",
   "experience_years": 0,
-  "reputation_score": 80.0,
+  "reputation_score": 80,
   "contact_info": {},
   "languages": [
     "中文"
@@ -30,5 +30,7 @@
   "projects": [],
   "source_file": "roles\\development_lead_001.json",
   "created_at": "2025-06-30T20:31:13.703866",
-  "updated_at": "2025-06-30T20:31:13.703866"
+  "updated_at": "2025-06-30T20:31:13.703866",
+  "system_prompt": "You are a development lead.",
+  "capabilities": []
 }

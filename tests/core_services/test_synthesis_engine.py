@@ -8,20 +8,21 @@
 """
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-import ollama
-from ollama import ResponseError
 
 from src.core_services.synthesis_engine import SynthesisEngine
 from src.core_services import prompts
 from src.models import DebateTurn
+from src.kernel.llm_interface import LLMInterface
 
 
 @pytest.fixture
-def mock_ollama_client():
-    """Fixture for a mocked Ollama async client."""
-    client = MagicMock(spec=ollama.AsyncClient)
-    client.chat = AsyncMock()
-    return client
+def mock_llm_interface():
+    """Fixture for a mocked LLM interface."""
+    mock_interface = MagicMock(spec=LLMInterface)
+    mock_interface.generate = AsyncMock()
+    mock_interface.config = MagicMock()
+    mock_interface.config.model = "test-model"
+    return mock_interface
 
 
 @pytest.fixture
@@ -34,54 +35,54 @@ def debate_history():
 
 
 @pytest.mark.asyncio
-async def test_summarize_context_success(mock_ollama_client, debate_history):
+async def test_summarize_context_success(mock_llm_interface, debate_history):
     """Tests successful context summarization."""
     # Arrange
-    mock_response = {"message": {"content": "A summary of the debate."}}
-    mock_ollama_client.chat.return_value = mock_response
+    mock_response = {"content": "A summary of the debate."}
+    mock_llm_interface.generate.return_value = mock_response
 
-    engine = SynthesisEngine(client=mock_ollama_client, model="test-summarizer")
+    engine = SynthesisEngine(llm_interface=mock_llm_interface)
 
     # Act
     summary = await engine.summarize_context(debate_history)
 
     # Assert
     assert summary == "A summary of the debate."
-    mock_ollama_client.chat.assert_awaited_once()
-    messages = mock_ollama_client.chat.call_args.kwargs['messages']
+    mock_llm_interface.generate.assert_awaited_once()
+    messages = mock_llm_interface.generate.call_args.kwargs['messages']
     assert messages[0]['content'] == prompts.SUMMARIZATION_SYSTEM_PROMPT
     assert "AI will solve all our problems." in messages[1]['content']
 
 
 @pytest.mark.asyncio
-async def test_summarize_context_empty_history(mock_ollama_client):
+async def test_summarize_context_empty_history(mock_llm_interface):
     """Tests summarization with no history."""
     # Arrange
-    engine = SynthesisEngine(client=mock_ollama_client, model="test-model")
+    engine = SynthesisEngine(llm_interface=mock_llm_interface)
 
     # Act
     summary = await engine.summarize_context([])
 
     # Assert
     assert summary == "The debate has just started."
-    mock_ollama_client.chat.assert_not_called()
+    mock_llm_interface.generate.assert_not_called()
 
 
 @pytest.mark.asyncio
-async def test_synthesize_opinions_success(mock_ollama_client, debate_history):
+async def test_synthesize_opinions_success(mock_llm_interface, debate_history):
     """Tests successful opinion synthesis."""
     # Arrange
-    mock_response = {"message": {"content": "A final conclusion."}}
-    mock_ollama_client.chat.return_value = mock_response
+    mock_response = {"content": "A final conclusion."}
+    mock_llm_interface.generate.return_value = mock_response
 
-    engine = SynthesisEngine(client=mock_ollama_client, model="test-model")
+    engine = SynthesisEngine(llm_interface=mock_llm_interface)
 
     # Act
     synthesis = await engine.synthesize_opinions(topic="Future of AI", history=debate_history)
 
     # Assert
     assert synthesis == "A final conclusion."
-    mock_ollama_client.chat.assert_awaited_once()
-    messages = mock_ollama_client.chat.call_args.kwargs['messages']
+    mock_llm_interface.generate.assert_awaited_once()
+    messages = mock_llm_interface.generate.call_args.kwargs['messages']
     assert messages[0]['content'] == prompts.SYNTHESIS_SYSTEM_PROMPT
     assert "Debate Topic: Future of AI" in messages[1]['content']

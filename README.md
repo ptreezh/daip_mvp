@@ -27,9 +27,9 @@
 2.  **命令行界面 (CLI) 是与系统交互和测试的主要方式**。
 3.  前端界面 (`ui/`) 的开发将在后端功能稳定且经过充分验证后才开始。
 
-## 快速开始 (后端服务)
+## 快速开始
 
-> **注意**: 详细的安装和配置步骤将在后续开发中完善。
+### 安装
 
 1.  **克隆项目**:
     ```bash
@@ -37,32 +37,144 @@
     cd daip_mvp_project
     ```
 
-2.  **安装依赖**:
+2.  **使用 Poetry 安装依赖**:
     ```bash
-    pip install -r requirements.txt
+    # 安装 Poetry（如果尚未安装）
+    pip install poetry
+
+    # 安装项目依赖
+    poetry install
     ```
 
-3.  **配置环境**:
-    *   复制 `.env.example` 为 `.env`。
-    *   在 `.env` 文件中配置必要的API密钥和模型路径。
-
-4.  **启动后端服务**:
+    或者使用 pip 安装:
     ```bash
-    python scripts/start_backend.py
+    pip install -e .
     ```
 
-5.  **通过 CLI/API 进行测试**:
-    *   服务启动后，您可以使用 `curl` 或简单的 Python `requests` 脚本来调用API。
-    *   **示例：获取系统状态**
-        ```bash
-        curl http://127.0.0.1:8000/sessions/some_session_id/status
-        ```
-    *   **示例：发起聊天**
-        ```bash
-        curl -X POST http://127.0.0.1:8000/sessions/some_session_id/chat \
-        -H "Content-Type: application/json" \
-        -d '{"message": "你好"}'
-        ```
+3.  **配置系统**:
+    * 项目默认使用 `config.yaml` 文件进行配置
+    * 如果文件不存在，系统会使用默认配置
+    * 创建或修改 `config.yaml` 文件以自定义配置:
+    
+    ```yaml
+    llm:
+      provider: "ollama"
+      ollama:
+        generation_model: "llama3:instruct"
+        embedding_model: "nomic-embed-text:latest"
+        host: "http://localhost:11434"
+        timeout: 30
+
+    vector_store:
+      chroma_db_path: "data/chroma_db"
+      role_collection_name: "roles"
+
+    logging:
+      level: "INFO"
+      format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+    roles_config_path: "configs/roles.yaml"
+    log_level: "INFO"
+    allowed_origins: ["*"]
+    ```
+
+### 使用命令行界面 (CLI)
+
+安装后，您可以使用 `daip-cli` 命令与系统交互:
+
+1.  **检查系统状态**:
+    ```bash
+    daip-cli status
+    ```
+
+2.  **查看可用角色**:
+    ```bash
+    daip-cli roles
+    ```
+
+3.  **启动辩论**:
+    ```bash
+    # 基本用法
+    daip-cli start "人工智能的伦理问题"
+    
+    # 指定角色
+    daip-cli start "气候变化解决方案" --role "环境科学家" --role "经济学家"
+    
+    # 高级选项
+    daip-cli start "未来工作趋势" --role "未来学家" --role "劳工专家" --rounds 5 --verbose --save --output "debate_results.txt"
+    ```
+
+4.  **获取帮助**:
+    ```bash
+    daip-cli help
+    ```
+
+### 启动 API 服务
+
+1.  **启动 FastAPI 后端服务**:
+    ```bash
+    uvicorn src.main:app --reload
+    ```
+
+2.  **通过 API 进行测试**:
+    * 服务启动后，您可以使用 `curl` 或 Python `requests` 库调用 API
+    * API 文档可在 http://127.0.0.1:8000/docs 访问
+    
+    **示例：检查服务状态**
+    ```bash
+    curl http://127.0.0.1:8000/health
+    ```
+    
+    **示例：获取详细系统状态**
+    ```bash
+    curl http://127.0.0.1:8000/status
+    ```
+    
+    **示例：获取可用角色**
+    ```bash
+    curl http://127.0.0.1:8000/roles
+    ```
+    
+    **示例：启动辩论**
+    ```bash
+    curl -X POST http://127.0.0.1:8000/protocols/debate/start \
+    -H "Content-Type: application/json" \
+    -d '{"topic": "人工智能的未来", "roles": ["技术专家", "伦理学家"], "rounds": 3}'
+    ```
+
+## 常见问题与故障排除
+
+### 安装问题
+
+1. **依赖安装失败**
+   * 确保您使用的是 Python 3.10 或更高版本
+   * 尝试更新 pip: `pip install --upgrade pip`
+   * 如果使用 Poetry，尝试: `poetry update`
+
+2. **CLI 命令未找到**
+   * 确保项目已正确安装: `pip install -e .`
+   * 检查 PATH 环境变量是否包含 Python 脚本目录
+
+### 运行时问题
+
+1. **LLM 连接错误**
+   * 确保 Ollama 服务已启动并运行在默认端口 (11434)
+   * 验证 config.yaml 中的 LLM 配置是否正确
+   * 检查网络连接和防火墙设置
+
+2. **内存不足**
+   * 减少辩论轮次 (`--rounds 2`)
+   * 使用更少的角色
+   * 关闭其他内存密集型应用程序
+
+3. **API 服务无法启动**
+   * 检查端口是否被占用
+   * 验证配置文件格式是否正确
+   * 查看日志获取详细错误信息
+
+4. **角色加载失败**
+   * 运行 `daip-cli status` 检查系统状态
+   * 确保角色配置文件存在且格式正确
 
 ## 项目规范
 

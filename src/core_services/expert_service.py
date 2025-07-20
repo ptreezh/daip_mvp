@@ -28,17 +28,52 @@ class ExpertService:
             logger.warning("role_utils not available. Some functionalities will be disabled.")
 
     def get_all_experts(self) -> List[Any]:
-        """Retrieves all experts from the expert library."""
-        return self.app_state.expert_library.get_all_experts()
+        """Retrieves all experts from the role details."""
+        # Convert role details to expert-like objects
+        experts = []
+        for name, details in self.app_state.all_roles_details.items():
+            expert = type('Expert', (), {
+                'name': name,
+                'description': details.get('desc', ''),
+                'to_dict': lambda self=details: dict(details, name=name)
+            })()
+            experts.append(expert)
+        return experts
 
     def create_expert(self, expert_data: Dict[str, Any]) -> Any:
         """
         Creates a single expert, handles validation and saving.
         Raises ValueError if the expert already exists.
         """
-        # The expert_library's add_expert_manually should handle the logic
-        # of checking for existence and saving the file.
-        return self.app_state.expert_library.add_expert_manually(expert_data)
+        if not ROLE_UTILS_AVAILABLE:
+            raise Exception("Role utils are not available for expert creation.")
+            
+        # Check if expert already exists
+        expert_name = expert_data.get('name', '')
+        if expert_name in self.app_state.all_roles_details:
+            raise ValueError(f"Expert '{expert_name}' already exists.")
+        
+        # Standardize the role data
+        standardized_role = standardize_role_dict(expert_data)
+        
+        # Save to user-defined roles file
+        safe_name = "".join(c for c in expert_name if c.isalnum() or c in ("_", "-")).strip()
+        filename = f"{safe_name}.json"
+        filepath = os.path.join(self.app_state.user_defined_dir, filename)
+        
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(standardized_role, f, ensure_ascii=False, indent=2)
+        
+        # Reload roles to include the new expert
+        self.app_state.load_all_roles()
+        
+        # Return expert-like object
+        expert = type('Expert', (), {
+            'name': expert_name,
+            'description': standardized_role.get('desc', ''),
+            'to_dict': lambda: standardized_role
+        })()
+        return expert
 
     def batch_import_experts(
         self, roles_data: List[Dict[str, Any]], overwrite: bool, validate_only: bool
@@ -85,8 +120,8 @@ class ExpertService:
                 results["details"].append({"index": i, "name": role_name, "status": "failed", "reason": str(e)})
 
         if not validate_only and results["success"] > 0:
-            logger.info("Batch import successful, reloading expert library.")
-            self.app_state.expert_library.load_experts_from_directory(force_reload=True)
+            logger.info("Batch import successful, reloading roles.")
+            self.app_state.load_all_roles()
 
         return results
 

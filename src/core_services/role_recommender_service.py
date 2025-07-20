@@ -74,10 +74,10 @@ class RoleRecommenderService:
 
         for role in roles:
             # Create a rich text document for embedding
-            doc_text = f"Role: {role['name']}. Description: {role['desc']}. Tags: {', '.join(role.get('tags', []))}"
+            doc_text = f"Role: {role.name}. Description: {role.description}. Capabilities: {', '.join(role.capabilities)}"
             documents.append(doc_text)
-            metadatas.append({"name": role['name'], "desc": role['desc']})
-            ids.append(role['name'])
+            metadatas.append({"id": role.id, "name": role.name, "description": role.description})
+            ids.append(role.id)
 
         embeddings = self.llm_interface.get_embeddings(documents)
         self.collection.add(embeddings=embeddings, documents=documents, metadatas=metadatas, ids=ids)
@@ -89,4 +89,12 @@ class RoleRecommenderService:
         query_embedding = self.llm_interface.get_embedding(topic)
         results = self.collection.query(query_embeddings=[query_embedding], n_results=top_k)
         
-        return results['metadatas'][0] if results and results['metadatas'] else []
+        # The results['metadatas'][0] will be a list of dictionaries, each representing a recommended role's metadata.
+        # We need to convert these back into Role objects using the RoleManager.
+        recommended_role_ids = [m['id'] for m in results['metadatas'][0]] if results and results['metadatas'] else []
+        
+        # Fetch the full Role objects using the RoleManager
+        recommended_roles = [self.role_manager.get_role_by_id(role_id) for role_id in recommended_role_ids]
+        
+        # Filter out any None values if a role couldn't be found (e.g., if file was deleted)
+        return [role for role in recommended_roles if role is not None]

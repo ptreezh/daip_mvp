@@ -1,4 +1,4 @@
-from typing import Annotated, TYPE_CHECKING
+from typing import Annotated, Optional, TYPE_CHECKING
 from fastapi import Depends, HTTPException
 
 if TYPE_CHECKING:
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 # This global variable will be populated by the main application instance
 # upon startup.
-app_state: "AppState" | None = None
+app_state: Optional["AppState"] = None
 
 def get_app_state() -> "AppState":
     if app_state is None:
@@ -21,7 +21,7 @@ AppStateDep = Annotated["AppState", Depends(get_app_state)]
 
 def get_expert_service(state: AppStateDep) -> "ExpertService":
     from src.core_services.expert_service import ExpertService
-    return ExpertService(app_state=state)
+    return ExpertService(state)  # Pass state directly, not as app_state parameter
 
 def get_document_service(state: AppStateDep) -> "DocumentService":
     from src.core_services.document_service import DocumentService

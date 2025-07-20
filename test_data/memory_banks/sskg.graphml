@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"><key id="d1" for="edge" attr.name="id" attr.type="string"/>
+<key id="d0" for="edge" attr.name="confidence" attr.type="double"/>
+<graph edgedefault="directed"><node id="测试专家"/>
+<node id="数据库测试"/>
+<edge source="测试专家" target="数据库测试" id="0">
+  <data key="d0">0.9</data>
+  <data key="d1">专长于</data>
+</edge>
+<edge source="测试专家" target="数据库测试" id="专长于">
+  <data key="d0">0.9</data>
+</edge>
+</graph></graphml>

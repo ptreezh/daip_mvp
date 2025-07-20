@@ -10,13 +10,16 @@
     This approach to dependency injection helps to decouple the components.
 """
 import asyncio
+import asyncio
 import ollama
 from typing import Any, Dict
 
-from src.config_loader import load_config # Import load_config
+from src.config_loader import load_config
 from src.core_services.synthesis_engine import SynthesisEngine
-from src.kernel.core import Kernel # Import Kernel
-from src.kernel.interaction_manager import InteractionManager
+from src.core_services.role_manager import RoleManager # Import RoleManager
+from src.core_services.role_recommender_service import RoleRecommenderService # Import RoleRecommenderService
+from src.kernel.core import Kernel
+from src.kernel.llm_interface import LLMConfig, LLMFactory
 from src.kernel.tool_executor import ToolExecutor
 from src.protocols.consensus_strategies import (
     ConsensusStrategyFactory,
@@ -37,14 +40,35 @@ def create_application_dependencies(output_queue: asyncio.Queue) -> Dict[str, An
     """
     # Load configuration
     app_config = load_config()
-    ollama_model_name = app_config.llm.ollama.generation_model
 
-    # Instantiate the Kernel, which now manages its own internal dependencies
-    kernel = Kernel(model=ollama_model_name)
+    # Create LLM Interface
+    llm_config = LLMConfig(
+        provider=app_config.llm.provider,
+        model=app_config.llm.ollama.generation_model,  # Or adapt for other providers
+        base_url=app_config.llm.ollama.base_url
+    )
+    llm_interface = LLMFactory.create(llm_config)
+
+    # Instantiate the Kernel
+    kernel = Kernel(llm_interface=llm_interface)
+
+    # Instantiate RoleManager and RoleRecommenderService
+    role_manager = RoleManager()
+    role_recommender_service = RoleRecommenderService(
+        role_manager=role_manager,
+        llm_interface=llm_interface
+    )
+    # Build role index if it doesn't exist or needs rebuilding
+    role_recommender_service.build_index()
 
     debate_protocol = DebateProtocol(
         kernel=kernel,
         event_queue=output_queue,
     )
 
-    return {"debate_protocol": debate_protocol}
+    return {
+        "debate_protocol": debate_protocol,
+        "role_manager": role_manager,
+        "role_recommender_service": role_recommender_service,
+        "kernel": kernel # Also return kernel for potential future use
+    }

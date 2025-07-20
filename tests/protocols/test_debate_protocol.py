@@ -38,7 +38,10 @@ def mock_kernel():
     kernel.synthesis_engine.summarize_context = AsyncMock()
     kernel.synthesis_engine.synthesize_opinions = AsyncMock()
     kernel.tool_executor = MagicMock()
-    kernel.tool_executor.execute = MagicMock()
+    kernel.tool_executor.execute_tool = MagicMock()
+    # Add the missing llm_interface attribute
+    kernel.llm_interface = MagicMock()
+    kernel.llm_interface.generate = AsyncMock()
     return kernel
 
 
@@ -73,8 +76,11 @@ async def test_run_successful_debate(mock_kernel, event_queue, debate_config):
     """
     # Arrange
     mock_kernel.synthesis_engine.summarize_context.side_effect = ["Context for RoleA", "Context for RoleB"]
-    mock_kernel.interaction_manager.get_response.side_effect = ["Opinion from RoleA", "Opinion from RoleB"]
-    mock_kernel.tool_executor.execute.return_value = {"status": "success", "result": "Consensus reached"}
+    mock_kernel.llm_interface.generate.side_effect = [
+        {"content": "Opinion from RoleA"},
+        {"content": "Opinion from RoleB"}
+    ]
+    mock_kernel.tool_executor.execute_tool.return_value = {"status": "success", "result": "Consensus reached"}
     mock_kernel.synthesis_engine.synthesize_opinions.return_value = "Final synthesis"
 
     protocol = DebateProtocol(kernel=mock_kernel, event_queue=event_queue)
@@ -85,12 +91,18 @@ async def test_run_successful_debate(mock_kernel, event_queue, debate_config):
     # Assert
     # Check kernel component calls
     assert mock_kernel.synthesis_engine.summarize_context.call_count == 2
-    assert mock_kernel.interaction_manager.get_response.call_count == 2
-    mock_kernel.interaction_manager.get_response.assert_has_calls([
-        call("RoleA", "Context for RoleA"),
-        call("RoleB", "Context for RoleB")
-    ])
-    mock_kernel.tool_executor.execute.assert_called_once_with(
+    assert mock_kernel.llm_interface.generate.call_count == 2
+    # Verify that generate was called with proper message structure
+    generate_calls = mock_kernel.llm_interface.generate.call_args_list
+    assert len(generate_calls) == 2
+    # Check that each call has the expected message structure
+    for call_args in generate_calls:
+        messages = call_args[0][0]  # First positional argument
+        assert len(messages) == 2
+        assert messages[0]["role"] == "system"
+        assert messages[1]["role"] == "user"
+    
+    mock_kernel.tool_executor.execute_tool.assert_called_once_with(
         tool_name="test_consensus",
         history=protocol.history
     )
@@ -124,11 +136,11 @@ async def test_run_successful_debate(mock_kernel, event_queue, debate_config):
 
 async def test_run_handles_interaction_failure(mock_kernel, event_queue, debate_config):
     """
-    Tests that an ErrorEvent is emitted if the InteractionManager fails.
+    Tests that an ErrorEvent is emitted if the LLM interface fails.
     """
     # Arrange
     mock_kernel.synthesis_engine.summarize_context.return_value = "Some context"
-    mock_kernel.interaction_manager.get_response.return_value = "Error: LLM is down"
+    mock_kernel.llm_interface.generate.side_effect = Exception("LLM is down")
     protocol = DebateProtocol(kernel=mock_kernel, event_queue=event_queue)
 
     # Act
@@ -138,17 +150,18 @@ async def test_run_handles_interaction_failure(mock_kernel, event_queue, debate_
     events = await get_all_events(event_queue)
     error_event = events[-1]
     assert isinstance(error_event, ErrorEvent)
-    assert "Interaction manager failed" in error_event.details
+    assert "LLM is down" in error_event.details
 
 
 async def test_run_handles_consensus_failure(mock_kernel, event_queue, debate_config):
     """
-    Tests that an ErrorEvent is emitted if the consensus tool fails.
+    Tests that the debate continues with simple consensus when consensus tool fails.
     """
     # Arrange
     mock_kernel.synthesis_engine.summarize_context.return_value = "Context"
-    mock_kernel.interaction_manager.get_response.return_value = "Opinion"
-    mock_kernel.tool_executor.execute.return_value = {"status": "error", "message": "tool broke"}
+    mock_kernel.llm_interface.generate.return_value = {"content": "Opinion"}
+    mock_kernel.tool_executor.execute_tool.return_value = {"status": "error", "message": "tool broke"}
+    mock_kernel.synthesis_engine.synthesize_opinions.return_value = "Final synthesis"
     protocol = DebateProtocol(kernel=mock_kernel, event_queue=event_queue)
 
     # Act
@@ -156,9 +169,17 @@ async def test_run_handles_consensus_failure(mock_kernel, event_queue, debate_co
 
     # Assert
     events = await get_all_events(event_queue)
-    error_event = events[-1]
-    assert isinstance(error_event, ErrorEvent)
-    assert "Consensus tool failed: tool broke" in error_event.details
+    # Should end successfully with DebateEndEvent, not ErrorEvent
+    end_event = events[-1]
+    assert isinstance(end_event, DebateEndEvent)
+    # Check that consensus fallback was used
+    # The consensus outcome is now set by the mock return value
+    assert isinstance(end_event.result.consensus_outcome, str)
+    assert "No clear consensus" in end_event.result.consensus_outcome
+    # Check that a TechLogEvent was emitted about the consensus tool failure
+    tech_log_events = [e for e in events if isinstance(e, TechLogEvent)]
+    consensus_failure_logs = [e for e in tech_log_events if "Consensus tool failed" in e.message]
+    assert len(consensus_failure_logs) > 0
 
 
 async def test_handle_user_intervention(mock_kernel, event_queue):

@@ -34,11 +34,24 @@ class LoggingConfig(BaseModel):
     level: str = "INFO"
     format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
+class TokenManagementConfig(BaseModel):
+    max_context_tokens: int = 4096
+    cost_per_1k_input_tokens: float = 0.0
+    cost_per_1k_output_tokens: float = 0.0
+    enable_cost_tracking: bool = True
+    enable_context_optimization: bool = True
+    compression_threshold: float = 0.8  # Start compression when context is 80% full
+
 class AppConfig(BaseModel):
     llm: LLMConfig = Field(default_factory=LLMConfig)
     vector_store: VectorStoreConfig = Field(default_factory=VectorStoreConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
+    token_management: TokenManagementConfig = Field(default_factory=TokenManagementConfig)
     roles_config_path: str = "configs/roles.yaml"
+    
+    # Additional settings needed by main.py
+    log_level: str = "INFO"
+    allowed_origins: list[str] = ["*"]
 
 
 # --- Configuration Loading Logic ---
@@ -61,3 +74,8 @@ def load_config(config_path: Path = Path("config.yaml")) -> AppConfig:
         config_data = yaml.safe_load(f)
     _config = AppConfig(**(config_data or {}))
     return _config
+
+# --- Global Settings Instance ---
+
+# Create the global settings instance that can be imported by other modules
+settings = load_config()

@@ -1,0 +1,35 @@
+{
+  "topic": "Should artificial intelligence be regulated?",
+  "roles": [
+    "Expert",
+    "Critic"
+  ],
+  "rounds": 2,
+  "consensus_strategy": "simple_majority_vote",
+  "history": [
+    {
+      "role": "Expert",
+      "opinion": "I think it's crucial for both sides to establish a clear understanding of the topic and set the stage for a productive discussion. Without a solid foundation, the debate may become muddled and lose focus on the key issues at hand. Let's take the time to clarify the central argument and create a framework for effective communication.",
+      "round": 1
+    },
+    {
+      "role": "Critic",
+      "opinion": "I agree with the expert's approach. Establishing a clear understanding of the topic and setting a productive tone is crucial in ensuring a successful debate. By taking the time to clarify the central argument and create a framework, debaters can avoid confusion, stay focused on key issues, and effectively communicate their ideas.",
+      "round": 1
+    },
+    {
+      "role": "Expert",
+      "opinion": "I agree that establishing a clear understanding of the topic and setting a productive tone are essential components for a successful and focused debate. This shared starting point allows both parties to build upon common ground, address each other's arguments more effectively, and maintain a constructive atmosphere throughout the discussion.",
+      "round": 2
+    },
+    {
+      "role": "Critic",
+      "opinion": "I think it's essential to establish a clear understanding of the topic at hand to ensure a productive and respectful debate. A common ground must be found to prevent miscommunication and enable all parties to engage in meaningful discourse. This foundation will also help identify key issues, facilitate constructive dialogue, and promote effective communication throughout the discussion.",
+      "round": 2
+    }
+  ],
+  "consensus": null,
+  "synthesis": null,
+  "success": true,
+  "timestamp": "2025-07-20T14:21:19.225930"
+}

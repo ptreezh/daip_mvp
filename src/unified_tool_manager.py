@@ -36,3 +36,23 @@ class UnifiedToolManager:
         logger.info(f"Simulating executing tool: {tool_name} with args: {kwargs}")
         # In a real scenario, this would call the actual tool implementation
         return f"Result from {tool_name} with {kwargs}"
+
+    def register_strategies_from_factory(self, consensus_factory):
+        """
+        Registers consensus strategies from a factory as available tools.
+        
+        Args:
+            consensus_factory: A ConsensusStrategyFactory instance containing registered strategies
+        """
+        try:
+            strategies = consensus_factory.get_all_strategies()
+            for strategy_name, strategy_class in strategies.items():
+                self.available_tools[f"consensus_{strategy_name}"] = {
+                    "type": "consensus_strategy",
+                    "class": strategy_class,
+                    "name": strategy_name
+                }
+                logger.info(f"Registered consensus strategy as tool: consensus_{strategy_name}")
+        except Exception as e:
+            logger.error(f"Failed to register strategies from factory: {e}")
+            # Don't fail the startup, just log the error

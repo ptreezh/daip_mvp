@@ -10,11 +10,9 @@
 import logging
 from typing import List
 
-import ollama
-from ollama import ResponseError
-
 from src.models import DebateTurn
 from . import prompts
+from src.kernel.llm_interface import LLMInterface
 
 logger = logging.getLogger(__name__)
 
@@ -22,16 +20,14 @@ logger = logging.getLogger(__name__)
 class SynthesisEngine:
     """Uses an LLM to summarize and synthesize debate content."""
 
-    def __init__(self, client: ollama.AsyncClient, model: str):
+    def __init__(self, llm_interface: LLMInterface):
         """
         Initializes the SynthesisEngine.
 
         Args:
-            client (ollama.AsyncClient): An instance of the Ollama async client.
-            model (str): The name of the Ollama model to use for synthesis.
+            llm_interface: An instance of a class that adheres to the LLMInterface.
         """
-        self.client = client
-        self.model = model
+        self.llm_interface = llm_interface
 
     async def summarize_context(self, history: List[DebateTurn]) -> str:
         """Summarizes the debate history for context using an LLM."""
@@ -48,15 +44,18 @@ class SynthesisEngine:
         ]
 
         try:
-            logger.info(f"Requesting context summary from model '{self.model}'")
-            response = await self.client.chat(model=self.model, messages=messages)
-            return response.get("message", {}).get("content", "").strip()
-        except ResponseError as e:
-            logger.error(f"Ollama API error during summarization: {e.error}")
-            return f"Error: Could not summarize context. (Details: {e.error})"
-        except Exception:
+            logger.info(f"Requesting context summary from model '{self.llm_interface.config.model}'")
+            response = await self.llm_interface.generate(messages=messages, participant_id="synthesis_engine")
+            
+            # Log token usage if available
+            if "token_usage" in response:
+                token_info = response["token_usage"]
+                logger.debug(f"Context summary token usage: {token_info['total_tokens']} tokens")
+            
+            return response.get("content", "").strip()
+        except Exception as e:
             logger.exception("An unexpected error occurred during context summarization.")
-            return "Error: An unexpected issue occurred during summarization."
+            return f"Error: An unexpected issue occurred during summarization. Details: {e}"
 
     async def synthesize_opinions(self, topic: str, history: List[DebateTurn]) -> str:
         """Synthesizes the final conclusion of the debate using an LLM."""
@@ -76,12 +75,15 @@ class SynthesisEngine:
         ]
 
         try:
-            logger.info(f"Requesting final synthesis from model '{self.model}'")
-            response = await self.client.chat(model=self.model, messages=messages)
-            return response.get("message", {}).get("content", "").strip()
-        except ResponseError as e:
-            logger.error(f"Ollama API error during synthesis: {e.error}")
-            return f"Error: Could not synthesize a conclusion. (Details: {e.error})"
-        except Exception:
+            logger.info(f"Requesting final synthesis from model '{self.llm_interface.config.model}'")
+            response = await self.llm_interface.generate(messages=messages, participant_id="synthesis_engine")
+            
+            # Log token usage if available
+            if "token_usage" in response:
+                token_info = response["token_usage"]
+                logger.debug(f"Final synthesis token usage: {token_info['total_tokens']} tokens")
+            
+            return response.get("content", "").strip()
+        except Exception as e:
             logger.exception("An unexpected error occurred during opinion synthesis.")
-            return "Error: An unexpected issue occurred during synthesis."
+            return f"Error: An unexpected issue occurred during synthesis. Details: {e}"

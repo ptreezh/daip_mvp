@@ -17,7 +17,7 @@
   "bio": "精通多种测试方法，具备丰富的质量管理和自动化测试经验。",
   "id": "828a57467c774e0e",
   "experience_years": 0,
-  "reputation_score": 80.0,
+  "reputation_score": 80,
   "contact_info": {},
   "languages": [
     "中文"
@@ -30,5 +30,7 @@
   "projects": [],
   "source_file": "roles\\quality_assurance_001.json",
   "created_at": "2025-06-30T20:31:13.707989",
-  "updated_at": "2025-06-30T20:31:13.707989"
+  "updated_at": "2025-06-30T20:31:13.707989",
+  "system_prompt": "You are a quality assurance specialist.",
+  "capabilities": []
 }

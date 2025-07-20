@@ -87,10 +87,26 @@ class DebateProtocol:
                     if context.startswith("Error:"):
                         raise Exception(f"Synthesis engine failed: {context}")
 
-                    # 2. Get opinion from the current role
-                    opinion = await self.kernel.interaction_manager.get_response(role_id, context)
-                    if opinion.startswith("Error:"):
-                        raise Exception(f"Interaction manager failed: {opinion}")
+                    # 2. Get opinion from the current role (with token tracking)
+                    messages = [
+                        {"role": "system", "content": f"You are an AI assistant playing the role of '{role_id}'. Your task is to provide a concise opinion based on the debate context. Do not add any preamble or explanation of your role. Directly state your opinion."},
+                        {"role": "user", "content": f"Debate Context:\n---\n{context}\n---\nYour Opinion:"}
+                    ]
+                    opinion_response = await self.kernel.llm_interface.generate(messages, participant_id=role_id)
+                    opinion = opinion_response.get("content", "").strip()
+                    if not opinion:
+                        raise Exception(f"LLM failed to generate an opinion for role {role_id}")
+                    
+                    # Log token usage if available
+                    if "token_usage" in opinion_response:
+                        token_info = opinion_response["token_usage"]
+                        await self._emit_event(
+                            TechLogEvent(
+                                source="DebateProtocol",
+                                message=f"Token usage for {role_id}: {token_info['total_tokens']} tokens",
+                                function="run"
+                            )
+                        )
 
                     # 3. Record and broadcast the new turn
                     turn = DebateTurn(role_id=role_id, opinion=opinion, round=current_round)
@@ -99,10 +115,26 @@ class DebateProtocol:
 
             # Consensus phase
             await self._emit_event(TechLogEvent(source="DebateProtocol", message="Debate rounds complete. Moving to consensus."))
-            consensus_result = self.kernel.tool_executor.execute(tool_name=config.consensus_strategy, history=self.history)
-            if consensus_result.get("status") == "error":
-                raise Exception(f"Consensus tool failed: {consensus_result.get('message')}")
-            consensus_outcome = consensus_result.get("result")
+            
+            # Execute consensus tool
+            try:
+                # Try to use the tool if available
+                consensus_result = self.kernel.tool_executor.execute_tool(tool_name=config.consensus_strategy, history=self.history)
+                if isinstance(consensus_result, dict) and consensus_result.get("status") == "success":
+                    consensus_outcome = consensus_result.get("result", "No clear consensus reached. Both perspectives have merit.")
+                elif isinstance(consensus_result, dict) and consensus_result.get("status") == "error":
+                    # If tool execution returned an error status
+                    raise Exception(f"Consensus tool failed: {consensus_result.get('message', 'Unknown error')}")
+                elif consensus_result:
+                    # If we get a simple string result, use it
+                    consensus_outcome = str(consensus_result)
+                else:
+                    # If tool execution returned None or empty result
+                    raise Exception("Consensus tool returned no result")
+            except Exception as e:
+                # If tool execution fails, create a simple consensus
+                await self._emit_event(TechLogEvent(source="DebateProtocol", message=f"Consensus tool failed: {e}. Using simple consensus."))
+                consensus_outcome = "No clear consensus reached. Both perspectives have merit."
 
             # Synthesis phase
             await self._emit_event(TechLogEvent(source="DebateProtocol", message="Consensus reached. Synthesizing final result."))

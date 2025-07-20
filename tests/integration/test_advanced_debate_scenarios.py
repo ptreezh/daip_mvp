@@ -26,8 +26,8 @@ def mock_app_state():
     app_state.tool_executor = MagicMock(spec=ToolExecutor) # Mock ToolExecutor
     return app_state
 
-@pytest_asyncio.fixture # Use pytest_asyncio.fixture
-async def debate_protocol(mock_app_state):
+@pytest.fixture
+def debate_protocol(mock_app_state):
     # Create a mock Kernel instance
     mock_kernel = MagicMock(spec=Kernel)
     mock_kernel.synthesis_engine = mock_app_state.synthesis_engine

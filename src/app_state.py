@@ -25,6 +25,8 @@ from src.core_services.memory_service import MemoryService
 from src.core_services.protocol_service import ProtocolService
 from src.core_services.synthesis_engine import SynthesisEngine
 from src.core_services.task_manager import TaskManager
+from src.core_services.token_management_service import TokenManagementService
+from src.core_services.universal_context_service import UniversalContextService
 from src.core_services.tool_service import FileToolsService, MemoryToolsService
 from src.core_services.virtual_team_service import VirtualTeamService
 from src.core_services.wiki_service import WikiService
@@ -76,7 +78,7 @@ class AppState:
         try:
             self.role_collection = self.chroma_client.get_collection("roles")
             logger.info("✅ Loaded existing role collection from ChromaDB.")
-        except ValueError:
+        except Exception:  # Catch any exception when collection doesn't exist
             self.role_collection = self.chroma_client.create_collection(name="roles")
             logger.info("✅ Created new role collection in ChromaDB.")
 
@@ -84,18 +86,37 @@ class AppState:
         # This is the correct, centralized way to do it.
 
         # 1. Foundational Components
-        # Assuming a default local LLM configuration
-        default_llm_config = LLMConfig(provider="ollama", model="gemma:2b", base_url="http://localhost:11434")
+        # Load configuration and initialize token management
+        from src.config import settings
+        from src.kernel.llm_interface import LLMFactory, LLMConfig
+        
+        # Initialize token management service
+        self.token_management_service = TokenManagementService(settings.token_management)
+        
+        # Create LLM configuration from settings
+        default_llm_config = LLMConfig(
+            provider=settings.llm.provider,
+            model=settings.llm.ollama.generation_model,
+            base_url=settings.llm.ollama.host
+        )
         self.fact_confidence_threshold = 0.75  # Configurable threshold
-        self.llm_interface = LLMInterface(config=default_llm_config)
+        
+        # Create LLM interface with token management
+        self.llm_interface = LLMFactory.create(config=default_llm_config, token_service=self.token_management_service)
         self.unified_tool_manager = UnifiedToolManager(config=tool_config.to_dict())
 
         # 2. Core Services (no dependencies or only foundational ones)
         self.memory_service = MemoryService(data_dir=os.path.join(self.base_dir, "data", "memory_banks"))
         self.wiki_service = WikiService(wiki_directory=os.path.join(self.base_dir, "data", "wiki"))
         self.task_manager = TaskManager(task_directory=os.path.join(self.base_dir, "data", "tasks"))
-        self.synthesis_engine = SynthesisEngine() # This might need llm_interface in the future
+        self.synthesis_engine = SynthesisEngine(llm_interface=self.llm_interface)
         self.expert_service = ExpertService(self) # Passes self to access app_state properties
+        
+        # Initialize universal context service (depends on token and memory services)
+        self.universal_context_service = UniversalContextService(
+            token_service=self.token_management_service,
+            memory_service=self.memory_service
+        )
         self.fact_extraction_service = FactExtractionService(
             llm_interface=self.llm_interface,
             memory_service=self.memory_service,
@@ -103,23 +124,36 @@ class AppState:
         )
 
         # 3. Kernel Components that depend on Core Services
+        # Create an Ollama client for InteractionManager
+        import ollama
+        ollama_client = ollama.AsyncClient(host=default_llm_config.base_url)
         self.interaction_manager = InteractionManager(
-            wiki_service=self.wiki_service,
-            memory_service=self.memory_service,
-            synthesis_engine=self.synthesis_engine,
-            llm_interface=self.llm_interface,
-            fact_extraction_service=self.fact_extraction_service
-
+            client=ollama_client,
+            model=default_llm_config.model
         )
 
         # 4. High-level Services that depend on other services
         self.protocol_service = ProtocolService(self)
         self.collaboration_service = CollaborationService(self)
-        self.document_service = DocumentService(self)
+        
+        # Try to initialize DocumentService, but don't fail if it's not available
+        try:
+            self.document_service = DocumentService(self)
+        except Exception as e:
+            logger.warning(f"DocumentService initialization failed: {e}. Continuing without document processing.")
+            self.document_service = None
+            
         self.chat_service = ChatService(self)
         self.tool_service = FileToolsService() # Assuming it's simple
         self.memory_tool_service = MemoryToolsService(self)
-        self.virtual_team_service = VirtualTeamService(self)
+        
+        # Try to initialize VirtualTeamService, but don't fail if it's not available
+        try:
+            self.virtual_team_service = VirtualTeamService(self, self.memory_tool_service)
+        except Exception as e:
+            logger.warning(f"VirtualTeamService initialization failed: {e}. Continuing without virtual team functionality.")
+            self.virtual_team_service = None
+            
         self.fact_validation_service = FactValidationService(self)
 
         # --- Startup Logic ---

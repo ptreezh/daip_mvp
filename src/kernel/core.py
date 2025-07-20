@@ -12,11 +12,10 @@
 import logging
 from typing import Optional
 
-import ollama
-from .interaction_manager import InteractionManager
 from .tool_executor import ToolExecutor
 from .tool_registry import tool_executor_instance
 from src.core_services.synthesis_engine import SynthesisEngine
+from .llm_interface import LLMInterface
 
 
 class Kernel:
@@ -28,20 +27,17 @@ class Kernel:
     with the kernel.
     """
 
-    def __init__(self, model: str = "llama3:8b-instruct-q5_K_M"):
+    def __init__(self, llm_interface: LLMInterface):
         """
         Initializes the complete kernel.
 
         Args:
-            model: The name of the Ollama model to be used by kernel components.
+            llm_interface: An instance of a class that adheres to the LLMInterface.
         """
-        # Create a single, shared client for all LLM interactions
-        client = ollama.AsyncClient()
+        # Store the LLM interface
+        self.llm_interface = llm_interface
         
-        # Instantiate all core components
-        self.synthesis_engine: SynthesisEngine = SynthesisEngine(client=client, model=model)
+        # Instantiate other core components
+        self.synthesis_engine: SynthesisEngine = SynthesisEngine(llm_interface=self.llm_interface)
         self.tool_executor: ToolExecutor = tool_executor_instance
-        self.interaction_manager: InteractionManager = InteractionManager(
-            client=client, model=model
-        )
         logging.info("Kernel initialized successfully.")

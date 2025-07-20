@@ -7,7 +7,7 @@
   "specialties": [],
   "description": " - 专业角色，具备相关领域知识和经验。",
   "experience_years": 0,
-  "reputation_score": 80.0,
+  "reputation_score": 80,
   "contact_info": {},
   "skills": [],
   "languages": [
@@ -22,5 +22,7 @@
   "bio": "",
   "source_file": "roles\\legal_expert.json",
   "created_at": "2025-06-23T12:46:24.946412",
-  "updated_at": "2025-06-30T20:31:13.706836"
+  "updated_at": "2025-06-30T20:31:13.706836",
+  "system_prompt": "You are a legal expert.",
+  "capabilities": []
 }

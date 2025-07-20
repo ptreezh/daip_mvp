@@ -4,322 +4,193 @@
 @Author  : DAIP-LIVE Team
 @File    : test_tui_integration.py
 @Description:
-    Integration tests for the Terminal User Interface (TUI) in src.cli.main.
-    These tests simulate the interaction between the TUI and the backend protocol
-    using asyncio queues.
+    Integration tests for the CLI in src.cli.main.
+    These tests simulate the interaction between the CLI and the backend services.
 """
 import asyncio
 import pytest
-import src.cli.main as main_module
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch, AsyncMock
+from typer.testing import CliRunner
 
-from prompt_toolkit.application import Application
-from prompt_toolkit.input.defaults import create_pipe_input
-from prompt_toolkit.output import DummyOutput
+from src.cli.main import app
 
 # Use pytest_asyncio for async tests
 pytestmark = pytest.mark.asyncio
 
-# Import components from the main TUI application
-from src.cli.main import (
-    create_key_bindings,
-    layout,
-    output_area,
-    input_area,
-    input_container,
-    toolbar,
-    to_protocol_queue,
-    from_protocol_queue,
-    ui_renderer,
-)
-from src.models import (
-    ClearScreenEvent,
-    DebateConfig,
-    DebateEndEvent,
-    DebateStartEvent,
-    NewTurnEvent,
-    TechLogEvent,
-    ErrorEvent,
-    UserInterventionCommand,
-    DebateResult,
-    DebateTurn,
-)
 
-@pytest.fixture(autouse=True)
-def clear_queues_and_text():
-    """Fixture to clear queues and text area before each test."""
-    # Clear queues
-    while not to_protocol_queue.empty():
-        to_protocol_queue.get_nowait()
-    while not from_protocol_queue.empty():
-        from_protocol_queue.get_nowait()
+@pytest.fixture
+def cli_runner():
+    """Fixture that provides a CLI test runner."""
+    return CliRunner()
+
+
+@patch("src.cli.commands.run_debate_command")
+@patch("src.cli.main.asyncio.run")
+async def test_cli_integration_with_backend_success(mock_asyncio_run, mock_run_debate, cli_runner):
+    """Test that the CLI integrates properly with backend services for a successful debate."""
+    # Mock successful debate execution
+    mock_run_debate.return_value = True
+    mock_asyncio_run.return_value = True  # asyncio.run should return the result of run_debate_command
     
-    # Reset text area
-    output_area.text = "Welcome to DAIP-LIVE Interactive Debate!\n"
-    yield # This is where the test runs
-
-async def test_tui_renders_new_turn_event():
-    """
-    Tests if the ui_renderer correctly processes a NewTurnEvent from the
-    protocol and updates the output_area.
-    """
-    # Mock the application instance required by the renderer
-    mock_app = MagicMock(spec=Application)
-    event_queue = asyncio.Queue()
-
-    renderer_task = asyncio.create_task(ui_renderer(mock_app, event_queue))
-    try:
-        # Create a sample event
-        test_event = NewTurnEvent(
-            turn=DebateTurn(role_id="TestRole", opinion="This is a test opinion.", round=1)
-        )
-        
-        # Put the event onto the queue for the renderer to process
-        await event_queue.put(test_event)
-        
-        # Give the renderer a moment to process the event
-        await asyncio.sleep(0.01)
-        
-        # Check if the output area was updated correctly
-        assert "[TestRole]: This is a test opinion." in output_area.text
-        
-        # Check if the application was told to redraw
-        mock_app.invalidate.assert_called_once()
-    finally:
-        # Clean up the task to prevent it from leaking
-        renderer_task.cancel()
-        with pytest.raises(asyncio.CancelledError):
-            await renderer_task
-
-async def test_tui_renders_tech_log_event():
-    """
-    Tests if the ui_renderer correctly processes a TechLogEvent and
-    updates the output_area, respecting the verbose toggle.
-    """
-    # Mock the application instance required by the renderer
-    mock_app = MagicMock(spec=Application)
-    event_queue = asyncio.Queue()
-
-    renderer_task = asyncio.create_task(ui_renderer(mock_app, event_queue))
-    try:
-        # --- Test 1: Verbose logs are ON ---
-        main_module.show_verbose_logs = True
-
-        # Act
-        event1 = TechLogEvent(
-            source="TestSystem",
-            message="This is a visible tech log."
-        )
-        await event_queue.put(event1)
-        await asyncio.sleep(0.01)
-
-        # Assert
-        assert "[VERBOSE] TestSystem: This is a visible tech log." in output_area.text
-        mock_app.invalidate.assert_called_once()
-
-        # --- Test 2: Verbose logs are OFF ---
-        main_module.show_verbose_logs = False
-
-        # Act
-        event2 = TechLogEvent(source="TestSystem", message="This is an invisible tech log.")
-        await event_queue.put(event2)
-        await asyncio.sleep(0.01)
-
-        # Assert: The text should NOT have changed, so the new message is not present.
-        assert "This is an invisible tech log." not in output_area.text
-        # invalidate() was called for the second event, so call count is now 2
-        assert mock_app.invalidate.call_count == 2
-    finally:
-        main_module.show_verbose_logs = False  # Reset state for other tests
-        # Clean up the task to prevent it from leaking
-        renderer_task.cancel()
-        with pytest.raises(asyncio.CancelledError):
-            await renderer_task
-
-async def test_tui_renders_clear_screen_event():
-    """
-    Tests if the ui_renderer correctly processes a ClearScreenEvent.
-    """
-    # Arrange
-    mock_app = MagicMock(spec=Application)
-    event_queue = asyncio.Queue()
-    # Set some initial text to ensure it gets cleared
-    main_module.output_area.text = "Some initial text that should be cleared."
-
-    renderer_task = asyncio.create_task(main_module.ui_renderer(mock_app, event_queue))
-    try:
-        # Act
-        await event_queue.put(ClearScreenEvent())
-        await asyncio.sleep(0.01)
-
-        # Assert
-        assert main_module.output_area.text == "Screen cleared.\n"
-        mock_app.invalidate.assert_called_once()
-    finally:
-        # Clean up
-        renderer_task.cancel()
-        with pytest.raises(asyncio.CancelledError):
-            await renderer_task
-
-async def test_tui_renders_debate_start_event():
-    """
-    Tests if the ui_renderer correctly processes a DebateStartEvent
-    and updates the output_area with the debate configuration.
-    """
-    # Mock the application instance required by the renderer
-    mock_app = MagicMock(spec=Application)
-    event_queue = asyncio.Queue()
-
-    renderer_task = asyncio.create_task(ui_renderer(mock_app, event_queue))
-    try:
-        # Create a sample event
-        test_event = DebateStartEvent(
-            config=DebateConfig(
-                topic="The Future of AI",
-                roles=["Optimist", "Pessimist"],
-                rounds=2,
-                consensus_strategy="simple_majority_vote"
-            )
-        )
-
-        # Put the event onto the queue for the renderer to process
-        await event_queue.put(test_event)
-
-        # Give the renderer a moment to process the event
-        await asyncio.sleep(0.01)
-
-        # Check if the output area was updated correctly
-        assert "--- Debate Started ---" in output_area.text
-        assert "Topic: The Future of AI" in output_area.text
-        assert "Roles: Optimist, Pessimist" in output_area.text
-
-        # Check if the application was told to redraw
-        mock_app.invalidate.assert_called_once()
-    finally:
-        # Clean up the task to prevent it from leaking
-        renderer_task.cancel()
-        with pytest.raises(asyncio.CancelledError):
-            await renderer_task
-
-async def test_tui_user_intervention_sends_command():
-    """
-    Tests if typing a message and pressing Enter correctly sends a
-    UserInterventionCommand to the protocol queue when in intervention mode.
-    """
-    # Set the TUI state to intervention mode manually to avoid race conditions
-    # with simulating the 'i' key press.
-    main_module._tui_state.input_visible = True
+    result = cli_runner.invoke(app, [
+        "start", 
+        "Should AI be regulated?",
+        "--role", "Policy Expert",
+        "--role", "Tech Entrepreneur", 
+        "--rounds", "2",
+        "--verbose"
+    ])
     
-    with create_pipe_input() as pipe_input:
-        # Create the application with our piped input
-        bindings = create_key_bindings(output_area, input_area, input_container, toolbar)
-        app = Application(layout=layout, input=pipe_input, output=DummyOutput(), key_bindings=bindings)
+    assert result.exit_code == 0
+    assert "Initializing debate" in result.stdout
+    assert "completed successfully" in result.stdout
+    
+    # Verify the backend was called with correct parameters
+    mock_run_debate.assert_called_once()
+    call_args = mock_run_debate.call_args
+    assert call_args[1]["topic"] == "Should AI be regulated?"
+    assert call_args[1]["roles"] == ["Policy Expert", "Tech Entrepreneur"]
+    assert call_args[1]["rounds"] == 2
+    assert call_args[1]["verbose"] is True
 
-        # Manually focus the input area, as the 'i' key handler would do
-        app.layout.focus(input_area)
 
-        # Run the application briefly in the background to process the input
-        app_task = asyncio.create_task(app.run_async())
+@patch("src.cli.commands.run_debate_command")
+@patch("src.cli.main.asyncio.run")
+async def test_cli_integration_with_backend_failure(mock_asyncio_run, mock_run_debate, cli_runner):
+    """Test that the CLI handles backend service failures gracefully."""
+    # Mock failed debate execution
+    mock_run_debate.return_value = False
+    mock_asyncio_run.return_value = False  # asyncio.run should return the result of run_debate_command
+    
+    result = cli_runner.invoke(app, ["start", "Test topic"])
+    
+    assert result.exit_code == 1
+    assert "failed to complete successfully" in result.stdout
+    assert "Troubleshooting tips" in result.stdout
 
-        try:
-            # Simulate user typing the message and pressing Enter
-            input_area.buffer.reset()
-            pipe_input.send_text("my test intervention\n")
 
-            # Wait for the command to appear in the queue with a timeout
-            sent_command = await asyncio.wait_for(to_protocol_queue.get(), timeout=2.0)
+@patch("src.cli.commands.run_debate_command")
+@patch("src.cli.main.asyncio.run")
+async def test_cli_integration_with_exception_handling(mock_asyncio_run, mock_run_debate, cli_runner):
+    """Test that the CLI handles various exceptions from backend services."""
+    # Test connection error
+    mock_asyncio_run.side_effect = Exception("Connection refused")
+    
+    result = cli_runner.invoke(app, ["start", "Test topic"])
+    
+    assert result.exit_code == 1
+    assert "Connection issue detected" in result.stdout
+    assert "Check if LLM server is running" in result.stdout
 
-            assert isinstance(sent_command, UserInterventionCommand)
-            assert sent_command.content == "my test nterventon"
-            assert "[You (Intervention)]: my test nterventon" in output_area.text
-        except asyncio.TimeoutError:
-            pytest.fail("The UserInterventionCommand was not sent to the queue within the timeout period.")
-        finally:
-            # Reset state for other tests
-            main_module._tui_state.input_visible = False
-            # Ensure the application is properly shut down
-            app.exit()
-            await app_task
 
-async def test_tui_renders_debate_end_event():
-    """
-    Tests if the ui_renderer correctly processes a DebateEndEvent and
-    updates the TUI before exiting the render loop.
-    """
-    # Mock the application instance required by the renderer
-    mock_app = MagicMock(spec=Application)
-    event_queue = asyncio.Queue()
+@patch("src.cli.commands.list_available_roles")
+async def test_cli_roles_integration_with_backend(mock_list_roles, cli_runner):
+    """Test that the roles command integrates properly with the role management backend."""
+    # Mock role data from backend
+    mock_list_roles.return_value = [
+        {
+            "name": "Climate Scientist", 
+            "description": "Expert in climate change research",
+            "tags": ["science", "environment"]
+        },
+        {
+            "name": "Economist", 
+            "description": "Specialist in economic analysis",
+            "tags": ["economics", "policy"]
+        }
+    ]
+    
+    result = cli_runner.invoke(app, ["roles"])
+    
+    assert result.exit_code == 0
+    assert "Climate Scientist" in result.stdout
+    assert "Economist" in result.stdout
+    # The description might be wrapped in the table, so check for key parts
+    assert "Expert in climate change" in result.stdout
+    assert "Available Categories" in result.stdout
+    
+    # Verify backend was called
+    mock_list_roles.assert_called_once()
 
-    # Start the renderer as a background task
-    renderer_task = asyncio.create_task(ui_renderer(mock_app, event_queue))
 
-    # Create a sample event
-    test_event = DebateEndEvent(
-        result=DebateResult(
-            topic="Test Topic",
-            history=[],
-            consensus_outcome="The final decision is to proceed.",
-            synthesis="After discussion, the team agreed on the proposed solution."
-        )
-    )
+@patch("src.cli.commands.list_available_roles")
+async def test_cli_roles_integration_with_backend_error(mock_list_roles, cli_runner):
+    """Test that the roles command handles backend errors gracefully."""
+    # Mock backend error
+    mock_list_roles.side_effect = ImportError("Cannot import role service")
+    
+    result = cli_runner.invoke(app, ["roles"])
+    
+    assert result.exit_code == 0  # Should not crash
+    assert "Cannot import role listing functionality" in result.stdout
+    assert "missing dependencies" in result.stdout
 
-    # Put the event onto the queue for the renderer to process
-    await event_queue.put(test_event)
 
-    # The renderer should exit its loop after this event. We wait for it to finish.
-    await asyncio.wait_for(renderer_task, timeout=1)
+@patch("src.cli.commands.check_system_health")
+async def test_cli_status_integration_with_backend(mock_check_health, cli_runner):
+    """Test that the status command integrates with backend health checks."""
+    # Mock system health data
+    mock_check_health.return_value = {
+        "llm_service": {
+            "status": "✅ Connected",
+            "details": "Ollama server responding"
+        },
+        "memory_service": {
+            "status": "✅ Operational", 
+            "details": "Database connection active"
+        }
+    }
+    
+    result = cli_runner.invoke(app, ["status"])
+    
+    assert result.exit_code == 0
+    assert "System Status" in result.stdout
+    # The mocked health check results should appear in the Service Initialization Test section
+    assert "Ollama server responding" in result.stdout
+    assert "Database connection active" in result.stdout
+    
+    # Verify backend health check was called
+    mock_check_health.assert_called_once()
 
-    # Check if the output area was updated correctly
-    assert "--- Debate Ended ---" in output_area.text
-    assert "Consensus: The final decision is to proceed." in output_area.text
-    assert "Synthesis: After discussion, the team agreed on the proposed solution." in output_area.text
 
-    # The final text update should trigger a redraw.
-    mock_app.invalidate.assert_called_once()
+@patch("src.cli.commands.run_debate_command")
+@patch("src.cli.main.asyncio.run")
+async def test_cli_save_functionality_integration(mock_asyncio_run, mock_run_debate, cli_runner):
+    """Test that the CLI save functionality integrates with backend properly."""
+    mock_run_debate.return_value = True
+    mock_asyncio_run.return_value = True  # asyncio.run should return the result of run_debate_command
+    
+    result = cli_runner.invoke(app, [
+        "start", 
+        "Test debate topic",
+        "--save",
+        "--output", "test_results.txt"
+    ])
+    
+    assert result.exit_code == 0
+    assert "Results saved to: test_results.txt" in result.stdout
+    
+    # Verify save parameters were passed to backend
+    call_args = mock_run_debate.call_args
+    assert call_args[1]["save_results"] is True
+    assert call_args[1]["output_file"] == "test_results.txt"
 
-async def test_tui_renders_error_event():
-    """
-    Tests if the ui_renderer correctly processes an ErrorEvent and
-    updates the TUI before exiting the render loop.
-    """
-    mock_app = MagicMock(spec=Application)
-    event_queue = asyncio.Queue()
-    renderer_task = asyncio.create_task(ui_renderer(mock_app, event_queue))
 
-    test_event = ErrorEvent(
-        error_message="LLM API call failed",
-        details="Connection timeout after 30 seconds."
-    )
-
-    await event_queue.put(test_event)
-
-    await asyncio.wait_for(renderer_task, timeout=1)
-
-    assert "[ERROR] LLM API call failed" in output_area.text
-    assert "Details: Connection timeout after 30 seconds." in output_area.text
-
-    mock_app.invalidate.assert_called_once()
-
-async def test_tui_quit_key_exits_application():
-    """
-    Tests if pressing 'q' correctly calls the application's exit method,
-    causing the application to terminate.
-    """
-    with create_pipe_input() as pipe_input:
-        # Simulate the user pressing the 'q' key
-        pipe_input.send_text("q")
-
-        # Create a real application instance with the piped input
-        bindings = create_key_bindings(output_area, input_area, input_container, toolbar)
-        app = Application(
-            layout=layout,
-            input=pipe_input,
-            output=DummyOutput(),
-            key_bindings=bindings
-        )
-
-        # Run the application. It should exit almost immediately.
-        # If app.exit() is not called, this await will time out.
-        await asyncio.wait_for(app.run_async(), timeout=1)
-
-        # The main assertion is that the run_async task completed without a timeout.
+@patch("src.cli.commands.run_debate_command")
+@patch("src.cli.main.asyncio.run")
+async def test_cli_consensus_strategy_integration(mock_asyncio_run, mock_run_debate, cli_runner):
+    """Test that consensus strategy selection integrates with backend."""
+    mock_run_debate.return_value = True
+    mock_asyncio_run.return_value = True  # asyncio.run should return the result of run_debate_command
+    
+    result = cli_runner.invoke(app, [
+        "start", 
+        "Test topic",
+        "--consensus", "weighted_vote"
+    ])
+    
+    assert result.exit_code == 0
+    
+    # Verify consensus strategy was passed to backend
+    call_args = mock_run_debate.call_args
+    assert call_args[1]["consensus_strategy"] == "weighted_vote"

@@ -436,6 +436,47 @@ class MemoryService:
         self.logger.info(f"Added memory for role {role_id}: {memory_type}")
         return memory_id
 
+    def add_token_usage_memory(
+        self,
+        role_id: str,
+        token_usage_info: dict[str, Any],
+        session_id: Optional[str] = None,
+        project_id: Optional[str] = None,
+    ) -> str:
+        """
+        Adds token usage information as a memory entry for conversation tracking.
+        
+        Args:
+            role_id: The role that used the tokens
+            token_usage_info: Dictionary containing token usage details
+            session_id: Optional session identifier
+            project_id: Optional project identifier
+            
+        Returns:
+            Memory ID of the stored token usage entry
+        """
+        content = f"Token usage: {token_usage_info.get('total_tokens', 0)} tokens " \
+                 f"(input: {token_usage_info.get('input_tokens', 0)}, " \
+                 f"output: {token_usage_info.get('output_tokens', 0)}) " \
+                 f"for model {token_usage_info.get('model', 'unknown')}"
+        
+        metadata = {
+            "token_usage": token_usage_info,
+            "cost_estimate": token_usage_info.get("estimated_cost", 0.0),
+            "model": token_usage_info.get("model", "unknown")
+        }
+        
+        return self.add_memory(
+            role_id=role_id,
+            content=content,
+            memory_type="token_usage",
+            importance=0.1,  # Low importance for token tracking
+            project_id=project_id,
+            session_id=session_id,
+            tags=["token_usage", "conversation_tracking"],
+            metadata=metadata
+        )
+
     def retrieve_memories(
         self,
         role_id: str,
