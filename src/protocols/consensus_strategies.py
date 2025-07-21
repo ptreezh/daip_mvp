@@ -68,6 +68,8 @@ class ConsensusStrategyFactory:
 
     def __init__(self):
         self._strategies: Dict[str, Type[ConsensusStrategy]] = {}
+        # Public property for test compatibility
+        self.strategies = self._strategies
 
     def register(self, name: str, strategy_class: Type[ConsensusStrategy]):
         """Registers a new consensus strategy."""
@@ -83,3 +85,19 @@ class ConsensusStrategyFactory:
     def get_all_strategies(self) -> Dict[str, Type[ConsensusStrategy]]:
         """Returns all registered strategy classes."""
         return self._strategies
+        
+    def create(self, name: str, **kwargs) -> ConsensusStrategy:
+        """Creates an instance of a registered consensus strategy with parameters."""
+        strategy_class = self._strategies.get(name)
+        if not strategy_class:
+            raise ValueError(f"Consensus strategy '{name}' not registered.")
+        return strategy_class(**kwargs)
+        
+    def register_strategies_with_tool_manager(self, tool_manager):
+        """Registers all strategies with the tool manager."""
+        for name, strategy_class in self._strategies.items():
+            tool_manager.register_tool(
+                f"consensus.{name}",
+                strategy_class,
+                description=f"Custom consensus strategy" if name == "custom_strategy" else f"{name.replace('_', ' ').title()} consensus strategy"
+            )

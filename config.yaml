@@ -1,19 +1,54 @@
+# DAIP-LIVE Default Configuration
+# This file contains the default configuration for the DAIP-LIVE application.
+# You can modify these values to customize the behavior of the application.
+
+# LLM Provider Configuration
 llm:
-  provider: "ollama"
+  provider: "ollama"  # Options: ollama, openai, etc.
   ollama:
     generation_model: "llama3:instruct"
     embedding_model: "nomic-embed-text:latest"
     host: "http://localhost:11434"
     timeout: 30
 
+# Vector Store Configuration
 vector_store:
   chroma_db_path: "data/chroma_db"
   role_collection_name: "roles"
 
+# Logging Configuration
 logging:
-  level: "INFO"
+  level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
+# Token Management Configuration
+token_management:
+  max_context_tokens: 4096
+  cost_per_1k_input_tokens: 0.0
+  cost_per_1k_output_tokens: 0.0
+  enable_cost_tracking: true
+  enable_context_optimization: true
+  compression_threshold: 0.8  # Start compression when context is 80% full
+
+# User Profile Configuration
+user_profile:
+  data_dir: "data/user_profiles"
+  max_interaction_history: 100
+  enable_intent_tracking: true
+
+# Session Management Configuration
+session:
+  auth_data_dir: "data/auth"
+  session_expiry_minutes: 60
+  token_expiry_minutes: 60
+  enable_session_tracking: true
+
+# Roles Configuration
 roles_config_path: "configs/roles.yaml"
+
+# API Configuration
 log_level: "INFO"
-allowed_origins: ["*"]
+allowed_origins:
+  - "*"  # Allow all origins (for development)
+  # Uncomment and modify for production:
+  # - "https://your-domain.com"

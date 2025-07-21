@@ -34,6 +34,7 @@ from src.api.routers import (
     tools,
     virtual_team,
 )
+from src.api import user_profile_api
 from src.app_state import AppState
 
 logging.basicConfig(level=settings.log_level)
@@ -110,6 +111,7 @@ app.include_router(protocols.router)
 app.include_router(roles.router)
 app.include_router(tools.router)
 app.include_router(virtual_team.router)
+app.include_router(user_profile_api.router)
 
 @app.get("/")
 async def read_root() -> dict[str, str]:
@@ -180,7 +182,9 @@ async def detailed_status():
                 ("memory_service", "Memory Service"),
                 ("wiki_service", "Wiki Service"),
                 ("synthesis_engine", "Synthesis Engine"),
-                ("unified_tool_manager", "Tool Manager")
+                ("unified_tool_manager", "Tool Manager"),
+                ("user_profile_service", "User Profile Service"),
+                ("session_management_service", "Session Management Service")
             ]
             
             for service_attr, service_name in services_to_check:

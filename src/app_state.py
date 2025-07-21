@@ -21,13 +21,18 @@ from src.core_services.document_service import DocumentService
 from src.core_services.expert_service import ExpertService
 from src.core_services.fact_validation_service import FactValidationService
 from src.core_services.fact_extraction_service import FactExtractionService
+from src.core_services.intent_analysis_service import BasicIntentAnalysisService
 from src.core_services.memory_service import MemoryService
+from src.core_services.personal_context_service import BasicPersonalContextService
+from src.core_services.prompt_optimization_service import BasicPromptOptimizationService
 from src.core_services.protocol_service import ProtocolService
 from src.core_services.synthesis_engine import SynthesisEngine
 from src.core_services.task_manager import TaskManager
 from src.core_services.token_management_service import TokenManagementService
 from src.core_services.universal_context_service import UniversalContextService
 from src.core_services.tool_service import FileToolsService, MemoryToolsService
+from src.core_services.user_profile_service import UserProfileService
+from src.core_services.session_management_service import SessionManagementService
 from src.core_services.virtual_team_service import VirtualTeamService
 from src.core_services.wiki_service import WikiService
 from src.kernel.interaction_manager import InteractionManager
@@ -112,6 +117,16 @@ class AppState:
         self.synthesis_engine = SynthesisEngine(llm_interface=self.llm_interface)
         self.expert_service = ExpertService(self) # Passes self to access app_state properties
         
+        # Initialize user profile and session management services
+        self.user_profile_service = UserProfileService(
+            data_dir=os.path.join(self.base_dir, settings.user_profile.data_dir)
+        )
+        self.session_management_service = SessionManagementService(
+            user_profile_service=self.user_profile_service,
+            auth_data_dir=os.path.join(self.base_dir, settings.session.auth_data_dir),
+            session_expiry_minutes=settings.session.session_expiry_minutes
+        )
+        
         # Initialize universal context service (depends on token and memory services)
         self.universal_context_service = UniversalContextService(
             token_service=self.token_management_service,
@@ -121,6 +136,23 @@ class AppState:
             llm_interface=self.llm_interface,
             memory_service=self.memory_service,
             confidence_threshold=self.fact_confidence_threshold,
+        )
+        
+        # Initialize Human User Intelligence Layer services
+        self.intent_analysis_service = BasicIntentAnalysisService(
+            user_profile_service=self.user_profile_service,
+            llm_interface=self.llm_interface
+        )
+        
+        self.personal_context_service = BasicPersonalContextService(
+            user_profile_service=self.user_profile_service,
+            memory_service=self.memory_service
+        )
+        
+        self.prompt_optimization_service = BasicPromptOptimizationService(
+            intent_service=self.intent_analysis_service,
+            personal_context_service=self.personal_context_service,
+            llm_interface=self.llm_interface
         )
 
         # 3. Kernel Components that depend on Core Services

@@ -9,19 +9,19 @@
 
 ## 核心使命与价值
 
-**本项目聚焦于“MVP：基于本地小模型的社会化工程幻觉抑制”。**
+**本项目聚焦于"MVP：基于本地小模型的社会化工程幻觉抑制"。**
 
 我们的核心价值在于，通过模拟一个由多个AI专家角色组成的虚拟团队，利用社会化工程（如多角色审查、对抗性辩论、共识机制）来识别、挑战和抑制单一AI模型可能产生的幻觉，从而在复杂问题上生成更可靠、更全面、更高质量的解决方案。
 
 ## 核心应用场景
 
 *   **虚拟多角色对话聊天**: 用户可以与一个由多个AI角色组成的虚拟团队进行对话，每个角色都有独特的专长和视角。
-*   **学术研究与决策支持**: 针对复杂或有争议的话题，发起一场多角色AI辩论，观察AI角色如何相互质疑、补充和达成共识，并最终获得由“系统综合师”生成的结构化综合意见。
+*   **学术研究与决策支持**: 针对复杂或有争议的话题，发起一场多角色AI辩论，观察AI角色如何相互质疑、补充和达成共识，并最终获得由"系统综合师"生成的结构化综合意见。
 *   **自动化敏捷项目执行**: 利用引导式任务分解和版本化的知识库，实现敏捷项目的自动化管理和执行。
 
 ## MVP 开发哲学：CLI 优先，后端先行
 
-在当前MVP阶段，我们严格遵循“CLI优先，后端先行”的开发哲学。这意味着：
+在当前MVP阶段，我们严格遵循"CLI优先，后端先行"的开发哲学。这意味着：
 
 1.  **所有核心功能都将首先通过后端API暴露**，并确保其工程可用性。
 2.  **命令行界面 (CLI) 是与系统交互和测试的主要方式**。
@@ -33,8 +33,8 @@
 
 1.  **克隆项目**:
     ```bash
-    git clone [repository-url]
-    cd daip_mvp_project
+    git clone https://github.com/your-organization/daip-live.git
+    cd daip-live
     ```
 
 2.  **使用 Poetry 安装依赖**:
@@ -76,6 +76,15 @@
     roles_config_path: "configs/roles.yaml"
     log_level: "INFO"
     allowed_origins: ["*"]
+    ```
+
+4.  **安装 Ollama (可选但推荐)**:
+    * DAIP-LIVE 默认使用 Ollama 作为本地 LLM 提供者
+    * 访问 [Ollama 官网](https://ollama.ai/) 下载并安装
+    * 安装后，运行以下命令拉取所需模型:
+    ```bash
+    ollama pull llama3:instruct
+    ollama pull nomic-embed-text:latest
     ```
 
 ### 使用命令行界面 (CLI)
@@ -137,9 +146,14 @@
     
     **示例：启动辩论**
     ```bash
-    curl -X POST http://127.0.0.1:8000/protocols/debate/start \
+    curl -X POST http://127.0.0.1:8000/protocols/run-debate \
     -H "Content-Type: application/json" \
-    -d '{"topic": "人工智能的未来", "roles": ["技术专家", "伦理学家"], "rounds": 3}'
+    -d '{
+      "topic": "人工智能的未来",
+      "roles": ["技术专家", "伦理学家"],
+      "rounds": 3,
+      "consensus_strategy": "simple_majority_vote"
+    }'
     ```
 
 ## 常见问题与故障排除
@@ -150,10 +164,13 @@
    * 确保您使用的是 Python 3.10 或更高版本
    * 尝试更新 pip: `pip install --upgrade pip`
    * 如果使用 Poetry，尝试: `poetry update`
+   * 检查是否有权限问题: 在 Windows 上尝试以管理员身份运行，在 Linux/Mac 上尝试使用 `sudo`
 
 2. **CLI 命令未找到**
    * 确保项目已正确安装: `pip install -e .`
    * 检查 PATH 环境变量是否包含 Python 脚本目录
+   * 尝试使用完整路径运行: `python -m src.cli.main`
+   * 检查 pyproject.toml 中的 entry_points 配置是否正确
 
 ### 运行时问题
 
@@ -161,20 +178,72 @@
    * 确保 Ollama 服务已启动并运行在默认端口 (11434)
    * 验证 config.yaml 中的 LLM 配置是否正确
    * 检查网络连接和防火墙设置
+   * 运行 `curl http://localhost:11434/api/tags` 测试 Ollama API 是否可访问
+   * 确保已下载所需模型: `ollama list` 查看已安装模型
 
 2. **内存不足**
    * 减少辩论轮次 (`--rounds 2`)
    * 使用更少的角色
    * 关闭其他内存密集型应用程序
+   * 考虑使用更小的 LLM 模型
+   * 增加系统虚拟内存/交换空间
 
 3. **API 服务无法启动**
-   * 检查端口是否被占用
+   * 检查端口是否被占用: `netstat -ano | findstr 8000` (Windows) 或 `lsof -i :8000` (Linux/Mac)
    * 验证配置文件格式是否正确
    * 查看日志获取详细错误信息
+   * 尝试使用不同端口: `uvicorn src.main:app --port 8080 --reload`
+   * 检查是否安装了所有必要的依赖: `pip install -r requirements.txt`
 
 4. **角色加载失败**
    * 运行 `daip-cli status` 检查系统状态
    * 确保角色配置文件存在且格式正确
+   * 检查 roles 目录中的文件权限
+   * 验证 JSON 文件格式是否有效
+   * 尝试手动加载单个角色文件进行测试
+
+5. **配置系统问题**
+   * 确保 config.yaml 文件格式正确
+   * 检查文件权限是否允许读取
+   * 尝试使用默认配置运行系统
+   * 检查日志中的配置相关错误
+   * 确保所有必需的配置项都已设置
+
+6. **ChromaDB 相关问题**
+   * 确保 ChromaDB 依赖已正确安装
+   * 检查 data/chroma_db 目录是否存在且有正确权限
+   * 尝试删除并重新创建 ChromaDB 目录
+   * 检查是否有足够的磁盘空间
+   * 验证 Python 版本兼容性
+
+7. **Token 管理服务问题**
+   * 确保 tiktoken 库已正确安装
+   * 检查 LLM 模型是否支持 token 计数
+   * 验证 token 限制设置是否合理
+   * 检查日志中的 token 相关错误
+
+### 调试技巧
+
+1. **启用详细日志**
+   * 在 config.yaml 中设置 `log_level: "DEBUG"`
+   * 使用 CLI 的 `--verbose` 标志
+   * 检查日志文件获取详细错误信息
+
+2. **检查系统状态**
+   * 运行 `daip-cli status` 获取全面的系统健康报告
+   * 使用 API 的 `/status` 端点获取详细状态信息
+   * 检查各个组件的状态和可用性
+
+3. **隔离问题**
+   * 尝试单独测试各个组件
+   * 使用最小配置运行系统
+   * 逐步添加功能以确定问题来源
+
+4. **常见错误代码**
+   * 400: 请求参数无效，检查 API 请求格式
+   * 404: 资源不存在，检查 URL 路径
+   * 500: 服务器内部错误，检查日志获取详细信息
+   * 503: 服务不可用，检查依赖服务是否运行
 
 ## 项目规范
 
