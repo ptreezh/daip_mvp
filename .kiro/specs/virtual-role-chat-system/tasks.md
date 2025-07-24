@@ -1,151 +1,282 @@
 # Implementation Plan
 
-- [ ] 1. Set up core data models and interfaces
-  - Create Pydantic models for ChatRoom, ChatSession, ChatMessage, and related types
-  - Define interfaces for the main components (ChatRoomManager, ChatSessionService, etc.)
-  - _Requirements: 1.1, 1.2, 1.3, 1.4_
+- [x] 1. Implement Cognitive Agent Foundation
 
-- [ ] 2. Implement Chat Room Manager
-  - [ ] 2.1 Create ChatRoomManager class with basic CRUD operations
-    - Implement create_chat_room, get_chat_room, update_chat_room, delete_chat_room methods
-    - Add persistence for chat room configurations
-    - _Requirements: 1.1, 1.2, 1.5_
-  
-  - [ ] 2.2 Implement role assignment and validation
-    - Add validation for role existence when creating/updating chat rooms
-    - Implement role initialization with appropriate context
-    - _Requirements: 1.3_
-  
-  - [ ] 2.3 Create chat room configuration validation
-    - Implement validation for chat room modes and interaction rules
-    - Add schema validation for mode-specific configuration
-    - _Requirements: 1.2_
+  - Create the core cognitive agent framework that enables true cognitive independence
+  - _Requirements: 1, 11_
 
-- [ ] 3. Implement Chat Session Service
-  - [ ] 3.1 Create ChatSessionService class with session lifecycle methods
-    - Implement start_session, end_session, pause_session, resume_session methods
-    - Add persistence for session state and history
-    - _Requirements: 1.4, 3.1, 3.3_
-  
-  - [ ] 3.2 Implement message handling
-    - Add methods for adding and retrieving messages
-    - Implement message validation and sanitization
-    - _Requirements: 1.4, 3.2_
-  
-  - [ ] 3.3 Create session export functionality
-    - Implement export_session method with multiple format options
-    - Add session summary generation
-    - _Requirements: 3.4, 3.5_
+- [x] 1.1 Implement CognitiveAgent base class
 
-- [ ] 4. Implement Role Interaction Engine
-  - [ ] 4.1 Create RoleInteractionEngine class with core interaction methods
-    - Implement process_user_input and generate_role_response methods
-    - Add integration with LLMInterface for role responses
-    - _Requirements: 2.1, 2.2, 3.2_
-  
-  - [ ] 4.2 Implement intelligent turn-taking algorithm
-    - Create get_next_role method with expertise-based prioritization
-    - Add conversation flow analysis for natural turn-taking
-    - _Requirements: 2.1_
-  
-  - [ ] 4.3 Implement hallucination suppression mechanisms
-    - Add cross-role validation using FactExtractionService
-    - Implement confidence scoring for role statements
-    - Create integration with SSKG for fact verification
-    - _Requirements: 2.3, 2.4, 2.5_
-  
-  - [ ] 4.4 Implement conflict resolution
-    - Create resolve_conflict method for handling disagreements
-    - Add integration with SynthesisEngine for consensus building
-    - _Requirements: 2.4_
-  
-  - [ ] 4.5 Implement conversation quality enhancement
-    - Add suggest_topic_refocus method for keeping conversations on track
-    - Implement role re-engagement mechanisms
-    - _Requirements: 3.3_
+  - Create the foundational CognitiveAgent class with core components
+  - Implement ReasoningFramework, BeliefSystem, Epistemology, and MetaCognition classes
+  - Create AgentMemory class for agent-specific memory management
+  - Write unit tests for cognitive independence verification
+  - _Requirements: 11.1, 11.2, 11.6, 11.7_
 
-- [ ] 5. Implement Chat Analytics Service
-  - [ ] 5.1 Create ChatAnalyticsService class with core metrics methods
-    - Implement get_session_metrics and get_role_performance methods
-    - Add real-time metric tracking during conversations
-    - _Requirements: 5.1, 5.2_
-  
-  - [ ] 5.2 Implement conversation quality analysis
-    - Create get_conversation_quality and detect_quality_issues methods
-    - Add pattern recognition for conversation dynamics
-    - _Requirements: 5.2, 5.4_
-  
-  - [ ] 5.3 Create analytics reporting
-    - Implement generate_analytics_report method
-    - Add visualization data generation for dashboards
-    - _Requirements: 5.3, 5.5_
+- [x] 1.2 Integrate cognitive framework with LLM interface
 
-- [ ] 6. Implement CLI and API interfaces
-  - [ ] 6.1 Extend CLI with chat commands
-    - Add commands for creating and managing chat rooms
-    - Implement interactive chat session interface
-    - _Requirements: 1.1, 1.2, 3.1, 3.2_
-  
-  - [ ] 6.2 Extend API with chat endpoints
-    - Add REST endpoints for chat room and session management
-    - Implement WebSocket support for real-time chat
-    - _Requirements: 1.1, 1.2, 3.1, 3.2_
+  - Extend EnhancedLLMInterface to support cognitive frameworks
+  - Implement cognitive framework injection mechanism
+  - Create cognitive state persistence system
+  - Implement cognitive consistency monitoring
+  - Write integration tests for LLM interface with cognitive frameworks
+  - _Requirements: 10.1, 10.2, 10.5, 11.3_
 
-- [ ] 7. Implement Interactive Testing Framework
-  - [ ] 7.1 Create test scenario framework
-    - Implement TestScenario class with configuration options
-    - Add predefined scenarios that showcase system capabilities
-    - _Requirements: 4.1, 4.2_
-  
-  - [ ] 7.2 Implement visualization components
-    - Create real-time visualization of internal processes
-    - Add metrics display for test runs
-    - _Requirements: 4.3_
-  
-  - [ ] 7.3 Create test reporting
-    - Implement detailed report generation
-    - Add performance metrics collection and analysis
-    - _Requirements: 4.4, 4.5_
+- [x] 2. Implement Institutional Primitives System
 
-- [ ] 8. Implement Multi-modal Support
-  - [ ] 8.1 Add support for rich text formatting
-    - Implement markdown rendering for role responses
-    - Add support for tables and structured data
-    - _Requirements: 7.2_
-  
-  - [ ] 8.2 Implement document processing
-    - Add file upload and analysis capabilities
-    - Implement document context integration in conversations
-    - _Requirements: 7.1, 7.3_
-  
-  - [ ] 8.3 Add accessibility features
-    - Implement screen reader support
-    - Add keyboard navigation for chat interface
-    - _Requirements: 7.4, 7.5_
+  - Create the core workflow node interfaces and registry
+  - _Requirements: 1, 4_
 
-- [ ] 9. Create extensibility framework
-  - [ ] 9.1 Implement plugin system for custom scenarios
-    - Create ScenarioPlugin interface
-    - Add plugin registration and discovery
-    - _Requirements: 6.1, 6.3_
-  
-  - [ ] 9.2 Add custom role behavior configuration
-    - Implement role behavior modification API
-    - Add personality adjustment capabilities
-    - _Requirements: 6.2_
-  
-  - [ ] 9.3 Create custom consensus strategy support
-    - Implement ConsensusStrategyPlugin interface
-    - Add strategy registration and selection
-    - _Requirements: 6.4, 6.5_
+- [x] 2.1 Create InstitutionalPrimitive base class
 
-- [ ] 10. Integration and system testing
-  - [ ] 10.1 Implement end-to-end tests
-    - Create test suite for complete chat workflows
-    - Add performance and load testing
-    - _Requirements: 4.1, 4.2, 4.3, 4.4_
-  
-  - [ ] 10.2 Create documentation
-    - Write user guide for chat system
-    - Add developer documentation for extensibility
-    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+  - Implement the abstract base class for all institutional primitives
+  - Define standard interfaces for input/output schemas
+  - Create execution context management
+  - Write unit tests for primitive base functionality
+  - _Requirements: 1.1, 1.2, 1.3_
+
+- [x] 2.2 Implement PrimitiveRegistry
+
+  - Create registry for managing primitive types
+  - Implement primitive discovery and instantiation
+  - Add validation mechanisms for primitive definitions
+  - Write unit tests for registry operations
+  - _Requirements: 4.1, 4.6, 7.1_
+
+- [x] 3. Implement Workflow Orchestration Engine
+
+  - Create the workflow engine for executing institutional workflows
+  - _Requirements: 4_
+
+- [x] 3.1 Implement WorkflowEngine core
+
+  - Create workflow execution engine
+  - Implement state management and persistence
+  - Add workflow monitoring capabilities
+  - Write unit tests for workflow execution
+  - _Requirements: 4.1, 4.2, 4.4_
+
+- [x] 3.2 Implement parallel execution capabilities
+
+  - Create fan-out/fan-in execution patterns
+  - Implement resource allocation and synchronization
+  - Add failure handling and recovery mechanisms
+  - Write unit tests for parallel workflow execution
+  - _Requirements: 4.3, 4.5_
+
+- [x] 4. Implement Semantic Structured Knowledge Graph
+
+  - Create the unified knowledge representation system
+  - _Requirements: 8_
+
+- [x] 4.1 Implement SSKG core interfaces
+
+  - Create KnowledgeFact and KnowledgeRelation models
+  - Implement basic CRUD operations for knowledge
+  - Add semantic query capabilities
+  - Write unit tests for core SSKG operations
+  - _Requirements: 8.1, 8.2, 8.3_
+
+- [x] 4.2 Implement knowledge conflict resolution
+
+  - Create conflict detection mechanisms
+  - Implement versioning and resolution strategies
+  - Add temporal metadata tracking
+  - Write unit tests for conflict resolution
+  - _Requirements: 8.4, 8.7_
+
+- [x] 4.3 Implement unified storage adapters
+
+  - Create adapters for different memory types
+  - Implement consistent access patterns
+  - Add hierarchical organization capabilities
+  - Write unit tests for storage adapters
+  - _Requirements: 8.5, 8.6, 8.8, 8.9_
+
+- [x] 5. Implement Memory Agent System
+
+  - Create the MemAgent-based memory management system
+  - _Requirements: 9_
+
+- [x] 5.1 Implement MemAgent core
+
+  - Create MemAgent class with reinforcement learning capabilities
+  - Implement memory selection and retrieval strategies
+
+  - Add memory organization and categorization
+  - Write unit tests for memory agent operations
+  - _Requirements: 9.1, 9.2, 9.3, 9.4_
+
+- [x] 5.2 Implement memory consolidation and sharing
+
+  - Create background consolidation processes
+  - Implement memory conflict resolution
+  - Add controlled memory sharing mechanisms
+  - Write unit tests for memory consolidation and sharing
+  - _Requirements: 9.5, 9.6, 9.7_
+
+- [x] 5.3 Integrate MemAgent with SSKG
+
+  - Implement unified memory retrieval interface
+  - Create memory-to-knowledge transformation pipeline
+  - Add cross-referencing between memory systems
+  - Write integration tests for MemAgent-SSKG interaction
+  - _Requirements: 9.8, 9.9, 9.10_
+
+- [x] 6. Implement Task Context Optimizer
+
+  - Create the task-focused context optimization system
+  - _Requirements: 10_
+
+- [x] 6.1 Implement context optimization strategies
+
+  - Create task detection and requirement extraction
+  - Implement context element prioritization
+  - Add context compression and blending capabilities
+  - Write unit tests for optimization strategies
+  - _Requirements: 10.1, 10.2, 10.3, 10.5_
+
+- [x] 6.2 Implement dynamic context adaptation
+
+  - Create task boundary delineation
+  - Implement real-time context adjustment
+  - Add task coherence maintenance
+  - Write unit tests for dynamic adaptation
+  - _Requirements: 10.6, 10.7, 10.8, 10.9_
+
+- [x] 7. Implement Critical Review Workflow
+
+  - Create the workflow for systematic fact validation
+  - _Requirements: 2_
+
+- [x] 7.1 Implement fact extraction and review nodes
+
+  - Create GenerationNode and FactExtractionNode
+  - Implement ParallelReviewNode with role-based review
+  - Add EvidenceAggregationNode for evidence collection
+  - Write unit tests for individual nodes
+  - _Requirements: 2.1, 2.2, 2.3, 2.4_
+
+- [x] 7.2 Implement consensus and revision nodes
+
+  - Create ConsensusNode for credibility scoring
+  - Implement RevisionNode for content correction
+  - Add persistence mechanisms for validated facts
+  - Write integration tests for complete workflow
+  - _Requirements: 2.5, 2.6, 2.7_
+
+- [x] 8. Implement Multi-perspective Synthesis Workflow
+
+
+
+  - Create the workflow for diverse expert collaboration
+  - _Requirements: 3_
+
+- [x] 8.1 Implement task decomposition and exploration nodes
+
+
+  - Create TaskDecompositionNode for problem breakdown
+  - Implement ParallelExplorationNode for expert assignment
+  - Add specialized expert role configuration
+  - Write unit tests for individual nodes
+  - _Requirements: 3.1, 3.2, 3.3_
+
+- [x] 8.2 Implement synthesis and refinement nodes
+
+
+
+
+
+  - Create ViewpointCollectionNode for gathering perspectives
+  - Implement SynthesisNode for merging viewpoints
+  - Add iterative refinement mechanisms
+  - Write integration tests for complete workflow
+
+  - _Requirements: 3.4, 3.5, 3.6, 3.7_
+
+- [-] 9. Implement User Interaction Interface
+
+
+  - Create interfaces for user interaction with workflows
+  - _Requirements: 5_
+
+
+- [x] 9.1 Implement command-line and API interfaces
+
+
+  - Create CLI commands for workflow triggering
+  - Implement API endpoints for workflow control
+  - Add real-time progress monitoring
+  - Write unit tests for interface functionality
+  - _Requirements: 5.1, 5.2_
+
+
+- [-] 9.2 Implement user intervention and customization
+
+
+  - Create interactive prompts and parameter adjustments
+  - Implement workflow steering capabilities
+  - Add configuration options for workflow customization
+  - Write integration tests for user interaction
+  - _Requirements: 5.3, 5.5_
+
+- [ ] 9.3 Implement result presentation and transparency
+  - Create multiple output format handlers
+  - Implement traceability and reasoning exposure
+  - Add user feedback and validation mechanisms
+  - Write unit tests for result presentation
+  - _Requirements: 5.4, 5.6, 5.7_
+
+- [ ] 10. Implement Knowledge Management Integration
+  - Create integration between workflows and knowledge systems
+  - _Requirements: 6_
+
+- [ ] 10.1 Implement knowledge persistence mechanisms
+  - Create automatic fact persistence from Critical Review
+  - Implement synthesis result storage from Multi-perspective Synthesis
+  - Add confidence scoring and evidence source tracking
+  - Write unit tests for knowledge persistence
+  - _Requirements: 6.1, 6.2_
+
+- [ ] 10.2 Implement knowledge retrieval and evolution
+  - Create cross-session knowledge sharing
+  - Implement semantic search for validated information
+  - Add knowledge quality assessment metrics
+  - Write integration tests for knowledge lifecycle
+  - _Requirements: 6.3, 6.4, 6.5, 6.6, 6.7_
+
+- [ ] 11. Implement Extensibility and Customization
+  - Create plugin interfaces for system extension
+  - _Requirements: 7_
+
+- [ ] 11.1 Implement custom primitive creation
+  - Create plugin interfaces for new workflow nodes
+  - Implement template-based workflow definition
+  - Add service adapter registration
+  - Write unit tests for custom primitive creation
+  - _Requirements: 7.1, 7.2, 7.3_
+
+- [ ] 11.2 Implement role and consensus customization
+  - Create dynamic role configuration capabilities
+  - Implement custom consensus mechanism registration
+  - Add performance profiling and optimization
+  - Write integration tests for customization features
+  - _Requirements: 7.4, 7.5, 7.6, 7.7_
+
+- [ ] 12. Implement Collective Intelligence Emergence
+  - Create mechanisms for cognitive diversity and perspective complementarity
+  - _Requirements: 11_
+
+- [ ] 12.1 Implement cognitive diversity evaluation
+  - Create metrics for measuring cognitive distance
+  - Implement diversity scoring algorithms
+  - Add longitudinal consistency tracking
+  - Write unit tests for diversity evaluation
+  - _Requirements: 11.3, 11.4, 11.9_
+
+- [ ] 12.2 Implement advanced consensus algorithms
+  - Create multiple consensus algorithm implementations
+  - Implement dynamic algorithm selection
+  - Add emergent insight detection
+  - Write unit tests for consensus algorithms
+  - _Requirements: 11.4, 11.5, 11.8, 11.10_

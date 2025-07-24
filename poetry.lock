@@ -3437,6 +3437,22 @@ dev = ["pre-commit", "tox"]
 testing = ["coverage", "pytest", "pytest-benchmark"]
 
 [[package]]
+name = "pocketflow"
+version = "0.0.2"
+description = "Pocket Flow: 100-line LLM framework. Let Agents build Agents!"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = []
+develop = false
+
+[package.source]
+type = "git"
+url = "https://github.com/The-Pocket/PocketFlow.git"
+reference = "HEAD"
+resolved_reference = "6a969e389795d32d7f5542ed5bcc60700def8027"
+
+[[package]]
 name = "posthog"
 version = "5.4.0"
 description = "Integrate PostHog into any python application."
@@ -6085,4 +6101,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "14b916f1b78c10027f6c32b26ebf5ff5898a1f7b10d5b44910e8044290c9844b"
+content-hash = "557b5b6beab103aeea3a7168b9314aa4ed040e952f4968ef6803970b4c049086"

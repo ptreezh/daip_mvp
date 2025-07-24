@@ -1,0 +1,28 @@
+{
+  "generation": {
+    "role_name": "专业创作者",
+    "capture_metadata": true
+  },
+  "fact_extraction": {
+    "min_confidence": 0.7,
+    "max_facts": 15
+  },
+  "parallel_review": {
+    "reviewer_roles": ["严格批判者", "专业验证者", "领域专家"],
+    "max_parallel_reviews": 10
+  },
+  "evidence_aggregation": {
+    "min_evidence_threshold": 2,
+    "weight_by_credibility": true
+  },
+  "consensus": {
+    "consensus_method": "synthesis",
+    "credibility_threshold": 0.75,
+    "use_synthesis_engine": true
+  },
+  "revision": {
+    "revision_role": "专业创作者",
+    "max_revision_attempts": 3,
+    "provide_evidence_details": true
+  }
+}

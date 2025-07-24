@@ -1,0 +1,39 @@
+{
+  "task_decomposition": {
+    "planner_role": "高级规划专家",
+    "default_perspectives": ["经济", "社会", "技术", "伦理", "政治", "环境"],
+    "max_sub_problems": 6
+  },
+  "parallel_exploration": {
+    "max_parallel_experts": 6,
+    "expert_roles": {
+      "economist": ["经济学", "宏观经济学", "劳动经济学", "产业经济学"],
+      "sociologist": ["社会学", "社会心理学", "公共政策", "社会工作"],
+      "technologist": ["计算机科学", "人工智能", "机器学习", "数据科学"],
+      "ethicist": ["伦理学", "应用伦理学", "技术伦理", "哲学"],
+      "political_scientist": ["政治学", "公共管理", "政策分析", "治理理论"],
+      "environmentalist": ["环境科学", "可持续发展", "环境政策", "生态学"]
+    },
+    "default_expert_role": "跨领域专家",
+    "use_tools": true
+  },
+  "viewpoint_collection": {
+    "min_viewpoints": 3,
+    "conflict_threshold": 0.25,
+    "consensus_threshold": 0.75,
+    "analyze_coverage": true
+  },
+  "enhanced_synthesis": {
+    "synthesis_method": "dialectical",
+    "min_confidence_threshold": 0.75,
+    "include_expert_attribution": true,
+    "quality_threshold": 0.8,
+    "max_synthesis_length": 3000
+  },
+  "iterative_refinement": {
+    "max_iterations": 3,
+    "quality_threshold": 0.85,
+    "improvement_threshold": 0.08,
+    "refinement_strategies": ["depth", "breadth", "insight", "coherence"]
+  }
+}

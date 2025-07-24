@@ -50,15 +50,19 @@ class CLIDebateHandler:
         self.app_state = None
         self.debate_protocol = None
         self.event_queue = None
+        self.command_queue = None
         self.debate_history = []
+        self.intervention_handler = None
         
     async def initialize(self):
         """Initialize the debate handler with app state and services."""
         initialization_steps = [
             ("Loading application state", "app_state"),
             ("Setting up communication channels", "event_queue"),
+            ("Setting up command channel", "command_queue"),
             ("Preparing debate kernel", "kernel"),
-            ("Initializing debate protocol", "protocol")
+            ("Initializing debate protocol", "protocol"),
+            ("Setting up user intervention", "intervention")
         ]
         
         try:
@@ -74,6 +78,10 @@ class CLIDebateHandler:
                 elif step_key == "event_queue":
                     self.event_queue = asyncio.Queue()
                     await asyncio.sleep(0.1)
+                
+                elif step_key == "command_queue":
+                    self.command_queue = asyncio.Queue()
+                    await asyncio.sleep(0.1)
                     
                 elif step_key == "kernel":
                     from types import SimpleNamespace
@@ -84,7 +92,12 @@ class CLIDebateHandler:
                     await asyncio.sleep(0.1)
                     
                 elif step_key == "protocol":
-                    self.debate_protocol = DebateProtocol(kernel=kernel, event_queue=self.event_queue)
+                    self.debate_protocol = DebateProtocol(kernel=kernel, event_queue=self.event_queue, command_queue=self.command_queue)
+                    await asyncio.sleep(0.1)
+                
+                elif step_key == "intervention":
+                    from src.cli.user_intervention import UserInterventionHandler
+                    self.intervention_handler = UserInterventionHandler(self.command_queue)
                     await asyncio.sleep(0.1)
                 
                 console.print(f"[green]   ✅ {step_name} completed[/green]")
@@ -141,6 +154,10 @@ class CLIDebateHandler:
         if not await self.initialize():
             return False
             
+        # Start listening for user interventions
+        if self.intervention_handler:
+            self.intervention_handler.start_listening()
+            
         # Validate roles
         if not roles:
             console.print("[yellow]No roles specified. Using default roles.[/yellow]")
@@ -168,6 +185,11 @@ class CLIDebateHandler:
             # Wait for both tasks to complete
             await asyncio.gather(debate_task, event_task)
             console.print("\n[bold green]✅ Debate completed successfully![/bold green]")
+            
+            # Stop listening for user interventions
+            if self.intervention_handler:
+                self.intervention_handler.stop_listening()
+                
             return True
             
         except Exception as e:
