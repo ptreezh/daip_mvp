@@ -22,6 +22,7 @@ from ..workflows.critical_review_workflow import CriticalReviewWorkflow
 from ..workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
 from .progress_monitor import ProgressMonitor
 from .result_formatter import ResultFormatter
+from .transparency_controller import TransparencyController
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +78,7 @@ class APIInterface:
         )
         self.progress_monitor = ProgressMonitor()
         self.result_formatter = ResultFormatter()
+        self.transparency_controller = TransparencyController()
         self.execution_status: Dict[str, WorkflowStatus] = {}
         
         # Set up routes
@@ -219,7 +221,11 @@ class APIInterface:
             return self.execution_status[execution_id]
         
         @self.app.get("/workflows/{execution_id}/result")
-        async def get_workflow_result(execution_id: str, format: str = "json"):
+        async def get_workflow_result(
+            execution_id: str, 
+            format: str = "json",
+            include_traceability: bool = False
+        ):
             """Get workflow execution result."""
             if execution_id not in self.execution_status:
                 raise HTTPException(status_code=404, detail="Execution not found")
@@ -235,14 +241,29 @@ class APIInterface:
             if not status.result:
                 raise HTTPException(status_code=404, detail="No result available")
             
+            # Use transparency controller for formatting
+            if include_traceability:
+                formatted_content = self.transparency_controller.present_with_traceability(
+                    status.result, execution_id, output_format=format
+                )
+            else:
+                formatted_content = self.result_formatter.format_result(status.result, format)
+            
             if format == "json":
-                return JSONResponse(content=status.result)
-            elif format == "markdown":
-                markdown_content = self.result_formatter.format_as_markdown(status.result)
+                return JSONResponse(content=status.result if not include_traceability else json.loads(formatted_content))
+            elif format in ["markdown", "html", "xml", "csv", "yaml", "text"]:
+                media_type_map = {
+                    "markdown": "text/markdown",
+                    "html": "text/html",
+                    "xml": "application/xml",
+                    "csv": "text/csv",
+                    "yaml": "application/x-yaml",
+                    "text": "text/plain"
+                }
                 return StreamingResponse(
-                    iter([markdown_content]),
-                    media_type="text/markdown",
-                    headers={"Content-Disposition": f"attachment; filename=result_{execution_id}.md"}
+                    iter([formatted_content]),
+                    media_type=media_type_map.get(format, "text/plain"),
+                    headers={"Content-Disposition": f"attachment; filename=result_{execution_id}.{format}"}
                 )
             else:
                 return JSONResponse(content=status.result)
@@ -278,6 +299,130 @@ class APIInterface:
                 "started_at": status.started_at,
                 "completed_at": status.completed_at
             }
+        
+        @self.app.get("/workflows/{execution_id}/traceability")
+        async def get_workflow_traceability(
+            execution_id: str,
+            include_reasoning: bool = True,
+            include_confidence: bool = True,
+            include_sources: bool = True,
+            format: str = "json"
+        ):
+            """Get workflow result with enhanced traceability."""
+            if execution_id not in self.execution_status:
+                raise HTTPException(status_code=404, detail="Execution not found")
+            
+            status = self.execution_status[execution_id]
+            
+            if status.status == "running":
+                raise HTTPException(status_code=202, detail="Workflow still running")
+            
+            if not status.result:
+                raise HTTPException(status_code=404, detail="No result available")
+            
+            traceable_result = self.transparency_controller.present_with_traceability(
+                status.result,
+                execution_id,
+                include_reasoning=include_reasoning,
+                include_confidence=include_confidence,
+                include_sources=include_sources,
+                output_format=format
+            )
+            
+            if format == "json":
+                return JSONResponse(content=json.loads(traceable_result))
+            else:
+                return StreamingResponse(
+                    iter([traceable_result]),
+                    media_type="text/plain",
+                    headers={"Content-Disposition": f"attachment; filename=traceability_{execution_id}.{format}"}
+                )
+        
+        @self.app.post("/workflows/{execution_id}/feedback")
+        async def submit_workflow_feedback(execution_id: str, feedback_data: Dict[str, Any]):
+            """Submit feedback for a workflow execution."""
+            if execution_id not in self.execution_status:
+                raise HTTPException(status_code=404, detail="Execution not found")
+            
+            status = self.execution_status[execution_id]
+            
+            if not status.result:
+                raise HTTPException(status_code=404, detail="No result available for feedback")
+            
+            try:
+                # Create feedback using the collector
+                feedback = self.transparency_controller.feedback_collector.collect_workflow_feedback(
+                    result=status.result,
+                    execution_id=execution_id,
+                    workflow_type=feedback_data.get("workflow_type", "unknown"),
+                    interactive=False,
+                    user_id=feedback_data.get("user_id")
+                )
+                
+                # Update feedback with provided data
+                if "overall_rating" in feedback_data:
+                    feedback.overall_rating = feedback_data["overall_rating"]
+                if "overall_satisfaction" in feedback_data:
+                    feedback.overall_satisfaction = feedback_data["overall_satisfaction"]
+                if "general_comments" in feedback_data:
+                    feedback.general_comments = feedback_data["general_comments"]
+                
+                return {"message": "Feedback submitted successfully", "feedback_id": execution_id}
+                
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Error submitting feedback: {str(e)}")
+        
+        @self.app.get("/workflows/{execution_id}/feedback")
+        async def get_workflow_feedback(execution_id: str):
+            """Get feedback for a workflow execution."""
+            feedback_summary = self.transparency_controller.get_feedback_summary(execution_id)
+            
+            if not feedback_summary:
+                raise HTTPException(status_code=404, detail="No feedback found for this execution")
+            
+            return feedback_summary
+        
+        @self.app.post("/workflows/{execution_id}/validate")
+        async def validate_workflow_result(
+            execution_id: str,
+            validation_criteria: Dict[str, Any] = None
+        ):
+            """Validate workflow result quality."""
+            if execution_id not in self.execution_status:
+                raise HTTPException(status_code=404, detail="Execution not found")
+            
+            status = self.execution_status[execution_id]
+            
+            if not status.result:
+                raise HTTPException(status_code=404, detail="No result available for validation")
+            
+            validation_results = self.transparency_controller.validate_result_quality(
+                status.result,
+                validation_criteria or {}
+            )
+            
+            return {
+                "execution_id": execution_id,
+                "validation_results": validation_results,
+                "validation_summary": {
+                    "total_elements": len(validation_results),
+                    "valid_elements": sum(1 for v in validation_results if v.get("is_valid", False)),
+                    "invalid_elements": sum(1 for v in validation_results if not v.get("is_valid", True))
+                }
+            }
+        
+        @self.app.get("/transparency/formats")
+        async def get_supported_formats():
+            """Get list of supported output formats."""
+            return {
+                "formats": self.transparency_controller.get_supported_formats(),
+                "transparency_levels": self.transparency_controller.get_transparency_levels()
+            }
+        
+        @self.app.get("/transparency/statistics")
+        async def get_transparency_statistics():
+            """Get transparency and feedback statistics."""
+            return self.transparency_controller.feedback_collector.get_feedback_statistics()
     
     async def _execute_critical_review_background(
         self,

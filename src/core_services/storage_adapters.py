@@ -1058,8 +1058,10 @@ class SessionAdapter(StorageAdapter):
             limit=1000
         ))
         
-        return [node.metadata.get("session_id", "") for node in session_nodes if node.metadata.get("session_id")]class 
-ProjectAdapter(StorageAdapter):
+        return [node.metadata.get("session_id", "") for node in session_nodes if node.metadata.get("session_id")]
+
+
+class ProjectAdapter(StorageAdapter):
     """
     Storage adapter for project configurations and management data.
     
@@ -1266,8 +1268,10 @@ ProjectAdapter(StorageAdapter):
             limit=1000
         ))
         
-        return [node.metadata.get("project_id", "") for node in project_nodes if node.metadata.get("project_id")]class Memo
-ryBankAdapter(StorageAdapter):
+        return [node.metadata.get("project_id", "") for node in project_nodes if node.metadata.get("project_id")]
+
+
+class MemoryBankAdapter(StorageAdapter):
     """
     Storage adapter for consolidated knowledge and memory banks.
     
@@ -1484,9 +1488,9 @@ ryBankAdapter(StorageAdapter):
         if success:
             self.logger.info(f"Updated memory bank {bank_id}")
         
-        return success    
- 
-   def delete(self, bank_id: str, **kwargs) -> bool:
+        return success
+    
+    def delete(self, bank_id: str, **kwargs) -> bool:
         """
         Delete memory bank data from the SSKG.
         

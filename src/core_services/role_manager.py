@@ -34,10 +34,10 @@ class Role:
     def from_dict(cls, data: Dict[str, Any]) -> "Role":
         """Creates a Role object from a dictionary."""
         return cls(
-            id=data["id"],
+            id=data.get("id", data.get("name", "unknown_id")), # Use name as fallback for id
             name=data["name"],
             description=data["description"],
-            system_prompt=data["system_prompt"],
+            system_prompt=data.get("system_prompt", data.get("description", "")), # Use description as fallback
             capabilities=data.get("capabilities", []), # Ensure capabilities is a list, default to empty
         )
 
@@ -94,6 +94,10 @@ class RoleManager:
             else:
                 logging.warning(f"Role file for '{role_id}' not found at {role_file}.")
         return self._roles.get(role_id)
+    
+    def get_role(self, role_id: str) -> Optional[Role]:
+        """Alias for get_role_by_id for compatibility."""
+        return self.get_role_by_id(role_id)
 
     def list_roles(self) -> List[Role]:
         """Returns a list of all available roles (reloads from disk to ensure freshness)."""

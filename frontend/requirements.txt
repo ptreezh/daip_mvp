@@ -1,0 +1,18 @@
+# Lona Web Framework
+lona==1.16.2
+
+# 现有后端集成
+requests>=2.31.0
+websockets>=11.0.2
+
+# 数据处理
+pydantic>=2.5.0
+
+# Markdown渲染
+markdown>=3.5.1
+Pygments>=2.16.1
+
+# 开发工具
+pytest>=7.4.3
+black>=23.11.0
+flake8>=6.1.0

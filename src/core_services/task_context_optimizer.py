@@ -161,8 +161,9 @@ class TaskContextOptimizer:
                 keywords=[]
             ))
         
-        return requirements    
-def prioritize_context_elements(
+        return requirements
+    
+    def prioritize_context_elements(
         self, 
         context_elements: List[Dict[str, Any]], 
         task_requirements: List[TaskRequirement]
@@ -354,7 +355,7 @@ def prioritize_context_elements(
             optimization_metrics=optimization_metrics,
             excluded_elements=excluded_elements
         ) 
-   def maintain_task_coherence(
+    def maintain_task_coherence(
         self,
         context: List[Dict[str, Any]],
         task: str
@@ -533,8 +534,9 @@ def prioritize_context_elements(
             return modified_context
         else:
             # If there's only one task, no need for boundaries
-            return context   
- def optimize_context_for_task(
+            return context
+    
+    def optimize_context_for_task(
         self,
         context: List[Dict[str, Any]],
         task: str,

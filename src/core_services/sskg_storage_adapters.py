@@ -57,8 +57,8 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-cl
-ass StorageAdapter(ABC):
+
+class StorageAdapter(ABC):
     """
     Abstract base class for all storage adapters.
     
@@ -181,8 +181,8 @@ ass StorageAdapter(ABC):
         )
         return self.sskg_manager.add_relation(relation)
 
-class 
-RoleMemoryAdapter(StorageAdapter):
+
+class RoleMemoryAdapter(StorageAdapter):
     """
     Storage adapter for virtual role memories and identities.
     
@@ -400,8 +400,7 @@ RoleMemoryAdapter(StorageAdapter):
         
         # Delete role node
         return self.sskg_manager.delete_node(role_node.id)
-class WikiA
-dapter(StorageAdapter):
+class WikiAdapter(StorageAdapter):
     """
     Storage adapter for wiki content and structured documentation.
     
@@ -470,9 +469,9 @@ dapter(StorageAdapter):
             )
         
         self.logger.info(f"Stored wiki page {page_id}")
-        return wiki_node_id    
- 
-   def _get_or_create_category(self, category: str) -> str:
+        return wiki_node_id
+    
+    def _get_or_create_category(self, category: str) -> str:
         """
         Get or create a category node.
         
@@ -791,8 +790,8 @@ class SessionAdapter(StorageAdapter):
         session_node = session_nodes[0]
         return self.sskg_manager.delete_node(session_node.id)
 
-clas
-s StorageAdapterManager:
+
+class StorageAdapterManager:
     """
     Manager for all storage adapters.
     

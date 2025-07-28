@@ -303,7 +303,7 @@ class ConfigurationManager:
             )
         ]
     
-    def create_configuration(
+    async def create_configuration(
         self,
         workflow_name: str,
         config_name: str = "default",

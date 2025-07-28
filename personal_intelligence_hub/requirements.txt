@@ -1,0 +1,35 @@
+# Personal Intelligence Hub - Lona Web Application Requirements
+
+# Core Lona Web Framework
+lona>=1.16.0
+
+# Web Framework Dependencies
+aiohttp>=3.8.0
+aiofiles>=23.0.0
+
+# Data Processing
+pydantic>=2.0.0
+python-dateutil>=2.8.0
+
+# Database and Storage
+sqlalchemy>=2.0.0
+alembic>=1.12.0
+
+# HTTP Client for Backend Integration
+httpx>=0.24.0
+websockets>=11.0.0
+
+# Development and Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+isort>=5.12.0
+mypy>=1.5.0
+
+# Logging and Monitoring
+structlog>=23.0.0
+rich>=13.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+click>=8.1.0

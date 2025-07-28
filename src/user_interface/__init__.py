@@ -7,8 +7,8 @@
     User Interface package for the Virtual Role Chat System.
 """
 
-from .cli_interface import WorkflowCLI
-from .api_interface import WorkflowAPI
+from .cli_interface import CLIInterface as WorkflowCLI
+from .api_interface import APIInterface as WorkflowAPI
 from .progress_monitor import ProgressMonitor
 from .result_formatter import ResultFormatter
 from .interactive_controller import InteractiveController

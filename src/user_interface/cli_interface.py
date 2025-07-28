@@ -24,6 +24,7 @@ from ..workflows.critical_review_workflow import CriticalReviewWorkflow
 from ..workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
 from .progress_monitor import ProgressMonitor
 from .result_formatter import ResultFormatter
+from .transparency_controller import TransparencyController
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -36,6 +37,7 @@ class CLIInterface:
         """Initialize the CLI interface."""
         self.progress_monitor = ProgressMonitor()
         self.result_formatter = ResultFormatter()
+        self.transparency_controller = TransparencyController()
         self.console = Console()
     
     async def setup_services(self) -> Dict[str, Any]:
@@ -76,6 +78,9 @@ class CLIInterface:
         config_file: str = None,
         output_file: str = None,
         format_type: str = "rich",
+        transparency_level: str = "moderate",
+        collect_feedback: bool = False,
+        include_traceability: bool = False,
         verbose: bool = False
     ) -> Dict[str, Any]:
         """Execute Critical Review Workflow."""
@@ -117,20 +122,40 @@ class CLIInterface:
                 
                 progress.update(task, completed=True)
             
-            # Format and display results
+            # Use transparency controller for result presentation
+            execution_id = result.get("execution_id", "cli_critical_review")
+            
             if format_type == "rich":
-                self.result_formatter.display_critical_review_result(result, console)
-            elif format_type == "json":
-                formatted_result = self.result_formatter.format_as_json(result)
-                console.print(formatted_result)
-            elif format_type == "markdown":
-                formatted_result = self.result_formatter.format_as_markdown(result)
+                # Use transparency controller for rich display
+                feedback = self.transparency_controller.present_workflow_result(
+                    result=result,
+                    execution_id=execution_id,
+                    workflow_type="critical-review",
+                    output_format="json",
+                    transparency_level=transparency_level,
+                    save_to_file=bool(output_file),
+                    collect_feedback=collect_feedback
+                )
+            else:
+                # Format for other output types
+                if include_traceability:
+                    formatted_result = self.transparency_controller.present_with_traceability(
+                        result, execution_id, output_format=format_type
+                    )
+                else:
+                    formatted_result = self.result_formatter.format_result(result, format_type)
+                
                 console.print(formatted_result)
             
-            # Save to file if requested
+            # Export to file if requested
             if output_file:
-                self._save_result_to_file(result, output_file, format_type)
-                console.print(f"[green]Results saved to {output_file}[/green]")
+                self.transparency_controller.export_result(
+                    result=result,
+                    execution_id=execution_id,
+                    format_type=format_type if format_type != "rich" else "json",
+                    include_traceability=include_traceability,
+                    output_path=output_file
+                )
             
             return result
             
@@ -147,6 +172,9 @@ class CLIInterface:
         config_file: str = None,
         output_file: str = None,
         format_type: str = "rich",
+        transparency_level: str = "moderate",
+        collect_feedback: bool = False,
+        include_traceability: bool = False,
         verbose: bool = False
     ) -> Dict[str, Any]:
         """Execute Multi-perspective Synthesis Workflow."""
@@ -199,20 +227,40 @@ class CLIInterface:
                 
                 progress.update(task, completed=True)
             
-            # Format and display results
+            # Use transparency controller for result presentation
+            execution_id = result.get("execution_id", "cli_multi_perspective")
+            
             if format_type == "rich":
-                self.result_formatter.display_multi_perspective_result(result, console)
-            elif format_type == "json":
-                formatted_result = self.result_formatter.format_as_json(result)
-                console.print(formatted_result)
-            elif format_type == "markdown":
-                formatted_result = self.result_formatter.format_as_markdown(result)
+                # Use transparency controller for rich display
+                feedback = self.transparency_controller.present_workflow_result(
+                    result=result,
+                    execution_id=execution_id,
+                    workflow_type="multi-perspective",
+                    output_format="json",
+                    transparency_level=transparency_level,
+                    save_to_file=bool(output_file),
+                    collect_feedback=collect_feedback
+                )
+            else:
+                # Format for other output types
+                if include_traceability:
+                    formatted_result = self.transparency_controller.present_with_traceability(
+                        result, execution_id, output_format=format_type
+                    )
+                else:
+                    formatted_result = self.result_formatter.format_result(result, format_type)
+                
                 console.print(formatted_result)
             
-            # Save to file if requested
+            # Export to file if requested
             if output_file:
-                self._save_result_to_file(result, output_file, format_type)
-                console.print(f"[green]Results saved to {output_file}[/green]")
+                self.transparency_controller.export_result(
+                    result=result,
+                    execution_id=execution_id,
+                    format_type=format_type if format_type != "rich" else "json",
+                    include_traceability=include_traceability,
+                    output_path=output_file
+                )
             
             return result
             
@@ -349,9 +397,12 @@ def cli(ctx, verbose):
 @click.option('--content-file', '-f', type=click.Path(exists=True), help='File containing content to review')
 @click.option('--config-file', type=click.Path(), help='JSON configuration file')
 @click.option('--output-file', '-o', help='Save results to file')
-@click.option('--format', 'format_type', type=click.Choice(['rich', 'json', 'markdown']), default='rich', help='Output format')
+@click.option('--format', 'format_type', type=click.Choice(['rich', 'json', 'markdown', 'html', 'xml', 'csv', 'yaml', 'text']), default='rich', help='Output format')
+@click.option('--transparency', 'transparency_level', type=click.Choice(['minimal', 'moderate', 'detailed']), default='moderate', help='Transparency level')
+@click.option('--feedback', 'collect_feedback', is_flag=True, help='Collect user feedback')
+@click.option('--traceability', 'include_traceability', is_flag=True, help='Include traceability information')
 @click.pass_context
-def critical_review(ctx, content, content_file, config_file, output_file, format_type):
+def critical_review(ctx, content, content_file, config_file, output_file, format_type, transparency_level, collect_feedback, include_traceability):
     """Execute Critical Review Workflow for systematic fact validation."""
     cli_interface = CLIInterface()
     
@@ -362,6 +413,9 @@ def critical_review(ctx, content, content_file, config_file, output_file, format
             config_file=config_file,
             output_file=output_file,
             format_type=format_type,
+            transparency_level=transparency_level,
+            collect_feedback=collect_feedback,
+            include_traceability=include_traceability,
             verbose=ctx.obj.get('verbose', False)
         )
     
@@ -375,9 +429,12 @@ def critical_review(ctx, content, content_file, config_file, output_file, format
 @click.option('--perspectives', '-p', help='Comma-separated list of perspectives')
 @click.option('--config-file', type=click.Path(), help='JSON configuration file')
 @click.option('--output-file', '-o', help='Save results to file')
-@click.option('--format', 'format_type', type=click.Choice(['rich', 'json', 'markdown']), default='rich', help='Output format')
+@click.option('--format', 'format_type', type=click.Choice(['rich', 'json', 'markdown', 'html', 'xml', 'csv', 'yaml', 'text']), default='rich', help='Output format')
+@click.option('--transparency', 'transparency_level', type=click.Choice(['minimal', 'moderate', 'detailed']), default='moderate', help='Transparency level')
+@click.option('--feedback', 'collect_feedback', is_flag=True, help='Collect user feedback')
+@click.option('--traceability', 'include_traceability', is_flag=True, help='Include traceability information')
 @click.pass_context
-def multi_perspective(ctx, topic, perspectives, config_file, output_file, format_type):
+def multi_perspective(ctx, topic, perspectives, config_file, output_file, format_type, transparency_level, collect_feedback, include_traceability):
     """Execute Multi-perspective Synthesis Workflow for comprehensive analysis."""
     cli_interface = CLIInterface()
     
@@ -393,6 +450,9 @@ def multi_perspective(ctx, topic, perspectives, config_file, output_file, format
             config_file=config_file,
             output_file=output_file,
             format_type=format_type,
+            transparency_level=transparency_level,
+            collect_feedback=collect_feedback,
+            include_traceability=include_traceability,
             verbose=ctx.obj.get('verbose', False)
         )
     
@@ -414,6 +474,51 @@ def help_workflow(workflow_name):
     """Show help for a specific workflow."""
     cli_interface = CLIInterface()
     cli_interface.show_workflow_help(workflow_name)
+
+
+@cli.command()
+@click.option('--transparency-level', type=click.Choice(['minimal', 'moderate', 'detailed']), default='moderate', help='Default transparency level')
+@click.option('--output-format', type=click.Choice(['json', 'markdown', 'html', 'xml', 'csv', 'yaml', 'text']), default='json', help='Default output format')
+@click.option('--auto-feedback', is_flag=True, help='Automatically collect feedback')
+@click.option('--save-results', is_flag=True, help='Automatically save results to files')
+@click.option('--results-dir', default='results', help='Directory for saved results')
+def configure_transparency(transparency_level, output_format, auto_feedback, save_results, results_dir):
+    """Configure transparency settings."""
+    cli_interface = CLIInterface()
+    cli_interface.transparency_controller.configure_transparency(
+        transparency_level=transparency_level,
+        output_format=output_format,
+        auto_collect_feedback=auto_feedback,
+        save_results=save_results,
+        results_directory=results_dir
+    )
+
+
+@cli.command()
+def list_formats():
+    """List supported output formats."""
+    cli_interface = CLIInterface()
+    formats = cli_interface.transparency_controller.get_supported_formats()
+    
+    table = Table(title="Supported Output Formats")
+    table.add_column("Format", style="cyan")
+    table.add_column("Description", style="magenta")
+    
+    format_descriptions = {
+        "json": "JavaScript Object Notation - structured data format",
+        "markdown": "Markdown format - human-readable text with formatting",
+        "html": "HTML format - web page format with styling",
+        "xml": "XML format - structured markup language",
+        "csv": "Comma-Separated Values - tabular data format",
+        "yaml": "YAML format - human-readable data serialization",
+        "text": "Plain text format - simple text output"
+    }
+    
+    for fmt in formats:
+        description = format_descriptions.get(fmt, "Standard format")
+        table.add_row(fmt, description)
+    
+    console.print(table)
 
 
 if __name__ == '__main__':

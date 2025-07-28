@@ -1,842 +1,683 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Knowledge Conflict Resolution for the Semantic Structured Knowledge Graph (SSKG).
+知识冲突解决器
 
-This module implements sophisticated strategies to detect and resolve conflicts
-between knowledge facts in the SSKG, ensuring knowledge coherence and consistency.
+自动识别和处理知识矛盾
 """
 
 import logging
+from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
-from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
-
-from pydantic import BaseModel, Field
-
-try:
-    from src.core_services.enhanced_sskg_manager import (
-        EnhancedSSKGManager,
-        KnowledgeNode,
-        KnowledgeRelation,
-        NodeType,
-        RelationType
-    )
-except ImportError:
-    # For testing purposes
-    from typing import Literal
-    
-    class NodeType(str, Enum):
-        """Types of nodes in the SSKG."""
-        FACT = "fact"
-        MEMORY = "memory"
-        WIKI = "wiki"
-        SESSION = "session"
-        PROJECT = "project"
-        ROLE = "role"
-        USER = "user"
-        CONCEPT = "concept"
-        EVENT = "event"
-    
-    class RelationType(str, Enum):
-        """Types of relationships in the SSKG."""
-        IS_A = "is_a"
-        PART_OF = "part_of"
-        RELATED_TO = "related_to"
-        SUPPORTS = "supports"
-        CONTRADICTS = "contradicts"
-        ELABORATES = "elaborates"
-        PRECEDES = "precedes"
-        FOLLOWS = "follows"
-        CAUSES = "causes"
-        CREATED_BY = "created_by"
-        OWNED_BY = "owned_by"
-        REFERENCES = "references"
-        INSTANCE_OF = "instance_of"
-        DERIVED_FROM = "derived_from"
-    
-    class KnowledgeNode(BaseModel):
-        """Base model for all knowledge nodes in the SSKG."""
-        id: str
-        node_type: NodeType
-        content: str
-        created_at: datetime = Field(default_factory=datetime.now)
-        updated_at: datetime = Field(default_factory=datetime.now)
-        confidence: float = 1.0
-        metadata: Dict[str, Any] = {}
-        version: int = 1
-    
-    class KnowledgeRelation(BaseModel):
-        """Model for relationships between knowledge nodes."""
-        source_id: str
-        target_id: str
-        relation_type: RelationType
-        confidence: float = 1.0
-        metadata: Dict[str, Any] = {}
-        created_at: datetime = Field(default_factory=datetime.now)
+import uuid
+import re
+from difflib import SequenceMatcher
 
 logger = logging.getLogger(__name__)
 
 
-class ConflictType(str, Enum):
-    """Types of conflicts that can occur between knowledge facts."""
-    DIRECT_CONTRADICTION = "direct_contradiction"  # Facts directly contradict each other
-    TEMPORAL_INCONSISTENCY = "temporal_inconsistency"  # Facts are inconsistent across time
-    CONFIDENCE_VARIATION = "confidence_variation"  # Same fact with different confidence levels
-    SOURCE_DISAGREEMENT = "source_disagreement"  # Different sources disagree on a fact
-    PARTIAL_OVERLAP = "partial_overlap"  # Facts partially overlap with inconsistencies
-    SEMANTIC_DRIFT = "semantic_drift"  # Facts have drifted in meaning over time
-
-
-class ResolutionStrategy(str, Enum):
-    """Strategies for resolving conflicts between knowledge facts."""
-    HIGHEST_CONFIDENCE = "highest_confidence"  # Choose fact with highest confidence
-    MOST_RECENT = "most_recent"  # Choose most recent fact
-    SOURCE_RELIABILITY = "source_reliability"  # Choose fact from most reliable source
-    MAJORITY_VOTE = "majority_vote"  # Choose fact supported by most sources
-    SYNTHESIS = "synthesis"  # Create a new fact that synthesizes conflicting facts
-    HUMAN_RESOLUTION = "human_resolution"  # Flag for human review and resolution
-
-
-class ConflictDetectionResult(BaseModel):
-    """Result of conflict detection between knowledge facts."""
-    conflict_type: ConflictType
-    conflicting_nodes: List[str]  # List of conflicting node IDs
-    confidence: float  # Confidence in the conflict detection
-    description: str  # Human-readable description of the conflict
-    metadata: Dict[str, Any] = {}
-
-
-class ConflictResolutionResult(BaseModel):
-    """Result of conflict resolution between knowledge facts."""
-    resolved_node_id: str  # ID of the resolved node
-    resolution_strategy: ResolutionStrategy
-    conflicting_node_ids: List[str]  # IDs of the original conflicting nodes
-    confidence: float  # Confidence in the resolution
-    reasoning: str  # Explanation of the resolution process
-    timestamp: datetime = Field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = {}
-
-
 class KnowledgeConflictResolver:
-    """
-    Resolver for conflicts between knowledge facts in the SSKG.
+    """知识冲突解决器"""
     
-    This class implements sophisticated strategies to detect and resolve conflicts
-    between knowledge facts, ensuring knowledge coherence and consistency.
-    """
-    
-    def __init__(self, sskg_manager: EnhancedSSKGManager):
-        """
-        Initialize the knowledge conflict resolver.
+    def __init__(self):
+        """初始化知识冲突解决器"""
+        self.conflict_detection_rules = self._initialize_detection_rules()
+        self.resolution_strategies = self._initialize_resolution_strategies()
+        self.conflict_history = []
         
-        Args:
-            sskg_manager: The SSKG manager to use for knowledge operations
-        """
-        self.sskg_manager = sskg_manager
-        self.logger = logging.getLogger(__name__)
-        
-        # Register resolution strategies
-        self.resolution_strategies = {
-            ResolutionStrategy.HIGHEST_CONFIDENCE: self._resolve_by_highest_confidence,
-            ResolutionStrategy.MOST_RECENT: self._resolve_by_most_recent,
-            ResolutionStrategy.SOURCE_RELIABILITY: self._resolve_by_source_reliability,
-            ResolutionStrategy.MAJORITY_VOTE: self._resolve_by_majority_vote,
-            ResolutionStrategy.SYNTHESIS: self._resolve_by_synthesis,
-        }
-        
-        # Source reliability rankings (higher is more reliable)
-        self.source_reliability = {
-            "human_verified": 5.0,
-            "expert_consensus": 4.5,
-            "primary_source": 4.0,
-            "verified_database": 3.5,
-            "reputable_publication": 3.0,
-            "expert_opinion": 2.5,
-            "ai_generated": 2.0,
-            "unverified_source": 1.0,
+        # 冲突类型定义
+        self.conflict_types = {
+            "contradictory_claims": "矛盾声明",
+            "inconsistent_data": "数据不一致",
+            "temporal_conflicts": "时间冲突",
+            "source_disagreement": "来源分歧",
+            "confidence_conflicts": "置信度冲突"
         }
     
-    def detect_conflicts(self, node_id: str) -> List[ConflictDetectionResult]:
-        """
-        Detect conflicts between a knowledge node and existing knowledge.
-        
-        Args:
-            node_id: ID of the node to check for conflicts
+    def detect_conflicts(self, knowledge_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """检测知识冲突"""
+        try:
+            conflicts = []
             
-        Returns:
-            List of detected conflicts
-        """
-        node = self.sskg_manager.get_node(node_id)
-        if not node:
-            self.logger.error(f"Cannot detect conflicts: node {node_id} does not exist")
+            # 两两比较知识项
+            for i in range(len(knowledge_items)):
+                for j in range(i + 1, len(knowledge_items)):
+                    item1 = knowledge_items[i]
+                    item2 = knowledge_items[j]
+                    
+                    # 应用检测规则
+                    for rule_name, rule_func in self.conflict_detection_rules.items():
+                        conflict = rule_func(item1, item2)
+                        if conflict:
+                            conflict["conflict_id"] = str(uuid.uuid4())
+                            conflict["detection_rule"] = rule_name
+                            conflict["timestamp"] = datetime.now().isoformat()
+                            conflicts.append(conflict)
+            
+            # 记录冲突历史
+            for conflict in conflicts:
+                self.conflict_history.append({
+                    "conflict_id": conflict["conflict_id"],
+                    "detection_time": conflict["timestamp"],
+                    "conflict_type": conflict["conflict_type"],
+                    "status": "detected"
+                })
+            
+            return conflicts
+            
+        except Exception as e:
+            logger.error(f"检测知识冲突失败: {e}")
             return []
-        
-        # Only check for conflicts in fact nodes
-        if node.node_type != NodeType.FACT:
-            return []
-        
-        conflicts = []
-        
-        # Check for direct contradictions using semantic similarity
-        semantic_conflicts = self._detect_semantic_conflicts(node)
-        conflicts.extend(semantic_conflicts)
-        
-        # Check for temporal inconsistencies
-        temporal_conflicts = self._detect_temporal_conflicts(node)
-        conflicts.extend(temporal_conflicts)
-        
-        # Check for source disagreements
-        source_conflicts = self._detect_source_conflicts(node)
-        conflicts.extend(source_conflicts)
-        
-        return conflicts
     
-    def _detect_semantic_conflicts(self, node: KnowledgeNode) -> List[ConflictDetectionResult]:
-        """
-        Detect semantic conflicts between a node and existing knowledge.
-        
-        Args:
-            node: The node to check for conflicts
+    def resolve_conflict(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+        """解决冲突"""
+        try:
+            conflict_type = conflict.get("conflict_type", "unknown")
             
-        Returns:
-            List of detected semantic conflicts
-        """
-        conflicts = []
-        
-        # Use vector search to find semantically similar nodes
-        similar_nodes = self.sskg_manager.query({
-            "node_types": [NodeType.FACT],
-            "content_query": node.content,
-            "limit": 10
-        })
-        
-        for similar_node in similar_nodes:
-            # Skip self
-            if similar_node.id == node.id:
-                continue
+            # 选择解决策略
+            strategy_name = self._select_resolution_strategy(conflict)
+            strategy_func = self.resolution_strategies.get(strategy_name)
             
-            # Check for direct contradictions
-            contradiction_score = self._calculate_contradiction_score(node, similar_node)
-            if contradiction_score > 0.7:  # Threshold for contradiction
-                conflicts.append(ConflictDetectionResult(
-                    conflict_type=ConflictType.DIRECT_CONTRADICTION,
-                    conflicting_nodes=[node.id, similar_node.id],
-                    confidence=contradiction_score,
-                    description=f"Direct contradiction detected between facts: '{node.content}' and '{similar_node.content}'",
-                    metadata={
-                        "similarity_score": contradiction_score,
-                        "detection_method": "semantic_similarity"
-                    }
-                ))
+            if not strategy_func:
+                return {"error": f"未找到解决策略: {strategy_name}"}
             
-            # Check for partial overlaps
-            elif contradiction_score > 0.3:  # Threshold for partial overlap
-                conflicts.append(ConflictDetectionResult(
-                    conflict_type=ConflictType.PARTIAL_OVERLAP,
-                    conflicting_nodes=[node.id, similar_node.id],
-                    confidence=contradiction_score,
-                    description=f"Partial overlap with inconsistencies detected between facts: '{node.content}' and '{similar_node.content}'",
-                    metadata={
-                        "similarity_score": contradiction_score,
-                        "detection_method": "semantic_similarity"
-                    }
-                ))
-        
-        return conflicts
-    
-    def _detect_temporal_conflicts(self, node: KnowledgeNode) -> List[ConflictDetectionResult]:
-        """
-        Detect temporal inconsistencies between a node and existing knowledge.
-        
-        Args:
-            node: The node to check for conflicts
+            # 应用解决策略
+            resolution = strategy_func(conflict)
             
-        Returns:
-            List of detected temporal conflicts
-        """
-        conflicts = []
-        
-        # Extract temporal information from node content and metadata
-        node_temporal_info = self._extract_temporal_info(node)
-        if not node_temporal_info:
-            return []
-        
-        # Find nodes with overlapping temporal context
-        temporal_nodes = self.sskg_manager.query({
-            "node_types": [NodeType.FACT],
-            "metadata_filters": {
-                "temporal_context": {"$exists": True}
-            },
-            "limit": 20
-        })
-        
-        for temporal_node in temporal_nodes:
-            # Skip self
-            if temporal_node.id == node.id:
-                continue
+            # 添加元数据
+            resolution.update({
+                "resolution_id": str(uuid.uuid4()),
+                "conflict_id": conflict.get("conflict_id"),
+                "strategy": strategy_name,
+                "resolution_time": datetime.now().isoformat()
+            })
             
-            # Extract temporal information
-            other_temporal_info = self._extract_temporal_info(temporal_node)
-            if not other_temporal_info:
-                continue
-            
-            # Check for temporal inconsistencies
-            if self._has_temporal_conflict(node_temporal_info, other_temporal_info):
-                # Check if content is semantically related
-                similarity_score = self._calculate_similarity_score(node, temporal_node)
-                if similarity_score > 0.5:  # Threshold for semantic relatedness
-                    conflicts.append(ConflictDetectionResult(
-                        conflict_type=ConflictType.TEMPORAL_INCONSISTENCY,
-                        conflicting_nodes=[node.id, temporal_node.id],
-                        confidence=similarity_score * 0.8,  # Adjust confidence
-                        description=f"Temporal inconsistency detected between facts: '{node.content}' and '{temporal_node.content}'",
-                        metadata={
-                            "similarity_score": similarity_score,
-                            "node_temporal_info": node_temporal_info,
-                            "other_temporal_info": other_temporal_info,
-                            "detection_method": "temporal_analysis"
-                        }
-                    ))
-        
-        return conflicts
-    
-    def _detect_source_conflicts(self, node: KnowledgeNode) -> List[ConflictDetectionResult]:
-        """
-        Detect source disagreements between a node and existing knowledge.
-        
-        Args:
-            node: The node to check for conflicts
-            
-        Returns:
-            List of detected source conflicts
-        """
-        conflicts = []
-        
-        # Extract source information
-        node_source = node.metadata.get("source", "")
-        if not node_source:
-            return []
-        
-        # Find semantically similar nodes with different sources
-        similar_nodes = self.sskg_manager.query({
-            "node_types": [NodeType.FACT],
-            "content_query": node.content,
-            "limit": 10
-        })
-        
-        for similar_node in similar_nodes:
-            # Skip self
-            if similar_node.id == node.id:
-                continue
-            
-            # Check if sources are different
-            other_source = similar_node.metadata.get("source", "")
-            if not other_source or other_source == node_source:
-                continue
-            
-            # Check if content is semantically similar but not identical
-            similarity_score = self._calculate_similarity_score(node, similar_node)
-            if 0.7 < similarity_score < 0.95:  # Similar but not identical
-                conflicts.append(ConflictDetectionResult(
-                    conflict_type=ConflictType.SOURCE_DISAGREEMENT,
-                    conflicting_nodes=[node.id, similar_node.id],
-                    confidence=similarity_score * 0.9,  # Adjust confidence
-                    description=f"Source disagreement detected between facts from '{node_source}' and '{other_source}'",
-                    metadata={
-                        "similarity_score": similarity_score,
-                        "node_source": node_source,
-                        "other_source": other_source,
-                        "detection_method": "source_analysis"
-                    }
-                ))
-        
-        return conflicts
-    
-    def _calculate_contradiction_score(self, node1: KnowledgeNode, node2: KnowledgeNode) -> float:
-        """
-        Calculate a contradiction score between two nodes.
-        
-        Args:
-            node1: First node
-            node2: Second node
-            
-        Returns:
-            Contradiction score between 0 and 1
-        """
-        # In a real implementation, this would use NLP techniques to detect contradictions
-        # For now, we'll use a simple heuristic based on semantic similarity
-        
-        # Check for explicit contradiction markers
-        contradiction_markers = [
-            ("is", "is not"),
-            ("was", "was not"),
-            ("will", "will not"),
-            ("can", "cannot"),
-            ("should", "should not"),
-            ("must", "must not"),
-            ("always", "never"),
-            ("all", "none"),
-            ("true", "false"),
-            ("yes", "no")
-        ]
-        
-        content1 = node1.content.lower()
-        content2 = node2.content.lower()
-        
-        # Check for explicit contradictions
-        for pos, neg in contradiction_markers:
-            if (pos in content1 and neg in content2 and content1.replace(pos, neg) == content2) or \
-               (pos in content2 and neg in content1 and content2.replace(pos, neg) == content1):
-                return 0.9  # High confidence in contradiction
-        
-        # Calculate semantic similarity (placeholder)
-        similarity = self._calculate_similarity_score(node1, node2)
-        
-        # Heuristic: if similar content but different confidence levels
-        if similarity > 0.8 and abs(node1.confidence - node2.confidence) > 0.3:
-            return 0.7  # Moderate confidence in contradiction
-        
-        # Default: low contradiction score
-        return 0.1
-    
-    def _calculate_similarity_score(self, node1: KnowledgeNode, node2: KnowledgeNode) -> float:
-        """
-        Calculate a semantic similarity score between two nodes.
-        
-        Args:
-            node1: First node
-            node2: Second node
-            
-        Returns:
-            Similarity score between 0 and 1
-        """
-        # In a real implementation, this would use embeddings or other NLP techniques
-        # For now, we'll use a simple heuristic based on word overlap
-        
-        words1 = set(node1.content.lower().split())
-        words2 = set(node2.content.lower().split())
-        
-        if not words1 or not words2:
-            return 0.0
-        
-        intersection = words1.intersection(words2)
-        union = words1.union(words2)
-        
-        return len(intersection) / len(union)
-    
-    def _extract_temporal_info(self, node: KnowledgeNode) -> Optional[Dict[str, Any]]:
-        """
-        Extract temporal information from a node.
-        
-        Args:
-            node: The node to extract temporal information from
-            
-        Returns:
-            Dictionary of temporal information, or None if not available
-        """
-        # Check metadata first
-        temporal_context = node.metadata.get("temporal_context")
-        if temporal_context:
-            return temporal_context
-        
-        # In a real implementation, this would use NLP to extract temporal information
-        # For now, we'll return None
-        return None
-    
-    def _has_temporal_conflict(self, temporal_info1: Dict[str, Any], temporal_info2: Dict[str, Any]) -> bool:
-        """
-        Check if two temporal contexts conflict.
-        
-        Args:
-            temporal_info1: First temporal context
-            temporal_info2: Second temporal context
-            
-        Returns:
-            True if the contexts conflict, False otherwise
-        """
-        # In a real implementation, this would check for temporal inconsistencies
-        # For now, we'll return False
-        return False
-    
-    def resolve_conflicts(self, conflicts: List[ConflictDetectionResult], 
-                         strategy: Optional[ResolutionStrategy] = None) -> List[ConflictResolutionResult]:
-        """
-        Resolve detected conflicts using the specified strategy.
-        
-        Args:
-            conflicts: List of detected conflicts
-            strategy: Resolution strategy to use (if None, will select automatically)
-            
-        Returns:
-            List of conflict resolution results
-        """
-        results = []
-        
-        for conflict in conflicts:
-            # Get conflicting nodes
-            node_ids = conflict.conflicting_nodes
-            nodes = [self.sskg_manager.get_node(node_id) for node_id in node_ids]
-            nodes = [node for node in nodes if node]  # Filter out None values
-            
-            if len(nodes) < 2:
-                self.logger.warning(f"Cannot resolve conflict: not enough valid nodes")
-                continue
-            
-            # Select resolution strategy if not specified
-            if strategy is None:
-                strategy = self._select_resolution_strategy(conflict, nodes)
-            
-            # Apply resolution strategy
-            resolution_func = self.resolution_strategies.get(strategy)
-            if not resolution_func:
-                self.logger.error(f"Unknown resolution strategy: {strategy}")
-                continue
-            
-            try:
-                result = resolution_func(conflict, nodes)
-                if result:
-                    results.append(result)
-            except Exception as e:
-                self.logger.error(f"Error resolving conflict: {e}")
-        
-        return results
-    
-    def _select_resolution_strategy(self, conflict: ConflictDetectionResult, 
-                                  nodes: List[KnowledgeNode]) -> ResolutionStrategy:
-        """
-        Select an appropriate resolution strategy for a conflict.
-        
-        Args:
-            conflict: The detected conflict
-            nodes: The conflicting nodes
-            
-        Returns:
-            Selected resolution strategy
-        """
-        conflict_type = conflict.conflict_type
-        
-        # Select strategy based on conflict type
-        if conflict_type == ConflictType.DIRECT_CONTRADICTION:
-            # For direct contradictions, use highest confidence
-            return ResolutionStrategy.HIGHEST_CONFIDENCE
-        
-        elif conflict_type == ConflictType.TEMPORAL_INCONSISTENCY:
-            # For temporal inconsistencies, use most recent
-            return ResolutionStrategy.MOST_RECENT
-        
-        elif conflict_type == ConflictType.SOURCE_DISAGREEMENT:
-            # For source disagreements, use source reliability
-            return ResolutionStrategy.SOURCE_RELIABILITY
-        
-        elif conflict_type == ConflictType.PARTIAL_OVERLAP:
-            # For partial overlaps, use synthesis
-            return ResolutionStrategy.SYNTHESIS
-        
-        elif conflict_type == ConflictType.CONFIDENCE_VARIATION:
-            # For confidence variations, use highest confidence
-            return ResolutionStrategy.HIGHEST_CONFIDENCE
-        
-        elif conflict_type == ConflictType.SEMANTIC_DRIFT:
-            # For semantic drift, use most recent
-            return ResolutionStrategy.MOST_RECENT
-        
-        # Default to highest confidence
-        return ResolutionStrategy.HIGHEST_CONFIDENCE
-    
-    def _resolve_by_highest_confidence(self, conflict: ConflictDetectionResult, 
-                                     nodes: List[KnowledgeNode]) -> ConflictResolutionResult:
-        """
-        Resolve conflict by selecting the node with highest confidence.
-        
-        Args:
-            conflict: The detected conflict
-            nodes: The conflicting nodes
-            
-        Returns:
-            Conflict resolution result
-        """
-        # Select node with highest confidence
-        resolved_node = max(nodes, key=lambda node: node.confidence)
-        
-        # Create resolution result
-        return self._create_resolution_result(
-            resolved_node=resolved_node,
-            conflicting_nodes=nodes,
-            strategy=ResolutionStrategy.HIGHEST_CONFIDENCE,
-            confidence=resolved_node.confidence,
-            reasoning=f"Selected fact with highest confidence ({resolved_node.confidence:.2f})"
-        )
-    
-    def _resolve_by_most_recent(self, conflict: ConflictDetectionResult, 
-                              nodes: List[KnowledgeNode]) -> ConflictResolutionResult:
-        """
-        Resolve conflict by selecting the most recent node.
-        
-        Args:
-            conflict: The detected conflict
-            nodes: The conflicting nodes
-            
-        Returns:
-            Conflict resolution result
-        """
-        # Select most recent node
-        resolved_node = max(nodes, key=lambda node: node.updated_at)
-        
-        # Create resolution result
-        return self._create_resolution_result(
-            resolved_node=resolved_node,
-            conflicting_nodes=nodes,
-            strategy=ResolutionStrategy.MOST_RECENT,
-            confidence=0.8,  # Fixed confidence for temporal resolution
-            reasoning=f"Selected most recent fact (updated at {resolved_node.updated_at.isoformat()})"
-        )
-    
-    def _resolve_by_source_reliability(self, conflict: ConflictDetectionResult, 
-                                     nodes: List[KnowledgeNode]) -> ConflictResolutionResult:
-        """
-        Resolve conflict by selecting the node from the most reliable source.
-        
-        Args:
-            conflict: The detected conflict
-            nodes: The conflicting nodes
-            
-        Returns:
-            Conflict resolution result
-        """
-        # Get source reliability for each node
-        node_reliability = []
-        for node in nodes:
-            source = node.metadata.get("source", "")
-            reliability = self.source_reliability.get(source, 1.0)
-            node_reliability.append((node, reliability))
-        
-        # Select node from most reliable source
-        resolved_node, reliability = max(node_reliability, key=lambda x: x[1])
-        
-        # Create resolution result
-        return self._create_resolution_result(
-            resolved_node=resolved_node,
-            conflicting_nodes=nodes,
-            strategy=ResolutionStrategy.SOURCE_RELIABILITY,
-            confidence=min(reliability / 5.0, 1.0),  # Normalize to 0-1
-            reasoning=f"Selected fact from most reliable source ({resolved_node.metadata.get('source', 'unknown')})"
-        )
-    
-    def _resolve_by_majority_vote(self, conflict: ConflictDetectionResult, 
-                                nodes: List[KnowledgeNode]) -> ConflictResolutionResult:
-        """
-        Resolve conflict by selecting the node supported by the most sources.
-        
-        Args:
-            conflict: The detected conflict
-            nodes: The conflicting nodes
-            
-        Returns:
-            Conflict resolution result
-        """
-        # Group nodes by content similarity
-        content_groups = {}
-        for node in nodes:
-            content = node.content
-            found_group = False
-            
-            for group_content, group_nodes in content_groups.items():
-                if self._calculate_similarity_score(node, group_nodes[0]) > 0.9:
-                    group_nodes.append(node)
-                    found_group = True
+            # 更新冲突历史
+            for history_item in self.conflict_history:
+                if history_item["conflict_id"] == conflict.get("conflict_id"):
+                    history_item["status"] = "resolved"
+                    history_item["resolution_id"] = resolution["resolution_id"]
+                    history_item["resolution_time"] = resolution["resolution_time"]
                     break
             
-            if not found_group:
-                content_groups[content] = [node]
-        
-        # Find group with most nodes
-        largest_group = max(content_groups.values(), key=len)
-        
-        # Select node with highest confidence from largest group
-        resolved_node = max(largest_group, key=lambda node: node.confidence)
-        
-        # Calculate confidence based on majority size
-        majority_confidence = len(largest_group) / len(nodes)
-        
-        # Create resolution result
-        return self._create_resolution_result(
-            resolved_node=resolved_node,
-            conflicting_nodes=nodes,
-            strategy=ResolutionStrategy.MAJORITY_VOTE,
-            confidence=majority_confidence,
-            reasoning=f"Selected fact supported by {len(largest_group)} out of {len(nodes)} sources"
-        )
-    
-    def _resolve_by_synthesis(self, conflict: ConflictDetectionResult, 
-                            nodes: List[KnowledgeNode]) -> ConflictResolutionResult:
-        """
-        Resolve conflict by synthesizing a new node from conflicting nodes.
-        
-        Args:
-            conflict: The detected conflict
-            nodes: The conflicting nodes
+            return resolution
             
-        Returns:
-            Conflict resolution result
-        """
-        # In a real implementation, this would use NLP to synthesize content
-        # For now, we'll use the content from the highest confidence node
-        
-        # Select node with highest confidence as base
-        base_node = max(nodes, key=lambda node: node.confidence)
-        
-        # Create a new synthesized node
-        import uuid
-        
-        # Combine metadata from all nodes
-        combined_metadata = {}
-        for node in nodes:
-            combined_metadata.update(node.metadata)
-        
-        # Add synthesis metadata
-        combined_metadata["synthesis"] = {
-            "source_nodes": [node.id for node in nodes],
-            "synthesis_time": datetime.now().isoformat(),
-            "synthesis_method": "highest_confidence_base"
-        }
-        
-        # Create new node
-        synthesized_node = KnowledgeNode(
-            id=str(uuid.uuid4()),
-            node_type=base_node.node_type,
-            content=base_node.content,
-            confidence=base_node.confidence * 0.9,  # Slightly reduce confidence
-            metadata=combined_metadata,
-            version=1
-        )
-        
-        # Add to graph
-        synthesized_node_id = self.sskg_manager.add_node(synthesized_node)
-        
-        # Add relations to original nodes
-        for node in nodes:
-            self.sskg_manager.add_relation(KnowledgeRelation(
-                source_id=synthesized_node_id,
-                target_id=node.id,
-                relation_type=RelationType.DERIVED_FROM
-            ))
-        
-        # Create resolution result
-        return ConflictResolutionResult(
-            resolved_node_id=synthesized_node_id,
-            resolution_strategy=ResolutionStrategy.SYNTHESIS,
-            conflicting_node_ids=[node.id for node in nodes],
-            confidence=base_node.confidence * 0.9,
-            reasoning=f"Synthesized new fact from {len(nodes)} conflicting facts",
-            metadata={
-                "synthesis_method": "highest_confidence_base",
-                "base_node_id": base_node.id
+        except Exception as e:
+            logger.error(f"解决冲突失败: {e}")
+            return {"error": str(e)}
+    
+    def validate_resolution(self, resolution: Dict[str, Any]) -> Dict[str, Any]:
+        """验证解决方案"""
+        try:
+            validation_result = {
+                "is_valid": True,
+                "validation_score": 0.0,
+                "validation_issues": [],
+                "validation_time": datetime.now().isoformat()
             }
-        )
-    
-    def _create_resolution_result(self, resolved_node: KnowledgeNode, 
-                                conflicting_nodes: List[KnowledgeNode],
-                                strategy: ResolutionStrategy, 
-                                confidence: float,
-                                reasoning: str) -> ConflictResolutionResult:
-        """
-        Create a conflict resolution result.
-        
-        Args:
-            resolved_node: The resolved node
-            conflicting_nodes: The original conflicting nodes
-            strategy: The resolution strategy used
-            confidence: Confidence in the resolution
-            reasoning: Explanation of the resolution process
             
-        Returns:
-            Conflict resolution result
-        """
-        # Add resolution metadata to node
-        resolution_metadata = {
-            "conflict_resolution": {
-                "strategy": strategy.value,
-                "conflicting_nodes": [node.id for node in conflicting_nodes],
-                "confidence": confidence,
-                "reasoning": reasoning,
-                "timestamp": datetime.now().isoformat()
-            }
+            # 检查必要字段
+            required_fields = ["resolved_content", "confidence_score", "evidence"]
+            for field in required_fields:
+                if field not in resolution:
+                    validation_result["validation_issues"].append(f"缺少必要字段: {field}")
+                    validation_result["is_valid"] = False
+            
+            if not validation_result["is_valid"]:
+                validation_result["validation_score"] = 0.0
+                return validation_result
+            
+            # 评估解决方案质量
+            quality_score = 0.0
+            
+            # 内容质量评估
+            content = resolution.get("resolved_content", "")
+            if len(content) > 50:
+                quality_score += 0.3
+            elif len(content) > 20:
+                quality_score += 0.2
+            else:
+                quality_score += 0.1
+            
+            # 置信度评估
+            confidence = resolution.get("confidence_score", 0.0)
+            if confidence >= 0.8:
+                quality_score += 0.3
+            elif confidence >= 0.6:
+                quality_score += 0.2
+            else:
+                quality_score += 0.1
+            
+            # 证据质量评估
+            evidence = resolution.get("evidence", [])
+            if len(evidence) >= 3:
+                quality_score += 0.3
+            elif len(evidence) >= 2:
+                quality_score += 0.2
+            elif len(evidence) >= 1:
+                quality_score += 0.1
+            
+            # 一致性检查
+            if self._check_internal_consistency(resolution):
+                quality_score += 0.1
+            else:
+                validation_result["validation_issues"].append("内部一致性检查失败")
+            
+            validation_result["validation_score"] = min(quality_score, 1.0)
+            
+            # 如果分数太低，标记为无效
+            if validation_result["validation_score"] < 0.5:
+                validation_result["is_valid"] = False
+                validation_result["validation_issues"].append("解决方案质量分数过低")
+            
+            return validation_result
+            
+        except Exception as e:
+            logger.error(f"验证解决方案失败: {e}")
+            return {"is_valid": False, "error": str(e)}
+    
+    def _initialize_detection_rules(self) -> Dict[str, callable]:
+        """初始化冲突检测规则"""
+        return {
+            "contradictory_claims": self._detect_contradictory_claims,
+            "inconsistent_data": self._detect_inconsistent_data,
+            "temporal_conflicts": self._detect_temporal_conflicts,
+            "source_disagreement": self._detect_source_disagreement,
+            "confidence_conflicts": self._detect_confidence_conflicts
         }
-        
-        # Update node metadata
-        self.sskg_manager.update_node(resolved_node.id, {
-            "metadata": {**resolved_node.metadata, **resolution_metadata}
-        })
-        
-        # Add relations to conflicting nodes
-        for node in conflicting_nodes:
-            if node.id != resolved_node.id:
-                self.sskg_manager.add_relation(KnowledgeRelation(
-                    source_id=resolved_node.id,
-                    target_id=node.id,
-                    relation_type=RelationType.DERIVED_FROM,
-                    metadata={"resolution_strategy": strategy.value}
-                ))
-        
-        # Create resolution result
-        return ConflictResolutionResult(
-            resolved_node_id=resolved_node.id,
-            resolution_strategy=strategy,
-            conflicting_node_ids=[node.id for node in conflicting_nodes],
-            confidence=confidence,
-            reasoning=reasoning,
-            metadata=resolution_metadata
-        )
     
-    def track_knowledge_evolution(self, node_id: str) -> List[Dict[str, Any]]:
-        """
-        Track the evolution of a knowledge node over time.
-        
-        Args:
-            node_id: ID of the node to track
+    def _initialize_resolution_strategies(self) -> Dict[str, callable]:
+        """初始化解决策略"""
+        return {
+            "evidence_weighting": self._resolve_by_evidence_weighting,
+            "source_credibility": self._resolve_by_source_credibility,
+            "temporal_priority": self._resolve_by_temporal_priority,
+            "confidence_based": self._resolve_by_confidence,
+            "synthesis": self._resolve_by_synthesis
+        }
+    
+    def _detect_contradictory_claims(self, item1: Dict[str, Any], item2: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """检测矛盾声明"""
+        try:
+            content1 = item1.get("content", "").lower()
+            content2 = item2.get("content", "").lower()
             
-        Returns:
-            List of evolution events
-        """
-        node = self.sskg_manager.get_node(node_id)
-        if not node:
-            self.logger.error(f"Cannot track evolution: node {node_id} does not exist")
-            return []
+            # 简单的矛盾检测逻辑
+            contradictory_pairs = [
+                ("安全", "危险"), ("可靠", "不可靠"), ("准确", "不准确"),
+                ("有效", "无效"), ("成功", "失败"), ("支持", "反对"),
+                ("是", "不是"), ("能", "不能"), ("会", "不会")
+            ]
+            
+            for pos, neg in contradictory_pairs:
+                if (pos in content1 and neg in content2) or (neg in content1 and pos in content2):
+                    return {
+                        "conflict_type": "contradictory_claims",
+                        "conflicting_items": [item1, item2],
+                        "severity": "high",
+                        "description": f"检测到矛盾声明: '{pos}' vs '{neg}'",
+                        "confidence": 0.8
+                    }
+            
+            # 检查数值矛盾
+            numbers1 = re.findall(r'\d+(?:\.\d+)?%?', content1)
+            numbers2 = re.findall(r'\d+(?:\.\d+)?%?', content2)
+            
+            if numbers1 and numbers2:
+                # 简化处理：如果数值差异很大，可能存在矛盾
+                try:
+                    num1 = float(numbers1[0].replace('%', ''))
+                    num2 = float(numbers2[0].replace('%', ''))
+                    
+                    if abs(num1 - num2) > 20:  # 差异超过20的阈值
+                        return {
+                            "conflict_type": "contradictory_claims",
+                            "conflicting_items": [item1, item2],
+                            "severity": "medium",
+                            "description": f"数值差异较大: {num1} vs {num2}",
+                            "confidence": 0.6
+                        }
+                except ValueError:
+                    pass
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"检测矛盾声明失败: {e}")
+            return None
+    
+    def _detect_inconsistent_data(self, item1: Dict[str, Any], item2: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """检测数据不一致"""
+        try:
+            # 检查相同主题的不同数据
+            title1 = item1.get("title", "").lower()
+            title2 = item2.get("title", "").lower()
+            
+            # 如果标题相似但内容不同，可能存在数据不一致
+            similarity = SequenceMatcher(None, title1, title2).ratio()
+            
+            if similarity > 0.7:  # 标题相似
+                content1 = item1.get("content", "")
+                content2 = item2.get("content", "")
+                content_similarity = SequenceMatcher(None, content1, content2).ratio()
+                
+                if content_similarity < 0.5:  # 但内容差异较大
+                    return {
+                        "conflict_type": "inconsistent_data",
+                        "conflicting_items": [item1, item2],
+                        "severity": "medium",
+                        "description": "相似主题但数据不一致",
+                        "confidence": 0.7
+                    }
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"检测数据不一致失败: {e}")
+            return None
+    
+    def _detect_temporal_conflicts(self, item1: Dict[str, Any], item2: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """检测时间冲突"""
+        try:
+            timestamp1 = item1.get("timestamp")
+            timestamp2 = item2.get("timestamp")
+            
+            if not timestamp1 or not timestamp2:
+                return None
+            
+            # 如果较新的信息与较旧的信息矛盾，可能存在时间冲突
+            time1 = datetime.fromisoformat(timestamp1.replace('Z', '+00:00'))
+            time2 = datetime.fromisoformat(timestamp2.replace('Z', '+00:00'))
+            
+            # 简化处理：检查是否存在明显的时间顺序问题
+            time_diff = abs((time2 - time1).days)
+            
+            if time_diff > 30:  # 时间差超过30天
+                # 检查内容是否存在矛盾
+                content1 = item1.get("content", "").lower()
+                content2 = item2.get("content", "").lower()
+                
+                if "最新" in content1 and "过时" in content2:
+                    return {
+                        "conflict_type": "temporal_conflicts",
+                        "conflicting_items": [item1, item2],
+                        "severity": "low",
+                        "description": "时间顺序可能存在问题",
+                        "confidence": 0.5
+                    }
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"检测时间冲突失败: {e}")
+            return None
+    
+    def _detect_source_disagreement(self, item1: Dict[str, Any], item2: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """检测来源分歧"""
+        try:
+            source1 = item1.get("source", "")
+            source2 = item2.get("source", "")
+            
+            if not source1 or not source2 or source1 == source2:
+                return None
+            
+            # 检查不同来源是否对同一主题有不同观点
+            content1 = item1.get("content", "").lower()
+            content2 = item2.get("content", "").lower()
+            
+            # 简单的主题相似性检查
+            common_keywords = set(content1.split()) & set(content2.split())
+            
+            if len(common_keywords) > 3:  # 有足够的共同关键词
+                # 检查观点是否不同
+                sentiment1 = self._analyze_sentiment(content1)
+                sentiment2 = self._analyze_sentiment(content2)
+                
+                if abs(sentiment1 - sentiment2) > 0.5:  # 情感倾向差异较大
+                    return {
+                        "conflict_type": "source_disagreement",
+                        "conflicting_items": [item1, item2],
+                        "severity": "medium",
+                        "description": f"不同来源观点分歧: {source1} vs {source2}",
+                        "confidence": 0.6
+                    }
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"检测来源分歧失败: {e}")
+            return None
+    
+    def _detect_confidence_conflicts(self, item1: Dict[str, Any], item2: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """检测置信度冲突"""
+        try:
+            confidence1 = item1.get("confidence", 0.5)
+            confidence2 = item2.get("confidence", 0.5)
+            
+            # 如果置信度差异很大且内容相关，可能存在冲突
+            confidence_diff = abs(confidence1 - confidence2)
+            
+            if confidence_diff > 0.4:  # 置信度差异超过0.4
+                content1 = item1.get("content", "")
+                content2 = item2.get("content", "")
+                
+                # 检查内容相似性
+                similarity = SequenceMatcher(None, content1, content2).ratio()
+                
+                if similarity > 0.3:  # 内容有一定相似性
+                    return {
+                        "conflict_type": "confidence_conflicts",
+                        "conflicting_items": [item1, item2],
+                        "severity": "low",
+                        "description": f"相似内容但置信度差异较大: {confidence1:.2f} vs {confidence2:.2f}",
+                        "confidence": 0.4
+                    }
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"检测置信度冲突失败: {e}")
+            return None
+    
+    def _select_resolution_strategy(self, conflict: Dict[str, Any]) -> str:
+        """选择解决策略"""
+        conflict_type = conflict.get("conflict_type", "unknown")
+        severity = conflict.get("severity", "medium")
         
-        evolution = []
+        # 基于冲突类型和严重程度选择策略
+        if conflict_type == "contradictory_claims":
+            if severity == "high":
+                return "evidence_weighting"
+            else:
+                return "synthesis"
+        elif conflict_type == "inconsistent_data":
+            return "source_credibility"
+        elif conflict_type == "temporal_conflicts":
+            return "temporal_priority"
+        elif conflict_type == "source_disagreement":
+            return "source_credibility"
+        elif conflict_type == "confidence_conflicts":
+            return "confidence_based"
+        else:
+            return "synthesis"  # 默认策略
+    
+    def _resolve_by_evidence_weighting(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+        """基于证据权重解决冲突"""
+        try:
+            conflicting_items = conflict.get("conflicting_items", [])
+            
+            # 评估每个项目的证据强度
+            evidence_scores = []
+            for item in conflicting_items:
+                score = 0.0
+                
+                # 基于来源可信度
+                source = item.get("source", "")
+                if "学术" in source or "研究" in source:
+                    score += 0.4
+                elif "官方" in source or "权威" in source:
+                    score += 0.3
+                else:
+                    score += 0.1
+                
+                # 基于置信度
+                confidence = item.get("confidence", 0.5)
+                score += confidence * 0.3
+                
+                # 基于内容质量
+                content = item.get("content", "")
+                if len(content) > 100:
+                    score += 0.2
+                elif len(content) > 50:
+                    score += 0.1
+                
+                evidence_scores.append(score)
+            
+            # 选择证据最强的项目
+            best_index = evidence_scores.index(max(evidence_scores))
+            best_item = conflicting_items[best_index]
+            
+            return {
+                "resolved_content": f"基于证据权重分析，采纳以下观点：{best_item.get('content', '')}",
+                "confidence_score": max(evidence_scores),
+                "evidence": [f"证据评分: {score:.2f}" for score in evidence_scores],
+                "resolution_method": "evidence_weighting",
+                "selected_item": best_item.get("id", "unknown")
+            }
+            
+        except Exception as e:
+            logger.error(f"基于证据权重解决冲突失败: {e}")
+            return {"error": str(e)}
+    
+    def _resolve_by_source_credibility(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+        """基于来源可信度解决冲突"""
+        try:
+            conflicting_items = conflict.get("conflicting_items", [])
+            
+            # 评估来源可信度
+            credibility_scores = []
+            for item in conflicting_items:
+                source = item.get("source", "").lower()
+                
+                if any(keyword in source for keyword in ["学术期刊", "研究院", "大学"]):
+                    score = 0.9
+                elif any(keyword in source for keyword in ["政府", "官方", "权威机构"]):
+                    score = 0.8
+                elif any(keyword in source for keyword in ["专业媒体", "行业报告"]):
+                    score = 0.6
+                else:
+                    score = 0.4
+                
+                credibility_scores.append(score)
+            
+            # 选择可信度最高的来源
+            best_index = credibility_scores.index(max(credibility_scores))
+            best_item = conflicting_items[best_index]
+            
+            return {
+                "resolved_content": f"基于来源可信度分析，采纳来自'{best_item.get('source', '')}'的观点：{best_item.get('content', '')}",
+                "confidence_score": max(credibility_scores),
+                "evidence": [f"来源可信度: {score:.2f}" for score in credibility_scores],
+                "resolution_method": "source_credibility",
+                "selected_source": best_item.get("source", "unknown")
+            }
+            
+        except Exception as e:
+            logger.error(f"基于来源可信度解决冲突失败: {e}")
+            return {"error": str(e)}
+    
+    def _resolve_by_temporal_priority(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+        """基于时间优先级解决冲突"""
+        try:
+            conflicting_items = conflict.get("conflicting_items", [])
+            
+            # 找到最新的项目
+            latest_item = None
+            latest_time = None
+            
+            for item in conflicting_items:
+                timestamp = item.get("timestamp")
+                if timestamp:
+                    try:
+                        time = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                        if latest_time is None or time > latest_time:
+                            latest_time = time
+                            latest_item = item
+                    except ValueError:
+                        continue
+            
+            if latest_item:
+                return {
+                    "resolved_content": f"基于时间优先级，采纳最新信息：{latest_item.get('content', '')}",
+                    "confidence_score": 0.7,
+                    "evidence": [f"最新时间: {latest_time.isoformat()}"],
+                    "resolution_method": "temporal_priority",
+                    "selected_timestamp": latest_item.get("timestamp")
+                }
+            else:
+                return {"error": "无法确定时间优先级"}
+                
+        except Exception as e:
+            logger.error(f"基于时间优先级解决冲突失败: {e}")
+            return {"error": str(e)}
+    
+    def _resolve_by_confidence(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+        """基于置信度解决冲突"""
+        try:
+            conflicting_items = conflict.get("conflicting_items", [])
+            
+            # 选择置信度最高的项目
+            best_item = max(conflicting_items, key=lambda x: x.get("confidence", 0.0))
+            
+            return {
+                "resolved_content": f"基于置信度分析，采纳置信度最高的观点：{best_item.get('content', '')}",
+                "confidence_score": best_item.get("confidence", 0.0),
+                "evidence": [f"置信度: {item.get('confidence', 0.0):.2f}" for item in conflicting_items],
+                "resolution_method": "confidence_based",
+                "selected_confidence": best_item.get("confidence", 0.0)
+            }
+            
+        except Exception as e:
+            logger.error(f"基于置信度解决冲突失败: {e}")
+            return {"error": str(e)}
+    
+    def _resolve_by_synthesis(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+        """通过综合解决冲突"""
+        try:
+            conflicting_items = conflict.get("conflicting_items", [])
+            
+            # 提取所有观点
+            viewpoints = [item.get("content", "") for item in conflicting_items]
+            
+            # 简单的综合策略：寻找共同点和差异点
+            common_themes = self._find_common_themes(viewpoints)
+            differences = self._identify_differences(viewpoints)
+            
+            # 生成综合观点
+            synthesized_content = f"综合分析表明：{common_themes}。同时需要注意：{differences}。"
+            
+            # 计算综合置信度
+            confidences = [item.get("confidence", 0.5) for item in conflicting_items]
+            avg_confidence = sum(confidences) / len(confidences) if confidences else 0.5
+            
+            return {
+                "resolved_content": synthesized_content,
+                "confidence_score": avg_confidence * 0.8,  # 综合后置信度略降
+                "evidence": [f"综合了{len(conflicting_items)}个观点", f"平均置信度: {avg_confidence:.2f}"],
+                "resolution_method": "synthesis",
+                "synthesis_components": len(conflicting_items)
+            }
+            
+        except Exception as e:
+            logger.error(f"通过综合解决冲突失败: {e}")
+            return {"error": str(e)}
+    
+    def _analyze_sentiment(self, text: str) -> float:
+        """简单的情感分析"""
+        positive_words = ["好", "优秀", "成功", "有效", "安全", "可靠", "准确"]
+        negative_words = ["坏", "失败", "无效", "危险", "不可靠", "错误", "风险"]
         
-        # Get derived nodes
-        derived_relations = self.sskg_manager.get_related_nodes(
-            node_id=node_id,
-            relation_types=[RelationType.DERIVED_FROM],
-            direction="incoming"
-        )
+        positive_count = sum(1 for word in positive_words if word in text)
+        negative_count = sum(1 for word in negative_words if word in text)
         
-        for derived_node, relation_type in derived_relations:
-            evolution.append({
-                "event_type": "derived_from",
-                "node_id": derived_node.id,
-                "timestamp": derived_node.created_at,
-                "description": f"Node {derived_node.id} was derived from this node",
-                "confidence_change": derived_node.confidence - node.confidence
-            })
+        total_words = len(text.split())
+        if total_words == 0:
+            return 0.5
         
-        # Get source nodes
-        source_relations = self.sskg_manager.get_related_nodes(
-            node_id=node_id,
-            relation_types=[RelationType.DERIVED_FROM],
-            direction="outgoing"
-        )
-        
-        for source_node, relation_type in source_relations:
-            evolution.append({
-                "event_type": "derived_from_source",
-                "node_id": source_node.id,
-                "timestamp": node.created_at,
-                "description": f"This node was derived from node {source_node.id}",
-                "confidence_change": node.confidence - source_node.confidence
-            })
-        
-        # Sort by timestamp
-        evolution.sort(key=lambda x: x["timestamp"])
-        
-        return evolution
+        sentiment_score = (positive_count - negative_count) / total_words
+        return max(0.0, min(1.0, sentiment_score + 0.5))  # 归一化到0-1
+    
+    def _check_internal_consistency(self, resolution: Dict[str, Any]) -> bool:
+        """检查内部一致性"""
+        try:
+            content = resolution.get("resolved_content", "")
+            confidence = resolution.get("confidence_score", 0.0)
+            
+            # 简单的一致性检查
+            if confidence > 0.8 and len(content) < 20:
+                return False  # 高置信度但内容太少
+            
+            if confidence < 0.3 and "确定" in content:
+                return False  # 低置信度但用确定性语言
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"检查内部一致性失败: {e}")
+            return False
+    
+    def _find_common_themes(self, viewpoints: List[str]) -> str:
+        """寻找共同主题"""
+        try:
+            # 简单的关键词提取和共同点识别
+            all_words = []
+            for viewpoint in viewpoints:
+                words = viewpoint.split()
+                all_words.extend(words)
+            
+            # 找出出现频率较高的词
+            word_count = {}
+            for word in all_words:
+                if len(word) > 2:  # 忽略太短的词
+                    word_count[word] = word_count.get(word, 0) + 1
+            
+            common_words = [word for word, count in word_count.items() if count > 1]
+            
+            if common_words:
+                return f"各方都提到了{', '.join(common_words[:3])}等关键概念"
+            else:
+                return "各方观点存在一定共识基础"
+                
+        except Exception as e:
+            logger.error(f"寻找共同主题失败: {e}")
+            return "存在一定共识"
+    
+    def _identify_differences(self, viewpoints: List[str]) -> str:
+        """识别差异点"""
+        try:
+            if len(viewpoints) < 2:
+                return "观点单一"
+            
+            # 简单的差异识别
+            differences = []
+            
+            for i, viewpoint in enumerate(viewpoints):
+                if "不" in viewpoint or "否" in viewpoint:
+                    differences.append(f"观点{i+1}持否定态度")
+                elif "是" in viewpoint or "确实" in viewpoint:
+                    differences.append(f"观点{i+1}持肯定态度")
+            
+            if differences:
+                return "; ".join(differences)
+            else:
+                return "各方观点在表述方式上存在差异"
+                
+        except Exception as e:
+            logger.error(f"识别差异点失败: {e}")
+            return "存在观点差异"
+    
+    def get_conflict_statistics(self) -> Dict[str, Any]:
+        """获取冲突统计"""
+        try:
+            stats = {
+                "total_conflicts": len(self.conflict_history),
+                "resolved_conflicts": len([c for c in self.conflict_history if c["status"] == "resolved"]),
+                "pending_conflicts": len([c for c in self.conflict_history if c["status"] == "detected"]),
+                "conflict_types": {},
+                "resolution_success_rate": 0.0
+            }
+            
+            # 统计冲突类型
+            for conflict in self.conflict_history:
+                conflict_type = conflict["conflict_type"]
+                stats["conflict_types"][conflict_type] = stats["conflict_types"].get(conflict_type, 0) + 1
+            
+            # 计算解决成功率
+            if stats["total_conflicts"] > 0:
+                stats["resolution_success_rate"] = stats["resolved_conflicts"] / stats["total_conflicts"]
+            
+            return stats
+            
+        except Exception as e:
+            logger.error(f"获取冲突统计失败: {e}")
+            return {"error": str(e)}
