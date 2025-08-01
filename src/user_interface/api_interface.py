@@ -518,7 +518,7 @@ class APIInterface:
             self.execution_status[execution_id].error = str(e)
             self.execution_status[execution_id].completed_at = datetime.now()
     
-    def run(self, host: str = "0.0.0.0", port: int = 8000, reload: bool = False):
+    def run(self, host: str = "127.0.0.1", port: int = 8000, reload: bool = False):
         """Run the API server."""
         uvicorn.run(self.app, host=host, port=port, reload=reload)
 
@@ -528,7 +528,7 @@ if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description="Virtual Role Chat System API Server")
-    parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
+    parser.add_argument("--host", default="127.0.0.1", help="Host to bind to")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload")
     parser.add_argument("--log-level", default="info", help="Log level")

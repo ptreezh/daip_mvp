@@ -64,6 +64,9 @@ class BackendConnector:
         self.user_profile_service = UserProfileService()
         self.intent_analysis_service = BasicIntentAnalysisService(user_profile_service=self.user_profile_service)
         
+        # Initialize RoleManager
+        self.role_manager = RoleManager()
+        
         # WebSocket connection status
         self.is_connected = False
         

@@ -66,7 +66,7 @@ class SystemConfig(BaseSettings):
     secret_key: str = Field(default="dev-secret-key", env="SECRET_KEY")
     
     # 服务器设置
-    host: str = Field(default="0.0.0.0", env="HOST")
+    host: str = Field(default="127.0.0.1", env="HOST")
     port: int = Field(default=8000, env="PORT")
     workers: int = Field(default=1, env="WORKERS")
     

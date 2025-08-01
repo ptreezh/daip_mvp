@@ -1,0 +1,106 @@
+{
+  "test_session": {
+    "start_time": "2025-08-01T10:20:26.675659",
+    "end_time": "2025-08-01T10:21:02.667440",
+    "debate_results": {
+      "debate_id": "debate_cabe4b8f",
+      "topic": "人工智能是否会取代人类工作？",
+      "participants": [
+        "AI Ethics",
+        "Business Ethics"
+      ],
+      "status": "initialization",
+      "duration_minutes": 10,
+      "key_points": [
+        "AI技术发展迅速，影响就业市场",
+        "需要平衡技术进步与人类福祉",
+        "教育和再培训是关键解决方案"
+      ],
+      "consensus_level": 0.7,
+      "quality_score": 0.85
+    },
+    "test_results": [
+      {
+        "scenario": "用户启动系统",
+        "status": "PASS",
+        "duration": 2.640667200088501,
+        "details": {
+          "system_initialized": true,
+          "components_loaded": 3,
+          "roles_available": 131
+        }
+      },
+      {
+        "scenario": "创建辩论话题",
+        "status": "PASS",
+        "duration": 0.0,
+        "details": {
+          "topic_created": true,
+          "topic": "人工智能是否会取代人类工作？",
+          "topic_length": 14
+        }
+      },
+      {
+        "scenario": "邀请专家角色",
+        "status": "PASS",
+        "duration": 0.0019516944885253906,
+        "details": {
+          "roles_invited": true,
+          "selected_roles": [
+            "AI Ethics",
+            "Business Ethics"
+          ],
+          "role_validation": {
+            "AI Ethics": true,
+            "Business Ethics": true
+          }
+        }
+      },
+      {
+        "scenario": "开始多轮辩论",
+        "status": "PASS",
+        "duration": 33.342132329940796,
+        "details": {
+          "debate_started": true,
+          "debate_id": "debate_cabe4b8f",
+          "rounds_completed": 3,
+          "participants": 2,
+          "cognitive_diversity": 0.5
+        }
+      },
+      {
+        "scenario": "监控辩论进展",
+        "status": "PASS",
+        "duration": 0.0010004043579101562,
+        "details": {
+          "status_retrieved": true,
+          "debate_phase": "initialization",
+          "active_debates": 1,
+          "history_records": 0
+        }
+      },
+      {
+        "scenario": "获取辩论结果",
+        "status": "PASS",
+        "duration": 0.0009992122650146484,
+        "details": {
+          "debate_id": "debate_cabe4b8f",
+          "topic": "人工智能是否会取代人类工作？",
+          "participants": [
+            "AI Ethics",
+            "Business Ethics"
+          ],
+          "status": "initialization",
+          "duration_minutes": 10,
+          "key_points": [
+            "AI技术发展迅速，影响就业市场",
+            "需要平衡技术进步与人类福祉",
+            "教育和再培训是关键解决方案"
+          ],
+          "consensus_level": 0.7,
+          "quality_score": 0.85
+        }
+      }
+    ]
+  }
+}

@@ -284,4 +284,4 @@ async def memory_management_route(request):
 if __name__ == '__main__':
     print("🚀 启动智能记忆管理系统...")
     print("📍 访问地址: http://localhost:8080")
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=True)
