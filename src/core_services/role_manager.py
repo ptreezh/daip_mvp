@@ -32,13 +32,48 @@ class Role:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Role":
-        """Creates a Role object from a dictionary."""
+        """Creates a Role object from a dictionary with enhanced error tolerance."""
+        # 处理不同的数据格式
+        if isinstance(data, list):
+            # 如果数据是列表，取第一个元素
+            if data and isinstance(data[0], dict):
+                data = data[0]
+            else:
+                # 如果列表为空或格式不对，创建默认角色
+                data = {"name": "Unknown Role", "description": "Default role"}
+        
+        # 确保数据是字典格式
+        if not isinstance(data, dict):
+            data = {"name": "Unknown Role", "description": "Default role"}
+        
+        # 容错处理各个字段
+        role_id = data.get("id") or data.get("name") or "unknown_id"
+        name = data.get("name") or data.get("id") or "Unknown Role"
+        description = data.get("description") or data.get("system_prompt") or f"Role: {name}"
+        system_prompt = data.get("system_prompt") or data.get("description") or f"You are {name}."
+        
+        # 处理capabilities字段的多种格式
+        capabilities = data.get("capabilities", [])
+        if not isinstance(capabilities, list):
+            if isinstance(capabilities, str):
+                capabilities = [capabilities]
+            else:
+                capabilities = []
+        
+        # 添加其他可能的能力字段
+        if "expertise" in data:
+            expertise = data["expertise"]
+            if isinstance(expertise, list):
+                capabilities.extend(expertise)
+            elif isinstance(expertise, str):
+                capabilities.append(expertise)
+        
         return cls(
-            id=data.get("id", data.get("name", "unknown_id")), # Use name as fallback for id
-            name=data["name"],
-            description=data["description"],
-            system_prompt=data.get("system_prompt", data.get("description", "")), # Use description as fallback
-            capabilities=data.get("capabilities", []), # Ensure capabilities is a list, default to empty
+            id=str(role_id),
+            name=str(name),
+            description=str(description),
+            system_prompt=str(system_prompt),
+            capabilities=list(set(capabilities))  # 去重
         )
 
 
@@ -66,6 +101,20 @@ class RoleManager:
             try:
                 with open(role_file, "r", encoding="utf-8") as f:
                     role_data = json.load(f)
+                    
+                    # 检查数据格式
+                    if isinstance(role_data, list):
+                        logging.warning(f"Skipping {role_file}: contains list instead of role object")
+                        continue
+                    elif not isinstance(role_data, dict):
+                        logging.warning(f"Skipping {role_file}: invalid data format")
+                        continue
+                    
+                    # 验证必需字段
+                    if "name" not in role_data or "description" not in role_data:
+                        logging.warning(f"Skipping {role_file}: missing required fields (name, description)")
+                        continue
+                    
                     role = Role.from_dict(role_data)
                     self._roles[role.id] = role
                     loaded_count += 1

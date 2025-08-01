@@ -1,0 +1,62 @@
+{
+  "task_description": "集成现有前端组件",
+  "analysis_timestamp": "D:\\DAIP\\daip_mvp_project",
+  "project_overview": {
+    "project_type": "未知项目类型",
+    "main_features": [
+      "认知代理系统",
+      "制度原语框架",
+      "工作流引擎"
+    ],
+    "implementation_status": "部分完成",
+    "key_technologies": []
+  },
+  "architecture_summary": {
+    "total_modules": 261,
+    "core_services_count": 77,
+    "frontend_modules_count": 0,
+    "key_services": [
+      "src.core_services.adaptive_learning_system",
+      "src.core_services.advanced_consensus_algorithms",
+      "src.core_services.chat_service",
+      "src.core_services.cognitive_diversity_evaluator",
+      "src.core_services.collaboration_service",
+      "src.core_services.collective_intelligence_manager",
+      "src.core_services.conflict_resolution_strategies",
+      "src.core_services.consensus_algorithm_selector",
+      "src.core_services.consensus_formation_process",
+      "src.core_services.consensus_quality_evaluator"
+    ]
+  },
+  "interface_summary": {
+    "total_classes": 660,
+    "service_classes_count": 73,
+    "model_classes_count": 137,
+    "key_services": [
+      "UnifiedToolManager",
+      "ChatService",
+      "CollaborationService",
+      "CollectiveIntelligenceManager",
+      "ContextQualityService",
+      "DocumentService",
+      "EnhancedSSKGManager",
+      "ExpertService",
+      "FactExtractionService",
+      "FactValidationService"
+    ]
+  },
+  "related_implementations": {
+    "keywords": [
+      "集成现有前端组件"
+    ],
+    "related_modules": [],
+    "related_classes": []
+  },
+  "recommendations": [
+    "建议遵循现有的core_services架构模式"
+  ],
+  "risk_assessment": [
+    "⚠️ 中风险：系统复杂度较高，需要仔细管理依赖关系"
+  ],
+  "required_dependencies": []
+}

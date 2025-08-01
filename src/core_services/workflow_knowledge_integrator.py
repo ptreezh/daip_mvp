@@ -63,7 +63,7 @@ class WorkflowKnowledgeIntegrator:
         self.config = config or WorkflowIntegrationConfig()
         
         # Initialize knowledge persistence service
-        conflict_resolver = KnowledgeConflictResolver(sskg_manager)
+        conflict_resolver = KnowledgeConflictResolver()
         self.persistence_service = KnowledgePersistenceService(
             sskg_manager=sskg_manager,
             wiki_service=wiki_service,

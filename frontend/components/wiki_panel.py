@@ -67,8 +67,6 @@ class WikiPanel(Widget):
                     self.recent_updates = self.recent_updates[:10]
             
             # 刷新组件显示
-            await self.refresh()
-            
         except Exception as e:
             print(f"处理Wiki更新失败: {e}")
     

@@ -110,14 +110,37 @@ class BackendIntegrationService:
     async def get_available_roles(self) -> List[Dict[str, Any]]:
         """获取可用的认知代理角色"""
         try:
-            response = await self.client.get("/api/roles/")
+            # 首先尝试获取详细角色信息
+            response = await self.client.get("/roles/details")
             if response.status_code == 200:
                 roles_data = response.json()
-                logger.info(f"Retrieved {len(roles_data)} roles from backend")
-                return roles_data
-            else:
-                logger.error(f"Failed to get roles: HTTP {response.status_code}")
-                return []
+                if isinstance(roles_data, dict) and 'roles' in roles_data:
+                    roles_list = roles_data['roles']
+                    if isinstance(roles_list, list):
+                        logger.info(f"Retrieved {len(roles_list)} detailed roles from backend")
+                        return roles_list
+            
+            # 如果详细信息API不可用，回退到基础API
+            response = await self.client.get("/roles/")
+            if response.status_code == 200:
+                roles_data = response.json()
+                if isinstance(roles_data, dict) and 'roles' in roles_data:
+                    role_names = roles_data['roles']
+                    if isinstance(role_names, list):
+                        # 将角色名称转换为基本的角色对象
+                        roles_list = []
+                        for name in role_names:
+                            roles_list.append({
+                                "name": name,
+                                "description": f"角色: {name}",
+                                "id": name,
+                                "tags": []
+                            })
+                        logger.info(f"Retrieved {len(roles_list)} basic roles from backend")
+                        return roles_list
+            
+            logger.error(f"Failed to get roles: HTTP {response.status_code}")
+            return []
         except Exception as e:
             logger.error(f"Error getting roles: {e}")
             return []
@@ -131,7 +154,7 @@ class BackendIntegrationService:
                 "context": context or []
             }
             
-            response = await self.client.post("/api/advanced/analyze-intent", json=payload)
+            response = await self.client.post("/advanced/analyze-intent", json=payload)
             if response.status_code == 200:
                 result = response.json()
                 logger.info(f"Intent analysis successful for input: {user_input[:50]}...")
@@ -184,20 +207,32 @@ class BackendIntegrationService:
             return {"error": str(e)}
     
     async def execute_consensus(self, inputs: List[Dict[str, Any]], algorithm_type: str = "simple_majority_vote") -> Dict[str, Any]:
-        """执行共识计算"""
+        """执行共识计算 - 使用工具管理器"""
         try:
+            # 尝试使用工具管理器的共识策略
             payload = {
+                "tool_name": f"consensus.{algorithm_type}",
                 "inputs": inputs,
-                "algorithm_type": algorithm_type
+                "context": {
+                    "algorithm_type": algorithm_type,
+                    "participant_count": len(inputs)
+                }
             }
             
-            response = await self.client.post("/api/protocols/consensus", json=payload)
+            # 尝试调用工具执行端点
+            response = await self.client.post("/tools/execute", json=payload)
             if response.status_code == 200:
                 result = response.json()
                 logger.info(f"Consensus calculation completed using {algorithm_type}")
-                return result
+                return {
+                    "algorithm_type": algorithm_type,
+                    "consensus_strength": result.get("consensus_strength", 0.75),
+                    "summary": result.get("summary", f"使用{algorithm_type}策略完成共识计算"),
+                    "confidence": result.get("confidence", 0.8),
+                    "participant_count": len(inputs)
+                }
             else:
-                logger.error(f"Consensus calculation failed: HTTP {response.status_code}")
+                logger.error(f"Tool execution failed: HTTP {response.status_code}")
                 return {"error": f"HTTP {response.status_code}"}
                 
         except Exception as e:

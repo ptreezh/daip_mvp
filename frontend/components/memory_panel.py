@@ -145,8 +145,6 @@ class MemoryPanel(Widget):
         
         # 过滤记忆
         await self._filter_memories()
-        await self.refresh()
-    
     async def _filter_memories(self):
         """根据搜索条件过滤记忆"""
         filtered = []
@@ -174,8 +172,6 @@ class MemoryPanel(Widget):
             self._create_memory_form()
         )
         self.edit_modal.open()
-        await self.refresh()
-    
     async def _handle_edit_memory(self, memory_id: str):
         """处理编辑记忆"""
         self.selected_memory = next(
@@ -189,15 +185,11 @@ class MemoryPanel(Widget):
                 self._create_memory_form(self.selected_memory)
             )
             self.edit_modal.open()
-            await self.refresh()
-    
     async def _handle_delete_memory(self, memory_id: str):
         """处理删除记忆"""
         self.current_memories = [
             m for m in self.current_memories if m["id"] != memory_id
         ]
-        await self.refresh()
-    
     def _create_memory_form(self, memory: Optional[Dict[str, Any]] = None) -> HTML:
         """创建记忆编辑表单"""
         is_edit = memory is not None

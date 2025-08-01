@@ -141,7 +141,7 @@ async def detailed_status():
     import os
     
     status_info = {
-        "timestamp": datetime.now(datetime.timezone.utc).isoformat(),
+        "timestamp": datetime.now().isoformat(),
         "service": {
             "name": "DAIP-LIVE MVP API",
             "version": "0.1.0",

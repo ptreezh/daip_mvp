@@ -113,7 +113,7 @@ async def call_llm_simulation(
     await asyncio.sleep(1)  # 模拟网络延迟
 
     # 从全局缓存获取角色描述
-    role_details = app_state.ALL_ROLES_DETAILS.get(
+    role_details = app_state.all_roles_details.get(
         role_name, {"desc": "一个普通的参与者"}
     )
     role_desc = role_details["desc"]
@@ -167,13 +167,29 @@ async def call_llm_simulation(
 @router.get("/roles", response_model=dict[str, list[str]])
 async def get_roles(app_state: AppState = Depends(get_app_state)):
     """获取所有可用的角色列表"""
-    return {"roles": sorted(list(app_state.ALL_ROLES_DETAILS.keys()))}
+    return {"roles": sorted(list(app_state.all_roles_details.keys()))}
+
+
+@router.get("/roles/details", response_model=dict[str, Any])
+async def get_roles_details(app_state: AppState = Depends(get_app_state)):
+    """获取所有角色的详细信息"""
+    roles_list = []
+    for name, details in app_state.all_roles_details.items():
+        role_info = {
+            "name": name,
+            "description": details.get("desc", ""),
+            "tags": details.get("tags", []),
+            "id": name  # 使用name作为id
+        }
+        roles_list.append(role_info)
+    
+    return {"roles": roles_list}
 
 
 @router.post("/roles/create", response_model=Role)
 async def create_role(role: Role, app_state: AppState = Depends(get_app_state)):
     """创建并保存一个新角色"""
-    if role.name in app_state.ALL_ROLES_DETAILS:
+    if role.name in app_state.all_roles_details:
         raise HTTPException(status_code=400, detail=f"角色 '{role.name}' 已存在。")
 
     try:
@@ -243,7 +259,7 @@ async def create_smart_role(
 
         standardized_role = standardize_role_dict(role_data)
 
-        if standardized_role["name"] in app_state.ALL_ROLES_DETAILS:
+        if standardized_role["name"] in app_state.all_roles_details:
             raise HTTPException(
                 status_code=400, detail=f"角色 '{standardized_role['name']}' 已存在。"
             )
@@ -392,7 +408,7 @@ async def api_search_roles_by_embedding(
     """智能embedding检索角色，返回最相关top_k角色"""
     query_emb = app_state.get_text_embedding(query)
     scored = []
-    for name, info in app_state.ALL_ROLES_DETAILS.items():
+    for name, info in app_state.all_roles_details.items():
         emb = info.get("embedding")
         if emb:
             score = float(

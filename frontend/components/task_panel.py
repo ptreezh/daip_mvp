@@ -76,8 +76,6 @@ class TaskPanel(Widget):
                         break
             
             # 刷新组件显示
-            await self.refresh()
-            
         except Exception as e:
             print(f"处理任务更新失败: {e}")
     

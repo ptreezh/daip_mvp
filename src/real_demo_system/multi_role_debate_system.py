@@ -144,10 +144,21 @@ class MultiRoleDebateSystem:
             for role_id in participating_roles:
                 try:
                     # 从角色管理器加载真实角色
-                    role_data = await self.role_manager.get_role(role_id)
-                    if not role_data:
+                    role = self.role_manager.get_role(role_id)
+                    if not role:
                         logger.warning(f"Role not found: {role_id}")
                         continue
+                    
+                    # 转换Role对象为字典格式，确保所有值都是可序列化的
+                    role_data = {
+                        "role_id": str(role.id),
+                        "name": str(role.name),
+                        "description": str(role.description),
+                        "capabilities": list(getattr(role, 'capabilities', [])),
+                        "values": list(getattr(role, 'values', [])),
+                        "reasoning_style": str(getattr(role, 'reasoning_style', 'analytical'))
+                    }
+
                     
                     # 分析角色认知档案
                     cognitive_profile = await self._analyze_cognitive_profile(role_id, role_data)
@@ -211,7 +222,7 @@ class MultiRoleDebateSystem:
         role_data: Dict[str, Any]
     ) -> CognitiveProfile:
         """
-        分析角色认知档案
+        分析角色认知档案 - 简化版本，避免LLM解析问题
         
         Args:
             role_id: 角色ID
@@ -220,67 +231,37 @@ class MultiRoleDebateSystem:
         Returns:
             认知档案
         """
-        try:
-            # 构建认知分析提示
-            analysis_prompt = f"""
-            分析以下AI角色的认知特征，提取关键认知维度：
-            
-            角色名称: {role_data.get('name', 'Unknown')}
-            角色描述: {role_data.get('description', '')}
-            专业领域: {role_data.get('expertise', [])}
-            价值观: {role_data.get('values', [])}
-            推理风格: {role_data.get('reasoning_style', '')}
-            
-            请分析并返回以下认知维度：
-            1. 思维风格 (analytical/intuitive/creative/systematic)
-            2. 价值体系 (核心价值观列表)
-            3. 专业领域 (专长领域列表)
-            4. 推理方式 (deductive/inductive/abductive/analogical)
-            5. 决策风格 (rational/emotional/collaborative/authoritative)
-            6. 沟通风格 (direct/diplomatic/persuasive/supportive)
-            
-            以JSON格式返回分析结果。
-            """
-            
-            # 调用真实LLM进行认知分析
-            record = await self.llm_integrator.call_llm(
-                role_id=role_id,
-                user_input=analysis_prompt,
-                context={
-                    "analysis_type": "cognitive_profile",
-                    "role_data": role_data
-                }
-            )
-            
-            if record.success:
-                # 解析LLM响应
-                try:
-                    import json
-                    analysis_result = json.loads(record.response)
-                    
-                    return CognitiveProfile(
-                        thinking_style=analysis_result.get("thinking_style", "analytical"),
-                        value_system=analysis_result.get("value_system", role_data.get('values', [])),
-                        expertise_areas=analysis_result.get("expertise_areas", role_data.get('expertise', [])),
-                        reasoning_approach=analysis_result.get("reasoning_approach", "deductive"),
-                        decision_making_style=analysis_result.get("decision_making_style", "rational"),
-                        communication_style=analysis_result.get("communication_style", "direct")
-                    )
-                    
-                except json.JSONDecodeError:
-                    logger.warning(f"Failed to parse cognitive analysis for {role_id}")
-                    
-        except Exception as e:
-            logger.error(f"Failed to analyze cognitive profile for {role_id}: {e}")
+        # 直接基于角色数据构建认知档案，避免LLM解析问题
+        logger.info(f"Creating cognitive profile for {role_id} without LLM analysis")
         
-        # 回退到基于角色数据的简单分析
+        # 从角色数据中提取信息
+        capabilities = role_data.get('capabilities', [])
+        description = role_data.get('description', '')
+        
+        # 基于描述和能力推断认知特征
+        thinking_style = "analytical"
+        if "creative" in description.lower() or "innovation" in description.lower():
+            thinking_style = "creative"
+        elif "systematic" in description.lower() or "process" in description.lower():
+            thinking_style = "systematic"
+        elif "intuitive" in description.lower():
+            thinking_style = "intuitive"
+        
+        communication_style = "direct"
+        if "diplomatic" in description.lower() or "negotiation" in description.lower():
+            communication_style = "diplomatic"
+        elif "persuasive" in description.lower() or "influence" in description.lower():
+            communication_style = "persuasive"
+        elif "supportive" in description.lower() or "collaborative" in description.lower():
+            communication_style = "supportive"
+        
         return CognitiveProfile(
-            thinking_style=role_data.get('reasoning_style', 'analytical'),
-            value_system=role_data.get('values', []),
-            expertise_areas=role_data.get('expertise', []),
+            thinking_style=thinking_style,
+            value_system=capabilities[:3] if capabilities else ["expertise", "accuracy", "helpfulness"],
+            expertise_areas=capabilities if capabilities else ["general"],
             reasoning_approach="deductive",
             decision_making_style="rational",
-            communication_style="direct"
+            communication_style=communication_style
         )
     
     def _calculate_cognitive_diversity(

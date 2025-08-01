@@ -23,6 +23,11 @@ from components.rich_text_renderer import rich_text_renderer
 # 配置日志
 logger = logging.getLogger(__name__)
 
+# Lona框架说明:
+# Lona会自动检测数据变化并更新UI，无需手动调用refresh()
+# 当组件的数据属性（如self.messages）发生变化时，UI会自动重新渲染
+
+
 
 class MessageType(Enum):
     """消息类型枚举"""
@@ -51,13 +56,24 @@ class ChatMessage:
 class ChatInterface(Widget):
     """聊天界面组件"""
     
-    def __init__(self, assistant_service: PersonalAssistantService):
+    def __init__(self, assistant_service: PersonalAssistantService, session_id: Optional[str] = None):
         super().__init__()
         
         self.assistant_service = assistant_service
         self.messages: List[ChatMessage] = []
-        self.session_id = f"session_{datetime.now().timestamp()}"
+        self.session_id = session_id or f"session_{datetime.now().timestamp()}"
         self.is_processing = False
+        
+        # 集成演示相关属性
+        self.current_scenario = None
+        self.demo_active = False
+        self.context_data = {}
+        self.current_task = None
+        
+        # 回调函数（供外部组件注册）
+        self.on_message_sent = None
+        self.on_workflow_triggered = None
+        self.on_context_updated = None
         
         # 创建UI元素
         self.message_input = TextInput(
@@ -117,8 +133,6 @@ class ChatInterface(Widget):
                     }
                 )
                 self.messages.append(agent_msg)
-                await self.refresh()
-                
             elif message.type == MessageType.WORKFLOW_STATUS:
                 # 工作流状态更新
                 status_msg = ChatMessage(
@@ -128,8 +142,6 @@ class ChatInterface(Widget):
                     metadata=message.payload
                 )
                 self.messages.append(status_msg)
-                await self.refresh()
-                
             elif message.type == MessageType.CONSENSUS_RESULT:
                 # 共识结果
                 consensus_msg = ChatMessage(
@@ -140,8 +152,6 @@ class ChatInterface(Widget):
                     metadata=message.payload
                 )
                 self.messages.append(consensus_msg)
-                await self.refresh()
-                
         except Exception as e:
             logger.error(f"处理WebSocket消息失败: {e}")
     
@@ -185,7 +195,12 @@ class ChatInterface(Widget):
             
             # 清空输入框并刷新界面
             self.message_input.value = ""
-            await self.refresh()
+            # 触发外部回调（用于组件间通信）
+            if self.on_message_sent:
+                try:
+                    await self.on_message_sent(user_message)
+                except Exception as e:
+                    logger.error(f"消息发送回调失败: {e}")
             
             # 检查是否是特殊命令
             if user_input.startswith('/'):
@@ -202,14 +217,10 @@ class ChatInterface(Widget):
                 message_type=MessageType.ERROR
             )
             self.messages.append(error_msg)
-            await self.refresh()
-            
         finally:
             self.is_processing = False
             self.send_button.disabled = False
             self.message_input.disabled = False
-            await self.refresh()
-    
     async def _handle_command(self, command: str):
         """处理特殊命令"""
         command = command.lower().strip()
@@ -338,8 +349,6 @@ class ChatInterface(Widget):
                 message_type=MessageType.SYSTEM_INFO
             )
             self.messages.append(processing_msg)
-            await self.refresh()
-            
             # 调用个人助手服务处理消息
             response = await self.assistant_service.process_message(user_input, self.session_id)
             
@@ -494,7 +503,6 @@ class ChatInterface(Widget):
             metadata=metadata or {}
         )
         self.messages.append(agent_msg)
-        await self.refresh()
         await self.scroll_to_bottom()
     
     async def add_system_message(self, content: str, message_type: MessageType = MessageType.SYSTEM_INFO):
@@ -505,7 +513,6 @@ class ChatInterface(Widget):
             message_type=message_type
         )
         self.messages.append(system_msg)
-        await self.refresh()
         await self.scroll_to_bottom()
     
     def get_message_history(self) -> List[Dict[str, Any]]:
@@ -526,3 +533,111 @@ class ChatInterface(Widget):
         """清空消息历史（供外部调用）"""
         self.messages.clear()
         self._add_welcome_message()
+    
+    # 集成演示相关方法
+    async def set_demo_scenario(self, scenario_key: str, scenario_data: Dict[str, Any]):
+        """设置演示场景"""
+        self.current_scenario = scenario_key
+        self.demo_active = True
+        
+        # 添加场景开始消息
+        scenario_msg = ChatMessage(
+            sender="system",
+            content=f"🎭 演示场景已启动: {scenario_data['name']}\n\n"
+                   f"📝 描述: {scenario_data['description']}\n"
+                   f"⏱️ 预计时长: {scenario_data['duration']}\n"
+                   f"👥 参与角色: {', '.join(scenario_data['roles'])}\n"
+                   f"🔄 工作流: {', '.join(scenario_data['workflows'])}\n\n"
+                   f"请输入您想要分析或讨论的具体问题。",
+            message_type=MessageType.SYSTEM_INFO
+        )
+        self.messages.append(scenario_msg)
+    async def add_context(self, context_data: Dict[str, Any]):
+        """添加上下文信息"""
+        self.context_data.update(context_data)
+        
+        # 通知用户上下文已更新
+        context_msg = ChatMessage(
+            sender="system",
+            content=f"📚 已添加上下文信息: {context_data.get('title', '未知')}\n"
+                   f"类型: {context_data.get('type', '知识')}\n"
+                   f"相关性: {context_data.get('relevance', 'N/A')}",
+            message_type=MessageType.SYSTEM_INFO
+        )
+        self.messages.append(context_msg)
+        # 触发上下文更新回调
+        if self.on_context_updated:
+            try:
+                await self.on_context_updated(self.context_data)
+            except Exception as e:
+                logger.error(f"上下文更新回调失败: {e}")
+    
+    async def set_current_task(self, task_data: Dict[str, Any]):
+        """设置当前任务"""
+        self.current_task = task_data
+        
+        # 通知用户任务已设置
+        task_msg = ChatMessage(
+            sender="system",
+            content=f"📋 当前任务: {task_data.get('title', '未知任务')}\n"
+                   f"状态: {task_data.get('status', '未知')}\n"
+                   f"负责人: {task_data.get('assigned_agent', '未分配')}",
+            message_type=MessageType.SYSTEM_INFO
+        )
+        self.messages.append(task_msg)
+    async def display_workflow_result(self, workflow_result: Dict[str, Any]):
+        """显示工作流执行结果"""
+        result_content = f"🎯 工作流执行完成\n\n"
+        
+        if workflow_result.get("consensus_result"):
+            result_content += f"📊 共识结果: {workflow_result['consensus_result']}\n"
+            result_content += f"🎯 置信度: {workflow_result.get('confidence', 0):.2f}\n\n"
+        
+        if workflow_result.get("key_insights"):
+            result_content += "💡 关键洞察:\n"
+            for insight in workflow_result["key_insights"]:
+                result_content += f"• {insight}\n"
+            result_content += "\n"
+        
+        if workflow_result.get("recommendations"):
+            result_content += "📋 建议:\n"
+            for rec in workflow_result["recommendations"]:
+                result_content += f"• {rec}\n"
+        
+        result_msg = ChatMessage(
+            sender="system",
+            content=result_content,
+            message_type=MessageType.CONSENSUS_RESULT,
+            metadata=workflow_result
+        )
+        self.messages.append(result_msg)
+    async def handle_realtime_message(self, message_data: Dict[str, Any]):
+        """处理实时消息更新"""
+        try:
+            msg_type = MessageType(message_data.get("type", "text"))
+            
+            realtime_msg = ChatMessage(
+                sender=message_data.get("sender", "system"),
+                content=message_data.get("content", ""),
+                message_type=msg_type,
+                metadata=message_data.get("metadata", {})
+            )
+            
+            self.messages.append(realtime_msg)
+            await self.scroll_to_bottom()
+            
+        except Exception as e:
+            logger.error(f"处理实时消息失败: {e}")
+    
+    def get_demo_context(self) -> Dict[str, Any]:
+        """获取演示上下文"""
+        return {
+            "session_id": self.session_id,
+            "current_scenario": self.current_scenario,
+            "demo_active": self.demo_active,
+            "context_data": self.context_data,
+            "current_task": self.current_task,
+            "message_count": len(self.messages)
+        }
+    
+
