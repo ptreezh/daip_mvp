@@ -53,7 +53,9 @@ class IntegratedLLMManager:
         """初始化LLM管理器"""
         self.context_optimizer = IntelligentContextOptimizer()
         self.role_manager = RoleManager()
-        self.memory_agent = MemAgent()
+        
+        # 安全初始化MemAgent，支持优雅降级
+        self.memory_agent = self._initialize_memory_agent()
         
         # 角色上下文缓存
         self.role_contexts: Dict[str, RoleContext] = {}

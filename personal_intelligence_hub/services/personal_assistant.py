@@ -108,19 +108,41 @@ class PersonalAssistantService:
             return await self._fallback_intent_analysis(user_input)
     
     async def _fallback_intent_analysis(self, user_input: str) -> IntentResult:
-        """降级意图分析（本地简单规则）"""
+        """增强的降级意图分析（智能规则引擎）"""
+        # 使用增强的工作流选择逻辑
+        from src.core_services.enhanced_workflow_selector import get_enhanced_workflow_selector
+        
+        try:
+            selector = get_enhanced_workflow_selector()
+            enhanced_result = selector.select_workflow(user_input)
+            
+            # 转换为PersonalAssistant的IntentResult格式
+            return IntentResult(
+                workflowType=enhanced_result.workflow_type,
+                confidence=enhanced_result.confidence,
+                reasoning=f"增强降级策略: {enhanced_result.reasoning}",
+                topic=enhanced_result.topic
+            )
+            
+        except Exception as e:
+            logger.error(f"Enhanced fallback analysis failed: {e}")
+            # 最终降级到简单规则
+            return self._simple_fallback_analysis(user_input)
+    
+    def _simple_fallback_analysis(self, user_input: str) -> IntentResult:
+        """简单降级分析（最后的备选方案）"""
         if any(keyword in user_input.lower() for keyword in ["分析", "审查", "评估", "检查"]):
             return IntentResult(
                 workflowType=WorkflowType.CRITICAL_REVIEW,
                 confidence=0.70,
-                reasoning="基于关键词的本地分析：建议使用批判性审查工作流",
+                reasoning="简单关键词匹配：建议使用批判性审查工作流",
                 topic=user_input
             )
         elif any(keyword in user_input.lower() for keyword in ["讨论", "观点", "角度", "看法"]):
             return IntentResult(
                 workflowType=WorkflowType.MULTI_PERSPECTIVE,
                 confidence=0.65,
-                reasoning="基于关键词的本地分析：建议使用多视角综合工作流",
+                reasoning="简单关键词匹配：建议使用多视角综合工作流",
                 topic=user_input
             )
         else:
