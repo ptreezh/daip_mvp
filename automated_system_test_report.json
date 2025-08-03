@@ -1,0 +1,190 @@
+{
+  "overall_success": false,
+  "test_summary": {
+    "start_time": "2025-08-02T19:50:28.011425",
+    "end_time": "2025-08-02T19:54:35.989825",
+    "duration_minutes": 4.132973333333333,
+    "total_test_categories": 5,
+    "passed_categories": 1,
+    "success_rate": 0.2
+  },
+  "detailed_results": {
+    "service_startup": {
+      "success": false,
+      "services": {
+        "personal_hub": {
+          "success": false,
+          "error": "服务启动超时"
+        },
+        "quick_delivery": {
+          "success": false,
+          "error": "服务启动超时"
+        }
+      },
+      "primary_service": null
+    },
+    "browser_automation": {
+      "success": false,
+      "success_rate": 0.0,
+      "user_story_results": [
+        {
+          "story_name": "用户访问主页",
+          "description": "用户能够成功访问系统主页",
+          "success": false,
+          "execution_time": 18.27339792251587,
+          "details": {
+            "success": false,
+            "error": "Message: unknown error: net::ERR_CONNECTION_REFUSED\n  (Session info: chrome=138.0.7204.184)\nStacktrace:\n\tGetHandleVerifier [0x0x7ff7fc73e415+77285]\n\tGetHandleVerifier [0x0x7ff7fc73e470+77376]\n\t(No symbol) [0x0x7ff7fc509a6a]\n\t(No symbol) [0x0x7ff7fc506823]\n\t(No symbol) [0x0x7ff7fc4f7659]\n\t(No symbol) [0x0x7ff7fc4f9401]\n\t(No symbol) [0x0x7ff7fc4f7976]\n\t(No symbol) [0x0x7ff7fc4f73d6]\n\t(No symbol) [0x0x7ff7fc4f709a]\n\t(No symbol) [0x0x7ff7fc4f4c68]\n\t(No symbol) [0x0x7ff7fc4f54ec]\n\t(No symbol) [0x0x7ff7fc50da1a]\n\t(No symbol) [0x0x7ff7fc5b167e]\n\t(No symbol) [0x0x7ff7fc58860a]\n\t(No symbol) [0x0x7ff7fc5b087f]\n\t(No symbol) [0x0x7ff7fc5883e3]\n\t(No symbol) [0x0x7ff7fc551521]\n\t(No symbol) [0x0x7ff7fc5522b3]\n\tGetHandleVerifier [0x0x7ff7fca21efd+3107021]\n\tGetHandleVerifier [0x0x7ff7fca1c29d+3083373]\n\tGetHandleVerifier [0x0x7ff7fca3bedd+3213485]\n\tGetHandleVerifier [0x0x7ff7fc75884e+184862]\n\tGetHandleVerifier [0x0x7ff7fc76055f+216879]\n\tGetHandleVerifier [0x0x7ff7fc747084+113236]\n\tGetHandleVerifier [0x0x7ff7fc747239+113673]\n\tGetHandleVerifier [0x0x7ff7fc72e298+11368]\n\tBaseThreadInitThunk [0x0x7ff926cfe8d7+23]\n\tRtlUserThreadStart [0x0x7ff927f9c34c+44]\n"
+          },
+          "timestamp": "2025-08-02T19:54:09.728582"
+        },
+        {
+          "story_name": "专家咨询场景",
+          "description": "用户能够发起专家咨询并获得建议",
+          "success": false,
+          "execution_time": 2.43424129486084,
+          "details": {
+            "success": false,
+            "error": "Message: unknown error: net::ERR_CONNECTION_REFUSED\n  (Session info: chrome=138.0.7204.184)\nStacktrace:\n\tGetHandleVerifier [0x0x7ff7fc73e415+77285]\n\tGetHandleVerifier [0x0x7ff7fc73e470+77376]\n\t(No symbol) [0x0x7ff7fc509a6a]\n\t(No symbol) [0x0x7ff7fc506823]\n\t(No symbol) [0x0x7ff7fc4f7659]\n\t(No symbol) [0x0x7ff7fc4f9401]\n\t(No symbol) [0x0x7ff7fc4f7976]\n\t(No symbol) [0x0x7ff7fc4f73d6]\n\t(No symbol) [0x0x7ff7fc4f709a]\n\t(No symbol) [0x0x7ff7fc4f4c68]\n\t(No symbol) [0x0x7ff7fc4f54ec]\n\t(No symbol) [0x0x7ff7fc50da1a]\n\t(No symbol) [0x0x7ff7fc5b167e]\n\t(No symbol) [0x0x7ff7fc58860a]\n\t(No symbol) [0x0x7ff7fc5b087f]\n\t(No symbol) [0x0x7ff7fc5883e3]\n\t(No symbol) [0x0x7ff7fc551521]\n\t(No symbol) [0x0x7ff7fc5522b3]\n\tGetHandleVerifier [0x0x7ff7fca21efd+3107021]\n\tGetHandleVerifier [0x0x7ff7fca1c29d+3083373]\n\tGetHandleVerifier [0x0x7ff7fca3bedd+3213485]\n\tGetHandleVerifier [0x0x7ff7fc75884e+184862]\n\tGetHandleVerifier [0x0x7ff7fc76055f+216879]\n\tGetHandleVerifier [0x0x7ff7fc747084+113236]\n\tGetHandleVerifier [0x0x7ff7fc747239+113673]\n\tGetHandleVerifier [0x0x7ff7fc72e298+11368]\n\tBaseThreadInitThunk [0x0x7ff926cfe8d7+23]\n\tRtlUserThreadStart [0x0x7ff927f9c34c+44]\n"
+          },
+          "timestamp": "2025-08-02T19:54:12.162823"
+        },
+        {
+          "story_name": "学术研究场景",
+          "description": "用户能够进行学术研究并生成报告",
+          "success": false,
+          "execution_time": 2.5601673126220703,
+          "details": {
+            "success": false,
+            "error": "Message: unknown error: net::ERR_CONNECTION_REFUSED\n  (Session info: chrome=138.0.7204.184)\nStacktrace:\n\tGetHandleVerifier [0x0x7ff7fc73e415+77285]\n\tGetHandleVerifier [0x0x7ff7fc73e470+77376]\n\t(No symbol) [0x0x7ff7fc509a6a]\n\t(No symbol) [0x0x7ff7fc506823]\n\t(No symbol) [0x0x7ff7fc4f7659]\n\t(No symbol) [0x0x7ff7fc4f9401]\n\t(No symbol) [0x0x7ff7fc4f7976]\n\t(No symbol) [0x0x7ff7fc4f73d6]\n\t(No symbol) [0x0x7ff7fc4f709a]\n\t(No symbol) [0x0x7ff7fc4f4c68]\n\t(No symbol) [0x0x7ff7fc4f54ec]\n\t(No symbol) [0x0x7ff7fc50da1a]\n\t(No symbol) [0x0x7ff7fc5b167e]\n\t(No symbol) [0x0x7ff7fc58860a]\n\t(No symbol) [0x0x7ff7fc5b087f]\n\t(No symbol) [0x0x7ff7fc5883e3]\n\t(No symbol) [0x0x7ff7fc551521]\n\t(No symbol) [0x0x7ff7fc5522b3]\n\tGetHandleVerifier [0x0x7ff7fca21efd+3107021]\n\tGetHandleVerifier [0x0x7ff7fca1c29d+3083373]\n\tGetHandleVerifier [0x0x7ff7fca3bedd+3213485]\n\tGetHandleVerifier [0x0x7ff7fc75884e+184862]\n\tGetHandleVerifier [0x0x7ff7fc76055f+216879]\n\tGetHandleVerifier [0x0x7ff7fc747084+113236]\n\tGetHandleVerifier [0x0x7ff7fc747239+113673]\n\tGetHandleVerifier [0x0x7ff7fc72e298+11368]\n\tBaseThreadInitThunk [0x0x7ff926cfe8d7+23]\n\tRtlUserThreadStart [0x0x7ff927f9c34c+44]\n"
+          },
+          "timestamp": "2025-08-02T19:54:14.722990"
+        },
+        {
+          "story_name": "界面响应性测试",
+          "description": "验证界面响应速度和交互性",
+          "success": false,
+          "execution_time": 2.224886178970337,
+          "details": {
+            "success": false,
+            "error": "Message: unknown error: net::ERR_CONNECTION_REFUSED\n  (Session info: chrome=138.0.7204.184)\nStacktrace:\n\tGetHandleVerifier [0x0x7ff7fc73e415+77285]\n\tGetHandleVerifier [0x0x7ff7fc73e470+77376]\n\t(No symbol) [0x0x7ff7fc509a6a]\n\t(No symbol) [0x0x7ff7fc506823]\n\t(No symbol) [0x0x7ff7fc4f7659]\n\t(No symbol) [0x0x7ff7fc4f9401]\n\t(No symbol) [0x0x7ff7fc4f7976]\n\t(No symbol) [0x0x7ff7fc4f73d6]\n\t(No symbol) [0x0x7ff7fc4f709a]\n\t(No symbol) [0x0x7ff7fc4f4c68]\n\t(No symbol) [0x0x7ff7fc4f54ec]\n\t(No symbol) [0x0x7ff7fc50da1a]\n\t(No symbol) [0x0x7ff7fc5b167e]\n\t(No symbol) [0x0x7ff7fc58860a]\n\t(No symbol) [0x0x7ff7fc5b087f]\n\t(No symbol) [0x0x7ff7fc5883e3]\n\t(No symbol) [0x0x7ff7fc551521]\n\t(No symbol) [0x0x7ff7fc5522b3]\n\tGetHandleVerifier [0x0x7ff7fca21efd+3107021]\n\tGetHandleVerifier [0x0x7ff7fca1c29d+3083373]\n\tGetHandleVerifier [0x0x7ff7fca3bedd+3213485]\n\tGetHandleVerifier [0x0x7ff7fc75884e+184862]\n\tGetHandleVerifier [0x0x7ff7fc76055f+216879]\n\tGetHandleVerifier [0x0x7ff7fc747084+113236]\n\tGetHandleVerifier [0x0x7ff7fc747239+113673]\n\tGetHandleVerifier [0x0x7ff7fc72e298+11368]\n\tBaseThreadInitThunk [0x0x7ff926cfe8d7+23]\n\tRtlUserThreadStart [0x0x7ff927f9c34c+44]\n"
+          },
+          "timestamp": "2025-08-02T19:54:16.947876"
+        },
+        {
+          "story_name": "错误处理测试",
+          "description": "验证系统错误处理能力",
+          "success": false,
+          "execution_time": 0.22726917266845703,
+          "details": {
+            "success": false,
+            "error": "Message: unknown error: net::ERR_CONNECTION_REFUSED\n  (Session info: chrome=138.0.7204.184)\nStacktrace:\n\tGetHandleVerifier [0x0x7ff7fc73e415+77285]\n\tGetHandleVerifier [0x0x7ff7fc73e470+77376]\n\t(No symbol) [0x0x7ff7fc509a6a]\n\t(No symbol) [0x0x7ff7fc506823]\n\t(No symbol) [0x0x7ff7fc4f7659]\n\t(No symbol) [0x0x7ff7fc4f9401]\n\t(No symbol) [0x0x7ff7fc4f7976]\n\t(No symbol) [0x0x7ff7fc4f73d6]\n\t(No symbol) [0x0x7ff7fc4f709a]\n\t(No symbol) [0x0x7ff7fc4f4c68]\n\t(No symbol) [0x0x7ff7fc4f54ec]\n\t(No symbol) [0x0x7ff7fc50da1a]\n\t(No symbol) [0x0x7ff7fc5b167e]\n\t(No symbol) [0x0x7ff7fc58860a]\n\t(No symbol) [0x0x7ff7fc5b087f]\n\t(No symbol) [0x0x7ff7fc5883e3]\n\t(No symbol) [0x0x7ff7fc551521]\n\t(No symbol) [0x0x7ff7fc5522b3]\n\tGetHandleVerifier [0x0x7ff7fca21efd+3107021]\n\tGetHandleVerifier [0x0x7ff7fca1c29d+3083373]\n\tGetHandleVerifier [0x0x7ff7fca3bedd+3213485]\n\tGetHandleVerifier [0x0x7ff7fc75884e+184862]\n\tGetHandleVerifier [0x0x7ff7fc76055f+216879]\n\tGetHandleVerifier [0x0x7ff7fc747084+113236]\n\tGetHandleVerifier [0x0x7ff7fc747239+113673]\n\tGetHandleVerifier [0x0x7ff7fc72e298+11368]\n\tBaseThreadInitThunk [0x0x7ff926cfe8d7+23]\n\tRtlUserThreadStart [0x0x7ff927f9c34c+44]\n"
+          },
+          "timestamp": "2025-08-02T19:54:17.175672"
+        }
+      ],
+      "total_stories": 5,
+      "successful_stories": 0,
+      "browser_available": true,
+      "tested_url": "http://localhost:8086/hub"
+    },
+    "api_endpoints": {
+      "success": false,
+      "endpoint_results": [
+        {
+          "endpoint": "http://localhost:8086",
+          "success": false,
+          "status_code": 502,
+          "response_time": 1.3178224563598633,
+          "content_length": 0
+        },
+        {
+          "endpoint": "http://localhost:8086/api/status",
+          "success": false,
+          "status_code": 502,
+          "response_time": 3.7575364112854004,
+          "content_length": 0
+        },
+        {
+          "endpoint": "http://localhost:8090",
+          "success": false,
+          "status_code": 502,
+          "response_time": 3.1516852378845215,
+          "content_length": 0
+        },
+        {
+          "endpoint": "http://localhost:8090/status",
+          "success": false,
+          "status_code": 502,
+          "response_time": 2.640247106552124,
+          "content_length": 0
+        }
+      ],
+      "total_endpoints": 4,
+      "successful_endpoints": 0,
+      "success_rate": 0.0
+    },
+    "performance": {
+      "success": true,
+      "performance_score": 0.9226,
+      "average_response_time": 0,
+      "details": {
+        "memory_usage": {
+          "total_gb": 63.71471405029297,
+          "available_gb": 51.40684509277344,
+          "percent_used": 19.3,
+          "used_gb": 12.307868957519531
+        },
+        "cpu_usage": 6.5,
+        "disk_usage": {
+          "total_gb": 451.64452743530273,
+          "free_gb": 421.56625747680664,
+          "percent_used": 6.659722000684433
+        },
+        "service_response_times": [
+          {
+            "service": "personal_hub",
+            "response_time": 3.885094165802002,
+            "success": false
+          },
+          {
+            "service": "quick_delivery",
+            "response_time": 3.0571019649505615,
+            "success": false
+          }
+        ]
+      }
+    },
+    "engineering_usability": {
+      "success": false,
+      "usability_score": 0.16666666666666666,
+      "usability_checks": {
+        "services_auto_start": false,
+        "browser_automation_works": false,
+        "apis_accessible": false,
+        "performance_acceptable": false,
+        "user_stories_pass": false,
+        "no_critical_errors": true
+      },
+      "engineering_quality": {
+        "deployment_ready": false,
+        "user_ready": false,
+        "performance_ready": false,
+        "stability_demonstrated": false
+      },
+      "overall_engineering_score": 0.0
+    }
+  },
+  "recommendations": [
+    "服务启动存在问题，需要检查依赖和配置",
+    "浏览器自动化测试失败，需要检查前端界面和交互",
+    "API端点测试失败，需要检查后端服务",
+    "工程可用性需要改进，建议完善部署和监控"
+  ],
+  "engineering_assessment": {
+    "deployment_ready": false,
+    "user_ready": false,
+    "performance_ready": false,
+    "overall_quality": 0.0
+  }
+}

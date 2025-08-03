@@ -1,1 +1,9 @@
-import sys\nsys.path.append('.')\n\nfrom src.real_demo_system.interactive_demo_flow import InteractiveDemoFlow\n\nprint(\"测试交互式演示流程\")\nflow = InteractiveDemoFlow()\nprint(\"初始化成功\")\n\nscenarios = flow.get_available_scenarios()\nprint(f\"可用场景数量: {len(scenarios)}\")\n\nfor scenario_type, info in scenarios.items():\n    print(f\"  - {info['name']} ({scenario_type})\")\n\nprint(\"基础功能测试完成！\")
+import asyncio
+from judao_mo_ai_tested_demo import JudaoMoAIEngine
+
+async def test():
+    engine = JudaoMoAIEngine()
+    result = await engine.expert_consultation("test", "strategic")
+    print(f"Test passed: {len(result.expert_opinions)} experts")
+
+asyncio.run(test())

@@ -78,7 +78,13 @@ class AcademicResearchScenario:
         self.consensus_algorithm = WeightedVotingConsensus()
         
         # 记忆代理 - 使用安全初始化
-        self.memory_agent = self._safe_initialize_memory_agent()
+        try:
+            from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
+            sskg_manager = EnhancedSSKGManager()
+            self.memory_agent = MemAgent(sskg_manager)
+        except Exception as e:
+            logger.warning(f"MemAgent初始化失败，使用空实现: {e}")
+            self.memory_agent = None
         
         # 知识持久化
         try:

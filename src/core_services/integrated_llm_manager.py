@@ -55,7 +55,11 @@ class IntegratedLLMManager:
         self.role_manager = RoleManager()
         
         # 安全初始化MemAgent，支持优雅降级
-        self.memory_agent = self._initialize_memory_agent()
+        try:
+            self.memory_agent = MemAgent()
+        except Exception as e:
+            logger.warning(f"MemAgent初始化失败，使用空实现: {e}")
+            self.memory_agent = None
         
         # 角色上下文缓存
         self.role_contexts: Dict[str, RoleContext] = {}
