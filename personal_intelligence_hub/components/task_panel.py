@@ -4,7 +4,7 @@ Personal Intelligence Hub - Task Panel Component
 任务管理面板组件
 """
 
-from lona import Component
+from lona import View
 from lona.html import HTML, Div, H3, H4, P, Button, Select, Option, Span, TextInput
 from datetime import datetime
 from typing import List, Optional, Dict, Any
@@ -16,7 +16,7 @@ from personal_intelligence_hub.models.task_models import (
 )
 
 
-class TaskPanel(Component):
+class TaskPanel(View):
     """任务面板组件"""
     
     def __init__(self):

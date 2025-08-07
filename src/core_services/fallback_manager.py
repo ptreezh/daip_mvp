@@ -628,8 +628,9 @@ class FallbackManager:
             
         except Exception as e:
             logger.error(f"Failed to update fallback strategy: {str(e)}")
-            return False    d
-ef add_priority_chain(self, algorithm_id: str, fallback_chain: List[str]) -> bool:
+            return False
+
+    def add_priority_chain(self, algorithm_id: str, fallback_chain: List[str]) -> bool:
         """
         添加算法优先级链
         

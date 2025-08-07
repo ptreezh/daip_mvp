@@ -902,18 +902,18 @@ async def system_status():
 if __name__ == "__main__":
     import uvicorn
     
-    print("🚀 启动 DAIP-LIVE V0.2 Web Demo 服务...")
-    print("📱 Web界面: http://localhost:8000")
-    print("📚 API文档: http://localhost:8000/docs")
-    print("💻 健康检查: http://localhost:8000/health")
-    print("🎯 支持的场景:")
-    print("   📚 学术研究场景 - 深度分析和研究报告")
-    print("   👨‍💼 专家咨询场景 - 专业建议和决策支持")
-    print("   😊 轻松讨论场景 - 自然对话和社交互动")
+    print("Starting DAIP-LIVE V0.2 Web Demo service...")
+    print("Web interface: http://localhost:8001")
+    print("API documentation: http://localhost:8001/docs")
+    print("Health check: http://localhost:8001/health")
+    print("Supported scenarios:")
+    print("   Academic Research Scenario - Deep analysis and research reports")
+    print("   Expert Consultation Scenario - Professional advice and decision support")
+    print("   Casual Discussion Scenario - Natural conversation and social interaction")
     
     uvicorn.run(
         app,
-        host="0.0.0.0",
-        port=8000,
+        host="127.0.0.1",
+        port=8001,
         log_level="info"
     )

@@ -16,9 +16,9 @@ from enum import Enum
 from lona.html.widget import Widget
 from lona.html import HTML, Div, TextInput, Button, P, Span, H3, Pre, Code
 
-from services.personal_assistant import PersonalAssistantService, ConversationContext
-from services.websocket_manager import websocket_manager, MessageType, WebSocketMessage
-from components.rich_text_renderer import rich_text_renderer
+from ..services.personal_assistant import PersonalAssistantService, ConversationContext
+from ..services.websocket_manager import websocket_manager, MessageType, WebSocketMessage
+from .rich_text_renderer import rich_text_renderer
 
 # 配置日志
 logger = logging.getLogger(__name__)

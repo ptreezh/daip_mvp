@@ -1,0 +1,63 @@
+{
+  "version": "V0.3.4",
+  "name": "知识检索和可视化系统",
+  "validation_date": "2025-08-03T17:57:48.191820",
+  "file_validation": {
+    "src/core_services/smart_recommendation_engine.py": true,
+    "src/core_services/knowledge_association_engine.py": true,
+    "src/core_services/knowledge_visualization_engine.py": true,
+    "src/core_services/knowledge_retrieval_optimizer.py": true,
+    "src/core_services/knowledge_history_tracker.py": true,
+    "tests/v0_3_4_integration_test.py": true
+  },
+  "content_checks": {
+    "src/core_services/smart_recommendation_engine.py": {
+      "has_class_def": true,
+      "has_async_def": true,
+      "has_docstring": true,
+      "has_import": true,
+      "line_count": 725
+    },
+    "src/core_services/knowledge_association_engine.py": {
+      "has_class_def": true,
+      "has_async_def": true,
+      "has_docstring": true,
+      "has_import": true,
+      "line_count": 1106
+    },
+    "src/core_services/knowledge_visualization_engine.py": {
+      "has_class_def": true,
+      "has_async_def": true,
+      "has_docstring": true,
+      "has_import": true,
+      "line_count": 923
+    },
+    "src/core_services/knowledge_retrieval_optimizer.py": {
+      "has_class_def": true,
+      "has_async_def": true,
+      "has_docstring": true,
+      "has_import": true,
+      "line_count": 942
+    },
+    "src/core_services/knowledge_history_tracker.py": {
+      "has_class_def": true,
+      "has_async_def": true,
+      "has_docstring": true,
+      "has_import": true,
+      "line_count": 1204
+    },
+    "tests/v0_3_4_integration_test.py": {
+      "has_class_def": true,
+      "has_async_def": true,
+      "has_docstring": true,
+      "has_import": true,
+      "line_count": 595
+    }
+  },
+  "summary": {
+    "total_files": 6,
+    "existing_files": 6,
+    "success_rate": 100.0,
+    "status": "SUCCESS"
+  }
+}

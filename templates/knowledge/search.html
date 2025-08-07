@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识检索 - DAIP-LIVE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .search-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 3rem 0;
+            color: white;
+        }
+        .search-form {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .result-card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+            margin-bottom: 1rem;
+        }
+        .result-card:hover {
+            transform: translateY(-2px);
+        }
+        .quality-badge {
+            font-size: 0.8rem;
+        }
+        .visualization-container {
+            min-height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .search-filters {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+        .loading-spinner {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/knowledge/">
+                <i class="fas fa-brain me-2"></i>DAIP-LIVE 知识系统
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link active" href="/knowledge/search">知识检索</a>
+                <a class="nav-link" href="/knowledge/visualization">可视化</a>
+                <a class="nav-link" href="/knowledge/graph">知识图谱</a>
+                <a class="nav-link" href="/knowledge/patterns">模式发现</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 搜索区域 -->
+    <div class="search-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="search-form">
+                        <h2 class="text-dark text-center mb-4">
+                            <i class="fas fa-search me-2"></i>智能知识检索
+                        </h2>
+                        
+                        <form id="search-form">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="mb-3">
+                                        <input type="text" 
+                                               class="form-control form-control-lg" 
+                                               id="search-query" 
+                                               placeholder="输入您要搜索的知识内容..."
+                                               required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-search me-2"></i>
+                                        <span class="search-btn-text">检索</span>
+                                        <div class="loading-spinner spinner-border spinner-border-sm ms-2" role="status">
+                                            <span class="visually-hidden">检索中...</span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- 高级选项 -->
+                            <div class="search-filters mt-4">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label class="form-label">检索模式</label>
+                                        <select class="form-select" id="retrieval-mode">
+                                            <option value="semantic">语义检索</option>
+                                            <option value="conceptual">概念检索</option>
+                                            <option value="temporal">时间检索</option>
+                                            <option value="associative">关联检索</option>
+                                            <option value="multi_modal">多模态检索</option>
+                                            <option value="exploratory">探索性检索</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">可视化类型</label>
+                                        <select class="form-select" id="visualization-type">
+                                            <option value="">无可视化</option>
+                                            <option value="knowledge_graph">知识图谱</option>
+                                            <option value="concept_map">概念图</option>
+                                            <option value="timeline">时间线</option>
+                                            <option value="cluster_map">聚类图</option>
+                                            <option value="relationship_matrix">关系矩阵</option>
+                                            <option value="interactive_3d">3D交互</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">结果数量</label>
+                                        <select class="form-select" id="max-results">
+                                            <option value="10">10 个结果</option>
+                                            <option value="20" selected>20 个结果</option>
+                                            <option value="50">50 个结果</option>
+                                            <option value="100">100 个结果</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">包含关联</label>
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="checkbox" id="include-related" checked>
+                                            <label class="form-check-label" for="include-related">
+                                                包含相关知识
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果区域 -->
+    <div class="container my-5">
+        <div id="search-results" style="display: none;">
+            <!-- 结果概览 -->
+            <div class="row mb-4">
+                <div class="col-lg-8">
+                    <h3>检索结果</h3>
+                    <p class="text-muted" id="results-summary"></p>
+                </div>
+                <div class="col-lg-4 text-end">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary" onclick="showResultsView()">
+                            <i class="fas fa-list me-1"></i>列表视图
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="showVisualizationView()">
+                            <i class="fas fa-chart-network me-1"></i>可视化视图
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结果标签页 -->
+            <ul class="nav nav-tabs mb-4" id="results-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#results-list-tab">
+                        <i class="fas fa-list me-1"></i>检索结果
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#visualization-tab">
+                        <i class="fas fa-chart-network me-1"></i>可视化
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#quality-analysis-tab">
+                        <i class="fas fa-award me-1"></i>质量分析
+                    </a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- 结果列表 -->
+                <div class="tab-pane fade show active" id="results-list-tab">
+                    <div id="results-list-container">
+                        <!-- 结果项将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+
+                <!-- 可视化 -->
+                <div class="tab-pane fade" id="visualization-tab">
+                    <div class="visualization-container" id="visualization-container">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-chart-network fa-3x mb-3"></i>
+                                <p>选择可视化类型后显示图表</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 质量分析 -->
+                <div class="tab-pane fade" id="quality-analysis-tab">
+                    <div id="quality-analysis-container">
+                        <!-- 质量分析将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 无结果提示 -->
+        <div id="no-results" style="display: none;">
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">未找到相关知识</h4>
+                <p class="text-muted">请尝试使用不同的关键词或检索模式</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentResults = null;
+
+        // 搜索表单提交
+        document.getElementById('search-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await performSearch();
+        });
+
+        async function performSearch() {
+            const query = document.getElementById('search-query').value.trim();
+            if (!query) return;
+
+            // 显示加载状态
+            showLoadingState(true);
+            hideResults();
+
+            try {
+                const searchData = {
+                    query: query,
+                    mode: document.getElementById('retrieval-mode').value,
+                    visualization: document.getElementById('visualization-type').value || null,
+                    max_results: parseInt(document.getElementById('max-results').value),
+                    include_related: document.getElementById('include-related').checked,
+                    filters: {},
+                    context: {}
+                };
+
+                const response = await fetch('/knowledge/api/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(searchData)
+                });
+
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+
+                currentResults = result;
+                displayResults(result);
+
+            } catch (error) {
+                console.error('搜索错误:', error);
+                showErrorMessage(error.message);
+            } finally {
+                showLoadingState(false);
+            }
+        }
+
+        function showLoadingState(loading) {
+            const button = document.querySelector('.search-btn-text');
+            const spinner = document.querySelector('.loading-spinner');
+            
+            if (loading) {
+                button.textContent = '检索中...';
+                spinner.style.display = 'inline-block';
+            } else {
+                button.textContent = '检索';
+                spinner.style.display = 'none';
+            }
+        }
+
+        function displayResults(results) {
+            if (results.nodes.length === 0) {
+                showNoResults();
+                return;
+            }
+
+            // 显示结果区域
+            document.getElementById('search-results').style.display = 'block';
+            
+            // 更新结果摘要
+            const summary = `找到 ${results.total_results} 个相关知识节点，处理时间 ${results.processing_time.toFixed(2)} 秒`;
+            document.getElementById('results-summary').textContent = summary;
+
+            // 显示结果列表
+            displayResultsList(results.nodes, results.relevance_scores);
+
+            // 显示可视化
+            if (results.visualization_data) {
+                displayVisualization(results.visualization_data);
+            }
+
+            // 显示质量分析
+            if (results.quality_assessment) {
+                displayQualityAnalysis(results.quality_assessment);
+            }
+        }
+
+        function displayResultsList(nodes, scores) {
+            const container = document.getElementById('results-list-container');
+            
+            let html = '';
+            nodes.forEach((node, index) => {
+                const score = scores[index] || 0;
+                const quality = getQualityBadge(node.quality);
+                
+                html += `
+                    <div class="result-card card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">${node.type} 知识</h5>
+                                <div>
+                                    ${quality}
+                                    <span class="badge bg-primary ms-1">相关性: ${(score * 100).toFixed(1)}%</span>
+                                </div>
+                            </div>
+                            <p class="card-text">${node.content}</p>
+                            <div class="row text-muted small">
+                                <div class="col-md-6">
+                                    <i class="fas fa-star me-1"></i>重要性: ${(node.importance * 100).toFixed(1)}%
+                                </div>
+                                <div class="col-md-6">
+                                    <i class="fas fa-clock me-1"></i>创建时间: ${new Date(node.created_at).toLocaleDateString()}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function displayVisualization(vizData) {
+            const container = document.getElementById('visualization-container');
+            
+            if (vizData.visualization_type === 'knowledge_graph' && vizData.plotly_json) {
+                // 使用Plotly显示知识图谱
+                const plotData = JSON.parse(vizData.plotly_json);
+                Plotly.newPlot(container, plotData.data, plotData.layout, {responsive: true});
+            } else if (vizData.interactive_map) {
+                // 显示交互式地图
+                const mapData = JSON.parse(vizData.interactive_map);
+                Plotly.newPlot(container, mapData.data, mapData.layout, {responsive: true});
+            } else {
+                container.innerHTML = `
+                    <div class="d-flex align-items-center justify-content-center h-100">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                            <p>可视化数据格式不支持</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function displayQualityAnalysis(qualityData) {
+            const container = document.getElementById('quality-analysis-container');
+            
+            let html = `
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">整体质量评估</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">平均质量分数</label>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: ${(qualityData.average_quality * 100).toFixed(1)}%">
+                                            ${(qualityData.average_quality * 100).toFixed(1)}%
+                                        </div>
+                                    </div>
+                                </div>
+            `;
+            
+            if (qualityData.quality_recommendations) {
+                html += `
+                    <h6>改进建议</h6>
+                    <ul class="list-unstyled">
+                `;
+                qualityData.quality_recommendations.forEach(rec => {
+                    html += `<li><i class="fas fa-lightbulb text-warning me-2"></i>${rec}</li>`;
+                });
+                html += `</ul>`;
+            }
+            
+            html += `
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">质量分布</h5>
+                            </div>
+                            <div class="card-body">
+            `;
+            
+            if (qualityData.quality_distribution) {
+                Object.entries(qualityData.quality_distribution).forEach(([level, count]) => {
+                    const percentage = (count / qualityData.individual_quality_scores.length * 100).toFixed(1);
+                    html += `
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>${level}</span>
+                                <span>${count} (${percentage}%)</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function getQualityBadge(quality) {
+            const badges = {
+                'high': '<span class="badge bg-success quality-badge">高质量</span>',
+                'medium': '<span class="badge bg-warning quality-badge">中等质量</span>',
+                'low': '<span class="badge bg-danger quality-badge">低质量</span>',
+                'uncertain': '<span class="badge bg-secondary quality-badge">待验证</span>'
+            };
+            return badges[quality] || badges['uncertain'];
+        }
+
+        function showNoResults() {
+            document.getElementById('no-results').style.display = 'block';
+        }
+
+        function hideResults() {
+            document.getElementById('search-results').style.display = 'none';
+            document.getElementById('no-results').style.display = 'none';
+        }
+
+        function showErrorMessage(message) {
+            const container = document.getElementById('results-list-container');
+            container.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    检索失败: ${message}
+                </div>
+            `;
+            document.getElementById('search-results').style.display = 'block';
+        }
+
+        function showResultsView() {
+            document.querySelector('a[href="#results-list-tab"]').click();
+        }
+
+        function showVisualizationView() {
+            document.querySelector('a[href="#visualization-tab"]').click();
+        }
+    </script>
+</body>
+</html>

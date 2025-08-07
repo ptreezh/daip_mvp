@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "daip-mvp-project"
-version = "0.1.0"
+version = "0.3.11"
 description = "DAIP-L.I.V.E. 智能协作平台，支持多AI角色协作与知识管理。"
 authors = ["DAIP-LIVE Team"]
 readme = "README.md"
@@ -33,6 +33,7 @@ questionary = "^2.0.1"
 prompt-toolkit = "^3.0.43"
 aiosqlite = "^0.20.0"
 httpx = "^0.27.0"
+textstat = "^0.7.0"
 pocketflow = {git = "https://github.com/The-Pocket/PocketFlow.git"}
 
 [tool.poetry.group.dev.dependencies]

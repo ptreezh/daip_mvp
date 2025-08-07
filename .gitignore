@@ -48,3 +48,14 @@ daip_live_poc/data/chroma_db/
 # Other
 .DS_Store
 Thumbs.db 
+
+# Crush agent files
+.crush/
+
+# Test files and reports
+test_reports/
+test_data/
+test_expected_results/
+*.log
+screenshots/
+allure-results/ 
