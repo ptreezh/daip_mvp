@@ -13,7 +13,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import List, Optional
 
 import chromadb
 import ollama
@@ -167,6 +167,7 @@ class WikiService:
 
         Returns:
             Optional[WikiVersion]: The newly created WikiVersion object, or None if it fails.
+
         """
         logging.info(f"Creating new wiki entry: '{entry_name}' by '{author_role}'.")
         entry_dir = self._get_entry_path(entry_name)
@@ -237,6 +238,7 @@ class WikiService:
 
         Returns:
             Optional[WikiVersion]: The WikiVersion object if found, otherwise None.
+
         """
         logging.info(
             f"Retrieving wiki entry: '{entry_name}' (Version: {version or 'latest'})."
@@ -259,13 +261,13 @@ class WikiService:
                 return None
 
             full_content = file_to_read.read_text(encoding="utf-8")
-            
+
             # Parse YAML front matter and content
             parts = full_content.split("---", 2)
             if len(parts) < 3:
                 logging.warning(f"Could not parse YAML front matter in {file_to_read}")
                 return None
-                
+
             front_matter = yaml.safe_load(parts[1])
             content = parts[2].strip()
 
@@ -294,6 +296,7 @@ class WikiService:
 
         Returns:
             Optional[str]: The proposal ID if successful, otherwise None.
+
         """
         entry_dir = self._get_entry_path(entry_name)
         if not entry_dir.is_dir():
@@ -324,7 +327,7 @@ class WikiService:
 
             proposals_dir = entry_dir / "proposals"
             proposal_file = proposals_dir / f"{proposal_id}.json"
-            
+
             # Convert Enum to string for JSON serialization
             proposal_dict = asdict(proposal)
             proposal_dict["status"] = proposal.status.value
@@ -350,6 +353,7 @@ class WikiService:
 
         Returns:
             bool: True if the proposal was applied successfully, False otherwise.
+
         """
         logging.info(f"Attempting to apply proposal '{proposal_id}' to '{entry_name}'.")
         entry_dir = self._get_entry_path(entry_name)
@@ -407,8 +411,7 @@ class WikiService:
             return False
 
     def search(self, query: str, top_k: int = 3) -> List[str]:
-        """
-        Performs a semantic search using a vector index.
+        """Performs a semantic search using a vector index.
 
         Args:
             query (str): The search query.
@@ -416,6 +419,7 @@ class WikiService:
 
         Returns:
             List[str]: A list of content snippets from matching entries, ranked by semantic similarity.
+
         """
         logging.info(f"Performing semantic search for query: '{query}'")
         if not query.strip():

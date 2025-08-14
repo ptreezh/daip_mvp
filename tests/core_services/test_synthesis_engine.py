@@ -1,18 +1,17 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 10:00:00
+"""@Time    : 2025-07-25 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_synthesis_engine.py
 @Description:
     Unit tests for the SynthesisEngine.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from src.core_services.synthesis_engine import SynthesisEngine
+import pytest
+
 from src.core_services import prompts
-from src.models import DebateTurn
+from src.core_services.synthesis_engine import SynthesisEngine
 from src.kernel.llm_interface import LLMInterface
+from src.models import DebateTurn
 
 
 @pytest.fixture

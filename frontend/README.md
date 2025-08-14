@@ -122,7 +122,7 @@ python run.py
 ```bash
 # 使用gunicorn部署
 pip install gunicorn
-gunicorn -w 4 -b 0.0.0.0:8080 main_app:app
+gunicorn -w 4 -b 127.0.0.1:8080 main_app:app
 ```
 
 ## 故障排除

@@ -3,10 +3,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 class ToolConfig:
-    """
-    Placeholder for tool configuration.
+    """Placeholder for tool configuration.
     This class would hold settings and definitions for various tools used in the application.
     """
+
     def __init__(self):
         self.tools = {
             "file_reader": {"description": "Reads content from a file."},

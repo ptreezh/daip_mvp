@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 11:00:00
+"""@Time    : 2025-07-24 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : composition.py
 @Description:
@@ -10,33 +8,25 @@
     This approach to dependency injection helps to decouple the components.
 """
 import asyncio
-import asyncio
-import ollama
 from typing import Any, Dict
 
 from src.config_loader import load_config
-from src.core_services.synthesis_engine import SynthesisEngine
-from src.core_services.role_manager import RoleManager # Import RoleManager
-from src.core_services.role_recommender_service import RoleRecommenderService # Import RoleRecommenderService
+from src.core_services.role_manager import RoleManager  # Import RoleManager
+from src.core_services.role_recommender_service import RoleRecommenderService  # Import RoleRecommenderService
 from src.kernel.core import Kernel
 from src.kernel.llm_interface import LLMConfig, LLMFactory
-from src.kernel.tool_executor import ToolExecutor
-from src.protocols.consensus_strategies import (
-    ConsensusStrategyFactory,
-    SimpleMajorityVoteStrategy,
-)
 from src.protocols.debate_protocol import DebateProtocol
 
 
 def create_application_dependencies(output_queue: asyncio.Queue) -> Dict[str, Any]:
-    """
-    Creates and wires up all application dependencies.
+    """Creates and wires up all application dependencies.
 
     Args:
         output_queue: The queue for the debate protocol to send events to the UI.
 
     Returns:
         A dictionary containing the initialized components.
+
     """
     # Load configuration
     app_config = load_config()

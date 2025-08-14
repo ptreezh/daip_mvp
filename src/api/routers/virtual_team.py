@@ -1,11 +1,9 @@
 import logging
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 
 from src.api.dependencies import AppStateDep
 from src.models import (
-    AssignRoleRequest,
     CreateVirtualProjectRequest,
     CreateVirtualTaskRequest,
 )

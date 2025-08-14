@@ -1,9 +1,11 @@
 from __future__ import annotations
-from datetime import datetime, timezone
-from typing import Any, Literal, Optional, List, Union
+
 import uuid
+from datetime import datetime, timezone
+from typing import Any, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
+
 
 # --- Document Analysis Models ---
 class DocumentAnalysisRequest(BaseModel):
@@ -121,10 +123,10 @@ class PromptOptimizationResponse(BaseModel):
 
 # --- Fact & Memory Models ---
 class PendingFact(BaseModel):
-    """
-    Represents a fact that has been extracted but is pending verification and processing.
+    """Represents a fact that has been extracted but is pending verification and processing.
     This model is used by services like FactExtractionService and MemoryService.
     """
+
     content: str = Field(..., description="The textual content of the extracted fact.")
     source: str = Field(
         ..., description="The origin of the fact (e.g., document name, agent message ID)."
@@ -202,6 +204,7 @@ class CreateVirtualTaskRequest(BaseModel):
     dependencies: Optional[list[str]] = []
 
 from enum import Enum
+
 
 class ProjectStatus(str, Enum):
     CREATED = "created"
@@ -344,12 +347,12 @@ class ExpertUpdateRequest(BaseModel):
 
 # --- Debate Protocol Models ---
 class DebateConfig(BaseModel):
-    """
-    Configuration for a new debate session.
+    """Configuration for a new debate session.
 
     This model defines all the parameters required to initialize and run a debate,
     including the topic, participants, and rules of engagement.
     """
+
     topic: str = Field(..., description="The central topic of the debate.")
     roles: List[str] = Field(..., description="A list of role IDs participating in the debate.")
     rounds: int = Field(default=2, description="The number of full rounds in the debate.")
@@ -363,24 +366,24 @@ class DebateConfig(BaseModel):
 
 
 class DebateTurn(BaseModel):
-    """
-    Represents a single turn taken by a role during the debate.
+    """Represents a single turn taken by a role during the debate.
 
     This model captures the output of a role's contribution at a specific point
     in the debate.
     """
+
     role_id: str = Field(..., description="The ID of the role that took the turn.")
     opinion: str = Field(..., description="The content of the role's opinion or argument.")
     round: int = Field(..., description="The debate round number in which this turn occurred.")
 
 
 class DebateResult(BaseModel):
-    """
-    The final, structured output of a completed debate protocol.
+    """The final, structured output of a completed debate protocol.
 
     This model aggregates the entire debate history, the outcome of the consensus
     process, and the final synthesized summary.
     """
+
     topic: str = Field(..., description="The original topic of the debate.")
     history: List[DebateTurn] = Field(
         ..., description="A complete history of all turns taken during the debate."
@@ -432,8 +435,7 @@ class NewTurnEvent(Event):
 
 
 class TechLogEvent(Event):
-    """
-    Event for displaying internal technical processes to the user.
+    """Event for displaying internal technical processes to the user.
     Used for the --verbose mode. Contains structured information for better debugging.
     """
 
@@ -461,6 +463,7 @@ class ErrorEvent(Event):
 
 class ClearScreenEvent(Event):
     """Event that signals the UI to clear the main output area."""
+
     event_type: Literal["clear_screen"] = "clear_screen"
 
 

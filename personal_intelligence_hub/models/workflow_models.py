@@ -1,17 +1,17 @@
-"""
-Personal Intelligence Hub - Workflow Models
+"""Personal Intelligence Hub - Workflow Models
 
 工作流相关的数据模型
 """
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class StepType(Enum):
     """步骤类型枚举"""
+
     ANALYSIS = "analysis"
     SYNTHESIS = "synthesis"
     CRITIQUE = "critique"
@@ -23,6 +23,7 @@ class StepType(Enum):
 
 class WorkflowStatus(Enum):
     """工作流状态枚举"""
+
     DRAFT = "draft"
     VALIDATED = "validated"
     ACTIVE = "active"
@@ -33,6 +34,7 @@ class WorkflowStatus(Enum):
 @dataclass
 class WorkflowStep:
     """工作流步骤"""
+
     id: str
     name: str
     type: StepType
@@ -44,7 +46,7 @@ class WorkflowStep:
     timeout: Optional[int] = 300
     retry_count: int = 0
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -53,6 +55,7 @@ class WorkflowStep:
 @dataclass
 class WorkflowDefinition:
     """工作流定义"""
+
     id: str
     name: str
     description: str
@@ -62,7 +65,7 @@ class WorkflowDefinition:
     created_at: datetime = None
     updated_at: datetime = None
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.created_at is None:
             self.created_at = datetime.now()
@@ -75,12 +78,13 @@ class WorkflowDefinition:
 @dataclass
 class WorkflowValidationResult:
     """工作流验证结果"""
+
     is_valid: bool
     issues: List[str]
     suggestions: List[str]
     confidence: float = 0.8
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.issues is None:
             self.issues = []
@@ -93,6 +97,7 @@ class WorkflowValidationResult:
 @dataclass
 class WorkflowPreview:
     """工作流预览"""
+
     name: str
     description: str
     total_steps: int
@@ -101,7 +106,7 @@ class WorkflowPreview:
     complexity: str
     confidence: float
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -110,6 +115,7 @@ class WorkflowPreview:
 @dataclass
 class WorkflowExecution:
     """工作流执行"""
+
     id: str
     workflow_id: str
     status: str
@@ -119,7 +125,7 @@ class WorkflowExecution:
     completed_at: Optional[datetime]
     results: Dict[str, Any]
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.started_at is None:
             self.started_at = datetime.now()
@@ -132,6 +138,7 @@ class WorkflowExecution:
 @dataclass
 class WorkflowTemplate:
     """工作流模板"""
+
     id: str
     name: str
     description: str
@@ -141,7 +148,7 @@ class WorkflowTemplate:
     created_at: datetime
     updated_at: datetime
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.created_at is None:
             self.created_at = datetime.now()

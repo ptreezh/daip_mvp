@@ -1,24 +1,21 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2024-07-18 14:00:00
+"""@Time    : 2024-07-18 14:00:00
 @Author  : DAIP-LIVE Team
 @File    : role_recommender_service.py
 @Description:
     A service to recommend roles based on semantic similarity to a topic.
 """
 import logging
-from typing import Dict, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List
 
 import chromadb
 
 if TYPE_CHECKING:
-    from src.core_services.role_manager import Role, RoleManager
+    from src.core_services.role_manager import RoleManager
     from src.kernel.llm_interface import LLMInterface
 
 
 class RoleRecommenderService:
-    """
-    Manages role recommendations using a vector database.
+    """Manages role recommendations using a vector database.
     """
 
     def __init__(
@@ -28,14 +25,14 @@ class RoleRecommenderService:
         db_path: str = "data/chroma_db",
         collection_name: str = "roles",
     ):
-        """
-        Initializes the service.
+        """Initializes the service.
 
         Args:
             role_manager: The service to get role definitions from.
             llm_interface: The service to generate text embeddings.
             db_path: The file path for the persistent ChromaDB.
             collection_name: The name of the ChromaDB collection.
+
         """
         self.role_manager = role_manager
         self.llm_interface = llm_interface
@@ -47,11 +44,11 @@ class RoleRecommenderService:
         )
 
     def build_index(self, force_rebuild: bool = False) -> None:
-        """
-        Builds or updates the vector index for all roles.
+        """Builds or updates the vector index for all roles.
 
         Args:
             force_rebuild: If True, clears the existing index before building.
+
         """
         if force_rebuild:
             logging.info(f"Forcing rebuild of role index '{self.collection_name}'.")
@@ -88,13 +85,13 @@ class RoleRecommenderService:
         logging.info(f"Recommending {top_k} roles for topic: '{topic}'")
         query_embedding = self.llm_interface.get_embedding(topic)
         results = self.collection.query(query_embeddings=[query_embedding], n_results=top_k)
-        
+
         # The results['metadatas'][0] will be a list of dictionaries, each representing a recommended role's metadata.
         # We need to convert these back into Role objects using the RoleManager.
         recommended_role_ids = [m['id'] for m in results['metadatas'][0]] if results and results['metadatas'] else []
-        
+
         # Fetch the full Role objects using the RoleManager
         recommended_roles = [self.role_manager.get_role_by_id(role_id) for role_id in recommended_role_ids]
-        
+
         # Filter out any None values if a role couldn't be found (e.g., if file was deleted)
         return [role for role in recommended_roles if role is not None]

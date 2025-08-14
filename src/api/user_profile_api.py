@@ -1,5 +1,4 @@
-"""
-API endpoints for user profile and session management.
+"""API endpoints for user profile and session management.
 
 This module provides FastAPI endpoints for user registration, authentication,
 profile management, and session handling.
@@ -8,12 +7,11 @@ profile management, and session handling.
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Header, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from pydantic import BaseModel
 
 from src.app_state import AppState
 from src.core_services.session_management_service import AuthenticationRequest, AuthenticationResponse
-from src.core_services.user_profile_service import UserProfile, UserSession
 
 
 # Define API models
@@ -76,7 +74,7 @@ async def get_current_user_id(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated"
         )
-    
+
     # Check if it's a session ID
     if authorization.startswith("Session "):
         session_id = authorization.replace("Session ", "")
@@ -87,7 +85,7 @@ async def get_current_user_id(
                 detail="Invalid or expired session"
             )
         return user_id
-    
+
     # Check if it's a token
     elif authorization.startswith("Bearer "):
         token = authorization.replace("Bearer ", "")
@@ -98,7 +96,7 @@ async def get_current_user_id(
                 detail="Invalid or expired token"
             )
         return user_id
-    
+
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid authorization header format"
@@ -117,13 +115,13 @@ async def register_user(
         display_name=request.display_name,
         email=request.email
     )
-    
+
     if not success or not profile:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=message
         )
-    
+
     return UserProfileResponse(
         user_id=profile.user_id,
         username=profile.username,
@@ -145,13 +143,13 @@ async def login(
         username=request.username,
         password=request.password
     )
-    
+
     if not response.success:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=response.message
         )
-    
+
     return response
 
 
@@ -167,16 +165,16 @@ async def logout(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid session header"
         )
-    
+
     session_id = authorization.replace("Session ", "")
     success = app_state.session_management_service.end_session(session_id)
-    
+
     if not success:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid session"
         )
-    
+
     return {"message": "Logged out successfully"}
 
 
@@ -187,13 +185,13 @@ async def get_profile(
 ):
     """Get the current user's profile."""
     profile = app_state.user_profile_service.get_profile(user_id)
-    
+
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User profile not found"
         )
-    
+
     return UserProfileResponse(
         user_id=profile.user_id,
         username=profile.username,
@@ -213,28 +211,28 @@ async def update_profile(
 ):
     """Update the current user's profile."""
     updates = {}
-    
+
     if request.display_name is not None:
         if not hasattr(updates, "metadata"):
             updates["metadata"] = {}
         updates["metadata"]["display_name"] = request.display_name
-    
+
     if request.preferences is not None:
         updates["preferences"] = request.preferences
-    
+
     if request.metadata is not None:
         if not hasattr(updates, "metadata"):
             updates["metadata"] = {}
         updates["metadata"].update(request.metadata)
-    
+
     profile = app_state.user_profile_service.update_profile(user_id, **updates)
-    
+
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User profile not found"
         )
-    
+
     return UserProfileResponse(
         user_id=profile.user_id,
         username=profile.username,
@@ -258,13 +256,13 @@ async def change_password(
         current_password=request.current_password,
         new_password=request.new_password
     )
-    
+
     if not success:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=message
         )
-    
+
     return {"message": message}
 
 
@@ -275,7 +273,7 @@ async def get_sessions(
 ):
     """Get all active sessions for the current user."""
     sessions = app_state.user_profile_service.get_active_sessions_for_user(user_id)
-    
+
     return [
         SessionResponse(
             session_id=session.session_id,
@@ -298,21 +296,21 @@ async def end_session(
     # Verify the session belongs to the current user
     sessions = app_state.user_profile_service.get_active_sessions_for_user(user_id)
     session_ids = [session.session_id for session in sessions]
-    
+
     if session_id not in session_ids:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to end this session"
         )
-    
+
     success = app_state.session_management_service.end_session(session_id)
-    
+
     if not success:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Failed to end session"
         )
-    
+
     return {"message": "Session ended successfully"}
 
 
@@ -326,5 +324,5 @@ async def create_token(
         user_id=user_id,
         expiry_minutes=app_state.session_management_service.session_expiry_minutes
     )
-    
+
     return {"token": token}

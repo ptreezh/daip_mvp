@@ -21,8 +21,7 @@ def _get_vector_store() -> VectorStore:
 
 
 def _sanitize_filename(title: str) -> str:
-    """
-    Converts a wiki entry title into a safe, valid filename.
+    """Converts a wiki entry title into a safe, valid filename.
     Example: "What is AI?" -> "what_is_ai.md"
     """
     # Step 1: Strip leading/trailing whitespace and convert to lowercase.
@@ -38,8 +37,7 @@ def _sanitize_filename(title: str) -> str:
 
 
 def write_wiki_entry(title: str, content: str) -> str:
-    """
-    Creates or overwrites an entry in the Wiki/Memory Bank.
+    """Creates or overwrites an entry in the Wiki/Memory Bank.
 
     Args:
         title: The title of the knowledge entry.
@@ -47,6 +45,7 @@ def write_wiki_entry(title: str, content: str) -> str:
 
     Returns:
         A confirmation message.
+
     """
     try:
         WIKI_DIR.mkdir(exist_ok=True)
@@ -66,14 +65,14 @@ def write_wiki_entry(title: str, content: str) -> str:
 
 
 def read_wiki_entry(title: str) -> str:
-    """
-    Reads an entry from the Wiki/Memory Bank.
+    """Reads an entry from the Wiki/Memory Bank.
 
     Args:
         title: The title of the knowledge entry to read.
 
     Returns:
         The content of the entry or an error message.
+
     """
     try:
         file_path = WIKI_DIR / _sanitize_filename(title)
@@ -86,11 +85,11 @@ def read_wiki_entry(title: str) -> str:
 
 
 def list_wiki_entries() -> str:
-    """
-    Lists all available entries in the Wiki/Memory Bank.
+    """Lists all available entries in the Wiki/Memory Bank.
 
     Returns:
         A formatted string of all entry titles.
+
     """
     if not WIKI_DIR.is_dir():
         return "The Wiki is empty. No entries found."
@@ -103,14 +102,14 @@ def list_wiki_entries() -> str:
 
 
 def search_wiki(query: str) -> str:
-    """
-    Performs a semantic search across all entries in the Wiki/Memory Bank.
+    """Performs a semantic search across all entries in the Wiki/Memory Bank.
 
     Args:
         query: The natural language query or concept to search for.
 
     Returns:
         A formatted string of the most relevant entries found.
+
     """
     try:
         vector_store = _get_vector_store()

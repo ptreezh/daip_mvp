@@ -12,7 +12,6 @@ from src.models import (
 )
 from src.protocols.debate_protocol import DebateProtocol
 
-
 router = APIRouter(
     prefix="/protocols",
     tags=["Protocol Management"],
@@ -23,18 +22,17 @@ logger = logging.getLogger(__name__)
 
 @router.post("/generate_intelligent")
 async def generate_intelligent_protocol(state: AppStateDep, req: IntelligentProtocolRequest):
-    """
-    Intelligently generate a DAIP protocol using an LLM.
+    """Intelligently generate a DAIP protocol using an LLM.
     Supports natural language understanding, multi-stage decomposition, and role assignment.
     """
     try:
         # Check if the intelligent protocol generator is available
         if not hasattr(state, 'intelligent_protocol_generator') or state.intelligent_protocol_generator is None:
             raise HTTPException(
-                status_code=503, 
+                status_code=503,
                 detail="Intelligent protocol generator service is not available. This feature is not yet implemented."
             )
-            
+
         generator = state.intelligent_protocol_generator
         if req.use_analysis:
             result = await generator.generate_protocol_with_analysis(
@@ -61,17 +59,16 @@ async def generate_intelligent_protocol(state: AppStateDep, req: IntelligentProt
 
 @router.post("/classify_task")
 async def classify_task(state: AppStateDep, user_request: str = Body(..., embed=True)):
-    """
-    Classify a user's request as either content creation or document analysis.
+    """Classify a user's request as either content creation or document analysis.
     """
     try:
         # Check if the task classifier is available
         if not hasattr(state, 'task_classifier') or state.task_classifier is None:
             raise HTTPException(
-                status_code=503, 
+                status_code=503,
                 detail="Task classifier service is not available. This feature is not yet implemented."
             )
-            
+
         classifier = state.task_classifier
         task_type, confidence, info = classifier.classify_task(user_request)
         workflow = classifier.get_recommended_workflow(task_type)
@@ -97,10 +94,10 @@ async def execute_protocol(state: AppStateDep, request: ProtocolExecutionRequest
         # Check if the protocol executor is available
         if not hasattr(state, 'protocol_executor') or state.protocol_executor is None:
             raise HTTPException(
-                status_code=503, 
+                status_code=503,
                 detail="Protocol executor service is not available. This feature is not yet implemented."
             )
-            
+
         executor = state.protocol_executor
         result = await executor.execute_protocol(request.protocol_id, request.inputs)
         return result
@@ -118,10 +115,10 @@ async def get_protocol_status(state: AppStateDep, protocol_id: str):
         # Check if the protocol executor is available
         if not hasattr(state, 'protocol_executor') or state.protocol_executor is None:
             raise HTTPException(
-                status_code=503, 
+                status_code=503,
                 detail="Protocol executor service is not available. This feature is not yet implemented."
             )
-            
+
         executor = state.protocol_executor
         status = executor.get_execution_status(protocol_id)
         if status is None:
@@ -141,10 +138,10 @@ async def get_protocol_history(state: AppStateDep, protocol_id: str):
         # Check if the protocol executor is available
         if not hasattr(state, 'protocol_executor') or state.protocol_executor is None:
             raise HTTPException(
-                status_code=503, 
+                status_code=503,
                 detail="Protocol executor service is not available. This feature is not yet implemented."
             )
-            
+
         executor = state.protocol_executor
         history = executor.get_execution_history(protocol_id)
         if history is None:
@@ -162,8 +159,7 @@ async def run_debate(
     config: DebateConfig,
     state: AppStateDep,
 ):
-    """
-    Run a full, multi-round debate based on the provided configuration.
+    """Run a full, multi-round debate based on the provided configuration.
 
     This endpoint orchestrates a debate by:
     1.  Initializing the `DebateProtocol` with required system services.
@@ -177,20 +173,20 @@ async def run_debate(
         # Check if required services are available
         if not hasattr(state, 'interaction_manager') or state.interaction_manager is None:
             raise HTTPException(
-                status_code=503, 
+                status_code=503,
                 detail="Interaction manager service is not available."
             )
         if not hasattr(state, 'synthesis_engine') or state.synthesis_engine is None:
             raise HTTPException(
-                status_code=503, 
+                status_code=503,
                 detail="Synthesis engine service is not available."
             )
         if not hasattr(state, 'unified_tool_manager') or state.unified_tool_manager is None:
             raise HTTPException(
-                status_code=503, 
+                status_code=503,
                 detail="Tool manager service is not available."
             )
-            
+
         # Instantiate the protocol with dependencies from the app state
         debate_protocol = DebateProtocol(
             interaction_manager=state.interaction_manager,

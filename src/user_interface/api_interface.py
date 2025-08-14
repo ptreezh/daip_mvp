@@ -1,22 +1,19 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 18:00:00
+"""@Time    : 2025-07-24 18:00:00
 @Author  : DAIP-LIVE Team
 @File    : api_interface.py
 @Description:
     REST API interface for the Virtual Role Chat System workflows.
 """
-import asyncio
 import json
 import logging
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
+import uvicorn
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
-import uvicorn
 
 from ..workflows.critical_review_workflow import CriticalReviewWorkflow
 from ..workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
@@ -30,6 +27,7 @@ logger = logging.getLogger(__name__)
 # Request/Response Models
 class CriticalReviewRequest(BaseModel):
     """Request model for Critical Review Workflow."""
+
     content: str = Field(..., description="Content to review")
     role_context: str = Field("", description="Additional context for the creator role")
     config: Dict[str, Any] = Field(default_factory=dict, description="Workflow configuration")
@@ -38,6 +36,7 @@ class CriticalReviewRequest(BaseModel):
 
 class MultiPerspectiveRequest(BaseModel):
     """Request model for Multi-perspective Synthesis Workflow."""
+
     topic: str = Field(..., description="Topic to analyze")
     perspectives: List[str] = Field(default_factory=list, description="List of perspectives to consider")
     config: Dict[str, Any] = Field(default_factory=dict, description="Workflow configuration")
@@ -46,6 +45,7 @@ class MultiPerspectiveRequest(BaseModel):
 
 class WorkflowResponse(BaseModel):
     """Response model for workflow execution."""
+
     success: bool
     execution_id: str
     result: Optional[Dict[str, Any]] = None
@@ -56,6 +56,7 @@ class WorkflowResponse(BaseModel):
 
 class WorkflowStatus(BaseModel):
     """Model for workflow execution status."""
+
     execution_id: str
     status: str  # "running", "completed", "failed", "cancelled"
     progress: float = Field(ge=0.0, le=1.0, description="Progress percentage")
@@ -68,7 +69,7 @@ class WorkflowStatus(BaseModel):
 
 class APIInterface:
     """REST API interface for workflow execution."""
-    
+
     def __init__(self):
         """Initialize the API interface."""
         self.app = FastAPI(
@@ -80,20 +81,20 @@ class APIInterface:
         self.result_formatter = ResultFormatter()
         self.transparency_controller = TransparencyController()
         self.execution_status: Dict[str, WorkflowStatus] = {}
-        
+
         # Set up routes
         self._setup_routes()
-    
+
     async def setup_services(self) -> Dict[str, Any]:
         """Set up required services for workflow execution."""
         try:
+            from ..core_services.fact_extraction_service import FactExtractionService
             from ..core_services.llm_interface import EnhancedLLMInterface
             from ..core_services.role_manager import RoleManager
-            from ..kernel.tool_executor import ToolExecutor
             from ..core_services.synthesis_engine import SynthesisEngine
-            from ..core_services.fact_extraction_service import FactExtractionService
             from ..core_services.wiki_service import WikiService
-            
+            from ..kernel.tool_executor import ToolExecutor
+
             # Initialize services
             llm_interface = EnhancedLLMInterface()
             role_manager = RoleManager()
@@ -101,7 +102,7 @@ class APIInterface:
             synthesis_engine = SynthesisEngine(llm_interface)
             fact_extraction_service = FactExtractionService()
             wiki_service = WikiService()
-            
+
             return {
                 "llm_interface": llm_interface,
                 "role_manager": role_manager,
@@ -113,10 +114,10 @@ class APIInterface:
         except ImportError as e:
             logger.warning(f"Some services not available: {e}")
             return {}
-    
+
     def _setup_routes(self):
         """Set up API routes."""
-        
+
         @self.app.get("/")
         async def root():
             """Root endpoint with API information."""
@@ -131,7 +132,7 @@ class APIInterface:
                     "status": "/workflows/{execution_id}/status"
                 }
             }
-        
+
         @self.app.get("/workflows")
         async def list_workflows():
             """List available workflows."""
@@ -149,7 +150,7 @@ class APIInterface:
                     }
                 ]
             }
-        
+
         @self.app.post("/workflows/critical-review", response_model=WorkflowResponse)
         async def execute_critical_review(
             request: CriticalReviewRequest,
@@ -158,7 +159,7 @@ class APIInterface:
             """Execute Critical Review Workflow."""
             execution_id = request.execution_id or str(uuid.uuid4())
             started_at = datetime.now()
-            
+
             # Initialize status
             self.execution_status[execution_id] = WorkflowStatus(
                 execution_id=execution_id,
@@ -167,20 +168,20 @@ class APIInterface:
                 current_step="Initializing",
                 started_at=started_at
             )
-            
+
             # Execute workflow in background
             background_tasks.add_task(
                 self._execute_critical_review_background,
                 execution_id,
                 request
             )
-            
+
             return WorkflowResponse(
                 success=True,
                 execution_id=execution_id,
                 started_at=started_at
             )
-        
+
         @self.app.post("/workflows/multi-perspective", response_model=WorkflowResponse)
         async def execute_multi_perspective(
             request: MultiPerspectiveRequest,
@@ -189,7 +190,7 @@ class APIInterface:
             """Execute Multi-perspective Synthesis Workflow."""
             execution_id = request.execution_id or str(uuid.uuid4())
             started_at = datetime.now()
-            
+
             # Initialize status
             self.execution_status[execution_id] = WorkflowStatus(
                 execution_id=execution_id,
@@ -198,49 +199,49 @@ class APIInterface:
                 current_step="Initializing",
                 started_at=started_at
             )
-            
+
             # Execute workflow in background
             background_tasks.add_task(
                 self._execute_multi_perspective_background,
                 execution_id,
                 request
             )
-            
+
             return WorkflowResponse(
                 success=True,
                 execution_id=execution_id,
                 started_at=started_at
             )
-        
+
         @self.app.get("/workflows/{execution_id}/status", response_model=WorkflowStatus)
         async def get_workflow_status(execution_id: str):
             """Get workflow execution status."""
             if execution_id not in self.execution_status:
                 raise HTTPException(status_code=404, detail="Execution not found")
-            
+
             return self.execution_status[execution_id]
-        
+
         @self.app.get("/workflows/{execution_id}/result")
         async def get_workflow_result(
-            execution_id: str, 
+            execution_id: str,
             format: str = "json",
             include_traceability: bool = False
         ):
             """Get workflow execution result."""
             if execution_id not in self.execution_status:
                 raise HTTPException(status_code=404, detail="Execution not found")
-            
+
             status = self.execution_status[execution_id]
-            
+
             if status.status == "running":
                 raise HTTPException(status_code=202, detail="Workflow still running")
-            
+
             if status.status == "failed":
                 raise HTTPException(status_code=500, detail=status.error)
-            
+
             if not status.result:
                 raise HTTPException(status_code=404, detail="No result available")
-            
+
             # Use transparency controller for formatting
             if include_traceability:
                 formatted_content = self.transparency_controller.present_with_traceability(
@@ -248,7 +249,7 @@ class APIInterface:
                 )
             else:
                 formatted_content = self.result_formatter.format_result(status.result, format)
-            
+
             if format == "json":
                 return JSONResponse(content=status.result if not include_traceability else json.loads(formatted_content))
             elif format in ["markdown", "html", "xml", "csv", "yaml", "text"]:
@@ -267,30 +268,30 @@ class APIInterface:
                 )
             else:
                 return JSONResponse(content=status.result)
-        
+
         @self.app.delete("/workflows/{execution_id}")
         async def cancel_workflow(execution_id: str):
             """Cancel workflow execution."""
             if execution_id not in self.execution_status:
                 raise HTTPException(status_code=404, detail="Execution not found")
-            
+
             status = self.execution_status[execution_id]
-            
+
             if status.status == "running":
                 status.status = "cancelled"
                 status.completed_at = datetime.now()
                 return {"message": "Workflow cancelled"}
             else:
                 return {"message": f"Workflow already {status.status}"}
-        
+
         @self.app.get("/workflows/{execution_id}/progress")
         async def get_workflow_progress(execution_id: str):
             """Get real-time workflow progress."""
             if execution_id not in self.execution_status:
                 raise HTTPException(status_code=404, detail="Execution not found")
-            
+
             status = self.execution_status[execution_id]
-            
+
             return {
                 "execution_id": execution_id,
                 "status": status.status,
@@ -299,7 +300,7 @@ class APIInterface:
                 "started_at": status.started_at,
                 "completed_at": status.completed_at
             }
-        
+
         @self.app.get("/workflows/{execution_id}/traceability")
         async def get_workflow_traceability(
             execution_id: str,
@@ -311,15 +312,15 @@ class APIInterface:
             """Get workflow result with enhanced traceability."""
             if execution_id not in self.execution_status:
                 raise HTTPException(status_code=404, detail="Execution not found")
-            
+
             status = self.execution_status[execution_id]
-            
+
             if status.status == "running":
                 raise HTTPException(status_code=202, detail="Workflow still running")
-            
+
             if not status.result:
                 raise HTTPException(status_code=404, detail="No result available")
-            
+
             traceable_result = self.transparency_controller.present_with_traceability(
                 status.result,
                 execution_id,
@@ -328,7 +329,7 @@ class APIInterface:
                 include_sources=include_sources,
                 output_format=format
             )
-            
+
             if format == "json":
                 return JSONResponse(content=json.loads(traceable_result))
             else:
@@ -337,18 +338,18 @@ class APIInterface:
                     media_type="text/plain",
                     headers={"Content-Disposition": f"attachment; filename=traceability_{execution_id}.{format}"}
                 )
-        
+
         @self.app.post("/workflows/{execution_id}/feedback")
         async def submit_workflow_feedback(execution_id: str, feedback_data: Dict[str, Any]):
             """Submit feedback for a workflow execution."""
             if execution_id not in self.execution_status:
                 raise HTTPException(status_code=404, detail="Execution not found")
-            
+
             status = self.execution_status[execution_id]
-            
+
             if not status.result:
                 raise HTTPException(status_code=404, detail="No result available for feedback")
-            
+
             try:
                 # Create feedback using the collector
                 feedback = self.transparency_controller.feedback_collector.collect_workflow_feedback(
@@ -358,7 +359,7 @@ class APIInterface:
                     interactive=False,
                     user_id=feedback_data.get("user_id")
                 )
-                
+
                 # Update feedback with provided data
                 if "overall_rating" in feedback_data:
                     feedback.overall_rating = feedback_data["overall_rating"]
@@ -366,22 +367,22 @@ class APIInterface:
                     feedback.overall_satisfaction = feedback_data["overall_satisfaction"]
                 if "general_comments" in feedback_data:
                     feedback.general_comments = feedback_data["general_comments"]
-                
+
                 return {"message": "Feedback submitted successfully", "feedback_id": execution_id}
-                
+
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Error submitting feedback: {str(e)}")
-        
+
         @self.app.get("/workflows/{execution_id}/feedback")
         async def get_workflow_feedback(execution_id: str):
             """Get feedback for a workflow execution."""
             feedback_summary = self.transparency_controller.get_feedback_summary(execution_id)
-            
+
             if not feedback_summary:
                 raise HTTPException(status_code=404, detail="No feedback found for this execution")
-            
+
             return feedback_summary
-        
+
         @self.app.post("/workflows/{execution_id}/validate")
         async def validate_workflow_result(
             execution_id: str,
@@ -390,17 +391,17 @@ class APIInterface:
             """Validate workflow result quality."""
             if execution_id not in self.execution_status:
                 raise HTTPException(status_code=404, detail="Execution not found")
-            
+
             status = self.execution_status[execution_id]
-            
+
             if not status.result:
                 raise HTTPException(status_code=404, detail="No result available for validation")
-            
+
             validation_results = self.transparency_controller.validate_result_quality(
                 status.result,
                 validation_criteria or {}
             )
-            
+
             return {
                 "execution_id": execution_id,
                 "validation_results": validation_results,
@@ -410,7 +411,7 @@ class APIInterface:
                     "invalid_elements": sum(1 for v in validation_results if not v.get("is_valid", True))
                 }
             }
-        
+
         @self.app.get("/transparency/formats")
         async def get_supported_formats():
             """Get list of supported output formats."""
@@ -418,12 +419,12 @@ class APIInterface:
                 "formats": self.transparency_controller.get_supported_formats(),
                 "transparency_levels": self.transparency_controller.get_transparency_levels()
             }
-        
+
         @self.app.get("/transparency/statistics")
         async def get_transparency_statistics():
             """Get transparency and feedback statistics."""
             return self.transparency_controller.feedback_collector.get_feedback_statistics()
-    
+
     async def _execute_critical_review_background(
         self,
         execution_id: str,
@@ -434,46 +435,46 @@ class APIInterface:
             # Update status
             self.execution_status[execution_id].current_step = "Setting up services"
             self.execution_status[execution_id].progress = 0.1
-            
+
             # Set up services
             services = await self.setup_services()
-            
+
             # Update status
             self.execution_status[execution_id].current_step = "Executing workflow"
             self.execution_status[execution_id].progress = 0.2
-            
+
             # Create and execute workflow
             workflow = CriticalReviewWorkflow(f"api_{execution_id}", request.config)
-            
+
             # Monitor progress during execution
             async def progress_callback(step: str, progress: float):
                 if execution_id in self.execution_status:
                     self.execution_status[execution_id].current_step = step
                     self.execution_status[execution_id].progress = 0.2 + (progress * 0.7)
-            
+
             result = await workflow.execute(
                 prompt=f"Please review the following content: {request.content}",
                 role_context=request.role_context,
                 services=services,
                 execution_id=execution_id
             )
-            
+
             # Update final status
             self.execution_status[execution_id].status = "completed" if result.get("success") else "failed"
             self.execution_status[execution_id].progress = 1.0
             self.execution_status[execution_id].current_step = "Completed"
             self.execution_status[execution_id].completed_at = datetime.now()
             self.execution_status[execution_id].result = result
-            
+
             if not result.get("success"):
                 self.execution_status[execution_id].error = result.get("error", "Unknown error")
-            
+
         except Exception as e:
             logger.exception(f"Critical Review Workflow failed: {e}")
             self.execution_status[execution_id].status = "failed"
             self.execution_status[execution_id].error = str(e)
             self.execution_status[execution_id].completed_at = datetime.now()
-    
+
     async def _execute_multi_perspective_background(
         self,
         execution_id: str,
@@ -484,41 +485,41 @@ class APIInterface:
             # Update status
             self.execution_status[execution_id].current_step = "Setting up services"
             self.execution_status[execution_id].progress = 0.1
-            
+
             # Set up services
             services = await self.setup_services()
-            
+
             # Update status
             self.execution_status[execution_id].current_step = "Executing workflow"
             self.execution_status[execution_id].progress = 0.2
-            
+
             # Create and execute workflow
             workflow = MultiPerspectiveSynthesisWorkflow(f"api_{execution_id}", request.config)
-            
+
             result = await workflow.execute(
                 topic=request.topic,
                 perspectives=request.perspectives,
                 services=services,
                 execution_id=execution_id
             )
-            
+
             # Update final status
             self.execution_status[execution_id].status = "completed" if result.get("success") else "failed"
             self.execution_status[execution_id].progress = 1.0
             self.execution_status[execution_id].current_step = "Completed"
             self.execution_status[execution_id].completed_at = datetime.now()
             self.execution_status[execution_id].result = result
-            
+
             if not result.get("success"):
                 self.execution_status[execution_id].error = result.get("error", "Unknown error")
-            
+
         except Exception as e:
             logger.exception(f"Multi-perspective Synthesis Workflow failed: {e}")
             self.execution_status[execution_id].status = "failed"
             self.execution_status[execution_id].error = str(e)
             self.execution_status[execution_id].completed_at = datetime.now()
-    
-    def run(self, host: str = "0.0.0.0", port: int = 8000, reload: bool = False):
+
+    def run(self, host: str = "127.0.0.1", port: int = 8000, reload: bool = False):
         """Run the API server."""
         uvicorn.run(self.app, host=host, port=port, reload=reload)
 
@@ -526,21 +527,21 @@ class APIInterface:
 # Standalone server script
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Virtual Role Chat System API Server")
-    parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
+    parser.add_argument("--host", default="127.0.0.1", help="Host to bind to")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload")
     parser.add_argument("--log-level", default="info", help="Log level")
-    
+
     args = parser.parse_args()
-    
+
     # Configure logging
     logging.basicConfig(
         level=getattr(logging, args.log_level.upper()),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    
+
     # Create and run API
     api = APIInterface()
     api.run(host=args.host, port=args.port, reload=args.reload)

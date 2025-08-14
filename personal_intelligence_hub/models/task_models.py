@@ -1,17 +1,17 @@
-"""
-Personal Intelligence Hub - Task Models
+"""Personal Intelligence Hub - Task Models
 
 任务管理相关的数据模型
 """
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class TaskStatus(Enum):
     """任务状态枚举"""
+
     NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -21,6 +21,7 @@ class TaskStatus(Enum):
 
 class TaskPriority(Enum):
     """任务优先级枚举"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -29,6 +30,7 @@ class TaskPriority(Enum):
 
 class TaskUpdateSource(Enum):
     """任务更新来源"""
+
     TASK_DECOMPOSITION = "task_decomposition"
     USER_INPUT = "user_input"
     AGENT_UPDATE = "agent_update"
@@ -38,6 +40,7 @@ class TaskUpdateSource(Enum):
 @dataclass
 class Task:
     """任务数据模型"""
+
     id: str
     title: str
     description: str
@@ -54,7 +57,7 @@ class Task:
     actual_hours: Optional[float] = None
     progress: float = 0.0
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -69,13 +72,14 @@ class Task:
 @dataclass
 class TaskUpdate:
     """任务更新"""
+
     id: str
     task_id: str
     source: TaskUpdateSource
     content: str
     timestamp: datetime
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -86,6 +90,7 @@ class TaskUpdate:
 @dataclass
 class TaskDecompositionNode:
     """任务分解节点"""
+
     id: str
     original_task: str
     subtasks: List[Task]
@@ -93,7 +98,7 @@ class TaskDecompositionNode:
     confidence: float
     timestamp: datetime
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -104,13 +109,14 @@ class TaskDecompositionNode:
 @dataclass
 class TaskAssignment:
     """任务分配"""
+
     task_id: str
     agent_id: str
     assigned_at: datetime
     priority: TaskPriority
     estimated_completion: Optional[datetime] = None
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -123,13 +129,14 @@ class TaskAssignment:
 @dataclass
 class TaskProgress:
     """任务进度"""
+
     task_id: str
     progress: float
     status: TaskStatus
     updated_at: datetime
     notes: Optional[str] = None
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -140,11 +147,12 @@ class TaskProgress:
 @dataclass
 class TaskDependency:
     """任务依赖"""
+
     task_id: str
     depends_on: str
     dependency_type: str
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}

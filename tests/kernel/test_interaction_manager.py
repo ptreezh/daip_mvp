@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 10:00:00
+"""@Time    : 2025-07-25 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_interaction_manager.py
 @Description:
     Unit tests for the InteractionManager.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
 import ollama
+import pytest
 from ollama import ResponseError
 
 from src.kernel.interaction_manager import InteractionManager

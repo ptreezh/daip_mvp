@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - 启动脚本
+"""Personal Intelligence Hub - 启动脚本
 
 快速启动Personal Intelligence Hub应用
 """
 
 import os
 import sys
-import asyncio
 from pathlib import Path
 
 # 添加项目根目录到Python路径
@@ -24,12 +21,12 @@ def main():
     """主函数"""
     print("🚀 启动 Personal Intelligence Hub...")
     print("=" * 50)
-    
+
     try:
         # 导入并运行主应用
         from personal_intelligence_hub.main_app import main as app_main
         app_main()
-        
+
     except KeyboardInterrupt:
         print("\n👋 Personal Intelligence Hub 已停止")
     except ImportError as e:

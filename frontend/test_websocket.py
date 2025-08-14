@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-WebSocket测试工具
+"""WebSocket测试工具
 
 用于测试WebSocket实时通信功能
 模拟后端发送各种类型的更新消息
@@ -10,13 +8,14 @@ WebSocket测试工具
 import asyncio
 import json
 from datetime import datetime
-from services.websocket_manager import websocket_manager, MessageType, WebSocketMessage
+
+from services.websocket_manager import MessageType, websocket_manager
 
 
 async def test_agent_status_updates():
     """测试代理状态更新"""
     print("🧪 测试代理状态更新...")
-    
+
     # 模拟代理状态变化
     agent_updates = [
         {
@@ -27,14 +26,14 @@ async def test_agent_status_updates():
             "current_task": "分析AI威胁论"
         },
         {
-            "agent_id": "artist", 
+            "agent_id": "artist",
             "name": "创意直觉师",
             "status": "responding",
             "framework": "直觉洞察",
             "current_task": "生成创意方案"
         }
     ]
-    
+
     for update in agent_updates:
         await websocket_manager.simulate_incoming_message(
             MessageType.AGENT_STATUS,
@@ -46,7 +45,7 @@ async def test_agent_status_updates():
 async def test_wiki_updates():
     """测试Wiki更新"""
     print("📚 测试Wiki更新...")
-    
+
     wiki_updates = [
         {
             "type": "new_fact",
@@ -65,7 +64,7 @@ async def test_wiki_updates():
             }
         }
     ]
-    
+
     for update in wiki_updates:
         await websocket_manager.simulate_incoming_message(
             MessageType.WIKI_UPDATE,
@@ -77,7 +76,7 @@ async def test_wiki_updates():
 async def test_task_updates():
     """测试任务更新"""
     print("📋 测试任务更新...")
-    
+
     task_updates = [
         {
             "type": "status_changed",
@@ -100,7 +99,7 @@ async def test_task_updates():
             }
         }
     ]
-    
+
     for update in task_updates:
         await websocket_manager.simulate_incoming_message(
             MessageType.TASK_UPDATE,
@@ -112,7 +111,7 @@ async def test_task_updates():
 async def test_workflow_updates():
     """测试工作流更新"""
     print("⚙️ 测试工作流更新...")
-    
+
     workflow_updates = [
         {
             "workflow_id": "critical_review_001",
@@ -122,14 +121,14 @@ async def test_workflow_updates():
             "progress": 0.3
         },
         {
-            "workflow_id": "critical_review_001", 
+            "workflow_id": "critical_review_001",
             "status": "running",
             "current_step": "critical_analysis",
             "participants": ["scientist", "philosopher"],
             "progress": 0.6
         }
     ]
-    
+
     for update in workflow_updates:
         await websocket_manager.simulate_incoming_message(
             MessageType.WORKFLOW_UPDATE,
@@ -142,13 +141,13 @@ async def run_comprehensive_test():
     """运行综合测试"""
     print("🚀 启动WebSocket综合测试...")
     print("=" * 50)
-    
+
     # 初始化WebSocket连接
     await websocket_manager.connect()
-    
+
     # 等待连接稳定
     await asyncio.sleep(1)
-    
+
     # 运行各种测试
     test_tasks = [
         test_agent_status_updates(),
@@ -156,13 +155,13 @@ async def run_comprehensive_test():
         test_task_updates(),
         test_workflow_updates()
     ]
-    
+
     # 并发运行测试
     await asyncio.gather(*test_tasks)
-    
+
     print("=" * 50)
     print("✅ WebSocket测试完成")
-    
+
     # 显示连接状态
     status = websocket_manager.get_connection_status()
     print(f"连接状态: {json.dumps(status, indent=2, ensure_ascii=False)}")
@@ -179,13 +178,13 @@ async def interactive_test():
     print("  5 - 运行综合测试")
     print("  q - 退出")
     print("=" * 30)
-    
+
     await websocket_manager.connect()
-    
+
     while True:
         try:
             command = input("请输入命令: ").strip()
-            
+
             if command == 'q':
                 break
             elif command == '1':
@@ -200,19 +199,19 @@ async def interactive_test():
                 await run_comprehensive_test()
             else:
                 print("无效命令，请重新输入")
-                
+
         except KeyboardInterrupt:
             break
         except Exception as e:
             print(f"执行命令时出错: {e}")
-    
+
     await websocket_manager.disconnect()
     print("👋 测试结束")
 
 
 if __name__ == '__main__':
     import sys
-    
+
     if len(sys.argv) > 1 and sys.argv[1] == 'interactive':
         asyncio.run(interactive_test())
     else:

@@ -1,16 +1,17 @@
-"""
-核心数据模型定义
+"""核心数据模型定义
 定义系统中所有核心数据结构和业务模型
 """
 
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Literal, Tuple
-from pydantic import BaseModel, Field
 from enum import Enum
+from typing import Any, Dict, List, Literal, Optional
+
+from pydantic import BaseModel, Field
 
 
 class ReasoningStyle(str, Enum):
     """推理风格枚举"""
+
     ANALYTICAL = "analytical"
     INTUITIVE = "intuitive"
     PRAGMATIC = "pragmatic"
@@ -19,6 +20,7 @@ class ReasoningStyle(str, Enum):
 
 class MemoryType(str, Enum):
     """记忆类型枚举"""
+
     EPISODIC = "episodic"
     SEMANTIC = "semantic"
     PROCEDURAL = "procedural"
@@ -26,6 +28,7 @@ class MemoryType(str, Enum):
 
 class WorkflowStatus(str, Enum):
     """工作流状态枚举"""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -35,6 +38,7 @@ class WorkflowStatus(str, Enum):
 
 class TaskStatus(str, Enum):
     """任务状态枚举"""
+
     NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -48,6 +52,7 @@ class TaskStatus(str, Enum):
 
 class CognitiveProfile(BaseModel):
     """认知档案模型"""
+
     agent_id: str
     name: str
     avatar: str = "🤖"
@@ -58,13 +63,14 @@ class CognitiveProfile(BaseModel):
     cognitive_biases: List[str] = Field(default_factory=list)
     thinking_pattern: str = ""
     prompt_template: str = ""
-    
+
     class Config:
         use_enum_values = True
 
 
 class AgentMessage(BaseModel):
     """代理消息模型"""
+
     agent_id: str
     content: str
     timestamp: datetime = Field(default_factory=datetime.now)
@@ -79,6 +85,7 @@ class AgentMessage(BaseModel):
 
 class WorkflowNode(BaseModel):
     """工作流节点模型"""
+
     id: str
     type: str  # 原语类型
     name: str
@@ -89,6 +96,7 @@ class WorkflowNode(BaseModel):
 
 class WorkflowEdge(BaseModel):
     """工作流边模型"""
+
     from_node: str
     to_node: str
     condition: Optional[str] = None
@@ -96,6 +104,7 @@ class WorkflowEdge(BaseModel):
 
 class WorkflowDefinition(BaseModel):
     """工作流定义模型"""
+
     id: str
     name: str
     description: str
@@ -108,6 +117,7 @@ class WorkflowDefinition(BaseModel):
 
 class ExecutionStep(BaseModel):
     """执行步骤模型"""
+
     step_id: str
     node_id: str
     status: WorkflowStatus
@@ -120,6 +130,7 @@ class ExecutionStep(BaseModel):
 
 class ExecutionMetrics(BaseModel):
     """执行指标模型"""
+
     total_duration: float  # 秒
     node_count: int
     success_rate: float
@@ -129,6 +140,7 @@ class ExecutionMetrics(BaseModel):
 
 class WorkflowResult(BaseModel):
     """工作流结果模型"""
+
     execution_id: str
     workflow_id: str
     status: WorkflowStatus
@@ -144,6 +156,7 @@ class WorkflowResult(BaseModel):
 
 class Memory(BaseModel):
     """记忆模型"""
+
     id: Optional[str] = None
     content: str
     source_role: str
@@ -159,6 +172,7 @@ class Memory(BaseModel):
 
 class KnowledgeRelation(BaseModel):
     """知识关系模型"""
+
     relation_type: str  # "supports", "contradicts", "elaborates"
     target_fact_id: str
     confidence: float = Field(ge=0.0, le=1.0, default=0.8)
@@ -167,6 +181,7 @@ class KnowledgeRelation(BaseModel):
 
 class KnowledgeFact(BaseModel):
     """知识事实模型"""
+
     id: Optional[str] = None
     content: str
     source: str
@@ -179,6 +194,7 @@ class KnowledgeFact(BaseModel):
 
 class WikiPage(BaseModel):
     """Wiki页面模型"""
+
     id: str
     title: str
     content: str
@@ -196,6 +212,7 @@ class WikiPage(BaseModel):
 
 class EmergentInsight(BaseModel):
     """涌现洞察模型"""
+
     insight_id: str
     title: str
     content: str
@@ -210,6 +227,7 @@ class EmergentInsight(BaseModel):
 
 class ConsensusResult(BaseModel):
     """共识结果模型"""
+
     consensus_id: str
     topic: str
     participants: List[str]
@@ -227,6 +245,7 @@ class ConsensusResult(BaseModel):
 
 class Argument(BaseModel):
     """论证模型"""
+
     argument_id: str
     agent_id: str
     position: Literal["pro", "con", "neutral"]
@@ -239,6 +258,7 @@ class Argument(BaseModel):
 
 class DebateRound(BaseModel):
     """辩论轮次模型"""
+
     round_id: str
     round_number: int
     arguments: List[Argument] = Field(default_factory=list)
@@ -248,6 +268,7 @@ class DebateRound(BaseModel):
 
 class DebateState(BaseModel):
     """辩论状态模型"""
+
     debate_id: str
     topic: str
     participants: List[str]
@@ -263,6 +284,7 @@ class DebateState(BaseModel):
 
 class Task(BaseModel):
     """任务模型"""
+
     task_id: str
     title: str
     description: str
@@ -279,6 +301,7 @@ class Task(BaseModel):
 
 class Project(BaseModel):
     """项目模型"""
+
     project_id: str
     name: str
     description: str
@@ -295,6 +318,7 @@ class Project(BaseModel):
 
 class SystemEvent(BaseModel):
     """系统事件模型"""
+
     event_id: str
     event_type: str
     source: str
@@ -305,6 +329,7 @@ class SystemEvent(BaseModel):
 
 class SessionMetrics(BaseModel):
     """会话指标模型"""
+
     session_id: str
     message_count: int
     average_response_time: float
@@ -315,6 +340,7 @@ class SessionMetrics(BaseModel):
 
 class RolePerformance(BaseModel):
     """角色表现模型"""
+
     role_id: str
     session_id: str
     message_count: int
@@ -330,6 +356,7 @@ class RolePerformance(BaseModel):
 
 class SystemConfig(BaseModel):
     """系统配置模型"""
+
     llm_provider: str = "openai"
     default_model: str = "gpt-4"
     max_context_length: int = 8000
@@ -341,6 +368,7 @@ class SystemConfig(BaseModel):
 
 class UserPreferences(BaseModel):
     """用户偏好模型"""
+
     user_id: str
     preferred_agents: List[str] = Field(default_factory=list)
     notification_settings: Dict[str, bool] = Field(default_factory=dict)

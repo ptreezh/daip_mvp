@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-命令处理器
+"""命令处理器
 
 处理聊天界面中的特殊命令，如 /consensus now, /status 等
 """
 
 import logging
-from typing import Dict, Any, Optional, Callable
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
 
 class CommandType(Enum):
     """命令类型枚举"""
+
     CONSENSUS = "consensus"
     STATUS = "status"
     HELP = "help"
@@ -26,7 +25,7 @@ class CommandType(Enum):
 
 class CommandProcessor:
     """命令处理器"""
-    
+
     def __init__(self):
         self.commands = {
             '/consensus': self._handle_consensus,
@@ -36,17 +35,16 @@ class CommandProcessor:
             '/debug': self._handle_debug,
             '/export': self._handle_export,
         }
-        
+
         self.command_aliases = {
             '/c': '/consensus',
             '/s': '/status',
             '/h': '/help',
             '/?': '/help',
         }
-    
+
     async def process_command(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        处理命令
+        """处理命令
         
         Args:
             command: 命令字符串
@@ -54,11 +52,12 @@ class CommandProcessor:
             
         Returns:
             Dict: 处理结果
+
         """
         try:
             # 标准化命令
             normalized_command = self._normalize_command(command)
-            
+
             if normalized_command in self.commands:
                 handler = self.commands[normalized_command]
                 return await handler(command, context)
@@ -68,7 +67,7 @@ class CommandProcessor:
                     "message": f"❌ 未知命令: {command}\\n输入 `/help` 查看可用命令",
                     "type": "error"
                 }
-                
+
         except Exception as e:
             logger.error(f"处理命令失败 {command}: {e}")
             return {
@@ -76,28 +75,28 @@ class CommandProcessor:
                 "message": f"❌ 命令执行出错: {str(e)}",
                 "type": "error"
             }
-    
+
     def _normalize_command(self, command: str) -> str:
         """标准化命令"""
         command = command.strip().lower()
-        
+
         # 处理别名
         if command in self.command_aliases:
             return self.command_aliases[command]
-        
+
         # 处理带参数的命令
         parts = command.split()
         if parts:
             base_command = parts[0]
             if base_command in self.commands:
                 return base_command
-        
+
         return command
-    
+
     async def _handle_consensus(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """处理共识命令"""
         parts = command.split()
-        
+
         if len(parts) >= 2 and parts[1] == "now":
             # 触发立即共识
             return {
@@ -122,15 +121,15 @@ class CommandProcessor:
 使用先进的共识算法得出最终结论。""",
                 "type": "system_info"
             }
-    
+
     async def _handle_status(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """处理状态命令"""
         # 获取系统状态信息
         websocket_manager = context.get("websocket_manager")
         chat_interface = context.get("chat_interface")
-        
+
         status_info = []
-        
+
         # WebSocket状态
         if websocket_manager:
             ws_status = websocket_manager.get_connection_status()
@@ -142,7 +141,7 @@ class CommandProcessor:
                 f"📤 **发送队列**: {ws_status['outgoing_queue_size']} 条消息",
                 f"📥 **接收队列**: {ws_status['incoming_queue_size']} 条消息"
             ])
-        
+
         # 聊天状态
         if chat_interface:
             message_count = len(chat_interface.messages) if hasattr(chat_interface, 'messages') else 0
@@ -151,16 +150,16 @@ class CommandProcessor:
                 f"📝 **消息历史**: {message_count} 条消息",
                 f"⚡ **处理状态**: {'处理中' if getattr(chat_interface, 'is_processing', False) else '空闲'}"
             ])
-        
+
         # 系统时间
         status_info.append(f"🕒 **系统时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        
+
         return {
             "success": True,
             "message": "📊 **系统状态报告**\\n\\n" + "\\n".join(status_info),
             "type": "system_info"
         }
-    
+
     async def _handle_help(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """处理帮助命令"""
         help_content = """🆘 **Personal Intelligence Hub 帮助**
@@ -193,13 +192,13 @@ class CommandProcessor:
 • Shift+Enter - 换行
 
 💡 **提示**: 您可以随时输入新话题，系统会智能识别并启动相应的分析流程。"""
-        
+
         return {
             "success": True,
             "message": help_content,
             "type": "system_info"
         }
-    
+
     async def _handle_clear(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """处理清空命令"""
         return {
@@ -208,76 +207,76 @@ class CommandProcessor:
             "type": "system_info",
             "action": "clear_chat"
         }
-    
+
     async def _handle_debug(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """处理调试命令"""
         debug_info = []
-        
+
         # 会话信息
         session_id = context.get("session_id", "Unknown")
         debug_info.append(f"**会话ID**: {session_id}")
-        
+
         # 上下文信息
         context_keys = list(context.keys())
         debug_info.append(f"**上下文键**: {', '.join(context_keys)}")
-        
+
         # 内存使用（简化版）
         import sys
         debug_info.append(f"**Python版本**: {sys.version.split()[0]}")
-        
+
         # 时间戳
         debug_info.append(f"**调试时间**: {datetime.now().isoformat()}")
-        
+
         return {
             "success": True,
             "message": "🐛 **调试信息**\\n\\n" + "\\n".join(debug_info),
             "type": "system_info"
         }
-    
+
     async def _handle_export(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """处理导出命令"""
         chat_interface = context.get("chat_interface")
-        
+
         if not chat_interface or not hasattr(chat_interface, 'get_message_history'):
             return {
                 "success": False,
                 "message": "❌ 无法访问聊天历史",
                 "type": "error"
             }
-        
+
         try:
             # 获取消息历史
             message_history = chat_interface.get_message_history()
-            
+
             # 生成导出内容
             export_content = []
-            export_content.append(f"# Personal Intelligence Hub 对话导出")
+            export_content.append("# Personal Intelligence Hub 对话导出")
             export_content.append(f"导出时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             export_content.append(f"会话ID: {context.get('session_id', 'Unknown')}")
             export_content.append(f"消息总数: {len(message_history)}")
             export_content.append("")
             export_content.append("---")
             export_content.append("")
-            
+
             for msg in message_history:
                 timestamp = msg.get('timestamp', '')
                 sender = msg.get('sender', 'Unknown')
                 content = msg.get('content', '')
                 msg_type = msg.get('type', 'text')
-                
+
                 export_content.append(f"**{sender}** ({timestamp}) [{msg_type}]:")
                 export_content.append(content)
                 export_content.append("")
-            
+
             export_text = "\\n".join(export_content)
-            
+
             return {
                 "success": True,
                 "message": f"📄 **对话导出完成**\\n\\n```markdown\\n{export_text[:500]}...\\n```\\n\\n完整内容已准备就绪，可以复制保存。",
                 "type": "system_info",
                 "export_data": export_text
             }
-            
+
         except Exception as e:
             logger.error(f"导出对话失败: {e}")
             return {
@@ -285,7 +284,7 @@ class CommandProcessor:
                 "message": f"❌ 导出失败: {str(e)}",
                 "type": "error"
             }
-    
+
     def get_available_commands(self) -> Dict[str, str]:
         """获取可用命令列表"""
         return {
@@ -296,7 +295,7 @@ class CommandProcessor:
             "/debug": "显示调试信息",
             "/export": "导出对话历史"
         }
-    
+
     def is_command(self, text: str) -> bool:
         """检查文本是否是命令"""
         return text.strip().startswith('/')

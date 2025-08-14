@@ -1,0 +1,123 @@
+{
+  "summary": {
+    "total_checks": 8,
+    "passed_checks": 7,
+    "failed_checks": 1,
+    "success_rate": 87.5,
+    "total_duration": 2.067908
+  },
+  "quality_gates": {
+    "code_quality_passed": true,
+    "import_tests_passed": true,
+    "component_tests_passed": true,
+    "performance_tests_passed": true,
+    "end_to_end_tests_passed": true,
+    "overall_success_rate_ok": true,
+    "overall_quality_gate_passed": true
+  },
+  "system_info": {
+    "python_version": "3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)]",
+    "platform": "win32",
+    "cpu_count": 32,
+    "memory_total": 68413153280,
+    "timestamp": "2025-07-31T13:23:56.005422"
+  },
+  "check_results": [
+    {
+      "check_name": "代码质量审查",
+      "passed": true,
+      "duration": 0.028453,
+      "error_message": "",
+      "details": {
+        "total_files": 14,
+        "total_lines": 6291,
+        "syntax_errors": 0
+      }
+    },
+    {
+      "check_name": "模块导入测试",
+      "passed": true,
+      "duration": 0.01285,
+      "error_message": "",
+      "details": {
+        "debate_flow_definition": "success",
+        "participant_management": "success",
+        "debate_state_manager": "success"
+      }
+    },
+    {
+      "check_name": "辩论系统组件测试",
+      "passed": true,
+      "duration": 0.0,
+      "error_message": "",
+      "details": {
+        "state_manager_created": true,
+        "participant_manager_created": true,
+        "test_session_created": true,
+        "session_has_id": true,
+        "session_has_status": true
+      }
+    },
+    {
+      "check_name": "多角色辩论系统测试",
+      "passed": true,
+      "duration": 0.004795,
+      "error_message": "",
+      "details": {
+        "system_created": true,
+        "has_llm_integrator": true,
+        "has_role_manager": true,
+        "has_active_debates": true,
+        "has_start_debate_method": true
+      }
+    },
+    {
+      "check_name": "性能指标测试",
+      "passed": true,
+      "duration": 0.000691,
+      "error_message": "",
+      "details": {
+        "startup_time_seconds": 0.0,
+        "memory_usage_mb": 28.59765625,
+        "startup_time_ok": true,
+        "memory_usage_ok": true
+      }
+    },
+    {
+      "check_name": "内存使用测试",
+      "passed": false,
+      "duration": 2.014965,
+      "error_message": "",
+      "details": {
+        "initial_memory_mb": 28.59765625,
+        "peak_memory_mb": 28.62890625,
+        "final_memory_mb": 28.6328125,
+        "memory_increase_mb": 0.03125,
+        "memory_after_cleanup_mb": 0.03515625,
+        "memory_leak_detected": true
+      }
+    },
+    {
+      "check_name": "错误处理测试",
+      "passed": true,
+      "duration": 0.0,
+      "error_message": "",
+      "details": {
+        "non_existent_session_handled": true,
+        "non_existent_delete_handled": true
+      }
+    },
+    {
+      "check_name": "端到端工作流测试",
+      "passed": true,
+      "duration": 0.002231,
+      "error_message": "",
+      "details": {
+        "session_created": true,
+        "debate_started": true,
+        "status_retrieved": true
+      }
+    }
+  ],
+  "timestamp": "2025-07-31T13:23:58.073330"
+}

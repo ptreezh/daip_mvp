@@ -1,27 +1,25 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-26 11:00:00
+"""@Time    : 2025-07-26 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : virtual_team_service.py
 @Description:
     Service for managing virtual team projects, tasks, and collaboration.
 """
 
-import json
 import logging
 import uuid
 from datetime import datetime
 from typing import Any, Optional
 
+from src.core_services.expert_service import ExpertService
 from src.memory_bank_tools import MemoryBankTools
 from src.models import (
     ProjectStatus,
     RoleContext,
-    TaskStatus,
     VirtualProject,
-    Task as VirtualTask, # Alias Task as VirtualTask
 )
-from src.core_services.expert_service import ExpertService
+from src.models import (
+    Task as VirtualTask,  # Alias Task as VirtualTask
+)
 
 logger = logging.getLogger(__name__)
 

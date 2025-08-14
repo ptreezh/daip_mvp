@@ -55,6 +55,7 @@ class TaskManager:
         Args:
         ----
             task_directory (str): The path to the directory for storing task files.
+
         """
         self._task_directory = Path(task_directory)
         os.makedirs(self._task_directory, exist_ok=True)
@@ -71,6 +72,7 @@ class TaskManager:
         Returns:
         -------
             Task: The newly created Task object.
+
         """
         task_id = metadata["task_id"]
         logging.info(f"Creating task: {task_id} - {metadata.get('title')}")
@@ -106,6 +108,7 @@ class TaskManager:
         Returns:
         -------
             Optional[Task]: The Task object if found, otherwise None.
+
         """
         logging.info(f"Retrieving task: {task_id}")
         file_path = self._task_directory / f"{task_id}.md"
@@ -138,6 +141,7 @@ class TaskManager:
         Returns:
         -------
             bool: True if the update was successful, False otherwise.
+
         """
         logging.info(f"Updating status for task '{task_id}' to '{new_status}'.")
         file_path = self._task_directory / f"{task_id}.md"
@@ -168,6 +172,7 @@ class TaskManager:
         Returns
         -------
             List[Task]: A list of ready Task objects.
+
         """
         logging.info("Scanning for ready tasks...")
         ready_tasks = []
@@ -210,6 +215,7 @@ class TaskManager:
         Returns:
         -------
             str: A string containing the concatenated content of all dependency deliverables.
+
         """
         logging.info(f"Getting context for task '{task_id}'...")
         task = self.get_task(task_id)

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 15:00:00
+"""@Time    : 2025-07-24 15:00:00
 @Author  : DAIP-LIVE Team
 @File    : multi_perspective_workflow.py
 @Description:
@@ -8,41 +6,39 @@
     all institutional primitive nodes for comprehensive knowledge synthesis.
 """
 import logging
-import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-from src.institutional_primitives.multi_perspective import (
-    TaskDecompositionNode,
-    ParallelExplorationNode,
-    ViewpointCollectionNode,
-    EnhancedSynthesisNode,
-    IterativeRefinementNode
-)
 from src.institutional_primitives.base import ExecutionContext
+from src.institutional_primitives.multi_perspective import (
+    EnhancedSynthesisNode,
+    IterativeRefinementNode,
+    ParallelExplorationNode,
+    TaskDecompositionNode,
+    ViewpointCollectionNode,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class MultiPerspectiveSynthesisWorkflow:
-    """
-    多视角综合工作流 - Orchestrates the complete Multi-perspective Synthesis Workflow.
+    """多视角综合工作流 - Orchestrates the complete Multi-perspective Synthesis Workflow.
     
     Implements a comprehensive framework to overcome single-LLM perspective limitations
     by orchestrating diverse expert viewpoints with true cognitive independence
     into synthesized knowledge.
     """
-    
+
     def __init__(self, workflow_id: str, config: Dict[str, Any] = None):
-        """
-        Initialize the Multi-perspective Synthesis Workflow.
+        """Initialize the Multi-perspective Synthesis Workflow.
         
         Args:
             workflow_id: Unique identifier for this workflow instance
             config: Configuration parameters for the workflow
+
         """
         self.workflow_id = workflow_id
         self.config = config or {}
-        
+
         # Default configuration
         self.default_config = {
             "task_decomposition": {
@@ -75,7 +71,7 @@ class MultiPerspectiveSynthesisWorkflow:
                 "refinement_strategies": ["depth", "breadth", "insight"]
             }
         }
-        
+
         # Merge default config with provided config
         for section, defaults in self.default_config.items():
             if section not in self.config:
@@ -83,33 +79,33 @@ class MultiPerspectiveSynthesisWorkflow:
             for key, value in defaults.items():
                 if key not in self.config[section]:
                     self.config[section][key] = value
-        
+
         # Initialize workflow nodes
         self.task_decomposition_node = TaskDecompositionNode(
             f"{workflow_id}_task_decomposition",
             self.config["task_decomposition"]
         )
-        
+
         self.parallel_exploration_node = ParallelExplorationNode(
             f"{workflow_id}_parallel_exploration",
             self.config["parallel_exploration"]
         )
-        
+
         self.viewpoint_collection_node = ViewpointCollectionNode(
             f"{workflow_id}_viewpoint_collection",
             self.config["viewpoint_collection"]
         )
-        
+
         self.enhanced_synthesis_node = EnhancedSynthesisNode(
             f"{workflow_id}_enhanced_synthesis",
             self.config["enhanced_synthesis"]
         )
-        
+
         self.iterative_refinement_node = IterativeRefinementNode(
             f"{workflow_id}_iterative_refinement",
             self.config["iterative_refinement"]
         )
-    
+
     async def execute(
         self,
         topic: str,
@@ -117,8 +113,7 @@ class MultiPerspectiveSynthesisWorkflow:
         services: Dict[str, Any] = None,
         execution_id: str = None
     ) -> Dict[str, Any]:
-        """
-        Execute the complete Multi-perspective Synthesis Workflow.
+        """Execute the complete Multi-perspective Synthesis Workflow.
         
         Args:
             topic: The complex topic to analyze
@@ -128,6 +123,7 @@ class MultiPerspectiveSynthesisWorkflow:
             
         Returns:
             Complete workflow results including all intermediate outputs
+
         """
         # Create execution context
         context = ExecutionContext(
@@ -137,59 +133,59 @@ class MultiPerspectiveSynthesisWorkflow:
             services=services or {},
             state={}
         )
-        
+
         try:
             logger.info(f"Starting Multi-perspective Synthesis Workflow: {context.execution_id}")
-            
+
             # Step 1: Task decomposition
             decomposition_inputs = {
                 "topic": topic,
                 "perspectives": perspectives or []
             }
             decomposition_result = await self.task_decomposition_node.execute(decomposition_inputs, context)
-            
+
             if not decomposition_result["success"]:
                 logger.error(f"Task decomposition failed: {decomposition_result.get('error')}")
                 return self._create_error_result("Task decomposition failed", decomposition_result)
-            
+
             # Step 2: Parallel exploration
             exploration_result = await self.parallel_exploration_node.execute({}, context)
-            
+
             if not exploration_result["success"]:
                 logger.error(f"Parallel exploration failed: {exploration_result.get('error')}")
                 return self._create_error_result("Parallel exploration failed", exploration_result)
-            
+
             # Step 3: Viewpoint collection and analysis
             collection_result = await self.viewpoint_collection_node.execute({}, context)
-            
+
             if not collection_result["success"]:
                 logger.error(f"Viewpoint collection failed: {collection_result.get('error')}")
                 return self._create_error_result("Viewpoint collection failed", collection_result)
-            
+
             # Step 4: Enhanced synthesis
             synthesis_result = await self.enhanced_synthesis_node.execute({}, context)
-            
+
             if not synthesis_result["success"]:
                 logger.error(f"Enhanced synthesis failed: {synthesis_result.get('error')}")
                 return self._create_error_result("Enhanced synthesis failed", synthesis_result)
-            
+
             # Step 5: Iterative refinement (if needed)
             refinement_result = synthesis_result  # Default to original synthesis
             if synthesis_result.get("needs_refinement", False):
                 logger.info("Synthesis needs refinement, applying iterative improvement...")
                 refinement_result = await self.iterative_refinement_node.execute({}, context)
-                
+
                 if not refinement_result["success"]:
                     logger.warning(f"Iterative refinement failed: {refinement_result.get('error')}")
                     # Continue with original synthesis if refinement fails
                     refinement_result = synthesis_result
-            
+
             # Prepare final result
             logger.info(f"Multi-perspective Synthesis Workflow completed: {context.execution_id}")
-            
+
             # Use refined result if available, otherwise use original synthesis
             final_synthesis = refinement_result.get("refined_synthesis", {}) if refinement_result.get("refinement_applied", False) else synthesis_result
-            
+
             return {
                 "success": True,
                 "topic": topic,
@@ -213,7 +209,7 @@ class MultiPerspectiveSynthesisWorkflow:
                     "iterative_refinement": refinement_result if refinement_result != synthesis_result else None
                 }
             }
-            
+
         except Exception as e:
             logger.exception(f"Multi-perspective Synthesis Workflow failed with exception: {e}")
             return {
@@ -221,7 +217,7 @@ class MultiPerspectiveSynthesisWorkflow:
                 "error": f"Workflow execution failed: {str(e)}",
                 "execution_id": context.execution_id
             }
-    
+
     def _create_error_result(self, error_message: str, step_result: Dict[str, Any]) -> Dict[str, Any]:
         """Create a standardized error result."""
         return {
@@ -230,7 +226,7 @@ class MultiPerspectiveSynthesisWorkflow:
             "error_details": step_result.get("error", "Unknown error"),
             "execution_id": step_result.get("execution_id", "unknown")
         }
-    
+
     @classmethod
     async def execute_multi_perspective_synthesis(
         cls,
@@ -240,8 +236,7 @@ class MultiPerspectiveSynthesisWorkflow:
         workflow_config: Dict[str, Any] = None,
         workflow_id: str = "multi_perspective"
     ) -> Dict[str, Any]:
-        """
-        Convenience method to execute a Multi-perspective Synthesis Workflow.
+        """Convenience method to execute a Multi-perspective Synthesis Workflow.
         
         Args:
             topic: The complex topic to analyze
@@ -252,6 +247,7 @@ class MultiPerspectiveSynthesisWorkflow:
             
         Returns:
             Workflow results
+
         """
         workflow = cls(workflow_id, workflow_config)
         return await workflow.execute(topic, perspectives, services)

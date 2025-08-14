@@ -1,30 +1,26 @@
-# -*- coding: utf-8 -*-
-"""
-Main entry point for running the DAIP-LIVE application.
+"""Main entry point for running the DAIP-LIVE application.
 This script ensures the correct Python path is set and launches the Typer CLI.
 """
-import sys
-import os
 import asyncio
-import logging
-import pathlib
 import datetime
+import logging
+import os
+import pathlib
 import re
-from typing import List, Optional, Dict, Any
+import sys
+from typing import Any, Dict, List, Optional
 
 # Add the project root to the Python path to resolve module imports
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-import typer
-from rich.console import Console
-
 from prompt_toolkit import Application
+from prompt_toolkit.filters import Condition, has_focus
 from prompt_toolkit.key_binding import KeyBindings, KeyBindingsBase
-from prompt_toolkit.layout.containers import HSplit, Window, ConditionalContainer
+from prompt_toolkit.layout.containers import ConditionalContainer, HSplit, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout.layout import Layout
-from prompt_toolkit.filters import has_focus, Condition
 from prompt_toolkit.widgets import TextArea
+from rich.console import Console
 
 from src.composition import create_application_dependencies
 from src.models import (
@@ -138,7 +134,7 @@ def create_key_bindings() -> KeyBindingsBase:
             filepath = transcript_dir / filename
             filepath.write_text(str(output_area.text), encoding="utf-8")
             output_area.text += f"\n[System] Transcript saved to {filepath}\n"
-        except IOError as e:
+        except OSError as e:
             output_area.text += f"\n[System] Error saving transcript: {e}\n"
         event.app.invalidate()
     @kb.add("i")

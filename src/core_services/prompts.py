@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 10:30:00
+"""@Time    : 2025-07-25 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : prompts.py
 @Description:

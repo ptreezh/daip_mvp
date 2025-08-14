@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-修复剩余的语法错误
+"""修复剩余的语法错误
 """
 
 import re
@@ -13,14 +11,14 @@ def fix_multi_role_debate_system():
     file_path = Path("src/real_demo_system/multi_role_debate_system.py")
     if file_path.exists():
         content = file_path.read_text(encoding='utf-8')
-        
+
         # 修复f-string中的括号问题
-        content = re.sub(r'f"debate_\(int\(datetime\.now\(\)\.timestamp\(\)\)\)"', 
+        content = re.sub(r'f"debate_\(int\(datetime\.now\(\)\.timestamp\(\)\)\)"',
                         'f"debate_{int(datetime.now().timestamp())}"', content)
-        
+
         # 修复错误的括号
         content = re.sub(r'cognitive_profiles = \(\}', 'cognitive_profiles = {}', content)
-        
+
         file_path.write_text(content, encoding='utf-8')
         print(f"✅ 修复了 {file_path}")
 
@@ -30,7 +28,7 @@ def fix_sskg_storage_adapters():
     file_path = Path("src/core_services/sskg_storage_adapters.py")
     if file_path.exists():
         content = file_path.read_text(encoding='utf-8')
-        
+
         # 查找并修复第794行附近的语法错误
         lines = content.split('\n')
         for i, line in enumerate(lines):
@@ -43,7 +41,7 @@ def fix_sskg_storage_adapters():
                     elif ':' in line and not line.strip().endswith(':'):
                         if 'def ' in line or 'class ' in line:
                             lines[i] = line.rstrip() + ':'
-        
+
         file_path.write_text('\n'.join(lines), encoding='utf-8')
         print(f"✅ 修复了 {file_path}")
 
@@ -53,7 +51,7 @@ def fix_task_context_optimizer():
     file_path = Path("src/core_services/task_context_optimizer.py")
     if file_path.exists():
         content = file_path.read_text(encoding='utf-8')
-        
+
         # 查找并修复第358行附近的缩进问题
         lines = content.split('\n')
         for i, line in enumerate(lines):
@@ -63,7 +61,7 @@ def fix_task_context_optimizer():
                     # 如果是类方法，应该有4个空格缩进
                     if 'def ' in line:
                         lines[i] = '    ' + line.strip()
-        
+
         file_path.write_text('\n'.join(lines), encoding='utf-8')
         print(f"✅ 修复了 {file_path}")
 
@@ -71,11 +69,11 @@ def fix_task_context_optimizer():
 def main():
     """主函数"""
     print("🔧 修复剩余的语法错误...")
-    
+
     fix_multi_role_debate_system()
     fix_sskg_storage_adapters()
     fix_task_context_optimizer()
-    
+
     print("✅ 剩余语法错误修复完成！")
 
 

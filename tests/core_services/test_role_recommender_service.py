@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+from unittest.mock import MagicMock
+
 import pytest
-from unittest.mock import MagicMock, patch
 
 # Assuming RoleRecommenderService and Role models exist in the src directory
 # from src.core_services.role_recommender_service import RoleRecommenderService
@@ -38,8 +38,7 @@ def recommender_with_mocks():
     yield recommender, mock_vector_store, mock_embedding_generator
 
 def test_add_roles_to_store(recommender_with_mocks):
-    """
-    Test adding roles to the vector store.
+    """Test adding roles to the vector store.
     Fixes AttributeError by calling assert_called_once_with on a mock object.
     Fixes ValueError by ensuring the mock embedding generator returns a list of floats.
     Fixes AssertionError by using a specific and correct assertion on the mock call.

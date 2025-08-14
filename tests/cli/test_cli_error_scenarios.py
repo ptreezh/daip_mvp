@@ -1,20 +1,17 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-20 00:00:00
+"""@Time    : 2025-07-20 00:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_cli_error_scenarios.py
 @Description: Tests for CLI error scenarios and edge cases.
 """
 
-import pytest
 import asyncio
-import tempfile
-import os
-from unittest.mock import MagicMock, patch, AsyncMock, mock_open
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from typer.testing import CliRunner
 
-from src.cli.main import app
 from src.cli.commands import CLIDebateHandler, run_debate_command
+from src.cli.main import app
 
 
 @pytest.fixture
@@ -25,35 +22,35 @@ def cli_runner():
 
 class TestCLIErrorScenarios:
     """Test CLI error handling in various failure scenarios."""
-    
+
     def test_start_command_empty_topic(self, cli_runner):
         """Test start command with empty topic."""
         result = cli_runner.invoke(app, ["start", ""])
-        
+
         assert result.exit_code == 1
         assert "Debate topic must be at least 3 characters long" in result.stdout
-    
+
     def test_start_command_whitespace_only_topic(self, cli_runner):
         """Test start command with whitespace-only topic."""
         result = cli_runner.invoke(app, ["start", "   "])
-        
+
         assert result.exit_code == 1
         assert "Debate topic must be at least 3 characters long" in result.stdout
-    
+
     def test_start_command_negative_rounds(self, cli_runner):
         """Test start command with negative rounds."""
         result = cli_runner.invoke(app, ["start", "Test topic", "--rounds", "-1"])
-        
+
         assert result.exit_code == 1
         assert "Number of rounds must be at least 1" in result.stdout
-    
+
     def test_start_command_excessive_rounds(self, cli_runner):
         """Test start command with excessive rounds."""
         result = cli_runner.invoke(app, ["start", "Test topic", "--rounds", "100"])
-        
+
         assert result.exit_code == 1
         assert "Number of rounds cannot exceed 20" in result.stdout
-    
+
     def test_start_command_invalid_output_path(self, cli_runner):
         """Test start command with invalid output path."""
         with patch("os.path.dirname") as mock_dirname:
@@ -62,46 +59,46 @@ class TestCLIErrorScenarios:
                     mock_dirname.return_value = "/invalid/path"
                     mock_exists.return_value = False
                     mock_makedirs.side_effect = PermissionError("Permission denied")
-                    
+
                     result = cli_runner.invoke(app, [
                         "start", "Test topic",
                         "--save",
                         "--output", "/invalid/path/output.txt"
                     ])
-                    
+
                     assert result.exit_code == 1
                     assert "Cannot create output directory" in result.stdout
                     assert "permission denied" in result.stdout
-    
+
     @patch("src.cli.main.asyncio.run")
     def test_start_command_module_import_error(self, mock_asyncio_run, cli_runner):
         """Test start command with module import errors."""
         mock_asyncio_run.side_effect = Exception("No module named 'missing_module'")
-        
+
         result = cli_runner.invoke(app, ["start", "Test topic"])
-        
+
         assert result.exit_code == 1
         assert "Missing dependency detected" in result.stdout
         assert "pip install -r requirements.txt" in result.stdout
-    
+
     @patch("src.cli.main.asyncio.run")
     def test_start_command_config_error(self, mock_asyncio_run, cli_runner):
         """Test start command with configuration errors."""
         mock_asyncio_run.side_effect = Exception("Config file not found")
-        
+
         result = cli_runner.invoke(app, ["start", "Test topic"])
-        
+
         assert result.exit_code == 1
         assert "Configuration issue detected" in result.stdout
         assert "Check config.yaml file" in result.stdout
-    
+
     @patch("src.cli.main.asyncio.run")
     def test_start_command_generic_error(self, mock_asyncio_run, cli_runner):
         """Test start command with generic errors."""
         mock_asyncio_run.side_effect = Exception("Unknown error occurred")
-        
+
         result = cli_runner.invoke(app, ["start", "Test topic"])
-        
+
         assert result.exit_code == 1
         assert "Unexpected error" in result.stdout
         assert "General troubleshooting" in result.stdout
@@ -110,18 +107,18 @@ class TestCLIErrorScenarios:
 
 class TestCLIDebateHandlerErrorScenarios:
     """Test CLIDebateHandler error handling."""
-    
+
     @patch("src.cli.commands.AppState")
     @pytest.mark.asyncio
     async def test_debate_handler_app_state_failure(self, mock_app_state):
         """Test CLIDebateHandler when AppState initialization fails."""
         mock_app_state.side_effect = Exception("Database connection failed")
-        
+
         handler = CLIDebateHandler()
         result = await handler.initialize()
-        
+
         assert result is False
-    
+
     @patch("src.cli.commands.AppState")
     @patch("src.cli.commands.DebateProtocol")
     @pytest.mark.asyncio
@@ -130,15 +127,15 @@ class TestCLIDebateHandlerErrorScenarios:
         # Mock successful AppState
         mock_app_state_instance = MagicMock()
         mock_app_state.return_value = mock_app_state_instance
-        
+
         # Mock failed DebateProtocol
         mock_debate_protocol.side_effect = Exception("Protocol initialization failed")
-        
+
         handler = CLIDebateHandler()
         result = await handler.initialize()
-        
+
         assert result is False
-    
+
     @patch("src.cli.commands.AppState")
     @patch("src.cli.commands.DebateProtocol")
     @pytest.mark.asyncio
@@ -147,18 +144,18 @@ class TestCLIDebateHandlerErrorScenarios:
         # Mock successful initialization
         mock_app_state_instance = MagicMock()
         mock_app_state.return_value = mock_app_state_instance
-        
+
         mock_protocol_instance = MagicMock()
         mock_protocol_instance.run = AsyncMock(side_effect=Exception("Debate execution failed"))
         mock_debate_protocol.return_value = mock_protocol_instance
-        
+
         handler = CLIDebateHandler()
         await handler.initialize()
-        
+
         # Mock DebateConfig
         with patch("src.cli.commands.DebateConfig") as mock_config:
             mock_config.return_value = MagicMock()
-            
+
             result = await handler.start_debate(
                 topic="Test topic",
                 roles=["Expert"],
@@ -166,9 +163,9 @@ class TestCLIDebateHandlerErrorScenarios:
                 consensus_strategy="simple_majority_vote",
                 verbose=False
             )
-            
+
             assert result is False
-    
+
     @patch("src.cli.commands.AppState")
     @patch("src.cli.commands.DebateProtocol")
     @pytest.mark.asyncio
@@ -177,18 +174,18 @@ class TestCLIDebateHandlerErrorScenarios:
         # Mock successful initialization
         mock_app_state_instance = MagicMock()
         mock_app_state.return_value = mock_app_state_instance
-        
+
         mock_protocol_instance = MagicMock()
         mock_protocol_instance.run = AsyncMock()
         mock_debate_protocol.return_value = mock_protocol_instance
-        
+
         handler = CLIDebateHandler()
         await handler.initialize()
-        
+
         # Mock event queue that raises an exception
         handler.event_queue = MagicMock()
         handler.event_queue.get = AsyncMock(side_effect=Exception("Event processing error"))
-        
+
         # Test event processing with error
         try:
             await asyncio.wait_for(handler._process_events(verbose=False), timeout=0.1)
@@ -198,7 +195,7 @@ class TestCLIDebateHandlerErrorScenarios:
 
 class TestRunDebateCommandErrorScenarios:
     """Test run_debate_command error handling."""
-    
+
     @patch("src.cli.commands.MISSING_DEPENDENCIES", ["aiosqlite", "chromadb"])
     @pytest.mark.asyncio
     async def test_run_debate_command_missing_dependencies(self):
@@ -210,9 +207,9 @@ class TestRunDebateCommandErrorScenarios:
             consensus_strategy="simple_majority_vote",
             verbose=False
         )
-        
+
         assert result is False
-    
+
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
     @patch("src.cli.commands.CLIDebateHandler")
     @pytest.mark.asyncio
@@ -221,7 +218,7 @@ class TestRunDebateCommandErrorScenarios:
         mock_handler = MagicMock()
         mock_handler.start_debate = AsyncMock(side_effect=Exception("Handler failed"))
         mock_handler_class.return_value = mock_handler
-        
+
         result = await run_debate_command(
             topic="Test topic",
             roles=["Expert"],
@@ -229,21 +226,21 @@ class TestRunDebateCommandErrorScenarios:
             consensus_strategy="simple_majority_vote",
             verbose=False
         )
-        
+
         assert result is False
-    
+
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
     @patch("src.cli.commands.AppState")
     @pytest.mark.asyncio
     async def test_run_debate_command_role_recommendation_failure(self, mock_app_state):
         """Test run_debate_command when role recommendation fails."""
         mock_app_state.side_effect = Exception("Role service unavailable")
-        
+
         with patch("src.cli.commands.CLIDebateHandler.initialize", new_callable=AsyncMock) as mock_init:
             with patch("src.cli.commands.CLIDebateHandler.start_debate", new_callable=AsyncMock) as mock_start:
                 mock_init.return_value = True
                 mock_start.return_value = True
-                
+
                 result = await run_debate_command(
                     topic="Test topic",
                     roles=[],  # No roles provided
@@ -251,13 +248,13 @@ class TestRunDebateCommandErrorScenarios:
                     consensus_strategy="simple_majority_vote",
                     verbose=False
                 )
-                
+
                 # Should still succeed with default roles
                 assert result is True
                 call_args = mock_start.call_args[0]
                 assert "Expert" in call_args[1]
                 assert "Critic" in call_args[1]
-    
+
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
     @patch("src.cli.commands.CLIDebateHandler")
     @pytest.mark.asyncio
@@ -269,7 +266,7 @@ class TestRunDebateCommandErrorScenarios:
                 with patch("src.cli.commands.CLIDebateHandler.start_debate", new_callable=AsyncMock) as mock_start:
                     mock_init.return_value = True
                     mock_start.return_value = True
-                    
+
                     result = await run_debate_command(
                         topic="Test topic",
                         roles=["Expert"],
@@ -279,63 +276,63 @@ class TestRunDebateCommandErrorScenarios:
                         save_results=True,
                         output_file="test_output.json"
                     )
-                    
+
                     # Should still return True (debate succeeded, save failed)
                     assert result is True
 
 
 class TestServiceHealthCheckErrorScenarios:
     """Test system health check error scenarios."""
-    
+
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
     @patch("src.cli.commands.AppState")
     def test_check_system_health_app_state_failure(self, mock_app_state):
         """Test check_system_health when AppState fails."""
         mock_app_state.side_effect = ImportError("Cannot import required module")
-        
+
         from src.cli.commands import check_system_health
         health_info = check_system_health()
-        
+
         assert "❌ Failed" in health_info["services"]["status"]
         assert "Cannot import required module" in health_info["services"]["details"]
-    
+
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
     @patch("src.cli.commands.AppState")
     def test_check_system_health_api_import_failure(self, mock_app_state):
         """Test check_system_health when API import fails."""
         mock_app_state.return_value = MagicMock()
-        
+
         # Since the API is now working correctly, this test should verify that
         # the API status is reported as ready when imports succeed
         from src.cli.commands import check_system_health
         health_info = check_system_health()
-        
+
         # The API should be ready since imports are working
         assert "✅ Ready" in health_info["api"]["status"]
 
 
 class TestRoleListingErrorScenarios:
     """Test role listing error scenarios."""
-    
+
     @patch("src.cli.commands.MISSING_DEPENDENCIES", ["frontmatter"])
     def test_list_available_roles_missing_dependencies(self):
         """Test list_available_roles with missing dependencies."""
         from src.cli.commands import list_available_roles
         roles = list_available_roles()
-        
+
         assert roles == []
-    
+
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
     @patch("src.cli.commands.AppState")
     def test_list_available_roles_app_state_failure(self, mock_app_state):
         """Test list_available_roles when AppState fails."""
         mock_app_state.side_effect = Exception("Role service unavailable")
-        
+
         from src.cli.commands import list_available_roles
         roles = list_available_roles()
-        
+
         assert roles == []
-    
+
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
     @patch("src.cli.commands.AppState")
     def test_list_available_roles_load_roles_failure(self, mock_app_state):
@@ -343,12 +340,12 @@ class TestRoleListingErrorScenarios:
         mock_app_state_instance = MagicMock()
         mock_app_state_instance.load_all_roles.side_effect = Exception("Cannot load roles")
         mock_app_state.return_value = mock_app_state_instance
-        
+
         from src.cli.commands import list_available_roles
         roles = list_available_roles()
-        
+
         assert roles == []
-    
+
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
     @patch("src.cli.commands.AppState")
     def test_list_available_roles_malformed_data(self, mock_app_state):
@@ -360,67 +357,67 @@ class TestRoleListingErrorScenarios:
             "AnotherValidRole": {"desc": "Another valid role", "tags": ["valid"]}
         }
         mock_app_state.return_value = mock_app_state_instance
-        
+
         from src.cli.commands import list_available_roles
         roles = list_available_roles()
-        
+
         # Should handle malformed data gracefully and return empty list due to error
         assert roles == []
 
 
 class TestCLIEdgeCases:
     """Test CLI edge cases and boundary conditions."""
-    
+
     def test_start_command_unicode_topic(self, cli_runner):
         """Test start command with unicode characters in topic."""
         with patch("src.cli.main.asyncio.run") as mock_asyncio_run:
             with patch("src.cli.commands.run_debate_command") as mock_run_debate:
                 mock_run_debate.return_value = True
                 mock_asyncio_run.return_value = True
-                
+
                 result = cli_runner.invoke(app, ["start", "人工智能的未来 🤖"])
-                
+
                 assert result.exit_code == 0
                 call_args = mock_run_debate.call_args
                 assert call_args[1]["topic"] == "人工智能的未来 🤖"
-    
+
     def test_start_command_very_long_role_names(self, cli_runner):
         """Test start command with very long role names."""
         long_role_name = "A" * 200  # 200 character role name
-        
+
         with patch("src.cli.main.asyncio.run") as mock_asyncio_run:
             with patch("src.cli.commands.run_debate_command") as mock_run_debate:
                 mock_run_debate.return_value = True
                 mock_asyncio_run.return_value = True
-                
+
                 result = cli_runner.invoke(app, [
                     "start", "Test topic",
                     "--role", long_role_name
                 ])
-                
+
                 assert result.exit_code == 0
                 call_args = mock_run_debate.call_args
                 assert long_role_name in call_args[1]["roles"]
-    
+
     def test_start_command_many_roles(self, cli_runner):
         """Test start command with many roles."""
         many_roles = [f"Role{i}" for i in range(20)]  # 20 roles
-        
+
         with patch("src.cli.main.asyncio.run") as mock_asyncio_run:
             with patch("src.cli.commands.run_debate_command") as mock_run_debate:
                 mock_run_debate.return_value = True
                 mock_asyncio_run.return_value = True
-                
+
                 cmd = ["start", "Test topic"]
                 for role in many_roles:
                     cmd.extend(["--role", role])
-                
+
                 result = cli_runner.invoke(app, cmd)
-                
+
                 assert result.exit_code == 0
                 call_args = mock_run_debate.call_args
                 assert len(call_args[1]["roles"]) == 20
-    
+
     def test_start_command_boundary_rounds(self, cli_runner):
         """Test start command with boundary values for rounds."""
         # Test minimum valid rounds
@@ -428,19 +425,19 @@ class TestCLIEdgeCases:
             with patch("src.cli.commands.run_debate_command") as mock_run_debate:
                 mock_run_debate.return_value = True
                 mock_asyncio_run.return_value = True
-                
+
                 result = cli_runner.invoke(app, ["start", "Test topic", "--rounds", "1"])
                 assert result.exit_code == 0
-        
+
         # Test maximum valid rounds
         with patch("src.cli.main.asyncio.run") as mock_asyncio_run:
             with patch("src.cli.commands.run_debate_command") as mock_run_debate:
                 mock_run_debate.return_value = True
                 mock_asyncio_run.return_value = True
-                
+
                 result = cli_runner.invoke(app, ["start", "Test topic", "--rounds", "20"])
                 assert result.exit_code == 0
-    
+
     def test_roles_command_with_empty_role_descriptions(self, cli_runner):
         """Test roles command with empty role descriptions."""
         with patch("src.cli.commands.list_available_roles") as mock_list_roles:
@@ -449,9 +446,9 @@ class TestCLIEdgeCases:
                 {"name": "Role2", "description": None, "tags": ["tag1"]},
                 {"name": "Role3", "description": "Valid description", "tags": []}
             ]
-            
+
             result = cli_runner.invoke(app, ["roles"])
-            
+
             assert result.exit_code == 0
             assert "Role1" in result.stdout
             # Role2 should be skipped due to None description

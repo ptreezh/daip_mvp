@@ -7,7 +7,7 @@
 
 import logging
 from enum import Enum, auto
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from src.core_services.memory_service import MemoryService
 from src.core_services.role_manager import RoleManager
@@ -60,6 +60,7 @@ class WorkflowManager:
             wiki_service (WikiService): Service for the versioned knowledge base.
             memory_service (MemoryService): Service for session history.
             synthesis_engine (SynthesisEngine): Service for generating summaries.
+
         """
         self.session_id = session_id
         self.current_state: SystemState = SystemState.IDLE
@@ -87,6 +88,7 @@ class WorkflowManager:
         ----
             event_type (str): The type of the event (e.g., 'user_message', 'command').
             payload (Dict[str, Any]): The data associated with the event.
+
         """
         logging.info(
             "Handling event '%s' in state '%s' with payload: %s",
@@ -106,7 +108,7 @@ class WorkflowManager:
                 # Placeholder for parsing task from command
                 task_description = "Parsed task from command"
                 self._transition_to(SystemState.PROJECT_EXECUTION, task=task_description)
-        
+
         # --- Delegate to Active Protocol ---
         elif self.active_protocol:
             # In a real implementation, you would await the handling
@@ -126,6 +128,7 @@ class WorkflowManager:
         ----
             new_state (SystemState): The state to transition to.
             **kwargs: Arguments needed to initialize the new state's protocol.
+
         """
         logging.info(
             "Transitioning state from %s to %s", self.current_state.name, new_state.name
@@ -147,6 +150,7 @@ class WorkflowManager:
         Returns
         -------
             Dict[str, Any]: A dictionary representing the current status.
+
         """
         return {
             "session_id": self.session_id,

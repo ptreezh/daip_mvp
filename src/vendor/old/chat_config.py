@@ -139,6 +139,7 @@ def get_chat_model_config(model_type: str = None) -> dict[str, Any]:
 
     Returns:
         dict[str, Any]: The configuration dictionary for the specified model.
+
     """
     if model_type is None:
         model_type = DEFAULT_CHAT_MODEL
@@ -151,6 +152,7 @@ def get_system_config() -> dict[str, Any]:
 
     Returns:
         dict[str, Any]: The chat system configuration dictionary.
+
     """
     return CHAT_SYSTEM_CONFIG
 
@@ -160,6 +162,7 @@ def get_recommendation_config() -> dict[str, Any]:
 
     Returns:
         dict[str, Any]: The role recommendation configuration dictionary.
+
     """
     return ROLE_RECOMMENDATION_CONFIG
 
@@ -169,6 +172,7 @@ def get_vectorization_config() -> dict[str, Any]:
 
     Returns:
         dict[str, Any]: The vectorization configuration dictionary.
+
     """
     return VECTORIZATION_CONFIG
 
@@ -178,6 +182,7 @@ def get_chatroom_config() -> dict[str, Any]:
 
     Returns:
         dict[str, Any]: The chatroom configuration dictionary.
+
     """
     return CHATROOM_CONFIG
 
@@ -190,6 +195,7 @@ def get_prompt_template(template_name: str) -> str:
 
     Returns:
         str: The prompt template string, or an empty string if not found.
+
     """
     return PROMPT_TEMPLATES.get(template_name, "")
 
@@ -203,6 +209,7 @@ def validate_model_availability(model_type: str = None) -> bool:
 
     Returns:
         bool: True if the model is available, False otherwise.
+
     """
     if model_type is None:
         model_type = DEFAULT_CHAT_MODEL
@@ -230,6 +237,7 @@ def get_available_models() -> list:
 
     Returns:
         list: A list of strings, where each string is an available model type.
+
     """
     available = []
     for model_type in CHAT_MODEL_CONFIG.keys():
@@ -243,6 +251,7 @@ def get_cloud_model_config() -> dict[str, Any]:
 
     Returns:
         dict[str, Any]: The cloud model configuration dictionary.
+
     """
     return CLOUD_MODEL_CONFIG
 
@@ -252,6 +261,7 @@ def is_cloud_models_enabled() -> bool:
 
     Returns:
         bool: True if cloud models are enabled, False otherwise.
+
     """
     return CLOUD_MODEL_CONFIG["enabled"]
 
@@ -261,6 +271,7 @@ def is_cloud_fallback_enabled() -> bool:
 
     Returns:
         bool: True if cloud fallback is enabled, False otherwise.
+
     """
     return CLOUD_MODEL_CONFIG["fallback_enabled"]
 

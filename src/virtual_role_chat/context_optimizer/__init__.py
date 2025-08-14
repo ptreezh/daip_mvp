@@ -1,37 +1,31 @@
-"""
-Task Context Optimizer module for the Virtual Role Chat System.
+"""Task Context Optimizer module for the Virtual Role Chat System.
 
 This module implements task-focused context optimization that is integrated
 at the lowest level of LLM interactions, automatically optimizing context
 preparation for all AI communications.
 """
 
-from .optimizer import TaskContextOptimizer
-from .models import (
-    TaskRequirement,
-    ContextElement,
-    OptimizedContext,
-    TaskDetectionResult
-)
-from .strategies import (
-    TaskDetectionStrategy,
-    ContextPrioritizationStrategy,
-    ContextCompressionStrategy,
-    ContextBlendingStrategy
-)
 from .dynamic_adapter import (
+    AdaptationAction,
+    AdaptationEvent,
+    AdaptationTrigger,
+    CoherenceMonitor,
     DynamicContextAdapter,
     TaskBoundaryDetector,
-    CoherenceMonitor,
-    AdaptationTrigger,
-    AdaptationAction,
-    AdaptationEvent
+)
+from .models import ContextElement, OptimizedContext, TaskDetectionResult, TaskRequirement
+from .optimizer import TaskContextOptimizer
+from .strategies import (
+    ContextBlendingStrategy,
+    ContextCompressionStrategy,
+    ContextPrioritizationStrategy,
+    TaskDetectionStrategy,
 )
 
 __all__ = [
     'TaskContextOptimizer',
     'TaskRequirement',
-    'ContextElement', 
+    'ContextElement',
     'OptimizedContext',
     'TaskDetectionResult',
     'TaskDetectionStrategy',

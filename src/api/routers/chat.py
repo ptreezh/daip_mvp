@@ -1,16 +1,14 @@
 import logging
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.dependencies import get_chat_service
+from src.chat_config import DEFAULT_CHAT_MODEL
+from src.core_services.chat_service import ChatService
 from src.models import (
-    ChatMessage,
     MultiRoleChatRequest,
     MultiRoleChatResponse,
 )
-from src.core_services.chat_service import ChatService
-from src.chat_config import DEFAULT_CHAT_MODEL
 
 router = APIRouter(
     prefix="/chat",
@@ -24,8 +22,7 @@ logger = logging.getLogger(__name__)
 async def multi_role_chat_simple(
     request: MultiRoleChatRequest, chat_service: ChatService = Depends(get_chat_service)
 ):
-    """
-    A simplified multi-role chat endpoint that simulates a response from a random AI role.
+    """A simplified multi-role chat endpoint that simulates a response from a random AI role.
     """
     try:
         return await chat_service.handle_simple_multi_role_chat(request)

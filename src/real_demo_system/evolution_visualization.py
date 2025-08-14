@@ -1,27 +1,24 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-演化可视化
+"""演化可视化
 
 提供知识演化过程的可视化展示
 """
 
 import logging
-from typing import Any, Dict, List, Optional
-from datetime import datetime
 import uuid
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
 
 class EvolutionVisualization:
     """演化可视化器"""
-    
+
     def __init__(self):
         """初始化演化可视化器"""
         self.visualization_types = [
             "timeline",
-            "lineage_graph", 
+            "lineage_graph",
             "quality_trend",
             "evolution_heatmap",
             "impact_network"
@@ -31,12 +28,12 @@ class EvolutionVisualization:
             "lineage_graph": {"type": "network", "layout": "hierarchical"},
             "quality_trend": {"type": "line_chart", "y_axis": "quality_score"}
         }
-    
+
     def create_evolution_timeline(self, evolution_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """创建演化时间线"""
         try:
             timeline_id = str(uuid.uuid4())
-            
+
             # 处理数据点
             data_points = []
             for event in evolution_data:
@@ -47,7 +44,7 @@ class EvolutionVisualization:
                     "description": f"{event.get('event', 'Unknown')} - Quality: {event.get('quality', 0.0):.2f}"
                 }
                 data_points.append(data_point)
-            
+
             timeline = {
                 "timeline_id": timeline_id,
                 "chart_config": self.chart_configurations["timeline"],
@@ -58,18 +55,18 @@ class EvolutionVisualization:
                 },
                 "total_events": len(evolution_data)
             }
-            
+
             return timeline
-            
+
         except Exception as e:
             logger.error(f"创建演化时间线失败: {e}")
             return {"error": str(e)}
-    
+
     def generate_lineage_graph(self, lineage_data: Dict[str, Any]) -> Dict[str, Any]:
         """生成谱系图"""
         try:
             graph_id = str(uuid.uuid4())
-            
+
             lineage_graph = {
                 "graph_id": graph_id,
                 "chart_config": self.chart_configurations["lineage_graph"],
@@ -86,18 +83,18 @@ class EvolutionVisualization:
                     "node_click": True
                 }
             }
-            
+
             return lineage_graph
-            
+
         except Exception as e:
             logger.error(f"生成谱系图失败: {e}")
             return {"error": str(e)}
-    
+
     def create_quality_trend_chart(self, quality_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """创建质量趋势图"""
         try:
             chart_id = str(uuid.uuid4())
-            
+
             # 处理质量数据
             chart_data = []
             for data_point in quality_data:
@@ -106,7 +103,7 @@ class EvolutionVisualization:
                     "y": data_point.get("quality_score", 0.0),
                     "label": f"Quality: {data_point.get('quality_score', 0.0):.2f}"
                 })
-            
+
             quality_chart = {
                 "chart_id": chart_id,
                 "chart_config": self.chart_configurations["quality_trend"],
@@ -121,9 +118,9 @@ class EvolutionVisualization:
                     "grid": True
                 }
             }
-            
+
             return quality_chart
-            
+
         except Exception as e:
             logger.error(f"创建质量趋势图失败: {e}")
             return {"error": str(e)}

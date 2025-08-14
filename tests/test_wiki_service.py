@@ -5,7 +5,8 @@ import tempfile
 from pathlib import Path
 from typing import List
 from unittest import TestCase, main
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
+
 import yaml
 
 from src.core_services.wiki_service import (
@@ -75,7 +76,7 @@ class TestWikiService(TestCase):
         self.assertTrue((entry_path / "entry.json").exists())
 
         # Verify metadata
-        with open(entry_path / "entry.json", "r") as f:
+        with open(entry_path / "entry.json") as f:
             metadata = WikiEntryMetadata(**json.load(f))
             self.assertEqual(metadata.entry_name, entry_name)
             self.assertEqual(metadata.creator, author)
@@ -86,7 +87,7 @@ class TestWikiService(TestCase):
         # Verify version content
         version_file = entry_path / "versions" / "1.0.0.md"
         self.assertTrue(version_file.exists())
-        with open(version_file, "r") as f:
+        with open(version_file) as f:
             file_content = f.read()
             parts = file_content.split("---", 2)
             front_matter = yaml.safe_load(parts[1])
@@ -135,7 +136,7 @@ class TestWikiService(TestCase):
         proposal_file = entry_path / "proposals" / f"{proposal_id}.json"
         self.assertTrue(proposal_file.exists())
 
-        with open(proposal_file, "r") as f:
+        with open(proposal_file) as f:
             proposal_data = json.load(f)
             # Convert status string from JSON back to Enum before instantiation
             proposal_data["status"] = EditStatus(proposal_data["status"])
@@ -169,7 +170,7 @@ class TestWikiService(TestCase):
         # Verify proposal status
         entry_path = Path(self.test_dir) / entry_name
         proposal_file = entry_path / "proposals" / f"{proposal_id}.json"
-        with open(proposal_file, "r") as f:
+        with open(proposal_file) as f:
             proposal_data = json.load(f)
             self.assertEqual(proposal_data["status"], EditStatus.APPLIED.value)
 

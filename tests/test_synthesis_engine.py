@@ -1,10 +1,12 @@
-import pytest
-from unittest.mock import MagicMock, AsyncMock
 from typing import List
-from src.core_services.synthesis_engine import SynthesisEngine
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
 from src.core_services import prompts
-from src.models import DebateTurn
+from src.core_services.synthesis_engine import SynthesisEngine
 from src.kernel.llm_interface import LLMInterface
+from src.models import DebateTurn
 
 # Mark all tests in this file as asyncio
 pytestmark = pytest.mark.asyncio

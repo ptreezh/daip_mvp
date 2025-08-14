@@ -9,8 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProtocolService:
-    """
-    Service layer for handling protocol generation, classification, and execution.
+    """Service layer for handling protocol generation, classification, and execution.
     """
 
     def __init__(self, app_state: Any): # Use Any to avoid circular import type hint

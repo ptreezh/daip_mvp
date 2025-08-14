@@ -5,10 +5,6 @@ from typing import Any, Dict
 
 from fastapi import HTTPException, UploadFile
 
-from typing import Any, Dict
-
-from fastapi import HTTPException, UploadFile
-
 try:
     from src.document_parser import (
         DocumentParser,
@@ -24,8 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentService:
-    """
-    Service layer for handling document processing, including uploading,
+    """Service layer for handling document processing, including uploading,
     parsing, and retrieving task results.
     """
 
@@ -38,8 +33,7 @@ class DocumentService:
     async def process_uploaded_document(
         self, file: UploadFile, chunk_strategy: str, chunk_size: int, chunk_overlap: int
     ) -> Dict[str, Any]:
-        """
-        Handles the entire document upload and parsing workflow.
+        """Handles the entire document upload and parsing workflow.
         Returns a dictionary with the task_id and a summary message.
         """
         task_id = str(uuid.uuid4())

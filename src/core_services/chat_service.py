@@ -2,11 +2,7 @@ import asyncio
 import json
 import logging
 import random
-from typing import Any, Dict, List, Optional
-
-from fastapi import HTTPException
-
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 from fastapi import HTTPException
 
@@ -24,8 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class ChatService:
-    """
-    Service layer for handling all chat-related functionalities,
+    """Service layer for handling all chat-related functionalities,
     including multi-role chat simulations and engine management.
     """
 
@@ -35,8 +30,7 @@ class ChatService:
             logger.warning("MultiRoleChatEngine not available. Chat functionalities will be limited.")
 
     async def handle_simple_multi_role_chat(self, request: MultiRoleChatRequest) -> MultiRoleChatResponse:
-        """
-        Handles the logic for a simplified multi-role chat simulation.
+        """Handles the logic for a simplified multi-role chat simulation.
         """
         # Log the conversation history
         with open(self.app_state.chat_log_file, "a", encoding="utf-8") as f:
@@ -66,8 +60,7 @@ class ChatService:
         return MultiRoleChatResponse(new_message=new_message)
 
     def create_chat_engine(self, engine_id: str, model_type: str) -> None:
-        """
-        Creates and registers a new multi-role chat engine.
+        """Creates and registers a new multi-role chat engine.
         """
         if not CHAT_ENGINE_AVAILABLE:
             raise HTTPException(status_code=503, detail="Chat Engine feature is not available.")
@@ -89,8 +82,7 @@ class ChatService:
         return self.app_state.chat_engines[engine_id]
 
     async def send_message_to_room(self, engine_id: str, room_id: str, content: str, sender_name: str) -> bool:
-        """
-        Sends a message to a specific chat room after validation.
+        """Sends a message to a specific chat room after validation.
         """
         chat_engine = self._get_engine(engine_id)
         room = chat_engine.get_chat_room(room_id)
@@ -107,15 +99,13 @@ class ChatService:
         return await chat_engine.send_user_message(room_id, content, sender_name)
 
     async def generate_responses_for_room(self, engine_id: str, room_id: str, target_roles: Optional[List[str]]) -> List["RoleResponse"]:
-        """
-        Generates responses from AI roles in a chat room.
+        """Generates responses from AI roles in a chat room.
         """
         chat_engine = self._get_engine(engine_id)
         return await chat_engine.generate_role_responses(room_id, target_roles)
 
     def get_room_details(self, engine_id: str, room_id: str) -> "ChatRoom":
-        """
-        Retrieves details for a specific chat room.
+        """Retrieves details for a specific chat room.
         """
         chat_engine = self._get_engine(engine_id)
         room = chat_engine.get_chat_room(room_id)
@@ -124,8 +114,7 @@ class ChatService:
         return room
 
     def list_all_rooms(self, engine_id: str) -> List["ChatRoom"]:
-        """
-        Lists all available chat rooms in a given engine.
+        """Lists all available chat rooms in a given engine.
         """
         chat_engine = self._get_engine(engine_id)
         return chat_engine.get_all_rooms()

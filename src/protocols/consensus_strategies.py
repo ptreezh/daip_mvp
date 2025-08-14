@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2023-10-27 10:05:00
+"""@Time    : 2023-10-27 10:05:00
 @Author  : DAIP-LIVE Team
 @File    : consensus_strategies.py
 @Description:
@@ -20,21 +18,20 @@ class ConsensusStrategy(ABC):
 
     @abstractmethod
     def execute(self, history: List[DebateTurn]) -> Any:
-        """
-        Executes the consensus-finding logic.
+        """Executes the consensus-finding logic.
 
         Args:
             history (List[DebateTurn]): The full history of the debate.
 
         Returns:
             Any: The outcome of the consensus process.
+
         """
         pass
 
 
 class SimpleMajorityVoteStrategy(ConsensusStrategy):
-    """
-    A simple consensus strategy based on majority vote.
+    """A simple consensus strategy based on majority vote.
 
     This strategy parses the last opinion of each role for keywords to determine
     their vote (e.g., 'agree' vs. 'disagree').
@@ -42,8 +39,7 @@ class SimpleMajorityVoteStrategy(ConsensusStrategy):
 
     @staticmethod # Make it a static method
     def execute(history: List[DebateTurn]) -> Dict[str, Any]:
-        """
-        Counts votes based on keywords in the last turn of each role.
+        """Counts votes based on keywords in the last turn of each role.
         """
         votes: Dict[str, int] = {"agree": 0, "disagree": 0, "neutral": 0}
         roles_voted = set()
@@ -85,19 +81,19 @@ class ConsensusStrategyFactory:
     def get_all_strategies(self) -> Dict[str, Type[ConsensusStrategy]]:
         """Returns all registered strategy classes."""
         return self._strategies
-        
+
     def create(self, name: str, **kwargs) -> ConsensusStrategy:
         """Creates an instance of a registered consensus strategy with parameters."""
         strategy_class = self._strategies.get(name)
         if not strategy_class:
             raise ValueError(f"Consensus strategy '{name}' not registered.")
         return strategy_class(**kwargs)
-        
+
     def register_strategies_with_tool_manager(self, tool_manager):
         """Registers all strategies with the tool manager."""
         for name, strategy_class in self._strategies.items():
             tool_manager.register_tool(
                 f"consensus.{name}",
                 strategy_class,
-                description=f"Custom consensus strategy" if name == "custom_strategy" else f"{name.replace('_', ' ').title()} consensus strategy"
+                description="Custom consensus strategy" if name == "custom_strategy" else f"{name.replace('_', ' ').title()} consensus strategy"
             )

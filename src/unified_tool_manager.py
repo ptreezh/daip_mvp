@@ -1,14 +1,14 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
 class UnifiedToolManager:
-    """
-    Unified tool manager for registering, managing, and executing various tools.
+    """Unified tool manager for registering, managing, and executing various tools.
     This class is responsible for registering, managing, and executing various tools
     based on a provided configuration.
     """
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.available_tools = {}
@@ -16,8 +16,7 @@ class UnifiedToolManager:
         logger.info("UnifiedToolManager initialized.")
 
     def _register_tools(self):
-        """
-        Registers tools based on the provided configuration.
+        """Registers tools based on the provided configuration.
         In a real scenario, this would dynamically load tool implementations.
         """
         for tool_name, tool_info in self.config.items():
@@ -29,13 +28,13 @@ class UnifiedToolManager:
         return self.available_tools.get(tool_name)
 
     def register_tool(self, tool_name: str, tool_class: Any, description: str = None):
-        """
-        Registers a new tool with the manager.
+        """Registers a new tool with the manager.
         
         Args:
             tool_name: The name of the tool
             tool_class: The class or function implementing the tool
             description: Optional description of the tool
+
         """
         self.available_tools[tool_name] = {
             "type": "custom_tool",
@@ -46,8 +45,7 @@ class UnifiedToolManager:
         return True
 
     async def execute_tool(self, tool_name: str, **kwargs) -> Any:
-        """
-        Executes a registered tool. Supports both synchronous and asynchronous tools.
+        """Executes a registered tool. Supports both synchronous and asynchronous tools.
         
         Args:
             tool_name: The name of the tool to execute
@@ -55,25 +53,26 @@ class UnifiedToolManager:
             
         Returns:
             The result of the tool execution
+
         """
         if tool_name not in self.available_tools:
             logger.warning(f"Tool '{tool_name}' not found.")
             return None
-            
+
         logger.info(f"Executing tool: {tool_name} with args: {kwargs}")
-        
+
         tool_info = self.available_tools[tool_name]
         tool_class = tool_info.get("class")
-        
+
         if not tool_class:
             logger.error(f"Tool '{tool_name}' has no implementation class.")
             return None
-            
+
         try:
             # If it's a class, instantiate it with kwargs and call execute
             if isinstance(tool_class, type):
                 tool_instance = tool_class(**kwargs)
-                
+
                 # Check if execute method is async
                 import inspect
                 if hasattr(tool_instance, 'execute'):
@@ -95,11 +94,11 @@ class UnifiedToolManager:
             return {"error": str(e)}
 
     def register_strategies_from_factory(self, consensus_factory):
-        """
-        Registers consensus strategies from a factory as available tools.
+        """Registers consensus strategies from a factory as available tools.
         
         Args:
             consensus_factory: A ConsensusStrategyFactory instance containing registered strategies
+
         """
         try:
             strategies = consensus_factory.get_all_strategies()

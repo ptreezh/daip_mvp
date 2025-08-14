@@ -1,18 +1,18 @@
-"""
-PocketFlow workflow interfaces and integration points for the Virtual Role Chat System.
+"""PocketFlow workflow interfaces and integration points for the Virtual Role Chat System.
 
 This module defines the interfaces and models for integrating PocketFlow as a lightweight
 workflow engine to orchestrate role interactions and conversation flows.
 """
 
-from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Protocol, runtime_checkable, Union
+from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+
 try:
-    from pocketflow import Workflow, WorkflowEngine, WorkflowStep as PFWorkflowStep
+    from pocketflow import Workflow, WorkflowEngine
+    from pocketflow import WorkflowStep as PFWorkflowStep
     POCKETFLOW_AVAILABLE = True
 except ImportError:
     POCKETFLOW_AVAILABLE = False
@@ -24,11 +24,12 @@ except ImportError:
     class PFWorkflowStep:
         pass
 
-from .models import ChatMessage, SessionID
+from .models import SessionID
 
 
 class WorkflowState(str, Enum):
     """States of a workflow execution."""
+
     PENDING = "pending"
     RUNNING = "running"
     PAUSED = "paused"
@@ -39,6 +40,7 @@ class WorkflowState(str, Enum):
 
 class WorkflowEventType(str, Enum):
     """Types of workflow events."""
+
     USER_INPUT = "user_input"
     ROLE_RESPONSE = "role_response"
     TOPIC_CHANGE = "topic_change"
@@ -52,6 +54,7 @@ class WorkflowEventType(str, Enum):
 
 class WorkflowEvent(BaseModel):
     """Represents an event in a workflow."""
+
     id: str
     type: WorkflowEventType
     session_id: SessionID
@@ -62,6 +65,7 @@ class WorkflowEvent(BaseModel):
 
 class WorkflowAction(BaseModel):
     """Represents an action to be executed in a workflow."""
+
     id: str
     name: str
     type: str  # e.g., "role_response", "validation", "synthesis"
@@ -72,6 +76,7 @@ class WorkflowAction(BaseModel):
 
 class WorkflowStep(BaseModel):
     """Represents a step in a workflow."""
+
     id: str
     name: str
     description: str = ""
@@ -82,6 +87,7 @@ class WorkflowStep(BaseModel):
 
 class ConversationWorkflow(BaseModel):
     """Defines a conversation workflow."""
+
     id: str
     name: str
     description: str = ""
@@ -94,6 +100,7 @@ class ConversationWorkflow(BaseModel):
 
 class WorkflowExecution(BaseModel):
     """Represents an active workflow execution."""
+
     id: str
     workflow_id: str
     session_id: SessionID
@@ -108,6 +115,7 @@ class WorkflowExecution(BaseModel):
 
 class TaskDecomposition(BaseModel):
     """Represents a task decomposition strategy."""
+
     id: str
     name: str
     description: str = ""
@@ -119,6 +127,7 @@ class TaskDecomposition(BaseModel):
 
 class ProcessingChain(BaseModel):
     """Represents a chain of processing tasks."""
+
     id: str
     name: str
     description: str = ""
@@ -133,7 +142,7 @@ class ProcessingChain(BaseModel):
 @runtime_checkable
 class WorkflowEngineInterface(Protocol):
     """Interface for the PocketFlow workflow engine."""
-    
+
     def create_workflow(self, workflow: ConversationWorkflow) -> str:
         """Create a new workflow definition.
         
@@ -142,9 +151,10 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             The ID of the created workflow.
+
         """
         ...
-    
+
     def start_workflow(self, workflow_id: str, session_id: SessionID, context: Optional[Dict[str, Any]] = None) -> str:
         """Start a workflow execution.
         
@@ -155,9 +165,10 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             The ID of the workflow execution.
+
         """
         ...
-    
+
     def pause_workflow(self, execution_id: str) -> bool:
         """Pause a workflow execution.
         
@@ -166,9 +177,10 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             True if paused successfully, False otherwise.
+
         """
         ...
-    
+
     def resume_workflow(self, execution_id: str) -> bool:
         """Resume a paused workflow execution.
         
@@ -177,9 +189,10 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             True if resumed successfully, False otherwise.
+
         """
         ...
-    
+
     def cancel_workflow(self, execution_id: str) -> bool:
         """Cancel a workflow execution.
         
@@ -188,9 +201,10 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             True if cancelled successfully, False otherwise.
+
         """
         ...
-    
+
     def send_event(self, execution_id: str, event: WorkflowEvent) -> bool:
         """Send an event to a workflow execution.
         
@@ -200,9 +214,10 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             True if event was processed successfully, False otherwise.
+
         """
         ...
-    
+
     def get_execution_status(self, execution_id: str) -> WorkflowExecution:
         """Get the status of a workflow execution.
         
@@ -211,9 +226,10 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             The workflow execution status.
+
         """
         ...
-    
+
     def get_execution_context(self, execution_id: str) -> Dict[str, Any]:
         """Get the context of a workflow execution.
         
@@ -222,6 +238,7 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             The workflow execution context.
+
         """
         ...
 
@@ -229,7 +246,7 @@ class WorkflowEngineInterface(Protocol):
 @runtime_checkable
 class WorkflowStateManagerInterface(Protocol):
     """Interface for managing workflow state."""
-    
+
     def save_state(self, execution_id: str, state: Dict[str, Any]) -> bool:
         """Save workflow state.
         
@@ -239,9 +256,10 @@ class WorkflowStateManagerInterface(Protocol):
             
         Returns:
             True if saved successfully, False otherwise.
+
         """
         ...
-    
+
     def load_state(self, execution_id: str) -> Dict[str, Any]:
         """Load workflow state.
         
@@ -250,9 +268,10 @@ class WorkflowStateManagerInterface(Protocol):
             
         Returns:
             The loaded state.
+
         """
         ...
-    
+
     def delete_state(self, execution_id: str) -> bool:
         """Delete workflow state.
         
@@ -261,6 +280,7 @@ class WorkflowStateManagerInterface(Protocol):
             
         Returns:
             True if deleted successfully, False otherwise.
+
         """
         ...
 
@@ -268,7 +288,7 @@ class WorkflowStateManagerInterface(Protocol):
 @runtime_checkable
 class TaskDecompositionServiceInterface(Protocol):
     """Interface for task decomposition services."""
-    
+
     def analyze_complexity(self, task: str, context: Dict[str, Any]) -> float:
         """Analyze the complexity of a task.
         
@@ -278,9 +298,10 @@ class TaskDecompositionServiceInterface(Protocol):
             
         Returns:
             A complexity score between 0 and 1.
+
         """
         ...
-    
+
     def decompose_task(self, task: str, strategy: TaskDecomposition, context: Dict[str, Any]) -> List[str]:
         """Decompose a task into subtasks.
         
@@ -291,9 +312,10 @@ class TaskDecompositionServiceInterface(Protocol):
             
         Returns:
             A list of subtasks.
+
         """
         ...
-    
+
     def create_processing_chain(self, tasks: List[str], execution_mode: str) -> ProcessingChain:
         """Create a processing chain from tasks.
         
@@ -303,6 +325,7 @@ class TaskDecompositionServiceInterface(Protocol):
             
         Returns:
             A processing chain.
+
         """
         ...
 
@@ -310,7 +333,7 @@ class TaskDecompositionServiceInterface(Protocol):
 @runtime_checkable
 class WorkflowAdapterInterface(Protocol):
     """Interface for adapting DAIP-LIVE components to PocketFlow workflows."""
-    
+
     def adapt_role_manager(self, role_manager: Any) -> Dict[str, Any]:
         """Adapt RoleManager for workflow use.
         
@@ -319,9 +342,10 @@ class WorkflowAdapterInterface(Protocol):
             
         Returns:
             Adapted interface for workflow actions.
+
         """
         ...
-    
+
     def adapt_memory_service(self, memory_service: Any) -> Dict[str, Any]:
         """Adapt MemoryService for workflow use.
         
@@ -330,9 +354,10 @@ class WorkflowAdapterInterface(Protocol):
             
         Returns:
             Adapted interface for workflow actions.
+
         """
         ...
-    
+
     def adapt_synthesis_engine(self, synthesis_engine: Any) -> Dict[str, Any]:
         """Adapt SynthesisEngine for workflow use.
         
@@ -341,9 +366,10 @@ class WorkflowAdapterInterface(Protocol):
             
         Returns:
             Adapted interface for workflow actions.
+
         """
         ...
-    
+
     def adapt_fact_services(self, fact_extraction: Any, fact_validation: Any) -> Dict[str, Any]:
         """Adapt fact extraction and validation services for workflow use.
         
@@ -353,6 +379,7 @@ class WorkflowAdapterInterface(Protocol):
             
         Returns:
             Adapted interface for workflow actions.
+
         """
         ...
 

@@ -1,9 +1,10 @@
-import os
 import json
+import os
+
 import nltk
-from nltk.tokenize import sent_tokenize
 from nltk.corpus import stopwords
 from nltk.tag import pos_tag
+from nltk.tokenize import sent_tokenize
 
 # Download nltk data if not already present
 try:
@@ -73,7 +74,7 @@ def generate_role_specific_capabilities(role_description):
     return capabilities
 
 def add_capabilities(role_file):
-    with open(role_file, 'r', encoding='utf-8') as f:
+    with open(role_file, encoding='utf-8') as f:
         try:
             role_data = json.load(f)
         except json.JSONDecodeError:

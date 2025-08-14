@@ -1,17 +1,19 @@
-import pytest
-import pytest_asyncio # Import pytest_asyncio
-from unittest.mock import AsyncMock, MagicMock, patch # Import patch
 import asyncio
+from unittest.mock import AsyncMock, MagicMock, patch  # Import patch
+
+import pytest
+
 from src.app_state import AppState
-from src.protocols.debate_protocol import DebateProtocol
-from src.core_services.role_manager import RoleManager, Role # Import Role
-from src.core_services.synthesis_engine import SynthesisEngine
 from src.core_services.memory_service import MemoryService
-from src.protocols.workflow_manager import WorkflowManager
+from src.core_services.role_manager import Role, RoleManager  # Import Role
+from src.core_services.synthesis_engine import SynthesisEngine
 from src.kernel.core import Kernel
 from src.kernel.interaction_manager import InteractionManager
 from src.kernel.tool_executor import ToolExecutor
-from src.models import DebateConfig, DebateTurn # Import DebateConfig and DebateTurn
+from src.models import DebateConfig  # Import DebateConfig and DebateTurn
+from src.protocols.debate_protocol import DebateProtocol
+from src.protocols.workflow_manager import WorkflowManager
+
 
 # Mock AppState and its components for testing
 @pytest.fixture
@@ -47,8 +49,7 @@ def debate_protocol(mock_app_state):
 
 @pytest.mark.asyncio
 async def test_professional_debate_scenario(debate_protocol, mock_app_state):
-    """
-    测试专业辩论场景：高专业度、深度分析、多轮次交锋。
+    """测试专业辩论场景：高专业度、深度分析、多轮次交锋。
     主题: "全球气候变化是否主要由人类活动引起，以及如何有效应对？"
     角色: 气候科学家, 能源政策专家, 地缘政治分析师, 环保主义者
     轮次: 25
@@ -66,7 +67,7 @@ async def test_professional_debate_scenario(debate_protocol, mock_app_state):
     # Mock LLM interface to return simple responses for each turn
     # This simulates the debate progression
     mock_app_state.llm_interface.generate_response.side_effect = [
-        f"发言来自 {{role}}. 这是第 {{i+1}} 轮的专业论点。"
+        "发言来自 {role}. 这是第 {i+1} 轮的专业论点。"
         for i in range(num_rounds)
         for role in roles
     ]
@@ -126,8 +127,7 @@ async def test_professional_debate_scenario(debate_protocol, mock_app_state):
 
 @pytest.mark.asyncio
 async def test_multi_role_free_debate_scenario(debate_protocol, mock_app_state):
-    """
-    测试多角色自由辩论场景：更开放、更具互动性、更多角色参与。
+    """测试多角色自由辩论场景：更开放、更具互动性、更多角色参与。
     主题: "元宇宙的未来发展方向及其对社会的影响"
     角色: 技术创新者, 社会心理学家, 经济学家, 伦理学家, 艺术家/文化评论家, 法律专家
     轮次: 30
@@ -140,7 +140,7 @@ async def test_multi_role_free_debate_scenario(debate_protocol, mock_app_state):
         MagicMock(id=role_name, name=role_name, spec=Role) for role_name in roles
     ]
     mock_app_state.llm_interface.generate_response.side_effect = [
-        f"发言来自 {{role}}. 这是第 {{i+1}} 轮的自由讨论。"
+        "发言来自 {role}. 这是第 {i+1} 轮的自由讨论。"
         for i in range(num_rounds)
         for role in roles
     ]
@@ -188,8 +188,7 @@ async def test_multi_role_free_debate_scenario(debate_protocol, mock_app_state):
 
 @pytest.mark.asyncio
 async def test_blue_red_adversarial_debate_scenario(debate_protocol, mock_app_state):
-    """
-    测试蓝红对抗辩论场景：正反方对抗、直接反驳、攻防。
+    """测试蓝红对抗辩论场景：正反方对抗、直接反驳、攻防。
     主题: "自动驾驶技术应被广泛推广还是严格限制？"
     角色: 蓝方 (自动驾驶工程师, 城市规划师, 经济学家), 红方 (安全伦理专家, 社会学家, 法律专家)
     轮次: 20
@@ -203,7 +202,7 @@ async def test_blue_red_adversarial_debate_scenario(debate_protocol, mock_app_st
         MagicMock(id=role_name, name=role_name, spec=Role) for role_name in roles
     ]
     mock_app_state.llm_interface.generate_response.side_effect = [
-        f"发言来自 {{role}}. 这是第 {{i+1}} 轮的对抗论点。"
+        "发言来自 {role}. 这是第 {i+1} 轮的对抗论点。"
         for i in range(num_rounds)
         for role in roles
     ]

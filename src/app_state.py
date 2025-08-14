@@ -6,7 +6,6 @@ import os
 import random
 import sys
 import time
-import uuid
 from typing import Any, Optional
 
 import chromadb
@@ -19,34 +18,32 @@ from src.core_services.chat_service import ChatService
 from src.core_services.collaboration_service import CollaborationService
 from src.core_services.document_service import DocumentService
 from src.core_services.expert_service import ExpertService
-from src.core_services.fact_validation_service import FactValidationService
 from src.core_services.fact_extraction_service import FactExtractionService
+from src.core_services.fact_validation_service import FactValidationService
 from src.core_services.intent_analysis_service import BasicIntentAnalysisService
 from src.core_services.memory_service import MemoryService
 from src.core_services.personal_context_service import BasicPersonalContextService
 from src.core_services.prompt_optimization_service import BasicPromptOptimizationService
 from src.core_services.protocol_service import ProtocolService
+from src.core_services.session_management_service import SessionManagementService
 from src.core_services.synthesis_engine import SynthesisEngine
 from src.core_services.task_manager import TaskManager
 from src.core_services.token_management_service import TokenManagementService
-from src.core_services.universal_context_service import UniversalContextService
 from src.core_services.tool_service import FileToolsService, MemoryToolsService
+from src.core_services.universal_context_service import UniversalContextService
 from src.core_services.user_profile_service import UserProfileService
-from src.core_services.session_management_service import SessionManagementService
 from src.core_services.virtual_team_service import VirtualTeamService
 from src.core_services.wiki_service import WikiService
 from src.kernel.interaction_manager import InteractionManager
-from src.kernel.llm_interface import LLMInterface, LLMConfig  # Assuming a default config mechanism
+from src.kernel.llm_interface import LLMConfig  # Assuming a default config mechanism
 from src.tool_config import tool_config
 from src.unified_tool_manager import UnifiedToolManager
-
 
 logger = logging.getLogger(__name__)
 
 
 class AppState:
-    """
-    A central state manager for the FastAPI application.
+    """A central state manager for the FastAPI application.
     It holds shared resources like database connections, models,
     and application-wide caches.
     """
@@ -93,11 +90,11 @@ class AppState:
         # 1. Foundational Components
         # Load configuration and initialize token management
         from src.config import settings
-        from src.kernel.llm_interface import LLMFactory, LLMConfig
-        
+        from src.kernel.llm_interface import LLMFactory
+
         # Initialize token management service
         self.token_management_service = TokenManagementService(settings.token_management)
-        
+
         # Create LLM configuration from settings
         default_llm_config = LLMConfig(
             provider=settings.llm.provider,
@@ -105,7 +102,7 @@ class AppState:
             base_url=settings.llm.ollama.host
         )
         self.fact_confidence_threshold = 0.75  # Configurable threshold
-        
+
         # Create LLM interface with token management
         self.llm_interface = LLMFactory.create(config=default_llm_config, token_service=self.token_management_service)
         self.unified_tool_manager = UnifiedToolManager(config=tool_config.to_dict())
@@ -116,7 +113,7 @@ class AppState:
         self.task_manager = TaskManager(task_directory=os.path.join(self.base_dir, "data", "tasks"))
         self.synthesis_engine = SynthesisEngine(llm_interface=self.llm_interface)
         self.expert_service = ExpertService(self) # Passes self to access app_state properties
-        
+
         # Initialize user profile and session management services
         self.user_profile_service = UserProfileService(
             data_dir=os.path.join(self.base_dir, settings.user_profile.data_dir)
@@ -126,7 +123,7 @@ class AppState:
             auth_data_dir=os.path.join(self.base_dir, settings.session.auth_data_dir),
             session_expiry_minutes=settings.session.session_expiry_minutes
         )
-        
+
         # Initialize universal context service (depends on token and memory services)
         self.universal_context_service = UniversalContextService(
             token_service=self.token_management_service,
@@ -137,18 +134,18 @@ class AppState:
             memory_service=self.memory_service,
             confidence_threshold=self.fact_confidence_threshold,
         )
-        
+
         # Initialize Human User Intelligence Layer services
         self.intent_analysis_service = BasicIntentAnalysisService(
             user_profile_service=self.user_profile_service,
             llm_interface=self.llm_interface
         )
-        
+
         self.personal_context_service = BasicPersonalContextService(
             user_profile_service=self.user_profile_service,
             memory_service=self.memory_service
         )
-        
+
         self.prompt_optimization_service = BasicPromptOptimizationService(
             intent_service=self.intent_analysis_service,
             personal_context_service=self.personal_context_service,
@@ -167,25 +164,25 @@ class AppState:
         # 4. High-level Services that depend on other services
         self.protocol_service = ProtocolService(self)
         self.collaboration_service = CollaborationService(self)
-        
+
         # Try to initialize DocumentService, but don't fail if it's not available
         try:
             self.document_service = DocumentService(self)
         except Exception as e:
             logger.warning(f"DocumentService initialization failed: {e}. Continuing without document processing.")
             self.document_service = None
-            
+
         self.chat_service = ChatService(self)
         self.tool_service = FileToolsService() # Assuming it's simple
         self.memory_tool_service = MemoryToolsService(self)
-        
+
         # Try to initialize VirtualTeamService, but don't fail if it's not available
         try:
             self.virtual_team_service = VirtualTeamService(self, self.memory_tool_service)
         except Exception as e:
             logger.warning(f"VirtualTeamService initialization failed: {e}. Continuing without virtual team functionality.")
             self.virtual_team_service = None
-            
+
         self.fact_validation_service = FactValidationService(self)
 
         # --- Startup Logic ---

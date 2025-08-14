@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-04 10:00:00
+"""@Time    : 2025-07-04 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : sskg_manager.py
 @Description:
@@ -16,18 +14,17 @@ logger = logging.getLogger(__name__)
 
 
 class SSKGManager:
-    """
-    Manages the storage, retrieval, and querying of structured knowledge
+    """Manages the storage, retrieval, and querying of structured knowledge
     in a semantic graph, with persistence to a file.
     """
 
     def __init__(self, graph_path: Optional[Path] = None):
-        """
-        Initializes the SSKGManager.
+        """Initializes the SSKGManager.
 
         Args:
             graph_path (Optional[Path]): Path to the graph file for persistence.
                                          If the file exists, it will be loaded.
+
         """
         self.graph_path = graph_path
         self.graph = self._load_graph()

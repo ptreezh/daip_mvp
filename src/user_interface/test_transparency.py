@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 21:00:00
+"""@Time    : 2025-07-24 21:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_transparency.py
 @Description:
@@ -9,15 +7,13 @@
 """
 import asyncio
 import json
-from datetime import datetime
-from pathlib import Path
 
 from rich.console import Console
 from rich.panel import Panel
 
-from .transparency_controller import TransparencyController
-from .result_formatter import ResultFormatter
 from .feedback_collector import FeedbackCollector
+from .result_formatter import ResultFormatter
+from .transparency_controller import TransparencyController
 
 
 def create_sample_critical_review_result():
@@ -48,7 +44,7 @@ def create_sample_critical_review_result():
             },
             {
                 "step_name": "Fact Extraction",
-                "status": "completed", 
+                "status": "completed",
                 "duration": 1.8,
                 "inputs": {"content": "Original content"},
                 "outputs": {"facts": ["fact_001", "fact_002"]},
@@ -151,31 +147,31 @@ async def test_result_formatting():
     """Test different result formatting options."""
     console = Console()
     formatter = ResultFormatter()
-    
+
     console.print(Panel(
         "[blue]Testing Result Formatting[/blue]",
         title="Test: Result Formatting",
         border_style="blue"
     ))
-    
+
     # Test Critical Review formatting
     critical_result = create_sample_critical_review_result()
-    
+
     console.print("\n[cyan]Critical Review - JSON Format:[/cyan]")
     json_output = formatter.format_as_json(critical_result)
     console.print(json_output[:200] + "..." if len(json_output) > 200 else json_output)
-    
+
     console.print("\n[cyan]Critical Review - Markdown Format:[/cyan]")
     md_output = formatter.format_as_markdown(critical_result)
     console.print(md_output[:300] + "..." if len(md_output) > 300 else md_output)
-    
+
     console.print("\n[cyan]Critical Review - HTML Format:[/cyan]")
     html_output = formatter.format_as_html(critical_result)
     console.print(html_output[:200] + "..." if len(html_output) > 200 else html_output)
-    
+
     # Test Multi-perspective formatting
     multi_result = create_sample_multi_perspective_result()
-    
+
     console.print("\n[cyan]Multi-perspective - Text Format:[/cyan]")
     text_output = formatter.format_as_text(multi_result)
     console.print(text_output)
@@ -185,15 +181,15 @@ async def test_traceability_features():
     """Test traceability and transparency features."""
     console = Console()
     formatter = ResultFormatter()
-    
+
     console.print(Panel(
         "[blue]Testing Traceability Features[/blue]",
         title="Test: Traceability",
         border_style="blue"
     ))
-    
+
     result = create_sample_critical_review_result()
-    
+
     # Test traceability formatting
     console.print("\n[cyan]Enhanced Traceability (JSON):[/cyan]")
     traceable_output = formatter.format_with_traceability(
@@ -203,21 +199,21 @@ async def test_traceability_features():
         include_confidence=True,
         include_sources=True
     )
-    
+
     # Parse and display key sections
     traceable_data = json.loads(traceable_output)
-    
+
     if "reasoning_trace" in traceable_data:
         console.print("\n[yellow]Reasoning Trace:[/yellow]")
         for i, trace in enumerate(traceable_data["reasoning_trace"], 1):
             console.print(f"  {i}. {trace['step']}: {trace['reasoning']}")
-    
+
     if "confidence_analysis" in traceable_data:
         console.print(f"\n[yellow]Overall Confidence:[/yellow] {traceable_data['confidence_analysis']['overall_confidence']:.3f}")
-    
+
     # Test transparency levels
     console.print("\n[cyan]Transparency Levels:[/cyan]")
-    
+
     for level in ["minimal", "moderate", "detailed"]:
         console.print(f"\n[yellow]{level.title()} Transparency:[/yellow]")
         formatter.display_with_transparency(result, console, level)
@@ -227,15 +223,15 @@ async def test_feedback_collection():
     """Test feedback collection features."""
     console = Console()
     collector = FeedbackCollector()
-    
+
     console.print(Panel(
         "[blue]Testing Feedback Collection[/blue]",
         title="Test: Feedback Collection",
         border_style="blue"
     ))
-    
+
     result = create_sample_critical_review_result()
-    
+
     # Test non-interactive feedback collection
     console.print("\n[cyan]Non-interactive Feedback Collection:[/cyan]")
     feedback = collector.collect_workflow_feedback(
@@ -244,17 +240,17 @@ async def test_feedback_collection():
         workflow_type="critical-review",
         interactive=False
     )
-    
+
     collector.display_feedback_summary(feedback)
-    
+
     # Test validation
     console.print("\n[cyan]Result Validation:[/cyan]")
     validation_results = collector.validate_result_elements(result)
-    
+
     for validation in validation_results:
         status = "✅ Valid" if validation.is_valid else "❌ Invalid"
         console.print(f"  {validation.element_id}: {status} - {validation.validation_reason}")
-    
+
     # Test feedback export
     console.print("\n[cyan]Feedback Export (JSON):[/cyan]")
     exported_feedback = collector.export_feedback("test_001", "json")
@@ -265,15 +261,15 @@ async def test_transparency_controller():
     """Test the complete transparency controller."""
     console = Console()
     controller = TransparencyController()
-    
+
     console.print(Panel(
         "[blue]Testing Transparency Controller[/blue]",
         title="Test: Transparency Controller",
         border_style="blue"
     ))
-    
+
     result = create_sample_critical_review_result()
-    
+
     # Test result presentation
     console.print("\n[cyan]Result Presentation (Moderate Transparency):[/cyan]")
     feedback = controller.present_workflow_result(
@@ -283,7 +279,7 @@ async def test_transparency_controller():
         transparency_level="moderate",
         collect_feedback=False
     )
-    
+
     # Test traceability report
     console.print("\n[cyan]Traceability Report:[/cyan]")
     traceable_result = controller.present_with_traceability(
@@ -292,12 +288,12 @@ async def test_transparency_controller():
         output_format="markdown"
     )
     console.print(traceable_result[:500] + "..." if len(traceable_result) > 500 else traceable_result)
-    
+
     # Test validation
     console.print("\n[cyan]Quality Validation:[/cyan]")
     validation_results = controller.validate_result_quality(result)
     console.print(f"Validation completed: {len(validation_results)} elements validated")
-    
+
     # Test export
     console.print("\n[cyan]Export Test:[/cyan]")
     exported_content = controller.export_result(
@@ -307,7 +303,7 @@ async def test_transparency_controller():
         include_traceability=True
     )
     console.print(f"Exported HTML content: {len(exported_content)} characters")
-    
+
     # Test comprehensive transparency report
     console.print("\n[cyan]Comprehensive Transparency Report:[/cyan]")
     transparency_report = controller.create_transparency_report(
@@ -315,7 +311,7 @@ async def test_transparency_controller():
         execution_id="test_controller_001",
         workflow_type="critical-review"
     )
-    
+
     console.print(f"Report sections: {list(transparency_report.keys())}")
     console.print(f"Report size: {len(json.dumps(transparency_report))} characters")
 
@@ -323,7 +319,7 @@ async def test_transparency_controller():
 async def main():
     """Run all transparency feature tests."""
     console = Console()
-    
+
     console.print(Panel(
         "[bold green]Transparency Features Test Suite[/bold green]\n\n"
         "This test suite demonstrates the implementation of task 9.3:\n"
@@ -333,13 +329,13 @@ async def main():
         title="Task 9.3 Implementation Test",
         border_style="green"
     ))
-    
+
     try:
         await test_result_formatting()
         await test_traceability_features()
         await test_feedback_collection()
         await test_transparency_controller()
-        
+
         console.print(Panel(
             "[bold green]All tests completed successfully![/bold green]\n\n"
             "Task 9.3 implementation includes:\n"
@@ -352,7 +348,7 @@ async def main():
             title="Test Results",
             border_style="green"
         ))
-        
+
     except Exception as e:
         console.print(f"[red]Test failed: {e}[/red]")
         console.print_exception()

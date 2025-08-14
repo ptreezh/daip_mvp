@@ -12,6 +12,7 @@ BOARD_FILE = DATA_DIR / "kanban_board.json"
 
 class KanbanToolError(Exception):
     """Custom exception for Kanban tool errors."""
+
     pass
 
 
@@ -38,8 +39,7 @@ def _save_board(board: Dict[str, Any]) -> None:
 
 
 def create_task(title: str, description: str, status: str = "TODO") -> str:
-    """
-    Creates a new task on the Kanban board.
+    """Creates a new task on the Kanban board.
 
     Args:
         title: The title of the task.
@@ -48,6 +48,7 @@ def create_task(title: str, description: str, status: str = "TODO") -> str:
 
     Returns:
         A confirmation message with the new task's ID.
+
     """
     try:
         board = _load_board()
@@ -62,21 +63,21 @@ def create_task(title: str, description: str, status: str = "TODO") -> str:
         _save_board(board)
         logging.info(f"Created new task {task_id}: {title}")
         return f"Successfully created task with ID: {task_id}"
-    except (IOError, json.JSONDecodeError) as e:
+    except (OSError, json.JSONDecodeError) as e:
         error_msg = f"Failed to create task due to a storage error: {e}"
         logging.error(error_msg)
         raise KanbanToolError(error_msg) from e
 
 
 def list_tasks(status: Optional[str] = None) -> str:
-    """
-    Lists tasks from the Kanban board, optionally filtering by status.
+    """Lists tasks from the Kanban board, optionally filtering by status.
 
     Args:
         status: If provided, only tasks with this status will be listed.
 
     Returns:
         A formatted string of tasks or a message if no tasks are found.
+
     """
     try:
         board = _load_board()
@@ -100,7 +101,7 @@ def list_tasks(status: Optional[str] = None) -> str:
         ]
 
         return "\n".join(output)
-    except (IOError, json.JSONDecodeError) as e:
+    except (OSError, json.JSONDecodeError) as e:
         error_msg = f"Failed to list tasks due to a storage error: {e}"
         logging.error(error_msg)
         raise KanbanToolError(error_msg) from e
@@ -111,8 +112,7 @@ def update_task(
     new_status: Optional[str] = None,
     new_description: Optional[str] = None,
 ) -> str:
-    """
-    Updates the status or description of an existing task.
+    """Updates the status or description of an existing task.
 
     Args:
         task_id: The ID of the task to update.
@@ -121,6 +121,7 @@ def update_task(
 
     Returns:
         A confirmation or error message.
+
     """
     if not new_status and not new_description:
         return "Error: You must provide either a new status or a new description to update the task."
@@ -141,7 +142,7 @@ def update_task(
         _save_board(board)
         logging.info(f"Updated task {task_id}: set {' and '.join(updated_fields)}")
         return f"Successfully updated task '{task_id}'."
-    except (IOError, json.JSONDecodeError) as e:
+    except (OSError, json.JSONDecodeError) as e:
         error_msg = f"Failed to update task {task_id} due to a storage error: {e}"
         logging.error(error_msg)
         raise KanbanToolError(error_msg) from e

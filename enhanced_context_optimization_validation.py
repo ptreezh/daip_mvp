@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-增强的上下文优化验证
+"""增强的上下文优化验证
 
 通过真实LLM调用验证优化效果
 """
 
-import sys
 import asyncio
-import json
+import sys
 import time
-from typing import Dict, List, Any, Tuple
+from typing import Any, Dict, List
+
 sys.path.append('src')
 
 class LLMContextValidator:
     """LLM上下文验证器"""
-    
+
     def __init__(self):
         """初始化验证器"""
         self.test_queries = [
@@ -35,31 +33,28 @@ class LLMContextValidator:
                 "complexity": "medium"
             }
         ]
-    
+
     async def validate_optimization_effectiveness(self):
         """验证优化效果"""
         print("🔬 开始真实LLM验证")
         print("=" * 60)
-        
-        from src.core_services.context_optimization_engine import (
-            ContextOptimizationEngine, 
-            ContextOptimizationRequest
-        )
-        
+
+        from src.core_services.context_optimization_engine import ContextOptimizationEngine, ContextOptimizationRequest
+
         engine = ContextOptimizationEngine()
         results = []
-        
+
         for test_case in self.test_queries:
             print(f"📋 测试查询: {test_case['query']}")
-            
+
             # 准备测试数据
             conversation_history = self._generate_realistic_history(test_case)
             available_context = self._generate_realistic_context(test_case)
-            
+
             # 测试不同策略
             for strategy in ["adaptive", "focused", "comprehensive"]:
                 print(f"   🎯 策略: {strategy}")
-                
+
                 request = ContextOptimizationRequest(
                     user_id="validation_user",
                     current_query=test_case["query"],
@@ -67,54 +62,54 @@ class LLMContextValidator:
                     available_context=available_context,
                     optimization_strategy=strategy
                 )
-                
+
                 # 执行优化
                 start_time = time.time()
                 optimized_context = await engine.optimize_context(request)
                 optimization_time = time.time() - start_time
-                
+
                 # 模拟LLM调用（实际应该调用真实LLM）
                 llm_response_original = await self._simulate_llm_call(
-                    test_case["query"], 
+                    test_case["query"],
                     self._create_baseline_context(available_context)
                 )
-                
+
                 llm_response_optimized = await self._simulate_llm_call(
                     test_case["query"],
                     optimized_context.optimized_prompt
                 )
-                
+
                 # 评估效果
                 effectiveness = self._evaluate_response_quality(
                     test_case,
                     llm_response_original,
                     llm_response_optimized
                 )
-                
+
                 result = {
                     "query": test_case["query"],
                     "strategy": strategy,
                     "optimization_time": optimization_time,
                     "context_reduction": (
-                        optimized_context.original_context_size - 
+                        optimized_context.original_context_size -
                         optimized_context.optimized_context_size
                     ) / optimized_context.original_context_size,
                     "effectiveness": effectiveness,
                     "confidence": optimized_context.confidence_score
                 }
-                
+
                 results.append(result)
-                
+
                 print(f"      ⏱️  优化时间: {optimization_time:.3f}s")
                 print(f"      📊 上下文压缩: {result['context_reduction']*100:.1f}%")
                 print(f"      🎯 效果评分: {effectiveness['overall_score']:.3f}")
                 print(f"      🔒 置信度: {optimized_context.confidence_score:.3f}")
-        
+
         # 生成验证报告
         self._generate_validation_report(results)
-        
+
         return results
-    
+
     def _generate_realistic_history(self, test_case: Dict[str, Any]) -> List[Dict[str, Any]]:
         """生成真实的对话历史"""
         if test_case["complexity"] == "high":
@@ -126,7 +121,7 @@ class LLMContextValidator:
                 },
                 {
                     "content": "AI伦理确实是个重要话题，涉及公平性、透明度等...",
-                    "type": "assistant_response", 
+                    "type": "assistant_response",
                     "timestamp": "2025-01-01T09:01:00"
                 },
                 {
@@ -156,7 +151,7 @@ class LLMContextValidator:
                     "timestamp": "2025-01-01T11:01:00"
                 }
             ]
-    
+
     def _generate_realistic_context(self, test_case: Dict[str, Any]) -> Dict[str, Any]:
         """生成真实的上下文"""
         base_context = {
@@ -169,19 +164,19 @@ class LLMContextValidator:
                 "expertise_level": "intermediate" if test_case["complexity"] == "medium" else "beginner"
             }
         }
-        
+
         if "医疗" in test_case["query"]:
             base_context["domain_knowledge"] = {
                 "医疗AI": "人工智能在医疗领域的应用",
                 "医疗伦理": "医疗实践中的道德考虑"
             }
-        
+
         return base_context
-    
+
     def _create_baseline_context(self, available_context: Dict[str, Any]) -> str:
         """创建基线上下文（未优化）"""
         context_parts = ["请回答以下问题："]
-        
+
         # 简单地将所有可用信息拼接
         for key, value in available_context.items():
             if isinstance(value, list):
@@ -189,69 +184,68 @@ class LLMContextValidator:
             elif isinstance(value, dict):
                 for k, v in value.items():
                     context_parts.append(f"- {k}: {v}")
-        
+
         return "\n".join(context_parts)
-    
+
     async def _simulate_llm_call(self, query: str, context: str) -> Dict[str, Any]:
         """模拟LLM调用（实际应该调用真实LLM）"""
         # 这里应该调用真实的LLM API
         # 目前只是模拟响应
-        
+
         response_length = len(context) // 10  # 模拟响应长度与上下文相关
         relevance_score = min(1.0, len([word for word in query.split() if word in context]) / len(query.split()))
-        
+
         return {
             "response": f"基于提供的上下文，针对'{query}'的回答...",
             "response_length": response_length,
             "relevance_score": relevance_score,
             "processing_time": 0.5 + len(context) / 1000  # 模拟处理时间
         }
-    
+
     def _evaluate_response_quality(
-        self, 
+        self,
         test_case: Dict[str, Any],
         original_response: Dict[str, Any],
         optimized_response: Dict[str, Any]
     ) -> Dict[str, float]:
         """评估响应质量"""
-        
         # 相关性改进
         relevance_improvement = (
-            optimized_response["relevance_score"] - 
+            optimized_response["relevance_score"] -
             original_response["relevance_score"]
         )
-        
+
         # 效率改进（处理时间）
         efficiency_improvement = (
-            original_response["processing_time"] - 
+            original_response["processing_time"] -
             optimized_response["processing_time"]
         ) / original_response["processing_time"]
-        
+
         # 简洁性（响应长度适中）
         optimal_length = 200  # 假设的最优长度
         original_length_score = 1 - abs(original_response["response_length"] - optimal_length) / optimal_length
         optimized_length_score = 1 - abs(optimized_response["response_length"] - optimal_length) / optimal_length
         conciseness_improvement = optimized_length_score - original_length_score
-        
+
         # 综合评分
         overall_score = (
             relevance_improvement * 0.5 +
             efficiency_improvement * 0.3 +
             conciseness_improvement * 0.2
         )
-        
+
         return {
             "relevance_improvement": relevance_improvement,
             "efficiency_improvement": efficiency_improvement,
             "conciseness_improvement": conciseness_improvement,
             "overall_score": overall_score
         }
-    
+
     def _generate_validation_report(self, results: List[Dict[str, Any]]):
         """生成验证报告"""
         print("\n📊 验证报告")
         print("=" * 60)
-        
+
         # 按策略统计
         strategy_stats = {}
         for result in results:
@@ -263,34 +257,34 @@ class LLMContextValidator:
                     "avg_compression": 0,
                     "avg_confidence": 0
                 }
-            
+
             stats = strategy_stats[strategy]
             stats["count"] += 1
             stats["avg_effectiveness"] += result["effectiveness"]["overall_score"]
             stats["avg_compression"] += result["context_reduction"]
             stats["avg_confidence"] += result["confidence"]
-        
+
         # 计算平均值
         for strategy, stats in strategy_stats.items():
             count = stats["count"]
             stats["avg_effectiveness"] /= count
             stats["avg_compression"] /= count
             stats["avg_confidence"] /= count
-            
+
             print(f"\n🎯 {strategy.upper()} 策略:")
             print(f"   平均效果评分: {stats['avg_effectiveness']:.3f}")
             print(f"   平均压缩率: {stats['avg_compression']*100:.1f}%")
             print(f"   平均置信度: {stats['avg_confidence']:.3f}")
-        
+
         # 整体统计
         all_scores = [r["effectiveness"]["overall_score"] for r in results]
         avg_score = sum(all_scores) / len(all_scores)
-        
-        print(f"\n📈 整体表现:")
+
+        print("\n📈 整体表现:")
         print(f"   平均优化效果: {avg_score:.3f}")
         print(f"   最佳效果: {max(all_scores):.3f}")
         print(f"   最差效果: {min(all_scores):.3f}")
-        
+
         # 可靠性评估
         if avg_score > 0.1:
             reliability = "较可靠"
@@ -298,14 +292,14 @@ class LLMContextValidator:
             reliability = "基本可靠"
         else:
             reliability = "不可靠"
-        
+
         print(f"   可靠性评估: {reliability}")
 
 async def main():
     """主验证函数"""
     validator = LLMContextValidator()
     results = await validator.validate_optimization_effectiveness()
-    
+
     print("\n🔍 诚实的评估结论:")
     print("=" * 60)
     print("❌ 当前实现的局限性:")

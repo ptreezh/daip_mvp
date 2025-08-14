@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 19:00:00
+"""@Time    : 2025-07-24 19:00:00
 @Author  : DAIP-LIVE Team
 @File    : workflow_customizer.py
 @Description:
@@ -9,25 +7,24 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List
 
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Confirm, Prompt
 from rich.table import Table
-from rich.panel import Panel
 
 logger = logging.getLogger(__name__)
 
 
 class WorkflowCustomizer:
     """Manages workflow customization and configuration."""
-    
+
     def __init__(self, console: Console = None):
         """Initialize the workflow customizer."""
         self.console = console or Console()
         self.config_templates = self._load_config_templates()
         self.custom_configs: Dict[str, Dict[str, Any]] = {}
-    
+
     def _load_config_templates(self) -> Dict[str, Dict[str, Any]]:
         """Load configuration templates for different workflows."""
         return {
@@ -79,7 +76,7 @@ class WorkflowCustomizer:
                 }
             }
         }
-    
+
     def create_custom_config(
         self,
         workflow_name: str,
@@ -88,42 +85,42 @@ class WorkflowCustomizer:
     ) -> Dict[str, Any]:
         """Create a custom configuration interactively."""
         self.console.print(f"\n[blue]🎨 Creating Custom Configuration for {workflow_name}[/blue]")
-        
+
         if workflow_name not in self.config_templates:
             self.console.print(f"[red]Unknown workflow: {workflow_name}[/red]")
             return {}
-        
+
         template = self.config_templates[workflow_name]
         config = base_config.copy() if base_config else {}
-        
+
         # Initialize with defaults if not provided
         for section_name, section_template in template.items():
             if section_name not in config:
                 config[section_name] = {}
-            
+
             for param_name, param_def in section_template.items():
                 if param_name not in config[section_name]:
                     config[section_name][param_name] = param_def["default"]
-        
+
         # Interactive customization
         self.console.print("\n[cyan]Current configuration sections:[/cyan]")
         sections = list(template.keys())
-        
+
         for i, section in enumerate(sections, 1):
             self.console.print(f"  {i}. {section}")
-        
+
         while True:
             self.console.print(f"\n  {len(sections) + 1}. Review and save")
             self.console.print(f"  {len(sections) + 2}. Cancel")
-            
+
             choice = Prompt.ask(
                 "Select a section to customize",
                 choices=[str(i) for i in range(1, len(sections) + 3)],
                 default=str(len(sections) + 1)
             )
-            
+
             choice_num = int(choice)
-            
+
             if choice_num == len(sections) + 1:
                 # Review and save
                 self._display_config_summary(config)
@@ -143,25 +140,25 @@ class WorkflowCustomizer:
                     template[section_name],
                     config[section_name]
                 )
-        
+
         return config
-    
+
     def load_config_from_file(self, file_path: str) -> Dict[str, Any]:
         """Load configuration from a JSON file."""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 config = json.load(f)
-            
+
             self.console.print(f"[green]✅ Configuration loaded from {file_path}[/green]")
             return config
-        
+
         except FileNotFoundError:
             self.console.print(f"[red]❌ Configuration file not found: {file_path}[/red]")
             return {}
         except json.JSONDecodeError as e:
             self.console.print(f"[red]❌ Invalid JSON in configuration file: {e}[/red]")
             return {}
-    
+
     def save_config_to_file(
         self,
         config: Dict[str, Any],
@@ -170,34 +167,34 @@ class WorkflowCustomizer:
     ) -> bool:
         """Save configuration to a JSON file."""
         path = Path(file_path)
-        
+
         if path.exists() and not overwrite:
             if not Confirm.ask(f"File {file_path} exists. Overwrite?"):
                 return False
-        
+
         try:
             # Create directory if it doesn't exist
             path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             with open(path, 'w', encoding='utf-8') as f:
                 json.dump(config, f, indent=2, ensure_ascii=False)
-            
+
             self.console.print(f"[green]✅ Configuration saved to {file_path}[/green]")
             return True
-        
+
         except Exception as e:
             self.console.print(f"[red]❌ Failed to save configuration: {e}[/red]")
             return False
-    
+
     def list_available_configs(self, workflow_name: str = None) -> List[str]:
         """List available configurations."""
         if workflow_name:
             configs = [name for name in self.custom_configs.keys() if name.startswith(workflow_name)]
         else:
             configs = list(self.custom_configs.keys())
-        
+
         return configs
-    
+
     def get_config_recommendations(
         self,
         workflow_name: str,
@@ -206,16 +203,16 @@ class WorkflowCustomizer:
         """Get recommended configuration based on use case."""
         if workflow_name not in self.config_templates:
             return {}
-        
+
         base_config = {}
         template = self.config_templates[workflow_name]
-        
+
         # Initialize with defaults
         for section_name, section_template in template.items():
             base_config[section_name] = {}
             for param_name, param_def in section_template.items():
                 base_config[section_name][param_name] = param_def["default"]
-        
+
         # Apply use case specific recommendations
         if workflow_name == "critical_review":
             if use_case == "academic":
@@ -227,7 +224,7 @@ class WorkflowCustomizer:
             elif use_case == "casual":
                 base_config["consensus"]["credibility_threshold"] = 0.6
                 base_config["fact_extraction"]["max_facts"] = 10
-        
+
         elif workflow_name == "multi_perspective":
             if use_case == "policy_analysis":
                 base_config["task_decomposition"]["default_perspectives"] = ["政策", "经济", "社会", "法律", "实施"]
@@ -238,9 +235,9 @@ class WorkflowCustomizer:
             elif use_case == "business_strategy":
                 base_config["task_decomposition"]["default_perspectives"] = ["市场", "财务", "运营", "风险", "创新"]
                 base_config["enhanced_synthesis"]["quality_threshold"] = 0.75
-        
+
         return base_config
-    
+
     def validate_config(
         self,
         config: Dict[str, Any],
@@ -249,30 +246,30 @@ class WorkflowCustomizer:
         """Validate configuration against template."""
         if workflow_name not in self.config_templates:
             return {"errors": [f"Unknown workflow: {workflow_name}"]}
-        
+
         template = self.config_templates[workflow_name]
         errors = []
         warnings = []
-        
+
         # Check for missing sections
         for section_name in template.keys():
             if section_name not in config:
                 errors.append(f"Missing section: {section_name}")
                 continue
-            
+
             # Check parameters in each section
             section_template = template[section_name]
             section_config = config[section_name]
-            
+
             for param_name, param_def in section_template.items():
                 if param_name not in section_config:
                     warnings.append(f"Missing parameter: {section_name}.{param_name}")
                     continue
-                
+
                 # Validate parameter type and value
                 param_value = section_config[param_name]
                 param_type = param_def["type"]
-                
+
                 if param_type == "float" and not isinstance(param_value, (int, float)):
                     errors.append(f"Invalid type for {section_name}.{param_name}: expected float")
                 elif param_type == "integer" and not isinstance(param_value, int):
@@ -283,13 +280,13 @@ class WorkflowCustomizer:
                     errors.append(f"Invalid type for {section_name}.{param_name}: expected list")
                 elif param_type == "string" and not isinstance(param_value, str):
                     errors.append(f"Invalid type for {section_name}.{param_name}: expected string")
-                
+
                 # Check choices if defined
                 if "choices" in param_def and param_value not in param_def["choices"]:
                     errors.append(f"Invalid choice for {section_name}.{param_name}: {param_value}")
-        
+
         return {"errors": errors, "warnings": warnings}
-    
+
     def _customize_section(
         self,
         section_name: str,
@@ -298,50 +295,50 @@ class WorkflowCustomizer:
     ) -> Dict[str, Any]:
         """Customize a specific configuration section."""
         self.console.print(f"\n[cyan]🔧 Customizing {section_name}[/cyan]")
-        
+
         new_config = current_config.copy()
-        
+
         while True:
             # Display current configuration
             table = Table(title=f"{section_name} Configuration")
             table.add_column("Parameter", style="cyan")
             table.add_column("Current Value", style="magenta")
             table.add_column("Description", style="dim")
-            
+
             for param_name, param_def in section_template.items():
                 current_value = new_config.get(param_name, param_def["default"])
                 description = param_def.get("description", "")
                 table.add_row(param_name, str(current_value), description)
-            
+
             self.console.print(table)
-            
+
             # Show options
             params = list(section_template.keys())
             params.append("Done")
-            
+
             self.console.print("\nSelect parameter to modify:")
             for i, param in enumerate(params, 1):
                 self.console.print(f"  {i}. {param}")
-            
+
             choice = Prompt.ask(
                 "Select parameter",
                 choices=[str(i) for i in range(1, len(params) + 1)],
                 default=str(len(params))
             )
-            
+
             if int(choice) == len(params):
                 break
-            
+
             param_name = params[int(choice) - 1]
             param_def = section_template[param_name]
             current_value = new_config.get(param_name, param_def["default"])
-            
+
             # Get new value based on parameter definition
             new_value = self._get_parameter_value(param_name, param_def, current_value)
             new_config[param_name] = new_value
-        
+
         return new_config
-    
+
     def _get_parameter_value(
         self,
         param_name: str,
@@ -352,11 +349,11 @@ class WorkflowCustomizer:
         param_type = param_def["type"]
         description = param_def.get("description", "")
         choices = param_def.get("choices")
-        
+
         self.console.print(f"\n[yellow]Setting {param_name}[/yellow]")
         self.console.print(f"Description: {description}")
         self.console.print(f"Current value: {current_value}")
-        
+
         if param_type == "string":
             if choices:
                 return Prompt.ask(
@@ -369,27 +366,27 @@ class WorkflowCustomizer:
                     f"Enter value for {param_name}",
                     default=str(current_value)
                 )
-        
+
         elif param_type == "integer":
             from rich.prompt import IntPrompt
             return IntPrompt.ask(
                 f"Enter integer value for {param_name}",
                 default=current_value
             )
-        
+
         elif param_type == "float":
             from rich.prompt import FloatPrompt
             return FloatPrompt.ask(
                 f"Enter float value for {param_name}",
                 default=current_value
             )
-        
+
         elif param_type == "boolean":
             return Confirm.ask(
                 f"Enable {param_name}?",
                 default=current_value
             )
-        
+
         elif param_type == "list":
             current_str = ",".join(str(v) for v in current_value) if isinstance(current_value, list) else str(current_value)
             value_str = Prompt.ask(
@@ -397,26 +394,26 @@ class WorkflowCustomizer:
                 default=current_str
             )
             return [item.strip() for item in value_str.split(",") if item.strip()]
-        
+
         else:
             return Prompt.ask(
                 f"Enter value for {param_name}",
                 default=str(current_value)
             )
-    
+
     def _display_config_summary(self, config: Dict[str, Any]) -> None:
         """Display a summary of the configuration."""
         self.console.print("\n[blue]📋 Configuration Summary[/blue]")
-        
+
         for section_name, section_config in config.items():
             self.console.print(f"\n[cyan]{section_name}:[/cyan]")
-            
+
             if isinstance(section_config, dict):
                 for param_name, param_value in section_config.items():
                     self.console.print(f"  • {param_name}: {param_value}")
             else:
                 self.console.print(f"  • {section_config}")
-    
+
     def create_config_preset(
         self,
         workflow_name: str,
@@ -426,7 +423,7 @@ class WorkflowCustomizer:
     ) -> bool:
         """Create a configuration preset."""
         preset_key = f"{workflow_name}_{preset_name}"
-        
+
         preset_data = {
             "name": preset_name,
             "description": description,
@@ -434,19 +431,19 @@ class WorkflowCustomizer:
             "config": config,
             "created_at": str(datetime.now())
         }
-        
+
         self.custom_configs[preset_key] = preset_data
-        
+
         self.console.print(f"[green]✅ Created preset '{preset_name}' for {workflow_name}[/green]")
         return True
-    
+
     def list_config_presets(self, workflow_name: str = None) -> List[Dict[str, Any]]:
         """List available configuration presets."""
         presets = []
-        
+
         for key, preset_data in self.custom_configs.items():
             if isinstance(preset_data, dict) and "workflow" in preset_data:
                 if workflow_name is None or preset_data["workflow"] == workflow_name:
                     presets.append(preset_data)
-        
+
         return presets

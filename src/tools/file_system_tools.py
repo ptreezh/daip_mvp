@@ -13,8 +13,7 @@ except FileNotFoundError:
 
 
 def list_files(directory: str = ".") -> str:
-    """
-    Lists the files and subdirectories in a specified directory.
+    """Lists the files and subdirectories in a specified directory.
 
     Args:
         directory (str): The path to the directory, relative to the project root.
@@ -24,6 +23,7 @@ def list_files(directory: str = ".") -> str:
         str: A string containing the list of files and directories,
              or an error message if the directory is not found, not accessible,
              or outside the allowed project scope.
+
     """
     try:
         target_path = BASE_DIR.joinpath(directory).resolve()
@@ -31,7 +31,7 @@ def list_files(directory: str = ".") -> str:
         # Security Check: Prevent directory traversal attacks.
         if not str(target_path).startswith(str(BASE_DIR)):
             logging.warning(f"Access denied: Path '{directory}' is outside the allowed base directory.")
-            return f"Error: Access denied. Path is outside the allowed project scope."
+            return "Error: Access denied. Path is outside the allowed project scope."
 
         if not target_path.is_dir():
             return f"Error: Directory not found at '{directory}'."
@@ -51,8 +51,7 @@ def list_files(directory: str = ".") -> str:
 
 
 def read_file(file_path: str) -> str:
-    """
-    Reads the content of a specified file.
+    """Reads the content of a specified file.
 
     Args:
         file_path (str): The path to the file, relative to the project root.
@@ -60,6 +59,7 @@ def read_file(file_path: str) -> str:
     Returns:
         str: The content of the file, or an error message if the file
              is not found, not accessible, or outside the allowed scope.
+
     """
     try:
         target_path = BASE_DIR.joinpath(file_path).resolve()
@@ -80,8 +80,7 @@ def read_file(file_path: str) -> str:
 
 
 def write_file(file_path: str, content: str) -> str:
-    """
-    Writes or overwrites content to a specified file.
+    """Writes or overwrites content to a specified file.
 
     Args:
         file_path (str): The path to the file, relative to the project root.
@@ -89,6 +88,7 @@ def write_file(file_path: str, content: str) -> str:
 
     Returns:
         str: A success message or an error message.
+
     """
     try:
         target_path = BASE_DIR.joinpath(file_path).resolve()

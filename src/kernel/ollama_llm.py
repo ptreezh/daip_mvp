@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-05 17:30:00
+"""@Time    : 2025-07-05 17:30:00
 @Author  : DAIP-LIVE Team
 @File    : ollama_llm.py
 @Description: Concrete implementation of LLMInterface for Ollama.
 """
 import logging
-from typing import Any, AsyncGenerator, Dict, List
+from collections.abc import AsyncGenerator
+from typing import Any, Dict, List
 
 import ollama
 

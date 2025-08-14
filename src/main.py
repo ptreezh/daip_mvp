@@ -18,12 +18,7 @@ from fastapi.responses import JSONResponse
 # Add project root to the Python path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.config import settings
-from src.protocols.consensus_strategies import (
-    ConsensusStrategyFactory,
-    SimpleMajorityVoteStrategy,
-)
-from src.api import dependencies
+from src.api import dependencies, user_profile_api
 from src.api.routers import (
     advanced,
     chat,
@@ -34,8 +29,12 @@ from src.api.routers import (
     tools,
     virtual_team,
 )
-from src.api import user_profile_api
 from src.app_state import AppState
+from src.config import settings
+from src.protocols.consensus_strategies import (
+    ConsensusStrategyFactory,
+    SimpleMajorityVoteStrategy,
+)
 
 logging.basicConfig(level=settings.log_level)
 logger = logging.getLogger(__name__)
@@ -60,8 +59,7 @@ app.add_middleware(
 
 @app.exception_handler(ValueError)
 async def value_error_exception_handler(request: Request, exc: ValueError):
-    """
-    Handles validation errors (e.g., from service layer checks).
+    """Handles validation errors (e.g., from service layer checks).
     Returns a 400 Bad Request response.
     """
     logger.warning(f"Validation error for request {request.url.path}: {exc}")
@@ -73,8 +71,7 @@ async def value_error_exception_handler(request: Request, exc: ValueError):
 
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
-    """
-    Handles any other unhandled exceptions.
+    """Handles any other unhandled exceptions.
     Returns a 500 Internal Server Error to prevent leaking details.
     """
     logger.error(f"Unhandled exception for request {request.url.path}: {exc}", exc_info=True)
@@ -126,6 +123,7 @@ async def health_check() -> dict[str, str]:
     
     Returns:
         dict: Simple health status message
+
     """
     return {"status": "healthy", "message": "Service is operational"}
 
@@ -136,12 +134,12 @@ async def detailed_status():
     
     Returns:
         dict: Detailed status information about all system components
+
     """
     from datetime import datetime
-    import os
-    
+
     status_info = {
-        "timestamp": datetime.now(datetime.timezone.utc).isoformat(),
+        "timestamp": datetime.now().isoformat(),
         "service": {
             "name": "DAIP-LIVE MVP API",
             "version": "0.1.0",
@@ -150,7 +148,7 @@ async def detailed_status():
         "system": {},
         "components": {}
     }
-    
+
     # Try to get system information if psutil is available
     try:
         import psutil
@@ -167,7 +165,7 @@ async def detailed_status():
         status_info["system"] = {
             "error": f"System metrics error: {str(e)}"
         }
-    
+
     # Check application state
     try:
         if dependencies.app_state is not None:
@@ -175,7 +173,7 @@ async def detailed_status():
                 "status": "healthy",
                 "details": "Application state initialized successfully"
             }
-            
+
             # Check core services
             services_to_check = [
                 ("llm_interface", "LLM Interface"),
@@ -186,7 +184,7 @@ async def detailed_status():
                 ("user_profile_service", "User Profile Service"),
                 ("session_management_service", "Session Management Service")
             ]
-            
+
             for service_attr, service_name in services_to_check:
                 try:
                     service = getattr(dependencies.app_state, service_attr, None)
@@ -205,7 +203,7 @@ async def detailed_status():
                         "status": "error",
                         "details": f"{service_name} check failed: {str(e)}"
                     }
-            
+
             # Check vector database
             try:
                 if hasattr(dependencies.app_state, 'chroma_client') and dependencies.app_state.chroma_client:
@@ -231,7 +229,7 @@ async def detailed_status():
                     "status": "error",
                     "details": f"ChromaDB check failed: {str(e)}"
                 }
-            
+
             # Check roles loading
             try:
                 roles_count = len(dependencies.app_state.all_roles_details)
@@ -250,19 +248,19 @@ async def detailed_status():
                     "status": "error",
                     "details": f"Roles check failed: {str(e)}"
                 }
-                
+
         else:
             status_info["components"]["app_state"] = {
                 "status": "error",
                 "details": "Application state not initialized"
             }
-            
+
     except Exception as e:
         status_info["components"]["app_state"] = {
             "status": "error",
             "details": f"Application state check failed: {str(e)}"
         }
-    
+
     # Check configuration
     try:
         status_info["components"]["configuration"] = {
@@ -274,7 +272,7 @@ async def detailed_status():
             "status": "error",
             "details": f"Configuration check failed: {str(e)}"
         }
-    
+
     # Determine overall health
     component_statuses = [comp["status"] for comp in status_info["components"].values()]
     if "error" in component_statuses:
@@ -283,5 +281,5 @@ async def detailed_status():
         status_info["overall_status"] = "degraded"
     else:
         status_info["overall_status"] = "healthy"
-    
+
     return status_info

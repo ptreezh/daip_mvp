@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 11:00:00
+"""@Time    : 2025-07-24 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : synthesis_engine.py
 @Description:
@@ -10,9 +8,10 @@
 import logging
 from typing import List
 
-from src.models import DebateTurn
-from . import prompts
 from src.kernel.llm_interface import LLMInterface
+from src.models import DebateTurn
+
+from . import prompts
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +20,11 @@ class SynthesisEngine:
     """Uses an LLM to summarize and synthesize debate content."""
 
     def __init__(self, llm_interface: LLMInterface):
-        """
-        Initializes the SynthesisEngine.
+        """Initializes the SynthesisEngine.
 
         Args:
             llm_interface: An instance of a class that adheres to the LLMInterface.
+
         """
         self.llm_interface = llm_interface
 
@@ -46,12 +45,12 @@ class SynthesisEngine:
         try:
             logger.info(f"Requesting context summary from model '{self.llm_interface.config.model}'")
             response = await self.llm_interface.generate(messages=messages, participant_id="synthesis_engine")
-            
+
             # Log token usage if available
             if "token_usage" in response:
                 token_info = response["token_usage"]
                 logger.debug(f"Context summary token usage: {token_info['total_tokens']} tokens")
-            
+
             return response.get("content", "").strip()
         except Exception as e:
             logger.exception("An unexpected error occurred during context summarization.")
@@ -77,12 +76,12 @@ class SynthesisEngine:
         try:
             logger.info(f"Requesting final synthesis from model '{self.llm_interface.config.model}'")
             response = await self.llm_interface.generate(messages=messages, participant_id="synthesis_engine")
-            
+
             # Log token usage if available
             if "token_usage" in response:
                 token_info = response["token_usage"]
                 logger.debug(f"Final synthesis token usage: {token_info['total_tokens']} tokens")
-            
+
             return response.get("content", "").strip()
         except Exception as e:
             logger.exception("An unexpected error occurred during opinion synthesis.")

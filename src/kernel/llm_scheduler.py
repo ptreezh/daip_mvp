@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2024-07-16 10:30:00
+"""@Time    : 2024-07-16 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : llm_scheduler.py
 @Description:
@@ -13,8 +11,9 @@
 import asyncio
 import json
 import logging
+from collections.abc import Coroutine
 from dataclasses import dataclass
-from typing import Any, Coroutine, Dict, List
+from typing import Any, Dict, List
 
 from .interaction_manager import InteractionManager
 from .llm_interface import LLMInterface
@@ -30,8 +29,7 @@ class LLMRequest:
 
 
 class LLMScheduler:
-    """
-    A scheduler that manages a queue of requests for an LLM.
+    """A scheduler that manages a queue of requests for an LLM.
 
     This class ensures that only one request is processed by the LLM at a time,
     which is critical for managing single-instance LLM resources in a concurrent
@@ -44,13 +42,13 @@ class LLMScheduler:
         tool_executor: ToolExecutor,
         interaction_manager: InteractionManager,
     ):
-        """
-        Initializes the LLMScheduler.
+        """Initializes the LLMScheduler.
 
         Args:
             llm_interface: The interface to the language model.
             tool_executor: The executor for running tools.
             interaction_manager: The engine for preparing conversational context.
+
         """
         self.llm_interface = llm_interface
         self.tool_executor = tool_executor
@@ -74,8 +72,7 @@ class LLMScheduler:
             logging.info("LLMScheduler worker stopped.")
 
     async def submit_request(self, history: List[Dict[str, Any]]) -> str:
-        """
-        Submits a request to the LLM and waits for the final response.
+        """Submits a request to the LLM and waits for the final response.
 
         This method handles the entire lifecycle of a request, including
         potential multi-turn tool calls.
@@ -85,6 +82,7 @@ class LLMScheduler:
 
         Returns:
             The final text response from the assistant.
+
         """
         future = asyncio.get_running_loop().create_future()
         request = LLMRequest(history=history, future=future)

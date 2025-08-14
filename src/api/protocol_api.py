@@ -1,6 +1,5 @@
 #@AI-Generated: 2024-07-23, Confidence: 0.99, Model: Gemini-Code-Assist
-"""
-API Endpoints for Protocol Generation and Execution.
+"""API Endpoints for Protocol Generation and Execution.
 """
 import logging
 import os

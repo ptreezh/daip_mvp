@@ -1,23 +1,22 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import chromadb
 import ollama
 
 
 class VectorStore:
-    """
-    A wrapper for a vector database (ChromaDB) to handle storage
+    """A wrapper for a vector database (ChromaDB) to handle storage
     and retrieval of wiki entry embeddings.
     """
 
     def __init__(self, path: str = "data/chroma_db", collection_name: str = "wiki"):
-        """
-        Initializes the VectorStore.
+        """Initializes the VectorStore.
 
         Args:
             path: The directory to store the ChromaDB data.
             collection_name: The name of the collection to use.
+
         """
         try:
             self.client = chromadb.PersistentClient(path=path)
@@ -32,8 +31,7 @@ class VectorStore:
             raise
 
     async def add_entry(self, doc_id: str, content: str, metadata: Dict[str, Any]):
-        """
-        Generates an embedding for a document and upserts it into the collection.
+        """Generates an embedding for a document and upserts it into the collection.
         'Upsert' will add the document if it's new or update it if it exists.
         """
         try:
@@ -50,8 +48,7 @@ class VectorStore:
             logging.error(f"Failed to add entry '{doc_id}' to vector store: {e}")
 
     async def search(self, query: str, n_results: int = 3) -> List[Dict[str, Any]]:
-        """
-        Performs a semantic search for a given query.
+        """Performs a semantic search for a given query.
         """
         try:
             response = await ollama.embeddings(model=self.embedding_model, prompt=query)

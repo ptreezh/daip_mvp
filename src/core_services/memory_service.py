@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-04 10:00:00
+"""@Time    : 2025-07-04 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : memory_service.py
 @Description:
@@ -13,17 +11,17 @@ import json
 import logging
 import sqlite3
 import threading
-import asyncio
-import aiosqlite
 import time
 from collections import defaultdict
-from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .sskg_manager import SSKGManager
 from src.models import PendingFact  # Assuming PendingFact model exists
+
+from .sskg_manager import SSKGManager
+
 try:
     import chromadb
     from chromadb.config import Settings
@@ -443,8 +441,7 @@ class MemoryService:
         session_id: Optional[str] = None,
         project_id: Optional[str] = None,
     ) -> str:
-        """
-        Adds token usage information as a memory entry for conversation tracking.
+        """Adds token usage information as a memory entry for conversation tracking.
         
         Args:
             role_id: The role that used the tokens
@@ -454,18 +451,19 @@ class MemoryService:
             
         Returns:
             Memory ID of the stored token usage entry
+
         """
         content = f"Token usage: {token_usage_info.get('total_tokens', 0)} tokens " \
                  f"(input: {token_usage_info.get('input_tokens', 0)}, " \
                  f"output: {token_usage_info.get('output_tokens', 0)}) " \
                  f"for model {token_usage_info.get('model', 'unknown')}"
-        
+
         metadata = {
             "token_usage": token_usage_info,
             "cost_estimate": token_usage_info.get("estimated_cost", 0.0),
             "model": token_usage_info.get("model", "unknown")
         }
-        
+
         return self.add_memory(
             role_id=role_id,
             content=content,
@@ -540,8 +538,7 @@ class MemoryService:
         return memories
 
     def add_fact_to_sskg(self, subject: str, predicate: str, obj: str, metadata: Optional[Dict[str, Any]] = None):
-        """
-        Adds a structured fact to the Semantic Structured Knowledge Graph.
+        """Adds a structured fact to the Semantic Structured Knowledge Graph.
 
         This is a direct interface to the underlying SSKGManager. It is thread-safe.
         """
@@ -549,8 +546,7 @@ class MemoryService:
             self.sskg_manager.add_fact(subject, predicate, obj, metadata)
 
     def query_sskg(self, subject: str, predicate: Optional[str] = None) -> List[Dict[str, Any]]:
-        """
-        Queries the SSKG for facts related to a subject. It is thread-safe.
+        """Queries the SSKG for facts related to a subject. It is thread-safe.
         """
         with self.lock:
             return self.sskg_manager.query(subject, predicate)
@@ -558,8 +554,7 @@ class MemoryService:
     def add_fact_to_staging(
         self, subject: str, predicate: str, obj: str, confidence: float, status: str, metadata: Optional[Dict[str, Any]] = None
     ) -> str:
-        """
-        Adds a fact to the staging table with a specific status ('pending' or 'rejected').
+        """Adds a fact to the staging table with a specific status ('pending' or 'rejected').
         """
         if status not in ["pending", "rejected"]:
             raise ValueError("Status must be 'pending' or 'rejected'.")
@@ -595,8 +590,7 @@ class MemoryService:
             return PendingFact(**dict(row)) if row else None
 
     def update_pending_fact_status(self, fact_id: str, status: str) -> bool:
-        """
-        Updates the status of a pending fact (e.g., to 'approved' or 'rejected').
+        """Updates the status of a pending fact (e.g., to 'approved' or 'rejected').
         Returns True if a row was updated, False otherwise.
         """
         if status not in ["approved", "rejected"]:
@@ -611,8 +605,7 @@ class MemoryService:
             return cursor.rowcount > 0
 
     def approve_fact(self, fact_id: str) -> bool:
-        """
-        Approves a fact: moves it to the SSKG and updates its status.
+        """Approves a fact: moves it to the SSKG and updates its status.
         """
         pending_fact = self.get_pending_fact_by_id(fact_id)
         if not pending_fact or pending_fact.status != 'pending':

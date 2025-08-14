@@ -1,29 +1,19 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 17:00:00
+"""@Time    : 2025-07-24 17:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_multi_perspective_workflow_integration.py
 @Description:
     Integration tests for the complete Multi-perspective Synthesis Workflow.
 """
+from unittest.mock import AsyncMock, Mock
+
 import pytest
-import asyncio
-from datetime import datetime
-from unittest.mock import Mock, AsyncMock, patch
 
 from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
-from src.institutional_primitives.multi_perspective import (
-    TaskDecompositionNode,
-    ParallelExplorationNode,
-    ViewpointCollectionNode,
-    EnhancedSynthesisNode,
-    IterativeRefinementNode
-)
 
 
 class TestMultiPerspectiveWorkflowIntegration:
     """Integration tests for the complete Multi-perspective Synthesis Workflow."""
-    
+
     @pytest.fixture
     def mock_services(self):
         """Create mock services with realistic responses."""
@@ -33,11 +23,11 @@ class TestMultiPerspectiveWorkflowIntegration:
             "tool_executor": Mock(),
             "synthesis_engine": AsyncMock()
         }
-        
+
         # Configure LLM interface for task decomposition
         async def llm_generate_side_effect(messages):
             content = messages[1]["content"]
-            
+
             if "分解" in content and "主题" in content:
                 return {
                     "content": """以下是对主题的分解：
@@ -107,9 +97,9 @@ class TestMultiPerspectiveWorkflowIntegration:
                 }
             else:
                 return {"content": "Generated response for testing"}
-        
+
         services["llm_interface"].generate.side_effect = llm_generate_side_effect
-        
+
         # Configure role manager
         def get_role_by_id_side_effect(role_id):
             role = Mock()
@@ -129,15 +119,15 @@ class TestMultiPerspectiveWorkflowIntegration:
                 role.system_prompt = "你是一位专业专家。"
                 role.name = "专家"
             return role
-        
+
         services["role_manager"].get_role_by_id.side_effect = get_role_by_id_side_effect
-        
+
         # Configure tool executor
         services["tool_executor"].execute.return_value = {
             "status": "success",
             "result": "研究表明，AI对就业的影响因行业而异，需要综合考虑多个因素。"
         }
-        
+
         # Configure synthesis engine
         services["synthesis_engine"].synthesize_opinions.return_value = """综合分析表明，AI对未来工作的影响是多维度的：
 
@@ -154,9 +144,9 @@ class TestMultiPerspectiveWorkflowIntegration:
 4. 技术发展的速度要求我们必须前瞻性地规划和准备
 
 总的来说，AI对未来工作的影响既带来挑战也蕴含机遇，关键在于如何通过教育、政策和技术创新来最大化其积极影响，同时减少负面冲击。"""
-        
+
         return services
-    
+
     @pytest.mark.asyncio
     async def test_complete_workflow_execution(self, mock_services):
         """Test the complete workflow execution from start to finish."""
@@ -184,42 +174,42 @@ class TestMultiPerspectiveWorkflowIntegration:
                 "quality_threshold": 0.8
             }
         }
-        
+
         workflow = MultiPerspectiveSynthesisWorkflow("test_workflow", workflow_config)
-        
+
         # Execute workflow
         result = await workflow.execute(
             topic="AI对未来工作的影响",
             perspectives=["经济", "社会", "技术"],
             services=mock_services
         )
-        
+
         # Verify overall success
         assert result["success"] is True
         assert result["topic"] == "AI对未来工作的影响"
-        
+
         # Verify all steps were executed
         assert "execution_details" in result
         execution_details = result["execution_details"]
-        
+
         # Check task decomposition
         assert "task_decomposition" in execution_details
         assert execution_details["task_decomposition"]["success"] is True
         assert execution_details["task_decomposition"]["sub_problem_count"] == 3
-        
+
         # Check parallel exploration
         assert "parallel_exploration" in execution_details
         assert execution_details["parallel_exploration"]["success"] is True
         assert execution_details["parallel_exploration"]["viewpoint_count"] == 3
-        
+
         # Check viewpoint collection
         assert "viewpoint_collection" in execution_details
         assert execution_details["viewpoint_collection"]["success"] is True
-        
+
         # Check enhanced synthesis
         assert "enhanced_synthesis" in execution_details
         assert execution_details["enhanced_synthesis"]["success"] is True
-        
+
         # Verify final results
         assert "synthesis" in result
         assert len(result["synthesis"]) > 100  # Should be substantial
@@ -229,19 +219,19 @@ class TestMultiPerspectiveWorkflowIntegration:
         assert len(result["expert_contributions"]) > 0
         assert "confidence" in result
         assert 0.0 <= result["confidence"] <= 1.0
-        
+
         # Verify perspectives were covered
         assert "perspectives" in result
         assert "经济" in result["perspectives"]
         assert "社会" in result["perspectives"]
         assert "技术" in result["perspectives"]
-    
+
     @pytest.mark.asyncio
     async def test_workflow_with_refinement(self, mock_services):
         """Test workflow execution that triggers refinement."""
         # Configure synthesis to need refinement
         original_synthesize = mock_services["synthesis_engine"].synthesize_opinions
-        
+
         async def synthesize_with_low_quality(*args, **kwargs):
             if "改进版本" in kwargs.get("topic", ""):
                 # Return improved synthesis for refinement
@@ -261,9 +251,9 @@ class TestMultiPerspectiveWorkflowIntegration:
             else:
                 # Return low-quality synthesis that needs refinement
                 return "AI会影响工作。有些工作会消失，有些会出现。需要学习新技能。"
-        
+
         mock_services["synthesis_engine"].synthesize_opinions.side_effect = synthesize_with_low_quality
-        
+
         workflow_config = {
             "enhanced_synthesis": {
                 "quality_threshold": 0.8  # High threshold to trigger refinement
@@ -274,44 +264,44 @@ class TestMultiPerspectiveWorkflowIntegration:
                 "improvement_threshold": 0.05
             }
         }
-        
+
         workflow = MultiPerspectiveSynthesisWorkflow("test_refinement", workflow_config)
-        
+
         # Execute workflow
         result = await workflow.execute(
             topic="AI对未来工作的影响",
             services=mock_services
         )
-        
+
         # Verify refinement was applied
         assert result["success"] is True
         assert result.get("refinement_applied", False) is True
         assert result.get("refinement_iterations", 0) > 0
-        
+
         # Verify improved quality
         final_synthesis = result["synthesis"]
         assert len(final_synthesis) > 200  # Should be more substantial after refinement
         assert "深层次" in final_synthesis or "根本机制" in final_synthesis  # Should show depth improvement
-    
+
     @pytest.mark.asyncio
     async def test_workflow_error_handling(self, mock_services):
         """Test workflow error handling when a step fails."""
         # Make task decomposition fail
         mock_services["llm_interface"].generate.side_effect = Exception("LLM service unavailable")
-        
+
         workflow = MultiPerspectiveSynthesisWorkflow("test_error")
-        
+
         # Execute workflow
         result = await workflow.execute(
             topic="AI对未来工作的影响",
             services=mock_services
         )
-        
+
         # Verify error handling
         assert result["success"] is False
         assert "error" in result
         assert "Task decomposition failed" in result["error"]
-    
+
     @pytest.mark.asyncio
     async def test_workflow_class_method(self, mock_services):
         """Test the convenience class method."""
@@ -323,7 +313,7 @@ class TestMultiPerspectiveWorkflowIntegration:
                 "task_decomposition": {"max_sub_problems": 2}
             }
         )
-        
+
         # Verify result
         assert result["success"] is True
         assert result["topic"] == "AI对未来工作的影响"

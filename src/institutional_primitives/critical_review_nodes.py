@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-23 13:00:00
+"""@Time    : 2025-07-23 13:00:00
 @Author  : DAIP-LIVE Team
 @File    : critical_review_nodes.py
 @Description:
@@ -10,13 +8,14 @@
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Literal
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from src.institutional_primitives.base import InstitutionalPrimitive, ExecutionContext
+from src.institutional_primitives.base import ExecutionContext, InstitutionalPrimitive
 from src.institutional_primitives.consensus_node import ConsensusNode
 from src.institutional_primitives.revision_node import RevisionNode
+
 # Service imports will be resolved at runtime through the execution context
 # from src.core_services.fact_extraction_service import FactExtractionService
 # from src.core_services.fact_validation_service import FactValidationService
@@ -29,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 class ExtractedFact(BaseModel):
     """Model for extracted facts."""
+
     id: str
     content: str
     confidence: float = Field(ge=0.0, le=1.0)
@@ -39,6 +39,7 @@ class ExtractedFact(BaseModel):
 
 class Evidence(BaseModel):
     """Model for evidence supporting or challenging facts."""
+
     content: str
     source: str
     credibility: float = Field(ge=0.0, le=1.0)
@@ -48,6 +49,7 @@ class Evidence(BaseModel):
 
 class EvidenceReport(BaseModel):
     """Model for evidence reports on specific facts."""
+
     fact_id: str
     supporting_evidence: List[Evidence] = Field(default_factory=list)
     challenging_evidence: List[Evidence] = Field(default_factory=list)
@@ -60,6 +62,7 @@ class EvidenceReport(BaseModel):
 
 class ReviewResult(BaseModel):
     """Model for complete review results."""
+
     original_content: str
     extracted_facts: List[ExtractedFact] = Field(default_factory=list)
     evidence_reports: List[EvidenceReport] = Field(default_factory=list)
@@ -70,21 +73,19 @@ class ReviewResult(BaseModel):
 
 
 class GenerationNode(InstitutionalPrimitive):
-    """
-    生成节点 - Captures initial AI role output with full context and metadata.
+    """生成节点 - Captures initial AI role output with full context and metadata.
     
     This node serves as the entry point for the Critical Review Workflow,
     capturing the original content that needs to be fact-checked.
     """
-    
+
     def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.role_name = config.get("role_name", "创作者") if config else "创作者"
         self.capture_metadata = config.get("capture_metadata", True) if config else True
-    
+
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute content generation and capture.
+        """Execute content generation and capture.
         
         Args:
             inputs: Should contain 'prompt' and optionally 'role_context'
@@ -92,34 +93,35 @@ class GenerationNode(InstitutionalPrimitive):
             
         Returns:
             Generated content with metadata
+
         """
         context.mark_started()
-        
+
         try:
             # Extract inputs
             prompt = inputs.get("prompt", "")
             role_context = inputs.get("role_context", "")
-            
+
             if not prompt:
                 raise ValueError("Prompt is required for content generation")
-            
+
             # Get LLM interface from services
             llm_interface = context.services.get("llm_interface")
             if not llm_interface:
                 raise ValueError("LLM interface not available in execution context")
-            
+
             # Prepare generation context
             generation_context = f"Role: {self.role_name}\n"
             if role_context:
                 generation_context += f"Context: {role_context}\n"
             generation_context += f"Task: {prompt}"
-            
+
             # Generate content
             messages = [{"role": "user", "content": generation_context}]
             response = await llm_interface.generate(messages)
-            
+
             generated_content = response.get("content", "")
-            
+
             # Capture metadata if enabled
             metadata = {}
             if self.capture_metadata:
@@ -132,19 +134,19 @@ class GenerationNode(InstitutionalPrimitive):
                     "token_usage": response.get("usage", {}),
                     "generation_id": f"gen_{context.execution_id}_{context.node_id}"
                 }
-            
+
             # Store in workflow state for downstream nodes
             context.state["original_content"] = generated_content
             context.state["generation_metadata"] = metadata
-            
+
             context.mark_completed()
-            
+
             return {
                 "content": generated_content,
                 "metadata": metadata,
                 "success": True
             }
-            
+
         except Exception as e:
             context.mark_failed()
             logger.error(f"GenerationNode execution failed: {e}")
@@ -154,7 +156,7 @@ class GenerationNode(InstitutionalPrimitive):
                 "success": False,
                 "error": str(e)
             }
-    
+
     def get_input_schema(self) -> Dict[str, Any]:
         """Return input schema for the generation node."""
         return {
@@ -171,7 +173,7 @@ class GenerationNode(InstitutionalPrimitive):
             },
             "required": ["prompt"]
         }
-    
+
     def get_output_schema(self) -> Dict[str, Any]:
         """Return output schema for the generation node."""
         return {
@@ -199,21 +201,19 @@ class GenerationNode(InstitutionalPrimitive):
 
 
 class FactExtractionNode(InstitutionalPrimitive):
-    """
-    事实提取节点 - Extracts verifiable factual assertions from content.
+    """事实提取节点 - Extracts verifiable factual assertions from content.
     
     Uses FactExtractionService to identify all verifiable factual assertions
     from the generated content for subsequent validation.
     """
-    
+
     def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.min_confidence = config.get("min_confidence", 0.5) if config else 0.5
         self.max_facts = config.get("max_facts", 20) if config else 20
-    
+
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute fact extraction from content.
+        """Execute fact extraction from content.
         
         Args:
             inputs: Should contain 'content' to extract facts from
@@ -221,24 +221,25 @@ class FactExtractionNode(InstitutionalPrimitive):
             
         Returns:
             List of extracted facts
+
         """
         context.mark_started()
-        
+
         try:
             # Get content from inputs or workflow state
             content = inputs.get("content") or context.state.get("original_content", "")
-            
+
             if not content:
                 raise ValueError("Content is required for fact extraction")
-            
+
             # Get fact extraction service
             fact_service = context.services.get("fact_extraction_service")
             if not fact_service:
                 raise ValueError("Fact extraction service not available")
-            
+
             # Extract facts
             raw_facts = await fact_service.extract_facts(content)
-            
+
             # Convert to ExtractedFact objects
             extracted_facts = []
             for i, fact in enumerate(raw_facts[:self.max_facts]):
@@ -256,18 +257,18 @@ class FactExtractionNode(InstitutionalPrimitive):
                         }
                     )
                     extracted_facts.append(extracted_fact)
-            
+
             # Store in workflow state
             context.state["extracted_facts"] = [fact.model_dump() for fact in extracted_facts]
-            
+
             context.mark_completed()
-            
+
             return {
                 "facts": [fact.model_dump() for fact in extracted_facts],
                 "fact_count": len(extracted_facts),
                 "success": True
             }
-            
+
         except Exception as e:
             context.mark_failed()
             logger.error(f"FactExtractionNode execution failed: {e}")
@@ -277,7 +278,7 @@ class FactExtractionNode(InstitutionalPrimitive):
                 "success": False,
                 "error": str(e)
             }
-    
+
     def get_input_schema(self) -> Dict[str, Any]:
         """Return input schema for the fact extraction node."""
         return {
@@ -290,7 +291,7 @@ class FactExtractionNode(InstitutionalPrimitive):
             },
             "required": ["content"]
         }
-    
+
     def get_output_schema(self) -> Dict[str, Any]:
         """Return output schema for the fact extraction node."""
         return {
@@ -315,21 +316,19 @@ class FactExtractionNode(InstitutionalPrimitive):
 
 
 class ParallelReviewNode(InstitutionalPrimitive):
-    """
-    并行审查节点 - Executes parallel review with multiple specialized roles.
+    """并行审查节点 - Executes parallel review with multiple specialized roles.
     
     Implements fan-out pattern to simultaneously deploy challenger and validator roles
     for comprehensive fact review from multiple perspectives.
     """
-    
+
     def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.reviewer_roles = config.get("reviewer_roles", ["批判者", "验证者"]) if config else ["批判者", "验证者"]
         self.max_parallel_reviews = config.get("max_parallel_reviews", 5) if config else 5
-    
+
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute parallel review of extracted facts.
+        """Execute parallel review of extracted facts.
         
         Args:
             inputs: Should contain 'facts' to review
@@ -337,36 +336,37 @@ class ParallelReviewNode(InstitutionalPrimitive):
             
         Returns:
             Evidence reports from all reviewers
+
         """
         context.mark_started()
-        
+
         try:
             # Get facts from inputs or workflow state
             facts_data = inputs.get("facts") or context.state.get("extracted_facts", [])
-            
+
             if not facts_data:
                 raise ValueError("Facts are required for parallel review")
-            
+
             # Convert to ExtractedFact objects
             facts = [ExtractedFact(**fact_data) for fact_data in facts_data]
-            
+
             # Get services
             llm_interface = context.services.get("llm_interface")
             wiki_service = context.services.get("wiki_service")
-            
+
             if not llm_interface:
                 raise ValueError("LLM interface not available")
-            
+
             # Create review tasks for each fact and reviewer combination
             review_tasks = []
             for fact in facts[:self.max_parallel_reviews]:
                 for role in self.reviewer_roles:
                     task = self._create_review_task(fact, role, llm_interface, wiki_service, context)
                     review_tasks.append(task)
-            
+
             # Execute all reviews in parallel
             review_results = await asyncio.gather(*review_tasks, return_exceptions=True)
-            
+
             # Process results
             evidence_reports = []
             for result in review_results:
@@ -374,18 +374,18 @@ class ParallelReviewNode(InstitutionalPrimitive):
                     evidence_reports.append(result)
                 elif isinstance(result, Exception):
                     logger.error(f"Review task failed: {result}")
-            
+
             # Store in workflow state
             context.state["evidence_reports"] = [report.model_dump() for report in evidence_reports]
-            
+
             context.mark_completed()
-            
+
             return {
                 "evidence_reports": [report.model_dump() for report in evidence_reports],
                 "review_count": len(evidence_reports),
                 "success": True
             }
-            
+
         except Exception as e:
             context.mark_failed()
             logger.error(f"ParallelReviewNode execution failed: {e}")
@@ -395,7 +395,7 @@ class ParallelReviewNode(InstitutionalPrimitive):
                 "success": False,
                 "error": str(e)
             }
-    
+
     async def _create_review_task(
         self,
         fact: ExtractedFact,
@@ -419,7 +419,7 @@ class ParallelReviewNode(InstitutionalPrimitive):
 4. 评估证据的可靠性
 
 请提供具体的挑战性证据和分析。"""
-            
+
             else:  # 验证者
                 prompt = f"""作为一个事实验证专家，请验证以下事实声明：
 
@@ -432,7 +432,7 @@ class ParallelReviewNode(InstitutionalPrimitive):
 4. 评估来源的权威性
 
 请提供具体的支持性证据和验证结果。"""
-            
+
             # Get background knowledge from wiki and SSKG if available
             background_info = ""
             if wiki_service:
@@ -442,7 +442,7 @@ class ParallelReviewNode(InstitutionalPrimitive):
                         background_info = f"\n\n背景信息：\n{related_pages[0].get('content', '')[:500]}..."
                 except Exception as e:
                     logger.warning(f"Failed to get background info from wiki: {e}")
-            
+
             # Get related facts from SSKG
             sskg_manager = context.services.get("sskg_manager")
             if sskg_manager:
@@ -460,7 +460,7 @@ class ParallelReviewNode(InstitutionalPrimitive):
                         background_info += sskg_info
                 except Exception as e:
                     logger.warning(f"Failed to get related facts from SSKG: {e}")
-            
+
             # Get relevant memories from MemAgent
             mem_agent = context.services.get("mem_agent")
             if mem_agent:
@@ -476,15 +476,15 @@ class ParallelReviewNode(InstitutionalPrimitive):
                         background_info += memory_info
                 except Exception as e:
                     logger.warning(f"Failed to get relevant memories: {e}")
-            
+
             full_prompt = prompt + background_info
-            
+
             # Generate review
             messages = [{"role": "user", "content": full_prompt}]
             response = await llm_interface.generate(messages)
-            
+
             review_content = response.get("content", "")
-            
+
             # Parse review content to extract evidence
             # This is a simplified implementation - in practice would use more sophisticated parsing
             evidence_list = []
@@ -502,7 +502,7 @@ class ParallelReviewNode(InstitutionalPrimitive):
                     credibility=0.8,
                     evidence_type="supporting"
                 ))
-            
+
             # Create evidence report
             report = EvidenceReport(
                 fact_id=fact.id,
@@ -512,9 +512,9 @@ class ParallelReviewNode(InstitutionalPrimitive):
                 confidence_score=0.75,
                 reviewer_id=reviewer_role
             )
-            
+
             return report
-            
+
         except Exception as e:
             logger.error(f"Review task failed for fact {fact.id} by {reviewer_role}: {e}")
             # Return empty report on failure
@@ -524,7 +524,7 @@ class ParallelReviewNode(InstitutionalPrimitive):
                 confidence_score=0.0,
                 reviewer_id=reviewer_role
             )
-    
+
     def get_input_schema(self) -> Dict[str, Any]:
         """Return input schema for the parallel review node."""
         return {
@@ -538,7 +538,7 @@ class ParallelReviewNode(InstitutionalPrimitive):
             },
             "required": ["facts"]
         }
-    
+
     def get_output_schema(self) -> Dict[str, Any]:
         """Return output schema for the parallel review node."""
         return {
@@ -563,21 +563,19 @@ class ParallelReviewNode(InstitutionalPrimitive):
 
 
 class EvidenceAggregationNode(InstitutionalPrimitive):
-    """
-    证据汇总节点 - Aggregates evidence from parallel reviews using fan-in pattern.
+    """证据汇总节点 - Aggregates evidence from parallel reviews using fan-in pattern.
     
     Collects all positive and negative evidence with source attribution
     and prepares comprehensive evidence summaries for consensus calculation.
     """
-    
+
     def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.min_evidence_threshold = config.get("min_evidence_threshold", 1) if config else 1
         self.weight_by_credibility = config.get("weight_by_credibility", True) if config else True
-    
+
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute evidence aggregation from parallel reviews.
+        """Execute evidence aggregation from parallel reviews.
         
         Args:
             inputs: Should contain 'evidence_reports' from parallel reviews
@@ -585,19 +583,20 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
             
         Returns:
             Aggregated evidence summary for each fact
+
         """
         context.mark_started()
-        
+
         try:
             # Get evidence reports from inputs or workflow state
             reports_data = inputs.get("evidence_reports") or context.state.get("evidence_reports", [])
-            
+
             if not reports_data:
                 raise ValueError("Evidence reports are required for aggregation")
-            
+
             # Convert to EvidenceReport objects
             reports = [EvidenceReport(**report_data) for report_data in reports_data]
-            
+
             # Group reports by fact ID
             fact_evidence = {}
             for report in reports:
@@ -608,12 +607,12 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
                         "neutral": [],
                         "reviewers": []
                     }
-                
+
                 fact_evidence[report.fact_id]["supporting"].extend(report.supporting_evidence)
                 fact_evidence[report.fact_id]["challenging"].extend(report.challenging_evidence)
                 fact_evidence[report.fact_id]["neutral"].extend(report.neutral_evidence)
                 fact_evidence[report.fact_id]["reviewers"].append(report.reviewer_id)
-            
+
             # Create aggregated evidence summaries
             aggregated_evidence = {}
             for fact_id, evidence in fact_evidence.items():
@@ -621,7 +620,7 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
                 supporting_score = self._calculate_evidence_score(evidence["supporting"])
                 challenging_score = self._calculate_evidence_score(evidence["challenging"])
                 neutral_score = self._calculate_evidence_score(evidence["neutral"])
-                
+
                 # Calculate overall credibility
                 total_evidence = len(evidence["supporting"]) + len(evidence["challenging"]) + len(evidence["neutral"])
                 if total_evidence >= self.min_evidence_threshold:
@@ -640,7 +639,7 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
                         credibility = max(0.5 - challenging_score * 0.3, 0.0)
                     else:
                         credibility = 0.3  # Low credibility when no evidence
-                
+
                 aggregated_evidence[fact_id] = {
                     "fact_id": fact_id,
                     "supporting_count": len(evidence["supporting"]),
@@ -654,18 +653,18 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
                     "evidence_summary": self._create_evidence_summary(evidence),
                     "aggregation_timestamp": datetime.now().isoformat()
                 }
-            
+
             # Store in workflow state
             context.state["aggregated_evidence"] = aggregated_evidence
-            
+
             context.mark_completed()
-            
+
             return {
                 "aggregated_evidence": aggregated_evidence,
                 "facts_processed": len(aggregated_evidence),
                 "success": True
             }
-            
+
         except Exception as e:
             context.mark_failed()
             logger.error(f"EvidenceAggregationNode execution failed: {e}")
@@ -675,36 +674,36 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
                 "success": False,
                 "error": str(e)
             }
-    
+
     def _calculate_evidence_score(self, evidence_list: List[Evidence]) -> float:
         """Calculate weighted evidence score."""
         if not evidence_list:
             return 0.0
-        
+
         if self.weight_by_credibility:
             total_score = sum(evidence.credibility for evidence in evidence_list)
             return total_score / len(evidence_list)
         else:
             return len(evidence_list) * 0.2  # Simple count-based scoring
-    
+
     def _create_evidence_summary(self, evidence: Dict[str, List]) -> str:
         """Create a human-readable evidence summary."""
         summary_parts = []
-        
+
         if evidence["supporting"]:
             summary_parts.append(f"支持性证据 ({len(evidence['supporting'])}项)")
-        
+
         if evidence["challenging"]:
             summary_parts.append(f"质疑性证据 ({len(evidence['challenging'])}项)")
-        
+
         if evidence["neutral"]:
             summary_parts.append(f"中性证据 ({len(evidence['neutral'])}项)")
-        
+
         if not summary_parts:
             return "无足够证据"
-        
+
         return "，".join(summary_parts) + f"，由{len(set(evidence.get('reviewers', [])))}位审查者提供"
-    
+
     def get_input_schema(self) -> Dict[str, Any]:
         """Return input schema for the evidence aggregation node."""
         return {
@@ -718,7 +717,7 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
             },
             "required": ["evidence_reports"]
         }
-    
+
     def get_output_schema(self) -> Dict[str, Any]:
         """Return output schema for the evidence aggregation node."""
         return {
@@ -746,13 +745,12 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
 
 
 class CriticalReviewWorkflow:
-    """
-    批判性审查工作流 - Orchestrates the complete critical review process.
+    """批判性审查工作流 - Orchestrates the complete critical review process.
     
     This class coordinates all the critical review nodes to implement the
     systematic fact validation workflow described in the design document.
     """
-    
+
     def __init__(self, config: Dict[str, Any] = None):
         self.config = config or {}
         self.credibility_threshold = self.config.get("credibility_threshold", 0.7)
@@ -760,7 +758,7 @@ class CriticalReviewWorkflow:
         self.enable_performance_monitoring = self.config.get("enable_performance_monitoring", True)
         self.enable_sskg_integration = self.config.get("enable_sskg_integration", True)
         self.enable_conflict_detection = self.config.get("enable_conflict_detection", True)
-        
+
     async def execute_critical_review(
         self,
         content: str,
@@ -768,8 +766,7 @@ class CriticalReviewWorkflow:
         roles: List[str],
         context: ExecutionContext
     ) -> ReviewResult:
-        """
-        Execute the complete critical review workflow.
+        """Execute the complete critical review workflow.
         
         Args:
             content: Original content to review
@@ -779,6 +776,7 @@ class CriticalReviewWorkflow:
             
         Returns:
             Complete review result with all evidence and revisions
+
         """
         try:
             # Initialize workflow state and performance monitoring
@@ -792,7 +790,7 @@ class CriticalReviewWorkflow:
                 "performance_metrics": {}
             }
             context.state.update(workflow_state)
-            
+
             # Step 1: Generation Node (if content is not already generated)
             if not content:
                 generation_node = GenerationNode("generation", self.config.get("generation", {}))
@@ -803,7 +801,7 @@ class CriticalReviewWorkflow:
                     raise ValueError(f"Content generation failed: {gen_result.get('error')}")
                 content = gen_result["content"]
                 context.state["original_content"] = content
-            
+
             # Step 2: Fact Extraction Node
             fact_extraction_node = FactExtractionNode("fact_extraction", self.config.get("fact_extraction", {}))
             fact_result = await fact_extraction_node.execute(
@@ -811,7 +809,7 @@ class CriticalReviewWorkflow:
             )
             if not fact_result.get("success"):
                 raise ValueError(f"Fact extraction failed: {fact_result.get('error')}")
-            
+
             # Step 3: Parallel Review Node
             review_config = self.config.get("parallel_review", {})
             review_config["reviewer_roles"] = roles
@@ -821,7 +819,7 @@ class CriticalReviewWorkflow:
             )
             if not review_result.get("success"):
                 raise ValueError(f"Parallel review failed: {review_result.get('error')}")
-            
+
             # Step 4: Evidence Aggregation Node
             aggregation_node = EvidenceAggregationNode("evidence_aggregation", self.config.get("evidence_aggregation", {}))
             agg_result = await aggregation_node.execute(
@@ -829,7 +827,7 @@ class CriticalReviewWorkflow:
             )
             if not agg_result.get("success"):
                 raise ValueError(f"Evidence aggregation failed: {agg_result.get('error')}")
-            
+
             # Step 5: Consensus Node
             consensus_node = ConsensusNode("consensus", self.config.get("consensus", {}))
             consensus_result = await consensus_node.execute(
@@ -837,7 +835,7 @@ class CriticalReviewWorkflow:
             )
             if not consensus_result.get("success"):
                 raise ValueError(f"Consensus calculation failed: {consensus_result.get('error')}")
-            
+
             # Step 6: Revision Node (if needed)
             revised_content = content
             credibility_scores = consensus_result.get("credibility_scores", {})
@@ -845,7 +843,7 @@ class CriticalReviewWorkflow:
                 fact_id for fact_id, score in credibility_scores.items()
                 if score < self.credibility_threshold
             ]
-            
+
             if low_credibility_facts and context.state.get("revision_cycle", 0) < self.max_revision_cycles:
                 revision_node = RevisionNode("revision", self.config.get("revision", {}))
                 revision_result = await revision_node.execute({
@@ -853,11 +851,11 @@ class CriticalReviewWorkflow:
                     "low_credibility_facts": low_credibility_facts,
                     "evidence_reports": review_result["evidence_reports"]
                 }, context)
-                
+
                 if revision_result.get("success"):
                     revised_content = revision_result.get("revised_content", content)
                     context.state["revision_cycle"] = context.state.get("revision_cycle", 0) + 1
-            
+
             # Store results in SSKG if enabled
             if self.enable_sskg_integration:
                 await self._store_review_results_in_sskg(context, {
@@ -867,11 +865,11 @@ class CriticalReviewWorkflow:
                     "evidence_reports": review_result["evidence_reports"],
                     "credibility_scores": credibility_scores
                 })
-            
+
             # Calculate performance metrics
             end_time = datetime.now()
             execution_time = (end_time - start_time).total_seconds()
-            
+
             performance_metrics = {
                 "total_execution_time": execution_time,
                 "facts_processed": len(fact_result["facts"]),
@@ -880,7 +878,7 @@ class CriticalReviewWorkflow:
                 "revision_cycles": context.state.get("revision_cycle", 0),
                 "throughput_facts_per_second": len(fact_result["facts"]) / execution_time if execution_time > 0 else 0
             }
-            
+
             # Create final review result
             review_result_obj = ReviewResult(
                 original_content=content,
@@ -900,13 +898,13 @@ class CriticalReviewWorkflow:
                     "conflict_detection_enabled": self.enable_conflict_detection
                 }
             )
-            
+
             return review_result_obj
-            
+
         except Exception as e:
             logger.error(f"Critical review workflow failed: {e}")
             raise
-    
+
     async def _store_review_results_in_sskg(self, context: ExecutionContext, results: Dict[str, Any]):
         """Store review results in SSKG for future reference."""
         try:
@@ -914,15 +912,15 @@ class CriticalReviewWorkflow:
             if not sskg_manager:
                 logger.warning("SSKG manager not available, skipping result storage")
                 return
-            
+
             # Store validated facts with proper KnowledgeFact structure
             for fact_data in results["facts"]:
                 fact_id = fact_data["id"]
                 credibility = results["credibility_scores"].get(fact_id, 0.5)
-                
+
                 # Create KnowledgeFact object according to design spec
                 from pydantic import BaseModel
-                
+
                 class KnowledgeFact(BaseModel):
                     id: Optional[str] = None
                     content: str
@@ -932,7 +930,7 @@ class CriticalReviewWorkflow:
                     metadata: Dict[str, Any] = Field(default_factory=dict)
                     relations: List[Dict[str, Any]] = Field(default_factory=list)
                     version: int = 1
-                
+
                 knowledge_fact = KnowledgeFact(
                     content=fact_data["content"],
                     source=f"critical_review_{context.execution_id}",
@@ -950,10 +948,10 @@ class CriticalReviewWorkflow:
                         ])
                     }
                 )
-                
+
                 # Store fact in SSKG
                 stored_fact_id = await sskg_manager.store_fact(knowledge_fact)
-                
+
                 # Store evidence relationships
                 for evidence_report in results["evidence_reports"]:
                     if evidence_report.get("fact_id") == fact_id:
@@ -970,7 +968,7 @@ class CriticalReviewWorkflow:
                                 }
                             )
                             await sskg_manager.store_fact(evidence_fact)
-                        
+
                         for evidence in evidence_report.get("challenging_evidence", []):
                             evidence_fact = KnowledgeFact(
                                 content=evidence.get("content", ""),
@@ -983,11 +981,11 @@ class CriticalReviewWorkflow:
                                 }
                             )
                             await sskg_manager.store_fact(evidence_fact)
-            
+
             # Check for conflicts with existing knowledge if enabled
             if self.enable_conflict_detection:
                 await self._detect_and_resolve_conflicts(sskg_manager, results, context)
-            
+
             # Store workflow execution metadata
             workflow_memory = {
                 "content": f"Critical review workflow completed for content: {results['original_content'][:100]}...",
@@ -1002,33 +1000,33 @@ class CriticalReviewWorkflow:
                     "completion_timestamp": datetime.now().isoformat()
                 }
             }
-            
+
             await sskg_manager.store_memory(workflow_memory, "procedural")
-            
+
         except Exception as e:
             logger.error(f"Failed to store review results in SSKG: {e}")
-    
+
     async def _detect_and_resolve_conflicts(self, sskg_manager, results: Dict[str, Any], context: ExecutionContext):
         """Detect and resolve conflicts with existing knowledge in SSKG."""
         try:
             conflicting_facts = []
-            
+
             for fact_data in results["facts"]:
                 fact_content = fact_data["content"]
                 credibility = results["credibility_scores"].get(fact_data["id"], 0.5)
-                
+
                 # Search for potentially conflicting facts
                 existing_facts = await sskg_manager.search_knowledge(
                     query=fact_content,
                     filters={"min_confidence": 0.5},
                     limit=5
                 )
-                
+
                 # Simple conflict detection based on content similarity and contradictory indicators
                 for existing_fact in existing_facts:
                     existing_content = existing_fact.get("content", "")
                     existing_confidence = existing_fact.get("confidence", 0.5)
-                    
+
                     # Check for potential conflicts (this is a simplified approach)
                     if self._are_facts_conflicting(fact_content, existing_content):
                         conflicting_facts.append({
@@ -1037,7 +1035,7 @@ class CriticalReviewWorkflow:
                             "existing_fact": existing_fact,
                             "existing_credibility": existing_confidence
                         })
-            
+
             # Resolve conflicts if any found
             if conflicting_facts:
                 for conflict in conflicting_facts:
@@ -1045,9 +1043,9 @@ class CriticalReviewWorkflow:
                         conflict["new_fact"]["id"],
                         conflict["existing_fact"]["id"]
                     ])
-                    
+
                     logger.info(f"Resolved conflict between facts: {resolution.get('resolution_strategy', 'unknown')}")
-                    
+
                     # Store conflict resolution in workflow metadata
                     context.state.setdefault("conflict_resolutions", []).append({
                         "new_fact_id": conflict["new_fact"]["id"],
@@ -1055,13 +1053,12 @@ class CriticalReviewWorkflow:
                         "resolution": resolution.get("resolution_strategy", "unknown"),
                         "timestamp": datetime.now().isoformat()
                     })
-            
+
         except Exception as e:
             logger.error(f"Failed to detect/resolve conflicts: {e}")
-    
+
     def _are_facts_conflicting(self, fact1: str, fact2: str) -> bool:
-        """
-        Simple conflict detection between two facts.
+        """Simple conflict detection between two facts.
         In a production system, this would use more sophisticated NLP techniques.
         """
         # Simple keyword-based conflict detection
@@ -1069,41 +1066,41 @@ class CriticalReviewWorkflow:
             ("是", "不是"), ("有", "没有"), ("能", "不能"), ("会", "不会"),
             ("正确", "错误"), ("真", "假"), ("存在", "不存在")
         ]
-        
+
         fact1_lower = fact1.lower()
         fact2_lower = fact2.lower()
-        
+
         for positive, negative in conflict_indicators:
             if (positive in fact1_lower and negative in fact2_lower) or \
                (negative in fact1_lower and positive in fact2_lower):
                 return True
-        
+
         return False
-    
+
     def _create_validation_summary(self, credibility_scores: Dict[str, float], low_credibility_facts: List[str]) -> str:
         """Create a human-readable validation summary."""
         total_facts = len(credibility_scores)
         high_credibility_facts = total_facts - len(low_credibility_facts)
-        
+
         if total_facts == 0:
             return "未发现可验证的事实声明"
-        
+
         avg_credibility = sum(credibility_scores.values()) / total_facts
-        
+
         summary = f"验证了{total_facts}个事实声明，"
         summary += f"其中{high_credibility_facts}个具有高可信度，"
         summary += f"{len(low_credibility_facts)}个需要进一步验证。"
         summary += f"平均可信度评分：{avg_credibility:.2f}"
-        
+
         if low_credibility_facts:
-            summary += f"。低可信度事实已标记为需要修订。"
-        
+            summary += "。低可信度事实已标记为需要修订。"
+
         return summary
 
 
 class CriticalReviewNodeRegistry:
     """Registry for critical review workflow nodes."""
-    
+
     @staticmethod
     def get_all_nodes() -> Dict[str, type]:
         """Get all available critical review nodes."""
@@ -1115,21 +1112,21 @@ class CriticalReviewNodeRegistry:
             "consensus": ConsensusNode,
             "revision": RevisionNode
         }
-    
+
     @staticmethod
     def create_node(node_type: str, node_id: str, config: Dict[str, Any] = None):
         """Create a node instance by type."""
         nodes = CriticalReviewNodeRegistry.get_all_nodes()
         if node_type not in nodes:
             raise ValueError(f"Unknown node type: {node_type}")
-        
+
         return nodes[node_type](node_id, config)
 
 
 # Export all nodes for easy import
 __all__ = [
     'ExtractedFact',
-    'Evidence', 
+    'Evidence',
     'EvidenceReport',
     'ReviewResult',
     'GenerationNode',

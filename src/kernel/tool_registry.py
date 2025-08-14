@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2024-07-16 10:00:00
+"""@Time    : 2024-07-16 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : tool_registry.py
 @Description:
@@ -10,8 +8,8 @@
 """
 
 from src.kernel.tool_executor import ToolExecutor
+from src.protocols.consensus_strategies import SimpleMajorityVoteStrategy  # Import the strategy
 from src.tools import kanban_tools
-from src.protocols.consensus_strategies import SimpleMajorityVoteStrategy # Import the strategy
 
 # --- Tool Definitions (JSON Schema for LLM Function Calling) ---
 
@@ -113,12 +111,12 @@ def _create_and_register_tools() -> ToolExecutor:
     executor.register_tool(kanban_tools.create_task, CREATE_TASK_DEF)
     executor.register_tool(kanban_tools.list_tasks, LIST_TASKS_DEF)
     executor.register_tool(kanban_tools.update_task, UPDATE_TASK_DEF)
-    
+
     # Register consensus strategy tools
     # Instantiate the strategy to register its instance method
     simple_majority_vote_instance = SimpleMajorityVoteStrategy()
     executor.register_tool(simple_majority_vote_instance.execute, SIMPLE_MAJORITY_VOTE_DEF) # Register the execute method of the instance
-    
+
     return executor
 
 

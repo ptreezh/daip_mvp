@@ -1,23 +1,23 @@
-"""
-Personal Intelligence Hub - Workflow Compiler Service
+"""Personal Intelligence Hub - Workflow Compiler Service
 
 自然语言工作流编译器服务
 """
 
 import re
-import yaml
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Dict, List
 
 from personal_intelligence_hub.models.workflow_models import (
-    WorkflowDefinition, WorkflowStep, StepType, WorkflowValidationResult
+    StepType,
+    WorkflowDefinition,
+    WorkflowStep,
+    WorkflowValidationResult,
 )
 
 
 class WorkflowCompiler:
     """自然语言工作流编译器"""
-    
+
     def __init__(self):
         self.institutional_primitives = {
             "analyze": ["analysis", "examine", "review", "assess", "evaluate"],
@@ -28,7 +28,7 @@ class WorkflowCompiler:
             "collaborate": ["collaborate", "work together", "cooperate", "coordinate"],
             "iterate": ["iterate", "repeat", "refine", "improve", "optimize"]
         }
-        
+
         self.workflow_patterns = {
             "critical_review": {
                 "keywords": ["critical review", "deep analysis", "thorough examination", "批判性审查"],
@@ -43,46 +43,46 @@ class WorkflowCompiler:
                 "steps": ["analyze", "critique", "iterate", "validate"]
             }
         }
-    
+
     def compile_natural_language(self, description: str) -> WorkflowDefinition:
         """将自然语言描述编译为工作流定义"""
         try:
             # 分析描述中的关键词
             detected_pattern = self._detect_pattern(description)
-            
+
             # 提取任务和步骤
             steps = self._extract_steps(description, detected_pattern)
-            
+
             # 生成工作流定义
             workflow = self._generate_workflow(description, steps)
-            
+
             return workflow
-            
-        except Exception as e:
+
+        except Exception:
             # 返回默认工作流
             return self._create_default_workflow(description)
-    
+
     def _detect_pattern(self, description: str) -> str:
         """检测工作流模式"""
         description_lower = description.lower()
-        
+
         for pattern_name, pattern_data in self.workflow_patterns.items():
             for keyword in pattern_data["keywords"]:
                 if keyword.lower() in description_lower:
                     return pattern_name
-        
+
         return "critical_review"  # 默认模式
-    
+
     def _extract_steps(self, description: str, pattern: str) -> List[WorkflowStep]:
         """提取工作流步骤"""
         steps = []
-        
+
         # 基于模式获取步骤模板
         if pattern in self.workflow_patterns:
             step_types = self.workflow_patterns[pattern]["steps"]
         else:
             step_types = ["analyze", "critique", "validate", "synthesize"]
-        
+
         # 创建步骤
         for i, step_type in enumerate(step_types):
             step = WorkflowStep(
@@ -96,9 +96,9 @@ class WorkflowCompiler:
                 validation_criteria=self._get_validation_criteria(step_type)
             )
             steps.append(step)
-        
+
         return steps
-    
+
     def _get_step_type(self, step_name: str) -> StepType:
         """获取步骤类型"""
         step_mapping = {
@@ -111,7 +111,7 @@ class WorkflowCompiler:
             "iterate": StepType.ITERATION
         }
         return step_mapping.get(step_name, StepType.ANALYSIS)
-    
+
     def _get_agent_roles_for_step(self, step_type: str) -> List[str]:
         """获取步骤的代理角色"""
         role_mapping = {
@@ -124,7 +124,7 @@ class WorkflowCompiler:
             "iterate": ["Optimizer-AI", "Refiner-AI"]
         }
         return role_mapping.get(step_type, ["General-AI"])
-    
+
     def _get_validation_criteria(self, step_type: str) -> Dict[str, Any]:
         """获取验证标准"""
         criteria_mapping = {
@@ -137,7 +137,7 @@ class WorkflowCompiler:
             "iterate": {"improvement": 0.8, "convergence": 0.75}
         }
         return criteria_mapping.get(step_type, {"quality": 0.8})
-    
+
     def _generate_workflow(self, description: str, steps: List[WorkflowStep]) -> WorkflowDefinition:
         """生成工作流定义"""
         return WorkflowDefinition(
@@ -156,7 +156,7 @@ class WorkflowCompiler:
                 "confidence": 0.85
             }
         )
-    
+
     def _generate_workflow_name(self, description: str) -> str:
         """生成工作流名称"""
         # 从描述中提取关键词
@@ -164,7 +164,7 @@ class WorkflowCompiler:
         key_phrase = "_".join(words).lower()
         key_phrase = re.sub(r'[^\w\s]', '', key_phrase)
         return f"workflow_{key_phrase}"
-    
+
     def _create_default_workflow(self, description: str) -> WorkflowDefinition:
         """创建默认工作流"""
         steps = [
@@ -199,7 +199,7 @@ class WorkflowCompiler:
                 validation_criteria={"coherence": 0.8}
             )
         ]
-        
+
         return WorkflowDefinition(
             id=f"default_workflow_{int(datetime.now().timestamp())}",
             name="default_critical_review",
@@ -208,66 +208,66 @@ class WorkflowCompiler:
             parameters={"timeout": 900, "quality_threshold": 0.8},
             metadata={"source": "default", "created_at": datetime.now().isoformat()}
         )
-    
+
     def validate_workflow(self, workflow: WorkflowDefinition) -> WorkflowValidationResult:
         """验证工作流定义"""
         issues = []
-        
+
         # 检查步骤完整性
         if not workflow.steps:
             issues.append("工作流必须包含至少一个步骤")
-        
+
         # 检查依赖关系
         step_ids = {step.id for step in workflow.steps}
         for step in workflow.steps:
             for dep in step.dependencies:
                 if dep not in step_ids:
                     issues.append(f"步骤 {step.id} 依赖不存在的步骤 {dep}")
-        
+
         # 检查循环依赖
         if self._has_circular_dependency(workflow.steps):
             issues.append("工作流存在循环依赖")
-        
+
         return WorkflowValidationResult(
             is_valid=len(issues) == 0,
             issues=issues,
             suggestions=self._generate_suggestions(issues)
         )
-    
+
     def _has_circular_dependency(self, steps: List[WorkflowStep]) -> bool:
         """检查循环依赖"""
         # 简化的循环检测
         visited = set()
         rec_stack = set()
-        
+
         def dfs(step_id):
             if step_id in rec_stack:
                 return True
             if step_id in visited:
                 return False
-            
+
             rec_stack.add(step_id)
             visited.add(step_id)
-            
+
             step = next((s for s in steps if s.id == step_id), None)
             if step:
                 for dep in step.dependencies:
                     if dfs(dep):
                         return True
-            
+
             rec_stack.remove(step_id)
             return False
-        
+
         for step in steps:
             if dfs(step.id):
                 return True
-        
+
         return False
-    
+
     def _generate_suggestions(self, issues: List[str]) -> List[str]:
         """生成改进建议"""
         suggestions = []
-        
+
         for issue in issues:
             if "依赖不存在的步骤" in issue:
                 suggestions.append("请检查并修正步骤依赖关系")
@@ -275,9 +275,9 @@ class WorkflowCompiler:
                 suggestions.append("请重新设计步骤依赖关系，避免循环")
             elif "必须包含至少一个步骤" in issue:
                 suggestions.append("请添加至少一个工作流步骤")
-        
+
         return suggestions
-    
+
     def preview_workflow(self, workflow: WorkflowDefinition) -> Dict[str, Any]:
         """预览工作流"""
         return {

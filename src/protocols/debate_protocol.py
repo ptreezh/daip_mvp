@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 11:00:00
+"""@Time    : 2025-07-25 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : debate_protocol.py
 @Description:
@@ -13,13 +11,13 @@ from typing import List
 from src.kernel.core import Kernel
 from src.models import (
     DebateConfig,
-    DebateTurn,
+    DebateEndEvent,
     DebateResult,
     DebateStartEvent,
+    DebateTurn,
+    ErrorEvent,
     NewTurnEvent,
     TechLogEvent,
-    DebateEndEvent,
-    ErrorEvent,
     UserInterventionCommand,
 )
 
@@ -27,17 +25,16 @@ logger = logging.getLogger(__name__)
 
 
 class DebateProtocol:
-    """
-    Orchestrates a structured debate between multiple AI roles using kernel components.
+    """Orchestrates a structured debate between multiple AI roles using kernel components.
     """
 
     def __init__(self, kernel: Kernel, event_queue: asyncio.Queue):
-        """
-        Initializes the DebateProtocol.
+        """Initializes the DebateProtocol.
 
         Args:
             kernel: An instance of the application kernel.
             event_queue: An asyncio queue to emit events to the UI or other listeners.
+
         """
         self.kernel = kernel
         self.event_queue = event_queue
@@ -60,8 +57,7 @@ class DebateProtocol:
             await self._emit_event(NewTurnEvent(turn=turn))
 
     async def run(self, config: DebateConfig):
-        """
-        Executes the entire debate flow based on the provided configuration.
+        """Executes the entire debate flow based on the provided configuration.
         """
         try:
             self.history = []
@@ -96,7 +92,7 @@ class DebateProtocol:
                     opinion = opinion_response.get("content", "").strip()
                     if not opinion:
                         raise Exception(f"LLM failed to generate an opinion for role {role_id}")
-                    
+
                     # Log token usage if available
                     if "token_usage" in opinion_response:
                         token_info = opinion_response["token_usage"]
@@ -115,7 +111,7 @@ class DebateProtocol:
 
             # Consensus phase
             await self._emit_event(TechLogEvent(source="DebateProtocol", message="Debate rounds complete. Moving to consensus."))
-            
+
             # Execute consensus tool
             try:
                 # Try to use the tool if available

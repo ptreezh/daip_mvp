@@ -1,5 +1,4 @@
-"""
-Virtual Role Chat System - A comprehensive system for managing dynamic chat environments with multiple AI roles.
+"""Virtual Role Chat System - A comprehensive system for managing dynamic chat environments with multiple AI roles.
 
 This package implements a flexible chat system that allows users to create and manage virtual chat rooms
 with multiple AI roles, facilitating dynamic discussions and collaborative problem-solving sessions.
@@ -8,60 +7,59 @@ with multiple AI roles, facilitating dynamic discussions and collaborative probl
 __version__ = "0.1.0"
 
 # Import core data models
+# Import interfaces
+from .interfaces import (
+    ChatAnalyticsServiceInterface,
+    ChatRoomManagerInterface,
+    ChatSessionServiceInterface,
+    RoleInteractionEngineInterface,
+)
 from .models import (
+    ChatMessage,
     ChatRoom,
     ChatRoomConfig,
     ChatRoomID,
     ChatRoomSummary,
-    ChatMessage,
     ChatSession,
-    SessionID,
-    SessionSummary,
-    ValidationResult,
+    QualityIssue,
+    QualityMetrics,
     ResolutionResult,
+    RolePerformance,
+    SessionID,
+    SessionMetrics,
+    SessionSummary,
     SubTopic,
     TransparencyLevel,
-    SessionMetrics,
-    RolePerformance,
-    QualityMetrics,
-    QualityIssue,
-)
-
-# Import interfaces
-from .interfaces import (
-    ChatRoomManagerInterface,
-    ChatSessionServiceInterface,
-    RoleInteractionEngineInterface,
-    ChatAnalyticsServiceInterface,
+    ValidationResult,
 )
 
 # Import workflow components
 from .workflow import (
-    WorkflowState,
-    WorkflowEventType,
-    WorkflowEvent,
-    WorkflowAction,
-    WorkflowStep,
-    ConversationWorkflow,
-    WorkflowExecution,
-    TaskDecomposition,
-    ProcessingChain,
-    WorkflowEngineInterface,
-    WorkflowStateManagerInterface,
-    TaskDecompositionServiceInterface,
-    WorkflowAdapterInterface,
+    DEBATE_WORKFLOW,
     FREE_FORM_WORKFLOW,
     STRUCTURED_WORKFLOW,
-    DEBATE_WORKFLOW,
+    ConversationWorkflow,
+    ProcessingChain,
+    TaskDecomposition,
+    TaskDecompositionServiceInterface,
+    WorkflowAction,
+    WorkflowAdapterInterface,
+    WorkflowEngineInterface,
+    WorkflowEvent,
+    WorkflowEventType,
+    WorkflowExecution,
+    WorkflowState,
+    WorkflowStateManagerInterface,
+    WorkflowStep,
 )
 
 # PocketFlow integration will be implemented in a separate task
 # Placeholder for future implementation
 try:
     from .pocketflow_adapter import (
-        workflow_engine,
-        WorkflowEngineImpl,
         PocketFlowAdapter,
+        WorkflowEngineImpl,
+        workflow_engine,
     )
     POCKETFLOW_AVAILABLE = True
 except ImportError:
@@ -75,7 +73,7 @@ except ImportError:
 __all__ = [
     # Core models
     "ChatRoom",
-    "ChatRoomConfig", 
+    "ChatRoomConfig",
     "ChatRoomID",
     "ChatRoomSummary",
     "ChatMessage",
@@ -90,13 +88,13 @@ __all__ = [
     "RolePerformance",
     "QualityMetrics",
     "QualityIssue",
-    
+
     # Interfaces
     "ChatRoomManagerInterface",
-    "ChatSessionServiceInterface", 
+    "ChatSessionServiceInterface",
     "RoleInteractionEngineInterface",
     "ChatAnalyticsServiceInterface",
-    
+
     # Workflow components
     "WorkflowState",
     "WorkflowEventType",
@@ -114,7 +112,7 @@ __all__ = [
     "FREE_FORM_WORKFLOW",
     "STRUCTURED_WORKFLOW",
     "DEBATE_WORKFLOW",
-    
+
     # PocketFlow integration
     "workflow_engine",
     "WorkflowEngineImpl",

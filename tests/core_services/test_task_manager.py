@@ -1,6 +1,8 @@
-import pytest
-from unittest.mock import MagicMock
 import uuid
+from unittest.mock import MagicMock
+
+import pytest
+
 
 # Dummy classes for testing purposes
 class Task:
@@ -30,8 +32,7 @@ def task_manager_with_task():
     return task_manager, task1
 
 def test_get_task_by_id(task_manager_with_task):
-    """
-    Test retrieving a task by its ID.
+    """Test retrieving a task by its ID.
     FIX: Replaced task.task_id with task.id to match the Task model.
     """
     task_manager, task1 = task_manager_with_task

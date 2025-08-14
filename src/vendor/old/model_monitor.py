@@ -23,6 +23,7 @@ class ModelMonitor:
         Args:
             config (Optional[dict[str, Any]], optional): A configuration dictionary.
                 This can contain settings for different model platforms. Defaults to None.
+
         """
         self.config = config or {}
         self.registry = ModelRegistry()
@@ -55,6 +56,7 @@ class ModelMonitor:
 
         Raises:
             Exception: If refreshing models fails.
+
         """
         self.logger.info("🚀 Starting model monitor...")
         self.running = True
@@ -85,6 +87,7 @@ class ModelMonitor:
 
         Raises:
             Exception: If there's an error during the shutdown process.
+
         """
         if not self.running:
             return
@@ -110,6 +113,7 @@ class ModelMonitor:
         Args:
             interval_minutes (int, optional): The interval in minutes between checks.
                 Defaults to 30.
+
         """
         while self.running:
             try:
@@ -133,6 +137,7 @@ class ModelMonitor:
 
         Returns:
             list: A list of available model details.
+
         """
         return self.registry.get_available_models(platform)
 
@@ -141,6 +146,7 @@ class ModelMonitor:
 
         Returns:
             dict: A dictionary containing statistics about the models.
+
         """
         return self.registry.get_registry_summary()
 
@@ -155,6 +161,7 @@ def get_model_monitor(config: Optional[dict[str, Any]] = None) -> ModelMonitor:
     Args:
         config (Optional[dict[str, Any]], optional): Configuration for the monitor.
             Defaults to None.
+
     """
     global _model_monitor
     if _model_monitor is None:
@@ -168,6 +175,7 @@ async def startup_model_monitor(config: Optional[dict[str, Any]] = None):
     Args:
         config (Optional[dict[str, Any]], optional): Configuration for the monitor.
             Defaults to None.
+
     """
     monitor = get_model_monitor(config)
     await monitor.startup()
@@ -188,6 +196,7 @@ def create_model_check_script():
 
     Returns:
         Path: The path to the created script.
+
     """
     script_content = '''#!/usr/bin/env python3
 """

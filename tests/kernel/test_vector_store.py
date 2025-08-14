@@ -10,8 +10,7 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.fixture
 def vector_store_with_mocks():
-    """
-    Pytest fixture to set up a VectorStore instance with mocked ChromaDB dependencies.
+    """Pytest fixture to set up a VectorStore instance with mocked ChromaDB dependencies.
     """
     with patch("src.kernel.vector_store.chromadb") as mock_chromadb:
         mock_persistent_client = MagicMock()

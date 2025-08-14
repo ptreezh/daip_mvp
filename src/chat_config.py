@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-19 01:00:00
+"""@Time    : 2025-07-19 01:00:00
 @Author  : DAIP-LIVE Team
 @File    : chat_config.py
 @Description: Basic chat configuration for the DAIP-LIVE system.

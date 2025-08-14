@@ -1,27 +1,25 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 16:30:00
+"""@Time    : 2025-07-24 16:30:00
 @Author  : DAIP-LIVE Team
 @File    : __init__.py
 @Description:
     Multi-perspective Synthesis Workflow nodes package.
 """
 
-from .models import SubProblem, ExpertViewpoint, ViewpointCollection, SynthesisQuality, SynthesisResult
-from .task_decomposition_node import TaskDecompositionNode
+from .models import ExpertViewpoint, SubProblem, SynthesisQuality, SynthesisResult, ViewpointCollection
 from .parallel_exploration_node import ParallelExplorationNode
-from .viewpoint_collection_node import ViewpointCollectionNode
-from .synthesis_node import EnhancedSynthesisNode
 from .refinement_node import IterativeRefinementNode
+from .synthesis_node import EnhancedSynthesisNode
+from .task_decomposition_node import TaskDecompositionNode
+from .viewpoint_collection_node import ViewpointCollectionNode
 
 __all__ = [
     "SubProblem",
-    "ExpertViewpoint", 
+    "ExpertViewpoint",
     "ViewpointCollection",
     "SynthesisQuality",
     "SynthesisResult",
     "TaskDecompositionNode",
-    "ParallelExplorationNode", 
+    "ParallelExplorationNode",
     "ViewpointCollectionNode",
     "EnhancedSynthesisNode",
     "IterativeRefinementNode"

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 16:30:00
+"""@Time    : 2025-07-24 16:30:00
 @Author  : DAIP-LIVE Team
 @File    : models.py
 @Description:
@@ -14,6 +12,7 @@ from pydantic import BaseModel, Field
 
 class SubProblem(BaseModel):
     """Model for a decomposed sub-problem."""
+
     id: str
     perspective: str  # e.g., "经济", "社会", "技术", "伦理"
     description: str
@@ -25,6 +24,7 @@ class SubProblem(BaseModel):
 
 class ExpertViewpoint(BaseModel):
     """Model for an expert's viewpoint on a sub-problem."""
+
     expert_id: str
     expert_name: str
     expertise_areas: List[str] = Field(default_factory=list)
@@ -39,6 +39,7 @@ class ExpertViewpoint(BaseModel):
 
 class ViewpointCollection(BaseModel):
     """Model for collected viewpoints with analysis."""
+
     topic: str
     viewpoints: List[ExpertViewpoint] = Field(default_factory=list)
     conflicts: List[Dict[str, Any]] = Field(default_factory=list)
@@ -51,6 +52,7 @@ class ViewpointCollection(BaseModel):
 
 class SynthesisQuality(BaseModel):
     """Model for assessing synthesis quality."""
+
     depth_score: float = Field(ge=0.0, le=1.0)
     breadth_score: float = Field(ge=0.0, le=1.0)
     insight_score: float = Field(ge=0.0, le=1.0)
@@ -62,6 +64,7 @@ class SynthesisQuality(BaseModel):
 
 class SynthesisResult(BaseModel):
     """Model for the final synthesis result."""
+
     topic: str
     perspectives: List[str] = Field(default_factory=list)
     synthesis: str

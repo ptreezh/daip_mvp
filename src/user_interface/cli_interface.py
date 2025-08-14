@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 18:00:00
+"""@Time    : 2025-07-24 18:00:00
 @Author  : DAIP-LIVE Team
 @File    : cli_interface.py
 @Description:
@@ -11,14 +9,13 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import click
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
-from rich.table import Table
 from rich.panel import Panel
-from rich.syntax import Syntax
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+from rich.table import Table
 
 from ..workflows.critical_review_workflow import CriticalReviewWorkflow
 from ..workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
@@ -32,24 +29,24 @@ console = Console()
 
 class CLIInterface:
     """Command-line interface for workflow execution."""
-    
+
     def __init__(self):
         """Initialize the CLI interface."""
         self.progress_monitor = ProgressMonitor()
         self.result_formatter = ResultFormatter()
         self.transparency_controller = TransparencyController()
         self.console = Console()
-    
+
     async def setup_services(self) -> Dict[str, Any]:
         """Set up required services for workflow execution."""
         try:
+            from ..core_services.fact_extraction_service import FactExtractionService
             from ..core_services.llm_interface import EnhancedLLMInterface
             from ..core_services.role_manager import RoleManager
-            from ..kernel.tool_executor import ToolExecutor
             from ..core_services.synthesis_engine import SynthesisEngine
-            from ..core_services.fact_extraction_service import FactExtractionService
             from ..core_services.wiki_service import WikiService
-            
+            from ..kernel.tool_executor import ToolExecutor
+
             # Initialize services
             llm_interface = EnhancedLLMInterface()
             role_manager = RoleManager()
@@ -57,7 +54,7 @@ class CLIInterface:
             synthesis_engine = SynthesisEngine(llm_interface)
             fact_extraction_service = FactExtractionService()
             wiki_service = WikiService()
-            
+
             return {
                 "llm_interface": llm_interface,
                 "role_manager": role_manager,
@@ -70,7 +67,7 @@ class CLIInterface:
             console.print(f"[red]Error importing services: {e}[/red]")
             console.print("[yellow]Some services may not be available. Continuing with available services.[/yellow]")
             return {}
-    
+
     async def execute_critical_review(
         self,
         content: str = None,
@@ -87,24 +84,24 @@ class CLIInterface:
         try:
             # Get content
             if content_file:
-                with open(content_file, 'r', encoding='utf-8') as f:
+                with open(content_file, encoding='utf-8') as f:
                     content = f.read()
             elif not content:
                 content = click.prompt("Please enter the content to review")
-            
+
             # Load configuration
             config = {}
             if config_file and Path(config_file).exists():
-                with open(config_file, 'r', encoding='utf-8') as f:
+                with open(config_file, encoding='utf-8') as f:
                     config = json.load(f)
-            
+
             # Set up services
             console.print("[blue]Setting up services...[/blue]")
             services = await self.setup_services()
-            
+
             # Create and execute workflow
             console.print("[blue]Starting Critical Review Workflow...[/blue]")
-            
+
             with Progress(
                 SpinnerColumn(),
                 TextColumn("[progress.description]{task.description}"),
@@ -113,18 +110,18 @@ class CLIInterface:
                 console=console
             ) as progress:
                 task = progress.add_task("Executing workflow...", total=None)
-                
+
                 workflow = CriticalReviewWorkflow("cli_critical_review", config)
                 result = await workflow.execute(
                     prompt=f"Please review the following content: {content}",
                     services=services
                 )
-                
+
                 progress.update(task, completed=True)
-            
+
             # Use transparency controller for result presentation
             execution_id = result.get("execution_id", "cli_critical_review")
-            
+
             if format_type == "rich":
                 # Use transparency controller for rich display
                 feedback = self.transparency_controller.present_workflow_result(
@@ -144,9 +141,9 @@ class CLIInterface:
                     )
                 else:
                     formatted_result = self.result_formatter.format_result(result, format_type)
-                
+
                 console.print(formatted_result)
-            
+
             # Export to file if requested
             if output_file:
                 self.transparency_controller.export_result(
@@ -156,15 +153,15 @@ class CLIInterface:
                     include_traceability=include_traceability,
                     output_path=output_file
                 )
-            
+
             return result
-            
+
         except Exception as e:
             console.print(f"[red]Error executing Critical Review Workflow: {e}[/red]")
             if verbose:
                 console.print_exception()
             return {"success": False, "error": str(e)}
-    
+
     async def execute_multi_perspective(
         self,
         topic: str = None,
@@ -182,7 +179,7 @@ class CLIInterface:
             # Get topic
             if not topic:
                 topic = click.prompt("Please enter the topic to analyze")
-            
+
             # Get perspectives
             if not perspectives:
                 perspectives_input = click.prompt(
@@ -194,21 +191,21 @@ class CLIInterface:
                     perspectives = [p.strip() for p in perspectives_input.split(",")]
                 else:
                     perspectives = ["经济", "社会", "技术", "伦理"]
-            
+
             # Load configuration
             config = {}
             if config_file and Path(config_file).exists():
-                with open(config_file, 'r', encoding='utf-8') as f:
+                with open(config_file, encoding='utf-8') as f:
                     config = json.load(f)
-            
+
             # Set up services
             console.print("[blue]Setting up services...[/blue]")
             services = await self.setup_services()
-            
+
             # Create and execute workflow
             console.print(f"[blue]Starting Multi-perspective Analysis of: {topic}[/blue]")
             console.print(f"[blue]Perspectives: {', '.join(perspectives)}[/blue]")
-            
+
             with Progress(
                 SpinnerColumn(),
                 TextColumn("[progress.description]{task.description}"),
@@ -217,19 +214,19 @@ class CLIInterface:
                 console=console
             ) as progress:
                 task = progress.add_task("Executing workflow...", total=None)
-                
+
                 workflow = MultiPerspectiveSynthesisWorkflow("cli_multi_perspective", config)
                 result = await workflow.execute(
                     topic=topic,
                     perspectives=perspectives,
                     services=services
                 )
-                
+
                 progress.update(task, completed=True)
-            
+
             # Use transparency controller for result presentation
             execution_id = result.get("execution_id", "cli_multi_perspective")
-            
+
             if format_type == "rich":
                 # Use transparency controller for rich display
                 feedback = self.transparency_controller.present_workflow_result(
@@ -249,9 +246,9 @@ class CLIInterface:
                     )
                 else:
                     formatted_result = self.result_formatter.format_result(result, format_type)
-                
+
                 console.print(formatted_result)
-            
+
             # Export to file if requested
             if output_file:
                 self.transparency_controller.export_result(
@@ -261,22 +258,22 @@ class CLIInterface:
                     include_traceability=include_traceability,
                     output_path=output_file
                 )
-            
+
             return result
-            
+
         except Exception as e:
             console.print(f"[red]Error executing Multi-perspective Synthesis Workflow: {e}[/red]")
             if verbose:
                 console.print_exception()
             return {"success": False, "error": str(e)}
-    
+
     def list_workflows(self) -> None:
         """List available workflows."""
         table = Table(title="Available Workflows")
         table.add_column("Workflow", style="cyan", no_wrap=True)
         table.add_column("Description", style="magenta")
         table.add_column("Command", style="green")
-        
+
         table.add_row(
             "Critical Review",
             "Systematic fact validation through multi-role review",
@@ -287,9 +284,9 @@ class CLIInterface:
             "Comprehensive analysis from multiple expert perspectives",
             "multi-perspective"
         )
-        
+
         console.print(table)
-    
+
     def show_workflow_help(self, workflow_name: str) -> None:
         """Show help for a specific workflow."""
         if workflow_name == "critical-review":
@@ -358,14 +355,14 @@ Create a JSON file with workflow configuration:
             """
         else:
             help_text = "Unknown workflow. Use 'list' to see available workflows."
-        
+
         console.print(Panel(help_text, title=f"Help: {workflow_name}", expand=False))
-    
+
     def _save_result_to_file(self, result: Dict[str, Any], output_file: str, format_type: str) -> None:
         """Save result to file."""
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         if format_type == "json":
             content = self.result_formatter.format_as_json(result)
         elif format_type == "markdown":
@@ -373,7 +370,7 @@ Create a JSON file with workflow configuration:
         else:
             # Default to JSON for file output
             content = json.dumps(result, indent=2, ensure_ascii=False)
-        
+
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(content)
 
@@ -386,7 +383,7 @@ def cli(ctx, verbose):
     """Virtual Role Chat System - Institutional Primitives CLI"""
     ctx.ensure_object(dict)
     ctx.obj['verbose'] = verbose
-    
+
     # Configure logging
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(level=level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -405,7 +402,7 @@ def cli(ctx, verbose):
 def critical_review(ctx, content, content_file, config_file, output_file, format_type, transparency_level, collect_feedback, include_traceability):
     """Execute Critical Review Workflow for systematic fact validation."""
     cli_interface = CLIInterface()
-    
+
     async def run():
         return await cli_interface.execute_critical_review(
             content=content,
@@ -418,7 +415,7 @@ def critical_review(ctx, content, content_file, config_file, output_file, format
             include_traceability=include_traceability,
             verbose=ctx.obj.get('verbose', False)
         )
-    
+
     result = asyncio.run(run())
     if not result.get('success', False):
         sys.exit(1)
@@ -437,12 +434,12 @@ def critical_review(ctx, content, content_file, config_file, output_file, format
 def multi_perspective(ctx, topic, perspectives, config_file, output_file, format_type, transparency_level, collect_feedback, include_traceability):
     """Execute Multi-perspective Synthesis Workflow for comprehensive analysis."""
     cli_interface = CLIInterface()
-    
+
     # Parse perspectives
     perspectives_list = None
     if perspectives:
         perspectives_list = [p.strip() for p in perspectives.split(',')]
-    
+
     async def run():
         return await cli_interface.execute_multi_perspective(
             topic=topic,
@@ -455,7 +452,7 @@ def multi_perspective(ctx, topic, perspectives, config_file, output_file, format
             include_traceability=include_traceability,
             verbose=ctx.obj.get('verbose', False)
         )
-    
+
     result = asyncio.run(run())
     if not result.get('success', False):
         sys.exit(1)
@@ -499,11 +496,11 @@ def list_formats():
     """List supported output formats."""
     cli_interface = CLIInterface()
     formats = cli_interface.transparency_controller.get_supported_formats()
-    
+
     table = Table(title="Supported Output Formats")
     table.add_column("Format", style="cyan")
     table.add_column("Description", style="magenta")
-    
+
     format_descriptions = {
         "json": "JavaScript Object Notation - structured data format",
         "markdown": "Markdown format - human-readable text with formatting",
@@ -513,11 +510,11 @@ def list_formats():
         "yaml": "YAML format - human-readable data serialization",
         "text": "Plain text format - simple text output"
     }
-    
+
     for fmt in formats:
         description = format_descriptions.get(fmt, "Standard format")
         table.add_row(fmt, description)
-    
+
     console.print(table)
 
 

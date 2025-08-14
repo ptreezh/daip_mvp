@@ -1,5 +1,4 @@
-"""
-Institutional Primitives System.
+"""Institutional Primitives System.
 
 This package implements the Institutional Primitives System, which provides
 standardized workflow nodes that encapsulate atomic capabilities and serve
@@ -13,8 +12,9 @@ from .base import (
     ExecutionTrace,
     InstitutionalPrimitive,
     PrimitiveInfo,
-    ValidationResult
+    ValidationResult,
 )
+from .parallel_execution import ParallelExecutionGroup, ParallelExecutionManager
 from .registry import PrimitiveRegistry
 from .workflow_engine import (
     WorkflowDefinition,
@@ -22,11 +22,7 @@ from .workflow_engine import (
     WorkflowEngine,
     WorkflowNode,
     WorkflowResult,
-    WorkflowStatus
-)
-from .parallel_execution import (
-    ParallelExecutionGroup,
-    ParallelExecutionManager
+    WorkflowStatus,
 )
 
 __all__ = [
@@ -37,10 +33,10 @@ __all__ = [
     "InstitutionalPrimitive",
     "PrimitiveInfo",
     "ValidationResult",
-    
+
     # Registry
     "PrimitiveRegistry",
-    
+
     # Workflow Engine
     "WorkflowDefinition",
     "WorkflowEdge",
@@ -48,7 +44,7 @@ __all__ = [
     "WorkflowNode",
     "WorkflowResult",
     "WorkflowStatus",
-    
+
     # Parallel Execution
     "ParallelExecutionGroup",
     "ParallelExecutionManager"

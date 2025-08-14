@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 01:15:00
+"""@Time    : 2025-07-25 01:15:00
 @Author  : DAIP-LIVE Team
 @File    : knowledge_management_api.py
 @Description:
     API endpoints for knowledge management functionality.
 """
 
-from fastapi import APIRouter, HTTPException, Depends
-from typing import Dict, List, Any, Optional
 import logging
+from typing import Any, Dict
+
+from fastapi import APIRouter
 
 logger = logging.getLogger(__name__)
 

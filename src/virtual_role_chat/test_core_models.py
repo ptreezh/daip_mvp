@@ -1,20 +1,23 @@
-"""
-Simple test script to validate the core data models.
+"""Simple test script to validate the core data models.
 """
 
 from datetime import datetime
-import json
 
 from src.virtual_role_chat.models import (
-    ChatRoomConfig, ChatRoom, ChatMessage, ChatSession, 
-    ValidationResult, SubTopic, TransparencyLevel
+    ChatMessage,
+    ChatRoom,
+    ChatRoomConfig,
+    ChatSession,
+    SubTopic,
+    TransparencyLevel,
+    ValidationResult,
 )
 
 
 def test_chat_room_models():
     """Test ChatRoom related models."""
     print("Testing ChatRoom models...")
-    
+
     # Test ChatRoomConfig
     config = ChatRoomConfig(
         name="Test Room",
@@ -26,7 +29,7 @@ def test_chat_room_models():
     )
     print(f"✓ ChatRoomConfig created: {config.name}")
     print(f"  - Config JSON: {config.model_dump_json()}")
-    
+
     # Test ChatRoom
     room = ChatRoom(
         id="room_001",
@@ -36,14 +39,14 @@ def test_chat_room_models():
         status="active"
     )
     print(f"✓ ChatRoom created: {room.id}")
-    
+
     return room
 
 
 def test_chat_session_models():
     """Test ChatSession related models."""
     print("\nTesting ChatSession models...")
-    
+
     # Test ChatMessage
     message = ChatMessage(
         id="msg_001",
@@ -55,7 +58,7 @@ def test_chat_session_models():
         metadata={"confidence": 0.9}
     )
     print(f"✓ ChatMessage created: {message.sender_id}")
-    
+
     # Test ChatSession
     session = ChatSession(
         id="session_001",
@@ -66,14 +69,14 @@ def test_chat_session_models():
         metadata={"transparency_level": "moderate"}
     )
     print(f"✓ ChatSession created: {session.id}")
-    
+
     return session
 
 
 def test_validation_models():
     """Test validation and processing models."""
     print("\nTesting validation models...")
-    
+
     # Test ValidationResult
     validation = ValidationResult(
         is_valid=True,
@@ -82,7 +85,7 @@ def test_validation_models():
         suggested_correction=None
     )
     print(f"✓ ValidationResult created: valid={validation.is_valid}")
-    
+
     # Test SubTopic
     subtopic = SubTopic(
         id="subtopic_001",
@@ -92,26 +95,26 @@ def test_validation_models():
         required_expertise=["philosophy", "cognitive_science"]
     )
     print(f"✓ SubTopic created: {subtopic.content}")
-    
+
     # Test TransparencyLevel
     transparency = TransparencyLevel.DETAILED
     print(f"✓ TransparencyLevel: {transparency}")
-    
+
     return validation, subtopic
 
 
 def main():
     """Run all tests."""
     print("=== Testing Virtual Role Chat System Core Models ===")
-    
+
     try:
         room = test_chat_room_models()
         session = test_chat_session_models()
         validation, subtopic = test_validation_models()
-        
+
         print("\n=== All Tests Passed! ===")
         print("✓ Core data models are working correctly")
-        
+
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         raise

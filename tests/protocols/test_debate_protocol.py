@@ -1,28 +1,27 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 12:00:00
+"""@Time    : 2025-07-25 12:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_debate_protocol.py
 @Description:
     Unit tests for the DebateProtocol orchestrator.
 """
 import asyncio
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, call
 
 from src.kernel.core import Kernel
-from src.protocols.debate_protocol import DebateProtocol
 from src.models import (
     DebateConfig,
-    DebateTurn,
+    DebateEndEvent,
     DebateResult,
     DebateStartEvent,
+    DebateTurn,
+    ErrorEvent,
     NewTurnEvent,
     TechLogEvent,
-    DebateEndEvent,
-    ErrorEvent,
     UserInterventionCommand,
 )
+from src.protocols.debate_protocol import DebateProtocol
 
 # Use pytest_asyncio for all tests in this module
 pytestmark = pytest.mark.asyncio
@@ -71,8 +70,7 @@ async def get_all_events(queue: asyncio.Queue):
 
 
 async def test_run_successful_debate(mock_kernel, event_queue, debate_config):
-    """
-    Tests the full, successful execution path of the debate protocol.
+    """Tests the full, successful execution path of the debate protocol.
     """
     # Arrange
     mock_kernel.synthesis_engine.summarize_context.side_effect = ["Context for RoleA", "Context for RoleB"]
@@ -101,7 +99,7 @@ async def test_run_successful_debate(mock_kernel, event_queue, debate_config):
         assert len(messages) == 2
         assert messages[0]["role"] == "system"
         assert messages[1]["role"] == "user"
-    
+
     mock_kernel.tool_executor.execute_tool.assert_called_once_with(
         tool_name="test_consensus",
         history=protocol.history
@@ -126,7 +124,7 @@ async def test_run_successful_debate(mock_kernel, event_queue, debate_config):
     assert isinstance(events[6], TechLogEvent) # "Moving to consensus."
     assert isinstance(events[7], TechLogEvent) # "Synthesizing final result."
     assert isinstance(events[8], DebateEndEvent)
-    
+
     final_result = events[8].result
     assert isinstance(final_result, DebateResult)
     assert final_result.consensus_outcome == "Consensus reached"
@@ -135,8 +133,7 @@ async def test_run_successful_debate(mock_kernel, event_queue, debate_config):
 
 
 async def test_run_handles_interaction_failure(mock_kernel, event_queue, debate_config):
-    """
-    Tests that an ErrorEvent is emitted if the LLM interface fails.
+    """Tests that an ErrorEvent is emitted if the LLM interface fails.
     """
     # Arrange
     mock_kernel.synthesis_engine.summarize_context.return_value = "Some context"
@@ -154,8 +151,7 @@ async def test_run_handles_interaction_failure(mock_kernel, event_queue, debate_
 
 
 async def test_run_handles_consensus_failure(mock_kernel, event_queue, debate_config):
-    """
-    Tests that the debate continues with simple consensus when consensus tool fails.
+    """Tests that the debate continues with simple consensus when consensus tool fails.
     """
     # Arrange
     mock_kernel.synthesis_engine.summarize_context.return_value = "Context"
@@ -183,8 +179,7 @@ async def test_run_handles_consensus_failure(mock_kernel, event_queue, debate_co
 
 
 async def test_handle_user_intervention(mock_kernel, event_queue):
-    """
-    Tests that a user intervention command is correctly processed.
+    """Tests that a user intervention command is correctly processed.
     """
     # Arrange
     protocol = DebateProtocol(kernel=mock_kernel, event_queue=event_queue)

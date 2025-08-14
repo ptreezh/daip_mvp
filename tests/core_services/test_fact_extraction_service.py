@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 from unittest.mock import AsyncMock, MagicMock, call
@@ -78,8 +77,7 @@ async def test_extract_retries_on_invalid_response_type_then_succeeds(
     mock_memory_service: MagicMock,
     caplog,
 ):
-    """
-    Verify that the service retries when the LLM returns a valid JSON
+    """Verify that the service retries when the LLM returns a valid JSON
     but not a list, then succeeds on the second attempt.
     """
     # Arrange

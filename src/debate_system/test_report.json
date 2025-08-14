@@ -1,0 +1,205 @@
+{
+  "summary": {
+    "total_tests": 12,
+    "passed_tests": 11,
+    "failed_tests": 1,
+    "success_rate": 91.66666666666666,
+    "total_duration": 4.320583,
+    "start_time": "2025-07-31T13:16:38.683889",
+    "end_time": "2025-07-31T13:16:43.004472"
+  },
+  "system_info": {
+    "python_version": "3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)]",
+    "platform": "win32",
+    "cpu_count": 32,
+    "memory_total": 68413153280,
+    "disk_usage": 484949618688,
+    "timestamp": "2025-07-31T13:16:38.683889"
+  },
+  "test_results": [
+    {
+      "test_name": "代码质量审查",
+      "passed": true,
+      "duration": 0.028735,
+      "error_message": "",
+      "details": {
+        "total_files": 13,
+        "total_lines": 5685,
+        "syntax_errors": 0
+      },
+      "start_time": "2025-07-31T13:16:38.683889",
+      "end_time": "2025-07-31T13:16:38.712624"
+    },
+    {
+      "test_name": "模块导入测试",
+      "passed": true,
+      "duration": 1.264761,
+      "error_message": "",
+      "details": {
+        "debate_flow_definition": "success",
+        "participant_management": "success",
+        "multi_role_dialogue_engine": "success",
+        "debate_state_manager": "success",
+        "websocket_manager": "success",
+        "web_interface": "success"
+      },
+      "start_time": "2025-07-31T13:16:38.712624",
+      "end_time": "2025-07-31T13:16:39.977385"
+    },
+    {
+      "test_name": "组件集成测试",
+      "passed": true,
+      "duration": 0.0,
+      "error_message": "",
+      "details": {
+        "dialogue_engine_created": true,
+        "state_manager_created": true,
+        "websocket_manager_created": true
+      },
+      "start_time": "2025-07-31T13:16:39.978395",
+      "end_time": "2025-07-31T13:16:39.978395"
+    },
+    {
+      "test_name": "Web界面功能测试",
+      "passed": true,
+      "duration": 0.228429,
+      "error_message": "",
+      "details": {
+        "initial_mode_correct": true,
+        "ui_elements_exist": true,
+        "mode_switching": true
+      },
+      "start_time": "2025-07-31T13:16:39.978395",
+      "end_time": "2025-07-31T13:16:40.206824"
+    },
+    {
+      "test_name": "WebSocket通信测试",
+      "passed": true,
+      "duration": 0.0,
+      "error_message": "",
+      "details": {
+        "message_creation": true,
+        "message_serialization": true,
+        "message_deserialization": true,
+        "manager_creation": true,
+        "connection_status": true
+      },
+      "start_time": "2025-07-31T13:16:40.206824",
+      "end_time": "2025-07-31T13:16:40.206824"
+    },
+    {
+      "test_name": "对话引擎测试",
+      "passed": true,
+      "duration": 0.0,
+      "error_message": "",
+      "details": {
+        "engine_creation": true,
+        "convergence_detection": true,
+        "convergence_keys": true
+      },
+      "start_time": "2025-07-31T13:16:40.207933",
+      "end_time": "2025-07-31T13:16:40.207933"
+    },
+    {
+      "test_name": "状态管理测试",
+      "passed": true,
+      "duration": 0.0,
+      "error_message": "",
+      "details": {
+        "session_creation": true,
+        "session_retrieval": true,
+        "participant_addition": true,
+        "snapshot_creation": true,
+        "metrics_retrieval": true
+      },
+      "start_time": "2025-07-31T13:16:40.207933",
+      "end_time": "2025-07-31T13:16:40.207933"
+    },
+    {
+      "test_name": "性能指标测试",
+      "passed": true,
+      "duration": 0.0,
+      "error_message": "",
+      "details": {
+        "startup_time_seconds": 0.0,
+        "response_time_seconds": 0.0,
+        "memory_usage_mb": 108.421875,
+        "startup_time_ok": true,
+        "response_time_ok": true,
+        "memory_usage_ok": true
+      },
+      "start_time": "2025-07-31T13:16:40.207933",
+      "end_time": "2025-07-31T13:16:40.207933"
+    },
+    {
+      "test_name": "内存使用测试",
+      "passed": false,
+      "duration": 2.041734,
+      "error_message": "",
+      "details": {
+        "initial_memory_mb": 108.421875,
+        "peak_memory_mb": 108.44140625,
+        "final_memory_mb": 108.44140625,
+        "memory_increase_mb": 0.01953125,
+        "memory_after_cleanup_mb": 0.01953125,
+        "memory_leak_detected": true
+      },
+      "start_time": "2025-07-31T13:16:40.207933",
+      "end_time": "2025-07-31T13:16:42.249667"
+    },
+    {
+      "test_name": "错误处理测试",
+      "passed": true,
+      "duration": 0.0,
+      "error_message": "",
+      "details": {
+        "non_existent_session_handled": true,
+        "non_existent_delete_handled": true,
+        "component_failure_handled": true
+      },
+      "start_time": "2025-07-31T13:16:42.249667",
+      "end_time": "2025-07-31T13:16:42.249667"
+    },
+    {
+      "test_name": "并发操作测试",
+      "passed": true,
+      "duration": 0.0,
+      "error_message": "",
+      "details": {
+        "total_tasks": 5,
+        "successful_creations": 5,
+        "exceptions_count": 0,
+        "all_successful": true
+      },
+      "start_time": "2025-07-31T13:16:42.250565",
+      "end_time": "2025-07-31T13:16:42.250565"
+    },
+    {
+      "test_name": "端到端工作流测试",
+      "passed": true,
+      "duration": 0.751791,
+      "error_message": "",
+      "details": {
+        "session_created": true,
+        "dialogue_started": true,
+        "dialogue_continued": true,
+        "summary_generated": true,
+        "dialogue_ended": true
+      },
+      "start_time": "2025-07-31T13:16:42.251681",
+      "end_time": "2025-07-31T13:16:43.003472"
+    }
+  ],
+  "quality_gates": {
+    "all_tests_passed": false,
+    "success_rate_above_90": true,
+    "performance_requirements_met": true,
+    "startup_time_ok": true,
+    "response_time_ok": true,
+    "memory_usage_ok": true,
+    "memory_leak_free": false,
+    "concurrent_operations_stable": true,
+    "end_to_end_workflow_complete": true,
+    "overall_quality_gate_passed": false
+  }
+}

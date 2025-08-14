@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock
 
+
 # Dummy class for testing purposes
 class WikiService:
     def __init__(self, llm_interface, knowledge_db):
@@ -7,8 +8,7 @@ class WikiService:
         self.db = knowledge_db
 
 def test_initialization():
-    """
-    Test correct instantiation of the WikiService.
+    """Test correct instantiation of the WikiService.
     """
     mock_llm = MagicMock()
     mock_db = MagicMock()
