@@ -168,7 +168,7 @@ def test_service_integration():
         # Test DebateConfig creation
         config = DebateConfig(
             topic="Test topic",
-            roles=["Test Role 1", "Test Role 2"],
+            roles=["AI Ethics", "Business Ethics"],
             rounds=1,
             consensus_strategy="simple_majority_vote"
         )

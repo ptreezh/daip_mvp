@@ -11,7 +11,7 @@
 import asyncio
 import logging
 import uuid
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
@@ -90,8 +90,8 @@ class DebateSession:
     conflicts: list[dict[str, Any]]
     metrics: dict[str, Any]
     start_time: datetime
+    max_rounds: int
     end_time: Optional[datetime] = None
-
 
 class MultiRoleDebateSystem:
     """多角色辩论系统"""
@@ -111,13 +111,28 @@ class MultiRoleDebateSystem:
         self.debate_history: list[dict[str, Any]] = []
         
         logger.info("MultiRoleDebateSystem initialized")
+
+    async def run_full_debate(self, debate_id: str) -> dict[str, Any]:
+        """运行完整的辩论流程"""
+        if debate_id not in self.active_debates:
+            raise ValueError(f"Debate not found: {debate_id}")
+
+        debate_session = self.active_debates[debate_id]
+        
+        for i in range(debate_session.max_rounds):
+            round_topic = f"第 {i+1} 轮辩论"
+            await self.conduct_debate_round(debate_id, round_topic)
+
+        return await self.conclude_debate(debate_id)
+
     
     async def start_debate(
         self,
         debate_topic: str,
         participating_roles: list[str],
         debate_format: str = "structured",
-        time_limit_minutes: int = 30
+        time_limit_minutes: int = 30,
+        max_rounds: int = 5
     ) -> dict[str, Any]:
         """启动多角色辩论
         
@@ -126,6 +141,7 @@ class MultiRoleDebateSystem:
             participating_roles: 参与角色ID列表
             debate_format: 辩论格式
             time_limit_minutes: 时间限制（分钟）
+            max_rounds: 最大辩论轮数
             
         Returns:
             辩论会话信息
@@ -186,7 +202,8 @@ class MultiRoleDebateSystem:
                     "total_arguments": 0,
                     "unique_perspectives": 0
                 },
-                start_time=datetime.now()
+                start_time=datetime.now(),
+                max_rounds=max_rounds
             )
             
             # 计算认知多样性分数
@@ -319,6 +336,8 @@ class MultiRoleDebateSystem:
         debate_session = self.active_debates[debate_id]
         round_arguments = []
         
+        logger.info(f"--- Starting Debate Round for '{debate_id}' on topic: {round_topic} ---")
+
         # 为每个角色生成论证
         for role_id in debate_session.participating_roles:
             try:
@@ -355,8 +374,8 @@ class MultiRoleDebateSystem:
             "cognitive_diversity_displayed": self._measure_displayed_diversity(round_arguments)
         }
         
-        logger.info(f"Debate round completed: {len(round_arguments)} arguments, "
-                   f"{len(conflicts)} conflicts, {len(consensus_points)} consensus points")
+        logger.info(f"--- Debate Round Completed: {len(round_arguments)} arguments, "
+                   f"{len(conflicts)} conflicts, {len(consensus_points)} consensus points ---")
         
         return round_result
     
@@ -378,98 +397,115 @@ class MultiRoleDebateSystem:
         """
         try:
             # 获取角色数据和认知档案
-            role_data = await self.role_manager.get_role(role_id)
+            role = self.role_manager.get_role(role_id)
+            if not role:
+                raise ValueError(f"Role {role_id} not found")
+            role_data = role.to_dict()
             cognitive_profile = debate_session.cognitive_profiles[role_id]
             
+            logger.info(f"Generating argument for role: {role_data.get('name', role_id)}...")
+
             # 构建角色特定的辩论提示
             argument_prompt = f"""
-            你是 {role_data.get('name', 'Unknown')}，具有以下认知特征：
-            - 思维风格: {cognitive_profile.thinking_style}
-            - 价值体系: {', '.join(cognitive_profile.value_system)}
-            - 专业领域: {', '.join(cognitive_profile.expertise_areas)}
-            - 推理方式: {cognitive_profile.reasoning_approach}
+            You are {role_data.get('name', 'Unknown')}, a professional AI agent. Your task is to provide a structured argument for a debate.
+            Your response MUST be a single, valid JSON object. Do not include any text, conversation, or explanation before or after the JSON object.
             
-            当前辩论主题: {debate_session.topic}
-            本轮讨论焦点: {topic}
+            The debate topic is: "{debate_session.topic}"
+            This round's focus is: "{topic}"
             
-            已有论证观点:
+            Your cognitive profile:
+            - Thinking Style: {cognitive_profile.thinking_style}
+            - Value System: {', '.join(cognitive_profile.value_system)}
+            - Expertise: {', '.join(cognitive_profile.expertise_areas)}
+
+            Recent arguments for context:
             {self._format_existing_arguments(debate_session.arguments[-3:])}
-            
-            请基于你的认知特征和专业背景，对本轮话题提出你的观点。
-            要求：
-            1. 体现你独特的思维风格和价值观
-            2. 运用你的专业知识
-            3. 可以支持、反对或质疑已有观点
-            4. 提供清晰的推理链条
-            5. 给出你的置信度评分 (0.0-1.0)
-            
-            请以JSON格式返回，包含：content, argument_type, confidence_score, reasoning_chain, evidence_sources
+
+            Please generate your argument in the following JSON structure:
+            {{
+                "content": "Your detailed argument, based on your profile.",
+                "argument_type": "support | oppose | question | clarification | synthesis",
+                "confidence_score": <a float between 0.0 and 1.0>,
+                "reasoning_chain": ["Step-by-step reasoning for your argument."],
+                "evidence_sources": ["List of sources, if any."]
+            }}
             """
             
             # 调用真实LLM生成论证
             record = await self.llm_integrator.call_llm(
-                role_id=role_id,
-                user_input=argument_prompt,
-                context={
+                prompt=argument_prompt,
+                metadata={
                     "current_task": "debate_argument_generation",
                     "debate_context": {
                         "topic": debate_session.topic,
                         "phase": debate_session.phase.value,
-                        "previous_arguments": debate_session.arguments[-5:],  # 最近5个论证
-                        "cognitive_profile": debate_session.cognitive_profiles.get(role_id, {})
+                        "previous_arguments": [arg.to_dict() for arg in debate_session.arguments[-5:]],  # 最近5个论证
+                        "cognitive_profile": asdict(debate_session.cognitive_profiles.get(role_id))
                     },
-                    "metadata": {
-                        "debate_id": debate_session.debate_id,
-                        "role_id": role_id,
-                        "argument_generation": True
-                    }
+                    "debate_id": debate_session.debate_id,
+                    "role_id": role_id,
+                    "argument_generation": True
                 }
             )
             
             # 适配原有的record格式
             if record.success:
+                import json
+                
+                response_text = record.response
+                
+                # --- Enhanced Preprocessing Logic ---
                 try:
-                    import json
-                    argument_data = json.loads(record.response)
+                    # Find the start and end of the JSON object
+                    start_index = response_text.find('{')
+                    end_index = response_text.rfind('}') + 1
                     
-                    # 确定论证类型
-                    arg_type_str = argument_data.get("argument_type", "support").lower()
-                    if arg_type_str in ["support", "agree"]:
-                        arg_type = ArgumentType.SUPPORT
-                    elif arg_type_str in ["oppose", "disagree"]:
-                        arg_type = ArgumentType.OPPOSE
-                    elif arg_type_str in ["question", "query"]:
-                        arg_type = ArgumentType.QUESTION
-                    elif arg_type_str in ["clarification", "clarify"]:
-                        arg_type = ArgumentType.CLARIFICATION
+                    if start_index != -1 and end_index != 0:
+                        json_str = response_text[start_index:end_index]
+                        argument_data = json.loads(json_str)
+                        
+                        # 确定论证类型
+                        arg_type_str = argument_data.get("argument_type", "support").lower()
+                        if arg_type_str in ["support", "agree"]:
+                            arg_type = ArgumentType.SUPPORT
+                        elif arg_type_str in ["oppose", "disagree"]:
+                            arg_type = ArgumentType.OPPOSE
+                        elif arg_type_str in ["question", "query"]:
+                            arg_type = ArgumentType.QUESTION
+                        elif arg_type_str in ["clarification", "clarify"]:
+                            arg_type = ArgumentType.CLARIFICATION
+                        else:
+                            arg_type = ArgumentType.SYNTHESIS
+                        
+                        argument = DebateArgument(
+                            argument_id=f"arg_{role_id}_{int(datetime.now().timestamp())}",
+                            role_id=role_id,
+                            role_name=role_data.get('name', 'Unknown'),
+                            content=argument_data.get("content", response_text),
+                            argument_type=arg_type,
+                            confidence_score=float(argument_data.get("confidence_score", 0.7)),
+                            reasoning_chain=argument_data.get("reasoning_chain", []),
+                            evidence_sources=argument_data.get("evidence_sources", []),
+                            timestamp=datetime.now()
+                        )
+                        
+                        logger.info(f"Successfully generated argument for {role_data.get('name', role_id)}. Type: {argument.argument_type.value}, Confidence: {argument.confidence_score}")
+                        return argument
                     else:
-                        arg_type = ArgumentType.SYNTHESIS
-                    
-                    argument = DebateArgument(
-                        argument_id=f"arg_{role_id}_{int(datetime.now().timestamp())}",
-                        role_id=role_id,
-                        role_name=role_data.get('name', 'Unknown'),
-                        content=argument_data.get("content", record.response),
-                        argument_type=arg_type,
-                        confidence_score=float(argument_data.get("confidence_score", 0.7)),
-                        reasoning_chain=argument_data.get("reasoning_chain", []),
-                        evidence_sources=argument_data.get("evidence_sources", []),
-                        timestamp=datetime.now()
-                    )
-                    
-                    return argument
-                    
-                except (json.JSONDecodeError, ValueError, KeyError) as e:
-                    logger.warning(f"Failed to parse argument JSON for {role_id}: {e}")
+                        # Raise an error to be caught by the outer handler
+                        raise json.JSONDecodeError("Could not find JSON object in response", response_text, 0)
+
+                except json.JSONDecodeError as e:
+                    logger.warning(f"Failed to parse JSON for {role_id}. Error: {e}.\n--- LLM Raw Response ---\n{response_text}\n------------------------")
                     # 创建简单论证作为回退
                     return DebateArgument(
                         argument_id=f"arg_{role_id}_{int(datetime.now().timestamp())}",
                         role_id=role_id,
                         role_name=role_data.get('name', 'Unknown'),
-                        content=record.response,
+                        content=response_text,
                         argument_type=ArgumentType.SUPPORT,
-                        confidence_score=0.7,
-                        reasoning_chain=[],
+                        confidence_score=0.5,
+                        reasoning_chain=["Fallback due to parsing error."],
                         evidence_sources=[],
                         timestamp=datetime.now()
                     )
@@ -497,8 +533,10 @@ class MultiRoleDebateSystem:
         for i, arg1 in enumerate(arguments):
             for j, arg2 in enumerate(arguments[i+1:], i+1):
                 # 简单的冲突检测逻辑
-                if (arg1.argument_type == ArgumentType.SUPPORT and 
-                    arg2.argument_type == ArgumentType.OPPOSE):
+                if (
+                    arg1.argument_type == ArgumentType.SUPPORT and 
+                    arg2.argument_type == ArgumentType.OPPOSE
+                ):
                     conflicts.append({
                         "type": "direct_opposition",
                         "arguments": [arg1.argument_id, arg2.argument_id],
@@ -562,7 +600,8 @@ class MultiRoleDebateSystem:
             "consensus_points": debate_session.consensus_points,
             "final_metrics": debate_session.metrics,
             "cognitive_diversity_score": debate_session.metrics["cognitive_diversity_score"],
-            "consensus_emergence_rate": debate_session.metrics["consensus_emergence_rate"]
+            "consensus_emergence_rate": debate_session.metrics["consensus_emergence_rate"],
+            "transcript": [arg.to_dict() for arg in debate_session.arguments]
         }
         
         # 移动到历史记录

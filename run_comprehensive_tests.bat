@@ -54,7 +54,7 @@ echo Running comprehensive automated tests...
 echo This may take several minutes...
 echo.
 
-python test_runner.py
+python tests\ddd\test_runner.py
 
 if errorlevel 1 (
     echo.

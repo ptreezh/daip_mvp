@@ -47,7 +47,7 @@ echo "Running comprehensive automated tests..."
 echo "This may take several minutes..."
 echo ""
 
-python3 test_runner.py
+python3 tests/ddd/test_runner.py
 
 if [ $? -eq 0 ]; then
     echo ""

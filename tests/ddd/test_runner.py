@@ -28,7 +28,7 @@ class TestRunner:
         
     def run_all_tests(self) -> dict[str, Any]:
         """Run all DDD tests and return comprehensive report"""
-        print("🚀 Starting DDD Test Suite for Personal Intelligence Hub")
+        print("Starting DDD Test Suite for Personal Intelligence Hub")
         print("=" * 60)
         
         self.start_time = time.time()
@@ -114,7 +114,7 @@ class TestRunner:
                 }
                 
         except Exception as e:
-            print(f"❌ Error running {module_name}: {e}")
+            print(f"Error running {module_name}: {e}")
             return {
                 "total": 0,
                 "passed": 0,
@@ -140,7 +140,7 @@ class TestRunner:
         print("📊 DDD TEST EXECUTION REPORT")
         print("=" * 60)
         
-        print(f"\n⏱️  Execution Time: {results['execution_time']:.2f} seconds")
+        print(f"\nExecution Time: {results['execution_time']:.2f} seconds")
         print(f"📅 Run Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
         print("\n🎯 OVERALL RESULTS:")
