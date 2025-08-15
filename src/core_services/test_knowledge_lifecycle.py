@@ -18,8 +18,13 @@ from .wiki_service import WikiService
 
 class TestKnowledgeLifecycle:
     """Comprehensive tests for knowledge retrieval and evolution lifecycle."""
+<<<<<<< HEAD
 
     @pytest.fixture
+=======
+    
+    @pytest.fixture()
+>>>>>>> feature/core-services-refactor
     async def knowledge_ecosystem(self):
         """Set up a complete knowledge management ecosystem for testing."""
         # Initialize core components
@@ -50,8 +55,13 @@ class TestKnowledgeLifecycle:
             "retrieval_service": knowledge_service.retrieval_service,
             "evolution_manager": knowledge_service.evolution_manager
         }
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_cross_session_knowledge_sharing(self, knowledge_ecosystem):
         """Test cross-session knowledge sharing (Requirement 6.3)."""
         services = knowledge_ecosystem
@@ -97,8 +107,13 @@ class TestKnowledgeLifecycle:
             if "Python" in fact["content"]
         ]
         assert len(python_facts) > 0
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_semantic_search_capabilities(self, knowledge_ecosystem):
         """Test semantic search for validated information (Requirement 6.4)."""
         services = knowledge_ecosystem
@@ -147,8 +162,13 @@ class TestKnowledgeLifecycle:
             assert hasattr(result, 'content')
             assert hasattr(result, 'confidence')
             assert hasattr(result, 'relevance_score')
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_knowledge_quality_assessment(self, knowledge_ecosystem):
         """Test knowledge quality assessment metrics (Requirement 6.5)."""
         services = knowledge_ecosystem
@@ -188,8 +208,13 @@ class TestKnowledgeLifecycle:
         for metric in expected_metrics:
             if metric in quality_assessment.quality_metrics:
                 assert 0.0 <= quality_assessment.quality_metrics[metric] <= 1.0
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_knowledge_evolution_lifecycle(self, knowledge_ecosystem):
         """Test knowledge evolution and lifecycle management (Requirements 6.6, 6.7)."""
         services = knowledge_ecosystem
@@ -222,8 +247,13 @@ class TestKnowledgeLifecycle:
         assert evolved_node is not None
         assert evolved_node.content == "Updated information about modern technology"
         assert "evolution_trigger" in evolved_node.metadata
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_comprehensive_integration(self, knowledge_ecosystem):
         """Test comprehensive knowledge management integration."""
         services = knowledge_ecosystem

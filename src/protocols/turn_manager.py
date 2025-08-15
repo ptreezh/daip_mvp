@@ -4,7 +4,6 @@
 @Description:
     Manages the state of a debate's turns, including round and role tracking.
 """
-from typing import List, Tuple
 
 from src.models import DebateConfig
 
@@ -23,7 +22,7 @@ class TurnManager:
                                    containing roles and number of rounds.
 
         """
-        self._roles: List[str] = config.roles
+        self._roles: list[str] = config.roles
         self._total_rounds: int = config.rounds
         self._current_round: int = 1
         self._current_role_index: int = 0
@@ -37,7 +36,11 @@ class TurnManager:
         """
         return self._current_round > self._total_rounds
 
+<<<<<<< HEAD
     def get_current_turn(self) -> Tuple[int, str]:
+=======
+    def get_current_turn(self) -> tuple[int, str]:
+>>>>>>> feature/core-services-refactor
         """Gets the current turn's round number and the ID of the role that should speak.
 
         Returns:

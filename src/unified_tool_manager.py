@@ -1,5 +1,9 @@
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -8,8 +12,12 @@ class UnifiedToolManager:
     This class is responsible for registering, managing, and executing various tools
     based on a provided configuration.
     """
+<<<<<<< HEAD
 
     def __init__(self, config: Dict[str, Any]):
+=======
+    def __init__(self, config: dict[str, Any]):
+>>>>>>> feature/core-services-refactor
         self.config = config
         self.available_tools = {}
         self._register_tools()

@@ -10,7 +10,11 @@ import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .real_llm_integrator import LLMCallRecord
 
@@ -34,10 +38,15 @@ class VerificationResult:
     status: VerificationStatus
     confidence_score: float
     verification_timestamp: datetime
-    details: Dict[str, Any]
+    details: dict[str, Any]
     signature: str
+<<<<<<< HEAD
 
     def to_dict(self) -> Dict[str, Any]:
+=======
+    
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         data = asdict(self)
         data['status'] = self.status.value
         data['verification_timestamp'] = self.verification_timestamp.isoformat()
@@ -52,10 +61,15 @@ class AuditEntry:
     call_id: str
     action: str
     timestamp: datetime
-    details: Dict[str, Any]
+    details: dict[str, Any]
     hash_chain: str
+<<<<<<< HEAD
 
     def to_dict(self) -> Dict[str, Any]:
+=======
+    
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         data = asdict(self)
         data['timestamp'] = self.timestamp.isoformat()
         return data
@@ -69,10 +83,17 @@ class CallVerificationSystem:
 
     def __init__(self):
         """初始化验证系统"""
+<<<<<<< HEAD
         self.audit_log: List[AuditEntry] = []
         self.verification_cache: Dict[str, VerificationResult] = {}
         self.hash_chain: List[str] = []
 
+=======
+        self.audit_log: list[AuditEntry] = []
+        self.verification_cache: dict[str, VerificationResult] = {}
+        self.hash_chain: list[str] = []
+        
+>>>>>>> feature/core-services-refactor
         logger.info("CallVerificationSystem initialized")
 
     def generate_call_signature(self, record: LLMCallRecord) -> str:
@@ -248,7 +269,11 @@ class CallVerificationSystem:
         self,
         original_record: LLMCallRecord,
         reproduction_record: LLMCallRecord
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """验证调用可重现性
         
         Args:
@@ -323,8 +348,13 @@ class CallVerificationSystem:
         union = words1.union(words2)
 
         return len(intersection) / len(union) if union else 0.0
+<<<<<<< HEAD
 
     def generate_audit_trail(self, call_id: str) -> Dict[str, Any]:
+=======
+    
+    def generate_audit_trail(self, call_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成审计轨迹
         
         Args:
@@ -347,8 +377,13 @@ class CallVerificationSystem:
             "last_entry": related_entries[-1].timestamp.isoformat() if related_entries else None,
             "hash_chain_verification": self._verify_hash_chain(related_entries)
         }
+<<<<<<< HEAD
 
     def _verify_hash_chain(self, entries: List[AuditEntry]) -> Dict[str, Any]:
+=======
+    
+    def _verify_hash_chain(self, entries: list[AuditEntry]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """验证哈希链"""
         if not entries:
             return {"valid": True, "reason": "no entries"}
@@ -365,8 +400,13 @@ class CallVerificationSystem:
                 }
 
         return {"valid": True, "reason": "all hashes verified"}
+<<<<<<< HEAD
 
     def _add_audit_entry(self, call_id: str, action: str, details: Dict[str, Any]):
+=======
+    
+    def _add_audit_entry(self, call_id: str, action: str, details: dict[str, Any]):
+>>>>>>> feature/core-services-refactor
         """添加审计条目"""
         entry_id = f"{call_id}_{action}_{int(datetime.now().timestamp())}"
 
@@ -403,7 +443,7 @@ class CallVerificationSystem:
         entry_id: str,
         call_id: str,
         action: str,
-        details: Dict[str, Any],
+        details: dict[str, Any],
         previous_entry: Optional[AuditEntry]
     ) -> str:
         """为新条目计算哈希"""
@@ -417,8 +457,13 @@ class CallVerificationSystem:
 
         content_str = json.dumps(hash_content, sort_keys=True)
         return hashlib.sha256(content_str.encode()).hexdigest()
+<<<<<<< HEAD
 
     def get_verification_summary(self) -> Dict[str, Any]:
+=======
+    
+    def get_verification_summary(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取验证摘要"""
         total_verifications = len(self.verification_cache)
 
@@ -449,8 +494,13 @@ class CallVerificationSystem:
                 "hash_chain_length": len(self.hash_chain)
             }
         }
+<<<<<<< HEAD
 
     def export_verification_report(self, call_id: Optional[str] = None) -> Dict[str, Any]:
+=======
+    
+    def export_verification_report(self, call_id: Optional[str] = None) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """导出验证报告
         
         Args:
@@ -482,8 +532,13 @@ class CallVerificationSystem:
                 "hash_chain": self.hash_chain,
                 "export_timestamp": datetime.now().isoformat()
             }
+<<<<<<< HEAD
 
     def validate_system_integrity(self) -> Dict[str, Any]:
+=======
+    
+    def validate_system_integrity(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """验证系统完整性"""
         integrity_checks = {
             "hash_chain_valid": True,

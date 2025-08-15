@@ -9,7 +9,11 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Type
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -49,12 +53,12 @@ class ServiceAdapterMetadata(BaseModel):
     name: str
     version: str
     service_type: ServiceType
-    capabilities: List[AdapterCapability]
+    capabilities: list[AdapterCapability]
     description: str
     author: str
     created_at: datetime = Field(default_factory=datetime.now)
-    dependencies: List[str] = Field(default_factory=list)
-    configuration_schema: Dict[str, Any] = Field(default_factory=dict)
+    dependencies: list[str] = Field(default_factory=list)
+    configuration_schema: dict[str, Any] = Field(default_factory=dict)
 
 
 class AdapterConfiguration(BaseModel):
@@ -62,7 +66,7 @@ class AdapterConfiguration(BaseModel):
 
     adapter_name: str
     instance_id: str
-    config: Dict[str, Any] = Field(default_factory=dict)
+    config: dict[str, Any] = Field(default_factory=dict)
     enabled: bool = True
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -73,8 +77,8 @@ class ServiceRequest(BaseModel):
 
     request_id: str
     operation: str
-    parameters: Dict[str, Any] = Field(default_factory=dict)
-    context: Dict[str, Any] = Field(default_factory=dict)
+    parameters: dict[str, Any] = Field(default_factory=dict)
+    context: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
@@ -85,7 +89,7 @@ class ServiceResponse(BaseModel):
     success: bool
     data: Any = None
     error: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.now)
     duration_ms: Optional[float] = None
 
@@ -157,8 +161,13 @@ class ServiceAdapter(ABC):
         """Check if this adapter supports a specific capability."""
         metadata = self.get_metadata()
         return capability in metadata.capabilities
+<<<<<<< HEAD
 
     def validate_configuration(self, config: Dict[str, Any]) -> List[str]:
+=======
+    
+    def validate_configuration(self, config: dict[str, Any]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Validate adapter configuration.
         
         Args:
@@ -182,8 +191,13 @@ class ServiceAdapter(ABC):
 
 class FactSourceAdapter(ServiceAdapter):
     """Adapter for fact source services."""
+<<<<<<< HEAD
 
     async def query_facts(self, query: str, filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+=======
+    
+    async def query_facts(self, query: str, filters: dict[str, Any] = None) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Query facts from the source."""
         request = ServiceRequest(
             request_id=f"fact_query_{datetime.now().timestamp()}",
@@ -197,8 +211,13 @@ class FactSourceAdapter(ServiceAdapter):
         else:
             logger.error(f"Fact query failed: {response.error}")
             return []
+<<<<<<< HEAD
 
     async def validate_fact(self, fact: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+=======
+    
+    async def validate_fact(self, fact: str, context: dict[str, Any] = None) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Validate a fact using the source."""
         request = ServiceRequest(
             request_id=f"fact_validation_{datetime.now().timestamp()}",
@@ -216,8 +235,13 @@ class FactSourceAdapter(ServiceAdapter):
 
 class ValidationServiceAdapter(ServiceAdapter):
     """Adapter for validation services."""
+<<<<<<< HEAD
 
     async def validate_content(self, content: str, validation_type: str, criteria: Dict[str, Any] = None) -> Dict[str, Any]:
+=======
+    
+    async def validate_content(self, content: str, validation_type: str, criteria: dict[str, Any] = None) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Validate content using the service."""
         request = ServiceRequest(
             request_id=f"content_validation_{datetime.now().timestamp()}",
@@ -239,8 +263,13 @@ class ValidationServiceAdapter(ServiceAdapter):
 
 class SynthesisEngineAdapter(ServiceAdapter):
     """Adapter for synthesis engine services."""
+<<<<<<< HEAD
 
     async def synthesize_content(self, inputs: List[str], synthesis_strategy: str, parameters: Dict[str, Any] = None) -> Dict[str, Any]:
+=======
+    
+    async def synthesize_content(self, inputs: list[str], synthesis_strategy: str, parameters: dict[str, Any] = None) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Synthesize content from multiple inputs."""
         request = ServiceRequest(
             request_id=f"synthesis_{datetime.now().timestamp()}",
@@ -269,6 +298,7 @@ class ServiceAdapterRegistry:
 
     def __init__(self):
         """Initialize the service adapter registry."""
+<<<<<<< HEAD
         self.adapter_classes: Dict[str, Type[ServiceAdapter]] = {}
         self.adapter_instances: Dict[str, ServiceAdapter] = {}
         self.configurations: Dict[str, AdapterConfiguration] = {}
@@ -276,6 +306,15 @@ class ServiceAdapterRegistry:
         logger.info("ServiceAdapterRegistry initialized")
 
     def register_adapter_class(self, adapter_name: str, adapter_class: Type[ServiceAdapter]) -> bool:
+=======
+        self.adapter_classes: dict[str, type[ServiceAdapter]] = {}
+        self.adapter_instances: dict[str, ServiceAdapter] = {}
+        self.configurations: dict[str, AdapterConfiguration] = {}
+        
+        logger.info("ServiceAdapterRegistry initialized")
+    
+    def register_adapter_class(self, adapter_name: str, adapter_class: type[ServiceAdapter]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Register a service adapter class.
         
         Args:
@@ -292,8 +331,13 @@ class ServiceAdapterRegistry:
         self.adapter_classes[adapter_name] = adapter_class
         logger.info(f"Registered adapter class: {adapter_name}")
         return True
+<<<<<<< HEAD
 
     def create_adapter_instance(self, adapter_name: str, instance_id: str, config: Dict[str, Any]) -> Optional[ServiceAdapter]:
+=======
+    
+    def create_adapter_instance(self, adapter_name: str, instance_id: str, config: dict[str, Any]) -> Optional[ServiceAdapter]:
+>>>>>>> feature/core-services-refactor
         """Create an instance of a service adapter.
         
         Args:
@@ -404,6 +448,7 @@ class ServiceAdapterRegistry:
     def get_adapter_instance(self, instance_id: str) -> Optional[ServiceAdapter]:
         """Get an adapter instance by ID."""
         return self.adapter_instances.get(instance_id)
+<<<<<<< HEAD
 
     def list_adapter_classes(self) -> List[str]:
         """List all registered adapter classes."""
@@ -414,6 +459,18 @@ class ServiceAdapterRegistry:
         return list(self.adapter_instances.keys())
 
     def get_adapters_by_type(self, service_type: ServiceType) -> List[ServiceAdapter]:
+=======
+    
+    def list_adapter_classes(self) -> list[str]:
+        """List all registered adapter classes."""
+        return list(self.adapter_classes.keys())
+    
+    def list_adapter_instances(self) -> list[str]:
+        """List all created adapter instances."""
+        return list(self.adapter_instances.keys())
+    
+    def get_adapters_by_type(self, service_type: ServiceType) -> list[ServiceAdapter]:
+>>>>>>> feature/core-services-refactor
         """Get all adapter instances of a specific service type."""
         result = []
         for adapter in self.adapter_instances.values():
@@ -421,16 +478,26 @@ class ServiceAdapterRegistry:
             if metadata.service_type == service_type:
                 result.append(adapter)
         return result
+<<<<<<< HEAD
 
     def get_adapters_by_capability(self, capability: AdapterCapability) -> List[ServiceAdapter]:
+=======
+    
+    def get_adapters_by_capability(self, capability: AdapterCapability) -> list[ServiceAdapter]:
+>>>>>>> feature/core-services-refactor
         """Get all adapter instances that support a specific capability."""
         result = []
         for adapter in self.adapter_instances.values():
             if adapter.supports_capability(capability):
                 result.append(adapter)
         return result
+<<<<<<< HEAD
 
     async def health_check_all(self) -> Dict[str, bool]:
+=======
+    
+    async def health_check_all(self) -> dict[str, bool]:
+>>>>>>> feature/core-services-refactor
         """Perform health checks on all adapter instances."""
         results = {}
 
@@ -444,8 +511,13 @@ class ServiceAdapterRegistry:
                 results[instance_id] = False
 
         return results
+<<<<<<< HEAD
 
     def get_adapter_info(self, instance_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def get_adapter_info(self, instance_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get detailed information about an adapter instance."""
         if instance_id not in self.adapter_instances:
             return None
@@ -487,12 +559,21 @@ class ServiceAdapterManager:
         self.registry.register_adapter_class("synthesis_engine", SynthesisEngineAdapter)
 
         logger.info("Registered standard adapter classes")
+<<<<<<< HEAD
 
     def register_custom_adapter(self, adapter_name: str, adapter_class: Type[ServiceAdapter]) -> bool:
         """Register a custom adapter class."""
         return self.registry.register_adapter_class(adapter_name, adapter_class)
 
     async def create_and_initialize_adapter(self, adapter_name: str, instance_id: str, config: Dict[str, Any]) -> Optional[ServiceAdapter]:
+=======
+    
+    def register_custom_adapter(self, adapter_name: str, adapter_class: type[ServiceAdapter]) -> bool:
+        """Register a custom adapter class."""
+        return self.registry.register_adapter_class(adapter_name, adapter_class)
+    
+    async def create_and_initialize_adapter(self, adapter_name: str, instance_id: str, config: dict[str, Any]) -> Optional[ServiceAdapter]:
+>>>>>>> feature/core-services-refactor
         """Create and initialize a service adapter in one step.
         
         Args:
@@ -522,8 +603,13 @@ class ServiceAdapterManager:
     def get_adapter(self, instance_id: str) -> Optional[ServiceAdapter]:
         """Get an adapter instance by ID."""
         return self.registry.get_adapter_instance(instance_id)
+<<<<<<< HEAD
 
     def find_adapters(self, service_type: ServiceType = None, capability: AdapterCapability = None) -> List[ServiceAdapter]:
+=======
+    
+    def find_adapters(self, service_type: ServiceType = None, capability: AdapterCapability = None) -> list[ServiceAdapter]:
+>>>>>>> feature/core-services-refactor
         """Find adapters by type or capability.
         
         Args:
@@ -540,8 +626,13 @@ class ServiceAdapterManager:
             return self.registry.get_adapters_by_capability(capability)
         else:
             return list(self.registry.adapter_instances.values())
+<<<<<<< HEAD
 
     async def execute_service_request(self, instance_id: str, operation: str, parameters: Dict[str, Any] = None, context: Dict[str, Any] = None) -> ServiceResponse:
+=======
+    
+    async def execute_service_request(self, instance_id: str, operation: str, parameters: dict[str, Any] = None, context: dict[str, Any] = None) -> ServiceResponse:
+>>>>>>> feature/core-services-refactor
         """Execute a service request through an adapter.
         
         Args:
@@ -570,8 +661,13 @@ class ServiceAdapterManager:
         )
 
         return await adapter.execute_request(request)
+<<<<<<< HEAD
 
     async def health_check_all(self) -> Dict[str, Any]:
+=======
+    
+    async def health_check_all(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Perform comprehensive health check on all adapters."""
         health_results = await self.registry.health_check_all()
 
@@ -584,8 +680,13 @@ class ServiceAdapterManager:
         }
 
         return summary
+<<<<<<< HEAD
 
     def get_system_status(self) -> Dict[str, Any]:
+=======
+    
+    def get_system_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get overall status of the service adapter system."""
         return {
             "registered_classes": len(self.registry.adapter_classes),

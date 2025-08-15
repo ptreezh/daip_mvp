@@ -7,7 +7,11 @@
 import logging
 import statistics
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +28,13 @@ class KnowledgeQualityTrendMonitor:
             "stable": "质量稳定",
             "volatile": "质量波动"
         }
+<<<<<<< HEAD
 
     def record_quality_measurement(self, measurement: Dict[str, Any]) -> bool:
+=======
+    
+    def record_quality_measurement(self, measurement: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """记录质量测量"""
         try:
             knowledge_id = measurement.get("knowledge_id")
@@ -45,8 +54,13 @@ class KnowledgeQualityTrendMonitor:
         except Exception as e:
             logger.error(f"记录质量测量失败: {e}")
             return False
+<<<<<<< HEAD
 
     def analyze_quality_trends(self, knowledge_id: str) -> Dict[str, Any]:
+=======
+    
+    def analyze_quality_trends(self, knowledge_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析质量趋势"""
         try:
             if knowledge_id not in self.quality_history:
@@ -78,8 +92,13 @@ class KnowledgeQualityTrendMonitor:
         except Exception as e:
             logger.error(f"分析质量趋势失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def generate_quality_forecast(self, knowledge_id: str, forecast_periods: int = 3) -> Dict[str, Any]:
+=======
+    
+    def generate_quality_forecast(self, knowledge_id: str, forecast_periods: int = 3) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成质量预测"""
         try:
             if knowledge_id not in self.quality_history:
@@ -113,8 +132,13 @@ class KnowledgeQualityTrendMonitor:
         except Exception as e:
             logger.error(f"生成质量预测失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def _determine_trend(self, quality_scores: List[float]) -> str:
+=======
+    
+    def _determine_trend(self, quality_scores: list[float]) -> str:
+>>>>>>> feature/core-services-refactor
         """确定趋势类型"""
         if len(quality_scores) < 2:
             return "stable"
@@ -139,8 +163,13 @@ class KnowledgeQualityTrendMonitor:
                 return "volatile"
             else:
                 return "stable"
+<<<<<<< HEAD
 
     def _calculate_trend_direction(self, quality_scores: List[float]) -> str:
+=======
+    
+    def _calculate_trend_direction(self, quality_scores: list[float]) -> str:
+>>>>>>> feature/core-services-refactor
         """计算趋势方向"""
         if len(quality_scores) < 2:
             return "neutral"
@@ -154,8 +183,13 @@ class KnowledgeQualityTrendMonitor:
             return "downward"
         else:
             return "neutral"
+<<<<<<< HEAD
 
     def _calculate_improvement_rate(self, quality_scores: List[float]) -> float:
+=======
+    
+    def _calculate_improvement_rate(self, quality_scores: list[float]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算改进率"""
         if len(quality_scores) < 2:
             return 0.0
@@ -168,8 +202,13 @@ class KnowledgeQualityTrendMonitor:
             return (last_score - first_score) / (first_score * periods)
         else:
             return 0.0
+<<<<<<< HEAD
 
     def _calculate_volatility(self, quality_scores: List[float]) -> float:
+=======
+    
+    def _calculate_volatility(self, quality_scores: list[float]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算波动性"""
         if len(quality_scores) < 2:
             return 0.0

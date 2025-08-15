@@ -1,7 +1,11 @@
 import asyncio
 import logging
 import uuid
+<<<<<<< HEAD
 from typing import Any, Dict
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from fastapi import HTTPException, UploadFile
 
@@ -32,7 +36,11 @@ class DocumentService:
 
     async def process_uploaded_document(
         self, file: UploadFile, chunk_strategy: str, chunk_size: int, chunk_overlap: int
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Handles the entire document upload and parsing workflow.
         Returns a dictionary with the task_id and a summary message.
         """
@@ -72,7 +80,7 @@ class DocumentService:
             "message": f"Document parsed successfully, created {len(result.chunks)} chunks.",
         }
 
-    def get_parsing_task_result(self, task_id: str) -> Dict[str, Any]:
+    def get_parsing_task_result(self, task_id: str) -> dict[str, Any]:
         """Retrieves and formats the result of a specific parsing task."""
         if task_id not in self.app_state.parsing_tasks:
             raise HTTPException(status_code=404, detail="Task not found")

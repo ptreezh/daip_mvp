@@ -1,0 +1,87 @@
+{
+  "test_phase": "Phase 1: 环境准备和基础验证",
+  "execution_time": "2025-08-05 23:53:37",
+  "total_tests": 9,
+  "passed_tests": 8,
+  "failed_tests": 1,
+  "error_tests": 0,
+  "success_rate": 88.88888888888889,
+  "test_results": [
+    {
+      "test_name": "Python版本检查",
+      "status": "PASS",
+      "details": "执行时间: 0.00秒",
+      "execution_time": 0.0,
+      "timestamp": "2025-08-05 23:53:33"
+    },
+    {
+      "test_name": "必需包安装检查",
+      "status": "PASS",
+      "details": "执行时间: 1.80秒",
+      "execution_time": 1.7989611625671387,
+      "timestamp": "2025-08-05 23:53:35"
+    },
+    {
+      "test_name": "项目结构检查",
+      "status": "PASS",
+      "details": "执行时间: 0.00秒",
+      "execution_time": 0.0009114742279052734,
+      "timestamp": "2025-08-05 23:53:35"
+    },
+    {
+      "test_name": "配置文件检查",
+      "status": "PASS",
+      "details": "执行时间: 0.00秒",
+      "execution_time": 0.002102375030517578,
+      "timestamp": "2025-08-05 23:53:35"
+    },
+    {
+      "test_name": "数据库目录检查",
+      "status": "PASS",
+      "details": "执行时间: 0.00秒",
+      "execution_time": 0.0009915828704833984,
+      "timestamp": "2025-08-05 23:53:35"
+    },
+    {
+      "test_name": "Ollama服务检查",
+      "status": "PASS",
+      "details": "执行时间: 0.94秒",
+      "execution_time": 0.9419019222259521,
+      "timestamp": "2025-08-05 23:53:36"
+    },
+    {
+      "test_name": "ChromaDB连接检查",
+      "status": "PASS",
+      "details": "执行时间: 1.40秒",
+      "execution_time": 1.3974826335906982,
+      "timestamp": "2025-08-05 23:53:37"
+    },
+    {
+      "test_name": "网络端口检查",
+      "status": "PASS",
+      "details": "执行时间: 0.02秒",
+      "execution_time": 0.019785165786743164,
+      "timestamp": "2025-08-05 23:53:37"
+    },
+    {
+      "test_name": "Web依赖检查",
+      "status": "FAIL",
+      "details": "测试返回False",
+      "execution_time": 0.005013942718505859,
+      "timestamp": "2025-08-05 23:53:37"
+    }
+  ],
+  "summary": {
+    "status": "FAIL",
+    "issues": [
+      {
+        "test_name": "Web依赖检查",
+        "status": "FAIL",
+        "details": "测试返回False",
+        "execution_time": 0.005013942718505859,
+        "timestamp": "2025-08-05 23:53:37"
+      }
+    ],
+    "recommendations": []
+  }
+}

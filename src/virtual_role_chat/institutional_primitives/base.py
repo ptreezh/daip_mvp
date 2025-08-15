@@ -8,7 +8,11 @@ atomic capabilities for AI collaboration workflows.
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -19,9 +23,9 @@ class ExecutionContext(BaseModel):
     execution_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     workflow_id: str
     node_id: str
-    services: Dict[str, Any] = Field(default_factory=dict)  # Available DAIP-LIVE services
-    state: Dict[str, Any] = Field(default_factory=dict)  # Workflow state
-    metadata: Dict[str, Any] = Field(default_factory=dict)  # Additional metadata
+    services: dict[str, Any] = Field(default_factory=dict)  # Available DAIP-LIVE services
+    state: dict[str, Any] = Field(default_factory=dict)  # Workflow state
+    metadata: dict[str, Any] = Field(default_factory=dict)  # Additional metadata
     timestamp: datetime = Field(default_factory=datetime.now)
 
     class Config:
@@ -34,10 +38,10 @@ class PrimitiveInfo(BaseModel):
     type: str
     name: str
     description: str
-    input_schema: Dict[str, Any]
-    output_schema: Dict[str, Any]
+    input_schema: dict[str, Any]
+    output_schema: dict[str, Any]
     version: str = "1.0.0"
-    tags: List[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
     author: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.now)
 
@@ -46,19 +50,19 @@ class ValidationResult(BaseModel):
     """Result of primitive validation."""
 
     is_valid: bool
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
 
 
 class ExecutionResult(BaseModel):
     """Result of primitive execution."""
 
     success: bool
-    outputs: Dict[str, Any] = Field(default_factory=dict)
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
+    outputs: dict[str, Any] = Field(default_factory=dict)
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
     execution_time: float = 0.0
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class InstitutionalPrimitive(ABC):
@@ -69,8 +73,13 @@ class InstitutionalPrimitive(ABC):
     They serve as the fundamental building blocks for complex social institutions
     within AI collaboration systems.
     """
+<<<<<<< HEAD
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
+=======
+    
+    def __init__(self, config: Optional[dict[str, Any]] = None):
+>>>>>>> feature/core-services-refactor
         """Initialize the primitive with configuration.
         
         Args:
@@ -81,7 +90,11 @@ class InstitutionalPrimitive(ABC):
         self._validate_config()
 
     @abstractmethod
+<<<<<<< HEAD
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> ExecutionResult:
+=======
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> ExecutionResult:
+>>>>>>> feature/core-services-refactor
         """Execute the primitive with given inputs and context.
         
         Args:
@@ -95,7 +108,11 @@ class InstitutionalPrimitive(ABC):
         pass
 
     @abstractmethod
+<<<<<<< HEAD
     def get_input_schema(self) -> Dict[str, Any]:
+=======
+    def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return JSON schema for expected inputs.
         
         Returns:
@@ -105,7 +122,11 @@ class InstitutionalPrimitive(ABC):
         pass
 
     @abstractmethod
+<<<<<<< HEAD
     def get_output_schema(self) -> Dict[str, Any]:
+=======
+    def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return JSON schema for produced outputs.
         
         Returns:
@@ -131,8 +152,13 @@ class InstitutionalPrimitive(ABC):
             tags=self.get_tags(),
             author=self.get_author()
         )
+<<<<<<< HEAD
 
     def validate_inputs(self, inputs: Dict[str, Any]) -> ValidationResult:
+=======
+    
+    def validate_inputs(self, inputs: dict[str, Any]) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate inputs against the input schema.
         
         Args:
@@ -172,8 +198,13 @@ class InstitutionalPrimitive(ABC):
                 is_valid=False,
                 errors=[f"Validation error: {str(e)}"]
             )
+<<<<<<< HEAD
 
     def validate_outputs(self, outputs: Dict[str, Any]) -> ValidationResult:
+=======
+    
+    def validate_outputs(self, outputs: dict[str, Any]) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate outputs against the output schema.
         
         Args:
@@ -243,8 +274,13 @@ class InstitutionalPrimitive(ABC):
 
         """
         return "1.0.0"
+<<<<<<< HEAD
 
     def get_tags(self) -> List[str]:
+=======
+    
+    def get_tags(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Get tags associated with this primitive.
         
         Returns:
@@ -271,8 +307,13 @@ class InstitutionalPrimitive(ABC):
         """
         # Override in subclasses to add specific validation
         pass
+<<<<<<< HEAD
 
     async def _pre_execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> None:
+=======
+    
+    async def _pre_execute(self, inputs: dict[str, Any], context: ExecutionContext) -> None:
+>>>>>>> feature/core-services-refactor
         """Pre-execution hook for setup operations.
         
         Args:

@@ -5,7 +5,11 @@
     A service to recommend roles based on semantic similarity to a topic.
 """
 import logging
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, Dict, List
+=======
+from typing import TYPE_CHECKING
+>>>>>>> feature/core-services-refactor
 
 import chromadb
 
@@ -80,7 +84,7 @@ class RoleRecommenderService:
         self.collection.add(embeddings=embeddings, documents=documents, metadatas=metadatas, ids=ids)
         logging.info(f"Successfully built index for {self.collection.count()} roles.")
 
-    def recommend_roles(self, topic: str, top_k: int = 3) -> List[Dict]:
+    def recommend_roles(self, topic: str, top_k: int = 3) -> list[dict]:
         """Recommends roles based on a topic."""
         logging.info(f"Recommending {top_k} roles for topic: '{topic}'")
         query_embedding = self.llm_interface.get_embedding(topic)

@@ -8,7 +8,11 @@
 import logging
 from datetime import datetime, timedelta
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -49,9 +53,9 @@ class KnowledgeSearchResult(BaseModel):
     relevance_score: float = 0.0
     created_at: datetime
     updated_at: datetime
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    related_nodes: List[str] = Field(default_factory=list)
-    quality_metrics: Dict[str, float] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    related_nodes: list[str] = Field(default_factory=list)
+    quality_metrics: dict[str, float] = Field(default_factory=dict)
 
 
 class KnowledgeEvolutionEvent(BaseModel):
@@ -62,7 +66,7 @@ class KnowledgeEvolutionEvent(BaseModel):
     node_id: str
     timestamp: datetime = Field(default_factory=datetime.now)
     description: str
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class KnowledgeQualityAssessment(BaseModel):
@@ -70,10 +74,10 @@ class KnowledgeQualityAssessment(BaseModel):
 
     node_id: str
     overall_quality: float = Field(ge=0.0, le=1.0)
-    quality_metrics: Dict[QualityMetric, float] = Field(default_factory=dict)
+    quality_metrics: dict[QualityMetric, float] = Field(default_factory=dict)
     assessment_timestamp: datetime = Field(default_factory=datetime.now)
-    recommendations: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    recommendations: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class KnowledgeRetrievalService:
@@ -103,6 +107,7 @@ class KnowledgeRetrievalService:
         self.wiki_service = wiki_service
 
         # Evolution tracking
+<<<<<<< HEAD
         self.evolution_events: List[KnowledgeEvolutionEvent] = []
 
         # Quality assessment cache
@@ -111,6 +116,16 @@ class KnowledgeRetrievalService:
         # Usage tracking
         self.usage_stats: Dict[str, Dict[str, Any]] = {}
 
+=======
+        self.evolution_events: list[KnowledgeEvolutionEvent] = []
+        
+        # Quality assessment cache
+        self.quality_assessments: dict[str, KnowledgeQualityAssessment] = {}
+        
+        # Usage tracking
+        self.usage_stats: dict[str, dict[str, Any]] = {}
+        
+>>>>>>> feature/core-services-refactor
         logger.info("KnowledgeRetrievalService initialized")
 
     async def semantic_search(
@@ -120,8 +135,13 @@ class KnowledgeRetrievalService:
         min_confidence: float = 0.5,
         limit: int = 10,
         include_related: bool = True,
+<<<<<<< HEAD
         expertise_domains: List[str] = None
     ) -> List[KnowledgeSearchResult]:
+=======
+        expertise_domains: list[str] = None
+    ) -> list[KnowledgeSearchResult]:
+>>>>>>> feature/core-services-refactor
         """Perform semantic search for validated information.
         
         Args:
@@ -208,11 +228,15 @@ class KnowledgeRetrievalService:
 
     async def get_cross_session_knowledge(
         self,
-        session_context: Dict[str, Any],
-        knowledge_types: List[str] = None,
+        session_context: dict[str, Any],
+        knowledge_types: list[str] = None,
         time_window_days: int = 30,
         min_relevance: float = 0.6
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get relevant knowledge from previous sessions for cross-session sharing.
         
         Args:
@@ -406,7 +430,7 @@ class KnowledgeRetrievalService:
         node_id: str,
         event_type: str,
         description: str,
-        metadata: Dict[str, Any] = None
+        metadata: dict[str, Any] = None
     ) -> str:
         """Track a knowledge evolution event.
         
@@ -436,9 +460,13 @@ class KnowledgeRetrievalService:
     def get_knowledge_evolution_history(
         self,
         node_id: Optional[str] = None,
-        event_types: List[str] = None,
+        event_types: list[str] = None,
         time_window_days: int = 30
+<<<<<<< HEAD
     ) -> List[KnowledgeEvolutionEvent]:
+=======
+    ) -> list[KnowledgeEvolutionEvent]:
+>>>>>>> feature/core-services-refactor
         """Get knowledge evolution history.
         
         Args:
@@ -473,8 +501,13 @@ class KnowledgeRetrievalService:
         filtered_events.sort(key=lambda x: x.timestamp, reverse=True)
 
         return filtered_events
+<<<<<<< HEAD
 
     def get_knowledge_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_knowledge_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get comprehensive knowledge statistics.
         
         Returns:
@@ -528,8 +561,13 @@ class KnowledgeRetrievalService:
         except Exception as e:
             logger.error(f"Error getting knowledge statistics: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def _get_node_types_for_scope(self, scope: SearchScope) -> List[NodeType]:
+=======
+    
+    def _get_node_types_for_scope(self, scope: SearchScope) -> list[NodeType]:
+>>>>>>> feature/core-services-refactor
         """Map search scope to node types."""
         scope_mapping = {
             SearchScope.ALL: [NodeType.FACT, NodeType.CONCEPT, NodeType.WIKI, NodeType.MEMORY],
@@ -564,8 +602,13 @@ class KnowledgeRetrievalService:
 
         relevance = min(term_relevance + confidence_boost + metadata_boost, 1.0)
         return relevance
+<<<<<<< HEAD
 
     async def _get_quality_metrics(self, node_id: str) -> Dict[str, float]:
+=======
+    
+    async def _get_quality_metrics(self, node_id: str) -> dict[str, float]:
+>>>>>>> feature/core-services-refactor
         """Get quality metrics for a node."""
         try:
             assessment = await self.assess_knowledge_quality(node_id)
@@ -623,9 +666,9 @@ class KnowledgeRetrievalService:
 
     def _generate_quality_recommendations(
         self,
-        quality_metrics: Dict[QualityMetric, float],
+        quality_metrics: dict[QualityMetric, float],
         node: KnowledgeNode
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate recommendations for improving knowledge quality."""
         recommendations = []
 
@@ -653,9 +696,9 @@ class KnowledgeRetrievalService:
 
     async def _find_knowledge_connections(
         self,
-        nodes: List[KnowledgeNode],
+        nodes: list[KnowledgeNode],
         query: str
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Find connections between knowledge nodes."""
         connections = []
 

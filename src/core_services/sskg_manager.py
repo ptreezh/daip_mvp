@@ -6,7 +6,7 @@
 """
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import networkx as nx
 
@@ -57,12 +57,12 @@ class SSKGManager:
             except Exception as e:
                 logger.error(f"Failed to save graph to {self.graph_path}: {e}")
 
-    def add_fact(self, subject: str, predicate: str, obj: str, metadata: Optional[Dict[str, Any]] = None):
+    def add_fact(self, subject: str, predicate: str, obj: str, metadata: Optional[dict[str, Any]] = None):
         """Adds a structured fact (a triple) to the knowledge graph."""
         self.graph.add_edge(subject, obj, key=predicate, **(metadata or {}))
         logger.debug("Added fact: (%s, %s, %s)", subject, predicate, obj)
 
-    def query(self, subject: str, predicate: Optional[str] = None) -> List[Dict[str, Any]]:
+    def query(self, subject: str, predicate: Optional[str] = None) -> list[dict[str, Any]]:
         """Queries the graph for facts related to a subject."""
         results = []
         if self.graph.has_node(subject):

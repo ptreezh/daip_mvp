@@ -6,8 +6,13 @@
 """
 import functools
 import logging
+<<<<<<< HEAD
 from collections.abc import Awaitable
 from typing import Any, Callable, Dict, Optional
+=======
+from collections.abc import Awaitable, Callable
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from ..core_services.enhanced_sskg_manager import EnhancedSSKGManager
 from ..core_services.wiki_service import WikiService
@@ -57,7 +62,7 @@ class KnowledgeIntegrationDecorator:
             min_confidence: Minimum confidence threshold for persistence
 
         """
-        def decorator(func: Callable[..., Awaitable[Dict[str, Any]]]):
+        def decorator(func: Callable[..., Awaitable[dict[str, Any]]]):
             @functools.wraps(func)
             async def wrapper(*args, **kwargs):
                 # Execute original workflow
@@ -99,7 +104,7 @@ class KnowledgeIntegrationDecorator:
             min_confidence: Minimum confidence threshold for persistence
 
         """
-        def decorator(func: Callable[..., Awaitable[Dict[str, Any]]]):
+        def decorator(func: Callable[..., Awaitable[dict[str, Any]]]):
             @functools.wraps(func)
             async def wrapper(*args, **kwargs):
                 # Execute original workflow
@@ -190,7 +195,7 @@ def with_critical_review_persistence(
         min_confidence: Minimum confidence threshold for persistence
 
     """
-    def decorator(func: Callable[..., Awaitable[Dict[str, Any]]]):
+    def decorator(func: Callable[..., Awaitable[dict[str, Any]]]):
         if _global_decorator is None:
             logger.warning("Knowledge integration decorator not initialized. Skipping integration.")
             return func
@@ -217,7 +222,7 @@ def with_multi_perspective_persistence(
         min_confidence: Minimum confidence threshold for persistence
 
     """
-    def decorator(func: Callable[..., Awaitable[Dict[str, Any]]]):
+    def decorator(func: Callable[..., Awaitable[dict[str, Any]]]):
         if _global_decorator is None:
             logger.warning("Knowledge integration decorator not initialized. Skipping integration.")
             return func
@@ -250,7 +255,7 @@ async def example_critical_review_integration():
         create_wiki=True,
         min_confidence=0.7
     )
-    async def critical_review_workflow(content: str) -> Dict[str, Any]:
+    async def critical_review_workflow(content: str) -> dict[str, Any]:
         # Simulate workflow execution
         return {
             "success": True,
@@ -286,7 +291,7 @@ async def example_multi_perspective_integration():
         create_wiki=True,
         min_confidence=0.6
     )
-    async def multi_perspective_workflow(topic: str, perspectives: list) -> Dict[str, Any]:
+    async def multi_perspective_workflow(topic: str, perspectives: list) -> dict[str, Any]:
         # Simulate workflow execution
         return {
             "success": True,

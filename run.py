@@ -8,7 +8,7 @@ import os
 import pathlib
 import re
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Add the project root to the Python path to resolve module imports
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -44,7 +44,7 @@ to_protocol_queue: asyncio.Queue = asyncio.Queue()
 from_protocol_queue: asyncio.Queue = asyncio.Queue()
 
 # --- Global State ---
-deps: Optional[Dict[str, Any]] = None
+deps: Optional[dict[str, Any]] = None
 show_verbose_logs: bool = False
 
 # --- TUI Application Components ---
@@ -205,7 +205,7 @@ def _get_topic_from_user(llm_interface) -> str:
         else:
             choice = console.input("[red]Invalid choice.[/red] Please enter '1' or '2': ")
 
-def _get_roles_from_user(topic: str, role_manager, role_recommender) -> List[str]:
+def _get_roles_from_user(topic: str, role_manager, role_recommender) -> list[str]:
     """Interactive prompt to select or create roles."""
     console.print("\n[bold cyan]Step 2: Select Roles[/bold cyan]")
     with console.status("[bold green]AI is recommending roles...[/bold green]"):

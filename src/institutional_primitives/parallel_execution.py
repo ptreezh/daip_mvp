@@ -6,9 +6,15 @@ allowing multiple nodes to be executed concurrently with controlled concurrency.
 
 import asyncio
 import logging
+<<<<<<< HEAD
 from collections.abc import Coroutine
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+=======
+from collections.abc import Callable, Coroutine
+from datetime import datetime
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .base import ExecutionTrace
 
@@ -39,16 +45,27 @@ class ParallelExecutionGroup:
         self.timeout = timeout
         self.semaphore = asyncio.Semaphore(max_concurrency)
         self.logger = logging.getLogger(__name__)
+<<<<<<< HEAD
         self.tasks: Set[asyncio.Task] = set()
         self.results: Dict[str, Any] = {}
         self.errors: Dict[str, Exception] = {}
 
+=======
+        self.tasks: set[asyncio.Task] = set()
+        self.results: dict[str, Any] = {}
+        self.errors: dict[str, Exception] = {}
+    
+>>>>>>> feature/core-services-refactor
     async def execute_node(
         self,
         node_id: str,
-        execute_func: Callable[[str], Coroutine[Any, Any, Dict[str, Any]]],
+        execute_func: Callable[[str], Coroutine[Any, Any, dict[str, Any]]],
         trace: ExecutionTrace
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute a node with concurrency control.
         
         Args:
@@ -83,10 +100,14 @@ class ParallelExecutionGroup:
 
     async def execute_all(
         self,
-        node_ids: List[str],
-        execute_func: Callable[[str], Coroutine[Any, Any, Dict[str, Any]]],
+        node_ids: list[str],
+        execute_func: Callable[[str], Coroutine[Any, Any, dict[str, Any]]],
         trace: ExecutionTrace
+<<<<<<< HEAD
     ) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Exception]]:
+=======
+    ) -> tuple[dict[str, dict[str, Any]], dict[str, Exception]]:
+>>>>>>> feature/core-services-refactor
         """Execute multiple nodes in parallel.
         
         Args:
@@ -137,7 +158,7 @@ class ParallelExecutionManager:
 
     def __init__(self):
         """Initialize the parallel execution manager."""
-        self.execution_groups: Dict[str, ParallelExecutionGroup] = {}
+        self.execution_groups: dict[str, ParallelExecutionGroup] = {}
         self.logger = logging.getLogger(__name__)
 
     def create_execution_group(
@@ -177,12 +198,16 @@ class ParallelExecutionManager:
 
     async def execute_nodes_in_parallel(
         self,
-        node_ids: List[str],
-        execute_func: Callable[[str], Coroutine[Any, Any, Dict[str, Any]]],
+        node_ids: list[str],
+        execute_func: Callable[[str], Coroutine[Any, Any, dict[str, Any]]],
         trace: ExecutionTrace,
         max_concurrency: int = 5,
         timeout: Optional[float] = None
+<<<<<<< HEAD
     ) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Exception]]:
+=======
+    ) -> tuple[dict[str, dict[str, Any]], dict[str, Exception]]:
+>>>>>>> feature/core-services-refactor
         """Execute multiple nodes in parallel.
         
         Args:
@@ -204,8 +229,13 @@ class ParallelExecutionManager:
 
         # Execute nodes in parallel
         return await group.execute_all(node_ids, execute_func, trace)
+<<<<<<< HEAD
 
     def get_group_status(self, group_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def get_group_status(self, group_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get the status of a parallel execution group.
         
         Args:

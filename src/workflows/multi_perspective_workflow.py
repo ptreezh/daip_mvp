@@ -6,7 +6,11 @@
     all institutional primitive nodes for comprehensive knowledge synthesis.
 """
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from src.institutional_primitives.base import ExecutionContext
 from src.institutional_primitives.multi_perspective import (
@@ -27,8 +31,13 @@ class MultiPerspectiveSynthesisWorkflow:
     by orchestrating diverse expert viewpoints with true cognitive independence
     into synthesized knowledge.
     """
+<<<<<<< HEAD
 
     def __init__(self, workflow_id: str, config: Dict[str, Any] = None):
+=======
+    
+    def __init__(self, workflow_id: str, config: dict[str, Any] = None):
+>>>>>>> feature/core-services-refactor
         """Initialize the Multi-perspective Synthesis Workflow.
         
         Args:
@@ -109,10 +118,14 @@ class MultiPerspectiveSynthesisWorkflow:
     async def execute(
         self,
         topic: str,
-        perspectives: List[str] = None,
-        services: Dict[str, Any] = None,
+        perspectives: list[str] = None,
+        services: dict[str, Any] = None,
         execution_id: str = None
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute the complete Multi-perspective Synthesis Workflow.
         
         Args:
@@ -217,8 +230,13 @@ class MultiPerspectiveSynthesisWorkflow:
                 "error": f"Workflow execution failed: {str(e)}",
                 "execution_id": context.execution_id
             }
+<<<<<<< HEAD
 
     def _create_error_result(self, error_message: str, step_result: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _create_error_result(self, error_message: str, step_result: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Create a standardized error result."""
         return {
             "success": False,
@@ -231,11 +249,15 @@ class MultiPerspectiveSynthesisWorkflow:
     async def execute_multi_perspective_synthesis(
         cls,
         topic: str,
-        perspectives: List[str] = None,
-        services: Dict[str, Any] = None,
-        workflow_config: Dict[str, Any] = None,
+        perspectives: list[str] = None,
+        services: dict[str, Any] = None,
+        workflow_config: dict[str, Any] = None,
         workflow_id: str = "multi_perspective"
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Convenience method to execute a Multi-perspective Synthesis Workflow.
         
         Args:

@@ -11,9 +11,16 @@ import asyncio
 import logging
 import time
 from collections import defaultdict, deque
+<<<<<<< HEAD
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
+=======
+from collections.abc import Callable
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from algorithm_registry import AlgorithmRegistry
 from algorithm_selector import AlgorithmSelector
@@ -25,7 +32,10 @@ logger = logging.getLogger(__name__)
 
 class FallbackStrategy(str, Enum):
     """降级策略枚举"""
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     SIMPLE_FALLBACK = "simple_fallback"
     PRIORITY_CHAIN = "priority_chain"
     SIMILARITY_BASED = "similarity_based"
@@ -35,7 +45,10 @@ class FallbackStrategy(str, Enum):
 
 class RetryStrategy(str, Enum):
     """重试策略枚举"""
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     NO_RETRY = "no_retry"
     FIXED_RETRY = "fixed_retry"
     EXPONENTIAL_BACKOFF = "exponential_backoff"
@@ -44,7 +57,10 @@ class RetryStrategy(str, Enum):
 
 class CircuitBreakerState(str, Enum):
     """熔断器状态枚举"""
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     CLOSED = "closed"
     OPEN = "open"
     HALF_OPEN = "half_open"
@@ -52,7 +68,11 @@ class CircuitBreakerState(str, Enum):
 
 class FallbackConfig:
     """降级配置"""
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     def __init__(self,
                  strategy: FallbackStrategy = FallbackStrategy.PRIORITY_CHAIN,
                  max_fallback_depth: int = 3,
@@ -74,7 +94,11 @@ class FallbackConfig:
 
 class CircuitBreakerInfo:
     """熔断器信息"""
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     def __init__(self):
         self.state = CircuitBreakerState.CLOSED
         self.failure_count = 0
@@ -85,7 +109,11 @@ class CircuitBreakerInfo:
 
 class FallbackEvent:
     """降级事件"""
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     def __init__(self,
                  event_id: str,
                  timestamp: datetime,
@@ -95,7 +123,11 @@ class FallbackEvent:
                  fallback_depth: int,
                  success: bool,
                  execution_time: float,
+<<<<<<< HEAD
                  metadata: Optional[Dict[str, Any]] = None):
+=======
+                 metadata: Optional[dict[str, Any]] = None):
+>>>>>>> feature/core-services-refactor
         self.event_id = event_id
         self.timestamp = timestamp
         self.original_algorithm = original_algorithm
@@ -112,7 +144,11 @@ class FallbackManager:
     
     处理算法失败场景，提供多级降级策略和智能重试机制。
     """
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     def __init__(self,
                  registry: AlgorithmRegistry,
                  selector: AlgorithmSelector,
@@ -120,6 +156,7 @@ class FallbackManager:
         self.registry = registry
         self.selector = selector
         self.config = config or FallbackConfig()
+<<<<<<< HEAD
 
         # 熔断器状态
         self.circuit_breakers: Dict[str, CircuitBreakerInfo] = defaultdict(CircuitBreakerInfo)
@@ -128,6 +165,16 @@ class FallbackManager:
         self.fallback_events: deque = deque(maxlen=1000)
         self.event_listeners: List[Callable[[FallbackEvent], None]] = []
 
+=======
+        
+        # 熔断器状态
+        self.circuit_breakers: dict[str, CircuitBreakerInfo] = defaultdict(CircuitBreakerInfo)
+        
+        # 事件记录
+        self.fallback_events: deque = deque(maxlen=1000)
+        self.event_listeners: list[Callable[[FallbackEvent], None]] = []
+        
+>>>>>>> feature/core-services-refactor
         # 统计信息
         self.stats = {
             "total_fallbacks": 0,
@@ -135,6 +182,7 @@ class FallbackManager:
             "failed_fallbacks": 0,
             "circuit_breaker_trips": 0
         }
+<<<<<<< HEAD
 
         logger.info("FallbackManager initialized")
 
@@ -142,6 +190,15 @@ class FallbackManager:
                           failed_algorithm: str,
                           request: ConsensusRequest,
                           failure_context: Optional[FailureContext] = None) -> List[str]:
+=======
+        
+        logger.info("FallbackManager initialized")
+        
+    def get_fallback_chain(self,
+                          failed_algorithm: str,
+                          request: ConsensusRequest,
+                          failure_context: Optional[FailureContext] = None) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """获取降级链
         
         Args:
@@ -151,7 +208,10 @@ class FallbackManager:
             
         Returns:
             降级算法链
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
         """
         try:
             # 获取可用算法（排除失败算法）
@@ -159,6 +219,7 @@ class FallbackManager:
                 algo_id for algo_id in self.registry.get_healthy_algorithms()
                 if algo_id != failed_algorithm
             ]
+<<<<<<< HEAD
 
             if not available_algorithms:
                 logger.warning("No available algorithms for fallback")
@@ -190,21 +251,65 @@ class FallbackManager:
         for algo_id in algorithms:
             breaker = self.circuit_breakers[algo_id]
 
+=======
+            
+            if not available_algorithms:
+                logger.warning("No available algorithms for fallback")
+                return []
+                
+            # 应用熔断器过滤
+            if self.config.circuit_breaker_enabled:
+                available_algorithms = self._filter_circuit_breaker_algorithms(available_algorithms)
+                
+            if not available_algorithms:
+                logger.warning("All algorithms are circuit broken")
+                return []
+                
+            # 使用算法选择器获取候选算法
+            candidates = self._get_selector_based_candidates(request, available_algorithms)
+                
+            # 限制降级深度
+            return candidates[:self.config.max_fallback_depth]
+            
+        except Exception as e:
+            logger.error(f"Failed to get fallback chain: {str(e)}")
+            return []
+            
+    def _filter_circuit_breaker_algorithms(self, algorithms: list[str]) -> list[str]:
+        """过滤熔断器开启的算法"""
+        filtered = []
+        current_time = datetime.now()
+        
+        for algo_id in algorithms:
+            breaker = self.circuit_breakers[algo_id]
+            
+>>>>>>> feature/core-services-refactor
             if breaker.state == CircuitBreakerState.CLOSED:
                 filtered.append(algo_id)
             elif breaker.state == CircuitBreakerState.HALF_OPEN:
                 filtered.append(algo_id)
             elif breaker.state == CircuitBreakerState.OPEN:
                 # 检查是否可以转为半开状态
+<<<<<<< HEAD
                 if (breaker.open_time and
+=======
+                if (breaker.open_time and 
+>>>>>>> feature/core-services-refactor
                     current_time - breaker.open_time >= timedelta(seconds=self.config.recovery_timeout)):
                     breaker.state = CircuitBreakerState.HALF_OPEN
                     filtered.append(algo_id)
                     logger.info(f"Circuit breaker for {algo_id} moved to HALF_OPEN")
+<<<<<<< HEAD
 
         return filtered
 
     def _get_selector_based_candidates(self, request: ConsensusRequest, available_algorithms: List[str]) -> List[str]:
+=======
+                    
+        return filtered
+        
+    def _get_selector_based_candidates(self, request: ConsensusRequest, available_algorithms: list[str]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """基于选择器获取候选算法"""
         try:
             scores = self.selector.get_algorithm_scores(request, available_algorithms)
@@ -212,7 +317,11 @@ class FallbackManager:
         except Exception as e:
             logger.error(f"Selector-based candidate selection failed: {str(e)}")
             return available_algorithms[:self.config.max_fallback_depth]
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
     async def execute_fallback(self,
                               fallback_algorithm: str,
                               request: ConsensusRequest,
@@ -228,20 +337,32 @@ class FallbackManager:
             
         Returns:
             共识响应
+<<<<<<< HEAD
 
         """
         start_time = time.time()
         event_id = f"fallback_{int(time.time() * 1000)}"
 
+=======
+        """
+        start_time = time.time()
+        event_id = f"fallback_{int(time.time() * 1000)}"
+        
+>>>>>>> feature/core-services-refactor
         try:
             # 检查熔断器状态
             if not self._check_circuit_breaker(fallback_algorithm):
                 raise RuntimeError(f"Circuit breaker is OPEN for algorithm {fallback_algorithm}")
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
             # 获取算法实例
             algorithm = self.registry.get_algorithm(fallback_algorithm)
             if not algorithm:
                 raise ValueError(f"Fallback algorithm {fallback_algorithm} not found")
+<<<<<<< HEAD
 
             # 执行算法（带重试）
             result = await self._execute_with_retry(algorithm, request, fallback_algorithm)
@@ -249,6 +370,15 @@ class FallbackManager:
             # 记录成功
             self._record_circuit_breaker_success(fallback_algorithm)
 
+=======
+                
+            # 执行算法（带重试）
+            result = await self._execute_with_retry(algorithm, request, fallback_algorithm)
+            
+            # 记录成功
+            self._record_circuit_breaker_success(fallback_algorithm)
+            
+>>>>>>> feature/core-services-refactor
             # 创建响应
             response = ConsensusResponse(
                 success=True,
@@ -258,7 +388,11 @@ class FallbackManager:
                 fallback_used=True,
                 timestamp=datetime.now()
             )
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             # 记录降级事件
             self._record_fallback_event(
                 event_id=event_id,
@@ -269,6 +403,7 @@ class FallbackManager:
                 success=True,
                 execution_time=response.execution_time
             )
+<<<<<<< HEAD
 
             self.stats["total_fallbacks"] += 1
             self.stats["successful_fallbacks"] += 1
@@ -283,6 +418,22 @@ class FallbackManager:
             # 记录失败
             self._record_circuit_breaker_failure(fallback_algorithm)
 
+=======
+            
+            self.stats["total_fallbacks"] += 1
+            self.stats["successful_fallbacks"] += 1
+            
+            logger.info(f"Fallback successful: {fallback_algorithm} (depth: {fallback_depth})")
+            
+            return response
+            
+        except Exception as e:
+            execution_time = time.time() - start_time
+            
+            # 记录失败
+            self._record_circuit_breaker_failure(fallback_algorithm)
+            
+>>>>>>> feature/core-services-refactor
             # 记录降级事件
             self._record_fallback_event(
                 event_id=event_id,
@@ -294,12 +445,21 @@ class FallbackManager:
                 execution_time=execution_time,
                 metadata={"error": str(e)}
             )
+<<<<<<< HEAD
 
             self.stats["total_fallbacks"] += 1
             self.stats["failed_fallbacks"] += 1
 
             logger.error(f"Fallback failed: {fallback_algorithm} - {str(e)}")
 
+=======
+            
+            self.stats["total_fallbacks"] += 1
+            self.stats["failed_fallbacks"] += 1
+            
+            logger.error(f"Fallback failed: {fallback_algorithm} - {str(e)}")
+            
+>>>>>>> feature/core-services-refactor
             # 创建失败响应
             return ConsensusResponse(
                 success=False,
@@ -310,14 +470,22 @@ class FallbackManager:
                 fallback_used=True,
                 timestamp=datetime.now()
             )
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
     async def _execute_with_retry(self,
                                  algorithm: ConsensusAlgorithm,
                                  request: ConsensusRequest,
                                  algorithm_id: str) -> ConsensusResult:
         """带重试的算法执行"""
         last_exception = None
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         for attempt in range(self.config.max_retry_count + 1):
             try:
                 # 创建执行上下文
@@ -326,6 +494,7 @@ class FallbackManager:
                     services={},
                     configuration={}
                 )
+<<<<<<< HEAD
 
                 # 执行算法
                 result = await algorithm.calculate(request.inputs, context)
@@ -338,6 +507,20 @@ class FallbackManager:
             except Exception as e:
                 last_exception = e
 
+=======
+                
+                # 执行算法
+                result = await algorithm.calculate(request.inputs, context)
+                
+                if attempt > 0:
+                    logger.info(f"Algorithm {algorithm_id} succeeded on retry {attempt}")
+                    
+                return result
+                
+            except Exception as e:
+                last_exception = e
+                
+>>>>>>> feature/core-services-refactor
                 if attempt < self.config.max_retry_count:
                     # 计算重试延迟
                     delay = self._calculate_retry_delay(attempt)
@@ -345,10 +528,17 @@ class FallbackManager:
                     await asyncio.sleep(delay)
                 else:
                     logger.error(f"Algorithm {algorithm_id} failed after {self.config.max_retry_count + 1} attempts")
+<<<<<<< HEAD
 
         # 所有重试都失败了
         raise last_exception
 
+=======
+                    
+        # 所有重试都失败了
+        raise last_exception
+        
+>>>>>>> feature/core-services-refactor
     def _calculate_retry_delay(self, attempt: int) -> float:
         """计算重试延迟"""
         if self.config.retry_strategy == RetryStrategy.NO_RETRY:
@@ -359,44 +549,78 @@ class FallbackManager:
             return self.config.retry_delay_base * (2 ** attempt)
         else:
             return self.config.retry_delay_base
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
     def _check_circuit_breaker(self, algorithm_id: str) -> bool:
         """检查熔断器状态"""
         if not self.config.circuit_breaker_enabled:
             return True
+<<<<<<< HEAD
 
         breaker = self.circuit_breakers[algorithm_id]
         return breaker.state != CircuitBreakerState.OPEN
 
+=======
+            
+        breaker = self.circuit_breakers[algorithm_id]
+        return breaker.state != CircuitBreakerState.OPEN
+        
+>>>>>>> feature/core-services-refactor
     def _record_circuit_breaker_success(self, algorithm_id: str):
         """记录熔断器成功"""
         if not self.config.circuit_breaker_enabled:
             return
+<<<<<<< HEAD
 
         breaker = self.circuit_breakers[algorithm_id]
         breaker.last_success_time = datetime.now()
 
+=======
+            
+        breaker = self.circuit_breakers[algorithm_id]
+        breaker.last_success_time = datetime.now()
+        
+>>>>>>> feature/core-services-refactor
         if breaker.state == CircuitBreakerState.HALF_OPEN:
             breaker.state = CircuitBreakerState.CLOSED
             breaker.failure_count = 0
             logger.info(f"Circuit breaker for {algorithm_id} moved to CLOSED")
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
     def _record_circuit_breaker_failure(self, algorithm_id: str):
         """记录熔断器失败"""
         if not self.config.circuit_breaker_enabled:
             return
+<<<<<<< HEAD
 
         breaker = self.circuit_breakers[algorithm_id]
         breaker.failure_count += 1
         breaker.last_failure_time = datetime.now()
 
+=======
+            
+        breaker = self.circuit_breakers[algorithm_id]
+        breaker.failure_count += 1
+        breaker.last_failure_time = datetime.now()
+        
+>>>>>>> feature/core-services-refactor
         if breaker.failure_count >= self.config.failure_threshold:
             if breaker.state != CircuitBreakerState.OPEN:
                 breaker.state = CircuitBreakerState.OPEN
                 breaker.open_time = datetime.now()
                 self.stats["circuit_breaker_trips"] += 1
                 logger.warning(f"Circuit breaker for {algorithm_id} moved to OPEN")
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
     def _record_fallback_event(self,
                               event_id: str,
                               original_algorithm: str,
@@ -405,7 +629,11 @@ class FallbackManager:
                               fallback_depth: int,
                               success: bool,
                               execution_time: float,
+<<<<<<< HEAD
                               metadata: Optional[Dict[str, Any]] = None):
+=======
+                              metadata: Optional[dict[str, Any]] = None):
+>>>>>>> feature/core-services-refactor
         """记录降级事件"""
         event = FallbackEvent(
             event_id=event_id,
@@ -418,12 +646,22 @@ class FallbackManager:
             execution_time=execution_time,
             metadata=metadata or {}
         )
+<<<<<<< HEAD
 
         self.fallback_events.append(event)
 
+=======
+        
+        self.fallback_events.append(event)
+        
+>>>>>>> feature/core-services-refactor
         # 通知监听器
         for listener in self.event_listeners:
             try:
                 listener(event)
             except Exception as e:
+<<<<<<< HEAD
                 logger.error(f"Event listener failed: {str(e)}")
+=======
+                logger.error(f"Event listener failed: {str(e)}")
+>>>>>>> feature/core-services-refactor

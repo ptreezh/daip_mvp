@@ -6,12 +6,11 @@
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 class StepType(Enum):
     """步骤类型枚举"""
-
     ANALYSIS = "analysis"
     SYNTHESIS = "synthesis"
     CRITIQUE = "critique"
@@ -23,7 +22,6 @@ class StepType(Enum):
 
 class WorkflowStatus(Enum):
     """工作流状态枚举"""
-
     DRAFT = "draft"
     VALIDATED = "validated"
     ACTIVE = "active"
@@ -34,19 +32,18 @@ class WorkflowStatus(Enum):
 @dataclass
 class WorkflowStep:
     """工作流步骤"""
-
     id: str
     name: str
     type: StepType
     description: str
-    agent_roles: List[str]
-    dependencies: List[str]
-    parameters: Dict[str, Any]
-    validation_criteria: Dict[str, Any]
+    agent_roles: list[str]
+    dependencies: list[str]
+    parameters: dict[str, Any]
+    validation_criteria: dict[str, Any]
     timeout: Optional[int] = 300
     retry_count: int = 0
-    metadata: Dict[str, Any] = None
-
+    metadata: dict[str, Any] = None
+    
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -55,17 +52,16 @@ class WorkflowStep:
 @dataclass
 class WorkflowDefinition:
     """工作流定义"""
-
     id: str
     name: str
     description: str
-    steps: List[WorkflowStep]
-    parameters: Dict[str, Any]
+    steps: list[WorkflowStep]
+    parameters: dict[str, Any]
     status: WorkflowStatus = WorkflowStatus.DRAFT
     created_at: datetime = None
     updated_at: datetime = None
-    metadata: Dict[str, Any] = None
-
+    metadata: dict[str, Any] = None
+    
     def __post_init__(self):
         if self.created_at is None:
             self.created_at = datetime.now()
@@ -78,13 +74,12 @@ class WorkflowDefinition:
 @dataclass
 class WorkflowValidationResult:
     """工作流验证结果"""
-
     is_valid: bool
-    issues: List[str]
-    suggestions: List[str]
+    issues: list[str]
+    suggestions: list[str]
     confidence: float = 0.8
-    metadata: Dict[str, Any] = None
-
+    metadata: dict[str, Any] = None
+    
     def __post_init__(self):
         if self.issues is None:
             self.issues = []
@@ -97,16 +92,15 @@ class WorkflowValidationResult:
 @dataclass
 class WorkflowPreview:
     """工作流预览"""
-
     name: str
     description: str
     total_steps: int
     estimated_duration: int
-    agent_roles: List[str]
+    agent_roles: list[str]
     complexity: str
     confidence: float
-    metadata: Dict[str, Any] = None
-
+    metadata: dict[str, Any] = None
+    
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -115,7 +109,6 @@ class WorkflowPreview:
 @dataclass
 class WorkflowExecution:
     """工作流执行"""
-
     id: str
     workflow_id: str
     status: str
@@ -123,9 +116,9 @@ class WorkflowExecution:
     progress: float
     started_at: datetime
     completed_at: Optional[datetime]
-    results: Dict[str, Any]
-    metadata: Dict[str, Any] = None
-
+    results: dict[str, Any]
+    metadata: dict[str, Any] = None
+    
     def __post_init__(self):
         if self.started_at is None:
             self.started_at = datetime.now()
@@ -138,17 +131,16 @@ class WorkflowExecution:
 @dataclass
 class WorkflowTemplate:
     """工作流模板"""
-
     id: str
     name: str
     description: str
     definition: WorkflowDefinition
-    tags: List[str]
+    tags: list[str]
     usage_count: int
     created_at: datetime
     updated_at: datetime
-    metadata: Dict[str, Any] = None
-
+    metadata: dict[str, Any] = None
+    
     def __post_init__(self):
         if self.created_at is None:
             self.created_at = datetime.now()

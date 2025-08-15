@@ -6,7 +6,11 @@ cognitive independence, and self-monitoring.
 """
 
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, List, Tuple
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -14,24 +18,30 @@ from pydantic import BaseModel, Field
 class TaskTemplate(BaseModel):
     """Template for recognizing and handling specific task types.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     name: str
     description: str
-    recognition_patterns: List[str]
-    required_capabilities: List[str]
+    recognition_patterns: list[str]
+    required_capabilities: list[str]
     handling_strategy: str
 
 
 class CognitiveStrategy(BaseModel):
     """Strategy for addressing specific cognitive challenges.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     name: str
     description: str
-    trigger_conditions: List[str]
-    steps: List[str]
+    trigger_conditions: list[str]
+    steps: list[str]
     effectiveness: float = Field(ge=0.0, le=1.0)
 
 
@@ -66,8 +76,13 @@ class MetaCognition:
         self.logger.info(f"Initialized level {level} meta-cognition for agent {agent_id}")
         self.logger.debug(f"Loaded {len(self.task_templates)} task templates and "
                          f"{len(self.cognitive_strategies)} cognitive strategies")
+<<<<<<< HEAD
 
     def _initialize_task_templates(self) -> Dict[str, TaskTemplate]:
+=======
+    
+    def _initialize_task_templates(self) -> dict[str, TaskTemplate]:
+>>>>>>> feature/core-services-refactor
         """Initialize task templates based on the meta-cognitive level.
         
         Returns:
@@ -166,8 +181,13 @@ class MetaCognition:
             )
 
         return templates
+<<<<<<< HEAD
 
     def _initialize_cognitive_strategies(self) -> Dict[str, CognitiveStrategy]:
+=======
+    
+    def _initialize_cognitive_strategies(self) -> dict[str, CognitiveStrategy]:
+>>>>>>> feature/core-services-refactor
         """Initialize cognitive strategies based on the meta-cognitive level.
         
         Returns:
@@ -266,8 +286,13 @@ class MetaCognition:
             )
 
         return strategies
+<<<<<<< HEAD
 
     async def identify_task(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    async def identify_task(self, input_data: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Identify the task type and requirements from input data and context.
         
         Args:
@@ -310,8 +335,13 @@ class MetaCognition:
             "handling_strategy": handling_strategy,
             "cognitive_strategies": [strategy.id for strategy in cognitive_strategies]
         }
+<<<<<<< HEAD
 
     def _match_task_type(self, query: str) -> Tuple[str, float]:
+=======
+    
+    def _match_task_type(self, query: str) -> tuple[str, float]:
+>>>>>>> feature/core-services-refactor
         """Match a query against task templates to identify the task type.
         
         Args:
@@ -350,8 +380,13 @@ class MetaCognition:
     def _identify_relevant_strategies(
         self,
         task_type: str,
+<<<<<<< HEAD
         context: Dict[str, Any]
     ) -> List[CognitiveStrategy]:
+=======
+        context: dict[str, Any]
+    ) -> list[CognitiveStrategy]:
+>>>>>>> feature/core-services-refactor
         """Identify cognitive strategies relevant to the task and context.
         
         Args:
@@ -388,9 +423,15 @@ class MetaCognition:
 
     async def ensure_independence(
         self,
+<<<<<<< HEAD
         result: Dict[str, Any],
         context: Dict[str, Any]
     ) -> Dict[str, Any]:
+=======
+        result: dict[str, Any],
+        context: dict[str, Any]
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Ensure cognitive independence by applying meta-cognitive strategies.
         
         This method helps maintain the agent's unique cognitive perspective by:
@@ -415,7 +456,11 @@ class MetaCognition:
         # Apply cognitive independence strategies
         independent_result = self._apply_independence_strategies(result, external_influences)
         self.logger.debug("Applied independence strategies")
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # Add meta-cognitive trace
         independent_result["meta_cognitive_trace"] = {
             "independence_level": self.level,
@@ -427,9 +472,15 @@ class MetaCognition:
 
     def _identify_external_influences(
         self,
+<<<<<<< HEAD
         result: Dict[str, Any],
         context: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
+=======
+        result: dict[str, Any],
+        context: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Identify potential external influences that might compromise cognitive independence.
         
         Args:
@@ -456,9 +507,15 @@ class MetaCognition:
 
     def _apply_independence_strategies(
         self,
+<<<<<<< HEAD
         result: Dict[str, Any],
         external_influences: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
+=======
+        result: dict[str, Any],
+        external_influences: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Apply strategies to enhance cognitive independence.
         
         Args:
@@ -476,8 +533,13 @@ class MetaCognition:
         independent_result = result.copy()
         independent_result["independence_enhanced"] = True
         return independent_result
+<<<<<<< HEAD
 
     def get_state(self) -> Dict[str, Any]:
+=======
+    
+    def get_state(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get the current state of the meta-cognition system.
         
         Returns:
@@ -489,8 +551,13 @@ class MetaCognition:
             "task_templates": list(self.task_templates.keys()),
             "cognitive_strategies": list(self.cognitive_strategies.keys())
         }
+<<<<<<< HEAD
 
     def update_state(self, state_updates: Dict[str, Any]) -> None:
+=======
+    
+    def update_state(self, state_updates: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Update the state of the meta-cognition system.
         
         Args:

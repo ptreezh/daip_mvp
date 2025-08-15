@@ -5,9 +5,14 @@
     User feedback collection and validation mechanisms for workflow results.
 """
 import logging
+from collections.abc import Callable
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Callable, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 from rich.console import Console
@@ -38,7 +43,7 @@ class FeedbackItem(BaseModel):
     validation_result: Optional[bool] = None
     correction_text: Optional[str] = None
     suggestion_text: Optional[str] = None
-    quality_scores: Dict[str, float] = Field(default_factory=dict)
+    quality_scores: dict[str, float] = Field(default_factory=dict)
     comments: str = ""
     timestamp: datetime = Field(default_factory=datetime.now)
     user_id: Optional[str] = None
@@ -51,9 +56,9 @@ class WorkflowFeedback(BaseModel):
     workflow_type: str
     overall_rating: Optional[int] = Field(None, ge=1, le=5)
     overall_satisfaction: Optional[bool] = None
-    feedback_items: List[FeedbackItem] = Field(default_factory=list)
+    feedback_items: list[FeedbackItem] = Field(default_factory=list)
     general_comments: str = ""
-    improvement_suggestions: List[str] = Field(default_factory=list)
+    improvement_suggestions: list[str] = Field(default_factory=list)
     timestamp: datetime = Field(default_factory=datetime.now)
     user_id: Optional[str] = None
 
@@ -76,12 +81,18 @@ class FeedbackCollector:
     def __init__(self):
         """Initialize the feedback collector."""
         self.console = Console()
+<<<<<<< HEAD
         self.feedback_storage: Dict[str, WorkflowFeedback] = {}
         self.validation_callbacks: List[Callable[[ValidationResult], None]] = []
 
+=======
+        self.feedback_storage: dict[str, WorkflowFeedback] = {}
+        self.validation_callbacks: list[Callable[[ValidationResult], None]] = []
+    
+>>>>>>> feature/core-services-refactor
     def collect_workflow_feedback(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         workflow_type: str,
         interactive: bool = True,
@@ -107,10 +118,10 @@ class FeedbackCollector:
 
     def validate_result_elements(
         self,
-        result: Dict[str, Any],
-        validation_criteria: Dict[str, Any] = None,
+        result: dict[str, Any],
+        validation_criteria: dict[str, Any] = None,
         user_id: Optional[str] = None
-    ) -> List[ValidationResult]:
+    ) -> list[ValidationResult]:
         """Validate specific elements of the workflow result."""
         validation_results = []
 
@@ -150,9 +161,9 @@ class FeedbackCollector:
 
     def collect_fact_validation(
         self,
-        facts: List[Dict[str, Any]],
+        facts: list[dict[str, Any]],
         interactive: bool = True
-    ) -> List[FeedbackItem]:
+    ) -> list[FeedbackItem]:
         """Collect validation feedback for extracted facts."""
         feedback_items = []
 
@@ -204,8 +215,8 @@ class FeedbackCollector:
 
     def collect_quality_assessment(
         self,
-        result: Dict[str, Any],
-        assessment_criteria: List[str] = None,
+        result: dict[str, Any],
+        assessment_criteria: list[str] = None,
         interactive: bool = True
     ) -> FeedbackItem:
         """Collect quality assessment feedback."""
@@ -243,9 +254,9 @@ class FeedbackCollector:
 
     def collect_improvement_suggestions(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         interactive: bool = True
-    ) -> List[str]:
+    ) -> list[str]:
         """Collect suggestions for improvement."""
         suggestions = []
 
@@ -335,8 +346,13 @@ class FeedbackCollector:
             return self._export_feedback_csv(feedback)
         else:
             raise ValueError(f"Unsupported export format: {format_type}")
+<<<<<<< HEAD
 
     def get_feedback_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_feedback_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get statistics about collected feedback."""
         if not self.feedback_storage:
             return {"total_feedback": 0}
@@ -378,7 +394,7 @@ class FeedbackCollector:
 
     def _collect_interactive_feedback(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         feedback: WorkflowFeedback
     ) -> None:
         """Collect feedback interactively from the user."""
@@ -428,8 +444,13 @@ class FeedbackCollector:
 
         # General comments
         feedback.general_comments = Prompt.ask("General comments (optional)", default="")
+<<<<<<< HEAD
 
     def _create_default_feedback_items(self, result: Dict[str, Any]) -> List[FeedbackItem]:
+=======
+    
+    def _create_default_feedback_items(self, result: dict[str, Any]) -> list[FeedbackItem]:
+>>>>>>> feature/core-services-refactor
         """Create default feedback items for non-interactive mode."""
         items = []
 
@@ -452,8 +473,13 @@ class FeedbackCollector:
             ))
 
         return items
+<<<<<<< HEAD
 
     def _collect_credibility_feedback(self, credibility_scores: Dict[str, float]) -> List[FeedbackItem]:
+=======
+    
+    def _collect_credibility_feedback(self, credibility_scores: dict[str, float]) -> list[FeedbackItem]:
+>>>>>>> feature/core-services-refactor
         """Collect feedback on credibility scores."""
         feedback_items = []
 
@@ -505,7 +531,7 @@ class FeedbackCollector:
         self,
         fact_id: str,
         score: float,
-        criteria: Dict[str, Any] = None,
+        criteria: dict[str, Any] = None,
         user_id: Optional[str] = None
     ) -> ValidationResult:
         """Validate a credibility score."""
@@ -534,7 +560,7 @@ class FeedbackCollector:
     def _validate_synthesis_quality(
         self,
         synthesis: str,
-        criteria: Dict[str, Any] = None,
+        criteria: dict[str, Any] = None,
         user_id: Optional[str] = None
     ) -> ValidationResult:
         """Validate synthesis quality."""
@@ -565,8 +591,8 @@ class FeedbackCollector:
 
     def _validate_fact_accuracy(
         self,
-        fact: Dict[str, Any],
-        criteria: Dict[str, Any] = None,
+        fact: dict[str, Any],
+        criteria: dict[str, Any] = None,
         user_id: Optional[str] = None
     ) -> ValidationResult:
         """Validate fact accuracy."""

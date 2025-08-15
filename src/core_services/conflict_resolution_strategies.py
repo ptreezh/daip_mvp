@@ -5,7 +5,11 @@
 """
 
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +33,13 @@ class ConflictResolutionStrategies:
             "temporal_priority": 0.70,
             "stakeholder_consensus": 0.65
         }
+<<<<<<< HEAD
 
     def select_strategy(self, conflict_context: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def select_strategy(self, conflict_context: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """选择策略"""
         try:
             conflict_type = conflict_context.get("conflict_type", "unknown")
@@ -57,8 +66,13 @@ class ConflictResolutionStrategies:
         except Exception as e:
             logger.error(f"选择策略失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def apply_synthesis_strategy(self, conflicting_claims: List[Dict[str, Any]]) -> Dict[str, Any]:
+=======
+    
+    def apply_synthesis_strategy(self, conflicting_claims: list[dict[str, Any]]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """应用综合策略"""
         try:
             if not conflicting_claims:
@@ -92,8 +106,13 @@ class ConflictResolutionStrategies:
         except Exception as e:
             logger.error(f"应用综合策略失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def apply_evidence_weighting(self, evidence_items: List[Dict[str, Any]]) -> Dict[str, Any]:
+=======
+    
+    def apply_evidence_weighting(self, evidence_items: list[dict[str, Any]]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """应用证据权重策略"""
         try:
             if not evidence_items:
@@ -124,8 +143,13 @@ class ConflictResolutionStrategies:
         except Exception as e:
             logger.error(f"应用证据权重策略失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def _find_common_elements(self, claims: List[str]) -> str:
+=======
+    
+    def _find_common_elements(self, claims: list[str]) -> str:
+>>>>>>> feature/core-services-refactor
         """寻找共同元素"""
         try:
             if len(claims) < 2:

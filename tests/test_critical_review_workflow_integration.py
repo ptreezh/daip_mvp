@@ -22,8 +22,8 @@ from src.institutional_primitives.revision_node import RevisionNode
 
 class TestCriticalReviewWorkflowIntegration:
     """Integration tests for the complete Critical Review Workflow."""
-
-    @pytest.fixture
+    
+    @pytest.fixture()
     def mock_context(self):
         """Create a mock execution context with shared state."""
         context = Mock(spec=ExecutionContext)
@@ -34,16 +34,16 @@ class TestCriticalReviewWorkflowIntegration:
         context.mark_completed = Mock()
         context.mark_failed = Mock()
         return context
-
-    @pytest.fixture
+    
+    @pytest.fixture()
     def mock_llm_interface(self):
         """Create a mock LLM interface."""
         llm = AsyncMock()
-
+        
         # Configure different responses based on the prompt content
         async def generate_side_effect(messages):
             prompt = messages[0]["content"]
-
+            
             if "创作者" in prompt:
                 # Generation node response
                 return {
@@ -79,11 +79,11 @@ class TestCriticalReviewWorkflowIntegration:
             else:
                 # Default response
                 return {"content": "默认回复内容"}
-
+        
         llm.generate.side_effect = generate_side_effect
         return llm
-
-    @pytest.fixture
+    
+    @pytest.fixture()
     def mock_fact_extraction_service(self):
         """Create a mock fact extraction service."""
         service = AsyncMock()
@@ -118,8 +118,8 @@ class TestCriticalReviewWorkflowIntegration:
             }
         ]
         return service
-
-    @pytest.fixture
+    
+    @pytest.fixture()
     def mock_wiki_service(self):
         """Create a mock wiki service."""
         service = AsyncMock()
@@ -131,33 +131,33 @@ class TestCriticalReviewWorkflowIntegration:
             }
         ]
         return service
-
-    @pytest.fixture
+    
+    @pytest.fixture()
     def mock_synthesis_engine(self):
         """Create a mock synthesis engine."""
         engine = AsyncMock()
-
+        
         async def synthesize_side_effect(topic, history):
             if "Fact Credibility Analysis" in topic:
                 fact_content = history[0]["opinion"]
-
+                
                 if "5000亿美元" in fact_content:
                     return "分析结果：这一事实声明的可信度较低。多个可靠来源表明2023年全球AI市场规模约为1500-2000亿美元，远低于5000亿美元。\n\n最终可信度评分：0.3"
                 elif "机器学习是AI的核心技术" in fact_content:
                     return "分析结果：这一事实声明基本可信，但表述过于绝对。机器学习确实是当前AI的主要技术路线之一，但不是唯一核心技术。\n\n最终可信度评分：0.6"
                 else:
                     return "分析结果：这一事实声明得到广泛认可和验证，可信度高。\n\n最终可信度评分：0.9"
-
+            
             return "综合分析结果"
-
+        
         engine.synthesize_opinions.side_effect = synthesize_side_effect
         return engine
-
-    @pytest.mark.asyncio
+    
+    @pytest.mark.asyncio()
     async def test_critical_review_workflow_integration(
-        self,
-        mock_context,
-        mock_llm_interface,
+        self, 
+        mock_context, 
+        mock_llm_interface, 
         mock_fact_extraction_service,
         mock_wiki_service,
         mock_synthesis_engine
@@ -168,7 +168,7 @@ class TestCriticalReviewWorkflowIntegration:
         mock_context.services["fact_extraction_service"] = mock_fact_extraction_service
         mock_context.services["wiki_service"] = mock_wiki_service
         mock_context.services["synthesis_engine"] = mock_synthesis_engine
-
+        
         # Create workflow nodes
         generation_node = GenerationNode("gen_1", {"role_name": "创作者"})
         fact_extraction_node = FactExtractionNode("fact_1", {"min_confidence": 0.6})
@@ -176,71 +176,71 @@ class TestCriticalReviewWorkflowIntegration:
         evidence_aggregation_node = EvidenceAggregationNode("agg_1")
         consensus_node = ConsensusNode("consensus_1", {"consensus_method": "synthesis", "credibility_threshold": 0.7})
         revision_node = RevisionNode("revision_1", {"revision_role": "创作者"})
-
+        
         # Step 1: Generate content
         gen_result = await generation_node.execute(
-            {"prompt": "请介绍人工智能的基本概念和市场规模"},
+            {"prompt": "请介绍人工智能的基本概念和市场规模"}, 
             mock_context
         )
-
+        
         # Verify generation result
         assert gen_result["success"] is True
         assert "人工智能" in gen_result["content"]
         assert "5000亿美元" in gen_result["content"]
-
+        
         # Step 2: Extract facts
         fact_result = await fact_extraction_node.execute({}, mock_context)
-
+        
         # Verify fact extraction result
         assert fact_result["success"] is True
         assert fact_result["fact_count"] == 4
-
+        
         # Step 3: Parallel review
         review_result = await parallel_review_node.execute({}, mock_context)
-
+        
         # Verify review result
         assert review_result["success"] is True
         assert review_result["review_count"] > 0
-
+        
         # Step 4: Evidence aggregation
         agg_result = await evidence_aggregation_node.execute({}, mock_context)
-
+        
         # Verify aggregation result
         assert agg_result["success"] is True
         assert agg_result["facts_processed"] > 0
-
+        
         # Step 5: Consensus calculation
         consensus_result = await consensus_node.execute({}, mock_context)
-
+        
         # Verify consensus result
         assert consensus_result["success"] is True
         assert len(consensus_result["credibility_scores"]) > 0
         assert len(consensus_result["facts_needing_revision"]) > 0
-
+        
         # The market size fact should need revision
         market_size_fact_id = None
         for fact in mock_context.state.get("extracted_facts", []):
             if "5000亿美元" in fact.get("content", ""):
                 market_size_fact_id = fact.get("id")
                 break
-
+        
         assert market_size_fact_id is not None
         assert market_size_fact_id in consensus_result["facts_needing_revision"]
-
+        
         # Step 6: Content revision
         revision_result = await revision_node.execute({}, mock_context)
-
+        
         # Verify revision result
         assert revision_result["success"] is True
         assert revision_result["revision_needed"] is True
         assert "1500-2000亿美元" in revision_result["revised_content"]
         assert "5000亿美元" not in revision_result["revised_content"]
-
-    @pytest.mark.asyncio
+    
+    @pytest.mark.asyncio()
     async def test_critical_review_workflow_no_revision_needed(
-        self,
-        mock_context,
-        mock_llm_interface,
+        self, 
+        mock_context, 
+        mock_llm_interface, 
         mock_fact_extraction_service,
         mock_wiki_service,
         mock_synthesis_engine
@@ -251,7 +251,7 @@ class TestCriticalReviewWorkflowIntegration:
         mock_context.services["fact_extraction_service"] = mock_fact_extraction_service
         mock_context.services["wiki_service"] = mock_wiki_service
         mock_context.services["synthesis_engine"] = mock_synthesis_engine
-
+        
         # Override fact extraction to return only high-credibility facts
         mock_fact_extraction_service.extract_facts.return_value = [
             {
@@ -269,7 +269,7 @@ class TestCriticalReviewWorkflowIntegration:
                 "method": "llm"
             }
         ]
-
+        
         # Create workflow nodes
         generation_node = GenerationNode("gen_1", {"role_name": "创作者"})
         fact_extraction_node = FactExtractionNode("fact_1", {"min_confidence": 0.6})
@@ -277,60 +277,60 @@ class TestCriticalReviewWorkflowIntegration:
         evidence_aggregation_node = EvidenceAggregationNode("agg_1")
         consensus_node = ConsensusNode("consensus_1", {"consensus_method": "synthesis", "credibility_threshold": 0.7})
         revision_node = RevisionNode("revision_1", {"revision_role": "创作者"})
-
+        
         # Execute workflow steps
         await generation_node.execute({"prompt": "请介绍人工智能的基本概念"}, mock_context)
         await fact_extraction_node.execute({}, mock_context)
         await parallel_review_node.execute({}, mock_context)
         await evidence_aggregation_node.execute({}, mock_context)
         consensus_result = await consensus_node.execute({}, mock_context)
-
+        
         # Verify no facts need revision
         assert len(consensus_result["facts_needing_revision"]) == 0
-
+        
         # Execute revision node
         revision_result = await revision_node.execute({}, mock_context)
-
+        
         # Verify revision was not needed
         assert revision_result["success"] is True
         assert revision_result["revision_needed"] is False
         assert "No revision needed" in revision_result["revision_summary"]
-
-    @pytest.mark.asyncio
+    
+    @pytest.mark.asyncio()
     async def test_critical_review_workflow_error_handling(
-        self,
-        mock_context,
-        mock_llm_interface,
+        self, 
+        mock_context, 
+        mock_llm_interface, 
         mock_fact_extraction_service
     ):
         """Test error handling in the workflow."""
         # Setup services with only LLM interface
         mock_context.services["llm_interface"] = mock_llm_interface
-
+        
         # Create workflow nodes
         generation_node = GenerationNode("gen_1", {"role_name": "创作者"})
         fact_extraction_node = FactExtractionNode("fact_1", {"min_confidence": 0.6})
-
+        
         # Step 1: Generate content
         gen_result = await generation_node.execute(
-            {"prompt": "请介绍人工智能的基本概念和市场规模"},
+            {"prompt": "请介绍人工智能的基本概念和市场规模"}, 
             mock_context
         )
-
+        
         # Verify generation result
         assert gen_result["success"] is True
-
+        
         # Step 2: Try fact extraction without the service
         fact_result = await fact_extraction_node.execute({}, mock_context)
-
+        
         # Verify fact extraction fails gracefully
         assert fact_result["success"] is False
         assert "Fact extraction service not available" in fact_result["error"]
-
+        
         # Now add the service and try again
         mock_context.services["fact_extraction_service"] = mock_fact_extraction_service
         fact_result = await fact_extraction_node.execute({}, mock_context)
-
+        
         # Verify fact extraction succeeds
         assert fact_result["success"] is True
         assert fact_result["fact_count"] > 0

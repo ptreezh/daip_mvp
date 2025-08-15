@@ -4,7 +4,11 @@
 import uuid
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Set
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -35,11 +39,11 @@ class WorkflowNode(BaseModel):
 
     id: str
     type: str  # Primitive type (e.g., "generation", "fact_extraction")
-    config: Dict[str, Any] = Field(default_factory=dict)
-    inputs: List[str] = Field(default_factory=list)  # Input parameter names
-    outputs: List[str] = Field(default_factory=list)  # Output parameter names
-    dependencies: List[str] = Field(default_factory=list)  # Node IDs this node depends on
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    config: dict[str, Any] = Field(default_factory=dict)
+    inputs: list[str] = Field(default_factory=list)  # Input parameter names
+    outputs: list[str] = Field(default_factory=list)  # Output parameter names
+    dependencies: list[str] = Field(default_factory=list)  # Node IDs this node depends on
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class WorkflowEdge(BaseModel):
@@ -48,8 +52,8 @@ class WorkflowEdge(BaseModel):
     from_node: str
     to_node: str
     condition: Optional[str] = None  # Conditional execution expression
-    data_mapping: Dict[str, str] = Field(default_factory=dict)  # Output->Input mapping
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    data_mapping: dict[str, str] = Field(default_factory=dict)  # Output->Input mapping
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class WorkflowDefinition(BaseModel):
@@ -59,14 +63,19 @@ class WorkflowDefinition(BaseModel):
     name: str
     description: str = ""
     version: str = "1.0.0"
-    nodes: List[WorkflowNode]
-    edges: List[WorkflowEdge]
-    parameters: Dict[str, Any] = Field(default_factory=dict)  # Workflow-level parameters
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    nodes: list[WorkflowNode]
+    edges: list[WorkflowEdge]
+    parameters: dict[str, Any] = Field(default_factory=dict)  # Workflow-level parameters
+    metadata: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
+<<<<<<< HEAD
 
     def validate_structure(self) -> List[str]:
+=======
+    
+    def validate_structure(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Validate the workflow structure and return list of errors."""
         errors = []
 
@@ -137,12 +146,12 @@ class ExecutionStep(BaseModel):
     status: NodeStatus
     start_time: datetime
     end_time: Optional[datetime] = None
-    inputs: Dict[str, Any] = Field(default_factory=dict)
-    outputs: Dict[str, Any] = Field(default_factory=dict)
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
+    inputs: dict[str, Any] = Field(default_factory=dict)
+    outputs: dict[str, Any] = Field(default_factory=dict)
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
     execution_time: float = 0.0  # Seconds
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ExecutionMetrics(BaseModel):
@@ -154,9 +163,9 @@ class ExecutionMetrics(BaseModel):
     failed_nodes: int = 0
     skipped_nodes: int = 0
     parallel_efficiency: float = 0.0  # Ratio of parallel to sequential time
-    memory_usage: Dict[str, float] = Field(default_factory=dict)  # Memory usage stats
-    resource_utilization: Dict[str, float] = Field(default_factory=dict)
-    bottlenecks: List[str] = Field(default_factory=list)  # Node IDs that were bottlenecks
+    memory_usage: dict[str, float] = Field(default_factory=dict)  # Memory usage stats
+    resource_utilization: dict[str, float] = Field(default_factory=dict)
+    bottlenecks: list[str] = Field(default_factory=list)  # Node IDs that were bottlenecks
 
 
 class WorkflowExecution(BaseModel):
@@ -169,6 +178,7 @@ class WorkflowExecution(BaseModel):
     start_time: datetime = Field(default_factory=datetime.now)
     end_time: Optional[datetime] = None
     current_step: Optional[str] = None  # Current node ID being executed
+<<<<<<< HEAD
     execution_trace: List[ExecutionStep] = Field(default_factory=list)
     workflow_state: Dict[str, Any] = Field(default_factory=dict)  # Shared state across nodes
     node_outputs: Dict[str, Dict[str, Any]] = Field(default_factory=dict)  # Node ID -> outputs
@@ -183,6 +193,22 @@ class WorkflowExecution(BaseModel):
     failed_nodes: Set[str] = Field(default_factory=set)
     current_nodes: Set[str] = Field(default_factory=set)  # Currently executing nodes
 
+=======
+    execution_trace: list[ExecutionStep] = Field(default_factory=list)
+    workflow_state: dict[str, Any] = Field(default_factory=dict)  # Shared state across nodes
+    node_outputs: dict[str, dict[str, Any]] = Field(default_factory=dict)  # Node ID -> outputs
+    parameters: dict[str, Any] = Field(default_factory=dict)  # Runtime parameters
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    
+    # Runtime tracking
+    node_states: dict[str, NodeStatus] = Field(default_factory=dict)  # Node ID -> status
+    completed_nodes: set[str] = Field(default_factory=set)
+    failed_nodes: set[str] = Field(default_factory=set)
+    current_nodes: set[str] = Field(default_factory=set)  # Currently executing nodes
+    
+>>>>>>> feature/core-services-refactor
     def is_complete(self) -> bool:
         """Check if workflow execution is complete."""
         return self.status in [WorkflowStatus.COMPLETED, WorkflowStatus.FAILED, WorkflowStatus.CANCELLED]
@@ -190,8 +216,13 @@ class WorkflowExecution(BaseModel):
     def has_failed(self) -> bool:
         """Check if workflow execution has failed."""
         return self.status == WorkflowStatus.FAILED or len(self.failed_nodes) > 0
+<<<<<<< HEAD
 
     def get_ready_nodes(self) -> List[str]:
+=======
+    
+    def get_ready_nodes(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Get list of node IDs that are ready for execution."""
         ready_nodes = []
 
@@ -219,15 +250,15 @@ class WorkflowResult(BaseModel):
     execution_id: str
     workflow_id: str
     status: WorkflowStatus
-    outputs: Dict[str, Any] = Field(default_factory=dict)
-    execution_trace: List[ExecutionStep] = Field(default_factory=list)
+    outputs: dict[str, Any] = Field(default_factory=dict)
+    execution_trace: list[ExecutionStep] = Field(default_factory=list)
     metrics: ExecutionMetrics
     start_time: datetime
     end_time: Optional[datetime] = None
     total_execution_time: float = 0.0
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class WorkflowTemplate(BaseModel):
@@ -238,8 +269,8 @@ class WorkflowTemplate(BaseModel):
     description: str = ""
     category: str = "general"
     template_definition: WorkflowDefinition
-    parameter_schema: Dict[str, Any] = Field(default_factory=dict)  # JSON schema for parameters
-    tags: List[str] = Field(default_factory=list)
+    parameter_schema: dict[str, Any] = Field(default_factory=dict)  # JSON schema for parameters
+    tags: list[str] = Field(default_factory=list)
     author: Optional[str] = None
     version: str = "1.0.0"
     created_at: datetime = Field(default_factory=datetime.now)
@@ -250,19 +281,23 @@ class WorkflowValidationResult(BaseModel):
     """Result of workflow definition validation."""
 
     is_valid: bool
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
-    suggestions: List[str] = Field(default_factory=list)
-    dependency_graph: Dict[str, List[str]] = Field(default_factory=dict)  # Node dependencies
-    execution_order: List[str] = Field(default_factory=list)  # Topological order of nodes
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    suggestions: list[str] = Field(default_factory=list)
+    dependency_graph: dict[str, list[str]] = Field(default_factory=dict)  # Node dependencies
+    execution_order: list[str] = Field(default_factory=list)  # Topological order of nodes
 
 
 class ParallelExecutionGroup(BaseModel):
     """Group of nodes that can be executed in parallel."""
 
     group_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    node_ids: List[str]
+    node_ids: list[str]
     max_concurrency: int = 5
     timeout: Optional[float] = None  # Timeout in seconds
     retry_count: int = 0
+<<<<<<< HEAD
     metadata: Dict[str, Any] = Field(default_factory=dict)
+=======
+    metadata: dict[str, Any] = Field(default_factory=dict)
+>>>>>>> feature/core-services-refactor

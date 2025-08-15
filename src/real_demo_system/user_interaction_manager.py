@@ -6,10 +6,18 @@
 import asyncio
 import logging
 import uuid
+<<<<<<< HEAD
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
+=======
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional, Union
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -42,12 +50,17 @@ class InteractionRequest:
     interaction_type: InteractionType
     title: str
     description: str
-    options: Optional[Dict[str, Any]]
+    options: Optional[dict[str, Any]]
     required: bool
     timeout_seconds: Optional[int]
     created_at: datetime
+<<<<<<< HEAD
 
     def to_dict(self) -> Dict[str, Any]:
+=======
+    
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         data = asdict(self)
         data['interaction_type'] = self.interaction_type.value
         data['created_at'] = self.created_at.isoformat()
@@ -62,8 +75,13 @@ class InteractionResponse:
     response_data: Any
     response_time: datetime
     user_id: Optional[str] = None
+<<<<<<< HEAD
 
     def to_dict(self) -> Dict[str, Any]:
+=======
+    
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         data = asdict(self)
         data['response_time'] = self.response_time.isoformat()
         return data
@@ -76,13 +94,18 @@ class InteractionSession:
     session_id: str
     user_id: Optional[str]
     demo_session_id: Optional[str]
-    active_requests: Dict[str, InteractionRequest]
-    completed_interactions: List[Dict[str, Any]]
-    session_context: Dict[str, Any]
+    active_requests: dict[str, InteractionRequest]
+    completed_interactions: list[dict[str, Any]]
+    session_context: dict[str, Any]
     created_at: datetime
     last_activity: datetime
+<<<<<<< HEAD
 
     def to_dict(self) -> Dict[str, Any]:
+=======
+    
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         data = asdict(self)
         data['created_at'] = self.created_at.isoformat()
         data['last_activity'] = self.last_activity.isoformat()
@@ -98,6 +121,7 @@ class UserInteractionManager:
 
     def __init__(self):
         """初始化用户交互管理器"""
+<<<<<<< HEAD
         self.interaction_sessions: Dict[str, InteractionSession] = {}
         self.pending_requests: Dict[str, InteractionRequest] = {}
         self.response_handlers: Dict[str, Callable] = {}
@@ -106,13 +130,23 @@ class UserInteractionManager:
         # 交互超时管理
         self.timeout_tasks: Dict[str, asyncio.Task] = {}
 
+=======
+        self.interaction_sessions: dict[str, InteractionSession] = {}
+        self.pending_requests: dict[str, InteractionRequest] = {}
+        self.response_handlers: dict[str, Callable] = {}
+        self.event_subscribers: list[Callable] = []
+        
+        # 交互超时管理
+        self.timeout_tasks: dict[str, asyncio.Task] = {}
+        
+>>>>>>> feature/core-services-refactor
         logger.info("UserInteractionManager initialized")
 
     def create_interaction_session(
         self,
         user_id: Optional[str] = None,
         demo_session_id: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[dict[str, Any]] = None
     ) -> str:
         """创建交互会话
         
@@ -149,7 +183,7 @@ class UserInteractionManager:
         title: str,
         description: str,
         input_type: str = "text",
-        validation_rules: Optional[Dict[str, Any]] = None,
+        validation_rules: Optional[dict[str, Any]] = None,
         default_value: Any = None,
         required: bool = True,
         timeout_seconds: Optional[int] = 300
@@ -222,7 +256,7 @@ class UserInteractionManager:
         current_value: Any,
         parameter_type: str,
         description: str,
-        allowed_values: Optional[List[Any]] = None,
+        allowed_values: Optional[list[Any]] = None,
         min_value: Optional[Union[int, float]] = None,
         max_value: Optional[Union[int, float]] = None,
         timeout_seconds: Optional[int] = 180
@@ -297,7 +331,7 @@ class UserInteractionManager:
         session_id: str,
         title: str,
         description: str,
-        choices: List[Dict[str, Any]],
+        choices: list[dict[str, Any]],
         allow_multiple: bool = False,
         required: bool = True,
         timeout_seconds: Optional[int] = 120
@@ -513,8 +547,13 @@ class UserInteractionManager:
 
         logger.info(f"Response submitted for request: {request_id}")
         return True
+<<<<<<< HEAD
 
     def _validate_response(self, request: InteractionRequest, response_data: Any) -> Dict[str, Any]:
+=======
+    
+    def _validate_response(self, request: InteractionRequest, response_data: Any) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """验证响应数据"""
         errors = []
 
@@ -618,8 +657,13 @@ class UserInteractionManager:
     def set_response_handler(self, request_id: str, handler: Callable):
         """设置响应处理器"""
         self.response_handlers[request_id] = handler
+<<<<<<< HEAD
 
     def get_pending_requests(self, session_id: Optional[str] = None) -> List[Dict[str, Any]]:
+=======
+    
+    def get_pending_requests(self, session_id: Optional[str] = None) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取待处理请求"""
         if session_id:
             session = self.interaction_sessions.get(session_id)
@@ -628,8 +672,13 @@ class UserInteractionManager:
             return []
         else:
             return [request.to_dict() for request in self.pending_requests.values()]
+<<<<<<< HEAD
 
     def get_session_status(self, session_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def get_session_status(self, session_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取会话状态"""
         session = self.interaction_sessions.get(session_id)
         if not session:
@@ -676,8 +725,13 @@ class UserInteractionManager:
 
         logger.info(f"Request cancelled: {request_id}")
         return True
+<<<<<<< HEAD
 
     async def _emit_event(self, event_type: str, data: Dict[str, Any]):
+=======
+    
+    async def _emit_event(self, event_type: str, data: dict[str, Any]):
+>>>>>>> feature/core-services-refactor
         """发送事件"""
         event = {
             "event_type": event_type,
@@ -705,8 +759,13 @@ class UserInteractionManager:
         if callback in self.event_subscribers:
             self.event_subscribers.remove(callback)
             logger.info(f"Interaction subscriber removed, total: {len(self.event_subscribers)}")
+<<<<<<< HEAD
 
     def get_interaction_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_interaction_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取交互统计信息"""
         total_sessions = len(self.interaction_sessions)
         total_pending = len(self.pending_requests)

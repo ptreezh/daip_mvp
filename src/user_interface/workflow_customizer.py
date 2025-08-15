@@ -7,7 +7,11 @@
 import json
 import logging
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from rich.console import Console
 from rich.prompt import Confirm, Prompt
@@ -23,9 +27,15 @@ class WorkflowCustomizer:
         """Initialize the workflow customizer."""
         self.console = console or Console()
         self.config_templates = self._load_config_templates()
+<<<<<<< HEAD
         self.custom_configs: Dict[str, Dict[str, Any]] = {}
 
     def _load_config_templates(self) -> Dict[str, Dict[str, Any]]:
+=======
+        self.custom_configs: dict[str, dict[str, Any]] = {}
+    
+    def _load_config_templates(self) -> dict[str, dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Load configuration templates for different workflows."""
         return {
             "critical_review": {
@@ -81,8 +91,8 @@ class WorkflowCustomizer:
         self,
         workflow_name: str,
         config_name: str = "custom",
-        base_config: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        base_config: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """Create a custom configuration interactively."""
         self.console.print(f"\n[blue]🎨 Creating Custom Configuration for {workflow_name}[/blue]")
 
@@ -142,8 +152,13 @@ class WorkflowCustomizer:
                 )
 
         return config
+<<<<<<< HEAD
 
     def load_config_from_file(self, file_path: str) -> Dict[str, Any]:
+=======
+    
+    def load_config_from_file(self, file_path: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Load configuration from a JSON file."""
         try:
             with open(file_path, encoding='utf-8') as f:
@@ -161,7 +176,7 @@ class WorkflowCustomizer:
 
     def save_config_to_file(
         self,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         file_path: str,
         overwrite: bool = False
     ) -> bool:
@@ -185,8 +200,13 @@ class WorkflowCustomizer:
         except Exception as e:
             self.console.print(f"[red]❌ Failed to save configuration: {e}[/red]")
             return False
+<<<<<<< HEAD
 
     def list_available_configs(self, workflow_name: str = None) -> List[str]:
+=======
+    
+    def list_available_configs(self, workflow_name: str = None) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List available configurations."""
         if workflow_name:
             configs = [name for name in self.custom_configs.keys() if name.startswith(workflow_name)]
@@ -199,7 +219,7 @@ class WorkflowCustomizer:
         self,
         workflow_name: str,
         use_case: str = "general"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get recommended configuration based on use case."""
         if workflow_name not in self.config_templates:
             return {}
@@ -240,9 +260,9 @@ class WorkflowCustomizer:
 
     def validate_config(
         self,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         workflow_name: str
-    ) -> Dict[str, List[str]]:
+    ) -> dict[str, list[str]]:
         """Validate configuration against template."""
         if workflow_name not in self.config_templates:
             return {"errors": [f"Unknown workflow: {workflow_name}"]}
@@ -290,9 +310,9 @@ class WorkflowCustomizer:
     def _customize_section(
         self,
         section_name: str,
-        section_template: Dict[str, Dict[str, Any]],
-        current_config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        section_template: dict[str, dict[str, Any]],
+        current_config: dict[str, Any]
+    ) -> dict[str, Any]:
         """Customize a specific configuration section."""
         self.console.print(f"\n[cyan]🔧 Customizing {section_name}[/cyan]")
 
@@ -342,7 +362,7 @@ class WorkflowCustomizer:
     def _get_parameter_value(
         self,
         param_name: str,
-        param_def: Dict[str, Any],
+        param_def: dict[str, Any],
         current_value: Any
     ) -> Any:
         """Get a parameter value from user input."""
@@ -400,8 +420,13 @@ class WorkflowCustomizer:
                 f"Enter value for {param_name}",
                 default=str(current_value)
             )
+<<<<<<< HEAD
 
     def _display_config_summary(self, config: Dict[str, Any]) -> None:
+=======
+    
+    def _display_config_summary(self, config: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Display a summary of the configuration."""
         self.console.print("\n[blue]📋 Configuration Summary[/blue]")
 
@@ -419,7 +444,7 @@ class WorkflowCustomizer:
         workflow_name: str,
         preset_name: str,
         description: str,
-        config: Dict[str, Any]
+        config: dict[str, Any]
     ) -> bool:
         """Create a configuration preset."""
         preset_key = f"{workflow_name}_{preset_name}"
@@ -436,8 +461,13 @@ class WorkflowCustomizer:
 
         self.console.print(f"[green]✅ Created preset '{preset_name}' for {workflow_name}[/green]")
         return True
+<<<<<<< HEAD
 
     def list_config_presets(self, workflow_name: str = None) -> List[Dict[str, Any]]:
+=======
+    
+    def list_config_presets(self, workflow_name: str = None) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """List available configuration presets."""
         presets = []
 

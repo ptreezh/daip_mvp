@@ -4,7 +4,7 @@
 @Description:
     Implementation of MemAgent based on ByteDance/Tsinghua research paper:
     "MemAgent: Reshaping Long-Context LLM with Multi-Conv RL-based Memory Agent"
-    
+
     This implementation provides intelligent memory management for long-context
     interactions across multiple conversations using reinforcement learning techniques.
 """
@@ -14,7 +14,11 @@ import random
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -27,7 +31,7 @@ class MemoryType(str, Enum):
     """Types of memories in the MemAgent system."""
 
     EPISODIC = "episodic"  # Specific conversations and events
-    SEMANTIC = "semantic"   # Facts, concepts, and knowledge
+    SEMANTIC = "semantic"  # Facts, concepts, and knowledge
     PROCEDURAL = "procedural"  # Processes, methods, and approaches
     META = "meta"  # Insights about memory usage patterns
 
@@ -44,15 +48,15 @@ class Memory(BaseModel):
     created_at: datetime = Field(default_factory=datetime.now)
     last_accessed: datetime = Field(default_factory=datetime.now)
     access_count: int = 0
-    related_memories: List[str] = []
-    metadata: Dict[str, Any] = {}
+    related_memories: list[str] = []
+    metadata: dict[str, Any] = {}
 
 
 class MemoryQuery(BaseModel):
     """Model for querying memories."""
 
     content: str
-    memory_types: Optional[List[MemoryType]] = None
+    memory_types: Optional[list[MemoryType]] = None
     source_id: Optional[str] = None
     min_importance: float = 0.0
     min_recency: float = 0.0
@@ -63,18 +67,23 @@ class TrainingExample(BaseModel):
     """Model for RL training examples."""
 
     context: str
-    candidate_memories: List[Memory]
-    selected_memories: List[str]
+    candidate_memories: list[Memory]
+    selected_memories: list[str]
     reward: float
 
 
 class MemAgent:
     """Implementation of MemAgent based on ByteDance/Tsinghua research.
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> feature/core-services-refactor
     Provides intelligent memory management for long-context interactions
     across multiple conversations using reinforcement learning techniques.
     """
 
+<<<<<<< HEAD
     def __init__(
         self,
         sskg_manager: EnhancedSSKGManager,
@@ -83,6 +92,11 @@ class MemAgent:
     ):
         """Initialize the MemAgent.
         
+=======
+    def __init__(self, sskg_manager: EnhancedSSKGManager, model_path: Optional[Path] = None, enable_rl: bool = True):
+        """Initialize the MemAgent.
+
+>>>>>>> feature/core-services-refactor
         Args:
             sskg_manager: Enhanced SSKG manager for memory storage
             model_path: Path to the RL model file
@@ -108,13 +122,9 @@ class MemAgent:
 
             # Define a simple model structure
             self.rl_model = {
-                "weights": {
-                    "importance": 0.3,
-                    "recency": 0.3,
-                    "relevance": 0.4
-                },
+                "weights": {"importance": 0.3, "recency": 0.3, "relevance": 0.4},
                 "version": "0.1",
-                "training_examples": 0
+                "training_examples": 0,
             }
 
             # Load model from file if available
@@ -133,10 +143,14 @@ class MemAgent:
 
     def store_memory(self, memory: Memory) -> str:
         """Store a memory in the SSKG.
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> feature/core-services-refactor
         Args:
             memory: The memory to store
-            
+
         Returns:
             ID of the stored memory
 
@@ -158,31 +172,41 @@ class MemAgent:
                 "last_accessed": memory.last_accessed.isoformat(),
                 "access_count": memory.access_count,
                 "related_memories": memory.related_memories,
-                **memory.metadata
-            }
+                **memory.metadata,
+            },
         )
 
         logger.debug(f"Stored memory {memory.id} in SSKG as node {node_id}")
         return memory.id
 
+<<<<<<< HEAD
     def retrieve_memories(self, context: str, query: Optional[MemoryQuery] = None, limit: int = 5) -> List[Memory]:
         """Retrieve memories relevant to the given context.
         
+=======
+    def retrieve_memories(self, context: str, query: Optional[MemoryQuery] = None, limit: int = 5) -> list[Memory]:
+        """Retrieve memories relevant to the given context.
+
+>>>>>>> feature/core-services-refactor
         Args:
             context: The context to retrieve memories for
             query: Optional additional query parameters
             limit: Maximum number of memories to return
-            
+
         Returns:
             List of relevant memories
 
         """
         # Create default query if not provided
         if not query:
+<<<<<<< HEAD
             query = MemoryQuery(
                 content=context,
                 limit=limit
             )
+=======
+            query = MemoryQuery(content=context, limit=limit)
+>>>>>>> feature/core-services-refactor
 
         # Use RL model for memory selection if enabled
         if self.enable_rl and self.rl_model:
@@ -190,13 +214,19 @@ class MemAgent:
         else:
             return self._retrieve_memories_simple(context, query)
 
+<<<<<<< HEAD
     def _retrieve_memories_simple(self, context: str, query: MemoryQuery) -> List[Memory]:
         """Simple memory retrieval without RL.
         
+=======
+    def _retrieve_memories_simple(self, context: str, query: MemoryQuery) -> list[Memory]:
+        """Simple memory retrieval without RL.
+
+>>>>>>> feature/core-services-refactor
         Args:
             context: The context to retrieve memories for
             query: Query parameters
-            
+
         Returns:
             List of relevant memories
 
@@ -210,7 +240,7 @@ class MemAgent:
             node_types=[NodeType.MEMORY],
             content_query=query.content,
             metadata_filters=metadata_filters,
-            limit=query.limit * 2  # Get more candidates for filtering
+            limit=query.limit * 2,  # Get more candidates for filtering
         )
 
         # Query SSKG
@@ -249,22 +279,43 @@ class MemAgent:
                     last_accessed=datetime.fromisoformat(metadata.get("last_accessed", datetime.now().isoformat())),
                     access_count=int(metadata.get("access_count", 0)),
                     related_memories=metadata.get("related_memories", []),
+<<<<<<< HEAD
                     metadata={k: v for k, v in metadata.items() if k not in [
                         "memory_id", "memory_type", "owner_id", "recency", "created_at",
                         "last_accessed", "access_count", "related_memories"
                     ]}
+=======
+                    metadata={
+                        k: v
+                        for k, v in metadata.items()
+                        if k
+                        not in [
+                            "memory_id",
+                            "memory_type",
+                            "owner_id",
+                            "recency",
+                            "created_at",
+                            "last_accessed",
+                            "access_count",
+                            "related_memories",
+                        ]
+                    },
+>>>>>>> feature/core-services-refactor
                 )
 
                 memories.append(memory)
 
                 # Update access count and last accessed time
-                self.sskg_manager.update_node(node.id, {
-                    "metadata": {
-                        **metadata,
-                        "access_count": memory.access_count + 1,
-                        "last_accessed": datetime.now().isoformat()
-                    }
-                })
+                self.sskg_manager.update_node(
+                    node.id,
+                    {
+                        "metadata": {
+                            **metadata,
+                            "access_count": memory.access_count + 1,
+                            "last_accessed": datetime.now().isoformat(),
+                        }
+                    },
+                )
             except Exception as e:
                 logger.error(f"Error converting node to memory: {e}")
 
@@ -272,20 +323,29 @@ class MemAgent:
         memories.sort(key=lambda m: (m.importance + m.recency) / 2, reverse=True)
 
         # Return limited results
+<<<<<<< HEAD
         return memories[:query.limit]
 
     def _retrieve_memories_with_rl(self, context: str, query: MemoryQuery) -> List[Memory]:
         """RL-based memory retrieval as described in the ByteDance/Tsinghua paper.
         
+=======
+        return memories[: query.limit]
+
+    def _retrieve_memories_with_rl(self, context: str, query: MemoryQuery) -> list[Memory]:
+        """RL-based memory retrieval as described in the ByteDance/Tsinghua paper.
+
+>>>>>>> feature/core-services-refactor
         Args:
             context: The context to retrieve memories for
             query: Query parameters
-            
+
         Returns:
             List of relevant memories
 
         """
         # Get candidate memories (more than we need)
+<<<<<<< HEAD
         candidates = self._retrieve_memories_simple(context, MemoryQuery(
             content=query.content,
             memory_types=query.memory_types,
@@ -294,6 +354,19 @@ class MemAgent:
             min_recency=0.0,     # No filtering by recency
             limit=query.limit * 3
         ))
+=======
+        candidates = self._retrieve_memories_simple(
+            context,
+            MemoryQuery(
+                content=query.content,
+                memory_types=query.memory_types,
+                source_id=query.source_id,
+                min_importance=0.0,  # No filtering by importance
+                min_recency=0.0,  # No filtering by recency
+                limit=query.limit * 3,
+            ),
+        )
+>>>>>>> feature/core-services-refactor
 
         if not candidates:
             return []
@@ -314,8 +387,8 @@ class MemAgent:
                     MemoryType.EPISODIC: 0.7,
                     MemoryType.SEMANTIC: 0.9,
                     MemoryType.PROCEDURAL: 0.8,
-                    MemoryType.META: 0.6
-                }.get(memory.memory_type, 0.7)
+                    MemoryType.META: 0.6,
+                }.get(memory.memory_type, 0.7),
             }
 
             candidate_features.append((memory, features))
@@ -325,14 +398,18 @@ class MemAgent:
         for memory, features in candidate_features:
             # Apply RL model weights
             score = (
-                features["importance"] * self.rl_model["weights"]["importance"] +
-                features["recency"] * self.rl_model["weights"]["recency"] +
-                features["relevance"] * self.rl_model["weights"]["relevance"]
+                features["importance"] * self.rl_model["weights"]["importance"]
+                + features["recency"] * self.rl_model["weights"]["recency"]
+                + features["relevance"] * self.rl_model["weights"]["relevance"]
             )
 
             # Apply additional factors
             score *= features["memory_type_factor"]
+<<<<<<< HEAD
             score *= (1 + 0.1 * features["access_count_norm"])  # Slight boost for frequently accessed memories
+=======
+            score *= 1 + 0.1 * features["access_count_norm"]  # Slight boost for frequently accessed memories
+>>>>>>> feature/core-services-refactor
 
             scored_candidates.append((memory, score))
 
@@ -340,15 +417,23 @@ class MemAgent:
         scored_candidates.sort(key=lambda x: x[1], reverse=True)
 
         # Return top memories
+<<<<<<< HEAD
         return [memory for memory, _ in scored_candidates[:query.limit]]
 
     def _calculate_relevance(self, context: str, memory_content: str) -> float:
         """Calculate relevance between context and memory content.
         
+=======
+        return [memory for memory, _ in scored_candidates[: query.limit]]
+
+    def _calculate_relevance(self, context: str, memory_content: str) -> float:
+        """Calculate relevance between context and memory content.
+
+>>>>>>> feature/core-services-refactor
         Args:
             context: The context
             memory_content: The memory content
-            
+
         Returns:
             Relevance score between 0 and 1
 
@@ -367,13 +452,19 @@ class MemAgent:
 
         return intersection / union
 
+<<<<<<< HEAD
     def consolidate_memories(self, source_id: str, memory_type: Optional[MemoryType] = None) -> List[Memory]:
         """Consolidate memories for a source.
         
+=======
+    def consolidate_memories(self, source_id: str, memory_type: Optional[MemoryType] = None) -> list[Memory]:
+        """Consolidate memories for a source.
+
+>>>>>>> feature/core-services-refactor
         Args:
             source_id: ID of the memory source
             memory_type: Optional type of memories to consolidate
-            
+
         Returns:
             List of consolidated memories
 
@@ -386,7 +477,7 @@ class MemAgent:
         sskg_query = KnowledgeQuery(
             node_types=[NodeType.MEMORY],
             metadata_filters=metadata_filters,
-            limit=100  # Get a large batch for consolidation
+            limit=100,  # Get a large batch for consolidation
         )
 
         # Query SSKG
@@ -409,10 +500,28 @@ class MemAgent:
                     last_accessed=datetime.fromisoformat(metadata.get("last_accessed", datetime.now().isoformat())),
                     access_count=int(metadata.get("access_count", 0)),
                     related_memories=metadata.get("related_memories", []),
+<<<<<<< HEAD
                     metadata={k: v for k, v in metadata.items() if k not in [
                         "memory_id", "memory_type", "owner_id", "recency", "created_at",
                         "last_accessed", "access_count", "related_memories"
                     ]}
+=======
+                    metadata={
+                        k: v
+                        for k, v in metadata.items()
+                        if k
+                        not in [
+                            "memory_id",
+                            "memory_type",
+                            "owner_id",
+                            "recency",
+                            "created_at",
+                            "last_accessed",
+                            "access_count",
+                            "related_memories",
+                        ]
+                    },
+>>>>>>> feature/core-services-refactor
                 )
 
                 memories.append(memory)
@@ -443,9 +552,13 @@ class MemAgent:
                 recent = [m for m in type_memories if m.recency > 0.7]
                 if recent:
                     consolidated = self._consolidate_memory_group(
+<<<<<<< HEAD
                         recent,
                         f"Recent experiences of {source_id}",
                         MemoryType.EPISODIC
+=======
+                        recent, f"Recent experiences of {source_id}", MemoryType.EPISODIC
+>>>>>>> feature/core-services-refactor
                     )
                     consolidated_memories.append(consolidated)
 
@@ -454,9 +567,13 @@ class MemAgent:
                 important = type_memories[:5]
                 if important:
                     consolidated = self._consolidate_memory_group(
+<<<<<<< HEAD
                         important,
                         f"Key knowledge of {source_id}",
                         MemoryType.SEMANTIC
+=======
+                        important, f"Key knowledge of {source_id}", MemoryType.SEMANTIC
+>>>>>>> feature/core-services-refactor
                     )
                     consolidated_memories.append(consolidated)
 
@@ -465,9 +582,13 @@ class MemAgent:
                 accessed = sorted(type_memories, key=lambda m: m.access_count, reverse=True)[:5]
                 if accessed:
                     consolidated = self._consolidate_memory_group(
+<<<<<<< HEAD
                         accessed,
                         f"Common procedures used by {source_id}",
                         MemoryType.PROCEDURAL
+=======
+                        accessed, f"Common procedures used by {source_id}", MemoryType.PROCEDURAL
+>>>>>>> feature/core-services-refactor
                     )
                     consolidated_memories.append(consolidated)
 
@@ -477,14 +598,20 @@ class MemAgent:
 
         return consolidated_memories
 
+<<<<<<< HEAD
     def _consolidate_memory_group(self, memories: List[Memory], title: str, memory_type: MemoryType) -> Memory:
         """Consolidate a group of memories into a single memory.
         
+=======
+    def _consolidate_memory_group(self, memories: list[Memory], title: str, memory_type: MemoryType) -> Memory:
+        """Consolidate a group of memories into a single memory.
+
+>>>>>>> feature/core-services-refactor
         Args:
             memories: List of memories to consolidate
             title: Title for the consolidated memory
             memory_type: Type of the consolidated memory
-            
+
         Returns:
             Consolidated memory
 
@@ -510,18 +637,24 @@ class MemAgent:
             metadata={
                 "consolidated": True,
                 "source_memories": [m.id for m in memories],
-                "consolidation_time": datetime.now().isoformat()
-            }
+                "consolidation_time": datetime.now().isoformat(),
+            },
         )
 
         return consolidated
 
+<<<<<<< HEAD
     def train_memory_selector(self, training_examples: List[TrainingExample]) -> Dict[str, Any]:
         """Train the RL model for memory selection.
         
+=======
+    def train_memory_selector(self, training_examples: list[TrainingExample]) -> dict[str, Any]:
+        """Train the RL model for memory selection.
+
+>>>>>>> feature/core-services-refactor
         Args:
             training_examples: List of training examples
-            
+
         Returns:
             Training results
 
@@ -534,11 +667,15 @@ class MemAgent:
         # For this example, we'll use a simple update rule
 
         # Initialize weight updates
+<<<<<<< HEAD
         weight_updates = {
             "importance": 0.0,
             "recency": 0.0,
             "relevance": 0.0
         }
+=======
+        weight_updates = {"importance": 0.0, "recency": 0.0, "relevance": 0.0}
+>>>>>>> feature/core-services-refactor
 
         # Process each training example
         for example in training_examples:
@@ -558,13 +695,15 @@ class MemAgent:
             selected_features = {
                 "importance": sum(m.importance for m in selected) / len(selected),
                 "recency": sum(m.recency for m in selected) / len(selected),
-                "relevance": sum(self._calculate_relevance(example.context, m.content) for m in selected) / len(selected)
+                "relevance": sum(self._calculate_relevance(example.context, m.content) for m in selected)
+                / len(selected),
             }
 
             non_selected_features = {
                 "importance": sum(m.importance for m in non_selected) / len(non_selected),
                 "recency": sum(m.recency for m in non_selected) / len(non_selected),
-                "relevance": sum(self._calculate_relevance(example.context, m.content) for m in non_selected) / len(non_selected)
+                "relevance": sum(self._calculate_relevance(example.context, m.content) for m in non_selected)
+                / len(non_selected),
             }
 
             # Update weights based on feature differences
@@ -594,7 +733,11 @@ class MemAgent:
                 # Ensure parent directory exists
                 self.model_path.parent.mkdir(parents=True, exist_ok=True)
 
+<<<<<<< HEAD
                 with open(self.model_path, 'w') as f:
+=======
+                with open(self.model_path, "w") as f:
+>>>>>>> feature/core-services-refactor
                     json.dump(self.rl_model, f)
                 logger.info(f"Saved RL model to {self.model_path}")
             except Exception as e:
@@ -603,16 +746,20 @@ class MemAgent:
         return {
             "success": True,
             "weights": self.rl_model["weights"],
-            "training_examples": self.rl_model["training_examples"]
+            "training_examples": self.rl_model["training_examples"],
         }
 
     def get_memory_importance(self, memory_content: str, context: str) -> float:
         """Calculate the importance of a memory in the given context.
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> feature/core-services-refactor
         Args:
             memory_content: The memory content
             context: The context
-            
+
         Returns:
             Importance score between 0 and 1
 
@@ -639,12 +786,18 @@ class MemAgent:
 
         return min(importance, 1.0)
 
+<<<<<<< HEAD
     def organize_memories(self, memories: List[Memory]) -> Dict[str, List[Memory]]:
         """Organize memories into categories.
         
+=======
+    def organize_memories(self, memories: list[Memory]) -> dict[str, list[Memory]]:
+        """Organize memories into categories.
+
+>>>>>>> feature/core-services-refactor
         Args:
             memories: List of memories to organize
-            
+
         Returns:
             Dictionary of categorized memories
 
@@ -673,28 +826,36 @@ class MemAgent:
 
         return by_type
 
+<<<<<<< HEAD
     def share_memories(self, source_id: str, target_id: str, memory_ids: List[str]) -> bool:
         """Share memories from one source to another.
         
+=======
+    def share_memories(self, source_id: str, target_id: str, memory_ids: list[str]) -> bool:
+        """Share memories from one source to another.
+
+>>>>>>> feature/core-services-refactor
         Args:
             source_id: ID of the memory source
             target_id: ID of the memory target
             memory_ids: List of memory IDs to share
-            
+
         Returns:
             True if successful, False otherwise
 
         """
         # Build query to get memories to share
+<<<<<<< HEAD
         metadata_filters = {
             "owner_id": source_id,
             "memory_id": {"$in": memory_ids}
         }
+=======
+        metadata_filters = {"owner_id": source_id, "memory_id": {"$in": memory_ids}}
+>>>>>>> feature/core-services-refactor
 
         sskg_query = KnowledgeQuery(
-            node_types=[NodeType.MEMORY],
-            metadata_filters=metadata_filters,
-            limit=len(memory_ids)
+            node_types=[NodeType.MEMORY], metadata_filters=metadata_filters, limit=len(memory_ids)
         )
 
         # Query SSKG
@@ -717,10 +878,28 @@ class MemAgent:
                     last_accessed=datetime.fromisoformat(metadata.get("last_accessed", datetime.now().isoformat())),
                     access_count=int(metadata.get("access_count", 0)),
                     related_memories=metadata.get("related_memories", []),
+<<<<<<< HEAD
                     metadata={k: v for k, v in metadata.items() if k not in [
                         "memory_id", "memory_type", "owner_id", "recency", "created_at",
                         "last_accessed", "access_count", "related_memories"
                     ]}
+=======
+                    metadata={
+                        k: v
+                        for k, v in metadata.items()
+                        if k
+                        not in [
+                            "memory_id",
+                            "memory_type",
+                            "owner_id",
+                            "recency",
+                            "created_at",
+                            "last_accessed",
+                            "access_count",
+                            "related_memories",
+                        ]
+                    },
+>>>>>>> feature/core-services-refactor
                 )
 
                 memories.append(memory)
@@ -740,8 +919,8 @@ class MemAgent:
                     **memory.metadata,
                     "shared_from": source_id,
                     "original_memory_id": memory.id,
-                    "shared_at": datetime.now().isoformat()
-                }
+                    "shared_at": datetime.now().isoformat(),
+                },
             )
 
             # Store shared memory
@@ -749,14 +928,20 @@ class MemAgent:
 
         return True
 
+<<<<<<< HEAD
     def optimize_context(self, context: str, task: str, max_tokens: int) -> Dict[str, Any]:
         """Optimize context for a specific task using MemAgent.
         
+=======
+    def optimize_context(self, context: str, task: str, max_tokens: int) -> dict[str, Any]:
+        """Optimize context for a specific task using MemAgent.
+
+>>>>>>> feature/core-services-refactor
         Args:
             context: The current context
             task: The current task
             max_tokens: Maximum tokens for the optimized context
-            
+
         Returns:
             Optimized context
 
@@ -765,6 +950,7 @@ class MemAgent:
         task_keywords = self._extract_keywords(task)
 
         # Retrieve relevant memories
+<<<<<<< HEAD
         memories = self.retrieve_memories(
             context=f"{task}\n\n{context}",
             query=MemoryQuery(
@@ -778,6 +964,12 @@ class MemAgent:
             "context": len(context.split()),
             "memories": sum(len(m.content.split()) for m in memories)
         }
+=======
+        memories = self.retrieve_memories(context=f"{task}\n\n{context}", query=MemoryQuery(content=task, limit=5))
+
+        # Calculate token counts (simplified)
+        token_counts = {"context": len(context.split()), "memories": sum(len(m.content.split()) for m in memories)}
+>>>>>>> feature/core-services-refactor
 
         # Check if we need to compress
         total_tokens = token_counts["context"] + token_counts["memories"]
@@ -791,7 +983,7 @@ class MemAgent:
                 "optimized_context": optimized_context,
                 "included_memories": [m.id for m in memories],
                 "excluded_memories": [],
-                "compression_applied": False
+                "compression_applied": False,
             }
         else:
             # Compression needed
@@ -838,15 +1030,21 @@ class MemAgent:
                 "optimized_context": optimized_context,
                 "included_memories": [m.id for m in included_memories],
                 "excluded_memories": [m.id for m in excluded_memories],
-                "compression_applied": token_counts["context"] > max_tokens * 0.7
+                "compression_applied": token_counts["context"] > max_tokens * 0.7,
             }
 
+<<<<<<< HEAD
     def _extract_keywords(self, text: str) -> List[str]:
         """Extract keywords from text.
         
+=======
+    def _extract_keywords(self, text: str) -> list[str]:
+        """Extract keywords from text.
+
+>>>>>>> feature/core-services-refactor
         Args:
             text: The text to extract keywords from
-            
+
         Returns:
             List of keywords
 
@@ -856,7 +1054,24 @@ class MemAgent:
         words = text.lower().split()
 
         # Remove common stop words
-        stop_words = {"the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "with", "by", "of", "is", "are"}
+        stop_words = {
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "with",
+            "by",
+            "of",
+            "is",
+            "are",
+        }
         keywords = [word for word in words if word not in stop_words and len(word) > 3]
 
         return keywords

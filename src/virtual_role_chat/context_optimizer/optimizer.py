@@ -6,7 +6,11 @@ task-focused context optimization integrated at the lowest level of LLM interact
 
 import logging
 import time
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .models import (
     ContextAnalysisResult,
@@ -78,7 +82,7 @@ class TaskContextOptimizer:
 
     def optimize_context_for_task(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         task: str,
         max_tokens: int
     ) -> OptimizedContext:
@@ -138,8 +142,13 @@ class TaskContextOptimizer:
             self.logger.error(f"Error optimizing context: {e}")
             # Return a basic optimized context as fallback
             return self._create_fallback_context(context, task, max_tokens)
+<<<<<<< HEAD
 
     def extract_task_requirements(self, task: str) -> List[TaskRequirement]:
+=======
+    
+    def extract_task_requirements(self, task: str) -> list[TaskRequirement]:
+>>>>>>> feature/core-services-refactor
         """Extract task requirements from a task description.
         
         Args:
@@ -159,9 +168,15 @@ class TaskContextOptimizer:
 
     def prioritize_context_elements(
         self,
+<<<<<<< HEAD
         context_elements: List[Dict[str, Any]],
         task_requirements: List[TaskRequirement]
     ) -> List[Dict[str, Any]]:
+=======
+        context_elements: list[dict[str, Any]],
+        task_requirements: list[TaskRequirement]
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Prioritize context elements based on task requirements.
         
         Args:
@@ -205,8 +220,8 @@ class TaskContextOptimizer:
     def blend_context_sources(
         self,
         task_instructions: str,
-        background_knowledge: List[str],
-        conversation_history: List[Dict[str, Any]],
+        background_knowledge: list[str],
+        conversation_history: list[dict[str, Any]],
         max_tokens: int
     ) -> OptimizedContext:
         """Blend multiple context sources into an optimized context.
@@ -227,9 +242,13 @@ class TaskContextOptimizer:
 
     def maintain_task_coherence(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         task: str
+<<<<<<< HEAD
     ) -> List[Dict[str, Any]]:
+=======
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Maintain task coherence by preserving causal relationships and dependencies.
         
         Args:
@@ -250,9 +269,13 @@ class TaskContextOptimizer:
 
     def delineate_task_boundaries(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         current_task: str
+<<<<<<< HEAD
     ) -> List[Dict[str, Any]]:
+=======
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Delineate task boundaries and prioritize the current active task.
         
         Args:
@@ -281,8 +304,13 @@ class TaskContextOptimizer:
                 relevant_context.append(element)
 
         return relevant_context
+<<<<<<< HEAD
 
     def _convert_context_to_messages(self, context: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+=======
+    
+    def _convert_context_to_messages(self, context: list[dict[str, Any]]) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Convert context to messages format for task detection.
         
         Args:
@@ -306,9 +334,13 @@ class TaskContextOptimizer:
 
     def _convert_to_context_elements(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         task_result: TaskDetectionResult
+<<<<<<< HEAD
     ) -> List[ContextElement]:
+=======
+    ) -> list[ContextElement]:
+>>>>>>> feature/core-services-refactor
         """Convert context to ContextElement objects.
         
         Args:
@@ -405,8 +437,13 @@ class TaskContextOptimizer:
         relevance = 0.5 + (overlap / len(task_words)) * 0.5
 
         return min(relevance, 1.0)
+<<<<<<< HEAD
 
     def _analyze_context(self, elements: List[ContextElement]) -> ContextAnalysisResult:
+=======
+    
+    def _analyze_context(self, elements: list[ContextElement]) -> ContextAnalysisResult:
+>>>>>>> feature/core-services-refactor
         """Analyze context before optimization.
         
         Args:
@@ -458,7 +495,7 @@ class TaskContextOptimizer:
 
     def _create_optimized_context(
         self,
-        elements: List[ContextElement],
+        elements: list[ContextElement],
         task_result: TaskDetectionResult,
         analysis: ContextAnalysisResult,
         start_time: float
@@ -507,7 +544,7 @@ class TaskContextOptimizer:
 
     def _create_fallback_context(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         task: str,
         max_tokens: int
     ) -> OptimizedContext:
@@ -579,8 +616,13 @@ class TaskContextOptimizer:
         if task_type not in self.optimization_stats['task_type_distribution']:
             self.optimization_stats['task_type_distribution'][task_type] = 0
         self.optimization_stats['task_type_distribution'][task_type] += 1
+<<<<<<< HEAD
 
     def get_optimization_stats(self) -> Dict[str, Any]:
+=======
+    
+    def get_optimization_stats(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get optimization statistics.
         
         Returns:

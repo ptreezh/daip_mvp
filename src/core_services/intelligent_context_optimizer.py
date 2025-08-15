@@ -9,7 +9,11 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -25,8 +29,13 @@ class ContextEmbedding:
     goal_embedding: np.ndarray   # 目标嵌入
     solution_steps: np.ndarray   # 解决方案步骤嵌入
     context_embedding: np.ndarray # 上下文嵌入（可选）
+<<<<<<< HEAD
     metadata: Dict[str, Any]     # 元数据
 
+=======
+    metadata: dict[str, Any]     # 元数据
+    
+>>>>>>> feature/core-services-refactor
     def similarity(self, other: 'ContextEmbedding') -> float:
         """计算多维相似度"""
         try:
@@ -67,7 +76,7 @@ class Conversation:
 
     conversation_id: str
     user_id: str
-    messages: List[Dict[str, Any]]
+    messages: list[dict[str, Any]]
     timestamp: str
     topic: Optional[str] = None
     task_type: Optional[str] = None
@@ -81,10 +90,10 @@ class Task:
     task_id: str
     task_type: str
     description: str
-    required_roles: List[str]
+    required_roles: list[str]
     complexity_level: str
     expected_output: str
-    context_requirements: List[str]
+    context_requirements: list[str]
 
 
 @dataclass
@@ -92,12 +101,12 @@ class OptimizedContext:
     """优化后的上下文"""
 
     context_id: str
-    original_context: Dict[str, Any]
-    optimized_context: Dict[str, Any]
+    original_context: dict[str, Any]
+    optimized_context: dict[str, Any]
     optimization_reasoning: str
-    relevance_scores: Dict[str, float]
-    embedding_analysis: Dict[str, Any]
-    performance_metrics: Dict[str, float]
+    relevance_scores: dict[str, float]
+    embedding_analysis: dict[str, Any]
+    performance_metrics: dict[str, float]
 
 
 class IntelligentContextOptimizer:
@@ -114,11 +123,17 @@ class IntelligentContextOptimizer:
         self.embedding_cache = {}
 
         logger.info("智能上下文优化器初始化完成")
+<<<<<<< HEAD
 
     def optimize_context(self,
                         user_history: List[Conversation],
+=======
+    
+    def optimize_context(self, 
+                        user_history: list[Conversation],
+>>>>>>> feature/core-services-refactor
                         current_task: Task,
-                        available_context: Dict[str, Any]) -> OptimizedContext:
+                        available_context: dict[str, Any]) -> OptimizedContext:
         """优化上下文"""
         try:
             context_id = f"ctx_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -189,7 +204,7 @@ class IntelligentContextOptimizer:
 
     def _calculate_context_relevance(self,
                                    embeddings: ContextEmbedding,
-                                   available_context: Dict[str, Any]) -> Dict[str, float]:
+                                   available_context: dict[str, Any]) -> dict[str, float]:
         """计算上下文相关性"""
         relevance_scores = {}
 
@@ -218,8 +233,13 @@ class IntelligentContextOptimizer:
             logger.warning(f"计算上下文相关性失败: {e}")
 
         return relevance_scores
+<<<<<<< HEAD
 
     def _keyword_relevance(self, text: str, keywords: List[str]) -> float:
+=======
+    
+    def _keyword_relevance(self, text: str, keywords: list[str]) -> float:
+>>>>>>> feature/core-services-refactor
         """基于关键词计算相关性"""
         if not keywords:
             return 0.5
@@ -229,9 +249,9 @@ class IntelligentContextOptimizer:
         return min(matches / len(keywords), 1.0)
 
     def _generate_optimization_reasoning(self,
-                                       history_patterns: Dict[str, Any],
-                                       task_features: Dict[str, Any],
-                                       relevance_scores: Dict[str, float]) -> str:
+                                       history_patterns: dict[str, Any],
+                                       task_features: dict[str, Any],
+                                       relevance_scores: dict[str, float]) -> str:
         """生成优化理由"""
         reasoning_parts = []
 
@@ -260,9 +280,9 @@ class IntelligentContextOptimizer:
         return "；".join(reasoning_parts) + "。"
 
     def _calculate_performance_metrics(self,
-                                     original_context: Dict[str, Any],
-                                     optimized_context: Dict[str, Any],
-                                     relevance_scores: Dict[str, float]) -> Dict[str, float]:
+                                     original_context: dict[str, Any],
+                                     optimized_context: dict[str, Any],
+                                     relevance_scores: dict[str, float]) -> dict[str, float]:
         """计算性能指标"""
         try:
             # 计算上下文压缩率
@@ -308,8 +328,13 @@ class ConversationHistoryAnalyzer:
 
     def __init__(self):
         self.vectorizer = TfidfVectorizer(max_features=1000, stop_words='english')
+<<<<<<< HEAD
 
     def analyze_conversation_history(self, conversations: List[Conversation]) -> Dict[str, Any]:
+=======
+    
+    def analyze_conversation_history(self, conversations: list[Conversation]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析对话历史"""
         try:
             if not conversations:
@@ -354,8 +379,13 @@ class ConversationHistoryAnalyzer:
         except Exception as e:
             logger.error(f"分析对话历史失败: {e}")
             return {"dominant_topics": [], "user_patterns": {}, "interaction_frequency": {}}
+<<<<<<< HEAD
 
     def _extract_dominant_topics(self, texts: List[str]) -> List[str]:
+=======
+    
+    def _extract_dominant_topics(self, texts: list[str]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """提取主导话题"""
         if not texts:
             return []
@@ -377,8 +407,13 @@ class ConversationHistoryAnalyzer:
         except Exception as e:
             logger.warning(f"提取主导话题失败: {e}")
             return []
+<<<<<<< HEAD
 
     def _analyze_user_patterns(self, conversations: List[Conversation]) -> Dict[str, Any]:
+=======
+    
+    def _analyze_user_patterns(self, conversations: list[Conversation]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析用户模式"""
         patterns = {
             "avg_message_length": 0,
@@ -433,8 +468,13 @@ class ConversationHistoryAnalyzer:
 
 class TaskFeatureAnalyzer:
     """任务特征分析器"""
+<<<<<<< HEAD
 
     def extract_task_features(self, task: Task) -> Dict[str, Any]:
+=======
+    
+    def extract_task_features(self, task: Task) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """提取任务特征"""
         try:
             features = {
@@ -466,8 +506,13 @@ class TaskFeatureAnalyzer:
                 "required_roles": [],
                 "keywords": []
             }
+<<<<<<< HEAD
 
     def _extract_keywords(self, text: str) -> List[str]:
+=======
+    
+    def _extract_keywords(self, text: str) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """提取关键词"""
         # 简单的关键词提取
         keywords = []
@@ -526,8 +571,13 @@ class TaskFeatureAnalyzer:
         score += complexity_map.get(task.complexity_level, 0.3)
 
         return min(score, 1.0)
+<<<<<<< HEAD
 
     def _analyze_resource_requirements(self, task: Task) -> Dict[str, Any]:
+=======
+    
+    def _analyze_resource_requirements(self, task: Task) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析资源需求"""
         return {
             "computational_intensity": "medium",  # 基于任务类型推断
@@ -544,9 +594,9 @@ class MultifacetedEmbeddingProcessor:
         self.embedding_dim = 384  # 使用标准的嵌入维度
 
     def generate_multifaceted_embeddings(self,
-                                       history_patterns: Dict[str, Any],
-                                       task_features: Dict[str, Any],
-                                       available_context: Dict[str, Any]) -> ContextEmbedding:
+                                       history_patterns: dict[str, Any],
+                                       task_features: dict[str, Any],
+                                       available_context: dict[str, Any]) -> ContextEmbedding:
         """生成多面嵌入"""
         try:
             # 生成问题模式嵌入
@@ -594,8 +644,8 @@ class MultifacetedEmbeddingProcessor:
             )
 
     def _generate_problem_pattern_embedding(self,
-                                          history_patterns: Dict[str, Any],
-                                          task_features: Dict[str, Any]) -> np.ndarray:
+                                          history_patterns: dict[str, Any],
+                                          task_features: dict[str, Any]) -> np.ndarray:
         """生成问题模式嵌入"""
         # 简化实现：基于历史话题和当前任务类型
         features = []
@@ -629,8 +679,13 @@ class MultifacetedEmbeddingProcessor:
             embedding = np.concatenate([embedding, padding])
 
         return embedding
+<<<<<<< HEAD
 
     def _generate_goal_embedding(self, task_features: Dict[str, Any]) -> np.ndarray:
+=======
+    
+    def _generate_goal_embedding(self, task_features: dict[str, Any]) -> np.ndarray:
+>>>>>>> feature/core-services-refactor
         """生成目标嵌入"""
         features = []
 
@@ -658,8 +713,8 @@ class MultifacetedEmbeddingProcessor:
         return embedding
 
     def _generate_solution_steps_embedding(self,
-                                         task_features: Dict[str, Any],
-                                         available_context: Dict[str, Any]) -> np.ndarray:
+                                         task_features: dict[str, Any],
+                                         available_context: dict[str, Any]) -> np.ndarray:
         """生成解决方案步骤嵌入"""
         features = []
 
@@ -684,8 +739,13 @@ class MultifacetedEmbeddingProcessor:
             embedding = np.concatenate([embedding, padding])
 
         return embedding
+<<<<<<< HEAD
 
     def _generate_context_embedding(self, available_context: Dict[str, Any]) -> np.ndarray:
+=======
+    
+    def _generate_context_embedding(self, available_context: dict[str, Any]) -> np.ndarray:
+>>>>>>> feature/core-services-refactor
         """生成上下文嵌入"""
         features = []
 
@@ -727,8 +787,13 @@ class MultifacetedEmbeddingProcessor:
             return 0.0
 
         return np.dot(vec1, vec2) / (norm1 * norm2)
+<<<<<<< HEAD
 
     def _encode_task_type(self, task_type: str) -> List[float]:
+=======
+    
+    def _encode_task_type(self, task_type: str) -> list[float]:
+>>>>>>> feature/core-services-refactor
         """编码任务类型"""
         type_map = {
             "analysis": [1.0, 0.0, 0.0, 0.0],
@@ -739,8 +804,13 @@ class MultifacetedEmbeddingProcessor:
 
         base_vector = type_map.get(task_type, [0.25, 0.25, 0.25, 0.25])
         return base_vector + [0.0] * 96  # 填充到100维
+<<<<<<< HEAD
 
     def _encode_user_patterns(self, patterns: Dict[str, Any]) -> List[float]:
+=======
+    
+    def _encode_user_patterns(self, patterns: dict[str, Any]) -> list[float]:
+>>>>>>> feature/core-services-refactor
         """编码用户模式"""
         features = []
 
@@ -761,8 +831,13 @@ class MultifacetedEmbeddingProcessor:
             features.append(0.0)
 
         return features[:134]
+<<<<<<< HEAD
 
     def _encode_text_features(self, text: str, target_dim: int) -> List[float]:
+=======
+    
+    def _encode_text_features(self, text: str, target_dim: int) -> list[float]:
+>>>>>>> feature/core-services-refactor
         """编码文本特征"""
         if not text:
             return [0.0] * target_dim
@@ -788,8 +863,13 @@ class MultifacetedEmbeddingProcessor:
             features.append(0.0)
 
         return features[:target_dim]
+<<<<<<< HEAD
 
     def _encode_roles(self, roles: List[str]) -> List[float]:
+=======
+    
+    def _encode_roles(self, roles: list[str]) -> list[float]:
+>>>>>>> feature/core-services-refactor
         """编码角色特征"""
         # 预定义角色类型
         role_types = [
@@ -808,8 +888,13 @@ class MultifacetedEmbeddingProcessor:
             features.append(0.0)
 
         return features[:100]
+<<<<<<< HEAD
 
     def _encode_context_requirements(self, requirements: List[str]) -> List[float]:
+=======
+    
+    def _encode_context_requirements(self, requirements: list[str]) -> list[float]:
+>>>>>>> feature/core-services-refactor
         """编码上下文需求特征"""
         features = []
 
@@ -827,8 +912,13 @@ class MultifacetedEmbeddingProcessor:
             features.append(0.0)
 
         return features[:84]
+<<<<<<< HEAD
 
     def _encode_available_context(self, context: Dict[str, Any]) -> List[float]:
+=======
+    
+    def _encode_available_context(self, context: dict[str, Any]) -> list[float]:
+>>>>>>> feature/core-services-refactor
         """编码可用上下文特征"""
         features = []
 
@@ -855,8 +945,13 @@ class MultifacetedEmbeddingProcessor:
             features.append(0.0)
 
         return features[:80]
+<<<<<<< HEAD
 
     def _encode_resource_requirements(self, requirements: Dict[str, Any]) -> List[float]:
+=======
+    
+    def _encode_resource_requirements(self, requirements: dict[str, Any]) -> list[float]:
+>>>>>>> feature/core-services-refactor
         """编码资源需求特征"""
         features = []
 
@@ -879,8 +974,13 @@ class MultifacetedEmbeddingProcessor:
             features.append(0.0)
 
         return features[:54]
+<<<<<<< HEAD
 
     def _encode_structured_data(self, data: Any) -> List[float]:
+=======
+    
+    def _encode_structured_data(self, data: Any) -> list[float]:
+>>>>>>> feature/core-services-refactor
         """编码结构化数据特征"""
         features = []
 
@@ -906,9 +1006,9 @@ class ContextSynthesizer:
     """上下文合成器"""
 
     def synthesize_context(self,
-                          relevance_scores: Dict[str, float],
-                          available_context: Dict[str, Any],
-                          task_features: Dict[str, Any]) -> Dict[str, Any]:
+                          relevance_scores: dict[str, float],
+                          available_context: dict[str, Any],
+                          task_features: dict[str, Any]) -> dict[str, Any]:
         """合成优化上下文"""
         try:
             optimized_context = {}
@@ -952,8 +1052,13 @@ class ContextSynthesizer:
         except Exception as e:
             logger.error(f"合成上下文失败: {e}")
             return available_context  # 返回原始上下文作为fallback
+<<<<<<< HEAD
 
     def _generate_task_enhancements(self, task_features: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _generate_task_enhancements(self, task_features: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成任务特定的上下文增强"""
         enhancements = {}
 

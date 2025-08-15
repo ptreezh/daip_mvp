@@ -8,7 +8,11 @@
 import logging
 import uuid
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -25,13 +29,13 @@ class ValidatedFact(BaseModel):
     id: str
     content: str
     confidence_score: float = Field(ge=0.0, le=1.0)
-    evidence_sources: List[str] = Field(default_factory=list)
+    evidence_sources: list[str] = Field(default_factory=list)
     validation_timestamp: datetime = Field(default_factory=datetime.now)
     original_content: Optional[str] = None
     revision_applied: bool = False
     credibility_threshold: float = 0.7
-    reviewer_roles: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    reviewer_roles: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class SynthesisResult(BaseModel):
@@ -40,15 +44,15 @@ class SynthesisResult(BaseModel):
     id: str
     topic: str
     synthesis_content: str
-    perspectives: List[str] = Field(default_factory=list)
-    expert_attributions: Dict[str, List[str]] = Field(default_factory=dict)
-    supporting_evidence: List[str] = Field(default_factory=list)
+    perspectives: list[str] = Field(default_factory=list)
+    expert_attributions: dict[str, list[str]] = Field(default_factory=dict)
+    supporting_evidence: list[str] = Field(default_factory=list)
     synthesis_rationale: str = ""
     quality_score: float = Field(ge=0.0, le=1.0, default=0.0)
     confidence: float = Field(ge=0.0, le=1.0, default=0.0)
     synthesis_timestamp: datetime = Field(default_factory=datetime.now)
     refinement_iterations: int = 0
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class KnowledgePersistenceResult(BaseModel):
@@ -57,11 +61,11 @@ class KnowledgePersistenceResult(BaseModel):
     success: bool
     persisted_node_id: Optional[str] = None
     wiki_page_id: Optional[str] = None
-    conflicts_detected: List[str] = Field(default_factory=list)
-    conflicts_resolved: List[str] = Field(default_factory=list)
+    conflicts_detected: list[str] = Field(default_factory=list)
+    conflicts_resolved: list[str] = Field(default_factory=list)
     error_message: Optional[str] = None
     persistence_timestamp: datetime = Field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class KnowledgePersistenceService:
@@ -100,9 +104,13 @@ class KnowledgePersistenceService:
 
     async def persist_critical_review_results(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
+<<<<<<< HEAD
     ) -> List[KnowledgePersistenceResult]:
+=======
+    ) -> list[KnowledgePersistenceResult]:
+>>>>>>> feature/core-services-refactor
         """Persist validated facts from Critical Review workflow.
         
         Args:
@@ -146,7 +154,7 @@ class KnowledgePersistenceService:
 
     async def persist_synthesis_results(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
     ) -> KnowledgePersistenceResult:
         """Persist synthesis results from Multi-perspective Synthesis workflow.
@@ -187,9 +195,9 @@ class KnowledgePersistenceService:
 
     def _extract_validated_facts(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
-    ) -> List[ValidatedFact]:
+    ) -> list[ValidatedFact]:
         """Extract validated facts from Critical Review workflow result."""
         validated_facts = []
 
@@ -260,7 +268,7 @@ class KnowledgePersistenceService:
 
     def _extract_synthesis_result(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
     ) -> SynthesisResult:
         """Extract synthesis result from Multi-perspective Synthesis workflow result."""
@@ -487,8 +495,8 @@ class KnowledgePersistenceService:
 
     async def _create_critical_review_wiki_page(
         self,
-        validated_facts: List[ValidatedFact],
-        workflow_result: Dict[str, Any],
+        validated_facts: list[ValidatedFact],
+        workflow_result: dict[str, Any],
         execution_id: str
     ) -> Optional[str]:
         """Create a wiki page summarizing Critical Review results."""
@@ -501,7 +509,11 @@ class KnowledgePersistenceService:
             content_parts.append(f"# Critical Review Results - {execution_id}")
             content_parts.append(f"\n**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             content_parts.append("**Workflow Type:** Critical Review")
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             # Add original content
             original_content = workflow_result.get("original_content", "")
             if original_content:
@@ -557,7 +569,7 @@ class KnowledgePersistenceService:
     async def _create_synthesis_wiki_page(
         self,
         synthesis: SynthesisResult,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
     ) -> Optional[str]:
         """Create a wiki page for Multi-perspective Synthesis results."""
@@ -646,8 +658,13 @@ class KnowledgePersistenceService:
 
         logger.info(f"Knowledge persistence configured: threshold={min_confidence_threshold}, "
                    f"auto_resolve={auto_resolve_conflicts}, wiki_pages={create_wiki_pages}")
+<<<<<<< HEAD
 
     def get_persistence_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_persistence_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get statistics about persisted knowledge."""
         try:
             # Query for facts from critical review

@@ -5,7 +5,11 @@
     Service layer for managing the validation of extracted facts.
 """
 import logging
+<<<<<<< HEAD
 from typing import Any, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from src.models import PendingFact
 
@@ -21,7 +25,7 @@ class FactValidationService:
         self.app_state = app_state
         self.memory_service = app_state.memory_service
 
-    def list_pending_facts(self, limit: int = 50, offset: int = 0) -> List[PendingFact]:
+    def list_pending_facts(self, limit: int = 50, offset: int = 0) -> list[PendingFact]:
         """Lists all facts currently awaiting review."""
         logger.info(f"Fetching pending facts with limit={limit}, offset={offset}")
         return self.memory_service.get_pending_facts(limit, offset)

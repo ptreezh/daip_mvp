@@ -5,7 +5,11 @@ for their registration, discovery, and instantiation.
 """
 
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Type
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .base import InstitutionalPrimitive, PrimitiveInfo, ValidationResult
 
@@ -19,10 +23,15 @@ class PrimitiveRegistry:
 
     def __init__(self):
         """Initialize the primitive registry."""
-        self._primitives: Dict[str, Type[InstitutionalPrimitive]] = {}
+        self._primitives: dict[str, type[InstitutionalPrimitive]] = {}
         self._logger = logging.getLogger(__name__)
+<<<<<<< HEAD
 
     def register_primitive(self, primitive_type: str, primitive_class: Type[InstitutionalPrimitive]) -> bool:
+=======
+    
+    def register_primitive(self, primitive_type: str, primitive_class: type[InstitutionalPrimitive]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Register a primitive type with the registry.
         
         Args:
@@ -39,8 +48,13 @@ class PrimitiveRegistry:
         self._primitives[primitive_type] = primitive_class
         self._logger.info(f"Registered primitive type '{primitive_type}'")
         return True
+<<<<<<< HEAD
 
     def get_primitive(self, primitive_type: str) -> Optional[Type[InstitutionalPrimitive]]:
+=======
+    
+    def get_primitive(self, primitive_type: str) -> Optional[type[InstitutionalPrimitive]]:
+>>>>>>> feature/core-services-refactor
         """Get a primitive class by type.
         
         Args:
@@ -55,8 +69,13 @@ class PrimitiveRegistry:
             return None
 
         return self._primitives[primitive_type]
+<<<<<<< HEAD
 
     def list_primitives(self) -> List[PrimitiveInfo]:
+=======
+    
+    def list_primitives(self) -> list[PrimitiveInfo]:
+>>>>>>> feature/core-services-refactor
         """List all registered primitives.
         
         Returns:
@@ -80,8 +99,13 @@ class PrimitiveRegistry:
             result.append(info)
 
         return result
+<<<<<<< HEAD
 
     def validate_primitive(self, primitive_def: Dict[str, Any]) -> ValidationResult:
+=======
+    
+    def validate_primitive(self, primitive_def: dict[str, Any]) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate a primitive definition.
         
         Args:
@@ -114,8 +138,13 @@ class PrimitiveRegistry:
         # the primitive's expected configuration schema
 
         return result
+<<<<<<< HEAD
 
     def instantiate_primitive(self, primitive_def: Dict[str, Any]) -> Optional[InstitutionalPrimitive]:
+=======
+    
+    def instantiate_primitive(self, primitive_def: dict[str, Any]) -> Optional[InstitutionalPrimitive]:
+>>>>>>> feature/core-services-refactor
         """Instantiate a primitive from a definition.
         
         Args:

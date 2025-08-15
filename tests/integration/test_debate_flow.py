@@ -17,7 +17,7 @@ from src.protocols.debate_protocol import DebateProtocol
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_kernel():
     """Fixture for a mocked Kernel with its components."""
     kernel = MagicMock(spec=Kernel)
@@ -33,13 +33,13 @@ def mock_kernel():
     return kernel
 
 
-@pytest.fixture
+@pytest.fixture()
 def event_queue():
     """Fixture for a new asyncio.Queue for each test."""
     return asyncio.Queue()
 
 
-@pytest.fixture
+@pytest.fixture()
 def simple_debate_config():
     """Fixture for a simple DebateConfig."""
     return DebateConfig(

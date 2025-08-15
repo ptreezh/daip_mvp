@@ -5,7 +5,7 @@ profile management, and session handling.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from pydantic import BaseModel
@@ -28,14 +28,14 @@ class UserProfileResponse(BaseModel):
     display_name: Optional[str] = None
     created_at: datetime
     last_active: datetime
-    preferences: Dict[str, Any] = {}
-    metadata: Dict[str, Any] = {}
+    preferences: dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
 
 class UserProfileUpdateRequest(BaseModel):
     display_name: Optional[str] = None
-    preferences: Optional[Dict[str, Any]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    preferences: Optional[dict[str, Any]] = None
+    metadata: Optional[dict[str, Any]] = None
 
 
 class PasswordChangeRequest(BaseModel):
@@ -266,7 +266,7 @@ async def change_password(
     return {"message": message}
 
 
-@router.get("/sessions", response_model=List[SessionResponse])
+@router.get("/sessions", response_model=list[SessionResponse])
 async def get_sessions(
     user_id: str = Depends(get_current_user_id),
     app_state: AppState = Depends(get_app_state)

@@ -9,7 +9,11 @@ component of the Human User Intelligence Layer.
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -21,11 +25,14 @@ logger = logging.getLogger(__name__)
 class ContextOptimization(BaseModel):
     """Represents the result of optimizing a prompt with context.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     original_prompt: str
     optimized_prompt: str
-    added_context: List[str] = Field(default_factory=list)
-    personalization_factors: Dict[str, Any] = Field(default_factory=dict)
+    added_context: list[str] = Field(default_factory=list)
+    personalization_factors: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
@@ -39,10 +46,17 @@ class PromptOptimizationServiceInterface(ABC):
 
     @abstractmethod
     async def optimize_prompt(
+<<<<<<< HEAD
         self,
         original_prompt: str,
         user_id: str,
         context: Dict[str, Any]
+=======
+        self, 
+        original_prompt: str, 
+        user_id: str, 
+        context: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> ContextOptimization:
         """Optimize prompt based on user profile and intent.
         
@@ -99,9 +113,15 @@ class PromptOptimizationServiceInterface(ABC):
 
     @abstractmethod
     def optimize_for_communication_style(
+<<<<<<< HEAD
         self,
         prompt: str,
         communication_preferences: Dict[str, Any]
+=======
+        self, 
+        prompt: str, 
+        communication_preferences: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> str:
         """Optimize prompt for user's communication style.
         
@@ -139,10 +159,17 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
         logger.info("BasicPromptOptimizationService initialized")
 
     async def optimize_prompt(
+<<<<<<< HEAD
         self,
         original_prompt: str,
         user_id: str,
         context: Dict[str, Any]
+=======
+        self, 
+        original_prompt: str, 
+        user_id: str, 
+        context: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> ContextOptimization:
         """Optimize prompt based on user profile and intent.
         
@@ -303,9 +330,15 @@ Based on the above context, please respond to: {prompt}"""
             return prompt
 
     def optimize_for_communication_style(
+<<<<<<< HEAD
         self,
         prompt: str,
         communication_preferences: Dict[str, Any]
+=======
+        self, 
+        prompt: str, 
+        communication_preferences: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> str:
         """Optimize prompt for user's communication style.
         

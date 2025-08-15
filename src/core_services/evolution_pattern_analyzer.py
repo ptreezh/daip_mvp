@@ -5,7 +5,11 @@
 """
 
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +27,13 @@ class EvolutionPatternAnalyzer:
             "paradigm_shift": "范式转换"
         }
         self.analysis_history = []
+<<<<<<< HEAD
 
     def identify_evolution_patterns(self, evolution_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+=======
+    
+    def identify_evolution_patterns(self, evolution_data: list[dict[str, Any]]) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """识别演化模式"""
         try:
             patterns = []
@@ -67,8 +76,13 @@ class EvolutionPatternAnalyzer:
         except Exception as e:
             logger.error(f"识别演化模式失败: {e}")
             return []
+<<<<<<< HEAD
 
     def predict_evolution_trends(self, historical_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+=======
+    
+    def predict_evolution_trends(self, historical_data: list[dict[str, Any]]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """预测演化趋势"""
         try:
             if not historical_data:
@@ -90,8 +104,13 @@ class EvolutionPatternAnalyzer:
         except Exception as e:
             logger.error(f"预测演化趋势失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def analyze_knowledge_lifecycle(self, evolution_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+=======
+    
+    def analyze_knowledge_lifecycle(self, evolution_data: list[dict[str, Any]]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析知识生命周期"""
         try:
             if not evolution_data:
@@ -123,14 +142,24 @@ class EvolutionPatternAnalyzer:
         except Exception as e:
             logger.error(f"分析知识生命周期失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def _detect_incremental_growth(self, change_types: List[str]) -> bool:
+=======
+    
+    def _detect_incremental_growth(self, change_types: list[str]) -> bool:
+>>>>>>> feature/core-services-refactor
         """检测渐进式增长"""
         growth_types = ["enhancement", "refinement", "expansion"]
         growth_count = sum(1 for ct in change_types if ct in growth_types)
         return growth_count >= len(change_types) * 0.6
+<<<<<<< HEAD
 
     def _detect_rapid_expansion(self, evolution_data: List[Dict[str, Any]]) -> bool:
+=======
+    
+    def _detect_rapid_expansion(self, evolution_data: list[dict[str, Any]]) -> bool:
+>>>>>>> feature/core-services-refactor
         """检测快速扩展"""
         if len(evolution_data) < 3:
             return False
@@ -140,14 +169,24 @@ class EvolutionPatternAnalyzer:
         expansion_count = sum(1 for event in evolution_data if event.get("change_type") == "expansion")
 
         return expansion_count >= 2 and len(evolution_data) >= 3
+<<<<<<< HEAD
 
     def _detect_refinement_cycle(self, change_types: List[str]) -> bool:
+=======
+    
+    def _detect_refinement_cycle(self, change_types: list[str]) -> bool:
+>>>>>>> feature/core-services-refactor
         """检测优化循环"""
         refinement_types = ["refinement", "correction"]
         refinement_count = sum(1 for ct in change_types if ct in refinement_types)
         return refinement_count >= 2
+<<<<<<< HEAD
 
     def _predict_next_change(self, recent_changes: List[str]) -> str:
+=======
+    
+    def _predict_next_change(self, recent_changes: list[str]) -> str:
+>>>>>>> feature/core-services-refactor
         """预测下一个变化"""
         if not recent_changes:
             return "enhancement"
@@ -164,8 +203,13 @@ class EvolutionPatternAnalyzer:
         }
 
         return prediction_map.get(last_change, "enhancement")
+<<<<<<< HEAD
 
     def _assess_maturity(self, change_types: List[str]) -> List[str]:
+=======
+    
+    def _assess_maturity(self, change_types: list[str]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """评估成熟度指标"""
         indicators = []
 
@@ -179,8 +223,13 @@ class EvolutionPatternAnalyzer:
             indicators.append("变化类型多样")
 
         return indicators
+<<<<<<< HEAD
 
     def _calculate_health_score(self, evolution_data: List[Dict[str, Any]]) -> float:
+=======
+    
+    def _calculate_health_score(self, evolution_data: list[dict[str, Any]]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算健康分数"""
         if not evolution_data:
             return 0.0

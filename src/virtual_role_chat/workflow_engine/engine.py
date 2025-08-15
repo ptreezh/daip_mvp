@@ -8,7 +8,11 @@ execution state.
 import asyncio
 import logging
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from ..institutional_primitives import PrimitiveRegistry, get_global_registry
 from .execution_manager import ExecutionManager
@@ -30,7 +34,7 @@ class WorkflowEngine:
         self,
         primitive_registry: Optional[PrimitiveRegistry] = None,
         state_manager: Optional[StateManager] = None,
-        services: Optional[Dict[str, Any]] = None,
+        services: Optional[dict[str, Any]] = None,
         max_concurrency: int = 5
     ):
         """Initialize the workflow engine.
@@ -48,6 +52,7 @@ class WorkflowEngine:
         self.execution_manager = ExecutionManager(self.primitive_registry, max_concurrency)
 
         # Active executions
+<<<<<<< HEAD
         self._active_executions: Dict[str, WorkflowExecution] = {}
         self._execution_tasks: Dict[str, asyncio.Task] = {}
 
@@ -55,6 +60,15 @@ class WorkflowEngine:
         self,
         workflow_def: WorkflowDefinition,
         params: Optional[Dict[str, Any]] = None
+=======
+        self._active_executions: dict[str, WorkflowExecution] = {}
+        self._execution_tasks: dict[str, asyncio.Task] = {}
+    
+    async def execute_workflow(
+        self, 
+        workflow_def: WorkflowDefinition, 
+        params: Optional[dict[str, Any]] = None
+>>>>>>> feature/core-services-refactor
     ) -> WorkflowResult:
         """Execute a workflow definition.
         
@@ -375,8 +389,13 @@ class WorkflowEngine:
             end_time=execution.end_time,
             errors=errors
         )
+<<<<<<< HEAD
 
     def get_active_executions(self) -> List[str]:
+=======
+    
+    def get_active_executions(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Get list of active workflow execution IDs.
         
         Returns:
@@ -413,8 +432,13 @@ class WorkflowEngine:
 
         """
         return await self.state_manager.cleanup_old_executions(max_age_days)
+<<<<<<< HEAD
 
     def get_engine_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_engine_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get engine statistics.
         
         Returns:

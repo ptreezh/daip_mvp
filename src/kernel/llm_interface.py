@@ -10,7 +10,11 @@ The interface now includes token management capabilities for cost tracking and c
 import logging
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
+=======
+from typing import TYPE_CHECKING, Any, Optional
+>>>>>>> feature/core-services-refactor
 
 import ollama
 from openai import AsyncOpenAI
@@ -51,7 +55,11 @@ class LLMInterface(ABC):
         self.token_service = token_service
 
     @abstractmethod
+<<<<<<< HEAD
     async def generate(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> Dict[str, Any]:
+=======
+    async def generate(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Generates a single, non-streaming response from the LLM.
         
         Args:
@@ -66,7 +74,11 @@ class LLMInterface(ABC):
         pass
 
     @abstractmethod
+<<<<<<< HEAD
     async def generate_stream(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
+=======
+    async def generate_stream(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
+>>>>>>> feature/core-services-refactor
         """Generates a response as a stream of text chunks.
         
         Args:
@@ -81,12 +93,12 @@ class LLMInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_embedding(self, text: str) -> List[float]:
+    async def get_embedding(self, text: str) -> list[float]:
         """Generates a single embedding vector for the given text."""
         pass
 
     @abstractmethod
-    async def get_embeddings(self, texts: List[str]) -> List[List[float]]:
+    async def get_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Generates embedding vectors for a list of texts."""
         pass
 
@@ -98,7 +110,7 @@ class OpenAIInterface(LLMInterface):
         super().__init__(config, token_service)
         self.client = AsyncOpenAI(api_key=config.api_key, base_url=config.base_url)
 
-    async def generate(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> Dict[str, Any]:
+    async def generate(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> dict[str, Any]:
         # Optimize context if token service is available
         if self.token_service:
             context_window = self.token_service.prepare_context_for_llm(messages, self.config.model, participant_id)
@@ -139,7 +151,7 @@ class OpenAIInterface(LLMInterface):
 
         return result
 
-    async def generate_stream(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
+    async def generate_stream(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
         # Optimize context if token service is available
         if self.token_service:
             context_window = self.token_service.prepare_context_for_llm(messages, self.config.model, participant_id)
@@ -175,13 +187,13 @@ class OpenAIInterface(LLMInterface):
                 participant_id=participant_id
             )
 
-    async def get_embedding(self, text: str) -> List[float]:
+    async def get_embedding(self, text: str) -> list[float]:
         """Generates a single embedding vector for the given text."""
         # Note: OpenAI's API can take a list, but we expose a single-text method for interface consistency.
         response = await self.client.embeddings.create(model=self.config.model, input=[text])
         return response.data[0].embedding
 
-    async def get_embeddings(self, texts: List[str]) -> List[List[float]]:
+    async def get_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Generates embedding vectors for a list of texts."""
         if not texts:
             return []
@@ -197,7 +209,7 @@ class OllamaInterface(LLMInterface):
         # The 'ollama' library uses 'host' instead of 'base_url'
         self.client = ollama.AsyncClient(host=config.base_url)
 
-    async def generate(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> Dict[str, Any]:
+    async def generate(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> dict[str, Any]:
         # Optimize context if token service is available
         if self.token_service:
             context_window = self.token_service.prepare_context_for_llm(messages, self.config.model, participant_id)
@@ -234,7 +246,7 @@ class OllamaInterface(LLMInterface):
 
         return response["message"]
 
-    async def generate_stream(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
+    async def generate_stream(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
         # Optimize context if token service is available
         if self.token_service:
             context_window = self.token_service.prepare_context_for_llm(messages, self.config.model, participant_id)
@@ -268,7 +280,7 @@ class OllamaInterface(LLMInterface):
                 participant_id=participant_id
             )
 
-    async def get_embedding(self, text: str) -> List[float]:
+    async def get_embedding(self, text: str) -> list[float]:
         """Generates a single embedding vector for the given text."""
         try:
             response = await self.client.embeddings(model=self.config.model, prompt=text)
@@ -277,7 +289,7 @@ class OllamaInterface(LLMInterface):
             logging.error(f"Ollama embedding error for model '{self.config.model}': {e}")
             return []
 
-    async def get_embeddings(self, texts: List[str]) -> List[List[float]]:
+    async def get_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Generates embedding vectors for a list of texts."""
         embeddings = []
         for text in texts:

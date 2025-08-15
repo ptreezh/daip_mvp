@@ -9,7 +9,11 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Union
+=======
+from typing import Any, Optional, Union
+>>>>>>> feature/core-services-refactor
 
 from rich.console import Console
 from rich.panel import Panel
@@ -29,7 +33,7 @@ class ConfigurationOption:
     description: str
     option_type: str  # "string", "integer", "float", "boolean", "list", "choice"
     default_value: Any
-    choices: Optional[List[str]] = None
+    choices: Optional[list[str]] = None
     min_value: Optional[Union[int, float]] = None
     max_value: Optional[Union[int, float]] = None
     category: str = "general"
@@ -45,11 +49,19 @@ class ConfigurationManager:
         self.console = console or Console()
         self.config_dir = Path(config_dir)
         self.config_dir.mkdir(parents=True, exist_ok=True)
+<<<<<<< HEAD
 
         self.configurations: Dict[str, Dict[str, Any]] = {}
         self.configuration_options: Dict[str, List[ConfigurationOption]] = {}
         self.user_preferences: Dict[str, Any] = {}
 
+=======
+        
+        self.configurations: dict[str, dict[str, Any]] = {}
+        self.configuration_options: dict[str, list[ConfigurationOption]] = {}
+        self.user_preferences: dict[str, Any] = {}
+        
+>>>>>>> feature/core-services-refactor
         # Load existing configurations
         self._load_configurations()
         self._initialize_default_options()
@@ -305,8 +317,8 @@ class ConfigurationManager:
         self,
         workflow_name: str,
         config_name: str = "default",
-        base_config: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        base_config: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """Create a new configuration interactively."""
         self.console.print(f"\n[blue]🎨 Creating Configuration for {workflow_name}[/blue]")
 
@@ -328,9 +340,9 @@ class ConfigurationManager:
     async def _interactive_configuration(
         self,
         workflow_name: str,
-        config: Dict[str, Any],
-        options: List[ConfigurationOption]
-    ) -> Dict[str, Any]:
+        config: dict[str, Any],
+        options: list[ConfigurationOption]
+    ) -> dict[str, Any]:
         """Handle interactive configuration creation."""
         # Group options by category
         categories = {}
@@ -382,9 +394,9 @@ class ConfigurationManager:
     async def _configure_category(
         self,
         category_name: str,
-        options: List[ConfigurationOption],
-        config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        options: list[ConfigurationOption],
+        config: dict[str, Any]
+    ) -> dict[str, Any]:
         """Configure options within a specific category."""
         self.console.print(f"\n[cyan]🔧 Configuring {category_name.title()}[/cyan]")
 
@@ -429,7 +441,7 @@ class ConfigurationManager:
     async def _get_option_value(
         self,
         option: ConfigurationOption,
-        config: Dict[str, Any]
+        config: dict[str, Any]
     ) -> Any:
         """Get a configuration option value from user input."""
         current_value = self._get_nested_value(config, option.key, option.default_value)
@@ -507,8 +519,13 @@ class ConfigurationManager:
                 f"Enter value for {option.name}",
                 default=str(current_value)
             )
+<<<<<<< HEAD
 
     def _get_nested_value(self, config: Dict[str, Any], key: str, default: Any = None) -> Any:
+=======
+    
+    def _get_nested_value(self, config: dict[str, Any], key: str, default: Any = None) -> Any:
+>>>>>>> feature/core-services-refactor
         """Get a nested configuration value using dot notation."""
         keys = key.split('.')
         value = config
@@ -519,8 +536,13 @@ class ConfigurationManager:
             return value
         except (KeyError, TypeError):
             return default
+<<<<<<< HEAD
 
     def _set_nested_value(self, config: Dict[str, Any], key: str, value: Any) -> None:
+=======
+    
+    def _set_nested_value(self, config: dict[str, Any], key: str, value: Any) -> None:
+>>>>>>> feature/core-services-refactor
         """Set a nested configuration value using dot notation."""
         keys = key.split('.')
         current = config
@@ -533,8 +555,13 @@ class ConfigurationManager:
 
         # Set the final value
         current[keys[-1]] = value
+<<<<<<< HEAD
 
     def _display_configuration_summary(self, config: Dict[str, Any]) -> None:
+=======
+    
+    def _display_configuration_summary(self, config: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Display a summary of the configuration."""
         self.console.print("\n[blue]📋 Configuration Summary[/blue]")
 
@@ -545,8 +572,13 @@ class ConfigurationManager:
             line_numbers=True
         )
         self.console.print(Panel(syntax, title="Configuration"))
+<<<<<<< HEAD
 
     def _save_configuration(self, config_name: str, config: Dict[str, Any]) -> bool:
+=======
+    
+    def _save_configuration(self, config_name: str, config: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Save configuration to disk."""
         try:
             config_file = self.config_dir / f"{config_name}.json"
@@ -561,8 +593,13 @@ class ConfigurationManager:
             self.console.print(f"[red]❌ Failed to save configuration: {e}[/red]")
             logger.error(f"Error saving configuration {config_name}: {e}")
             return False
+<<<<<<< HEAD
 
     def load_configuration(self, config_name: str) -> Dict[str, Any]:
+=======
+    
+    def load_configuration(self, config_name: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Load a configuration by name."""
         if config_name in self.configurations:
             return copy.deepcopy(self.configurations[config_name])
@@ -581,8 +618,13 @@ class ConfigurationManager:
                 logger.error(f"Error loading configuration {config_name}: {e}")
 
         return {}
+<<<<<<< HEAD
 
     def list_configurations(self, workflow_name: str = None) -> List[str]:
+=======
+    
+    def list_configurations(self, workflow_name: str = None) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List available configurations."""
         configs = list(self.configurations.keys())
 
@@ -637,7 +679,11 @@ class ConfigurationManager:
             if not import_file.exists():
                 self.console.print(f"[red]Import file not found: {import_path}[/red]")
                 return False
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             with open(import_file, encoding='utf-8') as f:
                 config = json.load(f)
 

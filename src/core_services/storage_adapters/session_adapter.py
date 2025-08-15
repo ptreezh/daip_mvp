@@ -5,7 +5,7 @@ This module implements the storage adapter for conversation states and session d
 
 import json
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 try:
     from src.core_services.enhanced_sskg_manager import KnowledgeQuery, NodeType
@@ -28,8 +28,13 @@ class SessionAdapter(StorageAdapter):
     This adapter manages the storage and retrieval of session states,
     conversation history, and context information.
     """
+<<<<<<< HEAD
 
     def store(self, session_data: Dict[str, Any], **kwargs) -> str:
+=======
+    
+    def store(self, session_data: dict[str, Any], **kwargs) -> str:
+>>>>>>> feature/core-services-refactor
         """Store session data in the SSKG.
         
         Args:
@@ -97,8 +102,13 @@ class SessionAdapter(StorageAdapter):
             self.logger.info(f"Created session {session_id}")
 
         return session_node_id
+<<<<<<< HEAD
 
     def retrieve(self, session_id: str, **kwargs) -> Optional[Dict[str, Any]]:
+=======
+    
+    def retrieve(self, session_id: str, **kwargs) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve session data from the SSKG.
         
         Args:
@@ -139,8 +149,13 @@ class SessionAdapter(StorageAdapter):
             "state": state,
             "metadata": metadata
         }
+<<<<<<< HEAD
 
     def update(self, session_id: str, session_data: Dict[str, Any], **kwargs) -> bool:
+=======
+    
+    def update(self, session_id: str, session_data: dict[str, Any], **kwargs) -> bool:
+>>>>>>> feature/core-services-refactor
         """Update session data in the SSKG.
         
         Args:
@@ -218,8 +233,13 @@ class SessionAdapter(StorageAdapter):
             self.logger.info(f"Deleted session {session_id}")
 
         return success
+<<<<<<< HEAD
 
     def list_all(self, **kwargs) -> List[str]:
+=======
+    
+    def list_all(self, **kwargs) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all session IDs.
         
         Args:

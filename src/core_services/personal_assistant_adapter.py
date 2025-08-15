@@ -13,7 +13,11 @@
 
 import logging
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from legacy_compatibility_layer import get_personal_assistant_compatibility
 
@@ -24,12 +28,21 @@ class PersonalAssistantServiceAdapter:
     提供与原有PersonalAssistantService完全兼容的接口，
     内部使用统一共识调度器进行共识计算。
     """
+<<<<<<< HEAD
 
     def __init__(self):
         self.logger = logging.getLogger("adapter.PersonalAssistant")
         self.compatibility_layer = get_personal_assistant_compatibility()
 
     async def _local_consensus_calculation(self, inputs: List[Dict[str, Any]]) -> str:
+=======
+    
+    def __init__(self):
+        self.logger = logging.getLogger("adapter.PersonalAssistant")
+        self.compatibility_layer = get_personal_assistant_compatibility()
+        
+    async def _local_consensus_calculation(self, inputs: list[dict[str, Any]]) -> str:
+>>>>>>> feature/core-services-refactor
         """本地共识计算实现 - 适配器版本
         
         这个方法替换PersonalAssistantService中的同名方法，
@@ -40,6 +53,7 @@ class PersonalAssistantServiceAdapter:
             
         Returns:
             格式化的共识结果字符串
+<<<<<<< HEAD
 
         """
         try:
@@ -61,6 +75,28 @@ class PersonalAssistantServiceAdapter:
     async def execute_consensus_for_backend(self,
                                           inputs: List[Dict[str, Any]],
                                           algorithm_type: str) -> Dict[str, Any]:
+=======
+        """
+        try:
+            self.logger.info(f"开始共识计算，输入数量: {len(inputs)}")
+            
+            if not inputs:
+                return "没有足够的输入数据进行共识计算"
+            
+            # 使用兼容层进行共识计算
+            result = await self.compatibility_layer.calculate_local_consensus(inputs)
+            
+            self.logger.info("共识计算完成")
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"共识计算失败: {e}")
+            return f"共识计算失败：{str(e)}"
+    
+    async def execute_consensus_for_backend(self, 
+                                          inputs: list[dict[str, Any]], 
+                                          algorithm_type: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """为后端服务提供共识计算接口
         
         这个方法用于替换PersonalAssistantService中通过backend_service调用的共识计算。
@@ -71,6 +107,7 @@ class PersonalAssistantServiceAdapter:
             
         Returns:
             共识计算结果字典
+<<<<<<< HEAD
 
         """
         try:
@@ -82,6 +119,18 @@ class PersonalAssistantServiceAdapter:
             self.logger.info(f"后端共识计算完成: {result.get('success', False)}")
             return result
 
+=======
+        """
+        try:
+            self.logger.info(f"后端共识计算: {algorithm_type}, 输入数量: {len(inputs)}")
+            
+            # 使用兼容层执行共识计算
+            result = await self.compatibility_layer.execute_consensus(inputs, algorithm_type)
+            
+            self.logger.info(f"后端共识计算完成: {result.get('success', False)}")
+            return result
+            
+>>>>>>> feature/core-services-refactor
         except Exception as e:
             self.logger.error(f"后端共识计算失败: {e}")
             return {
@@ -89,12 +138,21 @@ class PersonalAssistantServiceAdapter:
                 "success": False,
                 "algorithm_type": algorithm_type
             }
+<<<<<<< HEAD
 
     def get_supported_algorithms(self) -> List[str]:
         """获取支持的算法列表"""
         return self.compatibility_layer.get_supported_algorithms()
 
     async def health_check(self) -> Dict[str, Any]:
+=======
+    
+    def get_supported_algorithms(self) -> list[str]:
+        """获取支持的算法列表"""
+        return self.compatibility_layer.get_supported_algorithms()
+    
+    async def health_check(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """健康检查"""
         try:
             # 测试基本的共识计算功能
@@ -106,11 +164,19 @@ class PersonalAssistantServiceAdapter:
                     "reasoning": "health check test"
                 }
             ]
+<<<<<<< HEAD
 
             result = await self.compatibility_layer.execute_consensus(
                 test_inputs, "simple_majority_vote"
             )
 
+=======
+            
+            result = await self.compatibility_layer.execute_consensus(
+                test_inputs, "simple_majority_vote"
+            )
+            
+>>>>>>> feature/core-services-refactor
             return {
                 "status": "healthy" if result.get("success", False) else "degraded",
                 "adapter_available": True,
@@ -118,7 +184,11 @@ class PersonalAssistantServiceAdapter:
                 "supported_algorithms": len(self.get_supported_algorithms()),
                 "last_check": datetime.now().isoformat()
             }
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
         except Exception as e:
             self.logger.error(f"健康检查失败: {e}")
             return {
@@ -149,15 +219,23 @@ def patch_personal_assistant_service():
     """
     try:
         import personal_intelligence_hub.services.personal_assistant as pas_module
+<<<<<<< HEAD
 
         # 获取适配器实例
         adapter = get_personal_assistant_adapter()
 
+=======
+        
+        # 获取适配器实例
+        adapter = get_personal_assistant_adapter()
+        
+>>>>>>> feature/core-services-refactor
         # 替换_local_consensus_calculation方法
         original_method = getattr(pas_module.PersonalAssistantService, '_local_consensus_calculation', None)
         if original_method:
             # 保存原始方法作为备份
             pas_module.PersonalAssistantService._original_local_consensus_calculation = original_method
+<<<<<<< HEAD
 
             # 替换为适配器方法
             pas_module.PersonalAssistantService._local_consensus_calculation = adapter._local_consensus_calculation
@@ -171,6 +249,21 @@ def patch_personal_assistant_service():
 
         return True
 
+=======
+            
+            # 替换为适配器方法
+            pas_module.PersonalAssistantService._local_consensus_calculation = adapter._local_consensus_calculation
+            
+            logging.getLogger("adapter.PersonalAssistant").info(
+                "PersonalAssistantService._local_consensus_calculation 已替换为统一调度器版本"
+            )
+        
+        # 如果有backend_service的execute_consensus方法，也进行替换
+        # 这需要在运行时动态处理，因为backend_service是异步初始化的
+        
+        return True
+        
+>>>>>>> feature/core-services-refactor
     except Exception as e:
         logging.getLogger("adapter.PersonalAssistant").error(f"补丁应用失败: {e}")
         return False
@@ -181,12 +274,17 @@ def unpatch_personal_assistant_service():
     """
     try:
         import personal_intelligence_hub.services.personal_assistant as pas_module
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # 恢复原始方法
         original_method = getattr(pas_module.PersonalAssistantService, '_original_local_consensus_calculation', None)
         if original_method:
             pas_module.PersonalAssistantService._local_consensus_calculation = original_method
             delattr(pas_module.PersonalAssistantService, '_original_local_consensus_calculation')
+<<<<<<< HEAD
 
             logging.getLogger("adapter.PersonalAssistant").info(
                 "PersonalAssistantService._local_consensus_calculation 已恢复为原始版本"
@@ -194,6 +292,15 @@ def unpatch_personal_assistant_service():
 
         return True
 
+=======
+            
+            logging.getLogger("adapter.PersonalAssistant").info(
+                "PersonalAssistantService._local_consensus_calculation 已恢复为原始版本"
+            )
+        
+        return True
+        
+>>>>>>> feature/core-services-refactor
     except Exception as e:
         logging.getLogger("adapter.PersonalAssistant").error(f"补丁移除失败: {e}")
         return False
@@ -204,6 +311,7 @@ class BackendServiceAdapter:
     
     为PersonalAssistantService的backend_service提供共识计算接口。
     """
+<<<<<<< HEAD
 
     def __init__(self):
         self.logger = logging.getLogger("adapter.BackendService")
@@ -212,16 +320,33 @@ class BackendServiceAdapter:
     async def execute_consensus(self,
                                inputs: List[Dict[str, Any]],
                                algorithm_type: str) -> Dict[str, Any]:
+=======
+    
+    def __init__(self):
+        self.logger = logging.getLogger("adapter.BackendService")
+        self.compatibility_layer = get_personal_assistant_compatibility()
+    
+    async def execute_consensus(self, 
+                               inputs: list[dict[str, Any]], 
+                               algorithm_type: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行共识计算 - 后端服务接口
         
         这个方法模拟backend_service.execute_consensus的接口。
         """
         try:
             self.logger.info(f"后端服务共识计算: {algorithm_type}")
+<<<<<<< HEAD
 
             # 使用兼容层执行共识计算
             result = await self.compatibility_layer.execute_consensus(inputs, algorithm_type)
 
+=======
+            
+            # 使用兼容层执行共识计算
+            result = await self.compatibility_layer.execute_consensus(inputs, algorithm_type)
+            
+>>>>>>> feature/core-services-refactor
             # 确保返回格式符合backend_service的期望
             if result.get("success", False):
                 return {
@@ -238,7 +363,11 @@ class BackendServiceAdapter:
                     "error": result.get("error", "共识计算失败"),
                     "algorithm_type": algorithm_type
                 }
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
         except Exception as e:
             self.logger.error(f"后端服务共识计算失败: {e}")
             return {
@@ -256,4 +385,8 @@ def get_backend_service_adapter() -> BackendServiceAdapter:
     global _backend_service_adapter
     if _backend_service_adapter is None:
         _backend_service_adapter = BackendServiceAdapter()
+<<<<<<< HEAD
     return _backend_service_adapter
+=======
+    return _backend_service_adapter
+>>>>>>> feature/core-services-refactor

@@ -1,0 +1,136 @@
+{
+  "test_phase": "Phase 4.1: Expert Consultation Scenario Testing",
+  "execution_time": "2025-08-06T08:01:01.647105",
+  "total_duration_seconds": 1.0701079368591309,
+  "total_tests": 6,
+  "passed_tests": 3,
+  "partial_tests": 0,
+  "failed_tests": 2,
+  "pass_rate": 0.5,
+  "overall_status": "PARTIAL",
+  "test_results": [
+    {
+      "test_id": "T4.1.0",
+      "test_name": "Backend Health Check",
+      "status": "DEGRADED",
+      "duration": 1.0186645984649658,
+      "details": "Backend status: degraded",
+      "data": {
+        "backend_status": "degraded"
+      }
+    },
+    {
+      "test_id": "T4.1.1",
+      "test_name": "Available Roles",
+      "status": "PASSED",
+      "duration": 0.014161348342895508,
+      "details": "Retrieved 112 roles",
+      "data": {
+        "role_count": 112,
+        "sample_roles": [
+          {
+            "name": "**Agent Role: Academy of Management Journal Senior Editor**",
+            "description": "角色: **Agent Role: Academy of Management Journal Senior Editor**",
+            "id": "**Agent Role: Academy of Management Journal Senior Editor**",
+            "tags": []
+          },
+          {
+            "name": "**Agent Role: Academy of Management Review Senior Editor**",
+            "description": "角色: **Agent Role: Academy of Management Review Senior Editor**",
+            "id": "**Agent Role: Academy of Management Review Senior Editor**",
+            "tags": []
+          },
+          {
+            "name": "**Agent Role: Administrative Science Quarterly Senior Editor**",
+            "description": "角色: **Agent Role: Administrative Science Quarterly Senior Editor**",
+            "id": "**Agent Role: Administrative Science Quarterly Senior Editor**",
+            "tags": []
+          }
+        ]
+      }
+    },
+    {
+      "test_id": "T4.1.2",
+      "test_name": "Intent Analysis",
+      "status": "PASSED",
+      "duration": 0.01829218864440918,
+      "details": "Successfully analyzed 3/3 queries",
+      "data": {
+        "total_queries": 3,
+        "successful_intents": 3,
+        "results": [
+          {
+            "query": "How can I improve my company's AI strategy?",
+            "success": true,
+            "result": {
+              "workflow_type": "multi_perspective",
+              "confidence": 0.6,
+              "reasoning": "增强关键词分析: 基于场景unknown的默认选择",
+              "topic": "How can I improve my company's AI strategy?",
+              "scenario": "unknown"
+            }
+          },
+          {
+            "query": "What are the ethical implications of autonomous vehicles?",
+            "success": true,
+            "result": {
+              "workflow_type": "multi_perspective",
+              "confidence": 0.6,
+              "reasoning": "增强关键词分析: 基于场景unknown的默认选择",
+              "topic": "What are the ethical implications of autonomous vehicles?",
+              "scenario": "unknown"
+            }
+          },
+          {
+            "query": "How should we approach digital transformation?",
+            "success": true,
+            "result": {
+              "workflow_type": "multi_perspective",
+              "confidence": 0.6,
+              "reasoning": "增强关键词分析: 基于场景unknown的默认选择",
+              "topic": "How should we approach digital transformation?",
+              "scenario": "unknown"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "test_id": "T4.1.3",
+      "test_name": "Workflow Start",
+      "status": "FAILED",
+      "duration": 0.008631467819213867,
+      "details": "Workflow started: False",
+      "data": {
+        "workflow_result": {
+          "error": "HTTP 404"
+        },
+        "success": false
+      }
+    },
+    {
+      "test_id": "T4.1.4",
+      "test_name": "Consensus Calculation",
+      "status": "FAILED",
+      "duration": 0.004171848297119141,
+      "details": "Consensus calculated: False",
+      "data": {
+        "consensus_result": {
+          "error": "HTTP 404"
+        },
+        "success": false
+      }
+    },
+    {
+      "test_id": "T4.1.5",
+      "test_name": "Wiki Search",
+      "status": "PASSED",
+      "duration": 0.006186485290527344,
+      "details": "Wiki search completed: 0 results",
+      "data": {
+        "wiki_results": [],
+        "result_count": 0
+      }
+    }
+  ]
+}

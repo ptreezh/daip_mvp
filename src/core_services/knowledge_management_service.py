@@ -6,8 +6,14 @@
     components for complete knowledge lifecycle management.
 """
 import logging
+<<<<<<< HEAD
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
+=======
+from collections.abc import Callable
+from datetime import datetime
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel
 
@@ -115,8 +121,13 @@ class KnowledgeManagementService:
         self._configure_services()
 
         # Callback registry
+<<<<<<< HEAD
         self.knowledge_callbacks: List[Callable[[str, Dict[str, Any]], None]] = []
 
+=======
+        self.knowledge_callbacks: list[Callable[[str, dict[str, Any]], None]] = []
+        
+>>>>>>> feature/core-services-refactor
         logger.info("KnowledgeManagementService initialized")
 
     def _configure_services(self):
@@ -151,9 +162,13 @@ class KnowledgeManagementService:
 
     async def integrate_critical_review_workflow(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Integrate Critical Review workflow with knowledge management.
         
         Args:
@@ -181,9 +196,13 @@ class KnowledgeManagementService:
 
     async def integrate_multi_perspective_workflow(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Integrate Multi-perspective Synthesis workflow with knowledge management.
         
         Args:
@@ -218,8 +237,13 @@ class KnowledgeManagementService:
         min_confidence: float = None,
         limit: int = 10,
         include_related: bool = True,
+<<<<<<< HEAD
         expertise_domains: List[str] = None
     ) -> Dict[str, Any]:
+=======
+        expertise_domains: list[str] = None
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Search for knowledge across all persisted content.
         
         Args:
@@ -272,10 +296,14 @@ class KnowledgeManagementService:
 
     async def get_cross_session_knowledge(
         self,
-        session_context: Dict[str, Any],
+        session_context: dict[str, Any],
         time_window_days: int = 30,
         min_relevance: float = 0.6
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get relevant knowledge from previous sessions.
         
         Args:
@@ -294,8 +322,13 @@ class KnowledgeManagementService:
         )
 
     # Knowledge Quality and Evolution Methods
+<<<<<<< HEAD
 
     async def assess_knowledge_quality(self, node_id: str) -> Dict[str, Any]:
+=======
+    
+    async def assess_knowledge_quality(self, node_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Assess the quality of a knowledge node.
         
         Args:
@@ -317,8 +350,13 @@ class KnowledgeManagementService:
             "assessment_timestamp": assessment.assessment_timestamp.isoformat(),
             "metadata": assessment.metadata
         }
+<<<<<<< HEAD
 
     async def run_knowledge_evolution_cycle(self) -> Dict[str, Any]:
+=======
+    
+    async def run_knowledge_evolution_cycle(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Run a knowledge evolution cycle.
         
         Returns:
@@ -339,7 +377,7 @@ class KnowledgeManagementService:
         node_id: str,
         reason: str,
         new_content: Optional[str] = None,
-        metadata_updates: Dict[str, Any] = None
+        metadata_updates: dict[str, Any] = None
     ) -> Optional[str]:
         """Manually evolve a knowledge node.
         
@@ -373,8 +411,13 @@ class KnowledgeManagementService:
         return evolved_id
 
     # Statistics and Monitoring Methods
+<<<<<<< HEAD
 
     def get_comprehensive_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_comprehensive_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get comprehensive statistics about knowledge management.
         
         Returns:
@@ -432,22 +475,27 @@ class KnowledgeManagementService:
 
     def add_knowledge_callback(
         self,
-        callback: Callable[[str, Dict[str, Any]], None]
+        callback: Callable[[str, dict[str, Any]], None]
     ) -> None:
         """Add a callback for knowledge events."""
         self.knowledge_callbacks.append(callback)
 
     def remove_knowledge_callback(
         self,
-        callback: Callable[[str, Dict[str, Any]], None]
+        callback: Callable[[str, dict[str, Any]], None]
     ) -> None:
         """Remove a knowledge callback."""
         try:
             self.knowledge_callbacks.remove(callback)
         except ValueError:
             pass
+<<<<<<< HEAD
 
     def _notify_callbacks(self, event_type: str, event_data: Dict[str, Any]) -> None:
+=======
+    
+    def _notify_callbacks(self, event_type: str, event_data: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Notify all registered callbacks about knowledge events."""
         for callback in self.knowledge_callbacks:
             try:
@@ -456,8 +504,13 @@ class KnowledgeManagementService:
                 logger.error(f"Knowledge callback failed: {e}")
 
     # Utility Methods
+<<<<<<< HEAD
 
     async def health_check(self) -> Dict[str, Any]:
+=======
+    
+    async def health_check(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Perform a health check of all knowledge management components.
         
         Returns:

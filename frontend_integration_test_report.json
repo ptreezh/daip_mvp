@@ -1,0 +1,150 @@
+{
+  "test_timestamp": "2025-08-06T12:28:24.837894",
+  "overall_status": "EXCELLENT",
+  "total_tests": 20,
+  "successful_tests": 20,
+  "failed_tests": 0,
+  "success_rate": 1.0,
+  "detailed_results": [
+    {
+      "test_name": "后端服务可用性",
+      "success": true,
+      "details": "后端健康检查 - HTTP 200",
+      "execution_time": 0.0073680877685546875,
+      "timestamp": "2025-08-06T12:28:09.314094"
+    },
+    {
+      "test_name": "Web服务可用性",
+      "success": true,
+      "details": "Web健康检查 - HTTP 200",
+      "execution_time": 0.028150558471679688,
+      "timestamp": "2025-08-06T12:28:09.342856"
+    },
+    {
+      "test_name": "API端点_系统状态",
+      "success": true,
+      "details": "系统状态 - HTTP 200",
+      "execution_time": 0.031408071517944336,
+      "timestamp": "2025-08-06T12:28:09.374264"
+    },
+    {
+      "test_name": "API端点_场景列表",
+      "success": true,
+      "details": "场景列表 - HTTP 200",
+      "execution_time": 0.030125141143798828,
+      "timestamp": "2025-08-06T12:28:09.404389"
+    },
+    {
+      "test_name": "API端点_角色管理",
+      "success": true,
+      "details": "角色管理 - HTTP 200",
+      "execution_time": 0.030469655990600586,
+      "timestamp": "2025-08-06T12:28:09.434859"
+    },
+    {
+      "test_name": "API端点_记忆服务",
+      "success": true,
+      "details": "记忆服务 - HTTP 200",
+      "execution_time": 0.030268430709838867,
+      "timestamp": "2025-08-06T12:28:09.465127"
+    },
+    {
+      "test_name": "API端点_Wiki服务",
+      "success": true,
+      "details": "Wiki服务 - HTTP 200",
+      "execution_time": 0.030313491821289062,
+      "timestamp": "2025-08-06T12:28:09.495441"
+    },
+    {
+      "test_name": "后端API端点总体",
+      "success": true,
+      "details": "5/5 端点可用",
+      "execution_time": 0,
+      "timestamp": "2025-08-06T12:28:09.495441"
+    },
+    {
+      "test_name": "Web界面主页",
+      "success": true,
+      "details": "Web界面主页 - HTTP 200 - 页面内容正确",
+      "execution_time": 0.030289888381958008,
+      "timestamp": "2025-08-06T12:28:09.526422"
+    },
+    {
+      "test_name": "智能聊天功能",
+      "success": true,
+      "details": "智能聊天功能 - HTTP 200 - 聊天响应正常",
+      "execution_time": 1.0591752529144287,
+      "timestamp": "2025-08-06T12:28:10.585904"
+    },
+    {
+      "test_name": "场景执行功能",
+      "success": true,
+      "details": "场景执行功能 - HTTP 200 - 场景执行正常",
+      "execution_time": 1.062821865081787,
+      "timestamp": "2025-08-06T12:28:11.649557"
+    },
+    {
+      "test_name": "角色管理器集成",
+      "success": true,
+      "details": "角色管理器 - 加载了 131 个角色",
+      "execution_time": 0.2230665683746338,
+      "timestamp": "2025-08-06T12:28:15.207182"
+    },
+    {
+      "test_name": "记忆服务集成",
+      "success": true,
+      "details": "记忆服务 - 初始化成功",
+      "execution_time": 0.3483617305755615,
+      "timestamp": "2025-08-06T12:28:15.555544"
+    },
+    {
+      "test_name": "Wiki服务集成",
+      "success": true,
+      "details": "Wiki服务 - 初始化成功",
+      "execution_time": 0.22916340827941895,
+      "timestamp": "2025-08-06T12:28:20.018897"
+    },
+    {
+      "test_name": "后端连接器",
+      "success": true,
+      "details": "后端连接器 - 初始化成功",
+      "execution_time": 0.17486262321472168,
+      "timestamp": "2025-08-06T12:28:20.219385"
+    },
+    {
+      "test_name": "聊天界面",
+      "success": true,
+      "details": "聊天界面 - 初始化成功",
+      "execution_time": 0.0010251998901367188,
+      "timestamp": "2025-08-06T12:28:20.759201"
+    },
+    {
+      "test_name": "任务面板",
+      "success": true,
+      "details": "任务面板 - 初始化成功",
+      "execution_time": 0.0,
+      "timestamp": "2025-08-06T12:28:20.761299"
+    },
+    {
+      "test_name": "学术研究场景",
+      "success": true,
+      "details": "学术研究场景 - 执行成功",
+      "execution_time": 1.010697364807129,
+      "timestamp": "2025-08-06T12:28:22.811429"
+    },
+    {
+      "test_name": "专家咨询场景",
+      "success": true,
+      "details": "专家咨询场景 - 执行成功",
+      "execution_time": 1.0102124214172363,
+      "timestamp": "2025-08-06T12:28:23.821641"
+    },
+    {
+      "test_name": "轻松讨论场景",
+      "success": true,
+      "details": "轻松讨论场景 - 执行成功",
+      "execution_time": 1.014143705368042,
+      "timestamp": "2025-08-06T12:28:24.836506"
+    }
+  ]
+}

@@ -7,7 +7,7 @@
 import logging
 import re
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from ..base import ExecutionContext, InstitutionalPrimitive
 from .models import SynthesisQuality, SynthesisResult, ViewpointCollection
@@ -21,16 +21,26 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
     Uses SynthesisEngine to merge diverse and potentially conflicting viewpoints
     into a comprehensive, insightful, and nuanced synthesis report with quality assessment.
     """
+<<<<<<< HEAD
 
     def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+=======
+    
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
+>>>>>>> feature/core-services-refactor
         super().__init__(primitive_id, config)
         self.synthesis_method = config.get("synthesis_method", "dialectical") if config else "dialectical"
         self.min_confidence_threshold = config.get("min_confidence_threshold", 0.6) if config else 0.6
         self.include_expert_attribution = config.get("include_expert_attribution", True) if config else True
         self.quality_threshold = config.get("quality_threshold", 0.7) if config else 0.7
         self.max_synthesis_length = config.get("max_synthesis_length", 2000) if config else 2000
+<<<<<<< HEAD
 
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+=======
+    
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute enhanced synthesis of viewpoint collection.
         
         Args:
@@ -134,8 +144,13 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
                 "success": False,
                 "error": str(e)
             }
+<<<<<<< HEAD
 
     def _prepare_enhanced_synthesis_input(self, collection: ViewpointCollection) -> List[Dict[str, Any]]:
+=======
+    
+    def _prepare_enhanced_synthesis_input(self, collection: ViewpointCollection) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Prepare enhanced synthesis input with conflict and consensus awareness."""
         from src.models import DebateTurn
 
@@ -269,8 +284,13 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
                 "viewpoint_count": len(collection.viewpoints)
             }
         )
+<<<<<<< HEAD
 
     def _extract_key_insights(self, synthesis: str) -> List[str]:
+=======
+    
+    def _extract_key_insights(self, synthesis: str) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Extract key insights from synthesis text."""
         insights = []
 
@@ -305,8 +325,13 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
         # Limit to reasonable number and length
         insights = [insight for insight in insights if len(insight) <= 200]
         return insights[:5]  # Return at most 5 insights
+<<<<<<< HEAD
 
     def _create_expert_contributions(self, viewpoints: List) -> Dict[str, List[str]]:
+=======
+    
+    def _create_expert_contributions(self, viewpoints: list) -> dict[str, list[str]]:
+>>>>>>> feature/core-services-refactor
         """Create expert contribution mapping."""
         expert_contributions = {}
 
@@ -333,8 +358,13 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
             return f"从{perspective}角度提供了观点：{summary}"
         else:
             return f"提供了{perspective}角度的分析"
+<<<<<<< HEAD
 
     def _calculate_synthesis_confidence(self, viewpoints: List, quality_assessment: SynthesisQuality) -> float:
+=======
+    
+    def _calculate_synthesis_confidence(self, viewpoints: list, quality_assessment: SynthesisQuality) -> float:
+>>>>>>> feature/core-services-refactor
         """Calculate overall confidence in the synthesis."""
         if not viewpoints:
             return 0.0
@@ -370,8 +400,13 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
             return self.min_confidence_threshold
 
         return final_confidence
+<<<<<<< HEAD
 
     def get_input_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return input schema for the enhanced synthesis node."""
         return {
             "type": "object",
@@ -387,8 +422,13 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
             },
             "required": ["viewpoint_collection"]
         }
+<<<<<<< HEAD
 
     def get_output_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return output schema for the enhanced synthesis node."""
         return {
             "type": "object",

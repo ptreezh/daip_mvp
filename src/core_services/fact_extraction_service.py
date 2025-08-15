@@ -8,7 +8,11 @@
 import asyncio
 import json
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from src.core_services.memory_service import MemoryService
 from src.kernel.llm_interface import LLMInterface
@@ -63,7 +67,7 @@ class FactExtractionService:
         self.memory_service = memory_service
         self.confidence_threshold = confidence_threshold
 
-    async def extract_and_save_facts(self, text: str, source_metadata: Dict[str, Any], max_retries: int = 3):
+    async def extract_and_save_facts(self, text: str, source_metadata: dict[str, Any], max_retries: int = 3):
         """Analyzes text, extracts facts, and saves them to the SSKG."""
         prompt = FACT_EXTRACTION_PROMPT_TEMPLATE.format(text_to_analyze=text)
 

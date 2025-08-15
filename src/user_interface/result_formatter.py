@@ -9,7 +9,11 @@ import io
 import json
 import xml.etree.ElementTree as ET
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from rich.console import Console
 from rich.panel import Panel
@@ -25,12 +29,21 @@ class ResultFormatter:
         self.supported_formats = [
             "json", "markdown", "html", "xml", "csv", "yaml", "text"
         ]
+<<<<<<< HEAD
 
     def format_as_json(self, result: Dict[str, Any], indent: int = 2) -> str:
         """Format result as JSON string."""
         return json.dumps(result, indent=indent, ensure_ascii=False, default=str)
 
     def format_as_markdown(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def format_as_json(self, result: dict[str, Any], indent: int = 2) -> str:
+        """Format result as JSON string."""
+        return json.dumps(result, indent=indent, ensure_ascii=False, default=str)
+    
+    def format_as_markdown(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format result as Markdown string."""
         if not result.get("success", False):
             return f"# Workflow Failed\n\n**Error:** {result.get('error', 'Unknown error')}\n"
@@ -42,8 +55,13 @@ class ResultFormatter:
             return self._format_critical_review_markdown(result)
         else:
             return self._format_generic_markdown(result)
+<<<<<<< HEAD
 
     def display_critical_review_result(self, result: Dict[str, Any], console: Console) -> None:
+=======
+    
+    def display_critical_review_result(self, result: dict[str, Any], console: Console) -> None:
+>>>>>>> feature/core-services-refactor
         """Display Critical Review Workflow result using Rich."""
         if not result.get("success", False):
             console.print(Panel(
@@ -103,8 +121,13 @@ class ResultFormatter:
         # Revision summary
         if "revision_summary" in result:
             console.print(f"\n[blue]Revision Summary:[/blue] {result['revision_summary']}")
+<<<<<<< HEAD
 
     def display_multi_perspective_result(self, result: Dict[str, Any], console: Console) -> None:
+=======
+    
+    def display_multi_perspective_result(self, result: dict[str, Any], console: Console) -> None:
+>>>>>>> feature/core-services-refactor
         """Display Multi-perspective Synthesis Workflow result using Rich."""
         if not result.get("success", False):
             console.print(Panel(
@@ -183,8 +206,13 @@ class ResultFormatter:
                 tree.add(f"[cyan]{perspective}:[/cyan] {description}")
 
             console.print(tree)
+<<<<<<< HEAD
 
     def _format_critical_review_markdown(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def _format_critical_review_markdown(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format Critical Review result as Markdown."""
         md = "# Critical Review Workflow Results\n\n"
 
@@ -226,8 +254,13 @@ class ResultFormatter:
             md += f"{result['revision_summary']}\n\n"
 
         return md
+<<<<<<< HEAD
 
     def _format_multi_perspective_markdown(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def _format_multi_perspective_markdown(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format Multi-perspective Synthesis result as Markdown."""
         md = "# Multi-perspective Synthesis Workflow Results\n\n"
 
@@ -299,8 +332,13 @@ class ResultFormatter:
                     md += "\n"
 
         return md
+<<<<<<< HEAD
 
     def format_as_html(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def format_as_html(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format result as HTML string."""
         html = """<!DOCTYPE html>
 <html>
@@ -363,8 +401,13 @@ class ResultFormatter:
 </html>
 """
         return html
+<<<<<<< HEAD
 
     def format_as_xml(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def format_as_xml(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format result as XML string."""
         root = ET.Element("workflow_result")
 
@@ -389,8 +432,13 @@ class ResultFormatter:
                 self._add_xml_element(step_elem, "step_data", step)
 
         return ET.tostring(root, encoding='unicode', method='xml')
+<<<<<<< HEAD
 
     def format_as_csv(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def format_as_csv(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format result as CSV string (for tabular data)."""
         output = io.StringIO()
 
@@ -419,8 +467,13 @@ class ResultFormatter:
                 writer.writerow([perspective])
 
         return output.getvalue()
+<<<<<<< HEAD
 
     def format_as_yaml(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def format_as_yaml(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format result as YAML string."""
         try:
             import yaml
@@ -428,8 +481,13 @@ class ResultFormatter:
         except ImportError:
             # Fallback to simple YAML-like format
             return self._simple_yaml_format(result)
+<<<<<<< HEAD
 
     def format_as_text(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def format_as_text(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format result as plain text."""
         lines = []
         lines.append("WORKFLOW RESULTS")
@@ -481,8 +539,13 @@ class ResultFormatter:
         return "\n".join(lines)
 
     def format_with_traceability(
+<<<<<<< HEAD
         self,
         result: Dict[str, Any],
+=======
+        self, 
+        result: dict[str, Any], 
+>>>>>>> feature/core-services-refactor
         format_type: str = "json",
         include_reasoning: bool = True,
         include_confidence: bool = True,
@@ -521,8 +584,13 @@ class ResultFormatter:
             return self.format_as_json(enhanced_result)
 
     def display_with_transparency(
+<<<<<<< HEAD
         self,
         result: Dict[str, Any],
+=======
+        self, 
+        result: dict[str, Any], 
+>>>>>>> feature/core-services-refactor
         console: Console,
         transparency_level: str = "detailed"
     ) -> None:
@@ -536,8 +604,13 @@ class ResultFormatter:
         else:
             # Default to moderate
             self._display_moderate_transparency(result, console)
+<<<<<<< HEAD
 
     def _format_generic_markdown(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def _format_generic_markdown(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format generic result as Markdown."""
         md = "# Workflow Results\n\n"
 
@@ -553,10 +626,17 @@ class ResultFormatter:
         for key, value in result.items():
             if key not in ["success", "execution_id", "error"]:
                 md += f"**{key.replace('_', ' ').title()}:** {value}\n"
+<<<<<<< HEAD
 
         return md
 
     def _format_critical_review_html(self, result: Dict[str, Any]) -> str:
+=======
+        
+        return md  
+  
+    def _format_critical_review_html(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format Critical Review result as HTML."""
         html = """
     <div class="section">
@@ -611,8 +691,13 @@ class ResultFormatter:
     </div>
 """
         return html
+<<<<<<< HEAD
 
     def _format_multi_perspective_html(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def _format_multi_perspective_html(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format Multi-perspective result as HTML."""
         html = """
     <div class="section">
@@ -645,8 +730,13 @@ class ResultFormatter:
     </div>
 """
         return html
+<<<<<<< HEAD
 
     def _format_generic_html(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def _format_generic_html(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format generic result as HTML."""
         html = """
     <div class="section">
@@ -663,8 +753,13 @@ class ResultFormatter:
     </div>
 """
         return html
+<<<<<<< HEAD
 
     def _format_execution_trace_html(self, trace: List[Dict[str, Any]]) -> str:
+=======
+    
+    def _format_execution_trace_html(self, trace: list[dict[str, Any]]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format execution trace as HTML."""
         html = """
     <div class="section">
@@ -714,8 +809,13 @@ class ResultFormatter:
         else:
             elem = ET.SubElement(parent, key)
             elem.text = str(value)
+<<<<<<< HEAD
 
     def _simple_yaml_format(self, data: Dict[str, Any], indent: int = 0) -> str:
+=======
+    
+    def _simple_yaml_format(self, data: dict[str, Any], indent: int = 0) -> str:
+>>>>>>> feature/core-services-refactor
         """Simple YAML-like formatting without external dependencies."""
         lines = []
         prefix = "  " * indent
@@ -736,8 +836,13 @@ class ResultFormatter:
                 lines.append(f"{prefix}{key}: {value}")
 
         return "\n".join(lines)
+<<<<<<< HEAD
 
     def _extract_reasoning_trace(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:
+=======
+    
+    def _extract_reasoning_trace(self, result: dict[str, Any]) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Extract reasoning trace from result."""
         reasoning_trace = []
 
@@ -760,8 +865,13 @@ class ResultFormatter:
             })
 
         return reasoning_trace
+<<<<<<< HEAD
 
     def _extract_confidence_analysis(self, result: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _extract_confidence_analysis(self, result: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Extract confidence analysis from result."""
         analysis = {
             "overall_confidence": 0.0,
@@ -793,8 +903,13 @@ class ResultFormatter:
             ]
 
         return analysis
+<<<<<<< HEAD
 
     def _extract_source_attribution(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:
+=======
+    
+    def _extract_source_attribution(self, result: dict[str, Any]) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Extract source attribution from result."""
         sources = []
 
@@ -812,8 +927,13 @@ class ResultFormatter:
                             })
 
         return sources
+<<<<<<< HEAD
 
     def _format_traceable_markdown(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def _format_traceable_markdown(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format result with traceability as Markdown."""
         md = self.format_as_markdown(result)
 
@@ -846,8 +966,13 @@ class ResultFormatter:
             md += "\n"
 
         return md
+<<<<<<< HEAD
 
     def _format_traceable_html(self, result: Dict[str, Any]) -> str:
+=======
+    
+    def _format_traceable_html(self, result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format result with traceability as HTML."""
         html = self.format_as_html(result)
 
@@ -899,8 +1024,13 @@ class ResultFormatter:
         # Insert before closing body tag
         html = html.replace("</body>", traceability_html + "</body>")
         return html
+<<<<<<< HEAD
 
     def _display_minimal_transparency(self, result: Dict[str, Any], console: Console) -> None:
+=======
+    
+    def _display_minimal_transparency(self, result: dict[str, Any], console: Console) -> None:
+>>>>>>> feature/core-services-refactor
         """Display result with minimal transparency."""
         if not result.get("success", False):
             console.print(Panel(
@@ -929,8 +1059,13 @@ class ResultFormatter:
                 title="Revised Content",
                 border_style="green"
             ))
+<<<<<<< HEAD
 
     def _display_moderate_transparency(self, result: Dict[str, Any], console: Console) -> None:
+=======
+    
+    def _display_moderate_transparency(self, result: dict[str, Any], console: Console) -> None:
+>>>>>>> feature/core-services-refactor
         """Display result with moderate transparency."""
         # Show key reasoning steps and confidence scores
         if "synthesis" in result and "perspectives" in result:
@@ -943,8 +1078,13 @@ class ResultFormatter:
                 title="Results",
                 border_style="blue"
             ))
+<<<<<<< HEAD
 
     def _display_detailed_transparency(self, result: Dict[str, Any], console: Console) -> None:
+=======
+    
+    def _display_detailed_transparency(self, result: dict[str, Any], console: Console) -> None:
+>>>>>>> feature/core-services-refactor
         """Display result with detailed transparency."""
         # Show complete processing chains and detailed metrics
         self._display_moderate_transparency(result, console)
@@ -990,12 +1130,21 @@ class ResultFormatter:
                 console.print("[yellow]Low Confidence Items:[/yellow]")
                 for item in confidence_analysis["low_confidence_items"]:
                     console.print(f"  - {item['fact_id']}: {item['score']:.3f}")
+<<<<<<< HEAD
 
     def get_supported_formats(self) -> List[str]:
         """Get list of supported output formats."""
         return self.supported_formats.copy()
 
     def format_result(self, result: Dict[str, Any], format_type: str = "json") -> str:
+=======
+    
+    def get_supported_formats(self) -> list[str]:
+        """Get list of supported output formats."""
+        return self.supported_formats.copy()
+    
+    def format_result(self, result: dict[str, Any], format_type: str = "json") -> str:
+>>>>>>> feature/core-services-refactor
         """Format result in the specified format."""
         if format_type not in self.supported_formats:
             raise ValueError(f"Unsupported format: {format_type}. Supported formats: {self.supported_formats}")

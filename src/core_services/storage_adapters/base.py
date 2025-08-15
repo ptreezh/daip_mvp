@@ -6,7 +6,11 @@ and the manager class that coordinates them.
 
 import logging
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 try:
     from src.core_services.enhanced_sskg_manager import (
@@ -22,7 +26,11 @@ except ImportError:
     from enum import Enum
 
     from pydantic import BaseModel, Field
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     class NodeType(str, Enum):
         """Types of nodes in the SSKG."""
 
@@ -63,7 +71,7 @@ except ImportError:
         created_at: datetime = Field(default_factory=datetime.now)
         updated_at: datetime = Field(default_factory=datetime.now)
         confidence: float = 1.0
-        metadata: Dict[str, Any] = {}
+        metadata: dict[str, Any] = {}
         version: int = 1
 
     class KnowledgeRelation(BaseModel):
@@ -73,7 +81,7 @@ except ImportError:
         target_id: str
         relation_type: RelationType
         confidence: float = 1.0
-        metadata: Dict[str, Any] = {}
+        metadata: dict[str, Any] = {}
         created_at: datetime = Field(default_factory=datetime.now)
 
 
@@ -152,7 +160,11 @@ class StorageAdapter(ABC):
         pass
 
     @abstractmethod
+<<<<<<< HEAD
     def list_all(self, **kwargs) -> List[str]:
+=======
+    def list_all(self, **kwargs) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all identifiers of data stored by this adapter.
         
         Args:
@@ -163,9 +175,15 @@ class StorageAdapter(ABC):
 
         """
         pass
+<<<<<<< HEAD
 
     def _create_node(self, node_type: NodeType, content: str,
                     confidence: float = 1.0, metadata: Dict[str, Any] = None) -> str:
+=======
+    
+    def _create_node(self, node_type: NodeType, content: str, 
+                    confidence: float = 1.0, metadata: dict[str, Any] = None) -> str:
+>>>>>>> feature/core-services-refactor
         """Create a node in the SSKG.
         
         Args:
@@ -191,7 +209,11 @@ class StorageAdapter(ABC):
     def _create_relation(self, source_id: str, target_id: str,
                         relation_type: RelationType,
                         confidence: float = 1.0,
+<<<<<<< HEAD
                         metadata: Dict[str, Any] = None) -> bool:
+=======
+                        metadata: dict[str, Any] = None) -> bool:
+>>>>>>> feature/core-services-refactor
         """Create a relation between two nodes in the SSKG.
         
         Args:
@@ -240,7 +262,11 @@ class StorageAdapterManager:
         from .role_adapter import RoleMemoryAdapter
         from .session_adapter import SessionAdapter
         from .wiki_adapter import WikiAdapter
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         self.register_adapter("role_memory", RoleMemoryAdapter(sskg_manager))
         self.register_adapter("wiki", WikiAdapter(sskg_manager))
         self.register_adapter("session", SessionAdapter(sskg_manager))
@@ -269,8 +295,13 @@ class StorageAdapterManager:
         """
         self.adapters[adapter_type] = adapter
         self.logger.info(f"Registered storage adapter: {adapter_type}")
+<<<<<<< HEAD
 
     def list_adapters(self) -> List[str]:
+=======
+    
+    def list_adapters(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all registered adapter types.
         
         Returns:

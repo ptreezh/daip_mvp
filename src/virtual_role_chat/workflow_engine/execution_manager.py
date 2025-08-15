@@ -7,7 +7,11 @@ including parallel execution, dependency management, and error handling.
 import asyncio
 import logging
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from ..institutional_primitives import ExecutionContext, PrimitiveRegistry
 from .models import ExecutionStep, NodeStatus, WorkflowExecution, WorkflowNode
@@ -33,13 +37,18 @@ class ExecutionManager:
         self.primitive_registry = primitive_registry
         self.max_concurrency = max_concurrency
         self._execution_semaphore = asyncio.Semaphore(max_concurrency)
+<<<<<<< HEAD
         self._active_executions: Dict[str, asyncio.Task] = {}
 
+=======
+        self._active_executions: dict[str, asyncio.Task] = {}
+    
+>>>>>>> feature/core-services-refactor
     async def execute_node(
         self,
         node: WorkflowNode,
         execution: WorkflowExecution,
-        services: Dict[str, Any]
+        services: dict[str, Any]
     ) -> ExecutionStep:
         """Execute a single workflow node.
         
@@ -120,10 +129,15 @@ class ExecutionManager:
 
     async def execute_nodes_parallel(
         self,
-        nodes: List[WorkflowNode],
+        nodes: list[WorkflowNode],
         execution: WorkflowExecution,
+<<<<<<< HEAD
         services: Dict[str, Any]
     ) -> List[ExecutionStep]:
+=======
+        services: dict[str, Any]
+    ) -> list[ExecutionStep]:
+>>>>>>> feature/core-services-refactor
         """Execute multiple nodes in parallel.
         
         Args:
@@ -194,7 +208,11 @@ class ExecutionManager:
         self,
         node: WorkflowNode,
         execution: WorkflowExecution
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Prepare inputs for node execution from dependencies and parameters.
         
         Args:
@@ -270,8 +288,13 @@ class ExecutionManager:
                 cancelled_count += 1
 
         return cancelled_count
+<<<<<<< HEAD
 
     def get_active_executions(self) -> List[str]:
+=======
+    
+    def get_active_executions(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Get list of currently executing node IDs.
         
         Returns:
@@ -320,8 +343,13 @@ class ExecutionManager:
         except Exception as e:
             logger.error(f"Error waiting for node {node_id}: {e}")
             return False
+<<<<<<< HEAD
 
     def get_execution_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_execution_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get execution statistics.
         
         Returns:

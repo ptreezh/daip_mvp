@@ -1,0 +1,1471 @@
+{
+  "timestamp": "2025-08-04T14:58:41.193463",
+  "total_violations": 243,
+  "critical_violations": 243,
+  "warnings": [],
+  "pass": false,
+  "violations": [
+    {
+      "rule": "Code Quality Gates",
+      "message": "Ruff linting failed. Fix issues before committing.",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:37.219782"
+    },
+    {
+      "rule": "Code Quality Gates",
+      "message": "MyPy type checking failed. All type hints must be correct.",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.881219"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\app_state.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.883110"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\config_loader.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.886120"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\intelligent_assistant_app.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.886657"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\main.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.887680"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\memory_bank_tools.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.888296"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\models.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.889316"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_debate_system.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.890846"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_llm_debate_assistant.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.891860"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\tool_config.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.893687"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\unified_tool_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.894397"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\working_intelligent_assistant.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.896460"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\dependencies.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.898344"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\file_tools_api.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.898344"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\memory_tools_api.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.900367"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\multi_role_chat_api.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.900893"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\protocol_api.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.902413"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\user_profile_api.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.903078"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\v0_3_5_critical_review_api.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.903979"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core\\config.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.907492"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core\\exceptions.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.907492"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core\\logging.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.909030"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core\\models.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.910053"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\adaptive_learning_system.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.911933"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\advanced_consensus_algorithms.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.912601"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\algorithm_registry.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.914583"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\algorithm_selector.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.915742"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\automated_report_generator.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.915742"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\bayesian_algorithm.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.918331"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\chat_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.918331"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\cognitive_diversity_evaluator.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.920308"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\collaboration_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.920807"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\collaborative_review_environment.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.921932"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\collective_intelligence_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.923230"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\conflict_resolution_strategies.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.923815"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\conflict_resolution_system.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.924400"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\consensus_algorithm_interface.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.925734"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\consensus_algorithm_selector.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.926515"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\consensus_dispatcher.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.927410"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\consensus_formation_process.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.927991"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\consensus_models.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.929019"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\consensus_quality_evaluator.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.930528"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\consensus_validation.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.930839"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\context_collaboration_engine.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.932676"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\context_optimization_engine.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.933867"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\context_optimizer.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.934526"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\context_quality_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.935172"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\document_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.936352"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\emergent_insight_detector.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.936935"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\enhanced_workflow_selector.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.939716"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\evolution_pattern_analyzer.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.940278"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\experts.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.941669"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\expert_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.942237"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\fallback_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.944736"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\fallback_manager_core.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.945926"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\fallback_manager_utils.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.947010"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\integrated_llm_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.948003"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\integration_test_algorithm_registry.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.949031"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\integration_test_consensus_models.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.950429"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\intelligent_context_optimizer.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.951604"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\intent_analysis_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.952239"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\knowledge_association_engine.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.953990"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\knowledge_conflict_resolver.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.955348"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\knowledge_evolution_tracker.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.957130"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\knowledge_graph_builder.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.957520"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\knowledge_history_tracker.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.958333"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\knowledge_lineage_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.959853"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\knowledge_quality_scorer.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.962280"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\knowledge_quality_trend_monitor.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.962881"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\knowledge_retrieval_optimizer.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.965149"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\knowledge_version_control.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.966932"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\knowledge_visualization_engine.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.967991"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\legacy_compatibility_layer.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.969053"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\llm_based_workflow_selector.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.969595"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\multidimensional_assessment_engine.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.975117"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\multi_perspective_generator.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.976195"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\multi_role_dialogue_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.977534"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\personalized_experience_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.978834"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\personal_assistant_adapter.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.980024"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\personal_context_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.980770"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\personal_knowledge_graph.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.981314"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\perspective_conflict_detector.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.981890"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\prompt_optimization_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.984451"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\protocol_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.984451"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\real_llm_context_optimizer.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.986213"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\review_analytics.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.986878"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\role_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.987414"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\session_management_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.989172"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\simple_majority_algorithm.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.990291"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\smart_recommendation_engine.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.990291"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\smart_reviewer_allocator.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.992880"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\sskg_storage_adapters.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.992880"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\storage_adapters.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.994406"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\task_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.994406"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\test_advanced_consensus_algorithms.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.995912"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\test_algorithm_registry.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.997444"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\test_algorithm_selector.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.998454"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\test_cognitive_diversity_evaluator.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.998454"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\test_consensus_models.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.999977"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\test_dispatcher_simple.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:40.999977"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\test_fallback_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.001485"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\test_fallback_manager_simple.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.002506"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\test_unified_consensus_dispatcher.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.004928"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\token_management_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.005570"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\tool_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.006209"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\transparency_integration.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.006209"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\unified_consensus_dispatcher.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.006209"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\unified_consensus_dispatcher_utils.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.008069"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\universal_context_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.008762"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\user_interest_profiler.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.009762"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\user_profile_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.010267"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\weighted_voting_algorithm.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.010267"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\wiki_change_tracker.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.011770"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\wiki_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.013577"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\workflow_consensus_algorithm.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.014327"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\workflow_selector.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.015870"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\app.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.016877"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\argument_analysis.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.018396"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\comprehensive_test_suite.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.018396"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\debate_flow_definition.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.019939"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\debate_state_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.021140"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\multi_role_dialogue_engine.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.022862"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\participant_management.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.023903"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\quality_assurance.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.024563"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\test_web_interface.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.025102"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\v0_1_5_quality_check.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.025780"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\validate_multi_role_dialogue.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.027317"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\websocket_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.028325"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\web_interface.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.028325"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\demo\\collective_intelligence_demo.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.029851"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\institutional_primitives\\base.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.030872"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\institutional_primitives\\parallel_execution.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.034833"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\institutional_primitives\\primitives.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.036972"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\institutional_primitives\\registry.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.036972"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\institutional_primitives\\workflow_engine.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.041035"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\kernel\\context_segmenter.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.043573"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\kernel\\llm_interface.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.045909"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\kernel\\vector_store.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.049437"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\protocols\\schemas.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.049959"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\protocols\\workflow_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.052036"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\call_verification.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.053053"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\consensus_visualization.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.054170"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\context_optimization_demo.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.054586"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\demo_analyzer.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.055586"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\demo_system_integration_test.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.056103"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\demo_types.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.056857"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\evolution_visualization.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.056857"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\intelligent_collaboration_system.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.058365"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\interactive_demo_flow.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.058720"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\knowledge_graph_visualizer.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.059383"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\llm_integration_service.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.060905"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\llm_optimization_adapter.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.060905"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\memory_agent_validator.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.062854"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\memory_validator_fixed.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.063445"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\multi_role_debate_system.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.063445"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\personalized_recommendation_engine.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.064968"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\real_demo_controller.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.064968"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\real_llm_debate_executor.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.066663"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\real_llm_executor.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.067458"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\real_llm_integrator.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.067458"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\real_role_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.069690"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\real_time_conflict_monitor.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.069690"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\real_time_consensus_monitor.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.071709"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\real_time_wiki_updater.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.071709"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\real_workflow_executor.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.072409"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\scenario_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.072409"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\simple_memory_validator.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.073408"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\step_executor.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.073933"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\test_interactive_demo_flow.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.073933"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\test_memory_interface.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.075450"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\test_real_demo_system.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.075450"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\transparency_monitor.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.077150"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\transparent_conflict_resolution.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.077810"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\user_interaction_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.079338"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\real_demo_system\\wiki_knowledge_system.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.080355"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\scenarios\\academic_research_scenario.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.081870"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\scenarios\\academic_writing_assistant.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.083111"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\scenarios\\enhanced_academic_research_scenario_complete.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.085520"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\scenarios\\peer_review_simulator.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.087824"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\scenarios\\research_methodology_guide.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.088622"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\scenario_engine\\workflow_selector.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.090160"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\tools\\file_system_tools.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.092676"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\tools\\kanban_tools.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.095189"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\tools\\tool_definitions.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.097211"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\tools\\wiki_tools.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.099464"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\chat_room_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.103006"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\config_validator.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.104009"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\interfaces.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.104009"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\models.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.104009"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\pocketflow_adapter.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.104009"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\role_validator.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.105442"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\test_chat_room_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.110712"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\test_config_validation.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.112617"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\test_core_models.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.113136"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\test_models.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.114146"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\test_role_validation.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.115349"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\workflow.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.115349"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\routers\\advanced.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.119179"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\routers\\chat.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.120692"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\routers\\collaboration.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.121221"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\routers\\documents.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.121710"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\routers\\protocols.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.123217"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\routers\\roles.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.123217"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\routers\\schemas.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.124236"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\routers\\tools.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.125236"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\api\\routers\\virtual_team.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.125758"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\storage_adapters\\base.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.129568"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\storage_adapters\\role_adapter.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.130584"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\storage_adapters\\session_adapter.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.130584"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\core_services\\storage_adapters\\wiki_adapter.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.132106"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\debate_system\\tests\\test_multi_role_dialogue_integration.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.134644"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\vendor\\old\\chat_config.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.156303"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\vendor\\old\\enhanced_collaboration_system.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.156908"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\vendor\\old\\enhanced_collaboration_tools.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.157928"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\vendor\\old\\enhanced_collaborative_analysis.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.158944"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\vendor\\old\\enhanced_memory_system.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.159950"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\vendor\\old\\enhanced_recommendation_engine.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.161866"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\vendor\\old\\enhanced_tool_retrieval.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.163408"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\vendor\\old\\enhanced_wiki_collaboration.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.164694"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\vendor\\old\\model_monitor.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.165212"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\cognitive_agent\\agent.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.168981"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\cognitive_agent\\belief.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.169523"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\cognitive_agent\\epistemology.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.170879"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\cognitive_agent\\memory.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.171761"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\cognitive_agent\\metacognition.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.172385"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\cognitive_agent\\reasoning.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.173566"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\cognitive_agent\\test_cognitive_agent.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.174202"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\context_optimizer\\dynamic_adapter.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.175826"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\context_optimizer\\models.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.176344"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\context_optimizer\\optimizer.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.177498"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\context_optimizer\\strategies.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.178176"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\context_optimizer\\test_context_optimizer.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.179407"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\context_optimizer\\test_dynamic_adapter.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.180119"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\institutional_primitives\\base.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.181940"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\institutional_primitives\\registry.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.182698"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\sskg\\manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.185057"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\sskg\\models.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.185880"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\sskg\\storage.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.186397"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\workflow_engine\\engine.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.187613"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\workflow_engine\\execution_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.188273"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\workflow_engine\\models.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.188802"
+    },
+    {
+      "rule": "File Headers MANDATORY",
+      "message": "Missing or invalid header in src\\virtual_role_chat\\workflow_engine\\state_manager.py",
+      "severity": "CRITICAL",
+      "timestamp": "2025-08-04T14:58:41.189973"
+    }
+  ],
+  "summary": {
+    "status": "FAIL",
+    "message": "243 critical violations found"
+  }
+}

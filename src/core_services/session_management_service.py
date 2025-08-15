@@ -12,7 +12,11 @@ import logging
 import secrets
 from datetime import datetime, timedelta
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, Optional, Tuple
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel
 
@@ -24,7 +28,10 @@ logger = logging.getLogger(__name__)
 class AuthenticationRequest(BaseModel):
     """Model for authentication requests.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     username: str
     password: str
 
@@ -32,7 +39,10 @@ class AuthenticationRequest(BaseModel):
 class AuthenticationResponse(BaseModel):
     """Model for authentication responses.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     success: bool
     user_id: Optional[str] = None
     session_id: Optional[str] = None
@@ -81,8 +91,13 @@ class SessionManagementService:
         self.token_secret = token_secret or secrets.token_hex(32)
 
         logger.info(f"SessionManagementService initialized with auth directory: {self.auth_data_dir}")
+<<<<<<< HEAD
 
     def _hash_password(self, password: str, salt: Optional[str] = None) -> Tuple[str, str]:
+=======
+    
+    def _hash_password(self, password: str, salt: Optional[str] = None) -> tuple[str, str]:
+>>>>>>> feature/core-services-refactor
         """Hash a password using PBKDF2 with SHA-256.
         
         Args:
@@ -119,8 +134,13 @@ class SessionManagementService:
         """
         key, _ = self._hash_password(provided_password, stored_salt)
         return hmac.compare_digest(key, stored_hash)
+<<<<<<< HEAD
 
     def _load_credentials(self) -> Dict[str, Dict[str, Any]]:
+=======
+    
+    def _load_credentials(self) -> dict[str, dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Load user credentials from storage.
         
         Returns:
@@ -133,8 +153,13 @@ class SessionManagementService:
         except Exception as e:
             logger.error(f"Error loading credentials: {e}")
             return {}
+<<<<<<< HEAD
 
     def _save_credentials(self, credentials: Dict[str, Dict[str, Any]]) -> None:
+=======
+    
+    def _save_credentials(self, credentials: dict[str, dict[str, Any]]) -> None:
+>>>>>>> feature/core-services-refactor
         """Save user credentials to storage.
         
         Args:
@@ -146,8 +171,13 @@ class SessionManagementService:
                 json.dump(credentials, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving credentials: {e}")
+<<<<<<< HEAD
 
     def register_user(self, username: str, password: str, **profile_data) -> Tuple[bool, str, Optional[UserProfile]]:
+=======
+    
+    def register_user(self, username: str, password: str, **profile_data) -> tuple[bool, str, Optional[UserProfile]]:
+>>>>>>> feature/core-services-refactor
         """Register a new user.
         
         Args:
@@ -241,8 +271,13 @@ class SessionManagementService:
             message="Authentication successful",
             expires_at=session.expires_at
         )
+<<<<<<< HEAD
 
     def validate_session(self, session_id: str) -> Tuple[bool, Optional[str], Optional[UserSession]]:
+=======
+    
+    def validate_session(self, session_id: str) -> tuple[bool, Optional[str], Optional[UserSession]]:
+>>>>>>> feature/core-services-refactor
         """Validate a session.
         
         Args:
@@ -294,8 +329,13 @@ class SessionManagementService:
                 count += 1
 
         return count
+<<<<<<< HEAD
 
     def change_password(self, user_id: str, current_password: str, new_password: str) -> Tuple[bool, str]:
+=======
+    
+    def change_password(self, user_id: str, current_password: str, new_password: str) -> tuple[bool, str]:
+>>>>>>> feature/core-services-refactor
         """Change a user's password.
         
         Args:
@@ -334,8 +374,13 @@ class SessionManagementService:
 
         logger.info(f"Password changed for user {user_id}")
         return True, "Password changed successfully"
+<<<<<<< HEAD
 
     def reset_password(self, username: str, new_password: str) -> Tuple[bool, str]:
+=======
+    
+    def reset_password(self, username: str, new_password: str) -> tuple[bool, str]:
+>>>>>>> feature/core-services-refactor
         """Reset a user's password (admin function).
         
         Args:
@@ -405,8 +450,13 @@ class SessionManagementService:
         # Combine payload and signature
         token = f"{payload_b64}.{signature}"
         return token
+<<<<<<< HEAD
 
     def validate_token(self, token: str) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
+=======
+    
+    def validate_token(self, token: str) -> tuple[bool, Optional[str], Optional[dict[str, Any]]]:
+>>>>>>> feature/core-services-refactor
         """Validate an authentication token.
         
         Args:

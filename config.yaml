@@ -46,6 +46,17 @@ session:
 # Roles Configuration
 roles_config_path: "configs/roles.yaml"
 
+# Database Configuration
+database:
+  type: "chromadb"
+  path: "data/chroma_db"
+
+# Server Configuration
+server:
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
+
 # API Configuration
 log_level: "INFO"
 allowed_origins:

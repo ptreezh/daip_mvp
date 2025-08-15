@@ -6,7 +6,11 @@ belief system, epistemology, and meta-cognitive capabilities.
 """
 
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -20,7 +24,10 @@ from .reasoning import ReasoningFramework
 class CognitiveProfile(BaseModel):
     """Profile defining the cognitive characteristics of an agent.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     reasoning_style: str = Field(
         description="The dominant reasoning style (e.g., 'analytical', 'intuitive', 'pragmatic')"
     )
@@ -34,15 +41,15 @@ class CognitiveProfile(BaseModel):
         description="The level of metacognitive capability (1-5)",
         ge=1, le=5
     )
-    cognitive_biases: List[str] = Field(
+    cognitive_biases: list[str] = Field(
         default_factory=list,
         description="List of cognitive biases that influence the agent's reasoning"
     )
-    values: Dict[str, float] = Field(
+    values: dict[str, float] = Field(
         default_factory=dict,
         description="Dictionary of values and their importance (0.0-1.0)"
     )
-    domain_expertise: Dict[str, float] = Field(
+    domain_expertise: dict[str, float] = Field(
         default_factory=dict,
         description="Dictionary of domains and expertise levels (0.0-1.0)"
     )
@@ -61,7 +68,7 @@ class CognitiveAgent:
         agent_id: str,
         name: str,
         profile: CognitiveProfile,
-        initial_knowledge: Optional[Dict[str, Any]] = None
+        initial_knowledge: Optional[dict[str, Any]] = None
     ):
         """Initialize a cognitive agent with its core components.
         
@@ -140,8 +147,13 @@ class CognitiveAgent:
             level=self.profile.metacognitive_level,
             agent_id=self.agent_id
         )
+<<<<<<< HEAD
 
     def _initialize_memory(self, initial_knowledge: Optional[Dict[str, Any]] = None) -> AgentMemory:
+=======
+    
+    def _initialize_memory(self, initial_knowledge: Optional[dict[str, Any]] = None) -> AgentMemory:
+>>>>>>> feature/core-services-refactor
         """Initialize the agent memory with optional initial knowledge.
         
         Args:
@@ -160,8 +172,13 @@ class CognitiveAgent:
                 memory.store(key, value, source="initialization")
 
         return memory
+<<<<<<< HEAD
 
     async def process_input(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    async def process_input(self, input_data: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Process input through the cognitive pipeline.
         
         This method implements the core cognitive processing pipeline:
@@ -196,16 +213,25 @@ class CognitiveAgent:
             task, relevant_knowledge, domain_knowledge
         )
         self.logger.debug("Applied reasoning framework")
+<<<<<<< HEAD
 
         # 4. Belief system filtering
         belief_aligned_result = await self.belief_system.filter(reasoning_result)
         self.logger.debug("Filtered through belief system")
 
+=======
+        
+        # 4. Belief system filtering
+        belief_aligned_result = await self.belief_system.filter(reasoning_result)
+        self.logger.debug("Filtered through belief system")
+        
+>>>>>>> feature/core-services-refactor
         # 5. Ensure cognitive independence
         independent_perspective = await self.meta_cognition.ensure_independence(
             belief_aligned_result, context
         )
         self.logger.debug("Ensured cognitive independence")
+<<<<<<< HEAD
 
         # 6. Update memory
         await self.memory.update(task, independent_perspective)
@@ -214,6 +240,16 @@ class CognitiveAgent:
         return independent_perspective
 
     async def _retrieve_domain_knowledge(self, task: Dict[str, Any]) -> Dict[str, Any]:
+=======
+        
+        # 6. Update memory
+        await self.memory.update(task, independent_perspective)
+        self.logger.debug("Updated agent memory")
+        
+        return independent_perspective
+    
+    async def _retrieve_domain_knowledge(self, task: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Retrieve domain-specific knowledge relevant to the task.
         
         Args:
@@ -226,8 +262,13 @@ class CognitiveAgent:
         # In a real implementation, this would query external knowledge sources
         # based on the agent's domain expertise
         return {}
+<<<<<<< HEAD
 
     def get_cognitive_state(self) -> Dict[str, Any]:
+=======
+    
+    def get_cognitive_state(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get the current cognitive state of the agent.
         
         Returns:
@@ -244,8 +285,13 @@ class CognitiveAgent:
             "metacognition_state": self.meta_cognition.get_state(),
             "memory_stats": self.memory.get_stats()
         }
+<<<<<<< HEAD
 
     def update_cognitive_state(self, state_updates: Dict[str, Any]) -> None:
+=======
+    
+    def update_cognitive_state(self, state_updates: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Update the cognitive state of the agent.
         
         Args:

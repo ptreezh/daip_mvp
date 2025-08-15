@@ -34,6 +34,7 @@ __all__ = [
     'DebatePhase', 'ParticipantRole', 'DebateStatus', 'DebateFormat',
     'DebateSession', 'DebateRound', 'DebateContribution', 'DebateParticipant',
     'DebateRules',
+<<<<<<< HEAD
 
     # 参与者管理
     'Permission', 'ActionType', 'ParticipantManager',
@@ -43,3 +44,14 @@ __all__ = [
     'StateChangeType', 'StateChange', 'StateSnapshot',
     'DebateStateManager', 'StateStorage', 'MemoryStateStorage'
 ]
+=======
+    
+    # 参与者管理
+    'Permission', 'ActionType', 'ParticipantManager',
+    'ParticipantCredentials', 'ActionRecord',
+    
+    # 状态管理
+    'StateChangeType', 'StateChange', 'StateSnapshot',
+    'DebateStateManager', 'StateStorage', 'MemoryStateStorage'
+]
+>>>>>>> feature/core-services-refactor

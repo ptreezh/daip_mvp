@@ -6,7 +6,11 @@
     Sends low-credibility content back for evidence-based revision.
 """
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from .base import ExecutionContext, InstitutionalPrimitive
 
@@ -19,14 +23,24 @@ class RevisionNode(InstitutionalPrimitive):
     Sends content with low credibility scores back to the original creator role
     with evidence-based revision requirements for correction.
     """
+<<<<<<< HEAD
 
     def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+=======
+    
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
+>>>>>>> feature/core-services-refactor
         super().__init__(primitive_id, config)
         self.revision_role = config.get("revision_role", "创作者") if config else "创作者"
         self.max_revision_attempts = config.get("max_revision_attempts", 3) if config else 3
         self.provide_evidence_details = config.get("provide_evidence_details", True) if config else True
+<<<<<<< HEAD
 
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+=======
+    
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute content revision based on consensus results.
         
         Args:
@@ -114,10 +128,10 @@ class RevisionNode(InstitutionalPrimitive):
 
     def _prepare_revision_instructions(
         self,
-        facts_needing_revision: List[str],
-        credibility_scores: Dict[str, float],
-        consensus_details: Dict[str, Dict],
-        extracted_facts: List[Dict]
+        facts_needing_revision: list[str],
+        credibility_scores: dict[str, float],
+        consensus_details: dict[str, dict],
+        extracted_facts: list[dict]
     ) -> str:
         """Prepare detailed revision instructions based on consensus results.
         
@@ -167,8 +181,13 @@ class RevisionNode(InstitutionalPrimitive):
         instructions += "\n请修正上述内容中的不准确信息，确保修订后的内容具有更高的准确性和可信度。"
 
         return instructions
+<<<<<<< HEAD
 
     def get_input_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return input schema for the revision node."""
         return {
             "type": "object",
@@ -189,8 +208,13 @@ class RevisionNode(InstitutionalPrimitive):
             },
             "required": ["facts_needing_revision"]
         }
+<<<<<<< HEAD
 
     def get_output_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return output schema for the revision node."""
         return {
             "type": "object",

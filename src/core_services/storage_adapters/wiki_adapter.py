@@ -4,7 +4,7 @@ This module implements the storage adapter for wiki content and structured docum
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 try:
     from src.core_services.enhanced_sskg_manager import KnowledgeQuery, NodeType, RelationType
@@ -30,8 +30,13 @@ class WikiAdapter(StorageAdapter):
     This adapter manages the storage and retrieval of wiki pages,
     documentation, and structured knowledge articles.
     """
+<<<<<<< HEAD
 
     def store(self, wiki_data: Dict[str, Any], **kwargs) -> str:
+=======
+    
+    def store(self, wiki_data: dict[str, Any], **kwargs) -> str:
+>>>>>>> feature/core-services-refactor
         """Store wiki content in the SSKG.
         
         Args:
@@ -136,8 +141,13 @@ class WikiAdapter(StorageAdapter):
 
         self.logger.info(f"Stored wiki page {page_id} with {len(references)} references")
         return wiki_node_id
+<<<<<<< HEAD
 
     def retrieve(self, page_id: str, **kwargs) -> Optional[Dict[str, Any]]:
+=======
+    
+    def retrieve(self, page_id: str, **kwargs) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve wiki content from the SSKG.
         
         Args:
@@ -176,8 +186,13 @@ class WikiAdapter(StorageAdapter):
             wiki_data["references"] = self._retrieve_references(wiki_node.id)
 
         return wiki_data
+<<<<<<< HEAD
 
     def _retrieve_references(self, wiki_node_id: str) -> List[Dict[str, Any]]:
+=======
+    
+    def _retrieve_references(self, wiki_node_id: str) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve references for a wiki page.
         
         Args:
@@ -210,8 +225,13 @@ class WikiAdapter(StorageAdapter):
                 references.append(reference)
 
         return references
+<<<<<<< HEAD
 
     def update(self, page_id: str, wiki_data: Dict[str, Any], **kwargs) -> bool:
+=======
+    
+    def update(self, page_id: str, wiki_data: dict[str, Any], **kwargs) -> bool:
+>>>>>>> feature/core-services-refactor
         """Update wiki content in the SSKG.
         
         Args:
@@ -356,8 +376,13 @@ class WikiAdapter(StorageAdapter):
             self.logger.info(f"Deleted wiki page {page_id}")
 
         return success
+<<<<<<< HEAD
 
     def list_all(self, **kwargs) -> List[str]:
+=======
+    
+    def list_all(self, **kwargs) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all page IDs.
         
         Args:

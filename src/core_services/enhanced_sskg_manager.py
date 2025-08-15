@@ -12,7 +12,11 @@ import uuid
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Tuple
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 import networkx as nx
 from pydantic import BaseModel, Field
@@ -62,7 +66,7 @@ class KnowledgeNode(BaseModel):
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
     confidence: float = 1.0
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
     version: int = 1
 
 
@@ -73,20 +77,24 @@ class KnowledgeRelation(BaseModel):
     target_id: str
     relation_type: RelationType
     confidence: float = 1.0
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
     created_at: datetime = Field(default_factory=datetime.now)
 
 
 class KnowledgeQuery(BaseModel):
     """Model for querying the SSKG."""
+<<<<<<< HEAD
 
     node_types: Optional[List[NodeType]] = None
+=======
+    node_types: Optional[list[NodeType]] = None
+>>>>>>> feature/core-services-refactor
     content_query: Optional[str] = None
-    relation_types: Optional[List[RelationType]] = None
+    relation_types: Optional[list[RelationType]] = None
     min_confidence: float = 0.0
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
-    metadata_filters: Dict[str, Any] = {}
+    metadata_filters: dict[str, Any] = {}
     limit: int = 10
     include_relations: bool = False
 
@@ -290,8 +298,13 @@ class EnhancedSSKGManager:
         except Exception as e:
             logger.error(f"Error parsing node data: {e}")
             return None
+<<<<<<< HEAD
 
     def update_node(self, node_id: str, updates: Dict[str, Any]) -> bool:
+=======
+    
+    def update_node(self, node_id: str, updates: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Update a node in the SSKG.
         
         Args:
@@ -379,8 +392,13 @@ class EnhancedSSKGManager:
         self.graph.remove_node(node_id)
 
         logger.debug(f"Deleted node: {node_id}")
+<<<<<<< HEAD
         return True
     def query(self, query: KnowledgeQuery) -> List[KnowledgeNode]:
+=======
+        return True    
+    def query(self, query: KnowledgeQuery) -> list[KnowledgeNode]:
+>>>>>>> feature/core-services-refactor
         """Query the SSKG for nodes matching the given criteria.
         
         Args:
@@ -484,10 +502,17 @@ class EnhancedSSKGManager:
             # Stop if we have enough results
             if len(results) >= query.limit:
                 break
+<<<<<<< HEAD
 
         return results
     def get_related_nodes(self, node_id: str, relation_types: Optional[List[RelationType]] = None,
                       direction: str = "outgoing", limit: int = 10) -> List[Tuple[KnowledgeNode, RelationType]]:
+=======
+        
+        return results   
+    def get_related_nodes(self, node_id: str, relation_types: Optional[list[RelationType]] = None, 
+                      direction: str = "outgoing", limit: int = 10) -> list[tuple[KnowledgeNode, RelationType]]:
+>>>>>>> feature/core-services-refactor
         """Get nodes related to the given node.
         
         Args:
@@ -539,8 +564,13 @@ class EnhancedSSKGManager:
                     break
 
         return results
+<<<<<<< HEAD
 
     def resolve_conflicts(self, node_ids: List[str]) -> Optional[KnowledgeNode]:
+=======
+    
+    def resolve_conflicts(self, node_ids: list[str]) -> Optional[KnowledgeNode]:
+>>>>>>> feature/core-services-refactor
         """Resolve conflicts between multiple nodes.
         
         Args:
@@ -599,9 +629,15 @@ class EnhancedSSKGManager:
 
         return new_node
 # Domain-specific adapter methods
+<<<<<<< HEAD
 
     def store_memory(self, content: str, memory_type: str, owner_id: str,
                     importance: float = 0.5, metadata: Dict[str, Any] = None) -> str:
+=======
+    
+    def store_memory(self, content: str, memory_type: str, owner_id: str, 
+                    importance: float = 0.5, metadata: dict[str, Any] = None) -> str:
+>>>>>>> feature/core-services-refactor
         """Store a memory in the SSKG.
         
         Args:
@@ -643,7 +679,11 @@ class EnhancedSSKGManager:
 
     def retrieve_memories(self, owner_id: Optional[str] = None, memory_type: Optional[str] = None,
                          content_query: Optional[str] = None, min_importance: float = 0.0,
+<<<<<<< HEAD
                          limit: int = 10) -> List[KnowledgeNode]:
+=======
+                         limit: int = 10) -> list[KnowledgeNode]:
+>>>>>>> feature/core-services-refactor
         """Retrieve memories from the SSKG.
         
         Args:
@@ -674,8 +714,13 @@ class EnhancedSSKGManager:
 
         # Execute query
         return self.query(query)
+<<<<<<< HEAD
 
     def store_wiki_content(self, page_id: str, content: str, metadata: Dict[str, Any] = None) -> str:
+=======
+    
+    def store_wiki_content(self, page_id: str, content: str, metadata: dict[str, Any] = None) -> str:
+>>>>>>> feature/core-services-refactor
         """Store wiki content in the SSKG.
         
         Args:
@@ -732,9 +777,15 @@ class EnhancedSSKGManager:
             metadata_filters={"page_id": page_id},
             limit=1
         ))
+<<<<<<< HEAD
 
         return results[0] if results else None
     def store_session_state(self, session_id: str, state: Dict[str, Any]) -> str:
+=======
+        
+        return results[0] if results else None    
+    def store_session_state(self, session_id: str, state: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Store session state in the SSKG.
         
         Args:
@@ -778,8 +829,13 @@ class EnhancedSSKGManager:
 
             # Add to graph
             return self.add_node(session_node)
+<<<<<<< HEAD
 
     def retrieve_session_state(self, session_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def retrieve_session_state(self, session_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve session state from the SSKG.
         
         Args:
@@ -803,8 +859,13 @@ class EnhancedSSKGManager:
         except json.JSONDecodeError:
             logger.error(f"Failed to parse session state for session {session_id}")
             return None
+<<<<<<< HEAD
 
     def store_project_state(self, project_id: str, state: Dict[str, Any]) -> str:
+=======
+    
+    def store_project_state(self, project_id: str, state: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """Store project state in the SSKG.
         
         Args:
@@ -848,8 +909,13 @@ class EnhancedSSKGManager:
 
             # Add to graph
             return self.add_node(project_node)
+<<<<<<< HEAD
 
     def retrieve_project_state(self, project_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def retrieve_project_state(self, project_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve project state from the SSKG.
         
         Args:

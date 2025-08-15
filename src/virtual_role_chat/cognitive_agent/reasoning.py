@@ -6,7 +6,11 @@ heuristics, and cognitive biases.
 """
 
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -14,38 +18,47 @@ from pydantic import BaseModel, Field
 class InferenceRule(BaseModel):
     """Representation of an inference rule used in reasoning.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     name: str
     description: str
     pattern: str  # A pattern representation of the rule
     confidence: float = Field(ge=0.0, le=1.0)
-    domains: List[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
 
 
 class Heuristic(BaseModel):
     """Representation of a heuristic used in reasoning.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     name: str
     description: str
-    trigger_conditions: List[str]
+    trigger_conditions: list[str]
     application_strategy: str
     confidence: float = Field(ge=0.0, le=1.0)
-    domains: List[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
 
 
 class CognitiveBias(BaseModel):
     """Representation of a cognitive bias that influences reasoning.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     name: str
     description: str
     influence_pattern: str
     strength: float = Field(ge=0.0, le=1.0)
-    domains: List[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
 
 
 class ReasoningFramework:
@@ -61,8 +74,8 @@ class ReasoningFramework:
         self,
         framework_type: str,
         agent_id: str,
-        domain_expertise: Dict[str, float] = None,
-        cognitive_biases: List[str] = None
+        domain_expertise: dict[str, float] = None,
+        cognitive_biases: list[str] = None
     ):
         """Initialize a reasoning framework.
         
@@ -87,8 +100,13 @@ class ReasoningFramework:
         self.logger.info(f"Initialized {framework_type} reasoning framework for agent {agent_id}")
         self.logger.debug(f"Loaded {len(self.inference_rules)} inference rules, "
                          f"{len(self.heuristics)} heuristics, and {len(self.biases)} biases")
+<<<<<<< HEAD
 
     def _load_inference_rules(self) -> Dict[str, InferenceRule]:
+=======
+    
+    def _load_inference_rules(self) -> dict[str, InferenceRule]:
+>>>>>>> feature/core-services-refactor
         """Load inference rules appropriate for this reasoning framework.
         
         Returns:
@@ -154,8 +172,13 @@ class ReasoningFramework:
             )
 
         return rules
+<<<<<<< HEAD
 
     def _load_heuristics(self) -> Dict[str, Heuristic]:
+=======
+    
+    def _load_heuristics(self) -> dict[str, Heuristic]:
+>>>>>>> feature/core-services-refactor
         """Load heuristics appropriate for this reasoning framework.
         
         Returns:
@@ -200,8 +223,13 @@ class ReasoningFramework:
             )
 
         return heuristics
+<<<<<<< HEAD
 
     def _load_cognitive_biases(self) -> Dict[str, CognitiveBias]:
+=======
+    
+    def _load_cognitive_biases(self) -> dict[str, CognitiveBias]:
+>>>>>>> feature/core-services-refactor
         """Load cognitive biases that influence this reasoning framework.
         
         Returns:
@@ -245,10 +273,17 @@ class ReasoningFramework:
 
     async def apply(
         self,
+<<<<<<< HEAD
         task: Dict[str, Any],
         relevant_knowledge: Dict[str, Any],
         domain_knowledge: Dict[str, Any]
     ) -> Dict[str, Any]:
+=======
+        task: dict[str, Any],
+        relevant_knowledge: dict[str, Any],
+        domain_knowledge: dict[str, Any]
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Apply the reasoning framework to a task.
         
         This method implements the core reasoning process:
@@ -285,17 +320,29 @@ class ReasoningFramework:
             relevant_heuristics, initial_conclusions, task
         )
         self.logger.debug("Refined conclusions using heuristics")
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # 4. Apply cognitive biases to modify conclusions
         biased_conclusions = self._apply_cognitive_biases(
             refined_conclusions, task
         )
         self.logger.debug("Applied cognitive biases to conclusions")
+<<<<<<< HEAD
 
         # 5. Evaluate confidence in conclusions
         final_conclusions = self._evaluate_confidence(biased_conclusions)
         self.logger.debug("Evaluated confidence in conclusions")
 
+=======
+        
+        # 5. Evaluate confidence in conclusions
+        final_conclusions = self._evaluate_confidence(biased_conclusions)
+        self.logger.debug("Evaluated confidence in conclusions")
+        
+>>>>>>> feature/core-services-refactor
         return {
             "conclusions": final_conclusions,
             "reasoning_trace": {
@@ -306,8 +353,13 @@ class ReasoningFramework:
                 "confidence": self._calculate_overall_confidence(final_conclusions)
             }
         }
+<<<<<<< HEAD
 
     def _identify_relevant_rules(self, task: Dict[str, Any]) -> List[InferenceRule]:
+=======
+    
+    def _identify_relevant_rules(self, task: dict[str, Any]) -> list[InferenceRule]:
+>>>>>>> feature/core-services-refactor
         """Identify inference rules relevant to the task.
         
         Args:
@@ -322,8 +374,13 @@ class ReasoningFramework:
 
         # For now, we'll just return all rules
         return list(self.inference_rules.values())
+<<<<<<< HEAD
 
     def _identify_relevant_heuristics(self, task: Dict[str, Any]) -> List[Heuristic]:
+=======
+    
+    def _identify_relevant_heuristics(self, task: dict[str, Any]) -> list[Heuristic]:
+>>>>>>> feature/core-services-refactor
         """Identify heuristics relevant to the task.
         
         Args:
@@ -341,11 +398,19 @@ class ReasoningFramework:
 
     def _apply_inference_rules(
         self,
+<<<<<<< HEAD
         rules: List[InferenceRule],
         task: Dict[str, Any],
         relevant_knowledge: Dict[str, Any],
         domain_knowledge: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
+=======
+        rules: list[InferenceRule],
+        task: dict[str, Any],
+        relevant_knowledge: dict[str, Any],
+        domain_knowledge: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Apply inference rules to generate conclusions.
         
         Args:
@@ -371,10 +436,17 @@ class ReasoningFramework:
 
     def _apply_heuristics(
         self,
+<<<<<<< HEAD
         heuristics: List[Heuristic],
         conclusions: List[Dict[str, Any]],
         task: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
+=======
+        heuristics: list[Heuristic],
+        conclusions: list[dict[str, Any]],
+        task: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Apply heuristics to refine conclusions.
         
         Args:
@@ -394,9 +466,15 @@ class ReasoningFramework:
 
     def _apply_cognitive_biases(
         self,
+<<<<<<< HEAD
         conclusions: List[Dict[str, Any]],
         task: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
+=======
+        conclusions: list[dict[str, Any]],
+        task: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Apply cognitive biases to modify conclusions.
         
         Args:
@@ -415,8 +493,13 @@ class ReasoningFramework:
 
     def _evaluate_confidence(
         self,
+<<<<<<< HEAD
         conclusions: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
+=======
+        conclusions: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Evaluate confidence in conclusions.
         
         Args:
@@ -434,7 +517,7 @@ class ReasoningFramework:
 
     def _calculate_overall_confidence(
         self,
-        conclusions: List[Dict[str, Any]]
+        conclusions: list[dict[str, Any]]
     ) -> float:
         """Calculate overall confidence in the reasoning results.
         
@@ -450,8 +533,13 @@ class ReasoningFramework:
 
         # For now, we'll just return a placeholder value
         return 0.8
+<<<<<<< HEAD
 
     def get_state(self) -> Dict[str, Any]:
+=======
+    
+    def get_state(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get the current state of the reasoning framework.
         
         Returns:
@@ -465,8 +553,13 @@ class ReasoningFramework:
             "active_rules": [rule.id for rule in self.inference_rules.values()],
             "active_heuristics": [heuristic.id for heuristic in self.heuristics.values()]
         }
+<<<<<<< HEAD
 
     def update_state(self, state_updates: Dict[str, Any]) -> None:
+=======
+    
+    def update_state(self, state_updates: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Update the state of the reasoning framework.
         
         Args:

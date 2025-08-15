@@ -5,7 +5,11 @@ and instantiating institutional primitive nodes.
 """
 
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Type
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .base import InstitutionalPrimitive, PrimitiveInfo, ValidationResult
 
@@ -22,6 +26,7 @@ class PrimitiveRegistry:
 
     def __init__(self):
         """Initialize the primitive registry."""
+<<<<<<< HEAD
         self._primitives: Dict[str, Type[InstitutionalPrimitive]] = {}
         self._primitive_info: Dict[str, PrimitiveInfo] = {}
 
@@ -29,6 +34,15 @@ class PrimitiveRegistry:
         self,
         primitive_type: str,
         primitive_class: Type[InstitutionalPrimitive]
+=======
+        self._primitives: dict[str, type[InstitutionalPrimitive]] = {}
+        self._primitive_info: dict[str, PrimitiveInfo] = {}
+    
+    def register_primitive(
+        self, 
+        primitive_type: str, 
+        primitive_class: type[InstitutionalPrimitive]
+>>>>>>> feature/core-services-refactor
     ) -> bool:
         """Register a primitive type with the registry.
         
@@ -69,8 +83,13 @@ class PrimitiveRegistry:
         except Exception as e:
             logger.error(f"Failed to register primitive '{primitive_type}': {e}")
             return False
+<<<<<<< HEAD
 
     def get_primitive(self, primitive_type: str) -> Optional[Type[InstitutionalPrimitive]]:
+=======
+    
+    def get_primitive(self, primitive_type: str) -> Optional[type[InstitutionalPrimitive]]:
+>>>>>>> feature/core-services-refactor
         """Get a primitive class by type.
         
         Args:
@@ -83,9 +102,15 @@ class PrimitiveRegistry:
         return self._primitives.get(primitive_type)
 
     def create_primitive(
+<<<<<<< HEAD
         self,
         primitive_type: str,
         config: Optional[Dict[str, Any]] = None
+=======
+        self, 
+        primitive_type: str, 
+        config: Optional[dict[str, Any]] = None
+>>>>>>> feature/core-services-refactor
     ) -> Optional[InstitutionalPrimitive]:
         """Create an instance of a primitive by type.
         
@@ -107,8 +132,13 @@ class PrimitiveRegistry:
         except Exception as e:
             logger.error(f"Failed to create primitive '{primitive_type}': {e}")
             return None
+<<<<<<< HEAD
 
     def list_primitives(self) -> List[PrimitiveInfo]:
+=======
+    
+    def list_primitives(self) -> list[PrimitiveInfo]:
+>>>>>>> feature/core-services-refactor
         """List all registered primitives.
         
         Returns:
@@ -128,8 +158,13 @@ class PrimitiveRegistry:
 
         """
         return self._primitive_info.get(primitive_type)
+<<<<<<< HEAD
 
     def validate_primitive(self, primitive_def: Dict[str, Any]) -> ValidationResult:
+=======
+    
+    def validate_primitive(self, primitive_def: dict[str, Any]) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate a primitive definition.
         
         Args:
@@ -210,8 +245,13 @@ class PrimitiveRegistry:
 
         """
         return primitive_type in self._primitives
+<<<<<<< HEAD
 
     def get_primitives_by_tag(self, tag: str) -> List[PrimitiveInfo]:
+=======
+    
+    def get_primitives_by_tag(self, tag: str) -> list[PrimitiveInfo]:
+>>>>>>> feature/core-services-refactor
         """Get all primitives that have a specific tag.
         
         Args:
@@ -247,7 +287,11 @@ def get_global_registry() -> PrimitiveRegistry:
     return _global_registry
 
 
+<<<<<<< HEAD
 def register_primitive(primitive_type: str, primitive_class: Type[InstitutionalPrimitive]) -> bool:
+=======
+def register_primitive(primitive_type: str, primitive_class: type[InstitutionalPrimitive]) -> bool:
+>>>>>>> feature/core-services-refactor
     """Register a primitive with the global registry.
     
     Args:

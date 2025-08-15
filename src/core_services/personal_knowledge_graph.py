@@ -7,7 +7,11 @@
 import logging
 import uuid
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +48,7 @@ class PersonalKnowledgeGraph:
         concept: str,
         node_type: str = "concept",
         importance: float = 0.5,
-        metadata: Dict[str, Any] = None
+        metadata: dict[str, Any] = None
     ) -> str:
         """添加知识节点"""
         try:
@@ -123,7 +127,7 @@ class PersonalKnowledgeGraph:
         query: str,
         query_type: str = "concept_search",
         max_results: int = 10
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """查询知识"""
         try:
             results = []
@@ -173,8 +177,13 @@ class PersonalKnowledgeGraph:
         except Exception as e:
             logger.error(f"查询知识失败: {e}")
             return []
+<<<<<<< HEAD
 
     def get_knowledge_summary(self) -> Dict[str, Any]:
+=======
+    
+    def get_knowledge_summary(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取知识摘要"""
         try:
             # 计算统计信息
@@ -232,8 +241,13 @@ class PersonalKnowledgeGraph:
             if node_data["concept"] == concept:
                 return node_id
         return None
+<<<<<<< HEAD
 
     def _get_related_nodes(self, node_id: str) -> List[str]:
+=======
+    
+    def _get_related_nodes(self, node_id: str) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """获取相关节点"""
         related_nodes = []
 
@@ -252,8 +266,13 @@ class PersonalKnowledgeGraph:
                 (relationship["source_id"] == target_id and relationship["target_id"] == source_id)):
                 return relationship["strength"]
         return 0.0
+<<<<<<< HEAD
 
     def _calculate_relevance(self, query: str, node_data: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_relevance(self, query: str, node_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算相关性分数"""
         try:
             concept = node_data["concept"].lower()

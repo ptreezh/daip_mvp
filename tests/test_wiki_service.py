@@ -3,7 +3,6 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from typing import List
 from unittest import TestCase, main
 from unittest.mock import MagicMock, patch
 
@@ -51,7 +50,7 @@ class TestWikiService(TestCase):
         entry_name: str = "test_entry",
         content: str = "This is a test entry.",
         author_role: str = "test_author",
-        tags: List[str] = ["test"],
+        tags: list[str] = ["test"],
         category: str = "test",
     ) -> WikiVersion:
         return self.wiki_service.create_entry(

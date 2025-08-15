@@ -8,7 +8,11 @@
 import logging
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeNode, KnowledgeQuery, NodeType, RelationType
 from .knowledge_retrieval_service import KnowledgeRetrievalService
@@ -84,7 +88,7 @@ class KnowledgeEvolutionManager:
         node_id: str,
         trigger: EvolutionTrigger,
         new_content: Optional[str] = None,
-        metadata_updates: Dict[str, Any] = None,
+        metadata_updates: dict[str, Any] = None,
         reason: str = ""
     ) -> Optional[str]:
         """Evolve a knowledge node by creating a new version.
@@ -299,8 +303,13 @@ class KnowledgeEvolutionManager:
         except Exception as e:
             logger.error(f"Error archiving knowledge node {node_id}: {e}")
             return False
+<<<<<<< HEAD
 
     async def run_evolution_cycle(self) -> Dict[str, Any]:
+=======
+    
+    async def run_evolution_cycle(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Run an evolution cycle to identify and process nodes that need evolution.
         
         Returns:
@@ -369,8 +378,13 @@ class KnowledgeEvolutionManager:
             cycle_results["errors"].append(error_msg)
 
         return cycle_results
+<<<<<<< HEAD
 
     async def _check_evolution_triggers(self, node: KnowledgeNode) -> List[Dict[str, Any]]:
+=======
+    
+    async def _check_evolution_triggers(self, node: KnowledgeNode) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Check if a node has any evolution triggers."""
         triggers = []
 
@@ -416,8 +430,13 @@ class KnowledgeEvolutionManager:
             logger.error(f"Error checking evolution triggers for node {node.id}: {e}")
 
         return triggers
+<<<<<<< HEAD
 
     async def _process_evolution_trigger(self, node: KnowledgeNode, trigger: Dict[str, Any]) -> bool:
+=======
+    
+    async def _process_evolution_trigger(self, node: KnowledgeNode, trigger: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Process an evolution trigger."""
         try:
             trigger_type = trigger["trigger"]
@@ -449,8 +468,13 @@ class KnowledgeEvolutionManager:
             return False
 
         return False
+<<<<<<< HEAD
 
     def get_evolution_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_evolution_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get statistics about knowledge evolution."""
         try:
             # Get evolution events

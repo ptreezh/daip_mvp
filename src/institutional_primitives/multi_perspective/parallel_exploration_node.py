@@ -9,7 +9,7 @@ import json
 import logging
 import re
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from ..base import ExecutionContext, InstitutionalPrimitive
 from .models import ExpertViewpoint, SubProblem
@@ -23,15 +23,25 @@ class ParallelExplorationNode(InstitutionalPrimitive):
     Implements fan-out pattern to simultaneously deploy multiple expert roles
     to analyze different aspects of a complex topic.
     """
+<<<<<<< HEAD
 
     def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+=======
+    
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
+>>>>>>> feature/core-services-refactor
         super().__init__(primitive_id, config)
         self.max_parallel_experts = config.get("max_parallel_experts", 5) if config else 5
         self.expert_roles = config.get("expert_roles", {}) if config else {}
         self.default_expert_role = config.get("default_expert_role", "专家") if config else "专家"
         self.use_tools = config.get("use_tools", True) if config else True
+<<<<<<< HEAD
 
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+=======
+    
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute parallel exploration of sub-problems by expert roles.
         
         Args:
@@ -229,8 +239,13 @@ class ParallelExplorationNode(InstitutionalPrimitive):
                     "perspective": sub_problem.perspective
                 }
             )
+<<<<<<< HEAD
 
     def _select_expert_role(self, required_expertise: List[str]) -> str:
+=======
+    
+    def _select_expert_role(self, required_expertise: list[str]) -> str:
+>>>>>>> feature/core-services-refactor
         """Select the most appropriate expert role based on required expertise."""
         if not required_expertise or not self.expert_roles:
             return self.default_expert_role
@@ -246,17 +261,30 @@ class ParallelExplorationNode(InstitutionalPrimitive):
                 best_match_count = match_count
 
         return best_match if best_match else self.default_expert_role
+<<<<<<< HEAD
 
     def _format_questions(self, questions: List[str]) -> str:
+=======
+    
+    def _format_questions(self, questions: list[str]) -> str:
+>>>>>>> feature/core-services-refactor
         """Format a list of questions for the prompt."""
         return "\n".join([f"{i+1}. {q}" for i, q in enumerate(questions)])
 
     async def _execute_research_tool(
+<<<<<<< HEAD
         self,
         tool_executor,
         topic: str,
         perspective: str,
         questions: List[str]
+=======
+        self, 
+        tool_executor, 
+        topic: str, 
+        perspective: str, 
+        questions: list[str]
+>>>>>>> feature/core-services-refactor
     ) -> str:
         """Execute research tool to gather information."""
         try:
@@ -276,8 +304,13 @@ class ParallelExplorationNode(InstitutionalPrimitive):
         except Exception as e:
             logger.warning(f"Failed to execute research tool: {e}")
             return ""
+<<<<<<< HEAD
 
     def _extract_json_from_text(self, text: str) -> Dict[str, Any]:
+=======
+    
+    def _extract_json_from_text(self, text: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Extract JSON data from text response."""
         # Find JSON content between triple backticks
         json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', text)
@@ -335,8 +368,13 @@ class ParallelExplorationNode(InstitutionalPrimitive):
                 "reasoning_process": "",
                 "confidence": 0.5
             }
+<<<<<<< HEAD
 
     def get_input_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return input schema for the parallel exploration node."""
         return {
             "type": "object",
@@ -353,8 +391,13 @@ class ParallelExplorationNode(InstitutionalPrimitive):
             },
             "required": ["sub_problems"]
         }
+<<<<<<< HEAD
 
     def get_output_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return output schema for the parallel exploration node."""
         return {
             "type": "object",

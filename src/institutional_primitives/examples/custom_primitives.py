@@ -6,7 +6,11 @@
 """
 import asyncio
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from ..base import ExecutionContext
 from ..plugin_interface import CustomPrimitiveBase, PluginInterface, PluginMetadata
@@ -25,8 +29,13 @@ class SentimentAnalysisPrimitive(CustomPrimitiveBase):
 
     def get_primitive_type(self) -> str:
         return "sentiment_analysis"
+<<<<<<< HEAD
 
     def get_input_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         return {
             "type": "object",
             "properties": {
@@ -42,8 +51,13 @@ class SentimentAnalysisPrimitive(CustomPrimitiveBase):
             },
             "required": ["text"]
         }
+<<<<<<< HEAD
 
     def get_output_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         return {
             "type": "object",
             "properties": {
@@ -65,8 +79,13 @@ class SentimentAnalysisPrimitive(CustomPrimitiveBase):
             },
             "required": ["sentiment", "confidence"]
         }
+<<<<<<< HEAD
 
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+=======
+    
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute sentiment analysis."""
         text = inputs.get("text", "")
         language = inputs.get("language", "en")
@@ -110,8 +129,13 @@ class DataTransformationPrimitive(CustomPrimitiveBase):
 
     def get_primitive_type(self) -> str:
         return "data_transformation"
+<<<<<<< HEAD
 
     def get_input_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         return {
             "type": "object",
             "properties": {
@@ -131,8 +155,13 @@ class DataTransformationPrimitive(CustomPrimitiveBase):
             },
             "required": ["data", "transformation"]
         }
+<<<<<<< HEAD
 
     def get_output_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         return {
             "type": "object",
             "properties": {
@@ -146,8 +175,13 @@ class DataTransformationPrimitive(CustomPrimitiveBase):
             },
             "required": ["transformed_data"]
         }
+<<<<<<< HEAD
 
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+=======
+    
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute data transformation."""
         data = inputs.get("data", [])
         transformation = inputs.get("transformation", "filter")
@@ -300,12 +334,18 @@ class ExampleCustomPrimitivesPlugin(PluginInterface):
             primitive_types=["sentiment_analysis", "data_transformation"],
             service_adapters=["mock_external_service"]
         )
+<<<<<<< HEAD
 
     def get_primitive_classes(self) -> Dict[str, type]:
+=======
+    
+    def get_primitive_classes(self) -> dict[str, type]:
+>>>>>>> feature/core-services-refactor
         return {
             "sentiment_analysis": SentimentAnalysisPrimitive,
             "data_transformation": DataTransformationPrimitive
         }
+<<<<<<< HEAD
 
     def get_service_adapters(self) -> Dict[str, Any]:
         return {
@@ -313,6 +353,15 @@ class ExampleCustomPrimitivesPlugin(PluginInterface):
         }
 
     def initialize(self, context: Dict[str, Any]) -> bool:
+=======
+    
+    def get_service_adapters(self) -> dict[str, Any]:
+        return {
+            "mock_external_service": MockExternalServiceAdapter
+        }
+    
+    def initialize(self, context: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Initialize the plugin."""
         # Plugin-specific initialization
         return True

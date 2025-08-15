@@ -10,7 +10,11 @@ import logging
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 import yaml
 from pydantic import BaseModel, Field, validator
@@ -40,8 +44,13 @@ class TemplateParameter(BaseModel):
     description: str
     default: Optional[Any] = None
     required: bool = True
+<<<<<<< HEAD
     constraints: Dict[str, Any] = Field(default_factory=dict)  # min, max, choices, etc.
 
+=======
+    constraints: dict[str, Any] = Field(default_factory=dict)  # min, max, choices, etc.
+    
+>>>>>>> feature/core-services-refactor
     @validator('default')
     def validate_default(cls, v, values):
         """Validate that default value matches the parameter type."""
@@ -70,10 +79,10 @@ class WorkflowNode(BaseModel):
 
     id: str
     type: str  # Primitive type
-    config: Dict[str, Any] = Field(default_factory=dict)
-    inputs: List[str] = Field(default_factory=list)
-    outputs: List[str] = Field(default_factory=list)
-    conditions: Dict[str, Any] = Field(default_factory=dict)  # Conditional execution
+    config: dict[str, Any] = Field(default_factory=dict)
+    inputs: list[str] = Field(default_factory=list)
+    outputs: list[str] = Field(default_factory=list)
+    conditions: dict[str, Any] = Field(default_factory=dict)  # Conditional execution
     parallel_group: Optional[str] = None  # For parallel execution grouping
 
 
@@ -83,7 +92,7 @@ class WorkflowEdge(BaseModel):
     from_node: str
     to_node: str
     condition: Optional[str] = None  # Conditional edge
-    data_mapping: Dict[str, str] = Field(default_factory=dict)  # Output -> Input mapping
+    data_mapping: dict[str, str] = Field(default_factory=dict)  # Output -> Input mapping
 
 
 class WorkflowTemplate(BaseModel):
@@ -97,17 +106,31 @@ class WorkflowTemplate(BaseModel):
     updated_at: datetime = Field(default_factory=datetime.now)
 
     # Template parameters
+<<<<<<< HEAD
     parameters: List[TemplateParameter] = Field(default_factory=list)
 
     # Workflow structure
     nodes: List[WorkflowNode] = Field(default_factory=list)
     edges: List[WorkflowEdge] = Field(default_factory=list)
 
+=======
+    parameters: list[TemplateParameter] = Field(default_factory=list)
+    
+    # Workflow structure
+    nodes: list[WorkflowNode] = Field(default_factory=list)
+    edges: list[WorkflowEdge] = Field(default_factory=list)
+    
+>>>>>>> feature/core-services-refactor
     # Metadata
-    tags: List[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
     category: str = "general"
+<<<<<<< HEAD
     use_cases: List[str] = Field(default_factory=list)
 
+=======
+    use_cases: list[str] = Field(default_factory=list)
+    
+>>>>>>> feature/core-services-refactor
     def get_parameter(self, name: str) -> Optional[TemplateParameter]:
         """Get a parameter by name."""
         for param in self.parameters:
@@ -121,8 +144,13 @@ class WorkflowTemplate(BaseModel):
             if node.id == node_id:
                 return node
         return None
+<<<<<<< HEAD
 
     def validate_structure(self) -> List[str]:
+=======
+    
+    def validate_structure(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Validate the workflow structure and return any errors."""
         errors = []
 
@@ -146,9 +174,14 @@ class WorkflowTemplate(BaseModel):
 
 class TemplateParameterValues(BaseModel):
     """Values for template parameters."""
+<<<<<<< HEAD
 
     values: Dict[str, Any] = Field(default_factory=dict)
 
+=======
+    values: dict[str, Any] = Field(default_factory=dict)
+    
+>>>>>>> feature/core-services-refactor
     def get(self, name: str, default: Any = None) -> Any:
         """Get a parameter value."""
         return self.values.get(name, default)
@@ -168,9 +201,15 @@ class WorkflowInstance(BaseModel):
     created_at: datetime = Field(default_factory=datetime.now)
 
     # Instantiated workflow structure
+<<<<<<< HEAD
     nodes: List[WorkflowNode] = Field(default_factory=list)
     edges: List[WorkflowEdge] = Field(default_factory=list)
 
+=======
+    nodes: list[WorkflowNode] = Field(default_factory=list)
+    edges: list[WorkflowEdge] = Field(default_factory=list)
+    
+>>>>>>> feature/core-services-refactor
     # Runtime information
     status: str = "created"  # created, running, completed, failed
     execution_id: Optional[str] = None
@@ -186,9 +225,15 @@ class TemplateEngine:
 
     def __init__(self):
         """Initialize the template engine."""
+<<<<<<< HEAD
         self.templates: Dict[str, WorkflowTemplate] = {}
         self.instances: Dict[str, WorkflowInstance] = {}
 
+=======
+        self.templates: dict[str, WorkflowTemplate] = {}
+        self.instances: dict[str, WorkflowInstance] = {}
+        
+>>>>>>> feature/core-services-refactor
         logger.info("TemplateEngine initialized")
 
     def register_template(self, template: WorkflowTemplate) -> bool:
@@ -228,7 +273,11 @@ class TemplateEngine:
             if not path.exists():
                 logger.error(f"Template file not found: {file_path}")
                 return None
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             with open(path, encoding='utf-8') as f:
                 if path.suffix.lower() in ['.yaml', '.yml']:
                     data = yaml.safe_load(f)
@@ -342,12 +391,21 @@ class TemplateEngine:
             # Sort by version (simple string sort, could be improved)
             matching_templates.sort(key=lambda x: x[1].version, reverse=True)
             return matching_templates[0][1]
+<<<<<<< HEAD
 
     def list_templates(self) -> List[WorkflowTemplate]:
         """List all registered templates."""
         return list(self.templates.values())
 
     def validate_parameters(self, template: WorkflowTemplate, parameter_values: TemplateParameterValues) -> List[str]:
+=======
+    
+    def list_templates(self) -> list[WorkflowTemplate]:
+        """List all registered templates."""
+        return list(self.templates.values())
+    
+    def validate_parameters(self, template: WorkflowTemplate, parameter_values: TemplateParameterValues) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Validate parameter values against template parameter definitions.
         
         Args:
@@ -521,8 +579,13 @@ class TemplateEngine:
     def get_instance(self, instance_id: str) -> Optional[WorkflowInstance]:
         """Get a workflow instance by ID."""
         return self.instances.get(instance_id)
+<<<<<<< HEAD
 
     def list_instances(self) -> List[WorkflowInstance]:
+=======
+    
+    def list_instances(self) -> list[WorkflowInstance]:
+>>>>>>> feature/core-services-refactor
         """List all workflow instances."""
         return list(self.instances.values())
 
@@ -550,8 +613,13 @@ class TemplateLibrary:
 
         """
         self.engine = template_engine
+<<<<<<< HEAD
         self.template_directories: List[str] = []
 
+=======
+        self.template_directories: list[str] = []
+        
+>>>>>>> feature/core-services-refactor
         logger.info("TemplateLibrary initialized")
 
     def add_template_directory(self, directory: str) -> None:
@@ -559,8 +627,13 @@ class TemplateLibrary:
         if directory not in self.template_directories:
             self.template_directories.append(directory)
             logger.info(f"Added template directory: {directory}")
+<<<<<<< HEAD
 
     def discover_templates(self) -> Dict[str, bool]:
+=======
+    
+    def discover_templates(self) -> dict[str, bool]:
+>>>>>>> feature/core-services-refactor
         """Discover and load templates from registered directories.
         
         Returns:
@@ -589,8 +662,13 @@ class TemplateLibrary:
                 results[str(file_path)] = template is not None
 
         return results
+<<<<<<< HEAD
 
     def search_templates(self, query: str = None, category: str = None, tags: List[str] = None) -> List[WorkflowTemplate]:
+=======
+    
+    def search_templates(self, query: str = None, category: str = None, tags: list[str] = None) -> list[WorkflowTemplate]:
+>>>>>>> feature/core-services-refactor
         """Search templates by various criteria.
         
         Args:
@@ -625,15 +703,25 @@ class TemplateLibrary:
             results.append(template)
 
         return results
+<<<<<<< HEAD
 
     def get_template_categories(self) -> List[str]:
+=======
+    
+    def get_template_categories(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Get all template categories."""
         categories = set()
         for template in self.engine.list_templates():
             categories.add(template.category)
         return sorted(list(categories))
+<<<<<<< HEAD
 
     def get_template_tags(self) -> List[str]:
+=======
+    
+    def get_template_tags(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Get all template tags."""
         tags = set()
         for template in self.engine.list_templates():

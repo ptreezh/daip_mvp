@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
+<<<<<<< HEAD
 # -*- coding: utf-8 -*-
 """
 降级管理器 (Fallback Manager)
+=======
+"""降级管理器 (Fallback Manager)
+>>>>>>> feature/core-services-refactor
 
 处理算法失败场景，提供多级降级策略和智能重试机制。
 确保系统在算法失败时能够优雅降级到可用算法。
@@ -24,6 +28,7 @@ import asyncio
 import logging
 import time
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
@@ -38,6 +43,19 @@ from consensus_algorithm_interface import ConsensusAlgorithm, ConsensusContext
 from algorithm_registry import AlgorithmRegistry
 from algorithm_selector import AlgorithmSelector
 
+=======
+from collections import defaultdict, deque
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Optional
+
+from algorithm_registry import AlgorithmRegistry
+from algorithm_selector import AlgorithmSelector
+from consensus_algorithm_interface import ConsensusAlgorithm, ConsensusContext
+from consensus_models import ConsensusRequest, ConsensusResponse, ConsensusResult, FailureContext
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +95,11 @@ class FallbackConfig:
     circuit_breaker_enabled: bool = True
     failure_threshold: int = 5
     recovery_timeout: float = 60.0
+<<<<<<< HEAD
     exclude_algorithms: Set[str] = field(default_factory=set)
+=======
+    exclude_algorithms: set[str] = field(default_factory=set)
+>>>>>>> feature/core-services-refactor
 
 
 @dataclass
@@ -101,7 +123,11 @@ class FallbackEvent:
     fallback_depth: int
     success: bool
     execution_time: float
+<<<<<<< HEAD
     metadata: Dict[str, Any] = field(default_factory=dict)
+=======
+    metadata: dict[str, Any] = field(default_factory=dict)
+>>>>>>> feature/core-services-refactor
 
 
 class FallbackRule(ABC):
@@ -112,9 +138,14 @@ class FallbackRule(ABC):
                                failed_algorithm: str,
                                request: ConsensusRequest,
                                failure_context: FailureContext,
+<<<<<<< HEAD
                                available_algorithms: List[str]) -> List[str]:
         """
         获取降级候选算法
+=======
+                               available_algorithms: list[str]) -> list[str]:
+        """获取降级候选算法
+>>>>>>> feature/core-services-refactor
         
         Args:
             failed_algorithm: 失败的算法ID
@@ -131,9 +162,14 @@ class FallbackRule(ABC):
 class PriorityChainRule(FallbackRule):
     """优先级链降级规则"""
     
+<<<<<<< HEAD
     def __init__(self, priority_chains: Dict[str, List[str]]):
         """
         初始化优先级链规则
+=======
+    def __init__(self, priority_chains: dict[str, list[str]]):
+        """初始化优先级链规则
+>>>>>>> feature/core-services-refactor
         
         Args:
             priority_chains: 算法优先级链映射 {algorithm_id: [fallback1, fallback2, ...]}
@@ -144,7 +180,11 @@ class PriorityChainRule(FallbackRule):
                                failed_algorithm: str,
                                request: ConsensusRequest,
                                failure_context: FailureContext,
+<<<<<<< HEAD
                                available_algorithms: List[str]) -> List[str]:
+=======
+                               available_algorithms: list[str]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """基于预定义优先级链获取候选算法"""
         chain = self.priority_chains.get(failed_algorithm, [])
         
@@ -164,7 +204,11 @@ class SimilarityBasedRule(FallbackRule):
                                failed_algorithm: str,
                                request: ConsensusRequest,
                                failure_context: FailureContext,
+<<<<<<< HEAD
                                available_algorithms: List[str]) -> List[str]:
+=======
+                               available_algorithms: list[str]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """基于算法相似性获取候选算法"""
         failed_info = self.registry.get_algorithm_info(failed_algorithm)
         if not failed_info:
@@ -223,7 +267,11 @@ class LoadAwareRule(FallbackRule):
                                failed_algorithm: str,
                                request: ConsensusRequest,
                                failure_context: FailureContext,
+<<<<<<< HEAD
                                available_algorithms: List[str]) -> List[str]:
+=======
+                               available_algorithms: list[str]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """基于负载情况获取候选算法"""
         # 获取算法使用统计
         algorithm_loads = []
@@ -244,8 +292,12 @@ class LoadAwareRule(FallbackRule):
 
 
 class FallbackManager:
+<<<<<<< HEAD
     """
     降级管理器
+=======
+    """降级管理器
+>>>>>>> feature/core-services-refactor
     
     处理算法失败场景，提供多级降级策略和智能重试机制。
     """
@@ -259,6 +311,7 @@ class FallbackManager:
         self.config = config or FallbackConfig()
         
         # 降级规则
+<<<<<<< HEAD
         self.rules: Dict[FallbackStrategy, FallbackRule] = {}
         self._initialize_rules()
         
@@ -268,6 +321,17 @@ class FallbackManager:
         # 事件记录
         self.fallback_events: deque = deque(maxlen=1000)
         self.event_listeners: List[Callable[[FallbackEvent], None]] = []
+=======
+        self.rules: dict[FallbackStrategy, FallbackRule] = {}
+        self._initialize_rules()
+        
+        # 熔断器状态
+        self.circuit_breakers: dict[str, CircuitBreakerInfo] = defaultdict(CircuitBreakerInfo)
+        
+        # 事件记录
+        self.fallback_events: deque = deque(maxlen=1000)
+        self.event_listeners: list[Callable[[FallbackEvent], None]] = []
+>>>>>>> feature/core-services-refactor
         
         # 统计信息
         self.stats = {
@@ -298,9 +362,14 @@ class FallbackManager:
     def get_fallback_chain(self,
                           failed_algorithm: str,
                           request: ConsensusRequest,
+<<<<<<< HEAD
                           failure_context: Optional[FailureContext] = None) -> List[str]:
         """
         获取降级链
+=======
+                          failure_context: Optional[FailureContext] = None) -> list[str]:
+        """获取降级链
+>>>>>>> feature/core-services-refactor
         
         Args:
             failed_algorithm: 失败的算法ID
@@ -351,7 +420,11 @@ class FallbackManager:
             logger.error(f"Failed to get fallback chain: {str(e)}")
             return []
             
+<<<<<<< HEAD
     def _filter_circuit_breaker_algorithms(self, algorithms: List[str]) -> List[str]:
+=======
+    def _filter_circuit_breaker_algorithms(self, algorithms: list[str]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """过滤熔断器开启的算法"""
         filtered = []
         current_time = datetime.now()
@@ -373,7 +446,11 @@ class FallbackManager:
                     
         return filtered
         
+<<<<<<< HEAD
     def _get_selector_based_candidates(self, request: ConsensusRequest, available_algorithms: List[str]) -> List[str]:
+=======
+    def _get_selector_based_candidates(self, request: ConsensusRequest, available_algorithms: list[str]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """基于选择器获取候选算法"""
         try:
             # 获取算法评分
@@ -388,8 +465,12 @@ class FallbackManager:
                               request: ConsensusRequest,
                               failure_context: FailureContext,
                               fallback_depth: int = 1) -> ConsensusResponse:
+<<<<<<< HEAD
         """
         执行降级算法
+=======
+        """执行降级算法
+>>>>>>> feature/core-services-refactor
         
         Args:
             fallback_algorithm: 降级算法ID
@@ -581,7 +662,11 @@ class FallbackManager:
                               fallback_depth: int,
                               success: bool,
                               execution_time: float,
+<<<<<<< HEAD
                               metadata: Optional[Dict[str, Any]] = None):
+=======
+                              metadata: Optional[dict[str, Any]] = None):
+>>>>>>> feature/core-services-refactor
         """记录降级事件"""
         event = FallbackEvent(
             event_id=event_id,
@@ -607,8 +692,12 @@ class FallbackManager:
     def update_fallback_strategy(self,
                                 strategy: FallbackStrategy,
                                 config: Optional[FallbackConfig] = None) -> bool:
+<<<<<<< HEAD
         """
         更新降级策略
+=======
+        """更新降级策略
+>>>>>>> feature/core-services-refactor
         
         Args:
             strategy: 新的降级策略
@@ -628,10 +717,17 @@ class FallbackManager:
             
         except Exception as e:
             logger.error(f"Failed to update fallback strategy: {str(e)}")
+<<<<<<< HEAD
             return False    d
 ef add_priority_chain(self, algorithm_id: str, fallback_chain: List[str]) -> bool:
         """
         添加算法优先级链
+=======
+            return False
+
+    def add_priority_chain(self, algorithm_id: str, fallback_chain: list[str]) -> bool:
+        """添加算法优先级链
+>>>>>>> feature/core-services-refactor
         
         Args:
             algorithm_id: 算法ID
@@ -663,9 +759,14 @@ ef add_priority_chain(self, algorithm_id: str, fallback_chain: List[str]) -> boo
         if listener in self.event_listeners:
             self.event_listeners.remove(listener)
             
+<<<<<<< HEAD
     def get_fallback_stats(self) -> Dict[str, Any]:
         """
         获取降级统计信息
+=======
+    def get_fallback_stats(self) -> dict[str, Any]:
+        """获取降级统计信息
+>>>>>>> feature/core-services-refactor
         
         Returns:
             统计信息字典
@@ -714,9 +815,14 @@ ef add_priority_chain(self, algorithm_id: str, fallback_chain: List[str]) -> boo
             }
         }
         
+<<<<<<< HEAD
     def get_algorithm_reliability(self, algorithm_id: str) -> Dict[str, Any]:
         """
         获取算法可靠性信息
+=======
+    def get_algorithm_reliability(self, algorithm_id: str) -> dict[str, Any]:
+        """获取算法可靠性信息
+>>>>>>> feature/core-services-refactor
         
         Args:
             algorithm_id: 算法ID
@@ -770,8 +876,12 @@ ef add_priority_chain(self, algorithm_id: str, fallback_chain: List[str]) -> boo
         }
         
     def reset_circuit_breaker(self, algorithm_id: str) -> bool:
+<<<<<<< HEAD
         """
         重置算法的熔断器
+=======
+        """重置算法的熔断器
+>>>>>>> feature/core-services-refactor
         
         Args:
             algorithm_id: 算法ID
@@ -800,9 +910,14 @@ ef add_priority_chain(self, algorithm_id: str, fallback_chain: List[str]) -> boo
         self.fallback_events.clear()
         logger.info("Fallback event history cleared")
         
+<<<<<<< HEAD
     def export_events(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
         """
         导出降级事件
+=======
+    def export_events(self, limit: Optional[int] = None) -> list[dict[str, Any]]:
+        """导出降级事件
+>>>>>>> feature/core-services-refactor
         
         Args:
             limit: 导出数量限制
@@ -836,9 +951,14 @@ ef add_priority_chain(self, algorithm_id: str, fallback_chain: List[str]) -> boo
             
         return exported_events
         
+<<<<<<< HEAD
     def analyze_failure_patterns(self) -> Dict[str, Any]:
         """
         分析失败模式
+=======
+    def analyze_failure_patterns(self) -> dict[str, Any]:
+        """分析失败模式
+>>>>>>> feature/core-services-refactor
         
         Returns:
             失败模式分析结果

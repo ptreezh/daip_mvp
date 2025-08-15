@@ -16,7 +16,7 @@ from src.cli.main import app
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture
+@pytest.fixture()
 def cli_runner():
     """Fixture that provides a CLI test runner."""
     return CliRunner()

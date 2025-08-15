@@ -12,7 +12,7 @@ from src.working_intelligent_assistant import main
 
 if __name__ == "__main__":
     print("🚀 启动DAIP-LIVE工程可用智能助手...")
-
+    
     try:
         asyncio.run(main())
     except KeyboardInterrupt:

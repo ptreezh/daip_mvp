@@ -7,7 +7,11 @@
 import logging
 import uuid
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +24,13 @@ class TransparentConflictResolution:
         self.resolution_steps = []
         self.transparency_level = "detailed"
         self.visualization_history = []
+<<<<<<< HEAD
 
     def show_conflict_analysis(self, conflict_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def show_conflict_analysis(self, conflict_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """展示冲突分析"""
         try:
             analysis_id = str(uuid.uuid4())
@@ -45,8 +54,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"展示冲突分析失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def display_resolution_process(self, resolution_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def display_resolution_process(self, resolution_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """显示解决过程"""
         try:
             process_id = str(uuid.uuid4())
@@ -65,8 +79,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"显示解决过程失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def generate_resolution_report(self, resolution_result: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def generate_resolution_report(self, resolution_result: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成解决报告"""
         try:
             report_id = str(uuid.uuid4())
@@ -86,15 +105,25 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"生成解决报告失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def _extract_stakeholder_positions(self, conflict_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+=======
+    
+    def _extract_stakeholder_positions(self, conflict_data: dict[str, Any]) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """提取利益相关者立场"""
         try:
             positions = []
             sources = conflict_data.get("sources", [])
             statements = conflict_data.get("conflicting_statements", [])
+<<<<<<< HEAD
 
             for i, (source, statement) in enumerate(zip(sources, statements)):
+=======
+            
+            for i, (source, statement) in enumerate(zip(sources, statements, strict=False)):
+>>>>>>> feature/core-services-refactor
                 position = {
                     "stakeholder": source,
                     "position": statement,
@@ -109,8 +138,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"提取利益相关者立场失败: {e}")
             return []
+<<<<<<< HEAD
 
     def _calculate_conflict_metrics(self, conflict_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _calculate_conflict_metrics(self, conflict_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """计算冲突指标"""
         try:
             statements = conflict_data.get("conflicting_statements", [])
@@ -127,8 +161,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"计算冲突指标失败: {e}")
             return {}
+<<<<<<< HEAD
 
     def _generate_resolution_options(self, conflict_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+=======
+    
+    def _generate_resolution_options(self, conflict_data: dict[str, Any]) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """生成解决选项"""
         try:
             options = [
@@ -160,8 +199,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"生成解决选项失败: {e}")
             return []
+<<<<<<< HEAD
 
     def _create_step_visualization(self, resolution_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+=======
+    
+    def _create_step_visualization(self, resolution_data: dict[str, Any]) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """创建步骤可视化"""
         try:
             steps = [
@@ -207,8 +251,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"创建步骤可视化失败: {e}")
             return []
+<<<<<<< HEAD
 
     def _create_decision_tree(self, resolution_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _create_decision_tree(self, resolution_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """创建决策树"""
         try:
             decision_tree = {
@@ -238,8 +287,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"创建决策树失败: {e}")
             return {}
+<<<<<<< HEAD
 
     def _visualize_evidence_analysis(self, resolution_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _visualize_evidence_analysis(self, resolution_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """可视化证据分析"""
         try:
             evidence_analysis = {
@@ -260,8 +314,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"可视化证据分析失败: {e}")
             return {}
+<<<<<<< HEAD
 
     def _track_confidence_changes(self, resolution_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+=======
+    
+    def _track_confidence_changes(self, resolution_data: dict[str, Any]) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """追踪置信度变化"""
         try:
             confidence_timeline = [
@@ -276,8 +335,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"追踪置信度变化失败: {e}")
             return []
+<<<<<<< HEAD
 
     def _create_executive_summary(self, resolution_result: Dict[str, Any]) -> str:
+=======
+    
+    def _create_executive_summary(self, resolution_result: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """创建执行摘要"""
         try:
             strategy = resolution_result.get("strategy", "unknown")
@@ -291,8 +355,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"创建执行摘要失败: {e}")
             return "摘要生成失败"
+<<<<<<< HEAD
 
     def _create_detailed_analysis(self, resolution_result: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _create_detailed_analysis(self, resolution_result: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """创建详细分析"""
         try:
             analysis = {
@@ -318,8 +387,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"创建详细分析失败: {e}")
             return {}
+<<<<<<< HEAD
 
     def _generate_recommendations(self, resolution_result: Dict[str, Any]) -> List[str]:
+=======
+    
+    def _generate_recommendations(self, resolution_result: dict[str, Any]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """生成建议"""
         try:
             recommendations = [
@@ -334,8 +408,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"生成建议失败: {e}")
             return []
+<<<<<<< HEAD
 
     def _assess_resolution_quality(self, resolution_result: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _assess_resolution_quality(self, resolution_result: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """评估解决质量"""
         try:
             quality_assessment = {
@@ -357,8 +436,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"评估解决质量失败: {e}")
             return {}
+<<<<<<< HEAD
 
     def _calculate_transparency_score(self, resolution_result: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_transparency_score(self, resolution_result: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算透明度分数"""
         try:
             # 基于多个因素计算透明度
@@ -391,8 +475,13 @@ class TransparentConflictResolution:
         except Exception as e:
             logger.error(f"分析立场失败: {e}")
             return "unknown"
+<<<<<<< HEAD
 
     def _calculate_complexity(self, statements: List[str]) -> float:
+=======
+    
+    def _calculate_complexity(self, statements: list[str]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算复杂度"""
         try:
             if not statements:

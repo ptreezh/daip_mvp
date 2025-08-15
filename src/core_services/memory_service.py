@@ -16,10 +16,15 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from src.models import PendingFact  # Assuming PendingFact model exists
 
+<<<<<<< HEAD
+from src.models import PendingFact  # Assuming PendingFact model exists
+
+=======
+>>>>>>> feature/core-services-refactor
 from .sskg_manager import SSKGManager
 
 try:
@@ -537,7 +542,11 @@ class MemoryService:
 
         return memories
 
+<<<<<<< HEAD
     def add_fact_to_sskg(self, subject: str, predicate: str, obj: str, metadata: Optional[Dict[str, Any]] = None):
+=======
+    def add_fact_to_sskg(self, subject: str, predicate: str, obj: str, metadata: Optional[dict[str, Any]] = None):
+>>>>>>> feature/core-services-refactor
         """Adds a structured fact to the Semantic Structured Knowledge Graph.
 
         This is a direct interface to the underlying SSKGManager. It is thread-safe.
@@ -545,14 +554,18 @@ class MemoryService:
         with self.lock:
             self.sskg_manager.add_fact(subject, predicate, obj, metadata)
 
+<<<<<<< HEAD
     def query_sskg(self, subject: str, predicate: Optional[str] = None) -> List[Dict[str, Any]]:
+=======
+    def query_sskg(self, subject: str, predicate: Optional[str] = None) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Queries the SSKG for facts related to a subject. It is thread-safe.
         """
         with self.lock:
             return self.sskg_manager.query(subject, predicate)
 
     def add_fact_to_staging(
-        self, subject: str, predicate: str, obj: str, confidence: float, status: str, metadata: Optional[Dict[str, Any]] = None
+        self, subject: str, predicate: str, obj: str, confidence: float, status: str, metadata: Optional[dict[str, Any]] = None
     ) -> str:
         """Adds a fact to the staging table with a specific status ('pending' or 'rejected').
         """
@@ -572,7 +585,7 @@ class MemoryService:
             self.logger.info(f"Added fact '{fact_id}' to staging with status '{status}'.")
             return fact_id
 
-    def get_pending_facts(self, limit: int = 50, offset: int = 0) -> List[PendingFact]:
+    def get_pending_facts(self, limit: int = 50, offset: int = 0) -> list[PendingFact]:
         """Retrieves a list of facts with 'pending' status."""
         with self.lock:
             cursor = self.conn.execute(

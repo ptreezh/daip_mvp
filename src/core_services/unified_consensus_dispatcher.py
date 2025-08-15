@@ -12,7 +12,11 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from algorithm_registry import AlgorithmRegistry
 from algorithm_selector import AlgorithmSelector, SelectionStrategy
@@ -25,7 +29,10 @@ logger = logging.getLogger(__name__)
 @dataclass
 class DispatcherConfig:
     """调度器配置"""
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     default_timeout: float = 30.0
     max_concurrent_requests: int = 100
     enable_load_balancing: bool = True
@@ -38,20 +45,32 @@ class DispatcherConfig:
 @dataclass
 class DispatcherMetrics:
     """调度器指标"""
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     total_requests: int = 0
     successful_requests: int = 0
     failed_requests: int = 0
     fallback_requests: int = 0
     average_response_time: float = 0.0
     active_requests: int = 0
+<<<<<<< HEAD
     algorithm_usage: Dict[str, int] = field(default_factory=dict)
     error_counts: Dict[str, int] = field(default_factory=dict)
+=======
+    algorithm_usage: dict[str, int] = field(default_factory=dict)
+    error_counts: dict[str, int] = field(default_factory=dict)
+>>>>>>> feature/core-services-refactor
 
 
 class RequestContext:
     """请求上下文"""
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     def __init__(self, request_id: str, request: ConsensusRequest):
         self.request_id = request_id
         self.request = request
@@ -67,6 +86,7 @@ class UnifiedConsensusDispatcher:
     
     提供统一的共识计算入口，协调算法选择、执行和降级。
     """
+<<<<<<< HEAD
 
     def __init__(self,
                  config: Optional[DispatcherConfig] = None):
@@ -76,12 +96,24 @@ class UnifiedConsensusDispatcher:
         self.registry = AlgorithmRegistry()
         self.selector = AlgorithmSelector(self.registry, self.config.selection_strategy)
 
+=======
+    
+    def __init__(self, 
+                 config: Optional[DispatcherConfig] = None):
+        self.config = config or DispatcherConfig()
+        
+        # 核心组件
+        self.registry = AlgorithmRegistry()
+        self.selector = AlgorithmSelector(self.registry, self.config.selection_strategy)
+        
+>>>>>>> feature/core-services-refactor
         # 降级管理器（如果启用）
         if self.config.fallback_enabled:
             fallback_config = FallbackConfig()
             self.fallback_manager = FallbackManager(self.registry, self.selector, fallback_config)
         else:
             self.fallback_manager = None
+<<<<<<< HEAD
 
         # 指标和状态
         self.metrics = DispatcherMetrics()
@@ -93,6 +125,19 @@ class UnifiedConsensusDispatcher:
 
         logger.info("UnifiedConsensusDispatcher initialized")
 
+=======
+            
+        # 指标和状态
+        self.metrics = DispatcherMetrics()
+        self.active_requests: dict[str, RequestContext] = {}
+        self.request_counter = 0
+        
+        # 并发控制
+        self.semaphore = asyncio.Semaphore(self.config.max_concurrent_requests)
+        
+        logger.info("UnifiedConsensusDispatcher initialized")
+        
+>>>>>>> feature/core-services-refactor
     async def calculate_consensus(self, request: ConsensusRequest) -> ConsensusResponse:
         """计算共识 - 主要入口点
         
@@ -101,20 +146,31 @@ class UnifiedConsensusDispatcher:
             
         Returns:
             共识响应
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
         """
         # 生成请求ID
         request_id = f"req_{int(time.time() * 1000)}_{self.request_counter}"
         self.request_counter += 1
+<<<<<<< HEAD
 
         # 创建请求上下文
         context = RequestContext(request_id, request)
 
+=======
+        
+        # 创建请求上下文
+        context = RequestContext(request_id, request)
+        
+>>>>>>> feature/core-services-refactor
         # 并发控制
         async with self.semaphore:
             try:
                 # 记录请求开始
                 self._record_request_start(context)
+<<<<<<< HEAD
 
                 # 执行共识计算
                 response = await self._execute_consensus(context)
@@ -124,6 +180,17 @@ class UnifiedConsensusDispatcher:
 
                 return response
 
+=======
+                
+                # 执行共识计算
+                response = await self._execute_consensus(context)
+                
+                # 记录请求完成
+                self._record_request_completion(context, response)
+                
+                return response
+                
+>>>>>>> feature/core-services-refactor
             except Exception as e:
                 # 记录请求失败
                 error_response = ConsensusResponse(
@@ -135,17 +202,30 @@ class UnifiedConsensusDispatcher:
                     fallback_used=False,
                     timestamp=datetime.now()
                 )
+<<<<<<< HEAD
 
                 self._record_request_completion(context, error_response)
 
                 logger.error(f"Request {request_id} failed: {str(e)}")
                 return error_response
 
+=======
+                
+                self._record_request_completion(context, error_response)
+                
+                logger.error(f"Request {request_id} failed: {str(e)}")
+                return error_response
+                
+>>>>>>> feature/core-services-refactor
             finally:
                 # 清理请求上下文
                 if request_id in self.active_requests:
                     del self.active_requests[request_id]
+<<<<<<< HEAD
 
+=======
+                    
+>>>>>>> feature/core-services-refactor
     async def _execute_consensus(self, context: RequestContext) -> ConsensusResponse:
         """执行共识计算的核心逻辑
         
@@ -154,10 +234,16 @@ class UnifiedConsensusDispatcher:
             
         Returns:
             共识响应
+<<<<<<< HEAD
 
         """
         request = context.request
 
+=======
+        """
+        request = context.request
+        
+>>>>>>> feature/core-services-refactor
         try:
             # 1. 算法选择
             selection = await self._select_algorithm(request)
@@ -167,10 +253,17 @@ class UnifiedConsensusDispatcher:
                 "selection_time": selection.selection_time,
                 "confidence": selection.confidence
             })
+<<<<<<< HEAD
 
             # 2. 执行算法
             response = await self._execute_algorithm(selection.algorithm_id, request)
 
+=======
+            
+            # 2. 执行算法
+            response = await self._execute_algorithm(selection.algorithm_id, request)
+            
+>>>>>>> feature/core-services-refactor
             if response.success:
                 return response
             else:
@@ -179,10 +272,17 @@ class UnifiedConsensusDispatcher:
                     return await self._handle_algorithm_failure(context, response)
                 else:
                     return response
+<<<<<<< HEAD
 
         except Exception as e:
             logger.error(f"Consensus execution failed: {str(e)}")
 
+=======
+                    
+        except Exception as e:
+            logger.error(f"Consensus execution failed: {str(e)}")
+            
+>>>>>>> feature/core-services-refactor
             # 如果启用降级，尝试降级
             if self.config.fallback_enabled and self.fallback_manager:
                 failure_context = FailureContext(
@@ -203,7 +303,11 @@ class UnifiedConsensusDispatcher:
                     fallback_used=False,
                     timestamp=datetime.now()
                 )
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
     async def _select_algorithm(self, request: ConsensusRequest) -> AlgorithmSelection:
         """选择算法
         
@@ -212,19 +316,32 @@ class UnifiedConsensusDispatcher:
             
         Returns:
             算法选择结果
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
         """
         try:
             # 应用超时控制
             timeout = getattr(request, 'timeout', self.config.default_timeout)
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             selection = await asyncio.wait_for(
                 asyncio.create_task(self._async_select_algorithm(request)),
                 timeout=timeout * 0.1  # 选择阶段使用10%的超时时间
             )
+<<<<<<< HEAD
 
             return selection
 
+=======
+            
+            return selection
+            
+>>>>>>> feature/core-services-refactor
         except asyncio.TimeoutError:
             logger.warning("Algorithm selection timed out, using fallback selection")
             # 超时时使用简单选择策略
@@ -239,7 +356,11 @@ class UnifiedConsensusDispatcher:
                 )
             else:
                 raise RuntimeError("No available algorithms for selection")
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
     async def _async_select_algorithm(self, request: ConsensusRequest) -> AlgorithmSelection:
         """异步算法选择
         
@@ -248,16 +369,27 @@ class UnifiedConsensusDispatcher:
             
         Returns:
             算法选择结果
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
         """
         # 在线程池中执行选择逻辑（因为selector是同步的）
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
+<<<<<<< HEAD
             None,
             self.selector.select_algorithm,
             request
         )
 
+=======
+            None, 
+            self.selector.select_algorithm, 
+            request
+        )
+        
+>>>>>>> feature/core-services-refactor
     async def _execute_algorithm(self, algorithm_id: str, request: ConsensusRequest) -> ConsensusResponse:
         """执行指定算法
         
@@ -267,16 +399,26 @@ class UnifiedConsensusDispatcher:
             
         Returns:
             共识响应
+<<<<<<< HEAD
 
         """
         start_time = time.time()
 
+=======
+        """
+        start_time = time.time()
+        
+>>>>>>> feature/core-services-refactor
         try:
             # 获取算法实例
             algorithm = self.registry.get_algorithm(algorithm_id)
             if not algorithm:
                 raise ValueError(f"Algorithm {algorithm_id} not found")
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
             # 创建执行上下文
             from consensus_algorithm_interface import ConsensusContext
             context = ConsensusContext(
@@ -284,16 +426,27 @@ class UnifiedConsensusDispatcher:
                 services={"registry": self.registry, "selector": self.selector},
                 configuration={}
             )
+<<<<<<< HEAD
 
             # 应用超时控制
             timeout = getattr(request, 'timeout', self.config.default_timeout)
 
+=======
+            
+            # 应用超时控制
+            timeout = getattr(request, 'timeout', self.config.default_timeout)
+            
+>>>>>>> feature/core-services-refactor
             # 执行算法
             result = await asyncio.wait_for(
                 algorithm.calculate(request.inputs, context),
                 timeout=timeout
             )
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             # 创建成功响应
             response = ConsensusResponse(
                 success=True,
@@ -303,6 +456,7 @@ class UnifiedConsensusDispatcher:
                 fallback_used=False,
                 timestamp=datetime.now()
             )
+<<<<<<< HEAD
 
             return response
 
@@ -310,6 +464,15 @@ class UnifiedConsensusDispatcher:
             error_msg = f"Algorithm {algorithm_id} execution timed out"
             logger.warning(error_msg)
 
+=======
+            
+            return response
+            
+        except asyncio.TimeoutError:
+            error_msg = f"Algorithm {algorithm_id} execution timed out"
+            logger.warning(error_msg)
+            
+>>>>>>> feature/core-services-refactor
             return ConsensusResponse(
                 success=False,
                 result=None,
@@ -319,11 +482,19 @@ class UnifiedConsensusDispatcher:
                 fallback_used=False,
                 timestamp=datetime.now()
             )
+<<<<<<< HEAD
 
         except Exception as e:
             error_msg = f"Algorithm {algorithm_id} execution failed: {str(e)}"
             logger.error(error_msg)
 
+=======
+            
+        except Exception as e:
+            error_msg = f"Algorithm {algorithm_id} execution failed: {str(e)}"
+            logger.error(error_msg)
+            
+>>>>>>> feature/core-services-refactor
             return ConsensusResponse(
                 success=False,
                 result=None,
@@ -333,9 +504,15 @@ class UnifiedConsensusDispatcher:
                 fallback_used=False,
                 timestamp=datetime.now()
             )
+<<<<<<< HEAD
 
     async def _handle_algorithm_failure(self,
                                        context: RequestContext,
+=======
+            
+    async def _handle_algorithm_failure(self, 
+                                       context: RequestContext, 
+>>>>>>> feature/core-services-refactor
                                        failed_response: Optional[ConsensusResponse] = None,
                                        failure_context: Optional[FailureContext] = None) -> ConsensusResponse:
         """处理算法失败，尝试降级
@@ -347,7 +524,10 @@ class UnifiedConsensusDispatcher:
             
         Returns:
             共识响应
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
         """
         if not self.fallback_manager:
             return failed_response or ConsensusResponse(
@@ -359,7 +539,11 @@ class UnifiedConsensusDispatcher:
                 fallback_used=False,
                 timestamp=datetime.now()
             )
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
         try:
             # 创建失败上下文
             if not failure_context:
@@ -369,14 +553,22 @@ class UnifiedConsensusDispatcher:
                     error_message=failed_response.error if failed_response else "Unknown error",
                     execution_time=failed_response.execution_time if failed_response else 0.0
                 )
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
             # 获取降级链
             fallback_chain = self.fallback_manager.get_fallback_chain(
                 failure_context.failed_algorithm,
                 context.request,
                 failure_context
             )
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             if not fallback_chain:
                 logger.warning("No fallback algorithms available")
                 return failed_response or ConsensusResponse(
@@ -388,6 +580,7 @@ class UnifiedConsensusDispatcher:
                     fallback_used=False,
                     timestamp=datetime.now()
                 )
+<<<<<<< HEAD
 
             # 尝试第一个降级算法
             fallback_algorithm = fallback_chain[0]
@@ -395,6 +588,15 @@ class UnifiedConsensusDispatcher:
 
             logger.info(f"Attempting fallback to {fallback_algorithm}")
 
+=======
+                
+            # 尝试第一个降级算法
+            fallback_algorithm = fallback_chain[0]
+            context.fallback_used = True
+            
+            logger.info(f"Attempting fallback to {fallback_algorithm}")
+            
+>>>>>>> feature/core-services-refactor
             # 执行降级
             fallback_response = await self.fallback_manager.execute_fallback(
                 fallback_algorithm,
@@ -402,12 +604,21 @@ class UnifiedConsensusDispatcher:
                 failure_context,
                 fallback_depth=1
             )
+<<<<<<< HEAD
 
             return fallback_response
 
         except Exception as e:
             logger.error(f"Fallback handling failed: {str(e)}")
 
+=======
+            
+            return fallback_response
+            
+        except Exception as e:
+            logger.error(f"Fallback handling failed: {str(e)}")
+            
+>>>>>>> feature/core-services-refactor
             return ConsensusResponse(
                 success=False,
                 result=None,
@@ -417,25 +628,44 @@ class UnifiedConsensusDispatcher:
                 fallback_used=True,
                 timestamp=datetime.now()
             )
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
     def _record_request_start(self, context: RequestContext):
         """记录请求开始"""
         self.active_requests[context.request_id] = context
         self.metrics.active_requests = len(self.active_requests)
+<<<<<<< HEAD
 
         if self.config.enable_request_logging:
             logger.info(f"Request {context.request_id} started")
 
+=======
+        
+        if self.config.enable_request_logging:
+            logger.info(f"Request {context.request_id} started")
+            
+>>>>>>> feature/core-services-refactor
     def _record_request_completion(self, context: RequestContext, response: ConsensusResponse):
         """记录请求完成"""
         # 更新指标
         self.metrics.total_requests += 1
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         if response.success:
             self.metrics.successful_requests += 1
         else:
             self.metrics.failed_requests += 1
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             # 记录错误类型
             error_type = "unknown"
             if response.error:
@@ -447,6 +677,7 @@ class UnifiedConsensusDispatcher:
                     error_type = "circuit_breaker"
                 else:
                     error_type = "execution_error"
+<<<<<<< HEAD
 
             self.metrics.error_counts[error_type] = self.metrics.error_counts.get(error_type, 0) + 1
 
@@ -466,16 +697,43 @@ class UnifiedConsensusDispatcher:
         # 更新活跃请求数
         self.metrics.active_requests = len(self.active_requests)
 
+=======
+                    
+            self.metrics.error_counts[error_type] = self.metrics.error_counts.get(error_type, 0) + 1
+            
+        if response.fallback_used:
+            self.metrics.fallback_requests += 1
+            
+        # 更新算法使用统计
+        algorithm_used = response.algorithm_used
+        self.metrics.algorithm_usage[algorithm_used] = self.metrics.algorithm_usage.get(algorithm_used, 0) + 1
+        
+        # 更新平均响应时间
+        if self.metrics.total_requests > 0:
+            total_time = (self.metrics.average_response_time * (self.metrics.total_requests - 1) + 
+                         response.execution_time)
+            self.metrics.average_response_time = total_time / self.metrics.total_requests
+            
+        # 更新活跃请求数
+        self.metrics.active_requests = len(self.active_requests)
+        
+>>>>>>> feature/core-services-refactor
         if self.config.enable_request_logging:
             status = "SUCCESS" if response.success else "FAILED"
             logger.info(f"Request {context.request_id} completed: {status} "
                        f"(algorithm: {algorithm_used}, time: {response.execution_time:.3f}s)")
+<<<<<<< HEAD
 
     def get_health_status(self) -> Dict[str, Any]:
+=======
+                       
+    def get_health_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取调度器健康状态
         
         Returns:
             健康状态信息
+<<<<<<< HEAD
 
         """
         registry_stats = self.registry.get_registry_stats()
@@ -483,18 +741,34 @@ class UnifiedConsensusDispatcher:
         # 计算健康评分
         health_score = 1.0
 
+=======
+        """
+        registry_stats = self.registry.get_registry_stats()
+        
+        # 计算健康评分
+        health_score = 1.0
+        
+>>>>>>> feature/core-services-refactor
         # 基于算法可用性
         if registry_stats.total_algorithms == 0:
             health_score = 0.0
         else:
             algorithm_health_ratio = registry_stats.healthy_algorithms / registry_stats.total_algorithms
             health_score *= algorithm_health_ratio
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
         # 基于成功率
         if self.metrics.total_requests > 0:
             success_rate = self.metrics.successful_requests / self.metrics.total_requests
             health_score *= success_rate
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
         # 确定健康状态
         if health_score >= 0.8:
             status = "healthy"
@@ -502,7 +776,11 @@ class UnifiedConsensusDispatcher:
             status = "degraded"
         else:
             status = "unhealthy"
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
         return {
             "status": status,
             "health_score": health_score,
@@ -514,18 +792,27 @@ class UnifiedConsensusDispatcher:
             "fallback_enabled": self.config.fallback_enabled,
             "timestamp": datetime.now().isoformat()
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
     async def shutdown(self):
         """关闭调度器"""
         try:
             # 等待所有活跃请求完成（最多等待30秒）
             if self.active_requests:
                 logger.info(f"Waiting for {len(self.active_requests)} active requests to complete...")
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
                 for _ in range(30):  # 最多等待30秒
                     if not self.active_requests:
                         break
                     await asyncio.sleep(1)
+<<<<<<< HEAD
 
                 if self.active_requests:
                     logger.warning(f"Shutting down with {len(self.active_requests)} active requests")
@@ -546,3 +833,25 @@ class UnifiedConsensusDispatcher:
         return (f"UnifiedConsensusDispatcher(config={self.config}, "
                 f"algorithms={len(self.registry)}, "
                 f"metrics={self.metrics})")
+=======
+                    
+                if self.active_requests:
+                    logger.warning(f"Shutting down with {len(self.active_requests)} active requests")
+                    
+            # 关闭组件
+            if hasattr(self.registry, 'shutdown'):
+                self.registry.shutdown()
+                
+            logger.info("UnifiedConsensusDispatcher shutdown completed")
+            
+        except Exception as e:
+            logger.error(f"Error during shutdown: {str(e)}")
+            
+    def __str__(self) -> str:
+        return f"UnifiedConsensusDispatcher(algorithms={len(self.registry)}, active_requests={len(self.active_requests)})"
+        
+    def __repr__(self) -> str:
+        return (f"UnifiedConsensusDispatcher(config={self.config}, "
+                f"algorithms={len(self.registry)}, "
+                f"metrics={self.metrics})")
+>>>>>>> feature/core-services-refactor

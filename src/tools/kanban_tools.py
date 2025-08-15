@@ -3,7 +3,7 @@ import logging
 import os
 import uuid
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 # Define a path for the Kanban board data file
 DATA_DIR = Path("data")
@@ -16,7 +16,7 @@ class KanbanToolError(Exception):
     pass
 
 
-def _load_board() -> Dict[str, Any]:
+def _load_board() -> dict[str, Any]:
     """Loads the Kanban board from the JSON file."""
     # Let exceptions like FileNotFoundError, json.JSONDecodeError, and IOError
     # propagate to the caller for more specific handling.
@@ -27,7 +27,7 @@ def _load_board() -> Dict[str, Any]:
         return json.load(f)
 
 
-def _save_board(board: Dict[str, Any]) -> None:
+def _save_board(board: dict[str, Any]) -> None:
     """Saves the Kanban board to the JSON file."""
     # Implement atomic write to prevent data corruption.
     DATA_DIR.mkdir(exist_ok=True)

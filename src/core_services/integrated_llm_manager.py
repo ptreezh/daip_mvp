@@ -8,7 +8,11 @@ import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .memory_agent import MemAgent
 from .real_llm_context_optimizer import IntelligentContextOptimizer, OptimizationResult
@@ -23,9 +27,9 @@ class RoleContext:
 
     role_id: str
     role_name: str
-    role_definition: Dict[str, Any]
-    conversation_history: List[Dict[str, Any]]
-    memory_context: Dict[str, Any]
+    role_definition: dict[str, Any]
+    conversation_history: list[dict[str, Any]]
+    memory_context: dict[str, Any]
     current_task: Optional[str] = None
     interaction_count: int = 0
     last_interaction: Optional[datetime] = None
@@ -39,7 +43,7 @@ class OptimizedLLMCall:
     original_prompt: str
     optimized_prompt: str
     llm_response: str
-    optimization_metrics: Dict[str, Any]
+    optimization_metrics: dict[str, Any]
     call_timestamp: datetime
     tokens_used: int
     response_time: float
@@ -52,6 +56,7 @@ class IntegratedLLMManager:
         """初始化LLM管理器"""
         self.context_optimizer = IntelligentContextOptimizer()
         self.role_manager = RoleManager()
+<<<<<<< HEAD
         self.memory_agent = MemAgent()
 
         # 角色上下文缓存
@@ -60,6 +65,22 @@ class IntegratedLLMManager:
         # 调用历史记录
         self.call_history: List[OptimizedLLMCall] = []
 
+=======
+        
+        # 安全初始化MemAgent，支持优雅降级
+        try:
+            self.memory_agent = MemAgent()
+        except Exception as e:
+            logger.warning(f"MemAgent初始化失败，使用空实现: {e}")
+            self.memory_agent = None
+        
+        # 角色上下文缓存
+        self.role_contexts: dict[str, RoleContext] = {}
+        
+        # 调用历史记录
+        self.call_history: list[OptimizedLLMCall] = []
+        
+>>>>>>> feature/core-services-refactor
         # 性能统计
         self.performance_stats = {
             "total_calls": 0,
@@ -86,8 +107,8 @@ class IntegratedLLMManager:
         role_id: str,
         user_input: str,
         task_context: Optional[str] = None,
-        additional_context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        additional_context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """为特定角色调用LLM（带智能上下文优化）"""
         try:
             # 1. 获取或创建角色上下文
@@ -156,11 +177,11 @@ class IntegratedLLMManager:
 
     async def call_llm_for_multi_role_debate(
         self,
-        participating_roles: List[str],
+        participating_roles: list[str],
         debate_topic: str,
-        debate_context: Dict[str, Any],
+        debate_context: dict[str, Any],
         round_number: int = 1
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """多角色辩论的LLM调用（每个角色都使用优化）"""
         debate_results = {}
 
@@ -204,8 +225,13 @@ class IntegratedLLMManager:
             "debate_timestamp": datetime.now().isoformat(),
             "optimization_summary": await self._get_debate_optimization_summary(debate_results)
         }
+<<<<<<< HEAD
 
     async def get_role_performance_analytics(self, role_id: str) -> Dict[str, Any]:
+=======
+    
+    async def get_role_performance_analytics(self, role_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取特定角色的性能分析"""
         role_calls = [call for call in self.call_history if call.role_id == role_id]
 
@@ -242,8 +268,13 @@ class IntegratedLLMManager:
                 "avg_response_time": sum(call.response_time for call in role_calls) / total_calls
             }
         }
+<<<<<<< HEAD
 
     async def get_system_wide_analytics(self) -> Dict[str, Any]:
+=======
+    
+    async def get_system_wide_analytics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取系统级性能分析"""
         if not self.call_history:
             return {"error": "没有调用记录"}
@@ -349,8 +380,8 @@ class IntegratedLLMManager:
         self,
         role_context: RoleContext,
         task_context: Optional[str],
-        additional_context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        additional_context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """构建角色专用的上下文信息"""
         context = {
             "role_definition": role_context.role_definition,
@@ -416,7 +447,7 @@ class IntegratedLLMManager:
         role_id: str,
         user_input: str,
         task_context: Optional[str]
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """降级LLM调用（不使用优化）"""
         try:
             role_context = await self._get_or_create_role_context(role_id)
@@ -478,8 +509,13 @@ class IntegratedLLMManager:
 
         except Exception as e:
             logger.error(f"加载角色上下文失败: {e}")
+<<<<<<< HEAD
 
     async def _get_debate_optimization_summary(self, debate_results: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    async def _get_debate_optimization_summary(self, debate_results: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取辩论优化摘要"""
         successful_optimizations = 0
         total_tokens_saved = 0

@@ -6,7 +6,11 @@
 
 import logging
 import uuid
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +32,13 @@ class EvolutionVisualization:
             "lineage_graph": {"type": "network", "layout": "hierarchical"},
             "quality_trend": {"type": "line_chart", "y_axis": "quality_score"}
         }
+<<<<<<< HEAD
 
     def create_evolution_timeline(self, evolution_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+=======
+    
+    def create_evolution_timeline(self, evolution_data: list[dict[str, Any]]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """创建演化时间线"""
         try:
             timeline_id = str(uuid.uuid4())
@@ -61,8 +70,13 @@ class EvolutionVisualization:
         except Exception as e:
             logger.error(f"创建演化时间线失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def generate_lineage_graph(self, lineage_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def generate_lineage_graph(self, lineage_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成谱系图"""
         try:
             graph_id = str(uuid.uuid4())
@@ -89,8 +103,13 @@ class EvolutionVisualization:
         except Exception as e:
             logger.error(f"生成谱系图失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def create_quality_trend_chart(self, quality_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+=======
+    
+    def create_quality_trend_chart(self, quality_data: list[dict[str, Any]]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """创建质量趋势图"""
         try:
             chart_id = str(uuid.uuid4())

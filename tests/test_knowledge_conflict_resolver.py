@@ -244,19 +244,19 @@ class TestKnowledgeConflictResolver(unittest.TestCase):
         self.assertEqual(evolution[1]["node_id"], "derived_node")
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_sskg_manager():
     """Create a mock SSKG manager."""
     return MagicMock(spec=EnhancedSSKGManager)
 
 
-@pytest.fixture
+@pytest.fixture()
 def conflict_resolver(mock_sskg_manager):
     """Create a conflict resolver with mock SSKG manager."""
     return KnowledgeConflictResolver(mock_sskg_manager)
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_nodes():
     """Create test nodes."""
     return {

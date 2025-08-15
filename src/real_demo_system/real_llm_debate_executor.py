@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
+<<<<<<< HEAD
 # -*- coding: utf-8 -*-
+=======
+>>>>>>> feature/core-services-refactor
 """
 真实LLM角色辩论执行器
 

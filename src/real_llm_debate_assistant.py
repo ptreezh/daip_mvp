@@ -10,7 +10,11 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 import requests
 
@@ -27,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 class RealLLMDebateAssistant:
     """真实LLM辩论助手"""
+<<<<<<< HEAD
 
     def __init__(self):
         """初始化"""
@@ -36,6 +41,17 @@ class RealLLMDebateAssistant:
         self.role_manager = RoleManager()
         self.wiki_service = WikiService()
 
+=======
+    
+    def __init__(self):
+        """初始化"""
+        print("🚀 正在初始化真实LLM辩论助手...")
+        
+        # 初始化核心服务
+        self.role_manager = RoleManager()
+        self.wiki_service = WikiService()
+        
+>>>>>>> feature/core-services-refactor
         # LLM配置
         self.llm_config = {
             "base_url": "http://127.0.0.1:11434",  # Ollama默认地址
@@ -43,7 +59,11 @@ class RealLLMDebateAssistant:
             "temperature": 0.8,
             "max_tokens": 2000
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # 辩论配置
         self.debate_config = {
             "min_rounds": 5,
@@ -51,17 +71,28 @@ class RealLLMDebateAssistant:
             "min_response_length": 500,
             "consensus_threshold": 0.7
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # 会话状态
         self.session = {
             "user_id": "user_001",
             "conversation_history": [],
             "current_debate": None
         }
+<<<<<<< HEAD
 
         print("✅ 真实LLM辩论助手初始化完成")
         self._display_system_info()
 
+=======
+        
+        print("✅ 真实LLM辩论助手初始化完成")
+        self._display_system_info()
+    
+>>>>>>> feature/core-services-refactor
     def _display_system_info(self):
         """显示系统信息"""
         print("\n" + "="*70)
@@ -73,17 +104,26 @@ class RealLLMDebateAssistant:
         print("  • 高质量输出 (每次500+字)")
         print("  • 共识与分歧计算")
         print("  • 自动Wiki词条生成")
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # 测试LLM连接
         if self._test_llm_connection():
             print(f"🤖 LLM服务: ✅ 已连接 ({self.llm_config['model']})")
         else:
             print("🤖 LLM服务: ❌ 连接失败")
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # 显示可用角色
         try:
             roles = self.role_manager.list_roles()
             print(f"👥 可用角色: {len(roles)}个")
+<<<<<<< HEAD
 
             # 显示前3个角色
             for i, role in enumerate(roles[:3]):
@@ -94,6 +134,18 @@ class RealLLMDebateAssistant:
 
         print("="*70)
 
+=======
+            
+            # 显示前3个角色
+            for i, role in enumerate(roles[:3]):
+                print(f"  • {role.name}")
+                
+        except Exception as e:
+            print(f"  ⚠️ 角色加载警告: {e}")
+        
+        print("="*70)
+    
+>>>>>>> feature/core-services-refactor
     def _test_llm_connection(self) -> bool:
         """测试LLM连接"""
         try:
@@ -101,7 +153,11 @@ class RealLLMDebateAssistant:
             return response.status_code == 200
         except:
             return False
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     async def start_conversation(self):
         """开始对话"""
         print("\n💬 真实LLM辩论助手已准备就绪！")
@@ -112,11 +168,19 @@ class RealLLMDebateAssistant:
         print("4. 计算共识与分歧")
         print("5. 生成5000+字综合报告")
         print("\n输入 'quit' 退出，'demo' 运行演示")
+<<<<<<< HEAD
 
         while True:
             try:
                 user_input = input("\n👤 您: ").strip()
 
+=======
+        
+        while True:
+            try:
+                user_input = input("\n👤 您: ").strip()
+                
+>>>>>>> feature/core-services-refactor
                 if user_input.lower() == 'quit':
                     print("👋 感谢使用真实LLM辩论助手！")
                     break
@@ -125,33 +189,53 @@ class RealLLMDebateAssistant:
                     continue
                 elif not user_input:
                     continue
+<<<<<<< HEAD
 
                 # 处理用户输入
                 await self._process_debate_request(user_input)
 
+=======
+                
+                # 处理用户输入
+                await self._process_debate_request(user_input)
+                
+>>>>>>> feature/core-services-refactor
             except KeyboardInterrupt:
                 print("\n👋 感谢使用真实LLM辩论助手！")
                 break
             except Exception as e:
                 logger.error(f"处理输入错误: {e}")
                 print(f"❌ 处理您的输入时发生错误: {e}")
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     async def _run_demo(self):
         """运行演示"""
         print("\n🎬 运行演示: AI在教育中的应用前景与挑战")
         await self._process_debate_request("AI在教育中的应用前景与挑战")
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     async def _process_debate_request(self, topic: str):
         """处理辩论请求"""
         print("\n🔥 启动真实LLM多角色辩论")
         print(f"📋 辩论议题: {topic}")
         print("-" * 70)
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         try:
             # 步骤1: 选择角色
             print("🎭 步骤1: 智能选择辩论角色...")
             selected_roles = await self._select_debate_roles(topic)
             print(f"✅ 选定角色: {[role.name for role in selected_roles]}")
+<<<<<<< HEAD
 
             # 步骤2: 进行多轮辩论
             print(f"\n💭 步骤2: 开始{self.debate_config['min_rounds']}-{self.debate_config['max_rounds']}轮深度辩论...")
@@ -181,6 +265,37 @@ class RealLLMDebateAssistant:
         try:
             all_roles = self.role_manager.list_roles()
 
+=======
+            
+            # 步骤2: 进行多轮辩论
+            print(f"\n💭 步骤2: 开始{self.debate_config['min_rounds']}-{self.debate_config['max_rounds']}轮深度辩论...")
+            debate_result = await self._conduct_real_debate(topic, selected_roles)
+            
+            # 步骤3: 共识计算
+            print("\n🤝 步骤3: 计算共识与分歧...")
+            consensus_result = await self._calculate_consensus_and_divergence(debate_result)
+            
+            # 步骤4: 生成综合报告
+            print("\n📝 步骤4: 生成综合报告...")
+            final_report = await self._generate_comprehensive_report(topic, debate_result, consensus_result)
+            
+            # 步骤5: 保存到Wiki
+            print("\n📚 步骤5: 保存到Wiki知识库...")
+            await self._save_to_wiki(topic, final_report)
+            
+            # 显示结果
+            self._display_debate_results(topic, final_report)
+            
+        except Exception as e:
+            logger.error(f"辩论处理失败: {e}")
+            print(f"❌ 辩论处理失败: {e}")
+    
+    async def _select_debate_roles(self, topic: str) -> list[Any]:
+        """智能选择辩论角色"""
+        try:
+            all_roles = self.role_manager.list_roles()
+            
+>>>>>>> feature/core-services-refactor
             # 使用LLM智能选择最相关的角色
             selection_prompt = f"""
 作为角色选择专家，请从以下角色中选择3-4个最适合讨论"{topic}"的角色。
@@ -195,9 +310,15 @@ class RealLLMDebateAssistant:
 角色名称3
 角色名称4
 """
+<<<<<<< HEAD
 
             selected_names = await self._call_llm(selection_prompt, max_tokens=500)
 
+=======
+            
+            selected_names = await self._call_llm(selection_prompt, max_tokens=500)
+            
+>>>>>>> feature/core-services-refactor
             # 解析选择结果
             selected_roles = []
             for line in selected_names.strip().split('\n'):
@@ -208,6 +329,7 @@ class RealLLMDebateAssistant:
                         break
                 if len(selected_roles) >= 4:
                     break
+<<<<<<< HEAD
 
             # 如果LLM选择失败，使用默认策略
             if len(selected_roles) < 3:
@@ -215,10 +337,20 @@ class RealLLMDebateAssistant:
 
             return selected_roles[:4]
 
+=======
+            
+            # 如果LLM选择失败，使用默认策略
+            if len(selected_roles) < 3:
+                selected_roles = all_roles[:4]
+            
+            return selected_roles[:4]
+            
+>>>>>>> feature/core-services-refactor
         except Exception as e:
             logger.error(f"角色选择失败: {e}")
             # 返回前4个角色作为备选
             return self.role_manager.list_roles()[:4]
+<<<<<<< HEAD
 
     async def _conduct_real_debate(self, topic: str, roles: List[Any]) -> Dict[str, Any]:
         """进行真实的多轮辩论"""
@@ -229,6 +361,18 @@ class RealLLMDebateAssistant:
         print(f"  👥 参与角色: {len(roles)}个")
         print(f"  🔄 计划轮数: {self.debate_config['min_rounds']}-{self.debate_config['max_rounds']}轮")
 
+=======
+    
+    async def _conduct_real_debate(self, topic: str, roles: list[Any]) -> dict[str, Any]:
+        """进行真实的多轮辩论"""
+        debate_history = []
+        round_count = 0
+        
+        print(f"  🎯 辩论议题: {topic}")
+        print(f"  👥 参与角色: {len(roles)}个")
+        print(f"  🔄 计划轮数: {self.debate_config['min_rounds']}-{self.debate_config['max_rounds']}轮")
+        
+>>>>>>> feature/core-services-refactor
         # 初始化每个角色的立场
         for role in roles:
             initial_prompt = f"""
@@ -245,10 +389,17 @@ class RealLLMDebateAssistant:
 
 请开始你的发言:
 """
+<<<<<<< HEAD
 
             print(f"\n  🤖 {role.name} 正在深度思考...")
             response = await self._call_llm(initial_prompt, max_tokens=2000)
 
+=======
+            
+            print(f"\n  🤖 {role.name} 正在深度思考...")
+            response = await self._call_llm(initial_prompt, max_tokens=2000)
+            
+>>>>>>> feature/core-services-refactor
             debate_entry = {
                 "round": 1,
                 "role_name": role.name,
@@ -257,6 +408,7 @@ class RealLLMDebateAssistant:
                 "timestamp": datetime.now(),
                 "word_count": len(response.split())
             }
+<<<<<<< HEAD
 
             debate_history.append(debate_entry)
             print(f"  ✅ {role.name}: {len(response.split())}字 - {response[:100]}...")
@@ -272,6 +424,23 @@ class RealLLMDebateAssistant:
 
             round_responses = []
 
+=======
+            
+            debate_history.append(debate_entry)
+            print(f"  ✅ {role.name}: {len(response.split())}字 - {response[:100]}...")
+        
+        round_count = 1
+        
+        # 进行多轮辩论
+        for round_num in range(2, self.debate_config['max_rounds'] + 1):
+            print(f"\n  🔄 第{round_num}轮辩论开始...")
+            
+            # 为每个角色准备上下文
+            context = self._build_debate_context(debate_history, round_num - 1)
+            
+            round_responses = []
+            
+>>>>>>> feature/core-services-refactor
             for role in roles:
                 debate_prompt = f"""
 你是{role.name}。以下是你的专业背景:
@@ -291,10 +460,17 @@ class RealLLMDebateAssistant:
 
 请开始你的发言:
 """
+<<<<<<< HEAD
 
                 print(f"    🤖 {role.name} 正在回应...")
                 response = await self._call_llm(debate_prompt, max_tokens=2000)
 
+=======
+                
+                print(f"    🤖 {role.name} 正在回应...")
+                response = await self._call_llm(debate_prompt, max_tokens=2000)
+                
+>>>>>>> feature/core-services-refactor
                 debate_entry = {
                     "round": round_num,
                     "role_name": role.name,
@@ -303,11 +479,19 @@ class RealLLMDebateAssistant:
                     "timestamp": datetime.now(),
                     "word_count": len(response.split())
                 }
+<<<<<<< HEAD
 
                 debate_history.append(debate_entry)
                 round_responses.append(debate_entry)
                 print(f"    ✅ {role.name}: {len(response.split())}字")
 
+=======
+                
+                debate_history.append(debate_entry)
+                round_responses.append(debate_entry)
+                print(f"    ✅ {role.name}: {len(response.split())}字")
+            
+>>>>>>> feature/core-services-refactor
             # 检查是否达到最小轮数
             if round_num >= self.debate_config['min_rounds']:
                 # 评估是否需要继续辩论
@@ -316,7 +500,11 @@ class RealLLMDebateAssistant:
                 else:
                     print(f"  🏁 辩论在第{round_num}轮自然结束")
                     break
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         return {
             "topic": topic,
             "participants": [role.name for role in roles],
@@ -324,11 +512,19 @@ class RealLLMDebateAssistant:
             "debate_history": debate_history,
             "total_words": sum(entry["word_count"] for entry in debate_history)
         }
+<<<<<<< HEAD
 
     def _build_debate_context(self, debate_history: List[Dict], max_rounds: int) -> str:
         """构建辩论上下文"""
         context = ""
 
+=======
+    
+    def _build_debate_context(self, debate_history: list[dict], max_rounds: int) -> str:
+        """构建辩论上下文"""
+        context = ""
+        
+>>>>>>> feature/core-services-refactor
         for round_num in range(1, max_rounds + 1):
             round_entries = [entry for entry in debate_history if entry["round"] == round_num]
             if round_entries:
@@ -337,19 +533,31 @@ class RealLLMDebateAssistant:
                     # 只显示前200字作为上下文
                     preview = entry["response"][:200] + "..." if len(entry["response"]) > 200 else entry["response"]
                     context += f"\n{entry['role_name']}: {preview}\n"
+<<<<<<< HEAD
 
         return context
 
     async def _should_continue_debate(self, round_responses: List[Dict]) -> bool:
+=======
+        
+        return context
+    
+    async def _should_continue_debate(self, round_responses: list[dict]) -> bool:
+>>>>>>> feature/core-services-refactor
         """判断是否应该继续辩论"""
         try:
             # 简单策略：如果回应中包含新观点或强烈反驳，继续辩论
             continue_keywords = ["但是", "然而", "不同意", "反对", "质疑", "新的观点", "进一步", "补充"]
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             for response in round_responses:
                 content = response["response"]
                 if any(keyword in content for keyword in continue_keywords):
                     return True
+<<<<<<< HEAD
 
             return False
 
@@ -362,6 +570,20 @@ class RealLLMDebateAssistant:
         try:
             debate_history = debate_result["debate_history"]
 
+=======
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"判断辩论继续失败: {e}")
+            return False
+    
+    async def _calculate_consensus_and_divergence(self, debate_result: dict[str, Any]) -> dict[str, Any]:
+        """计算共识与分歧"""
+        try:
+            debate_history = debate_result["debate_history"]
+            
+>>>>>>> feature/core-services-refactor
             # 使用LLM分析共识和分歧
             analysis_prompt = f"""
 作为辩论分析专家，请分析以下多轮辩论的共识和分歧情况。
@@ -391,6 +613,7 @@ class RealLLMDebateAssistant:
 共识度: [0.XX]
 分歧度: [0.XX]
 """
+<<<<<<< HEAD
 
             analysis_result = await self._call_llm(analysis_prompt, max_tokens=1500)
 
@@ -398,16 +621,33 @@ class RealLLMDebateAssistant:
             consensus_score = 0.7  # 默认值
             divergence_score = 0.3  # 默认值
 
+=======
+            
+            analysis_result = await self._call_llm(analysis_prompt, max_tokens=1500)
+            
+            # 解析分析结果
+            consensus_score = 0.7  # 默认值
+            divergence_score = 0.3  # 默认值
+            
+>>>>>>> feature/core-services-refactor
             # 尝试提取分数
             import re
             consensus_match = re.search(r'共识度:\s*([0-9.]+)', analysis_result)
             divergence_match = re.search(r'分歧度:\s*([0-9.]+)', analysis_result)
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             if consensus_match:
                 consensus_score = float(consensus_match.group(1))
             if divergence_match:
                 divergence_score = float(divergence_match.group(1))
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             return {
                 "analysis_text": analysis_result,
                 "consensus_score": consensus_score,
@@ -415,7 +655,11 @@ class RealLLMDebateAssistant:
                 "total_participants": len(debate_result['participants']),
                 "analysis_timestamp": datetime.now()
             }
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
         except Exception as e:
             logger.error(f"共识分歧计算失败: {e}")
             return {
@@ -425,19 +669,34 @@ class RealLLMDebateAssistant:
                 "total_participants": len(debate_result.get('participants', [])),
                 "analysis_timestamp": datetime.now()
             }
+<<<<<<< HEAD
 
     def _summarize_debate_for_analysis(self, debate_history: List[Dict]) -> str:
         """为分析总结辩论内容"""
         summary = ""
 
+=======
+    
+    def _summarize_debate_for_analysis(self, debate_history: list[dict]) -> str:
+        """为分析总结辩论内容"""
+        summary = ""
+        
+>>>>>>> feature/core-services-refactor
         for entry in debate_history:
             # 每个发言只取前300字
             preview = entry["response"][:300] + "..." if len(entry["response"]) > 300 else entry["response"]
             summary += f"\n第{entry['round']}轮 - {entry['role_name']}: {preview}\n"
+<<<<<<< HEAD
 
         return summary
 
     async def _generate_comprehensive_report(self, topic: str, debate_result: Dict, consensus_result: Dict) -> Dict[str, Any]:
+=======
+        
+        return summary
+    
+    async def _generate_comprehensive_report(self, topic: str, debate_result: dict, consensus_result: dict) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成综合报告"""
         try:
             # 使用LLM生成高质量综合报告
@@ -468,10 +727,17 @@ class RealLLMDebateAssistant:
 - 结论有理有据
 - 语言专业，表达准确
 """
+<<<<<<< HEAD
 
             print("  📝 正在生成综合报告...")
             comprehensive_report = await self._call_llm(report_prompt, max_tokens=8000)
 
+=======
+            
+            print("  📝 正在生成综合报告...")
+            comprehensive_report = await self._call_llm(report_prompt, max_tokens=8000)
+            
+>>>>>>> feature/core-services-refactor
             return {
                 "topic": topic,
                 "report_content": comprehensive_report,
@@ -480,7 +746,11 @@ class RealLLMDebateAssistant:
                 "generation_timestamp": datetime.now(),
                 "word_count": len(comprehensive_report.split())
             }
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
         except Exception as e:
             logger.error(f"生成综合报告失败: {e}")
             return {
@@ -491,16 +761,25 @@ class RealLLMDebateAssistant:
                 "generation_timestamp": datetime.now(),
                 "word_count": 0
             }
+<<<<<<< HEAD
 
     def _format_full_debate_for_report(self, debate_history: List[Dict]) -> str:
         """为报告格式化完整辩论记录"""
         formatted = ""
 
+=======
+    
+    def _format_full_debate_for_report(self, debate_history: list[dict]) -> str:
+        """为报告格式化完整辩论记录"""
+        formatted = ""
+        
+>>>>>>> feature/core-services-refactor
         current_round = 0
         for entry in debate_history:
             if entry["round"] != current_round:
                 current_round = entry["round"]
                 formatted += f"\n=== 第{current_round}轮辩论 ===\n"
+<<<<<<< HEAD
 
             formatted += f"\n【{entry['role_name']}】\n{entry['response']}\n"
 
@@ -511,6 +790,18 @@ class RealLLMDebateAssistant:
         try:
             title = f"深度辩论报告：{topic}"
 
+=======
+            
+            formatted += f"\n【{entry['role_name']}】\n{entry['response']}\n"
+        
+        return formatted
+    
+    async def _save_to_wiki(self, topic: str, report: dict[str, Any]):
+        """保存到Wiki"""
+        try:
+            title = f"深度辩论报告：{topic}"
+            
+>>>>>>> feature/core-services-refactor
             content = f"""# {title}
 
 **生成时间**: {report['generation_timestamp'].strftime('%Y-%m-%d %H:%M:%S')}
@@ -531,6 +822,7 @@ class RealLLMDebateAssistant:
 ---
 *本报告由DAIP-LIVE真实LLM辩论助手自动生成*
 """
+<<<<<<< HEAD
 
             self.wiki_service.create_entry(title, content, "debate_assistant", ["辩论", "研究"], "深度分析")
             print("  ✅ 报告已保存到Wiki知识库")
@@ -539,6 +831,16 @@ class RealLLMDebateAssistant:
             logger.error(f"保存到Wiki失败: {e}")
             print("  ⚠️ Wiki保存失败，但报告已生成")
 
+=======
+            
+            self.wiki_service.create_entry(title, content, "debate_assistant", ["辩论", "研究"], "深度分析")
+            print("  ✅ 报告已保存到Wiki知识库")
+            
+        except Exception as e:
+            logger.error(f"保存到Wiki失败: {e}")
+            print("  ⚠️ Wiki保存失败，但报告已生成")
+    
+>>>>>>> feature/core-services-refactor
     async def _call_llm(self, prompt: str, max_tokens: int = 2000) -> str:
         """调用真实LLM"""
         try:
@@ -551,35 +853,57 @@ class RealLLMDebateAssistant:
                     "num_predict": max_tokens
                 }
             }
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             response = requests.post(
                 f"{self.llm_config['base_url']}/api/generate",
                 json=payload,
                 timeout=120
             )
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             if response.status_code == 200:
                 result = response.json()
                 return result.get("response", "").strip()
             else:
                 logger.error(f"LLM调用失败: {response.status_code}")
                 return "LLM调用失败，请检查服务状态"
+<<<<<<< HEAD
 
         except Exception as e:
             logger.error(f"LLM调用异常: {e}")
             return f"LLM调用异常: {str(e)}"
 
     def _display_debate_results(self, topic: str, report: Dict[str, Any]):
+=======
+                
+        except Exception as e:
+            logger.error(f"LLM调用异常: {e}")
+            return f"LLM调用异常: {str(e)}"
+    
+    def _display_debate_results(self, topic: str, report: dict[str, Any]):
+>>>>>>> feature/core-services-refactor
         """显示辩论结果"""
         print("\n" + "="*70)
         print("🎉 真实LLM多轮辩论完成！")
         print("="*70)
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         print(f"📋 辩论议题: {topic}")
         print(f"👥 参与专家: {', '.join(report['debate_summary']['participants'])}")
         print(f"🔄 辩论轮数: {report['debate_summary']['total_rounds']}轮")
         print(f"📝 总发言字数: {report['debate_summary']['total_words']}字")
         print(f"📊 综合报告字数: {report['word_count']}字")
+<<<<<<< HEAD
 
         print(f"\n🤝 共识度: {report['consensus_analysis']['consensus_score']:.2f}")
         print(f"⚡ 分歧度: {report['consensus_analysis']['divergence_score']:.2f}")
@@ -587,6 +911,15 @@ class RealLLMDebateAssistant:
         print("\n📚 完整报告已保存到Wiki知识库")
         print(f"🕒 生成时间: {report['generation_timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
 
+=======
+        
+        print(f"\n🤝 共识度: {report['consensus_analysis']['consensus_score']:.2f}")
+        print(f"⚡ 分歧度: {report['consensus_analysis']['divergence_score']:.2f}")
+        
+        print("\n📚 完整报告已保存到Wiki知识库")
+        print(f"🕒 生成时间: {report['generation_timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
+        
+>>>>>>> feature/core-services-refactor
         # 显示报告预览
         if report['report_content']:
             preview = report['report_content'][:500] + "..." if len(report['report_content']) > 500 else report['report_content']
@@ -594,7 +927,11 @@ class RealLLMDebateAssistant:
             print("-" * 50)
             print(preview)
             print("-" * 50)
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         print("="*70)
 
 
@@ -609,4 +946,8 @@ async def main():
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     asyncio.run(main())
+=======
+    asyncio.run(main())
+>>>>>>> feature/core-services-refactor

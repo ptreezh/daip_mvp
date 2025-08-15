@@ -22,28 +22,28 @@ app = App(__name__)
 
 class MemoryManagementView(TemplateView):
     """记忆管理主视图"""
-
+    
     def __init__(self, request):
         super().__init__(request)
         self.memory_service = MemoryService()
         self.memory_panel = None
-
+        
     async def handle_request(self, request):
         """处理请求"""
         try:
             # 初始化服务
             await self.memory_service.initialize()
-
+            
             # 创建记忆面板
             self.memory_panel = MemoryPanel(self.memory_service)
-
+            
             # 创建主界面
             return self.create_main_interface()
-
+            
         except Exception as e:
             logger.error(f"处理请求失败: {e}")
             return self.create_error_interface(str(e))
-
+    
     def create_main_interface(self) -> HTML:
         """创建主界面"""
         return HTML(
@@ -51,11 +51,11 @@ class MemoryManagementView(TemplateView):
                 # 页面标题
                 Div(
                     H1("🧠 DAIP-LIVE 智能记忆管理系统", style="text-align: center; margin-bottom: 10px;"),
-                    P("基于MemAgent的智能记忆管理，支持多对话记忆、强化学习选择和记忆共享",
+                    P("基于MemAgent的智能记忆管理，支持多对话记忆、强化学习选择和记忆共享", 
                       style="text-align: center; color: #6c757d; margin-bottom: 30px;"),
                     style="margin-bottom: 40px;"
                 ),
-
+                
                 # 功能导航
                 Div(
                     Button("记忆管理", _class="nav-btn active", onclick=self.show_memory_panel),
@@ -64,32 +64,32 @@ class MemoryManagementView(TemplateView):
                     Button("系统设置", _class="nav-btn", onclick=self.show_settings_panel),
                     style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px;"
                 ),
-
+                
                 # 主内容区域
                 Div(
                     self.memory_panel.render() if self.memory_panel else Div(),
                     _id="main-content",
                     style="max-width: 1200px; margin: 0 auto; padding: 0 20px;"
                 ),
-
+                
                 # 页脚
                 Div(
-                    P("DAIP-LIVE 真实演示系统 - 智能记忆管理模块",
+                    P("DAIP-LIVE 真实演示系统 - 智能记忆管理模块", 
                       style="text-align: center; color: #6c757d; font-size: 0.9rem;"),
                     style="margin-top: 50px; padding: 20px; border-top: 1px solid #e9ecef;"
                 ),
-
+                
                 style="min-height: 100vh; background: #f8f9fa;"
             )
         )
-
+    
     def create_error_interface(self, error_message: str) -> HTML:
         """创建错误界面"""
         return HTML(
             Div(
                 Div(
                     H1("❌ 系统错误", style="color: #dc3545; text-align: center;"),
-                    P(f"初始化记忆管理系统时发生错误: {error_message}",
+                    P(f"初始化记忆管理系统时发生错误: {error_message}", 
                       style="text-align: center; color: #6c757d;"),
                     Button(
                         "重新加载",
@@ -102,55 +102,55 @@ class MemoryManagementView(TemplateView):
                 style="min-height: 100vh; background: #f8f9fa; display: flex; align-items: center;"
             )
         )
-
+    
     async def show_memory_panel(self, event):
         """显示记忆管理面板"""
         # 更新导航状态
         self.update_nav_state("记忆管理")
-
+        
         # 显示记忆面板
         if self.memory_panel:
             await self.memory_panel.refresh()
-
+    
     async def show_analysis_panel(self, event):
         """显示记忆分析面板"""
         self.update_nav_state("记忆分析")
-
+        
         # 创建分析面板
         analysis_content = self.create_analysis_panel()
         self.update_main_content(analysis_content)
-
+    
     async def show_sharing_panel(self, event):
         """显示协作共享面板"""
         self.update_nav_state("协作共享")
-
+        
         # 创建共享面板
         sharing_content = self.create_sharing_panel()
         self.update_main_content(sharing_content)
-
+    
     async def show_settings_panel(self, event):
         """显示系统设置面板"""
         self.update_nav_state("系统设置")
-
+        
         # 创建设置面板
         settings_content = self.create_settings_panel()
         self.update_main_content(settings_content)
-
+    
     def update_nav_state(self, active_nav: str):
         """更新导航状态"""
         # 这里需要JavaScript支持来更新导航按钮状态
         pass
-
+    
     def update_main_content(self, content: HTML):
         """更新主内容区域"""
         # 这里需要JavaScript支持来动态更新内容
         pass
-
+    
     def create_analysis_panel(self) -> HTML:
         """创建记忆分析面板"""
         return Div(
             H2("📊 记忆分析", style="margin-bottom: 20px;"),
-
+            
             # 统计卡片
             Div(
                 Div(
@@ -173,7 +173,7 @@ class MemoryManagementView(TemplateView):
                 ),
                 style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;"
             ),
-
+            
             # 记忆类型分布
             Div(
                 H3("记忆类型分布", style="margin-bottom: 15px;"),
@@ -186,12 +186,12 @@ class MemoryManagementView(TemplateView):
                 style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
             )
         )
-
+    
     def create_sharing_panel(self) -> HTML:
         """创建协作共享面板"""
         return Div(
             H2("🤝 协作共享", style="margin-bottom: 20px;"),
-
+            
             # 共享操作区域
             Div(
                 H3("记忆共享", style="margin-bottom: 15px;"),
@@ -216,7 +216,7 @@ class MemoryManagementView(TemplateView):
                 ),
                 style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px;"
             ),
-
+            
             # 共享历史
             Div(
                 H3("共享历史", style="margin-bottom: 15px;"),
@@ -226,12 +226,12 @@ class MemoryManagementView(TemplateView):
                 style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
             )
         )
-
+    
     def create_settings_panel(self) -> HTML:
         """创建系统设置面板"""
         return Div(
             H2("⚙️ 系统设置", style="margin-bottom: 20px;"),
-
+            
             # MemAgent设置
             Div(
                 H3("MemAgent 配置", style="margin-bottom: 15px;"),
@@ -254,7 +254,7 @@ class MemoryManagementView(TemplateView):
                 ),
                 style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;"
             ),
-
+            
             # 系统信息
             Div(
                 H3("系统信息", style="margin-bottom: 15px;"),

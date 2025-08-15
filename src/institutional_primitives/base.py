@@ -6,7 +6,11 @@ including the base InstitutionalPrimitive class and execution context.
 
 from abc import ABC, abstractmethod
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -14,12 +18,15 @@ from pydantic import BaseModel, Field
 class ExecutionContext(BaseModel):
     """Context for primitive execution, containing workflow state and available services.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     execution_id: str
     workflow_id: str
     node_id: str
-    services: Dict[str, Any] = Field(default_factory=dict)  # Available DAIP-LIVE services
-    state: Dict[str, Any] = Field(default_factory=dict)  # Workflow state
+    services: dict[str, Any] = Field(default_factory=dict)  # Available DAIP-LIVE services
+    state: dict[str, Any] = Field(default_factory=dict)  # Workflow state
     parent_context: Optional["ExecutionContext"] = None
     start_time: datetime = Field(default_factory=datetime.now)
     end_time: Optional[datetime] = None
@@ -55,31 +62,42 @@ class ExecutionContext(BaseModel):
 class ExecutionStep(BaseModel):
     """Record of a single execution step in the workflow.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     node_id: str
     node_type: str
-    inputs: Dict[str, Any]
-    outputs: Dict[str, Any]
+    inputs: dict[str, Any]
+    outputs: dict[str, Any]
     start_time: datetime
     end_time: datetime
     duration_ms: float
     status: str  # completed, failed
     error: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ExecutionTrace(BaseModel):
     """Complete trace of workflow execution, including all steps and metrics.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     execution_id: str
     workflow_id: str
-    steps: List[ExecutionStep] = Field(default_factory=list)
+    steps: list[ExecutionStep] = Field(default_factory=list)
     start_time: datetime
     end_time: Optional[datetime] = None
     status: str  # running, completed, failed, cancelled
+<<<<<<< HEAD
     metrics: Dict[str, Any] = Field(default_factory=dict)
 
+=======
+    metrics: dict[str, Any] = Field(default_factory=dict)
+    
+>>>>>>> feature/core-services-refactor
     def add_step(self, step: ExecutionStep) -> None:
         """Add an execution step to the trace."""
         self.steps.append(step)
@@ -108,8 +126,13 @@ class InstitutionalPrimitive(ABC):
     They serve as the fundamental building blocks for complex social institutions
     within AI collaboration systems.
     """
+<<<<<<< HEAD
 
     def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+=======
+    
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
+>>>>>>> feature/core-services-refactor
         """Initialize the institutional primitive.
         
         Args:
@@ -121,7 +144,11 @@ class InstitutionalPrimitive(ABC):
         self.config = config or {}
 
     @abstractmethod
+<<<<<<< HEAD
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+=======
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute the primitive with given inputs and context.
         
         Args:
@@ -135,7 +162,11 @@ class InstitutionalPrimitive(ABC):
         pass
 
     @abstractmethod
+<<<<<<< HEAD
     def get_input_schema(self) -> Dict[str, Any]:
+=======
+    def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return JSON schema for expected inputs.
         
         Returns:
@@ -145,7 +176,11 @@ class InstitutionalPrimitive(ABC):
         pass
 
     @abstractmethod
+<<<<<<< HEAD
     def get_output_schema(self) -> Dict[str, Any]:
+=======
+    def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return JSON schema for produced outputs.
         
         Returns:
@@ -153,8 +188,13 @@ class InstitutionalPrimitive(ABC):
 
         """
         pass
+<<<<<<< HEAD
 
     def validate_inputs(self, inputs: Dict[str, Any]) -> bool:
+=======
+    
+    def validate_inputs(self, inputs: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Validate that the inputs match the expected schema.
         
         Args:
@@ -167,8 +207,13 @@ class InstitutionalPrimitive(ABC):
         # In a real implementation, this would use the JSON schema to validate
         # For now, we'll just return True
         return True
+<<<<<<< HEAD
 
     def validate_outputs(self, outputs: Dict[str, Any]) -> bool:
+=======
+    
+    def validate_outputs(self, outputs: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Validate that the outputs match the expected schema.
         
         Args:
@@ -181,8 +226,13 @@ class InstitutionalPrimitive(ABC):
         # In a real implementation, this would use the JSON schema to validate
         # For now, we'll just return True
         return True
+<<<<<<< HEAD
 
     def get_metadata(self) -> Dict[str, Any]:
+=======
+    
+    def get_metadata(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get metadata about this primitive.
         
         Returns:
@@ -201,19 +251,28 @@ class InstitutionalPrimitive(ABC):
 class PrimitiveInfo(BaseModel):
     """Information about a registered primitive type.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     type: str
     name: str
     description: str
-    input_schema: Dict[str, Any]
-    output_schema: Dict[str, Any]
+    input_schema: dict[str, Any]
+    output_schema: dict[str, Any]
     version: str
 
 
 class ValidationResult(BaseModel):
     """Result of validating a primitive definition.
     """
+<<<<<<< HEAD
 
     is_valid: bool
     errors: List[str] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
+=======
+    is_valid: bool
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+>>>>>>> feature/core-services-refactor

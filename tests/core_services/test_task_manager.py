@@ -22,7 +22,7 @@ class TaskManager:
     def add_task(self, task):
         self.tasks[task.id] = task
 
-@pytest.fixture
+@pytest.fixture()
 def task_manager_with_task():
     """Sets up a TaskManager with a pre-added task."""
     mock_db = MagicMock()

@@ -12,10 +12,18 @@ import os
 # 导入现有的工作流
 import sys
 import time
+<<<<<<< HEAD
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
+=======
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -45,12 +53,18 @@ class WorkflowExecution:
     start_time: datetime
     end_time: Optional[datetime]
     duration_ms: Optional[int]
-    inputs: Dict[str, Any]
-    outputs: Optional[Dict[str, Any]]
+    inputs: dict[str, Any]
+    outputs: Optional[dict[str, Any]]
     error_message: Optional[str]
+<<<<<<< HEAD
     metadata: Dict[str, Any]
 
     def to_dict(self) -> Dict[str, Any]:
+=======
+    metadata: dict[str, Any]
+    
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         data = asdict(self)
         data['status'] = self.status.value
         data['start_time'] = self.start_time.isoformat()
@@ -67,8 +81,13 @@ class WorkflowMetrics:
     failed_executions: int = 0
     average_duration_ms: float = 0.0
     success_rate: float = 0.0
+<<<<<<< HEAD
     workflow_type_distribution: Dict[str, int] = None
 
+=======
+    workflow_type_distribution: dict[str, int] = None
+    
+>>>>>>> feature/core-services-refactor
     def __post_init__(self):
         if self.workflow_type_distribution is None:
             self.workflow_type_distribution = {}
@@ -113,24 +132,36 @@ class RealWorkflowExecutor:
         self.role_manager = role_manager
 
         # 执行记录和指标
-        self.executions: Dict[str, WorkflowExecution] = {}
+        self.executions: dict[str, WorkflowExecution] = {}
         self.metrics = WorkflowMetrics()
 
         # 活跃执行
+<<<<<<< HEAD
         self.active_executions: Dict[str, Dict[str, Any]] = {}
 
         # 事件订阅者
         self.subscribers: List[Callable] = []
 
+=======
+        self.active_executions: dict[str, dict[str, Any]] = {}
+        
+        # 事件订阅者
+        self.subscribers: list[Callable] = []
+        
+>>>>>>> feature/core-services-refactor
         logger.info("RealWorkflowExecutor initialized")
 
     async def execute_critical_review(
         self,
         prompt: str,
         role_context: str = "",
-        workflow_config: Optional[Dict[str, Any]] = None,
+        workflow_config: Optional[dict[str, Any]] = None,
         execution_id: Optional[str] = None
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行批判性审查工作流
         
         Args:
@@ -266,10 +297,14 @@ class RealWorkflowExecutor:
     async def execute_multi_perspective(
         self,
         topic: str,
-        perspectives: Optional[List[str]] = None,
-        workflow_config: Optional[Dict[str, Any]] = None,
+        perspectives: Optional[list[str]] = None,
+        workflow_config: Optional[dict[str, Any]] = None,
         execution_id: Optional[str] = None
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行多视角综合工作流
         
         Args:
@@ -439,8 +474,13 @@ class RealWorkflowExecutor:
 
         logger.info(f"Workflow execution cancelled: {execution_id}")
         return True
+<<<<<<< HEAD
 
     def get_execution_status(self, execution_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def get_execution_status(self, execution_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取执行状态"""
         if execution_id not in self.executions:
             return None
@@ -453,8 +493,13 @@ class RealWorkflowExecutor:
             status_info["active_info"] = self.active_executions[execution_id]
 
         return status_info
+<<<<<<< HEAD
 
     def get_all_executions(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+=======
+    
+    def get_all_executions(self, limit: Optional[int] = None) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取所有执行记录"""
         executions = list(self.executions.values())
         executions.sort(key=lambda x: x.start_time, reverse=True)
@@ -463,6 +508,7 @@ class RealWorkflowExecutor:
             executions = executions[:limit]
 
         return [execution.to_dict() for execution in executions]
+<<<<<<< HEAD
 
     def get_active_executions(self) -> Dict[str, Dict[str, Any]]:
         """获取活跃执行"""
@@ -473,6 +519,18 @@ class RealWorkflowExecutor:
         return asdict(self.metrics)
 
     def get_execution_transparency_report(self, execution_id: str) -> Dict[str, Any]:
+=======
+    
+    def get_active_executions(self) -> dict[str, dict[str, Any]]:
+        """获取活跃执行"""
+        return self.active_executions.copy()
+    
+    def get_performance_metrics(self) -> dict[str, Any]:
+        """获取性能指标"""
+        return asdict(self.metrics)
+    
+    def get_execution_transparency_report(self, execution_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取执行透明度报告
         
         Args:
@@ -529,20 +587,35 @@ class RealWorkflowExecutor:
             score += 15.0
 
         return min(score, 100.0)
+<<<<<<< HEAD
 
     def _calculate_inputs_hash(self, inputs: Dict[str, Any]) -> str:
+=======
+    
+    def _calculate_inputs_hash(self, inputs: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """计算输入哈希"""
         import hashlib
         inputs_str = json.dumps(inputs, sort_keys=True)
         return hashlib.sha256(inputs_str.encode()).hexdigest()
+<<<<<<< HEAD
 
     def _calculate_outputs_hash(self, outputs: Dict[str, Any]) -> str:
+=======
+    
+    def _calculate_outputs_hash(self, outputs: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """计算输出哈希"""
         import hashlib
         outputs_str = json.dumps(outputs, sort_keys=True)
         return hashlib.sha256(outputs_str.encode()).hexdigest()
+<<<<<<< HEAD
 
     async def _emit_event(self, event_type: str, data: Dict[str, Any]):
+=======
+    
+    async def _emit_event(self, event_type: str, data: dict[str, Any]):
+>>>>>>> feature/core-services-refactor
         """发送事件"""
         event = {
             "event_type": event_type,
@@ -570,8 +643,13 @@ class RealWorkflowExecutor:
         if callback in self.subscribers:
             self.subscribers.remove(callback)
             logger.info(f"Workflow subscriber removed, total: {len(self.subscribers)}")
+<<<<<<< HEAD
 
     def get_workflow_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_workflow_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取工作流统计信息"""
         now = datetime.now()
 
@@ -595,8 +673,13 @@ class RealWorkflowExecutor:
             "workflow_types": list(self.metrics.workflow_type_distribution.keys()),
             "average_duration_seconds": self.metrics.average_duration_ms / 1000 if self.metrics.average_duration_ms > 0 else 0
         }
+<<<<<<< HEAD
 
     def export_execution_log(self) -> Dict[str, Any]:
+=======
+    
+    def export_execution_log(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """导出执行日志"""
         return {
             "export_timestamp": datetime.now().isoformat(),

@@ -4,7 +4,7 @@ This module implements the storage adapter for virtual role memories and identit
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 try:
     from src.core_services.enhanced_sskg_manager import KnowledgeQuery, NodeType, RelationType
@@ -31,8 +31,13 @@ class RoleMemoryAdapter(StorageAdapter):
     This adapter manages the storage and retrieval of role-specific memories,
     personality traits, and cognitive frameworks.
     """
+<<<<<<< HEAD
 
     def store(self, role_data: Dict[str, Any], **kwargs) -> str:
+=======
+    
+    def store(self, role_data: dict[str, Any], **kwargs) -> str:
+>>>>>>> feature/core-services-refactor
         """Store role memory data in the SSKG.
         
         Args:
@@ -84,8 +89,13 @@ class RoleMemoryAdapter(StorageAdapter):
 
         self.logger.info(f"Stored role {role_id} with {len(memories)} memories")
         return role_node_id
+<<<<<<< HEAD
 
     def _store_role_memory(self, memory_data: Dict[str, Any], role_id: str) -> Optional[str]:
+=======
+    
+    def _store_role_memory(self, memory_data: dict[str, Any], role_id: str) -> Optional[str]:
+>>>>>>> feature/core-services-refactor
         """Store a single role memory.
         
         Args:
@@ -114,8 +124,13 @@ class RoleMemoryAdapter(StorageAdapter):
             confidence=memory_data.get("confidence", 0.8),
             metadata=memory_metadata
         )
+<<<<<<< HEAD
 
     def retrieve(self, role_id: str, **kwargs) -> Optional[Dict[str, Any]]:
+=======
+    
+    def retrieve(self, role_id: str, **kwargs) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve role data from the SSKG.
         
         Args:
@@ -151,8 +166,13 @@ class RoleMemoryAdapter(StorageAdapter):
             role_data["memories"] = self._retrieve_role_memories(role_id)
 
         return role_data
+<<<<<<< HEAD
 
     def _retrieve_role_memories(self, role_id: str) -> List[Dict[str, Any]]:
+=======
+    
+    def _retrieve_role_memories(self, role_id: str) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve memories for a role.
         
         Args:
@@ -180,8 +200,13 @@ class RoleMemoryAdapter(StorageAdapter):
             })
 
         return memories
+<<<<<<< HEAD
 
     def update(self, role_id: str, role_data: Dict[str, Any], **kwargs) -> bool:
+=======
+    
+    def update(self, role_id: str, role_data: dict[str, Any], **kwargs) -> bool:
+>>>>>>> feature/core-services-refactor
         """Update role data in the SSKG.
         
         Args:
@@ -274,8 +299,13 @@ class RoleMemoryAdapter(StorageAdapter):
             self.logger.info(f"Deleted role {role_id}")
 
         return success
+<<<<<<< HEAD
 
     def list_all(self, **kwargs) -> List[str]:
+=======
+    
+    def list_all(self, **kwargs) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all role IDs.
         
         Args:

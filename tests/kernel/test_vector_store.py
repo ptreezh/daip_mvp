@@ -8,7 +8,7 @@ from src.kernel.vector_store import VectorStore
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture
+@pytest.fixture()
 def vector_store_with_mocks():
     """Pytest fixture to set up a VectorStore instance with mocked ChromaDB dependencies.
     """

@@ -123,7 +123,11 @@ async def test_memory_interface_components():
         # 测试记忆面板组件创建
         from frontend.components.memory_panel_fixed import MemoryPanel
         from frontend.services.memory_service import MemoryService
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # 初始化服务
         memory_service = MemoryService()
         await memory_service.initialize()

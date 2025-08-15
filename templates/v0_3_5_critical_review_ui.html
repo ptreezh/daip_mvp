@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V0.3.5 Critical Review Workflow - 智能协作评审系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #ecf0f1;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: var(--card-shadow);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--secondary-color), #5dade2);
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), #5dade2);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            border: none;
+            border-radius: 8px;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color), #f1c40f);
+            border: none;
+            border-radius: 8px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-healthy { background-color: var(--success-color); }
+        .status-warning { background-color: var(--warning-color); }
+        .status-error { background-color: var(--danger-color); }
+
+        .metric-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .session-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--card-shadow);
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .session-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            flex-grow: 1;
+        }
+
+        .session-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background-color: #d5f4e6;
+            color: var(--success-color);
+        }
+
+        .status-pending {
+            background-color: #fef9e7;
+            color: var(--warning-color);
+        }
+
+        .comment-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .comment {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .comment-time {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        .assessment-result {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .score-display {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .score-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+
+        .score-high { background-color: var(--success-color); }
+        .score-medium { background-color: var(--warning-color); }
+        .score-low { background-color: var(--danger-color); }
+
+        .dimension-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .dimension-score {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .workflow-step {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ddd;
+        }
+
+        .workflow-step.completed {
+            border-left-color: var(--success-color);
+            background: #f8fff8;
+        }
+
+        .workflow-step.active {
+            border-left-color: var(--secondary-color);
+            background: #f0f8ff;
+        }
+
+        .workflow-step.pending {
+            border-left-color: #ddd;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .insight-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .insight-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .insight-impact {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .impact-high {
+            background-color: #fadbd8;
+            color: var(--danger-color);
+        }
+
+        .impact-medium {
+            background-color: #fef9e7;
+            color: var(--warning-color);
+        }
+
+        .impact-low {
+            background-color: #d5f4e6;
+            color: var(--success-color);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+
+        .custom-toast {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: var(--card-shadow);
+            border-left: 4px solid var(--success-color);
+            min-width: 300px;
+        }
+
+        .toast-error {
+            border-left-color: var(--danger-color);
+        }
+
+        .toast-warning {
+            border-left-color: var(--warning-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-clipboard-check me-2"></i>
+                V0.3.5 Critical Review Workflow
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text">
+                    <i class="fas fa-robot me-1"></i>
+                    智能协作评审系统
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- System Status -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-heartbeat me-2"></i>
+                            系统状态监控
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="systemStatus">
+                            <div class="col-md-2">
+                                <div class="text-center">
+                                    <div class="loading-spinner"></div>
+                                    <p class="mt-2">加载中...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-value" id="activeSessionsCount">-</div>
+                    <div class="metric-label">活跃评审会话</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-value" id="totalReviewersCount">-</div>
+                    <div class="metric-label">可用评审员</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-value" id="avgQualityScore">-</div>
+                    <div class="metric-label">平均质量评分</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-value" id="resolvedConflictsCount">-</div>
+                    <div class="metric-label">已解决冲突</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="workflow-tab" data-bs-toggle="tab" data-bs-target="#workflow" type="button">
+                    <i class="fas fa-cogs me-1"></i>工作流管理
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sessions-tab" data-bs-toggle="tab" data-bs-target="#sessions" type="button">
+                    <i class="fas fa-users me-1"></i>协作评审
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button">
+                    <i class="fas fa-chart-line me-1"></i>分析洞察
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button">
+                    <i class="fas fa-file-alt me-1"></i>报告生成
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabsContent">
+            <!-- Workflow Management Tab -->
+            <div class="tab-pane fade show active" id="workflow" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">启动评审工作流</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="workflowForm">
+                                    <div class="mb-3">
+                                        <label for="contentType" class="form-label">内容类型</label>
+                                        <select class="form-select" id="contentType" required>
+                                            <option value="">选择内容类型</option>
+                                            <option value="code_review">代码评审</option>
+                                            <option value="document_review">文档评审</option>
+                                            <option value="design_review">设计评审</option>
+                                            <option value="security_review">安全评审</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="content" class="form-label">评审内容</label>
+                                        <textarea class="form-control" id="content" rows="6" placeholder="输入需要评审的内容..." required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="contentTags" class="form-label">内容标签</label>
+                                        <input type="text" class="form-control" id="contentTags" placeholder="Python, 测试, 安全 (用逗号分隔)">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="requiredReviewers" class="form-label">需要评审员数量</label>
+                                        <input type="number" class="form-control" id="requiredReviewers" value="3" min="1" max="10">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-play me-2"></i>启动工作流
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">工作流状态</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="workflowStatus">
+                                    <p class="text-muted">暂无运行中的工作流</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collaborative Review Tab -->
+            <div class="tab-pane fade" id="sessions" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">活跃评审会话</h5>
+                                <button class="btn btn-success btn-sm" onclick="refreshSessions()">
+                                    <i class="fas fa-refresh me-1"></i>刷新
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="sessionsList">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-users fa-3x mb-3"></i>
+                                        <p>加载中...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div class="tab-pane fade" id="analytics" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">分析洞察</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="analytics-grid" id="insightsList">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                        <p>加载分析数据...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div class="tab-pane fade" id="reports" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">生成报告</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="reportForm">
+                                    <div class="mb-3">
+                                        <label for="reportType" class="form-label">报告类型</label>
+                                        <select class="form-select" id="reportType" required>
+                                            <option value="">选择报告类型</option>
+                                            <option value="session_summary">会话摘要</option>
+                                            <option value="reviewer_performance">评审员表现</option>
+                                            <option value="team_analytics">团队分析</option>
+                                            <option value="quality_assessment">质量评估</option>
+                                            <option value="efficiency_report">效率报告</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="reportFormat" class="form-label">报告格式</label>
+                                        <select class="form-select" id="reportFormat" required>
+                                            <option value="html">HTML</option>
+                                            <option value="markdown">Markdown</option>
+                                            <option value="json">JSON</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="reportScope" class="form-label">分析范围</label>
+                                        <select class="form-select" id="reportScope" required>
+                                            <option value="session">会话</option>
+                                            <option value="reviewer">评审员</option>
+                                            <option value="team">团队</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="scopeId" class="form-label">范围ID</label>
+                                        <input type="text" class="form-control" id="scopeId" placeholder="会话ID、评审员ID等">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-file-export me-2"></i>生成报告
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">报告历史</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="reportsHistory">
+                                    <p class="text-muted">暂无报告历史</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // API Base URL
+        const API_BASE = '/api/v0.3.5/critical-review';
+        
+        // Global state
+        let systemHealth = {};
+        let activeWorkflows = {};
+        let activeSessions = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSystemStatus();
+            loadQuickStats();
+            loadActiveSessions();
+            
+            // Set up form handlers
+            document.getElementById('workflowForm').addEventListener('submit', startWorkflow);
+            document.getElementById('reportForm').addEventListener('submit', generateReport);
+            
+            // Set up periodic updates
+            setInterval(loadSystemStatus, 30000); // Every 30 seconds
+            setInterval(loadQuickStats, 60000); // Every minute
+        });
+
+        // System Status
+        async function loadSystemStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                systemHealth = data;
+                renderSystemStatus(data);
+            } catch (error) {
+                console.error('Error loading system status:', error);
+                showToast('系统状态加载失败', 'error');
+            }
+        }
+
+        function renderSystemStatus(data) {
+            const container = document.getElementById('systemStatus');
+            let html = '';
+            
+            for (const [component, status] of Object.entries(data.components)) {
+                const statusClass = status.status === 'healthy' ? 'status-healthy' : 
+                                  status.status === 'warning' ? 'status-warning' : 'status-error';
+                
+                html += `
+                    <div class="col-md-2">
+                        <div class="text-center">
+                            <div class="status-indicator ${statusClass}"></div>
+                            <div class="fw-bold">${component.replace(/_/g, ' ')}</div>
+                            <div class="text-muted small">${status.status}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Quick Stats
+        async function loadQuickStats() {
+            try {
+                const promises = [
+                    fetch(`${API_BASE}/reviewers/pool`),
+                    fetch(`${API_BASE}/analytics/system-stats`),
+                    fetch(`${API_BASE}/conflicts/system-stats`)
+                ];
+                
+                const responses = await Promise.all(promises);
+                const data = await Promise.all(responses.map(r => r.json()));
+                
+                // Update stats
+                const reviewerPool = data[0];
+                const analyticsStats = data[1];
+                const conflictStats = data[2];
+                
+                document.getElementById('totalReviewersCount').textContent = 
+                    Object.keys(reviewerPool.reviewer_pool || {}).length;
+                document.getElementById('activeSessionsCount').textContent = 
+                    analyticsStats.metrics_recorded || 0;
+                document.getElementById('avgQualityScore').textContent = 
+                    (Math.random() * 0.3 + 0.7).toFixed(2); // Mock data
+                document.getElementById('resolvedConflictsCount').textContent = 
+                    conflictStats.resolved_conflicts || 0;
+                
+            } catch (error) {
+                console.error('Error loading quick stats:', error);
+            }
+        }
+
+        // Workflow Management
+        async function startWorkflow(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const data = {
+                content: document.getElementById('content').value,
+                content_type: document.getElementById('contentType').value,
+                required_reviewers: parseInt(document.getElementById('requiredReviewers').value),
+                content_tags: document.getElementById('contentTags').value
+                    .split(',')
+                    .map(tag => tag.trim())
+                    .filter(tag => tag)
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/workflow/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('工作流启动成功！', 'success');
+                    updateWorkflowStatus(result);
+                    event.target.reset();
+                } else {
+                    showToast(`工作流启动失败: ${result.detail}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error starting workflow:', error);
+                showToast('工作流启动失败', 'error');
+            }
+        }
+
+        function updateWorkflowStatus(workflowData) {
+            const container = document.getElementById('workflowStatus');
+            
+            container.innerHTML = `
+                <div class="workflow-step completed">
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fas fa-check-circle text-success me-2"></i>评审员选择</span>
+                        <small class="text-muted">已完成</small>
+                    </div>
+                    <div class="small text-muted mt-1">
+                        选中 ${workflowData.selected_reviewers.length} 位评审员
+                    </div>
+                </div>
+                <div class="workflow-step completed">
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fas fa-check-circle text-success me-2"></i>会话创建</span>
+                        <small class="text-muted">已完成</small>
+                    </div>
+                    <div class="small text-muted mt-1">
+                        会话ID: ${workflowData.session_id}
+                    </div>
+                </div>
+                <div class="workflow-step active">
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fas fa-spinner fa-spin text-primary me-2"></i>进行评估</span>
+                        <small class="text-muted">进行中</small>
+                    </div>
+                    <div class="small text-muted mt-1">
+                        ${workflowData.assessments_completed} 项评估已完成
+                    </div>
+                </div>
+                <div class="workflow-step pending">
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fas fa-circle text-muted me-2"></i>协作评审</span>
+                        <small class="text-muted">待开始</small>
+                    </div>
+                </div>
+                <div class="workflow-step pending">
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fas fa-circle text-muted me-2"></i>报告生成</span>
+                        <small class="text-muted">待开始</small>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Sessions Management
+        async function loadActiveSessions() {
+            try {
+                // Mock data for demo
+                const mockSessions = [
+                    {
+                        session_id: 'session_001',
+                        session_name: 'Python代码评审',
+                        participants: ['user1', 'user2', 'user3'],
+                        content_type: 'code_review',
+                        created_at: new Date().toISOString(),
+                        status: 'active'
+                    },
+                    {
+                        session_id: 'session_002',
+                        session_name: 'API设计评审',
+                        participants: ['user4', 'user5'],
+                        content_type: 'design_review',
+                        created_at: new Date(Date.now() - 3600000).toISOString(),
+                        status: 'active'
+                    }
+                ];
+                
+                renderSessions(mockSessions);
+                
+            } catch (error) {
+                console.error('Error loading sessions:', error);
+                document.getElementById('sessionsList').innerHTML = 
+                    '<div class="text-center text-muted">加载失败</div>';
+            }
+        }
+
+        function renderSessions(sessions) {
+            const container = document.getElementById('sessionsList');
+            
+            if (sessions.length === 0) {
+                container.innerHTML = 
+                    '<div class="text-center text-muted">暂无活跃会话</div>';
+                return;
+            }
+            
+            container.innerHTML = sessions.map(session => `
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">${session.session_name}</div>
+                        <span class="session-status status-active">活跃</span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong>会话ID:</strong> ${session.session_id}
+                            </div>
+                            <div class="mb-2">
+                                <strong>内容类型:</strong> ${session.content_type}
+                            </div>
+                            <div class="mb-2">
+                                <strong>参与人员:</strong> ${session.participants.join(', ')}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong>创建时间:</strong> ${new Date(session.created_at).toLocaleString()}
+                            </div>
+                            <div class="mb-2">
+                                <strong>状态:</strong> ${session.status}
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="joinSession('${session.session_id}')">
+                                <i class="fas fa-sign-in-alt me-1"></i>加入会话
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function refreshSessions() {
+            loadActiveSessions();
+            showToast('会话列表已刷新', 'success');
+        }
+
+        async function joinSession(sessionId) {
+            try {
+                const response = await fetch(`${API_BASE}/sessions/${sessionId}/join`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id: 'current_user' })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('成功加入会话！', 'success');
+                    // Switch to sessions tab
+                    const tab = new bootstrap.Tab(document.getElementById('sessions-tab'));
+                    tab.show();
+                } else {
+                    showToast(`加入会话失败: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error joining session:', error);
+                showToast('加入会话失败', 'error');
+            }
+        }
+
+        // Analytics
+        async function loadAnalytics() {
+            try {
+                const response = await fetch(`${API_BASE}/analytics/system-stats`);
+                const data = await response.json();
+                
+                // Mock insights for demo
+                const mockInsights = [
+                    {
+                        title: '参与率提升建议',
+                        description: '当前参与率为75%，建议发送提醒通知给未活跃参与者',
+                        impact_level: 'medium',
+                        actionable: true,
+                        recommendations: ['发送提醒邮件', '简化评审流程', '提供激励措施']
+                    },
+                    {
+                        title: '质量评分优秀',
+                        description: '平均质量评分达到0.85，超过预期目标',
+                        impact_level: 'low',
+                        actionable: false,
+                        recommendations: ['继续保持当前标准']
+                    }
+                ];
+                
+                renderInsights(mockInsights);
+                
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        function renderInsights(insights) {
+            const container = document.getElementById('insightsList');
+            
+            container.innerHTML = insights.map(insight => `
+                <div class="insight-card">
+                    <div class="insight-title">${insight.title}</div>
+                    <div class="insight-impact impact-${insight.impact_level}">
+                        影响程度: ${insight.impact_level === 'high' ? '高' : insight.impact_level === 'medium' ? '中' : '低'}
+                    </div>
+                    <div class="mb-3">${insight.description}</div>
+                    ${insight.actionable ? `
+                        <div>
+                            <strong>建议措施:</strong>
+                            <ul class="mb-0">
+                                ${insight.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Reports
+        async function generateReport(event) {
+            event.preventDefault();
+            
+            const data = {
+                report_type: document.getElementById('reportType').value,
+                report_format: document.getElementById('reportFormat').value,
+                data_sources: {
+                    session_data: {
+                        session_id: document.getElementById('scopeId').value || 'demo_session'
+                    }
+                },
+                parameters: {}
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/reports/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('报告生成已开始！', 'success');
+                    // Add to history
+                    addToReportHistory(data.report_type, result.request_id);
+                } else {
+                    showToast(`报告生成失败: ${result.detail}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error generating report:', error);
+                showToast('报告生成失败', 'error');
+            }
+        }
+
+        function addToReportHistory(reportType, requestId) {
+            const container = document.getElementById('reportsHistory');
+            const timestamp = new Date().toLocaleString();
+            
+            const historyItem = document.createElement('div');
+            historyItem.className = 'mb-2 p-2 bg-light rounded';
+            historyItem.innerHTML = `
+                <div class="d-flex justify-content-between">
+                    <span>${reportType}</span>
+                    <small class="text-muted">${timestamp}</small>
+                </div>
+                <div class="small text-muted">请求ID: ${requestId}</div>
+            `;
+            
+            container.appendChild(historyItem);
+        }
+
+        // Utility Functions
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `custom-toast toast-${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : 
+                         type === 'error' ? 'exclamation-circle' : 
+                         'info-circle';
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="me-2">
+                        <i class="fas fa-${icon}"></i>
+                    </div>
+                    <div>${message}</div>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Tab event handlers
+        document.getElementById('analytics-tab').addEventListener('shown.bs.tab', function () {
+            loadAnalytics();
+        });
+
+        document.getElementById('sessions-tab').addEventListener('shown.bs.tab', function () {
+            refreshSessions();
+        });
+    </script>
+</body>
+</html>

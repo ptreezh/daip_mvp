@@ -8,14 +8,21 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .debate_flow_definition import DebatePhase, ParticipantRole
 
 
 class Permission(Enum):
     """权限枚举"""
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     VIEW_DEBATE = "view_debate"
     JOIN_DEBATE = "join_debate"
     LEAVE_DEBATE = "leave_debate"
@@ -31,7 +38,10 @@ class Permission(Enum):
 
 class ActionType(Enum):
     """行为类型枚举"""
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     CONTRIBUTION = "contribution"
     INTERACTION = "interaction"
     MODERATION = "moderation"
@@ -42,7 +52,10 @@ class ActionType(Enum):
 @dataclass
 class ParticipantCredentials:
     """参与者凭证"""
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     participant_id: str
     authentication_token: str
     role: ParticipantRole
@@ -51,13 +64,20 @@ class ParticipantCredentials:
     issued_at: datetime = field(default_factory=datetime.now)
     expires_at: Optional[datetime] = None
     issuer: Optional[str] = None
+<<<<<<< HEAD
     metadata: Dict[str, Any] = field(default_factory=dict)
+=======
+    metadata: dict[str, Any] = field(default_factory=dict)
+>>>>>>> feature/core-services-refactor
 
 
 @dataclass
 class ActionRecord:
     """行为记录"""
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     action_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     participant_id: str = ""
     action_type: ActionType = ActionType.CONTRIBUTION
@@ -67,17 +87,29 @@ class ActionRecord:
     round_number: int = 1
     phase: DebatePhase = DebatePhase.MAIN_ARGUMENTS
     success: bool = True
+<<<<<<< HEAD
     details: Dict[str, Any] = field(default_factory=dict)
+=======
+    details: dict[str, Any] = field(default_factory=dict)
+>>>>>>> feature/core-services-refactor
     impact_score: Optional[float] = None
 
 
 class ParticipantManager:
     """参与者管理器"""
+<<<<<<< HEAD
 
     def __init__(self):
         self.participants: Dict[str, ParticipantCredentials] = {}
         self.action_history: List[ActionRecord] = []
 
+=======
+    
+    def __init__(self):
+        self.participants: dict[str, ParticipantCredentials] = {}
+        self.action_history: list[ActionRecord] = []
+    
+>>>>>>> feature/core-services-refactor
     def register_participant(self,
                            participant_id: str,
                            role: ParticipantRole,
@@ -91,16 +123,24 @@ class ParticipantManager:
             verification_level=verification_level,
             verified=verification_level > 0
         )
+<<<<<<< HEAD
 
         self.participants[participant_id] = credentials
         return credentials
 
+=======
+        
+        self.participants[participant_id] = credentials
+        return credentials
+    
+>>>>>>> feature/core-services-refactor
     def authenticate_participant(self,
                                participant_id: str,
                                authentication_token: str) -> bool:
         """认证参与者"""
         if participant_id not in self.participants:
             return False
+<<<<<<< HEAD
 
         credentials = self.participants[participant_id]
         return credentials.authentication_token == authentication_token
@@ -119,24 +159,57 @@ class ParticipantManager:
         if credentials.role == ParticipantRole.MODERATOR:
             return True  # 主持人拥有所有权限
 
+=======
+        
+        credentials = self.participants[participant_id]
+        return credentials.authentication_token == authentication_token
+    
+    def check_permission(self,
+                        participant_id: str,
+                        permission: Permission,
+                        context: dict[str, Any]) -> bool:
+        """检查参与者权限"""
+        if participant_id not in self.participants:
+            return False
+        
+        credentials = self.participants[participant_id]
+        
+        # 简单的权限检查逻辑
+        if credentials.role == ParticipantRole.MODERATOR:
+            return True  # 主持人拥有所有权限
+        
+>>>>>>> feature/core-services-refactor
         if credentials.role in [ParticipantRole.EXPERT, ParticipantRole.PROPONENT, ParticipantRole.OPPONENT]:
             return permission in [
                 Permission.VIEW_DEBATE, Permission.MAKE_STATEMENT,
                 Permission.PROVIDE_REBUTTAL, Permission.SUBMIT_EVIDENCE
             ]
+<<<<<<< HEAD
 
         if credentials.role == ParticipantRole.OBSERVER:
             return permission == Permission.VIEW_DEBATE
 
         return False
 
+=======
+        
+        if credentials.role == ParticipantRole.OBSERVER:
+            return permission == Permission.VIEW_DEBATE
+        
+        return False
+    
+>>>>>>> feature/core-services-refactor
     def record_action(self,
                      participant_id: str,
                      action_type: ActionType,
                      permission_used: Permission,
                      session_id: str,
                      success: bool = True,
+<<<<<<< HEAD
                      details: Optional[Dict[str, Any]] = None) -> ActionRecord:
+=======
+                     details: Optional[dict[str, Any]] = None) -> ActionRecord:
+>>>>>>> feature/core-services-refactor
         """记录参与者行为"""
         record = ActionRecord(
             participant_id=participant_id,
@@ -146,6 +219,12 @@ class ParticipantManager:
             success=success,
             details=details or {}
         )
+<<<<<<< HEAD
 
         self.action_history.append(record)
         return record
+=======
+        
+        self.action_history.append(record)
+        return record
+>>>>>>> feature/core-services-refactor

@@ -6,7 +6,7 @@
 """
 
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import APIRouter
 
@@ -36,7 +36,7 @@ async def search_knowledge(query: str, limit: int = 10):
 
 
 @router.post("/create")
-async def create_knowledge_entry(data: Dict[str, Any]):
+async def create_knowledge_entry(data: dict[str, Any]):
     """创建知识条目"""
     return {
         "id": "knowledge_001",

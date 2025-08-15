@@ -6,7 +6,11 @@ used in the DAIP-LIVE system for collective intelligence and decision-making.
 
 import logging
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
 from typing import Any, Dict
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +23,7 @@ class InstitutionalPrimitive(ABC):
         self.name = name
 
     @abstractmethod
-    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
         """执行制度原语"""
         pass
 
@@ -29,8 +33,13 @@ class ConsensusBuilding(InstitutionalPrimitive):
 
     def __init__(self):
         super().__init__("consensus_building")
+<<<<<<< HEAD
 
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+=======
+        
+    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行共识构建"""
         logger.info("执行共识构建原语")
 
@@ -51,8 +60,13 @@ class CriticalReview(InstitutionalPrimitive):
 
     def __init__(self):
         super().__init__("critical_review")
+<<<<<<< HEAD
 
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+=======
+        
+    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行批判性审查"""
         logger.info("执行批判性审查原语")
 
@@ -73,8 +87,13 @@ class MultiPerspectiveAnalysis(InstitutionalPrimitive):
 
     def __init__(self):
         super().__init__("multi_perspective_analysis")
+<<<<<<< HEAD
 
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+=======
+        
+    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行多视角分析"""
         logger.info("执行多视角分析原语")
 

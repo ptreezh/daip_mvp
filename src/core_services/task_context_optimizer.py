@@ -9,7 +9,11 @@ import logging
 import re
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -47,7 +51,7 @@ class TaskRequirement(BaseModel):
     requirement_type: RequirementType
     content: str
     importance: float = Field(ge=0.0, le=1.0)
-    keywords: List[str] = []
+    keywords: list[str] = []
 
 
 class ContextElement(BaseModel):
@@ -57,17 +61,21 @@ class ContextElement(BaseModel):
     element_type: ElementType
     relevance_score: float = Field(ge=0.0, le=1.0)
     token_count: int
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
 
 class OptimizedContext(BaseModel):
     """Model for optimized context."""
+<<<<<<< HEAD
 
     elements: List[ContextElement]
+=======
+    elements: list[ContextElement]
+>>>>>>> feature/core-services-refactor
     total_tokens: int
     task_focus: str
-    optimization_metrics: Dict[str, float]
-    excluded_elements: List[ContextElement] = []
+    optimization_metrics: dict[str, float]
+    excluded_elements: list[ContextElement] = []
 
 
 class TaskContextOptimizer:
@@ -118,8 +126,13 @@ class TaskContextOptimizer:
         }
 
         logger.info("TaskContextOptimizer initialized")
+<<<<<<< HEAD
 
     def extract_task_requirements(self, task: str) -> List[TaskRequirement]:
+=======
+    
+    def extract_task_requirements(self, task: str) -> list[TaskRequirement]:
+>>>>>>> feature/core-services-refactor
         """Extract requirements from a task description.
         
         Args:
@@ -166,10 +179,17 @@ class TaskContextOptimizer:
         return requirements
 
     def prioritize_context_elements(
+<<<<<<< HEAD
         self,
         context_elements: List[Dict[str, Any]],
         task_requirements: List[TaskRequirement]
     ) -> List[ContextElement]:
+=======
+        self, 
+        context_elements: list[dict[str, Any]], 
+        task_requirements: list[TaskRequirement]
+    ) -> list[ContextElement]:
+>>>>>>> feature/core-services-refactor
         """Prioritize context elements based on task requirements.
         
         Args:
@@ -249,8 +269,8 @@ class TaskContextOptimizer:
     def blend_context_sources(
         self,
         task_instructions: str,
-        background_knowledge: List[str],
-        conversation_history: List[Dict[str, Any]],
+        background_knowledge: list[str],
+        conversation_history: list[dict[str, Any]],
         max_tokens: int
     ) -> OptimizedContext:
         """Blend multiple context sources into an optimized context.
@@ -359,9 +379,13 @@ class TaskContextOptimizer:
         )
     def maintain_task_coherence(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         task: str
+<<<<<<< HEAD
     ) -> List[Dict[str, Any]]:
+=======
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Maintain task coherence by preserving causal relationships and dependencies.
         
         Args:
@@ -457,9 +481,13 @@ class TaskContextOptimizer:
 
     def delineate_task_boundaries(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         current_task: str
+<<<<<<< HEAD
     ) -> List[Dict[str, Any]]:
+=======
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Clearly delineate task boundaries in the context.
         
         Args:
@@ -540,7 +568,7 @@ class TaskContextOptimizer:
 
     def optimize_context_for_task(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         task: str,
         max_tokens: int
     ) -> OptimizedContext:
@@ -618,10 +646,14 @@ class TaskContextOptimizer:
 
     def prepare_context_for_llm(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         task: str,
         model: str
+<<<<<<< HEAD
     ) -> List[Dict[str, Any]]:
+=======
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Prepare optimized context for LLM call.
         
         Args:

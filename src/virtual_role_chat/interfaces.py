@@ -4,7 +4,11 @@ This module defines the interfaces for the main components of the Virtual Role C
 including ChatRoomManager, ChatSessionService, RoleInteractionEngine, and ChatAnalyticsService.
 """
 
+<<<<<<< HEAD
 from typing import Any, Dict, List, Literal, Optional, Protocol, runtime_checkable
+=======
+from typing import Any, Literal, Optional, Protocol, runtime_checkable
+>>>>>>> feature/core-services-refactor
 
 from .models import (
     ChatMessage,
@@ -86,8 +90,13 @@ class ChatRoomManagerInterface(Protocol):
 
         """
         ...
+<<<<<<< HEAD
 
     def list_chat_rooms(self) -> List[ChatRoomSummary]:
+=======
+    
+    def list_chat_rooms(self) -> list[ChatRoomSummary]:
+>>>>>>> feature/core-services-refactor
         """List all chat rooms.
         
         Returns:
@@ -176,8 +185,13 @@ class ChatSessionServiceInterface(Protocol):
 
         """
         ...
+<<<<<<< HEAD
 
     def get_messages(self, session_id: SessionID, limit: int = 50, offset: int = 0) -> List[ChatMessage]:
+=======
+    
+    def get_messages(self, session_id: SessionID, limit: int = 50, offset: int = 0) -> list[ChatMessage]:
+>>>>>>> feature/core-services-refactor
         """Get messages from a chat session.
         
         Args:
@@ -274,8 +288,13 @@ class RoleInteractionEngineInterface(Protocol):
 
         """
         ...
+<<<<<<< HEAD
 
     def get_next_role(self, session_id: SessionID, context: Optional[Dict[str, Any]] = None) -> str:
+=======
+    
+    def get_next_role(self, session_id: SessionID, context: Optional[dict[str, Any]] = None) -> str:
+>>>>>>> feature/core-services-refactor
         """Get the next role that should respond.
         
         Args:
@@ -306,8 +325,13 @@ class RoleInteractionEngineInterface(Protocol):
 
         """
         ...
+<<<<<<< HEAD
 
     def resolve_conflict(self, session_id: SessionID, conflicting_statements: List[str]) -> ResolutionResult:
+=======
+    
+    def resolve_conflict(self, session_id: SessionID, conflicting_statements: list[str]) -> ResolutionResult:
+>>>>>>> feature/core-services-refactor
         """Resolve conflicting statements.
         
         Args:
@@ -337,8 +361,13 @@ class RoleInteractionEngineInterface(Protocol):
 
         """
         ...
+<<<<<<< HEAD
 
     def decompose_complex_topic(self, session_id: SessionID, topic: str) -> List[SubTopic]:
+=======
+    
+    def decompose_complex_topic(self, session_id: SessionID, topic: str) -> list[SubTopic]:
+>>>>>>> feature/core-services-refactor
         """Decompose a complex topic into simpler sub-topics.
         
         Args:
@@ -353,8 +382,13 @@ class RoleInteractionEngineInterface(Protocol):
 
         """
         ...
+<<<<<<< HEAD
 
     def assign_subtopics_to_roles(self, session_id: SessionID, subtopics: List[SubTopic]) -> Dict[str, List[str]]:
+=======
+    
+    def assign_subtopics_to_roles(self, session_id: SessionID, subtopics: list[SubTopic]) -> dict[str, list[str]]:
+>>>>>>> feature/core-services-refactor
         """Assign sub-topics to roles based on expertise.
         
         Args:
@@ -435,8 +469,13 @@ class ChatAnalyticsServiceInterface(Protocol):
 
         """
         ...
+<<<<<<< HEAD
 
     def detect_quality_issues(self, session_id: SessionID) -> List[QualityIssue]:
+=======
+    
+    def detect_quality_issues(self, session_id: SessionID) -> list[QualityIssue]:
+>>>>>>> feature/core-services-refactor
         """Detect quality issues in a conversation.
         
         Args:
@@ -450,8 +489,13 @@ class ChatAnalyticsServiceInterface(Protocol):
 
         """
         ...
+<<<<<<< HEAD
 
     def generate_analytics_report(self, session_id: SessionID) -> Dict[str, Any]:
+=======
+    
+    def generate_analytics_report(self, session_id: SessionID) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Generate a comprehensive analytics report for a chat session.
         
         Args:

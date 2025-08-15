@@ -11,7 +11,11 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 import ollama
 
@@ -37,8 +41,8 @@ class LLMCall:
     prompt: str
     response: str
     duration: float
-    token_usage: Dict[str, int]
-    metadata: Dict[str, Any]
+    token_usage: dict[str, int]
+    metadata: dict[str, Any]
     signature: str
     hash: str
 
@@ -51,8 +55,8 @@ class LLMResponse:
     model: str
     backend: str
     duration: float
-    token_usage: Dict[str, int]
-    metadata: Dict[str, Any]
+    token_usage: dict[str, int]
+    metadata: dict[str, Any]
     call_record: Optional[LLMCall] = None
 
 
@@ -67,7 +71,7 @@ class LLMIntegrationService:
 
         """
         self.secret_key = secret_key.encode()
-        self.call_history: List[LLMCall] = []
+        self.call_history: list[LLMCall] = []
         self.available_models = {}
         self._initialize_backends()
 
@@ -94,8 +98,13 @@ class LLMIntegrationService:
         except Exception as e:
             logger.error(f"Failed to initialize Ollama: {e}")
             self.available_models[LLMBackend.OLLAMA] = []
+<<<<<<< HEAD
 
     def get_available_models(self, backend: LLMBackend = None) -> Dict[str, List[Dict]]:
+=======
+    
+    def get_available_models(self, backend: LLMBackend = None) -> dict[str, list[dict]]:
+>>>>>>> feature/core-services-refactor
         """获取可用模型列表
         
         Args:
@@ -160,8 +169,8 @@ class LLMIntegrationService:
         prompt: str,
         response: str,
         duration: float,
-        token_usage: Dict[str, int],
-        metadata: Dict[str, Any]
+        token_usage: dict[str, int],
+        metadata: dict[str, Any]
     ) -> LLMCall:
         """创建调用记录"""
         timestamp = datetime.now().isoformat()
@@ -297,7 +306,11 @@ class LLMIntegrationService:
         text: str,
         model: str = None,
         backend: LLMBackend = LLMBackend.OLLAMA
+<<<<<<< HEAD
     ) -> List[float]:
+=======
+    ) -> list[float]:
+>>>>>>> feature/core-services-refactor
         """生成文本嵌入
         
         Args:
@@ -346,8 +359,13 @@ class LLMIntegrationService:
         except Exception as e:
             logger.error(f"Embedding failed: {e}")
             raise
+<<<<<<< HEAD
 
     def get_call_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_call_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取调用统计信息"""
         if not self.call_history:
             return {
@@ -383,16 +401,26 @@ class LLMIntegrationService:
             'models_used': models_used,
             'backend_stats': backend_stats
         }
+<<<<<<< HEAD
 
     def get_call_history(self, limit: int = None) -> List[Dict[str, Any]]:
+=======
+    
+    def get_call_history(self, limit: int = None) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取调用历史"""
         history = self.call_history
         if limit:
             history = history[-limit:]
 
         return [asdict(call) for call in history]
+<<<<<<< HEAD
 
     def verify_call_integrity(self) -> Dict[str, Any]:
+=======
+    
+    def verify_call_integrity(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """验证调用完整性"""
         if not self.call_history:
             return {'valid': True, 'message': 'No calls to verify'}
@@ -413,8 +441,13 @@ class LLMIntegrationService:
             'valid': True,
             'message': f'All {len(self.call_history)} calls verified successfully'
         }
+<<<<<<< HEAD
 
     def export_transparency_report(self) -> Dict[str, Any]:
+=======
+    
+    def export_transparency_report(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """导出透明度报告"""
         stats = self.get_call_statistics()
         integrity = self.verify_call_integrity()
@@ -447,13 +480,13 @@ async def generate_text(prompt: str, **kwargs) -> str:
     return response.content
 
 
-async def generate_embedding(text: str, **kwargs) -> List[float]:
+async def generate_embedding(text: str, **kwargs) -> list[float]:
     """便捷的嵌入生成函数"""
     service = get_llm_service()
     return await service.embed(text, **kwargs)
 
 
-def get_transparency_report() -> Dict[str, Any]:
+def get_transparency_report() -> dict[str, Any]:
     """获取透明度报告"""
     service = get_llm_service()
     return service.export_transparency_report()

@@ -177,11 +177,19 @@ def test_call_verification(llm_integrator):
         print(f"\n1. 验证调用完整性 (调用ID: {record.call_id}):")
         verification_result = verification_system.verify_call_integrity(record)
         print(json.dumps(verification_result.to_dict(), indent=2, ensure_ascii=False))
+<<<<<<< HEAD
 
         print("\n2. 生成调用签名:")
         signature = verification_system.generate_call_signature(record)
         print(f"签名: {signature}")
 
+=======
+        
+        print("\n2. 生成调用签名:")
+        signature = verification_system.generate_call_signature(record)
+        print(f"签名: {signature}")
+        
+>>>>>>> feature/core-services-refactor
         print("\n3. 审计轨迹:")
         audit_trail = verification_system.generate_audit_trail(record.call_id)
         print(json.dumps(audit_trail, indent=2, ensure_ascii=False))

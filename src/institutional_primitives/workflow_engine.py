@@ -8,7 +8,11 @@ import asyncio
 import logging
 import uuid
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -20,12 +24,15 @@ from .registry import PrimitiveRegistry
 class WorkflowNode(BaseModel):
     """Definition of a node in a workflow.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     type: str  # Primitive type (e.g., "generation", "fact_extraction")
-    config: Dict[str, Any] = Field(default_factory=dict)
-    inputs: List[str] = Field(default_factory=list)
-    outputs: List[str] = Field(default_factory=list)
+    config: dict[str, Any] = Field(default_factory=dict)
+    inputs: list[str] = Field(default_factory=list)
+    outputs: list[str] = Field(default_factory=list)
     parallel_group: Optional[str] = None  # ID of parallel execution group
     max_retries: int = 0  # Number of retries on failure
     parallel_group: Optional[str] = None  # ID of parallel execution group
@@ -35,7 +42,10 @@ class WorkflowNode(BaseModel):
 class WorkflowEdge(BaseModel):
     """Definition of an edge between nodes in a workflow.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     from_node: str
     to_node: str
     condition: Optional[str] = None  # Conditional execution
@@ -44,41 +54,50 @@ class WorkflowEdge(BaseModel):
 class WorkflowDefinition(BaseModel):
     """Definition of a complete workflow.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     name: str
     description: str
-    nodes: List[WorkflowNode] = Field(default_factory=list)
-    edges: List[WorkflowEdge] = Field(default_factory=list)
-    parameters: Dict[str, Any] = Field(default_factory=dict)
-    metadata: Dict[str, Any] = Field(default_factory=dict)  # For parallel group configs
+    nodes: list[WorkflowNode] = Field(default_factory=list)
+    edges: list[WorkflowEdge] = Field(default_factory=list)
+    parameters: dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)  # For parallel group configs
 
 
 class WorkflowResult(BaseModel):
     """Result of a workflow execution.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     execution_id: str
     status: str  # "completed", "failed", "cancelled"
-    outputs: Dict[str, Any] = Field(default_factory=dict)
+    outputs: dict[str, Any] = Field(default_factory=dict)
     execution_trace: ExecutionTrace
-    metrics: Dict[str, Any] = Field(default_factory=dict)
+    metrics: dict[str, Any] = Field(default_factory=dict)
 
 
 class WorkflowStatus(BaseModel):
     """Status of a workflow execution.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     execution_id: str
     workflow_id: str
     status: str  # "running", "completed", "failed", "cancelled", "paused"
     progress: float  # 0.0 to 1.0
-    current_nodes: List[str] = Field(default_factory=list)
-    completed_nodes: List[str] = Field(default_factory=list)
-    failed_nodes: List[str] = Field(default_factory=list)
+    current_nodes: list[str] = Field(default_factory=list)
+    completed_nodes: list[str] = Field(default_factory=list)
+    failed_nodes: list[str] = Field(default_factory=list)
     start_time: datetime
     end_time: Optional[datetime] = None
-    metrics: Dict[str, Any] = Field(default_factory=dict)
+    metrics: dict[str, Any] = Field(default_factory=dict)
 
 
 class WorkflowEngine:
@@ -97,14 +116,20 @@ class WorkflowEngine:
 
         """
         self.primitive_registry = primitive_registry
-        self.active_workflows: Dict[str, Dict[str, Any]] = {}
+        self.active_workflows: dict[str, dict[str, Any]] = {}
         self.parallel_execution_manager = ParallelExecutionManager()
         self.logger = logging.getLogger(__name__)
 
     async def execute_workflow(
+<<<<<<< HEAD
         self,
         workflow_def: WorkflowDefinition,
         params: Dict[str, Any] = None
+=======
+        self, 
+        workflow_def: WorkflowDefinition, 
+        params: dict[str, Any] = None
+>>>>>>> feature/core-services-refactor
     ) -> WorkflowResult:
         """Execute a workflow with the given parameters.
         
@@ -299,7 +324,7 @@ class WorkflowEngine:
     def create_parallel_group(
         self,
         workflow_def: WorkflowDefinition,
-        node_ids: List[str],
+        node_ids: list[str],
         group_id: str = None,
         max_concurrency: int = 5,
         timeout: Optional[float] = None
@@ -356,7 +381,7 @@ class WorkflowEngine:
     def create_parallel_group(
         self,
         workflow_def: WorkflowDefinition,
-        node_ids: List[str],
+        node_ids: list[str],
         group_id: str = None,
         max_concurrency: int = 5,
         timeout: Optional[float] = None
@@ -435,8 +460,13 @@ class WorkflowEngine:
         self.logger.info(f"Workflow {execution_id} cancelled")
 
         return True
+<<<<<<< HEAD
 
     def _build_execution_graph(self, workflow_def: WorkflowDefinition) -> Dict[str, Any]:
+=======
+    
+    def _build_execution_graph(self, workflow_def: WorkflowDefinition) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Build an execution graph from a workflow definition.
         
         Args:
@@ -480,11 +510,19 @@ class WorkflowEngine:
         return graph
 
     async def _execute_graph(
+<<<<<<< HEAD
         self,
         graph: Dict[str, Any],
         context: ExecutionContext,
         trace: ExecutionTrace
     ) -> Dict[str, Any]:
+=======
+        self, 
+        graph: dict[str, Any], 
+        context: ExecutionContext, 
+        trace: ExecutionTrace
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute a workflow graph.
         
         Args:
@@ -513,11 +551,11 @@ class WorkflowEngine:
 
     async def _execute_graph_with_parallelism(
         self,
-        graph: Dict[str, Any],
+        graph: dict[str, Any],
         context: ExecutionContext,
         trace: ExecutionTrace,
-        node_status: Dict[str, str],
-        node_outputs: Dict[str, Dict[str, Any]]
+        node_status: dict[str, str],
+        node_outputs: dict[str, dict[str, Any]]
     ) -> None:
         """Execute a workflow graph with parallel execution support.
         
@@ -630,12 +668,18 @@ class WorkflowEngine:
     async def _execute_single_node_wrapper(
         self,
         node_id: str,
-        graph: Dict[str, Any],
+        graph: dict[str, Any],
         context: ExecutionContext,
         trace: ExecutionTrace,
+<<<<<<< HEAD
         node_status: Dict[str, str],
         node_outputs: Dict[str, Dict[str, Any]]
     ) -> Dict[str, Any]:
+=======
+        node_status: dict[str, str],
+        node_outputs: dict[str, dict[str, Any]]
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Wrapper for executing a single node in parallel.
         
         Args:
@@ -675,11 +719,11 @@ class WorkflowEngine:
     async def _execute_node(
         self,
         node_id: str,
-        graph: Dict[str, Any],
+        graph: dict[str, Any],
         context: ExecutionContext,
         trace: ExecutionTrace,
-        node_status: Dict[str, str],
-        node_outputs: Dict[str, Dict[str, Any]]
+        node_status: dict[str, str],
+        node_outputs: dict[str, dict[str, Any]]
     ) -> None:
         """Execute a single node in the workflow.
         
@@ -733,7 +777,11 @@ class WorkflowEngine:
                     pass
 
                 await self._execute_node(to_node, graph, context, trace, node_status, node_outputs)
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         except Exception:
             # Mark as failed
             node_status[node_id] = "failed"
@@ -743,11 +791,16 @@ class WorkflowEngine:
     async def _execute_single_node(
         self,
         node_id: str,
-        graph: Dict[str, Any],
+        graph: dict[str, Any],
         node_context: ExecutionContext,
         trace: ExecutionTrace,
+<<<<<<< HEAD
         node_outputs: Dict[str, Dict[str, Any]]
     ) -> Dict[str, Any]:
+=======
+        node_outputs: dict[str, dict[str, Any]]
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute a single node in the workflow.
         
         Args:
@@ -842,8 +895,13 @@ class WorkflowEngine:
             # Mark context as failed
             node_context.mark_failed()
             raise
+<<<<<<< HEAD
 
     def _calculate_metrics(self, trace: ExecutionTrace) -> Dict[str, Any]:
+=======
+    
+    def _calculate_metrics(self, trace: ExecutionTrace) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Calculate metrics from an execution trace.
         
         Args:

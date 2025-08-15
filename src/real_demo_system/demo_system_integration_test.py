@@ -85,7 +85,11 @@ async def test_ai_ethics_scenario():
             ethical_dilemma=ethical_dilemma,
             context=context
         )
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         print("\n4. 场景执行结果:")
         print(f"成功: {result['success']}")
 
@@ -209,7 +213,11 @@ async def test_product_strategy_scenario(demo_controller):
             product_description=product_description,
             market_context=market_context
         )
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         print("\n3. 场景执行结果:")
         print(f"成功: {result['success']}")
 

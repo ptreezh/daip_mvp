@@ -11,7 +11,11 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 import anthropic
 import ollama
@@ -46,9 +50,15 @@ class LLMCallRecord:
     cost_usd: float
     success: bool
     error_message: Optional[str] = None
+<<<<<<< HEAD
     metadata: Dict[str, Any] = None
 
     def to_dict(self) -> Dict[str, Any]:
+=======
+    metadata: dict[str, Any] = None
+    
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """转换为字典格式"""
         data = asdict(self)
         data['timestamp'] = self.timestamp.isoformat()
@@ -96,8 +106,13 @@ class RealLLMIntegrator:
     
     提供真实的LLM调用功能，支持多种后端，包含完整的监控和透明度功能。
     """
+<<<<<<< HEAD
 
     def __init__(self, config_override: Optional[Dict[str, Any]] = None):
+=======
+    
+    def __init__(self, config_override: Optional[dict[str, Any]] = None):
+>>>>>>> feature/core-services-refactor
         """初始化LLM集成器
         
         Args:
@@ -116,7 +131,7 @@ class RealLLMIntegrator:
         self.anthropic_client = None
 
         # 调用记录和性能指标
-        self.call_records: List[LLMCallRecord] = []
+        self.call_records: list[LLMCallRecord] = []
         self.performance_metrics = LLMPerformanceMetrics()
 
         # 初始化客户端
@@ -155,7 +170,7 @@ class RealLLMIntegrator:
         model: Optional[str] = None,
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[dict[str, Any]] = None
     ) -> LLMCallRecord:
         """调用LLM并返回完整的调用记录
         
@@ -345,6 +360,7 @@ class RealLLMIntegrator:
             return "claude-3-sonnet-20240229"
         else:
             return "unknown"
+<<<<<<< HEAD
 
     def get_call_records(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
         """获取调用记录"""
@@ -356,6 +372,19 @@ class RealLLMIntegrator:
         return asdict(self.performance_metrics)
 
     def get_real_time_status(self) -> Dict[str, Any]:
+=======
+    
+    def get_call_records(self, limit: Optional[int] = None) -> list[dict[str, Any]]:
+        """获取调用记录"""
+        records = self.call_records[-limit:] if limit else self.call_records
+        return [record.to_dict() for record in records]
+    
+    def get_performance_metrics(self) -> dict[str, Any]:
+        """获取性能指标"""
+        return asdict(self.performance_metrics)
+    
+    def get_real_time_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取实时状态"""
         recent_records = self.call_records[-10:] if self.call_records else []
 
@@ -367,16 +396,26 @@ class RealLLMIntegrator:
             "total_calls_today": len([r for r in self.call_records if r.timestamp.date() == datetime.now().date()]),
             "providers_status": self._get_providers_status()
         }
+<<<<<<< HEAD
 
     def _get_providers_status(self) -> Dict[str, bool]:
+=======
+    
+    def _get_providers_status(self) -> dict[str, bool]:
+>>>>>>> feature/core-services-refactor
         """获取各提供商状态"""
         return {
             "ollama": self.ollama_client is not None,
             "openai": self.openai_client is not None,
             "anthropic": self.anthropic_client is not None
         }
+<<<<<<< HEAD
 
     def verify_call_authenticity(self, call_id: str) -> Dict[str, Any]:
+=======
+    
+    def verify_call_authenticity(self, call_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """验证调用的真实性"""
         record = next((r for r in self.call_records if r.call_id == call_id), None)
         if not record:
@@ -394,8 +433,13 @@ class RealLLMIntegrator:
             "success": record.success,
             "metadata": record.metadata
         }
+<<<<<<< HEAD
 
     def export_audit_log(self) -> Dict[str, Any]:
+=======
+    
+    def export_audit_log(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """导出审计日志"""
         return {
             "export_timestamp": datetime.now().isoformat(),
@@ -404,8 +448,13 @@ class RealLLMIntegrator:
             "call_records": self.get_call_records(),
             "verification_hashes": [r.get_signature() for r in self.call_records]
         }
+<<<<<<< HEAD
 
     async def health_check(self) -> Dict[str, Any]:
+=======
+    
+    async def health_check(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """健康检查"""
         health_status = {
             "overall_status": "healthy",

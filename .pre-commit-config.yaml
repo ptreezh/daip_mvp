@@ -30,3 +30,13 @@ repos:
         args: [--config-file=pyproject.toml]
         # Exclude files if necessary, e.g., tests/
         exclude: ^(docs/|tests/)
+
+-   repo: local
+    hooks:
+    -   id: mandatory-rules-check
+        name: Mandatory Development Rules Check
+        entry: python mandatory_rules_checker.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        # This hook will block commits if any mandatory rules are violated

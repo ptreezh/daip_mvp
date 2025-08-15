@@ -8,10 +8,18 @@
 import logging
 import statistics
 import time
+<<<<<<< HEAD
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
+=======
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -51,7 +59,7 @@ class PerformanceMetric:
     value: float
     unit: str
     timestamp: datetime = field(default_factory=datetime.now)
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -60,15 +68,20 @@ class PerformanceProfile:
 
     component_id: str
     component_type: str
-    metrics: List[PerformanceMetric] = field(default_factory=list)
+    metrics: list[PerformanceMetric] = field(default_factory=list)
     start_time: datetime = field(default_factory=datetime.now)
     end_time: Optional[datetime] = None
 
     def add_metric(self, metric: PerformanceMetric) -> None:
         """Add a performance metric."""
         self.metrics.append(metric)
+<<<<<<< HEAD
 
     def get_metrics_by_type(self, metric_type: PerformanceMetricType) -> List[PerformanceMetric]:
+=======
+    
+    def get_metrics_by_type(self, metric_type: PerformanceMetricType) -> list[PerformanceMetric]:
+>>>>>>> feature/core-services-refactor
         """Get metrics of a specific type."""
         return [m for m in self.metrics if m.metric_type == metric_type]
 
@@ -87,8 +100,8 @@ class BottleneckAnalysis(BaseModel):
     severity: float = Field(ge=0.0, le=1.0)
     component_id: str
     description: str
-    impact_metrics: List[str] = Field(default_factory=list)
-    recommendations: List[str] = Field(default_factory=list)
+    impact_metrics: list[str] = Field(default_factory=list)
+    recommendations: list[str] = Field(default_factory=list)
     estimated_improvement: Optional[float] = None
 
 
@@ -102,19 +115,19 @@ class OptimizationRecommendation(BaseModel):
     priority: int = Field(ge=1, le=5)  # 1 = highest priority
     estimated_impact: float = Field(ge=0.0, le=1.0)
     implementation_effort: str  # "low", "medium", "high"
-    affected_components: List[str] = Field(default_factory=list)
-    implementation_steps: List[str] = Field(default_factory=list)
+    affected_components: list[str] = Field(default_factory=list)
+    implementation_steps: list[str] = Field(default_factory=list)
 
 
 class ConfigurationValidationResult(BaseModel):
     """Result of configuration validation."""
 
     is_valid: bool
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
-    performance_concerns: List[str] = Field(default_factory=list)
-    dependency_issues: List[str] = Field(default_factory=list)
-    recommendations: List[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    performance_concerns: list[str] = Field(default_factory=list)
+    dependency_issues: list[str] = Field(default_factory=list)
+    recommendations: list[str] = Field(default_factory=list)
 
 
 class PerformanceProfiler:
@@ -126,11 +139,19 @@ class PerformanceProfiler:
 
     def __init__(self):
         """Initialize the performance profiler."""
+<<<<<<< HEAD
         self.profiles: Dict[str, PerformanceProfile] = {}
         self.active_profiles: Dict[str, PerformanceProfile] = {}
         self.bottleneck_analyzers: List[Callable] = []
         self.optimization_rules: List[Callable] = []
 
+=======
+        self.profiles: dict[str, PerformanceProfile] = {}
+        self.active_profiles: dict[str, PerformanceProfile] = {}
+        self.bottleneck_analyzers: list[Callable] = []
+        self.optimization_rules: list[Callable] = []
+        
+>>>>>>> feature/core-services-refactor
         # Initialize built-in analyzers
         self._initialize_analyzers()
 
@@ -178,7 +199,7 @@ class PerformanceProfiler:
         metric_type: PerformanceMetricType,
         value: float,
         unit: str,
-        context: Dict[str, Any] = None
+        context: dict[str, Any] = None
     ) -> None:
         """Record a performance metric.
         
@@ -226,8 +247,13 @@ class PerformanceProfiler:
 
         logger.info(f"Ended profiling session: {session_id}")
         return profile
+<<<<<<< HEAD
 
     def analyze_bottlenecks(self, session_id: str) -> List[BottleneckAnalysis]:
+=======
+    
+    def analyze_bottlenecks(self, session_id: str) -> list[BottleneckAnalysis]:
+>>>>>>> feature/core-services-refactor
         """Analyze performance bottlenecks for a profile.
         
         Args:
@@ -261,8 +287,13 @@ class PerformanceProfiler:
     def generate_optimization_recommendations(
         self,
         session_id: str,
+<<<<<<< HEAD
         bottlenecks: List[BottleneckAnalysis] = None
     ) -> List[OptimizationRecommendation]:
+=======
+        bottlenecks: list[BottleneckAnalysis] = None
+    ) -> list[OptimizationRecommendation]:
+>>>>>>> feature/core-services-refactor
         """Generate optimization recommendations.
         
         Args:
@@ -297,8 +328,13 @@ class PerformanceProfiler:
 
         logger.info(f"Generated {len(recommendations)} optimization recommendations")
         return recommendations
+<<<<<<< HEAD
 
     def _analyze_execution_time_bottlenecks(self, profile: PerformanceProfile) -> List[BottleneckAnalysis]:
+=======
+    
+    def _analyze_execution_time_bottlenecks(self, profile: PerformanceProfile) -> list[BottleneckAnalysis]:
+>>>>>>> feature/core-services-refactor
         """Analyze execution time bottlenecks."""
         bottlenecks = []
 
@@ -347,8 +383,13 @@ class PerformanceProfiler:
                 ))
 
         return bottlenecks
+<<<<<<< HEAD
 
     def _analyze_memory_bottlenecks(self, profile: PerformanceProfile) -> List[BottleneckAnalysis]:
+=======
+    
+    def _analyze_memory_bottlenecks(self, profile: PerformanceProfile) -> list[BottleneckAnalysis]:
+>>>>>>> feature/core-services-refactor
         """Analyze memory usage bottlenecks."""
         bottlenecks = []
 
@@ -378,8 +419,13 @@ class PerformanceProfiler:
             ))
 
         return bottlenecks
+<<<<<<< HEAD
 
     def _analyze_throughput_bottlenecks(self, profile: PerformanceProfile) -> List[BottleneckAnalysis]:
+=======
+    
+    def _analyze_throughput_bottlenecks(self, profile: PerformanceProfile) -> list[BottleneckAnalysis]:
+>>>>>>> feature/core-services-refactor
         """Analyze throughput bottlenecks."""
         bottlenecks = []
 
@@ -412,8 +458,8 @@ class PerformanceProfiler:
     def _recommend_parallel_execution(
         self,
         profile: PerformanceProfile,
-        bottlenecks: List[BottleneckAnalysis]
-    ) -> List[OptimizationRecommendation]:
+        bottlenecks: list[BottleneckAnalysis]
+    ) -> list[OptimizationRecommendation]:
         """Recommend parallel execution optimizations."""
         recommendations = []
 
@@ -443,8 +489,8 @@ class PerformanceProfiler:
     def _recommend_caching(
         self,
         profile: PerformanceProfile,
-        bottlenecks: List[BottleneckAnalysis]
-    ) -> List[OptimizationRecommendation]:
+        bottlenecks: list[BottleneckAnalysis]
+    ) -> list[OptimizationRecommendation]:
         """Recommend caching optimizations."""
         recommendations = []
 
@@ -477,8 +523,8 @@ class PerformanceProfiler:
     def _recommend_resource_optimization(
         self,
         profile: PerformanceProfile,
-        bottlenecks: List[BottleneckAnalysis]
-    ) -> List[OptimizationRecommendation]:
+        bottlenecks: list[BottleneckAnalysis]
+    ) -> list[OptimizationRecommendation]:
         """Recommend resource optimization."""
         recommendations = []
 
@@ -515,9 +561,15 @@ class ConfigurationValidator:
 
     def __init__(self):
         """Initialize the configuration validator."""
+<<<<<<< HEAD
         self.validation_rules: List[Callable] = []
         self.dependency_checkers: List[Callable] = []
 
+=======
+        self.validation_rules: list[Callable] = []
+        self.dependency_checkers: list[Callable] = []
+        
+>>>>>>> feature/core-services-refactor
         # Initialize built-in validators
         self._initialize_validators()
 
@@ -537,8 +589,13 @@ class ConfigurationValidator:
             self._check_primitive_dependencies,
             self._check_circular_dependencies
         ])
+<<<<<<< HEAD
 
     def validate_configuration(self, config: Dict[str, Any]) -> ConfigurationValidationResult:
+=======
+    
+    def validate_configuration(self, config: dict[str, Any]) -> ConfigurationValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate a configuration.
         
         Args:
@@ -579,8 +636,13 @@ class ConfigurationValidator:
             result.recommendations.extend(self._generate_validation_recommendations(result))
 
         return result
+<<<<<<< HEAD
 
     def _validate_basic_structure(self, config: Dict[str, Any]) -> Dict[str, List[str]]:
+=======
+    
+    def _validate_basic_structure(self, config: dict[str, Any]) -> dict[str, list[str]]:
+>>>>>>> feature/core-services-refactor
         """Validate basic configuration structure."""
         errors = []
         warnings = []
@@ -605,8 +667,13 @@ class ConfigurationValidator:
                 warnings.append(f"Deprecated field '{field}' should be removed")
 
         return {"errors": errors, "warnings": warnings}
+<<<<<<< HEAD
 
     def _validate_parameter_types(self, config: Dict[str, Any]) -> Dict[str, List[str]]:
+=======
+    
+    def _validate_parameter_types(self, config: dict[str, Any]) -> dict[str, list[str]]:
+>>>>>>> feature/core-services-refactor
         """Validate parameter types and values."""
         errors = []
         warnings = []
@@ -627,8 +694,13 @@ class ConfigurationValidator:
                             errors.append(f"Count parameter '{param_name}' must be non-negative")
 
         return {"errors": errors, "warnings": warnings}
+<<<<<<< HEAD
 
     def _validate_resource_limits(self, config: Dict[str, Any]) -> Dict[str, List[str]]:
+=======
+    
+    def _validate_resource_limits(self, config: dict[str, Any]) -> dict[str, list[str]]:
+>>>>>>> feature/core-services-refactor
         """Validate resource limits and constraints."""
         errors = []
         warnings = []
@@ -656,8 +728,13 @@ class ConfigurationValidator:
                     warnings.append(f"Very long timeout: {timeout}s may cause resource exhaustion")
 
         return {"errors": errors, "warnings": warnings, "performance_concerns": performance_concerns}
+<<<<<<< HEAD
 
     def _validate_performance_settings(self, config: Dict[str, Any]) -> Dict[str, List[str]]:
+=======
+    
+    def _validate_performance_settings(self, config: dict[str, Any]) -> dict[str, list[str]]:
+>>>>>>> feature/core-services-refactor
         """Validate performance-related settings."""
         errors = []
         warnings = []
@@ -685,8 +762,13 @@ class ConfigurationValidator:
                     performance_concerns.append(f"Large cache size: {cache_size} may consume significant memory")
 
         return {"errors": errors, "warnings": warnings, "performance_concerns": performance_concerns}
+<<<<<<< HEAD
 
     def _check_service_dependencies(self, config: Dict[str, Any]) -> Dict[str, List[str]]:
+=======
+    
+    def _check_service_dependencies(self, config: dict[str, Any]) -> dict[str, list[str]]:
+>>>>>>> feature/core-services-refactor
         """Check service dependencies."""
         issues = []
         warnings = []
@@ -708,8 +790,13 @@ class ConfigurationValidator:
                     warnings.append("Large number of service dependencies may indicate design issues")
 
         return {"issues": issues, "warnings": warnings}
+<<<<<<< HEAD
 
     def _check_primitive_dependencies(self, config: Dict[str, Any]) -> Dict[str, List[str]]:
+=======
+    
+    def _check_primitive_dependencies(self, config: dict[str, Any]) -> dict[str, list[str]]:
+>>>>>>> feature/core-services-refactor
         """Check primitive dependencies."""
         issues = []
         warnings = []
@@ -728,8 +815,13 @@ class ConfigurationValidator:
                     warnings.append(f"Unknown primitive type: {primitive}")
 
         return {"issues": issues, "warnings": warnings}
+<<<<<<< HEAD
 
     def _check_circular_dependencies(self, config: Dict[str, Any]) -> Dict[str, List[str]]:
+=======
+    
+    def _check_circular_dependencies(self, config: dict[str, Any]) -> dict[str, list[str]]:
+>>>>>>> feature/core-services-refactor
         """Check for circular dependencies."""
         issues = []
         warnings = []
@@ -775,8 +867,13 @@ class ConfigurationValidator:
                         break
 
         return {"issues": issues, "warnings": warnings}
+<<<<<<< HEAD
 
     def _generate_validation_recommendations(self, result: ConfigurationValidationResult) -> List[str]:
+=======
+    
+    def _generate_validation_recommendations(self, result: ConfigurationValidationResult) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Generate recommendations based on validation results."""
         recommendations = []
 
@@ -804,11 +901,19 @@ class PerformanceOptimizationManager:
         """Initialize the performance optimization manager."""
         self.profiler = PerformanceProfiler()
         self.validator = ConfigurationValidator()
+<<<<<<< HEAD
         self.optimization_history: List[Dict[str, Any]] = []
 
         logger.info("PerformanceOptimizationManager initialized")
 
     def validate_and_optimize_configuration(self, config: Dict[str, Any]) -> Dict[str, Any]:
+=======
+        self.optimization_history: list[dict[str, Any]] = []
+        
+        logger.info("PerformanceOptimizationManager initialized")
+    
+    def validate_and_optimize_configuration(self, config: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Validate configuration and provide optimization suggestions.
         
         Args:
@@ -832,9 +937,9 @@ class PerformanceOptimizationManager:
 
     def _generate_config_optimizations(
         self,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         validation_result: ConfigurationValidationResult
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Generate optimization suggestions based on configuration."""
         suggestions = []
 
@@ -871,8 +976,13 @@ class PerformanceOptimizationManager:
             })
 
         return suggestions
+<<<<<<< HEAD
 
     def get_system_status(self) -> Dict[str, Any]:
+=======
+    
+    def get_system_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get system status information."""
         return {
             "active_profiles": len(self.profiler.active_profiles),

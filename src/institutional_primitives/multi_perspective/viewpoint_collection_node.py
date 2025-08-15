@@ -6,7 +6,7 @@
 """
 import logging
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from ..base import ExecutionContext, InstitutionalPrimitive
 from .models import ExpertViewpoint, ViewpointCollection
@@ -20,15 +20,25 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
     Collects all expert viewpoints and analyzes them for conflicts, consensus areas,
     and coverage to prepare for synthesis.
     """
+<<<<<<< HEAD
 
     def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+=======
+    
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
+>>>>>>> feature/core-services-refactor
         super().__init__(primitive_id, config)
         self.min_viewpoints = config.get("min_viewpoints", 2) if config else 2
         self.conflict_threshold = config.get("conflict_threshold", 0.3) if config else 0.3
         self.consensus_threshold = config.get("consensus_threshold", 0.7) if config else 0.7
         self.analyze_coverage = config.get("analyze_coverage", True) if config else True
+<<<<<<< HEAD
 
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+=======
+    
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute viewpoint collection and analysis.
         
         Args:
@@ -110,8 +120,13 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
                 "success": False,
                 "error": str(e)
             }
+<<<<<<< HEAD
 
     def _analyze_conflicts(self, viewpoints: List[ExpertViewpoint]) -> List[Dict[str, Any]]:
+=======
+    
+    def _analyze_conflicts(self, viewpoints: list[ExpertViewpoint]) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Analyze conflicts between viewpoints."""
         conflicts = []
 
@@ -180,8 +195,13 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
             return "confidence_difference"
         else:
             return "content_disagreement"
+<<<<<<< HEAD
 
     def _identify_consensus_areas(self, viewpoints: List[ExpertViewpoint]) -> List[str]:
+=======
+    
+    def _identify_consensus_areas(self, viewpoints: list[ExpertViewpoint]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Identify areas of consensus among viewpoints."""
         consensus_areas = []
 
@@ -203,8 +223,13 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
         consensus_areas.extend(evidence_consensus)
 
         return consensus_areas[:5]  # Limit to top 5 consensus areas
+<<<<<<< HEAD
 
     def _extract_common_keywords(self, viewpoints: List[ExpertViewpoint]) -> List[str]:
+=======
+    
+    def _extract_common_keywords(self, viewpoints: list[ExpertViewpoint]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Extract common keywords from viewpoints."""
         # Simple keyword extraction - in practice would use more sophisticated NLP
         important_keywords = [
@@ -221,8 +246,13 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
 
         # Return keywords sorted by frequency
         return sorted(keyword_counts.keys(), key=lambda k: keyword_counts[k], reverse=True)[:10]
+<<<<<<< HEAD
 
     def _find_evidence_consensus(self, viewpoints: List[ExpertViewpoint]) -> List[str]:
+=======
+    
+    def _find_evidence_consensus(self, viewpoints: list[ExpertViewpoint]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Find consensus in supporting evidence."""
         evidence_consensus = []
 
@@ -258,8 +288,13 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
         union = words1.union(words2)
 
         return len(intersection) / len(union) if union else 0.0
+<<<<<<< HEAD
 
     def _analyze_coverage(self, viewpoints: List[ExpertViewpoint], topic: str) -> Dict[str, Any]:
+=======
+    
+    def _analyze_coverage(self, viewpoints: list[ExpertViewpoint], topic: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Analyze coverage of the topic by viewpoints."""
         coverage_analysis = {
             "perspectives_covered": [],
@@ -294,11 +329,19 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
         return coverage_analysis
 
     def _calculate_quality_score(
+<<<<<<< HEAD
         self,
         viewpoints: List[ExpertViewpoint],
         conflicts: List[Dict[str, Any]],
         consensus_areas: List[str],
         coverage_analysis: Dict[str, Any]
+=======
+        self, 
+        viewpoints: list[ExpertViewpoint], 
+        conflicts: list[dict[str, Any]], 
+        consensus_areas: list[str],
+        coverage_analysis: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> float:
         """Calculate overall quality score for the viewpoint collection."""
         if not viewpoints:
@@ -335,8 +378,13 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
         )
 
         return quality_score
+<<<<<<< HEAD
 
     def get_input_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return input schema for the viewpoint collection node."""
         return {
             "type": "object",
@@ -353,8 +401,13 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
             },
             "required": ["viewpoints"]
         }
+<<<<<<< HEAD
 
     def get_output_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return output schema for the viewpoint collection node."""
         return {
             "type": "object",

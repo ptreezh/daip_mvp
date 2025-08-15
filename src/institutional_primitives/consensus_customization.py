@@ -9,7 +9,11 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -68,10 +72,10 @@ class ConsensusInput(BaseModel):
     participant_id: str
     vote: Any  # Can be boolean, numeric, categorical, or complex object
     confidence: float = Field(ge=0.0, le=1.0)
-    evidence: List[Dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
     reasoning: str = ""
     weight: float = Field(ge=0.0, default=1.0)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ConsensusResult(BaseModel):
@@ -81,11 +85,11 @@ class ConsensusResult(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     agreement_level: float = Field(ge=0.0, le=1.0)
     participant_count: int
-    supporting_participants: List[str] = Field(default_factory=list)
-    dissenting_participants: List[str] = Field(default_factory=list)
-    evidence_summary: Dict[str, Any] = Field(default_factory=dict)
+    supporting_participants: list[str] = Field(default_factory=list)
+    dissenting_participants: list[str] = Field(default_factory=list)
+    evidence_summary: dict[str, Any] = Field(default_factory=dict)
     reasoning: str = ""
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
@@ -112,8 +116,13 @@ class ConsensusConfiguration(BaseModel):
     max_iterations: int = Field(ge=1, default=3)
 
     # Custom parameters
+<<<<<<< HEAD
     custom_parameters: Dict[str, Any] = Field(default_factory=dict)
 
+=======
+    custom_parameters: dict[str, Any] = Field(default_factory=dict)
+    
+>>>>>>> feature/core-services-refactor
     # Metadata
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -136,7 +145,11 @@ class ConsensusAlgorithm(ABC):
         self.config = config
 
     @abstractmethod
+<<<<<<< HEAD
     async def calculate_consensus(self, inputs: List[ConsensusInput]) -> ConsensusResult:
+=======
+    async def calculate_consensus(self, inputs: list[ConsensusInput]) -> ConsensusResult:
+>>>>>>> feature/core-services-refactor
         """Calculate consensus from participant inputs.
         
         Args:
@@ -149,7 +162,11 @@ class ConsensusAlgorithm(ABC):
         pass
 
     @abstractmethod
+<<<<<<< HEAD
     def validate_inputs(self, inputs: List[ConsensusInput]) -> List[str]:
+=======
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Validate consensus inputs.
         
         Args:
@@ -160,8 +177,13 @@ class ConsensusAlgorithm(ABC):
 
         """
         pass
+<<<<<<< HEAD
 
     def get_algorithm_info(self) -> Dict[str, Any]:
+=======
+    
+    def get_algorithm_info(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get information about this algorithm."""
         return {
             "mechanism_id": self.config.mechanism_id,
@@ -174,8 +196,13 @@ class ConsensusAlgorithm(ABC):
 
 class MajorityVoteAlgorithm(ConsensusAlgorithm):
     """Simple majority voting algorithm."""
+<<<<<<< HEAD
 
     async def calculate_consensus(self, inputs: List[ConsensusInput]) -> ConsensusResult:
+=======
+    
+    async def calculate_consensus(self, inputs: list[ConsensusInput]) -> ConsensusResult:
+>>>>>>> feature/core-services-refactor
         """Calculate majority vote consensus."""
         if not inputs:
             return ConsensusResult(
@@ -229,8 +256,13 @@ class MajorityVoteAlgorithm(ConsensusAlgorithm):
             dissenting_participants=dissenting,
             reasoning=f"Majority vote: {majority_count}/{total_votes} participants agreed on '{consensus_value}'"
         )
+<<<<<<< HEAD
 
     def validate_inputs(self, inputs: List[ConsensusInput]) -> List[str]:
+=======
+    
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Validate inputs for majority voting."""
         errors = []
 
@@ -246,8 +278,13 @@ class MajorityVoteAlgorithm(ConsensusAlgorithm):
 
 class WeightedVoteAlgorithm(ConsensusAlgorithm):
     """Weighted voting algorithm based on participant weights."""
+<<<<<<< HEAD
 
     async def calculate_consensus(self, inputs: List[ConsensusInput]) -> ConsensusResult:
+=======
+    
+    async def calculate_consensus(self, inputs: list[ConsensusInput]) -> ConsensusResult:
+>>>>>>> feature/core-services-refactor
         """Calculate weighted vote consensus."""
         if not inputs:
             return ConsensusResult(
@@ -305,8 +342,13 @@ class WeightedVoteAlgorithm(ConsensusAlgorithm):
             dissenting_participants=dissenting,
             reasoning=f"Weighted vote: {majority_weight:.2f}/{total_weight:.2f} weight for '{consensus_value}'"
         )
+<<<<<<< HEAD
 
     def validate_inputs(self, inputs: List[ConsensusInput]) -> List[str]:
+=======
+    
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Validate inputs for weighted voting."""
         errors = []
 
@@ -328,8 +370,13 @@ class WeightedVoteAlgorithm(ConsensusAlgorithm):
 
 class EvidenceBasedAlgorithm(ConsensusAlgorithm):
     """Evidence-based consensus algorithm."""
+<<<<<<< HEAD
 
     async def calculate_consensus(self, inputs: List[ConsensusInput]) -> ConsensusResult:
+=======
+    
+    async def calculate_consensus(self, inputs: list[ConsensusInput]) -> ConsensusResult:
+>>>>>>> feature/core-services-refactor
         """Calculate evidence-based consensus."""
         if not inputs:
             return ConsensusResult(
@@ -424,8 +471,13 @@ class EvidenceBasedAlgorithm(ConsensusAlgorithm):
             reasoning=f"Evidence-based consensus: '{consensus_value}' with score {best_score['score']:.3f} "
                      f"({best_score['evidence_count']} evidence items, {best_score['participant_count']} participants)"
         )
+<<<<<<< HEAD
 
     def validate_inputs(self, inputs: List[ConsensusInput]) -> List[str]:
+=======
+    
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Validate inputs for evidence-based consensus."""
         errors = []
 
@@ -441,8 +493,13 @@ class EvidenceBasedAlgorithm(ConsensusAlgorithm):
 
 class BayesianConsensusAlgorithm(ConsensusAlgorithm):
     """Bayesian consensus algorithm using prior beliefs and evidence."""
+<<<<<<< HEAD
 
     async def calculate_consensus(self, inputs: List[ConsensusInput]) -> ConsensusResult:
+=======
+    
+    async def calculate_consensus(self, inputs: list[ConsensusInput]) -> ConsensusResult:
+>>>>>>> feature/core-services-refactor
         """Calculate Bayesian consensus."""
         if not inputs:
             return ConsensusResult(
@@ -525,8 +582,13 @@ class BayesianConsensusAlgorithm(ConsensusAlgorithm):
                 "likelihood_false": likelihood_false
             }
         )
+<<<<<<< HEAD
 
     def validate_inputs(self, inputs: List[ConsensusInput]) -> List[str]:
+=======
+    
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Validate inputs for Bayesian consensus."""
         errors = []
 
@@ -549,9 +611,15 @@ class ConsensusRegistry:
 
     def __init__(self):
         """Initialize the consensus registry."""
+<<<<<<< HEAD
         self.algorithms: Dict[str, type] = {}
         self.configurations: Dict[str, ConsensusConfiguration] = {}
 
+=======
+        self.algorithms: dict[str, type] = {}
+        self.configurations: dict[str, ConsensusConfiguration] = {}
+        
+>>>>>>> feature/core-services-refactor
         # Register built-in algorithms
         self._register_builtin_algorithms()
 
@@ -633,12 +701,21 @@ class ConsensusRegistry:
         except Exception as e:
             logger.error(f"Error creating consensus instance: {e}")
             return None
+<<<<<<< HEAD
 
     def list_algorithms(self) -> List[str]:
         """List all registered algorithm types."""
         return list(self.algorithms.keys())
 
     def list_configurations(self) -> List[ConsensusConfiguration]:
+=======
+    
+    def list_algorithms(self) -> list[str]:
+        """List all registered algorithm types."""
+        return list(self.algorithms.keys())
+    
+    def list_configurations(self) -> list[ConsensusConfiguration]:
+>>>>>>> feature/core-services-refactor
         """List all registered configurations."""
         return list(self.configurations.values())
 
@@ -657,8 +734,13 @@ class ConsensusManager:
     def __init__(self):
         """Initialize the consensus manager."""
         self.registry = ConsensusRegistry()
+<<<<<<< HEAD
         self.active_sessions: Dict[str, ConsensusAlgorithm] = {}
 
+=======
+        self.active_sessions: dict[str, ConsensusAlgorithm] = {}
+        
+>>>>>>> feature/core-services-refactor
         # Create default configurations
         self._create_default_configurations()
 
@@ -755,7 +837,7 @@ class ConsensusManager:
     async def calculate_consensus(
         self,
         mechanism_id: str,
-        inputs: List[ConsensusInput],
+        inputs: list[ConsensusInput],
         session_id: str = None
     ) -> Optional[ConsensusResult]:
         """Calculate consensus using a specific mechanism.
@@ -812,8 +894,13 @@ class ConsensusManager:
             logger.info(f"Ended consensus session: {session_id}")
             return True
         return False
+<<<<<<< HEAD
 
     def get_available_mechanisms(self) -> List[Dict[str, Any]]:
+=======
+    
+    def get_available_mechanisms(self) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get information about available consensus mechanisms."""
         mechanisms = []
 
@@ -829,8 +916,13 @@ class ConsensusManager:
             })
 
         return mechanisms
+<<<<<<< HEAD
 
     def get_system_status(self) -> Dict[str, Any]:
+=======
+    
+    def get_system_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get system status information."""
         return {
             "registered_algorithms": len(self.registry.algorithms),

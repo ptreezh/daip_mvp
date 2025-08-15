@@ -7,7 +7,11 @@
 import logging
 from datetime import datetime
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from rich.console import Console
 from rich.panel import Panel
@@ -45,7 +49,7 @@ class TransparencyController:
 
     def present_workflow_result(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         workflow_type: str,
         output_format: str = None,
@@ -101,7 +105,7 @@ class TransparencyController:
 
     def present_with_traceability(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         include_reasoning: bool = True,
         include_confidence: bool = True,
@@ -155,10 +159,14 @@ class TransparencyController:
 
     def validate_result_quality(
         self,
-        result: Dict[str, Any],
-        validation_criteria: Dict[str, Any] = None,
+        result: dict[str, Any],
+        validation_criteria: dict[str, Any] = None,
         user_id: Optional[str] = None
+<<<<<<< HEAD
     ) -> List[Dict[str, Any]]:
+=======
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Validate result quality and return validation results.
         
         Args:
@@ -187,7 +195,7 @@ class TransparencyController:
 
     def export_result(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         format_type: str,
         include_traceability: bool = False,
@@ -230,8 +238,13 @@ class TransparencyController:
             logger.error(f"Error exporting result: {e}")
             self.console.print(f"[red]Error exporting result: {e}[/red]")
             return ""
+<<<<<<< HEAD
 
     def get_feedback_summary(self, execution_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def get_feedback_summary(self, execution_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get feedback summary for a specific execution."""
         try:
             if execution_id in self.feedback_collector.feedback_storage:
@@ -275,18 +288,27 @@ class TransparencyController:
             title="Configuration",
             border_style="blue"
         ))
+<<<<<<< HEAD
 
     def get_supported_formats(self) -> List[str]:
         """Get list of supported output formats."""
         return self.result_formatter.get_supported_formats()
 
     def get_transparency_levels(self) -> List[str]:
+=======
+    
+    def get_supported_formats(self) -> list[str]:
+        """Get list of supported output formats."""
+        return self.result_formatter.get_supported_formats()
+    
+    def get_transparency_levels(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Get list of supported transparency levels."""
         return ["minimal", "moderate", "detailed"]
 
     def _display_result_with_transparency(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         transparency_level: str
     ) -> None:
         """Display result with specified transparency level."""
@@ -296,7 +318,7 @@ class TransparencyController:
 
     def _format_and_save_result(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         output_format: str,
         save_to_file: bool
@@ -322,7 +344,7 @@ class TransparencyController:
 
     def _collect_user_feedback(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         workflow_type: str,
         user_id: Optional[str]
@@ -347,8 +369,13 @@ class TransparencyController:
             logger.error(f"Error collecting user feedback: {e}")
             self.console.print(f"[red]Error collecting feedback: {e}[/red]")
             return None
+<<<<<<< HEAD
 
     def _display_validation_summary(self, validation_results: List[Any]) -> None:
+=======
+    
+    def _display_validation_summary(self, validation_results: list[Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Display validation results summary."""
         if not validation_results:
             self.console.print("[yellow]No validation results to display[/yellow]")
@@ -375,11 +402,15 @@ class TransparencyController:
 
     def create_transparency_report(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         workflow_type: str,
         include_all_details: bool = True
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Create a comprehensive transparency report.
         
         Args:

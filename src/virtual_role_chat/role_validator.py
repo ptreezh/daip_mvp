@@ -5,7 +5,11 @@ with appropriate context, and manage role assignments in chat rooms.
 """
 
 import logging
+<<<<<<< HEAD
 from typing import Dict, List, Optional
+=======
+from typing import Optional
+>>>>>>> feature/core-services-refactor
 
 from src.core_services.role_manager import Role, RoleManager
 
@@ -31,9 +35,15 @@ class RoleValidator:
 
         """
         self.role_manager = role_manager or RoleManager()
+<<<<<<< HEAD
         self._role_cache: Dict[str, Role] = {}
 
     def validate_roles(self, role_ids: List[str]) -> ValidationResult:
+=======
+        self._role_cache: dict[str, Role] = {}
+    
+    def validate_roles(self, role_ids: list[str]) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate that all specified roles exist and are available.
         
         Args:
@@ -148,8 +158,13 @@ class RoleValidator:
             reasoning="Chat room configuration is valid.",
             suggested_correction=None
         )
+<<<<<<< HEAD
 
     def initialize_roles_for_room(self, role_ids: List[str], room_context: Dict) -> Dict[str, Dict]:
+=======
+    
+    def initialize_roles_for_room(self, role_ids: list[str], room_context: dict) -> dict[str, dict]:
+>>>>>>> feature/core-services-refactor
         """Initialize roles with appropriate context for a chat room.
         
         Args:
@@ -177,8 +192,13 @@ class RoleValidator:
                 logger.error(f"Error initializing role {role_id}: {e}")
 
         return initialized_roles
+<<<<<<< HEAD
 
     def get_available_roles(self) -> List[Dict[str, str]]:
+=======
+    
+    def get_available_roles(self) -> list[dict[str, str]]:
+>>>>>>> feature/core-services-refactor
         """Get a list of all available roles.
         
         Returns:
@@ -195,8 +215,13 @@ class RoleValidator:
             }
             for role in roles
         ]
+<<<<<<< HEAD
 
     def get_roles_by_capability(self, capability: str) -> List[str]:
+=======
+    
+    def get_roles_by_capability(self, capability: str) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Get roles that have a specific capability.
         
         Args:
@@ -214,8 +239,13 @@ class RoleValidator:
                 matching_roles.append(role.id)
 
         return matching_roles
+<<<<<<< HEAD
 
     def suggest_roles_for_topic(self, topic: str, max_suggestions: int = 5) -> List[str]:
+=======
+    
+    def suggest_roles_for_topic(self, topic: str, max_suggestions: int = 5) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Suggest roles that might be relevant for a given topic.
         
         Args:
@@ -291,8 +321,13 @@ class RoleValidator:
 
         # Additional validation can be added here
         return True
+<<<<<<< HEAD
 
     def _validate_mode_compatibility(self, role_ids: List[str], mode: str) -> ValidationResult:
+=======
+    
+    def _validate_mode_compatibility(self, role_ids: list[str], mode: str) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate that roles are compatible with the chat mode.
         
         Args:
@@ -358,8 +393,13 @@ class RoleValidator:
             "debate": 6
         }
         return mode_requirements.get(mode, 10)
+<<<<<<< HEAD
 
     def _generate_role_suggestions(self, invalid_roles: List[str]) -> str:
+=======
+    
+    def _generate_role_suggestions(self, invalid_roles: list[str]) -> str:
+>>>>>>> feature/core-services-refactor
         """Generate suggestions for invalid or missing roles.
         
         Args:
@@ -389,8 +429,13 @@ class RoleValidator:
         else:
             available_ids = [role["id"] for role in available_roles[:5]]
             return f"Available roles include: {', '.join(available_ids)}"
+<<<<<<< HEAD
 
     def _create_role_context(self, role: Role, room_context: Dict) -> Dict:
+=======
+    
+    def _create_role_context(self, role: Role, room_context: dict) -> dict:
+>>>>>>> feature/core-services-refactor
         """Create initialization context for a role in a chat room.
         
         Args:

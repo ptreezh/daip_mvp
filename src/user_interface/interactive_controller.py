@@ -7,7 +7,12 @@
 import json
 import logging
 import time
+<<<<<<< HEAD
 from typing import Any, Callable, Dict, List
+=======
+from collections.abc import Callable
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from rich.console import Console
 from rich.panel import Panel
@@ -28,9 +33,15 @@ class InteractiveController:
     def __init__(self, console: Console = None, config_dir: str = ".kiro/config"):
         """Initialize the interactive controller."""
         self.console = console or Console()
+<<<<<<< HEAD
         self.intervention_callbacks: Dict[str, List[Callable]] = {}
         self.customization_options: Dict[str, Dict[str, Any]] = {}
 
+=======
+        self.intervention_callbacks: dict[str, list[Callable]] = {}
+        self.customization_options: dict[str, dict[str, Any]] = {}
+        
+>>>>>>> feature/core-services-refactor
         # Initialize component managers
         self.parameter_manager = ParameterManager(console=self.console)
         self.workflow_steering = WorkflowSteering(console=self.console)
@@ -56,9 +67,9 @@ class InteractiveController:
     async def trigger_intervention(
         self,
         point_id: str,
-        context: Dict[str, Any],
-        options: List[str] = None
-    ) -> Dict[str, Any]:
+        context: dict[str, Any],
+        options: list[str] = None
+    ) -> dict[str, Any]:
         """Trigger user intervention at a specific point."""
         if point_id not in self.intervention_callbacks:
             return {"action": "continue", "data": {}}
@@ -107,8 +118,8 @@ class InteractiveController:
     async def customize_workflow_config(
         self,
         workflow_name: str,
-        current_config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        current_config: dict[str, Any]
+    ) -> dict[str, Any]:
         """Allow user to customize workflow configuration interactively."""
         self.console.print(f"\n[blue]🔧 Customizing {workflow_name} Configuration[/blue]")
 
@@ -150,8 +161,8 @@ class InteractiveController:
 
     async def get_user_parameters(
         self,
-        parameter_definitions: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        parameter_definitions: dict[str, dict[str, Any]]
+    ) -> dict[str, Any]:
         """Get parameters from user based on definitions."""
         self.console.print("\n[blue]📝 Parameter Configuration[/blue]")
 
@@ -210,8 +221,8 @@ class InteractiveController:
 
     def create_workflow_steering_menu(
         self,
-        workflow_state: Dict[str, Any],
-        available_actions: List[str]
+        workflow_state: dict[str, Any],
+        available_actions: list[str]
     ) -> str:
         """Create an interactive menu for workflow steering."""
         self.console.print("\n[yellow]🎛️  Workflow Steering[/yellow]")
@@ -234,8 +245,8 @@ class InteractiveController:
 
     async def configure_quality_thresholds(
         self,
-        current_thresholds: Dict[str, float]
-    ) -> Dict[str, float]:
+        current_thresholds: dict[str, float]
+    ) -> dict[str, float]:
         """Interactive configuration of quality thresholds."""
         self.console.print("\n[blue]🎯 Quality Threshold Configuration[/blue]")
 
@@ -269,7 +280,7 @@ class InteractiveController:
     def display_workflow_options(
         self,
         workflow_name: str,
-        options: Dict[str, Any]
+        options: dict[str, Any]
     ) -> None:
         """Display available workflow options."""
         self.console.print(f"\n[blue]⚙️  {workflow_name} Options[/blue]")
@@ -282,8 +293,13 @@ class InteractiveController:
                     self.console.print(f"  • {key}: {value}")
             else:
                 self.console.print(f"  • {settings}")
+<<<<<<< HEAD
 
     async def _handle_modification(self, context: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    async def _handle_modification(self, context: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Handle modification request from user."""
         self.console.print("\n[blue]🔧 Modification Options[/blue]")
 
@@ -330,8 +346,13 @@ class InteractiveController:
                 "new_value": new_value
             }
         }
+<<<<<<< HEAD
 
     async def _handle_pause(self) -> Dict[str, Any]:
+=======
+    
+    async def _handle_pause(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Handle pause request from user."""
         self.console.print("\n[yellow]⏸️  Workflow Paused[/yellow]")
 
@@ -368,8 +389,8 @@ class InteractiveController:
     async def _modify_config_section(
         self,
         section_name: str,
-        section_config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        section_config: dict[str, Any]
+    ) -> dict[str, Any]:
         """Modify a specific configuration section."""
         self.console.print(f"\n[cyan]Modifying {section_name}:[/cyan]")
 
@@ -429,9 +450,9 @@ class InteractiveController:
     async def collect_workflow_parameters(
         self,
         workflow_name: str,
-        parameter_definitions: List[ParameterDefinition],
-        context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        parameter_definitions: list[ParameterDefinition],
+        context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """Collect workflow parameters using the parameter manager."""
         self.console.print(f"\n[blue]📝 Collecting Parameters for {workflow_name}[/blue]")
 
@@ -444,7 +465,7 @@ class InteractiveController:
     async def setup_workflow_steering(
         self,
         workflow_name: str,
-        steering_points: List[Dict[str, Any]]
+        steering_points: list[dict[str, Any]]
     ) -> None:
         """Setup workflow steering points."""
         self.console.print(f"\n[blue]🎛️  Setting up Steering for {workflow_name}[/blue]")
@@ -463,8 +484,8 @@ class InteractiveController:
     async def trigger_workflow_steering(
         self,
         point_id: str,
-        context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """Trigger workflow steering at a specific point."""
         command = await self.workflow_steering.trigger_steering_point(
             point_id=point_id,
@@ -483,7 +504,7 @@ class InteractiveController:
         self,
         workflow_name: str,
         config_name: str = "custom"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create a workflow configuration interactively."""
         return await self.configuration_manager.create_configuration(
             workflow_name=workflow_name,
@@ -493,14 +514,14 @@ class InteractiveController:
     def load_workflow_configuration(
         self,
         config_name: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Load a workflow configuration."""
         return self.configuration_manager.load_configuration(config_name)
 
     def save_workflow_configuration(
         self,
         config_name: str,
-        config: Dict[str, Any]
+        config: dict[str, Any]
     ) -> bool:
         """Save a workflow configuration."""
         return self.configuration_manager._save_configuration(config_name, config)
@@ -508,15 +529,15 @@ class InteractiveController:
     def list_workflow_configurations(
         self,
         workflow_name: str = None
-    ) -> List[str]:
+    ) -> list[str]:
         """List available workflow configurations."""
         return self.configuration_manager.list_configurations(workflow_name)
 
     async def adjust_workflow_parameters(
         self,
-        current_parameters: Dict[str, Any],
-        parameter_definitions: List[ParameterDefinition]
-    ) -> Dict[str, Any]:
+        current_parameters: dict[str, Any],
+        parameter_definitions: list[ParameterDefinition]
+    ) -> dict[str, Any]:
         """Allow interactive adjustment of workflow parameters."""
         return await self.parameter_manager.interactive_parameter_adjustment(
             current_parameters=current_parameters,
@@ -526,7 +547,7 @@ class InteractiveController:
     def create_parameter_preset(
         self,
         preset_name: str,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         description: str = ""
     ) -> bool:
         """Create a parameter preset for reuse."""
@@ -535,12 +556,21 @@ class InteractiveController:
             parameters=parameters,
             description=description
         )
+<<<<<<< HEAD
 
     def load_parameter_preset(self, preset_name: str) -> Dict[str, Any]:
         """Load a parameter preset."""
         return self.parameter_manager.load_parameter_preset(preset_name)
 
     def get_steering_history(self) -> List[Dict[str, Any]]:
+=======
+    
+    def load_parameter_preset(self, preset_name: str) -> dict[str, Any]:
+        """Load a parameter preset."""
+        return self.parameter_manager.load_parameter_preset(preset_name)
+    
+    def get_steering_history(self) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get the history of steering commands."""
         commands = self.workflow_steering.get_steering_history()
         return [
@@ -556,7 +586,7 @@ class InteractiveController:
 
     def display_intervention_summary(
         self,
-        interventions: List[Dict[str, Any]]
+        interventions: list[dict[str, Any]]
     ) -> None:
         """Display a summary of user interventions."""
         if not interventions:
@@ -587,8 +617,8 @@ class InteractiveController:
     async def handle_workflow_customization_menu(
         self,
         workflow_name: str,
-        current_config: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        current_config: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """Display and handle workflow customization menu."""
         self.console.print(f"\n[blue]🔧 Workflow Customization: {workflow_name}[/blue]")
 
@@ -674,8 +704,13 @@ class InteractiveController:
                 break
 
         return current_config or {}
+<<<<<<< HEAD
 
     def _display_context(self, context: Dict[str, Any]) -> None:
+=======
+    
+    def _display_context(self, context: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Display context information."""
         self.console.print("\n[blue]Current Context:[/blue]")
 
@@ -694,8 +729,13 @@ class InteractiveController:
                     if len(display_value) > 100:
                         display_value = display_value[:97] + "..."
                     self.console.print(f"  • {key}: {display_value}")
+<<<<<<< HEAD
 
     def _display_config(self, config: Dict[str, Any]) -> None:
+=======
+    
+    def _display_config(self, config: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Display configuration in a readable format."""
         syntax = Syntax(
             json.dumps(config, indent=2, ensure_ascii=False),
@@ -704,8 +744,13 @@ class InteractiveController:
             line_numbers=True
         )
         self.console.print(Panel(syntax, title="Current Configuration"))
+<<<<<<< HEAD
 
     def _display_workflow_state(self, state: Dict[str, Any]) -> None:
+=======
+    
+    def _display_workflow_state(self, state: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Display current workflow state."""
         self.console.print("\n[blue]Current Workflow State:[/blue]")
 

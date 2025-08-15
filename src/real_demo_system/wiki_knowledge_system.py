@@ -10,7 +10,11 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Set
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -44,16 +48,22 @@ class KnowledgeEntry:
     content: str
     knowledge_type: KnowledgeType
     status: KnowledgeStatus
-    tags: List[str]
-    related_entries: List[str]
-    source_data: Dict[str, Any]
+    tags: list[str]
+    related_entries: list[str]
+    source_data: dict[str, Any]
     quality_score: float
     created_at: datetime
     updated_at: datetime
     version: int
+<<<<<<< HEAD
     contributors: List[str]
 
     def to_dict(self) -> Dict[str, Any]:
+=======
+    contributors: list[str]
+    
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         data = asdict(self)
         data['knowledge_type'] = self.knowledge_type.value
         data['status'] = self.status.value
@@ -65,10 +75,16 @@ class KnowledgeEntry:
 @dataclass
 class KnowledgeGraph:
     """知识图谱"""
+<<<<<<< HEAD
 
     nodes: Dict[str, Dict[str, Any]]
     edges: List[Dict[str, Any]]
     clusters: Dict[str, List[str]]
+=======
+    nodes: dict[str, dict[str, Any]]
+    edges: list[dict[str, Any]]
+    clusters: dict[str, list[str]]
+>>>>>>> feature/core-services-refactor
 
 
 class WikiKnowledgeSystem:
@@ -88,11 +104,17 @@ class WikiKnowledgeSystem:
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
         # 知识库
-        self.knowledge_entries: Dict[str, KnowledgeEntry] = {}
+        self.knowledge_entries: dict[str, KnowledgeEntry] = {}
         self.knowledge_graph = KnowledgeGraph(nodes={}, edges=[], clusters={})
+<<<<<<< HEAD
         self.tag_index: Dict[str, Set[str]] = {}
         self.search_index: Dict[str, Set[str]] = {}
 
+=======
+        self.tag_index: dict[str, set[str]] = {}
+        self.search_index: dict[str, set[str]] = {}
+        
+>>>>>>> feature/core-services-refactor
         # 加载现有知识
         self._load_existing_knowledge()
 
@@ -144,9 +166,15 @@ class WikiKnowledgeSystem:
             logger.error(f"Failed to save knowledge: {e}")
 
     async def distill_debate_knowledge(
+<<<<<<< HEAD
         self,
         debate_transcript: Dict[str, Any],
         consensus_result: Dict[str, Any]
+=======
+        self, 
+        debate_transcript: dict[str, Any],
+        consensus_result: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> str:
         """从辩论中提炼知识
         
@@ -255,8 +283,13 @@ class WikiKnowledgeSystem:
         except Exception as e:
             logger.error(f"Failed to distill debate knowledge: {e}")
             return ""
+<<<<<<< HEAD
 
     def _summarize_debate_transcript(self, transcript: List[Dict[str, Any]]) -> str:
+=======
+    
+    def _summarize_debate_transcript(self, transcript: list[dict[str, Any]]) -> str:
+>>>>>>> feature/core-services-refactor
         """总结辩论记录"""
         if not transcript:
             return "无辩论记录"
@@ -277,8 +310,13 @@ class WikiKnowledgeSystem:
             summary_parts.append(f"- {role_name}: {len(arguments)}个论证 ({', '.join(set(arg_types))})")
 
         return "\n".join(summary_parts)
+<<<<<<< HEAD
 
     def _extract_tags_from_content(self, content: str) -> List[str]:
+=======
+    
+    def _extract_tags_from_content(self, content: str) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """从内容中提取标签"""
         # 简化的标签提取
         tags = []
@@ -320,8 +358,8 @@ class WikiKnowledgeSystem:
         self,
         title: str,
         analysis_content: str,
-        source_data: Dict[str, Any],
-        tags: Optional[List[str]] = None
+        source_data: dict[str, Any],
+        tags: Optional[list[str]] = None
     ) -> str:
         """创建分析知识条目
         
@@ -371,10 +409,14 @@ class WikiKnowledgeSystem:
     def search_knowledge(
         self,
         query: str,
-        knowledge_types: Optional[List[KnowledgeType]] = None,
-        tags: Optional[List[str]] = None,
+        knowledge_types: Optional[list[KnowledgeType]] = None,
+        tags: Optional[list[str]] = None,
         limit: int = 10
+<<<<<<< HEAD
     ) -> List[Dict[str, Any]]:
+=======
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """搜索知识
         
         Args:
@@ -431,10 +473,17 @@ class WikiKnowledgeSystem:
         return results[:limit]
 
     def _calculate_relevance_score(
+<<<<<<< HEAD
         self,
         entry: KnowledgeEntry,
         query: str,
         tags: Optional[List[str]]
+=======
+        self, 
+        entry: KnowledgeEntry, 
+        query: str, 
+        tags: Optional[list[str]]
+>>>>>>> feature/core-services-refactor
     ) -> float:
         """计算相关性分数"""
         score = 0.0
@@ -464,14 +513,24 @@ class WikiKnowledgeSystem:
         score += freshness * 0.1
 
         return min(score, 1.0)
+<<<<<<< HEAD
 
     def get_knowledge_by_id(self, entry_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def get_knowledge_by_id(self, entry_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """根据ID获取知识条目"""
         if entry_id in self.knowledge_entries:
             return self.knowledge_entries[entry_id].to_dict()
         return None
+<<<<<<< HEAD
 
     def get_related_knowledge(self, entry_id: str, limit: int = 5) -> List[Dict[str, Any]]:
+=======
+    
+    def get_related_knowledge(self, entry_id: str, limit: int = 5) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取相关知识"""
         if entry_id not in self.knowledge_entries:
             return []
@@ -505,8 +564,13 @@ class WikiKnowledgeSystem:
         results.sort(key=lambda x: x['relevance_score'], reverse=True)
 
         return results[:limit]
+<<<<<<< HEAD
 
     def get_knowledge_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_knowledge_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取知识库统计信息"""
         total_entries = len(self.knowledge_entries)
 
@@ -541,8 +605,13 @@ class WikiKnowledgeSystem:
                 default=datetime.now()
             ).isoformat()
         }
+<<<<<<< HEAD
 
     def export_knowledge_graph(self) -> Dict[str, Any]:
+=======
+    
+    def export_knowledge_graph(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """导出知识图谱"""
         # 构建节点
         nodes = {}

@@ -9,7 +9,11 @@ import logging
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -19,14 +23,17 @@ logger = logging.getLogger(__name__)
 class UserSession(BaseModel):
     """Represents a user session with authentication and context information.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     session_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
     created_at: datetime = Field(default_factory=datetime.now)
     last_active: datetime = Field(default_factory=datetime.now)
     expires_at: Optional[datetime] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    context: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    context: dict[str, Any] = Field(default_factory=dict)
     is_active: bool = True
 
 
@@ -39,12 +46,12 @@ class UserProfile(BaseModel):
     username: str
     created_at: datetime = Field(default_factory=datetime.now)
     last_active: datetime = Field(default_factory=datetime.now)
-    preferences: Dict[str, Any] = Field(default_factory=dict)
-    background_knowledge: List[str] = Field(default_factory=list)
-    interaction_history: List[Dict[str, Any]] = Field(default_factory=list)
-    intent_patterns: Dict[str, float] = Field(default_factory=dict)
-    sessions: List[str] = Field(default_factory=list)  # List of session IDs
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    preferences: dict[str, Any] = Field(default_factory=dict)
+    background_knowledge: list[str] = Field(default_factory=list)
+    interaction_history: list[dict[str, Any]] = Field(default_factory=list)
+    intent_patterns: dict[str, float] = Field(default_factory=dict)
+    sessions: list[str] = Field(default_factory=list)  # List of session IDs
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class UserProfileService:
@@ -70,9 +77,15 @@ class UserProfileService:
         self.sessions_dir.mkdir(parents=True, exist_ok=True)
 
         # In-memory caches for active profiles and sessions
+<<<<<<< HEAD
         self._profile_cache: Dict[str, UserProfile] = {}
         self._session_cache: Dict[str, UserSession] = {}
 
+=======
+        self._profile_cache: dict[str, UserProfile] = {}
+        self._session_cache: dict[str, UserSession] = {}
+        
+>>>>>>> feature/core-services-refactor
         # Load active sessions into memory
         self._load_active_sessions()
 
@@ -368,8 +381,13 @@ class UserProfileService:
 
         logger.info(f"Ended session {session_id}")
         return True
+<<<<<<< HEAD
 
     def get_active_sessions_for_user(self, user_id: str) -> List[UserSession]:
+=======
+    
+    def get_active_sessions_for_user(self, user_id: str) -> list[UserSession]:
+>>>>>>> feature/core-services-refactor
         """Get all active sessions for a user.
         
         Args:
@@ -408,8 +426,13 @@ class UserProfileService:
 
         logger.info(f"Cleaned up {count} expired sessions")
         return count
+<<<<<<< HEAD
 
     def add_interaction_to_profile(self, user_id: str, interaction_type: str, content: str, metadata: Dict[str, Any] = None) -> bool:
+=======
+    
+    def add_interaction_to_profile(self, user_id: str, interaction_type: str, content: str, metadata: dict[str, Any] = None) -> bool:
+>>>>>>> feature/core-services-refactor
         """Add an interaction to a user's profile history.
         
         Args:

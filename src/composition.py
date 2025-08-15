@@ -8,7 +8,7 @@
     This approach to dependency injection helps to decouple the components.
 """
 import asyncio
-from typing import Any, Dict
+from typing import Any
 
 from src.config_loader import load_config
 from src.core_services.role_manager import RoleManager  # Import RoleManager
@@ -18,7 +18,7 @@ from src.kernel.llm_interface import LLMConfig, LLMFactory
 from src.protocols.debate_protocol import DebateProtocol
 
 
-def create_application_dependencies(output_queue: asyncio.Queue) -> Dict[str, Any]:
+def create_application_dependencies(output_queue: asyncio.Queue) -> dict[str, Any]:
     """Creates and wires up all application dependencies.
 
     Args:
@@ -26,7 +26,6 @@ def create_application_dependencies(output_queue: asyncio.Queue) -> Dict[str, An
 
     Returns:
         A dictionary containing the initialized components.
-
     """
     # Load configuration
     app_config = load_config()

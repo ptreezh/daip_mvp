@@ -9,7 +9,11 @@ of the Human User Intelligence Layer.
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -21,13 +25,16 @@ logger = logging.getLogger(__name__)
 class PersonalContext(BaseModel):
     """Represents personal context information for a user.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     user_id: str
-    background_knowledge: List[Dict[str, Any]] = Field(default_factory=list)
-    interaction_patterns: Dict[str, float] = Field(default_factory=dict)
-    learning_preferences: Dict[str, Any] = Field(default_factory=dict)
-    expertise_areas: List[Dict[str, Any]] = Field(default_factory=list)
-    conversation_history: List[Dict[str, Any]] = Field(default_factory=list)
+    background_knowledge: list[dict[str, Any]] = Field(default_factory=list)
+    interaction_patterns: dict[str, float] = Field(default_factory=dict)
+    learning_preferences: dict[str, Any] = Field(default_factory=dict)
+    expertise_areas: list[dict[str, Any]] = Field(default_factory=list)
+    conversation_history: list[dict[str, Any]] = Field(default_factory=list)
     last_updated: datetime = Field(default_factory=datetime.now)
 
 
@@ -67,9 +74,15 @@ class PersonalContextServiceInterface(ABC):
 
     @abstractmethod
     def update_user_preferences(
+<<<<<<< HEAD
         self,
         user_id: str,
         interaction_data: Dict[str, Any]
+=======
+        self, 
+        user_id: str, 
+        interaction_data: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> bool:
         """Learn from user interactions to improve personalization.
         
@@ -85,9 +98,15 @@ class PersonalContextServiceInterface(ABC):
 
     @abstractmethod
     def add_background_knowledge(
+<<<<<<< HEAD
         self,
         user_id: str,
         knowledge_item: Dict[str, Any]
+=======
+        self, 
+        user_id: str, 
+        knowledge_item: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> bool:
         """Add background knowledge for a user.
         
@@ -106,7 +125,11 @@ class PersonalContextServiceInterface(ABC):
         self,
         user_id: str,
         topic: str
+<<<<<<< HEAD
     ) -> List[Dict[str, Any]]:
+=======
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get user's relevant background knowledge for a topic.
         
         Args:
@@ -121,9 +144,15 @@ class PersonalContextServiceInterface(ABC):
 
     @abstractmethod
     def add_conversation_entry(
+<<<<<<< HEAD
         self,
         user_id: str,
         entry: Dict[str, Any]
+=======
+        self, 
+        user_id: str, 
+        entry: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> bool:
         """Add an entry to the user's conversation history.
         
@@ -142,7 +171,11 @@ class PersonalContextServiceInterface(ABC):
         self,
         user_id: str,
         limit: int = 10
+<<<<<<< HEAD
     ) -> List[Dict[str, Any]]:
+=======
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get recent conversation history for a user.
         
         Args:
@@ -235,9 +268,15 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
         return context
 
     def update_user_preferences(
+<<<<<<< HEAD
         self,
         user_id: str,
         interaction_data: Dict[str, Any]
+=======
+        self, 
+        user_id: str, 
+        interaction_data: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> bool:
         """Update user preferences based on interaction data.
         
@@ -295,9 +334,15 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
             return False
 
     def add_background_knowledge(
+<<<<<<< HEAD
         self,
         user_id: str,
         knowledge_item: Dict[str, Any]
+=======
+        self, 
+        user_id: str, 
+        knowledge_item: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> bool:
         """Add background knowledge for a user.
         
@@ -345,7 +390,11 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
         self,
         user_id: str,
         topic: str
+<<<<<<< HEAD
     ) -> List[Dict[str, Any]]:
+=======
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get user's relevant background knowledge for a topic.
         
         Args:
@@ -390,9 +439,15 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
             return []
 
     def add_conversation_entry(
+<<<<<<< HEAD
         self,
         user_id: str,
         entry: Dict[str, Any]
+=======
+        self, 
+        user_id: str, 
+        entry: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> bool:
         """Add an entry to the user's conversation history.
         
@@ -438,7 +493,11 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
         self,
         user_id: str,
         limit: int = 10
+<<<<<<< HEAD
     ) -> List[Dict[str, Any]]:
+=======
+    ) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get recent conversation history for a user.
         
         Args:

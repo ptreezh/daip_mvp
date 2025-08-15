@@ -7,7 +7,11 @@
 import logging
 import uuid
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +45,13 @@ class RealTimeConflictMonitor:
         except Exception as e:
             logger.error(f"启动监控失败: {e}")
             return None
+<<<<<<< HEAD
 
     def detect_emerging_conflicts(self, new_knowledge: Dict[str, Any]) -> List[Dict[str, Any]]:
+=======
+    
+    def detect_emerging_conflicts(self, new_knowledge: dict[str, Any]) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """检测新兴冲突"""
         try:
             emerging_conflicts = []
@@ -71,8 +80,13 @@ class RealTimeConflictMonitor:
         except Exception as e:
             logger.error(f"检测新兴冲突失败: {e}")
             return []
+<<<<<<< HEAD
 
     def send_conflict_alert(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def send_conflict_alert(self, conflict: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """发送冲突警报"""
         try:
             alert_id = str(uuid.uuid4())
@@ -93,8 +107,13 @@ class RealTimeConflictMonitor:
         except Exception as e:
             logger.error(f"发送冲突警报失败: {e}")
             return {"success": False, "error": str(e)}
+<<<<<<< HEAD
 
     def _initialize_monitoring_rules(self) -> Dict[str, Any]:
+=======
+    
+    def _initialize_monitoring_rules(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """初始化监控规则"""
         return {
             "contradiction_detection": {

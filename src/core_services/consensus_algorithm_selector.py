@@ -11,7 +11,11 @@ Requirements: 11.4, 11.5, 11.8, 11.10
 import logging
 from dataclasses import dataclass
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Type
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .advanced_consensus_algorithms import (
     AdvancedConsensusAlgorithm,
@@ -48,15 +52,15 @@ class SelectionContext:
     time_constraint: float  # 0.0 (no constraint) to 1.0 (very tight)
     accuracy_requirement: float  # 0.0 to 1.0
     domain: Optional[str] = None
-    previous_algorithm_performance: Optional[Dict[str, float]] = None
+    previous_algorithm_performance: Optional[dict[str, float]] = None
 
 
 class AlgorithmPerformanceTracker:
     """Tracks performance of different algorithms over time."""
 
     def __init__(self):
-        self.performance_history: Dict[ConsensusAlgorithmType, List[float]] = {}
-        self.context_performance: Dict[str, Dict[ConsensusAlgorithmType, List[float]]] = {}
+        self.performance_history: dict[ConsensusAlgorithmType, list[float]] = {}
+        self.context_performance: dict[str, dict[ConsensusAlgorithmType, list[float]]] = {}
         self.logger = logging.getLogger("algorithm_performance_tracker")
 
     def record_performance(
@@ -121,7 +125,7 @@ class ConsensusAlgorithmSelector:
         self.performance_tracker = AlgorithmPerformanceTracker()
 
         # Available algorithms
-        self.algorithms: Dict[ConsensusAlgorithmType, Type[AdvancedConsensusAlgorithm]] = {
+        self.algorithms: dict[ConsensusAlgorithmType, type[AdvancedConsensusAlgorithm]] = {
             ConsensusAlgorithmType.WEIGHTED_VOTING: WeightedVotingConsensus,
             ConsensusAlgorithmType.BAYESIAN_CONSENSUS: BayesianConsensus,
             ConsensusAlgorithmType.COGNITIVE_DIVERSITY_PRESERVING: CognitiveDiversityPreservingConsensus
@@ -129,8 +133,13 @@ class ConsensusAlgorithmSelector:
 
         # Selection rules (can be learned over time)
         self.selection_rules = self._initialize_selection_rules()
+<<<<<<< HEAD
 
     def _initialize_selection_rules(self) -> Dict[str, Dict[ConsensusAlgorithmType, float]]:
+=======
+    
+    def _initialize_selection_rules(self) -> dict[str, dict[ConsensusAlgorithmType, float]]:
+>>>>>>> feature/core-services-refactor
         """Initialize algorithm selection rules."""
         return {
             # Rules based on participant count
@@ -182,8 +191,8 @@ class ConsensusAlgorithmSelector:
 
     def select_algorithm(
         self,
-        inputs: List[ConsensusInput],
-        context: Optional[Dict[str, Any]] = None
+        inputs: list[ConsensusInput],
+        context: Optional[dict[str, Any]] = None
     ) -> ConsensusAlgorithmType:
         """Select the most appropriate consensus algorithm."""
         self.logger.info(f"Selecting consensus algorithm for {len(inputs)} inputs")
@@ -203,8 +212,8 @@ class ConsensusAlgorithmSelector:
 
     def _analyze_context(
         self,
-        inputs: List[ConsensusInput],
-        context: Optional[Dict[str, Any]] = None
+        inputs: list[ConsensusInput],
+        context: Optional[dict[str, Any]] = None
     ) -> SelectionContext:
         """Analyze the context for algorithm selection."""
         # Determine position type
@@ -242,8 +251,13 @@ class ConsensusAlgorithmSelector:
             accuracy_requirement=accuracy_requirement,
             domain=domain
         )
+<<<<<<< HEAD
 
     def _calculate_diversity_score(self, inputs: List[ConsensusInput]) -> float:
+=======
+    
+    def _calculate_diversity_score(self, inputs: list[ConsensusInput]) -> float:
+>>>>>>> feature/core-services-refactor
         """Calculate diversity score for inputs."""
         if len(inputs) < 2:
             return 0.0
@@ -266,8 +280,8 @@ class ConsensusAlgorithmSelector:
 
     def _calculate_cognitive_distance(
         self,
-        profile1: Dict[str, Any],
-        profile2: Dict[str, Any]
+        profile1: dict[str, Any],
+        profile2: dict[str, Any]
     ) -> float:
         """Calculate cognitive distance between profiles."""
         distance = 0.0
@@ -292,8 +306,13 @@ class ConsensusAlgorithmSelector:
         distance += bias_distance * 0.3
 
         return min(distance, 1.0)
+<<<<<<< HEAD
 
     def _calculate_value_distance(self, values1: Dict[str, float], values2: Dict[str, float]) -> float:
+=======
+    
+    def _calculate_value_distance(self, values1: dict[str, float], values2: dict[str, float]) -> float:
+>>>>>>> feature/core-services-refactor
         """Calculate distance between value systems."""
         import math
 
@@ -308,8 +327,13 @@ class ConsensusAlgorithmSelector:
             distance_sum += (v1 - v2) ** 2
 
         return math.sqrt(distance_sum) / math.sqrt(len(all_values))
+<<<<<<< HEAD
 
     def _calculate_variance(self, values: List[float]) -> float:
+=======
+    
+    def _calculate_variance(self, values: list[float]) -> float:
+>>>>>>> feature/core-services-refactor
         """Calculate variance of a list of values."""
         if len(values) < 2:
             return 0.0
@@ -317,8 +341,13 @@ class ConsensusAlgorithmSelector:
         mean = sum(values) / len(values)
         variance = sum((x - mean) ** 2 for x in values) / len(values)
         return variance
+<<<<<<< HEAD
 
     def _calculate_algorithm_scores(self, context: SelectionContext) -> Dict[ConsensusAlgorithmType, float]:
+=======
+    
+    def _calculate_algorithm_scores(self, context: SelectionContext) -> dict[ConsensusAlgorithmType, float]:
+>>>>>>> feature/core-services-refactor
         """Calculate scores for each algorithm based on context."""
         scores = {}
 
@@ -484,16 +513,16 @@ class ConsensusAlgorithmSelector:
 
     def get_algorithm_recommendations(
         self,
-        inputs: List[ConsensusInput],
-        context: Optional[Dict[str, Any]] = None
-    ) -> Dict[ConsensusAlgorithmType, float]:
+        inputs: list[ConsensusInput],
+        context: Optional[dict[str, Any]] = None
+    ) -> dict[ConsensusAlgorithmType, float]:
         """Get recommendations for all algorithms with their scores."""
         selection_context = self._analyze_context(inputs, context)
         return self._calculate_algorithm_scores(selection_context)
 
     def update_selection_rules(
         self,
-        performance_data: Dict[str, Dict[ConsensusAlgorithmType, float]]
+        performance_data: dict[str, dict[ConsensusAlgorithmType, float]]
     ) -> None:
         """Update selection rules based on performance data."""
         # Simple rule updating - can be made more sophisticated

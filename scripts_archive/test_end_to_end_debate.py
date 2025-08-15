@@ -19,7 +19,7 @@ from src.cli.commands import run_debate_command
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_basic_debate():
     """Test basic debate functionality with minimal configuration."""
     print("🧪 Testing basic debate functionality...")
@@ -61,7 +61,7 @@ async def test_basic_debate():
         logger.error(f"Basic debate test failed: {e}", exc_info=True)
         return False
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_role_assignment():
     """Test that roles are properly assigned and participate in the debate."""
     print("\n🧪 Testing role assignment and participation...")
@@ -96,7 +96,7 @@ async def test_role_assignment():
         logger.error(f"Role assignment test failed: {e}", exc_info=True)
         return False
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_consensus_mechanism():
     """Test that consensus mechanisms work correctly."""
     print("\n🧪 Testing consensus mechanism...")
@@ -168,7 +168,7 @@ def test_service_integration():
         # Test DebateConfig creation
         config = DebateConfig(
             topic="Test topic",
-            roles=["Test Role 1", "Test Role 2"],
+            roles=["AI Ethics", "Business Ethics"],
             rounds=1,
             consensus_strategy="simple_majority_vote"
         )

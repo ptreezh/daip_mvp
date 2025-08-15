@@ -13,7 +13,11 @@ import json
 import logging
 from collections.abc import Coroutine
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from .interaction_manager import InteractionManager
 from .llm_interface import LLMInterface
@@ -24,7 +28,7 @@ from .tool_executor import ToolExecutor
 class LLMRequest:
     """Represents a single request to be processed by the LLM."""
 
-    history: List[Dict[str, Any]]
+    history: list[dict[str, Any]]
     future: asyncio.Future
 
 
@@ -71,7 +75,11 @@ class LLMScheduler:
             self._worker_task = None
             logging.info("LLMScheduler worker stopped.")
 
+<<<<<<< HEAD
     async def submit_request(self, history: List[Dict[str, Any]]) -> str:
+=======
+    async def submit_request(self, history: list[dict[str, Any]]) -> str:
+>>>>>>> feature/core-services-refactor
         """Submits a request to the LLM and waits for the final response.
 
         This method handles the entire lifecycle of a request, including

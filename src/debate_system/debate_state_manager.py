@@ -13,9 +13,15 @@ from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
 
 from src.debate_system.debate_flow_definition import (
+=======
+from typing import Any, Optional
+
+from .debate_flow_definition import (
+>>>>>>> feature/core-services-refactor
     DebateContribution,
     DebateParticipant,
     DebatePhase,
@@ -26,7 +32,10 @@ from src.debate_system.debate_flow_definition import (
 
 class StateChangeType(Enum):
     """状态变更类型"""
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     SESSION_CREATED = "session_created"
     SESSION_STARTED = "session_started"
     SESSION_COMPLETED = "session_completed"
@@ -42,21 +51,31 @@ class StateChangeType(Enum):
 @dataclass
 class StateChange:
     """状态变更记录"""
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     change_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     session_id: str = ""
     change_type: StateChangeType = StateChangeType.CUSTOM
     timestamp: datetime = field(default_factory=datetime.now)
     actor_id: Optional[str] = None
+<<<<<<< HEAD
     previous_state: Optional[Dict[str, Any]] = None
     new_state: Optional[Dict[str, Any]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
+=======
+    previous_state: Optional[dict[str, Any]] = None
+    new_state: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+>>>>>>> feature/core-services-refactor
     version: int = 1
 
 
 @dataclass
 class StateSnapshot:
     """状态快照"""
+<<<<<<< HEAD
 
     snapshot_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     session_id: str = ""
@@ -66,52 +85,99 @@ class StateSnapshot:
     version: int = 1
     checksum: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
+=======
+    snapshot_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    session_id: str = ""
+    timestamp: datetime = field(default_factory=datetime.now)
+    session_state: dict[str, Any] = field(default_factory=dict)
+    participant_states: dict[str, Any] = field(default_factory=dict)
+    version: int = 1
+    checksum: Optional[str] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+>>>>>>> feature/core-services-refactor
 
 
 class StateStorage(ABC):
     """状态存储抽象接口"""
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     @abstractmethod
     async def save_session(self, session: DebateSession) -> bool:
         """保存会话状态"""
         pass
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     @abstractmethod
     async def load_session(self, session_id: str) -> Optional[DebateSession]:
         """加载会话状态"""
         pass
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     @abstractmethod
     async def delete_session(self, session_id: str) -> bool:
         """删除会话状态"""
         pass
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     @abstractmethod
     async def save_snapshot(self, snapshot: StateSnapshot) -> bool:
         """保存状态快照"""
         pass
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     @abstractmethod
     async def load_snapshot(self, snapshot_id: str) -> Optional[StateSnapshot]:
         """加载状态快照"""
         pass
+<<<<<<< HEAD
 
     @abstractmethod
     async def list_sessions(self,
                            status: Optional[DebateStatus] = None,
                            limit: int = 100) -> List[str]:
+=======
+    
+    @abstractmethod
+    async def list_sessions(self, 
+                           status: Optional[DebateStatus] = None,
+                           limit: int = 100) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """列出会话ID"""
         pass
 
 
 class MemoryStateStorage(StateStorage):
     """内存状态存储实现"""
+<<<<<<< HEAD
 
     def __init__(self):
         self.sessions: Dict[str, DebateSession] = {}
         self.snapshots: Dict[str, StateSnapshot] = {}
         self._lock = threading.RLock()
 
+=======
+    
+    def __init__(self):
+        self.sessions: dict[str, DebateSession] = {}
+        self.snapshots: dict[str, StateSnapshot] = {}
+        self._lock = threading.RLock()
+    
+>>>>>>> feature/core-services-refactor
     async def save_session(self, session: DebateSession) -> bool:
         """保存会话状态"""
         try:
@@ -122,7 +188,11 @@ class MemoryStateStorage(StateStorage):
             return True
         except Exception:
             return False
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     async def load_session(self, session_id: str) -> Optional[DebateSession]:
         """加载会话状态"""
         try:
@@ -133,7 +203,11 @@ class MemoryStateStorage(StateStorage):
             return None
         except Exception:
             return None
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     async def delete_session(self, session_id: str) -> bool:
         """删除会话状态"""
         try:
@@ -144,7 +218,11 @@ class MemoryStateStorage(StateStorage):
             return False
         except Exception:
             return False
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     async def save_snapshot(self, snapshot: StateSnapshot) -> bool:
         """保存状态快照"""
         try:
@@ -154,7 +232,11 @@ class MemoryStateStorage(StateStorage):
             return True
         except Exception:
             return False
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     async def load_snapshot(self, snapshot_id: str) -> Optional[StateSnapshot]:
         """加载状态快照"""
         try:
@@ -164,10 +246,17 @@ class MemoryStateStorage(StateStorage):
             return None
         except Exception:
             return None
+<<<<<<< HEAD
 
     async def list_sessions(self,
                            status: Optional[DebateStatus] = None,
                            limit: int = 100) -> List[str]:
+=======
+    
+    async def list_sessions(self, 
+                           status: Optional[DebateStatus] = None,
+                           limit: int = 100) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """列出会话ID"""
         with self._lock:
             session_ids = []
@@ -185,6 +274,7 @@ class DebateStateManager:
     负责辩论会话的状态管理、持久化、同步和通知。
     支持分布式环境下的状态一致性和实时更新。
     """
+<<<<<<< HEAD
 
     def __init__(self, storage: Optional[StateStorage] = None):
         self.storage = storage or MemoryStateStorage()
@@ -200,11 +290,32 @@ class DebateStateManager:
         # 快照管理
         self.snapshots: Dict[str, List[str]] = {}  # session_id -> snapshot_ids
 
+=======
+    
+    def __init__(self, storage: Optional[StateStorage] = None):
+        self.storage = storage or MemoryStateStorage()
+        
+        # 内存缓存
+        self.session_cache: dict[str, DebateSession] = {}
+        self.cache_lock = threading.RLock()
+        
+        # 状态变更历史
+        self.change_history: list[StateChange] = []
+        self.history_lock = threading.RLock()
+        
+        # 快照管理
+        self.snapshots: dict[str, list[str]] = {}  # session_id -> snapshot_ids
+        
+>>>>>>> feature/core-services-refactor
         # 配置
         self.auto_save_interval = 60  # 自动保存间隔（秒）
         self.max_history_size = 1000  # 最大历史记录数
         self.max_snapshots_per_session = 10  # 每个会话最大快照数
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     async def create_session(self, session: DebateSession) -> bool:
         """创建新的辩论会话"""
         try:
@@ -212,11 +323,19 @@ class DebateStateManager:
             success = await self.storage.save_session(session)
             if not success:
                 return False
+<<<<<<< HEAD
 
             # 更新缓存
             with self.cache_lock:
                 self.session_cache[session.session_id] = session
 
+=======
+            
+            # 更新缓存
+            with self.cache_lock:
+                self.session_cache[session.session_id] = session
+            
+>>>>>>> feature/core-services-refactor
             # 记录状态变更
             change = StateChange(
                 session_id=session.session_id,
@@ -225,6 +344,7 @@ class DebateStateManager:
                 metadata={"title": session.title, "topic": session.topic}
             )
             await self._record_state_change(change)
+<<<<<<< HEAD
 
             return True
 
@@ -232,6 +352,15 @@ class DebateStateManager:
             print(f"Error creating session {session.session_id}: {e}")
             return False
 
+=======
+            
+            return True
+        
+        except Exception as e:
+            print(f"Error creating session {session.session_id}: {e}")
+            return False
+    
+>>>>>>> feature/core-services-refactor
     async def get_session(self, session_id: str) -> Optional[DebateSession]:
         """获取辩论会话"""
         try:
@@ -239,13 +368,18 @@ class DebateStateManager:
             with self.cache_lock:
                 if session_id in self.session_cache:
                     return self.session_cache[session_id]
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             # 从存储加载
             session = await self.storage.load_session(session_id)
             if session:
                 # 更新缓存
                 with self.cache_lock:
                     self.session_cache[session_id] = session
+<<<<<<< HEAD
 
             return session
 
@@ -254,6 +388,16 @@ class DebateStateManager:
             return None
 
     async def update_session(self,
+=======
+            
+            return session
+        
+        except Exception as e:
+            print(f"Error getting session {session_id}: {e}")
+            return None
+    
+    async def update_session(self, 
+>>>>>>> feature/core-services-refactor
                            session: DebateSession,
                            actor_id: Optional[str] = None,
                            change_type: StateChangeType = StateChangeType.CUSTOM) -> bool:
@@ -268,23 +412,39 @@ class DebateStateManager:
                     "current_round": old_session.current_round,
                     "participants_count": len(old_session.participants)
                 }
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             # 保存到存储
             success = await self.storage.save_session(session)
             if not success:
                 return False
+<<<<<<< HEAD
 
             # 更新缓存
             with self.cache_lock:
                 self.session_cache[session.session_id] = session
 
+=======
+            
+            # 更新缓存
+            with self.cache_lock:
+                self.session_cache[session.session_id] = session
+            
+>>>>>>> feature/core-services-refactor
             # 记录状态变更
             new_state = {
                 "status": session.status.value,
                 "current_round": session.current_round,
                 "participants_count": len(session.participants)
             }
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             change = StateChange(
                 session_id=session.session_id,
                 change_type=change_type,
@@ -293,6 +453,7 @@ class DebateStateManager:
                 new_state=new_state
             )
             await self._record_state_change(change)
+<<<<<<< HEAD
 
             return True
 
@@ -300,6 +461,15 @@ class DebateStateManager:
             print(f"Error updating session {session.session_id}: {e}")
             return False
 
+=======
+            
+            return True
+        
+        except Exception as e:
+            print(f"Error updating session {session.session_id}: {e}")
+            return False
+    
+>>>>>>> feature/core-services-refactor
     async def delete_session(self, session_id: str) -> bool:
         """删除辩论会话"""
         try:
@@ -307,22 +477,35 @@ class DebateStateManager:
             success = await self.storage.delete_session(session_id)
             if not success:
                 return False
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             # 从缓存删除
             with self.cache_lock:
                 if session_id in self.session_cache:
                     del self.session_cache[session_id]
+<<<<<<< HEAD
 
             # 清理快照
             if session_id in self.snapshots:
                 del self.snapshots[session_id]
 
+=======
+            
+            # 清理快照
+            if session_id in self.snapshots:
+                del self.snapshots[session_id]
+            
+>>>>>>> feature/core-services-refactor
             # 记录状态变更
             change = StateChange(
                 session_id=session_id,
                 change_type=StateChangeType.SESSION_COMPLETED
             )
             await self._record_state_change(change)
+<<<<<<< HEAD
 
             return True
 
@@ -330,6 +513,15 @@ class DebateStateManager:
             print(f"Error deleting session {session_id}: {e}")
             return False
 
+=======
+            
+            return True
+        
+        except Exception as e:
+            print(f"Error deleting session {session_id}: {e}")
+            return False
+    
+>>>>>>> feature/core-services-refactor
     async def add_participant(self,
                             session_id: str,
                             participant: DebateParticipant,
@@ -338,11 +530,16 @@ class DebateStateManager:
         session = await self.get_session(session_id)
         if not session:
             return False
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # 检查参与者是否已存在
         existing_ids = [p.participant_id for p in session.participants]
         if participant.participant_id in existing_ids:
             return False
+<<<<<<< HEAD
 
         session.participants.append(participant)
 
@@ -352,6 +549,17 @@ class DebateStateManager:
 
         return success
 
+=======
+        
+        session.participants.append(participant)
+        
+        success = await self.update_session(
+            session, actor_id, StateChangeType.PARTICIPANT_JOINED
+        )
+        
+        return success
+    
+>>>>>>> feature/core-services-refactor
     async def remove_participant(self,
                                session_id: str,
                                participant_id: str,
@@ -360,6 +568,7 @@ class DebateStateManager:
         session = await self.get_session(session_id)
         if not session:
             return False
+<<<<<<< HEAD
 
         # 查找并移除参与者
         original_count = len(session.participants)
@@ -377,6 +586,25 @@ class DebateStateManager:
 
         return success
 
+=======
+        
+        # 查找并移除参与者
+        original_count = len(session.participants)
+        session.participants = [
+            p for p in session.participants 
+            if p.participant_id != participant_id
+        ]
+        
+        if len(session.participants) == original_count:
+            return False  # 参与者不存在
+        
+        success = await self.update_session(
+            session, actor_id, StateChangeType.PARTICIPANT_LEFT
+        )
+        
+        return success
+    
+>>>>>>> feature/core-services-refactor
     async def add_contribution(self,
                              session_id: str,
                              contribution: DebateContribution,
@@ -385,6 +613,7 @@ class DebateStateManager:
         session = await self.get_session(session_id)
         if not session:
             return False
+<<<<<<< HEAD
 
         if not session.rounds:
             return False
@@ -398,6 +627,21 @@ class DebateStateManager:
 
         return success
 
+=======
+        
+        if not session.rounds:
+            return False
+        
+        current_round = session.rounds[session.current_round - 1]
+        current_round.contributions.append(contribution)
+        
+        success = await self.update_session(
+            session, actor_id, StateChangeType.CONTRIBUTION_ADDED
+        )
+        
+        return success
+    
+>>>>>>> feature/core-services-refactor
     async def advance_phase(self,
                           session_id: str,
                           new_phase: DebatePhase,
@@ -406,6 +650,7 @@ class DebateStateManager:
         session = await self.get_session(session_id)
         if not session:
             return False
+<<<<<<< HEAD
 
         if not session.rounds:
             return False
@@ -418,6 +663,20 @@ class DebateStateManager:
             session, actor_id, StateChangeType.PHASE_CHANGED
         )
 
+=======
+        
+        if not session.rounds:
+            return False
+        
+        current_round = session.rounds[session.current_round - 1]
+        old_phase = current_round.current_phase
+        current_round.current_phase = new_phase
+        
+        success = await self.update_session(
+            session, actor_id, StateChangeType.PHASE_CHANGED
+        )
+        
+>>>>>>> feature/core-services-refactor
         if success:
             # 记录阶段变更详情
             change = StateChange(
@@ -429,29 +688,47 @@ class DebateStateManager:
                 metadata={"round": session.current_round}
             )
             await self._record_state_change(change)
+<<<<<<< HEAD
 
         return success
 
     async def create_snapshot(self,
                             session_id: str,
                             metadata: Optional[Dict[str, Any]] = None) -> Optional[str]:
+=======
+        
+        return success
+    
+    async def create_snapshot(self,
+                            session_id: str,
+                            metadata: Optional[dict[str, Any]] = None) -> Optional[str]:
+>>>>>>> feature/core-services-refactor
         """创建状态快照"""
         try:
             session = await self.get_session(session_id)
             if not session:
                 return None
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             # 创建快照
             snapshot = StateSnapshot(
                 session_id=session_id,
                 session_state=asdict(session),
                 metadata=metadata or {}
             )
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             # 保存快照
             success = await self.storage.save_snapshot(snapshot)
             if not success:
                 return None
+<<<<<<< HEAD
 
             # 管理快照数量
             if session_id not in self.snapshots:
@@ -459,11 +736,21 @@ class DebateStateManager:
 
             self.snapshots[session_id].append(snapshot.snapshot_id)
 
+=======
+            
+            # 管理快照数量
+            if session_id not in self.snapshots:
+                self.snapshots[session_id] = []
+            
+            self.snapshots[session_id].append(snapshot.snapshot_id)
+            
+>>>>>>> feature/core-services-refactor
             # 限制快照数量
             if len(self.snapshots[session_id]) > self.max_snapshots_per_session:
                 # 删除最旧的快照
                 oldest_snapshot_id = self.snapshots[session_id].pop(0)
                 # 这里可以添加删除存储中快照的逻辑
+<<<<<<< HEAD
 
             return snapshot.snapshot_id
 
@@ -474,12 +761,25 @@ class DebateStateManager:
     async def get_session_history(self,
                                 session_id: str,
                                 limit: int = 100) -> List[StateChange]:
+=======
+            
+            return snapshot.snapshot_id
+        
+        except Exception as e:
+            print(f"Error creating snapshot for session {session_id}: {e}")
+            return None
+    
+    async def get_session_history(self,
+                                session_id: str,
+                                limit: int = 100) -> list[StateChange]:
+>>>>>>> feature/core-services-refactor
         """获取会话历史"""
         with self.history_lock:
             history = [
                 change for change in self.change_history
                 if change.session_id == session_id
             ]
+<<<<<<< HEAD
 
             # 按时间倒序排列
             history.sort(key=lambda x: x.timestamp, reverse=True)
@@ -491,25 +791,53 @@ class DebateStateManager:
         return await self.storage.list_sessions(DebateStatus.ACTIVE)
 
     async def get_session_metrics(self, session_id: str) -> Optional[Dict[str, Any]]:
+=======
+            
+            # 按时间倒序排列
+            history.sort(key=lambda x: x.timestamp, reverse=True)
+            
+            return history[:limit]
+    
+    async def get_active_sessions(self) -> list[str]:
+        """获取活跃会话列表"""
+        return await self.storage.list_sessions(DebateStatus.ACTIVE)
+    
+    async def get_session_metrics(self, session_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取会话指标"""
         session = await self.get_session(session_id)
         if not session:
             return None
+<<<<<<< HEAD
 
         # 计算基本指标
         total_contributions = sum(len(round.contributions) for round in session.rounds)
         total_participants = len(session.participants)
 
+=======
+        
+        # 计算基本指标
+        total_contributions = sum(len(round.contributions) for round in session.rounds)
+        total_participants = len(session.participants)
+        
+>>>>>>> feature/core-services-refactor
         # 计算持续时间
         duration_minutes = 0
         if session.started_at:
             end_time = session.completed_at or datetime.now()
             duration = end_time - session.started_at
             duration_minutes = duration.total_seconds() / 60
+<<<<<<< HEAD
 
         # 获取历史记录数
         history = await self.get_session_history(session_id)
 
+=======
+        
+        # 获取历史记录数
+        history = await self.get_session_history(session_id)
+        
+>>>>>>> feature/core-services-refactor
         return {
             "session_id": session_id,
             "status": session.status.value,
@@ -523,22 +851,36 @@ class DebateStateManager:
             "started_at": session.started_at.isoformat() if session.started_at else None,
             "completed_at": session.completed_at.isoformat() if session.completed_at else None
         }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     async def _record_state_change(self, change: StateChange) -> None:
         """记录状态变更"""
         with self.history_lock:
             self.change_history.append(change)
+<<<<<<< HEAD
 
             # 限制历史记录大小
             if len(self.change_history) > self.max_history_size:
                 self.change_history = self.change_history[-self.max_history_size:]
 
     async def get_system_status(self) -> Dict[str, Any]:
+=======
+            
+            # 限制历史记录大小
+            if len(self.change_history) > self.max_history_size:
+                self.change_history = self.change_history[-self.max_history_size:]
+    
+    async def get_system_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取系统状态"""
         try:
             # 统计会话数量
             all_sessions = await self.storage.list_sessions()
             active_sessions = await self.storage.list_sessions(DebateStatus.ACTIVE)
+<<<<<<< HEAD
 
             # 缓存统计
             with self.cache_lock:
@@ -548,6 +890,17 @@ class DebateStateManager:
             with self.history_lock:
                 total_changes = len(self.change_history)
 
+=======
+            
+            # 缓存统计
+            with self.cache_lock:
+                cached_sessions = len(self.session_cache)
+            
+            # 历史记录统计
+            with self.history_lock:
+                total_changes = len(self.change_history)
+            
+>>>>>>> feature/core-services-refactor
             return {
                 "total_sessions": len(all_sessions),
                 "active_sessions": len(active_sessions),
@@ -556,7 +909,11 @@ class DebateStateManager:
                 "system_uptime": datetime.now().isoformat(),
                 "storage_type": type(self.storage).__name__
             }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         except Exception as e:
             return {
                 "error": str(e),
@@ -567,6 +924,7 @@ class DebateStateManager:
 # 使用示例和测试代码
 if __name__ == "__main__":
     import asyncio
+<<<<<<< HEAD
 
     async def test_debate_state_manager():
         """测试辩论状态管理器"""
@@ -578,11 +936,25 @@ if __name__ == "__main__":
         # 创建测试会话
         from debate_flow_definition import DebateParticipant, DebateSession, ParticipantRole
 
+=======
+    
+    async def test_debate_state_manager():
+        """测试辩论状态管理器"""
+        print("🧪 测试辩论状态管理器...")
+        
+        # 创建状态管理器
+        state_manager = DebateStateManager()
+        
+        # 创建测试会话
+        from debate_flow_definition import DebateParticipant, DebateSession, ParticipantRole
+        
+>>>>>>> feature/core-services-refactor
         session = DebateSession(
             title="测试辩论",
             topic="人工智能的未来发展",
             description="讨论AI技术的发展趋势和影响"
         )
+<<<<<<< HEAD
 
         # 测试创建会话
         success = await state_manager.create_session(session)
@@ -592,30 +964,54 @@ if __name__ == "__main__":
         retrieved_session = await state_manager.get_session(session.session_id)
         print(f"✅ 获取会话: {'成功' if retrieved_session else '失败'}")
 
+=======
+        
+        # 测试创建会话
+        success = await state_manager.create_session(session)
+        print(f"✅ 创建会话: {'成功' if success else '失败'}")
+        
+        # 测试获取会话
+        retrieved_session = await state_manager.get_session(session.session_id)
+        print(f"✅ 获取会话: {'成功' if retrieved_session else '失败'}")
+        
+>>>>>>> feature/core-services-refactor
         # 测试添加参与者
         participant = DebateParticipant(
             participant_id="user_001",
             name="测试用户",
             role=ParticipantRole.PROPONENT
         )
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         success = await state_manager.add_participant(
             session.session_id, participant, "system"
         )
         print(f"✅ 添加参与者: {'成功' if success else '失败'}")
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # 测试创建快照
         snapshot_id = await state_manager.create_snapshot(
             session.session_id, {"reason": "测试快照"}
         )
         print(f"✅ 创建快照: {'成功' if snapshot_id else '失败'}")
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # 测试获取会话指标
         metrics = await state_manager.get_session_metrics(session.session_id)
         print(f"✅ 获取指标: {'成功' if metrics else '失败'}")
         if metrics:
             print(f"   - 参与者数量: {metrics['total_participants']}")
             print(f"   - 状态变更: {metrics['state_changes']}")
+<<<<<<< HEAD
 
         # 测试获取系统状态
         system_status = await state_manager.get_system_status()
@@ -625,3 +1021,14 @@ if __name__ == "__main__":
 
     # 运行测试
     asyncio.run(test_debate_state_manager())
+=======
+        
+        # 测试获取系统状态
+        system_status = await state_manager.get_system_status()
+        print(f"✅ 系统状态: {system_status}")
+        
+        print("🎉 辩论状态管理器测试完成！")
+    
+    # 运行测试
+    asyncio.run(test_debate_state_manager())
+>>>>>>> feature/core-services-refactor

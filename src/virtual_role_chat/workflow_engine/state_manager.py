@@ -6,7 +6,11 @@ This module handles workflow state persistence, recovery, and monitoring.
 import asyncio
 import logging
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .models import ExecutionStep, WorkflowExecution, WorkflowStatus
 
@@ -28,7 +32,7 @@ class StateManager:
 
         """
         self.storage_backend = storage_backend
-        self._executions: Dict[str, WorkflowExecution] = {}
+        self._executions: dict[str, WorkflowExecution] = {}
         self._state_lock = asyncio.Lock()
 
     async def create_execution(self, execution: WorkflowExecution) -> bool:
@@ -158,9 +162,15 @@ class StateManager:
         return await self.update_execution(execution)
 
     async def update_workflow_state(
+<<<<<<< HEAD
         self,
         execution_id: str,
         state_updates: Dict[str, Any]
+=======
+        self, 
+        execution_id: str, 
+        state_updates: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> bool:
         """Update workflow shared state.
         
@@ -180,10 +190,17 @@ class StateManager:
         return await self.update_execution(execution)
 
     async def set_node_outputs(
+<<<<<<< HEAD
         self,
         execution_id: str,
         node_id: str,
         outputs: Dict[str, Any]
+=======
+        self, 
+        execution_id: str, 
+        node_id: str, 
+        outputs: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> bool:
         """Set outputs for a specific node.
         
@@ -207,7 +224,11 @@ class StateManager:
         self,
         execution_id: str,
         node_id: str
+<<<<<<< HEAD
     ) -> Optional[Dict[str, Any]]:
+=======
+    ) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get outputs for a specific node.
         
         Args:
@@ -331,7 +352,11 @@ class StateManager:
     async def list_executions(
         self,
         status_filter: Optional[WorkflowStatus] = None
+<<<<<<< HEAD
     ) -> List[str]:
+=======
+    ) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List execution IDs, optionally filtered by status.
         
         Args:
@@ -387,6 +412,7 @@ class StateManager:
         if self.storage_backend and hasattr(self.storage_backend, 'load_execution'):
             return await self.storage_backend.load_execution(execution_id)
         return None
+<<<<<<< HEAD
 
     async def _store_checkpoint(self, checkpoint_id: str, checkpoint_data: Dict[str, Any]) -> None:
         """Store checkpoint to storage backend."""
@@ -394,6 +420,15 @@ class StateManager:
             await self.storage_backend.store_checkpoint(checkpoint_id, checkpoint_data)
 
     async def _load_checkpoint(self, checkpoint_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    async def _store_checkpoint(self, checkpoint_id: str, checkpoint_data: dict[str, Any]) -> None:
+        """Store checkpoint to storage backend."""
+        if self.storage_backend and hasattr(self.storage_backend, 'store_checkpoint'):
+            await self.storage_backend.store_checkpoint(checkpoint_id, checkpoint_data)
+    
+    async def _load_checkpoint(self, checkpoint_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Load checkpoint from storage backend."""
         if self.storage_backend and hasattr(self.storage_backend, 'load_checkpoint'):
             return await self.storage_backend.load_checkpoint(checkpoint_id)

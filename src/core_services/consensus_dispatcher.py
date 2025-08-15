@@ -7,7 +7,11 @@
 import logging
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Union
+=======
+from typing import Any, Optional, Union
+>>>>>>> feature/core-services-refactor
 
 from src.protocols.consensus_strategies import ConsensusStrategyFactory, SimpleMajorityVoteStrategy
 
@@ -24,7 +28,10 @@ logger = logging.getLogger(__name__)
 
 class ConsensusMethod(str, Enum):
     """共识计算方法枚举"""
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     SIMPLE_MAJORITY = "simple_majority"
     WEIGHTED_VOTING = "weighted_voting"
     BAYESIAN = "bayesian"
@@ -34,25 +41,38 @@ class ConsensusMethod(str, Enum):
 
 class UnifiedConsensusDispatcher:
     """统一共识计算调度器"""
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     def __init__(self):
         """初始化调度器"""
         self.strategy_factory = ConsensusStrategyFactory()
         self.advanced_algorithms = {}
         self._initialize_algorithms()
         logger.info("统一共识调度器初始化完成")
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     def _initialize_algorithms(self):
         """初始化所有共识算法"""
         # 注册简单策略
         self.strategy_factory.register("simple_majority_vote", SimpleMajorityVoteStrategy)
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # 初始化高级算法
         self.advanced_algorithms = {
             ConsensusMethod.WEIGHTED_VOTING: WeightedVotingConsensus(),
             ConsensusMethod.BAYESIAN: BayesianConsensus(),
             ConsensusMethod.DIVERSITY_PRESERVING: CognitiveDiversityPreservingConsensus()
         }
+<<<<<<< HEAD
 
     async def calculate_consensus(
         self,
@@ -60,6 +80,15 @@ class UnifiedConsensusDispatcher:
         method: ConsensusMethod = ConsensusMethod.AUTO_SELECT,
         context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
+=======
+    
+    async def calculate_consensus(
+        self,
+        inputs: list[dict[str, Any]],
+        method: ConsensusMethod = ConsensusMethod.AUTO_SELECT,
+        context: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """统一的共识计算入口
         
         Args:
@@ -69,21 +98,33 @@ class UnifiedConsensusDispatcher:
             
         Returns:
             统一格式的共识计算结果
+<<<<<<< HEAD
 
         """
         try:
             logger.info(f"开始共识计算，方法: {method}, 输入数量: {len(inputs)}")
 
+=======
+        """
+        try:
+            logger.info(f"开始共识计算，方法: {method}, 输入数量: {len(inputs)}")
+            
+>>>>>>> feature/core-services-refactor
             # 自动选择最佳方法
             if method == ConsensusMethod.AUTO_SELECT:
                 method = self._select_optimal_method(inputs, context)
                 logger.info(f"自动选择方法: {method}")
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             # 执行共识计算
             if method == ConsensusMethod.SIMPLE_MAJORITY:
                 result = await self._execute_simple_majority(inputs)
             else:
                 result = await self._execute_advanced_consensus(inputs, method, context)
+<<<<<<< HEAD
 
             # 统一结果格式
             unified_result = self._unify_result_format(result, method)
@@ -91,6 +132,15 @@ class UnifiedConsensusDispatcher:
             logger.info(f"共识计算完成，方法: {method}, 强度: {unified_result.get('consensus_strength', 0):.2f}")
             return unified_result
 
+=======
+            
+            # 统一结果格式
+            unified_result = self._unify_result_format(result, method)
+            
+            logger.info(f"共识计算完成，方法: {method}, 强度: {unified_result.get('consensus_strength', 0):.2f}")
+            return unified_result
+            
+>>>>>>> feature/core-services-refactor
         except Exception as e:
             logger.error(f"共识计算失败: {e}")
             return {
@@ -98,11 +148,19 @@ class UnifiedConsensusDispatcher:
                 "method": method,
                 "timestamp": datetime.now().isoformat()
             }
+<<<<<<< HEAD
 
     def _select_optimal_method(
         self,
         inputs: List[Dict[str, Any]],
         context: Optional[Dict[str, Any]] = None
+=======
+    
+    def _select_optimal_method(
+        self,
+        inputs: list[dict[str, Any]],
+        context: Optional[dict[str, Any]] = None
+>>>>>>> feature/core-services-refactor
     ) -> ConsensusMethod:
         """自动选择最优的共识计算方法"""
         # 基于输入数量选择
@@ -112,12 +170,21 @@ class UnifiedConsensusDispatcher:
             return ConsensusMethod.WEIGHTED_VOTING
         else:
             return ConsensusMethod.DIVERSITY_PRESERVING
+<<<<<<< HEAD
 
     async def _execute_simple_majority(self, inputs: List[Dict[str, Any]]) -> Dict[str, Any]:
         """执行简单多数投票"""
         # 转换为SimpleMajorityVoteStrategy期望的格式
         from src.models import DebateTurn
 
+=======
+    
+    async def _execute_simple_majority(self, inputs: list[dict[str, Any]]) -> dict[str, Any]:
+        """执行简单多数投票"""
+        # 转换为SimpleMajorityVoteStrategy期望的格式
+        from src.models import DebateTurn
+        
+>>>>>>> feature/core-services-refactor
         # 模拟DebateTurn格式
         debate_turns = []
         for i, input_data in enumerate(inputs):
@@ -128,11 +195,19 @@ class UnifiedConsensusDispatcher:
                 timestamp=datetime.now()
             )
             debate_turns.append(turn)
+<<<<<<< HEAD
 
         # 执行简单多数投票
         strategy = SimpleMajorityVoteStrategy()
         result = strategy.execute(debate_turns)
 
+=======
+        
+        # 执行简单多数投票
+        strategy = SimpleMajorityVoteStrategy()
+        result = strategy.execute(debate_turns)
+        
+>>>>>>> feature/core-services-refactor
         return {
             "algorithm_type": "simple_majority_vote",
             "consensus_strength": self._calculate_strength_from_votes(result.get("votes", {})),
@@ -140,12 +215,21 @@ class UnifiedConsensusDispatcher:
             "confidence": 0.75,
             "details": result
         }
+<<<<<<< HEAD
 
     async def _execute_advanced_consensus(
         self,
         inputs: List[Dict[str, Any]],
         method: ConsensusMethod,
         context: Optional[Dict[str, Any]] = None
+=======
+    
+    async def _execute_advanced_consensus(
+        self,
+        inputs: list[dict[str, Any]],
+        method: ConsensusMethod,
+        context: Optional[dict[str, Any]] = None
+>>>>>>> feature/core-services-refactor
     ) -> ConsensusResult:
         """执行高级共识算法"""
         # 转换为ConsensusInput格式
@@ -159,17 +243,30 @@ class UnifiedConsensusDispatcher:
                 timestamp=datetime.now()
             )
             consensus_inputs.append(consensus_input)
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # 获取对应的算法
         algorithm = self.advanced_algorithms.get(method)
         if not algorithm:
             raise ValueError(f"不支持的共识方法: {method}")
+<<<<<<< HEAD
 
         # 执行算法
         result = algorithm.calculate_consensus(consensus_inputs, context)
         return result
 
     def _unify_result_format(self, result: Union[Dict[str, Any], ConsensusResult], method: ConsensusMethod) -> Dict[str, Any]:
+=======
+        
+        # 执行算法
+        result = algorithm.calculate_consensus(consensus_inputs, context)
+        return result
+    
+    def _unify_result_format(self, result: Union[dict[str, Any], ConsensusResult], method: ConsensusMethod) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """统一结果格式"""
         if isinstance(result, ConsensusResult):
             # 高级算法结果
@@ -192,6 +289,7 @@ class UnifiedConsensusDispatcher:
                 "method_used": method,
                 "timestamp": datetime.now().isoformat()
             }
+<<<<<<< HEAD
 
     def _calculate_strength_from_votes(self, votes: Dict[str, int]) -> float:
         """从投票结果计算共识强度"""
@@ -210,6 +308,26 @@ class UnifiedConsensusDispatcher:
         return [method.value for method in ConsensusMethod]
 
     def get_method_info(self, method: ConsensusMethod) -> Dict[str, Any]:
+=======
+    
+    def _calculate_strength_from_votes(self, votes: dict[str, int]) -> float:
+        """从投票结果计算共识强度"""
+        if not votes:
+            return 0.0
+        
+        total_votes = sum(votes.values())
+        if total_votes == 0:
+            return 0.0
+        
+        max_votes = max(votes.values())
+        return max_votes / total_votes
+    
+    def get_available_methods(self) -> list[str]:
+        """获取可用的共识计算方法"""
+        return [method.value for method in ConsensusMethod]
+    
+    def get_method_info(self, method: ConsensusMethod) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取方法信息"""
         method_info = {
             ConsensusMethod.SIMPLE_MAJORITY: {
@@ -237,7 +355,11 @@ class UnifiedConsensusDispatcher:
                 "complexity": "高"
             }
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         return method_info.get(method, {"name": "未知方法"})
 
 
@@ -249,4 +371,8 @@ def get_consensus_dispatcher() -> UnifiedConsensusDispatcher:
     global _consensus_dispatcher
     if _consensus_dispatcher is None:
         _consensus_dispatcher = UnifiedConsensusDispatcher()
+<<<<<<< HEAD
     return _consensus_dispatcher
+=======
+    return _consensus_dispatcher
+>>>>>>> feature/core-services-refactor

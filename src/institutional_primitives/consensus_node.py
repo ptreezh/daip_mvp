@@ -6,7 +6,11 @@
     Calculates credibility scores using synthesis engine or voting algorithms.
 """
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, Tuple
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from .base import ExecutionContext, InstitutionalPrimitive
 
@@ -19,14 +23,24 @@ class ConsensusNode(InstitutionalPrimitive):
     Uses SynthesisEngine or voting algorithms to assign credibility scores
     to each factual assertion based on aggregated evidence.
     """
+<<<<<<< HEAD
 
     def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+=======
+    
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
+>>>>>>> feature/core-services-refactor
         super().__init__(primitive_id, config)
         self.consensus_method = config.get("consensus_method", "weighted_average") if config else "weighted_average"
         self.credibility_threshold = config.get("credibility_threshold", 0.6) if config else 0.6
         self.use_synthesis_engine = config.get("use_synthesis_engine", True) if config else True
+<<<<<<< HEAD
 
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+=======
+    
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute consensus calculation on aggregated evidence.
         
         Args:
@@ -114,8 +128,13 @@ class ConsensusNode(InstitutionalPrimitive):
                 "success": False,
                 "error": str(e)
             }
+<<<<<<< HEAD
 
     def _calculate_weighted_average_consensus(self, evidence_data: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
+=======
+    
+    def _calculate_weighted_average_consensus(self, evidence_data: dict[str, Any]) -> tuple[float, dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Calculate consensus using weighted average of evidence scores.
         
         Args:
@@ -149,8 +168,13 @@ class ConsensusNode(InstitutionalPrimitive):
         }
 
         return credibility, details
+<<<<<<< HEAD
 
     def _calculate_majority_vote_consensus(self, evidence_data: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
+=======
+    
+    def _calculate_majority_vote_consensus(self, evidence_data: dict[str, Any]) -> tuple[float, dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Calculate consensus using majority vote of evidence counts.
         
         Args:
@@ -207,8 +231,13 @@ class ConsensusNode(InstitutionalPrimitive):
         }
 
         return credibility, details
+<<<<<<< HEAD
 
     def _calculate_majority_vote(self, evidence_data: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_majority_vote(self, evidence_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """Calculate credibility score using majority vote method.
         This is a simplified version for testing.
         
@@ -229,8 +258,13 @@ class ConsensusNode(InstitutionalPrimitive):
         # Calculate credibility based on vote ratio
         supporting_ratio = supporting / total
         return min(max(supporting_ratio, 0.0), 1.0)
+<<<<<<< HEAD
 
     def _calculate_weighted_consensus(self, evidence_data: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_weighted_consensus(self, evidence_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """Calculate credibility score using weighted average method.
         This is a simplified version for testing.
         
@@ -253,8 +287,13 @@ class ConsensusNode(InstitutionalPrimitive):
         weighted_score = (supporting - challenging) / total_weight
         # Convert to 0-1 scale
         return min(max(0.5 + weighted_score * 0.5, 0.0), 1.0)
+<<<<<<< HEAD
 
     async def _calculate_synthesis_consensus(self, evidence_data: Dict[str, Any], context: ExecutionContext) -> Tuple[float, Dict[str, Any]]:
+=======
+    
+    async def _calculate_synthesis_consensus(self, evidence_data: dict[str, Any], context: ExecutionContext) -> tuple[float, dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Calculate consensus using synthesis engine for complex evidence analysis.
         
         Args:
@@ -323,8 +362,13 @@ and 1.0 (completely reliable) for this fact. Provide your reasoning.
             logger.error(f"Synthesis consensus calculation failed: {e}")
             # Fall back to weighted average
             return self._calculate_weighted_average_consensus(evidence_data)
+<<<<<<< HEAD
 
     def get_input_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return input schema for the consensus node."""
         return {
             "type": "object",
@@ -336,8 +380,13 @@ and 1.0 (completely reliable) for this fact. Provide your reasoning.
             },
             "required": ["aggregated_evidence"]
         }
+<<<<<<< HEAD
 
     def get_output_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return output schema for the consensus node."""
         return {
             "type": "object",

@@ -25,58 +25,58 @@ app = LonaApp(__file__)
 
 class RealtimeMonitoringDemoView(View):
     """实时状态监控演示视图"""
-
+    
     def __init__(self, server, view_runtime, request):
         super().__init__(server, view_runtime, request)
-
+        
         # 初始化透明度监控器
         self.transparency_monitor = TransparencyMonitor(
             websocket_manager=websocket_manager,
             realtime_manager=realtime_manager
         )
-
+        
         # 演示状态
         self.demo_running = False
         self.demo_task = None
-
+        
         logger.info("实时状态监控演示视图已初始化")
-
+    
     async def handle_start_demo(self, event):
         """处理开始演示按钮"""
         if not self.demo_running:
             self.demo_running = True
-
+            
             # 连接WebSocket
             await websocket_manager.connect()
-
+            
             # 启动透明度监控
             await self.transparency_monitor.start_monitoring()
-
+            
             # 启动演示任务
             self.demo_task = asyncio.create_task(self._run_demo_simulation())
-
+            
             logger.info("实时状态监控演示已启动")
             await self.refresh()
-
+    
     async def handle_stop_demo(self, event):
         """处理停止演示按钮"""
         if self.demo_running:
             self.demo_running = False
-
+            
             # 停止演示任务
             if self.demo_task:
                 self.demo_task.cancel()
                 self.demo_task = None
-
+            
             # 停止透明度监控
             await self.transparency_monitor.stop_monitoring()
-
+            
             # 断开WebSocket
             await websocket_manager.disconnect()
-
+            
             logger.info("实时状态监控演示已停止")
             await self.refresh()
-
+    
     async def _run_demo_simulation(self):
         """运行演示模拟"""
         try:
@@ -94,7 +94,7 @@ class RealtimeMonitoringDemoView(View):
                 # LLM服务上线
                 {
                     "delay": 2,
-                    "type": "system_status",
+                    "type": "system_status", 
                     "data": {
                         "type": "llm_service",
                         "data": {
@@ -199,14 +199,14 @@ class RealtimeMonitoringDemoView(View):
                     }
                 }
             ]
-
+            
             # 执行演示事件
             for event in demo_events:
                 if not self.demo_running:
                     break
-
+                
                 await asyncio.sleep(event["delay"])
-
+                
                 # 发送事件到透明度监控器
                 if event["type"] == "agent_status":
                     await self.transparency_monitor.update_agent_status(event["data"])
@@ -216,20 +216,20 @@ class RealtimeMonitoringDemoView(View):
                     await self.transparency_monitor.update_workflow_status(event["data"])
                 elif event["type"] == "llm_call":
                     await self.transparency_monitor.log_llm_call(event["data"])
-
+                
                 # 刷新界面
                 await self.refresh()
-
+            
             # 演示完成后循环重复
             if self.demo_running:
                 await asyncio.sleep(5)  # 等待5秒后重新开始
                 self.demo_task = asyncio.create_task(self._run_demo_simulation())
-
+        
         except asyncio.CancelledError:
             logger.info("演示模拟已取消")
         except Exception as e:
             logger.error(f"演示模拟出错: {e}")
-
+    
     def render(self) -> HTML:
         """渲染演示界面"""
         # 创建控制按钮
@@ -243,21 +243,21 @@ class RealtimeMonitoringDemoView(View):
         else:
             control_button = Button(
                 "▶️ 开始演示",
-                _class="btn btn-success",
+                _class="btn btn-success", 
                 onclick=self.handle_start_demo
             )
             status_text = "⏸️ 演示已停止"
-
+        
         return HTML(
             Div(
                 # 标题区域
                 Div(
                     H1("🔍 实时状态监控演示", style="text-align: center; color: #2c3e50; margin-bottom: 20px;"),
-                    P("任务3.1.2: 基于现有TransparencyMonitor展示系统状态",
+                    P("任务3.1.2: 基于现有TransparencyMonitor展示系统状态", 
                       style="text-align: center; color: #7f8c8d; margin-bottom: 30px;"),
                     style="padding: 20px; background: #ecf0f1; border-radius: 10px; margin-bottom: 20px;"
                 ),
-
+                
                 # 控制面板
                 Div(
                     H2("🎛️ 演示控制", style="margin-bottom: 15px;"),
@@ -268,7 +268,7 @@ class RealtimeMonitoringDemoView(View):
                     ),
                     style="background: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px;"
                 ),
-
+                
                 # 功能说明
                 Div(
                     H2("✨ 功能特性", style="margin-bottom: 15px;"),
@@ -283,14 +283,14 @@ class RealtimeMonitoringDemoView(View):
                     ),
                     style="background: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px;"
                 ),
-
+                
                 # 透明度监控组件
                 Div(
                     H2("📊 实时监控面板", style="margin-bottom: 15px;"),
                     self.transparency_monitor.render(),
                     style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px;"
                 ),
-
+                
                 style="max-width: 1200px; margin: 0 auto; padding: 20px;"
             ),
             style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; min-height: 100vh;"
@@ -308,7 +308,7 @@ if __name__ == '__main__':
     print("🔍 功能: 实时状态监控、透明度展示、WebSocket通信")
     print("⚡ 特性: 系统健康监控、代理状态跟踪、工作流进度监控")
     print("="*60)
-
+    
     try:
         app.run(
             host='127.0.0.1',

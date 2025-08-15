@@ -9,7 +9,11 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 try:
     from src.core_services.enhanced_sskg_manager import (
@@ -21,7 +25,11 @@ try:
     )
 except ImportError:
     # For testing purposes
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     class NodeType(str, Enum):
         """Types of nodes in the SSKG."""
 
@@ -130,7 +138,11 @@ class StorageAdapter(ABC):
         pass
 
     @abstractmethod
+<<<<<<< HEAD
     def list(self, **kwargs) -> List[str]:
+=======
+    def list(self, **kwargs) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all data identifiers of this type.
         
         Args:
@@ -141,9 +153,15 @@ class StorageAdapter(ABC):
 
         """
         pass
+<<<<<<< HEAD
 
     def _create_node(self, node_type: NodeType, content: str,
                     confidence: float = 1.0, metadata: Dict[str, Any] = None) -> str:
+=======
+    
+    def _create_node(self, node_type: NodeType, content: str, 
+                    confidence: float = 1.0, metadata: dict[str, Any] = None) -> str:
+>>>>>>> feature/core-services-refactor
         """Helper method to create a node in the SSKG.
         
         Args:
@@ -169,7 +187,11 @@ class StorageAdapter(ABC):
 
     def _create_relation(self, source_id: str, target_id: str,
                         relation_type: RelationType, confidence: float = 1.0,
+<<<<<<< HEAD
                         metadata: Dict[str, Any] = None) -> bool:
+=======
+                        metadata: dict[str, Any] = None) -> bool:
+>>>>>>> feature/core-services-refactor
         """Helper method to create a relation in the SSKG.
         
         Args:
@@ -201,8 +223,13 @@ class RoleMemoryAdapter(StorageAdapter):
     This adapter manages the storage and retrieval of role-specific memories,
     personality traits, and cognitive frameworks.
     """
+<<<<<<< HEAD
 
     def store(self, role_data: Dict[str, Any], **kwargs) -> str:
+=======
+    
+    def store(self, role_data: dict[str, Any], **kwargs) -> str:
+>>>>>>> feature/core-services-refactor
         """Store role memory data in the SSKG.
         
         Args:
@@ -254,8 +281,13 @@ class RoleMemoryAdapter(StorageAdapter):
 
         self.logger.info(f"Stored role {role_id} with {len(memories)} memories")
         return role_node_id
+<<<<<<< HEAD
 
     def _store_role_memory(self, memory_data: Dict[str, Any], role_id: str) -> Optional[str]:
+=======
+    
+    def _store_role_memory(self, memory_data: dict[str, Any], role_id: str) -> Optional[str]:
+>>>>>>> feature/core-services-refactor
         """Store a single role memory.
         
         Args:
@@ -284,8 +316,13 @@ class RoleMemoryAdapter(StorageAdapter):
             confidence=memory_data.get("confidence", 0.8),
             metadata=memory_metadata
         )
+<<<<<<< HEAD
 
     def retrieve(self, role_id: str, **kwargs) -> Optional[Dict[str, Any]]:
+=======
+    
+    def retrieve(self, role_id: str, **kwargs) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve role data from the SSKG.
         
         Args:
@@ -339,8 +376,13 @@ class RoleMemoryAdapter(StorageAdapter):
                 role_data["memories"].append(memory_data)
 
         return role_data
+<<<<<<< HEAD
 
     def update(self, role_id: str, role_data: Dict[str, Any], **kwargs) -> bool:
+=======
+    
+    def update(self, role_id: str, role_data: dict[str, Any], **kwargs) -> bool:
+>>>>>>> feature/core-services-refactor
         """Update role data in the SSKG.
         
         Args:
@@ -430,8 +472,13 @@ class RoleMemoryAdapter(StorageAdapter):
             self.logger.info(f"Deleted role {role_id}")
 
         return success
+<<<<<<< HEAD
 
     def list(self, **kwargs) -> List[str]:
+=======
+    
+    def list(self, **kwargs) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all role IDs.
         
         Args:
@@ -458,8 +505,13 @@ class WikiAdapter(StorageAdapter):
     This adapter manages the storage and retrieval of wiki pages,
     documentation, and structured knowledge articles.
     """
+<<<<<<< HEAD
 
     def store(self, wiki_data: Dict[str, Any], **kwargs) -> str:
+=======
+    
+    def store(self, wiki_data: dict[str, Any], **kwargs) -> str:
+>>>>>>> feature/core-services-refactor
         """Store wiki content in the SSKG.
         
         Args:
@@ -506,8 +558,13 @@ class WikiAdapter(StorageAdapter):
 
         self.logger.info(f"Stored wiki page {page_id}")
         return wiki_node_id
+<<<<<<< HEAD
 
     def _create_wiki_relations(self, wiki_node_id: str, wiki_data: Dict[str, Any]):
+=======
+    
+    def _create_wiki_relations(self, wiki_node_id: str, wiki_data: dict[str, Any]):
+>>>>>>> feature/core-services-refactor
         """Create relations for wiki page (tags, categories, etc.).
         
         Args:
@@ -602,8 +659,13 @@ class WikiAdapter(StorageAdapter):
                 "adapter_type": "wiki"
             }
         )
+<<<<<<< HEAD
 
     def retrieve(self, page_id: str, **kwargs) -> Optional[Dict[str, Any]]:
+=======
+    
+    def retrieve(self, page_id: str, **kwargs) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve wiki content from the SSKG.
         
         Args:
@@ -655,8 +717,13 @@ class WikiAdapter(StorageAdapter):
             wiki_data["related_pages"] = related_pages
 
         return wiki_data
+<<<<<<< HEAD
 
     def _get_related_pages(self, wiki_node_id: str) -> List[Dict[str, Any]]:
+=======
+    
+    def _get_related_pages(self, wiki_node_id: str) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get pages related to the given wiki page.
         
         Args:
@@ -680,10 +747,17 @@ class WikiAdapter(StorageAdapter):
                     "title": related_node.metadata.get("title", ""),
                     "relation_type": relation_type.value
                 })
+<<<<<<< HEAD
 
         return related_pages
 
     def update(self, page_id: str, wiki_data: Dict[str, Any], **kwargs) -> bool:
+=======
+        
+        return related_pages   
+ 
+    def update(self, page_id: str, wiki_data: dict[str, Any], **kwargs) -> bool:
+>>>>>>> feature/core-services-refactor
         """Update wiki content in the SSKG.
         
         Args:
@@ -769,8 +843,13 @@ class WikiAdapter(StorageAdapter):
             self.logger.info(f"Deleted wiki page {page_id}")
 
         return success
+<<<<<<< HEAD
 
     def list(self, **kwargs) -> List[str]:
+=======
+    
+    def list(self, **kwargs) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all wiki page IDs.
         
         Args:
@@ -810,8 +889,13 @@ class SessionAdapter(StorageAdapter):
     This adapter manages the storage and retrieval of session states,
     conversation history, and context information.
     """
+<<<<<<< HEAD
 
     def store(self, session_data: Dict[str, Any], **kwargs) -> str:
+=======
+    
+    def store(self, session_data: dict[str, Any], **kwargs) -> str:
+>>>>>>> feature/core-services-refactor
         """Store session data in the SSKG.
         
         Args:
@@ -895,8 +979,13 @@ class SessionAdapter(StorageAdapter):
                 target_id=participant_nodes[0].id,
                 relation_type=RelationType.REFERENCES
             )
+<<<<<<< HEAD
 
     def retrieve(self, session_id: str, **kwargs) -> Optional[Dict[str, Any]]:
+=======
+    
+    def retrieve(self, session_id: str, **kwargs) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve session data from the SSKG.
         
         Args:
@@ -934,10 +1023,17 @@ class SessionAdapter(StorageAdapter):
         for key, value in session_node.metadata.items():
             if key not in ["session_id", "state", "context", "participants", "created_at", "adapter_type"]:
                 session_data[key] = value
+<<<<<<< HEAD
 
         return session_data
 
     def update(self, session_id: str, session_data: Dict[str, Any], **kwargs) -> bool:
+=======
+        
+        return session_data   
+ 
+    def update(self, session_id: str, session_data: dict[str, Any], **kwargs) -> bool:
+>>>>>>> feature/core-services-refactor
         """Update session data in the SSKG.
         
         Args:
@@ -1024,8 +1120,13 @@ class SessionAdapter(StorageAdapter):
             self.logger.info(f"Deleted session {session_id}")
 
         return success
+<<<<<<< HEAD
 
     def list(self, **kwargs) -> List[str]:
+=======
+    
+    def list(self, **kwargs) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all session IDs.
         
         Args:
@@ -1061,8 +1162,13 @@ class ProjectAdapter(StorageAdapter):
     This adapter manages the storage and retrieval of project settings,
     configurations, and metadata.
     """
+<<<<<<< HEAD
 
     def store(self, project_data: Dict[str, Any], **kwargs) -> str:
+=======
+    
+    def store(self, project_data: dict[str, Any], **kwargs) -> str:
+>>>>>>> feature/core-services-refactor
         """Store project data in the SSKG.
         
         Args:
@@ -1111,8 +1217,13 @@ class ProjectAdapter(StorageAdapter):
 
         self.logger.info(f"Stored project {project_id}")
         return project_node_id
+<<<<<<< HEAD
 
     def retrieve(self, project_id: str, **kwargs) -> Optional[Dict[str, Any]]:
+=======
+    
+    def retrieve(self, project_id: str, **kwargs) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve project data from the SSKG.
         
         Args:
@@ -1151,10 +1262,17 @@ class ProjectAdapter(StorageAdapter):
         for key, value in project_node.metadata.items():
             if key not in ["project_id", "name", "description", "configuration", "settings", "created_at", "adapter_type"]:
                 project_data[key] = value
+<<<<<<< HEAD
 
         return project_data
 
     def update(self, project_id: str, project_data: Dict[str, Any], **kwargs) -> bool:
+=======
+        
+        return project_data   
+ 
+    def update(self, project_id: str, project_data: dict[str, Any], **kwargs) -> bool:
+>>>>>>> feature/core-services-refactor
         """Update project data in the SSKG.
         
         Args:
@@ -1242,8 +1360,13 @@ class ProjectAdapter(StorageAdapter):
             self.logger.info(f"Deleted project {project_id}")
 
         return success
+<<<<<<< HEAD
 
     def list(self, **kwargs) -> List[str]:
+=======
+    
+    def list(self, **kwargs) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all project IDs.
         
         Args:
@@ -1270,8 +1393,13 @@ class MemoryBankAdapter(StorageAdapter):
     This adapter manages the storage and retrieval of consolidated memories,
     knowledge summaries, and aggregated information.
     """
+<<<<<<< HEAD
 
     def store(self, memory_bank_data: Dict[str, Any], **kwargs) -> str:
+=======
+    
+    def store(self, memory_bank_data: dict[str, Any], **kwargs) -> str:
+>>>>>>> feature/core-services-refactor
         """Store memory bank data in the SSKG.
         
         Args:
@@ -1331,8 +1459,13 @@ class MemoryBankAdapter(StorageAdapter):
 
         self.logger.info(f"Stored memory bank {bank_id} with {len(memories)} memories")
         return bank_node_id
+<<<<<<< HEAD
 
     def _store_consolidated_memory(self, memory_data: Dict[str, Any], bank_id: str) -> Optional[str]:
+=======
+    
+    def _store_consolidated_memory(self, memory_data: dict[str, Any], bank_id: str) -> Optional[str]:
+>>>>>>> feature/core-services-refactor
         """Store a consolidated memory.
         
         Args:
@@ -1362,9 +1495,15 @@ class MemoryBankAdapter(StorageAdapter):
             content=memory_data["content"],
             confidence=memory_data.get("confidence", 0.7),
             metadata=memory_metadata
+<<<<<<< HEAD
         )
 
     def retrieve(self, bank_id: str, **kwargs) -> Optional[Dict[str, Any]]:
+=======
+        )   
+ 
+    def retrieve(self, bank_id: str, **kwargs) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve memory bank data from the SSKG.
         
         Args:
@@ -1425,8 +1564,13 @@ class MemoryBankAdapter(StorageAdapter):
                 bank_data["memories"].append(memory_data)
 
         return bank_data
+<<<<<<< HEAD
 
     def update(self, bank_id: str, memory_bank_data: Dict[str, Any], **kwargs) -> bool:
+=======
+    
+    def update(self, bank_id: str, memory_bank_data: dict[str, Any], **kwargs) -> bool:
+>>>>>>> feature/core-services-refactor
         """Update memory bank data in the SSKG.
         
         Args:
@@ -1526,8 +1670,13 @@ class MemoryBankAdapter(StorageAdapter):
             self.logger.info(f"Deleted memory bank {bank_id}")
 
         return success
+<<<<<<< HEAD
 
     def list(self, **kwargs) -> List[str]:
+=======
+    
+    def list(self, **kwargs) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all memory bank IDs.
         
         Args:
@@ -1603,8 +1752,13 @@ class StorageAdapterManager:
         """
         self.adapters[adapter_type] = adapter
         self.logger.info(f"Registered storage adapter: {adapter_type}")
+<<<<<<< HEAD
 
     def list_adapters(self) -> List[str]:
+=======
+    
+    def list_adapters(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all registered adapter types.
         
         Returns:

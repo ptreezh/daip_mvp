@@ -6,7 +6,6 @@
 """
 import asyncio
 import logging
-from typing import List
 
 from src.kernel.core import Kernel
 from src.models import (
@@ -38,7 +37,7 @@ class DebateProtocol:
         """
         self.kernel = kernel
         self.event_queue = event_queue
-        self.history: List[DebateTurn] = []
+        self.history: list[DebateTurn] = []
 
     async def _emit_event(self, event):
         """Helper to put an event on the queue."""

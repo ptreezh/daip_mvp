@@ -6,7 +6,11 @@ including task requirements, context elements, and optimization results.
 
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -52,20 +56,26 @@ class ElementType(str, Enum):
 class TaskRequirement(BaseModel):
     """Representation of a requirement for task execution.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     requirement_type: RequirementType
     content: str
     importance: float = Field(ge=0.0, le=1.0, description="Importance level (0.0-1.0)")
     domain: Optional[str] = None
     specificity: float = Field(ge=0.0, le=1.0, default=0.5, description="How specific this requirement is")
     urgency: float = Field(ge=0.0, le=1.0, default=0.5, description="How urgent this requirement is")
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ContextElement(BaseModel):
     """Individual element within a context.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     content: str
     element_type: ElementType
@@ -74,9 +84,15 @@ class ContextElement(BaseModel):
     token_count: int = Field(ge=0, description="Estimated token count")
     source: str = Field(description="Source of this context element")
     timestamp: datetime = Field(default_factory=datetime.now)
+<<<<<<< HEAD
     dependencies: List[str] = Field(default_factory=list, description="IDs of elements this depends on")
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
+=======
+    dependencies: list[str] = Field(default_factory=list, description="IDs of elements this depends on")
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    
+>>>>>>> feature/core-services-refactor
     def get_priority_score(self) -> float:
         """Calculate priority score based on relevance, importance, and other factors.
         
@@ -105,28 +121,35 @@ class ContextElement(BaseModel):
 class TaskDetectionResult(BaseModel):
     """Result of task detection analysis.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     task_type: TaskType
     confidence: float = Field(ge=0.0, le=1.0)
     task_description: str
-    detected_goals: List[str] = Field(default_factory=list)
-    detected_constraints: List[str] = Field(default_factory=list)
+    detected_goals: list[str] = Field(default_factory=list)
+    detected_constraints: list[str] = Field(default_factory=list)
     domain: Optional[str] = None
     complexity: float = Field(ge=0.0, le=1.0, default=0.5)
     urgency: float = Field(ge=0.0, le=1.0, default=0.5)
-    requirements: List[TaskRequirement] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    requirements: list[TaskRequirement] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class OptimizedContext(BaseModel):
     """Result of context optimization.
     """
+<<<<<<< HEAD
 
     elements: List[ContextElement]
+=======
+    elements: list[ContextElement]
+>>>>>>> feature/core-services-refactor
     total_tokens: int
     task_focus: str
-    optimization_metrics: Dict[str, float] = Field(default_factory=dict)
-    excluded_elements: List[ContextElement] = Field(default_factory=list)
+    optimization_metrics: dict[str, float] = Field(default_factory=dict)
+    excluded_elements: list[ContextElement] = Field(default_factory=list)
     compression_ratio: float = Field(ge=0.0, le=1.0, default=1.0)
     coherence_score: float = Field(ge=0.0, le=1.0, default=1.0)
     completeness_score: float = Field(ge=0.0, le=1.0, default=1.0)
@@ -183,7 +206,10 @@ class OptimizedContext(BaseModel):
 class ContextOptimizationConfig(BaseModel):
     """Configuration for context optimization.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     max_tokens: int = 4000
     min_relevance_threshold: float = Field(ge=0.0, le=1.0, default=0.3)
     compression_target: float = Field(ge=0.0, le=1.0, default=0.8)
@@ -195,10 +221,15 @@ class ContextOptimizationConfig(BaseModel):
     diversity_weight: float = Field(ge=0.0, le=1.0, default=0.1)
 
     # Task-specific settings
+<<<<<<< HEAD
     task_specific_weights: Dict[TaskType, Dict[str, float]] = Field(default_factory=dict)
 
+=======
+    task_specific_weights: dict[TaskType, dict[str, float]] = Field(default_factory=dict)
+    
+>>>>>>> feature/core-services-refactor
     # Element type priorities
-    element_type_priorities: Dict[ElementType, float] = Field(
+    element_type_priorities: dict[ElementType, float] = Field(
         default_factory=lambda: {
             ElementType.INSTRUCTION: 1.0,
             ElementType.CONSTRAINT: 0.9,
@@ -214,14 +245,22 @@ class ContextOptimizationConfig(BaseModel):
 class ContextAnalysisResult(BaseModel):
     """Result of context analysis before optimization.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     total_elements: int
     total_tokens: int
-    element_type_distribution: Dict[ElementType, int]
+    element_type_distribution: dict[ElementType, int]
     average_relevance: float
     average_importance: float
     complexity_score: float = Field(ge=0.0, le=1.0)
     coherence_score: float = Field(ge=0.0, le=1.0)
     redundancy_score: float = Field(ge=0.0, le=1.0)
+<<<<<<< HEAD
     coverage_gaps: List[str] = Field(default_factory=list)
     optimization_recommendations: List[str] = Field(default_factory=list)
+=======
+    coverage_gaps: list[str] = Field(default_factory=list)
+    optimization_recommendations: list[str] = Field(default_factory=list)
+>>>>>>> feature/core-services-refactor

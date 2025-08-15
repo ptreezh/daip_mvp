@@ -8,7 +8,7 @@ import json
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 from .config_validator import ConfigValidationError, ConfigValidator
 from .interfaces import ChatRoomManagerInterface
@@ -34,7 +34,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
 
         """
         self.storage_path = Path(storage_path) if storage_path else None
-        self._rooms: Dict[ChatRoomID, ChatRoom] = {}
+        self._rooms: dict[ChatRoomID, ChatRoom] = {}
         self.role_validator = role_validator or RoleValidator()
         self.config_validator = config_validator or ConfigValidator()
         self._load_rooms()
@@ -238,8 +238,13 @@ class ChatRoomManager(ChatRoomManagerInterface):
         except Exception as e:
             print(f"Error deleting chat room {room_id}: {e}")
             return False
+<<<<<<< HEAD
 
     def list_chat_rooms(self) -> List[ChatRoomSummary]:
+=======
+    
+    def list_chat_rooms(self) -> list[ChatRoomSummary]:
+>>>>>>> feature/core-services-refactor
         """List all chat rooms.
         
         Returns:
@@ -343,8 +348,13 @@ class ChatRoomManager(ChatRoomManagerInterface):
 
         """
         return len(self._rooms)
+<<<<<<< HEAD
 
     def get_active_rooms(self) -> List[ChatRoom]:
+=======
+    
+    def get_active_rooms(self) -> list[ChatRoom]:
+>>>>>>> feature/core-services-refactor
         """Get all active chat rooms.
         
         Returns:
@@ -352,8 +362,13 @@ class ChatRoomManager(ChatRoomManagerInterface):
 
         """
         return [room for room in self._rooms.values() if room.status == "active"]
+<<<<<<< HEAD
 
     def get_archived_rooms(self) -> List[ChatRoom]:
+=======
+    
+    def get_archived_rooms(self) -> list[ChatRoom]:
+>>>>>>> feature/core-services-refactor
         """Get all archived chat rooms.
         
         Returns:
@@ -361,8 +376,13 @@ class ChatRoomManager(ChatRoomManagerInterface):
 
         """
         return [room for room in self._rooms.values() if room.status == "archived"]
+<<<<<<< HEAD
 
     def validate_room_config(self, config: ChatRoomConfig) -> Dict[str, any]:
+=======
+    
+    def validate_room_config(self, config: ChatRoomConfig) -> dict[str, any]:
+>>>>>>> feature/core-services-refactor
         """Validate a chat room configuration without creating the room.
         
         Args:
@@ -404,8 +424,13 @@ class ChatRoomManager(ChatRoomManagerInterface):
             "mode_requirements": self.config_validator.get_mode_requirements(config.mode),
             "suggested_rules": self.config_validator.suggest_rules_for_mode(config.mode)
         }
+<<<<<<< HEAD
 
     def get_available_roles(self) -> List[Dict[str, str]]:
+=======
+    
+    def get_available_roles(self) -> list[dict[str, str]]:
+>>>>>>> feature/core-services-refactor
         """Get all available roles that can be used in chat rooms.
         
         Returns:
@@ -413,8 +438,13 @@ class ChatRoomManager(ChatRoomManagerInterface):
 
         """
         return self.role_validator.get_available_roles()
+<<<<<<< HEAD
 
     def suggest_roles_for_topic(self, topic: str, max_suggestions: int = 5) -> List[str]:
+=======
+    
+    def suggest_roles_for_topic(self, topic: str, max_suggestions: int = 5) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Suggest roles that might be relevant for a given topic.
         
         Args:
@@ -426,8 +456,13 @@ class ChatRoomManager(ChatRoomManagerInterface):
 
         """
         return self.role_validator.suggest_roles_for_topic(topic, max_suggestions)
+<<<<<<< HEAD
 
     def get_rooms_by_role(self, role_id: str) -> List[ChatRoomSummary]:
+=======
+    
+    def get_rooms_by_role(self, role_id: str) -> list[ChatRoomSummary]:
+>>>>>>> feature/core-services-refactor
         """Get all chat rooms that include a specific role.
         
         Args:
@@ -456,8 +491,13 @@ class ChatRoomManager(ChatRoomManagerInterface):
         matching_rooms.sort(key=lambda x: x.last_active, reverse=True)
 
         return matching_rooms
+<<<<<<< HEAD
 
     def get_rooms_by_topic_keyword(self, keyword: str) -> List[ChatRoomSummary]:
+=======
+    
+    def get_rooms_by_topic_keyword(self, keyword: str) -> list[ChatRoomSummary]:
+>>>>>>> feature/core-services-refactor
         """Get chat rooms that have a keyword in their topic.
         
         Args:
@@ -487,8 +527,13 @@ class ChatRoomManager(ChatRoomManagerInterface):
         matching_rooms.sort(key=lambda x: x.last_active, reverse=True)
 
         return matching_rooms
+<<<<<<< HEAD
 
     def get_valid_modes(self) -> List[str]:
+=======
+    
+    def get_valid_modes(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Get all valid chat room modes.
         
         Returns:
@@ -496,8 +541,13 @@ class ChatRoomManager(ChatRoomManagerInterface):
 
         """
         return self.config_validator.get_valid_modes()
+<<<<<<< HEAD
 
     def get_mode_requirements(self, mode: str) -> Dict[str, Any]:
+=======
+    
+    def get_mode_requirements(self, mode: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get requirements for a specific chat mode.
         
         Args:
@@ -508,8 +558,13 @@ class ChatRoomManager(ChatRoomManagerInterface):
 
         """
         return self.config_validator.get_mode_requirements(mode)
+<<<<<<< HEAD
 
     def suggest_rules_for_mode(self, mode: str) -> Dict[str, List[str]]:
+=======
+    
+    def suggest_rules_for_mode(self, mode: str) -> dict[str, list[str]]:
+>>>>>>> feature/core-services-refactor
         """Get suggested rules for a specific mode.
         
         Args:
@@ -520,8 +575,13 @@ class ChatRoomManager(ChatRoomManagerInterface):
 
         """
         return self.config_validator.suggest_rules_for_mode(mode)
+<<<<<<< HEAD
 
     def validate_interaction_rules(self, rules: Dict[str, Any], mode: str) -> Dict[str, Any]:
+=======
+    
+    def validate_interaction_rules(self, rules: dict[str, Any], mode: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Validate interaction rules for a specific mode.
         
         Args:

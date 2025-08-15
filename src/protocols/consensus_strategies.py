@@ -8,7 +8,7 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Type
+from typing import Any
 
 from src.models import DebateTurn
 
@@ -17,7 +17,11 @@ class ConsensusStrategy(ABC):
     """Abstract base class for all consensus strategies."""
 
     @abstractmethod
+<<<<<<< HEAD
     def execute(self, history: List[DebateTurn]) -> Any:
+=======
+    def execute(self, history: list[DebateTurn]) -> Any:
+>>>>>>> feature/core-services-refactor
         """Executes the consensus-finding logic.
 
         Args:
@@ -38,10 +42,17 @@ class SimpleMajorityVoteStrategy(ConsensusStrategy):
     """
 
     @staticmethod # Make it a static method
+<<<<<<< HEAD
     def execute(history: List[DebateTurn]) -> Dict[str, Any]:
         """Counts votes based on keywords in the last turn of each role.
         """
         votes: Dict[str, int] = {"agree": 0, "disagree": 0, "neutral": 0}
+=======
+    def execute(history: list[DebateTurn]) -> dict[str, Any]:
+        """Counts votes based on keywords in the last turn of each role.
+        """
+        votes: dict[str, int] = {"agree": 0, "disagree": 0, "neutral": 0}
+>>>>>>> feature/core-services-refactor
         roles_voted = set()
         # Iterate backwards to find the last opinion of each role
         for turn in reversed(history):
@@ -63,11 +74,11 @@ class ConsensusStrategyFactory:
     """Factory for creating and managing consensus strategy instances."""
 
     def __init__(self):
-        self._strategies: Dict[str, Type[ConsensusStrategy]] = {}
+        self._strategies: dict[str, type[ConsensusStrategy]] = {}
         # Public property for test compatibility
         self.strategies = self._strategies
 
-    def register(self, name: str, strategy_class: Type[ConsensusStrategy]):
+    def register(self, name: str, strategy_class: type[ConsensusStrategy]):
         """Registers a new consensus strategy."""
         self._strategies[name] = strategy_class
 
@@ -78,7 +89,7 @@ class ConsensusStrategyFactory:
             raise ValueError(f"Consensus strategy '{name}' not registered.")
         return strategy_class()
 
-    def get_all_strategies(self) -> Dict[str, Type[ConsensusStrategy]]:
+    def get_all_strategies(self) -> dict[str, type[ConsensusStrategy]]:
         """Returns all registered strategy classes."""
         return self._strategies
 

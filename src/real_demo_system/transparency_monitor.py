@@ -7,9 +7,16 @@ import asyncio
 import json
 import logging
 from collections import defaultdict, deque
+<<<<<<< HEAD
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List
+=======
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from .real_llm_integrator import LLMCallRecord, RealLLMIntegrator
 
@@ -23,9 +30,15 @@ class TransparencyEvent:
     event_id: str
     event_type: str  # call_started, call_completed, call_failed, metrics_updated
     timestamp: datetime
+<<<<<<< HEAD
     data: Dict[str, Any]
 
     def to_dict(self) -> Dict[str, Any]:
+=======
+    data: dict[str, Any]
+    
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         data = asdict(self)
         data['timestamp'] = self.timestamp.isoformat()
         return data
@@ -41,8 +54,13 @@ class RealTimeMetrics:
     success_rate_last_hour: float = 0.0
     total_cost_today: float = 0.0
     total_tokens_today: int = 0
+<<<<<<< HEAD
     provider_distribution: Dict[str, int] = None
 
+=======
+    provider_distribution: dict[str, int] = None
+    
+>>>>>>> feature/core-services-refactor
     def __post_init__(self):
         if self.provider_distribution is None:
             self.provider_distribution = {}
@@ -64,8 +82,8 @@ class TransparencyMonitor:
         """
         self.llm_integrator = llm_integrator
         self.events: deque = deque(maxlen=1000)  # 保留最近1000个事件
-        self.active_calls: Dict[str, Dict[str, Any]] = {}
-        self.subscribers: List[Callable] = []
+        self.active_calls: dict[str, dict[str, Any]] = {}
+        self.subscribers: list[Callable] = []
         self.real_time_metrics = RealTimeMetrics()
 
         # 启动监控任务
@@ -152,7 +170,7 @@ class TransparencyMonitor:
         provider: str,
         model: str,
         prompt: str,
-        parameters: Dict[str, Any]
+        parameters: dict[str, Any]
     ):
         """监控LLM调用开始
         
@@ -213,8 +231,13 @@ class TransparencyMonitor:
         })
 
         logger.info(f"LLM call completed: {record.call_id}, success: {record.success}")
+<<<<<<< HEAD
 
     async def _emit_event(self, event_type: str, data: Dict[str, Any]):
+=======
+    
+    async def _emit_event(self, event_type: str, data: dict[str, Any]):
+>>>>>>> feature/core-services-refactor
         """发送事件"""
         event = TransparencyEvent(
             event_id=f"{datetime.now().timestamp()}_{event_type}",
@@ -250,8 +273,13 @@ class TransparencyMonitor:
         if callback in self.subscribers:
             self.subscribers.remove(callback)
             logger.info(f"Subscriber removed, total: {len(self.subscribers)}")
+<<<<<<< HEAD
 
     def get_real_time_status(self) -> Dict[str, Any]:
+=======
+    
+    def get_real_time_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取实时状态"""
         return {
             "timestamp": datetime.now().isoformat(),
@@ -269,8 +297,13 @@ class TransparencyMonitor:
             "metrics": asdict(self.real_time_metrics),
             "recent_events_count": len(self.events)
         }
+<<<<<<< HEAD
 
     def get_call_transparency_report(self, call_id: str) -> Dict[str, Any]:
+=======
+    
+    def get_call_transparency_report(self, call_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取特定调用的透明度报告
         
         Args:
@@ -311,7 +344,7 @@ class TransparencyMonitor:
         }
 
     def _calculate_transparency_score(
-        self, record: LLMCallRecord, events: List[Dict[str, Any]]
+        self, record: LLMCallRecord, events: list[dict[str, Any]]
     ) -> float:
         """计算透明度分数"""
         score = 0.0
@@ -334,8 +367,13 @@ class TransparencyMonitor:
             score += 10.0
 
         return min(score, 100.0)
+<<<<<<< HEAD
 
     def get_performance_dashboard(self) -> Dict[str, Any]:
+=======
+    
+    def get_performance_dashboard(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取性能仪表板数据"""
         now = datetime.now()
 
@@ -370,8 +408,13 @@ class TransparencyMonitor:
                 }
 
         return dashboard_data
+<<<<<<< HEAD
 
     def get_audit_summary(self) -> Dict[str, Any]:
+=======
+    
+    def get_audit_summary(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取审计摘要"""
         total_records = len(self.llm_integrator.call_records)
 
@@ -403,8 +446,13 @@ class TransparencyMonitor:
             },
             "transparency_metrics": asdict(self.real_time_metrics)
         }
+<<<<<<< HEAD
 
     async def generate_transparency_certificate(self, call_id: str) -> Dict[str, Any]:
+=======
+    
+    async def generate_transparency_certificate(self, call_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成透明度证书
         
         Args:

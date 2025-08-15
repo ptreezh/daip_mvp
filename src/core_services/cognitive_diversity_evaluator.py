@@ -13,7 +13,11 @@ import math
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Tuple
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 import numpy as np
 from pydantic import BaseModel, Field
@@ -33,10 +37,14 @@ class DiversityMetric(str, Enum):
 @dataclass
 class CognitiveDistance:
     """Represents the cognitive distance between two agents."""
+<<<<<<< HEAD
 
     agent_pair: Tuple[str, str]
+=======
+    agent_pair: tuple[str, str]
+>>>>>>> feature/core-services-refactor
     overall_distance: float
-    metric_distances: Dict[DiversityMetric, float]
+    metric_distances: dict[DiversityMetric, float]
     timestamp: datetime
 
 
@@ -44,9 +52,9 @@ class DiversityScore(BaseModel):
     """Represents a diversity score for a group of agents."""
 
     group_id: str
-    agents: List[str]
+    agents: list[str]
     overall_score: float = Field(ge=0.0, le=1.0)
-    metric_scores: Dict[DiversityMetric, float] = Field(default_factory=dict)
+    metric_scores: dict[DiversityMetric, float] = Field(default_factory=dict)
     timestamp: datetime
     sample_size: int
 
@@ -55,9 +63,9 @@ class ConsistencyTracker(BaseModel):
     """Tracks longitudinal consistency of an agent's cognitive profile."""
 
     agent_id: str
-    baseline_profile: Dict[str, Any]
-    consistency_scores: List[Tuple[datetime, float]] = Field(default_factory=list)
-    drift_indicators: Dict[str, float] = Field(default_factory=dict)
+    baseline_profile: dict[str, Any]
+    consistency_scores: list[tuple[datetime, float]] = Field(default_factory=list)
+    drift_indicators: dict[str, float] = Field(default_factory=dict)
     last_updated: datetime
 
 
@@ -72,10 +80,17 @@ class CognitiveDiversityEvaluator:
     def __init__(self):
         """Initialize the cognitive diversity evaluator."""
         self.logger = logging.getLogger("cognitive_diversity_evaluator")
+<<<<<<< HEAD
         self.distance_cache: Dict[Tuple[str, str], CognitiveDistance] = {}
         self.consistency_trackers: Dict[str, ConsistencyTracker] = {}
         self.diversity_history: List[DiversityScore] = []
 
+=======
+        self.distance_cache: dict[tuple[str, str], CognitiveDistance] = {}
+        self.consistency_trackers: dict[str, ConsistencyTracker] = {}
+        self.diversity_history: list[DiversityScore] = []
+        
+>>>>>>> feature/core-services-refactor
         # Weights for different diversity metrics
         self.metric_weights = {
             DiversityMetric.REASONING_STYLE: 0.25,
@@ -90,8 +105,8 @@ class CognitiveDiversityEvaluator:
 
     def calculate_cognitive_distance(
         self,
-        agent1_profile: Dict[str, Any],
-        agent2_profile: Dict[str, Any],
+        agent1_profile: dict[str, Any],
+        agent2_profile: dict[str, Any],
         agent1_id: str,
         agent2_id: str
     ) -> CognitiveDistance:
@@ -165,8 +180,8 @@ class CognitiveDiversityEvaluator:
 
     def _calculate_reasoning_distance(
         self,
-        profile1: Dict[str, Any],
-        profile2: Dict[str, Any]
+        profile1: dict[str, Any],
+        profile2: dict[str, Any]
     ) -> float:
         """Calculate distance between reasoning styles."""
         reasoning1 = profile1.get("profile", {}).get("reasoning_style", "analytical")
@@ -188,8 +203,8 @@ class CognitiveDiversityEvaluator:
 
     def _calculate_value_distance(
         self,
-        profile1: Dict[str, Any],
-        profile2: Dict[str, Any]
+        profile1: dict[str, Any],
+        profile2: dict[str, Any]
     ) -> float:
         """Calculate distance between value systems."""
         values1 = profile1.get("profile", {}).get("values", {})
@@ -214,8 +229,8 @@ class CognitiveDiversityEvaluator:
 
     def _calculate_epistemological_distance(
         self,
-        profile1: Dict[str, Any],
-        profile2: Dict[str, Any]
+        profile1: dict[str, Any],
+        profile2: dict[str, Any]
     ) -> float:
         """Calculate distance between epistemological approaches."""
         approach1 = profile1.get("profile", {}).get("epistemological_approach", "empirical")
@@ -237,8 +252,8 @@ class CognitiveDiversityEvaluator:
 
     def _calculate_belief_structure_distance(
         self,
-        profile1: Dict[str, Any],
-        profile2: Dict[str, Any]
+        profile1: dict[str, Any],
+        profile2: dict[str, Any]
     ) -> float:
         """Calculate distance between belief structures."""
         structure1 = profile1.get("profile", {}).get("belief_structure", "hierarchical")
@@ -260,8 +275,8 @@ class CognitiveDiversityEvaluator:
 
     def _calculate_bias_distance(
         self,
-        profile1: Dict[str, Any],
-        profile2: Dict[str, Any]
+        profile1: dict[str, Any],
+        profile2: dict[str, Any]
     ) -> float:
         """Calculate distance between cognitive bias sets."""
         biases1 = set(profile1.get("profile", {}).get("cognitive_biases", []))
@@ -279,8 +294,8 @@ class CognitiveDiversityEvaluator:
 
     def _calculate_expertise_distance(
         self,
-        profile1: Dict[str, Any],
-        profile2: Dict[str, Any]
+        profile1: dict[str, Any],
+        profile2: dict[str, Any]
     ) -> float:
         """Calculate distance between domain expertise profiles."""
         expertise1 = profile1.get("profile", {}).get("domain_expertise", {})
@@ -305,7 +320,7 @@ class CognitiveDiversityEvaluator:
 
     def calculate_group_diversity(
         self,
-        agent_profiles: Dict[str, Dict[str, Any]],
+        agent_profiles: dict[str, dict[str, Any]],
         group_id: str = "default"
     ) -> DiversityScore:
         """Calculate diversity score for a group of agents.
@@ -389,8 +404,8 @@ class CognitiveDiversityEvaluator:
     def track_longitudinal_consistency(
         self,
         agent_id: str,
-        current_profile: Dict[str, Any],
-        baseline_profile: Optional[Dict[str, Any]] = None
+        current_profile: dict[str, Any],
+        baseline_profile: Optional[dict[str, Any]] = None
     ) -> ConsistencyTracker:
         """Track longitudinal consistency of an agent's cognitive profile.
         
@@ -442,8 +457,8 @@ class CognitiveDiversityEvaluator:
 
     def _calculate_profile_consistency(
         self,
-        baseline_profile: Dict[str, Any],
-        current_profile: Dict[str, Any]
+        baseline_profile: dict[str, Any],
+        current_profile: dict[str, Any]
     ) -> float:
         """Calculate consistency score between baseline and current profiles.
         
@@ -508,9 +523,15 @@ class CognitiveDiversityEvaluator:
 
     def _calculate_drift_indicators(
         self,
+<<<<<<< HEAD
         baseline_profile: Dict[str, Any],
         current_profile: Dict[str, Any]
     ) -> Dict[str, float]:
+=======
+        baseline_profile: dict[str, Any],
+        current_profile: dict[str, Any]
+    ) -> dict[str, float]:
+>>>>>>> feature/core-services-refactor
         """Calculate drift indicators for different aspects of the profile.
         
         Args:
@@ -553,7 +574,11 @@ class CognitiveDiversityEvaluator:
         self,
         group_id: str,
         time_window: Optional[timedelta] = None
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get diversity trends for a specific group over time.
         
         Args:
@@ -611,7 +636,11 @@ class CognitiveDiversityEvaluator:
         self,
         agent_id: str,
         time_window: Optional[timedelta] = None
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get consistency report for a specific agent.
         
         Args:

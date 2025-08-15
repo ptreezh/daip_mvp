@@ -147,7 +147,7 @@ class WorkflowManager:
     def get_status(self) -> dict[str, Any]:
         """Gets the current status of the workflow.
 
-        Returns
+        Returns:
         -------
             Dict[str, Any]: A dictionary representing the current status.
 

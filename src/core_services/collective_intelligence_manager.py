@@ -11,7 +11,11 @@ Requirements: 11.4, 11.5, 11.8, 11.10
 import logging
 from dataclasses import dataclass
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Tuple
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .advanced_consensus_algorithms import ConsensusInput, ConsensusResult
 from .cognitive_diversity_evaluator import CognitiveDiversityEvaluator
@@ -24,13 +28,13 @@ class CollectiveIntelligenceSession:
     """Represents a collective intelligence session."""
 
     session_id: str
-    participants: List[str]
+    participants: list[str]
     topic: str
     start_time: datetime
     end_time: Optional[datetime] = None
     diversity_score: Optional[float] = None
-    consensus_results: List[ConsensusResult] = None
-    emergent_insights: List[EmergentInsight] = None
+    consensus_results: list[ConsensusResult] = None
+    emergent_insights: list[EmergentInsight] = None
     intelligence_emergence_score: Optional[float] = None
 
 
@@ -52,11 +56,17 @@ class CollectiveIntelligenceManager:
         self.insight_detector = EmergentInsightDetector()
 
         # Session management
+<<<<<<< HEAD
         self.active_sessions: Dict[str, CollectiveIntelligenceSession] = {}
         self.session_history: List[CollectiveIntelligenceSession] = []
 
+=======
+        self.active_sessions: dict[str, CollectiveIntelligenceSession] = {}
+        self.session_history: list[CollectiveIntelligenceSession] = []
+        
+>>>>>>> feature/core-services-refactor
         # Performance tracking
-        self.emergence_metrics: Dict[str, List[float]] = {
+        self.emergence_metrics: dict[str, list[float]] = {
             "diversity_scores": [],
             "consensus_confidence": [],
             "insight_counts": [],
@@ -68,9 +78,9 @@ class CollectiveIntelligenceManager:
     def start_collective_intelligence_session(
         self,
         session_id: str,
-        participants: List[str],
+        participants: list[str],
         topic: str,
-        participant_profiles: Dict[str, Dict[str, Any]]
+        participant_profiles: dict[str, dict[str, Any]]
     ) -> CollectiveIntelligenceSession:
         """Start a new collective intelligence session.
         
@@ -110,9 +120,15 @@ class CollectiveIntelligenceManager:
     def process_collective_input(
         self,
         session_id: str,
+<<<<<<< HEAD
         inputs: List[ConsensusInput],
         context: Optional[Dict[str, Any]] = None
     ) -> Tuple[ConsensusResult, List[EmergentInsight]]:
+=======
+        inputs: list[ConsensusInput],
+        context: Optional[dict[str, Any]] = None
+    ) -> tuple[ConsensusResult, list[EmergentInsight]]:
+>>>>>>> feature/core-services-refactor
         """Process collective input to generate consensus and detect emergent insights.
         
         Args:
@@ -174,7 +190,11 @@ class CollectiveIntelligenceManager:
     def evaluate_intelligence_emergence(
         self,
         session_id: str
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Evaluate the level of collective intelligence emergence in a session.
         
         Args:
@@ -272,7 +292,11 @@ class CollectiveIntelligenceManager:
     def get_collective_intelligence_report(
         self,
         session_id: str
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Generate a comprehensive collective intelligence report.
         
         Args:
@@ -334,7 +358,7 @@ class CollectiveIntelligenceManager:
         self,
         session: CollectiveIntelligenceSession,
         consensus_result: ConsensusResult,
-        emergent_insights: List[EmergentInsight]
+        emergent_insights: list[EmergentInsight]
     ) -> None:
         """Update emergence metrics."""
         self.emergence_metrics["diversity_scores"].append(session.diversity_score or 0.0)
@@ -348,8 +372,13 @@ class CollectiveIntelligenceManager:
             len(emergent_insights)
         )
         self.emergence_metrics["intelligence_emergence"].append(intelligence_score)
+<<<<<<< HEAD
 
     def _calculate_trend(self, values: List[float]) -> str:
+=======
+    
+    def _calculate_trend(self, values: list[float]) -> str:
+>>>>>>> feature/core-services-refactor
         """Calculate trend direction for a list of values."""
         if len(values) < 2:
             return "stable"
@@ -365,24 +394,39 @@ class CollectiveIntelligenceManager:
             return "decreasing"
         else:
             return "stable"
+<<<<<<< HEAD
 
     def _analyze_insight_types(self, insights: List[EmergentInsight]) -> Dict[str, int]:
+=======
+    
+    def _analyze_insight_types(self, insights: list[EmergentInsight]) -> dict[str, int]:
+>>>>>>> feature/core-services-refactor
         """Analyze the types of emergent insights."""
         type_counts = {}
         for insight in insights:
             insight_type = insight.insight_type.value
             type_counts[insight_type] = type_counts.get(insight_type, 0) + 1
         return type_counts
+<<<<<<< HEAD
 
     def _analyze_emergence_patterns(self, insights: List[EmergentInsight]) -> Dict[str, int]:
+=======
+    
+    def _analyze_emergence_patterns(self, insights: list[EmergentInsight]) -> dict[str, int]:
+>>>>>>> feature/core-services-refactor
         """Analyze emergence patterns in insights."""
         pattern_counts = {}
         for insight in insights:
             pattern = insight.emergence_pattern.value
             pattern_counts[pattern] = pattern_counts.get(pattern, 0) + 1
         return pattern_counts
+<<<<<<< HEAD
 
     def _calculate_intelligence_emergence_score(self, evaluation: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_intelligence_emergence_score(self, evaluation: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """Calculate overall intelligence emergence score."""
         score = 0.0
 
@@ -429,8 +473,13 @@ class CollectiveIntelligenceManager:
         )
 
         return min(score, 1.0)
+<<<<<<< HEAD
 
     def _summarize_consensus_results(self, results: List[ConsensusResult]) -> Dict[str, Any]:
+=======
+    
+    def _summarize_consensus_results(self, results: list[ConsensusResult]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Summarize consensus results."""
         if not results:
             return {}
@@ -445,16 +494,26 @@ class CollectiveIntelligenceManager:
             "avg_diversity": sum(diversities) / len(diversities),
             "confidence_trend": self._calculate_trend(confidences)
         }
+<<<<<<< HEAD
 
     def _analyze_algorithm_usage(self, results: List[ConsensusResult]) -> Dict[str, int]:
+=======
+    
+    def _analyze_algorithm_usage(self, results: list[ConsensusResult]) -> dict[str, int]:
+>>>>>>> feature/core-services-refactor
         """Analyze which algorithms were used."""
         algorithm_counts = {}
         for result in results:
             algorithm = result.algorithm_used.value
             algorithm_counts[algorithm] = algorithm_counts.get(algorithm, 0) + 1
         return algorithm_counts
+<<<<<<< HEAD
 
     def _get_top_insights(self, insights: List[EmergentInsight], count: int) -> List[Dict[str, Any]]:
+=======
+    
+    def _get_top_insights(self, insights: list[EmergentInsight], count: int) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get top insights by emergence score."""
         sorted_insights = sorted(insights, key=lambda x: x.emergence_score, reverse=True)
 
@@ -489,8 +548,13 @@ class CollectiveIntelligenceManager:
             return "moderate"
         else:
             return "strong"
+<<<<<<< HEAD
 
     def _identify_key_emergence_indicators(self, session: CollectiveIntelligenceSession) -> List[str]:
+=======
+    
+    def _identify_key_emergence_indicators(self, session: CollectiveIntelligenceSession) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Identify key indicators of intelligence emergence."""
         indicators = []
 
@@ -511,8 +575,13 @@ class CollectiveIntelligenceManager:
                 indicators.append("High novelty in generated insights")
 
         return indicators
+<<<<<<< HEAD
 
     def _generate_recommendations(self, session: CollectiveIntelligenceSession) -> List[str]:
+=======
+    
+    def _generate_recommendations(self, session: CollectiveIntelligenceSession) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Generate recommendations for improving collective intelligence."""
         recommendations = []
 
@@ -531,8 +600,13 @@ class CollectiveIntelligenceManager:
             recommendations.append("Consider including more participants to increase perspective diversity")
 
         return recommendations
+<<<<<<< HEAD
 
     def get_system_performance_metrics(self) -> Dict[str, Any]:
+=======
+    
+    def get_system_performance_metrics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get overall system performance metrics."""
         return {
             "active_sessions": len(self.active_sessions),

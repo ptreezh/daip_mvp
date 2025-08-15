@@ -1,7 +1,11 @@
 import json
 import logging
 import os
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 try:
     from src.role_utils import standardize_role_dict
@@ -24,7 +28,7 @@ class ExpertService:
         if not ROLE_UTILS_AVAILABLE:
             logger.warning("role_utils not available. Some functionalities will be disabled.")
 
-    def get_all_experts(self) -> List[Any]:
+    def get_all_experts(self) -> list[Any]:
         """Retrieves all experts from the role details."""
         # Convert role details to expert-like objects
         experts = []
@@ -37,7 +41,11 @@ class ExpertService:
             experts.append(expert)
         return experts
 
+<<<<<<< HEAD
     def create_expert(self, expert_data: Dict[str, Any]) -> Any:
+=======
+    def create_expert(self, expert_data: dict[str, Any]) -> Any:
+>>>>>>> feature/core-services-refactor
         """Creates a single expert, handles validation and saving.
         Raises ValueError if the expert already exists.
         """
@@ -72,8 +80,13 @@ class ExpertService:
         return expert
 
     def batch_import_experts(
+<<<<<<< HEAD
         self, roles_data: List[Dict[str, Any]], overwrite: bool, validate_only: bool
     ) -> Dict[str, Any]:
+=======
+        self, roles_data: list[dict[str, Any]], overwrite: bool, validate_only: bool
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Batch imports experts from a list of dictionaries.
         Handles standardization, file writing, validation, and state reloading.
         """
@@ -120,7 +133,7 @@ class ExpertService:
 
         return results
 
-    def search_experts_by_embedding(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+    def search_experts_by_embedding(self, query: str, top_k: int = 5) -> list[dict[str, Any]]:
         """Searches for experts using vector embeddings and returns a formatted list."""
         search_results = self.app_state.search_roles_by_vector(query, top_k)
         reformatted_results = [

@@ -148,7 +148,11 @@ def demo_performance_optimization():
     }
 
     result = optimization_manager.validate_and_optimize_configuration(test_config)
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     print("✅ Configuration Validation:")
     print(f"   Valid: {result['validation']['is_valid']}")
     print(f"   Errors: {len(result['validation']['errors'])}")
@@ -210,7 +214,11 @@ async def demo_integration():
 
     # Calculate consensus
     result = await consensus_manager.calculate_consensus("weighted_expert", inputs)
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/core-services-refactor
     print("\n🏛️ Committee Decision:")
     print(f"   Consensus: {result.consensus_value}")
     print(f"   Confidence: {result.confidence:.3f}")

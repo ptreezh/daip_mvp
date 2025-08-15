@@ -8,7 +8,7 @@ import json
 import logging
 import re
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from ..base import ExecutionContext, InstitutionalPrimitive
 from .models import SubProblem
@@ -22,14 +22,24 @@ class TaskDecompositionNode(InstitutionalPrimitive):
     Uses a "规划者" role to break down complex topics into sub-problems that can be
     analyzed from different perspectives (e.g., economic, social, technical, ethical).
     """
+<<<<<<< HEAD
 
     def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+=======
+    
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
+>>>>>>> feature/core-services-refactor
         super().__init__(primitive_id, config)
         self.planner_role = config.get("planner_role", "规划者") if config else "规划者"
         self.default_perspectives = config.get("default_perspectives", ["经济", "社会", "技术", "伦理"]) if config else ["经济", "社会", "技术", "伦理"]
         self.max_sub_problems = config.get("max_sub_problems", 5) if config else 5
+<<<<<<< HEAD
 
     async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+=======
+    
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute task decomposition for a complex topic.
         
         Args:
@@ -157,8 +167,13 @@ class TaskDecompositionNode(InstitutionalPrimitive):
                 "success": False,
                 "error": str(e)
             }
+<<<<<<< HEAD
 
     def _extract_json_from_text(self, text: str) -> List[Dict[str, Any]]:
+=======
+    
+    def _extract_json_from_text(self, text: str) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Extract JSON data from text response."""
         # Find JSON content between triple backticks
         json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', text)
@@ -178,8 +193,13 @@ class TaskDecompositionNode(InstitutionalPrimitive):
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON: {e}")
             return []
+<<<<<<< HEAD
 
     def get_input_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return input schema for the task decomposition node."""
         return {
             "type": "object",
@@ -196,8 +216,13 @@ class TaskDecompositionNode(InstitutionalPrimitive):
             },
             "required": ["topic"]
         }
+<<<<<<< HEAD
 
     def get_output_schema(self) -> Dict[str, Any]:
+=======
+    
+    def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return output schema for the task decomposition node."""
         return {
             "type": "object",

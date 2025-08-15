@@ -11,7 +11,11 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +37,15 @@ class RoleValidationResult:
     status: RoleValidationStatus
     confidence_score: float
     validation_timestamp: datetime
-    issues: List[str]
+    issues: list[str]
     file_hash: str
+<<<<<<< HEAD
 
     def to_dict(self) -> Dict[str, Any]:
+=======
+    
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         data = asdict(self)
         data['status'] = self.status.value
         data['validation_timestamp'] = self.validation_timestamp.isoformat()
@@ -55,8 +64,13 @@ class RoleMetadata:
     file_hash: str
     last_modified: datetime
     validation_result: RoleValidationResult
+<<<<<<< HEAD
 
     def to_dict(self) -> Dict[str, Any]:
+=======
+    
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         data = asdict(self)
         data['last_modified'] = self.last_modified.isoformat()
         data['validation_result'] = self.validation_result.to_dict()
@@ -89,10 +103,17 @@ class RealRoleManager:
 
         """
         self.roles_directory = Path(roles_directory)
+<<<<<<< HEAD
         self.loaded_roles: Dict[str, Dict[str, Any]] = {}
         self.role_metadata: Dict[str, RoleMetadata] = {}
         self.validation_cache: Dict[str, RoleValidationResult] = {}
 
+=======
+        self.loaded_roles: dict[str, dict[str, Any]] = {}
+        self.role_metadata: dict[str, RoleMetadata] = {}
+        self.validation_cache: dict[str, RoleValidationResult] = {}
+        
+>>>>>>> feature/core-services-refactor
         # 必需字段定义
         self.required_fields = {
             "basic": ["name", "id"],
@@ -165,8 +186,13 @@ class RealRoleManager:
         with open(file_path, 'rb') as f:
             content = f.read()
         return hashlib.sha256(content).hexdigest()
+<<<<<<< HEAD
 
     def _extract_role_id(self, role_data: Dict[str, Any], file_path: Path) -> str:
+=======
+    
+    def _extract_role_id(self, role_data: dict[str, Any], file_path: Path) -> str:
+>>>>>>> feature/core-services-refactor
         """提取角色ID"""
         # 尝试多种可能的ID字段
         for id_field in ["id", "role_id", "name"]:
@@ -175,8 +201,13 @@ class RealRoleManager:
 
         # 如果没有找到ID，使用文件名
         return file_path.stem
+<<<<<<< HEAD
 
     def _validate_role_data(self, role_data: Dict[str, Any], file_path: Path) -> RoleValidationResult:
+=======
+    
+    def _validate_role_data(self, role_data: dict[str, Any], file_path: Path) -> RoleValidationResult:
+>>>>>>> feature/core-services-refactor
         """验证角色数据"""
         role_id = self._extract_role_id(role_data, file_path)
         issues = []
@@ -229,8 +260,13 @@ class RealRoleManager:
             issues=issues,
             file_hash=self._calculate_file_hash(file_path)
         )
+<<<<<<< HEAD
 
     def _validate_field_types(self, role_data: Dict[str, Any]) -> List[str]:
+=======
+    
+    def _validate_field_types(self, role_data: dict[str, Any]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """验证字段类型"""
         issues = []
 
@@ -253,8 +289,13 @@ class RealRoleManager:
                 issues.append(f"Field '{field}' should be numeric, got {type(role_data[field])}")
 
         return issues
+<<<<<<< HEAD
 
     def _validate_content_quality(self, role_data: Dict[str, Any]) -> float:
+=======
+    
+    def _validate_content_quality(self, role_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """验证内容质量"""
         score = 0.0
 
@@ -273,8 +314,13 @@ class RealRoleManager:
             score += 2.5
 
         return min(score, 10.0)
+<<<<<<< HEAD
 
     def get_role(self, role_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def get_role(self, role_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取角色定义
         
         Args:
@@ -285,24 +331,39 @@ class RealRoleManager:
 
         """
         return self.loaded_roles.get(role_id)
+<<<<<<< HEAD
 
     def get_all_roles(self) -> Dict[str, Dict[str, Any]]:
+=======
+    
+    def get_all_roles(self) -> dict[str, dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取所有角色定义"""
         return self.loaded_roles.copy()
 
     def get_role_metadata(self, role_id: str) -> Optional[RoleMetadata]:
         """获取角色元数据"""
         return self.role_metadata.get(role_id)
+<<<<<<< HEAD
 
     def get_roles_by_category(self, category: str) -> Dict[str, Dict[str, Any]]:
+=======
+    
+    def get_roles_by_category(self, category: str) -> dict[str, dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """按类别获取角色"""
         return {
             role_id: role_data
             for role_id, role_data in self.loaded_roles.items()
             if role_data.get("category", "").lower() == category.lower()
         }
+<<<<<<< HEAD
 
     def search_roles(self, query: str, fields: Optional[List[str]] = None) -> Dict[str, Dict[str, Any]]:
+=======
+    
+    def search_roles(self, query: str, fields: Optional[list[str]] = None) -> dict[str, dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """搜索角色
         
         Args:
@@ -334,8 +395,13 @@ class RealRoleManager:
                         break
 
         return matching_roles
+<<<<<<< HEAD
 
     def verify_role_authenticity(self, role_id: str) -> Dict[str, Any]:
+=======
+    
+    def verify_role_authenticity(self, role_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """验证角色真实性
         
         Args:
@@ -368,8 +434,13 @@ class RealRoleManager:
             "file_size": metadata.file_size,
             "issues": validation_result.issues
         }
+<<<<<<< HEAD
 
     def analyze_cognitive_differences(self, role1_id: str, role2_id: str) -> List[CognitiveDifference]:
+=======
+    
+    def analyze_cognitive_differences(self, role1_id: str, role2_id: str) -> list[CognitiveDifference]:
+>>>>>>> feature/core-services-refactor
         """分析角色间的认知差异
         
         Args:
@@ -454,8 +525,13 @@ class RealRoleManager:
             ))
 
         return differences
+<<<<<<< HEAD
 
     def get_role_uniqueness_metrics(self, role_id: str) -> Dict[str, Any]:
+=======
+    
+    def get_role_uniqueness_metrics(self, role_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取角色唯一性指标
         
         Args:
@@ -498,8 +574,13 @@ class RealRoleManager:
             "total_comparisons": len(similarities),
             "uniqueness_level": self._categorize_uniqueness(uniqueness_score)
         }
+<<<<<<< HEAD
 
     def _calculate_role_similarity(self, role1: Dict[str, Any], role2: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_role_similarity(self, role1: dict[str, Any], role2: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算角色相似度"""
         similarity_score = 0.0
         total_weight = 0.0
@@ -553,8 +634,13 @@ class RealRoleManager:
             return "somewhat_similar"
         else:
             return "highly_similar"
+<<<<<<< HEAD
 
     def get_validation_summary(self) -> Dict[str, Any]:
+=======
+    
+    def get_validation_summary(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取验证摘要"""
         total_roles = len(self.loaded_roles)
 
@@ -582,8 +668,13 @@ class RealRoleManager:
                 "unique_categories": len(set(role.get("category", "") for role in self.loaded_roles.values()))
             }
         }
+<<<<<<< HEAD
 
     def export_role_registry(self) -> Dict[str, Any]:
+=======
+    
+    def export_role_registry(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """导出角色注册表"""
         return {
             "export_timestamp": datetime.now().isoformat(),
@@ -595,8 +686,13 @@ class RealRoleManager:
                 "exists": self.roles_directory.exists()
             }
         }
+<<<<<<< HEAD
 
     def reload_roles(self) -> Dict[str, Any]:
+=======
+    
+    def reload_roles(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """重新加载角色"""
         old_count = len(self.loaded_roles)
 

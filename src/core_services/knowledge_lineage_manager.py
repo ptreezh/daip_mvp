@@ -7,7 +7,11 @@
 import logging
 import uuid
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -81,8 +85,13 @@ class KnowledgeLineageManager:
         except Exception as e:
             logger.error(f"建立关系失败: {e}")
             return False
+<<<<<<< HEAD
 
     def trace_knowledge_ancestry(self, node_id: str) -> List[Dict[str, Any]]:
+=======
+    
+    def trace_knowledge_ancestry(self, node_id: str) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """追踪知识祖先"""
         try:
             if node_id not in self.lineage_graph:

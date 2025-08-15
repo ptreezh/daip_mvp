@@ -8,7 +8,11 @@ import logging
 import uuid
 from collections import defaultdict
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -77,8 +81,13 @@ class KnowledgeEvolutionTracker:
         except Exception as e:
             logger.error(f"追踪知识变化失败: {e}")
             return None
+<<<<<<< HEAD
 
     def analyze_evolution_patterns(self, knowledge_topic: str = None) -> Dict[str, Any]:
+=======
+    
+    def analyze_evolution_patterns(self, knowledge_topic: str = None) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析演化模式"""
         try:
             if knowledge_topic:
@@ -107,8 +116,13 @@ class KnowledgeEvolutionTracker:
         except Exception as e:
             logger.error(f"分析演化模式失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def generate_lineage_graph(self, knowledge_id: str) -> Dict[str, Any]:
+=======
+    
+    def generate_lineage_graph(self, knowledge_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成谱系图"""
         try:
             if knowledge_id not in self.evolution_history:
@@ -227,8 +241,13 @@ class KnowledgeEvolutionTracker:
         except Exception as e:
             logger.error(f"计算变化幅度失败: {e}")
             return 0.5
+<<<<<<< HEAD
 
     def _update_lineage_info(self, knowledge_id: str, evolution_event: Dict[str, Any]) -> None:
+=======
+    
+    def _update_lineage_info(self, knowledge_id: str, evolution_event: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """更新谱系信息"""
         try:
             if knowledge_id not in self.knowledge_lineage:
@@ -253,8 +272,13 @@ class KnowledgeEvolutionTracker:
 
         except Exception as e:
             logger.error(f"更新谱系信息失败: {e}")
+<<<<<<< HEAD
 
     def _identify_dominant_patterns(self, histories: Dict[str, List[Dict[str, Any]]]) -> List[str]:
+=======
+    
+    def _identify_dominant_patterns(self, histories: dict[str, list[dict[str, Any]]]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """识别主要模式"""
         try:
             pattern_counts = defaultdict(int)
@@ -276,8 +300,13 @@ class KnowledgeEvolutionTracker:
         except Exception as e:
             logger.error(f"识别主要模式失败: {e}")
             return []
+<<<<<<< HEAD
 
     def _calculate_evolution_velocity(self, histories: Dict[str, List[Dict[str, Any]]]) -> float:
+=======
+    
+    def _calculate_evolution_velocity(self, histories: dict[str, list[dict[str, Any]]]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算演化速度"""
         try:
             total_velocity = 0.0
@@ -303,8 +332,13 @@ class KnowledgeEvolutionTracker:
         except Exception as e:
             logger.error(f"计算演化速度失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _analyze_change_frequency(self, histories: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Any]:
+=======
+    
+    def _analyze_change_frequency(self, histories: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析变化频率"""
         try:
             change_type_counts = defaultdict(int)
@@ -328,8 +362,13 @@ class KnowledgeEvolutionTracker:
         except Exception as e:
             logger.error(f"分析变化频率失败: {e}")
             return {}
+<<<<<<< HEAD
 
     def _analyze_quality_trends(self, histories: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Any]:
+=======
+    
+    def _analyze_quality_trends(self, histories: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析质量趋势"""
         try:
             quality_trends = {
@@ -370,8 +409,13 @@ class KnowledgeEvolutionTracker:
         except Exception as e:
             logger.error(f"分析质量趋势失败: {e}")
             return {}
+<<<<<<< HEAD
 
     def _identify_lifecycle_stages(self, histories: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Any]:
+=======
+    
+    def _identify_lifecycle_stages(self, histories: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """识别生命周期阶段"""
         try:
             lifecycle_analysis = {
@@ -406,8 +450,13 @@ class KnowledgeEvolutionTracker:
         except Exception as e:
             logger.error(f"识别生命周期阶段失败: {e}")
             return {}
+<<<<<<< HEAD
 
     def _calculate_evolution_span(self, events: List[Dict[str, Any]]) -> str:
+=======
+    
+    def _calculate_evolution_span(self, events: list[dict[str, Any]]) -> str:
+>>>>>>> feature/core-services-refactor
         """计算演化时间跨度"""
         try:
             if len(events) < 2:
@@ -428,8 +477,13 @@ class KnowledgeEvolutionTracker:
         except Exception as e:
             logger.error(f"计算演化时间跨度失败: {e}")
             return "unknown"
+<<<<<<< HEAD
 
     def _get_most_common_change_type(self, events: List[Dict[str, Any]]) -> str:
+=======
+    
+    def _get_most_common_change_type(self, events: list[dict[str, Any]]) -> str:
+>>>>>>> feature/core-services-refactor
         """获取最常见的变化类型"""
         try:
             change_counts = defaultdict(int)
@@ -445,8 +499,13 @@ class KnowledgeEvolutionTracker:
         except Exception as e:
             logger.error(f"获取最常见变化类型失败: {e}")
             return "unknown"
+<<<<<<< HEAD
 
     def get_evolution_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_evolution_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取演化统计"""
         try:
             stats = {

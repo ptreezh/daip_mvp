@@ -438,7 +438,7 @@ class TestInteractiveController:
         assert history[0]["parameters"] == {"test": "value"}
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_integration_workflow():
     """Test integration of all components in a workflow scenario."""
     temp_dir = tempfile.mkdtemp()

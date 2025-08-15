@@ -26,7 +26,7 @@ class RoleRecommenderService:
         ids = [role.id for role in roles]
         self.vector_store.add(documents=texts, embeddings=embeddings, ids=ids)
 
-@pytest.fixture
+@pytest.fixture()
 def recommender_with_mocks():
     """Set up mock dependencies and the service instance for each test."""
     mock_vector_store = MagicMock()
@@ -35,7 +35,7 @@ def recommender_with_mocks():
         vector_store=mock_vector_store,
         embedding_generator=mock_embedding_generator,
     )
-    yield recommender, mock_vector_store, mock_embedding_generator
+    return recommender, mock_vector_store, mock_embedding_generator
 
 def test_add_roles_to_store(recommender_with_mocks):
     """Test adding roles to the vector store.

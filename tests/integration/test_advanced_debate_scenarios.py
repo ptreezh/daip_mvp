@@ -16,7 +16,7 @@ from src.protocols.workflow_manager import WorkflowManager
 
 
 # Mock AppState and its components for testing
-@pytest.fixture
+@pytest.fixture()
 def mock_app_state():
     app_state = MagicMock(spec=AppState)
     app_state.role_manager = MagicMock(spec=RoleManager)
@@ -28,7 +28,7 @@ def mock_app_state():
     app_state.tool_executor = MagicMock(spec=ToolExecutor) # Mock ToolExecutor
     return app_state
 
-@pytest.fixture
+@pytest.fixture()
 def debate_protocol(mock_app_state):
     # Create a mock Kernel instance
     mock_kernel = MagicMock(spec=Kernel)
@@ -47,7 +47,7 @@ def debate_protocol(mock_app_state):
     )
     return protocol
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_professional_debate_scenario(debate_protocol, mock_app_state):
     """测试专业辩论场景：高专业度、深度分析、多轮次交锋。
     主题: "全球气候变化是否主要由人类活动引起，以及如何有效应对？"
@@ -125,7 +125,7 @@ async def test_professional_debate_scenario(debate_protocol, mock_app_state):
     mock_app_state.synthesis_engine.synthesize_opinions.assert_called_once() # Changed from synthesize_debate
     mock_app_state.memory_service.add_memory.assert_called() # Should be called for each message
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_multi_role_free_debate_scenario(debate_protocol, mock_app_state):
     """测试多角色自由辩论场景：更开放、更具互动性、更多角色参与。
     主题: "元宇宙的未来发展方向及其对社会的影响"
@@ -186,7 +186,7 @@ async def test_multi_role_free_debate_scenario(debate_protocol, mock_app_state):
     mock_app_state.synthesis_engine.synthesize_opinions.assert_called_once()
     mock_app_state.memory_service.add_memory.assert_called()
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_blue_red_adversarial_debate_scenario(debate_protocol, mock_app_state):
     """测试蓝红对抗辩论场景：正反方对抗、直接反驳、攻防。
     主题: "自动驾驶技术应被广泛推广还是严格限制？"

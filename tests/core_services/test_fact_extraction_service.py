@@ -9,19 +9,19 @@ from src.core_services.memory_service import MemoryService
 from src.kernel.llm_interface import LLMInterface
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_llm_interface() -> AsyncMock:
     """Fixture for a mocked LLM interface."""
     return AsyncMock(spec=LLMInterface)
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_memory_service() -> MagicMock:
     """Fixture for a mocked MemoryService."""
     return MagicMock(spec=MemoryService)
 
 
-@pytest.fixture
+@pytest.fixture()
 def fact_extraction_service(
     mock_llm_interface: AsyncMock, mock_memory_service: MagicMock
 ) -> FactExtractionService:
@@ -33,7 +33,7 @@ def fact_extraction_service(
     )
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_extract_and_save_facts_success(
     fact_extraction_service: FactExtractionService,
     mock_llm_interface: AsyncMock,
@@ -70,7 +70,7 @@ async def test_extract_and_save_facts_success(
     assert mock_memory_service.add_fact_to_staging.call_count == 2
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_extract_retries_on_invalid_response_type_then_succeeds(
     fact_extraction_service: FactExtractionService,
     mock_llm_interface: AsyncMock,

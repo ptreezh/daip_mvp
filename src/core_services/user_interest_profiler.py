@@ -7,7 +7,11 @@
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +33,13 @@ class UserInterestProfiler:
         self.user_interactions = {}  # {user_id: interaction_history}
 
         logger.info("用户兴趣画像器初始化完成")
+<<<<<<< HEAD
 
     def analyze_user_behavior(self, user_behavior: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def analyze_user_behavior(self, user_behavior: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析用户行为"""
         try:
             user_id = user_behavior.get("user_id")
@@ -71,8 +80,13 @@ class UserInterestProfiler:
         except Exception as e:
             logger.error(f"分析用户行为失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def update_interest_profile(self, user_id: str, feedback: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def update_interest_profile(self, user_id: str, feedback: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """更新兴趣档案"""
         try:
             # 获取当前档案
@@ -106,9 +120,9 @@ class UserInterestProfiler:
     def get_personalized_recommendations(
         self,
         user_id: str,
-        context: Dict[str, Any] = None,
+        context: dict[str, Any] = None,
         recommendation_count: int = 5
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """获取个性化推荐"""
         try:
             # 获取用户档案
@@ -160,8 +174,13 @@ class UserInterestProfiler:
         except Exception as e:
             logger.error(f"获取个性化推荐失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def _calculate_interest_scores(self, interactions: List[Dict[str, Any]]) -> Dict[str, float]:
+=======
+    
+    def _calculate_interest_scores(self, interactions: list[dict[str, Any]]) -> dict[str, float]:
+>>>>>>> feature/core-services-refactor
         """计算兴趣分数"""
         scores = defaultdict(float)
 
@@ -196,8 +215,13 @@ class UserInterestProfiler:
             scores = {k: v / max_score for k, v in scores.items()}
 
         return dict(scores)
+<<<<<<< HEAD
 
     def _identify_dominant_interests(self, interest_scores: Dict[str, float]) -> List[str]:
+=======
+    
+    def _identify_dominant_interests(self, interest_scores: dict[str, float]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """识别主导兴趣"""
         if not interest_scores:
             return []
@@ -213,8 +237,13 @@ class UserInterestProfiler:
         dominant.sort(key=lambda x: interest_scores[x], reverse=True)
 
         return dominant[:3]  # 返回前3个主导兴趣
+<<<<<<< HEAD
 
     def _analyze_interaction_patterns(self, interactions: List[Dict[str, Any]]) -> Dict[str, Any]:
+=======
+    
+    def _analyze_interaction_patterns(self, interactions: list[dict[str, Any]]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析交互模式"""
         if not interactions:
             return {}
@@ -249,8 +278,13 @@ class UserInterestProfiler:
             "time_distribution": dict(time_distribution),
             "engagement_level": self._calculate_engagement_level(interactions)
         }
+<<<<<<< HEAD
 
     def _calculate_interest_trends(self, user_id: str) -> Dict[str, Any]:
+=======
+    
+    def _calculate_interest_trends(self, user_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """计算兴趣演化趋势"""
         user_history = self.user_interactions.get(user_id, [])
 
@@ -297,9 +331,9 @@ class UserInterestProfiler:
 
     def _adjust_scores_based_on_feedback(
         self,
-        current_scores: Dict[str, float],
-        feedback: Dict[str, Any]
-    ) -> Dict[str, float]:
+        current_scores: dict[str, float],
+        feedback: dict[str, Any]
+    ) -> dict[str, float]:
         """根据反馈调整分数"""
         adjusted_scores = current_scores.copy()
 
@@ -322,8 +356,13 @@ class UserInterestProfiler:
                     adjusted_scores[interest] = min(1.0, adjusted_scores[interest] + 0.2)
 
         return adjusted_scores
+<<<<<<< HEAD
 
     def _get_suggested_actions(self, interest: str) -> List[str]:
+=======
+    
+    def _get_suggested_actions(self, interest: str) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """获取建议行动"""
         action_map = {
             "AI伦理": [
@@ -344,8 +383,13 @@ class UserInterestProfiler:
         }
 
         return action_map.get(interest, ["探索相关主题", "参与相关讨论"])
+<<<<<<< HEAD
 
     def _get_related_topics(self, interest: str) -> List[str]:
+=======
+    
+    def _get_related_topics(self, interest: str) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """获取相关主题"""
         related_map = {
             "AI伦理": ["算法公平性", "AI透明度", "隐私保护"],
@@ -357,9 +401,9 @@ class UserInterestProfiler:
 
     def _generate_contextual_recommendations(
         self,
-        user_profile: Dict[str, Any],
-        context: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        user_profile: dict[str, Any],
+        context: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """生成上下文相关推荐"""
         recommendations = []
 
@@ -377,8 +421,13 @@ class UserInterestProfiler:
             recommendations.append(recommendation)
 
         return recommendations
+<<<<<<< HEAD
 
     def _calculate_engagement_level(self, interactions: List[Dict[str, Any]]) -> str:
+=======
+    
+    def _calculate_engagement_level(self, interactions: list[dict[str, Any]]) -> str:
+>>>>>>> feature/core-services-refactor
         """计算参与度水平"""
         if not interactions:
             return "none"
@@ -393,8 +442,13 @@ class UserInterestProfiler:
             return "low"
         else:
             return "minimal"
+<<<<<<< HEAD
 
     def _is_recent_interaction(self, interaction: Dict[str, Any], days: int = 7) -> bool:
+=======
+    
+    def _is_recent_interaction(self, interaction: dict[str, Any], days: int = 7) -> bool:
+>>>>>>> feature/core-services-refactor
         """判断是否为近期交互"""
         timestamp = interaction.get("timestamp", "")
         if not timestamp:
@@ -406,8 +460,13 @@ class UserInterestProfiler:
             return interaction_time > cutoff_time
         except:
             return False
+<<<<<<< HEAD
 
     def _get_current_profile(self, user_id: str) -> Dict[str, Any]:
+=======
+    
+    def _get_current_profile(self, user_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取当前档案"""
         # 简化实现，实际应该从持久化存储中获取
         return {
@@ -416,6 +475,7 @@ class UserInterestProfiler:
             "feedback_history": [],
             "profile_version": 0
         }
+<<<<<<< HEAD
 
     def _save_profile(self, user_id: str, profile: Dict[str, Any]):
         """保存档案"""
@@ -423,6 +483,15 @@ class UserInterestProfiler:
         logger.info(f"保存用户档案: {user_id}")
 
     def _calculate_profile_maturity(self, profile: Dict[str, Any]) -> str:
+=======
+    
+    def _save_profile(self, user_id: str, profile: dict[str, Any]):
+        """保存档案"""
+        # 简化实现，实际应该保存到持久化存储
+        logger.info(f"保存用户档案: {user_id}")
+    
+    def _calculate_profile_maturity(self, profile: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """计算档案成熟度"""
         version = profile.get("profile_version", 0)
         feedback_count = len(profile.get("feedback_history", []))
@@ -447,8 +516,13 @@ class UserInterestProfiler:
         )
 
         return latest_interaction.get("timestamp", "unknown")
+<<<<<<< HEAD
 
     def _calculate_analysis_confidence(self, interactions: List[Dict[str, Any]]) -> float:
+=======
+    
+    def _calculate_analysis_confidence(self, interactions: list[dict[str, Any]]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算分析置信度"""
         if not interactions:
             return 0.0

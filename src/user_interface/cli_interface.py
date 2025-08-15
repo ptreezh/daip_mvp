@@ -9,7 +9,11 @@ import json
 import logging
 import sys
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 import click
 from rich.console import Console
@@ -36,8 +40,13 @@ class CLIInterface:
         self.result_formatter = ResultFormatter()
         self.transparency_controller = TransparencyController()
         self.console = Console()
+<<<<<<< HEAD
 
     async def setup_services(self) -> Dict[str, Any]:
+=======
+    
+    async def setup_services(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Set up required services for workflow execution."""
         try:
             from ..core_services.fact_extraction_service import FactExtractionService
@@ -46,7 +55,11 @@ class CLIInterface:
             from ..core_services.synthesis_engine import SynthesisEngine
             from ..core_services.wiki_service import WikiService
             from ..kernel.tool_executor import ToolExecutor
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             # Initialize services
             llm_interface = EnhancedLLMInterface()
             role_manager = RoleManager()
@@ -79,7 +92,7 @@ class CLIInterface:
         collect_feedback: bool = False,
         include_traceability: bool = False,
         verbose: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Execute Critical Review Workflow."""
         try:
             # Get content
@@ -165,7 +178,7 @@ class CLIInterface:
     async def execute_multi_perspective(
         self,
         topic: str = None,
-        perspectives: List[str] = None,
+        perspectives: list[str] = None,
         config_file: str = None,
         output_file: str = None,
         format_type: str = "rich",
@@ -173,7 +186,7 @@ class CLIInterface:
         collect_feedback: bool = False,
         include_traceability: bool = False,
         verbose: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Execute Multi-perspective Synthesis Workflow."""
         try:
             # Get topic
@@ -357,8 +370,13 @@ Create a JSON file with workflow configuration:
             help_text = "Unknown workflow. Use 'list' to see available workflows."
 
         console.print(Panel(help_text, title=f"Help: {workflow_name}", expand=False))
+<<<<<<< HEAD
 
     def _save_result_to_file(self, result: Dict[str, Any], output_file: str, format_type: str) -> None:
+=======
+    
+    def _save_result_to_file(self, result: dict[str, Any], output_file: str, format_type: str) -> None:
+>>>>>>> feature/core-services-refactor
         """Save result to file."""
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)

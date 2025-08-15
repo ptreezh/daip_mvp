@@ -8,7 +8,11 @@ import logging
 import uuid
 from collections import Counter, defaultdict
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +26,13 @@ class WikiChangeTracker:
         self.tracked_entities = {}  # {entity_id: entity_info}
         self.change_patterns = {}
         self.contributors = {}  # {contributor_id: contributor_info}
+<<<<<<< HEAD
 
     def track_change(self, change_data: Dict[str, Any]) -> str:
+=======
+    
+    def track_change(self, change_data: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """追踪变更"""
         try:
             change_id = str(uuid.uuid4())
@@ -92,7 +101,7 @@ class WikiChangeTracker:
         contributor: str = None,
         change_type: str = None,
         limit: int = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """获取变更历史"""
         try:
             filtered_history = self.change_history.copy()
@@ -119,8 +128,13 @@ class WikiChangeTracker:
         except Exception as e:
             logger.error(f"获取变更历史失败: {e}")
             return []
+<<<<<<< HEAD
 
     def analyze_change_patterns(self) -> Dict[str, Any]:
+=======
+    
+    def analyze_change_patterns(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析变更模式"""
         try:
             if not self.change_history:
@@ -140,8 +154,13 @@ class WikiChangeTracker:
         except Exception as e:
             logger.error(f"分析变更模式失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def get_entity_change_summary(self, entity_id: str) -> Dict[str, Any]:
+=======
+    
+    def get_entity_change_summary(self, entity_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取实体变更摘要"""
         try:
             if entity_id not in self.tracked_entities:
@@ -167,8 +186,13 @@ class WikiChangeTracker:
         except Exception as e:
             logger.error(f"获取实体变更摘要失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def get_contributor_profile(self, contributor: str) -> Dict[str, Any]:
+=======
+    
+    def get_contributor_profile(self, contributor: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取贡献者档案"""
         try:
             if contributor not in self.contributors:
@@ -195,8 +219,13 @@ class WikiChangeTracker:
         except Exception as e:
             logger.error(f"获取贡献者档案失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def _calculate_impact_score(self, change_data: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_impact_score(self, change_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算变更影响分数"""
         try:
             impact_score = 0.0
@@ -230,8 +259,13 @@ class WikiChangeTracker:
         except Exception as e:
             logger.error(f"计算影响分数失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _calculate_change_size(self, change_data: Dict[str, Any]) -> str:
+=======
+    
+    def _calculate_change_size(self, change_data: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """计算变更大小"""
         try:
             old_content = change_data.get("old_content", "")
@@ -260,8 +294,13 @@ class WikiChangeTracker:
         except Exception as e:
             logger.error(f"计算变更大小失败: {e}")
             return "unknown"
+<<<<<<< HEAD
 
     def _analyze_frequent_contributors(self) -> List[Dict[str, Any]]:
+=======
+    
+    def _analyze_frequent_contributors(self) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """分析频繁贡献者"""
         contributor_stats = []
 
@@ -277,8 +316,13 @@ class WikiChangeTracker:
         # 按活跃度排序
         contributor_stats.sort(key=lambda x: x["activity_score"], reverse=True)
         return contributor_stats[:10]  # 返回前10名
+<<<<<<< HEAD
 
     def _analyze_change_types(self) -> Dict[str, Any]:
+=======
+    
+    def _analyze_change_types(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析变更类型"""
         type_counter = Counter(change["change_type"] for change in self.change_history)
 
@@ -287,8 +331,13 @@ class WikiChangeTracker:
             "most_common": type_counter.most_common(5),
             "total_types": len(type_counter)
         }
+<<<<<<< HEAD
 
     def _analyze_temporal_patterns(self) -> Dict[str, Any]:
+=======
+    
+    def _analyze_temporal_patterns(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析时间模式"""
         try:
             if not self.change_history:
@@ -319,8 +368,13 @@ class WikiChangeTracker:
         except Exception as e:
             logger.error(f"分析时间模式失败: {e}")
             return {}
+<<<<<<< HEAD
 
     def _analyze_entity_activity(self) -> List[Dict[str, Any]]:
+=======
+    
+    def _analyze_entity_activity(self) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """分析实体活跃度"""
         entity_stats = []
 
@@ -336,8 +390,13 @@ class WikiChangeTracker:
         # 按活跃度排序
         entity_stats.sort(key=lambda x: x["activity_score"], reverse=True)
         return entity_stats[:10]  # 返回前10名
+<<<<<<< HEAD
 
     def _calculate_change_velocity(self) -> Dict[str, float]:
+=======
+    
+    def _calculate_change_velocity(self) -> dict[str, float]:
+>>>>>>> feature/core-services-refactor
         """计算变更速度"""
         try:
             if len(self.change_history) < 2:
@@ -367,8 +426,13 @@ class WikiChangeTracker:
         except Exception as e:
             logger.error(f"计算变更速度失败: {e}")
             return {"daily_velocity": 0.0, "weekly_velocity": 0.0}
+<<<<<<< HEAD
 
     def _analyze_collaboration_patterns(self) -> Dict[str, Any]:
+=======
+    
+    def _analyze_collaboration_patterns(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析协作模式"""
         try:
             # 找出协作实体（多个贡献者修改的实体）
@@ -463,8 +527,13 @@ class WikiChangeTracker:
         except Exception as e:
             logger.error(f"计算贡献者频率失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _identify_contributor_expertise(self, contributor: str) -> List[str]:
+=======
+    
+    def _identify_contributor_expertise(self, contributor: str) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """识别贡献者专长领域"""
         try:
             contributor_changes = self.get_change_history(contributor=contributor)

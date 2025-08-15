@@ -13,7 +13,11 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+<<<<<<< HEAD
 from typing import List, Optional
+=======
+from typing import Optional
+>>>>>>> feature/core-services-refactor
 
 import chromadb
 import ollama
@@ -42,9 +46,9 @@ class WikiEntryMetadata:
     created_at: str
     last_editor: str
     last_modified: str
-    tags: List[str]
+    tags: list[str]
     category: str
-    versions: List[str]
+    versions: list[str]
 
 
 @dataclass
@@ -154,7 +158,7 @@ class WikiService:
             return f"{current_version}-next"
 
     def create_entry(
-        self, entry_name: str, content: str, author_role: str, tags: List[str], category: str
+        self, entry_name: str, content: str, author_role: str, tags: list[str], category: str
     ) -> Optional[WikiVersion]:
         """Creates a new wiki entry and persists it to the file system.
 
@@ -410,7 +414,11 @@ class WikiService:
             logging.error(f"Failed to apply proposal '{proposal_id}': {e}")
             return False
 
+<<<<<<< HEAD
     def search(self, query: str, top_k: int = 3) -> List[str]:
+=======
+    def search(self, query: str, top_k: int = 3) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Performs a semantic search using a vector index.
 
         Args:
@@ -438,7 +446,7 @@ class WikiService:
 
             snippets = [
                 f"[{doc_id}]: {doc_content[:250]}..."
-                for doc_id, doc_content in zip(retrieved_ids, retrieved_docs)
+                for doc_id, doc_content in zip(retrieved_ids, retrieved_docs, strict=False)
             ]
             return snippets
 

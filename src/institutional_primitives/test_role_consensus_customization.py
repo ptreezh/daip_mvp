@@ -30,8 +30,13 @@ from .role_customization import (
 
 class TestRoleCustomization:
     """Test role customization functionality (Requirement 7.4)."""
+<<<<<<< HEAD
 
     @pytest.fixture
+=======
+    
+    @pytest.fixture()
+>>>>>>> feature/core-services-refactor
     def role_manager(self):
         """Create a role configuration manager for testing."""
         return RoleConfigurationManager()
@@ -138,6 +143,7 @@ class TestRoleCustomization:
 
 class TestConsensusCustomization:
     """Test consensus customization functionality (Requirement 7.5)."""
+<<<<<<< HEAD
 
     @pytest.fixture
     def consensus_manager(self):
@@ -145,6 +151,15 @@ class TestConsensusCustomization:
         return ConsensusManager()
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.fixture()
+    def consensus_manager(self):
+        """Create a consensus manager for testing."""
+        return ConsensusManager()
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_majority_vote_consensus(self, consensus_manager):
         """Test majority voting consensus mechanism."""
         # Create consensus inputs
@@ -165,8 +180,13 @@ class TestConsensusCustomization:
         assert len(result.dissenting_participants) == 1
         assert result.agreement_level == 0.75  # 3/4 agreement
         assert result.confidence > 0.5
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_weighted_vote_consensus(self, consensus_manager):
         """Test weighted voting consensus mechanism."""
         # Create weighted consensus inputs
@@ -188,8 +208,13 @@ class TestConsensusCustomization:
 
 class TestPerformanceOptimization:
     """Test performance optimization functionality (Requirements 7.6, 7.7)."""
+<<<<<<< HEAD
 
     @pytest.fixture
+=======
+    
+    @pytest.fixture()
+>>>>>>> feature/core-services-refactor
     def optimization_manager(self):
         """Create a performance optimization manager for testing."""
         return PerformanceOptimizationManager()
@@ -247,8 +272,13 @@ class TestPerformanceOptimization:
 
 class TestIntegration:
     """Test integration between role and consensus customization."""
+<<<<<<< HEAD
 
     @pytest.fixture
+=======
+    
+    @pytest.fixture()
+>>>>>>> feature/core-services-refactor
     def integrated_system(self):
         """Create an integrated system for testing."""
         return {
@@ -256,8 +286,13 @@ class TestIntegration:
             "consensus_manager": ConsensusManager(),
             "optimization_manager": PerformanceOptimizationManager()
         }
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_role_based_consensus(self, integrated_system):
         """Test consensus with role-based weighting."""
         role_manager = integrated_system["role_manager"]

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest --version)",
+      "Bash(poetry --version)",
+      "Bash(python:*)",
+      "Bash(ls:*)",
+      "Bash(start:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(black:*)",
+      "Bash(ruff check:*)",
+      "Bash(mypy src/)",
+      "Bash(mkdir:*)",
+      "Bash(pkill:*)",
+      "Bash(true:*)",
+      "Bash(taskkill:*)"
+    ],
+    "deny": []
+  }
+}

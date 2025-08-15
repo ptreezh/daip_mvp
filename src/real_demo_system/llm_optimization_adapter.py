@@ -6,7 +6,11 @@
 
 import logging
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from ..core_services.integrated_llm_manager import IntegratedLLMManager
 
@@ -32,8 +36,8 @@ class LLMOptimizationAdapter:
         self,
         role_id: str,
         user_input: str,
-        context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """为角色响应提供优化（适配现有接口）"""
         if not self.is_initialized:
             await self.initialize()
@@ -72,10 +76,10 @@ class LLMOptimizationAdapter:
 
     async def optimize_multi_role_debate(
         self,
-        roles: List[str],
+        roles: list[str],
         topic: str,
-        context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """优化多角色辩论（适配现有接口）"""
         if not self.is_initialized:
             await self.initialize()
@@ -125,8 +129,13 @@ class LLMOptimizationAdapter:
             "optimization_summary": result.get("optimization_summary", {}),
             "timestamp": result.get("debate_timestamp")
         }
+<<<<<<< HEAD
 
     async def get_optimization_analytics(self, role_id: Optional[str] = None) -> Dict[str, Any]:
+=======
+    
+    async def get_optimization_analytics(self, role_id: Optional[str] = None) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取优化分析（适配现有接口）"""
         if not self.is_initialized:
             await self.initialize()
@@ -161,22 +170,22 @@ async def get_llm_optimization_adapter() -> LLMOptimizationAdapter:
 async def optimize_role_llm_call(
     role_id: str,
     user_input: str,
-    context: Dict[str, Any] = None
-) -> Dict[str, Any]:
+    context: dict[str, Any] = None
+) -> dict[str, Any]:
     """便捷函数：优化角色LLM调用"""
     adapter = await get_llm_optimization_adapter()
     return await adapter.optimize_role_response(role_id, user_input, context)
 
 async def optimize_debate_llm_calls(
-    roles: List[str],
+    roles: list[str],
     topic: str,
-    context: Dict[str, Any] = None
-) -> Dict[str, Any]:
+    context: dict[str, Any] = None
+) -> dict[str, Any]:
     """便捷函数：优化辩论LLM调用"""
     adapter = await get_llm_optimization_adapter()
     return await adapter.optimize_multi_role_debate(roles, topic, context)
 
-async def get_llm_optimization_stats(role_id: Optional[str] = None) -> Dict[str, Any]:
+async def get_llm_optimization_stats(role_id: Optional[str] = None) -> dict[str, Any]:
     """便捷函数：获取LLM优化统计"""
     adapter = await get_llm_optimization_adapter()
     return await adapter.get_optimization_analytics(role_id)

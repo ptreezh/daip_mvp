@@ -8,10 +8,18 @@ import json
 import logging
 import time
 import uuid
+<<<<<<< HEAD
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
+=======
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .call_verification import CallVerificationSystem
 
@@ -46,12 +54,21 @@ class DemoSession:
     start_time: datetime
     end_time: Optional[datetime]
     scenario_type: str
+<<<<<<< HEAD
     participants: List[str]
     execution_log: List[Dict[str, Any]]
     results: Optional[Dict[str, Any]]
     metadata: Dict[str, Any]
 
     def to_dict(self) -> Dict[str, Any]:
+=======
+    participants: list[str]
+    execution_log: list[dict[str, Any]]
+    results: Optional[dict[str, Any]]
+    metadata: dict[str, Any]
+    
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         data = asdict(self)
         data['status'] = self.status.value
         data['start_time'] = self.start_time.isoformat()
@@ -65,8 +82,13 @@ class RealDemoController:
     统一管理演示流程，协调各个组件的真实调用，
     实现演示会话管理和完整的透明度监控。
     """
+<<<<<<< HEAD
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
+=======
+    
+    def __init__(self, config: Optional[dict[str, Any]] = None):
+>>>>>>> feature/core-services-refactor
         """初始化演示控制器
         
         Args:
@@ -83,12 +105,21 @@ class RealDemoController:
         self.verification_system = CallVerificationSystem()
 
         # 演示会话管理
+<<<<<<< HEAD
         self.active_sessions: Dict[str, DemoSession] = {}
         self.session_history: List[DemoSession] = []
 
         # 事件订阅者
         self.subscribers: List[Callable] = []
 
+=======
+        self.active_sessions: dict[str, DemoSession] = {}
+        self.session_history: list[DemoSession] = []
+        
+        # 事件订阅者
+        self.subscribers: list[Callable] = []
+        
+>>>>>>> feature/core-services-refactor
         # 订阅工作流事件
         self.workflow_executor.subscribe(self._handle_workflow_event)
 
@@ -98,8 +129,8 @@ class RealDemoController:
         self,
         session_name: str,
         scenario_type: str,
-        participants: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        participants: Optional[list[str]] = None,
+        metadata: Optional[dict[str, Any]] = None
     ) -> str:
         """创建演示会话
         
@@ -189,8 +220,13 @@ class RealDemoController:
         self,
         session_id: str,
         ethical_dilemma: str,
+<<<<<<< HEAD
         context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
+=======
+        context: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行AI伦理决策分析场景
         
         Args:
@@ -348,8 +384,13 @@ class RealDemoController:
         self,
         session_id: str,
         product_description: str,
+<<<<<<< HEAD
         market_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
+=======
+        market_context: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行产品策略评估场景
         
         Args:
@@ -453,8 +494,13 @@ class RealDemoController:
                 "error": str(e),
                 "session_id": session_id
             }
+<<<<<<< HEAD
 
     async def get_session_status(self, session_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    async def get_session_status(self, session_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取会话状态"""
         # 检查活跃会话
         if session_id in self.active_sessions:
@@ -484,8 +530,13 @@ class RealDemoController:
         del self.active_sessions[session_id]
 
         return True
+<<<<<<< HEAD
 
     async def _log_session_event(self, session_id: str, event_type: str, data: Dict[str, Any]):
+=======
+    
+    async def _log_session_event(self, session_id: str, event_type: str, data: dict[str, Any]):
+>>>>>>> feature/core-services-refactor
         """记录会话事件"""
         if session_id in self.active_sessions:
             session = self.active_sessions[session_id]
@@ -501,8 +552,13 @@ class RealDemoController:
                 "session_id": session_id,
                 "event": event
             })
+<<<<<<< HEAD
 
     async def _generate_session_certificate(self, session_id: str) -> Dict[str, Any]:
+=======
+    
+    async def _generate_session_certificate(self, session_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成会话透明度证书"""
         session_data = await self.get_session_status(session_id)
         if not session_data:
@@ -534,6 +590,7 @@ class RealDemoController:
         certificate["certificate_hash"] = hashlib.sha256(cert_content.encode()).hexdigest()
 
         return certificate
+<<<<<<< HEAD
 
     async def _handle_workflow_event(self, event: Dict[str, Any]):
         """处理工作流事件"""
@@ -541,6 +598,15 @@ class RealDemoController:
         await self._emit_event("workflow_event", event)
 
     async def _emit_event(self, event_type: str, data: Dict[str, Any]):
+=======
+    
+    async def _handle_workflow_event(self, event: dict[str, Any]):
+        """处理工作流事件"""
+        # 转发工作流事件给订阅者
+        await self._emit_event("workflow_event", event)
+    
+    async def _emit_event(self, event_type: str, data: dict[str, Any]):
+>>>>>>> feature/core-services-refactor
         """发送事件"""
         event = {
             "event_type": event_type,
@@ -568,8 +634,13 @@ class RealDemoController:
         if callback in self.subscribers:
             self.subscribers.remove(callback)
             logger.info(f"Demo subscriber removed, total: {len(self.subscribers)}")
+<<<<<<< HEAD
 
     def get_system_status(self) -> Dict[str, Any]:
+=======
+    
+    def get_system_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取系统状态"""
         return {
             "timestamp": datetime.now().isoformat(),
@@ -588,8 +659,13 @@ class RealDemoController:
                 "role_validation": self.role_manager.get_validation_summary()
             }
         }
+<<<<<<< HEAD
 
     def get_demo_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_demo_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取演示统计信息"""
         all_sessions = list(self.active_sessions.values()) + self.session_history
 

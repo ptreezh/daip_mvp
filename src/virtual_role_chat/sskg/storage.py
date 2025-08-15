@@ -9,7 +9,11 @@ import json
 import logging
 import sqlite3
 from datetime import datetime
+<<<<<<< HEAD
 from typing import List, Optional
+=======
+from typing import Optional
+>>>>>>> feature/core-services-refactor
 
 from .models import (
     KnowledgeFact,
@@ -318,8 +322,13 @@ class SSKGStorage:
                 WHERE id = ?
             """, (access_count, last_accessed.isoformat(), fact_id))
             conn.commit()
+<<<<<<< HEAD
 
     def search_facts(self, query: KnowledgeQuery) -> List[KnowledgeFact]:
+=======
+    
+    def search_facts(self, query: KnowledgeQuery) -> list[KnowledgeFact]:
+>>>>>>> feature/core-services-refactor
         """Search for knowledge facts based on query criteria.
         
         Args:
@@ -488,8 +497,13 @@ class SSKGStorage:
             conn.commit()
 
         return memory.id
+<<<<<<< HEAD
 
     def search_memories(self, query: MemoryQuery) -> List[Memory]:
+=======
+    
+    def search_memories(self, query: MemoryQuery) -> list[Memory]:
+>>>>>>> feature/core-services-refactor
         """Search for memories based on query criteria.
         
         Args:

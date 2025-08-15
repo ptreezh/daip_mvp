@@ -8,7 +8,11 @@ import logging
 import re
 import statistics
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +41,13 @@ class KnowledgeQualityScorer:
             "currency": 0.10,
             "relevance": 0.10
         }
+<<<<<<< HEAD
 
     def score_knowledge(self, knowledge_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def score_knowledge(self, knowledge_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """评估知识质量"""
         try:
             score_result = {
@@ -78,8 +87,13 @@ class KnowledgeQualityScorer:
         except Exception as e:
             logger.error(f"评估知识质量失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def evaluate_accuracy(self, knowledge_data: Dict[str, Any]) -> float:
+=======
+    
+    def evaluate_accuracy(self, knowledge_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """评估准确性"""
         try:
             accuracy_score = 0.0
@@ -109,8 +123,13 @@ class KnowledgeQualityScorer:
         except Exception as e:
             logger.error(f"评估准确性失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def assess_completeness(self, knowledge_data: Dict[str, Any]) -> float:
+=======
+    
+    def assess_completeness(self, knowledge_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """评估完整性"""
         try:
             completeness_score = 0.0
@@ -149,8 +168,13 @@ class KnowledgeQualityScorer:
         except Exception as e:
             logger.error(f"评估完整性失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _evaluate_reliability(self, knowledge_data: Dict[str, Any]) -> float:
+=======
+    
+    def _evaluate_reliability(self, knowledge_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """评估可靠性"""
         try:
             reliability_score = 0.0
@@ -192,8 +216,13 @@ class KnowledgeQualityScorer:
         except Exception as e:
             logger.error(f"评估可靠性失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _evaluate_clarity(self, knowledge_data: Dict[str, Any]) -> float:
+=======
+    
+    def _evaluate_clarity(self, knowledge_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """评估清晰度"""
         try:
             clarity_score = 0.0
@@ -238,8 +267,13 @@ class KnowledgeQualityScorer:
         except Exception as e:
             logger.error(f"评估清晰度失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _evaluate_currency(self, knowledge_data: Dict[str, Any]) -> float:
+=======
+    
+    def _evaluate_currency(self, knowledge_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """评估时效性"""
         try:
             # 获取最后更新时间
@@ -255,8 +289,13 @@ class KnowledgeQualityScorer:
         except Exception as e:
             logger.error(f"评估时效性失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _evaluate_relevance(self, knowledge_data: Dict[str, Any]) -> float:
+=======
+    
+    def _evaluate_relevance(self, knowledge_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """评估相关性"""
         try:
             relevance_score = 0.0
@@ -289,8 +328,13 @@ class KnowledgeQualityScorer:
         except Exception as e:
             logger.error(f"评估相关性失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _assess_evidence_quality(self, evidence: List[str]) -> float:
+=======
+    
+    def _assess_evidence_quality(self, evidence: list[str]) -> float:
+>>>>>>> feature/core-services-refactor
         """评估证据质量"""
         if not evidence:
             return 0.0
@@ -307,8 +351,13 @@ class KnowledgeQualityScorer:
                 quality_score += 0.1
 
         return min(quality_score / len(evidence), 1.0)
+<<<<<<< HEAD
 
     def _assess_source_credibility(self, sources: List[str]) -> float:
+=======
+    
+    def _assess_source_credibility(self, sources: list[str]) -> float:
+>>>>>>> feature/core-services-refactor
         """评估来源可信度"""
         if not sources:
             return 0.0
@@ -387,8 +436,13 @@ class KnowledgeQualityScorer:
         except Exception as e:
             logger.error(f"计算可读性失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _calculate_keyword_density(self, content: str, keywords: List[str]) -> float:
+=======
+    
+    def _calculate_keyword_density(self, content: str, keywords: list[str]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算关键词密度"""
         try:
             if not content or not keywords:
@@ -427,8 +481,13 @@ class KnowledgeQualityScorer:
             return "及格"
         else:
             return "需要改进"
+<<<<<<< HEAD
 
     def _generate_recommendations(self, scores: Dict[str, float]) -> List[str]:
+=======
+    
+    def _generate_recommendations(self, scores: dict[str, float]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """生成改进建议"""
         recommendations = []
 
@@ -454,8 +513,13 @@ class KnowledgeQualityScorer:
             recommendations.append("内容质量良好，继续保持")
 
         return recommendations
+<<<<<<< HEAD
 
     def get_scoring_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_scoring_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取评分统计"""
         try:
             if not self.scoring_history:

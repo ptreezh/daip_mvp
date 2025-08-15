@@ -18,8 +18,13 @@ from .wiki_service import WikiService
 
 class TestKnowledgeIntegration:
     """Integration tests for knowledge retrieval and evolution."""
+<<<<<<< HEAD
 
     @pytest.fixture
+=======
+    
+    @pytest.fixture()
+>>>>>>> feature/core-services-refactor
     async def setup_services(self):
         """Set up test services."""
         # Initialize SSKG manager
@@ -51,8 +56,13 @@ class TestKnowledgeIntegration:
             "retrieval_service": knowledge_service.retrieval_service,
             "evolution_manager": knowledge_service.evolution_manager
         }
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_cross_session_knowledge_sharing(self, setup_services):
         """Test cross-session knowledge sharing (Requirement 6.3)."""
         services = await setup_services
@@ -122,8 +132,13 @@ class TestKnowledgeIntegration:
         ]
         assert len(python_facts) > 0
         assert python_facts[0]["confidence"] == 0.9
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_semantic_search_capabilities(self, setup_services):
         """Test semantic search for validated information (Requirement 6.4)."""
         services = await setup_services
@@ -201,8 +216,13 @@ class TestKnowledgeIntegration:
                 assert hasattr(result, 'confidence')
                 assert hasattr(result, 'relevance_score')
                 assert hasattr(result, 'quality_metrics')
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_knowledge_quality_assessment(self, setup_services):
         """Test knowledge quality assessment metrics (Requirement 6.5)."""
         services = await setup_services
@@ -254,8 +274,13 @@ class TestKnowledgeIntegration:
 
         # High-quality node should have good overall score
         assert quality_assessment.overall_quality > 0.6
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_knowledge_evolution_lifecycle(self, setup_services):
         """Test knowledge evolution and lifecycle management (Requirements 6.6, 6.7)."""
         services = await setup_services
@@ -314,8 +339,13 @@ class TestKnowledgeIntegration:
         evolution_event = evolution_history[0]
         assert evolution_event.node_id == evolved_id
         assert evolution_event.event_type == "evolved"
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_automatic_evolution_cycle(self, setup_services):
         """Test automatic knowledge evolution cycle (Requirement 6.7)."""
         services = await setup_services
@@ -369,8 +399,13 @@ class TestKnowledgeIntegration:
 
         # Should have detected some triggers
         assert len(cycle_results["evolution_triggers"]) > 0
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_comprehensive_knowledge_statistics(self, setup_services):
         """Test comprehensive knowledge statistics and monitoring."""
         services = await setup_services
@@ -396,8 +431,13 @@ class TestKnowledgeIntegration:
 
         # Service should be active
         assert stats["service_status"] == "active"
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_knowledge_conflict_resolution(self, setup_services):
         """Test knowledge conflict detection and resolution."""
         services = await setup_services
@@ -443,8 +483,13 @@ class TestKnowledgeIntegration:
         # Higher confidence fact should rank higher
         search_results.sort(key=lambda x: x.confidence, reverse=True)
         assert search_results[0].confidence > search_results[1].confidence
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_health_check_functionality(self, setup_services):
         """Test knowledge management health check."""
         services = await setup_services

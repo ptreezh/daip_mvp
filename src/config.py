@@ -6,7 +6,7 @@
 """
 import logging
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import yaml
 from pydantic import BaseModel, Field
@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 class OllamaConfig(BaseModel):
     """Configuration for the Ollama LLM provider."""
-
     generation_model: str = "llama3:instruct"
     embedding_model: str = "nomic-embed-text:latest"
     host: str = "http://localhost:11434"
@@ -25,25 +24,21 @@ class OllamaConfig(BaseModel):
 
 class LLMConfig(BaseModel):
     """Top-level LLM configuration."""
-
     provider: str = "ollama"
     ollama: OllamaConfig = Field(default_factory=OllamaConfig)
 
 class VectorStoreConfig(BaseModel):
     """Configuration for the vector store."""
-
     chroma_db_path: str = "data/chroma_db"
     role_collection_name: str = "roles"
 
 class LoggingConfig(BaseModel):
     """Configuration for logging."""
-
     level: str = "INFO"
     format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 class TokenManagementConfig(BaseModel):
     """Configuration for token management and optimization."""
-
     max_context_tokens: int = 4096
     cost_per_1k_input_tokens: float = 0.0
     cost_per_1k_output_tokens: float = 0.0
@@ -53,14 +48,12 @@ class TokenManagementConfig(BaseModel):
 
 class UserProfileConfig(BaseModel):
     """Configuration for user profiles."""
-
     data_dir: str = "data/user_profiles"
     max_interaction_history: int = 100
     enable_intent_tracking: bool = True
 
 class SessionConfig(BaseModel):
     """Configuration for session management."""
-
     auth_data_dir: str = "data/auth"
     session_expiry_minutes: int = 60
     token_expiry_minutes: int = 60
@@ -68,7 +61,6 @@ class SessionConfig(BaseModel):
 
 class AppConfig(BaseModel):
     """Root model for the entire application configuration."""
-
     llm: LLMConfig = Field(default_factory=LLMConfig)
     vector_store: VectorStoreConfig = Field(default_factory=VectorStoreConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
@@ -76,10 +68,10 @@ class AppConfig(BaseModel):
     user_profile: UserProfileConfig = Field(default_factory=UserProfileConfig)
     session: SessionConfig = Field(default_factory=SessionConfig)
     roles_config_path: str = "configs/roles.yaml"
-
+    
     # Additional settings needed by main.py
     log_level: str = "INFO"
-    allowed_origins: List[str] = ["*"]
+    allowed_origins: list[str] = ["*"]
 
 
 # --- Configuration Loading Logic ---
@@ -98,7 +90,6 @@ def load_config(config_path: Union[str, Path] = "config.yaml") -> AppConfig:
     Note:
         If the configuration file doesn't exist, default values will be used.
         If the file exists but has invalid content, an error will be logged and defaults used.
-
     """
     global _config
     if _config:
@@ -117,19 +108,19 @@ def load_config(config_path: Union[str, Path] = "config.yaml") -> AppConfig:
         logger.info(f"Loading configuration from '{config_path.resolve()}'...")
         with open(config_path, encoding="utf-8") as f:
             config_data = yaml.safe_load(f)
-
+            
         if not config_data:
             logger.warning("Configuration file is empty or invalid. Using default settings.")
             _config = AppConfig()
         else:
             # Create config with loaded values, falling back to defaults for missing values
             _config = AppConfig(**(config_data or {}))
-
+            
         # Set up logging based on configuration
         log_level = getattr(logging, _config.logging.level.upper(), logging.INFO)
         logging.basicConfig(level=log_level, format=_config.logging.format)
         logger.debug("Configuration loaded successfully")
-
+        
         return _config
     except (yaml.YAMLError, Exception) as e:
         logger.error(f"Failed to load or validate configuration from {config_path}: {e}")
@@ -142,7 +133,6 @@ def get_config() -> AppConfig:
     
     Returns:
         AppConfig: The current configuration
-
     """
     global _config
     if _config is None:
@@ -157,7 +147,6 @@ def reload_config(config_path: Union[str, Path] = "config.yaml") -> AppConfig:
         
     Returns:
         AppConfig: The reloaded configuration
-
     """
     global _config
     _config = None

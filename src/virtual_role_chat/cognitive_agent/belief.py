@@ -6,7 +6,11 @@ and belief updating mechanisms.
 """
 
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -14,12 +18,15 @@ from pydantic import BaseModel, Field
 class Belief(BaseModel):
     """Representation of a single belief held by an agent.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     content: str
     confidence: float = Field(ge=0.0, le=1.0)
-    sources: List[str] = Field(default_factory=list)
-    related_beliefs: List[str] = Field(default_factory=list)
+    sources: list[str] = Field(default_factory=list)
+    related_beliefs: list[str] = Field(default_factory=list)
     last_updated: str  # ISO format timestamp
     update_count: int = 0
 
@@ -27,24 +34,30 @@ class Belief(BaseModel):
 class Value(BaseModel):
     """Representation of a value held by an agent.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     name: str
     description: str
     importance: float = Field(ge=0.0, le=1.0)
-    related_values: List[str] = Field(default_factory=list)
+    related_values: list[str] = Field(default_factory=list)
 
 
 class Principle(BaseModel):
     """Representation of a principle derived from values.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     name: str
     description: str
-    derived_from: List[str]  # Value IDs
+    derived_from: list[str]  # Value IDs
     strength: float = Field(ge=0.0, le=1.0)
-    application_domains: List[str] = Field(default_factory=list)
+    application_domains: list[str] = Field(default_factory=list)
 
 
 class BeliefSystem:
@@ -60,7 +73,7 @@ class BeliefSystem:
         self,
         structure_type: str,
         agent_id: str,
-        values: Dict[str, float] = None
+        values: dict[str, float] = None
     ):
         """Initialize a belief system.
         
@@ -81,8 +94,13 @@ class BeliefSystem:
 
         self.logger.info(f"Initialized {structure_type} belief system for agent {agent_id}")
         self.logger.debug(f"Loaded {len(self.values)} values and {len(self.principles)} principles")
+<<<<<<< HEAD
 
     def _initialize_values(self, value_importances: Dict[str, float]) -> Dict[str, Value]:
+=======
+    
+    def _initialize_values(self, value_importances: dict[str, float]) -> dict[str, Value]:
+>>>>>>> feature/core-services-refactor
         """Initialize values based on provided importance levels.
         
         Args:
@@ -123,8 +141,13 @@ class BeliefSystem:
         self._add_value_relationships(values)
 
         return values
+<<<<<<< HEAD
 
     def _add_value_relationships(self, values: Dict[str, Value]) -> None:
+=======
+    
+    def _add_value_relationships(self, values: dict[str, Value]) -> None:
+>>>>>>> feature/core-services-refactor
         """Add relationships between values.
         
         Args:
@@ -154,8 +177,13 @@ class BeliefSystem:
                     related_id for related_id in related_ids
                     if related_id in values
                 ]
+<<<<<<< HEAD
 
     def _initialize_principles(self) -> Dict[str, Principle]:
+=======
+    
+    def _initialize_principles(self) -> dict[str, Principle]:
+>>>>>>> feature/core-services-refactor
         """Initialize principles based on the agent's values.
         
         Returns:
@@ -225,8 +253,13 @@ class BeliefSystem:
                 )
 
         return principles
+<<<<<<< HEAD
 
     async def filter(self, reasoning_result: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    async def filter(self, reasoning_result: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Filter reasoning results through the belief system.
         
         This method ensures that conclusions align with the agent's values and principles,
@@ -272,8 +305,13 @@ class BeliefSystem:
         }
 
         return filtered_result
+<<<<<<< HEAD
 
     def _check_value_alignment(self, conclusion: Dict[str, Any]) -> Dict[str, float]:
+=======
+    
+    def _check_value_alignment(self, conclusion: dict[str, Any]) -> dict[str, float]:
+>>>>>>> feature/core-services-refactor
         """Check how well a conclusion aligns with the agent's values.
         
         Args:
@@ -287,9 +325,15 @@ class BeliefSystem:
         # to determine how well it aligns with each value
 
         # For now, we'll just return a placeholder alignment
+<<<<<<< HEAD
         return dict.fromkeys(self.values, 0.5)
 
     def _check_principle_alignment(self, conclusion: Dict[str, Any]) -> Dict[str, float]:
+=======
+        return {value_id: 0.5 for value_id in self.values}
+    
+    def _check_principle_alignment(self, conclusion: dict[str, Any]) -> dict[str, float]:
+>>>>>>> feature/core-services-refactor
         """Check how well a conclusion aligns with the agent's principles.
         
         Args:
@@ -303,9 +347,15 @@ class BeliefSystem:
         # to determine how well it aligns with each principle
 
         # For now, we'll just return a placeholder alignment
+<<<<<<< HEAD
         return dict.fromkeys(self.principles, 0.5)
 
     def _check_belief_consistency(self, conclusion: Dict[str, Any]) -> Dict[str, float]:
+=======
+        return {principle_id: 0.5 for principle_id in self.principles}
+    
+    def _check_belief_consistency(self, conclusion: dict[str, Any]) -> dict[str, float]:
+>>>>>>> feature/core-services-refactor
         """Check how consistent a conclusion is with existing beliefs.
         
         Args:
@@ -323,11 +373,19 @@ class BeliefSystem:
 
     def _adjust_conclusion(
         self,
+<<<<<<< HEAD
         conclusion: Dict[str, Any],
         value_alignment: Dict[str, float],
         principle_alignment: Dict[str, float],
         belief_consistency: Dict[str, float]
     ) -> Dict[str, Any]:
+=======
+        conclusion: dict[str, Any],
+        value_alignment: dict[str, float],
+        principle_alignment: dict[str, float],
+        belief_consistency: dict[str, float]
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Adjust a conclusion based on alignments with values, principles, and beliefs.
         
         Args:
@@ -347,8 +405,13 @@ class BeliefSystem:
         adjusted = conclusion.copy()
         adjusted["belief_filtered"] = True
         return adjusted
+<<<<<<< HEAD
 
     def update_belief(self, belief_content: str, confidence: float, sources: List[str]) -> str:
+=======
+    
+    def update_belief(self, belief_content: str, confidence: float, sources: list[str]) -> str:
+>>>>>>> feature/core-services-refactor
         """Update or create a belief based on new information.
         
         Args:
@@ -397,8 +460,13 @@ class BeliefSystem:
         """
         from datetime import datetime
         return datetime.now().isoformat()
+<<<<<<< HEAD
 
     def get_state(self) -> Dict[str, Any]:
+=======
+    
+    def get_state(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get the current state of the belief system.
         
         Returns:
@@ -411,8 +479,13 @@ class BeliefSystem:
             "principles": {principle_id: principle.strength for principle_id, principle in self.principles.items()},
             "belief_count": len(self.beliefs)
         }
+<<<<<<< HEAD
 
     def update_state(self, state_updates: Dict[str, Any]) -> None:
+=======
+    
+    def update_state(self, state_updates: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Update the state of the belief system.
         
         Args:

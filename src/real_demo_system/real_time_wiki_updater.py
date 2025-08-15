@@ -7,7 +7,11 @@
 import logging
 import uuid
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +31,13 @@ class RealTimeWikiUpdater:
         self.update_queue = []
         self.update_history = []
         self.processing = False
+<<<<<<< HEAD
 
     def process_debate_result(self, debate_result: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def process_debate_result(self, debate_result: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """处理辩论结果并更新Wiki"""
         try:
             update_result = {
@@ -126,8 +135,8 @@ class RealTimeWikiUpdater:
     def auto_update_knowledge(
         self,
         topic: str,
-        new_information: List[str]
-    ) -> Dict[str, Any]:
+        new_information: list[str]
+    ) -> dict[str, Any]:
         """自动更新知识"""
         try:
             update_result = {
@@ -192,8 +201,13 @@ class RealTimeWikiUpdater:
         except Exception as e:
             logger.error(f"自动更新知识失败: {e}")
             return {"success": False, "error": str(e)}
+<<<<<<< HEAD
 
     def track_changes(self, change_data: Dict[str, Any]) -> str:
+=======
+    
+    def track_changes(self, change_data: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """追踪变更"""
         try:
             change_id = str(uuid.uuid4())
@@ -217,8 +231,13 @@ class RealTimeWikiUpdater:
         except Exception as e:
             logger.error(f"追踪变更失败: {e}")
             return None
+<<<<<<< HEAD
 
     def _evaluate_content_quality(self, content_data: Dict[str, Any]) -> Dict[str, float]:
+=======
+    
+    def _evaluate_content_quality(self, content_data: dict[str, Any]) -> dict[str, float]:
+>>>>>>> feature/core-services-refactor
         """评估内容质量"""
         try:
             quality_score = {
@@ -265,8 +284,13 @@ class RealTimeWikiUpdater:
         except Exception as e:
             logger.error(f"评估内容质量失败: {e}")
             return {"accuracy": 0.0, "completeness": 0.0, "reliability": 0.0, "overall": 0.0}
+<<<<<<< HEAD
 
     def _find_related_entries(self, topic: str, information: str) -> List[Dict[str, Any]]:
+=======
+    
+    def _find_related_entries(self, topic: str, information: str) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """查找相关条目"""
         try:
             if self.wiki_service:
@@ -287,8 +311,13 @@ class RealTimeWikiUpdater:
         except Exception as e:
             logger.error(f"查找相关条目失败: {e}")
             return []
+<<<<<<< HEAD
 
     def _merge_information(self, existing_entry: Dict[str, Any], new_info: str) -> Dict[str, Any]:
+=======
+    
+    def _merge_information(self, existing_entry: dict[str, Any], new_info: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """合并信息"""
         try:
             merged_entry = existing_entry.copy()
@@ -306,8 +335,13 @@ class RealTimeWikiUpdater:
         except Exception as e:
             logger.error(f"合并信息失败: {e}")
             return existing_entry
+<<<<<<< HEAD
 
     def get_update_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_update_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取更新统计"""
         try:
             stats = {

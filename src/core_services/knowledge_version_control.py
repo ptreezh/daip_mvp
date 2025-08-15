@@ -9,7 +9,11 @@ import json
 import logging
 import uuid
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +29,7 @@ class KnowledgeVersionControl:
 
     def create_version(
         self,
-        content: Dict[str, Any],
+        content: dict[str, Any],
         change_description: str = "",
         entity_id: str = None
     ) -> str:
@@ -80,7 +84,7 @@ class KnowledgeVersionControl:
         entity_id: str,
         version1_id: str,
         version2_id: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """比较两个版本"""
         try:
             if entity_id not in self.versions:
@@ -169,8 +173,13 @@ class KnowledgeVersionControl:
         except Exception as e:
             logger.error(f"回滚版本失败: {e}")
             return False
+<<<<<<< HEAD
 
     def get_version_history(self, entity_id: str) -> List[Dict[str, Any]]:
+=======
+    
+    def get_version_history(self, entity_id: str) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取版本历史"""
         try:
             if entity_id not in self.versions:
@@ -197,8 +206,13 @@ class KnowledgeVersionControl:
         except Exception as e:
             logger.error(f"获取版本历史失败: {e}")
             return []
+<<<<<<< HEAD
 
     def get_current_version(self, entity_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def get_current_version(self, entity_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取当前版本"""
         try:
             if entity_id not in self.current_versions:
@@ -210,8 +224,13 @@ class KnowledgeVersionControl:
         except Exception as e:
             logger.error(f"获取当前版本失败: {e}")
             return None
+<<<<<<< HEAD
 
     def _generate_entity_id(self, content: Dict[str, Any]) -> str:
+=======
+    
+    def _generate_entity_id(self, content: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """生成实体ID"""
         # 基于内容标题或关键信息生成ID
         title = content.get("title", "")
@@ -224,8 +243,13 @@ class KnowledgeVersionControl:
         else:
             # 使用UUID作为后备
             return str(uuid.uuid4())
+<<<<<<< HEAD
 
     def _calculate_content_hash(self, content: Dict[str, Any]) -> str:
+=======
+    
+    def _calculate_content_hash(self, content: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """计算内容哈希"""
         try:
             # 创建内容的标准化JSON表示
@@ -242,8 +266,13 @@ class KnowledgeVersionControl:
 
         max_version = max(version["version_number"] for version in self.versions[entity_id])
         return max_version + 1
+<<<<<<< HEAD
 
     def _find_version(self, entity_id: str, version_id: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def _find_version(self, entity_id: str, version_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """查找指定版本"""
         if entity_id not in self.versions:
             return None
@@ -253,8 +282,13 @@ class KnowledgeVersionControl:
                 return version
 
         return None
+<<<<<<< HEAD
 
     def _calculate_differences(self, content1: Dict[str, Any], content2: Dict[str, Any]) -> List[Dict[str, Any]]:
+=======
+    
+    def _calculate_differences(self, content1: dict[str, Any], content2: dict[str, Any]) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """计算内容差异"""
         differences = []
 
@@ -283,8 +317,13 @@ class KnowledgeVersionControl:
                 })
 
         return differences
+<<<<<<< HEAD
 
     def _calculate_similarity(self, content1: Dict[str, Any], content2: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_similarity(self, content1: dict[str, Any], content2: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算内容相似度"""
         try:
             # 简单的相似度计算
@@ -302,8 +341,13 @@ class KnowledgeVersionControl:
         except Exception as e:
             logger.error(f"计算相似度失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def get_change_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_change_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取变更统计"""
         try:
             stats = {
@@ -335,8 +379,13 @@ class KnowledgeVersionControl:
         except Exception as e:
             logger.error(f"获取变更统计失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def export_version_data(self, entity_id: str, version_id: str = None) -> Dict[str, Any]:
+=======
+    
+    def export_version_data(self, entity_id: str, version_id: str = None) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """导出版本数据"""
         try:
             if entity_id not in self.versions:

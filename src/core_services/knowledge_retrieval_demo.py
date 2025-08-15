@@ -283,7 +283,11 @@ class KnowledgeRetrievalDemo:
                 time_window_days=30,
                 min_relevance=0.4
             )
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
             print("   📊 Retrieved Knowledge:")
             print(f"      • Facts: {len(cross_session_knowledge['facts'])}")
             print(f"      • Synthesis: {len(cross_session_knowledge['synthesis'])}")
@@ -383,11 +387,19 @@ class KnowledgeRetrievalDemo:
 
             # Assess quality
             assessment = await self.knowledge_service.retrieval_service.assess_knowledge_quality(node_id)
+<<<<<<< HEAD
 
             print("   📈 Quality Assessment:")
             print(f"      Overall Quality: {assessment.overall_quality:.2f}")
             print("      Quality Metrics:")
 
+=======
+            
+            print("   📈 Quality Assessment:")
+            print(f"      Overall Quality: {assessment.overall_quality:.2f}")
+            print("      Quality Metrics:")
+            
+>>>>>>> feature/core-services-refactor
             for metric, score in assessment.quality_metrics.items():
                 print(f"         • {metric.value.replace('_', ' ').title()}: {score:.2f}")
 
@@ -443,7 +455,11 @@ class KnowledgeRetrievalDemo:
 
         # Run evolution cycle
         cycle_results = await self.knowledge_service.evolution_manager.run_evolution_cycle()
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         print("   📊 Evolution Cycle Results:")
         print(f"      • Nodes Evaluated: {cycle_results['nodes_evaluated']}")
         print(f"      • Nodes Evolved: {cycle_results['nodes_evolved']}")
@@ -475,14 +491,22 @@ class KnowledgeRetrievalDemo:
         stats = self.knowledge_service.get_comprehensive_statistics()
 
         print(f"\n🏥 Service Status: {stats['service_status'].upper()}")
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         print("\n⚙️  Configuration:")
         config = stats['configuration']
         print(f"   • Auto Persist Facts: {config['auto_persist_facts']}")
         print(f"   • Evolution Strategy: {config['evolution_strategy'].title()}")
         print(f"   • Quality Threshold: {config['quality_threshold']}")
         print(f"   • Cross-Session Sharing: {config['cross_session_sharing']}")
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         print("\n📊 Knowledge Statistics:")
         if 'retrieval' in stats:
             retrieval_stats = stats['retrieval']
@@ -495,7 +519,11 @@ class KnowledgeRetrievalDemo:
                 avg_conf = retrieval_stats['average_confidence']
                 print(f"   • Avg Confidence - Facts: {avg_conf.get('facts', 0):.2f}")
                 print(f"   • Avg Confidence - Synthesis: {avg_conf.get('synthesis', 0):.2f}")
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         print("\n🔄 Evolution Statistics:")
         if 'evolution' in stats:
             evolution_stats = stats['evolution']

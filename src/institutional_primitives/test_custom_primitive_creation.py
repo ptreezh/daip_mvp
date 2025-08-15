@@ -38,6 +38,7 @@ from .workflow_templates import (
 
 class TestPluginInterface:
     """Test plugin interface system (Requirement 7.1)."""
+<<<<<<< HEAD
 
     @pytest.fixture
     def registry(self):
@@ -45,6 +46,15 @@ class TestPluginInterface:
         return PrimitiveRegistry()
 
     @pytest.fixture
+=======
+    
+    @pytest.fixture()
+    def registry(self):
+        """Create a primitive registry for testing."""
+        return PrimitiveRegistry()
+    
+    @pytest.fixture()
+>>>>>>> feature/core-services-refactor
     def plugin_manager(self, registry):
         """Create a plugin manager for testing."""
         return PluginManager(registry)
@@ -152,8 +162,13 @@ class TestPluginInterface:
         assert status["loaded_plugins"] >= 1
         assert status["registered_primitives"] >= 2
         assert "example_custom_primitives" in [p["name"] for p in status["plugins"]]
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_custom_primitive_execution(self):
         """Test execution of custom primitives."""
         # Test sentiment analysis primitive
@@ -198,6 +213,7 @@ class TestPluginInterface:
 
 class TestWorkflowTemplates:
     """Test template-based workflow definition (Requirement 7.2)."""
+<<<<<<< HEAD
 
     @pytest.fixture
     def template_engine(self):
@@ -205,6 +221,15 @@ class TestWorkflowTemplates:
         return TemplateEngine()
 
     @pytest.fixture
+=======
+    
+    @pytest.fixture()
+    def template_engine(self):
+        """Create a template engine for testing."""
+        return TemplateEngine()
+    
+    @pytest.fixture()
+>>>>>>> feature/core-services-refactor
     def sample_template(self):
         """Create a sample workflow template."""
         return WorkflowTemplate(
@@ -412,15 +437,25 @@ class TestWorkflowTemplates:
 
 class TestServiceAdapters:
     """Test service adapter registration (Requirement 7.3)."""
+<<<<<<< HEAD
 
     @pytest.fixture
+=======
+    
+    @pytest.fixture()
+>>>>>>> feature/core-services-refactor
     def adapter_manager(self):
         """Create a service adapter manager for testing."""
         manager = ServiceAdapterManager()
         manager.register_standard_adapters()
         return manager
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_service_adapter_creation(self, adapter_manager):
         """Test service adapter creation and initialization."""
         # Register custom adapter
@@ -448,8 +483,13 @@ class TestServiceAdapters:
         assert metadata.name == "mock_external_service"
         assert metadata.service_type == ServiceType.CUSTOM
         assert AdapterCapability.READ in metadata.capabilities
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_service_adapter_execution(self, adapter_manager):
         """Test service adapter request execution."""
         # Register and create adapter
@@ -474,8 +514,13 @@ class TestServiceAdapters:
         assert len(response.data) >= 1
         assert response.data[0]["name"] == "Item 1"
         assert response.duration_ms is not None
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_adapter_discovery(self, adapter_manager):
         """Test adapter discovery by type and capability."""
         # Register and create multiple adapters
@@ -500,8 +545,13 @@ class TestServiceAdapters:
         # Find adapters by capability
         read_adapters = adapter_manager.find_adapters(capability=AdapterCapability.READ)
         assert len(read_adapters) >= 2
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_health_check(self, adapter_manager):
         """Test adapter health checking."""
         # Register and create adapter
@@ -540,8 +590,13 @@ class TestServiceAdapters:
 
 class TestIntegration:
     """Test integration between all components."""
+<<<<<<< HEAD
 
     @pytest.fixture
+=======
+    
+    @pytest.fixture()
+>>>>>>> feature/core-services-refactor
     def integrated_system(self):
         """Create an integrated system with all components."""
         registry = PrimitiveRegistry()
@@ -556,8 +611,13 @@ class TestIntegration:
             "template_engine": template_engine,
             "adapter_manager": adapter_manager
         }
+<<<<<<< HEAD
 
     @pytest.mark.asyncio
+=======
+    
+    @pytest.mark.asyncio()
+>>>>>>> feature/core-services-refactor
     async def test_end_to_end_workflow(self, integrated_system):
         """Test end-to-end workflow with custom primitives, templates, and adapters."""
         plugin_manager = integrated_system["plugin_manager"]

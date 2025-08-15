@@ -5,7 +5,11 @@ knowledge acquisition and validation approaches of a cognitive agent.
 """
 
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -13,26 +17,32 @@ from pydantic import BaseModel, Field
 class EvidenceStandard(BaseModel):
     """Standard for evaluating evidence in a particular domain.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     name: str
     description: str
     required_confidence: float = Field(ge=0.0, le=1.0)
     required_sources: int
     source_quality_threshold: float = Field(ge=0.0, le=1.0)
-    domains: List[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
 
 
 class ValidationStrategy(BaseModel):
     """Strategy for validating knowledge claims.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     name: str
     description: str
-    steps: List[str]
+    steps: list[str]
     effectiveness: float = Field(ge=0.0, le=1.0)
-    domains: List[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
 
 
 class Epistemology:
@@ -66,8 +76,13 @@ class Epistemology:
         self.logger.info(f"Initialized {approach} epistemology for agent {agent_id}")
         self.logger.debug(f"Loaded {len(self.evidence_standards)} evidence standards and "
                          f"{len(self.validation_strategies)} validation strategies")
+<<<<<<< HEAD
 
     def _initialize_evidence_standards(self) -> Dict[str, EvidenceStandard]:
+=======
+    
+    def _initialize_evidence_standards(self) -> dict[str, EvidenceStandard]:
+>>>>>>> feature/core-services-refactor
         """Initialize evidence standards based on the epistemological approach.
         
         Returns:
@@ -146,8 +161,13 @@ class Epistemology:
         )
 
         return standards
+<<<<<<< HEAD
 
     def _initialize_validation_strategies(self) -> Dict[str, ValidationStrategy]:
+=======
+    
+    def _initialize_validation_strategies(self) -> dict[str, ValidationStrategy]:
+>>>>>>> feature/core-services-refactor
         """Initialize validation strategies based on the epistemological approach.
         
         Returns:
@@ -259,8 +279,13 @@ class Epistemology:
         self,
         claim: str,
         domain: str,
+<<<<<<< HEAD
         evidence: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
+=======
+        evidence: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Validate a knowledge claim using appropriate standards and strategies.
         
         Args:
@@ -337,10 +362,14 @@ class Epistemology:
     def _apply_validation_strategy(
         self,
         claim: str,
-        evidence: List[Dict[str, Any]],
+        evidence: list[dict[str, Any]],
         standard: EvidenceStandard,
         strategy: ValidationStrategy
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Apply a validation strategy to evaluate a claim against evidence.
         
         Args:
@@ -369,9 +398,13 @@ class Epistemology:
 
     def _assess_evidence_quality(
         self,
-        evidence: List[Dict[str, Any]],
+        evidence: list[dict[str, Any]],
         standard: EvidenceStandard
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Assess the quality of evidence against a standard.
         
         Args:
@@ -391,8 +424,13 @@ class Epistemology:
             "meets_quality_threshold": True,
             "overall_quality": 0.8
         }
+<<<<<<< HEAD
 
     def get_state(self) -> Dict[str, Any]:
+=======
+    
+    def get_state(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get the current state of the epistemology.
         
         Returns:
@@ -406,8 +444,13 @@ class Epistemology:
             "validation_strategies": {strat_id: strat.effectiveness
                                     for strat_id, strat in self.validation_strategies.items()}
         }
+<<<<<<< HEAD
 
     def update_state(self, state_updates: Dict[str, Any]) -> None:
+=======
+    
+    def update_state(self, state_updates: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Update the state of the epistemology.
         
         Args:

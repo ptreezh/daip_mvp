@@ -5,7 +5,11 @@ including mode-specific validation and interaction rules validation.
 """
 
 import logging
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from .models import ChatRoomConfig, ValidationResult
 
@@ -105,8 +109,13 @@ class ConfigValidator:
             reasoning="Chat room configuration is valid",
             suggested_correction=None
         )
+<<<<<<< HEAD
 
     def _validate_mode_config(self, mode: str, interaction_rules: Dict[str, Any]) -> ValidationResult:
+=======
+    
+    def _validate_mode_config(self, mode: str, interaction_rules: dict[str, Any]) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate mode-specific configuration.
         
         Args:
@@ -180,8 +189,13 @@ class ConfigValidator:
             reasoning=f"Configuration for {mode} mode is valid",
             suggested_correction=None
         )
+<<<<<<< HEAD
 
     def _validate_structured_mode(self, interaction_rules: Dict[str, Any]) -> ValidationResult:
+=======
+    
+    def _validate_structured_mode(self, interaction_rules: dict[str, Any]) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate structured mode configuration.
         
         Args:
@@ -232,8 +246,13 @@ class ConfigValidator:
             reasoning="Structured mode configuration is valid",
             suggested_correction=None
         )
+<<<<<<< HEAD
 
     def _validate_debate_mode(self, interaction_rules: Dict[str, Any]) -> ValidationResult:
+=======
+    
+    def _validate_debate_mode(self, interaction_rules: dict[str, Any]) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate debate mode configuration.
         
         Args:
@@ -310,8 +329,13 @@ class ConfigValidator:
             reasoning="Debate mode configuration is valid",
             suggested_correction=None
         )
+<<<<<<< HEAD
 
     def generate_mode_template(self, mode: str) -> Dict[str, Any]:
+=======
+    
+    def generate_mode_template(self, mode: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Generate a template configuration for a specific mode.
         
         Args:
@@ -354,8 +378,13 @@ class ConfigValidator:
                 "consensus_strategy": "consensus_building",
                 "moderation_level": "moderate"
             }
+<<<<<<< HEAD
 
     def get_mode_schema(self, mode: str) -> Dict[str, List[str]]:
+=======
+    
+    def get_mode_schema(self, mode: str) -> dict[str, list[str]]:
+>>>>>>> feature/core-services-refactor
         """Get the schema for a specific mode.
         
         Args:
@@ -372,8 +401,13 @@ class ConfigValidator:
             raise ValueError(f"Invalid mode: {mode}. Valid modes are: {', '.join(self.VALID_MODES)}")
 
         return self.MODE_SCHEMAS[mode]
+<<<<<<< HEAD
 
     def get_valid_modes(self) -> List[str]:
+=======
+    
+    def get_valid_modes(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Get all valid chat room modes.
         
         Returns:
@@ -381,8 +415,13 @@ class ConfigValidator:
 
         """
         return self.VALID_MODES
+<<<<<<< HEAD
 
     def get_mode_requirements(self, mode: str) -> Dict[str, Any]:
+=======
+    
+    def get_mode_requirements(self, mode: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get requirements for a specific chat mode.
         
         Args:
@@ -405,8 +444,13 @@ class ConfigValidator:
                 if param in self.VALID_VALUES
             }
         }
+<<<<<<< HEAD
 
     def suggest_rules_for_mode(self, mode: str) -> Dict[str, Any]:
+=======
+    
+    def suggest_rules_for_mode(self, mode: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get suggested rules for a specific mode.
         
         Args:
@@ -420,8 +464,13 @@ class ConfigValidator:
             raise ValueError(f"Invalid mode: {mode}. Valid modes are: {', '.join(self.VALID_MODES)}")
 
         return self.generate_mode_template(mode)
+<<<<<<< HEAD
 
     def _validate_interaction_rules(self, rules: Dict[str, Any], mode: str) -> ValidationResult:
+=======
+    
+    def _validate_interaction_rules(self, rules: dict[str, Any], mode: str) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate interaction rules for a specific mode.
         
         Args:

@@ -7,9 +7,16 @@
 import asyncio
 import logging
 import time
+<<<<<<< HEAD
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
+=======
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from rich.console import Console
 from rich.prompt import Prompt
@@ -41,8 +48,8 @@ class SteeringPoint:
     name: str
     description: str
     workflow_step: str
-    available_actions: List[SteeringAction]
-    context: Dict[str, Any] = field(default_factory=dict)
+    available_actions: list[SteeringAction]
+    context: dict[str, Any] = field(default_factory=dict)
     auto_continue_timeout: Optional[float] = None
     priority: int = 1  # 1=low, 2=medium, 3=high
 
@@ -52,7 +59,7 @@ class SteeringCommand:
     """Command issued by user during workflow steering."""
 
     action: SteeringAction
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
     target_step: Optional[str] = None
     message: Optional[str] = None
     timestamp: float = field(default_factory=time.time)
@@ -64,21 +71,29 @@ class WorkflowSteering:
     def __init__(self, console: Console = None):
         """Initialize the workflow steering system."""
         self.console = console or Console()
-        self.steering_points: Dict[str, SteeringPoint] = {}
+        self.steering_points: dict[str, SteeringPoint] = {}
         self.active_steering: bool = False
         self.steering_queue: asyncio.Queue = asyncio.Queue()
+<<<<<<< HEAD
         self.command_callbacks: Dict[SteeringAction, List[Callable]] = {}
         self.workflow_state: Dict[str, Any] = {}
         self.checkpoints: Dict[str, Dict[str, Any]] = {}
         self.steering_history: List[SteeringCommand] = []
 
+=======
+        self.command_callbacks: dict[SteeringAction, list[Callable]] = {}
+        self.workflow_state: dict[str, Any] = {}
+        self.checkpoints: dict[str, dict[str, Any]] = {}
+        self.steering_history: list[SteeringCommand] = []
+    
+>>>>>>> feature/core-services-refactor
     def register_steering_point(
         self,
         point_id: str,
         name: str,
         description: str,
         workflow_step: str,
-        available_actions: List[SteeringAction] = None,
+        available_actions: list[SteeringAction] = None,
         auto_continue_timeout: Optional[float] = None,
         priority: int = 1
     ) -> None:
@@ -117,7 +132,7 @@ class WorkflowSteering:
     async def trigger_steering_point(
         self,
         point_id: str,
-        context: Dict[str, Any] = None,
+        context: dict[str, Any] = None,
         force_interaction: bool = False
     ) -> SteeringCommand:
         """Trigger a steering point and wait for user input."""
@@ -180,7 +195,7 @@ class WorkflowSteering:
         action_names = [action.value.replace("_", " ").title() for action in actions]
 
         self.console.print("\n[cyan]Available actions:[/cyan]")
-        for i, (action, name) in enumerate(zip(actions, action_names), 1):
+        for i, (action, name) in enumerate(zip(actions, action_names, strict=False), 1):
             self.console.print(f"  {i}. {name}")
 
         # Get user choice
@@ -279,8 +294,13 @@ class WorkflowSteering:
             return f"Paused for {delay} seconds"
 
         return f"Paused: {selected_option}"
+<<<<<<< HEAD
 
     async def _handle_modify_parameters(self) -> Dict[str, Any]:
+=======
+    
+    async def _handle_modify_parameters(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Handle parameter modification."""
         self.console.print("[blue]🔧 Parameter Modification[/blue]")
 
@@ -345,8 +365,13 @@ class WorkflowSteering:
             "old_value": current_value,
             "new_value": new_value
         }
+<<<<<<< HEAD
 
     async def _handle_skip_step(self) -> Dict[str, Any]:
+=======
+    
+    async def _handle_skip_step(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Handle step skipping."""
         self.console.print("[yellow]⏭️  Skip Step[/yellow]")
 
@@ -356,8 +381,13 @@ class WorkflowSteering:
             "skip_reason": reason,
             "skip_timestamp": time.time()
         }
+<<<<<<< HEAD
 
     async def _handle_retry_step(self) -> Dict[str, Any]:
+=======
+    
+    async def _handle_retry_step(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Handle step retry."""
         self.console.print("[blue]🔄 Retry Step[/blue]")
 
@@ -383,8 +413,13 @@ class WorkflowSteering:
             "retry_type": selected_option,
             "retry_timestamp": time.time()
         }
+<<<<<<< HEAD
 
     async def _handle_inject_data(self) -> Dict[str, Any]:
+=======
+    
+    async def _handle_inject_data(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Handle data injection."""
         self.console.print("[green]💉 Inject Data[/green]")
 
@@ -404,8 +439,13 @@ class WorkflowSteering:
             "injection_value": data_value,
             "injection_timestamp": time.time()
         }
+<<<<<<< HEAD
 
     async def _handle_change_direction(self) -> Dict[str, Any]:
+=======
+    
+    async def _handle_change_direction(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Handle workflow direction change."""
         self.console.print("[purple]🔀 Change Direction[/purple]")
 
@@ -421,8 +461,13 @@ class WorkflowSteering:
             "priority": priority,
             "change_timestamp": time.time()
         }
+<<<<<<< HEAD
 
     async def _handle_save_checkpoint(self) -> Dict[str, Any]:
+=======
+    
+    async def _handle_save_checkpoint(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Handle checkpoint saving."""
         self.console.print("[blue]💾 Save Checkpoint[/blue]")
 
@@ -445,8 +490,13 @@ class WorkflowSteering:
             "checkpoint_name": checkpoint_name,
             "checkpoint_description": description
         }
+<<<<<<< HEAD
 
     async def _handle_load_checkpoint(self) -> Dict[str, Any]:
+=======
+    
+    async def _handle_load_checkpoint(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Handle checkpoint loading."""
         self.console.print("[blue]📂 Load Checkpoint[/blue]")
 
@@ -485,8 +535,13 @@ class WorkflowSteering:
             "checkpoint_name": selected_checkpoint,
             "checkpoint_data": checkpoint_data
         }
+<<<<<<< HEAD
 
     def _display_steering_context(self, context: Dict[str, Any]) -> None:
+=======
+    
+    def _display_steering_context(self, context: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Display current steering context."""
         self.console.print("\n[blue]Current Context:[/blue]")
 
@@ -518,16 +573,26 @@ class WorkflowSteering:
                         callback(command)
                 except Exception as e:
                     logger.error(f"Error executing steering callback: {e}")
+<<<<<<< HEAD
 
     def get_steering_history(self) -> List[SteeringCommand]:
+=======
+    
+    def get_steering_history(self) -> list[SteeringCommand]:
+>>>>>>> feature/core-services-refactor
         """Get the history of steering commands."""
         return self.steering_history.copy()
 
     def clear_steering_history(self) -> None:
         """Clear the steering command history."""
         self.steering_history.clear()
+<<<<<<< HEAD
 
     def get_available_checkpoints(self) -> List[str]:
+=======
+    
+    def get_available_checkpoints(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Get list of available checkpoint names."""
         return list(self.checkpoints.keys())
 

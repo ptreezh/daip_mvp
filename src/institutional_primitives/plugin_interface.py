@@ -11,7 +11,11 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Type
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -28,9 +32,9 @@ class PluginMetadata(BaseModel):
     version: str
     author: str
     description: str
-    dependencies: List[str] = Field(default_factory=list)
-    primitive_types: List[str] = Field(default_factory=list)
-    service_adapters: List[str] = Field(default_factory=list)
+    dependencies: list[str] = Field(default_factory=list)
+    primitive_types: list[str] = Field(default_factory=list)
+    service_adapters: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=datetime.now)
 
 
@@ -38,8 +42,8 @@ class PluginValidationResult(BaseModel):
     """Result of plugin validation."""
 
     is_valid: bool
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
     metadata: Optional[PluginMetadata] = None
 
 
@@ -49,12 +53,21 @@ class CustomPrimitiveBase(InstitutionalPrimitive):
     This class extends the basic InstitutionalPrimitive with additional
     features needed for plugin-based custom primitives.
     """
+<<<<<<< HEAD
 
     def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.plugin_metadata: Optional[PluginMetadata] = None
         self.service_adapters: Dict[str, Any] = {}
 
+=======
+    
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
+        super().__init__(primitive_id, config)
+        self.plugin_metadata: Optional[PluginMetadata] = None
+        self.service_adapters: dict[str, Any] = {}
+    
+>>>>>>> feature/core-services-refactor
     def set_plugin_metadata(self, metadata: PluginMetadata) -> None:
         """Set plugin metadata for this primitive."""
         self.plugin_metadata = metadata
@@ -71,8 +84,13 @@ class CustomPrimitiveBase(InstitutionalPrimitive):
     def get_primitive_type(self) -> str:
         """Return the primitive type identifier."""
         pass
+<<<<<<< HEAD
 
     def get_plugin_info(self) -> Dict[str, Any]:
+=======
+    
+    def get_plugin_info(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get plugin information for this primitive."""
         return {
             "primitive_type": self.get_primitive_type(),
@@ -94,16 +112,21 @@ class PluginInterface(ABC):
         pass
 
     @abstractmethod
-    def get_primitive_classes(self) -> Dict[str, Type[CustomPrimitiveBase]]:
+    def get_primitive_classes(self) -> dict[str, type[CustomPrimitiveBase]]:
         """Return a dictionary of primitive type -> primitive class mappings."""
         pass
 
     @abstractmethod
-    def get_service_adapters(self) -> Dict[str, Any]:
+    def get_service_adapters(self) -> dict[str, Any]:
         """Return a dictionary of service name -> adapter mappings."""
         pass
+<<<<<<< HEAD
 
     def initialize(self, context: Dict[str, Any]) -> bool:
+=======
+    
+    def initialize(self, context: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Initialize the plugin with the given context.
         
         Args:
@@ -135,10 +158,17 @@ class PluginLoader:
 
         """
         self.registry = registry
+<<<<<<< HEAD
         self.loaded_plugins: Dict[str, PluginInterface] = {}
         self.plugin_metadata: Dict[str, PluginMetadata] = {}
         self.service_adapters: Dict[str, Any] = {}
 
+=======
+        self.loaded_plugins: dict[str, PluginInterface] = {}
+        self.plugin_metadata: dict[str, PluginMetadata] = {}
+        self.service_adapters: dict[str, Any] = {}
+        
+>>>>>>> feature/core-services-refactor
         logger.info("PluginLoader initialized")
 
     def load_plugin_from_module(self, module_path: str) -> PluginValidationResult:
@@ -349,12 +379,21 @@ class PluginLoader:
         except Exception as e:
             logger.error(f"Error unloading plugin {plugin_name}: {e}")
             return False
+<<<<<<< HEAD
 
     def list_loaded_plugins(self) -> List[PluginMetadata]:
         """List all loaded plugins."""
         return list(self.plugin_metadata.values())
 
     def get_plugin_info(self, plugin_name: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def list_loaded_plugins(self) -> list[PluginMetadata]:
+        """List all loaded plugins."""
+        return list(self.plugin_metadata.values())
+    
+    def get_plugin_info(self, plugin_name: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get detailed information about a loaded plugin."""
         if plugin_name not in self.loaded_plugins:
             return None
@@ -372,8 +411,13 @@ class PluginLoader:
     def get_service_adapter(self, service_name: str) -> Optional[Any]:
         """Get a registered service adapter."""
         return self.service_adapters.get(service_name)
+<<<<<<< HEAD
 
     def list_service_adapters(self) -> List[str]:
+=======
+    
+    def list_service_adapters(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all registered service adapters."""
         return list(self.service_adapters.keys())
 
@@ -394,8 +438,13 @@ class PluginManager:
         """
         self.registry = registry
         self.loader = PluginLoader(registry)
+<<<<<<< HEAD
         self.plugin_directories: List[str] = []
 
+=======
+        self.plugin_directories: list[str] = []
+        
+>>>>>>> feature/core-services-refactor
         logger.info("PluginManager initialized")
 
     def add_plugin_directory(self, directory: str) -> None:
@@ -403,8 +452,13 @@ class PluginManager:
         if directory not in self.plugin_directories:
             self.plugin_directories.append(directory)
             logger.info(f"Added plugin directory: {directory}")
+<<<<<<< HEAD
 
     def discover_and_load_plugins(self) -> Dict[str, PluginValidationResult]:
+=======
+    
+    def discover_and_load_plugins(self) -> dict[str, PluginValidationResult]:
+>>>>>>> feature/core-services-refactor
         """Discover and load all plugins from registered directories.
         
         Returns:
@@ -450,20 +504,34 @@ class PluginManager:
     def unload_plugin(self, plugin_name: str) -> bool:
         """Unload a plugin."""
         return self.loader.unload_plugin(plugin_name)
+<<<<<<< HEAD
 
     def list_plugins(self) -> List[PluginMetadata]:
         """List all loaded plugins."""
         return self.loader.list_loaded_plugins()
 
     def get_plugin_info(self, plugin_name: str) -> Optional[Dict[str, Any]]:
+=======
+    
+    def list_plugins(self) -> list[PluginMetadata]:
+        """List all loaded plugins."""
+        return self.loader.list_loaded_plugins()
+    
+    def get_plugin_info(self, plugin_name: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get information about a specific plugin."""
         return self.loader.get_plugin_info(plugin_name)
 
     def get_service_adapter(self, service_name: str) -> Optional[Any]:
         """Get a service adapter by name."""
         return self.loader.get_service_adapter(service_name)
+<<<<<<< HEAD
 
     def create_primitive_instance(self, primitive_type: str, primitive_id: str, config: Dict[str, Any] = None) -> Optional[InstitutionalPrimitive]:
+=======
+    
+    def create_primitive_instance(self, primitive_type: str, primitive_id: str, config: dict[str, Any] = None) -> Optional[InstitutionalPrimitive]:
+>>>>>>> feature/core-services-refactor
         """Create an instance of a primitive type.
         
         Args:
@@ -482,8 +550,13 @@ class PluginManager:
         }
 
         return self.registry.instantiate_primitive(primitive_def)
+<<<<<<< HEAD
 
     def get_system_status(self) -> Dict[str, Any]:
+=======
+    
+    def get_system_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get overall status of the plugin system."""
         return {
             "loaded_plugins": len(self.loader.loaded_plugins),

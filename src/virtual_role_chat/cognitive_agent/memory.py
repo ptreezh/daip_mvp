@@ -7,7 +7,11 @@ and organization of memories.
 
 import logging
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Set
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -15,7 +19,10 @@ from pydantic import BaseModel, Field
 class MemoryItem(BaseModel):
     """Individual memory item stored by an agent.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     content: Any
     memory_type: str  # "episodic", "semantic", "procedural"
@@ -24,20 +31,23 @@ class MemoryItem(BaseModel):
     access_count: int = 0
     importance: float = Field(ge=0.0, le=1.0)
     source: str
-    related_memories: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    related_memories: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class MemoryCategory(BaseModel):
     """Category for organizing related memories.
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
     id: str
     name: str
     description: str
     parent_category: Optional[str] = None
-    subcategories: List[str] = Field(default_factory=list)
-    memory_ids: List[str] = Field(default_factory=list)
+    subcategories: list[str] = Field(default_factory=list)
+    memory_ids: list[str] = Field(default_factory=list)
 
 
 class AgentMemory:
@@ -59,6 +69,7 @@ class AgentMemory:
         self.logger = logging.getLogger(f"cognitive_agent.{agent_id}.memory")
 
         # Initialize memory components
+<<<<<<< HEAD
         self.memories: Dict[str, MemoryItem] = {}
         self.categories: Dict[str, MemoryCategory] = self._initialize_categories()
         self.memory_index: Dict[str, Set[str]] = {}  # Maps keywords to memory IDs
@@ -66,6 +77,15 @@ class AgentMemory:
         self.logger.info(f"Initialized memory system for agent {agent_id}")
 
     def _initialize_categories(self) -> Dict[str, MemoryCategory]:
+=======
+        self.memories: dict[str, MemoryItem] = {}
+        self.categories: dict[str, MemoryCategory] = self._initialize_categories()
+        self.memory_index: dict[str, set[str]] = {}  # Maps keywords to memory IDs
+        
+        self.logger.info(f"Initialized memory system for agent {agent_id}")
+    
+    def _initialize_categories(self) -> dict[str, MemoryCategory]:
+>>>>>>> feature/core-services-refactor
         """Initialize basic memory categories.
         
         Returns:
@@ -127,7 +147,7 @@ class AgentMemory:
         memory_type: str = "semantic",
         importance: float = 0.5,
         source: str = "agent",
-        metadata: Dict[str, Any] = None
+        metadata: dict[str, Any] = None
     ) -> str:
         """Store a new memory item.
         
@@ -213,8 +233,13 @@ class AgentMemory:
         self.logger.debug(f"Retrieved memory {memory_id}")
 
         return memory
+<<<<<<< HEAD
 
     async def retrieve_by_key(self, key: str, memory_type: str = None) -> List[MemoryItem]:
+=======
+    
+    async def retrieve_by_key(self, key: str, memory_type: str = None) -> list[MemoryItem]:
+>>>>>>> feature/core-services-refactor
         """Retrieve memories by key.
         
         Args:
@@ -247,7 +272,11 @@ class AgentMemory:
         query: str,
         memory_type: str = None,
         limit: int = 10
+<<<<<<< HEAD
     ) -> List[MemoryItem]:
+=======
+    ) -> list[MemoryItem]:
+>>>>>>> feature/core-services-refactor
         """Search for memories matching a query.
         
         Args:
@@ -288,8 +317,13 @@ class AgentMemory:
         self.logger.debug(f"Search for '{query}' returned {len(memories)} results")
 
         return memories
+<<<<<<< HEAD
 
     async def retrieve_relevant(self, task: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    async def retrieve_relevant(self, task: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Retrieve memories relevant to a specific task.
         
         Args:
@@ -319,8 +353,13 @@ class AgentMemory:
             organized_memories[memory_type].append(memory.dict())
 
         return organized_memories
+<<<<<<< HEAD
 
     async def update(self, task: Dict[str, Any], result: Dict[str, Any]) -> None:
+=======
+    
+    async def update(self, task: dict[str, Any], result: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Update memory based on task execution results.
         
         Args:
@@ -329,7 +368,11 @@ class AgentMemory:
 
         """
         self.logger.info("Updating memory based on task execution")
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         # Store task execution as episodic memory
         task_memory_id = self.store(
             key=f"task_{datetime.now().isoformat()}",
@@ -463,8 +506,13 @@ class AgentMemory:
         self.logger.debug(f"Created relationship between memories {memory_id1} and {memory_id2}")
 
         return True
+<<<<<<< HEAD
 
     def get_stats(self) -> Dict[str, Any]:
+=======
+    
+    def get_stats(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get statistics about the agent's memory.
         
         Returns:

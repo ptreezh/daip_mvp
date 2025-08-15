@@ -9,7 +9,11 @@
 import logging
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -29,8 +33,12 @@ class ConflictResolutionStrategy(str, Enum):
 
 class MemoryConflict(BaseModel):
     """Model for memory conflicts."""
+<<<<<<< HEAD
 
     conflicting_memories: List[Memory]
+=======
+    conflicting_memories: list[Memory]
+>>>>>>> feature/core-services-refactor
     conflict_type: str
     severity: float = Field(ge=0.0, le=1.0)
     description: str
@@ -42,7 +50,7 @@ class SharingPolicy(BaseModel):
 
     source_id: str
     target_id: str
-    allowed_memory_types: List[MemoryType]
+    allowed_memory_types: list[MemoryType]
     importance_threshold: float = 0.7
     max_memories_per_share: int = 10
     trust_level: float = Field(ge=0.0, le=1.0, default=0.5)
@@ -54,15 +62,20 @@ class MemoryConsolidationService:
     def __init__(self, mem_agent: MemAgent):
         """Initialize the consolidation service."""
         self.mem_agent = mem_agent
-        self.sharing_policies: List[SharingPolicy] = []
+        self.sharing_policies: list[SharingPolicy] = []
         self.consolidation_stats = {
             "total_consolidations": 0,
             "conflicts_resolved": 0,
             "memories_shared": 0
         }
         logger.info("MemoryConsolidationService initialized")
+<<<<<<< HEAD
 
     def consolidate_memories_advanced(self, source_id: str) -> List[Memory]:
+=======
+    
+    def consolidate_memories_advanced(self, source_id: str) -> list[Memory]:
+>>>>>>> feature/core-services-refactor
         """Advanced memory consolidation."""
         consolidated_memories = []
 
@@ -96,7 +109,7 @@ class MemoryConsolidationService:
         return consolidated_memories
 
     def _create_consolidated_memory(
-        self, memories: List[Memory], title: str, memory_type: MemoryType, source_id: str
+        self, memories: list[Memory], title: str, memory_type: MemoryType, source_id: str
     ) -> Memory:
         """Create a consolidated memory."""
         contents = [m.content for m in memories]
@@ -117,8 +130,13 @@ class MemoryConsolidationService:
                 "consolidation_time": datetime.now().isoformat()
             }
         )
+<<<<<<< HEAD
 
     def detect_memory_conflicts(self, source_id: str) -> List[MemoryConflict]:
+=======
+    
+    def detect_memory_conflicts(self, source_id: str) -> list[MemoryConflict]:
+>>>>>>> feature/core-services-refactor
         """Detect conflicts between memories."""
         conflicts = []
 
@@ -212,7 +230,12 @@ class MemoryConsolidationService:
 
         self.consolidation_stats["memories_shared"] += memories_shared
         return memories_shared
+<<<<<<< HEAD
 
     def get_consolidation_stats(self) -> Dict[str, Any]:
+=======
+    
+    def get_consolidation_stats(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get consolidation statistics."""
         return self.consolidation_stats.copy()

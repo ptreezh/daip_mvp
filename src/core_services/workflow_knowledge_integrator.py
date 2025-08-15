@@ -6,8 +6,14 @@
     into Critical Review and Multi-perspective Synthesis workflows.
 """
 import logging
+<<<<<<< HEAD
 from datetime import datetime
 from typing import Any, Callable, Dict, List
+=======
+from collections.abc import Callable
+from datetime import datetime
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel
 
@@ -72,17 +78,27 @@ class WorkflowKnowledgeIntegrator:
         )
 
         # Callback registry for notifications
+<<<<<<< HEAD
         self.persistence_callbacks: List[Callable[[str, KnowledgePersistenceResult], None]] = []
         self.conflict_callbacks: List[Callable[[str, List[str]], None]] = []
 
+=======
+        self.persistence_callbacks: list[Callable[[str, KnowledgePersistenceResult], None]] = []
+        self.conflict_callbacks: list[Callable[[str, list[str]], None]] = []
+        
+>>>>>>> feature/core-services-refactor
         logger.info("WorkflowKnowledgeIntegrator initialized")
 
     async def integrate_critical_review_workflow(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str,
         workflow_instance: Any = None
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Integrate knowledge persistence into Critical Review workflow results.
         
         Args:
@@ -152,10 +168,14 @@ class WorkflowKnowledgeIntegrator:
 
     async def integrate_multi_perspective_workflow(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str,
         workflow_instance: Any = None
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Integrate knowledge persistence into Multi-perspective Synthesis workflow results.
         
         Args:
@@ -202,9 +222,15 @@ class WorkflowKnowledgeIntegrator:
                             callback(execution_id, persistence_result.conflicts_detected)
                         except Exception as e:
                             logger.error(f"Conflict callback failed: {e}")
+<<<<<<< HEAD
 
                 logger.info("Successfully integrated synthesis result from Multi-perspective workflow")
 
+=======
+                
+                logger.info("Successfully integrated synthesis result from Multi-perspective workflow")
+            
+>>>>>>> feature/core-services-refactor
             # Enable cross-session knowledge sharing if configured
             if self.config.enable_cross_session_sharing:
                 enhanced_result["cross_session_knowledge"] = await self._get_related_knowledge(
@@ -219,9 +245,13 @@ class WorkflowKnowledgeIntegrator:
 
     async def _get_related_knowledge(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         workflow_type: str
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get related knowledge from previous sessions for cross-session sharing.
         
         Args:
@@ -312,7 +342,7 @@ class WorkflowKnowledgeIntegrator:
 
     def add_conflict_callback(
         self,
-        callback: Callable[[str, List[str]], None]
+        callback: Callable[[str, list[str]], None]
     ) -> None:
         """Add a callback for conflict events.
         
@@ -334,7 +364,7 @@ class WorkflowKnowledgeIntegrator:
 
     def remove_conflict_callback(
         self,
-        callback: Callable[[str, List[str]], None]
+        callback: Callable[[str, list[str]], None]
     ) -> None:
         """Remove a conflict callback."""
         try:
@@ -389,8 +419,13 @@ class WorkflowKnowledgeIntegrator:
             self.config.enable_cross_session_sharing = enable_cross_session_sharing
 
         logger.info("Workflow knowledge integration configuration updated")
+<<<<<<< HEAD
 
     def get_integration_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_integration_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get statistics about knowledge integration.
         
         Returns:
@@ -427,10 +462,14 @@ class WorkflowKnowledgeIntegrator:
     async def search_knowledge(
         self,
         query: str,
-        knowledge_types: List[str] = None,
+        knowledge_types: list[str] = None,
         min_confidence: float = 0.5,
         limit: int = 10
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Search for knowledge across all persisted content.
         
         Args:

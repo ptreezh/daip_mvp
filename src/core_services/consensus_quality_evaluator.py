@@ -7,7 +7,11 @@
 import logging
 import statistics
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +38,9 @@ class ConsensusQualityEvaluator:
 
     def evaluate_consensus_quality(
         self,
-        consensus_data: Dict[str, Any],
-        participants_data: List[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        consensus_data: dict[str, Any],
+        participants_data: list[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """评估共识质量"""
         try:
             evaluation_result = {
@@ -84,8 +88,13 @@ class ConsensusQualityEvaluator:
         except Exception as e:
             logger.error(f"评估共识质量失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def calculate_coherence_score(self, consensus_data: Dict[str, Any]) -> float:
+=======
+    
+    def calculate_coherence_score(self, consensus_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算一致性分数"""
         try:
             # 获取参与者立场
@@ -110,8 +119,13 @@ class ConsensusQualityEvaluator:
         except Exception as e:
             logger.error(f"计算一致性分数失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def assess_participant_satisfaction(self, participants_data: List[Dict[str, Any]]) -> float:
+=======
+    
+    def assess_participant_satisfaction(self, participants_data: list[dict[str, Any]]) -> float:
+>>>>>>> feature/core-services-refactor
         """评估参与者满意度"""
         try:
             if not participants_data:
@@ -153,8 +167,13 @@ class ConsensusQualityEvaluator:
         except Exception as e:
             logger.error(f"评估参与者满意度失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _calculate_consensus_score(self, consensus_data: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_consensus_score(self, consensus_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算共识分数"""
         try:
             # 从共识数据中提取分数
@@ -171,8 +190,13 @@ class ConsensusQualityEvaluator:
         except Exception as e:
             logger.error(f"计算共识分数失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _calculate_convergence_rate(self, consensus_data: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_convergence_rate(self, consensus_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算收敛速度"""
         try:
             convergence_history = consensus_data.get("convergence_history", [])
@@ -193,8 +217,13 @@ class ConsensusQualityEvaluator:
         except Exception as e:
             logger.error(f"计算收敛速度失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _calculate_stability_index(self, consensus_data: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_stability_index(self, consensus_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算稳定性指数"""
         try:
             stability_data = consensus_data.get("stability_measurements", [])
@@ -214,8 +243,13 @@ class ConsensusQualityEvaluator:
         except Exception as e:
             logger.error(f"计算稳定性指数失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _calculate_diversity_preservation(self, consensus_data: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_diversity_preservation(self, consensus_data: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算多样性保持度"""
         try:
             initial_diversity = consensus_data.get("initial_diversity", 0.0)
@@ -230,8 +264,13 @@ class ConsensusQualityEvaluator:
         except Exception as e:
             logger.error(f"计算多样性保持度失败: {e}")
             return 0.0
+<<<<<<< HEAD
 
     def _calculate_position_similarity(self, position1: Dict[str, Any], position2: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_position_similarity(self, position1: dict[str, Any], position2: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算立场相似度"""
         try:
             # 简单的文本相似度计算（实际应用中可以使用更复杂的NLP方法）
@@ -269,8 +308,13 @@ class ConsensusQualityEvaluator:
             return "poor"
         else:
             return "very_poor"
+<<<<<<< HEAD
 
     def _generate_improvement_recommendations(self, metrics: Dict[str, float]) -> List[str]:
+=======
+    
+    def _generate_improvement_recommendations(self, metrics: dict[str, float]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """生成改进建议"""
         recommendations = []
 
@@ -296,12 +340,21 @@ class ConsensusQualityEvaluator:
             recommendations.append("当前共识质量良好，继续保持现有流程")
 
         return recommendations
+<<<<<<< HEAD
 
     def get_evaluation_history(self) -> List[Dict[str, Any]]:
         """获取评估历史"""
         return self.evaluation_history.copy()
 
     def get_quality_trends(self) -> Dict[str, Any]:
+=======
+    
+    def get_evaluation_history(self) -> list[dict[str, Any]]:
+        """获取评估历史"""
+        return self.evaluation_history.copy()
+    
+    def get_quality_trends(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取质量趋势分析"""
         if len(self.evaluation_history) < 2:
             return {"message": "需要至少两次评估才能分析趋势"}

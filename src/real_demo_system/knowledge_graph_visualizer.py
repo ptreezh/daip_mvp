@@ -8,7 +8,11 @@ import json
 import logging
 import uuid
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -50,11 +54,11 @@ class KnowledgeGraphVisualizer:
 
     def create_graph_visualization(
         self,
-        graph_data: Dict[str, Any],
+        graph_data: dict[str, Any],
         layout: str = "force_directed",
         style: str = "default",
         interactive: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建图谱可视化"""
         try:
             visualization_id = str(uuid.uuid4())
@@ -111,9 +115,9 @@ class KnowledgeGraphVisualizer:
 
     def generate_interactive_view(
         self,
-        visualization_config: Dict[str, Any],
-        user_preferences: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        visualization_config: dict[str, Any],
+        user_preferences: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """生成交互式视图"""
         try:
             # 应用用户偏好
@@ -156,10 +160,10 @@ class KnowledgeGraphVisualizer:
 
     def export_graph_data(
         self,
-        visualization_config: Dict[str, Any],
+        visualization_config: dict[str, Any],
         export_format: str = "json",
         include_metadata: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导出图谱数据"""
         try:
             export_data = {}
@@ -193,8 +197,13 @@ class KnowledgeGraphVisualizer:
         except Exception as e:
             logger.error(f"导出图谱数据失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def _process_nodes(self, nodes: List[Dict[str, Any]], style: str) -> List[Dict[str, Any]]:
+=======
+    
+    def _process_nodes(self, nodes: list[dict[str, Any]], style: str) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """处理节点数据"""
         processed_nodes = []
         style_config = self.visualization_styles[style]
@@ -229,8 +238,13 @@ class KnowledgeGraphVisualizer:
             processed_nodes.append(processed_node)
 
         return processed_nodes
+<<<<<<< HEAD
 
     def _process_edges(self, edges: List[Dict[str, Any]], style: str) -> List[Dict[str, Any]]:
+=======
+    
+    def _process_edges(self, edges: list[dict[str, Any]], style: str) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """处理边数据"""
         processed_edges = []
         style_config = self.visualization_styles[style]
@@ -266,8 +280,13 @@ class KnowledgeGraphVisualizer:
             processed_edges.append(processed_edge)
 
         return processed_edges
+<<<<<<< HEAD
 
     def _generate_layout_config(self, layout: str, nodes: List[Dict[str, Any]]) -> Dict[str, Any]:
+=======
+    
+    def _generate_layout_config(self, layout: str, nodes: list[dict[str, Any]]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成布局配置"""
         base_config = {
             "algorithm": layout,
@@ -301,8 +320,13 @@ class KnowledgeGraphVisualizer:
             })
 
         return base_config
+<<<<<<< HEAD
 
     def _generate_interactive_features(self, interactive: bool) -> Dict[str, Any]:
+=======
+    
+    def _generate_interactive_features(self, interactive: bool) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成交互功能配置"""
         if not interactive:
             return {"enabled": False}
@@ -346,8 +370,13 @@ class KnowledgeGraphVisualizer:
                 "dynamic_filtering": True
             }
         }
+<<<<<<< HEAD
 
     def _determine_node_color(self, node: Dict[str, Any], color_scheme: str) -> str:
+=======
+    
+    def _determine_node_color(self, node: dict[str, Any], color_scheme: str) -> str:
+>>>>>>> feature/core-services-refactor
         """确定节点颜色"""
         if color_scheme == "category":
             color_map = {
@@ -371,8 +400,13 @@ class KnowledgeGraphVisualizer:
 
         else:
             return "#3498db"
+<<<<<<< HEAD
 
     def _determine_edge_color(self, edge: Dict[str, Any], color_scheme: str) -> str:
+=======
+    
+    def _determine_edge_color(self, edge: dict[str, Any], color_scheme: str) -> str:
+>>>>>>> feature/core-services-refactor
         """确定边颜色"""
         if color_scheme == "category":
             color_map = {
@@ -387,8 +421,13 @@ class KnowledgeGraphVisualizer:
 
         else:
             return "#bdc3c7"
+<<<<<<< HEAD
 
     def _generate_node_label(self, node: Dict[str, Any], label_display: str) -> str:
+=======
+    
+    def _generate_node_label(self, node: dict[str, Any], label_display: str) -> str:
+>>>>>>> feature/core-services-refactor
         """生成节点标签"""
         if label_display == "none":
             return ""
@@ -398,8 +437,13 @@ class KnowledgeGraphVisualizer:
             return ""  # 悬停时显示
         else:
             return node.get("label", "")
+<<<<<<< HEAD
 
     def _generate_edge_label(self, edge: Dict[str, Any], label_display: str) -> str:
+=======
+    
+    def _generate_edge_label(self, edge: dict[str, Any], label_display: str) -> str:
+>>>>>>> feature/core-services-refactor
         """生成边标签"""
         if label_display == "none":
             return ""
@@ -407,8 +451,13 @@ class KnowledgeGraphVisualizer:
             return edge.get("type", "")
         else:
             return ""
+<<<<<<< HEAD
 
     def _generate_node_tooltip(self, node: Dict[str, Any]) -> str:
+=======
+    
+    def _generate_node_tooltip(self, node: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """生成节点提示信息"""
         tooltip_parts = [
             f"标签: {node.get('label', 'N/A')}",
@@ -423,8 +472,13 @@ class KnowledgeGraphVisualizer:
                 tooltip_parts.append(f"  {key}: {value}")
 
         return "\\n".join(tooltip_parts)
+<<<<<<< HEAD
 
     def _generate_edge_tooltip(self, edge: Dict[str, Any]) -> str:
+=======
+    
+    def _generate_edge_tooltip(self, edge: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """生成边提示信息"""
         tooltip_parts = [
             f"关系类型: {edge.get('type', 'N/A')}",
@@ -434,8 +488,13 @@ class KnowledgeGraphVisualizer:
         ]
 
         return "\\n".join(tooltip_parts)
+<<<<<<< HEAD
 
     def _generate_interactive_code(self, visualization_config: Dict[str, Any]) -> str:
+=======
+    
+    def _generate_interactive_code(self, visualization_config: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """生成交互式代码"""
         # 简化的JavaScript代码生成
         code_template = f"""
@@ -466,8 +525,13 @@ class KnowledgeGraphVisualizer:
         """
 
         return code_template
+<<<<<<< HEAD
 
     def _generate_control_panel(self, visualization_config: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _generate_control_panel(self, visualization_config: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成控制面板配置"""
         return {
             "layout_controls": {
@@ -490,8 +554,13 @@ class KnowledgeGraphVisualizer:
                 "include_metadata": True
             }
         }
+<<<<<<< HEAD
 
     def _generate_event_handlers(self, visualization_config: Dict[str, Any]) -> Dict[str, str]:
+=======
+    
+    def _generate_event_handlers(self, visualization_config: dict[str, Any]) -> dict[str, str]:
+>>>>>>> feature/core-services-refactor
         """生成事件处理器"""
         return {
             "node_click": "handleNodeClick",
@@ -504,9 +573,9 @@ class KnowledgeGraphVisualizer:
 
     def _apply_user_preferences(
         self,
-        visualization_config: Dict[str, Any],
-        user_preferences: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        visualization_config: dict[str, Any],
+        user_preferences: dict[str, Any]
+    ) -> dict[str, Any]:
         """应用用户偏好"""
         # 应用布局偏好
         if "preferred_layout" in user_preferences:
@@ -523,8 +592,13 @@ class KnowledgeGraphVisualizer:
             visualization_config["style_config"]["color_scheme"] = user_preferences["color_scheme"]
 
         return visualization_config
+<<<<<<< HEAD
 
     def _export_to_json(self, visualization_config: Dict[str, Any], include_metadata: bool) -> Dict[str, Any]:
+=======
+    
+    def _export_to_json(self, visualization_config: dict[str, Any], include_metadata: bool) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """导出为JSON格式"""
         export_data = {
             "nodes": visualization_config.get("data", {}).get("nodes", []),
@@ -536,8 +610,13 @@ class KnowledgeGraphVisualizer:
             export_data["layout_config"] = visualization_config.get("layout_config", {})
 
         return export_data
+<<<<<<< HEAD
 
     def _export_to_graphml(self, visualization_config: Dict[str, Any], include_metadata: bool) -> str:
+=======
+    
+    def _export_to_graphml(self, visualization_config: dict[str, Any], include_metadata: bool) -> str:
+>>>>>>> feature/core-services-refactor
         """导出为GraphML格式"""
         # 简化的GraphML生成
         nodes = visualization_config.get("data", {}).get("nodes", [])
@@ -564,8 +643,13 @@ class KnowledgeGraphVisualizer:
         graphml_content += '</graphml>'
 
         return graphml_content
+<<<<<<< HEAD
 
     def _export_to_csv(self, visualization_config: Dict[str, Any], include_metadata: bool) -> Dict[str, str]:
+=======
+    
+    def _export_to_csv(self, visualization_config: dict[str, Any], include_metadata: bool) -> dict[str, str]:
+>>>>>>> feature/core-services-refactor
         """导出为CSV格式"""
         nodes = visualization_config.get("data", {}).get("nodes", [])
         edges = visualization_config.get("data", {}).get("edges", [])
@@ -584,8 +668,13 @@ class KnowledgeGraphVisualizer:
             "nodes.csv": nodes_csv,
             "edges.csv": edges_csv
         }
+<<<<<<< HEAD
 
     def _export_to_svg(self, visualization_config: Dict[str, Any]) -> str:
+=======
+    
+    def _export_to_svg(self, visualization_config: dict[str, Any]) -> str:
+>>>>>>> feature/core-services-refactor
         """导出为SVG格式"""
         # 简化的SVG生成
         nodes = visualization_config.get("data", {}).get("nodes", [])

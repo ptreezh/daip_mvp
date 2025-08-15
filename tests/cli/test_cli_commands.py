@@ -12,7 +12,7 @@ from typer.testing import CliRunner
 from src.cli.main import app
 
 
-@pytest.fixture
+@pytest.fixture()
 def cli_runner():
     """Fixture that provides a CLI test runner."""
     return CliRunner()

@@ -8,7 +8,11 @@ import logging
 import uuid
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List
+=======
+from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -54,10 +58,10 @@ class ConsensusFormationProcess:
     def initiate_consensus_formation(
         self,
         topic: str,
-        initial_positions: List[Dict[str, Any]],
+        initial_positions: list[dict[str, Any]],
         target_consensus: float = 0.8,
-        process_config: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        process_config: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """启动共识形成过程"""
         try:
             formation_id = str(uuid.uuid4())
@@ -108,8 +112,8 @@ class ConsensusFormationProcess:
     def facilitate_convergence(
         self,
         formation_id: str,
-        convergence_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        convergence_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """促进共识收敛"""
         try:
             if formation_id not in self.active_processes:
@@ -155,8 +159,13 @@ class ConsensusFormationProcess:
         except Exception as e:
             logger.error(f"促进共识收敛失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def resolve_conflicts(self, conflicts: List[Dict[str, Any]]) -> Dict[str, Any]:
+=======
+    
+    def resolve_conflicts(self, conflicts: list[dict[str, Any]]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """解决冲突"""
         try:
             resolved_conflicts = []
@@ -188,8 +197,13 @@ class ConsensusFormationProcess:
         except Exception as e:
             logger.error(f"解决冲突失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
 
     def _create_stage_plan(self, initial_positions: List[Dict[str, Any]], target_consensus: float) -> List[Dict[str, Any]]:
+=======
+    
+    def _create_stage_plan(self, initial_positions: list[dict[str, Any]], target_consensus: float) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """创建阶段计划"""
         stages = []
 
@@ -205,8 +219,13 @@ class ConsensusFormationProcess:
             stages.append(stage_info)
 
         return stages
+<<<<<<< HEAD
 
     def _estimate_process_duration(self, initial_positions: List[Dict[str, Any]], target_consensus: float) -> str:
+=======
+    
+    def _estimate_process_duration(self, initial_positions: list[dict[str, Any]], target_consensus: float) -> str:
+>>>>>>> feature/core-services-refactor
         """估算过程持续时间"""
         # 基于参与者数量和目标共识水平估算
         base_duration = 30  # 基础30分钟
@@ -230,8 +249,13 @@ class ConsensusFormationProcess:
             FormationStage.FINALIZATION: "最终确认和文档化"
         }
         return descriptions.get(stage, "未知阶段")
+<<<<<<< HEAD
 
     def _estimate_stage_duration(self, stage: FormationStage, initial_positions: List[Dict[str, Any]]) -> int:
+=======
+    
+    def _estimate_stage_duration(self, stage: FormationStage, initial_positions: list[dict[str, Any]]) -> int:
+>>>>>>> feature/core-services-refactor
         """估算阶段持续时间（分钟）"""
         base_durations = {
             FormationStage.INITIALIZATION: 5,
@@ -247,8 +271,13 @@ class ConsensusFormationProcess:
         participant_factor = len(initial_positions) * 2
 
         return base + participant_factor
+<<<<<<< HEAD
 
     def _get_stage_success_criteria(self, stage: FormationStage) -> List[str]:
+=======
+    
+    def _get_stage_success_criteria(self, stage: FormationStage) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """获取阶段成功标准"""
         criteria = {
             FormationStage.INITIALIZATION: ["所有参与者已就绪", "讨论规则已确立"],
@@ -287,8 +316,13 @@ class ConsensusFormationProcess:
         except Exception as e:
             logger.error(f"进入下一阶段失败: {e}")
             return False
+<<<<<<< HEAD
 
     def _can_advance_stage(self, process: Dict[str, Any]) -> bool:
+=======
+    
+    def _can_advance_stage(self, process: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """判断是否可以进入下一阶段"""
         current_stage = process["current_stage"]
 
@@ -307,8 +341,13 @@ class ConsensusFormationProcess:
             return True  # 验证后总是可以最终确认
 
         return False
+<<<<<<< HEAD
 
     def _analyze_convergence(self, process: Dict[str, Any], convergence_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _analyze_convergence(self, process: dict[str, Any], convergence_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """分析收敛情况"""
         analysis = {
             "convergence_rate": 0.0,
@@ -335,8 +374,13 @@ class ConsensusFormationProcess:
                 analysis["conflicts_detected"].append(conflict)
 
         return analysis
+<<<<<<< HEAD
 
     def _apply_convergence_facilitation(self, process: Dict[str, Any], convergence_data: Dict[str, Any]) -> List[str]:
+=======
+    
+    def _apply_convergence_facilitation(self, process: dict[str, Any], convergence_data: dict[str, Any]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """应用收敛促进措施"""
         actions = []
 
@@ -349,8 +393,13 @@ class ConsensusFormationProcess:
             actions.append("激励低参与度成员")
 
         return actions
+<<<<<<< HEAD
 
     def _calculate_overall_progress(self, process: Dict[str, Any]) -> float:
+=======
+    
+    def _calculate_overall_progress(self, process: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """计算整体进度"""
         completed_stages = sum(1 for stage in process["stages"] if stage["status"] == "completed")
         total_stages = len(process["stages"])
@@ -362,7 +411,7 @@ class ConsensusFormationProcess:
         return stage_progress * 0.6 + consensus_progress * 0.4
 
     # 冲突解决策略方法
-    def _resolve_priority_conflict(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def _resolve_priority_conflict(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """解决优先级冲突"""
         return {
             "success": True,
@@ -370,8 +419,13 @@ class ConsensusFormationProcess:
             "resolution": "通过权重调整和优先级协商解决冲突",
             "actions": ["重新评估优先级", "寻找平衡点", "建立权重共识"]
         }
+<<<<<<< HEAD
 
     def _resolve_value_conflict(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _resolve_value_conflict(self, conflict: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """解决价值观冲突"""
         return {
             "success": True,
@@ -379,8 +433,13 @@ class ConsensusFormationProcess:
             "resolution": "寻找共同价值基础，建立价值桥梁",
             "actions": ["识别共同价值", "尊重差异", "寻找兼容方案"]
         }
+<<<<<<< HEAD
 
     def _resolve_factual_conflict(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _resolve_factual_conflict(self, conflict: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """解决事实争议"""
         return {
             "success": True,
@@ -388,8 +447,13 @@ class ConsensusFormationProcess:
             "resolution": "通过证据验证和专家意见解决事实争议",
             "actions": ["收集可靠证据", "咨询专家意见", "建立事实共识"]
         }
+<<<<<<< HEAD
 
     def _resolve_methodological_conflict(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _resolve_methodological_conflict(self, conflict: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """解决方法论争议"""
         return {
             "success": True,
@@ -397,8 +461,13 @@ class ConsensusFormationProcess:
             "resolution": "整合不同方法论，形成综合方案",
             "actions": ["分析方法优劣", "寻找互补性", "设计混合方案"]
         }
+<<<<<<< HEAD
 
     def _resolve_resource_conflict(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+=======
+    
+    def _resolve_resource_conflict(self, conflict: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """解决资源竞争"""
         return {
             "success": True,
@@ -406,8 +475,13 @@ class ConsensusFormationProcess:
             "resolution": "优化资源配置，寻找共赢方案",
             "actions": ["评估资源需求", "探索替代方案", "建立分配机制"]
         }
+<<<<<<< HEAD
 
     def get_process_status(self, formation_id: str) -> Dict[str, Any]:
+=======
+    
+    def get_process_status(self, formation_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取过程状态"""
         if formation_id not in self.active_processes:
             return {"error": f"进程不存在: {formation_id}"}

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 @Time    : 2025-07-23 13:30:00
 @Author  : DAIP-LIVE Team

@@ -17,24 +17,37 @@
 
 from abc import ABC, abstractmethod
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Set
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from consensus_models import AlgorithmMetadata, ConsensusInput, ConsensusRequest, ConsensusResult, ValidationResult
 
 
 class ConsensusContext:
     """共识算法执行上下文"""
+<<<<<<< HEAD
 
     def __init__(self,
                  session_id: Optional[str] = None,
                  services: Optional[Dict[str, Any]] = None,
                  configuration: Optional[Dict[str, Any]] = None):
+=======
+    
+    def __init__(self, 
+                 session_id: Optional[str] = None,
+                 services: Optional[dict[str, Any]] = None,
+                 configuration: Optional[dict[str, Any]] = None):
+>>>>>>> feature/core-services-refactor
         self.session_id = session_id or f"session_{datetime.now().timestamp()}"
         self.services = services or {}
         self.configuration = configuration or {}
         self.state = {}
         self.metrics = {}
         self.start_time = datetime.now()
+<<<<<<< HEAD
 
     def get_service(self, service_name: str) -> Optional[Any]:
         """获取服务实例"""
@@ -48,6 +61,21 @@ class ConsensusContext:
         """获取指标"""
         return self.metrics.get(key, default)
 
+=======
+        
+    def get_service(self, service_name: str) -> Optional[Any]:
+        """获取服务实例"""
+        return self.services.get(service_name)
+        
+    def set_metric(self, key: str, value: Any) -> None:
+        """设置指标"""
+        self.metrics[key] = value
+        
+    def get_metric(self, key: str, default: Any = None) -> Any:
+        """获取指标"""
+        return self.metrics.get(key, default)
+        
+>>>>>>> feature/core-services-refactor
     def get_execution_time(self) -> float:
         """获取执行时间"""
         return (datetime.now() - self.start_time).total_seconds()
@@ -55,10 +83,17 @@ class ConsensusContext:
 
 class AlgorithmCapabilities:
     """算法能力描述"""
+<<<<<<< HEAD
 
     def __init__(self,
                  supported_input_types: Set[str],
                  supported_output_types: Set[str],
+=======
+    
+    def __init__(self,
+                 supported_input_types: set[str],
+                 supported_output_types: set[str],
+>>>>>>> feature/core-services-refactor
                  requires_reasoning: bool = False,
                  requires_evidence: bool = False,
                  supports_async: bool = True,
@@ -71,7 +106,11 @@ class AlgorithmCapabilities:
         self.supports_async = supports_async
         self.min_participants = min_participants
         self.max_participants = max_participants
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
     def can_handle_request(self, request: ConsensusRequest) -> bool:
         """检查是否能处理请求"""
         # 检查参与者数量
@@ -80,23 +119,39 @@ class AlgorithmCapabilities:
             return False
         if self.max_participants and participant_count > self.max_participants:
             return False
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
         # 检查输入类型
         for input_item in request.inputs:
             input_type = type(input_item.position).__name__
             if input_type not in self.supported_input_types:
                 return False
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
         # 检查推理要求
         if self.requires_reasoning:
             if not all(input_item.reasoning for input_item in request.inputs):
                 return False
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
         # 检查证据要求
         if self.requires_evidence:
             if not all(input_item.evidence for input_item in request.inputs):
                 return False
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
         return True
 
 class ConsensusAlgorithm(ABC):
@@ -105,16 +160,28 @@ class ConsensusAlgorithm(ABC):
     所有共识算法必须继承此类并实现其抽象方法。
     提供统一的接口确保算法间的一致性和可互换性。
     """
+<<<<<<< HEAD
 
     def __init__(self, algorithm_id: str, configuration: Optional[Dict[str, Any]] = None):
+=======
+    
+    def __init__(self, algorithm_id: str, configuration: Optional[dict[str, Any]] = None):
+>>>>>>> feature/core-services-refactor
         self.algorithm_id = algorithm_id
         self.configuration = configuration or {}
         self._metadata = None
         self._capabilities = None
+<<<<<<< HEAD
 
     @abstractmethod
     async def calculate(self,
                        inputs: List[ConsensusInput],
+=======
+        
+    @abstractmethod
+    async def calculate(self, 
+                       inputs: list[ConsensusInput], 
+>>>>>>> feature/core-services-refactor
                        context: ConsensusContext) -> ConsensusResult:
         """执行共识计算
         
@@ -128,32 +195,52 @@ class ConsensusAlgorithm(ABC):
         Raises:
             ValueError: 输入数据无效
             RuntimeError: 算法执行失败
+<<<<<<< HEAD
 
         """
         pass
 
+=======
+        """
+        pass
+        
+>>>>>>> feature/core-services-refactor
     @abstractmethod
     def get_metadata(self) -> AlgorithmMetadata:
         """获取算法元数据
         
         Returns:
             算法元数据信息
+<<<<<<< HEAD
 
         """
         pass
 
+=======
+        """
+        pass
+        
+>>>>>>> feature/core-services-refactor
     @abstractmethod
     def get_capabilities(self) -> AlgorithmCapabilities:
         """获取算法能力描述
         
         Returns:
             算法能力信息
+<<<<<<< HEAD
 
         """
         pass
 
     @abstractmethod
     def validate_inputs(self, inputs: List[ConsensusInput]) -> ValidationResult:
+=======
+        """
+        pass
+        
+    @abstractmethod
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """验证输入数据
         
         Args:
@@ -161,6 +248,7 @@ class ConsensusAlgorithm(ABC):
             
         Returns:
             验证结果
+<<<<<<< HEAD
 
         """
         pass
@@ -170,6 +258,16 @@ class ConsensusAlgorithm(ABC):
         return self.configuration.copy()
 
     def set_configuration(self, config: Dict[str, Any]) -> bool:
+=======
+        """
+        pass
+        
+    def get_configuration(self) -> dict[str, Any]:
+        """获取算法配置"""
+        return self.configuration.copy()
+        
+    def set_configuration(self, config: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """设置算法配置
         
         Args:
@@ -177,21 +275,33 @@ class ConsensusAlgorithm(ABC):
             
         Returns:
             是否设置成功
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
         """
         try:
             # 验证配置
             validation_result = self.validate_configuration(config)
             if not validation_result.is_valid:
                 return False
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
             # 更新配置
             self.configuration.update(config)
             return True
         except Exception:
             return False
+<<<<<<< HEAD
 
     def validate_configuration(self, config: Dict[str, Any]) -> ValidationResult:
+=======
+            
+    def validate_configuration(self, config: dict[str, Any]) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """验证配置参数
         
         Args:
@@ -199,11 +309,18 @@ class ConsensusAlgorithm(ABC):
             
         Returns:
             验证结果
+<<<<<<< HEAD
 
         """
         # 默认实现，子类可以重写
         return ValidationResult(is_valid=True)
 
+=======
+        """
+        # 默认实现，子类可以重写
+        return ValidationResult(is_valid=True)
+        
+>>>>>>> feature/core-services-refactor
     def can_handle_request(self, request: ConsensusRequest) -> bool:
         """检查是否能处理请求
         
@@ -212,11 +329,18 @@ class ConsensusAlgorithm(ABC):
             
         Returns:
             是否能处理
+<<<<<<< HEAD
 
         """
         capabilities = self.get_capabilities()
         return capabilities.can_handle_request(request)
 
+=======
+        """
+        capabilities = self.get_capabilities()
+        return capabilities.can_handle_request(request)
+        
+>>>>>>> feature/core-services-refactor
     def estimate_execution_time(self, request: ConsensusRequest) -> float:
         """估算执行时间
         
@@ -225,19 +349,30 @@ class ConsensusAlgorithm(ABC):
             
         Returns:
             预估执行时间(秒)
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
         """
         # 默认实现，基于输入数量的简单估算
         base_time = 1.0
         input_factor = len(request.inputs) * 0.1
         return base_time + input_factor
+<<<<<<< HEAD
 
     def get_health_status(self) -> Dict[str, Any]:
+=======
+        
+    def get_health_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取算法健康状态
         
         Returns:
             健康状态信息
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
         """
         return {
             "algorithm_id": self.algorithm_id,
@@ -245,9 +380,18 @@ class ConsensusAlgorithm(ABC):
             "last_check": datetime.now().isoformat(),
             "configuration_valid": True
         }
+<<<<<<< HEAD
 
     def __str__(self) -> str:
         return f"ConsensusAlgorithm(id={self.algorithm_id})"
 
     def __repr__(self) -> str:
         return f"ConsensusAlgorithm(id='{self.algorithm_id}', config={self.configuration})"
+=======
+        
+    def __str__(self) -> str:
+        return f"ConsensusAlgorithm(id={self.algorithm_id})"
+        
+    def __repr__(self) -> str:
+        return f"ConsensusAlgorithm(id='{self.algorithm_id}', config={self.configuration})"
+>>>>>>> feature/core-services-refactor

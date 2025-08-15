@@ -476,19 +476,19 @@ class TestStorageAdapterManager(unittest.TestCase):
 
 
 # Pytest-style tests
-@pytest.fixture
+@pytest.fixture()
 def mock_sskg_manager():
     """Create a mock SSKG manager."""
     return MockSSKGManager()
 
 
-@pytest.fixture
+@pytest.fixture()
 def role_adapter(mock_sskg_manager):
     """Create a role memory adapter."""
     return RoleMemoryAdapter(mock_sskg_manager)
 
 
-@pytest.fixture
+@pytest.fixture()
 def wiki_adapter(mock_sskg_manager):
     """Create a wiki adapter."""
     return WikiAdapter(mock_sskg_manager)

@@ -12,7 +12,7 @@ import pytest
 from src.core_services.memory_service import MemoryService
 
 
-@pytest.fixture
+@pytest.fixture()
 def temp_memory_dir(tmp_path: Path) -> str:
     """Create a temporary directory for memory data."""
     return str(tmp_path)

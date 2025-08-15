@@ -9,7 +9,11 @@ import asyncio
 import logging
 import time
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from consensus_algorithm_interface import ConsensusAlgorithm
 from consensus_models import AlgorithmMetadata
@@ -20,12 +24,21 @@ logger = logging.getLogger(__name__)
 
 class DispatcherManager:
     """调度器管理器"""
+<<<<<<< HEAD
 
     def __init__(self, dispatcher: UnifiedConsensusDispatcher):
         self.dispatcher = dispatcher
 
     def register_algorithm(self,
                           algorithm_id: str,
+=======
+    
+    def __init__(self, dispatcher: UnifiedConsensusDispatcher):
+        self.dispatcher = dispatcher
+        
+    def register_algorithm(self, 
+                          algorithm_id: str, 
+>>>>>>> feature/core-services-refactor
                           algorithm: ConsensusAlgorithm,
                           metadata: Optional[AlgorithmMetadata] = None) -> bool:
         """注册算法
@@ -37,6 +50,7 @@ class DispatcherManager:
             
         Returns:
             是否注册成功
+<<<<<<< HEAD
 
         """
         try:
@@ -45,11 +59,21 @@ class DispatcherManager:
             if success:
                 logger.info(f"Algorithm {algorithm_id} registered successfully")
 
+=======
+        """
+        try:
+            success = self.dispatcher.registry.register(algorithm_id, algorithm, metadata)
+            
+            if success:
+                logger.info(f"Algorithm {algorithm_id} registered successfully")
+                
+>>>>>>> feature/core-services-refactor
                 # 更新选择器
                 self.dispatcher.selector = self.dispatcher.selector.__class__(
                     self.dispatcher.registry,
                     self.dispatcher.config.selection_strategy
                 )
+<<<<<<< HEAD
 
                 # 更新降级管理器
                 if self.dispatcher.fallback_manager:
@@ -61,6 +85,19 @@ class DispatcherManager:
             logger.error(f"Failed to register algorithm {algorithm_id}: {str(e)}")
             return False
 
+=======
+                
+                # 更新降级管理器
+                if self.dispatcher.fallback_manager:
+                    self.dispatcher.fallback_manager.registry = self.dispatcher.registry
+                    
+            return success
+            
+        except Exception as e:
+            logger.error(f"Failed to register algorithm {algorithm_id}: {str(e)}")
+            return False
+            
+>>>>>>> feature/core-services-refactor
     def unregister_algorithm(self, algorithm_id: str) -> bool:
         """注销算法
         
@@ -69,6 +106,7 @@ class DispatcherManager:
             
         Returns:
             是否注销成功
+<<<<<<< HEAD
 
         """
         try:
@@ -84,15 +122,38 @@ class DispatcherManager:
             return False
 
     def get_available_algorithms(self) -> List[Dict[str, Any]]:
+=======
+        """
+        try:
+            success = self.dispatcher.registry.unregister(algorithm_id)
+            
+            if success:
+                logger.info(f"Algorithm {algorithm_id} unregistered successfully")
+                
+            return success
+            
+        except Exception as e:
+            logger.error(f"Failed to unregister algorithm {algorithm_id}: {str(e)}")
+            return False
+            
+    def get_available_algorithms(self) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取可用算法列表
         
         Returns:
             算法信息列表
+<<<<<<< HEAD
 
         """
         try:
             algorithms = self.dispatcher.registry.list_algorithms()
 
+=======
+        """
+        try:
+            algorithms = self.dispatcher.registry.list_algorithms()
+            
+>>>>>>> feature/core-services-refactor
             algorithm_list = []
             for algo_info in algorithms:
                 algorithm_list.append({
@@ -107,6 +168,7 @@ class DispatcherManager:
                     "performance": algo_info.metadata.performance,
                     "complexity": algo_info.metadata.complexity
                 })
+<<<<<<< HEAD
 
             return algorithm_list
 
@@ -115,6 +177,16 @@ class DispatcherManager:
             return []
 
     def get_algorithm_details(self, algorithm_id: str) -> Optional[Dict[str, Any]]:
+=======
+                
+            return algorithm_list
+            
+        except Exception as e:
+            logger.error(f"Failed to get available algorithms: {str(e)}")
+            return []
+            
+    def get_algorithm_details(self, algorithm_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取算法详细信息
         
         Args:
@@ -122,13 +194,20 @@ class DispatcherManager:
             
         Returns:
             算法详细信息
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
         """
         try:
             algo_info = self.dispatcher.registry.get_algorithm_info(algorithm_id)
             if not algo_info:
                 return None
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> feature/core-services-refactor
             return {
                 "algorithm_id": algo_info.algorithm_id,
                 "metadata": {
@@ -161,7 +240,11 @@ class DispatcherManager:
                 },
                 "configuration": algo_info.configuration
             }
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
         except Exception as e:
             logger.error(f"Failed to get algorithm details for {algorithm_id}: {str(e)}")
             return None
@@ -169,29 +252,51 @@ class DispatcherManager:
 
 class MetricsCollector:
     """指标收集器"""
+<<<<<<< HEAD
 
     def __init__(self, dispatcher: UnifiedConsensusDispatcher):
         self.dispatcher = dispatcher
 
     def get_metrics(self) -> Dict[str, Any]:
+=======
+    
+    def __init__(self, dispatcher: UnifiedConsensusDispatcher):
+        self.dispatcher = dispatcher
+        
+    def get_metrics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取调度器指标
         
         Returns:
             指标字典
+<<<<<<< HEAD
 
         """
         metrics = self.dispatcher.metrics
 
+=======
+        """
+        metrics = self.dispatcher.metrics
+        
+>>>>>>> feature/core-services-refactor
         # 计算成功率
         success_rate = 0.0
         if metrics.total_requests > 0:
             success_rate = metrics.successful_requests / metrics.total_requests
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
         # 计算降级率
         fallback_rate = 0.0
         if metrics.total_requests > 0:
             fallback_rate = metrics.fallback_requests / metrics.total_requests
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
         return {
             "summary": {
                 "total_requests": metrics.total_requests,
@@ -209,8 +314,13 @@ class MetricsCollector:
             "fallback_stats": self._get_fallback_stats(),
             "timestamp": datetime.now().isoformat()
         }
+<<<<<<< HEAD
 
     def _get_fallback_stats(self) -> Dict[str, Any]:
+=======
+        
+    def _get_fallback_stats(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取降级统计"""
         if self.dispatcher.fallback_manager:
             from fallback_manager_utils import FallbackManagerUtils
@@ -218,21 +328,36 @@ class MetricsCollector:
             return utils.get_fallback_stats()
         else:
             return {"message": "Fallback manager not enabled"}
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
     def reset_metrics(self):
         """重置指标"""
         self.dispatcher.metrics = DispatcherMetrics()
         logger.info("Dispatcher metrics reset")
+<<<<<<< HEAD
 
     def get_active_requests(self) -> List[Dict[str, Any]]:
+=======
+        
+    def get_active_requests(self) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取活跃请求信息
         
         Returns:
             活跃请求列表
+<<<<<<< HEAD
 
         """
         active_requests = []
 
+=======
+        """
+        active_requests = []
+        
+>>>>>>> feature/core-services-refactor
         for request_id, context in self.dispatcher.active_requests.items():
             active_requests.append({
                 "request_id": request_id,
@@ -243,17 +368,29 @@ class MetricsCollector:
                 "attempts": len(context.attempts),
                 "participant_count": len(context.request.inputs)
             })
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> feature/core-services-refactor
         return active_requests
 
 
 class ConfigurationManager:
     """配置管理器"""
+<<<<<<< HEAD
 
     def __init__(self, dispatcher: UnifiedConsensusDispatcher):
         self.dispatcher = dispatcher
 
     def update_config(self, config_updates: Dict[str, Any]) -> bool:
+=======
+    
+    def __init__(self, dispatcher: UnifiedConsensusDispatcher):
+        self.dispatcher = dispatcher
+        
+    def update_config(self, config_updates: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """更新配置
         
         Args:
@@ -261,6 +398,7 @@ class ConfigurationManager:
             
         Returns:
             是否更新成功
+<<<<<<< HEAD
 
         """
         try:
@@ -270,11 +408,22 @@ class ConfigurationManager:
             if "default_timeout" in config_updates:
                 config.default_timeout = float(config_updates["default_timeout"])
 
+=======
+        """
+        try:
+            config = self.dispatcher.config
+            
+            # 更新基本配置
+            if "default_timeout" in config_updates:
+                config.default_timeout = float(config_updates["default_timeout"])
+                
+>>>>>>> feature/core-services-refactor
             if "max_concurrent_requests" in config_updates:
                 new_limit = int(config_updates["max_concurrent_requests"])
                 config.max_concurrent_requests = new_limit
                 # 更新信号量
                 self.dispatcher.semaphore = asyncio.Semaphore(new_limit)
+<<<<<<< HEAD
 
             if "enable_load_balancing" in config_updates:
                 config.enable_load_balancing = bool(config_updates["enable_load_balancing"])
@@ -288,6 +437,21 @@ class ConfigurationManager:
             if "fallback_enabled" in config_updates:
                 config.fallback_enabled = bool(config_updates["fallback_enabled"])
 
+=======
+                
+            if "enable_load_balancing" in config_updates:
+                config.enable_load_balancing = bool(config_updates["enable_load_balancing"])
+                
+            if "enable_metrics_collection" in config_updates:
+                config.enable_metrics_collection = bool(config_updates["enable_metrics_collection"])
+                
+            if "enable_request_logging" in config_updates:
+                config.enable_request_logging = bool(config_updates["enable_request_logging"])
+                
+            if "fallback_enabled" in config_updates:
+                config.fallback_enabled = bool(config_updates["fallback_enabled"])
+                
+>>>>>>> feature/core-services-refactor
             if "selection_strategy" in config_updates:
                 from algorithm_selector import SelectionStrategy
                 strategy_name = config_updates["selection_strategy"]
@@ -295,6 +459,7 @@ class ConfigurationManager:
                     config.selection_strategy = getattr(SelectionStrategy, strategy_name.upper())
                     # 更新选择器策略
                     self.dispatcher.selector.update_selection_strategy(config.selection_strategy)
+<<<<<<< HEAD
 
             logger.info("Dispatcher configuration updated")
             return True
@@ -304,14 +469,31 @@ class ConfigurationManager:
             return False
 
     def get_config(self) -> Dict[str, Any]:
+=======
+                    
+            logger.info("Dispatcher configuration updated")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to update configuration: {str(e)}")
+            return False
+            
+    def get_config(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取当前配置
         
         Returns:
             配置字典
+<<<<<<< HEAD
 
         """
         config = self.dispatcher.config
 
+=======
+        """
+        config = self.dispatcher.config
+        
+>>>>>>> feature/core-services-refactor
         return {
             "default_timeout": config.default_timeout,
             "max_concurrent_requests": config.max_concurrent_requests,
@@ -321,17 +503,28 @@ class ConfigurationManager:
             "fallback_enabled": config.fallback_enabled,
             "selection_strategy": config.selection_strategy.value
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
     def export_config(self) -> str:
         """导出配置为JSON字符串
         
         Returns:
             JSON配置字符串
+<<<<<<< HEAD
 
         """
         import json
         return json.dumps(self.get_config(), indent=2)
 
+=======
+        """
+        import json
+        return json.dumps(self.get_config(), indent=2)
+        
+>>>>>>> feature/core-services-refactor
     def import_config(self, config_json: str) -> bool:
         """从JSON字符串导入配置
         
@@ -340,13 +533,23 @@ class ConfigurationManager:
             
         Returns:
             是否导入成功
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/core-services-refactor
         """
         try:
             import json
             config_dict = json.loads(config_json)
             return self.update_config(config_dict)
+<<<<<<< HEAD
 
         except Exception as e:
             logger.error(f"Failed to import configuration: {str(e)}")
             return False
+=======
+            
+        except Exception as e:
+            logger.error(f"Failed to import configuration: {str(e)}")
+            return False
+>>>>>>> feature/core-services-refactor

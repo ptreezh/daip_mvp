@@ -9,7 +9,11 @@
 """
 import logging
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Tuple
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel
 
@@ -28,8 +32,8 @@ class OptimizationMetadata(BaseModel):
     original_context_tokens: int
     optimized_context_tokens: int
     compression_ratio: float
-    included_memories: List[str]
-    excluded_memories: List[str]
+    included_memories: list[str]
+    excluded_memories: list[str]
     task_focus: str
     optimization_strategy: str
     processing_time_ms: float
@@ -40,9 +44,9 @@ class EnhancedLLMResponse(BaseModel):
 
     content: str
     model: str
-    token_usage: Optional[Dict[str, int]] = None
+    token_usage: Optional[dict[str, int]] = None
     optimization_metadata: Optional[OptimizationMetadata] = None
-    raw_response: Optional[Dict[str, Any]] = None
+    raw_response: Optional[dict[str, Any]] = None
 
 
 class EnhancedLLMInterface:
@@ -87,12 +91,16 @@ class EnhancedLLMInterface:
 
     async def generate(
         self,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         model: str = "gpt-3.5-turbo",
         participant_id: Optional[str] = None,
         task_context: Optional[str] = None,
         **kwargs
+<<<<<<< HEAD
     ) -> Dict[str, Any]:
+=======
+    ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Generate a response using the LLM with automatic context optimization.
         
         Args:
@@ -149,11 +157,15 @@ class EnhancedLLMInterface:
 
     async def _optimize_context(
         self,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         model: str,
         participant_id: Optional[str] = None,
         task_context: Optional[str] = None
+<<<<<<< HEAD
     ) -> Tuple[List[Dict[str, Any]], OptimizationMetadata]:
+=======
+    ) -> tuple[list[dict[str, Any]], OptimizationMetadata]:
+>>>>>>> feature/core-services-refactor
         """Apply task-focused context optimization to messages.
         
         Args:
@@ -207,8 +219,13 @@ class EnhancedLLMInterface:
         )
 
         return optimized_messages, metadata
+<<<<<<< HEAD
 
     def _detect_task_context(self, messages: List[Dict[str, Any]]) -> str:
+=======
+    
+    def _detect_task_context(self, messages: list[dict[str, Any]]) -> str:
+>>>>>>> feature/core-services-refactor
         """Automatically detect task context from messages.
         
         Args:
@@ -250,7 +267,11 @@ class EnhancedLLMInterface:
         self,
         task_context: str,
         participant_id: Optional[str] = None
+<<<<<<< HEAD
     ) -> Tuple[List[str], List[str]]:
+=======
+    ) -> tuple[list[str], list[str]]:
+>>>>>>> feature/core-services-refactor
         """Get information about memories included and excluded in optimization.
         
         Args:
@@ -319,7 +340,7 @@ class EnhancedLLMInterface:
 
     async def generate_streaming(
         self,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         model: str = "gpt-3.5-turbo",
         participant_id: Optional[str] = None,
         task_context: Optional[str] = None,
@@ -363,8 +384,13 @@ class EnhancedLLMInterface:
                 messages, model=model, participant_id=participant_id, **kwargs
             ):
                 yield chunk
+<<<<<<< HEAD
 
     def get_optimization_stats(self) -> Dict[str, Any]:
+=======
+    
+    def get_optimization_stats(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get statistics about context optimization performance.
         
         Returns:

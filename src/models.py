@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
+<<<<<<< HEAD
 from typing import Any, List, Literal, Optional, Union
+=======
+from typing import Any, Literal, Optional, Union
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -191,7 +195,7 @@ class VirtualProject(BaseModel):
     created_at: str
     updated_at: str
     creator: str
-    assigned_roles: List[str] = Field(default_factory=list)
+    assigned_roles: list[str] = Field(default_factory=list)
     memory_bank_path: str
     config: Dict[str, Any] = Field(default_factory=dict)
 
@@ -354,7 +358,7 @@ class DebateConfig(BaseModel):
     """
 
     topic: str = Field(..., description="The central topic of the debate.")
-    roles: List[str] = Field(..., description="A list of role IDs participating in the debate.")
+    roles: list[str] = Field(..., description="A list of role IDs participating in the debate.")
     rounds: int = Field(default=2, description="The number of full rounds in the debate.")
     turn_taking_policy: Literal['round_robin'] = Field(
         default='round_robin', description="The policy for turn-taking among roles."
@@ -385,7 +389,7 @@ class DebateResult(BaseModel):
     """
 
     topic: str = Field(..., description="The original topic of the debate.")
-    history: List[DebateTurn] = Field(
+    history: list[DebateTurn] = Field(
         ..., description="A complete history of all turns taken during the debate."
     )
     consensus_outcome: Any = Field(

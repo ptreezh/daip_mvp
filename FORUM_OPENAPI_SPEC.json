@@ -1,0 +1,535 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DAIP-LIVE MVP API",
+    "description": "API for multi-role debate, agile project execution, and hallucination suppression. V0.3.12 with three core scenarios: Expert Consultation, Academic Research, and Industry Analysis, plus Forum Mode.",
+    "version": "0.3.12"
+  },
+  "paths": {
+    "/api/forum/session": {
+      "post": {
+        "tags": ["forum"],
+        "summary": "Create Forum Session",
+        "description": "Create a new Forum session with multi-agent debate capabilities.",
+        "operationId": "create_forum_session",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForumSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForumSessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/session/{session_id}": {
+      "get": {
+        "tags": ["forum"],
+        "summary": "Get Session Context",
+        "description": "Get detailed context information about a Forum session.",
+        "operationId": "get_session_context",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionContextResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/session/{session_id}/messages": {
+      "get": {
+        "tags": ["forum"],
+        "summary": "Get Session Messages",
+        "description": "Get message history for a specific session.",
+        "operationId": "get_session_messages",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "session_id": {"type": "string"},
+                    "messages": {"type": "array", "items": {"type": "object"}},
+                    "message_count": {"type": "integer"},
+                    "timestamp": {"type": "string", "format": "date-time"}
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/session/{session_id}/optimize": {
+      "post": {
+        "tags": ["forum"],
+        "summary": "Optimize User Input",
+        "description": "Optimize user input for better collaboration.",
+        "operationId": "optimize_user_input",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "input": {"type": "string"},
+                  "intent": {"type": "string", "default": "comment"}
+                },
+                "required": ["input"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "original_input": {"type": "string"},
+                    "optimized_input": {"type": "string"},
+                    "intent": {"type": "string"},
+                    "session_id": {"type": "string"},
+                    "timestamp": {"type": "string", "format": "date-time"}
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/intervention": {
+      "post": {
+        "tags": ["forum"],
+        "summary": "Handle User Intervention",
+        "description": "Process user intervention in an ongoing Forum session.",
+        "operationId": "handle_user_intervention",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInterventionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInterventionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/control": {
+      "post": {
+        "tags": ["forum"],
+        "summary": "Control Session",
+        "description": "Control session state (pause, resume, end).",
+        "operationId": "control_session",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionControlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {"type": "string"},
+                    "action": {"type": "string"},
+                    "session_id": {"type": "string"},
+                    "timestamp": {"type": "string", "format": "date-time"}
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/sessions": {
+      "get": {
+        "tags": ["forum"],
+        "summary": "List Active Sessions",
+        "description": "Get all active Forum sessions.",
+        "operationId": "get_active_sessions",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sessions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "session_id": {"type": "string"},
+                          "topic": {"type": "string"},
+                          "status": {"type": "string"},
+                          "start_time": {"type": "string", "format": "date-time"},
+                          "active_agents": {"type": "array", "items": {"type": "string"}},
+                          "message_count": {"type": "integer"}
+                        }
+                      }
+                    },
+                    "count": {"type": "integer"},
+                    "timestamp": {"type": "string", "format": "date-time"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/statistics": {
+      "get": {
+        "tags": ["forum"],
+        "summary": "Get Forum Statistics",
+        "description": "Get comprehensive Forum service statistics.",
+        "operationId": "get_forum_statistics",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForumStatisticsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/health": {
+      "get": {
+        "tags": ["forum"],
+        "summary": "Forum Health Check",
+        "description": "Check Forum service health status.",
+        "operationId": "forum_health_check",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {"type": "string"},
+                    "service": {"type": "string"},
+                    "active_sessions": {"type": "integer"},
+                    "statistics": {"$ref": "#/components/schemas/ForumStatisticsResponse"},
+                    "timestamp": {"type": "string", "format": "date-time"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/session/{session_id}": {
+      "delete": {
+        "tags": ["forum"],
+        "summary": "Delete Session",
+        "description": "Delete a Forum session.",
+        "operationId": "delete_session",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {"type": "string"},
+                    "session_id": {"type": "string"},
+                    "result": {"type": "object"},
+                    "timestamp": {"type": "string", "format": "date-time"}
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ForumSessionRequest": {
+        "type": "object",
+        "properties": {
+          "topic": {"type": "string", "description": "讨论话题"},
+          "user_id": {"type": "string", "default": "default_user", "description": "用户ID"},
+          "settings": {"type": "object", "default": null, "description": "会话设置"}
+        },
+        "required": ["topic"],
+        "title": "ForumSessionRequest"
+      },
+      "UserInterventionRequest": {
+        "type": "object",
+        "properties": {
+          "session_id": {"type": "string", "description": "会话ID"},
+          "message": {"type": "object", "description": "用户消息"},
+          "intent": {"type": "string", "default": "comment", "description": "干预意图"}
+        },
+        "required": ["session_id", "message"],
+        "title": "UserInterventionRequest"
+      },
+      "SessionControlRequest": {
+        "type": "object",
+        "properties": {
+          "session_id": {"type": "string", "description": "会话ID"},
+          "action": {"type": "string", "description": "控制动作: pause, resume, end"}
+        },
+        "required": ["session_id", "action"],
+        "title": "SessionControlRequest"
+      },
+      "ForumSessionResponse": {
+        "type": "object",
+        "properties": {
+          "session_id": {"type": "string"},
+          "topic": {"type": "string"},
+          "status": {"type": "string"},
+          "start_time": {"type": "string", "format": "date-time"},
+          "active_agents": {"type": "array", "items": {"type": "string"}},
+          "message_count": {"type": "integer"},
+          "user_intervention_count": {"type": "integer"},
+          "consensus_level": {"type": "number"},
+          "duration": {"type": "number"}
+        },
+        "required": ["session_id", "topic", "status", "start_time", "active_agents", "message_count", "user_intervention_count", "consensus_level", "duration"],
+        "title": "ForumSessionResponse"
+      },
+      "UserInterventionResponse": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "string"},
+          "optimized_input": {"type": "string"},
+          "session_id": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"}
+        },
+        "required": ["status", "optimized_input", "session_id", "timestamp"],
+        "title": "UserInterventionResponse"
+      },
+      "SessionContextResponse": {
+        "type": "object",
+        "properties": {
+          "session_id": {"type": "string"},
+          "topic": {"type": "string"},
+          "status": {"type": "string"},
+          "consensus_level": {"type": "number"},
+          "active_agents": {"type": "array", "items": {"type": "string"}},
+          "key_arguments": {"type": "array", "items": {"type": "object"}},
+          "message_count": {"type": "integer"},
+          "user_intervention_count": {"type": "integer"},
+          "start_time": {"type": "string", "format": "date-time"},
+          "duration": {"type": "number"}
+        },
+        "required": ["session_id", "topic", "status", "consensus_level", "active_agents", "key_arguments", "message_count", "user_intervention_count", "start_time", "duration"],
+        "title": "SessionContextResponse"
+      },
+      "ForumStatisticsResponse": {
+        "type": "object",
+        "properties": {
+          "total_sessions": {"type": "integer"},
+          "active_sessions": {"type": "integer"},
+          "total_messages": {"type": "integer"},
+          "total_interventions": {"type": "integer"},
+          "average_consensus": {"type": "number"}
+        },
+        "required": ["total_sessions", "active_sessions", "total_messages", "total_interventions", "average_consensus"],
+        "title": "ForumStatisticsResponse"
+      },
+      "HTTPValidationError": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        },
+        "title": "HTTPValidationError"
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "msg": {"type": "string"},
+          "type": {"type": "string"}
+        },
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

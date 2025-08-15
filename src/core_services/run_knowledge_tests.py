@@ -27,7 +27,11 @@ async def run_basic_functionality_test():
         from src.core_services.knowledge_management_service import KnowledgeManagementConfig, KnowledgeManagementService
         from src.core_services.knowledge_retrieval_service import SearchScope
         from src.core_services.wiki_service import WikiService
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> feature/core-services-refactor
         print("✅ All required modules imported successfully")
 
         # Initialize services

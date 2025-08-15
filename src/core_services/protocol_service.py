@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Any, Dict, List
+from typing import Any
 
 from src.models import DebateConfig, DebateResult, IntelligentProtocolRequest
 from src.protocols.debate_protocol import DebateProtocol
@@ -15,7 +15,7 @@ class ProtocolService:
     def __init__(self, app_state: Any): # Use Any to avoid circular import type hint
         self.app_state = app_state
 
-    async def generate_intelligent_protocol(self, req: IntelligentProtocolRequest) -> Dict[str, Any]:
+    async def generate_intelligent_protocol(self, req: IntelligentProtocolRequest) -> dict[str, Any]:
         """Generates a DAIP protocol from a user's natural language request."""
         generator = self.app_state.intelligent_protocol_generator
         if req.use_analysis:
@@ -34,7 +34,7 @@ class ProtocolService:
             result["saved_path"] = req.output_path
         return result
 
-    def classify_task(self, user_request: str) -> Dict[str, Any]:
+    def classify_task(self, user_request: str) -> dict[str, Any]:
         """Classifies a user task and recommends a workflow."""
         classifier = self.app_state.task_classifier
         task_type, confidence, info = classifier.classify_task(user_request)
@@ -47,7 +47,7 @@ class ProtocolService:
             "recommended_workflow": workflow,
         }
 
-    async def execute_protocol(self, protocol_id: str, inputs: Dict[str, Any]) -> Any:
+    async def execute_protocol(self, protocol_id: str, inputs: dict[str, Any]) -> Any:
         """Executes a given protocol by its ID."""
         return await self.app_state.protocol_executor.execute_protocol(protocol_id, inputs)
 
@@ -58,7 +58,7 @@ class ProtocolService:
             raise ValueError("Protocol execution not found.")
         return status
 
-    def get_protocol_history(self, protocol_id: str) -> List[Any]:
+    def get_protocol_history(self, protocol_id: str) -> list[Any]:
         """Gets the execution history of a protocol."""
         history = self.app_state.protocol_executor.get_execution_history(protocol_id)
         if history is None:

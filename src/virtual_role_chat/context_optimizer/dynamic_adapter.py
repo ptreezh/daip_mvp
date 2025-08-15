@@ -8,7 +8,11 @@ maintain task coherence throughout conversations.
 import logging
 from datetime import datetime, timedelta
 from enum import Enum
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Tuple
+=======
+from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .models import (
     ContextElement,
@@ -53,7 +57,7 @@ class AdaptationEvent:
         timestamp: datetime,
         context_before: OptimizedContext,
         context_after: OptimizedContext,
-        metadata: Dict[str, Any] = None
+        metadata: dict[str, Any] = None
     ):
         self.trigger = trigger
         self.action = action
@@ -75,14 +79,20 @@ class TaskBoundaryDetector:
         """
         self.task_detection_strategy = task_detection_strategy or PatternBasedTaskDetection()
         self.logger = logging.getLogger(__name__)
-        self.task_history: List[Tuple[datetime, TaskDetectionResult]] = []
+        self.task_history: list[tuple[datetime, TaskDetectionResult]] = []
         self.current_task: Optional[TaskDetectionResult] = None
 
     def detect_task_transition(
         self,
+<<<<<<< HEAD
         new_messages: List[Dict[str, Any]],
         context: Dict[str, Any]
     ) -> Tuple[bool, Optional[TaskDetectionResult]]:
+=======
+        new_messages: list[dict[str, Any]],
+        context: dict[str, Any]
+    ) -> tuple[bool, Optional[TaskDetectionResult]]:
+>>>>>>> feature/core-services-refactor
         """Detect if there's a task transition in the conversation.
         
         Args:
@@ -133,8 +143,13 @@ class TaskBoundaryDetector:
             return True
 
         return False
+<<<<<<< HEAD
 
     def get_task_context_window(self, window_size: int = 3) -> List[TaskDetectionResult]:
+=======
+    
+    def get_task_context_window(self, window_size: int = 3) -> list[TaskDetectionResult]:
+>>>>>>> feature/core-services-refactor
         """Get recent task context for understanding task flow.
         
         Args:
@@ -163,8 +178,13 @@ class CoherenceMonitor:
     def __init__(self):
         """Initialize the coherence monitor."""
         self.logger = logging.getLogger(__name__)
+<<<<<<< HEAD
         self.coherence_history: List[Tuple[datetime, float]] = []
 
+=======
+        self.coherence_history: list[tuple[datetime, float]] = []
+    
+>>>>>>> feature/core-services-refactor
     def assess_coherence(
         self,
         context: OptimizedContext,
@@ -332,8 +352,13 @@ class DynamicContextAdapter:
         self.logger = logging.getLogger(__name__)
 
         # Adaptation history
+<<<<<<< HEAD
         self.adaptation_events: List[AdaptationEvent] = []
 
+=======
+        self.adaptation_events: list[AdaptationEvent] = []
+        
+>>>>>>> feature/core-services-refactor
         # Monitoring thresholds
         self.coherence_threshold = 0.6
         self.relevance_threshold = 0.4
@@ -342,9 +367,15 @@ class DynamicContextAdapter:
     def adapt_context_realtime(
         self,
         current_context: OptimizedContext,
+<<<<<<< HEAD
         new_messages: List[Dict[str, Any]],
         conversation_context: Dict[str, Any]
     ) -> Tuple[OptimizedContext, List[AdaptationEvent]]:
+=======
+        new_messages: list[dict[str, Any]],
+        conversation_context: dict[str, Any]
+    ) -> tuple[OptimizedContext, list[AdaptationEvent]]:
+>>>>>>> feature/core-services-refactor
         """Adapt context in real-time based on new messages and current state.
         
         Args:
@@ -403,7 +434,11 @@ class DynamicContextAdapter:
         self,
         context: OptimizedContext,
         new_task: TaskDetectionResult
+<<<<<<< HEAD
     ) -> Tuple[OptimizedContext, AdaptationEvent]:
+=======
+    ) -> tuple[OptimizedContext, AdaptationEvent]:
+>>>>>>> feature/core-services-refactor
         """Adapt context for a task transition.
         
         Args:
@@ -469,7 +504,11 @@ class DynamicContextAdapter:
         context: OptimizedContext,
         current_task: TaskDetectionResult,
         coherence_score: float
+<<<<<<< HEAD
     ) -> Tuple[OptimizedContext, AdaptationEvent]:
+=======
+    ) -> tuple[OptimizedContext, AdaptationEvent]:
+>>>>>>> feature/core-services-refactor
         """Adapt context for low coherence.
         
         Args:
@@ -517,7 +556,11 @@ class DynamicContextAdapter:
     def _adapt_for_context_overflow(
         self,
         context: OptimizedContext
+<<<<<<< HEAD
     ) -> Tuple[OptimizedContext, AdaptationEvent]:
+=======
+    ) -> tuple[OptimizedContext, AdaptationEvent]:
+>>>>>>> feature/core-services-refactor
         """Adapt context for token overflow.
         
         Args:
@@ -567,7 +610,11 @@ class DynamicContextAdapter:
     def _remove_stale_content(
         self,
         context: OptimizedContext
+<<<<<<< HEAD
     ) -> Tuple[OptimizedContext, List[AdaptationEvent]]:
+=======
+    ) -> tuple[OptimizedContext, list[AdaptationEvent]]:
+>>>>>>> feature/core-services-refactor
         """Remove stale content from context.
         
         Args:
@@ -651,8 +698,13 @@ class DynamicContextAdapter:
             relevance *= 1.1
 
         return min(relevance, 1.0)
+<<<<<<< HEAD
 
     def get_adaptation_stats(self) -> Dict[str, Any]:
+=======
+    
+    def get_adaptation_stats(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get statistics about context adaptations.
         
         Returns:

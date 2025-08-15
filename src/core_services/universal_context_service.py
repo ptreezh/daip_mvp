@@ -12,7 +12,7 @@ comprehensive context optimization for all AI participants.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
@@ -26,7 +26,7 @@ class ConversationState(BaseModel):
     """Model for tracking conversation state across participants."""
 
     participant_id: str  # Can be user_id or role_id
-    conversation_history: List[Dict[str, Any]]
+    conversation_history: list[dict[str, Any]]
     context_window: ContextWindow
     last_updated: datetime
     session_id: Optional[str] = None
@@ -41,7 +41,7 @@ class ImportantInformation(BaseModel):
     source_message_index: int
     participant_id: str
     timestamp: datetime
-    tags: List[str] = []
+    tags: list[str] = []
 
 
 class UniversalContextService:
@@ -55,8 +55,13 @@ class UniversalContextService:
         """Initialize the universal context service."""
         self.token_service = token_service
         self.memory_service = memory_service
+<<<<<<< HEAD
         self.conversation_states: Dict[str, ConversationState] = {}
 
+=======
+        self.conversation_states: dict[str, ConversationState] = {}
+        
+>>>>>>> feature/core-services-refactor
         # Configuration for context optimization
         self.importance_threshold = 0.5  # Minimum importance score to preserve information
         self.max_conversation_history = 50  # Maximum messages to keep in memory
@@ -66,8 +71,13 @@ class UniversalContextService:
         ]
 
         logger.info("UniversalContextService initialized")
+<<<<<<< HEAD
 
     def _calculate_importance_score(self, message: Dict[str, Any], context: List[Dict[str, Any]]) -> float:
+=======
+    
+    def _calculate_importance_score(self, message: dict[str, Any], context: list[dict[str, Any]]) -> float:
+>>>>>>> feature/core-services-refactor
         """Calculate importance score for a message based on content and context.
         
         Args:
@@ -111,9 +121,15 @@ class UniversalContextService:
                 score += 0.1
 
         return min(score, 1.0)
+<<<<<<< HEAD
 
     def compress_conversation(self, messages: List[Dict[str, Any]], target_tokens: int,
                             model: str, participant_id: Optional[str] = None) -> Tuple[List[Dict[str, Any]], List[ImportantInformation]]:
+=======
+    
+    def compress_conversation(self, messages: list[dict[str, Any]], target_tokens: int, 
+                            model: str, participant_id: Optional[str] = None) -> tuple[list[dict[str, Any]], list[ImportantInformation]]:
+>>>>>>> feature/core-services-refactor
         """Compress conversation while preserving key information.
         
         Args:
@@ -198,8 +214,13 @@ class UniversalContextService:
                     f"extracted {len(important_info)} important items")
 
         return final_messages, important_info
+<<<<<<< HEAD
 
     def consolidate_memory(self, participant_id: str, conversation: List[Dict[str, Any]],
+=======
+    
+    def consolidate_memory(self, participant_id: str, conversation: list[dict[str, Any]], 
+>>>>>>> feature/core-services-refactor
                           session_id: Optional[str] = None, project_id: Optional[str] = None) -> None:
         """Extract and store important information from conversation in memory.
         
@@ -254,7 +275,7 @@ class UniversalContextService:
         logger.info(f"Consolidated {len(important_items)} important items to memory for {participant_id}")
 
     def prepare_context(self, participant_id: str, new_message: str, model: str,
-                       conversation_history: Optional[List[Dict[str, Any]]] = None,
+                       conversation_history: Optional[list[dict[str, Any]]] = None,
                        session_id: Optional[str] = None, project_id: Optional[str] = None) -> ContextWindow:
         """Prepare optimized context for LLM call with memory integration.
         
@@ -399,8 +420,13 @@ class UniversalContextService:
 
             del self.conversation_states[participant_id]
             logger.info(f"Cleared conversation state for {participant_id}")
+<<<<<<< HEAD
 
     def get_context_statistics(self) -> Dict[str, Any]:
+=======
+    
+    def get_context_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get statistics about context optimization across all participants.
         
         Returns:

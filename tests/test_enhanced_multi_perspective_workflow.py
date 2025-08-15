@@ -13,8 +13,8 @@ from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWo
 
 class TestEnhancedMultiPerspectiveWorkflow:
     """Integration tests for the enhanced Multi-perspective Synthesis Workflow."""
-
-    @pytest.fixture
+    
+    @pytest.fixture()
     def mock_services(self):
         """Create comprehensive mock services."""
         services = {
@@ -23,11 +23,11 @@ class TestEnhancedMultiPerspectiveWorkflow:
             "tool_executor": Mock(),
             "synthesis_engine": AsyncMock()
         }
-
+        
         # Configure LLM interface for different types of requests
         async def llm_generate_side_effect(messages):
             content = messages[-1]["content"]
-
+            
             if "分解" in content and "JSON" in content:
                 # Task decomposition response
                 return {
@@ -79,9 +79,9 @@ class TestEnhancedMultiPerspectiveWorkflow:
             else:
                 # Default response
                 return {"content": "Generated response"}
-
+        
         services["llm_interface"].generate.side_effect = llm_generate_side_effect
-
+        
         # Configure synthesis engine
         services["synthesis_engine"].synthesize_opinions.return_value = """综合分析表明，AI对就业的影响是多方面的：
 
@@ -91,16 +91,16 @@ class TestEnhancedMultiPerspectiveWorkflow:
 4. 需要政策干预来确保AI带来的利益公平分配。
 
 总的来说，AI对就业的影响既有挑战也有机遇，关键在于如何通过政策和教育体系的调整来最大化机遇并减少负面影响。"""
-
+        
         # Configure tool executor
         services["tool_executor"].execute.return_value = {
             "status": "success",
             "result": "研究表明，AI对就业的影响因行业而异。"
         }
-
+        
         return services
-
-    @pytest.mark.asyncio
+    
+    @pytest.mark.asyncio()
     async def test_enhanced_workflow_complete_execution(self, mock_services):
         """Test complete execution of the enhanced workflow."""
         workflow = MultiPerspectiveSynthesisWorkflow("enhanced_test", {
@@ -112,13 +112,13 @@ class TestEnhancedMultiPerspectiveWorkflow:
                 "max_iterations": 2
             }
         })
-
+        
         result = await workflow.execute(
             "AI对未来工作的影响",
             ["经济", "社会"],
             mock_services
         )
-
+        
         # Verify successful execution
         assert result["success"] is True
         assert result["topic"] == "AI对未来工作的影响"
@@ -126,40 +126,40 @@ class TestEnhancedMultiPerspectiveWorkflow:
         assert "key_insights" in result
         assert "expert_contributions" in result
         assert "quality_score" in result
-
+        
         # Verify all workflow steps were executed
         execution_details = result["execution_details"]
         assert "task_decomposition" in execution_details
         assert "parallel_exploration" in execution_details
         assert "viewpoint_collection" in execution_details
         assert "enhanced_synthesis" in execution_details
-
+        
         # Verify sub-problems were created
         assert len(result["sub_problems"]) == 2
         assert any(sp["perspective"] == "经济" for sp in result["sub_problems"])
         assert any(sp["perspective"] == "社会" for sp in result["sub_problems"])
-
+        
         # Verify viewpoints were generated
         assert len(result["viewpoints"]) == 2
-
+        
         # Verify viewpoint analysis was performed
         assert "viewpoint_analysis" in result
         viewpoint_analysis = result["viewpoint_analysis"]
         assert "quality_score" in viewpoint_analysis
         assert "conflicts" in viewpoint_analysis
         assert "consensus_areas" in viewpoint_analysis
-
-    @pytest.mark.asyncio
+    
+    @pytest.mark.asyncio()
     async def test_enhanced_workflow_with_refinement(self, mock_services):
         """Test workflow execution with iterative refinement."""
         # Configure synthesis engine to return low-quality synthesis initially
         services = mock_services.copy()
-
+        
         synthesis_calls = []
-
+        
         async def synthesis_side_effect(topic, history):
             synthesis_calls.append(len(history))
-
+            
             if len(synthesis_calls) == 1:
                 # First call - low quality synthesis
                 return "简单的分析：AI会影响工作。"
@@ -173,9 +173,9 @@ class TestEnhancedMultiPerspectiveWorkflow:
 4. 政策响应机制：需要建立包容性增长的政策框架
 
 这一转变过程需要教育体系、社会保障和产业政策的协同配合。"""
-
+        
         services["synthesis_engine"].synthesize_opinions.side_effect = synthesis_side_effect
-
+        
         workflow = MultiPerspectiveSynthesisWorkflow("refinement_test", {
             "enhanced_synthesis": {
                 "quality_threshold": 0.8  # High threshold to trigger refinement
@@ -186,34 +186,34 @@ class TestEnhancedMultiPerspectiveWorkflow:
                 "improvement_threshold": 0.05
             }
         })
-
+        
         result = await workflow.execute(
             "AI对未来工作的影响",
             ["经济", "社会"],
             services
         )
-
+        
         # Verify refinement was applied
         assert result["success"] is True
         assert result.get("refinement_applied", False) is True
         assert result.get("refinement_iterations", 0) > 0
-
+        
         # Verify synthesis was improved
         assert len(result["synthesis"]) > 50  # Should be longer after refinement
         assert "深入分析" in result["synthesis"] or "技术替代" in result["synthesis"]
-
+        
         # Verify synthesis engine was called multiple times
         assert len(synthesis_calls) >= 2
-
-    @pytest.mark.asyncio
+    
+    @pytest.mark.asyncio()
     async def test_enhanced_workflow_error_handling(self, mock_services):
         """Test error handling in the enhanced workflow."""
         # Configure services to fail at different stages
         services = mock_services.copy()
-
+        
         # Make viewpoint collection fail
         workflow = MultiPerspectiveSynthesisWorkflow("error_test")
-
+        
         # Mock viewpoint collection to fail
         with patch.object(workflow.viewpoint_collection_node, 'execute', AsyncMock(return_value={
             "success": False,
@@ -224,12 +224,12 @@ class TestEnhancedMultiPerspectiveWorkflow:
                 ["经济", "社会"],
                 services
             )
-
+            
             # Verify error handling
             assert result["success"] is False
             assert "Viewpoint collection failed" in result["error"]
-
-    @pytest.mark.asyncio
+    
+    @pytest.mark.asyncio()
     async def test_enhanced_workflow_quality_assessment(self, mock_services):
         """Test quality assessment functionality."""
         workflow = MultiPerspectiveSynthesisWorkflow("quality_test", {
@@ -237,39 +237,39 @@ class TestEnhancedMultiPerspectiveWorkflow:
                 "quality_threshold": 0.6
             }
         })
-
+        
         result = await workflow.execute(
             "AI对未来工作的影响",
             ["经济", "社会", "技术", "伦理"],
             mock_services
         )
-
+        
         # Verify quality assessment is included
         assert result["success"] is True
         assert "quality_score" in result
         assert isinstance(result["quality_score"], (int, float))
         assert 0.0 <= result["quality_score"] <= 1.0
-
+        
         # Verify execution details include quality assessment
         synthesis_details = result["execution_details"]["enhanced_synthesis"]
         assert "quality_assessment" in synthesis_details
-
+        
         quality_assessment = synthesis_details["quality_assessment"]
         assert "depth_score" in quality_assessment
         assert "breadth_score" in quality_assessment
         assert "insight_score" in quality_assessment
         assert "coherence_score" in quality_assessment
         assert "overall_score" in quality_assessment
-
-    @pytest.mark.asyncio
+    
+    @pytest.mark.asyncio()
     async def test_enhanced_workflow_conflict_analysis(self, mock_services):
         """Test conflict analysis in viewpoint collection."""
         # Configure services to generate conflicting viewpoints
         services = mock_services.copy()
-
+        
         async def conflicting_llm_side_effect(messages):
             content = messages[-1]["content"]
-
+            
             if "分解" in content and "JSON" in content:
                 return {
                     "content": """```json
@@ -313,25 +313,25 @@ class TestEnhancedMultiPerspectiveWorkflow:
                     }
             else:
                 return {"content": "Generated response"}
-
+        
         services["llm_interface"].generate.side_effect = conflicting_llm_side_effect
-
+        
         workflow = MultiPerspectiveSynthesisWorkflow("conflict_test")
-
+        
         result = await workflow.execute(
             "AI的影响",
             ["经济", "社会"],
             services
         )
-
+        
         # Verify conflict analysis was performed
         assert result["success"] is True
         viewpoint_analysis = result["viewpoint_analysis"]
-
+        
         # Should detect conflicts between positive economic view and negative social view
         assert "conflicts" in viewpoint_analysis
         conflicts = viewpoint_analysis["conflicts"]
-
+        
         # May or may not detect conflicts depending on the analysis algorithm
         # But the structure should be there
         assert isinstance(conflicts, list)
