@@ -1,24 +1,21 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-矩道-墨AI™ 智慧协同演示系统 - 完整测试版
+"""矩道-墨AI™ 智慧协同演示系统 - 完整测试版
 经过完整自动化测试的版本
 """
 
-import sys
-import os
-import time
-import json
 import asyncio
-import aiohttp
-import threading
-import webbrowser
-from datetime import datetime
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
 import http.server
+import json
+import os
 import socketserver
+import sys
+import threading
 import uuid
+import webbrowser
+from dataclasses import asdict, dataclass
+from datetime import datetime
+
+import aiohttp
 
 # 添加项目路径
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -33,7 +30,7 @@ class ExpertOpinion:
     opinion: str
     reasoning: str
     confidence: float
-    evidence: List[str]
+    evidence: list[str]
     timestamp: str
 
 @dataclass
@@ -41,12 +38,12 @@ class ConsensusResult:
     """共识结果"""
     consensus_id: str
     topic: str
-    expert_opinions: List[ExpertOpinion]
+    expert_opinions: list[ExpertOpinion]
     final_judgment: str
     confidence_score: float
     reasoning_chain: str
-    dissenting_views: List[str]
-    supporting_evidence: List[str]
+    dissenting_views: list[str]
+    supporting_evidence: list[str]
     recommendation: str
     timestamp: str
 
@@ -59,7 +56,7 @@ class JudaoMoAIEngine:
         # 延迟LLM检查，避免初始化时的事件循环问题
         self._llm_checked = False
     
-    def _initialize_expert_database(self) -> Dict[str, Dict]:
+    def _initialize_expert_database(self) -> dict[str, dict]:
         """初始化专家数据库"""
         return {
             "strategic_analyst": {
@@ -141,7 +138,7 @@ class JudaoMoAIEngine:
         
         return consensus
     
-    def _select_experts_for_consultation(self, query: str, consultation_type: str) -> List[Dict]:
+    def _select_experts_for_consultation(self, query: str, consultation_type: str) -> list[dict]:
         """智能选择专家组合"""
         expert_pools = {
             "strategic": ["strategic_analyst", "investment_advisor", "risk_assessor", "tech_expert"],
@@ -153,9 +150,8 @@ class JudaoMoAIEngine:
         selected_ids = expert_pools.get(consultation_type, expert_pools["general"])
         return [self.expert_database[expert_id] for expert_id in selected_ids[:3]]
     
-    async def _get_expert_opinion(self, expert: Dict, query: str, context: str) -> ExpertOpinion:
+    async def _get_expert_opinion(self, expert: dict, query: str, context: str) -> ExpertOpinion:
         """获取专家观点"""
-        
         if self.llm_available:
             opinion_content = await self._call_real_llm(expert, query, context)
         else:
@@ -172,7 +168,7 @@ class JudaoMoAIEngine:
             timestamp=datetime.now().isoformat()
         )
     
-    async def _call_real_llm(self, expert: Dict, query: str, context: str) -> str:
+    async def _call_real_llm(self, expert: dict, query: str, context: str) -> str:
         """调用真实LLM"""
         prompt = f"""
 你是{expert['name']}，{expert['expertise']}专家。
@@ -210,7 +206,7 @@ class JudaoMoAIEngine:
             print(f"LLM调用失败：{e}")
             return self._generate_expert_simulation(expert, query, context)
     
-    def _generate_expert_simulation(self, expert: Dict, query: str, context: str) -> str:
+    def _generate_expert_simulation(self, expert: dict, query: str, context: str) -> str:
         """生成专家模拟观点"""
         expert_templates = {
             "Dr. 张战略": f"""
@@ -304,7 +300,7 @@ class JudaoMoAIEngine:
 **置信度：** {85 + (hash(expert['name']) % 10)}%
         """)
     
-    async def _generate_consultation_consensus(self, opinions: List[ExpertOpinion], query: str) -> ConsensusResult:
+    async def _generate_consultation_consensus(self, opinions: list[ExpertOpinion], query: str) -> ConsensusResult:
         """生成咨询共识"""
         avg_confidence = sum(op.confidence for op in opinions) / len(opinions)
         
@@ -368,7 +364,7 @@ class JudaoMoAIEngine:
         consensus = await self._generate_academic_consensus(opinions, topic)
         return consensus
     
-    async def _generate_academic_consensus(self, opinions: List[ExpertOpinion], topic: str) -> ConsensusResult:
+    async def _generate_academic_consensus(self, opinions: list[ExpertOpinion], topic: str) -> ConsensusResult:
         """生成学术共识"""
         consensus_content = f"""
 # {topic} - 学术研究综合报告
@@ -430,7 +426,7 @@ class JudaoMoAIEngine:
         consensus = await self._generate_industry_consensus(opinions, industry)
         return consensus
     
-    async def _generate_industry_consensus(self, opinions: List[ExpertOpinion], industry: str) -> ConsensusResult:
+    async def _generate_industry_consensus(self, opinions: list[ExpertOpinion], industry: str) -> ConsensusResult:
         """生成行业研究共识"""
         consensus_content = f"""
 # {industry}行业深度研究报告
@@ -941,7 +937,7 @@ class TestableJudaoMoAIDemoHandler(http.server.SimpleHTTPRequestHandler):
         self.send_response(404)
         self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
-        self.wfile.write('<h1>404 Not Found</h1><p>矩道-墨AI™ 测试系统</p>'.encode('utf-8'))
+        self.wfile.write('<h1>404 Not Found</h1><p>矩道-墨AI™ 测试系统</p>'.encode())
 
 def run_automated_test():
     """运行自动化测试"""
@@ -991,7 +987,6 @@ def run_automated_test():
 
 def start_tested_demo(port=8889):
     """启动经过测试的演示系统"""
-    
     # 首先运行自动化测试
     print("=" * 70)
     print("🧪 矩道-墨AI™ 自动化测试开始")
@@ -1001,7 +996,7 @@ def start_tested_demo(port=8889):
     
     if not test_passed:
         print("❌ 自动化测试失败，请检查系统")
-        return
+        return None
     
     print("=" * 70)
     print("✅ 自动化测试通过，启动演示系统")
@@ -1009,20 +1004,20 @@ def start_tested_demo(port=8889):
     
     try:
         with socketserver.TCPServer(("", port), TestableJudaoMoAIDemoHandler) as httpd:
-            print(f"🌟 矩道-墨AI™ 经过测试的演示系统启动成功！")
+            print("🌟 矩道-墨AI™ 经过测试的演示系统启动成功！")
             print(f"📍 访问地址: http://localhost:{port}")
-            print(f"🎭 智慧协同模式已激活")
-            print(f"=" * 70)
-            print(f"✨ 测试验证的功能:")
-            print(f"  • 🎯 专家咨询：多专家协同决策 ✅")
-            print(f"  • 📚 学术研究：跨学科深度分析 ✅") 
-            print(f"  • 🏭 行业研究：全面行业洞察 ✅")
-            print(f"  • ⚖️ 共识判断：集体智慧结晶 ✅")
-            print(f"  • 🤖 真实LLM：支持Ollama调用 ✅")
-            print(f"=" * 70)
-            print(f"💡 设计理念: 不是工具人的集合，而是专家们的共识")
-            print(f"🚀 核心价值: 提升判断的决策质量，降低认知风险")
-            print(f"按 Ctrl+C 停止服务器")
+            print("🎭 智慧协同模式已激活")
+            print("=" * 70)
+            print("✨ 测试验证的功能:")
+            print("  • 🎯 专家咨询：多专家协同决策 ✅")
+            print("  • 📚 学术研究：跨学科深度分析 ✅") 
+            print("  • 🏭 行业研究：全面行业洞察 ✅")
+            print("  • ⚖️ 共识判断：集体智慧结晶 ✅")
+            print("  • 🤖 真实LLM：支持Ollama调用 ✅")
+            print("=" * 70)
+            print("💡 设计理念: 不是工具人的集合，而是专家们的共识")
+            print("🚀 核心价值: 提升判断的决策质量，降低认知风险")
+            print("按 Ctrl+C 停止服务器")
             
             # 自动打开浏览器
             threading.Timer(1.0, lambda: webbrowser.open(f'http://localhost:{port}')).start()

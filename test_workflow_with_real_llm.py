@@ -1,28 +1,21 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-测试工作流引擎功能 - 配置真实LLM接口
+"""测试工作流引擎功能 - 配置真实LLM接口
 验证CriticalReviewWorkflow批判性审查、MultiPerspectiveWorkflow多视角综合、制度原语正确执行
 """
 
-import sys
-import os
 import asyncio
 import logging
-import tempfile
-import shutil
-from pathlib import Path
-from datetime import datetime
+import sys
 
 # 添加src目录到Python路径
 sys.path.append('src')
 
+from src.core_services.role_manager import RoleManager
+from src.institutional_primitives.base import ExecutionContext
+from src.kernel.llm_interface import LLMConfig
+from src.real_demo_system.llm_integration_service import LLMBackend, LLMIntegrationService
 from src.workflows.critical_review_workflow import CriticalReviewWorkflow
 from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
-from src.core_services.role_manager import RoleManager
-from src.real_demo_system.llm_integration_service import LLMIntegrationService, LLMBackend
-from src.kernel.llm_interface import LLMConfig
-from src.institutional_primitives.base import ExecutionContext
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -38,8 +31,8 @@ def create_llm_service():
         ollama_url = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')
         ollama_model = os.getenv('OLLAMA_MODEL', 'gemma3:latest')
         
-        print(f"🔧 配置LLM服务...")
-        print(f"   后端: Ollama")
+        print("🔧 配置LLM服务...")
+        print("   后端: Ollama")
         print(f"   URL: {ollama_url}")
         print(f"   模型: {ollama_model}")
         
@@ -55,7 +48,7 @@ def create_llm_service():
         # 创建LLM集成服务
         llm_service = LLMIntegrationService()
         
-        print(f"✅ LLM服务创建成功")
+        print("✅ LLM服务创建成功")
         
         return llm_service, llm_config
         
@@ -70,7 +63,7 @@ async def test_llm_connection(llm_service, llm_config):
     print("=" * 60)
     
     try:
-        print(f"\n🔧 测试LLM连接...")
+        print("\n🔧 测试LLM连接...")
         
         # 简单的测试调用
         test_prompt = "请简单回答：你好，这是一个连接测试。"
@@ -85,13 +78,13 @@ async def test_llm_connection(llm_service, llm_config):
         )
         
         if response and response.content:
-            print(f"✅ LLM连接测试成功")
+            print("✅ LLM连接测试成功")
             print(f"   响应: {response.content[:100]}...")
             print(f"   调用ID: {response.call_id}")
             print(f"   耗时: {response.duration:.2f}s")
             return True
         else:
-            print(f"❌ LLM连接测试失败: 无响应内容")
+            print("❌ LLM连接测试失败: 无响应内容")
             return False
             
     except Exception as e:
@@ -107,7 +100,7 @@ async def test_critical_review_workflow_with_llm(llm_service, llm_config):
     print("=" * 60)
     
     try:
-        print(f"\n🔧 初始化CriticalReviewWorkflow...")
+        print("\n🔧 初始化CriticalReviewWorkflow...")
         
         # 初始化批判性审查工作流
         workflow = CriticalReviewWorkflow(
@@ -129,7 +122,7 @@ async def test_critical_review_workflow_with_llm(llm_service, llm_config):
             }
         )
         
-        print(f"✅ CriticalReviewWorkflow初始化成功")
+        print("✅ CriticalReviewWorkflow初始化成功")
         print(f"   工作流ID: {workflow.workflow_id}")
         
         # 测试用例：AI伦理决策分析
@@ -149,7 +142,7 @@ async def test_critical_review_workflow_with_llm(llm_service, llm_config):
         请提供全面的分析和建议。
         """
         
-        print(f"\n📝 执行批判性审查...")
+        print("\n📝 执行批判性审查...")
         print(f"   测试提示长度: {len(test_prompt)} 字符")
         
         # 创建执行上下文
@@ -179,7 +172,7 @@ async def test_critical_review_workflow_with_llm(llm_service, llm_config):
                 execution_id="test_critical_real_001"
             )
             
-            print(f"\n📊 批判性审查结果:")
+            print("\n📊 批判性审查结果:")
             print(f"   执行ID: {result.get('execution_id', 'N/A')}")
             print(f"   成功状态: {result.get('success', False)}")
             
@@ -194,7 +187,7 @@ async def test_critical_review_workflow_with_llm(llm_service, llm_config):
                 # 显示部分最终内容
                 final_content = result.get('final_content', '')
                 if final_content:
-                    print(f"\n   最终内容预览:")
+                    print("\n   最终内容预览:")
                     print(f"   {final_content[:200]}...")
                 
                 return True
@@ -221,7 +214,7 @@ async def test_multi_perspective_workflow_with_llm(llm_service, llm_config):
     print("=" * 60)
     
     try:
-        print(f"\n🔧 初始化MultiPerspectiveSynthesisWorkflow...")
+        print("\n🔧 初始化MultiPerspectiveSynthesisWorkflow...")
         
         # 初始化多视角工作流
         workflow = MultiPerspectiveSynthesisWorkflow(
@@ -243,7 +236,7 @@ async def test_multi_perspective_workflow_with_llm(llm_service, llm_config):
             }
         )
         
-        print(f"✅ MultiPerspectiveSynthesisWorkflow初始化成功")
+        print("✅ MultiPerspectiveSynthesisWorkflow初始化成功")
         print(f"   工作流ID: {workflow.workflow_id}")
         
         # 测试用例：远程工作政策分析
@@ -258,7 +251,7 @@ async def test_multi_perspective_workflow_with_llm(llm_service, llm_config):
         请从多个角度分析这个问题并提供综合建议。
         """
         
-        print(f"\n📝 执行多视角分析...")
+        print("\n📝 执行多视角分析...")
         print(f"   测试主题长度: {len(test_topic)} 字符")
         
         # 定义分析视角
@@ -283,7 +276,7 @@ async def test_multi_perspective_workflow_with_llm(llm_service, llm_config):
                 execution_id="test_multi_real_001"
             )
             
-            print(f"\n📊 多视角分析结果:")
+            print("\n📊 多视角分析结果:")
             print(f"   执行ID: {result.get('execution_id', 'N/A')}")
             print(f"   成功状态: {result.get('success', False)}")
             
@@ -298,13 +291,13 @@ async def test_multi_perspective_workflow_with_llm(llm_service, llm_config):
                 # 显示综合结果
                 synthesis = result.get('synthesis', '')
                 if synthesis:
-                    print(f"\n   综合结果预览:")
+                    print("\n   综合结果预览:")
                     print(f"   {str(synthesis)[:200]}...")
                 
                 # 显示关键洞察
                 insights = result.get('key_insights', [])
                 if insights:
-                    print(f"\n   关键洞察:")
+                    print("\n   关键洞察:")
                     for i, insight in enumerate(insights[:3], 1):
                         print(f"     {i}. {insight}")
                 
@@ -332,7 +325,7 @@ async def test_workflow_integration_with_llm(llm_service, llm_config):
     print("=" * 60)
     
     try:
-        print(f"\n🔧 测试工作流间协作...")
+        print("\n🔧 测试工作流间协作...")
         
         # 测试场景：企业AI战略制定
         decision_topic = """
@@ -346,10 +339,10 @@ async def test_workflow_integration_with_llm(llm_service, llm_config):
         5. 合规性和伦理考量
         """
         
-        print(f"   测试场景: 企业AI战略制定")
+        print("   测试场景: 企业AI战略制定")
         
         # 第一步：多视角分析
-        print(f"\n   步骤1: 多视角分析...")
+        print("\n   步骤1: 多视角分析...")
         
         multi_workflow = MultiPerspectiveSynthesisWorkflow(
             workflow_id="integration_multi_real",
@@ -372,7 +365,7 @@ async def test_workflow_integration_with_llm(llm_service, llm_config):
             )
             
             if multi_result.get('success'):
-                print(f"      ✅ 多视角分析完成")
+                print("      ✅ 多视角分析完成")
                 print(f"         置信度: {multi_result.get('confidence', 0.0):.2f}")
                 print(f"         质量评分: {multi_result.get('quality_score', 0.0):.2f}")
             else:
@@ -383,7 +376,7 @@ async def test_workflow_integration_with_llm(llm_service, llm_config):
                     "synthesis": "基于多视角分析，建议采用渐进式AI整合策略...",
                     "confidence": 0.8
                 }
-                print(f"      ⚠️ 使用模拟结果继续测试")
+                print("      ⚠️ 使用模拟结果继续测试")
         
         except Exception as e:
             print(f"      ❌ 多视角分析异常: {e}")
@@ -393,10 +386,10 @@ async def test_workflow_integration_with_llm(llm_service, llm_config):
                 "synthesis": "基于多视角分析，建议采用渐进式AI整合策略...",
                 "confidence": 0.8
             }
-            print(f"      ⚠️ 使用模拟结果继续测试")
+            print("      ⚠️ 使用模拟结果继续测试")
         
         # 第二步：批判性审查
-        print(f"\n   步骤2: 批判性审查...")
+        print("\n   步骤2: 批判性审查...")
         
         critical_workflow = CriticalReviewWorkflow(
             workflow_id="integration_critical_real",
@@ -415,7 +408,7 @@ async def test_workflow_integration_with_llm(llm_service, llm_config):
             )
             
             if critical_result.get('success'):
-                print(f"      ✅ 批判性审查完成")
+                print("      ✅ 批判性审查完成")
                 print(f"         需要修订: {critical_result.get('revision_needed', False)}")
                 print(f"         事实核查: {critical_result.get('facts_reviewed', 0)} 个")
             else:
@@ -426,7 +419,7 @@ async def test_workflow_integration_with_llm(llm_service, llm_config):
                     "final_content": synthesis_content + " [已通过批判性审查]",
                     "revision_needed": False
                 }
-                print(f"      ⚠️ 使用模拟结果继续测试")
+                print("      ⚠️ 使用模拟结果继续测试")
         
         except Exception as e:
             print(f"      ❌ 批判性审查异常: {e}")
@@ -436,10 +429,10 @@ async def test_workflow_integration_with_llm(llm_service, llm_config):
                 "final_content": synthesis_content + " [已通过批判性审查]",
                 "revision_needed": False
             }
-            print(f"      ⚠️ 使用模拟结果继续测试")
+            print("      ⚠️ 使用模拟结果继续测试")
         
         # 第三步：结果整合
-        print(f"\n   步骤3: 结果整合...")
+        print("\n   步骤3: 结果整合...")
         
         integrated_result = {
             "topic": "企业AI战略制定",
@@ -457,13 +450,13 @@ async def test_workflow_integration_with_llm(llm_service, llm_config):
             "total_processing_time": "估计5-10分钟"
         }
         
-        print(f"      ✅ 结果整合完成")
+        print("      ✅ 结果整合完成")
         print(f"      最终建议: {integrated_result['final_recommendation']['strategy']}")
         print(f"      置信度: {integrated_result['confidence_level']}")
         print(f"      LLM调用次数: {integrated_result['llm_calls']}")
         
         # 验证工作流协作效果
-        print(f"\n📊 工作流协作验证:")
+        print("\n📊 工作流协作验证:")
         
         # 检查数据流连续性
         data_continuity = (

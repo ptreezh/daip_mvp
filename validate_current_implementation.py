@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 18:57:00
+"""@Time    : 2025-08-06 18:57:00
 @Author  : DAIP-LIVE Team
 @File    : validate_current_implementation.py
 @Description:
@@ -14,7 +12,6 @@ import json
 import logging
 import time
 from datetime import datetime
-from typing import Dict, List, Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -84,7 +81,12 @@ async def validate_industry_analysis_scenario():
     logger.info("🔍 Validating Industry Analysis Scenario...")
     
     try:
-        from src.core_services.industry_analysis_scenario import IndustryAnalysisScenario, AnalysisRequest, IndustryType, AnalysisDepth
+        from src.core_services.industry_analysis_scenario import (
+            AnalysisDepth,
+            AnalysisRequest,
+            IndustryAnalysisScenario,
+            IndustryType,
+        )
         
         # Initialize scenario
         scenario = IndustryAnalysisScenario()
@@ -136,7 +138,12 @@ async def validate_expert_consultation_scenario():
     logger.info("🔍 Validating Expert Consultation Scenario...")
     
     try:
-        from src.core_services.expert_consultation_scenario import ExpertConsultationScenario, ExpertConsultationRequest, ConsultationType, ConsultationPriority
+        from src.core_services.expert_consultation_scenario import (
+            ConsultationPriority,
+            ConsultationType,
+            ExpertConsultationRequest,
+            ExpertConsultationScenario,
+        )
         
         # Initialize scenario
         scenario = ExpertConsultationScenario()
@@ -220,8 +227,8 @@ async def validate_api_endpoints():
     logger.info("🔍 Validating API Endpoints...")
     
     try:
+
         import aiohttp
-        import asyncio
         
         # Test basic endpoints
         base_url = "http://localhost:8000"
@@ -336,7 +343,7 @@ async def generate_validation_report():
     with open("validation_report.json", "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
     
-    logger.info(f"📄 Validation report saved to validation_report.json")
+    logger.info("📄 Validation report saved to validation_report.json")
     logger.info(f"📊 Summary: {passed_tests}/{total_tests} tests passed ({report['summary']['success_rate']:.1f}%)")
     
     return report

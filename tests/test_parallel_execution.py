@@ -1,25 +1,21 @@
-"""
-Unit tests for the parallel execution capability.
+"""Unit tests for the parallel execution capability.
 """
 
 import asyncio
-import logging
-import pytest
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
+
+import pytest
 
 from src.institutional_primitives.base import ExecutionContext, ExecutionTrace, InstitutionalPrimitive
+from src.institutional_primitives.parallel_execution import ParallelExecutionGroup, ParallelExecutionManager
 from src.institutional_primitives.registry import PrimitiveRegistry
-from src.institutional_primitives.parallel_execution import (
-    ParallelExecutionGroup,
-    ParallelExecutionManager
-)
 
 
 class DelayedPrimitive(InstitutionalPrimitive):
     """Test primitive with configurable delay for parallel execution testing."""
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         """Execute with a delay."""
         delay = self.config.get('delay', 0.1)
         should_fail = self.config.get('should_fail', False)
@@ -45,7 +41,7 @@ class DelayedPrimitive(InstitutionalPrimitive):
             "input_value": inputs.get('value', None)
         }
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -53,7 +49,7 @@ class DelayedPrimitive(InstitutionalPrimitive):
             }
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -69,7 +65,7 @@ class DelayedPrimitive(InstitutionalPrimitive):
 class SlowPrimitive(InstitutionalPrimitive):
     """Slow primitive for testing timeouts."""
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         """Execute with a long delay."""
         delay = self.config.get('delay', 2.0)
         await asyncio.sleep(delay)
@@ -79,10 +75,10 @@ class SlowPrimitive(InstitutionalPrimitive):
             "result": "slow_execution_completed"
         }
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {"type": "object", "properties": {}}
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -92,7 +88,7 @@ class SlowPrimitive(InstitutionalPrimitive):
         }
 
 
-@pytest.fixture
+@pytest.fixture()
 def execution_trace():
     """Create test execution trace."""
     return ExecutionTrace(
@@ -103,7 +99,7 @@ def execution_trace():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def execution_context():
     """Create test execution context."""
     return ExecutionContext(
@@ -132,12 +128,12 @@ class TestParallelExecutionGroup:
         assert len(group.results) == 0
         assert len(group.errors) == 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_single_node(self, execution_trace):
         """Test executing a single node in a parallel group."""
         group = ParallelExecutionGroup("test_group", max_concurrency=1)
         
-        async def mock_execute_func(node_id: str) -> Dict[str, Any]:
+        async def mock_execute_func(node_id: str) -> dict[str, Any]:
             await asyncio.sleep(0.1)
             return {"node_id": node_id, "result": "success"}
         
@@ -148,12 +144,12 @@ class TestParallelExecutionGroup:
         assert "test_node" in group.results
         assert len(group.errors) == 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_node_with_error(self, execution_trace):
         """Test executing a node that raises an error."""
         group = ParallelExecutionGroup("test_group", max_concurrency=1)
         
-        async def failing_execute_func(node_id: str) -> Dict[str, Any]:
+        async def failing_execute_func(node_id: str) -> dict[str, Any]:
             raise ValueError("Test error")
         
         with pytest.raises(ValueError):
@@ -162,12 +158,12 @@ class TestParallelExecutionGroup:
         assert "test_node" in group.errors
         assert isinstance(group.errors["test_node"], ValueError)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_multiple_nodes_parallel(self, execution_trace):
         """Test executing multiple nodes in parallel."""
         group = ParallelExecutionGroup("test_group", max_concurrency=3)
         
-        async def mock_execute_func(node_id: str) -> Dict[str, Any]:
+        async def mock_execute_func(node_id: str) -> dict[str, Any]:
             await asyncio.sleep(0.1)
             return {"node_id": node_id, "result": "success"}
         
@@ -185,14 +181,14 @@ class TestParallelExecutionGroup:
         assert len(errors) == 0
         assert all(node_id in results for node_id in node_ids)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_with_concurrency_limit(self, execution_trace):
         """Test that concurrency limit is respected."""
         group = ParallelExecutionGroup("test_group", max_concurrency=2)
         
         execution_order = []
         
-        async def mock_execute_func(node_id: str) -> Dict[str, Any]:
+        async def mock_execute_func(node_id: str) -> dict[str, Any]:
             execution_order.append(f"{node_id}_start")
             await asyncio.sleep(0.1)
             execution_order.append(f"{node_id}_end")
@@ -208,12 +204,12 @@ class TestParallelExecutionGroup:
         # This is a simplified check - in practice, timing can be tricky to test
         assert len(execution_order) == 8  # 4 starts + 4 ends
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_with_timeout(self, execution_trace):
         """Test execution with timeout."""
         group = ParallelExecutionGroup("test_group", max_concurrency=2, timeout=0.2)
         
-        async def slow_execute_func(node_id: str) -> Dict[str, Any]:
+        async def slow_execute_func(node_id: str) -> dict[str, Any]:
             await asyncio.sleep(0.5)  # Longer than timeout
             return {"node_id": node_id, "result": "success"}
         
@@ -265,12 +261,12 @@ class TestParallelExecutionManager:
         assert group2.timeout is None
         assert group2.group_id in manager.execution_groups
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_nodes_in_parallel(self, execution_trace):
         """Test executing nodes in parallel through the manager."""
         manager = ParallelExecutionManager()
         
-        async def mock_execute_func(node_id: str) -> Dict[str, Any]:
+        async def mock_execute_func(node_id: str) -> dict[str, Any]:
             await asyncio.sleep(0.1)
             return {"node_id": node_id, "result": "success"}
         
@@ -293,12 +289,12 @@ class TestParallelExecutionManager:
         assert len(errors) == 0
         assert all(node_id in results for node_id in node_ids)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_with_mixed_success_failure(self, execution_trace):
         """Test executing nodes with mixed success and failure."""
         manager = ParallelExecutionManager()
         
-        async def mixed_execute_func(node_id: str) -> Dict[str, Any]:
+        async def mixed_execute_func(node_id: str) -> dict[str, Any]:
             if node_id == "failing_node":
                 raise ValueError("Simulated failure")
             await asyncio.sleep(0.1)
@@ -364,7 +360,7 @@ class TestParallelExecutionManager:
 class TestParallelExecutionIntegration:
     """Integration tests for parallel execution with primitives."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def primitive_registry(self):
         """Create test primitive registry."""
         registry = PrimitiveRegistry()
@@ -372,7 +368,7 @@ class TestParallelExecutionIntegration:
         registry.register_primitive("slow", SlowPrimitive)
         return registry
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_parallel_primitive_execution(self, primitive_registry, execution_trace):
         """Test parallel execution of actual primitives."""
         manager = ParallelExecutionManager()
@@ -396,7 +392,7 @@ class TestParallelExecutionIntegration:
             )
         }
         
-        async def execute_primitive(node_id: str) -> Dict[str, Any]:
+        async def execute_primitive(node_id: str) -> dict[str, Any]:
             primitive_class = primitive_registry.get_primitive("delayed")
             primitive = primitive_class(
                 primitive_id=node_id,
@@ -433,7 +429,7 @@ class TestParallelExecutionIntegration:
             assert result["input_value"] == f"test_value_{node_id}"
             assert result["duration"] > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_parallel_execution_with_different_delays(self, primitive_registry, execution_trace):
         """Test parallel execution with primitives having different delays."""
         manager = ParallelExecutionManager()
@@ -453,7 +449,7 @@ class TestParallelExecutionIntegration:
                 node_id=node_id
             )
         
-        async def execute_primitive(node_id: str) -> Dict[str, Any]:
+        async def execute_primitive(node_id: str) -> dict[str, Any]:
             primitive_class = primitive_registry.get_primitive("delayed")
             primitive = primitive_class(
                 primitive_id=node_id,
@@ -487,7 +483,7 @@ class TestParallelExecutionIntegration:
         slow_result = results["slow_node"]
         assert fast_result["end_time"] <= slow_result["end_time"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_parallel_execution_with_failure_recovery(self, primitive_registry, execution_trace):
         """Test that parallel execution continues even when some nodes fail."""
         manager = ParallelExecutionManager()
@@ -506,7 +502,7 @@ class TestParallelExecutionIntegration:
                 node_id=node_id
             )
         
-        async def execute_primitive(node_id: str) -> Dict[str, Any]:
+        async def execute_primitive(node_id: str) -> dict[str, Any]:
             primitive_class = primitive_registry.get_primitive("delayed")
             primitive = primitive_class(
                 primitive_id=node_id,
@@ -538,12 +534,12 @@ class TestParallelExecutionIntegration:
 class TestParallelExecutionPerformance:
     """Performance tests for parallel execution."""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_performance_comparison_sequential_vs_parallel(self, execution_trace):
         """Compare performance of sequential vs parallel execution."""
         manager = ParallelExecutionManager()
         
-        async def mock_execute_func(node_id: str) -> Dict[str, Any]:
+        async def mock_execute_func(node_id: str) -> dict[str, Any]:
             await asyncio.sleep(0.1)  # 100ms delay per node
             return {"node_id": node_id, "result": "success"}
         
@@ -578,12 +574,12 @@ class TestParallelExecutionPerformance:
         assert len(parallel_results) == len(sequential_results) == 5
         assert len(parallel_errors) == len(sequential_errors) == 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_concurrency_scaling(self, execution_trace):
         """Test how execution time scales with different concurrency limits."""
         manager = ParallelExecutionManager()
         
-        async def mock_execute_func(node_id: str) -> Dict[str, Any]:
+        async def mock_execute_func(node_id: str) -> dict[str, Any]:
             await asyncio.sleep(0.1)
             return {"node_id": node_id, "result": "success"}
         

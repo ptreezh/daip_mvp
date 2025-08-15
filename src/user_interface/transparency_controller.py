@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 20:30:00
+"""@Time    : 2025-07-24 20:30:00
 @Author  : DAIP-LIVE Team
 @File    : transparency_controller.py
 @Description:
@@ -8,23 +6,22 @@
 """
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Literal
 from pathlib import Path
+from typing import Any, Optional
 
 from rich.console import Console
 from rich.panel import Panel
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Confirm
 
-from .result_formatter import ResultFormatter
 from .feedback_collector import FeedbackCollector, WorkflowFeedback
 from .progress_monitor import ProgressMonitor
+from .result_formatter import ResultFormatter
 
 logger = logging.getLogger(__name__)
 
 
 class TransparencyController:
-    """
-    Controller for managing result presentation and transparency features.
+    """Controller for managing result presentation and transparency features.
     
     This class implements the requirements for task 9.3:
     - Multiple output format handlers
@@ -48,7 +45,7 @@ class TransparencyController:
     
     def present_workflow_result(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         workflow_type: str,
         output_format: str = None,
@@ -57,8 +54,7 @@ class TransparencyController:
         collect_feedback: bool = None,
         user_id: Optional[str] = None
     ) -> Optional[WorkflowFeedback]:
-        """
-        Present workflow result with configurable transparency and collect feedback.
+        """Present workflow result with configurable transparency and collect feedback.
         
         Args:
             result: The workflow result to present
@@ -104,15 +100,14 @@ class TransparencyController:
     
     def present_with_traceability(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         include_reasoning: bool = True,
         include_confidence: bool = True,
         include_sources: bool = True,
         output_format: str = "json"
     ) -> str:
-        """
-        Present result with enhanced traceability information.
+        """Present result with enhanced traceability information.
         
         Args:
             result: The workflow result
@@ -158,12 +153,11 @@ class TransparencyController:
     
     def validate_result_quality(
         self,
-        result: Dict[str, Any],
-        validation_criteria: Dict[str, Any] = None,
+        result: dict[str, Any],
+        validation_criteria: dict[str, Any] = None,
         user_id: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """
-        Validate result quality and return validation results.
+    ) -> list[dict[str, Any]]:
+        """Validate result quality and return validation results.
         
         Args:
             result: The workflow result to validate
@@ -190,14 +184,13 @@ class TransparencyController:
     
     def export_result(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         format_type: str,
         include_traceability: bool = False,
         output_path: Optional[str] = None
     ) -> str:
-        """
-        Export result in specified format.
+        """Export result in specified format.
         
         Args:
             result: The workflow result to export
@@ -234,7 +227,7 @@ class TransparencyController:
             self.console.print(f"[red]Error exporting result: {e}[/red]")
             return ""
     
-    def get_feedback_summary(self, execution_id: str) -> Optional[Dict[str, Any]]:
+    def get_feedback_summary(self, execution_id: str) -> Optional[dict[str, Any]]:
         """Get feedback summary for a specific execution."""
         try:
             if execution_id in self.feedback_collector.feedback_storage:
@@ -279,17 +272,17 @@ class TransparencyController:
             border_style="blue"
         ))
     
-    def get_supported_formats(self) -> List[str]:
+    def get_supported_formats(self) -> list[str]:
         """Get list of supported output formats."""
         return self.result_formatter.get_supported_formats()
     
-    def get_transparency_levels(self) -> List[str]:
+    def get_transparency_levels(self) -> list[str]:
         """Get list of supported transparency levels."""
         return ["minimal", "moderate", "detailed"]
     
     def _display_result_with_transparency(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         transparency_level: str
     ) -> None:
         """Display result with specified transparency level."""
@@ -299,7 +292,7 @@ class TransparencyController:
     
     def _format_and_save_result(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         output_format: str,
         save_to_file: bool
@@ -325,7 +318,7 @@ class TransparencyController:
     
     def _collect_user_feedback(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         workflow_type: str,
         user_id: Optional[str]
@@ -351,7 +344,7 @@ class TransparencyController:
             self.console.print(f"[red]Error collecting feedback: {e}[/red]")
             return None
     
-    def _display_validation_summary(self, validation_results: List[Any]) -> None:
+    def _display_validation_summary(self, validation_results: list[Any]) -> None:
         """Display validation results summary."""
         if not validation_results:
             self.console.print("[yellow]No validation results to display[/yellow]")
@@ -378,13 +371,12 @@ class TransparencyController:
     
     def create_transparency_report(
         self,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         execution_id: str,
         workflow_type: str,
         include_all_details: bool = True
-    ) -> Dict[str, Any]:
-        """
-        Create a comprehensive transparency report.
+    ) -> dict[str, Any]:
+        """Create a comprehensive transparency report.
         
         Args:
             result: The workflow result

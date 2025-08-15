@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-PersonalAssistantService适配器
+"""PersonalAssistantService适配器
 
 为PersonalAssistantService提供统一共识调度器的集成，
 保持原有接口不变，内部使用新的共识系统。
@@ -13,17 +11,15 @@ PersonalAssistantService适配器
 - 提供性能和稳定性改进
 """
 
-import asyncio
 import logging
-from typing import Any, Dict, List, Optional
 from datetime import datetime
+from typing import Any
 
 from legacy_compatibility_layer import get_personal_assistant_compatibility
 
 
 class PersonalAssistantServiceAdapter:
-    """
-    PersonalAssistantService适配器
+    """PersonalAssistantService适配器
     
     提供与原有PersonalAssistantService完全兼容的接口，
     内部使用统一共识调度器进行共识计算。
@@ -33,9 +29,8 @@ class PersonalAssistantServiceAdapter:
         self.logger = logging.getLogger("adapter.PersonalAssistant")
         self.compatibility_layer = get_personal_assistant_compatibility()
         
-    async def _local_consensus_calculation(self, inputs: List[Dict[str, Any]]) -> str:
-        """
-        本地共识计算实现 - 适配器版本
+    async def _local_consensus_calculation(self, inputs: list[dict[str, Any]]) -> str:
+        """本地共识计算实现 - 适配器版本
         
         这个方法替换PersonalAssistantService中的同名方法，
         使用统一共识调度器而不是直接调用高级共识算法。
@@ -63,10 +58,9 @@ class PersonalAssistantServiceAdapter:
             return f"共识计算失败：{str(e)}"
     
     async def execute_consensus_for_backend(self, 
-                                          inputs: List[Dict[str, Any]], 
-                                          algorithm_type: str) -> Dict[str, Any]:
-        """
-        为后端服务提供共识计算接口
+                                          inputs: list[dict[str, Any]], 
+                                          algorithm_type: str) -> dict[str, Any]:
+        """为后端服务提供共识计算接口
         
         这个方法用于替换PersonalAssistantService中通过backend_service调用的共识计算。
         
@@ -94,11 +88,11 @@ class PersonalAssistantServiceAdapter:
                 "algorithm_type": algorithm_type
             }
     
-    def get_supported_algorithms(self) -> List[str]:
+    def get_supported_algorithms(self) -> list[str]:
         """获取支持的算法列表"""
         return self.compatibility_layer.get_supported_algorithms()
     
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """健康检查"""
         try:
             # 测试基本的共识计算功能
@@ -146,8 +140,7 @@ def get_personal_assistant_adapter() -> PersonalAssistantServiceAdapter:
 
 
 def patch_personal_assistant_service():
-    """
-    为PersonalAssistantService打补丁，使其使用统一共识调度器
+    """为PersonalAssistantService打补丁，使其使用统一共识调度器
     
     这个函数可以在系统启动时调用，将PersonalAssistantService的
     共识计算方法替换为使用统一调度器的版本。
@@ -182,8 +175,7 @@ def patch_personal_assistant_service():
 
 
 def unpatch_personal_assistant_service():
-    """
-    移除PersonalAssistantService的补丁，恢复原始方法
+    """移除PersonalAssistantService的补丁，恢复原始方法
     """
     try:
         import personal_intelligence_hub.services.personal_assistant as pas_module
@@ -206,8 +198,7 @@ def unpatch_personal_assistant_service():
 
 
 class BackendServiceAdapter:
-    """
-    后端服务适配器
+    """后端服务适配器
     
     为PersonalAssistantService的backend_service提供共识计算接口。
     """
@@ -217,10 +208,9 @@ class BackendServiceAdapter:
         self.compatibility_layer = get_personal_assistant_compatibility()
     
     async def execute_consensus(self, 
-                               inputs: List[Dict[str, Any]], 
-                               algorithm_type: str) -> Dict[str, Any]:
-        """
-        执行共识计算 - 后端服务接口
+                               inputs: list[dict[str, Any]], 
+                               algorithm_type: str) -> dict[str, Any]:
+        """执行共识计算 - 后端服务接口
         
         这个方法模拟backend_service.execute_consensus的接口。
         """

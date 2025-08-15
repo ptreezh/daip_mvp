@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Simple test script for the Judao-Mo AI system
+"""Simple test script for the Judao-Mo AI system
 """
 
-import sys
-import os
 import asyncio
-from datetime import datetime
+import os
+import sys
 
 # Add project path
 project_root = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, project_root)
 
 from judao_mo_ai_tested_demo import JudaoMoAIEngine
+
 
 async def test_system():
     """Test the core system functionality"""

@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-交互式演示流程管理器
+"""交互式演示流程管理器
 """
 
 import logging
 import uuid
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Optional
 
-from .demo_types import DemoStepStatus, DemoStatus
+from .demo_analyzer import DemoAnalyzer
+from .demo_types import DemoStatus, DemoStepStatus
 from .scenario_manager import ScenarioManager
 from .step_executor import StepExecutor
-from .demo_analyzer import DemoAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +39,11 @@ class InteractiveDemoFlow:
             "auto_advance": False
         }
     
-    def get_available_scenarios(self) -> Dict[str, Dict[str, Any]]:
+    def get_available_scenarios(self) -> dict[str, dict[str, Any]]:
         """获取可用场景"""
         return self.scenario_manager.get_available_scenarios()
     
-    async def start_demo(self, scenario_type: str, custom_params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def start_demo(self, scenario_type: str, custom_params: Optional[dict[str, Any]] = None) -> dict[str, Any]:
         """启动演示"""
         try:
             # 获取场景信息
@@ -107,7 +105,7 @@ class InteractiveDemoFlow:
             }
             self.current_demo["steps"].append(step)
     
-    async def execute_next_step(self, user_input: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute_next_step(self, user_input: Optional[dict[str, Any]] = None) -> dict[str, Any]:
         """执行下一步"""
         try:
             if not self.current_demo:
@@ -162,7 +160,7 @@ class InteractiveDemoFlow:
             logger.error(f"执行步骤失败: {e}")
             return {"error": str(e)}
     
-    def _get_next_step_info(self) -> Optional[Dict[str, Any]]:
+    def _get_next_step_info(self) -> Optional[dict[str, Any]]:
         """获取下一步信息"""
         if not self.current_demo:
             return None
@@ -180,7 +178,7 @@ class InteractiveDemoFlow:
             "status": next_step["status"]
         }
     
-    async def _complete_demo(self) -> Dict[str, Any]:
+    async def _complete_demo(self) -> dict[str, Any]:
         """完成演示"""
         try:
             # 更新状态
@@ -217,7 +215,7 @@ class InteractiveDemoFlow:
             logger.error(f"完成演示失败: {e}")
             return {"error": str(e)}
     
-    def _record_interaction(self, interaction_type: str, data: Dict[str, Any]):
+    def _record_interaction(self, interaction_type: str, data: dict[str, Any]):
         """记录用户交互"""
         if self.current_demo and self.config["record_interactions"]:
             interaction = {
@@ -228,7 +226,7 @@ class InteractiveDemoFlow:
             }
             self.current_demo["user_interactions"].append(interaction)
     
-    def get_current_demo_status(self) -> Optional[Dict[str, Any]]:
+    def get_current_demo_status(self) -> Optional[dict[str, Any]]:
         """获取当前演示状态"""
         if not self.current_demo:
             return None
@@ -243,7 +241,7 @@ class InteractiveDemoFlow:
             "elapsed_time": (datetime.now() - self.current_demo["start_time"]).total_seconds()
         }
     
-    def get_demo_history(self) -> List[Dict[str, Any]]:
+    def get_demo_history(self) -> list[dict[str, Any]]:
         """获取演示历史"""
         return [{
             "demo_id": demo["demo_id"],

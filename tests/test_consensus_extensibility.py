@@ -1,35 +1,30 @@
-"""
-Tests for consensus algorithm extensibility.
+"""Tests for consensus algorithm extensibility.
 
 This module contains tests to validate that new consensus strategies can be registered and used.
 """
 
 import unittest
+from typing import Any
 from unittest.mock import MagicMock, patch
-import asyncio
-from typing import List, Dict, Any
 
 from src.protocols.consensus_strategies import ConsensusStrategy, ConsensusStrategyFactory
 from src.unified_tool_manager import UnifiedToolManager
 
 
 class CustomConsensusStrategy(ConsensusStrategy):
-    """
-    A custom consensus strategy for testing extensibility.
+    """A custom consensus strategy for testing extensibility.
     """
     
     def __init__(self, custom_param: str = "default"):
-        """
-        Initialize the CustomConsensusStrategy.
+        """Initialize the CustomConsensusStrategy.
         
         Args:
             custom_param: A custom parameter for testing
         """
         self.custom_param = custom_param
     
-    async def execute(self, opinions: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """
-        Execute the custom consensus strategy on a list of opinions.
+    async def execute(self, opinions: list[dict[str, Any]]) -> dict[str, Any]:
+        """Execute the custom consensus strategy on a list of opinions.
         
         Args:
             opinions: List of Opinion objects representing different viewpoints

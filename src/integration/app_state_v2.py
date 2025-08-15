@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 22:10:00
+"""@Time    : 2025-08-03 22:10:00
 @Author  : DAIP-LIVE Team  
 @File    : app_state_v2.py
 @Description:
@@ -11,22 +9,17 @@
     保持完全向后兼容性。
 """
 
-import os
 import logging
 from typing import Any, Optional
 
 # 导入原有AppState
 from src.app_state import AppState as OriginalAppState
-from src.integration.service_integration_manager import (
-    create_service_integration_manager, 
-    IntegrationConfig
-)
+from src.integration.service_integration_manager import IntegrationConfig, create_service_integration_manager
 
 logger = logging.getLogger(__name__)
 
 class EnhancedAppState(OriginalAppState):
-    """
-    增强版AppState - 安全集成新服务
+    """增强版AppState - 安全集成新服务
     
     继承自原有AppState，增加新服务的安全集成功能，
     确保向后兼容性和系统稳定性。
@@ -64,8 +57,7 @@ class EnhancedAppState(OriginalAppState):
         logger.info("EnhancedAppState 初始化完成")
     
     async def integrate_new_services(self) -> dict:
-        """
-        异步集成新服务
+        """异步集成新服务
         
         Returns:
             集成结果字典
@@ -103,8 +95,7 @@ class EnhancedAppState(OriginalAppState):
             }
     
     def get_service_status(self) -> dict:
-        """
-        获取所有服务状态（包括新服务）
+        """获取所有服务状态（包括新服务）
         
         Returns:
             服务状态字典
@@ -139,8 +130,7 @@ class EnhancedAppState(OriginalAppState):
         return status
     
     async def health_check_all_services(self) -> dict:
-        """
-        对所有服务进行健康检查
+        """对所有服务进行健康检查
         
         Returns:
             健康检查结果
@@ -212,8 +202,7 @@ def create_enhanced_app_state() -> EnhancedAppState:
 
 # 向后兼容的AppState（默认使用原版）
 def create_app_state(enhanced: bool = False) -> OriginalAppState:
-    """
-    创建AppState实例
+    """创建AppState实例
     
     Args:
         enhanced: 是否使用增强版本

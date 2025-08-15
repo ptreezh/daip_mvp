@@ -1,22 +1,21 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: Claude Code
 @File: conflict_resolution_system.py
 @Description: Conflict resolution system for collaborative review environment with graceful degradation
 """
 
 import asyncio
-import json
 import logging
+import threading
 import time
+import uuid
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Any, Set, Tuple, Callable
-from dataclasses import dataclass, field
-from concurrent.futures import ThreadPoolExecutor
-import threading
 from queue import Queue
-import uuid
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -53,14 +52,14 @@ class Conflict:
     conflict_id: str
     conflict_type: ConflictType
     priority: ConflictPriority
-    affected_resources: List[str]
-    conflicting_operations: List[Dict[str, Any]]
+    affected_resources: list[str]
+    conflicting_operations: list[dict[str, Any]]
     timestamp: datetime
-    user_ids: Set[str]
-    context: Dict[str, Any] = field(default_factory=dict)
+    user_ids: set[str]
+    context: dict[str, Any] = field(default_factory=dict)
     resolution_strategy: ResolutionStrategy = ResolutionStrategy.MANUAL_REVIEW
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert conflict to dictionary"""
         return {
             'conflict_id': self.conflict_id,
@@ -80,14 +79,14 @@ class ResolutionResult:
     """Result of conflict resolution"""
     conflict_id: str
     resolution_strategy: ResolutionStrategy
-    resolved_operations: List[Dict[str, Any]]
+    resolved_operations: list[dict[str, Any]]
     resolution_time: datetime
     resolver_id: Optional[str]
     success: bool
     message: str
     fallback_used: bool = False
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert resolution result to dictionary"""
         return {
             'conflict_id': self.conflict_id,
@@ -102,17 +101,16 @@ class ResolutionResult:
 
 
 class ConflictResolutionSystem:
-    """
-    Conflict resolution system with graceful degradation
+    """Conflict resolution system with graceful degradation
     Handles concurrent editing, comment conflicts, and review conflicts
     """
     
     def __init__(self, max_workers: int = 4):
         self.max_workers = max_workers
         self.conflict_queue = Queue()
-        self.resolved_conflicts: Dict[str, ResolutionResult] = {}
-        self.active_conflicts: Dict[str, Conflict] = {}
-        self.resolution_strategies: Dict[ConflictType, List[ResolutionStrategy]] = {
+        self.resolved_conflicts: dict[str, ResolutionResult] = {}
+        self.active_conflicts: dict[str, Conflict] = {}
+        self.resolution_strategies: dict[ConflictType, list[ResolutionStrategy]] = {
             ConflictType.CONCURRENT_EDIT: [
                 ResolutionStrategy.LAST_WRITE_WINS,
                 ResolutionStrategy.MERGE,
@@ -143,8 +141,8 @@ class ConflictResolutionSystem:
         self.max_queue_size = 1000
         
         # Performance monitoring
-        self.resolution_times: List[float] = []
-        self.conflict_counts: Dict[ConflictType, int] = {}
+        self.resolution_times: list[float] = []
+        self.conflict_counts: dict[ConflictType, int] = {}
         
         # Background processing
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
@@ -152,8 +150,8 @@ class ConflictResolutionSystem:
         self._lock = threading.Lock()
         
         # Event handlers
-        self.conflict_handlers: Dict[str, Callable] = {}
-        self.resolution_handlers: Dict[str, Callable] = {}
+        self.conflict_handlers: dict[str, Callable] = {}
+        self.resolution_handlers: dict[str, Callable] = {}
         
     async def start(self) -> None:
         """Start the conflict resolution system"""
@@ -169,9 +167,8 @@ class ConflictResolutionSystem:
         self.executor.shutdown(wait=True)
         logger.info("Conflict resolution system stopped")
         
-    async def detect_conflict(self, operations: List[Dict[str, Any]]) -> Optional[Conflict]:
-        """
-        Detect potential conflicts in operations
+    async def detect_conflict(self, operations: list[dict[str, Any]]) -> Optional[Conflict]:
+        """Detect potential conflicts in operations
         Returns conflict if detected, None otherwise
         """
         try:
@@ -274,7 +271,7 @@ class ConflictResolutionSystem:
                 fallback_used=True
             )
             
-    async def get_conflict_status(self, conflict_id: str) -> Dict[str, Any]:
+    async def get_conflict_status(self, conflict_id: str) -> dict[str, Any]:
         """Get status of a conflict"""
         with self._lock:
             if conflict_id in self.active_conflicts:
@@ -292,7 +289,7 @@ class ConflictResolutionSystem:
             else:
                 return {'status': 'not_found'}
                 
-    async def get_system_stats(self) -> Dict[str, Any]:
+    async def get_system_stats(self) -> dict[str, Any]:
         """Get system statistics"""
         with self._lock:
             active_count = len(self.active_conflicts)
@@ -322,7 +319,7 @@ class ConflictResolutionSystem:
             self.resolution_handlers[handler.__name__] = handler
             
     # Private methods for conflict detection
-    async def _detect_concurrent_edit_conflict(self, operations: List[Dict[str, Any]]) -> Optional[Conflict]:
+    async def _detect_concurrent_edit_conflict(self, operations: list[dict[str, Any]]) -> Optional[Conflict]:
         """Detect concurrent editing conflicts"""
         # Group operations by resource
         resource_ops = {}
@@ -351,7 +348,7 @@ class ConflictResolutionSystem:
                     
         return None
         
-    async def _detect_comment_conflict(self, operations: List[Dict[str, Any]]) -> Optional[Conflict]:
+    async def _detect_comment_conflict(self, operations: list[dict[str, Any]]) -> Optional[Conflict]:
         """Detect comment conflicts"""
         comment_ops = [op for op in operations if op.get('type') == 'comment']
         
@@ -381,7 +378,7 @@ class ConflictResolutionSystem:
                     
         return None
         
-    async def _detect_annotation_conflict(self, operations: List[Dict[str, Any]]) -> Optional[Conflict]:
+    async def _detect_annotation_conflict(self, operations: list[dict[str, Any]]) -> Optional[Conflict]:
         """Detect annotation conflicts"""
         annotation_ops = [op for op in operations if op.get('type') == 'annotation']
         
@@ -411,7 +408,7 @@ class ConflictResolutionSystem:
                     
         return None
         
-    async def _detect_status_conflict(self, operations: List[Dict[str, Any]]) -> Optional[Conflict]:
+    async def _detect_status_conflict(self, operations: list[dict[str, Any]]) -> Optional[Conflict]:
         """Detect status conflicts"""
         status_ops = [op for op in operations if op.get('type') == 'status_change']
         
@@ -441,7 +438,7 @@ class ConflictResolutionSystem:
                     
         return None
         
-    async def _detect_version_conflict(self, operations: List[Dict[str, Any]]) -> Optional[Conflict]:
+    async def _detect_version_conflict(self, operations: list[dict[str, Any]]) -> Optional[Conflict]:
         """Detect version conflicts"""
         version_ops = [op for op in operations if op.get('type') == 'version_change']
         
@@ -462,7 +459,7 @@ class ConflictResolutionSystem:
         return None
         
     # Private helper methods
-    def _check_time_overlap(self, timestamps: List[datetime]) -> bool:
+    def _check_time_overlap(self, timestamps: list[datetime]) -> bool:
         """Check if timestamps overlap within a threshold"""
         if len(timestamps) < 2:
             return False
@@ -478,7 +475,7 @@ class ConflictResolutionSystem:
                 
         return False
         
-    def _check_contradictory_comments(self, comments: List[Dict[str, Any]]) -> bool:
+    def _check_contradictory_comments(self, comments: list[dict[str, Any]]) -> bool:
         """Check if comments are contradictory"""
         # Simple heuristic: check for opposing sentiment keywords
         positive_keywords = ['good', 'great', 'excellent', 'approve', 'agree']
@@ -494,7 +491,7 @@ class ConflictResolutionSystem:
                 
         return len(set(sentiments)) > 1
         
-    def _check_annotation_overlap(self, annotations: List[Dict[str, Any]]) -> bool:
+    def _check_annotation_overlap(self, annotations: list[dict[str, Any]]) -> bool:
         """Check if annotations overlap spatially"""
         # Simple overlap detection
         for i, ann1 in enumerate(annotations):
@@ -509,7 +506,7 @@ class ConflictResolutionSystem:
                     
         return False
         
-    def _check_incompatible_statuses(self, statuses: List[Dict[str, Any]]) -> bool:
+    def _check_incompatible_statuses(self, statuses: list[dict[str, Any]]) -> bool:
         """Check if statuses are incompatible"""
         # Define incompatible status pairs
         incompatible_pairs = [

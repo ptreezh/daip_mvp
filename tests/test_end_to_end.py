@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 16:30:00
+"""@Time    : 2025-08-04 16:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_end_to_end.py
 @Description:
@@ -8,18 +6,16 @@
     Tests the entire workflow from user interaction to system response.
 """
 
-import pytest
 import asyncio
-import json
 import time
-from datetime import datetime
-from unittest.mock import Mock, patch, AsyncMock
-from typing import Dict, List, Any
+from unittest.mock import patch
+
+import pytest
 
 # Import system components
 from src.app_state import AppState
-from src.core_services.expert_consultation_scenario import ExpertConsultationScenario
 from src.core_services.academic_research_scenario import AcademicResearchScenario
+from src.core_services.expert_consultation_scenario import ExpertConsultationScenario
 from src.core_services.industry_analysis_scenario import IndustryAnalysisScenario
 from src.core_services.smart_reviewer_allocator_simple import SmartReviewerAllocator
 
@@ -27,7 +23,7 @@ from src.core_services.smart_reviewer_allocator_simple import SmartReviewerAlloc
 class TestEndToEndSystem:
     """End-to-end tests for the complete system"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_complete_system_startup(self):
         """Test complete system startup and initialization"""
         print("🚀 Testing complete system startup...")
@@ -70,7 +66,7 @@ class TestEndToEndSystem:
             "reviewer_allocator": reviewer_allocator
         }
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_end_to_end_user_interaction(self):
         """Test complete end-to-end user interaction"""
         print("👤 Testing end-to-end user interaction...")
@@ -96,7 +92,11 @@ class TestEndToEndSystem:
         
         # Step 2: User seeks expert consultation based on research
         print("🎯 Step 2: User consults experts...")
-        from src.core_services.expert_consultation_scenario import ExpertConsultationRequest, ConsultationType, PriorityLevel
+        from src.core_services.expert_consultation_scenario import (
+            ConsultationType,
+            ExpertConsultationRequest,
+            PriorityLevel,
+        )
         
         consultation_request = ExpertConsultationRequest(
             consultation_type=ConsultationType.TECHNICAL_REVIEW,
@@ -115,7 +115,7 @@ class TestEndToEndSystem:
         
         # Step 3: User wants industry analysis to understand market context
         print("📊 Step 3: User requests industry analysis...")
-        from src.core_services.industry_analysis_scenario import AnalysisRequest, IndustryType, AnalysisDepth
+        from src.core_services.industry_analysis_scenario import AnalysisDepth, AnalysisRequest, IndustryType
         
         industry_request = AnalysisRequest(
             industry_type=IndustryType.FINANCE,
@@ -150,7 +150,7 @@ class TestEndToEndSystem:
         
         tech_result = await system['expert_scenario'].handle_consultation(tech_request)
         assert tech_result['success'] is True
-        print(f"✅ Technical consultation completed")
+        print("✅ Technical consultation completed")
         
         # Step 5: User checks the status of all their requests
         print("📋 Step 5: User checks request status...")
@@ -196,7 +196,7 @@ class TestEndToEndSystem:
             }
         }
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_system_performance_under_load(self):
         """Test system performance under realistic load"""
         print("⚡ Testing system performance under load...")
@@ -227,7 +227,11 @@ class TestEndToEndSystem:
                     )
                 elif request_id % 3 == 1:
                     # Expert consultation request
-                    from src.core_services.expert_consultation_scenario import ExpertConsultationRequest, ConsultationType, PriorityLevel
+                    from src.core_services.expert_consultation_scenario import (
+                        ConsultationType,
+                        ExpertConsultationRequest,
+                        PriorityLevel,
+                    )
                     
                     request = ExpertConsultationRequest(
                         consultation_type=ConsultationType.TECHNICAL_REVIEW,
@@ -238,7 +242,11 @@ class TestEndToEndSystem:
                     task = system['expert_scenario'].handle_consultation(request)
                 else:
                     # Industry analysis request
-                    from src.core_services.industry_analysis_scenario import AnalysisRequest, IndustryType, AnalysisDepth
+                    from src.core_services.industry_analysis_scenario import (
+                        AnalysisDepth,
+                        AnalysisRequest,
+                        IndustryType,
+                    )
                     
                     request = AnalysisRequest(
                         industry_type=IndustryType.TECHNOLOGY,
@@ -267,7 +275,7 @@ class TestEndToEndSystem:
         total_requests = num_users * requests_per_user
         success_rate = len(successful_requests) / total_requests
         
-        print(f"📊 Performance Results:")
+        print("📊 Performance Results:")
         print(f"   Total requests: {total_requests}")
         print(f"   Successful requests: {len(successful_requests)}")
         print(f"   Failed requests: {len(failed_requests)}")
@@ -291,7 +299,7 @@ class TestEndToEndSystem:
             "requests_per_second": total_requests / total_time
         }
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_system_error_handling_and_recovery(self):
         """Test system error handling and recovery"""
         print("🛡️ Testing system error handling and recovery...")
@@ -304,7 +312,11 @@ class TestEndToEndSystem:
         
         try:
             # Invalid consultation request
-            from src.core_services.expert_consultation_scenario import ExpertConsultationRequest, ConsultationType, PriorityLevel
+            from src.core_services.expert_consultation_scenario import (
+                ConsultationType,
+                ExpertConsultationRequest,
+                PriorityLevel,
+            )
             
             invalid_request = ExpertConsultationRequest(
                 consultation_type=None,  # Invalid
@@ -382,7 +394,7 @@ class TestEndToEndSystem:
         
         return {"error_handling_tests": "passed"}
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_data_consistency_and_integrity(self):
         """Test data consistency and integrity across the system"""
         print("🔍 Testing data consistency and integrity...")
@@ -403,7 +415,11 @@ class TestEndToEndSystem:
         )
         
         # Expert consultation
-        from src.core_services.expert_consultation_scenario import ExpertConsultationRequest, ConsultationType, PriorityLevel
+        from src.core_services.expert_consultation_scenario import (
+            ConsultationType,
+            ExpertConsultationRequest,
+            PriorityLevel,
+        )
         
         consultation_result = await system['expert_scenario'].handle_consultation(
             ExpertConsultationRequest(
@@ -415,7 +431,7 @@ class TestEndToEndSystem:
         )
         
         # Industry analysis
-        from src.core_services.industry_analysis_scenario import AnalysisRequest, IndustryType, AnalysisDepth
+        from src.core_services.industry_analysis_scenario import AnalysisDepth, AnalysisRequest, IndustryType
         
         industry_result = await system['industry_scenario'].submit_analysis_request(
             AnalysisRequest(
@@ -507,7 +523,7 @@ class TestEndToEndSystem:
 class TestComprehensiveEndToEnd:
     """Comprehensive end-to-end test suite"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_comprehensive_system_validation(self):
         """Run comprehensive system validation"""
         print("🔥 Running comprehensive system validation...")
@@ -545,10 +561,10 @@ class TestComprehensiveEndToEnd:
         # Generate summary
         print("\n🎊 COMPREHENSIVE SYSTEM VALIDATION SUMMARY")
         print("=" * 50)
-        print(f"✅ System Startup: PASSED")
-        print(f"✅ User Interaction: PASSED")
+        print("✅ System Startup: PASSED")
+        print("✅ User Interaction: PASSED")
         print(f"✅ Performance Test: PASSED ({results['performance']['success_rate']:.1%} success rate)")
-        print(f"✅ Error Handling: PASSED")
+        print("✅ Error Handling: PASSED")
         print(f"✅ Data Consistency: PASSED ({results['data_consistency']['records_tested']} records verified)")
         print("=" * 50)
         print("🎉 ALL SYSTEMS OPERATIONAL!")

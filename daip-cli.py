@@ -1,14 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-21 14:35:00
+"""@Time    : 2025-07-21 14:35:00
 @Author  : DAIP-LIVE Team
 @File    : daip-cli.py
 @Description: Standalone script to run the DAIP-LIVE CLI
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add project root to path to ensure imports work correctly

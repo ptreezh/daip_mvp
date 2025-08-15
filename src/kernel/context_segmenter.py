@@ -86,7 +86,7 @@ class ContextSegmenter:
         """Segments a text and then creates a summary of summaries.
         This is useful for very long documents.
 
-        Returns
+        Returns:
         -------
             str: The final, condensed summary.
         """

@@ -1,29 +1,22 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 23:45:00
+"""@Time    : 2025-07-24 23:45:00
 @Author  : DAIP-LIVE Team
 @File    : test_knowledge_persistence.py
 @Description:
     Test script for knowledge persistence mechanisms.
 """
 import asyncio
-import json
 from datetime import datetime
-from pathlib import Path
 
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
 from .enhanced_sskg_manager import EnhancedSSKGManager
-from .wiki_service import WikiService
 from .knowledge_persistence_service import KnowledgePersistenceService
 from .knowledge_retrieval_service import KnowledgeRetrievalService, SearchScope
-from .workflow_knowledge_integrator import (
-    WorkflowKnowledgeIntegrator,
-    WorkflowIntegrationConfig
-)
+from .wiki_service import WikiService
+from .workflow_knowledge_integrator import WorkflowIntegrationConfig, WorkflowKnowledgeIntegrator
 
 console = Console()
 

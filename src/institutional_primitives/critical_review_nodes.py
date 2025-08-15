@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-23 13:00:00
+"""@Time    : 2025-07-23 13:00:00
 @Author  : DAIP-LIVE Team
 @File    : critical_review_nodes.py
 @Description:
@@ -10,13 +8,14 @@
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Literal
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
-from src.institutional_primitives.base import InstitutionalPrimitive, ExecutionContext
+from src.institutional_primitives.base import ExecutionContext, InstitutionalPrimitive
 from src.institutional_primitives.consensus_node import ConsensusNode
 from src.institutional_primitives.revision_node import RevisionNode
+
 # Service imports will be resolved at runtime through the execution context
 # from src.core_services.fact_extraction_service import FactExtractionService
 # from src.core_services.fact_validation_service import FactValidationService
@@ -34,7 +33,7 @@ class ExtractedFact(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     source_location: str
     fact_type: str = "general"  # general, numerical, temporal, causal
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class Evidence(BaseModel):
@@ -43,15 +42,15 @@ class Evidence(BaseModel):
     source: str
     credibility: float = Field(ge=0.0, le=1.0)
     evidence_type: str  # "supporting", "challenging", "neutral"
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class EvidenceReport(BaseModel):
     """Model for evidence reports on specific facts."""
     fact_id: str
-    supporting_evidence: List[Evidence] = Field(default_factory=list)
-    challenging_evidence: List[Evidence] = Field(default_factory=list)
-    neutral_evidence: List[Evidence] = Field(default_factory=list)
+    supporting_evidence: list[Evidence] = Field(default_factory=list)
+    challenging_evidence: list[Evidence] = Field(default_factory=list)
+    neutral_evidence: list[Evidence] = Field(default_factory=list)
     overall_assessment: str
     confidence_score: float = Field(ge=0.0, le=1.0)
     reviewer_id: str
@@ -61,30 +60,28 @@ class EvidenceReport(BaseModel):
 class ReviewResult(BaseModel):
     """Model for complete review results."""
     original_content: str
-    extracted_facts: List[ExtractedFact] = Field(default_factory=list)
-    evidence_reports: List[EvidenceReport] = Field(default_factory=list)
-    credibility_scores: Dict[str, float] = Field(default_factory=dict)
+    extracted_facts: list[ExtractedFact] = Field(default_factory=list)
+    evidence_reports: list[EvidenceReport] = Field(default_factory=list)
+    credibility_scores: dict[str, float] = Field(default_factory=dict)
     revised_content: Optional[str] = None
     validation_summary: str
-    review_metadata: Dict[str, Any] = Field(default_factory=dict)
+    review_metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class GenerationNode(InstitutionalPrimitive):
-    """
-    生成节点 - Captures initial AI role output with full context and metadata.
+    """生成节点 - Captures initial AI role output with full context and metadata.
     
     This node serves as the entry point for the Critical Review Workflow,
     capturing the original content that needs to be fact-checked.
     """
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.role_name = config.get("role_name", "创作者") if config else "创作者"
         self.capture_metadata = config.get("capture_metadata", True) if config else True
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute content generation and capture.
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        """Execute content generation and capture.
         
         Args:
             inputs: Should contain 'prompt' and optionally 'role_context'
@@ -155,7 +152,7 @@ class GenerationNode(InstitutionalPrimitive):
                 "error": str(e)
             }
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         """Return input schema for the generation node."""
         return {
             "type": "object",
@@ -172,7 +169,7 @@ class GenerationNode(InstitutionalPrimitive):
             "required": ["prompt"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         """Return output schema for the generation node."""
         return {
             "type": "object",
@@ -199,21 +196,19 @@ class GenerationNode(InstitutionalPrimitive):
 
 
 class FactExtractionNode(InstitutionalPrimitive):
-    """
-    事实提取节点 - Extracts verifiable factual assertions from content.
+    """事实提取节点 - Extracts verifiable factual assertions from content.
     
     Uses FactExtractionService to identify all verifiable factual assertions
     from the generated content for subsequent validation.
     """
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.min_confidence = config.get("min_confidence", 0.5) if config else 0.5
         self.max_facts = config.get("max_facts", 20) if config else 20
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute fact extraction from content.
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        """Execute fact extraction from content.
         
         Args:
             inputs: Should contain 'content' to extract facts from
@@ -278,7 +273,7 @@ class FactExtractionNode(InstitutionalPrimitive):
                 "error": str(e)
             }
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         """Return input schema for the fact extraction node."""
         return {
             "type": "object",
@@ -291,7 +286,7 @@ class FactExtractionNode(InstitutionalPrimitive):
             "required": ["content"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         """Return output schema for the fact extraction node."""
         return {
             "type": "object",
@@ -315,21 +310,19 @@ class FactExtractionNode(InstitutionalPrimitive):
 
 
 class ParallelReviewNode(InstitutionalPrimitive):
-    """
-    并行审查节点 - Executes parallel review with multiple specialized roles.
+    """并行审查节点 - Executes parallel review with multiple specialized roles.
     
     Implements fan-out pattern to simultaneously deploy challenger and validator roles
     for comprehensive fact review from multiple perspectives.
     """
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.reviewer_roles = config.get("reviewer_roles", ["批判者", "验证者"]) if config else ["批判者", "验证者"]
         self.max_parallel_reviews = config.get("max_parallel_reviews", 5) if config else 5
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute parallel review of extracted facts.
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        """Execute parallel review of extracted facts.
         
         Args:
             inputs: Should contain 'facts' to review
@@ -525,7 +518,7 @@ class ParallelReviewNode(InstitutionalPrimitive):
                 reviewer_id=reviewer_role
             )
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         """Return input schema for the parallel review node."""
         return {
             "type": "object",
@@ -539,7 +532,7 @@ class ParallelReviewNode(InstitutionalPrimitive):
             "required": ["facts"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         """Return output schema for the parallel review node."""
         return {
             "type": "object",
@@ -563,21 +556,19 @@ class ParallelReviewNode(InstitutionalPrimitive):
 
 
 class EvidenceAggregationNode(InstitutionalPrimitive):
-    """
-    证据汇总节点 - Aggregates evidence from parallel reviews using fan-in pattern.
+    """证据汇总节点 - Aggregates evidence from parallel reviews using fan-in pattern.
     
     Collects all positive and negative evidence with source attribution
     and prepares comprehensive evidence summaries for consensus calculation.
     """
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.min_evidence_threshold = config.get("min_evidence_threshold", 1) if config else 1
         self.weight_by_credibility = config.get("weight_by_credibility", True) if config else True
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute evidence aggregation from parallel reviews.
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        """Execute evidence aggregation from parallel reviews.
         
         Args:
             inputs: Should contain 'evidence_reports' from parallel reviews
@@ -676,7 +667,7 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
                 "error": str(e)
             }
     
-    def _calculate_evidence_score(self, evidence_list: List[Evidence]) -> float:
+    def _calculate_evidence_score(self, evidence_list: list[Evidence]) -> float:
         """Calculate weighted evidence score."""
         if not evidence_list:
             return 0.0
@@ -687,7 +678,7 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
         else:
             return len(evidence_list) * 0.2  # Simple count-based scoring
     
-    def _create_evidence_summary(self, evidence: Dict[str, List]) -> str:
+    def _create_evidence_summary(self, evidence: dict[str, list]) -> str:
         """Create a human-readable evidence summary."""
         summary_parts = []
         
@@ -705,7 +696,7 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
         
         return "，".join(summary_parts) + f"，由{len(set(evidence.get('reviewers', [])))}位审查者提供"
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         """Return input schema for the evidence aggregation node."""
         return {
             "type": "object",
@@ -719,7 +710,7 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
             "required": ["evidence_reports"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         """Return output schema for the evidence aggregation node."""
         return {
             "type": "object",
@@ -746,14 +737,13 @@ class EvidenceAggregationNode(InstitutionalPrimitive):
 
 
 class CriticalReviewWorkflow:
-    """
-    批判性审查工作流 - Orchestrates the complete critical review process.
+    """批判性审查工作流 - Orchestrates the complete critical review process.
     
     This class coordinates all the critical review nodes to implement the
     systematic fact validation workflow described in the design document.
     """
     
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         self.config = config or {}
         self.credibility_threshold = self.config.get("credibility_threshold", 0.7)
         self.max_revision_cycles = self.config.get("max_revision_cycles", 3)
@@ -765,11 +755,10 @@ class CriticalReviewWorkflow:
         self,
         content: str,
         topic: str,
-        roles: List[str],
+        roles: list[str],
         context: ExecutionContext
     ) -> ReviewResult:
-        """
-        Execute the complete critical review workflow.
+        """Execute the complete critical review workflow.
         
         Args:
             content: Original content to review
@@ -907,7 +896,7 @@ class CriticalReviewWorkflow:
             logger.error(f"Critical review workflow failed: {e}")
             raise
     
-    async def _store_review_results_in_sskg(self, context: ExecutionContext, results: Dict[str, Any]):
+    async def _store_review_results_in_sskg(self, context: ExecutionContext, results: dict[str, Any]):
         """Store review results in SSKG for future reference."""
         try:
             sskg_manager = context.services.get("sskg_manager")
@@ -929,8 +918,8 @@ class CriticalReviewWorkflow:
                     source: str
                     confidence: float = Field(ge=0.0, le=1.0)
                     timestamp: datetime = Field(default_factory=datetime.now)
-                    metadata: Dict[str, Any] = Field(default_factory=dict)
-                    relations: List[Dict[str, Any]] = Field(default_factory=list)
+                    metadata: dict[str, Any] = Field(default_factory=dict)
+                    relations: list[dict[str, Any]] = Field(default_factory=list)
                     version: int = 1
                 
                 knowledge_fact = KnowledgeFact(
@@ -1008,7 +997,7 @@ class CriticalReviewWorkflow:
         except Exception as e:
             logger.error(f"Failed to store review results in SSKG: {e}")
     
-    async def _detect_and_resolve_conflicts(self, sskg_manager, results: Dict[str, Any], context: ExecutionContext):
+    async def _detect_and_resolve_conflicts(self, sskg_manager, results: dict[str, Any], context: ExecutionContext):
         """Detect and resolve conflicts with existing knowledge in SSKG."""
         try:
             conflicting_facts = []
@@ -1060,8 +1049,7 @@ class CriticalReviewWorkflow:
             logger.error(f"Failed to detect/resolve conflicts: {e}")
     
     def _are_facts_conflicting(self, fact1: str, fact2: str) -> bool:
-        """
-        Simple conflict detection between two facts.
+        """Simple conflict detection between two facts.
         In a production system, this would use more sophisticated NLP techniques.
         """
         # Simple keyword-based conflict detection
@@ -1080,7 +1068,7 @@ class CriticalReviewWorkflow:
         
         return False
     
-    def _create_validation_summary(self, credibility_scores: Dict[str, float], low_credibility_facts: List[str]) -> str:
+    def _create_validation_summary(self, credibility_scores: dict[str, float], low_credibility_facts: list[str]) -> str:
         """Create a human-readable validation summary."""
         total_facts = len(credibility_scores)
         high_credibility_facts = total_facts - len(low_credibility_facts)
@@ -1096,7 +1084,7 @@ class CriticalReviewWorkflow:
         summary += f"平均可信度评分：{avg_credibility:.2f}"
         
         if low_credibility_facts:
-            summary += f"。低可信度事实已标记为需要修订。"
+            summary += "。低可信度事实已标记为需要修订。"
         
         return summary
 
@@ -1105,7 +1093,7 @@ class CriticalReviewNodeRegistry:
     """Registry for critical review workflow nodes."""
     
     @staticmethod
-    def get_all_nodes() -> Dict[str, type]:
+    def get_all_nodes() -> dict[str, type]:
         """Get all available critical review nodes."""
         return {
             "generation": GenerationNode,
@@ -1117,7 +1105,7 @@ class CriticalReviewNodeRegistry:
         }
     
     @staticmethod
-    def create_node(node_type: str, node_id: str, config: Dict[str, Any] = None):
+    def create_node(node_type: str, node_id: str, config: dict[str, Any] = None):
         """Create a node instance by type."""
         nodes = CriticalReviewNodeRegistry.get_all_nodes()
         if node_type not in nodes:

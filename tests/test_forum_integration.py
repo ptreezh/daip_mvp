@@ -1,25 +1,23 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 15:00:00
+"""@Time    : 2025-08-06 15:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_forum_integration.py
 @Description:
     Forum模式集成测试 - 完整的端到端测试场景
 """
 
-import pytest
 import asyncio
-import json
-from unittest.mock import Mock, patch, AsyncMock
-from datetime import datetime, timedelta
+from datetime import datetime
+from unittest.mock import Mock
 
-from src.core_services.forum_service import forum_service, ForumSession
-from src.core_services.forum_service import DebateOrchestrator, UserInterventionManager, ConsensusTracker
-from src.api.routers.forum import forum_router
+import pytest
+
 from frontend.components.forum_chat_interface import ForumChatInterface
 from frontend.services.forum_websocket_integration import forum_websocket_integration
-from frontend.services.dual_entrance_websocket_manager import dual_entrance_websocket_manager
+from src.core_services.forum_service import (
+    ForumSession,
+    forum_service,
+)
 
 
 class TestForumIntegration:

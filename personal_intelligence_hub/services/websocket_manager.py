@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - WebSocket Manager
+"""Personal Intelligence Hub - WebSocket Manager
 
 实时通信管理器，处理WebSocket连接和实时状态更新
 """
 
-import logging
 import asyncio
 import json
-from typing import Dict, List, Set, Optional, Any
-from dataclasses import dataclass, asdict
+import logging
+import uuid
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-import uuid
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +32,7 @@ class MessageType(Enum):
 class WebSocketMessage:
     """WebSocket消息结构"""
     type: MessageType
-    data: Dict[str, Any]
+    data: dict[str, Any]
     timestamp: datetime = None
     message_id: str = None
     
@@ -44,7 +42,7 @@ class WebSocketMessage:
         if self.message_id is None:
             self.message_id = str(uuid.uuid4())
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         return {
             "type": self.type.value,
@@ -67,7 +65,7 @@ class WebSocketConnection:
         self.user_id = user_id
         self.connected_at = datetime.now()
         self.last_heartbeat = datetime.now()
-        self.subscriptions: Set[str] = set()
+        self.subscriptions: set[str] = set()
     
     async def send_message(self, message: WebSocketMessage):
         """发送消息到客户端"""
@@ -108,8 +106,8 @@ class WebSocketManager:
     """WebSocket连接管理器"""
     
     def __init__(self):
-        self.connections: Dict[str, WebSocketConnection] = {}
-        self.channels: Dict[str, Set[str]] = {}  # channel -> session_ids
+        self.connections: dict[str, WebSocketConnection] = {}
+        self.channels: dict[str, set[str]] = {}  # channel -> session_ids
         self.heartbeat_interval = 30  # 心跳间隔（秒）
         self.heartbeat_task: Optional[asyncio.Task] = None
         logger.info("WebSocket Manager initialized")
@@ -219,7 +217,7 @@ class WebSocketManager:
                 logger.error(f"Failed to send to session {session_id}: {e}")
                 await self.disconnect(session_id)
     
-    async def broadcast_system_status(self, status_data: Dict[str, Any]):
+    async def broadcast_system_status(self, status_data: dict[str, Any]):
         """广播系统状态更新"""
         message = WebSocketMessage(
             type=MessageType.SYSTEM_STATUS,
@@ -227,7 +225,7 @@ class WebSocketManager:
         )
         await self.broadcast_to_channel("system_status", message)
     
-    async def broadcast_agent_status(self, agent_data: Dict[str, Any]):
+    async def broadcast_agent_status(self, agent_data: dict[str, Any]):
         """广播代理状态更新"""
         message = WebSocketMessage(
             type=MessageType.AGENT_STATUS,
@@ -235,7 +233,7 @@ class WebSocketManager:
         )
         await self.broadcast_to_channel("system_status", message)
     
-    async def broadcast_workflow_update(self, workflow_data: Dict[str, Any]):
+    async def broadcast_workflow_update(self, workflow_data: dict[str, Any]):
         """广播工作流更新"""
         message = WebSocketMessage(
             type=MessageType.WORKFLOW_UPDATE,
@@ -276,7 +274,7 @@ class WebSocketManager:
             except Exception as e:
                 logger.error(f"Error in heartbeat loop: {e}")
     
-    def get_connection_stats(self) -> Dict[str, Any]:
+    def get_connection_stats(self) -> dict[str, Any]:
         """获取连接统计信息"""
         return {
             "total_connections": len(self.connections),

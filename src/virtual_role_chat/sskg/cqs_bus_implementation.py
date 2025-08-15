@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 18:15:00
+"""@Time    : 2025-08-03 18:15:00
 @Author  : DAIP-LIVE Team
 @File    : cqs_bus_implementation.py
 @Description:
@@ -17,17 +15,22 @@
 import asyncio
 import logging
 import time
-import uuid
-from typing import Any, Dict, List, Optional, Type
-from datetime import datetime, timedelta
 from collections import defaultdict
-import weakref
+from datetime import datetime, timedelta
+from typing import Any, Optional
 
 from .cqs_interfaces import (
-    ICQSBus, IQueryHandler, ICommandHandler, IQueryCache, ICQSMetrics,
-    QuerySpec, CommandSpec, QueryResult, CommandResult,
-    QueryResultStatus, CommandResultStatus, CQSConfiguration,
-    CQSViolationError, CQSValidator
+    CommandResult,
+    CommandResultStatus,
+    CommandSpec,
+    CQSConfiguration,
+    CQSValidator,
+    ICommandHandler,
+    ICQSBus,
+    IQueryHandler,
+    QueryResult,
+    QueryResultStatus,
+    QuerySpec,
 )
 
 logger = logging.getLogger(__name__)
@@ -81,7 +84,7 @@ class CQSMetricsCollector:
         if len(self.command_metrics[command_type]) > 1000:
             self.command_metrics[command_type] = self.command_metrics[command_type][-500:]
     
-    async def get_performance_metrics(self) -> Dict[str, Any]:
+    async def get_performance_metrics(self) -> dict[str, Any]:
         """获取性能指标"""
         query_stats = {}
         for query_type, metrics in self.query_metrics.items():
@@ -124,7 +127,7 @@ class CQSMetricsCollector:
             "total_errors": sum(self.error_counts.values())
         }
     
-    async def get_health_status(self) -> Dict[str, Any]:
+    async def get_health_status(self) -> dict[str, Any]:
         """获取健康状态"""
         metrics = await self.get_performance_metrics()
         
@@ -176,7 +179,7 @@ class CQSMetricsCollector:
             "issues": self._identify_health_issues(metrics)
         }
     
-    def _identify_health_issues(self, metrics: Dict[str, Any]) -> List[str]:
+    def _identify_health_issues(self, metrics: dict[str, Any]) -> list[str]:
         """识别健康问题"""
         issues = []
         
@@ -274,8 +277,8 @@ class CQSBusImplementation(ICQSBus):
     
     def __init__(self, config: CQSConfiguration):
         self.config = config
-        self.query_handlers: Dict[str, IQueryHandler] = {}
-        self.command_handlers: Dict[str, ICommandHandler] = {}
+        self.query_handlers: dict[str, IQueryHandler] = {}
+        self.command_handlers: dict[str, ICommandHandler] = {}
         
         # 组件初始化
         self.query_cache = InMemoryQueryCache() if config.query_cache_enabled else None
@@ -524,11 +527,11 @@ class CQSBusImplementation(ICQSBus):
         circuit["last_failure"] = None
         circuit["state"] = "closed"
     
-    async def get_metrics(self) -> Dict[str, Any]:
+    async def get_metrics(self) -> dict[str, Any]:
         """获取指标"""
         return await self.metrics.get_performance_metrics()
     
-    async def get_health(self) -> Dict[str, Any]:
+    async def get_health(self) -> dict[str, Any]:
         """获取健康状态"""
         return await self.metrics.get_health_status()
 

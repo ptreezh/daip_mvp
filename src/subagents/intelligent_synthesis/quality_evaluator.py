@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 10:30:00
+"""@Time    : 2025-08-04 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : quality_evaluator.py
 @Description:
@@ -8,12 +6,9 @@
 """
 
 import logging
-import asyncio
-from typing import Any, Dict, List, Optional, Tuple
-from datetime import datetime
-import statistics
-import json
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
 
 from ...core_services.consensus_quality_evaluator import ConsensusQualityEvaluator
 
@@ -27,21 +22,19 @@ class QualityDimension:
     score: float
     weight: float
     confidence: float
-    details: Dict[str, Any]
-    improvement_suggestions: List[str]
+    details: dict[str, Any]
+    improvement_suggestions: list[str]
 
 
 class EnhancedQualityEvaluator:
-    """
-    增强质量评估器 - Advanced quality evaluation for intelligent synthesis.
+    """增强质量评估器 - Advanced quality evaluation for intelligent synthesis.
     
     Extends the basic consensus quality evaluator with sophisticated metrics
     for cognitive quality, insight generation, and synthesis effectiveness.
     """
     
-    def __init__(self, config: Dict[str, Any] = None):
-        """
-        Initialize the Enhanced Quality Evaluator.
+    def __init__(self, config: dict[str, Any] = None):
+        """Initialize the Enhanced Quality Evaluator.
         
         Args:
             config: Configuration parameters
@@ -77,13 +70,12 @@ class EnhancedQualityEvaluator:
         
     async def evaluate_enhanced_quality(
         self,
-        synthesis_result: Dict[str, Any],
-        viewpoints: List[Dict[str, Any]],
-        cognitive_analysis: Dict[str, Any] = None,
-        conflicts: List[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """
-        Perform enhanced quality evaluation.
+        synthesis_result: dict[str, Any],
+        viewpoints: list[dict[str, Any]],
+        cognitive_analysis: dict[str, Any] = None,
+        conflicts: list[dict[str, Any]] = None
+    ) -> dict[str, Any]:
+        """Perform enhanced quality evaluation.
         
         Args:
             synthesis_result: The synthesis result to evaluate
@@ -160,13 +152,12 @@ class EnhancedQualityEvaluator:
         self,
         dimension_name: str,
         synthesis_content: str,
-        viewpoints: List[Dict[str, Any]],
-        cognitive_analysis: Dict[str, Any] = None,
-        conflicts: List[Dict[str, Any]] = None,
-        dimension_config: Dict[str, Any] = None
+        viewpoints: list[dict[str, Any]],
+        cognitive_analysis: dict[str, Any] = None,
+        conflicts: list[dict[str, Any]] = None,
+        dimension_config: dict[str, Any] = None
     ) -> QualityDimension:
         """Evaluate a specific quality dimension."""
-        
         if dimension_config is None:
             dimension_config = self.enhanced_dimensions.get(dimension_name, {"weight": 0.1, "threshold": 0.5})
         
@@ -201,12 +192,11 @@ class EnhancedQualityEvaluator:
     async def _evaluate_cognitive_depth(
         self,
         synthesis_content: str,
-        viewpoints: List[Dict[str, Any]],
-        cognitive_analysis: Dict[str, Any] = None,
-        conflicts: List[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        cognitive_analysis: dict[str, Any] = None,
+        conflicts: list[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """Evaluate cognitive depth of synthesis."""
-        
         # Depth indicators
         depth_indicators = {
             "mechanism": ["机制", "原理", "根本", "深层", "本质", "核心"],
@@ -251,12 +241,11 @@ class EnhancedQualityEvaluator:
     async def _evaluate_insight_quality(
         self,
         synthesis_content: str,
-        viewpoints: List[Dict[str, Any]],
-        cognitive_analysis: Dict[str, Any] = None,
-        conflicts: List[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        cognitive_analysis: dict[str, Any] = None,
+        conflicts: list[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """Evaluate insight quality and generation."""
-        
         # Insight quality indicators
         insight_indicators = {
             "novelty": ["新", "创新", "独特", "突破", "首创", "原创"],
@@ -305,12 +294,11 @@ class EnhancedQualityEvaluator:
     async def _evaluate_synthesis_coherence(
         self,
         synthesis_content: str,
-        viewpoints: List[Dict[str, Any]],
-        cognitive_analysis: Dict[str, Any] = None,
-        conflicts: List[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        cognitive_analysis: dict[str, Any] = None,
+        conflicts: list[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """Evaluate synthesis coherence and structure."""
-        
         # Structure indicators
         structure_indicators = {
             "logical_flow": ["首先", "其次", "然后", "最后", "总之", "综上", "因此"],
@@ -360,12 +348,11 @@ class EnhancedQualityEvaluator:
     async def _evaluate_perspective_integration(
         self,
         synthesis_content: str,
-        viewpoints: List[Dict[str, Any]],
-        cognitive_analysis: Dict[str, Any] = None,
-        conflicts: List[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        cognitive_analysis: dict[str, Any] = None,
+        conflicts: list[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """Evaluate perspective integration quality."""
-        
         if not viewpoints:
             return {"score": 0.0, "confidence": 0.0, "details": {}, "suggestions": []}
         
@@ -420,12 +407,11 @@ class EnhancedQualityEvaluator:
     async def _evaluate_conflict_resolution(
         self,
         synthesis_content: str,
-        viewpoints: List[Dict[str, Any]],
-        cognitive_analysis: Dict[str, Any] = None,
-        conflicts: List[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        cognitive_analysis: dict[str, Any] = None,
+        conflicts: list[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """Evaluate conflict resolution quality."""
-        
         if not conflicts:
             return {"score": 1.0, "confidence": 1.0, "details": {"no_conflicts": True}, "suggestions": []}
         
@@ -471,12 +457,11 @@ class EnhancedQualityEvaluator:
     async def _evaluate_evidence_utilization(
         self,
         synthesis_content: str,
-        viewpoints: List[Dict[str, Any]],
-        cognitive_analysis: Dict[str, Any] = None,
-        conflicts: List[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        cognitive_analysis: dict[str, Any] = None,
+        conflicts: list[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """Evaluate evidence utilization in synthesis."""
-        
         # Evidence indicators
         evidence_indicators = [
             "证据", "数据", "事实", "研究", "分析", "统计",
@@ -519,12 +504,11 @@ class EnhancedQualityEvaluator:
     async def _evaluate_practical_value(
         self,
         synthesis_content: str,
-        viewpoints: List[Dict[str, Any]],
-        cognitive_analysis: Dict[str, Any] = None,
-        conflicts: List[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        cognitive_analysis: dict[str, Any] = None,
+        conflicts: list[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """Evaluate practical value and applicability."""
-        
         # Practical value indicators
         practical_indicators = [
             "应用", "实践", "实施", "执行", "操作", "运用",
@@ -567,12 +551,11 @@ class EnhancedQualityEvaluator:
     async def _evaluate_innovation_level(
         self,
         synthesis_content: str,
-        viewpoints: List[Dict[str, Any]],
-        cognitive_analysis: Dict[str, Any] = None,
-        conflicts: List[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        cognitive_analysis: dict[str, Any] = None,
+        conflicts: list[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """Evaluate innovation level and creativity."""
-        
         # Innovation indicators
         innovation_indicators = [
             "创新", "突破", "首创", "原创", "新", "独特",
@@ -612,7 +595,7 @@ class EnhancedQualityEvaluator:
             "suggestions": suggestions
         }
     
-    def _calculate_overall_score(self, dimension_results: Dict[str, QualityDimension]) -> float:
+    def _calculate_overall_score(self, dimension_results: dict[str, QualityDimension]) -> float:
         """Calculate overall quality score."""
         weighted_sum = sum(
             dimension.score * dimension.weight
@@ -623,7 +606,7 @@ class EnhancedQualityEvaluator:
         
         return weighted_sum / total_weight if total_weight > 0 else 0.0
     
-    def _generate_quality_assessment(self, overall_score: float, dimension_results: Dict[str, QualityDimension]) -> Dict[str, Any]:
+    def _generate_quality_assessment(self, overall_score: float, dimension_results: dict[str, QualityDimension]) -> dict[str, Any]:
         """Generate quality assessment."""
         # Determine quality grade
         grade = "very_poor"
@@ -650,9 +633,9 @@ class EnhancedQualityEvaluator:
     
     async def _generate_enhanced_recommendations(
         self,
-        dimension_results: Dict[str, QualityDimension],
+        dimension_results: dict[str, QualityDimension],
         overall_score: float
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate enhanced improvement recommendations."""
         recommendations = []
         
@@ -680,11 +663,11 @@ class EnhancedQualityEvaluator:
         unique_recommendations = list(set(recommendations))
         return unique_recommendations[:5]
     
-    def get_evaluation_history(self) -> List[Dict[str, Any]]:
+    def get_evaluation_history(self) -> list[dict[str, Any]]:
         """Get evaluation history."""
         return self.evaluation_history.copy()
     
-    def get_quality_trends(self) -> Dict[str, Any]:
+    def get_quality_trends(self) -> dict[str, Any]:
         """Get quality trends over time."""
         if len(self.evaluation_history) < 2:
             return {"message": "需要至少两次评估才能分析趋势"}
@@ -721,6 +704,6 @@ class EnhancedQualityEvaluator:
             "evaluation_count": len(self.evaluation_history)
         }
     
-    def get_quality_benchmarks(self) -> Dict[str, Any]:
+    def get_quality_benchmarks(self) -> dict[str, Any]:
         """Get quality benchmarks."""
         return self.quality_benchmarks.copy()

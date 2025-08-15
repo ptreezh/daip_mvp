@@ -1,24 +1,21 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2024-07-18 14:00:00
+"""@Time    : 2024-07-18 14:00:00
 @Author  : DAIP-LIVE Team
 @File    : role_recommender_service.py
 @Description:
     A service to recommend roles based on semantic similarity to a topic.
 """
 import logging
-from typing import Dict, List, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import chromadb
 
 if TYPE_CHECKING:
-    from src.core_services.role_manager import Role, RoleManager
+    from src.core_services.role_manager import RoleManager
     from src.kernel.llm_interface import LLMInterface
 
 
 class RoleRecommenderService:
-    """
-    Manages role recommendations using a vector database.
+    """Manages role recommendations using a vector database.
     """
 
     def __init__(
@@ -28,8 +25,7 @@ class RoleRecommenderService:
         db_path: str = "data/chroma_db",
         collection_name: str = "roles",
     ):
-        """
-        Initializes the service.
+        """Initializes the service.
 
         Args:
             role_manager: The service to get role definitions from.
@@ -47,8 +43,7 @@ class RoleRecommenderService:
         )
 
     def build_index(self, force_rebuild: bool = False) -> None:
-        """
-        Builds or updates the vector index for all roles.
+        """Builds or updates the vector index for all roles.
 
         Args:
             force_rebuild: If True, clears the existing index before building.
@@ -83,7 +78,7 @@ class RoleRecommenderService:
         self.collection.add(embeddings=embeddings, documents=documents, metadatas=metadatas, ids=ids)
         logging.info(f"Successfully built index for {self.collection.count()} roles.")
 
-    def recommend_roles(self, topic: str, top_k: int = 3) -> List[Dict]:
+    def recommend_roles(self, topic: str, top_k: int = 3) -> list[dict]:
         """Recommends roles based on a topic."""
         logging.info(f"Recommending {top_k} roles for topic: '{topic}'")
         query_embedding = self.llm_interface.get_embedding(topic)

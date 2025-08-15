@@ -1,23 +1,22 @@
+"""Unit tests for institutional primitives base classes and registry.
 """
-Unit tests for institutional primitives base classes and registry.
-"""
+
+import asyncio
+from datetime import datetime
+from typing import Any
 
 import pytest
-import asyncio
-from typing import Dict, Any
-from datetime import datetime
 
 from src.virtual_role_chat.institutional_primitives.base import (
-    InstitutionalPrimitive,
     ExecutionContext,
+    ExecutionResult,
+    InstitutionalPrimitive,
     PrimitiveInfo,
-    ValidationResult,
-    ExecutionResult
 )
 from src.virtual_role_chat.institutional_primitives.registry import (
     PrimitiveRegistry,
     get_global_registry,
-    register_primitive
+    register_primitive,
 )
 
 
@@ -29,7 +28,7 @@ class TestPrimitive(InstitutionalPrimitive):
         self.executed = False
         self.execution_count = 0
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> ExecutionResult:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> ExecutionResult:
         """Test execution that simply echoes inputs."""
         self.executed = True
         self.execution_count += 1
@@ -46,7 +45,7 @@ class TestPrimitive(InstitutionalPrimitive):
             execution_time=0.01
         )
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         """Return test input schema."""
         return {
             "type": "object",
@@ -56,7 +55,7 @@ class TestPrimitive(InstitutionalPrimitive):
             "required": ["data"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         """Return test output schema."""
         return {
             "type": "object",
@@ -101,7 +100,7 @@ class TestInstitutionalPrimitive:
         primitive = TestPrimitive(config)
         assert primitive.config == config
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_primitive_execution(self):
         """Test primitive execution."""
         primitive = TestPrimitive()

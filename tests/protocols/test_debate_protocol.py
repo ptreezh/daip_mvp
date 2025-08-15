@@ -1,34 +1,33 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 12:00:00
+"""@Time    : 2025-07-25 12:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_debate_protocol.py
 @Description:
     Unit tests for the DebateProtocol orchestrator.
 """
 import asyncio
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, call
 
 from src.kernel.core import Kernel
-from src.protocols.debate_protocol import DebateProtocol
 from src.models import (
     DebateConfig,
-    DebateTurn,
+    DebateEndEvent,
     DebateResult,
     DebateStartEvent,
+    DebateTurn,
+    ErrorEvent,
     NewTurnEvent,
     TechLogEvent,
-    DebateEndEvent,
-    ErrorEvent,
     UserInterventionCommand,
 )
+from src.protocols.debate_protocol import DebateProtocol
 
 # Use pytest_asyncio for all tests in this module
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_kernel():
     """Fixture for a mocked Kernel with its components."""
     kernel = MagicMock(spec=Kernel)
@@ -45,13 +44,13 @@ def mock_kernel():
     return kernel
 
 
-@pytest.fixture
+@pytest.fixture()
 def event_queue():
     """Fixture for a new asyncio.Queue for each test."""
     return asyncio.Queue()
 
 
-@pytest.fixture
+@pytest.fixture()
 def debate_config():
     """Fixture for a standard DebateConfig."""
     return DebateConfig(
@@ -71,8 +70,7 @@ async def get_all_events(queue: asyncio.Queue):
 
 
 async def test_run_successful_debate(mock_kernel, event_queue, debate_config):
-    """
-    Tests the full, successful execution path of the debate protocol.
+    """Tests the full, successful execution path of the debate protocol.
     """
     # Arrange
     mock_kernel.synthesis_engine.summarize_context.side_effect = ["Context for RoleA", "Context for RoleB"]
@@ -135,8 +133,7 @@ async def test_run_successful_debate(mock_kernel, event_queue, debate_config):
 
 
 async def test_run_handles_interaction_failure(mock_kernel, event_queue, debate_config):
-    """
-    Tests that an ErrorEvent is emitted if the LLM interface fails.
+    """Tests that an ErrorEvent is emitted if the LLM interface fails.
     """
     # Arrange
     mock_kernel.synthesis_engine.summarize_context.return_value = "Some context"
@@ -154,8 +151,7 @@ async def test_run_handles_interaction_failure(mock_kernel, event_queue, debate_
 
 
 async def test_run_handles_consensus_failure(mock_kernel, event_queue, debate_config):
-    """
-    Tests that the debate continues with simple consensus when consensus tool fails.
+    """Tests that the debate continues with simple consensus when consensus tool fails.
     """
     # Arrange
     mock_kernel.synthesis_engine.summarize_context.return_value = "Context"
@@ -183,8 +179,7 @@ async def test_run_handles_consensus_failure(mock_kernel, event_queue, debate_co
 
 
 async def test_handle_user_intervention(mock_kernel, event_queue):
-    """
-    Tests that a user intervention command is correctly processed.
+    """Tests that a user intervention command is correctly processed.
     """
     # Arrange
     protocol = DebateProtocol(kernel=mock_kernel, event_queue=event_queue)

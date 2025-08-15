@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-真实用户端到端测试
+"""真实用户端到端测试
 
 模拟真实用户使用场景，测试完整的辩论流程，包括：
 - 用户启动辩论
@@ -13,9 +11,8 @@
 import asyncio
 import sys
 import time
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, List
+from pathlib import Path
 
 # 添加项目路径
 project_root = Path(__file__).parent
@@ -90,16 +87,16 @@ class RealUserTestScenario:
         print("正在启动辩论系统...")
         
         try:
+            from src.core_services.role_manager import RoleManager
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-            from src.core_services.role_manager import RoleManager
             
             # 创建系统组件
             llm_integrator = RealLLMIntegrator()
             role_manager = RoleManager()
             self.debate_system = MultiRoleDebateSystem(llm_integrator, role_manager)
             
-            print(f"✓ 系统组件初始化成功")
+            print("✓ 系统组件初始化成功")
             print(f"✓ LLM集成器: {type(llm_integrator).__name__}")
             print(f"✓ 角色管理器: 加载了 {len(role_manager._roles)} 个角色")
             

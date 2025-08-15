@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 12:35:00
+"""@Time    : 2025-08-03 12:35:00
 @Author  : DAIP-LIVE Team
 @File    : test_scenario_integration.py
 @Description:
@@ -16,12 +14,12 @@
 """
 
 import asyncio
+import json
 import logging
 import time
-import json
-from typing import Dict, List, Any
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 # 导入待测试组件
 from src.scenarios.scenario_manager import ScenarioManager, ScenarioType
@@ -38,7 +36,7 @@ class ScenarioIntegrationQualityAssurance:
         self.test_results = {}
         self.scenario_manager = ScenarioManager()
         
-    async def run_all_tests(self) -> Dict[str, Any]:
+    async def run_all_tests(self) -> dict[str, Any]:
         """运行所有质量保证测试"""
         logger.info("=" * 60)
         logger.info("🎭 开始三场景集成质量保证测试")
@@ -95,7 +93,7 @@ class ScenarioIntegrationQualityAssurance:
         
         return final_report
     
-    async def test_scenario_switching(self) -> Dict[str, Any]:
+    async def test_scenario_switching(self) -> dict[str, Any]:
         """场景切换功能测试 - 验证用户在不同场景间的无缝切换"""
         logger.info("执行场景切换功能测试...")
         
@@ -199,7 +197,7 @@ class ScenarioIntegrationQualityAssurance:
                 "details": "场景切换功能测试执行失败"
             }
     
-    async def test_context_preservation(self) -> Dict[str, Any]:
+    async def test_context_preservation(self) -> dict[str, Any]:
         """上下文保持测试 - 确保场景切换时的对话上下文连贯性"""
         logger.info("执行上下文保持测试...")
         
@@ -302,7 +300,7 @@ class ScenarioIntegrationQualityAssurance:
                 "details": "上下文保持测试执行失败"
             }
     
-    async def test_intelligent_recommendation(self) -> Dict[str, Any]:
+    async def test_intelligent_recommendation(self) -> dict[str, Any]:
         """智能推荐系统测试 - 基于用户历史偏好智能推荐合适的场景"""
         logger.info("执行智能推荐系统测试...")
         
@@ -414,7 +412,7 @@ class ScenarioIntegrationQualityAssurance:
                 "details": "智能推荐系统测试执行失败"
             }
     
-    async def test_unified_interface(self) -> Dict[str, Any]:
+    async def test_unified_interface(self) -> dict[str, Any]:
         """统一界面集成测试 - 三个场景在统一界面下的一致性体验"""
         logger.info("执行统一界面集成测试...")
         
@@ -508,7 +506,7 @@ class ScenarioIntegrationQualityAssurance:
                 "details": "统一界面集成测试执行失败"
             }
     
-    async def test_personalization(self) -> Dict[str, Any]:
+    async def test_personalization(self) -> dict[str, Any]:
         """个性化适配测试 - 验证基于用户历史偏好的个性化适配"""
         logger.info("执行个性化适配测试...")
         
@@ -619,7 +617,7 @@ class ScenarioIntegrationQualityAssurance:
                 "details": "个性化适配测试执行失败"
             }
     
-    async def test_data_consistency(self) -> Dict[str, Any]:
+    async def test_data_consistency(self) -> dict[str, Any]:
         """数据一致性测试 - 验证场景间切换的数据一致性"""
         logger.info("执行数据一致性测试...")
         
@@ -730,7 +728,7 @@ class ScenarioIntegrationQualityAssurance:
                 "details": "数据一致性测试执行失败"
             }
     
-    async def test_performance_stability(self) -> Dict[str, Any]:
+    async def test_performance_stability(self) -> dict[str, Any]:
         """性能和稳定性测试 - 验证系统在高频使用下的稳定性"""
         logger.info("执行性能和稳定性测试...")
         
@@ -855,7 +853,7 @@ class ScenarioIntegrationQualityAssurance:
             }
     
     # 辅助方法
-    def _check_preference_consistency(self, original: Dict[str, Any], preserved: Dict[str, Any]) -> bool:
+    def _check_preference_consistency(self, original: dict[str, Any], preserved: dict[str, Any]) -> bool:
         """检查偏好一致性"""
         key_fields = ["interests", "experience_level", "user_id"]
         return all(
@@ -882,7 +880,7 @@ class ScenarioIntegrationQualityAssurance:
             user_preferences={"test": True}
         )
     
-    async def _test_recommendation_consistency(self, user_id: str) -> Dict[str, Any]:
+    async def _test_recommendation_consistency(self, user_id: str) -> dict[str, Any]:
         """测试推荐一致性"""
         same_input = "人工智能技术发展趋势"
         
@@ -902,7 +900,7 @@ class ScenarioIntegrationQualityAssurance:
             "consistency_score": 1.0 if len(set(recommendations)) == 1 else 0.5
         }
     
-    async def _simulate_user_history(self, user_id: str, profile: Dict[str, Any]):
+    async def _simulate_user_history(self, user_id: str, profile: dict[str, Any]):
         """模拟用户使用历史"""
         usage_pattern = profile.get("usage_pattern", "balanced")
         
@@ -923,7 +921,7 @@ class ScenarioIntegrationQualityAssurance:
                 user_preferences=profile
             )
     
-    def _check_usage_stats_growth(self, snapshots: List[Dict[str, Any]]) -> bool:
+    def _check_usage_stats_growth(self, snapshots: list[dict[str, Any]]) -> bool:
         """检查使用统计是否递增"""
         for i in range(1, len(snapshots)):
             if snapshots[i]["user_profile"] and snapshots[i-1]["user_profile"]:
@@ -933,7 +931,7 @@ class ScenarioIntegrationQualityAssurance:
                     return False
         return True
     
-    def _check_context_preservation_consistency(self, contexts: List[Dict[str, Any]]) -> bool:
+    def _check_context_preservation_consistency(self, contexts: list[dict[str, Any]]) -> bool:
         """检查上下文保持一致性"""
         # 简化检查：确保所有上下文都有基本字段
         required_fields = ["scenario_id", "scenario_type", "topic"]
@@ -942,7 +940,7 @@ class ScenarioIntegrationQualityAssurance:
             for context in contexts
         )
     
-    def _check_data_corruption(self, snapshots: List[Dict[str, Any]]) -> bool:
+    def _check_data_corruption(self, snapshots: list[dict[str, Any]]) -> bool:
         """检查数据损坏"""
         # 简化检查：确保用户档案数据结构完整
         for snapshot in snapshots:
@@ -952,7 +950,7 @@ class ScenarioIntegrationQualityAssurance:
                     return False
         return True
     
-    def _count_profile_changes(self, snapshots: List[Dict[str, Any]]) -> int:
+    def _count_profile_changes(self, snapshots: list[dict[str, Any]]) -> int:
         """统计档案变化次数"""
         changes = 0
         for i in range(1, len(snapshots)):
@@ -971,9 +969,8 @@ class ScenarioIntegrationQualityAssurance:
         estimated_memory = active_contexts * 10 + user_profiles * 5 + transition_history * 1
         return estimated_memory
     
-    async def generate_final_report(self, overall_success: bool) -> Dict[str, Any]:
+    async def generate_final_report(self, overall_success: bool) -> dict[str, Any]:
         """生成最终质量保证报告"""
-        
         # 统计测试结果
         total_tests = len(self.test_results)
         passed_tests = sum(1 for result in self.test_results.values() if result.get("success", False))
@@ -1016,7 +1013,7 @@ class ScenarioIntegrationQualityAssurance:
         
         return report
     
-    async def save_report(self, report: Dict[str, Any]):
+    async def save_report(self, report: dict[str, Any]):
         """保存质量保证报告"""
         try:
             report_path = Path("v0_2_8_scenario_integration_quality_report.json")
@@ -1047,7 +1044,7 @@ async def main():
             status = "✅" if passed else "❌"
             print(f"  {check}: {status}")
         
-        print(f"\n💡 建议:")
+        print("\n💡 建议:")
         for rec in final_report['recommendations']:
             print(f"  • {rec}")
         

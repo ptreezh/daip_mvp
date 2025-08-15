@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-个性化推荐引擎
+"""个性化推荐引擎
 
 基于用户兴趣和知识图谱生成个性化推荐
 """
 
 import logging
-from typing import Dict, List, Any, Optional
 from datetime import datetime
-import random
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -37,11 +34,11 @@ class PersonalizedRecommendationEngine:
     
     def generate_recommendations(
         self,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         knowledge_graph: Any = None,
         recommendation_count: int = 5,
         strategy: str = "hybrid"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成个性化推荐"""
         try:
             user_id = user_profile.get("user_id", "unknown")
@@ -97,10 +94,10 @@ class PersonalizedRecommendationEngine:
     
     def _generate_hybrid_recommendations(
         self,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         knowledge_graph: Any,
         recommendation_count: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成混合推荐"""
         all_recommendations = []
         
@@ -132,10 +129,10 @@ class PersonalizedRecommendationEngine:
     
     def _generate_interest_based_recommendations(
         self,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         knowledge_graph: Any,
         recommendation_count: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """基于兴趣的推荐"""
         recommendations = []
         user_interests = user_profile.get("interests", {})
@@ -166,10 +163,10 @@ class PersonalizedRecommendationEngine:
     
     def _generate_knowledge_graph_recommendations(
         self,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         knowledge_graph: Any,
         recommendation_count: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """基于知识图谱的推荐"""
         recommendations = []
         
@@ -209,10 +206,10 @@ class PersonalizedRecommendationEngine:
     
     def _generate_collaborative_recommendations(
         self,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         knowledge_graph: Any,
         recommendation_count: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """协同过滤推荐"""
         recommendations = []
         
@@ -238,10 +235,10 @@ class PersonalizedRecommendationEngine:
     
     def _generate_content_based_recommendations(
         self,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         knowledge_graph: Any,
         recommendation_count: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """基于内容的推荐"""
         recommendations = []
         
@@ -268,7 +265,7 @@ class PersonalizedRecommendationEngine:
         
         return recommendations
     
-    def _deduplicate_recommendations(self, recommendations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _deduplicate_recommendations(self, recommendations: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """去重推荐"""
         seen_topics = set()
         unique_recommendations = []
@@ -281,7 +278,7 @@ class PersonalizedRecommendationEngine:
         
         return unique_recommendations
     
-    def _sort_recommendations(self, recommendations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _sort_recommendations(self, recommendations: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """排序推荐"""
         # 综合考虑相关性分数和策略权重
         def sort_key(rec):
@@ -291,7 +288,7 @@ class PersonalizedRecommendationEngine:
         
         return sorted(recommendations, key=sort_key, reverse=True)
     
-    def _calculate_recommendation_confidence(self, recommendations: List[Dict[str, Any]]) -> Dict[str, float]:
+    def _calculate_recommendation_confidence(self, recommendations: list[dict[str, Any]]) -> dict[str, float]:
         """计算推荐置信度"""
         confidence_scores = {}
         
@@ -316,8 +313,8 @@ class PersonalizedRecommendationEngine:
     
     def _generate_recommendation_reasoning(
         self,
-        user_profile: Dict[str, Any],
-        recommendations: List[Dict[str, Any]],
+        user_profile: dict[str, Any],
+        recommendations: list[dict[str, Any]],
         strategy: str
     ) -> str:
         """生成推荐理由"""
@@ -350,7 +347,7 @@ class PersonalizedRecommendationEngine:
         
         return "，".join(reasoning_parts) + "。"
     
-    def _calculate_diversity(self, recommendations: List[Dict[str, Any]]) -> float:
+    def _calculate_diversity(self, recommendations: list[dict[str, Any]]) -> float:
         """计算推荐多样性"""
         if not recommendations:
             return 0.0
@@ -378,7 +375,7 @@ class PersonalizedRecommendationEngine:
         else:
             return "surface"
     
-    def _get_related_concepts(self, interest: str) -> List[str]:
+    def _get_related_concepts(self, interest: str) -> list[str]:
         """获取相关概念"""
         concept_map = {
             "AI伦理": ["算法公平性", "AI透明度", "隐私保护", "责任AI"],
@@ -388,7 +385,7 @@ class PersonalizedRecommendationEngine:
         
         return concept_map.get(interest, [])
     
-    def _generate_learning_path(self, interest: str, user_profile: Dict[str, Any]) -> List[str]:
+    def _generate_learning_path(self, interest: str, user_profile: dict[str, Any]) -> list[str]:
         """生成学习路径"""
         expertise_level = user_profile.get("expertise_level", "intermediate")
         
@@ -402,7 +399,7 @@ class PersonalizedRecommendationEngine:
         
         return learning_paths.get(interest, {}).get(expertise_level, ["基础学习", "实践应用"])
     
-    def _generate_exploration_suggestions(self, concept: Dict[str, Any]) -> List[str]:
+    def _generate_exploration_suggestions(self, concept: dict[str, Any]) -> list[str]:
         """生成探索建议"""
         concept_type = concept.get("node_type", "concept")
         
@@ -414,7 +411,7 @@ class PersonalizedRecommendationEngine:
         
         return suggestions_map.get(concept_type, ["进一步探索", "查看相关内容"])
     
-    def _get_collaborative_topics(self, user_interests: Dict[str, float], expertise_level: str) -> List[Dict[str, Any]]:
+    def _get_collaborative_topics(self, user_interests: dict[str, float], expertise_level: str) -> list[dict[str, Any]]:
         """获取协同过滤主题"""
         # 模拟协同过滤结果
         base_topics = [

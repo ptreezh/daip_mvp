@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-WebSocket测试工具
+"""WebSocket测试工具
 
 用于测试WebSocket实时通信功能
 模拟后端发送各种类型的更新消息
@@ -10,7 +8,8 @@ WebSocket测试工具
 import asyncio
 import json
 from datetime import datetime
-from services.websocket_manager import websocket_manager, MessageType, WebSocketMessage
+
+from services.websocket_manager import MessageType, websocket_manager
 
 
 async def test_agent_status_updates():

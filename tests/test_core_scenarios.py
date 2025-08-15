@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 15:45:00
+"""@Time    : 2025-08-04 15:45:00
 @Author  : DAIP-LIVE Team
 @File    : test_core_scenarios.py
 @Description:
@@ -10,42 +8,40 @@
     - Industry Analysis Scenario
 """
 
-import pytest
 import asyncio
-import json
 from datetime import datetime
-from unittest.mock import Mock, patch, AsyncMock
-from typing import Dict, List, Any
 
-# Import the scenarios to test
-from src.core_services.expert_consultation_scenario import (
-    ExpertConsultationScenario,
-    ExpertConsultationRequest,
-    ConsultationType,
-    ConsultationPriority
-)
+import pytest
+
 from src.core_services.academic_research_scenario import (
     AcademicResearchScenario,
     ResearchPaper,
     ResearchType,
-    AcademicStandard
+)
+
+# Import the scenarios to test
+from src.core_services.expert_consultation_scenario import (
+    ConsultationPriority,
+    ConsultationType,
+    ExpertConsultationRequest,
+    ExpertConsultationScenario,
 )
 from src.core_services.industry_analysis_scenario import (
-    IndustryAnalysisScenario,
+    AnalysisDepth,
     AnalysisRequest,
+    IndustryAnalysisScenario,
     IndustryType,
-    AnalysisDepth
 )
 
 
 class TestExpertConsultationScenario:
     """Test suite for Expert Consultation Scenario"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def scenario(self):
         return ExpertConsultationScenario()
     
-    @pytest.fixture
+    @pytest.fixture()
     def consultation_request(self):
         return ExpertConsultationRequest(
             id="test_consultation_001",
@@ -61,7 +57,7 @@ class TestExpertConsultationScenario:
             time_constraints={"response_time": "72 hours"}
         )
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_scenario_initialization(self, scenario):
         """Test scenario initialization"""
         assert scenario is not None
@@ -69,7 +65,7 @@ class TestExpertConsultationScenario:
         assert hasattr(scenario, 'consultation_history')
         assert len(scenario.expert_pool) > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_handle_consultation_basic(self, scenario, consultation_request):
         """Test basic consultation handling"""
         result = await scenario.handle_consultation(consultation_request)
@@ -80,7 +76,7 @@ class TestExpertConsultationScenario:
         assert 'synthesis' in result
         assert len(result['selected_experts']) > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_expert_selection(self, scenario):
         """Test expert selection logic"""
         experts = scenario._select_experts_for_consultation(
@@ -95,7 +91,7 @@ class TestExpertConsultationScenario:
             assert hasattr(expert, 'name')
             assert hasattr(expert, 'expertise_area')
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_different_consultation_types(self, scenario):
         """Test different consultation types"""
         types_to_test = [
@@ -122,7 +118,7 @@ class TestExpertConsultationScenario:
             result = await scenario.handle_consultation(request)
             assert result['success'] is True
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_priority_handling(self, scenario):
         """Test different priority levels"""
         priorities_to_test = [
@@ -150,7 +146,7 @@ class TestExpertConsultationScenario:
             result = await scenario.handle_consultation(request)
             assert result['success'] is True
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_consultation_history(self, scenario, consultation_request):
         """Test consultation history tracking"""
         # Submit a consultation
@@ -166,11 +162,11 @@ class TestExpertConsultationScenario:
 class TestAcademicResearchScenario:
     """Test suite for Academic Research Scenario"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def scenario(self):
         return AcademicResearchScenario()
     
-    @pytest.fixture
+    @pytest.fixture()
     def research_paper(self):
         return ResearchPaper(
             id="test_paper_001",
@@ -188,7 +184,7 @@ class TestAcademicResearchScenario:
             submission_date=datetime.now()
         )
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_scenario_initialization(self, scenario):
         """Test scenario initialization"""
         assert scenario is not None
@@ -196,7 +192,7 @@ class TestAcademicResearchScenario:
         assert hasattr(scenario, 'research_history')
         assert hasattr(scenario, 'academic_standards')
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_submit_research_paper(self, scenario, research_paper):
         """Test research paper submission"""
         result = await scenario.submit_research_paper(research_paper)
@@ -208,7 +204,7 @@ class TestAcademicResearchScenario:
         assert 'academic_assessment' in result
         assert len(result['peer_reviews']) > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_conduct_literature_review(self, scenario):
         """Test literature review functionality"""
         result = await scenario.conduct_literature_review(
@@ -222,7 +218,7 @@ class TestAcademicResearchScenario:
         assert 'thematic_analysis' in result
         assert 'research_gaps' in result
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_different_research_types(self, scenario):
         """Test different research types"""
         research_types = [
@@ -245,7 +241,7 @@ class TestAcademicResearchScenario:
             result = await scenario.submit_research_paper(paper)
             assert result['success'] is True
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_multidimensional_assessment(self, scenario, research_paper):
         """Test multidimensional assessment"""
         result = await scenario.submit_research_paper(research_paper)
@@ -261,7 +257,7 @@ class TestAcademicResearchScenario:
             assert 'impact_score' in assessment
             assert 'overall_score' in assessment
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_research_history(self, scenario, research_paper):
         """Test research history tracking"""
         # Submit a paper
@@ -277,11 +273,11 @@ class TestAcademicResearchScenario:
 class TestIndustryAnalysisScenario:
     """Test suite for Industry Analysis Scenario"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def scenario(self):
         return IndustryAnalysisScenario()
     
-    @pytest.fixture
+    @pytest.fixture()
     def analysis_request(self):
         return AnalysisRequest(
             industry_type=IndustryType.TECHNOLOGY,
@@ -292,7 +288,7 @@ class TestIndustryAnalysisScenario:
             priority_level="HIGH"
         )
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_scenario_initialization(self, scenario):
         """Test scenario initialization"""
         assert scenario is not None
@@ -300,7 +296,7 @@ class TestIndustryAnalysisScenario:
         assert hasattr(scenario, 'analysis_history')
         assert len(scenario.expert_pool) > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_submit_analysis_request(self, scenario, analysis_request):
         """Test analysis request submission"""
         result = await scenario.submit_analysis_request(analysis_request)
@@ -312,7 +308,7 @@ class TestIndustryAnalysisScenario:
         assert 'quality_score' in result
         assert result['quality_score'] > 0.0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_different_industry_types(self, scenario):
         """Test different industry types"""
         industries_to_test = [
@@ -335,7 +331,7 @@ class TestIndustryAnalysisScenario:
             result = await scenario.submit_analysis_request(request)
             assert result['success'] is True
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_different_analysis_depths(self, scenario):
         """Test different analysis depths"""
         depths_to_test = [
@@ -357,7 +353,7 @@ class TestIndustryAnalysisScenario:
             result = await scenario.submit_analysis_request(request)
             assert result['success'] is True
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_expert_selection(self, scenario, analysis_request):
         """Test expert selection for industry analysis"""
         selected_experts = scenario._select_experts_for_analysis(analysis_request)
@@ -369,7 +365,7 @@ class TestIndustryAnalysisScenario:
         for expert in selected_experts:
             assert analysis_request.industry_type in expert.industry_focus
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_get_industry_overview(self, scenario):
         """Test industry overview functionality"""
         overview = await scenario.get_industry_overview(IndustryType.TECHNOLOGY)
@@ -381,7 +377,7 @@ class TestIndustryAnalysisScenario:
         assert 'available_experts' in overview
         assert overview['available_experts'] > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_analysis_status_tracking(self, scenario, analysis_request):
         """Test analysis status tracking"""
         # Submit analysis
@@ -393,7 +389,7 @@ class TestIndustryAnalysisScenario:
         assert status['status'] == 'success'
         assert status['industry_type'] == analysis_request.industry_type.value
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_analysis_history(self, scenario, analysis_request):
         """Test analysis history tracking"""
         # Submit analysis
@@ -409,7 +405,7 @@ class TestIndustryAnalysisScenario:
 class TestScenarioIntegration:
     """Integration tests for all three scenarios"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_cross_scenario_functionality(self):
         """Test that all scenarios can coexist and function together"""
         # Initialize all scenarios
@@ -472,7 +468,7 @@ class TestScenarioIntegration:
                 pytest.fail(f"Scenario failed with exception: {result}")
             assert result['success'] is True
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_performance_benchmark(self):
         """Test performance benchmark for all scenarios"""
         expert_scenario = ExpertConsultationScenario()

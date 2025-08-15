@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : config.py
 @Description:
@@ -8,12 +6,11 @@
     Handles environment variables, configuration loading, and validation.
 """
 
-import os
 import json
-from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, field
 from pathlib import Path
-import logging
+from typing import Any, Optional
+
 from pydantic import BaseSettings, Field, validator
 
 
@@ -79,12 +76,12 @@ class SecurityConfig:
     refresh_token_expire_minutes: int = 60
     algorithm: str = "HS256"
     enable_cors: bool = True
-    cors_origins: List[str] = field(default_factory=lambda: [
+    cors_origins: list[str] = field(default_factory=lambda: [
         "http://localhost:3000",
         "http://localhost:8080", 
         "http://localhost:5173"
     ])
-    trusted_hosts: List[str] = field(default_factory=lambda: ["localhost", "127.0.0.1"])
+    trusted_hosts: list[str] = field(default_factory=lambda: ["localhost", "127.0.0.1"])
 
 
 @dataclass
@@ -412,7 +409,7 @@ def load_config_from_file(config_path: str) -> Settings:
     if not config_file.exists():
         raise FileNotFoundError(f"Config file not found: {config_path}")
     
-    with open(config_file, 'r', encoding='utf-8') as f:
+    with open(config_file, encoding='utf-8') as f:
         config_data = json.load(f)
     
     return Settings(**config_data)
@@ -429,7 +426,7 @@ def save_config_to_file(settings: Settings, config_path: str):
         json.dump(settings.dict(), f, indent=2, ensure_ascii=False)
 
 
-def validate_config(settings: Settings) -> List[str]:
+def validate_config(settings: Settings) -> list[str]:
     """验证配置"""
     errors = []
     
@@ -470,7 +467,7 @@ def validate_config(settings: Settings) -> List[str]:
     return errors
 
 
-def get_config_summary(settings: Settings) -> Dict[str, Any]:
+def get_config_summary(settings: Settings) -> dict[str, Any]:
     """获取配置摘要"""
     return {
         "app_name": settings.app_name,

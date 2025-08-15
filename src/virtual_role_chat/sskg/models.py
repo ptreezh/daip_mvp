@@ -1,13 +1,12 @@
-"""
-Data models for the Semantic Structured Knowledge Graph (SSKG).
+"""Data models for the Semantic Structured Knowledge Graph (SSKG).
 
 This module defines the core data models used by the SSKG system,
 including knowledge facts, relations, queries, and various memory types.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
 from enum import Enum
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -44,22 +43,20 @@ class ConflictResolutionStrategy(str, Enum):
 
 
 class KnowledgeRelation(BaseModel):
-    """
-    Represents a relationship between two knowledge facts.
+    """Represents a relationship between two knowledge facts.
     """
     id: Optional[str] = None
     relation_type: RelationType
     target_fact_id: str
     confidence: float = Field(ge=0.0, le=1.0, description="Confidence in this relationship")
-    evidence: List[str] = Field(default_factory=list, description="Evidence supporting this relationship")
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    evidence: list[str] = Field(default_factory=list, description="Evidence supporting this relationship")
+    metadata: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.now)
     created_by: Optional[str] = None  # Agent or user ID
 
 
 class KnowledgeFact(BaseModel):
-    """
-    Represents a single fact in the knowledge graph.
+    """Represents a single fact in the knowledge graph.
     """
     id: Optional[str] = None
     content: str = Field(description="The actual content/statement of the fact")
@@ -72,22 +69,22 @@ class KnowledgeFact(BaseModel):
     # Semantic information
     domain: Optional[str] = None
     topic: Optional[str] = None
-    keywords: List[str] = Field(default_factory=list)
+    keywords: list[str] = Field(default_factory=list)
     
     # Relationships
-    relations: List[KnowledgeRelation] = Field(default_factory=list)
+    relations: list[KnowledgeRelation] = Field(default_factory=list)
     
     # Provenance and validation
     validation_status: str = Field(default="unvalidated", description="Validation status")
-    validation_history: List[Dict[str, Any]] = Field(default_factory=list)
+    validation_history: list[dict[str, Any]] = Field(default_factory=list)
     
     # Access and usage tracking
     access_count: int = Field(default=0)
     last_accessed: Optional[datetime] = None
     
     # Metadata
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    tags: List[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    tags: list[str] = Field(default_factory=list)
     
     def add_relation(self, relation: KnowledgeRelation) -> None:
         """Add a relationship to this fact."""
@@ -117,14 +114,13 @@ class KnowledgeFact(BaseModel):
 
 
 class KnowledgeQuery(BaseModel):
-    """
-    Query specification for searching knowledge facts.
+    """Query specification for searching knowledge facts.
     """
     content: Optional[str] = None
     source: Optional[str] = None
     domain: Optional[str] = None
     topic: Optional[str] = None
-    keywords: List[str] = Field(default_factory=list)
+    keywords: list[str] = Field(default_factory=list)
     
     # Confidence and validation filters
     min_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -132,17 +128,17 @@ class KnowledgeQuery(BaseModel):
     validation_status: Optional[str] = None
     
     # Relationship filters
-    relation_filter: Optional[Dict[str, Any]] = None
+    relation_filter: Optional[dict[str, Any]] = None
     related_to_fact_id: Optional[str] = None
-    relation_types: List[RelationType] = Field(default_factory=list)
+    relation_types: list[RelationType] = Field(default_factory=list)
     
     # Temporal filters
-    time_range: Optional[Tuple[datetime, datetime]] = None
+    time_range: Optional[tuple[datetime, datetime]] = None
     updated_since: Optional[datetime] = None
     
     # Metadata filters
-    metadata_filter: Optional[Dict[str, Any]] = None
-    tags: List[str] = Field(default_factory=list)
+    metadata_filter: Optional[dict[str, Any]] = None
+    tags: list[str] = Field(default_factory=list)
     
     # Result options
     limit: int = Field(default=10, ge=1, le=1000)
@@ -157,23 +153,21 @@ class KnowledgeQuery(BaseModel):
 
 
 class ConflictResolution(BaseModel):
-    """
-    Result of resolving conflicts between knowledge facts.
+    """Result of resolving conflicts between knowledge facts.
     """
     resolved_fact: KnowledgeFact
-    conflicting_facts: List[KnowledgeFact]
+    conflicting_facts: list[KnowledgeFact]
     resolution_strategy: ConflictResolutionStrategy
     confidence: float = Field(ge=0.0, le=1.0)
     reasoning: str
-    evidence: List[str] = Field(default_factory=list)
+    evidence: list[str] = Field(default_factory=list)
     resolved_at: datetime = Field(default_factory=datetime.now)
     resolved_by: Optional[str] = None  # Agent or user ID
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class Memory(BaseModel):
-    """
-    Represents a memory item in the system.
+    """Represents a memory item in the system.
     """
     id: Optional[str] = None
     content: str
@@ -190,13 +184,13 @@ class Memory(BaseModel):
     access_count: int = Field(default=0)
     
     # Relationships and associations
-    related_memories: List[str] = Field(default_factory=list, description="IDs of related memories")
-    associated_facts: List[str] = Field(default_factory=list, description="IDs of associated knowledge facts")
+    related_memories: list[str] = Field(default_factory=list, description="IDs of related memories")
+    associated_facts: list[str] = Field(default_factory=list, description="IDs of associated knowledge facts")
     
     # Context and metadata
-    context: Dict[str, Any] = Field(default_factory=dict)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    tags: List[str] = Field(default_factory=list)
+    context: dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    tags: list[str] = Field(default_factory=list)
     
     def mark_accessed(self) -> None:
         """Mark this memory as accessed."""
@@ -205,8 +199,7 @@ class Memory(BaseModel):
 
 
 class MemoryQuery(BaseModel):
-    """
-    Query specification for searching memories.
+    """Query specification for searching memories.
     """
     content: Optional[str] = None
     memory_type: Optional[MemoryType] = None
@@ -217,7 +210,7 @@ class MemoryQuery(BaseModel):
     relevance_context: Optional[str] = None
     
     # Temporal filters
-    time_range: Optional[Tuple[datetime, datetime]] = None
+    time_range: Optional[tuple[datetime, datetime]] = None
     accessed_since: Optional[datetime] = None
     
     # Relationship filters
@@ -225,8 +218,8 @@ class MemoryQuery(BaseModel):
     associated_with_fact: Optional[str] = None
     
     # Metadata filters
-    metadata_filter: Optional[Dict[str, Any]] = None
-    tags: List[str] = Field(default_factory=list)
+    metadata_filter: Optional[dict[str, Any]] = None
+    tags: list[str] = Field(default_factory=list)
     
     # Result options
     limit: int = Field(default=10, ge=1, le=1000)
@@ -236,8 +229,7 @@ class MemoryQuery(BaseModel):
 
 
 class WikiPage(BaseModel):
-    """
-    Represents a wiki page in the system.
+    """Represents a wiki page in the system.
     """
     id: str
     title: str
@@ -248,22 +240,22 @@ class WikiPage(BaseModel):
     created_by: str
     created_at: datetime = Field(default_factory=datetime.now)
     last_updated: datetime = Field(default_factory=datetime.now)
-    contributors: List[str] = Field(default_factory=list)
+    contributors: list[str] = Field(default_factory=list)
     
     # Organization
     category: Optional[str] = None
-    tags: List[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
     
     # Relationships
-    linked_pages: List[str] = Field(default_factory=list, description="IDs of linked wiki pages")
-    associated_facts: List[str] = Field(default_factory=list, description="IDs of associated knowledge facts")
+    linked_pages: list[str] = Field(default_factory=list, description="IDs of linked wiki pages")
+    associated_facts: list[str] = Field(default_factory=list, description="IDs of associated knowledge facts")
     
     # Access tracking
     view_count: int = Field(default=0)
     last_viewed: Optional[datetime] = None
     
     # Metadata
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     
     def mark_viewed(self) -> None:
         """Mark this page as viewed."""
@@ -272,15 +264,14 @@ class WikiPage(BaseModel):
 
 
 class SessionState(BaseModel):
-    """
-    Represents session state information.
+    """Represents session state information.
     """
     session_id: str
     user_id: Optional[str] = None
     
     # Session data
-    state_data: Dict[str, Any] = Field(default_factory=dict)
-    context: Dict[str, Any] = Field(default_factory=dict)
+    state_data: dict[str, Any] = Field(default_factory=dict)
+    context: dict[str, Any] = Field(default_factory=dict)
     
     # Temporal information
     created_at: datetime = Field(default_factory=datetime.now)
@@ -288,63 +279,60 @@ class SessionState(BaseModel):
     expires_at: Optional[datetime] = None
     
     # Associated entities
-    active_roles: List[str] = Field(default_factory=list)
-    conversation_history: List[Dict[str, Any]] = Field(default_factory=list)
+    active_roles: list[str] = Field(default_factory=list)
+    conversation_history: list[dict[str, Any]] = Field(default_factory=list)
     
     # Metadata
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ProjectState(BaseModel):
-    """
-    Represents project state and configuration.
+    """Represents project state and configuration.
     """
     project_id: str
     name: str
     description: Optional[str] = None
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict)
-    settings: Dict[str, Any] = Field(default_factory=dict)
+    config: dict[str, Any] = Field(default_factory=dict)
+    settings: dict[str, Any] = Field(default_factory=dict)
     
     # Temporal information
     created_at: datetime = Field(default_factory=datetime.now)
     last_updated: datetime = Field(default_factory=datetime.now)
     
     # Associated entities
-    participants: List[str] = Field(default_factory=list)
-    associated_sessions: List[str] = Field(default_factory=list)
+    participants: list[str] = Field(default_factory=list)
+    associated_sessions: list[str] = Field(default_factory=list)
     
     # Resources and artifacts
-    resources: Dict[str, Any] = Field(default_factory=dict)
-    artifacts: List[str] = Field(default_factory=list)
+    resources: dict[str, Any] = Field(default_factory=dict)
+    artifacts: list[str] = Field(default_factory=list)
     
     # Metadata
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    tags: List[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    tags: list[str] = Field(default_factory=list)
 
 
 class SearchResult(BaseModel):
-    """
-    Represents a search result from the SSKG.
+    """Represents a search result from the SSKG.
     """
     item: Union[KnowledgeFact, Memory, WikiPage]
     relevance_score: float = Field(ge=0.0, le=1.0)
     match_type: str  # exact, semantic, related, etc.
-    match_details: Dict[str, Any] = Field(default_factory=dict)
+    match_details: dict[str, Any] = Field(default_factory=dict)
     
     # Context information
     context_snippet: Optional[str] = None
-    highlighted_terms: List[str] = Field(default_factory=list)
+    highlighted_terms: list[str] = Field(default_factory=list)
     
     # Relationship information (if applicable)
-    relationship_path: List[str] = Field(default_factory=list)
+    relationship_path: list[str] = Field(default_factory=list)
     relationship_strength: Optional[float] = None
 
 
 class SSKGStats(BaseModel):
-    """
-    Statistics about the SSKG system.
+    """Statistics about the SSKG system.
     """
     # Content statistics
     total_facts: int = 0
@@ -368,6 +356,6 @@ class SSKGStats(BaseModel):
     last_updated: datetime = Field(default_factory=datetime.now)
     
     # Breakdown by type/category
-    facts_by_domain: Dict[str, int] = Field(default_factory=dict)
-    memories_by_type: Dict[str, int] = Field(default_factory=dict)
-    queries_by_type: Dict[str, int] = Field(default_factory=dict)
+    facts_by_domain: dict[str, int] = Field(default_factory=dict)
+    memories_by_type: dict[str, int] = Field(default_factory=dict)
+    queries_by_type: dict[str, int] = Field(default_factory=dict)

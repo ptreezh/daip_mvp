@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.1.3 真实LLM调用集成测试
+"""V0.1.3 真实LLM调用集成测试
 
 测试PersonalAssistantService与真实后端服务的集成
 验证多角色对话功能的实际工程可用性
@@ -79,7 +77,7 @@ async def test_real_backend_integration():
         
         print(f"✅ 真实消息处理完成 (耗时: {message_time:.2f}秒)")
         print(f"   - 响应长度: {len(response)}字符")
-        print(f"   - 响应内容:")
+        print("   - 响应内容:")
         print(f"     {response}")
         
         # 验证响应质量
@@ -94,7 +92,7 @@ async def test_real_backend_integration():
         consensus_time = time.time() - start_time
         
         print(f"✅ 真实共识计算完成 (耗时: {consensus_time:.2f}秒)")
-        print(f"   - 响应内容:")
+        print("   - 响应内容:")
         print(f"     {consensus_response}")
         
         # 验证共识计算结果
@@ -102,7 +100,7 @@ async def test_real_backend_integration():
         
         # 测试系统状态查询
         status_response = await service.execute_command("/status", "real_test_session")
-        print(f"✅ 系统状态查询完成")
+        print("✅ 系统状态查询完成")
         print(f"   - 状态信息: {status_response[:100]}...")
         
         print("\n5️⃣ 测试性能要求...")
@@ -195,7 +193,7 @@ async def test_multi_round_dialogue():
         
         # 验证对话上下文保持
         context = service.get_conversation_context(session_id)
-        print(f"\n📊 对话上下文验证:")
+        print("\n📊 对话上下文验证:")
         print(f"   - 会话ID: {context['session_id']}")
         print(f"   - 消息历史长度: {len(context.get('message_history', []))}")
         print(f"   - 活跃代理: {context.get('active_agents', [])}")
@@ -273,13 +271,13 @@ async def main():
         "错误恢复机制"
     ]
     
-    for i, (name, result) in enumerate(zip(test_names, results)):
+    for i, (name, result) in enumerate(zip(test_names, results, strict=False)):
         status = "✅ 通过" if result else "❌ 失败"
         print(f"   {i+1}. {name}: {status}")
     
     # 显示性能数据
     if backend_result["success"]:
-        print(f"\n📊 性能数据:")
+        print("\n📊 性能数据:")
         print(f"   - 意图分析: {backend_result['intent_time']:.2f}秒")
         print(f"   - 团队组建: {backend_result['team_time']:.2f}秒")
         print(f"   - 消息处理: {backend_result['message_time']:.2f}秒")

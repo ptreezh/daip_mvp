@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-共识形成过程
+"""共识形成过程
 
 管理和协调共识形成的各个阶段
 """
 
 import logging
 import uuid
-from typing import Any, Dict, List, Optional, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -54,10 +52,10 @@ class ConsensusFormationProcess:
     def initiate_consensus_formation(
         self,
         topic: str,
-        initial_positions: List[Dict[str, Any]],
+        initial_positions: list[dict[str, Any]],
         target_consensus: float = 0.8,
-        process_config: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        process_config: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """启动共识形成过程"""
         try:
             formation_id = str(uuid.uuid4())
@@ -108,8 +106,8 @@ class ConsensusFormationProcess:
     def facilitate_convergence(
         self,
         formation_id: str,
-        convergence_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        convergence_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """促进共识收敛"""
         try:
             if formation_id not in self.active_processes:
@@ -156,7 +154,7 @@ class ConsensusFormationProcess:
             logger.error(f"促进共识收敛失败: {e}")
             return {"error": str(e)}
     
-    def resolve_conflicts(self, conflicts: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def resolve_conflicts(self, conflicts: list[dict[str, Any]]) -> dict[str, Any]:
         """解决冲突"""
         try:
             resolved_conflicts = []
@@ -189,7 +187,7 @@ class ConsensusFormationProcess:
             logger.error(f"解决冲突失败: {e}")
             return {"error": str(e)}
     
-    def _create_stage_plan(self, initial_positions: List[Dict[str, Any]], target_consensus: float) -> List[Dict[str, Any]]:
+    def _create_stage_plan(self, initial_positions: list[dict[str, Any]], target_consensus: float) -> list[dict[str, Any]]:
         """创建阶段计划"""
         stages = []
         
@@ -206,7 +204,7 @@ class ConsensusFormationProcess:
         
         return stages
     
-    def _estimate_process_duration(self, initial_positions: List[Dict[str, Any]], target_consensus: float) -> str:
+    def _estimate_process_duration(self, initial_positions: list[dict[str, Any]], target_consensus: float) -> str:
         """估算过程持续时间"""
         # 基于参与者数量和目标共识水平估算
         base_duration = 30  # 基础30分钟
@@ -231,7 +229,7 @@ class ConsensusFormationProcess:
         }
         return descriptions.get(stage, "未知阶段")
     
-    def _estimate_stage_duration(self, stage: FormationStage, initial_positions: List[Dict[str, Any]]) -> int:
+    def _estimate_stage_duration(self, stage: FormationStage, initial_positions: list[dict[str, Any]]) -> int:
         """估算阶段持续时间（分钟）"""
         base_durations = {
             FormationStage.INITIALIZATION: 5,
@@ -248,7 +246,7 @@ class ConsensusFormationProcess:
         
         return base + participant_factor
     
-    def _get_stage_success_criteria(self, stage: FormationStage) -> List[str]:
+    def _get_stage_success_criteria(self, stage: FormationStage) -> list[str]:
         """获取阶段成功标准"""
         criteria = {
             FormationStage.INITIALIZATION: ["所有参与者已就绪", "讨论规则已确立"],
@@ -288,7 +286,7 @@ class ConsensusFormationProcess:
             logger.error(f"进入下一阶段失败: {e}")
             return False
     
-    def _can_advance_stage(self, process: Dict[str, Any]) -> bool:
+    def _can_advance_stage(self, process: dict[str, Any]) -> bool:
         """判断是否可以进入下一阶段"""
         current_stage = process["current_stage"]
         
@@ -308,7 +306,7 @@ class ConsensusFormationProcess:
         
         return False
     
-    def _analyze_convergence(self, process: Dict[str, Any], convergence_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _analyze_convergence(self, process: dict[str, Any], convergence_data: dict[str, Any]) -> dict[str, Any]:
         """分析收敛情况"""
         analysis = {
             "convergence_rate": 0.0,
@@ -336,7 +334,7 @@ class ConsensusFormationProcess:
         
         return analysis
     
-    def _apply_convergence_facilitation(self, process: Dict[str, Any], convergence_data: Dict[str, Any]) -> List[str]:
+    def _apply_convergence_facilitation(self, process: dict[str, Any], convergence_data: dict[str, Any]) -> list[str]:
         """应用收敛促进措施"""
         actions = []
         
@@ -350,7 +348,7 @@ class ConsensusFormationProcess:
         
         return actions
     
-    def _calculate_overall_progress(self, process: Dict[str, Any]) -> float:
+    def _calculate_overall_progress(self, process: dict[str, Any]) -> float:
         """计算整体进度"""
         completed_stages = sum(1 for stage in process["stages"] if stage["status"] == "completed")
         total_stages = len(process["stages"])
@@ -362,7 +360,7 @@ class ConsensusFormationProcess:
         return stage_progress * 0.6 + consensus_progress * 0.4
     
     # 冲突解决策略方法
-    def _resolve_priority_conflict(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def _resolve_priority_conflict(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """解决优先级冲突"""
         return {
             "success": True,
@@ -371,7 +369,7 @@ class ConsensusFormationProcess:
             "actions": ["重新评估优先级", "寻找平衡点", "建立权重共识"]
         }
     
-    def _resolve_value_conflict(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def _resolve_value_conflict(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """解决价值观冲突"""
         return {
             "success": True,
@@ -380,7 +378,7 @@ class ConsensusFormationProcess:
             "actions": ["识别共同价值", "尊重差异", "寻找兼容方案"]
         }
     
-    def _resolve_factual_conflict(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def _resolve_factual_conflict(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """解决事实争议"""
         return {
             "success": True,
@@ -389,7 +387,7 @@ class ConsensusFormationProcess:
             "actions": ["收集可靠证据", "咨询专家意见", "建立事实共识"]
         }
     
-    def _resolve_methodological_conflict(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def _resolve_methodological_conflict(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """解决方法论争议"""
         return {
             "success": True,
@@ -398,7 +396,7 @@ class ConsensusFormationProcess:
             "actions": ["分析方法优劣", "寻找互补性", "设计混合方案"]
         }
     
-    def _resolve_resource_conflict(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def _resolve_resource_conflict(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """解决资源竞争"""
         return {
             "success": True,
@@ -407,7 +405,7 @@ class ConsensusFormationProcess:
             "actions": ["评估资源需求", "探索替代方案", "建立分配机制"]
         }
     
-    def get_process_status(self, formation_id: str) -> Dict[str, Any]:
+    def get_process_status(self, formation_id: str) -> dict[str, Any]:
         """获取过程状态"""
         if formation_id not in self.active_processes:
             return {"error": f"进程不存在: {formation_id}"}

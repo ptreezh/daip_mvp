@@ -1,20 +1,19 @@
-"""
-Primitive Registry for managing institutional primitives.
+"""Primitive Registry for managing institutional primitives.
 
 This module provides the registry system for discovering, registering,
 and instantiating institutional primitive nodes.
 """
 
-from typing import Dict, Type, List, Optional, Any
-from .base import InstitutionalPrimitive, PrimitiveInfo, ValidationResult
 import logging
+from typing import Any, Optional
+
+from .base import InstitutionalPrimitive, PrimitiveInfo, ValidationResult
 
 logger = logging.getLogger(__name__)
 
 
 class PrimitiveRegistry:
-    """
-    Registry for managing institutional primitive types.
+    """Registry for managing institutional primitive types.
     
     The registry handles registration, discovery, and instantiation of
     institutional primitives, providing a centralized way to manage
@@ -23,16 +22,15 @@ class PrimitiveRegistry:
     
     def __init__(self):
         """Initialize the primitive registry."""
-        self._primitives: Dict[str, Type[InstitutionalPrimitive]] = {}
-        self._primitive_info: Dict[str, PrimitiveInfo] = {}
+        self._primitives: dict[str, type[InstitutionalPrimitive]] = {}
+        self._primitive_info: dict[str, PrimitiveInfo] = {}
     
     def register_primitive(
         self, 
         primitive_type: str, 
-        primitive_class: Type[InstitutionalPrimitive]
+        primitive_class: type[InstitutionalPrimitive]
     ) -> bool:
-        """
-        Register a primitive type with the registry.
+        """Register a primitive type with the registry.
         
         Args:
             primitive_type: Unique identifier for the primitive type
@@ -71,9 +69,8 @@ class PrimitiveRegistry:
             logger.error(f"Failed to register primitive '{primitive_type}': {e}")
             return False
     
-    def get_primitive(self, primitive_type: str) -> Optional[Type[InstitutionalPrimitive]]:
-        """
-        Get a primitive class by type.
+    def get_primitive(self, primitive_type: str) -> Optional[type[InstitutionalPrimitive]]:
+        """Get a primitive class by type.
         
         Args:
             primitive_type: Type identifier of the primitive
@@ -86,10 +83,9 @@ class PrimitiveRegistry:
     def create_primitive(
         self, 
         primitive_type: str, 
-        config: Optional[Dict[str, Any]] = None
+        config: Optional[dict[str, Any]] = None
     ) -> Optional[InstitutionalPrimitive]:
-        """
-        Create an instance of a primitive by type.
+        """Create an instance of a primitive by type.
         
         Args:
             primitive_type: Type identifier of the primitive
@@ -109,9 +105,8 @@ class PrimitiveRegistry:
             logger.error(f"Failed to create primitive '{primitive_type}': {e}")
             return None
     
-    def list_primitives(self) -> List[PrimitiveInfo]:
-        """
-        List all registered primitives.
+    def list_primitives(self) -> list[PrimitiveInfo]:
+        """List all registered primitives.
         
         Returns:
             List of PrimitiveInfo objects for all registered primitives
@@ -119,8 +114,7 @@ class PrimitiveRegistry:
         return list(self._primitive_info.values())
     
     def get_primitive_info(self, primitive_type: str) -> Optional[PrimitiveInfo]:
-        """
-        Get information about a specific primitive.
+        """Get information about a specific primitive.
         
         Args:
             primitive_type: Type identifier of the primitive
@@ -130,9 +124,8 @@ class PrimitiveRegistry:
         """
         return self._primitive_info.get(primitive_type)
     
-    def validate_primitive(self, primitive_def: Dict[str, Any]) -> ValidationResult:
-        """
-        Validate a primitive definition.
+    def validate_primitive(self, primitive_def: dict[str, Any]) -> ValidationResult:
+        """Validate a primitive definition.
         
         Args:
             primitive_def: Dictionary containing primitive definition
@@ -161,7 +154,7 @@ class PrimitiveRegistry:
                     config = primitive_def.get('config', {})
                     primitive = self.create_primitive(primitive_type, config)
                     if primitive is None:
-                        errors.append(f"Failed to create primitive instance for validation")
+                        errors.append("Failed to create primitive instance for validation")
                 except Exception as e:
                     errors.append(f"Configuration validation failed: {str(e)}")
             
@@ -178,8 +171,7 @@ class PrimitiveRegistry:
             )
     
     def unregister_primitive(self, primitive_type: str) -> bool:
-        """
-        Unregister a primitive type.
+        """Unregister a primitive type.
         
         Args:
             primitive_type: Type identifier of the primitive to unregister
@@ -201,8 +193,7 @@ class PrimitiveRegistry:
             return False
     
     def is_registered(self, primitive_type: str) -> bool:
-        """
-        Check if a primitive type is registered.
+        """Check if a primitive type is registered.
         
         Args:
             primitive_type: Type identifier to check
@@ -212,9 +203,8 @@ class PrimitiveRegistry:
         """
         return primitive_type in self._primitives
     
-    def get_primitives_by_tag(self, tag: str) -> List[PrimitiveInfo]:
-        """
-        Get all primitives that have a specific tag.
+    def get_primitives_by_tag(self, tag: str) -> list[PrimitiveInfo]:
+        """Get all primitives that have a specific tag.
         
         Args:
             tag: Tag to search for
@@ -239,8 +229,7 @@ _global_registry = PrimitiveRegistry()
 
 
 def get_global_registry() -> PrimitiveRegistry:
-    """
-    Get the global primitive registry instance.
+    """Get the global primitive registry instance.
     
     Returns:
         Global PrimitiveRegistry instance
@@ -248,9 +237,8 @@ def get_global_registry() -> PrimitiveRegistry:
     return _global_registry
 
 
-def register_primitive(primitive_type: str, primitive_class: Type[InstitutionalPrimitive]) -> bool:
-    """
-    Register a primitive with the global registry.
+def register_primitive(primitive_type: str, primitive_class: type[InstitutionalPrimitive]) -> bool:
+    """Register a primitive with the global registry.
     
     Args:
         primitive_type: Unique identifier for the primitive type

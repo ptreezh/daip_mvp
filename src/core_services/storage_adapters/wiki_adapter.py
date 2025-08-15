@@ -1,18 +1,13 @@
-"""
-Wiki Adapter for the SSKG.
+"""Wiki Adapter for the SSKG.
 
 This module implements the storage adapter for wiki content and structured documentation.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 try:
-    from src.core_services.enhanced_sskg_manager import (
-        KnowledgeQuery,
-        NodeType,
-        RelationType
-    )
+    from src.core_services.enhanced_sskg_manager import KnowledgeQuery, NodeType, RelationType
 except ImportError:
     # For testing purposes
     from enum import Enum
@@ -30,16 +25,14 @@ from .base import StorageAdapter
 
 
 class WikiAdapter(StorageAdapter):
-    """
-    Storage adapter for wiki content and structured documentation.
+    """Storage adapter for wiki content and structured documentation.
     
     This adapter manages the storage and retrieval of wiki pages,
     documentation, and structured knowledge articles.
     """
     
-    def store(self, wiki_data: Dict[str, Any], **kwargs) -> str:
-        """
-        Store wiki content in the SSKG.
+    def store(self, wiki_data: dict[str, Any], **kwargs) -> str:
+        """Store wiki content in the SSKG.
         
         Args:
             wiki_data: Dictionary containing wiki information
@@ -143,9 +136,8 @@ class WikiAdapter(StorageAdapter):
         self.logger.info(f"Stored wiki page {page_id} with {len(references)} references")
         return wiki_node_id
     
-    def retrieve(self, page_id: str, **kwargs) -> Optional[Dict[str, Any]]:
-        """
-        Retrieve wiki content from the SSKG.
+    def retrieve(self, page_id: str, **kwargs) -> Optional[dict[str, Any]]:
+        """Retrieve wiki content from the SSKG.
         
         Args:
             page_id: ID of the page to retrieve
@@ -183,9 +175,8 @@ class WikiAdapter(StorageAdapter):
         
         return wiki_data
     
-    def _retrieve_references(self, wiki_node_id: str) -> List[Dict[str, Any]]:
-        """
-        Retrieve references for a wiki page.
+    def _retrieve_references(self, wiki_node_id: str) -> list[dict[str, Any]]:
+        """Retrieve references for a wiki page.
         
         Args:
             wiki_node_id: ID of the wiki node
@@ -217,9 +208,8 @@ class WikiAdapter(StorageAdapter):
         
         return references
     
-    def update(self, page_id: str, wiki_data: Dict[str, Any], **kwargs) -> bool:
-        """
-        Update wiki content in the SSKG.
+    def update(self, page_id: str, wiki_data: dict[str, Any], **kwargs) -> bool:
+        """Update wiki content in the SSKG.
         
         Args:
             page_id: ID of the page to update
@@ -320,8 +310,7 @@ class WikiAdapter(StorageAdapter):
         return success
     
     def delete(self, page_id: str, **kwargs) -> bool:
-        """
-        Delete wiki content from the SSKG.
+        """Delete wiki content from the SSKG.
         
         Args:
             page_id: ID of the page to delete
@@ -363,9 +352,8 @@ class WikiAdapter(StorageAdapter):
         
         return success
     
-    def list_all(self, **kwargs) -> List[str]:
-        """
-        List all page IDs.
+    def list_all(self, **kwargs) -> list[str]:
+        """List all page IDs.
         
         Args:
             **kwargs: Additional parameters

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : session_manager.py
 @Description:
@@ -9,21 +7,19 @@
 """
 
 import asyncio
-import json
-from typing import Dict, Any, List, Optional, Set
-from datetime import datetime, timedelta
-from uuid import uuid4
 import logging
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
+from uuid import uuid4
 
-from ..domain.entities import User, Session, Task, Message
+from ..domain.aggregates import SessionAggregate, TaskAggregate
+from ..domain.entities import Message, User
 from ..domain.value_objects import (
-    EntranceType, IntentType, TaskStatus, SessionStatus, 
-    MessageIntent, ConsensusLevel, UserPreference, 
-    TaskPriority, TimeInterval
+    EntranceType,
+    SessionStatus,
 )
-from ..domain.aggregates import SessionAggregate, TaskAggregate, DebateAggregate
 
 
 class SessionState(Enum):
@@ -59,9 +55,9 @@ class SessionEvent:
     session_id: str
     user_id: str
     timestamp: datetime
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {
             "event_id": self.event_id,
@@ -93,11 +89,11 @@ class SessionManager:
         self.config = config or SessionConfig()
         
         # 会话存储
-        self.sessions: Dict[str, SessionAggregate] = {}
-        self.user_sessions: Dict[str, Set[str]] = {}  # user_id -> session_ids
+        self.sessions: dict[str, SessionAggregate] = {}
+        self.user_sessions: dict[str, set[str]] = {}  # user_id -> session_ids
         
         # 事件历史
-        self.event_history: List[SessionEvent] = []
+        self.event_history: list[SessionEvent] = []
         
         # 统计信息
         self.stats = {
@@ -111,7 +107,7 @@ class SessionManager:
         }
         
         # 会话状态监听器
-        self.session_listeners: Dict[str, List[callable]] = {}
+        self.session_listeners: dict[str, list[callable]] = {}
         
         # 后台任务
         self._cleanup_task: Optional[asyncio.Task] = None
@@ -160,7 +156,7 @@ class SessionManager:
         logging.info("Session Manager stopped")
     
     async def create_session(self, user: User, entrance_type: EntranceType, 
-                           session_config: Dict[str, Any] = None) -> SessionAggregate:
+                           session_config: dict[str, Any] = None) -> SessionAggregate:
         """创建新会话"""
         # 检查用户会话数量限制
         user_session_count = len(self.user_sessions.get(user.user_id, set()))
@@ -208,12 +204,12 @@ class SessionManager:
         """获取会话"""
         return self.sessions.get(session_id)
     
-    async def get_user_sessions(self, user_id: str) -> List[SessionAggregate]:
+    async def get_user_sessions(self, user_id: str) -> list[SessionAggregate]:
         """获取用户的所有会话"""
         session_ids = self.user_sessions.get(user_id, set())
         return [self.sessions[session_id] for session_id in session_ids if session_id in self.sessions]
     
-    async def get_active_sessions(self) -> List[SessionAggregate]:
+    async def get_active_sessions(self) -> list[SessionAggregate]:
         """获取所有活跃会话"""
         return [session for session in self.sessions.values() if session.session.is_active()]
     
@@ -330,7 +326,7 @@ class SessionManager:
         
         return success
     
-    async def get_session_tasks(self, session_id: str) -> List[TaskAggregate]:
+    async def get_session_tasks(self, session_id: str) -> list[TaskAggregate]:
         """获取会话的任务"""
         session_aggregate = await self.get_session(session_id)
         if not session_aggregate:
@@ -339,7 +335,7 @@ class SessionManager:
         # 这里简化处理，实际应该从任务管理器获取
         return []
     
-    async def get_session_messages(self, session_id: str, limit: int = 50) -> List[Message]:
+    async def get_session_messages(self, session_id: str, limit: int = 50) -> list[Message]:
         """获取会话的消息"""
         session_aggregate = await self.get_session(session_id)
         if not session_aggregate:
@@ -349,7 +345,7 @@ class SessionManager:
         recent_messages = session_aggregate.get_recent_messages(limit)
         return recent_messages
     
-    async def get_session_status(self, session_id: str) -> Dict[str, Any]:
+    async def get_session_status(self, session_id: str) -> dict[str, Any]:
         """获取会话状态"""
         session_aggregate = await self.get_session(session_id)
         if not session_aggregate:
@@ -478,7 +474,7 @@ class SessionManager:
                 except Exception as e:
                     logging.error(f"Error in session listener for {session_id}: {e}")
     
-    async def _record_event(self, event_type: SessionEventType, session_id: str, user_id: str, data: Dict[str, Any] = None):
+    async def _record_event(self, event_type: SessionEventType, session_id: str, user_id: str, data: dict[str, Any] = None):
         """记录事件"""
         if not self.config.enable_event_logging:
             return
@@ -534,7 +530,7 @@ class SessionManager:
         # 在实际应用中，这里应该实现数据库持久化
         pass
     
-    async def get_session_events(self, session_id: str, limit: int = 100) -> List[Dict[str, Any]]:
+    async def get_session_events(self, session_id: str, limit: int = 100) -> list[dict[str, Any]]:
         """获取会话事件历史"""
         session_events = [
             event for event in self.event_history 
@@ -547,7 +543,7 @@ class SessionManager:
         
         return [event.to_dict() for event in recent_events]
     
-    async def get_user_session_summary(self, user_id: str) -> Dict[str, Any]:
+    async def get_user_session_summary(self, user_id: str) -> dict[str, Any]:
         """获取用户会话摘要"""
         user_session_ids = self.user_sessions.get(user_id, set())
         user_sessions = [self.sessions[sid] for sid in user_session_ids if sid in self.sessions]
@@ -584,7 +580,7 @@ class SessionManager:
             "last_activity": max([s.session.updated_at for s in user_sessions]) if user_sessions else None
         }
     
-    async def get_system_statistics(self) -> Dict[str, Any]:
+    async def get_system_statistics(self) -> dict[str, Any]:
         """获取系统统计信息"""
         uptime = (datetime.now() - self.stats["start_time"]).total_seconds()
         
@@ -628,7 +624,7 @@ class SessionManager:
         # 检查会话状态
         return session_aggregate.session.status in [SessionStatus.ACTIVE, SessionStatus.PAUSED]
     
-    async def get_session_transcript(self, session_id: str) -> Dict[str, Any]:
+    async def get_session_transcript(self, session_id: str) -> dict[str, Any]:
         """获取会话转录"""
         session_aggregate = await self.get_session(session_id)
         if not session_aggregate:
@@ -664,7 +660,7 @@ class SessionManager:
         
         return transcript
     
-    async def export_session_data(self, session_id: str, format_type: str = "json") -> Dict[str, Any]:
+    async def export_session_data(self, session_id: str, format_type: str = "json") -> dict[str, Any]:
         """导出会话数据"""
         session_aggregate = await self.get_session(session_id)
         if not session_aggregate:
@@ -693,7 +689,7 @@ class SessionManager:
             # 其他格式可以在这里实现
             return {"error": f"Unsupported format: {format_type}"}
     
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """健康检查"""
         active_sessions = len(await self.get_active_sessions())
         total_sessions = len(self.sessions)

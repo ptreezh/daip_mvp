@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-最基础的Web测试 - 确保能访问
+"""最基础的Web测试 - 确保能访问
 """
 
 try:
     from lona import LonaApp, View
-    from lona.html import HTML, Div, H1, P, H2
+    from lona.html import H1, H2, HTML, Div, P
     
     app = LonaApp(__file__)
     

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多角色对话引擎
+"""多角色对话引擎
 
 基于现有CognitiveAgent和IntegratedLLMManager实现多角色对话功能。
 支持角色轮流发言、上下文传递、讨论收敛机制。
@@ -15,20 +13,19 @@
 """
 
 import asyncio
-import json
-from typing import Dict, List, Optional, Any, Tuple, Set
+import logging
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-import uuid
-import logging
+from typing import Any, Optional
 
 # 导入现有组件（在实际使用时需要正确的路径）
 try:
     from src.core_services.cognitive_agent import CognitiveAgent
-    from src.core_services.role_manager import RoleManager
     from src.core_services.integrated_llm_manager import IntegratedLLMManager
     from src.core_services.memory_agent import MemAgent
+    from src.core_services.role_manager import RoleManager
 except ImportError:
     # 如果无法导入，创建占位符类
     class CognitiveAgent:
@@ -40,11 +37,9 @@ except ImportError:
     class MemAgent:
         pass
 
-from .debate_flow_definition import (
-    DebateSession, DebateRound, DebateContribution, 
-    DebatePhase, ParticipantRole, DebateParticipant
-)
-from participant_management import ParticipantManager, Permission, ActionType
+from participant_management import ParticipantManager
+
+from .debate_flow_definition import DebatePhase, DebateSession, ParticipantRole
 
 
 class DialogueState(Enum):
@@ -72,8 +67,8 @@ class RoleContext:
     role_id: str
     role_name: str
     role_type: ParticipantRole
-    expertise_areas: List[str] = field(default_factory=list)
-    personality_traits: Dict[str, float] = field(default_factory=dict)
+    expertise_areas: list[str] = field(default_factory=list)
+    personality_traits: dict[str, float] = field(default_factory=dict)
     speaking_style: str = "formal"
     current_stance: Optional[str] = None
     confidence_level: float = 0.5
@@ -90,10 +85,10 @@ class DialogueTurn:
     turn_type: ConversationTurn = ConversationTurn.RESPONSE
     content: str = ""
     timestamp: datetime = field(default_factory=datetime.now)
-    context_references: List[str] = field(default_factory=list)
+    context_references: list[str] = field(default_factory=list)
     confidence_score: float = 0.0
-    quality_metrics: Dict[str, float] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    quality_metrics: dict[str, float] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -102,13 +97,13 @@ class DialogueContext:
     session_id: str
     topic: str
     current_phase: DebatePhase
-    active_roles: List[RoleContext] = field(default_factory=list)
-    dialogue_history: List[DialogueTurn] = field(default_factory=list)
-    shared_knowledge: Dict[str, Any] = field(default_factory=dict)
-    convergence_indicators: Dict[str, float] = field(default_factory=dict)
+    active_roles: list[RoleContext] = field(default_factory=list)
+    dialogue_history: list[DialogueTurn] = field(default_factory=list)
+    shared_knowledge: dict[str, Any] = field(default_factory=dict)
+    convergence_indicators: dict[str, float] = field(default_factory=dict)
     discussion_summary: str = ""
-    key_points: List[str] = field(default_factory=list)
-    unresolved_issues: List[str] = field(default_factory=list)
+    key_points: list[str] = field(default_factory=list)
+    unresolved_issues: list[str] = field(default_factory=list)
 
 
 class RoleSelector:
@@ -121,7 +116,7 @@ class RoleSelector:
     async def select_roles_for_topic(self, 
                                    topic: str,
                                    max_roles: int = 4,
-                                   required_diversity: float = 0.7) -> List[RoleContext]:
+                                   required_diversity: float = 0.7) -> list[RoleContext]:
         """为话题选择合适的角色"""
         try:
             # 获取所有可用角色
@@ -159,7 +154,7 @@ class RoleSelector:
             self.logger.error(f"角色选择失败: {e}")
             return []
     
-    async def _calculate_role_relevance(self, topic: str, role_info: Dict[str, Any]) -> float:
+    async def _calculate_role_relevance(self, topic: str, role_info: dict[str, Any]) -> float:
         """计算角色与话题的相关性"""
         # 简单的关键词匹配算法
         # 在实际实现中，可以使用更复杂的语义匹配
@@ -184,9 +179,9 @@ class RoleSelector:
         return min(relevance, 1.0)
     
     async def _select_diverse_roles(self, 
-                                  role_scores: Dict[str, float],
+                                  role_scores: dict[str, float],
                                   max_roles: int,
-                                  required_diversity: float) -> List[str]:
+                                  required_diversity: float) -> list[str]:
         """选择多样化的角色组合"""
         # 按相关性排序
         sorted_roles = sorted(role_scores.items(), key=lambda x: x[1], reverse=True)
@@ -202,7 +197,7 @@ class RoleSelector:
         
         return selected
     
-    def _check_diversity(self, selected: List[str], candidate: str, threshold: float) -> bool:
+    def _check_diversity(self, selected: list[str], candidate: str, threshold: float) -> bool:
         """检查角色多样性"""
         # 简单实现：确保不选择相同类型的角色
         # 在实际实现中，可以基于更复杂的多样性指标
@@ -374,7 +369,7 @@ class ConvergenceDetector:
         self.repetition_threshold = 3    # 重复观点阈值
         self.stagnation_threshold = 5    # 停滞轮次阈值
     
-    async def detect_convergence(self, dialogue_context: DialogueContext) -> Dict[str, float]:
+    async def detect_convergence(self, dialogue_context: DialogueContext) -> dict[str, float]:
         """检测讨论收敛情况"""
         try:
             convergence_indicators = {}
@@ -509,8 +504,8 @@ class MultiRoleDialogueEngine:
         self.convergence_detector = ConvergenceDetector()
         
         # 状态管理
-        self.active_dialogues: Dict[str, DialogueContext] = {}
-        self.dialogue_state: Dict[str, DialogueState] = {}
+        self.active_dialogues: dict[str, DialogueContext] = {}
+        self.dialogue_state: dict[str, DialogueState] = {}
         
         self.logger = logging.getLogger(__name__)
     
@@ -619,7 +614,7 @@ class MultiRoleDialogueEngine:
     
     async def _determine_speaking_order(self,
                                       dialogue_context: DialogueContext,
-                                      turn_type: ConversationTurn) -> List[RoleContext]:
+                                      turn_type: ConversationTurn) -> list[RoleContext]:
         """确定发言顺序"""
         active_roles = dialogue_context.active_roles.copy()
         
@@ -664,7 +659,7 @@ class MultiRoleDialogueEngine:
         except Exception as e:
             self.logger.error(f"更新记忆失败: {e}")
     
-    async def get_dialogue_summary(self, session_id: str) -> Optional[Dict[str, Any]]:
+    async def get_dialogue_summary(self, session_id: str) -> Optional[dict[str, Any]]:
         """获取对话摘要"""
         try:
             if session_id not in self.active_dialogues:

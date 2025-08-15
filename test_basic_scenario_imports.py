@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 18:40:00
+"""@Time    : 2025-08-04 18:40:00
 @Author  : DAIP-LIVE Team
 @File    : test_basic_scenario_imports.py
 @Description:
     Test basic scenario imports without multidimensional assessment engine.
 """
 
-import sys
 import time
+
 
 def test_basic_imports():
     """Test basic scenario imports"""
@@ -17,8 +15,7 @@ def test_basic_imports():
     # Test basic enum import
     start_time = time.time()
     try:
-        from src.core_services.expert_consultation_scenario import ConsultationType
-        print("✅ ConsultationType import successful ({:.2f}s)".format(time.time() - start_time))
+        print(f"✅ ConsultationType import successful ({time.time() - start_time:.2f}s)")
     except Exception as e:
         print(f"❌ ConsultationType import failed: {e}")
         return False
@@ -26,8 +23,7 @@ def test_basic_imports():
     # Test smart reviewer allocator
     start_time = time.time()
     try:
-        from src.core_services.smart_reviewer_allocator_simple import SmartReviewerAllocator
-        print("✅ SmartReviewerAllocator import successful ({:.2f}s)".format(time.time() - start_time))
+        print(f"✅ SmartReviewerAllocator import successful ({time.time() - start_time:.2f}s)")
     except Exception as e:
         print(f"❌ SmartReviewerAllocator import failed: {e}")
         return False
@@ -35,8 +31,7 @@ def test_basic_imports():
     # Test collaborative review environment
     start_time = time.time()
     try:
-        from src.core_services.collaborative_review_environment import CollaborativeReviewEnvironment
-        print("✅ CollaborativeReviewEnvironment import successful ({:.2f}s)".format(time.time() - start_time))
+        print(f"✅ CollaborativeReviewEnvironment import successful ({time.time() - start_time:.2f}s)")
     except Exception as e:
         print(f"❌ CollaborativeReviewEnvironment import failed: {e}")
         return False

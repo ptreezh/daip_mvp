@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-测试修复后的系统
+"""测试修复后的系统
 """
 
 import asyncio
@@ -17,9 +15,9 @@ async def test_debate_system():
     print("🔧 测试修复后的辩论系统...")
     
     try:
+        from src.core_services.role_manager import RoleManager
         from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
         from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-        from src.core_services.role_manager import RoleManager
         
         # 创建系统组件
         print("1. 初始化组件...")

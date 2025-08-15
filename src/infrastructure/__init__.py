@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : __init__.py
 @Description:
@@ -10,9 +8,9 @@
 """
 
 from .database import DatabaseManager, get_database_manager
+from .ollama_service import OllamaService, get_ollama_service
 from .redis_client import RedisManager, get_redis_manager
 from .vector_store import VectorStoreManager, get_vector_store_manager
-from .ollama_service import OllamaService, get_ollama_service
 
 __all__ = [
     "DatabaseManager", "get_database_manager",

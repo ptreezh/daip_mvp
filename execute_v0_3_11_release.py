@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 17:00:00
+"""@Time    : 2025-08-05 17:00:00
 @Author  : DAIP-LIVE Team
 @File    : execute_v0_3_11_release.py
 @Description:
@@ -12,21 +10,20 @@ import asyncio
 import json
 import logging
 import os
-import sys
 import subprocess
+import sys
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Any
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
 from core_services.git_version_release_system import (
-    VersionReleaseSystem,
-    VersionInfo,
-    ReleaseType,
     ReleaseConfig,
     ReleaseInfo,
-    get_version_release_system
+    ReleaseType,
+    VersionInfo,
+    VersionReleaseSystem,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -48,7 +45,7 @@ class V0_3_11_ReleaseExecutor:
             "recommendations": []
         }
     
-    async def execute_release(self) -> Dict[str, Any]:
+    async def execute_release(self) -> dict[str, Any]:
         """Execute complete V0.3.11 release process."""
         logger.info("🚀 Starting V0.3.11 Git Version Release System execution...")
         
@@ -481,7 +478,7 @@ This release represents the completion of V0.3 milestone with full Git version m
                 print(f"  - {error}")
         
         if self.release_results["recommendations"]:
-            print(f"\nRecommendations:")
+            print("\nRecommendations:")
             for rec in self.release_results["recommendations"]:
                 print(f"  - {rec}")
         

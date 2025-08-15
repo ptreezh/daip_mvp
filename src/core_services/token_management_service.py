@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Token Management Service for DAIP-LIVE
+"""Token Management Service for DAIP-LIVE
 
 This service provides universal token management capabilities including:
 - Precise token counting using tiktoken
@@ -14,7 +12,7 @@ to optimize token usage and manage context windows effectively.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import tiktoken
 from pydantic import BaseModel
@@ -37,7 +35,7 @@ class TokenUsage(BaseModel):
 
 class ContextWindow(BaseModel):
     """Model for managing context window state."""
-    messages: List[Dict[str, Any]]
+    messages: list[dict[str, Any]]
     total_tokens: int
     max_tokens: int
     compression_applied: bool = False
@@ -46,8 +44,7 @@ class ContextWindow(BaseModel):
 
 
 class TokenManagementService:
-    """
-    Universal Token Management Service for all AI participants.
+    """Universal Token Management Service for all AI participants.
     
     Provides token counting, cost estimation, and context optimization
     for efficient LLM usage across all roles and users.
@@ -57,7 +54,7 @@ class TokenManagementService:
         """Initialize the token management service."""
         self.config = config
         self.tokenizer = tiktoken.get_encoding("cl100k_base")  # GPT-3.5/4 encoding
-        self.usage_history: List[TokenUsage] = []
+        self.usage_history: list[TokenUsage] = []
         
         # Model-specific token limits (can be extended)
         self.model_limits = {
@@ -83,8 +80,7 @@ class TokenManagementService:
         logger.info("TokenManagementService initialized")
     
     def count_tokens(self, text: str, model: Optional[str] = None) -> int:
-        """
-        Count tokens in text using appropriate tokenizer.
+        """Count tokens in text using appropriate tokenizer.
         
         Args:
             text: The text to count tokens for
@@ -102,9 +98,8 @@ class TokenManagementService:
             # Fallback: rough estimation (4 chars per token)
             return len(text) // 4
     
-    def count_messages_tokens(self, messages: List[Dict[str, Any]], model: Optional[str] = None) -> int:
-        """
-        Count total tokens in a list of messages.
+    def count_messages_tokens(self, messages: list[dict[str, Any]], model: Optional[str] = None) -> int:
+        """Count total tokens in a list of messages.
         
         Args:
             messages: List of message dictionaries
@@ -131,8 +126,7 @@ class TokenManagementService:
         return total_tokens
     
     def estimate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
-        """
-        Calculate estimated cost for token usage.
+        """Calculate estimated cost for token usage.
         
         Args:
             input_tokens: Number of input tokens
@@ -153,8 +147,7 @@ class TokenManagementService:
         return input_cost + output_cost
     
     def get_context_limit(self, model: str) -> int:
-        """
-        Get the context token limit for a specific model.
+        """Get the context token limit for a specific model.
         
         Args:
             model: Model name
@@ -164,9 +157,8 @@ class TokenManagementService:
         """
         return self.model_limits.get(model, self.config.max_context_tokens)
     
-    def check_context_limit(self, messages: List[Dict[str, Any]], model: str) -> Tuple[bool, int, int]:
-        """
-        Check if messages fit within model's context window.
+    def check_context_limit(self, messages: list[dict[str, Any]], model: str) -> tuple[bool, int, int]:
+        """Check if messages fit within model's context window.
         
         Args:
             messages: List of message dictionaries
@@ -180,10 +172,9 @@ class TokenManagementService:
         
         return current_tokens <= max_tokens, current_tokens, max_tokens
     
-    def optimize_context_window(self, messages: List[Dict[str, Any]], model: str, 
+    def optimize_context_window(self, messages: list[dict[str, Any]], model: str, 
                               target_tokens: Optional[int] = None) -> ContextWindow:
-        """
-        Smart truncation while preserving important context.
+        """Smart truncation while preserving important context.
         
         This method implements intelligent context optimization by:
         1. Preserving system messages and recent messages
@@ -257,8 +248,7 @@ class TokenManagementService:
     
     def record_usage(self, input_tokens: int, output_tokens: int, model: str, 
                     participant_id: Optional[str] = None) -> TokenUsage:
-        """
-        Record token usage for analytics and tracking.
+        """Record token usage for analytics and tracking.
         
         Args:
             input_tokens: Number of input tokens used
@@ -290,9 +280,8 @@ class TokenManagementService:
         return usage
     
     def get_usage_stats(self, participant_id: Optional[str] = None, 
-                       hours: Optional[int] = None) -> Dict[str, Any]:
-        """
-        Get token usage statistics.
+                       hours: Optional[int] = None) -> dict[str, Any]:
+        """Get token usage statistics.
         
         Args:
             participant_id: Optional filter by participant
@@ -335,10 +324,9 @@ class TokenManagementService:
             "output_tokens": sum(u.output_tokens for u in filtered_usage)
         }
     
-    def prepare_context_for_llm(self, messages: List[Dict[str, Any]], model: str, 
+    def prepare_context_for_llm(self, messages: list[dict[str, Any]], model: str, 
                                participant_id: Optional[str] = None) -> ContextWindow:
-        """
-        Prepare optimized context for LLM call.
+        """Prepare optimized context for LLM call.
         
         This is the main method that should be called before making LLM requests.
         It handles context optimization and prepares the messages for efficient processing.

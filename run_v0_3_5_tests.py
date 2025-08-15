@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: Claude Code
 @File: run_v0_3_5_tests.py
 @Description: Run V0.3.5 Critical Review Workflow tests
 """
 
 import asyncio
-import sys
 import logging
+import sys
 import traceback
 from datetime import datetime
 
@@ -52,12 +51,12 @@ async def run_integration_tests():
     
     try:
         # Import components
-        from src.core_services.smart_reviewer_allocator import SmartReviewerAllocator
-        from src.core_services.multidimensional_assessment_engine import MultidimensionalAssessmentEngine
+        from src.core_services.automated_report_generator import AutomatedReportGenerator
         from src.core_services.collaborative_review_environment import CollaborativeReviewEnvironment
         from src.core_services.conflict_resolution_system import ConflictResolutionSystem
+        from src.core_services.multidimensional_assessment_engine import MultidimensionalAssessmentEngine
         from src.core_services.review_analytics import ReviewAnalytics
-        from src.core_services.automated_report_generator import AutomatedReportGenerator
+        from src.core_services.smart_reviewer_allocator import SmartReviewerAllocator
         
         # Initialize components
         allocator = SmartReviewerAllocator()
@@ -185,7 +184,7 @@ async def run_integration_tests():
         # Test 5: Analytics Recording
         logger.info("Test 5: Analytics Recording")
         try:
-            from src.core_services.review_analytics import ReviewMetric, MetricType, AnalysisScope
+            from src.core_services.review_analytics import AnalysisScope, MetricType, ReviewMetric
             
             metric = ReviewMetric(
                 metric_id="test_metric",
@@ -212,7 +211,7 @@ async def run_integration_tests():
         # Test 6: Report Generation
         logger.info("Test 6: Report Generation")
         try:
-            from src.core_services.automated_report_generator import ReportRequest, ReportType, ReportFormat
+            from src.core_services.automated_report_generator import ReportFormat, ReportRequest, ReportType
             
             request = ReportRequest(
                 request_id="test_report",
@@ -249,7 +248,7 @@ async def run_integration_tests():
         passed_tests = sum(test_results)
         total_tests = len(test_results)
         
-        logger.info(f"=== Integration Tests Summary ===")
+        logger.info("=== Integration Tests Summary ===")
         logger.info(f"Passed: {passed_tests}/{total_tests}")
         
         if passed_tests == total_tests:
@@ -299,6 +298,7 @@ async def run_performance_tests():
     
     try:
         import time
+
         from src.core_services.smart_reviewer_allocator import SmartReviewerAllocator
         
         # Test reviewer selection performance

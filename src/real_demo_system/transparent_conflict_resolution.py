@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-透明冲突解决展示
+"""透明冲突解决展示
 
 提供冲突解决过程的透明展示
 """
 
 import logging
-from typing import Any, Dict, List, Optional
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +21,7 @@ class TransparentConflictResolution:
         self.transparency_level = "detailed"
         self.visualization_history = []
     
-    def show_conflict_analysis(self, conflict_data: Dict[str, Any]) -> Dict[str, Any]:
+    def show_conflict_analysis(self, conflict_data: dict[str, Any]) -> dict[str, Any]:
         """展示冲突分析"""
         try:
             analysis_id = str(uuid.uuid4())
@@ -48,7 +46,7 @@ class TransparentConflictResolution:
             logger.error(f"展示冲突分析失败: {e}")
             return {"error": str(e)}
     
-    def display_resolution_process(self, resolution_data: Dict[str, Any]) -> Dict[str, Any]:
+    def display_resolution_process(self, resolution_data: dict[str, Any]) -> dict[str, Any]:
         """显示解决过程"""
         try:
             process_id = str(uuid.uuid4())
@@ -68,7 +66,7 @@ class TransparentConflictResolution:
             logger.error(f"显示解决过程失败: {e}")
             return {"error": str(e)}
     
-    def generate_resolution_report(self, resolution_result: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_resolution_report(self, resolution_result: dict[str, Any]) -> dict[str, Any]:
         """生成解决报告"""
         try:
             report_id = str(uuid.uuid4())
@@ -89,14 +87,14 @@ class TransparentConflictResolution:
             logger.error(f"生成解决报告失败: {e}")
             return {"error": str(e)}
     
-    def _extract_stakeholder_positions(self, conflict_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _extract_stakeholder_positions(self, conflict_data: dict[str, Any]) -> list[dict[str, Any]]:
         """提取利益相关者立场"""
         try:
             positions = []
             sources = conflict_data.get("sources", [])
             statements = conflict_data.get("conflicting_statements", [])
             
-            for i, (source, statement) in enumerate(zip(sources, statements)):
+            for i, (source, statement) in enumerate(zip(sources, statements, strict=False)):
                 position = {
                     "stakeholder": source,
                     "position": statement,
@@ -112,7 +110,7 @@ class TransparentConflictResolution:
             logger.error(f"提取利益相关者立场失败: {e}")
             return []
     
-    def _calculate_conflict_metrics(self, conflict_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _calculate_conflict_metrics(self, conflict_data: dict[str, Any]) -> dict[str, Any]:
         """计算冲突指标"""
         try:
             statements = conflict_data.get("conflicting_statements", [])
@@ -130,7 +128,7 @@ class TransparentConflictResolution:
             logger.error(f"计算冲突指标失败: {e}")
             return {}
     
-    def _generate_resolution_options(self, conflict_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_resolution_options(self, conflict_data: dict[str, Any]) -> list[dict[str, Any]]:
         """生成解决选项"""
         try:
             options = [
@@ -163,7 +161,7 @@ class TransparentConflictResolution:
             logger.error(f"生成解决选项失败: {e}")
             return []
     
-    def _create_step_visualization(self, resolution_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _create_step_visualization(self, resolution_data: dict[str, Any]) -> list[dict[str, Any]]:
         """创建步骤可视化"""
         try:
             steps = [
@@ -210,7 +208,7 @@ class TransparentConflictResolution:
             logger.error(f"创建步骤可视化失败: {e}")
             return []
     
-    def _create_decision_tree(self, resolution_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_decision_tree(self, resolution_data: dict[str, Any]) -> dict[str, Any]:
         """创建决策树"""
         try:
             decision_tree = {
@@ -241,7 +239,7 @@ class TransparentConflictResolution:
             logger.error(f"创建决策树失败: {e}")
             return {}
     
-    def _visualize_evidence_analysis(self, resolution_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _visualize_evidence_analysis(self, resolution_data: dict[str, Any]) -> dict[str, Any]:
         """可视化证据分析"""
         try:
             evidence_analysis = {
@@ -263,7 +261,7 @@ class TransparentConflictResolution:
             logger.error(f"可视化证据分析失败: {e}")
             return {}
     
-    def _track_confidence_changes(self, resolution_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _track_confidence_changes(self, resolution_data: dict[str, Any]) -> list[dict[str, Any]]:
         """追踪置信度变化"""
         try:
             confidence_timeline = [
@@ -279,7 +277,7 @@ class TransparentConflictResolution:
             logger.error(f"追踪置信度变化失败: {e}")
             return []
     
-    def _create_executive_summary(self, resolution_result: Dict[str, Any]) -> str:
+    def _create_executive_summary(self, resolution_result: dict[str, Any]) -> str:
         """创建执行摘要"""
         try:
             strategy = resolution_result.get("strategy", "unknown")
@@ -294,7 +292,7 @@ class TransparentConflictResolution:
             logger.error(f"创建执行摘要失败: {e}")
             return "摘要生成失败"
     
-    def _create_detailed_analysis(self, resolution_result: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_detailed_analysis(self, resolution_result: dict[str, Any]) -> dict[str, Any]:
         """创建详细分析"""
         try:
             analysis = {
@@ -321,7 +319,7 @@ class TransparentConflictResolution:
             logger.error(f"创建详细分析失败: {e}")
             return {}
     
-    def _generate_recommendations(self, resolution_result: Dict[str, Any]) -> List[str]:
+    def _generate_recommendations(self, resolution_result: dict[str, Any]) -> list[str]:
         """生成建议"""
         try:
             recommendations = [
@@ -337,7 +335,7 @@ class TransparentConflictResolution:
             logger.error(f"生成建议失败: {e}")
             return []
     
-    def _assess_resolution_quality(self, resolution_result: Dict[str, Any]) -> Dict[str, Any]:
+    def _assess_resolution_quality(self, resolution_result: dict[str, Any]) -> dict[str, Any]:
         """评估解决质量"""
         try:
             quality_assessment = {
@@ -360,7 +358,7 @@ class TransparentConflictResolution:
             logger.error(f"评估解决质量失败: {e}")
             return {}
     
-    def _calculate_transparency_score(self, resolution_result: Dict[str, Any]) -> float:
+    def _calculate_transparency_score(self, resolution_result: dict[str, Any]) -> float:
         """计算透明度分数"""
         try:
             # 基于多个因素计算透明度
@@ -394,7 +392,7 @@ class TransparentConflictResolution:
             logger.error(f"分析立场失败: {e}")
             return "unknown"
     
-    def _calculate_complexity(self, statements: List[str]) -> float:
+    def _calculate_complexity(self, statements: list[str]) -> float:
         """计算复杂度"""
         try:
             if not statements:

@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-DAIP-LIVE 自修复演示系统
+"""DAIP-LIVE 自修复演示系统
 自动检测和修复依赖问题，确保可展示可互动
 """
 
-import sys
-import os
 import subprocess
+import sys
+
 
 def install_package(package):
     """安装缺失的包"""
@@ -44,11 +42,10 @@ def check_and_install_dependencies():
 
 def create_minimal_web_app():
     """创建最小化可运行的Web应用"""
-    
     # 检查Lona是否可用
     try:
         from lona import LonaApp, View
-        from lona.html import HTML, Div, H1, P, Button, TextInput, Pre
+        from lona.html import H1, HTML, Button, Div, P, Pre, TextInput
         
         app = LonaApp(__file__)
         
@@ -189,7 +186,6 @@ def create_minimal_web_app():
 def create_simple_http_server():
     """创建简单HTTP服务器作为备用"""
     from http.server import HTTPServer, SimpleHTTPRequestHandler
-    import threading
     
     class CustomHandler(SimpleHTTPRequestHandler):
         def do_GET(self):

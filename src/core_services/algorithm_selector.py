@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-智能算法选择器 (Algorithm Selector)
+"""智能算法选择器 (Algorithm Selector)
 
 基于输入特征和算法能力智能选择最优的共识算法。
 提供多种选择策略和决策可解释性。
@@ -24,17 +22,16 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Dict, List, Optional, Set, Any, Tuple
 from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
 
+from algorithm_registry import AlgorithmInfo, AlgorithmRegistry
 from consensus_models import (
-    ConsensusRequest, AlgorithmSelection, AlgorithmMetadata,
-    QualityPriority, QualityRequirements
+    AlgorithmSelection,
+    ConsensusRequest,
+    QualityPriority,
 )
-from consensus_algorithm_interface import AlgorithmCapabilities
-from algorithm_registry import AlgorithmRegistry, AlgorithmInfo
-
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +69,7 @@ class AlgorithmScore:
     availability_score: float
     compatibility_score: float
     load_score: float
-    reasoning: Dict[str, Any] = field(default_factory=dict)
+    reasoning: dict[str, Any] = field(default_factory=dict)
 
 
 class SelectionRule(ABC):
@@ -82,9 +79,8 @@ class SelectionRule(ABC):
     def evaluate(self, 
                  request: ConsensusRequest,
                  algorithm_info: AlgorithmInfo,
-                 context: Dict[str, Any]) -> float:
-        """
-        评估算法对请求的适合程度
+                 context: dict[str, Any]) -> float:
+        """评估算法对请求的适合程度
         
         Args:
             request: 共识请求
@@ -111,7 +107,7 @@ class InputCompatibilityRule(SelectionRule):
     def evaluate(self, 
                  request: ConsensusRequest,
                  algorithm_info: AlgorithmInfo,
-                 context: Dict[str, Any]) -> float:
+                 context: dict[str, Any]) -> float:
         """评估输入兼容性"""
         capabilities = algorithm_info.capabilities
         
@@ -163,7 +159,7 @@ class PerformanceRule(SelectionRule):
     def evaluate(self, 
                  request: ConsensusRequest,
                  algorithm_info: AlgorithmInfo,
-                 context: Dict[str, Any]) -> float:
+                 context: dict[str, Any]) -> float:
         """评估性能"""
         metadata = algorithm_info.metadata
         
@@ -214,7 +210,7 @@ class AccuracyRule(SelectionRule):
     def evaluate(self, 
                  request: ConsensusRequest,
                  algorithm_info: AlgorithmInfo,
-                 context: Dict[str, Any]) -> float:
+                 context: dict[str, Any]) -> float:
         """评估准确性"""
         metadata = algorithm_info.metadata
         accuracy_score = metadata.accuracy
@@ -248,7 +244,7 @@ class AvailabilityRule(SelectionRule):
     def evaluate(self, 
                  request: ConsensusRequest,
                  algorithm_info: AlgorithmInfo,
-                 context: Dict[str, Any]) -> float:
+                 context: dict[str, Any]) -> float:
         """评估可用性"""
         # 健康状态评分
         health_scores = {
@@ -301,7 +297,7 @@ class LoadBalanceRule(SelectionRule):
     def evaluate(self, 
                  request: ConsensusRequest,
                  algorithm_info: AlgorithmInfo,
-                 context: Dict[str, Any]) -> float:
+                 context: dict[str, Any]) -> float:
         """评估负载均衡"""
         # 获取所有算法的使用统计
         all_usage = context.get("all_algorithm_usage", {})
@@ -335,8 +331,7 @@ class LoadBalanceRule(SelectionRule):
 
 
 class AlgorithmSelector:
-    """
-    智能算法选择器
+    """智能算法选择器
     
     基于多维度评分和可配置策略选择最优的共识算法。
     """
@@ -397,11 +392,10 @@ class AlgorithmSelector:
         
     def select_algorithm(self,
                         request: ConsensusRequest,
-                        available_algorithms: Optional[List[str]] = None,
+                        available_algorithms: Optional[list[str]] = None,
                         strategy: Optional[SelectionStrategy] = None,
                         criteria: Optional[SelectionCriteria] = None) -> AlgorithmSelection:
-        """
-        选择最优算法
+        """选择最优算法
         
         Args:
             request: 共识请求
@@ -476,7 +470,7 @@ class AlgorithmSelector:
                 
     def _filter_compatible_algorithms(self, 
                                     request: ConsensusRequest, 
-                                    available_algorithms: List[str]) -> List[str]:
+                                    available_algorithms: list[str]) -> list[str]:
         """过滤兼容的算法"""
         compatible = []
         
@@ -506,8 +500,8 @@ class AlgorithmSelector:
         
     def _score_algorithms(self, 
                          request: ConsensusRequest,
-                         algorithm_ids: List[str],
-                         criteria: SelectionCriteria) -> List[AlgorithmScore]:
+                         algorithm_ids: list[str],
+                         criteria: SelectionCriteria) -> list[AlgorithmScore]:
         """为算法评分"""
         scores = []
         
@@ -573,7 +567,7 @@ class AlgorithmSelector:
         
         return scores    
     def _select_best_algorithm(self, 
-                              algorithm_scores: List[AlgorithmScore],
+                              algorithm_scores: list[AlgorithmScore],
                               strategy: SelectionStrategy) -> AlgorithmScore:
         """选择最佳算法"""
         if not algorithm_scores:
@@ -589,7 +583,7 @@ class AlgorithmSelector:
             
     def _generate_reasoning(self, 
                            best_algorithm: AlgorithmScore,
-                           all_scores: List[AlgorithmScore],
+                           all_scores: list[AlgorithmScore],
                            strategy: SelectionStrategy,
                            criteria: SelectionCriteria) -> str:
         """生成选择理由"""
@@ -635,8 +629,7 @@ class AlgorithmSelector:
     def update_selection_strategy(self, 
                                  strategy: SelectionStrategy,
                                  criteria: Optional[SelectionCriteria] = None) -> bool:
-        """
-        更新选择策略
+        """更新选择策略
         
         Args:
             strategy: 新的选择策略
@@ -659,8 +652,7 @@ class AlgorithmSelector:
             return False
             
     def add_custom_rule(self, rule_name: str, rule: SelectionRule) -> bool:
-        """
-        添加自定义评估规则
+        """添加自定义评估规则
         
         Args:
             rule_name: 规则名称
@@ -679,8 +671,7 @@ class AlgorithmSelector:
             return False
             
     def get_selection_reasoning(self, selection: AlgorithmSelection) -> str:
-        """
-        获取选择推理过程
+        """获取选择推理过程
         
         Args:
             selection: 算法选择结果
@@ -692,11 +683,10 @@ class AlgorithmSelector:
         
     def get_algorithm_scores(self, 
                            request: ConsensusRequest,
-                           available_algorithms: Optional[List[str]] = None,
+                           available_algorithms: Optional[list[str]] = None,
                            strategy: Optional[SelectionStrategy] = None,
-                           criteria: Optional[SelectionCriteria] = None) -> List[AlgorithmScore]:
-        """
-        获取所有算法的详细评分（用于分析和调试）
+                           criteria: Optional[SelectionCriteria] = None) -> list[AlgorithmScore]:
+        """获取所有算法的详细评分（用于分析和调试）
         
         Args:
             request: 共识请求
@@ -722,9 +712,8 @@ class AlgorithmSelector:
             logger.error(f"Failed to get algorithm scores: {str(e)}")
             return []
             
-    def get_selection_stats(self) -> Dict[str, Any]:
-        """
-        获取选择器统计信息
+    def get_selection_stats(self) -> dict[str, Any]:
+        """获取选择器统计信息
         
         Returns:
             统计信息字典
@@ -748,9 +737,8 @@ class AlgorithmSelector:
             }
         }
         
-    def validate_request_compatibility(self, request: ConsensusRequest) -> Dict[str, List[str]]:
-        """
-        验证请求与所有算法的兼容性
+    def validate_request_compatibility(self, request: ConsensusRequest) -> dict[str, list[str]]:
+        """验证请求与所有算法的兼容性
         
         Args:
             request: 共识请求

@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-演示步骤执行器
+"""演示步骤执行器
 """
 
 import logging
-from typing import Dict, Any
 from datetime import datetime
+from typing import Any
+
 from .demo_types import DemoScenarioType
 
 logger = logging.getLogger(__name__)
@@ -18,7 +17,7 @@ class StepExecutor:
     def __init__(self):
         pass
     
-    async def execute_step(self, scenario_type: str, step_name: str, step_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute_step(self, scenario_type: str, step_name: str, step_data: dict[str, Any]) -> dict[str, Any]:
         """执行演示步骤"""
         try:
             if scenario_type == DemoScenarioType.MULTI_ROLE_DEBATE.value:
@@ -33,7 +32,7 @@ class StepExecutor:
             logger.error(f"执行步骤失败: {e}")
             return {"error": str(e)}
     
-    async def _execute_debate_step(self, step_name: str, step_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_debate_step(self, step_name: str, step_data: dict[str, Any]) -> dict[str, Any]:
         """执行辩论场景步骤"""
         # 导入真实LLM执行器
         try:
@@ -82,7 +81,7 @@ class StepExecutor:
                     "timestamp": datetime.now().isoformat()
                 }
     
-    async def _execute_ethical_step(self, step_name: str, step_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_ethical_step(self, step_name: str, step_data: dict[str, Any]) -> dict[str, Any]:
         """执行伦理分析步骤"""
         return {
             "action": f"伦理分析: {step_name}",
@@ -90,7 +89,7 @@ class StepExecutor:
             "timestamp": datetime.now().isoformat()
         }
     
-    async def _execute_conflict_step(self, step_name: str, step_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_conflict_step(self, step_name: str, step_data: dict[str, Any]) -> dict[str, Any]:
         """执行冲突解决步骤"""
         return {
             "action": f"冲突解决: {step_name}",
@@ -98,7 +97,7 @@ class StepExecutor:
             "timestamp": datetime.now().isoformat()
         }
     
-    async def _execute_generic_step(self, step_name: str, step_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_generic_step(self, step_name: str, step_data: dict[str, Any]) -> dict[str, Any]:
         """执行通用步骤"""
         return {
             "action": f"通用步骤: {step_name}",

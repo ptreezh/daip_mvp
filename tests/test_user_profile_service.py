@@ -1,5 +1,4 @@
-"""
-Tests for the UserProfileService and SessionManagementService.
+"""Tests for the UserProfileService and SessionManagementService.
 
 This module contains unit tests for the user profile and session management functionality.
 """
@@ -9,11 +8,9 @@ import shutil
 import tempfile
 import time
 import unittest
-from datetime import datetime, timedelta
-from pathlib import Path
 
-from src.core_services.user_profile_service import UserProfile, UserProfileService, UserSession
 from src.core_services.session_management_service import SessionManagementService
+from src.core_services.user_profile_service import UserProfileService
 
 
 class TestUserProfileService(unittest.TestCase):

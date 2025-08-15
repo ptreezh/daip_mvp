@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-简单多数投票算法适配器
+"""简单多数投票算法适配器
 
 实现简单多数投票共识算法，适配统一共识调度器接口。
 这是最基础的共识算法，基于"少数服从多数"的原则。
@@ -19,30 +17,23 @@
 - 参与者权重相等的场景
 """
 
-import asyncio
 from collections import Counter
-from typing import Any, Dict, List, Optional, Set
 from datetime import datetime
+from typing import Any, Optional
 
-from consensus_algorithm_interface import (
-    ConsensusAlgorithm, ConsensusContext, AlgorithmCapabilities
-)
-from consensus_models import (
-    ConsensusInput, ConsensusResult, AlgorithmMetadata, 
-    ValidationResult, AlgorithmType
-)
+from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm, ConsensusContext
+from consensus_models import AlgorithmMetadata, AlgorithmType, ConsensusInput, ConsensusResult, ValidationResult
 
 
 class SimpleMajorityAlgorithm(ConsensusAlgorithm):
-    """
-    简单多数投票算法实现
+    """简单多数投票算法实现
     
     基于"少数服从多数"原则的共识算法。
     对于分类问题，选择得票最多的选项；
     对于数值问题，计算简单平均值。
     """
     
-    def __init__(self, configuration: Optional[Dict[str, Any]] = None):
+    def __init__(self, configuration: Optional[dict[str, Any]] = None):
         super().__init__("simple_majority", configuration)
         
         # 配置参数
@@ -51,10 +42,9 @@ class SimpleMajorityAlgorithm(ConsensusAlgorithm):
         self.numerical_aggregation = self.configuration.get("numerical_aggregation", "mean")
         
     async def calculate(self, 
-                       inputs: List[ConsensusInput], 
+                       inputs: list[ConsensusInput], 
                        context: ConsensusContext) -> ConsensusResult:
-        """
-        执行简单多数投票共识计算
+        """执行简单多数投票共识计算
         
         Args:
             inputs: 共识输入列表
@@ -124,7 +114,7 @@ class SimpleMajorityAlgorithm(ConsensusAlgorithm):
         )
     
     async def _calculate_categorical_consensus(self, 
-                                             inputs: List[ConsensusInput],
+                                             inputs: list[ConsensusInput],
                                              context: ConsensusContext) -> tuple[str, float]:
         """计算分类共识"""
         # 统计每个选项的票数
@@ -172,7 +162,7 @@ class SimpleMajorityAlgorithm(ConsensusAlgorithm):
         return consensus_value, final_confidence
     
     async def _calculate_numerical_consensus(self, 
-                                           inputs: List[ConsensusInput],
+                                           inputs: list[ConsensusInput],
                                            context: ConsensusContext) -> tuple[float, float]:
         """计算数值共识"""
         values = [float(inp.position) for inp in inputs]
@@ -189,7 +179,7 @@ class SimpleMajorityAlgorithm(ConsensusAlgorithm):
                 consensus_value = sorted_values[n//2]
         elif self.numerical_aggregation == "weighted_mean":
             # 使用置信度作为权重
-            weighted_sum = sum(v * c for v, c in zip(values, confidences))
+            weighted_sum = sum(v * c for v, c in zip(values, confidences, strict=False))
             weight_sum = sum(confidences)
             consensus_value = weighted_sum / weight_sum if weight_sum > 0 else sum(values) / len(values)
         else:
@@ -223,7 +213,7 @@ class SimpleMajorityAlgorithm(ConsensusAlgorithm):
         return consensus_value, final_confidence
     
     async def _calculate_complex_consensus(self, 
-                                         inputs: List[ConsensusInput],
+                                         inputs: list[ConsensusInput],
                                          context: ConsensusContext) -> tuple[Any, float]:
         """计算复杂类型共识"""
         # 将复杂类型转换为字符串进行处理
@@ -258,9 +248,9 @@ class SimpleMajorityAlgorithm(ConsensusAlgorithm):
         return consensus_str, confidence
     
     def _break_tie(self, 
-                   tied_options: List[str], 
-                   confidence_sums: Dict[str, float],
-                   inputs: List[ConsensusInput]) -> str:
+                   tied_options: list[str], 
+                   confidence_sums: dict[str, float],
+                   inputs: list[ConsensusInput]) -> str:
         """处理平票情况"""
         if self.tie_breaking_method == "first":
             # 返回第一个出现的选项
@@ -336,7 +326,7 @@ class SimpleMajorityAlgorithm(ConsensusAlgorithm):
             max_participants=None
         )
     
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> ValidationResult:
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> ValidationResult:
         """验证输入数据"""
         errors = []
         warnings = []
@@ -371,7 +361,7 @@ class SimpleMajorityAlgorithm(ConsensusAlgorithm):
             }
         )
     
-    def validate_configuration(self, config: Dict[str, Any]) -> ValidationResult:
+    def validate_configuration(self, config: dict[str, Any]) -> ValidationResult:
         """验证配置参数"""
         errors = []
         warnings = []

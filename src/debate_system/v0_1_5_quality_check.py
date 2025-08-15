@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.1.5 全面质量检查和端到端测试
+"""V0.1.5 全面质量检查和端到端测试
 
 执行多轮辩论系统的全面质量验证，包括：
 - 代码质量审查
@@ -12,16 +10,15 @@ V0.1.5 全面质量检查和端到端测试
 """
 
 import asyncio
-import time
-import sys
-import os
-import logging
-import subprocess
-import psutil
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 import json
+import logging
+import sys
+import time
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+import psutil
 
 # 添加项目根目录到路径
 current_dir = Path(__file__).parent
@@ -52,7 +49,7 @@ class QualityCheckResult:
         """开始检查"""
         self.start_time = datetime.now()
     
-    def finish(self, passed: bool, error_message: str = "", details: Dict = None):
+    def finish(self, passed: bool, error_message: str = "", details: dict = None):
         """结束检查"""
         self.end_time = datetime.now()
         self.passed = passed
@@ -66,12 +63,12 @@ class V015QualityChecker:
     """V0.1.5质量检查器"""
     
     def __init__(self):
-        self.check_results: List[QualityCheckResult] = []
+        self.check_results: list[QualityCheckResult] = []
         self.start_time = None
         self.end_time = None
         self.system_info = self._collect_system_info()
     
-    def _collect_system_info(self) -> Dict[str, Any]:
+    def _collect_system_info(self) -> dict[str, Any]:
         """收集系统信息"""
         return {
             "python_version": sys.version,
@@ -81,7 +78,7 @@ class V015QualityChecker:
             "timestamp": datetime.now().isoformat()
         }
     
-    async def run_all_checks(self) -> Dict[str, Any]:
+    async def run_all_checks(self) -> dict[str, Any]:
         """运行所有质量检查"""
         self.start_time = datetime.now()
         logger.info("🚀 开始V0.1.5全面质量检查...")
@@ -122,7 +119,7 @@ class V015QualityChecker:
             
             for py_file in python_files:
                 try:
-                    with open(py_file, 'r', encoding='utf-8') as f:
+                    with open(py_file, encoding='utf-8') as f:
                         compile(f.read(), py_file, 'exec')
                 except SyntaxError as e:
                     syntax_errors.append(f"{py_file}: {e}")
@@ -136,7 +133,7 @@ class V015QualityChecker:
             
             for py_file in python_files:
                 try:
-                    with open(py_file, 'r', encoding='utf-8') as f:
+                    with open(py_file, encoding='utf-8') as f:
                         code_metrics["total_lines"] += len(f.readlines())
                 except:
                     pass
@@ -194,9 +191,9 @@ class V015QualityChecker:
         result.start()
         
         try:
-            from src.debate_system.debate_flow_definition import DebateSession, DebatePhase, DebateStatus
-            from src.debate_system.participant_management import ParticipantManager, Permission
+            from src.debate_system.debate_flow_definition import DebateSession
             from src.debate_system.debate_state_manager import DebateStateManager
+            from src.debate_system.participant_management import ParticipantManager
             
             # 测试组件创建
             state_manager = DebateStateManager()
@@ -286,8 +283,6 @@ class V015QualityChecker:
             # 测试系统启动时间
             startup_start = time.time()
             
-            from src.debate_system.debate_state_manager import DebateStateManager
-            from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             
             startup_time = time.time() - startup_start
             
@@ -414,8 +409,8 @@ class V015QualityChecker:
         result.start()
         
         try:
-            from src.debate_system.debate_state_manager import DebateStateManager
             from src.debate_system.debate_flow_definition import DebateSession
+            from src.debate_system.debate_state_manager import DebateStateManager
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             
             # 创建模拟组件
@@ -482,7 +477,7 @@ class V015QualityChecker:
         self.check_results.append(result)
         logger.info(f"✅ 端到端工作流测试: {'通过' if result.passed else '失败'}")
     
-    def _generate_quality_report(self) -> Dict[str, Any]:
+    def _generate_quality_report(self) -> dict[str, Any]:
         """生成质量报告"""
         total_checks = len(self.check_results)
         passed_checks = sum(1 for r in self.check_results if r.passed)

@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-"""
-Phase 4.2: Academic Research Scenario Test
+"""Phase 4.2: Academic Research Scenario Test
 Test research report generation and multi-angle analysis
 """
 
 import asyncio
-import sys
 import os
-import json
-from datetime import datetime, timedelta
-from typing import Dict, List, Any
+import sys
+from datetime import datetime
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -18,13 +15,9 @@ async def test_academic_research_scenario():
     """Test academic research scenario with comprehensive validation"""
     try:
         from src.core_services.academic_research_scenario import (
-            AcademicResearchScenario, 
-            ResearchPaper, 
+            AcademicResearchScenario,
+            ResearchPaper,
             ResearchType,
-            ResearchProposal,
-            PeerReview,
-            ResearchAssessment,
-            ResearchSynthesis
         )
         
         print("Phase 4.2: Academic Research Scenario Test")

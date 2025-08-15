@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 15:40:00
+"""@Time    : 2025-08-05 15:40:00
 @Author  : DAIP-LIVE Team
 @File    : graceful_degradation.py
 @Description:
@@ -9,9 +7,10 @@
 
 import logging
 import time
-from typing import Dict, Any, Optional, List, Callable
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ class ServiceHealth:
     status: ServiceStatus
     last_check: float
     error_message: Optional[str] = None
-    performance_metrics: Dict[str, float] = field(default_factory=dict)
+    performance_metrics: dict[str, float] = field(default_factory=dict)
     fallback_available: bool = True
 
 
@@ -53,7 +52,7 @@ class FallbackService:
         self.name = name
         self.is_fallback = True
     
-    def get_capabilities(self) -> List[str]:
+    def get_capabilities(self) -> list[str]:
         """Get list of available capabilities in fallback mode"""
         return []
     
@@ -72,22 +71,22 @@ class GracefulAppState:
         self.service_configs = self._define_service_configs()
         
         # Service health tracking
-        self.service_health: Dict[str, ServiceHealth] = {}
+        self.service_health: dict[str, ServiceHealth] = {}
         
         # Service instances (both real and fallback)
-        self.services: Dict[str, Any] = {}
-        self.fallback_services: Dict[str, FallbackService] = {}
+        self.services: dict[str, Any] = {}
+        self.fallback_services: dict[str, FallbackService] = {}
         
         # Performance metrics
         self.startup_time = time.time()
-        self.initialization_errors: List[str] = []
+        self.initialization_errors: list[str] = []
         
         # Initialize services with graceful degradation
         self._initialize_services()
         
         logger.info("✅ Application initialized with graceful degradation")
     
-    def _define_service_configs(self) -> Dict[str, ServiceConfig]:
+    def _define_service_configs(self) -> dict[str, ServiceConfig]:
         """Define service configurations"""
         return {
             # Critical services (must work, but can have fallbacks)
@@ -331,7 +330,7 @@ class GracefulAppState:
         """Get health information for a service"""
         return self.service_health.get(service_name)
     
-    def get_system_health(self) -> Dict[str, Any]:
+    def get_system_health(self) -> dict[str, Any]:
         """Get overall system health status"""
         healthy_count = sum(1 for health in self.service_health.values() if health.status == ServiceStatus.HEALTHY)
         fallback_count = sum(1 for health in self.service_health.values() if health.status == ServiceStatus.FALLBACK)
@@ -376,8 +375,8 @@ class GracefulAppState:
     
     def _initialize_llm_interface(self):
         """Initialize LLM interface"""
-        from src.kernel.llm_interface import LLMFactory, LLMConfig
         from src.config import settings
+        from src.kernel.llm_interface import LLMConfig, LLMFactory
         
         config = LLMConfig(
             provider=settings.llm.provider,
@@ -391,8 +390,9 @@ class GracefulAppState:
     
     def _initialize_memory_service(self):
         """Initialize memory service"""
-        from src.core_services.memory_service import MemoryService
         import os
+
+        from src.core_services.memory_service import MemoryService
         
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         data_dir = os.path.join(base_dir, "data", "memory_banks")
@@ -401,8 +401,9 @@ class GracefulAppState:
     
     def _initialize_wiki_service(self):
         """Initialize wiki service"""
-        from src.core_services.wiki_service import WikiService
         import os
+
+        from src.core_services.wiki_service import WikiService
         
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         wiki_dir = os.path.join(base_dir, "data", "wiki")
@@ -411,8 +412,8 @@ class GracefulAppState:
     
     def _initialize_token_management_service(self):
         """Initialize token management service"""
-        from src.core_services.token_management_service import TokenManagementService
         from src.config import settings
+        from src.core_services.token_management_service import TokenManagementService
         
         return TokenManagementService(settings.token_management)
     
@@ -434,8 +435,9 @@ class GracefulAppState:
     
     def _initialize_task_manager(self):
         """Initialize task manager"""
-        from src.core_services.task_manager import TaskManager
         import os
+
+        from src.core_services.task_manager import TaskManager
         
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         task_dir = os.path.join(base_dir, "data", "tasks")
@@ -488,7 +490,7 @@ class MockLLMFallback(FallbackService):
     def __init__(self):
         super().__init__("mock_llm")
     
-    def get_capabilities(self) -> List[str]:
+    def get_capabilities(self) -> list[str]:
         return ["text_generation", "basic_analysis", "simple_responses"]
     
     def generate_response(self, prompt: str) -> str:
@@ -508,7 +510,7 @@ class InMemoryMemoryFallback(FallbackService):
         super().__init__("in_memory_memory")
         self.memory_storage = {}
     
-    def get_capabilities(self) -> List[str]:
+    def get_capabilities(self) -> list[str]:
         return ["basic_storage", "simple_retrieval", "temporary_memory"]
     
     def store(self, key: str, value: Any):
@@ -533,7 +535,7 @@ class SimpleWikiFallback(FallbackService):
         super().__init__("simple_wiki")
         self.wiki_pages = {}
     
-    def get_capabilities(self) -> List[str]:
+    def get_capabilities(self) -> list[str]:
         return ["basic_wiki", "simple_pages", "temporary_storage"]
     
     def create_page(self, title: str, content: str):
@@ -559,7 +561,7 @@ class SimpleTokenManagerFallback(FallbackService):
         self.token_count = 0
         self.max_tokens = 1000000
     
-    def get_capabilities(self) -> List[str]:
+    def get_capabilities(self) -> list[str]:
         return ["basic_tracking", "simple_limits", "token_counting"]
     
     def use_tokens(self, amount: int):

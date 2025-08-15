@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-智能记忆管理应用
+"""智能记忆管理应用
 
 基于MemAgent的记忆管理界面，提供完整的记忆管理功能
 """
 
-import asyncio
 import logging
-from lona import App, Route
-from lona.html import HTML, Div, H1, H2, P, Button
-from lona.view import TemplateView
 
 from components.memory_panel import MemoryPanel
-from components.base_components import Panel, Card, Tabs
+from lona import App
+from lona.html import H1, H2, HTML, Button, Div, P
+from lona.view import TemplateView
 from services.memory_service import MemoryService
 
 # 配置日志

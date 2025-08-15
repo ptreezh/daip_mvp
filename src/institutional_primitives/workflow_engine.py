@@ -1,5 +1,4 @@
-"""
-Workflow Engine for the Institutional Primitives System.
+"""Workflow Engine for the Institutional Primitives System.
 
 This module implements the workflow orchestration engine that coordinates
 the execution of institutional primitives in complex workflows.
@@ -9,26 +8,23 @@ import asyncio
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
+from .base import ExecutionContext, ExecutionStep, ExecutionTrace
 from .parallel_execution import ParallelExecutionManager
-
-from .base import ExecutionContext, ExecutionStep, ExecutionTrace, InstitutionalPrimitive
 from .registry import PrimitiveRegistry
-from .parallel_execution import ParallelExecutionManager
 
 
 class WorkflowNode(BaseModel):
-    """
-    Definition of a node in a workflow.
+    """Definition of a node in a workflow.
     """
     id: str
     type: str  # Primitive type (e.g., "generation", "fact_extraction")
-    config: Dict[str, Any] = Field(default_factory=dict)
-    inputs: List[str] = Field(default_factory=list)
-    outputs: List[str] = Field(default_factory=list)
+    config: dict[str, Any] = Field(default_factory=dict)
+    inputs: list[str] = Field(default_factory=list)
+    outputs: list[str] = Field(default_factory=list)
     parallel_group: Optional[str] = None  # ID of parallel execution group
     max_retries: int = 0  # Number of retries on failure
     parallel_group: Optional[str] = None  # ID of parallel execution group
@@ -36,8 +32,7 @@ class WorkflowNode(BaseModel):
 
 
 class WorkflowEdge(BaseModel):
-    """
-    Definition of an edge between nodes in a workflow.
+    """Definition of an edge between nodes in a workflow.
     """
     from_node: str
     to_node: str
@@ -45,48 +40,44 @@ class WorkflowEdge(BaseModel):
 
 
 class WorkflowDefinition(BaseModel):
-    """
-    Definition of a complete workflow.
+    """Definition of a complete workflow.
     """
     id: str
     name: str
     description: str
-    nodes: List[WorkflowNode] = Field(default_factory=list)
-    edges: List[WorkflowEdge] = Field(default_factory=list)
-    parameters: Dict[str, Any] = Field(default_factory=dict)
-    metadata: Dict[str, Any] = Field(default_factory=dict)  # For parallel group configs
+    nodes: list[WorkflowNode] = Field(default_factory=list)
+    edges: list[WorkflowEdge] = Field(default_factory=list)
+    parameters: dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)  # For parallel group configs
 
 
 class WorkflowResult(BaseModel):
-    """
-    Result of a workflow execution.
+    """Result of a workflow execution.
     """
     execution_id: str
     status: str  # "completed", "failed", "cancelled"
-    outputs: Dict[str, Any] = Field(default_factory=dict)
+    outputs: dict[str, Any] = Field(default_factory=dict)
     execution_trace: ExecutionTrace
-    metrics: Dict[str, Any] = Field(default_factory=dict)
+    metrics: dict[str, Any] = Field(default_factory=dict)
 
 
 class WorkflowStatus(BaseModel):
-    """
-    Status of a workflow execution.
+    """Status of a workflow execution.
     """
     execution_id: str
     workflow_id: str
     status: str  # "running", "completed", "failed", "cancelled", "paused"
     progress: float  # 0.0 to 1.0
-    current_nodes: List[str] = Field(default_factory=list)
-    completed_nodes: List[str] = Field(default_factory=list)
-    failed_nodes: List[str] = Field(default_factory=list)
+    current_nodes: list[str] = Field(default_factory=list)
+    completed_nodes: list[str] = Field(default_factory=list)
+    failed_nodes: list[str] = Field(default_factory=list)
     start_time: datetime
     end_time: Optional[datetime] = None
-    metrics: Dict[str, Any] = Field(default_factory=dict)
+    metrics: dict[str, Any] = Field(default_factory=dict)
 
 
 class WorkflowEngine:
-    """
-    Engine for executing institutional workflows.
+    """Engine for executing institutional workflows.
     
     The WorkflowEngine orchestrates the execution of institutional primitives
     in complex workflows, managing state, handling failures, and providing
@@ -94,24 +85,22 @@ class WorkflowEngine:
     """
     
     def __init__(self, primitive_registry: PrimitiveRegistry):
-        """
-        Initialize the workflow engine.
+        """Initialize the workflow engine.
         
         Args:
             primitive_registry: Registry of available primitives
         """
         self.primitive_registry = primitive_registry
-        self.active_workflows: Dict[str, Dict[str, Any]] = {}
+        self.active_workflows: dict[str, dict[str, Any]] = {}
         self.parallel_execution_manager = ParallelExecutionManager()
         self.logger = logging.getLogger(__name__)
     
     async def execute_workflow(
         self, 
         workflow_def: WorkflowDefinition, 
-        params: Dict[str, Any] = None
+        params: dict[str, Any] = None
     ) -> WorkflowResult:
-        """
-        Execute a workflow with the given parameters.
+        """Execute a workflow with the given parameters.
         
         Args:
             workflow_def: Definition of the workflow to execute
@@ -204,8 +193,7 @@ class WorkflowEngine:
             asyncio.create_task(self._cleanup_workflow(execution_id))
     
     def get_workflow_status(self, execution_id: str) -> Optional[WorkflowStatus]:
-        """
-        Get the status of a workflow execution.
+        """Get the status of a workflow execution.
         
         Args:
             execution_id: ID of the workflow execution
@@ -245,8 +233,7 @@ class WorkflowEngine:
         )
     
     async def pause_workflow(self, execution_id: str) -> bool:
-        """
-        Pause a running workflow.
+        """Pause a running workflow.
         
         Args:
             execution_id: ID of the workflow execution
@@ -273,8 +260,7 @@ class WorkflowEngine:
         return True
     
     async def resume_workflow(self, execution_id: str) -> bool:
-        """
-        Resume a paused workflow.
+        """Resume a paused workflow.
         
         Args:
             execution_id: ID of the workflow execution
@@ -303,13 +289,12 @@ class WorkflowEngine:
     def create_parallel_group(
         self,
         workflow_def: WorkflowDefinition,
-        node_ids: List[str],
+        node_ids: list[str],
         group_id: str = None,
         max_concurrency: int = 5,
         timeout: Optional[float] = None
     ) -> str:
-        """
-        Create a parallel execution group for a set of nodes.
+        """Create a parallel execution group for a set of nodes.
         
         Args:
             workflow_def: Workflow definition to modify
@@ -360,13 +345,12 @@ class WorkflowEngine:
     def create_parallel_group(
         self,
         workflow_def: WorkflowDefinition,
-        node_ids: List[str],
+        node_ids: list[str],
         group_id: str = None,
         max_concurrency: int = 5,
         timeout: Optional[float] = None
     ) -> str:
-        """
-        Create a parallel execution group for a set of nodes.
+        """Create a parallel execution group for a set of nodes.
         
         Args:
             workflow_def: Workflow definition to modify
@@ -412,8 +396,7 @@ class WorkflowEngine:
         return group_id
     
     async def cancel_workflow(self, execution_id: str) -> bool:
-        """
-        Cancel a running or paused workflow.
+        """Cancel a running or paused workflow.
         
         Args:
             execution_id: ID of the workflow execution
@@ -440,9 +423,8 @@ class WorkflowEngine:
         
         return True
     
-    def _build_execution_graph(self, workflow_def: WorkflowDefinition) -> Dict[str, Any]:
-        """
-        Build an execution graph from a workflow definition.
+    def _build_execution_graph(self, workflow_def: WorkflowDefinition) -> dict[str, Any]:
+        """Build an execution graph from a workflow definition.
         
         Args:
             workflow_def: Definition of the workflow
@@ -485,12 +467,11 @@ class WorkflowEngine:
     
     async def _execute_graph(
         self, 
-        graph: Dict[str, Any], 
+        graph: dict[str, Any], 
         context: ExecutionContext, 
         trace: ExecutionTrace
-    ) -> Dict[str, Any]:
-        """
-        Execute a workflow graph.
+    ) -> dict[str, Any]:
+        """Execute a workflow graph.
         
         Args:
             graph: Execution graph representation
@@ -517,14 +498,13 @@ class WorkflowEngine:
         
     async def _execute_graph_with_parallelism(
         self,
-        graph: Dict[str, Any],
+        graph: dict[str, Any],
         context: ExecutionContext,
         trace: ExecutionTrace,
-        node_status: Dict[str, str],
-        node_outputs: Dict[str, Dict[str, Any]]
+        node_status: dict[str, str],
+        node_outputs: dict[str, dict[str, Any]]
     ) -> None:
-        """
-        Execute a workflow graph with parallel execution support.
+        """Execute a workflow graph with parallel execution support.
         
         This method uses a level-based approach to identify nodes that can be
         executed in parallel at each step of the workflow execution.
@@ -634,14 +614,13 @@ class WorkflowEngine:
     async def _execute_single_node_wrapper(
         self,
         node_id: str,
-        graph: Dict[str, Any],
+        graph: dict[str, Any],
         context: ExecutionContext,
         trace: ExecutionTrace,
-        node_status: Dict[str, str],
-        node_outputs: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, Any]:
-        """
-        Wrapper for executing a single node in parallel.
+        node_status: dict[str, str],
+        node_outputs: dict[str, dict[str, Any]]
+    ) -> dict[str, Any]:
+        """Wrapper for executing a single node in parallel.
         
         Args:
             node_id: ID of the node to execute
@@ -670,7 +649,7 @@ class WorkflowEngine:
             node_context.mark_completed()
             
             return result
-        except Exception as e:
+        except Exception:
             # Mark as failed
             node_status[node_id] = "failed"
             node_context.mark_failed()
@@ -679,14 +658,13 @@ class WorkflowEngine:
     async def _execute_node(
         self,
         node_id: str,
-        graph: Dict[str, Any],
+        graph: dict[str, Any],
         context: ExecutionContext,
         trace: ExecutionTrace,
-        node_status: Dict[str, str],
-        node_outputs: Dict[str, Dict[str, Any]]
+        node_status: dict[str, str],
+        node_outputs: dict[str, dict[str, Any]]
     ) -> None:
-        """
-        Execute a single node in the workflow.
+        """Execute a single node in the workflow.
         
         This method is kept for backward compatibility but delegates to the new
         parallel execution approach.
@@ -738,7 +716,7 @@ class WorkflowEngine:
                 
                 await self._execute_node(to_node, graph, context, trace, node_status, node_outputs)
         
-        except Exception as e:
+        except Exception:
             # Mark as failed
             node_status[node_id] = "failed"
             node_context.mark_failed()
@@ -747,13 +725,12 @@ class WorkflowEngine:
     async def _execute_single_node(
         self,
         node_id: str,
-        graph: Dict[str, Any],
+        graph: dict[str, Any],
         node_context: ExecutionContext,
         trace: ExecutionTrace,
-        node_outputs: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, Any]:
-        """
-        Execute a single node in the workflow.
+        node_outputs: dict[str, dict[str, Any]]
+    ) -> dict[str, Any]:
+        """Execute a single node in the workflow.
         
         Args:
             node_id: ID of the node to execute
@@ -847,9 +824,8 @@ class WorkflowEngine:
             node_context.mark_failed()
             raise
     
-    def _calculate_metrics(self, trace: ExecutionTrace) -> Dict[str, Any]:
-        """
-        Calculate metrics from an execution trace.
+    def _calculate_metrics(self, trace: ExecutionTrace) -> dict[str, Any]:
+        """Calculate metrics from an execution trace.
         
         Args:
             trace: Execution trace
@@ -891,8 +867,7 @@ class WorkflowEngine:
         }
     
     async def _cleanup_workflow(self, execution_id: str, delay: float = 3600) -> None:
-        """
-        Clean up a workflow after a delay.
+        """Clean up a workflow after a delay.
         
         Args:
             execution_id: ID of the workflow execution

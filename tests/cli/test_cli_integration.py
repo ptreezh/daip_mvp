@@ -1,21 +1,20 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-20 00:00:00
+"""@Time    : 2025-07-20 00:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_cli_integration.py
 @Description: Integration tests for CLI-to-service interactions.
 """
 
-import pytest
 import asyncio
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from typer.testing import CliRunner
 
+from src.cli.commands import CLIDebateHandler, check_system_health, list_available_roles, run_debate_command
 from src.cli.main import app
-from src.cli.commands import CLIDebateHandler, run_debate_command, check_system_health, list_available_roles
 
 
-@pytest.fixture
+@pytest.fixture()
 def cli_runner():
     """Fixture that provides a CLI test runner."""
     return CliRunner()
@@ -26,7 +25,7 @@ class TestCLIServiceIntegration:
     
     @patch("src.cli.commands.AppState")
     @patch("src.cli.commands.DebateProtocol")
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_cli_debate_handler_initialization(self, mock_debate_protocol, mock_app_state):
         """Test CLIDebateHandler initializes services correctly."""
         # Mock AppState and its services
@@ -50,7 +49,7 @@ class TestCLIServiceIntegration:
         mock_debate_protocol.assert_called_once()
     
     @patch("src.cli.commands.AppState")
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_cli_debate_handler_initialization_failure(self, mock_app_state):
         """Test CLIDebateHandler handles initialization failures."""
         mock_app_state.side_effect = Exception("Database connection failed")
@@ -61,7 +60,7 @@ class TestCLIServiceIntegration:
         assert result is False
     
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_run_debate_command_success(self):
         """Test run_debate_command integrates with CLIDebateHandler successfully."""
         # For this test, we'll mock the entire function execution
@@ -84,7 +83,7 @@ class TestCLIServiceIntegration:
                     assert result is True
     
     @patch("src.cli.commands.MISSING_DEPENDENCIES", ["aiosqlite"])
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_run_debate_command_missing_dependencies(self):
         """Test run_debate_command handles missing dependencies."""
         result = await run_debate_command(
@@ -99,7 +98,7 @@ class TestCLIServiceIntegration:
     
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
     @patch("src.cli.commands.AppState")
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_run_debate_command_role_recommendation(self, mock_app_state):
         """Test run_debate_command recommends roles when none provided."""
         # Mock AppState with role recommendation
@@ -213,7 +212,7 @@ class TestCLIEventProcessing:
     
     @patch("src.cli.commands.AppState")
     @patch("src.cli.commands.DebateProtocol")
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_cli_debate_handler_event_processing(self, mock_debate_protocol, mock_app_state):
         """Test CLIDebateHandler processes debate events correctly."""
         # Mock services
@@ -267,7 +266,7 @@ class TestCLIEventProcessing:
         assert len(handler.debate_history) == 2  # Should have captured the two turns
     
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_run_debate_command_with_save(self):
         """Test run_debate_command saves results when requested."""
         # This test is complex due to the internal ResultCapturingDebateHandler class

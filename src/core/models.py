@@ -1,12 +1,12 @@
-"""
-核心数据模型定义
+"""核心数据模型定义
 定义系统中所有核心数据结构和业务模型
 """
 
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Literal, Tuple
-from pydantic import BaseModel, Field
 from enum import Enum
+from typing import Any, Literal, Optional
+
+from pydantic import BaseModel, Field
 
 
 class ReasoningStyle(str, Enum):
@@ -52,10 +52,10 @@ class CognitiveProfile(BaseModel):
     name: str
     avatar: str = "🤖"
     reasoning_style: ReasoningStyle
-    core_values: Dict[str, float] = Field(default_factory=dict)
-    personality_traits: List[str] = Field(default_factory=list)
-    expertise_domains: Dict[str, float] = Field(default_factory=dict)
-    cognitive_biases: List[str] = Field(default_factory=list)
+    core_values: dict[str, float] = Field(default_factory=dict)
+    personality_traits: list[str] = Field(default_factory=list)
+    expertise_domains: dict[str, float] = Field(default_factory=dict)
+    cognitive_biases: list[str] = Field(default_factory=list)
     thinking_pattern: str = ""
     prompt_template: str = ""
     
@@ -70,7 +70,7 @@ class AgentMessage(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.now)
     message_type: Literal["analysis", "argument", "question", "summary"] = "analysis"
     confidence: float = Field(ge=0.0, le=1.0, default=0.8)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 # ============================================================================
@@ -82,9 +82,9 @@ class WorkflowNode(BaseModel):
     id: str
     type: str  # 原语类型
     name: str
-    config: Dict[str, Any] = Field(default_factory=dict)
-    inputs: List[str] = Field(default_factory=list)
-    outputs: List[str] = Field(default_factory=list)
+    config: dict[str, Any] = Field(default_factory=dict)
+    inputs: list[str] = Field(default_factory=list)
+    outputs: list[str] = Field(default_factory=list)
 
 
 class WorkflowEdge(BaseModel):
@@ -99,9 +99,9 @@ class WorkflowDefinition(BaseModel):
     id: str
     name: str
     description: str
-    nodes: List[WorkflowNode]
-    edges: List[WorkflowEdge]
-    parameters: Dict[str, Any] = Field(default_factory=dict)
+    nodes: list[WorkflowNode]
+    edges: list[WorkflowEdge]
+    parameters: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.now)
     version: str = "1.0.0"
 
@@ -113,8 +113,8 @@ class ExecutionStep(BaseModel):
     status: WorkflowStatus
     start_time: datetime
     end_time: Optional[datetime] = None
-    inputs: Dict[str, Any] = Field(default_factory=dict)
-    outputs: Dict[str, Any] = Field(default_factory=dict)
+    inputs: dict[str, Any] = Field(default_factory=dict)
+    outputs: dict[str, Any] = Field(default_factory=dict)
     error_message: Optional[str] = None
 
 
@@ -132,8 +132,8 @@ class WorkflowResult(BaseModel):
     execution_id: str
     workflow_id: str
     status: WorkflowStatus
-    outputs: Dict[str, Any] = Field(default_factory=dict)
-    execution_trace: List[ExecutionStep] = Field(default_factory=list)
+    outputs: dict[str, Any] = Field(default_factory=dict)
+    execution_trace: list[ExecutionStep] = Field(default_factory=list)
     metrics: ExecutionMetrics
     created_at: datetime = Field(default_factory=datetime.now)
 
@@ -153,8 +153,8 @@ class Memory(BaseModel):
     creation_time: datetime = Field(default_factory=datetime.now)
     last_accessed: datetime = Field(default_factory=datetime.now)
     access_count: int = 0
-    related_memories: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    related_memories: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class KnowledgeRelation(BaseModel):
@@ -162,7 +162,7 @@ class KnowledgeRelation(BaseModel):
     relation_type: str  # "supports", "contradicts", "elaborates"
     target_fact_id: str
     confidence: float = Field(ge=0.0, le=1.0, default=0.8)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class KnowledgeFact(BaseModel):
@@ -172,8 +172,8 @@ class KnowledgeFact(BaseModel):
     source: str
     confidence: float = Field(ge=0.0, le=1.0, default=0.8)
     timestamp: datetime = Field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    relations: List[KnowledgeRelation] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    relations: list[KnowledgeRelation] = Field(default_factory=list)
     version: int = 1
 
 
@@ -184,10 +184,10 @@ class WikiPage(BaseModel):
     content: str
     version: int = 1
     last_updated: datetime = Field(default_factory=datetime.now)
-    contributors: List[str] = Field(default_factory=list)
-    tags: List[str] = Field(default_factory=list)
+    contributors: list[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
     quality_score: float = Field(ge=0.0, le=1.0, default=0.5)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 # ============================================================================
@@ -201,9 +201,9 @@ class EmergentInsight(BaseModel):
     content: str
     novelty_score: float = Field(ge=0.0, le=1.0)
     emergence_score: float = Field(ge=0.0, le=1.0)
-    contributing_agents: List[str] = Field(default_factory=list)
-    evidence_support: List[str] = Field(default_factory=list)
-    applications: List[str] = Field(default_factory=list)
+    contributing_agents: list[str] = Field(default_factory=list)
+    evidence_support: list[str] = Field(default_factory=list)
+    applications: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=datetime.now)
     impact_level: Literal["low", "medium", "high", "breakthrough"] = "medium"
 
@@ -212,10 +212,10 @@ class ConsensusResult(BaseModel):
     """共识结果模型"""
     consensus_id: str
     topic: str
-    participants: List[str]
+    participants: list[str]
     consensus_strength: float = Field(ge=0.0, le=1.0)
-    agreement_points: List[str] = Field(default_factory=list)
-    disagreement_points: List[str] = Field(default_factory=list)
+    agreement_points: list[str] = Field(default_factory=list)
+    disagreement_points: list[str] = Field(default_factory=list)
     final_position: str
     confidence: float = Field(ge=0.0, le=1.0)
     created_at: datetime = Field(default_factory=datetime.now)
@@ -231,7 +231,7 @@ class Argument(BaseModel):
     agent_id: str
     position: Literal["pro", "con", "neutral"]
     content: str
-    evidence: List[str] = Field(default_factory=list)
+    evidence: list[str] = Field(default_factory=list)
     logical_strength: float = Field(ge=0.0, le=1.0, default=0.5)
     evidence_quality: float = Field(ge=0.0, le=1.0, default=0.5)
     timestamp: datetime = Field(default_factory=datetime.now)
@@ -241,7 +241,7 @@ class DebateRound(BaseModel):
     """辩论轮次模型"""
     round_id: str
     round_number: int
-    arguments: List[Argument] = Field(default_factory=list)
+    arguments: list[Argument] = Field(default_factory=list)
     summary: Optional[str] = None
     consensus_shift: float = 0.0
 
@@ -250,8 +250,8 @@ class DebateState(BaseModel):
     """辩论状态模型"""
     debate_id: str
     topic: str
-    participants: List[str]
-    rounds: List[DebateRound] = Field(default_factory=list)
+    participants: list[str]
+    rounds: list[DebateRound] = Field(default_factory=list)
     current_consensus: Optional[ConsensusResult] = None
     status: Literal["preparing", "active", "concluded"] = "preparing"
     created_at: datetime = Field(default_factory=datetime.now)
@@ -268,8 +268,8 @@ class Task(BaseModel):
     description: str
     status: TaskStatus = TaskStatus.NOT_STARTED
     assigned_agent: Optional[str] = None
-    dependencies: List[str] = Field(default_factory=list)
-    deliverables: List[str] = Field(default_factory=list)
+    dependencies: list[str] = Field(default_factory=list)
+    deliverables: list[str] = Field(default_factory=list)
     priority: Literal["low", "medium", "high", "urgent"] = "medium"
     estimated_duration: Optional[int] = None  # 分钟
     actual_duration: Optional[int] = None
@@ -282,8 +282,8 @@ class Project(BaseModel):
     project_id: str
     name: str
     description: str
-    tasks: List[Task] = Field(default_factory=list)
-    participants: List[str] = Field(default_factory=list)
+    tasks: list[Task] = Field(default_factory=list)
+    participants: list[str] = Field(default_factory=list)
     status: Literal["planning", "active", "completed", "cancelled"] = "planning"
     created_at: datetime = Field(default_factory=datetime.now)
     deadline: Optional[datetime] = None
@@ -298,7 +298,7 @@ class SystemEvent(BaseModel):
     event_id: str
     event_type: str
     source: str
-    data: Dict[str, Any] = Field(default_factory=dict)
+    data: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.now)
     severity: Literal["info", "warning", "error", "critical"] = "info"
 
@@ -309,7 +309,7 @@ class SessionMetrics(BaseModel):
     message_count: int
     average_response_time: float
     topic_coherence: float = Field(ge=0.0, le=1.0)
-    engagement_distribution: Dict[str, float] = Field(default_factory=dict)
+    engagement_distribution: dict[str, float] = Field(default_factory=dict)
     quality_score: float = Field(ge=0.0, le=1.0)
 
 
@@ -342,8 +342,8 @@ class SystemConfig(BaseModel):
 class UserPreferences(BaseModel):
     """用户偏好模型"""
     user_id: str
-    preferred_agents: List[str] = Field(default_factory=list)
-    notification_settings: Dict[str, bool] = Field(default_factory=dict)
+    preferred_agents: list[str] = Field(default_factory=list)
+    notification_settings: dict[str, bool] = Field(default_factory=dict)
     ui_theme: str = "default"
     language: str = "zh-CN"
     timezone: str = "Asia/Shanghai"

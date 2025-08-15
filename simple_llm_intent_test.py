@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-简单直接的LLM意图分析测试
+"""简单直接的LLM意图分析测试
 """
 
 import asyncio
 import sys
-import json
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.kernel.llm_interface import LLMConfig, LLMFactory
+
 
 async def test_simple_llm():
     """简单测试LLM意图分析"""

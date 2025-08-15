@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-自适应学习系统
+"""自适应学习系统
 
 基于用户交互和反馈持续优化推荐和体验
 """
 
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
-from collections import defaultdict
-import json
 import math
+from collections import defaultdict
+from datetime import datetime
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +35,7 @@ class AdaptiveLearningSystem:
         
         logger.info("自适应学习系统初始化完成")
     
-    def learn_from_interaction(self, interaction_data: Dict[str, Any]) -> Dict[str, Any]:
+    def learn_from_interaction(self, interaction_data: dict[str, Any]) -> dict[str, Any]:
         """从交互中学习"""
         try:
             user_id = interaction_data.get("user_id")
@@ -110,9 +107,9 @@ class AdaptiveLearningSystem:
     def adapt_recommendations(
         self,
         user_id: str,
-        current_recommendations: List[Dict[str, Any]],
+        current_recommendations: list[dict[str, Any]],
         adaptation_strategy: str = "immediate"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """适应性调整推荐"""
         try:
             # 获取用户学习历史
@@ -153,7 +150,7 @@ class AdaptiveLearningSystem:
             logger.error(f"适应推荐失败: {e}")
             return {"error": str(e)}
     
-    def evaluate_learning_effectiveness(self, user_id: str) -> Dict[str, Any]:
+    def evaluate_learning_effectiveness(self, user_id: str) -> dict[str, Any]:
         """评估学习效果"""
         try:
             user_history = self.learning_history.get(user_id, {})
@@ -199,9 +196,9 @@ class AdaptiveLearningSystem:
     def _immediate_adaptation(
         self,
         user_id: str,
-        recommendations: List[Dict[str, Any]],
-        user_history: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        recommendations: list[dict[str, Any]],
+        user_history: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """即时适应策略"""
         adapted_recommendations = []
         
@@ -235,9 +232,9 @@ class AdaptiveLearningSystem:
     def _gradual_adaptation(
         self,
         user_id: str,
-        recommendations: List[Dict[str, Any]],
-        user_history: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        recommendations: list[dict[str, Any]],
+        user_history: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """渐进适应策略"""
         adapted_recommendations = []
         
@@ -264,9 +261,9 @@ class AdaptiveLearningSystem:
     def _batch_adaptation(
         self,
         user_id: str,
-        recommendations: List[Dict[str, Any]],
-        user_history: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        recommendations: list[dict[str, Any]],
+        user_history: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """批量适应策略"""
         adapted_recommendations = []
         
@@ -291,8 +288,8 @@ class AdaptiveLearningSystem:
     
     def _calculate_confidence_change(
         self,
-        interaction_data: Dict[str, Any],
-        learning_updates: Dict[str, Any]
+        interaction_data: dict[str, Any],
+        learning_updates: dict[str, Any]
     ) -> float:
         """计算置信度变化"""
         user_feedback = interaction_data.get("user_feedback", {})
@@ -340,9 +337,9 @@ class AdaptiveLearningSystem:
     
     def _calculate_adaptation_metrics(
         self,
-        original_recommendations: List[Dict[str, Any]],
-        adapted_recommendations: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        original_recommendations: list[dict[str, Any]],
+        adapted_recommendations: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """计算适应指标"""
         if not original_recommendations or not adapted_recommendations:
             return {}
@@ -370,7 +367,7 @@ class AdaptiveLearningSystem:
     def _generate_adaptation_reasoning(
         self,
         strategy: str,
-        metrics: Dict[str, Any]
+        metrics: dict[str, Any]
     ) -> str:
         """生成适应推理"""
         reasoning_parts = []
@@ -399,16 +396,16 @@ class AdaptiveLearningSystem:
     
     def _get_recent_feedback_for_topic(
         self,
-        interactions: List[Dict[str, Any]],
+        interactions: list[dict[str, Any]],
         topic: str
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[dict[str, Any]]:
         """获取主题的最近反馈"""
         for interaction in reversed(interactions):
             if topic.lower() in interaction.get("query", "").lower():
                 return interaction.get("user_feedback")
         return None
     
-    def _calculate_score_adjustment(self, feedback: Dict[str, Any]) -> float:
+    def _calculate_score_adjustment(self, feedback: dict[str, Any]) -> float:
         """计算分数调整"""
         relevance = feedback.get("relevance", 0.5)
         usefulness = feedback.get("usefulness", 0.5)
@@ -421,7 +418,7 @@ class AdaptiveLearningSystem:
     
     def _calculate_gradual_adjustment(
         self,
-        learning_updates: List[Dict[str, Any]],
+        learning_updates: list[dict[str, Any]],
         topic: str
     ) -> float:
         """计算渐进调整"""
@@ -439,12 +436,12 @@ class AdaptiveLearningSystem:
         
         # 计算加权平均（最近的权重更高）
         weights = [0.1 * (i + 1) for i in range(len(topic_changes))]
-        weighted_sum = sum(change * weight for change, weight in zip(topic_changes, weights))
+        weighted_sum = sum(change * weight for change, weight in zip(topic_changes, weights, strict=False))
         weight_sum = sum(weights)
         
         return weighted_sum / weight_sum if weight_sum > 0 else 0.0
     
-    def _analyze_behavior_patterns(self, interactions: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_behavior_patterns(self, interactions: list[dict[str, Any]]) -> dict[str, Any]:
         """分析行为模式"""
         if not interactions:
             return {}
@@ -470,8 +467,8 @@ class AdaptiveLearningSystem:
     
     def _calculate_pattern_score(
         self,
-        recommendation: Dict[str, Any],
-        behavior_patterns: Dict[str, Any]
+        recommendation: dict[str, Any],
+        behavior_patterns: dict[str, Any]
     ) -> float:
         """计算模式分数"""
         base_score = 0.5
@@ -496,7 +493,7 @@ class AdaptiveLearningSystem:
         
         return max(0.0, min(1.0, base_score))
     
-    def _analyze_time_patterns(self, interactions: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_time_patterns(self, interactions: list[dict[str, Any]]) -> dict[str, Any]:
         """分析时间模式"""
         hour_counts = defaultdict(int)
         
@@ -521,7 +518,7 @@ class AdaptiveLearningSystem:
             "activity_spread": len(hour_counts)
         }
     
-    def _analyze_content_preferences(self, interactions: List[Dict[str, Any]]) -> Dict[str, float]:
+    def _analyze_content_preferences(self, interactions: list[dict[str, Any]]) -> dict[str, float]:
         """分析内容偏好"""
         content_scores = defaultdict(float)
         
@@ -545,7 +542,7 @@ class AdaptiveLearningSystem:
         
         return dict(content_scores)
     
-    def _extract_keywords(self, text: str) -> List[str]:
+    def _extract_keywords(self, text: str) -> list[str]:
         """提取关键词"""
         # 简化的关键词提取
         keywords = []
@@ -561,7 +558,7 @@ class AdaptiveLearningSystem:
         
         return keywords
     
-    def _calculate_order_similarity(self, order1: List[str], order2: List[str]) -> float:
+    def _calculate_order_similarity(self, order1: list[str], order2: list[str]) -> float:
         """计算排序相似度"""
         if not order1 or not order2:
             return 0.0
@@ -590,7 +587,7 @@ class AdaptiveLearningSystem:
         
         return consistent_pairs / total_pairs if total_pairs > 0 else 1.0
     
-    def _calculate_average_confidence_change(self, learning_updates: List[Dict[str, Any]]) -> float:
+    def _calculate_average_confidence_change(self, learning_updates: list[dict[str, Any]]) -> float:
         """计算平均置信度变化"""
         if not learning_updates:
             return 0.0
@@ -598,7 +595,7 @@ class AdaptiveLearningSystem:
         changes = [update.get("confidence_change", 0.0) for update in learning_updates]
         return sum(changes) / len(changes)
     
-    def _calculate_learning_velocity(self, learning_updates: List[Dict[str, Any]]) -> float:
+    def _calculate_learning_velocity(self, learning_updates: list[dict[str, Any]]) -> float:
         """计算学习速度"""
         if len(learning_updates) < 2:
             return 0.0
@@ -612,7 +609,7 @@ class AdaptiveLearningSystem:
         
         return velocity / (len(changes) - 1)
     
-    def _calculate_model_stability(self, learning_updates: List[Dict[str, Any]]) -> float:
+    def _calculate_model_stability(self, learning_updates: list[dict[str, Any]]) -> float:
         """计算模型稳定性"""
         if not learning_updates:
             return 1.0
@@ -656,7 +653,7 @@ class AdaptiveLearningSystem:
         
         return sum(feedback_scores) / len(feedback_scores)
     
-    def _evaluate_overall_effectiveness(self, learning_metrics: Dict[str, Any]) -> str:
+    def _evaluate_overall_effectiveness(self, learning_metrics: dict[str, Any]) -> str:
         """评估整体效果"""
         confidence_change = learning_metrics.get("average_confidence_change", 0.0)
         prediction_accuracy = learning_metrics.get("prediction_accuracy", 0.5)
@@ -678,7 +675,7 @@ class AdaptiveLearningSystem:
         else:
             return "poor"
     
-    def _generate_improvement_suggestions(self, learning_metrics: Dict[str, Any]) -> List[str]:
+    def _generate_improvement_suggestions(self, learning_metrics: dict[str, Any]) -> list[str]:
         """生成改进建议"""
         suggestions = []
         
@@ -705,7 +702,7 @@ class AdaptiveLearningSystem:
         
         return suggestions
     
-    def _analyze_learning_trend(self, learning_updates: List[Dict[str, Any]]) -> str:
+    def _analyze_learning_trend(self, learning_updates: list[dict[str, Any]]) -> str:
         """分析学习趋势"""
         if len(learning_updates) < 3:
             return "insufficient_data"
@@ -729,7 +726,7 @@ class AdaptiveLearningSystem:
         
         return "stable"
     
-    def _identify_optimization_targets(self, learning_metrics: Dict[str, Any]) -> List[str]:
+    def _identify_optimization_targets(self, learning_metrics: dict[str, Any]) -> list[str]:
         """识别优化目标"""
         targets = []
         
@@ -759,7 +756,7 @@ class UserPreferenceLearningModel:
         self.preference_weights = {}
         self.learning_rate = 0.1
     
-    def update(self, interaction_data: Dict[str, Any]) -> Dict[str, Any]:
+    def update(self, interaction_data: dict[str, Any]) -> dict[str, Any]:
         """更新用户偏好"""
         user_feedback = interaction_data.get("user_feedback", {})
         query = interaction_data.get("query", "")
@@ -781,7 +778,7 @@ class UserPreferenceLearningModel:
             "adjustment_applied": adjustment if 'adjustment' in locals() else 0.0
         }
     
-    def get_adjustment_recommendation(self) -> Optional[Dict[str, Any]]:
+    def get_adjustment_recommendation(self) -> Optional[dict[str, Any]]:
         """获取调整建议"""
         if not self.preference_weights:
             return None
@@ -802,7 +799,7 @@ class ContentEffectivenessModel:
     def __init__(self):
         self.content_scores = {}
     
-    def update(self, interaction_data: Dict[str, Any]) -> Dict[str, Any]:
+    def update(self, interaction_data: dict[str, Any]) -> dict[str, Any]:
         """更新内容效果"""
         content_type = interaction_data.get("content_type", "default")
         user_feedback = interaction_data.get("user_feedback", {})
@@ -825,7 +822,7 @@ class ContentEffectivenessModel:
             "average_score": sum(self.content_scores.get(content_type, [0.5])) / len(self.content_scores.get(content_type, [0.5]))
         }
     
-    def get_adjustment_recommendation(self) -> Optional[Dict[str, Any]]:
+    def get_adjustment_recommendation(self) -> Optional[dict[str, Any]]:
         """获取调整建议"""
         if not self.content_scores:
             return None
@@ -855,7 +852,7 @@ class InteractionPatternModel:
     def __init__(self):
         self.interaction_patterns = {}
     
-    def update(self, interaction_data: Dict[str, Any]) -> Dict[str, Any]:
+    def update(self, interaction_data: dict[str, Any]) -> dict[str, Any]:
         """更新交互模式"""
         interaction_type = interaction_data.get("interaction_type", "unknown")
         timestamp = interaction_data.get("timestamp", datetime.now().isoformat())
@@ -887,7 +884,7 @@ class InteractionPatternModel:
             "success_rate": pattern["success_rate"]
         }
     
-    def get_adjustment_recommendation(self) -> Optional[Dict[str, Any]]:
+    def get_adjustment_recommendation(self) -> Optional[dict[str, Any]]:
         """获取调整建议"""
         if not self.interaction_patterns:
             return None
@@ -915,7 +912,7 @@ class RecommendationQualityModel:
         self.quality_history = []
         self.quality_trends = {}
     
-    def update(self, interaction_data: Dict[str, Any]) -> Dict[str, Any]:
+    def update(self, interaction_data: dict[str, Any]) -> dict[str, Any]:
         """更新推荐质量"""
         user_feedback = interaction_data.get("user_feedback", {})
         
@@ -944,7 +941,7 @@ class RecommendationQualityModel:
             "average_quality": sum(r["quality_score"] for r in self.quality_history) / len(self.quality_history) if self.quality_history else 0.5
         }
     
-    def get_adjustment_recommendation(self) -> Optional[Dict[str, Any]]:
+    def get_adjustment_recommendation(self) -> Optional[dict[str, Any]]:
         """获取调整建议"""
         if len(self.quality_history) < 5:
             return None

@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-增强的测试生成器
+"""增强的测试生成器
 能够分析构造函数参数并生成正确的实例化代码
 """
 
 import json
-import ast
-from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any
+
 
 class EnhancedTestGenerator:
     """增强的测试生成器"""
@@ -17,23 +14,23 @@ class EnhancedTestGenerator:
         self.interface_map = self._load_interface_map()
         self.architecture_map = self._load_architecture_map()
     
-    def _load_interface_map(self) -> Dict[str, Any]:
+    def _load_interface_map(self) -> dict[str, Any]:
         """加载接口映射"""
         try:
-            with open("interface_map.json", 'r', encoding='utf-8') as f:
+            with open("interface_map.json", encoding='utf-8') as f:
                 return json.load(f)
         except FileNotFoundError:
             return {}
     
-    def _load_architecture_map(self) -> Dict[str, Any]:
+    def _load_architecture_map(self) -> dict[str, Any]:
         """加载架构映射"""
         try:
-            with open("architecture_map.json", 'r', encoding='utf-8') as f:
+            with open("architecture_map.json", encoding='utf-8') as f:
                 return json.load(f)
         except FileNotFoundError:
             return {}
     
-    def get_constructor_info(self, class_name: str) -> Dict[str, Any]:
+    def get_constructor_info(self, class_name: str) -> dict[str, Any]:
         """获取构造函数信息"""
         class_info = self.interface_map.get("available_classes", {}).get(class_name)
         if not class_info:
@@ -162,7 +159,6 @@ class EnhancedTestGenerator:
     
     def generate_complete_test_file(self) -> str:
         """生成完整的测试文件"""
-        
         # 查找用户干预相关的类
         relevant_classes = []
         
@@ -197,7 +193,7 @@ sys.path.append('src')
             test_code += self.generate_enhanced_class_test(class_name) + "\n\n"
         
         # 生成主函数
-        test_code += f'''async def main():
+        test_code += '''async def main():
     """主验证函数"""
     print("🚀 开始验证用户干预机制 (增强版)")
     

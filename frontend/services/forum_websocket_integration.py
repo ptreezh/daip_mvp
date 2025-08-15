@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 12:00:00
+"""@Time    : 2025-08-06 12:00:00
 @Author  : DAIP-LIVE Team
 @File    : forum_websocket_integration.py
 @Description:
@@ -9,14 +7,14 @@
 """
 
 import asyncio
-import json
 import logging
 import uuid
-from typing import Dict, List, Optional, Any, Callable
+from collections.abc import Callable
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
-from ..services.dual_entrance_websocket_manager import dual_entrance_websocket_manager, MessageType, EntranceType
+from ..services.dual_entrance_websocket_manager import dual_entrance_websocket_manager
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -40,8 +38,8 @@ class ForumWebSocketIntegration:
     """Forum WebSocket集成服务"""
     
     def __init__(self):
-        self.active_sessions: Dict[str, Dict[str, Any]] = {}
-        self.message_handlers: Dict[ForumWebSocketEventType, List[Callable]] = {}
+        self.active_sessions: dict[str, dict[str, Any]] = {}
+        self.message_handlers: dict[ForumWebSocketEventType, list[Callable]] = {}
         self.connection_status = "disconnected"
         self.message_queue = asyncio.Queue()
         self.is_processing = False
@@ -83,7 +81,7 @@ class ForumWebSocketIntegration:
             self.connection_status = "disconnected"
             logger.error(f"Forum WebSocket初始化失败: {e}")
     
-    async def handle_forum_message(self, message_data: Dict[str, Any]):
+    async def handle_forum_message(self, message_data: dict[str, Any]):
         """处理Forum消息"""
         try:
             self.stats["messages_received"] += 1
@@ -112,7 +110,7 @@ class ForumWebSocketIntegration:
             logger.error(f"处理Forum消息失败: {e}")
             self.stats["errors"] += 1
     
-    async def _handle_agent_message(self, message_data: Dict[str, Any]):
+    async def _handle_agent_message(self, message_data: dict[str, Any]):
         """处理Agent消息"""
         event = {
             "type": ForumWebSocketEventType.AGENT_MESSAGE,
@@ -126,7 +124,7 @@ class ForumWebSocketIntegration:
         
         await self._trigger_event_handlers(event)
     
-    async def _handle_context_update(self, message_data: Dict[str, Any]):
+    async def _handle_context_update(self, message_data: dict[str, Any]):
         """处理上下文更新"""
         event = {
             "type": ForumWebSocketEventType.CONTEXT_UPDATE,
@@ -142,7 +140,7 @@ class ForumWebSocketIntegration:
         
         await self._trigger_event_handlers(event)
     
-    async def _handle_consensus_update(self, message_data: Dict[str, Any]):
+    async def _handle_consensus_update(self, message_data: dict[str, Any]):
         """处理共识更新"""
         event = {
             "type": ForumWebSocketEventType.CONSENSUS_UPDATE,
@@ -153,7 +151,7 @@ class ForumWebSocketIntegration:
         
         await self._trigger_event_handlers(event)
     
-    async def _handle_debate_status(self, message_data: Dict[str, Any]):
+    async def _handle_debate_status(self, message_data: dict[str, Any]):
         """处理辩论状态更新"""
         event = {
             "type": ForumWebSocketEventType.DEBATE_STATUS,
@@ -165,7 +163,7 @@ class ForumWebSocketIntegration:
         
         await self._trigger_event_handlers(event)
     
-    async def _handle_error_message(self, message_data: Dict[str, Any]):
+    async def _handle_error_message(self, message_data: dict[str, Any]):
         """处理错误消息"""
         event = {
             "type": ForumWebSocketEventType.ERROR,
@@ -177,7 +175,7 @@ class ForumWebSocketIntegration:
         
         await self._trigger_event_handlers(event)
     
-    async def _trigger_event_handlers(self, event: Dict[str, Any]):
+    async def _trigger_event_handlers(self, event: dict[str, Any]):
         """触发事件处理器"""
         event_type = event["type"]
         
@@ -382,15 +380,15 @@ class ForumWebSocketIntegration:
                 logger.error(f"消息处理错误: {e}")
                 await asyncio.sleep(1)
     
-    def get_session_info(self, session_id: str) -> Optional[Dict[str, Any]]:
+    def get_session_info(self, session_id: str) -> Optional[dict[str, Any]]:
         """获取会话信息"""
         return self.active_sessions.get(session_id)
     
-    def get_active_sessions(self) -> List[Dict[str, Any]]:
+    def get_active_sessions(self) -> list[dict[str, Any]]:
         """获取所有活跃会话"""
         return list(self.active_sessions.values())
     
-    def get_connection_status(self) -> Dict[str, Any]:
+    def get_connection_status(self) -> dict[str, Any]:
         """获取连接状态"""
         return {
             "status": self.connection_status,

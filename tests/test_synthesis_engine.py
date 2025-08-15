@@ -1,16 +1,17 @@
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock
-from typing import List
-from src.core_services.synthesis_engine import SynthesisEngine
+
 from src.core_services import prompts
-from src.models import DebateTurn
+from src.core_services.synthesis_engine import SynthesisEngine
 from src.kernel.llm_interface import LLMInterface
+from src.models import DebateTurn
 
 # Mark all tests in this file as asyncio
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_llm_interface() -> MagicMock:
     """Fixture for a mocked LLM interface."""
     mock_interface = MagicMock(spec=LLMInterface)
@@ -22,7 +23,7 @@ def mock_llm_interface() -> MagicMock:
     return mock_interface
 
 
-@pytest.fixture
+@pytest.fixture()
 def synthesis_engine(mock_llm_interface: MagicMock) -> SynthesisEngine:
     """Fixture for the SynthesisEngine instance."""
     # The engine expects an LLM interface
@@ -34,7 +35,7 @@ async def test_summarize_conversation_with_correct_data_structure(
     mock_llm_interface: MagicMock,
 ) -> None:
     """Test conversation summarization with correctly structured history data."""
-    messages: List[DebateTurn] = [
+    messages: list[DebateTurn] = [
         DebateTurn(round=1, role_id="role1", opinion="Point A"),
         DebateTurn(round=2, role_id="role2", opinion="Point B"),
     ]
@@ -59,7 +60,7 @@ async def test_summarize_context_handles_response_error(
     mock_llm_interface.generate.side_effect = Exception(mock_error_details)
 
     # Create some dummy history to pass to the function
-    messages: List[DebateTurn] = [
+    messages: list[DebateTurn] = [
         DebateTurn(round=1, role_id="role1", opinion="This will fail anyway."),
     ]
 
@@ -79,7 +80,7 @@ async def test_synthesize_opinions_success(
     """Tests successful opinion synthesis."""
     # Arrange
     topic = "The future of AI"
-    history: List[DebateTurn] = [
+    history: list[DebateTurn] = [
         DebateTurn(round=1, role_id="role1", opinion="AI is the future."),
         DebateTurn(round=2, role_id="role2", opinion="AI has risks."),
     ]

@@ -1,5 +1,4 @@
-"""
-Dynamic Context Adapter for real-time context optimization.
+"""Dynamic Context Adapter for real-time context optimization.
 
 This module implements dynamic context adaptation capabilities that can
 adjust context in real-time based on changing task requirements and
@@ -8,14 +7,18 @@ maintain task coherence throughout conversations.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple
 from enum import Enum
+from typing import Any, Optional
 
 from .models import (
-    TaskType, TaskRequirement, ContextElement, TaskDetectionResult,
-    OptimizedContext, ContextOptimizationConfig, ElementType
+    ContextElement,
+    ContextOptimizationConfig,
+    ElementType,
+    OptimizedContext,
+    TaskDetectionResult,
+    TaskType,
 )
-from .strategies import TaskDetectionStrategy, PatternBasedTaskDetection
+from .strategies import PatternBasedTaskDetection, TaskDetectionStrategy
 
 
 class AdaptationTrigger(str, Enum):
@@ -48,7 +51,7 @@ class AdaptationEvent:
         timestamp: datetime,
         context_before: OptimizedContext,
         context_after: OptimizedContext,
-        metadata: Dict[str, Any] = None
+        metadata: dict[str, Any] = None
     ):
         self.trigger = trigger
         self.action = action
@@ -62,24 +65,22 @@ class TaskBoundaryDetector:
     """Detects task boundaries and transitions in conversations."""
     
     def __init__(self, task_detection_strategy: Optional[TaskDetectionStrategy] = None):
-        """
-        Initialize the task boundary detector.
+        """Initialize the task boundary detector.
         
         Args:
             task_detection_strategy: Strategy for detecting tasks
         """
         self.task_detection_strategy = task_detection_strategy or PatternBasedTaskDetection()
         self.logger = logging.getLogger(__name__)
-        self.task_history: List[Tuple[datetime, TaskDetectionResult]] = []
+        self.task_history: list[tuple[datetime, TaskDetectionResult]] = []
         self.current_task: Optional[TaskDetectionResult] = None
     
     def detect_task_transition(
         self,
-        new_messages: List[Dict[str, Any]],
-        context: Dict[str, Any]
-    ) -> Tuple[bool, Optional[TaskDetectionResult]]:
-        """
-        Detect if there's a task transition in the conversation.
+        new_messages: list[dict[str, Any]],
+        context: dict[str, Any]
+    ) -> tuple[bool, Optional[TaskDetectionResult]]:
+        """Detect if there's a task transition in the conversation.
         
         Args:
             new_messages: New messages to analyze
@@ -106,8 +107,7 @@ class TaskBoundaryDetector:
         return has_transition, new_task_result if has_transition else None
     
     def _is_significant_task_change(self, new_task_result: TaskDetectionResult) -> bool:
-        """
-        Determine if a new task result represents a significant change.
+        """Determine if a new task result represents a significant change.
         
         Args:
             new_task_result: New task detection result
@@ -129,9 +129,8 @@ class TaskBoundaryDetector:
         
         return False
     
-    def get_task_context_window(self, window_size: int = 3) -> List[TaskDetectionResult]:
-        """
-        Get recent task context for understanding task flow.
+    def get_task_context_window(self, window_size: int = 3) -> list[TaskDetectionResult]:
+        """Get recent task context for understanding task flow.
         
         Args:
             window_size: Number of recent tasks to include
@@ -158,15 +157,14 @@ class CoherenceMonitor:
     def __init__(self):
         """Initialize the coherence monitor."""
         self.logger = logging.getLogger(__name__)
-        self.coherence_history: List[Tuple[datetime, float]] = []
+        self.coherence_history: list[tuple[datetime, float]] = []
     
     def assess_coherence(
         self,
         context: OptimizedContext,
         current_task: TaskDetectionResult
     ) -> float:
-        """
-        Assess the coherence of context with respect to the current task.
+        """Assess the coherence of context with respect to the current task.
         
         Args:
             context: Current optimized context
@@ -211,8 +209,7 @@ class CoherenceMonitor:
         context: OptimizedContext,
         current_task: TaskDetectionResult
     ) -> float:
-        """
-        Calculate how well context aligns with the current task.
+        """Calculate how well context aligns with the current task.
         
         Args:
             context: Current context
@@ -243,8 +240,7 @@ class CoherenceMonitor:
         return sum(alignment_scores) / len(alignment_scores) if alignment_scores else 0.0
     
     def _calculate_internal_consistency(self, context: OptimizedContext) -> float:
-        """
-        Calculate internal consistency of context elements.
+        """Calculate internal consistency of context elements.
         
         Args:
             context: Current context
@@ -272,8 +268,7 @@ class CoherenceMonitor:
         return sum(consistency_scores) / len(consistency_scores) if consistency_scores else 0.0
     
     def _calculate_temporal_coherence(self, context: OptimizedContext) -> float:
-        """
-        Calculate temporal coherence of context elements.
+        """Calculate temporal coherence of context elements.
         
         Args:
             context: Current context
@@ -301,8 +296,7 @@ class CoherenceMonitor:
 
 
 class DynamicContextAdapter:
-    """
-    Main dynamic context adapter that provides real-time context optimization.
+    """Main dynamic context adapter that provides real-time context optimization.
     
     This adapter monitors context quality, detects task transitions, and
     automatically adjusts context to maintain optimal performance.
@@ -314,8 +308,7 @@ class DynamicContextAdapter:
         task_boundary_detector: Optional[TaskBoundaryDetector] = None,
         coherence_monitor: Optional[CoherenceMonitor] = None
     ):
-        """
-        Initialize the dynamic context adapter.
+        """Initialize the dynamic context adapter.
         
         Args:
             config: Optimization configuration
@@ -328,7 +321,7 @@ class DynamicContextAdapter:
         self.logger = logging.getLogger(__name__)
         
         # Adaptation history
-        self.adaptation_events: List[AdaptationEvent] = []
+        self.adaptation_events: list[AdaptationEvent] = []
         
         # Monitoring thresholds
         self.coherence_threshold = 0.6
@@ -338,11 +331,10 @@ class DynamicContextAdapter:
     def adapt_context_realtime(
         self,
         current_context: OptimizedContext,
-        new_messages: List[Dict[str, Any]],
-        conversation_context: Dict[str, Any]
-    ) -> Tuple[OptimizedContext, List[AdaptationEvent]]:
-        """
-        Adapt context in real-time based on new messages and current state.
+        new_messages: list[dict[str, Any]],
+        conversation_context: dict[str, Any]
+    ) -> tuple[OptimizedContext, list[AdaptationEvent]]:
+        """Adapt context in real-time based on new messages and current state.
         
         Args:
             current_context: Current optimized context
@@ -399,9 +391,8 @@ class DynamicContextAdapter:
         self,
         context: OptimizedContext,
         new_task: TaskDetectionResult
-    ) -> Tuple[OptimizedContext, AdaptationEvent]:
-        """
-        Adapt context for a task transition.
+    ) -> tuple[OptimizedContext, AdaptationEvent]:
+        """Adapt context for a task transition.
         
         Args:
             context: Current context
@@ -465,9 +456,8 @@ class DynamicContextAdapter:
         context: OptimizedContext,
         current_task: TaskDetectionResult,
         coherence_score: float
-    ) -> Tuple[OptimizedContext, AdaptationEvent]:
-        """
-        Adapt context for low coherence.
+    ) -> tuple[OptimizedContext, AdaptationEvent]:
+        """Adapt context for low coherence.
         
         Args:
             context: Current context
@@ -513,9 +503,8 @@ class DynamicContextAdapter:
     def _adapt_for_context_overflow(
         self,
         context: OptimizedContext
-    ) -> Tuple[OptimizedContext, AdaptationEvent]:
-        """
-        Adapt context for token overflow.
+    ) -> tuple[OptimizedContext, AdaptationEvent]:
+        """Adapt context for token overflow.
         
         Args:
             context: Current context
@@ -563,9 +552,8 @@ class DynamicContextAdapter:
     def _remove_stale_content(
         self,
         context: OptimizedContext
-    ) -> Tuple[OptimizedContext, List[AdaptationEvent]]:
-        """
-        Remove stale content from context.
+    ) -> tuple[OptimizedContext, list[AdaptationEvent]]:
+        """Remove stale content from context.
         
         Args:
             context: Current context
@@ -621,8 +609,7 @@ class DynamicContextAdapter:
         element: ContextElement,
         task: TaskDetectionResult
     ) -> float:
-        """
-        Calculate relevance of an element to a specific task.
+        """Calculate relevance of an element to a specific task.
         
         Args:
             element: Context element
@@ -648,9 +635,8 @@ class DynamicContextAdapter:
         
         return min(relevance, 1.0)
     
-    def get_adaptation_stats(self) -> Dict[str, Any]:
-        """
-        Get statistics about context adaptations.
+    def get_adaptation_stats(self) -> dict[str, Any]:
+        """Get statistics about context adaptations.
         
         Returns:
             Dictionary containing adaptation statistics

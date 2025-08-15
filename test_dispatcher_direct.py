@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-直接测试统一调度器
+"""直接测试统一调度器
 
 直接测试统一调度器的功能，不通过兼容层。
 """
 
 import asyncio
 import sys
-import os
 
 # 添加src路径
 sys.path.append('src')
@@ -19,10 +16,9 @@ async def test_dispatcher_direct():
     print("🧪 直接测试统一调度器...")
     
     try:
-        from unified_consensus_dispatcher import UnifiedConsensusDispatcher
-        from algorithm_registry import AlgorithmRegistry
-        from simple_majority_algorithm import SimpleMajorityAlgorithm
         from consensus_models import ConsensusInput, ConsensusRequest
+        from simple_majority_algorithm import SimpleMajorityAlgorithm
+        from unified_consensus_dispatcher import UnifiedConsensusDispatcher
         
         # 创建调度器
         dispatcher = UnifiedConsensusDispatcher()
@@ -85,10 +81,10 @@ async def test_algorithm_selector():
     print("\n🎯 测试算法选择器...")
     
     try:
-        from algorithm_selector import AlgorithmSelector, SelectionStrategy
         from algorithm_registry import AlgorithmRegistry
+        from algorithm_selector import AlgorithmSelector, SelectionStrategy
+        from consensus_models import ConsensusInput, ConsensusRequest
         from simple_majority_algorithm import SimpleMajorityAlgorithm
-        from consensus_models import ConsensusRequest, ConsensusInput
         
         # 创建注册表和选择器
         registry = AlgorithmRegistry()

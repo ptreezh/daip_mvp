@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 16:45:00
+"""@Time    : 2025-08-04 16:45:00
 @Author  : DAIP-LIVE Team
 @File    : scenario_integration_service.py
 @Description:
@@ -10,29 +8,30 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Any, Optional, Union
-from datetime import datetime
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
+
+from src.core_services.academic_research_scenario import (
+    AcademicResearchScenario,
+    AcademicStandard,
+    ResearchPaper,
+    ResearchType,
+)
 
 # Import the three core scenarios
 from src.core_services.expert_consultation_scenario import (
-    ExpertConsultationScenario,
-    ExpertConsultationRequest,
+    ConsultationPriority,
     ConsultationType,
-    ConsultationPriority
-)
-from src.core_services.academic_research_scenario import (
-    AcademicResearchScenario,
-    ResearchPaper,
-    ResearchType,
-    AcademicStandard
+    ExpertConsultationRequest,
+    ExpertConsultationScenario,
 )
 from src.core_services.industry_analysis_scenario import (
-    IndustryAnalysisScenario,
+    AnalysisDepth,
     AnalysisRequest,
+    IndustryAnalysisScenario,
     IndustryType,
-    AnalysisDepth
 )
 
 logger = logging.getLogger(__name__)
@@ -51,9 +50,9 @@ class UnifiedRequest:
     scenario_type: ScenarioType
     user_id: str
     session_id: str
-    request_data: Dict[str, Any]
+    request_data: dict[str, Any]
     priority: str = "medium"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
 
 
@@ -63,16 +62,15 @@ class UnifiedResponse:
     success: bool
     scenario_type: ScenarioType
     request_id: str
-    response_data: Dict[str, Any]
+    response_data: dict[str, Any]
     execution_time: float
     error_message: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     completed_at: datetime = field(default_factory=datetime.now)
 
 
 class ScenarioIntegrationService:
-    """
-    Integration service for the three core scenarios.
+    """Integration service for the three core scenarios.
     Provides unified interface and manages scenario lifecycle.
     """
     
@@ -184,7 +182,7 @@ class ScenarioIntegrationService:
                 }
             )
     
-    async def _process_expert_consultation(self, request: UnifiedRequest) -> Dict[str, Any]:
+    async def _process_expert_consultation(self, request: UnifiedRequest) -> dict[str, Any]:
         """Process expert consultation request."""
         data = request.request_data
         
@@ -212,7 +210,7 @@ class ScenarioIntegrationService:
             }
         }
     
-    async def _process_academic_research(self, request: UnifiedRequest) -> Dict[str, Any]:
+    async def _process_academic_research(self, request: UnifiedRequest) -> dict[str, Any]:
         """Process academic research request."""
         data = request.request_data
         
@@ -268,7 +266,7 @@ class ScenarioIntegrationService:
         else:
             raise ValueError(f"Unsupported academic research request type: {request_type}")
     
-    async def _process_industry_analysis(self, request: UnifiedRequest) -> Dict[str, Any]:
+    async def _process_industry_analysis(self, request: UnifiedRequest) -> dict[str, Any]:
         """Process industry analysis request."""
         data = request.request_data
         
@@ -363,7 +361,7 @@ class ScenarioIntegrationService:
         
         user_session["last_activity"] = response.completed_at.isoformat()
     
-    async def get_request_status(self, request_id: str) -> Dict[str, Any]:
+    async def get_request_status(self, request_id: str) -> dict[str, Any]:
         """Get status of a specific request."""
         # Search in history
         for record in self.request_history:
@@ -380,7 +378,7 @@ class ScenarioIntegrationService:
             "error": f"Request {request_id} not found"
         }
     
-    async def get_user_session_info(self, user_id: str, session_id: Optional[str] = None) -> Dict[str, Any]:
+    async def get_user_session_info(self, user_id: str, session_id: Optional[str] = None) -> dict[str, Any]:
         """Get user session information."""
         if user_id not in self.user_sessions:
             return {
@@ -412,7 +410,7 @@ class ScenarioIntegrationService:
                 "active_sessions": list(user_session["active_sessions"].values())
             }
     
-    async def get_service_metrics(self) -> Dict[str, Any]:
+    async def get_service_metrics(self) -> dict[str, Any]:
         """Get service performance metrics."""
         return {
             "service_id": self.service_id,
@@ -427,7 +425,7 @@ class ScenarioIntegrationService:
             "average_execution_time": self.performance_metrics["average_execution_time"]
         }
     
-    async def get_scenario_capabilities(self) -> Dict[str, Any]:
+    async def get_scenario_capabilities(self) -> dict[str, Any]:
         """Get capabilities of all scenarios."""
         return {
             "expert_consultation": {
@@ -453,7 +451,7 @@ class ScenarioIntegrationService:
             }
         }
     
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Perform health check of all scenarios."""
         health_status = {
             "service_id": self.service_id,
@@ -516,9 +514,9 @@ async def process_unified_request(
     scenario_type: str,
     user_id: str,
     session_id: str,
-    request_data: Dict[str, Any],
+    request_data: dict[str, Any],
     priority: str = "medium"
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Convenience function to process a unified request."""
     service = await create_scenario_integration_service()
     

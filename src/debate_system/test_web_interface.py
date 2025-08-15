@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多轮辩论系统Web界面测试
+"""多轮辩论系统Web界面测试
 
 测试Web界面的基本功能和组件集成。
 """
 
 import asyncio
 import sys
-import os
 from pathlib import Path
 
 # 添加项目根目录到路径
@@ -20,10 +17,10 @@ def test_imports():
     print("🧪 测试模块导入...")
     
     try:
-        from web_interface import DebateWebInterface, DebateInterfaceMode
+        from web_interface import DebateInterfaceMode, DebateWebInterface
         print("✅ Web界面模块导入成功")
         
-        from websocket_manager import DebateWebSocketManager, WebSocketMessage, MessageType
+        from websocket_manager import DebateWebSocketManager, MessageType, WebSocketMessage
         print("✅ WebSocket管理器模块导入成功")
         
         from multi_role_dialogue_engine import MultiRoleDialogueEngine
@@ -44,7 +41,7 @@ def test_websocket_manager():
     print("🧪 测试WebSocket管理器...")
     
     try:
-        from websocket_manager import DebateWebSocketManager, WebSocketMessage, MessageType
+        from websocket_manager import DebateWebSocketManager, MessageType, WebSocketMessage
         
         # 创建管理器
         manager = DebateWebSocketManager()
@@ -93,9 +90,9 @@ def test_web_interface_components():
     print("🧪 测试Web界面组件...")
     
     try:
-        from web_interface import DebateWebInterface, DebateInterfaceMode, MockPersonalAssistantService
-        from multi_role_dialogue_engine import MultiRoleDialogueEngine
         from debate_state_manager import DebateStateManager
+        from multi_role_dialogue_engine import MultiRoleDialogueEngine
+        from web_interface import DebateInterfaceMode, DebateWebInterface, MockPersonalAssistantService
         
         # 创建模拟组件
         class MockCognitiveAgent:
@@ -190,7 +187,7 @@ def test_css_file():
         css_file = Path(__file__).parent / "static" / "debate_interface.css"
         
         if css_file.exists():
-            with open(css_file, 'r', encoding='utf-8') as f:
+            with open(css_file, encoding='utf-8') as f:
                 css_content = f.read()
             
             # 检查关键样式类

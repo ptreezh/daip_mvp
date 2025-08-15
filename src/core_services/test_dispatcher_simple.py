@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-统一共识调度器简化测试
+"""统一共识调度器简化测试
 
 专注于核心功能的简化测试
 """
@@ -9,9 +7,9 @@
 import asyncio
 
 from consensus_models import ConsensusInput, ConsensusRequest
-from unified_consensus_dispatcher import UnifiedConsensusDispatcher, DispatcherConfig
-from unified_consensus_dispatcher_utils import DispatcherManager, MetricsCollector
 from test_algorithm_registry import MockConsensusAlgorithm
+from unified_consensus_dispatcher import DispatcherConfig, UnifiedConsensusDispatcher
+from unified_consensus_dispatcher_utils import DispatcherManager, MetricsCollector
 
 
 def test_core_functionality():

@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-"""
-修复PersonalAssistantService初始化参数的脚本
+"""修复PersonalAssistantService初始化参数的脚本
 """
 
 import re
 
+
 def fix_personal_assistant_init():
     """修复PersonalAssistantService初始化参数"""
-    
     file_path = "frontend/test_task_3_1_1.py"
     
     # 读取文件内容
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding='utf-8') as f:
         content = f.read()
     
     # 定义要替换的模式

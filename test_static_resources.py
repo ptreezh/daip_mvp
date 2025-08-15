@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 11:00:00
+"""@Time    : 2025-08-05 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_static_resources.py
 @Description:
     Test static resource loading for web applications
 """
 
-import requests
 import os
-from pathlib import Path
+
+import requests
+
 
 def test_static_resources():
     """Test static resource loading"""
@@ -46,12 +45,12 @@ def test_static_resources():
             print(f"ERROR {resource_path} - Error: {e}")
             failed_loads.append(resource_path)
     
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"Successfully loaded: {len(successful_loads)}")
     print(f"Failed to load: {len(failed_loads)}")
     
     if failed_loads:
-        print(f"\nFailed resources:")
+        print("\nFailed resources:")
         for resource in failed_loads:
             print(f"  - {resource}")
     

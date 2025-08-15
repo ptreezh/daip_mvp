@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-增强透明度监控系统集成
+"""增强透明度监控系统集成
 
 V0.2.2 - 透明度监控系统集成
 将现有TransparencyMonitor与后端服务深度集成，提供实时监控能力
@@ -9,15 +7,15 @@ V0.2.2 - 透明度监控系统集成
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Callable
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
 from enum import Enum
-import json
+from typing import Any, Optional
 
 from frontend.components.transparency_monitor import TransparencyMonitor
-from frontend.services.websocket_manager import websocket_manager, realtime_manager, MessageType, WebSocketMessage
-from personal_intelligence_hub.services.backend_integration import get_backend_service, ServiceStatus
+from frontend.services.websocket_manager import MessageType, WebSocketMessage, websocket_manager
+from personal_intelligence_hub.services.backend_integration import ServiceStatus, get_backend_service
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +53,7 @@ class WorkflowMetrics:
     workflow_type: str
     status: str
     progress: float
-    participants: List[str]
+    participants: list[str]
     start_time: datetime
     current_step: Optional[str] = None
     estimated_completion: Optional[datetime] = None
@@ -66,7 +64,7 @@ class WorkflowMetrics:
 class SystemHealthMetrics:
     """系统健康指标"""
     backend_status: ServiceStatus
-    llm_services: Dict[str, Dict[str, Any]]
+    llm_services: dict[str, dict[str, Any]]
     active_workflows: int
     total_memory_usage: float
     cpu_usage: float
@@ -85,11 +83,11 @@ class EnhancedTransparencyIntegration:
         
         # 监控状态
         self.is_monitoring = False
-        self.monitoring_tasks: List[asyncio.Task] = []
+        self.monitoring_tasks: list[asyncio.Task] = []
         
         # 数据缓存
-        self.llm_call_cache: List[LLMCallMetrics] = []
-        self.workflow_cache: Dict[str, WorkflowMetrics] = {}
+        self.llm_call_cache: list[LLMCallMetrics] = []
+        self.workflow_cache: dict[str, WorkflowMetrics] = {}
         self.system_health_cache: Optional[SystemHealthMetrics] = None
         
         # 配置参数
@@ -358,7 +356,7 @@ class EnhancedTransparencyIntegration:
         except Exception as e:
             logger.error(f"Error handling agent status update: {e}")
     
-    async def _update_workflow_metrics(self, workflow_id: str, status_data: Dict[str, Any]):
+    async def _update_workflow_metrics(self, workflow_id: str, status_data: dict[str, Any]):
         """更新工作流指标"""
         try:
             if workflow_id not in self.workflow_cache:
@@ -384,7 +382,7 @@ class EnhancedTransparencyIntegration:
         except Exception as e:
             logger.error(f"Error updating workflow metrics: {e}")
     
-    async def _update_system_health_cache(self, health_status: Dict[str, Any]):
+    async def _update_system_health_cache(self, health_status: dict[str, Any]):
         """更新系统健康缓存"""
         try:
             backend_status = health_status.get("backend", {})
@@ -403,7 +401,7 @@ class EnhancedTransparencyIntegration:
         except Exception as e:
             logger.error(f"Error updating system health cache: {e}")
     
-    def _extract_llm_services_status(self, health_status: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    def _extract_llm_services_status(self, health_status: dict[str, Any]) -> dict[str, dict[str, Any]]:
         """提取LLM服务状态"""
         llm_services = {}
         
@@ -451,7 +449,7 @@ class EnhancedTransparencyIntegration:
         error_count = sum(1 for call in recent_calls if not call.success)
         return (error_count / len(recent_calls)) * 100
     
-    async def _calculate_performance_metrics(self) -> Dict[str, float]:
+    async def _calculate_performance_metrics(self) -> dict[str, float]:
         """计算性能指标"""
         try:
             return {
@@ -485,7 +483,7 @@ class EnhancedTransparencyIntegration:
         except Exception as e:
             logger.error(f"Error cleaning up cache: {e}")
     
-    async def _notify_system_status_update(self, health_status: Dict[str, Any]):
+    async def _notify_system_status_update(self, health_status: dict[str, Any]):
         """通知系统状态更新"""
         try:
             # 构造系统状态更新消息
@@ -510,24 +508,24 @@ class EnhancedTransparencyIntegration:
             logger.error(f"Error notifying system status update: {e}")
     
     # 监控器回调方法
-    async def _on_monitor_llm_call(self, call_data: Dict[str, Any]):
+    async def _on_monitor_llm_call(self, call_data: dict[str, Any]):
         """监控器LLM调用回调"""
         logger.debug(f"Monitor LLM call callback: {call_data.get('model', 'unknown')}")
     
-    async def _on_monitor_workflow_update(self, workflow_data: Dict[str, Any]):
+    async def _on_monitor_workflow_update(self, workflow_data: dict[str, Any]):
         """监控器工作流更新回调"""
         logger.debug(f"Monitor workflow update callback: {workflow_data.get('workflow_id', 'unknown')}")
     
-    async def _on_monitor_agent_update(self, agent_data: Dict[str, Any]):
+    async def _on_monitor_agent_update(self, agent_data: dict[str, Any]):
         """监控器代理更新回调"""
         logger.debug(f"Monitor agent update callback: {agent_data.get('agent_id', 'unknown')}")
     
-    async def _on_monitor_system_status_change(self, status_data: Dict[str, Any]):
+    async def _on_monitor_system_status_change(self, status_data: dict[str, Any]):
         """监控器系统状态变更回调"""
         logger.debug("Monitor system status change callback triggered")
     
     # 公共接口方法
-    async def log_llm_call(self, call_data: Dict[str, Any]):
+    async def log_llm_call(self, call_data: dict[str, Any]):
         """手动记录LLM调用"""
         try:
             llm_metrics = LLMCallMetrics(
@@ -551,7 +549,7 @@ class EnhancedTransparencyIntegration:
         except Exception as e:
             logger.error(f"Error logging LLM call: {e}")
     
-    async def log_workflow_start(self, workflow_data: Dict[str, Any]):
+    async def log_workflow_start(self, workflow_data: dict[str, Any]):
         """记录工作流开始"""
         try:
             workflow_id = workflow_data.get("workflow_id", f"workflow_{datetime.now().timestamp()}")
@@ -580,7 +578,7 @@ class EnhancedTransparencyIntegration:
         except Exception as e:
             logger.error(f"Error logging workflow start: {e}")
     
-    def get_monitoring_statistics(self) -> Dict[str, Any]:
+    def get_monitoring_statistics(self) -> dict[str, Any]:
         """获取监控统计信息"""
         try:
             return {

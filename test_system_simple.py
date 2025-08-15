@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Simple test script for the Judao-Mo AI system (Windows compatible)
+"""Simple test script for the Judao-Mo AI system (Windows compatible)
 """
 
-import sys
-import os
 import asyncio
-from datetime import datetime
+import os
+import sys
 
 # Fix Unicode output for Windows
 if sys.platform.startswith('win'):

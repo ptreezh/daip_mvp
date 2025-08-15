@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-基础UI组件库
+"""基础UI组件库
 
 提供Personal Intelligence Hub使用的通用Lona组件
 包括按钮、输入框、面板、卡片等基础组件
 """
 
-from lona.html.widget import Widget
-from lona.html import HTML, Div, Button as LonaButton, TextInput as LonaInput, H3, P, Span, A
-from typing import Optional, Dict, Any, List, Callable
-from datetime import datetime
+from collections.abc import Callable
 from enum import Enum
+from typing import Any, Optional
+
+from lona.html import H3, HTML, Div, P, Span
+from lona.html import Button as LonaButton
+from lona.html import TextInput as LonaInput
+from lona.html.widget import Widget
 
 
 class ButtonVariant(Enum):
@@ -133,7 +134,7 @@ class Panel(Widget):
         self.collapsible = collapsible
         self.collapsed = collapsed
         self.kwargs = kwargs
-        self.content_items: List[HTML] = []
+        self.content_items: list[HTML] = []
         
         # 面板样式类
         panel_classes = ["panel"]
@@ -197,7 +198,7 @@ class Card(Widget):
         self.clickable = clickable
         self.onclick = onclick
         self.kwargs = kwargs
-        self.content_items: List[HTML] = []
+        self.content_items: list[HTML] = []
         
         # 卡片样式类
         card_classes = ["card"]
@@ -391,8 +392,8 @@ class Modal(Widget):
         self.closable = closable
         self.size = size
         self.kwargs = kwargs
-        self.content_items: List[HTML] = []
-        self.footer_items: List[HTML] = []
+        self.content_items: list[HTML] = []
+        self.footer_items: list[HTML] = []
     
     def add_content(self, *items: HTML):
         """添加内容到模态框"""
@@ -459,7 +460,7 @@ class Tabs(Widget):
         super().__init__()
         
         self.kwargs = kwargs
-        self.tabs: List[Dict[str, Any]] = []
+        self.tabs: list[dict[str, Any]] = []
         self.active_tab = 0
     
     def add_tab(self, title: str, content: HTML, disabled: bool = False):

@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证个人知识图谱集成
+"""验证个人知识图谱集成
 """
 
-import sys
-import os
 import asyncio
+import sys
+
 sys.path.append('src')
 
 def test_personal_knowledge_graph():

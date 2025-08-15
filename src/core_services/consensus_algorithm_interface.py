@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-统一共识算法接口定义
+"""统一共识算法接口定义
 
 定义所有共识算法必须实现的统一接口，确保算法间的一致性和可互换性。
 
@@ -17,15 +15,11 @@
 - 异步支持：支持异步执行模式
 """
 
-import asyncio
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Set
 from datetime import datetime
+from typing import Any, Optional
 
-from consensus_models import (
-    ConsensusInput, ConsensusResult, ConsensusRequest,
-    AlgorithmMetadata, ValidationResult, AlgorithmType
-)
+from consensus_models import AlgorithmMetadata, ConsensusInput, ConsensusRequest, ConsensusResult, ValidationResult
 
 
 class ConsensusContext:
@@ -33,8 +27,8 @@ class ConsensusContext:
     
     def __init__(self, 
                  session_id: Optional[str] = None,
-                 services: Optional[Dict[str, Any]] = None,
-                 configuration: Optional[Dict[str, Any]] = None):
+                 services: Optional[dict[str, Any]] = None,
+                 configuration: Optional[dict[str, Any]] = None):
         self.session_id = session_id or f"session_{datetime.now().timestamp()}"
         self.services = services or {}
         self.configuration = configuration or {}
@@ -63,8 +57,8 @@ class AlgorithmCapabilities:
     """算法能力描述"""
     
     def __init__(self,
-                 supported_input_types: Set[str],
-                 supported_output_types: Set[str],
+                 supported_input_types: set[str],
+                 supported_output_types: set[str],
                  requires_reasoning: bool = False,
                  requires_evidence: bool = False,
                  supports_async: bool = True,
@@ -106,14 +100,13 @@ class AlgorithmCapabilities:
         return True
 
 class ConsensusAlgorithm(ABC):
-    """
-    统一共识算法抽象基类
+    """统一共识算法抽象基类
     
     所有共识算法必须继承此类并实现其抽象方法。
     提供统一的接口确保算法间的一致性和可互换性。
     """
     
-    def __init__(self, algorithm_id: str, configuration: Optional[Dict[str, Any]] = None):
+    def __init__(self, algorithm_id: str, configuration: Optional[dict[str, Any]] = None):
         self.algorithm_id = algorithm_id
         self.configuration = configuration or {}
         self._metadata = None
@@ -121,10 +114,9 @@ class ConsensusAlgorithm(ABC):
         
     @abstractmethod
     async def calculate(self, 
-                       inputs: List[ConsensusInput], 
+                       inputs: list[ConsensusInput], 
                        context: ConsensusContext) -> ConsensusResult:
-        """
-        执行共识计算
+        """执行共识计算
         
         Args:
             inputs: 共识输入列表
@@ -141,8 +133,7 @@ class ConsensusAlgorithm(ABC):
         
     @abstractmethod
     def get_metadata(self) -> AlgorithmMetadata:
-        """
-        获取算法元数据
+        """获取算法元数据
         
         Returns:
             算法元数据信息
@@ -151,8 +142,7 @@ class ConsensusAlgorithm(ABC):
         
     @abstractmethod
     def get_capabilities(self) -> AlgorithmCapabilities:
-        """
-        获取算法能力描述
+        """获取算法能力描述
         
         Returns:
             算法能力信息
@@ -160,9 +150,8 @@ class ConsensusAlgorithm(ABC):
         pass
         
     @abstractmethod
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> ValidationResult:
-        """
-        验证输入数据
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> ValidationResult:
+        """验证输入数据
         
         Args:
             inputs: 待验证的输入数据
@@ -172,13 +161,12 @@ class ConsensusAlgorithm(ABC):
         """
         pass
         
-    def get_configuration(self) -> Dict[str, Any]:
+    def get_configuration(self) -> dict[str, Any]:
         """获取算法配置"""
         return self.configuration.copy()
         
-    def set_configuration(self, config: Dict[str, Any]) -> bool:
-        """
-        设置算法配置
+    def set_configuration(self, config: dict[str, Any]) -> bool:
+        """设置算法配置
         
         Args:
             config: 新的配置参数
@@ -198,9 +186,8 @@ class ConsensusAlgorithm(ABC):
         except Exception:
             return False
             
-    def validate_configuration(self, config: Dict[str, Any]) -> ValidationResult:
-        """
-        验证配置参数
+    def validate_configuration(self, config: dict[str, Any]) -> ValidationResult:
+        """验证配置参数
         
         Args:
             config: 待验证的配置
@@ -212,8 +199,7 @@ class ConsensusAlgorithm(ABC):
         return ValidationResult(is_valid=True)
         
     def can_handle_request(self, request: ConsensusRequest) -> bool:
-        """
-        检查是否能处理请求
+        """检查是否能处理请求
         
         Args:
             request: 共识请求
@@ -225,8 +211,7 @@ class ConsensusAlgorithm(ABC):
         return capabilities.can_handle_request(request)
         
     def estimate_execution_time(self, request: ConsensusRequest) -> float:
-        """
-        估算执行时间
+        """估算执行时间
         
         Args:
             request: 共识请求
@@ -239,9 +224,8 @@ class ConsensusAlgorithm(ABC):
         input_factor = len(request.inputs) * 0.1
         return base_time + input_factor
         
-    def get_health_status(self) -> Dict[str, Any]:
-        """
-        获取算法健康状态
+    def get_health_status(self) -> dict[str, Any]:
+        """获取算法健康状态
         
         Returns:
             健康状态信息

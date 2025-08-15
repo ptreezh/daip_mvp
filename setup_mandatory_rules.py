@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 15:00:00
+"""@Time    : 2025-08-04 15:00:00
 @Author  : DAIP-LIVE Team
 @File    : setup_mandatory_rules.py
 @Description:
@@ -11,8 +9,6 @@
 
 import subprocess
 import sys
-import os
-from pathlib import Path
 
 
 def run_command(command, description):

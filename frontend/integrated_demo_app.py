@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-集成演示应用 - 真实DAIP-LIVE演示系统
+"""集成演示应用 - 真实DAIP-LIVE演示系统
 
 整合所有前端组件，提供统一的演示体验
 支持真实LLM调用、角色库集成和工作流执行
@@ -10,22 +8,19 @@
 import asyncio
 import logging
 import uuid
-from typing import Dict, List, Optional, Any
-from datetime import datetime
-
-from lona import LonaApp, View
-from lona.html import HTML, Div, H1, H2, Head, Title, Link, Button, Select, Option, P, Span
 
 # 导入现有组件
 from components.chat_interface import ChatInterface
+from components.task_panel import TaskPanel
 from components.transparency_monitor import TransparencyMonitor
 from components.wiki_panel import WikiPanel
-from components.task_panel import TaskPanel
+from lona import LonaApp, View
+from lona.html import H1, H2, HTML, Button, Div, Head, Option, P, Select, Span, Title
+from services.backend_connector import BackendConnector
 
 # 导入服务
 from services.personal_assistant import PersonalAssistantService
-from services.backend_connector import BackendConnector
-from services.websocket_manager import websocket_manager, realtime_manager
+from services.websocket_manager import realtime_manager, websocket_manager
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -129,7 +124,6 @@ class IntegratedDemoView(View):
     
     async def handle_request(self, request):
         """处理HTTP请求并返回页面内容"""
-        
         try:
             # 生成演示会话ID
             self.demo_session_id = str(uuid.uuid4())
@@ -156,7 +150,6 @@ class IntegratedDemoView(View):
             return self._create_error_interface(str(e))
     
     def _create_demo_interface(self):
-        
         """创建演示界面"""
         return HTML(
             Head(

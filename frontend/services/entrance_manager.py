@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-双入口管理器
+"""双入口管理器
 
 负责管理Secretariat和Forum两种入口模式
 提供统一的入口切换和上下文保存机制
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, List, Optional, Any, Callable
+from collections.abc import Callable
 from datetime import datetime
-from enum import Enum
-from dataclasses import dataclass, asdict
-import uuid
+from typing import Any, Optional
 
-from .dual_entrance_websocket_manager import dual_entrance_websocket_manager, EntranceType, MessageType
+from .dual_entrance_websocket_manager import EntranceType, MessageType, dual_entrance_websocket_manager
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -44,7 +39,7 @@ class UserContext:
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         return {
             "user_id": self.user_id,
@@ -58,7 +53,7 @@ class UserContext:
         }
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'UserContext':
+    def from_dict(cls, data: dict[str, Any]) -> 'UserContext':
         """从字典创建用户上下文"""
         context = cls(data["user_id"])
         context.preferred_entrance = EntranceType(data["preferred_entrance"])
@@ -111,7 +106,7 @@ class SessionContext:
         self.last_activity = datetime.now()
         self.updated_at = datetime.now()
     
-    def add_conversation_message(self, message: Dict[str, Any]):
+    def add_conversation_message(self, message: dict[str, Any]):
         """添加对话消息"""
         self.shared_context["conversation_history"].append({
             "timestamp": datetime.now().isoformat(),
@@ -147,28 +142,28 @@ class SessionContext:
         ]
         self.update_activity()
     
-    def update_consensus_data(self, consensus_data: Dict[str, Any]):
+    def update_consensus_data(self, consensus_data: dict[str, Any]):
         """更新共识数据"""
         self.shared_context["consensus_data"].update(consensus_data)
         self.update_activity()
     
-    def set_workflow_state(self, workflow_id: str, step: int, results: Dict[str, Any]):
+    def set_workflow_state(self, workflow_id: str, step: int, results: dict[str, Any]):
         """设置工作流状态"""
         self.workflow_state["current_workflow"] = workflow_id
         self.workflow_state["current_step"] = step
         self.workflow_state["workflow_results"].update(results)
         self.update_activity()
     
-    def get_entrance_context(self) -> Dict[str, Any]:
+    def get_entrance_context(self) -> dict[str, Any]:
         """获取入口特定上下文"""
         return self.entrance_context
     
-    def set_entrance_context(self, context: Dict[str, Any]):
+    def set_entrance_context(self, context: dict[str, Any]):
         """设置入口特定上下文"""
         self.entrance_context.update(context)
         self.update_activity()
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         return {
             "session_id": self.session_id,
@@ -185,7 +180,7 @@ class SessionContext:
         }
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'SessionContext':
+    def from_dict(cls, data: dict[str, Any]) -> 'SessionContext':
         """从字典创建会话上下文"""
         context = cls(
             data["session_id"],
@@ -207,9 +202,9 @@ class EntranceManager:
     """入口管理器"""
     
     def __init__(self):
-        self.user_contexts: Dict[str, UserContext] = {}
-        self.session_contexts: Dict[str, SessionContext] = {}
-        self.entrance_callbacks: Dict[str, List[Callable]] = {}
+        self.user_contexts: dict[str, UserContext] = {}
+        self.session_contexts: dict[str, SessionContext] = {}
+        self.entrance_callbacks: dict[str, list[Callable]] = {}
         
         # 注册WebSocket消息处理器
         self._setup_websocket_handlers()
@@ -241,7 +236,7 @@ class EntranceManager:
             MessageType.CONSENSUS_UPDATE, self._handle_consensus_update, EntranceType.FORUM
         )
     
-    async def create_user_context(self, user_id: str, preferences: Dict[str, Any] = None) -> UserContext:
+    async def create_user_context(self, user_id: str, preferences: dict[str, Any] = None) -> UserContext:
         """创建用户上下文"""
         if user_id in self.user_contexts:
             logger.warning(f"用户上下文已存在: {user_id}")
@@ -266,7 +261,7 @@ class EntranceManager:
         return user_context
     
     async def create_session_context(self, user_id: str, entrance_type: EntranceType, 
-                                    initial_context: Dict[str, Any] = None) -> str:
+                                    initial_context: dict[str, Any] = None) -> str:
         """创建会话上下文"""
         session_id = await dual_entrance_websocket_manager.create_session(
             entrance_type, user_id, initial_context
@@ -363,7 +358,7 @@ class EntranceManager:
         """获取会话上下文"""
         return self.session_contexts.get(session_id)
     
-    def get_user_sessions(self, user_id: str) -> List[str]:
+    def get_user_sessions(self, user_id: str) -> list[str]:
         """获取用户的所有会话"""
         return [
             session_id for session_id, context in self.session_contexts.items()
@@ -376,7 +371,7 @@ class EntranceManager:
             self.entrance_callbacks[event_type] = []
         self.entrance_callbacks[event_type].append(callback)
     
-    async def _trigger_callbacks(self, event_type: str, data: Dict[str, Any]):
+    async def _trigger_callbacks(self, event_type: str, data: dict[str, Any]):
         """触发事件回调"""
         if event_type in self.entrance_callbacks:
             for callback in self.entrance_callbacks[event_type]:
@@ -421,7 +416,7 @@ class EntranceManager:
             session_context = self.session_contexts[message.session_id]
             session_context.update_consensus_data(message.payload)
     
-    def get_manager_status(self) -> Dict[str, Any]:
+    def get_manager_status(self) -> dict[str, Any]:
         """获取管理器状态"""
         return {
             "total_users": len(self.user_contexts),

@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 19:00:00
+"""@Time    : 2025-08-04 19:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_lazy_loading_imports.py
 @Description:
     Test lazy loading imports to verify performance improvements.
 """
 
-import sys
 import time
+
 
 def test_lazy_imports():
     """Test lazy loading imports"""
@@ -17,8 +15,7 @@ def test_lazy_imports():
     # Test 1: Import basic enums and dataclasses
     start_time = time.time()
     try:
-        from src.core_services.expert_consultation_scenario import ConsultationType, ConsultationPriority
-        print("✅ Consultation enums import successful ({:.2f}s)".format(time.time() - start_time))
+        print(f"✅ Consultation enums import successful ({time.time() - start_time:.2f}s)")
     except Exception as e:
         print(f"❌ Consultation enums import failed: {e}")
         return False
@@ -27,7 +24,7 @@ def test_lazy_imports():
     start_time = time.time()
     try:
         from src.core_services.expert_consultation_scenario import ExpertConsultationScenario
-        print("✅ ExpertConsultationScenario import successful ({:.2f}s)".format(time.time() - start_time))
+        print(f"✅ ExpertConsultationScenario import successful ({time.time() - start_time:.2f}s)")
     except Exception as e:
         print(f"❌ ExpertConsultationScenario import failed: {e}")
         return False
@@ -36,11 +33,9 @@ def test_lazy_imports():
     start_time = time.time()
     try:
         from src.core_services.multidimensional_assessment_engine import (
-            AssessmentDimension, QualityLevel, ContentType, 
-            AssessmentCriteria, MetricResult, DimensionResult, 
-            AssessmentResult, ContentToAssess, MultiDimensionalAssessmentEngine
+            MultiDimensionalAssessmentEngine,
         )
-        print("✅ Assessment engine classes import successful ({:.2f}s)".format(time.time() - start_time))
+        print(f"✅ Assessment engine classes import successful ({time.time() - start_time:.2f}s)")
     except Exception as e:
         print(f"❌ Assessment engine classes import failed: {e}")
         return False
@@ -50,7 +45,7 @@ def test_lazy_imports():
     try:
         # Test creating instances with None dependencies
         engine = MultiDimensionalAssessmentEngine(None, None, None)
-        print("✅ MultiDimensionalAssessmentEngine instantiation successful ({:.2f}s)".format(time.time() - start_time))
+        print(f"✅ MultiDimensionalAssessmentEngine instantiation successful ({time.time() - start_time:.2f}s)")
     except Exception as e:
         print(f"❌ MultiDimensionalAssessmentEngine instantiation failed: {e}")
         return False
@@ -59,7 +54,7 @@ def test_lazy_imports():
     start_time = time.time()
     try:
         consultation_scenario = ExpertConsultationScenario()
-        print("✅ ExpertConsultationScenario instantiation successful ({:.2f}s)".format(time.time() - start_time))
+        print(f"✅ ExpertConsultationScenario instantiation successful ({time.time() - start_time:.2f}s)")
     except Exception as e:
         print(f"❌ ExpertConsultationScenario instantiation failed: {e}")
         return False

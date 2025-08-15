@@ -6,7 +6,6 @@ import os
 import random
 import sys
 import time
-import uuid
 from typing import Any, Optional
 
 import chromadb
@@ -36,8 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 class AppState:
-    """
-    A central state manager for the FastAPI application.
+    """A central state manager for the FastAPI application.
     It holds shared resources like database connections, models,
     and application-wide caches.
     """
@@ -84,10 +82,10 @@ class AppState:
         # 1. Foundational Components
         # Load configuration and initialize token management
         from src.config import settings
-        from src.kernel.llm_interface import LLMFactory, LLMConfig
-        
+
         # Import token management service
         from src.core_services.token_management_service import TokenManagementService
+        from src.kernel.llm_interface import LLMConfig, LLMFactory
         
         # Initialize token management service
         self.token_management_service = TokenManagementService(settings.token_management)
@@ -116,12 +114,12 @@ class AppState:
         self._unified_tool_manager = UnifiedToolManager(config=tool_config)
 
         # Import core services
-        from src.core_services.memory_service import MemoryService
-        from src.core_services.wiki_service import WikiService
-        from src.core_services.synthesis_engine import SynthesisEngine
         from src.core_services.expert_service import ExpertService
-        from src.core_services.task_manager import TaskManager
         from src.core_services.forum_service import ForumService
+        from src.core_services.memory_service import MemoryService
+        from src.core_services.synthesis_engine import SynthesisEngine
+        from src.core_services.task_manager import TaskManager
+        from src.core_services.wiki_service import WikiService
 
         # 2. Core Services (no dependencies or only foundational ones)
         self._memory_service = MemoryService(data_dir=os.path.join(self.base_dir, "data", "memory_banks"))
@@ -132,8 +130,8 @@ class AppState:
         self._forum_service = ForumService()
         
         # Import user profile and session management services
-        from src.core_services.user_profile_service import UserProfileService
         from src.core_services.session_management_service import SessionManagementService
+        from src.core_services.user_profile_service import UserProfileService
         
         # Initialize user profile and session management services
         self._user_profile_service = UserProfileService(
@@ -187,6 +185,7 @@ class AppState:
         # 3. Kernel Components that depend on Core Services
         # Create an Ollama client for InteractionManager
         import ollama
+
         from src.kernel.interaction_manager import InteractionManager
         
         ollama_client = ollama.AsyncClient(host=default_llm_config.base_url)
@@ -306,7 +305,7 @@ class AppState:
         roles = [json.loads(doc) for doc in results["documents"][0]]
         scores = results.get("distances", [[]])[0]
 
-        return [{"role": r, "score": float(s)} for r, s in zip(roles, scores)]
+        return [{"role": r, "score": float(s)} for r, s in zip(roles, scores, strict=False)]
 
     async def call_llm_simulation(self, role_name: str, topic: str, history: list) -> str:
         """Simulates an LLM call with a role-playing prompt."""

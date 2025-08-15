@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-算法注册表 (Algorithm Registry)
+"""算法注册表 (Algorithm Registry)
 
 提供统一的共识算法管理和注册功能。
 负责算法的注册、发现、验证和健康检查。
@@ -23,19 +21,14 @@
 import asyncio
 import logging
 import threading
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set, Any, Callable
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Optional
 
-from consensus_models import (
-    AlgorithmMetadata, ValidationResult, AlgorithmType,
-    ConsensusRequest, ConsensusInput
-)
-from consensus_algorithm_interface import (
-    ConsensusAlgorithm, ConsensusContext, AlgorithmCapabilities
-)
-
+from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm
+from consensus_models import AlgorithmMetadata, AlgorithmType, ConsensusInput, ValidationResult
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +45,7 @@ class AlgorithmInfo:
     health_status: str = "unknown"  # healthy, unhealthy, unknown
     usage_count: int = 0
     last_used: Optional[datetime] = None
-    configuration: Dict[str, Any] = field(default_factory=dict)
+    configuration: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -67,8 +60,7 @@ class RegistryStats:
 
 
 class AlgorithmRegistry:
-    """
-    算法注册表
+    """算法注册表
     
     管理所有可用的共识算法，提供注册、发现、验证和健康检查功能。
     """
@@ -76,13 +68,13 @@ class AlgorithmRegistry:
     def __init__(self, 
                  health_check_interval: int = 300,  # 5分钟
                  max_health_check_workers: int = 5):
-        self._algorithms: Dict[str, AlgorithmInfo] = {}
+        self._algorithms: dict[str, AlgorithmInfo] = {}
         self._lock = threading.RLock()
         self._health_check_interval = health_check_interval
         self._health_check_executor = ThreadPoolExecutor(max_workers=max_health_check_workers)
         self._health_check_task: Optional[asyncio.Task] = None
         self._shutdown_event = asyncio.Event()
-        self._listeners: List[Callable[[str, str], None]] = []  # (event_type, algorithm_id)
+        self._listeners: list[Callable[[str, str], None]] = []  # (event_type, algorithm_id)
         
         logger.info("AlgorithmRegistry initialized")
         
@@ -90,9 +82,8 @@ class AlgorithmRegistry:
                  algorithm_id: str, 
                  algorithm: ConsensusAlgorithm,
                  metadata: Optional[AlgorithmMetadata] = None,
-                 configuration: Optional[Dict[str, Any]] = None) -> bool:
-        """
-        注册算法
+                 configuration: Optional[dict[str, Any]] = None) -> bool:
+        """注册算法
         
         Args:
             algorithm_id: 算法唯一标识
@@ -144,8 +135,7 @@ class AlgorithmRegistry:
             return False
             
     def unregister(self, algorithm_id: str) -> bool:
-        """
-        注销算法
+        """注销算法
         
         Args:
             algorithm_id: 算法标识
@@ -172,8 +162,7 @@ class AlgorithmRegistry:
             return False
             
     def get_algorithm(self, algorithm_id: str) -> Optional[ConsensusAlgorithm]:
-        """
-        获取算法实例
+        """获取算法实例
         
         Args:
             algorithm_id: 算法标识
@@ -191,8 +180,7 @@ class AlgorithmRegistry:
             return None
             
     def get_algorithm_info(self, algorithm_id: str) -> Optional[AlgorithmInfo]:
-        """
-        获取算法详细信息
+        """获取算法详细信息
         
         Args:
             algorithm_id: 算法标识
@@ -205,9 +193,8 @@ class AlgorithmRegistry:
             
     def list_algorithms(self, 
                        algorithm_type: Optional[AlgorithmType] = None,
-                       health_status: Optional[str] = None) -> List[AlgorithmInfo]:
-        """
-        列出所有算法
+                       health_status: Optional[str] = None) -> list[AlgorithmInfo]:
+        """列出所有算法
         
         Args:
             algorithm_type: 过滤算法类型（可选）
@@ -235,9 +222,8 @@ class AlgorithmRegistry:
                 
             return algorithms
             
-    def get_algorithm_ids(self) -> List[str]:
-        """
-        获取所有算法ID列表
+    def get_algorithm_ids(self) -> list[str]:
+        """获取所有算法ID列表
         
         Returns:
             算法ID列表
@@ -246,8 +232,7 @@ class AlgorithmRegistry:
             return list(self._algorithms.keys())
             
     def validate_algorithm(self, algorithm: ConsensusAlgorithm) -> ValidationResult:
-        """
-        验证算法
+        """验证算法
         
         Args:
             algorithm: 待验证的算法
@@ -304,13 +289,12 @@ class AlgorithmRegistry:
         )
         
     def find_algorithms_by_capability(self, 
-                                    input_types: Optional[Set[str]] = None,
+                                    input_types: Optional[set[str]] = None,
                                     min_participants: Optional[int] = None,
                                     max_participants: Optional[int] = None,
                                     requires_reasoning: Optional[bool] = None,
-                                    requires_evidence: Optional[bool] = None) -> List[str]:
-        """
-        根据能力查找算法
+                                    requires_evidence: Optional[bool] = None) -> list[str]:
+        """根据能力查找算法
         
         Args:
             input_types: 支持的输入类型
@@ -351,8 +335,7 @@ class AlgorithmRegistry:
         return matching_algorithms
         
     async def check_algorithm_health(self, algorithm_id: str) -> bool:
-        """
-        检查单个算法健康状态
+        """检查单个算法健康状态
         
         Args:
             algorithm_id: 算法标识
@@ -397,8 +380,7 @@ class AlgorithmRegistry:
             return False
             
     async def _basic_health_check(self, algorithm: ConsensusAlgorithm) -> bool:
-        """
-        基本健康检查
+        """基本健康检查
         
         Args:
             algorithm: 算法实例
@@ -424,9 +406,8 @@ class AlgorithmRegistry:
         except Exception:
             return False
             
-    async def check_all_algorithms_health(self) -> Dict[str, bool]:
-        """
-        检查所有算法健康状态
+    async def check_all_algorithms_health(self) -> dict[str, bool]:
+        """检查所有算法健康状态
         
         Returns:
             算法ID到健康状态的映射
@@ -450,9 +431,8 @@ class AlgorithmRegistry:
                 
         return health_results
         
-    def get_healthy_algorithms(self) -> List[str]:
-        """
-        获取所有健康的算法ID
+    def get_healthy_algorithms(self) -> list[str]:
+        """获取所有健康的算法ID
         
         Returns:
             健康算法ID列表（包括健康和未知状态的算法）
@@ -463,8 +443,7 @@ class AlgorithmRegistry:
         ]
         
     def get_registry_stats(self) -> RegistryStats:
-        """
-        获取注册表统计信息
+        """获取注册表统计信息
         
         Returns:
             统计信息
@@ -494,8 +473,7 @@ class AlgorithmRegistry:
             return stats
             
     def add_listener(self, listener: Callable[[str, str], None]) -> None:
-        """
-        添加事件监听器
+        """添加事件监听器
         
         Args:
             listener: 监听器函数，接收(event_type, algorithm_id)参数
@@ -503,8 +481,7 @@ class AlgorithmRegistry:
         self._listeners.append(listener)
         
     def remove_listener(self, listener: Callable[[str, str], None]) -> None:
-        """
-        移除事件监听器
+        """移除事件监听器
         
         Args:
             listener: 要移除的监听器函数
@@ -513,8 +490,7 @@ class AlgorithmRegistry:
             self._listeners.remove(listener)
             
     def _notify_listeners(self, event_type: str, algorithm_id: str) -> None:
-        """
-        通知所有监听器
+        """通知所有监听器
         
         Args:
             event_type: 事件类型

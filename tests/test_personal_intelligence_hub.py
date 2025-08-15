@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Comprehensive Test Suite for Personal Intelligence Hub
+"""Comprehensive Test Suite for Personal Intelligence Hub
 
 Tests all scenarios from UserCase.txt including:
 - Intent recognition (INT-01 to INT-04)
@@ -11,22 +9,18 @@ Tests all scenarios from UserCase.txt including:
 """
 
 import asyncio
-import pytest
-import json
-import os
-import tempfile
 from datetime import datetime
-from typing import Dict, List, Any
+
+import pytest
 
 # Import the hub
-from src.core_services.personal_intelligence_hub import (
-    PersonalIntelligenceHub, EntranceType, IntentType
-)
+from src.core_services.personal_intelligence_hub import EntranceType, IntentType, PersonalIntelligenceHub
+
 
 class TestPersonalIntelligenceHub:
     """Test suite for Personal Intelligence Hub"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def hub(self):
         """Create test hub instance"""
         class MockAppState:
@@ -37,7 +31,7 @@ class TestPersonalIntelligenceHub:
         
         return PersonalIntelligenceHub(MockAppState())
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_intent_recognition_int_01(self, hub):
         """Test INT-01: Academic research intent recognition"""
         response = await hub.process_request(
@@ -49,7 +43,7 @@ class TestPersonalIntelligenceHub:
         assert response.intent_type == IntentType.ACADEMIC_RESEARCH
         assert response.success == True
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_intent_recognition_int_02(self, hub):
         """Test INT-02: Critical review intent recognition"""
         response = await hub.process_request(
@@ -61,7 +55,7 @@ class TestPersonalIntelligenceHub:
         assert response.intent_type == IntentType.CRITICAL_REVIEW
         assert response.success == True
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_intent_recognition_int_03(self, hub):
         """Test INT-03: Casual discussion intent recognition"""
         response = await hub.process_request(
@@ -73,7 +67,7 @@ class TestPersonalIntelligenceHub:
         assert response.intent_type == IntentType.CASUAL_DISCUSSION
         assert response.success == True
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_intent_recognition_int_04(self, hub):
         """Test INT-04: Industry analysis intent recognition"""
         response = await hub.process_request(
@@ -85,7 +79,7 @@ class TestPersonalIntelligenceHub:
         assert response.intent_type == IntentType.INDUSTRY_ANALYSIS
         assert response.success == True
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_expert_consultation_uc_07(self, hub):
         """Test UC-07: Three expert evaluation"""
         response = await hub.process_request(
@@ -98,7 +92,7 @@ class TestPersonalIntelligenceHub:
         assert "三位专家" in response.content
         assert response.metadata.get("interactive") == True
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_expert_consultation_uc_08(self, hub):
         """Test UC-08: Expert opinion divergence"""
         response = await hub.process_request(
@@ -110,7 +104,7 @@ class TestPersonalIntelligenceHub:
         assert response.success == True
         # In real implementation, would check for dissent_count > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_academic_research_uc_04(self, hub):
         """Test UC-04: 2000-word quantum review generation"""
         response = await hub.process_request(
@@ -123,7 +117,7 @@ class TestPersonalIntelligenceHub:
         assert "学术研究报告" in response.content
         assert "PDF" in response.content
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_academic_research_uc_05(self, hub):
         """Test UC-05: Research paper with 5+ references"""
         response = await hub.process_request(
@@ -135,7 +129,7 @@ class TestPersonalIntelligenceHub:
         assert response.success == True
         assert "参考文献" in response.content
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_industry_analysis_uc_10(self, hub):
         """Test UC-10: New energy vehicle 2025 analysis"""
         response = await hub.process_request(
@@ -148,7 +142,7 @@ class TestPersonalIntelligenceHub:
         assert "行业分析" in response.content
         assert "SWOT" in response.content
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_industry_analysis_uc_11(self, hub):
         """Test UC-11: Report auto-saved to Wiki"""
         response = await hub.process_request(
@@ -160,7 +154,7 @@ class TestPersonalIntelligenceHub:
         assert response.success == True
         # In real implementation, would check wiki_id is not None
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_industry_analysis_uc_12(self, hub):
         """Test UC-12: Report exportable to PPT"""
         response = await hub.process_request(
@@ -172,7 +166,7 @@ class TestPersonalIntelligenceHub:
         assert response.success == True
         assert "PPT" in response.content
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_casual_chat_uc_01(self, hub):
         """Test UC-01: Casual chat response time"""
         import time
@@ -190,7 +184,7 @@ class TestPersonalIntelligenceHub:
         assert response.success == True
         assert response_time <= 3  # Response within 3 seconds
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_casual_chat_uc_02(self, hub):
         """Test UC-02: 5-round chat maintains same session"""
         # Simulate 5-round conversation
@@ -210,7 +204,7 @@ class TestPersonalIntelligenceHub:
             if i > 0:
                 assert response.session_id == session_id
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_casual_chat_uc_03(self, hub):
         """Test UC-03: Casual chat doesn't create Wiki entries"""
         response = await hub.process_request(
@@ -222,7 +216,7 @@ class TestPersonalIntelligenceHub:
         assert response.success == True
         # In real implementation, would check wiki_diff == 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_role_matching_match_19(self, hub):
         """Test MATCH-19: Dynamic role matching"""
         response = await hub.process_request(
@@ -234,7 +228,7 @@ class TestPersonalIntelligenceHub:
         assert response.success == True
         # In real implementation, would check role changes
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_consensus_algorithms_cons_21(self, hub):
         """Test CONS-21: Simple majority voting"""
         response = await hub.process_request(
@@ -246,7 +240,7 @@ class TestPersonalIntelligenceHub:
         assert response.success == True
         # In real implementation, would check consensus_method == "simple_majority"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_auto_routing(self, hub):
         """Test automatic request routing"""
         response, entrance_type = await hub.auto_route_request(
@@ -257,7 +251,7 @@ class TestPersonalIntelligenceHub:
         assert response.success == True
         assert entrance_type in [EntranceType.SECRETARIAT, EntranceType.FORUM]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_secretariat_interface_config(self, hub):
         """Test Secretariat interface configuration"""
         config = hub.secretariat.get_interface_config()
@@ -267,7 +261,7 @@ class TestPersonalIntelligenceHub:
         assert "quick_actions" in config["features"]
         assert config["automation_level"] == "high"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_forum_interface_config(self, hub):
         """Test Forum interface configuration"""
         config = hub.forum.get_interface_config()
@@ -277,7 +271,7 @@ class TestPersonalIntelligenceHub:
         assert "expert_panel" in config["features"]
         assert config["automation_level"] == "medium"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_request_history(self, hub):
         """Test request history tracking"""
         # Make some requests
@@ -300,7 +294,7 @@ class TestPersonalIntelligenceHub:
 class TestPerformance:
     """Performance test suite"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_concurrent_requests_perf_54(self):
         """Test PERF-54: 100 concurrent conversations"""
         hub = PersonalIntelligenceHub(type('MockAppState', (), {})())
@@ -322,7 +316,7 @@ class TestPerformance:
         
         assert success_rate > 0.99  # 99% success rate
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_large_context_perf_55(self):
         """Test PERF-55: 10k token context processing"""
         hub = PersonalIntelligenceHub(type('MockAppState', (), {})())
@@ -348,7 +342,7 @@ class TestPerformance:
 class TestIntegration:
     """Integration test suite"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_full_scenarios_scene_89(self):
         """Test SCENE-89: Complete expert consultation workflow"""
         hub = PersonalIntelligenceHub(type('MockAppState', (), {})())
@@ -363,7 +357,7 @@ class TestIntegration:
         assert response.session_id is not None
         # In real implementation, would check for consultation_id
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_full_scenarios_scene_90(self):
         """Test SCENE-90: Complete academic research workflow"""
         hub = PersonalIntelligenceHub(type('MockAppState', (), {})())

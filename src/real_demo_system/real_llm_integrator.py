@@ -1,5 +1,4 @@
-"""
-真实LLM集成器
+"""真实LLM集成器
 
 这个模块提供真实的LLM调用功能，支持多种LLM后端（Ollama、OpenAI、Claude），
 并提供完整的调用记录、性能监控和透明度功能。
@@ -7,18 +6,16 @@
 
 import asyncio
 import hashlib
-import json
 import logging
 import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
-from dataclasses import dataclass, asdict
 from enum import Enum
+from typing import Any, Optional
 
-import httpx
+import anthropic
 import ollama
 import openai
-import anthropic
 
 from src.config import get_config
 
@@ -47,9 +44,9 @@ class LLMCallRecord:
     cost_usd: float
     success: bool
     error_message: Optional[str] = None
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         data = asdict(self)
         data['timestamp'] = self.timestamp.isoformat()
@@ -92,15 +89,13 @@ class LLMPerformanceMetrics:
 
 
 class RealLLMIntegrator:
-    """
-    真实LLM集成器
+    """真实LLM集成器
     
     提供真实的LLM调用功能，支持多种后端，包含完整的监控和透明度功能。
     """
     
-    def __init__(self, config_override: Optional[Dict[str, Any]] = None):
-        """
-        初始化LLM集成器
+    def __init__(self, config_override: Optional[dict[str, Any]] = None):
+        """初始化LLM集成器
         
         Args:
             config_override: 可选的配置覆盖
@@ -117,7 +112,7 @@ class RealLLMIntegrator:
         self.anthropic_client = None
         
         # 调用记录和性能指标
-        self.call_records: List[LLMCallRecord] = []
+        self.call_records: list[LLMCallRecord] = []
         self.performance_metrics = LLMPerformanceMetrics()
         
         # 初始化客户端
@@ -156,10 +151,9 @@ class RealLLMIntegrator:
         model: Optional[str] = None,
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[dict[str, Any]] = None
     ) -> LLMCallRecord:
-        """
-        调用LLM并返回完整的调用记录
+        """调用LLM并返回完整的调用记录
         
         Args:
             prompt: 输入提示
@@ -347,16 +341,16 @@ class RealLLMIntegrator:
         else:
             return "unknown"
     
-    def get_call_records(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+    def get_call_records(self, limit: Optional[int] = None) -> list[dict[str, Any]]:
         """获取调用记录"""
         records = self.call_records[-limit:] if limit else self.call_records
         return [record.to_dict() for record in records]
     
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """获取性能指标"""
         return asdict(self.performance_metrics)
     
-    def get_real_time_status(self) -> Dict[str, Any]:
+    def get_real_time_status(self) -> dict[str, Any]:
         """获取实时状态"""
         recent_records = self.call_records[-10:] if self.call_records else []
         
@@ -369,7 +363,7 @@ class RealLLMIntegrator:
             "providers_status": self._get_providers_status()
         }
     
-    def _get_providers_status(self) -> Dict[str, bool]:
+    def _get_providers_status(self) -> dict[str, bool]:
         """获取各提供商状态"""
         return {
             "ollama": self.ollama_client is not None,
@@ -377,7 +371,7 @@ class RealLLMIntegrator:
             "anthropic": self.anthropic_client is not None
         }
     
-    def verify_call_authenticity(self, call_id: str) -> Dict[str, Any]:
+    def verify_call_authenticity(self, call_id: str) -> dict[str, Any]:
         """验证调用的真实性"""
         record = next((r for r in self.call_records if r.call_id == call_id), None)
         if not record:
@@ -396,7 +390,7 @@ class RealLLMIntegrator:
             "metadata": record.metadata
         }
     
-    def export_audit_log(self) -> Dict[str, Any]:
+    def export_audit_log(self) -> dict[str, Any]:
         """导出审计日志"""
         return {
             "export_timestamp": datetime.now().isoformat(),
@@ -406,7 +400,7 @@ class RealLLMIntegrator:
             "verification_hashes": [r.get_signature() for r in self.call_records]
         }
     
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """健康检查"""
         health_status = {
             "overall_status": "healthy",

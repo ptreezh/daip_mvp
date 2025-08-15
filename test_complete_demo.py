@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-import sys
 import asyncio
+import sys
+
 sys.path.append('.')
 
-from src.real_demo_system.interactive_demo_flow import InteractiveDemoFlow
 from src.real_demo_system.demo_types import DemoScenarioType
+from src.real_demo_system.interactive_demo_flow import InteractiveDemoFlow
 
 
 async def run_complete_demo():
@@ -34,7 +35,7 @@ async def run_complete_demo():
         print(f"❌ 启动失败: {start_result['error']}")
         return False
     
-    print(f"✅ 演示启动成功")
+    print("✅ 演示启动成功")
     print(f"   演示ID: {start_result['demo_id']}")
     print(f"   场景: {start_result['scenario_name']}")
     print(f"   总步骤: {start_result['total_steps']}")

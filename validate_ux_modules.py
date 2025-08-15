@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 16:20:00
+"""@Time    : 2025-08-05 16:20:00
 @Author  : DAIP-LIVE Team
 @File    : validate_ux_modules.py
 @Description:
     Simple validation script to check UX enhancement modules exist and are properly structured.
 """
 
-import os
 import sys
 from pathlib import Path
 
+
 def validate_module_structure():
     """Validate that all UX enhancement modules exist and have proper structure"""
-    
     base_dir = Path(__file__).parent
     core_services_dir = base_dir / "src" / "core_services"
     
@@ -40,20 +37,20 @@ def validate_module_structure():
             print(f"✅ {module_file} - EXISTS")
             
             # Check if file has proper header
-            with open(module_path, 'r', encoding='utf-8') as f:
+            with open(module_path, encoding='utf-8') as f:
                 content = f.read()
                 
             if '@Time' in content and '@Author' in content and '@Description' in content:
-                print(f"   - Proper file header")
+                print("   - Proper file header")
             else:
-                print(f"   ⚠️  Missing or incomplete file header")
+                print("   ⚠️  Missing or incomplete file header")
                 all_valid = False
                 
             # Check if file has proper class/function definitions
             if 'class ' in content or 'def ' in content:
-                print(f"   - Contains class/function definitions")
+                print("   - Contains class/function definitions")
             else:
-                print(f"   ⚠️  No class/function definitions found")
+                print("   ⚠️  No class/function definitions found")
                 all_valid = False
                 
         else:
@@ -71,13 +68,12 @@ def validate_module_structure():
 
 def validate_comprehensive_test():
     """Validate the comprehensive test script exists"""
-    
     test_file = Path(__file__).parent / "comprehensive_ux_test.py"
     
     if test_file.exists():
         print("✅ comprehensive_ux_test.py - EXISTS")
         
-        with open(test_file, 'r', encoding='utf-8') as f:
+        with open(test_file, encoding='utf-8') as f:
             content = f.read()
             
         # Check for key test functions

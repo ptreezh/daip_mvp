@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-演示分析器
+"""演示分析器
 """
 
 import logging
-from typing import Dict, Any, List
 from datetime import datetime
-from .demo_types import DemoStepStatus, DemoScenarioType
+from typing import Any
+
+from .demo_types import DemoScenarioType, DemoStepStatus
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +17,7 @@ class DemoAnalyzer:
     def __init__(self):
         pass
     
-    def analyze_demo(self, demo_data: Dict[str, Any]) -> Dict[str, Any]:
+    def analyze_demo(self, demo_data: dict[str, Any]) -> dict[str, Any]:
         """分析演示数据"""
         try:
             steps = demo_data.get("steps", [])
@@ -56,7 +55,7 @@ class DemoAnalyzer:
             logger.error(f"分析演示失败: {e}")
             return {"error": str(e)}
     
-    def _calculate_statistics(self, steps: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _calculate_statistics(self, steps: list[dict[str, Any]]) -> dict[str, Any]:
         """计算统计信息"""
         completed_steps = [s for s in steps if s.get("status") == DemoStepStatus.COMPLETED.value]
         failed_steps = [s for s in steps if s.get("status") == DemoStepStatus.FAILED.value]
@@ -73,7 +72,7 @@ class DemoAnalyzer:
             "avg_step_duration": avg_duration
         }
     
-    def _analyze_engagement(self, demo_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _analyze_engagement(self, demo_data: dict[str, Any]) -> dict[str, Any]:
         """分析用户参与度"""
         interactions = demo_data.get("user_interactions", [])
         steps = demo_data.get("steps", [])
@@ -83,7 +82,7 @@ class DemoAnalyzer:
             "engagement_score": min(1.0, len(interactions) / len(steps)) if steps else 0
         }
     
-    def _calculate_quality_score(self, demo_data: Dict[str, Any]) -> float:
+    def _calculate_quality_score(self, demo_data: dict[str, Any]) -> float:
         """计算质量分数"""
         steps = demo_data.get("steps", [])
         completed_steps = [s for s in steps if s.get("status") == DemoStepStatus.COMPLETED.value]
@@ -100,7 +99,7 @@ class DemoAnalyzer:
         
         return round(quality_score, 2)
     
-    def _generate_insights(self, demo_data: Dict[str, Any]) -> List[str]:
+    def _generate_insights(self, demo_data: dict[str, Any]) -> list[str]:
         """生成洞察"""
         insights = []
         
@@ -120,7 +119,7 @@ class DemoAnalyzer:
         
         return insights
     
-    def _generate_recommendations(self, demo_data: Dict[str, Any]) -> List[str]:
+    def _generate_recommendations(self, demo_data: dict[str, Any]) -> list[str]:
         """生成建议"""
         recommendations = []
         
@@ -138,7 +137,7 @@ class DemoAnalyzer:
         
         return recommendations
     
-    def generate_summary(self, demo_data: Dict[str, Any]) -> str:
+    def generate_summary(self, demo_data: dict[str, Any]) -> str:
         """生成演示摘要"""
         try:
             scenario_name = demo_data.get("scenario_info", {}).get("name", "未知场景")

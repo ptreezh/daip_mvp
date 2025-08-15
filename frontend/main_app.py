@@ -1,29 +1,28 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Lona Web应用入口点
+"""Personal Intelligence Hub - Lona Web应用入口点
 
 基于Lona Web框架的统一Python前后端解决方案
 为DAIP-LIVE项目提供直观的用户交互界面
 """
 
-from lona import LonaApp, View
-from lona.html import HTML, Div, H1, Head, Title, Link
 import asyncio
 import logging
+
+from lona import LonaApp, View
+from lona.html import H1, HTML, Div, Head, Link, Title
+
 logger = logging.getLogger(__name__)
-import uuid
 
 # 导入组件
 from components.chat_interface import ChatInterface
+from components.task_panel import TaskPanel
 from components.transparency_monitor import TransparencyMonitor
 from components.wiki_panel import WikiPanel
-from components.task_panel import TaskPanel
+from services.backend_connector import BackendConnector
 
 # 导入服务
 from services.personal_assistant import PersonalAssistantService
-from services.backend_connector import BackendConnector
-from services.websocket_manager import websocket_manager, realtime_manager
+from services.websocket_manager import realtime_manager, websocket_manager
 
 # 创建Lona应用实例
 app = LonaApp(__file__)
@@ -71,7 +70,6 @@ class PersonalIntelligenceHubView(View):
     
     def handle_request(self, request):
         """处理HTTP请求并返回页面内容"""
-        
         # 初始化组件（在请求时初始化以确保正确的上下文）
         # Obtain session_id from request, or generate one if not available
         # Assuming request.session.sid is available in Lona's request object

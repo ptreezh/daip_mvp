@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 15:30:00
+"""@Time    : 2025-08-03 15:30:00
 @Author  : DAIP-LIVE Team
 @File    : professional_chat_interface.py
 @Description:
@@ -18,13 +16,13 @@
 import asyncio
 import logging
 import uuid
-from typing import List, Optional, Dict, Any, Callable
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass
+from typing import Any
 
+from lona.html import H3, Button, Div, I, Li, P, Span, TextInput, Ul
 from lona.html.widget import Widget
-from lona.html import HTML, Div, TextInput, Button, P, Span, H3, Pre, Code, A, I, Ul, Li
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +55,9 @@ class ChatMessage:
     message_type: MessageType
     priority: MessagePriority = MessagePriority.NORMAL
     timestamp: datetime = None
-    metadata: Dict[str, Any] = None
-    attachments: List[Dict[str, Any]] = None
-    reactions: Dict[str, int] = None
+    metadata: dict[str, Any] = None
+    attachments: list[dict[str, Any]] = None
+    reactions: dict[str, int] = None
     
     def __post_init__(self):
         if self.timestamp is None:
@@ -90,7 +88,7 @@ class ProfessionalChatInterface(Widget):
         self.enable_accessibility = enable_accessibility
         
         # 状态管理
-        self.messages: List[ChatMessage] = []
+        self.messages: list[ChatMessage] = []
         self.is_typing = False
         self.current_scenario = "smart"
         self.user_preferences = {}
@@ -104,7 +102,6 @@ class ProfessionalChatInterface(Widget):
         
     def _build_interface(self):
         """构建专业化界面结构"""
-        
         # 主容器 - 专业化设计
         self.main_container = Div(
             _class="professional-chat-container",
@@ -646,7 +643,7 @@ class ProfessionalChatInterface(Widget):
         # 更新侧边面板中的计数显示
         pass
     
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """获取性能指标"""
         if not self.response_times:
             return {}

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-手动修复最后的语法错误
+"""手动修复最后的语法错误
 """
 
 from pathlib import Path
+
 
 def manual_fix():
     """手动修复最后的语法错误"""

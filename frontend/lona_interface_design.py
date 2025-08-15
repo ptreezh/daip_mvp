@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Lona Web界面设计文档
+"""Personal Intelligence Hub - Lona Web界面设计文档
 
 基于DDD架构设计的双入口统一界面框架
 支持Secretariat和Forum两种用户交互模式
@@ -14,18 +12,42 @@ Personal Intelligence Hub - Lona Web界面设计文档
 5. 透明度监控和用户干预功能
 """
 
-from lona import LonaApp, View
-from lona.html import HTML, Div, H1, H2, Head, Title, Link, Button, P, Span
-from lona.html import TextInput, Select, Option, Form, Label, Ul, Li, Nav, Section
-from lona.html import Article, Aside, Header, Footer, Main, Table, Tr, Td, Th, Thead, Tbody
-from lona.html import Img, I, Strong, Em, Br, Hr, Blockquote, Pre, Code
-from lona.html.widget import Widget
-from typing import Dict, List, Optional, Any, Callable
 import asyncio
 import logging
 import uuid
+from collections.abc import Callable
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
+
+from lona import LonaApp, View
+from lona.html import (
+    H1,
+    H2,
+    HTML,
+    Aside,
+    Button,
+    Div,
+    Footer,
+    Form,
+    Head,
+    Header,
+    I,
+    Label,
+    Li,
+    Link,
+    Main,
+    Nav,
+    Option,
+    P,
+    Select,
+    Span,
+    Strong,
+    TextInput,
+    Title,
+    Ul,
+)
+from lona.html.widget import Widget
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -51,8 +73,8 @@ class ComponentRegistry:
     """组件注册表"""
     
     def __init__(self):
-        self.components: Dict[str, type] = {}
-        self.instances: Dict[str, Widget] = {}
+        self.components: dict[str, type] = {}
+        self.instances: dict[str, Widget] = {}
     
     def register(self, name: str, component_class: type):
         """注册组件类"""
@@ -86,7 +108,7 @@ class BaseWidget(Widget):
         super().__init__()
         self.component_id = component_id or f"comp_{uuid.uuid4().hex[:8]}"
         self.state = UIState.IDLE
-        self.callbacks: Dict[str, List[Callable]] = {}
+        self.callbacks: dict[str, list[Callable]] = {}
         
         # 基础样式类
         self.base_classes = ["base-widget"]
@@ -111,7 +133,7 @@ class BaseWidget(Widget):
         self.state = new_state
         self.trigger_callback("state_changed", new_state)
     
-    def get_classes(self) -> List[str]:
+    def get_classes(self) -> list[str]:
         """获取CSS类名"""
         return self.base_classes + [f"state-{self.state.value}"]
 
@@ -302,7 +324,7 @@ class SecretariatChatInterface(BaseWidget):
         self.set_state(UIState.IDLE)
         await self.trigger_callback("message_received", response_message)
     
-    def render_message(self, message: Dict[str, Any]) -> HTML:
+    def render_message(self, message: dict[str, Any]) -> HTML:
         """渲染单条消息"""
         message_classes = ["message"]
         
@@ -414,7 +436,7 @@ class ForumChatInterface(BaseWidget):
         # 注册组件
         component_registry.register("forum_chat", ForumChatInterface)
     
-    async def start_debate(self, topic: str, participants: List[str]):
+    async def start_debate(self, topic: str, participants: list[str]):
         """开始辩论"""
         self.debate_topic = topic
         self.active_agents = participants
@@ -607,7 +629,7 @@ class ForumChatInterface(BaseWidget):
                         Div(
                             P(f"总消息数: {len(self.messages)}"),
                             P(f"代理发言: {len([m for m in self.messages if m['type'] == 'agent_speech'])}"),
-                            P(f"辩论时长: 5分钟"),
+                            P("辩论时长: 5分钟"),
                             _class="debate-stats"
                         ),
                         _class="stats-panel"
@@ -668,7 +690,7 @@ class StatusMonitor(BaseWidget):
         # 注册组件
         component_registry.register("status_monitor", StatusMonitor)
     
-    def update_status(self, new_status: Dict[str, Any]):
+    def update_status(self, new_status: dict[str, Any]):
         """更新状态"""
         self.system_status.update(new_status)
         # Lona会自动重新渲染
@@ -770,7 +792,7 @@ class DualEntranceController(BaseWidget):
         # 更新状态
         await self.trigger_callback("entrance_changed", entrance_type)
     
-    async def _on_secretariat_message(self, message: Dict[str, Any]):
+    async def _on_secretariat_message(self, message: dict[str, Any]):
         """处理Secretariat消息"""
         logger.info(f"Secretariat消息: {message['content']}")
         
@@ -781,7 +803,7 @@ class DualEntranceController(BaseWidget):
             "token_usage": self.status_monitor.system_status.get("token_usage", 0) + 150
         })
     
-    async def _on_debate_started(self, debate_info: Dict[str, Any]):
+    async def _on_debate_started(self, debate_info: dict[str, Any]):
         """处理辩论开始"""
         logger.info(f"辩论开始: {debate_info['topic']}")
         

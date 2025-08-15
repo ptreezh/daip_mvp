@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 11:00:00
+"""@Time    : 2025-07-24 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : tool_executor.py
 @Description:
@@ -9,7 +7,8 @@
     tool/strategy implementations.
 """
 import logging
-from typing import Any, Callable, Dict
+from collections.abc import Callable
+from typing import Any
 
 
 class ToolExecutor:
@@ -17,11 +16,11 @@ class ToolExecutor:
 
     def __init__(self):
         """Initializes the ToolExecutor with an empty tool registry."""
-        self.tools: Dict[str, Callable] = {}
-        self.tool_definitions: Dict[str, Dict] = {}
+        self.tools: dict[str, Callable] = {}
+        self.tool_definitions: dict[str, dict] = {}
         logging.info("ToolExecutor initialized.")
 
-    def register_tool(self, tool_func: Callable, definition: Dict):
+    def register_tool(self, tool_func: Callable, definition: dict):
         """Registers a tool function and its JSON schema definition."""
         try:
             tool_name = definition["function"]["name"]
@@ -31,7 +30,7 @@ class ToolExecutor:
         except KeyError:
             logging.exception(f"Failed to register tool. The definition is missing 'function' or 'name': {definition}")
 
-    def execute(self, tool_name: str, **kwargs) -> Dict[str, Any]:
+    def execute(self, tool_name: str, **kwargs) -> dict[str, Any]:
         """Executes a named tool with the given keyword arguments."""
         if tool_name not in self.tools:
             logging.error(f"Execution failed: Tool '{tool_name}' is not registered.")

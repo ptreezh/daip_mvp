@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-智能记忆管理面板组件
+"""智能记忆管理面板组件
 
 基于MemAgent提供记忆管理界面，支持记忆查看、编辑和组织
 """
 
-from lona.html.widget import Widget
-from lona.html import HTML, Div, H3, P, TextInput, Button, Select, Option, Span
-from datetime import datetime
-from typing import Dict, List, Optional, Any
 from enum import Enum
+from typing import Any, Optional
 
-from .base_components import Panel, Card, Button as CustomButton, Input, Badge, Tabs, Modal
-from .base_components import ButtonVariant, StatusIndicator
+from lona.html import H3, HTML, Button, Div, Option, P, Select, Span, TextInput
+from lona.html.widget import Widget
+
+from .base_components import Button as CustomButton
+from .base_components import ButtonVariant, Input, Modal
 
 
 class MemoryType(str, Enum):
@@ -31,8 +29,8 @@ class MemoryPanel(Widget):
         super().__init__()
         
         self.memory_service = memory_service
-        self.current_memories: List[Dict[str, Any]] = []
-        self.selected_memory: Optional[Dict[str, Any]] = None
+        self.current_memories: list[dict[str, Any]] = []
+        self.selected_memory: Optional[dict[str, Any]] = None
         self.filter_type: Optional[MemoryType] = None
         self.search_query: str = ""
         
@@ -190,7 +188,7 @@ class MemoryPanel(Widget):
         self.current_memories = [
             m for m in self.current_memories if m["id"] != memory_id
         ]
-    def _create_memory_form(self, memory: Optional[Dict[str, Any]] = None) -> HTML:
+    def _create_memory_form(self, memory: Optional[dict[str, Any]] = None) -> HTML:
         """创建记忆编辑表单"""
         is_edit = memory is not None
         
@@ -260,7 +258,7 @@ class MemoryPanel(Widget):
             )
         )
     
-    def _create_memory_card(self, memory: Dict[str, Any]) -> HTML:
+    def _create_memory_card(self, memory: dict[str, Any]) -> HTML:
         """创建记忆卡片"""
         memory_type_display = self._get_memory_type_display(memory["memory_type"])
         

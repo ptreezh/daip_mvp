@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-真实LLM辩论助手
+"""真实LLM辩论助手
 
 基于真实大模型调用的多角色深度辩论系统
 支持多轮辩论、共识计算、高质量输出
@@ -10,11 +8,11 @@
 import asyncio
 import logging
 import sys
-import json
-import requests
-from pathlib import Path
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+import requests
 
 # 添加项目根目录到路径
 sys.path.append(str(Path(__file__).parent.parent))
@@ -80,7 +78,7 @@ class RealLLMDebateAssistant:
         if self._test_llm_connection():
             print(f"🤖 LLM服务: ✅ 已连接 ({self.llm_config['model']})")
         else:
-            print(f"🤖 LLM服务: ❌ 连接失败")
+            print("🤖 LLM服务: ❌ 连接失败")
         
         # 显示可用角色
         try:
@@ -145,7 +143,7 @@ class RealLLMDebateAssistant:
     
     async def _process_debate_request(self, topic: str):
         """处理辩论请求"""
-        print(f"\n🔥 启动真实LLM多角色辩论")
+        print("\n🔥 启动真实LLM多角色辩论")
         print(f"📋 辩论议题: {topic}")
         print("-" * 70)
         
@@ -160,15 +158,15 @@ class RealLLMDebateAssistant:
             debate_result = await self._conduct_real_debate(topic, selected_roles)
             
             # 步骤3: 共识计算
-            print(f"\n🤝 步骤3: 计算共识与分歧...")
+            print("\n🤝 步骤3: 计算共识与分歧...")
             consensus_result = await self._calculate_consensus_and_divergence(debate_result)
             
             # 步骤4: 生成综合报告
-            print(f"\n📝 步骤4: 生成综合报告...")
+            print("\n📝 步骤4: 生成综合报告...")
             final_report = await self._generate_comprehensive_report(topic, debate_result, consensus_result)
             
             # 步骤5: 保存到Wiki
-            print(f"\n📚 步骤5: 保存到Wiki知识库...")
+            print("\n📚 步骤5: 保存到Wiki知识库...")
             await self._save_to_wiki(topic, final_report)
             
             # 显示结果
@@ -178,7 +176,7 @@ class RealLLMDebateAssistant:
             logger.error(f"辩论处理失败: {e}")
             print(f"❌ 辩论处理失败: {e}")
     
-    async def _select_debate_roles(self, topic: str) -> List[Any]:
+    async def _select_debate_roles(self, topic: str) -> list[Any]:
         """智能选择辩论角色"""
         try:
             all_roles = self.role_manager.list_roles()
@@ -222,7 +220,7 @@ class RealLLMDebateAssistant:
             # 返回前4个角色作为备选
             return self.role_manager.list_roles()[:4]
     
-    async def _conduct_real_debate(self, topic: str, roles: List[Any]) -> Dict[str, Any]:
+    async def _conduct_real_debate(self, topic: str, roles: list[Any]) -> dict[str, Any]:
         """进行真实的多轮辩论"""
         debate_history = []
         round_count = 0
@@ -327,7 +325,7 @@ class RealLLMDebateAssistant:
             "total_words": sum(entry["word_count"] for entry in debate_history)
         }
     
-    def _build_debate_context(self, debate_history: List[Dict], max_rounds: int) -> str:
+    def _build_debate_context(self, debate_history: list[dict], max_rounds: int) -> str:
         """构建辩论上下文"""
         context = ""
         
@@ -342,7 +340,7 @@ class RealLLMDebateAssistant:
         
         return context
     
-    async def _should_continue_debate(self, round_responses: List[Dict]) -> bool:
+    async def _should_continue_debate(self, round_responses: list[dict]) -> bool:
         """判断是否应该继续辩论"""
         try:
             # 简单策略：如果回应中包含新观点或强烈反驳，继续辩论
@@ -359,7 +357,7 @@ class RealLLMDebateAssistant:
             logger.error(f"判断辩论继续失败: {e}")
             return False
     
-    async def _calculate_consensus_and_divergence(self, debate_result: Dict[str, Any]) -> Dict[str, Any]:
+    async def _calculate_consensus_and_divergence(self, debate_result: dict[str, Any]) -> dict[str, Any]:
         """计算共识与分歧"""
         try:
             debate_history = debate_result["debate_history"]
@@ -428,7 +426,7 @@ class RealLLMDebateAssistant:
                 "analysis_timestamp": datetime.now()
             }
     
-    def _summarize_debate_for_analysis(self, debate_history: List[Dict]) -> str:
+    def _summarize_debate_for_analysis(self, debate_history: list[dict]) -> str:
         """为分析总结辩论内容"""
         summary = ""
         
@@ -439,7 +437,7 @@ class RealLLMDebateAssistant:
         
         return summary
     
-    async def _generate_comprehensive_report(self, topic: str, debate_result: Dict, consensus_result: Dict) -> Dict[str, Any]:
+    async def _generate_comprehensive_report(self, topic: str, debate_result: dict, consensus_result: dict) -> dict[str, Any]:
         """生成综合报告"""
         try:
             # 使用LLM生成高质量综合报告
@@ -494,7 +492,7 @@ class RealLLMDebateAssistant:
                 "word_count": 0
             }
     
-    def _format_full_debate_for_report(self, debate_history: List[Dict]) -> str:
+    def _format_full_debate_for_report(self, debate_history: list[dict]) -> str:
         """为报告格式化完整辩论记录"""
         formatted = ""
         
@@ -508,7 +506,7 @@ class RealLLMDebateAssistant:
         
         return formatted
     
-    async def _save_to_wiki(self, topic: str, report: Dict[str, Any]):
+    async def _save_to_wiki(self, topic: str, report: dict[str, Any]):
         """保存到Wiki"""
         try:
             title = f"深度辩论报告：{topic}"
@@ -571,7 +569,7 @@ class RealLLMDebateAssistant:
             logger.error(f"LLM调用异常: {e}")
             return f"LLM调用异常: {str(e)}"
     
-    def _display_debate_results(self, topic: str, report: Dict[str, Any]):
+    def _display_debate_results(self, topic: str, report: dict[str, Any]):
         """显示辩论结果"""
         print("\n" + "="*70)
         print("🎉 真实LLM多轮辩论完成！")
@@ -586,13 +584,13 @@ class RealLLMDebateAssistant:
         print(f"\n🤝 共识度: {report['consensus_analysis']['consensus_score']:.2f}")
         print(f"⚡ 分歧度: {report['consensus_analysis']['divergence_score']:.2f}")
         
-        print(f"\n📚 完整报告已保存到Wiki知识库")
+        print("\n📚 完整报告已保存到Wiki知识库")
         print(f"🕒 生成时间: {report['generation_timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
         
         # 显示报告预览
         if report['report_content']:
             preview = report['report_content'][:500] + "..." if len(report['report_content']) > 500 else report['report_content']
-            print(f"\n📖 报告预览:")
+            print("\n📖 报告预览:")
             print("-" * 50)
             print(preview)
             print("-" * 50)

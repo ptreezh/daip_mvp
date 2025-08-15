@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-知识质量趋势监控
+"""知识质量趋势监控
 
 监控知识质量随时间的变化趋势
 """
 
 import logging
-from typing import Any, Dict, List, Optional
-from datetime import datetime
 import statistics
+from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +25,7 @@ class KnowledgeQualityTrendMonitor:
             "volatile": "质量波动"
         }
     
-    def record_quality_measurement(self, measurement: Dict[str, Any]) -> bool:
+    def record_quality_measurement(self, measurement: dict[str, Any]) -> bool:
         """记录质量测量"""
         try:
             knowledge_id = measurement.get("knowledge_id")
@@ -48,7 +46,7 @@ class KnowledgeQualityTrendMonitor:
             logger.error(f"记录质量测量失败: {e}")
             return False
     
-    def analyze_quality_trends(self, knowledge_id: str) -> Dict[str, Any]:
+    def analyze_quality_trends(self, knowledge_id: str) -> dict[str, Any]:
         """分析质量趋势"""
         try:
             if knowledge_id not in self.quality_history:
@@ -81,7 +79,7 @@ class KnowledgeQualityTrendMonitor:
             logger.error(f"分析质量趋势失败: {e}")
             return {"error": str(e)}
     
-    def generate_quality_forecast(self, knowledge_id: str, forecast_periods: int = 3) -> Dict[str, Any]:
+    def generate_quality_forecast(self, knowledge_id: str, forecast_periods: int = 3) -> dict[str, Any]:
         """生成质量预测"""
         try:
             if knowledge_id not in self.quality_history:
@@ -116,7 +114,7 @@ class KnowledgeQualityTrendMonitor:
             logger.error(f"生成质量预测失败: {e}")
             return {"error": str(e)}
     
-    def _determine_trend(self, quality_scores: List[float]) -> str:
+    def _determine_trend(self, quality_scores: list[float]) -> str:
         """确定趋势类型"""
         if len(quality_scores) < 2:
             return "stable"
@@ -142,7 +140,7 @@ class KnowledgeQualityTrendMonitor:
             else:
                 return "stable"
     
-    def _calculate_trend_direction(self, quality_scores: List[float]) -> str:
+    def _calculate_trend_direction(self, quality_scores: list[float]) -> str:
         """计算趋势方向"""
         if len(quality_scores) < 2:
             return "neutral"
@@ -157,7 +155,7 @@ class KnowledgeQualityTrendMonitor:
         else:
             return "neutral"
     
-    def _calculate_improvement_rate(self, quality_scores: List[float]) -> float:
+    def _calculate_improvement_rate(self, quality_scores: list[float]) -> float:
         """计算改进率"""
         if len(quality_scores) < 2:
             return 0.0
@@ -171,7 +169,7 @@ class KnowledgeQualityTrendMonitor:
         else:
             return 0.0
     
-    def _calculate_volatility(self, quality_scores: List[float]) -> float:
+    def _calculate_volatility(self, quality_scores: list[float]) -> float:
         """计算波动性"""
         if len(quality_scores) < 2:
             return 0.0

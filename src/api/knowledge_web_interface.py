@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 17:45:00
+"""@Time    : 2025-08-03 17:45:00
 @Author  : DAIP-LIVE Team
 @File    : knowledge_web_interface.py
 @Description:
@@ -15,22 +13,22 @@
     - 实时知识发现
 """
 
-from flask import Blueprint, render_template, request, jsonify, session
 import asyncio
-import json
 import logging
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import Optional
 
+from flask import Blueprint, jsonify, render_template, request, session
+
+from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
 from src.core_services.knowledge_retrieval_visualization import (
     KnowledgeRetrievalEngine,
-    RetrievalQuery,
     RetrievalMode,
+    RetrievalQuery,
     VisualizationType,
-    create_knowledge_retrieval_engine
+    create_knowledge_retrieval_engine,
 )
 from src.core_services.memory_agent import MemAgent
-from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
 from src.core_services.role_manager import RoleManager
 
 logger = logging.getLogger(__name__)
@@ -79,7 +77,6 @@ def search_page():
 @knowledge_bp.route('/api/search', methods=['POST'])
 def api_search():
     """知识检索API"""
-    
     if not retrieval_engine:
         return jsonify({"error": "知识检索引擎未初始化"}), 500
     
@@ -148,7 +145,6 @@ def api_search():
 @knowledge_bp.route('/api/discover_patterns', methods=['POST'])
 def api_discover_patterns():
     """知识模式发现API"""
-    
     if not retrieval_engine:
         return jsonify({"error": "知识检索引擎未初始化"}), 500
     
@@ -175,7 +171,6 @@ def api_discover_patterns():
 @knowledge_bp.route('/api/interactive_map', methods=['POST'])
 def api_interactive_map():
     """交互式知识地图API"""
-    
     if not retrieval_engine:
         return jsonify({"error": "知识检索引擎未初始化"}), 500
     
@@ -205,7 +200,6 @@ def api_interactive_map():
 @knowledge_bp.route('/api/statistics')
 def api_statistics():
     """知识统计API"""
-    
     if not retrieval_engine:
         return jsonify({"error": "知识检索引擎未初始化"}), 500
     

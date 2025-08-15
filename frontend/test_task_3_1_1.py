@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-任务3.1.1测试套件 - 集成现有前端组件
+"""任务3.1.1测试套件 - 集成现有前端组件
 
 严格测试前端组件集成的完整性、数据流同步和用户体验
 """
 
-import sys
-import os
-import asyncio
-import unittest
 import logging
+import sys
+import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
-from datetime import datetime
+from unittest.mock import Mock
 
 # 添加项目路径
 project_root = Path(__file__).parent.parent
@@ -45,17 +40,17 @@ class TestTask311Integration(unittest.TestCase):
         try:
             # 测试核心组件导入
             from components.chat_interface import ChatInterface
+            from components.task_panel import TaskPanel
             from components.transparency_monitor import TransparencyMonitor
             from components.wiki_panel import WikiPanel
-            from components.task_panel import TaskPanel
-            
-            # 测试服务导入
-            from services.personal_assistant import PersonalAssistantService
-            from services.backend_connector import BackendConnector
-            from services.websocket_manager import websocket_manager, realtime_manager
-            
+
             # 测试集成应用导入
             from integrated_demo_app import IntegratedDemoView, app
+            from services.backend_connector import BackendConnector
+
+            # 测试服务导入
+            from services.personal_assistant import PersonalAssistantService
+            from services.websocket_manager import realtime_manager, websocket_manager
             
             self.test_results["component_import"] = True
             logger.info("✅ 所有组件导入成功")
@@ -69,12 +64,12 @@ class TestTask311Integration(unittest.TestCase):
         logger.info("🧪 测试2: 组件初始化测试")
         
         try:
-            from services.backend_connector import BackendConnector
-            from services.personal_assistant import PersonalAssistantService
             from components.chat_interface import ChatInterface
+            from components.task_panel import TaskPanel
             from components.transparency_monitor import TransparencyMonitor
             from components.wiki_panel import WikiPanel
-            from components.task_panel import TaskPanel
+            from services.backend_connector import BackendConnector
+            from services.personal_assistant import PersonalAssistantService
             
             # 初始化后端连接器
             backend_connector = BackendConnector()
@@ -140,10 +135,10 @@ class TestTask311Integration(unittest.TestCase):
         logger.info("🧪 测试4: 数据流同步测试")
         
         try:
-            from services.backend_connector import BackendConnector
-            from services.personal_assistant import PersonalAssistantService
             from components.chat_interface import ChatInterface
             from components.transparency_monitor import TransparencyMonitor
+            from services.backend_connector import BackendConnector
+            from services.personal_assistant import PersonalAssistantService
             
             # 初始化组件
             backend_connector = BackendConnector()
@@ -208,9 +203,9 @@ class TestTask311Integration(unittest.TestCase):
         logger.info("🧪 测试5: 用户交互流程测试")
         
         try:
+            from components.chat_interface import ChatInterface
             from services.backend_connector import BackendConnector
             from services.personal_assistant import PersonalAssistantService
-            from components.chat_interface import ChatInterface
             
             # 初始化组件
             backend_connector = BackendConnector()
@@ -291,7 +286,7 @@ class TestTask311Integration(unittest.TestCase):
             self.assertTrue(css_file.exists(), "demo.css文件不存在")
             
             # 检查CSS文件内容
-            with open(css_file, 'r', encoding='utf-8') as f:
+            with open(css_file, encoding='utf-8') as f:
                 css_content = f.read()
             
             # 验证关键CSS类存在
@@ -325,7 +320,7 @@ class TestTask311Integration(unittest.TestCase):
             self.assertTrue(startup_script.exists(), "启动脚本不存在")
             
             # 检查启动脚本可执行性
-            with open(startup_script, 'r', encoding='utf-8') as f:
+            with open(startup_script, encoding='utf-8') as f:
                 script_content = f.read()
             
             # 验证关键函数存在
@@ -350,7 +345,7 @@ class TestTask311Integration(unittest.TestCase):
             self.assertTrue(readme_file.exists(), "README文件不存在")
             
             # 检查README内容
-            with open(readme_file, 'r', encoding='utf-8') as f:
+            with open(readme_file, encoding='utf-8') as f:
                 readme_content = f.read()
             
             # 验证关键章节存在
@@ -424,10 +419,10 @@ class TestTask311AsyncFunctions(unittest.IsolatedAsyncioTestCase):
         logger.info("🧪 异步测试: 数据流同步")
         
         try:
-            from services.backend_connector import BackendConnector
-            from services.personal_assistant import PersonalAssistantService
             from components.chat_interface import ChatInterface
             from components.transparency_monitor import TransparencyMonitor
+            from services.backend_connector import BackendConnector
+            from services.personal_assistant import PersonalAssistantService
             
             # 初始化组件
             backend_connector = BackendConnector()

@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-冲突解决策略
+"""冲突解决策略
 
 提供多种冲突解决策略
 """
 
 import logging
-from typing import Any, Dict, List, Optional
-from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +30,7 @@ class ConflictResolutionStrategies:
             "stakeholder_consensus": 0.65
         }
     
-    def select_strategy(self, conflict_context: Dict[str, Any]) -> Dict[str, Any]:
+    def select_strategy(self, conflict_context: dict[str, Any]) -> dict[str, Any]:
         """选择策略"""
         try:
             conflict_type = conflict_context.get("conflict_type", "unknown")
@@ -61,7 +58,7 @@ class ConflictResolutionStrategies:
             logger.error(f"选择策略失败: {e}")
             return {"error": str(e)}
     
-    def apply_synthesis_strategy(self, conflicting_claims: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def apply_synthesis_strategy(self, conflicting_claims: list[dict[str, Any]]) -> dict[str, Any]:
         """应用综合策略"""
         try:
             if not conflicting_claims:
@@ -96,7 +93,7 @@ class ConflictResolutionStrategies:
             logger.error(f"应用综合策略失败: {e}")
             return {"error": str(e)}
     
-    def apply_evidence_weighting(self, evidence_items: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def apply_evidence_weighting(self, evidence_items: list[dict[str, Any]]) -> dict[str, Any]:
         """应用证据权重策略"""
         try:
             if not evidence_items:
@@ -128,7 +125,7 @@ class ConflictResolutionStrategies:
             logger.error(f"应用证据权重策略失败: {e}")
             return {"error": str(e)}
     
-    def _find_common_elements(self, claims: List[str]) -> str:
+    def _find_common_elements(self, claims: list[str]) -> str:
         """寻找共同元素"""
         try:
             if len(claims) < 2:

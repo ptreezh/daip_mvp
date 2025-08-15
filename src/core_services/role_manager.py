@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """Manages the definitions and capabilities of different roles in the system."""
 
-import logging
 import json
+import logging
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Any
 from pathlib import Path
+from typing import Any, Optional
 
 # Define the base directory for roles
 ROLES_DIR = Path("roles")
@@ -18,9 +17,9 @@ class Role:
     name: str
     description: str
     system_prompt: str
-    capabilities: List[str]
+    capabilities: list[str]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Converts the Role object to a dictionary for JSON serialization."""
         return {
             "id": self.id,
@@ -31,7 +30,7 @@ class Role:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Role":
+    def from_dict(cls, data: dict[str, Any]) -> "Role":
         """Creates a Role object from a dictionary with enhanced error tolerance."""
         # 处理不同的数据格式
         if isinstance(data, list):
@@ -87,7 +86,7 @@ class RoleManager:
             roles_directory (Path): The path to the directory containing role JSON files.
         """
         self.roles_directory = roles_directory
-        self._roles: Dict[str, Role] = {}
+        self._roles: dict[str, Role] = {}
         self._load_roles()
         logging.info(f"RoleManager initialized. Roles directory: {self.roles_directory}")
 
@@ -99,7 +98,7 @@ class RoleManager:
         loaded_count = 0
         for role_file in self.roles_directory.glob("*.json"):
             try:
-                with open(role_file, "r", encoding="utf-8") as f:
+                with open(role_file, encoding="utf-8") as f:
                     role_data = json.load(f)
                     
                     # 检查数据格式
@@ -132,7 +131,7 @@ class RoleManager:
             role_file = self.roles_directory / f"{role_id}.json"
             if role_file.exists():
                 try:
-                    with open(role_file, "r", encoding="utf-8") as f:
+                    with open(role_file, encoding="utf-8") as f:
                         role_data = json.load(f)
                         role = Role.from_dict(role_data)
                         self._roles[role.id] = role # Add to in-memory cache
@@ -148,7 +147,7 @@ class RoleManager:
         """Alias for get_role_by_id for compatibility."""
         return self.get_role_by_id(role_id)
 
-    def list_roles(self) -> List[Role]:
+    def list_roles(self) -> list[Role]:
         """Returns a list of all available roles (reloads from disk to ensure freshness)."""
         self._load_roles() # Ensure the in-memory cache is fresh
         return list(self._roles.values())

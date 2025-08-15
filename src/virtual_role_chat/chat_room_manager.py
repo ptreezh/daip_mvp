@@ -1,5 +1,4 @@
-"""
-ChatRoomManager implementation for the Virtual Role Chat System.
+"""ChatRoomManager implementation for the Virtual Role Chat System.
 
 This module provides the implementation of ChatRoomManager that handles
 the creation, configuration, and lifecycle management of chat rooms.
@@ -9,8 +8,9 @@ import json
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
+from .config_validator import ConfigValidationError, ConfigValidator
 from .interfaces import ChatRoomManagerInterface
 from .models import (
     ChatRoom,
@@ -18,8 +18,7 @@ from .models import (
     ChatRoomID,
     ChatRoomSummary,
 )
-from .role_validator import RoleValidator, RoleValidationError
-from .config_validator import ConfigValidator, ConfigValidationError
+from .role_validator import RoleValidationError, RoleValidator
 
 
 class ChatRoomManager(ChatRoomManagerInterface):
@@ -34,7 +33,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
             config_validator: Optional ConfigValidator instance. If None, creates a new one.
         """
         self.storage_path = Path(storage_path) if storage_path else None
-        self._rooms: Dict[ChatRoomID, ChatRoom] = {}
+        self._rooms: dict[ChatRoomID, ChatRoom] = {}
         self.role_validator = role_validator or RoleValidator()
         self.config_validator = config_validator or ConfigValidator()
         self._load_rooms()
@@ -45,7 +44,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
             return
         
         try:
-            with open(self.storage_path, 'r', encoding='utf-8') as f:
+            with open(self.storage_path, encoding='utf-8') as f:
                 rooms_data = json.load(f)
                 
             for room_data in rooms_data:
@@ -235,7 +234,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
             print(f"Error deleting chat room {room_id}: {e}")
             return False
     
-    def list_chat_rooms(self) -> List[ChatRoomSummary]:
+    def list_chat_rooms(self) -> list[ChatRoomSummary]:
         """List all chat rooms.
         
         Returns:
@@ -336,7 +335,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
         """
         return len(self._rooms)
     
-    def get_active_rooms(self) -> List[ChatRoom]:
+    def get_active_rooms(self) -> list[ChatRoom]:
         """Get all active chat rooms.
         
         Returns:
@@ -344,7 +343,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
         """
         return [room for room in self._rooms.values() if room.status == "active"]
     
-    def get_archived_rooms(self) -> List[ChatRoom]:
+    def get_archived_rooms(self) -> list[ChatRoom]:
         """Get all archived chat rooms.
         
         Returns:
@@ -352,7 +351,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
         """
         return [room for room in self._rooms.values() if room.status == "archived"]
     
-    def validate_room_config(self, config: ChatRoomConfig) -> Dict[str, any]:
+    def validate_room_config(self, config: ChatRoomConfig) -> dict[str, any]:
         """Validate a chat room configuration without creating the room.
         
         Args:
@@ -394,7 +393,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
             "suggested_rules": self.config_validator.suggest_rules_for_mode(config.mode)
         }
     
-    def get_available_roles(self) -> List[Dict[str, str]]:
+    def get_available_roles(self) -> list[dict[str, str]]:
         """Get all available roles that can be used in chat rooms.
         
         Returns:
@@ -402,7 +401,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
         """
         return self.role_validator.get_available_roles()
     
-    def suggest_roles_for_topic(self, topic: str, max_suggestions: int = 5) -> List[str]:
+    def suggest_roles_for_topic(self, topic: str, max_suggestions: int = 5) -> list[str]:
         """Suggest roles that might be relevant for a given topic.
         
         Args:
@@ -414,7 +413,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
         """
         return self.role_validator.suggest_roles_for_topic(topic, max_suggestions)
     
-    def get_rooms_by_role(self, role_id: str) -> List[ChatRoomSummary]:
+    def get_rooms_by_role(self, role_id: str) -> list[ChatRoomSummary]:
         """Get all chat rooms that include a specific role.
         
         Args:
@@ -443,7 +442,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
         
         return matching_rooms
     
-    def get_rooms_by_topic_keyword(self, keyword: str) -> List[ChatRoomSummary]:
+    def get_rooms_by_topic_keyword(self, keyword: str) -> list[ChatRoomSummary]:
         """Get chat rooms that have a keyword in their topic.
         
         Args:
@@ -473,7 +472,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
         
         return matching_rooms
     
-    def get_valid_modes(self) -> List[str]:
+    def get_valid_modes(self) -> list[str]:
         """Get all valid chat room modes.
         
         Returns:
@@ -481,7 +480,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
         """
         return self.config_validator.get_valid_modes()
     
-    def get_mode_requirements(self, mode: str) -> Dict[str, Any]:
+    def get_mode_requirements(self, mode: str) -> dict[str, Any]:
         """Get requirements for a specific chat mode.
         
         Args:
@@ -492,7 +491,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
         """
         return self.config_validator.get_mode_requirements(mode)
     
-    def suggest_rules_for_mode(self, mode: str) -> Dict[str, List[str]]:
+    def suggest_rules_for_mode(self, mode: str) -> dict[str, list[str]]:
         """Get suggested rules for a specific mode.
         
         Args:
@@ -503,7 +502,7 @@ class ChatRoomManager(ChatRoomManagerInterface):
         """
         return self.config_validator.suggest_rules_for_mode(mode)
     
-    def validate_interaction_rules(self, rules: Dict[str, Any], mode: str) -> Dict[str, Any]:
+    def validate_interaction_rules(self, rules: dict[str, Any], mode: str) -> dict[str, Any]:
         """Validate interaction rules for a specific mode.
         
         Args:

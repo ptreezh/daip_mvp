@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 14:30:00
+"""@Time    : 2025-08-03 14:30:00
 @Author  : DAIP-LIVE Team
 @File    : integrated_web_demo.py
 @Description:
@@ -16,20 +14,16 @@
     真正集成V0.2三场景系统，使用实际的LLM推理
 """
 
-import asyncio
 import logging
-import json
-import uuid
 import sys
-import os
-from typing import Dict, List, Any, Optional
+import uuid
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Optional
 
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 
 # 添加项目路径
@@ -37,12 +31,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[0]))
 
 # 导入真实的V0.2组件
 try:
-    from src.scenarios.academic_research_scenario import AcademicResearchScenario
-    from src.scenarios.expert_consultation_scenario import ExpertConsultationScenario  
-    from src.scenarios.casual_discussion_scenario import CasualDiscussionScenario
-    from src.scenarios.scenario_manager import ScenarioManager, ScenarioType
     from src.core_services.integrated_llm_manager import IntegratedLLMManager
     from src.core_services.role_manager import RoleManager
+    from src.scenarios.academic_research_scenario import AcademicResearchScenario
+    from src.scenarios.casual_discussion_scenario import CasualDiscussionScenario
+    from src.scenarios.expert_consultation_scenario import ExpertConsultationScenario
+    from src.scenarios.scenario_manager import ScenarioManager, ScenarioType
     REAL_INTEGRATION = True
     logger = logging.getLogger(__name__)
     logger.info("✅ 成功导入V0.2真实组件")
@@ -75,13 +69,13 @@ app.add_middleware(
 class ChatMessage(BaseModel):
     user_input: str
     scenario_type: Optional[str] = None
-    user_preferences: Optional[Dict[str, Any]] = {}
+    user_preferences: Optional[dict[str, Any]] = {}
     stream: Optional[bool] = False
 
 class ScenarioRequest(BaseModel):
     topic: str
     scenario_type: str
-    user_preferences: Optional[Dict[str, Any]] = {}
+    user_preferences: Optional[dict[str, Any]] = {}
     stream: Optional[bool] = False
 
 # === 真实LLM集成服务 ===
@@ -127,7 +121,7 @@ class RealLLMIntegratedService:
             logger.error(f"❌ V0.2组件初始化失败: {e}")
             self.initialized = False
     
-    async def smart_chat(self, user_input: str, user_preferences: Dict[str, Any] = {}) -> Dict[str, Any]:
+    async def smart_chat(self, user_input: str, user_preferences: dict[str, Any] = {}) -> dict[str, Any]:
         """智能聊天 - 自动推荐场景并执行"""
         try:
             if not self.initialized:
@@ -166,7 +160,7 @@ class RealLLMIntegratedService:
             logger.error(f"❌ 智能聊天处理失败: {e}")
             return await self._fallback_response(user_input, "error")
     
-    async def academic_research(self, topic: str, user_preferences: Dict[str, Any] = {}) -> Dict[str, Any]:
+    async def academic_research(self, topic: str, user_preferences: dict[str, Any] = {}) -> dict[str, Any]:
         """学术研究场景 - 真实LLM调用"""
         try:
             if not self.initialized:
@@ -200,7 +194,7 @@ class RealLLMIntegratedService:
             logger.error(f"❌ 学术研究场景执行异常: {e}")
             return await self._fallback_response(topic, "academic_research")
     
-    async def expert_consultation(self, question: str, user_preferences: Dict[str, Any] = {}) -> Dict[str, Any]:
+    async def expert_consultation(self, question: str, user_preferences: dict[str, Any] = {}) -> dict[str, Any]:
         """专家咨询场景 - 真实LLM调用"""
         try:
             if not self.initialized:
@@ -233,7 +227,7 @@ class RealLLMIntegratedService:
             logger.error(f"❌ 专家咨询场景执行异常: {e}")
             return await self._fallback_response(question, "expert_consultation")
     
-    async def casual_discussion(self, topic: str, user_preferences: Dict[str, Any] = {}) -> Dict[str, Any]:
+    async def casual_discussion(self, topic: str, user_preferences: dict[str, Any] = {}) -> dict[str, Any]:
         """轻松讨论场景 - 真实LLM调用"""
         try:
             if not self.initialized:
@@ -266,7 +260,7 @@ class RealLLMIntegratedService:
             logger.error(f"❌ 轻松讨论场景执行异常: {e}")
             return await self._fallback_response(topic, "casual_discussion")
     
-    async def _fallback_response(self, input_text: str, scenario_type: str) -> Dict[str, Any]:
+    async def _fallback_response(self, input_text: str, scenario_type: str) -> dict[str, Any]:
         """回退响应 - 当真实LLM不可用时"""
         logger.info(f"🔄 使用回退响应模式: {scenario_type}")
         
@@ -311,7 +305,7 @@ class RealLLMIntegratedService:
             **response
         }
     
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """获取系统状态"""
         return {
             "real_integration": REAL_INTEGRATION,
@@ -334,7 +328,6 @@ llm_service = RealLLMIntegratedService()
 @app.get("/", response_class=HTMLResponse)
 async def get_web_interface():
     """提供完整的Web界面"""
-    
     html_content = """
 <!DOCTYPE html>
 <html lang="zh-CN">

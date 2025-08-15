@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # MemAgent验证器
 # 验证MemAgent记忆管理功能的完整性和正确性
 
 import asyncio
-import logging
 import json
-from datetime import datetime, timedelta
+import logging
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any
 
-from src.core_services.memory_agent import MemAgent, Memory, MemoryType, MemoryQuery, TrainingExample
 from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
+from src.core_services.memory_agent import MemAgent, Memory, MemoryQuery, MemoryType, TrainingExample
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +46,7 @@ class MemAgentValidator:
             logger.error(f"初始化失败: {e}")
             return False
     
-    async def validate_all(self) -> Dict[str, Any]:
+    async def validate_all(self) -> dict[str, Any]:
         # 执行所有验证测试
         
         validation_tests = [
@@ -91,7 +90,7 @@ class MemAgentValidator:
         
         return results
     
-    async def validate_basic_memory_operations(self) -> Dict[str, Any]:
+    async def validate_basic_memory_operations(self) -> dict[str, Any]:
         # 验证基础记忆存储和检索功能
         
         test_memories = [
@@ -165,7 +164,7 @@ class MemAgentValidator:
                 "details": {}
             }
     
-    async def validate_multi_conversation_memory(self) -> Dict[str, Any]:
+    async def validate_multi_conversation_memory(self) -> dict[str, Any]:
         # 验证多对话记忆管理功能
         
         # 模拟多个对话会话
@@ -266,7 +265,7 @@ class MemAgentValidator:
                 "details": {}
             }
     
-    async def validate_rl_memory_selection(self) -> Dict[str, Any]:
+    async def validate_rl_memory_selection(self) -> dict[str, Any]:
         # 验证强化学习记忆选择机制
         
         # 创建训练数据
@@ -351,7 +350,7 @@ class MemAgentValidator:
                 "details": {}
             }
     
-    async def validate_memory_consolidation(self) -> Dict[str, Any]:
+    async def validate_memory_consolidation(self) -> dict[str, Any]:
         # 验证记忆整合功能
         
         # 创建需要整合的记忆
@@ -427,7 +426,7 @@ class MemAgentValidator:
                 "details": {}
             }
     
-    async def validate_memory_sharing(self) -> Dict[str, Any]:
+    async def validate_memory_sharing(self) -> dict[str, Any]:
         # 验证记忆共享功能
         
         # 创建要共享的记忆
@@ -500,7 +499,7 @@ class MemAgentValidator:
                 "details": {}
             }
     
-    async def validate_memory_importance(self) -> Dict[str, Any]:
+    async def validate_memory_importance(self) -> dict[str, Any]:
         # 验证记忆重要性计算
         
         test_cases = [
@@ -562,7 +561,7 @@ class MemAgentValidator:
                 "details": {}
             }
     
-    async def validate_memory_organization(self) -> Dict[str, Any]:
+    async def validate_memory_organization(self) -> dict[str, Any]:
         # 验证记忆组织功能
         
         # 创建不同类型的记忆
@@ -647,7 +646,7 @@ class MemAgentValidator:
                 "details": {}
             }
     
-    async def validate_performance_scalability(self) -> Dict[str, Any]:
+    async def validate_performance_scalability(self) -> dict[str, Any]:
         # 验证性能和可扩展性
         
         import time
@@ -726,7 +725,7 @@ class MemAgentValidator:
                 "details": {}
             }
     
-    def _generate_summary(self, test_results: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_summary(self, test_results: dict[str, Any]) -> dict[str, Any]:
         # 生成验证结果摘要
         
         total_tests = len(test_results)

@@ -1,35 +1,29 @@
-"""
-Integration tests for the parallel execution capability in the Workflow Engine.
+"""Integration tests for the parallel execution capability in the Workflow Engine.
 
 This module tests the integration between the WorkflowEngine and the
 ParallelExecutionManager to ensure proper parallel execution of workflow nodes.
 """
 
 import asyncio
-import logging
-import pytest
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
-from src.institutional_primitives.base import ExecutionContext, ExecutionTrace, InstitutionalPrimitive
+import pytest
+
+from src.institutional_primitives.base import ExecutionContext, InstitutionalPrimitive
 from src.institutional_primitives.registry import PrimitiveRegistry
 from src.institutional_primitives.workflow_engine import (
     WorkflowDefinition,
     WorkflowEdge,
     WorkflowEngine,
     WorkflowNode,
-    WorkflowResult
-)
-from src.institutional_primitives.parallel_execution import (
-    ParallelExecutionGroup,
-    ParallelExecutionManager
 )
 
 
 class DelayedPrimitive(InstitutionalPrimitive):
     """Test primitive with configurable delay for parallel execution testing."""
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         """Execute with a delay."""
         delay = self.config.get('delay', 0.1)
         should_fail = self.config.get('should_fail', False)
@@ -55,7 +49,7 @@ class DelayedPrimitive(InstitutionalPrimitive):
             "input_value": inputs.get('value', None)
         }
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -63,7 +57,7 @@ class DelayedPrimitive(InstitutionalPrimitive):
             }
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -76,7 +70,7 @@ class DelayedPrimitive(InstitutionalPrimitive):
         }
 
 
-@pytest.fixture
+@pytest.fixture()
 def primitive_registry():
     """Create test primitive registry."""
     registry = PrimitiveRegistry()
@@ -84,13 +78,13 @@ def primitive_registry():
     return registry
 
 
-@pytest.fixture
+@pytest.fixture()
 def workflow_engine(primitive_registry):
     """Create test workflow engine."""
     return WorkflowEngine(primitive_registry=primitive_registry)
 
 
-@pytest.fixture
+@pytest.fixture()
 def sequential_workflow():
     """Create a sequential workflow for testing."""
     return WorkflowDefinition(
@@ -113,7 +107,7 @@ def sequential_workflow():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def parallel_workflow():
     """Create a workflow with parallel execution."""
     return WorkflowDefinition(
@@ -141,7 +135,7 @@ def parallel_workflow():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def mixed_workflow():
     """Create a workflow with mixed sequential and parallel execution."""
     return WorkflowDefinition(
@@ -173,7 +167,7 @@ def mixed_workflow():
 class TestParallelExecution:
     """Test the parallel execution capability."""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_sequential_execution(self, workflow_engine, sequential_workflow):
         """Test sequential execution as baseline."""
         start_time = datetime.now().timestamp()
@@ -196,7 +190,7 @@ class TestParallelExecution:
         for i in range(1, len(steps)):
             assert steps[i-1].end_time <= steps[i].start_time
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_parallel_execution(self, workflow_engine, parallel_workflow):
         """Test parallel execution."""
         # Create a parallel group for the parallel nodes
@@ -241,7 +235,7 @@ class TestParallelExecution:
         
         assert overlaps > 0, "Expected parallel steps to have overlapping execution times"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_mixed_execution(self, workflow_engine, mixed_workflow):
         """Test mixed sequential and parallel execution."""
         # Create a parallel group for the parallel nodes
@@ -276,7 +270,7 @@ class TestParallelExecution:
         assert steps_by_id["parallel1"].end_time <= steps_by_id["seq2"].start_time
         assert steps_by_id["seq2"].end_time <= steps_by_id["end"].start_time
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_parallel_execution_with_failure(self, workflow_engine, parallel_workflow):
         """Test parallel execution with a failing node."""
         # Modify one node to fail
@@ -311,7 +305,7 @@ class TestParallelExecution:
         ]
         assert len(completed_parallel_nodes) == 3
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_parallel_execution_with_timeout(self, workflow_engine, parallel_workflow):
         """Test parallel execution with timeout."""
         # Make one node very slow
@@ -341,7 +335,7 @@ class TestParallelExecution:
         assert steps_by_id.get("parallel2").status == "completed"
         assert steps_by_id.get("parallel4").status == "completed"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_create_parallel_group(self, workflow_engine, parallel_workflow):
         """Test creating a parallel execution group."""
         parallel_nodes = ["parallel1", "parallel2", "parallel3", "parallel4"]
@@ -369,7 +363,7 @@ class TestParallelExecution:
         assert parallel_workflow.metadata["parallel_groups"][group_id]["timeout"] == 0.5
         assert set(parallel_workflow.metadata["parallel_groups"][group_id]["node_ids"]) == set(parallel_nodes)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_multiple_parallel_groups(self, workflow_engine):
         """Test workflow with multiple parallel groups."""
         # Create a workflow with two sets of parallel nodes

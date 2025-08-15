@@ -1,20 +1,17 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 11:30:00
+"""@Time    : 2025-08-04 11:30:00
 @Author  : DAIP-LIVE Team
 @File    : performance_monitor.py
 @Description:
     Performance Monitor for tracking synthesis system performance.
 """
 
-import logging
 import asyncio
-from typing import Any, Dict, List, Optional, Tuple
-from datetime import datetime, timedelta
+import logging
 import statistics
-import json
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +33,8 @@ class PerformanceDataPoint:
     timestamp: str
     metric_type: PerformanceMetric
     value: float
-    metadata: Dict[str, Any]
-    context: Dict[str, Any]
+    metadata: dict[str, Any]
+    context: dict[str, Any]
 
 
 @dataclass
@@ -48,20 +45,18 @@ class PerformanceAlert:
     severity: str
     message: str
     timestamp: str
-    suggested_actions: List[str]
+    suggested_actions: list[str]
 
 
 class PerformanceMonitor:
-    """
-    性能监控器 - Comprehensive performance monitoring for synthesis system.
+    """性能监控器 - Comprehensive performance monitoring for synthesis system.
     
     Tracks system performance metrics, detects anomalies, generates alerts,
     and provides performance insights for optimization.
     """
     
-    def __init__(self, config: Dict[str, Any] = None):
-        """
-        Initialize the Performance Monitor.
+    def __init__(self, config: dict[str, Any] = None):
+        """Initialize the Performance Monitor.
         
         Args:
             config: Configuration parameters
@@ -100,11 +95,10 @@ class PerformanceMonitor:
         self,
         metric_type: PerformanceMetric,
         value: float,
-        metadata: Dict[str, Any] = None,
-        context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
-        """
-        Record a performance data point.
+        metadata: dict[str, Any] = None,
+        context: dict[str, Any] = None
+    ) -> dict[str, Any]:
+        """Record a performance data point.
         
         Args:
             metric_type: Type of performance metric
@@ -154,7 +148,7 @@ class PerformanceMonitor:
             logger.error(f"Failed to record performance data: {e}")
             return {"success": False, "error": str(e)}
     
-    async def _check_alerts(self, data_point: PerformanceDataPoint) -> List[PerformanceAlert]:
+    async def _check_alerts(self, data_point: PerformanceDataPoint) -> list[PerformanceAlert]:
         """Check for performance alerts."""
         alerts = []
         
@@ -195,7 +189,7 @@ class PerformanceMonitor:
         
         return alerts
     
-    def _get_suggested_actions(self, metric_name: str, severity: str, value: float) -> List[str]:
+    def _get_suggested_actions(self, metric_name: str, severity: str, value: float) -> list[str]:
         """Get suggested actions for alerts."""
         actions = []
         
@@ -295,7 +289,7 @@ class PerformanceMonitor:
         n = len(values)
         sum_x = sum(x_values)
         sum_y = sum(values)
-        sum_xy = sum(x * y for x, y in zip(x_values, values))
+        sum_xy = sum(x * y for x, y in zip(x_values, values, strict=False))
         sum_x2 = sum(x * x for x in x_values)
         
         if n * sum_x2 - sum_x * sum_x != 0:
@@ -328,7 +322,7 @@ class PerformanceMonitor:
         if len(self.alerts) > 1000:
             self.alerts = self.alerts[-1000:]
     
-    def _initialize_baselines(self) -> Dict[str, Any]:
+    def _initialize_baselines(self) -> dict[str, Any]:
         """Initialize performance baselines."""
         return {
             "quality_score": {"target": 0.75, "minimum": 0.5},
@@ -339,7 +333,7 @@ class PerformanceMonitor:
             "error_rate": {"target": 0.05, "maximum": 0.1}
         }
     
-    async def get_performance_summary(self) -> Dict[str, Any]:
+    async def get_performance_summary(self) -> dict[str, Any]:
         """Get comprehensive performance summary."""
         try:
             # Calculate current metrics
@@ -376,7 +370,7 @@ class PerformanceMonitor:
             logger.error(f"Failed to generate performance summary: {e}")
             return {"error": str(e)}
     
-    def _calculate_current_metrics(self) -> Dict[str, Any]:
+    def _calculate_current_metrics(self) -> dict[str, Any]:
         """Calculate current performance metrics."""
         current_metrics = {}
         
@@ -407,7 +401,7 @@ class PerformanceMonitor:
         
         return current_metrics
     
-    def _get_trend_analysis(self) -> Dict[str, Any]:
+    def _get_trend_analysis(self) -> dict[str, Any]:
         """Get trend analysis for all metrics."""
         trend_analysis = {}
         
@@ -424,7 +418,7 @@ class PerformanceMonitor:
         
         return trend_analysis
     
-    def _get_alert_summary(self) -> Dict[str, Any]:
+    def _get_alert_summary(self) -> dict[str, Any]:
         """Get alert summary."""
         # Count alerts by severity
         severity_counts = {"critical": 0, "warning": 0, "info": 0}
@@ -446,7 +440,7 @@ class PerformanceMonitor:
             "most_recent_alert": recent_alerts[-1].timestamp if recent_alerts else None
         }
     
-    def _calculate_health_status(self, current_metrics: Dict[str, Any]) -> Dict[str, Any]:
+    def _calculate_health_status(self, current_metrics: dict[str, Any]) -> dict[str, Any]:
         """Calculate overall system health status."""
         health_scores = {}
         
@@ -494,9 +488,9 @@ class PerformanceMonitor:
     
     async def _generate_performance_insights(
         self,
-        current_metrics: Dict[str, Any],
-        trend_analysis: Dict[str, Any]
-    ) -> List[str]:
+        current_metrics: dict[str, Any],
+        trend_analysis: dict[str, Any]
+    ) -> list[str]:
         """Generate performance insights."""
         insights = []
         
@@ -529,7 +523,7 @@ class PerformanceMonitor:
         
         return insights[:5]  # Return top 5 insights
     
-    def get_performance_history(self, metric_type: PerformanceMetric = None, days: int = 7) -> List[Dict[str, Any]]:
+    def get_performance_history(self, metric_type: PerformanceMetric = None, days: int = 7) -> list[dict[str, Any]]:
         """Get performance history for a specific metric."""
         cutoff_date = datetime.now() - timedelta(days=days)
         
@@ -541,7 +535,7 @@ class PerformanceMonitor:
         
         return filtered_data
     
-    def get_alerts(self, severity: str = None, days: int = 7) -> List[Dict[str, Any]]:
+    def get_alerts(self, severity: str = None, days: int = 7) -> list[dict[str, Any]]:
         """Get alerts with optional filtering."""
         cutoff_date = datetime.now() - timedelta(days=days)
         
@@ -553,7 +547,7 @@ class PerformanceMonitor:
         
         return filtered_alerts
     
-    def get_performance_report(self) -> Dict[str, Any]:
+    def get_performance_report(self) -> dict[str, Any]:
         """Generate comprehensive performance report."""
         return {
             "report_timestamp": datetime.now().isoformat(),
@@ -563,7 +557,7 @@ class PerformanceMonitor:
             "recommendations": self._generate_recommendations()
         }
     
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """Generate performance improvement recommendations."""
         recommendations = []
         
@@ -599,7 +593,7 @@ class PerformanceMonitor:
         self.trends.clear()
         logger.info("Performance monitoring data reset")
     
-    def export_performance_data(self) -> Dict[str, Any]:
+    def export_performance_data(self) -> dict[str, Any]:
         """Export performance data for analysis."""
         return {
             "export_timestamp": datetime.now().isoformat(),
@@ -614,11 +608,11 @@ class PerformanceMonitor:
 class AnomalyDetector:
     """Simple anomaly detector for performance metrics."""
     
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         self.config = config or {}
         self.sensitivity = self.config.get("sensitivity", 2.0)  # Standard deviations
     
-    async def detect_anomalies(self, data_point: PerformanceDataPoint) -> List[Dict[str, Any]]:
+    async def detect_anomalies(self, data_point: PerformanceDataPoint) -> list[dict[str, Any]]:
         """Detect anomalies in performance data."""
         # This is a simplified anomaly detection
         # In practice, would use more sophisticated methods

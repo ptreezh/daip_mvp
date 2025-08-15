@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 16:15:00
+"""@Time    : 2025-08-04 16:15:00
 @Author  : DAIP-LIVE Team
 @File    : test_user_stories.py
 @Description:
@@ -8,38 +6,36 @@
     Tests complete user workflows and experiences.
 """
 
-import pytest
 import asyncio
-import json
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock
-from typing import Dict, List, Any
+
+import pytest
+
+from src.core_services.academic_research_scenario import (
+    AcademicResearchScenario,
+    AcademicStandard,
+    ResearchPaper,
+    ResearchType,
+)
 
 # Import the scenarios
 from src.core_services.expert_consultation_scenario import (
-    ExpertConsultationScenario,
-    ExpertConsultationRequest,
     ConsultationType,
-    PriorityLevel
-)
-from src.core_services.academic_research_scenario import (
-    AcademicResearchScenario,
-    ResearchPaper,
-    ResearchType,
-    AcademicStandard
+    ExpertConsultationRequest,
+    ExpertConsultationScenario,
+    PriorityLevel,
 )
 from src.core_services.industry_analysis_scenario import (
-    IndustryAnalysisScenario,
+    AnalysisDepth,
     AnalysisRequest,
+    IndustryAnalysisScenario,
     IndustryType,
-    AnalysisDepth
 )
 
 
 class TestUserStoryAcademicResearcher:
     """User story: Academic researcher writing a paper on AI ethics"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_complete_research_workflow(self):
         """Test complete academic research workflow"""
         academic_scenario = AcademicResearchScenario()
@@ -109,7 +105,7 @@ class TestUserStoryAcademicResearcher:
         
         ethics_result = await expert_scenario.handle_consultation(ethics_request)
         assert ethics_result['success'] is True
-        print(f"✅ Ethics consultation completed")
+        print("✅ Ethics consultation completed")
         
         # Step 5: Track paper progress and get assessment
         print("📊 Step 5: Tracking paper assessment...")
@@ -131,7 +127,7 @@ class TestUserStoryAcademicResearcher:
 class TestUserStoryStartupFounder:
     """User story: Startup founder seeking market analysis and funding advice"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_complete_startup_workflow(self):
         """Test complete startup founder workflow"""
         industry_scenario = IndustryAnalysisScenario()
@@ -175,7 +171,7 @@ class TestUserStoryStartupFounder:
         
         strategy_result = await expert_scenario.handle_consultation(strategy_request)
         assert strategy_result['success'] is True
-        print(f"✅ Strategy consultation completed")
+        print("✅ Strategy consultation completed")
         
         # Step 3: Technical architecture consultation
         print("🔧 Step 3: Consulting technical architecture experts...")
@@ -193,7 +189,7 @@ class TestUserStoryStartupFounder:
         
         tech_result = await expert_scenario.handle_consultation(tech_request)
         assert tech_result['success'] is True
-        print(f"✅ Technical consultation completed")
+        print("✅ Technical consultation completed")
         
         # Step 4: Funding strategy consultation
         print("💰 Step 4: Consulting funding experts...")
@@ -211,7 +207,7 @@ class TestUserStoryStartupFounder:
         
         funding_result = await expert_scenario.handle_consultation(funding_request)
         assert funding_result['success'] is True
-        print(f"✅ Funding consultation completed")
+        print("✅ Funding consultation completed")
         
         # Step 5: Quick market overview for follow-up
         print("🔍 Step 5: Getting updated market overview...")
@@ -234,7 +230,7 @@ class TestUserStoryStartupFounder:
 class TestUserStoryHealthcareAdministrator:
     """User story: Healthcare administrator implementing AI solutions"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_complete_healthcare_workflow(self):
         """Test complete healthcare administrator workflow"""
         industry_scenario = IndustryAnalysisScenario()
@@ -261,7 +257,7 @@ class TestUserStoryHealthcareAdministrator:
         
         healthcare_result = await industry_scenario.submit_analysis_request(healthcare_request)
         assert healthcare_result['success'] is True
-        print(f"✅ Healthcare analysis completed")
+        print("✅ Healthcare analysis completed")
         
         # Step 2: Literature review on AI in healthcare
         print("📚 Step 2: Reviewing academic literature on AI in healthcare...")
@@ -293,7 +289,7 @@ class TestUserStoryHealthcareAdministrator:
         
         implementation_result = await expert_scenario.handle_consultation(implementation_request)
         assert implementation_result['success'] is True
-        print(f"✅ Implementation consultation completed")
+        print("✅ Implementation consultation completed")
         
         # Step 4: Regulatory compliance consultation
         print("⚖️ Step 4: Consulting regulatory compliance experts...")
@@ -311,7 +307,7 @@ class TestUserStoryHealthcareAdministrator:
         
         regulatory_result = await expert_scenario.handle_consultation(regulatory_request)
         assert regulatory_result['success'] is True
-        print(f"✅ Regulatory consultation completed")
+        print("✅ Regulatory consultation completed")
         
         # Step 5: Change management consultation
         print("👥 Step 5: Consulting change management experts...")
@@ -329,7 +325,7 @@ class TestUserStoryHealthcareAdministrator:
         
         change_result = await expert_scenario.handle_consultation(change_request)
         assert change_result['success'] is True
-        print(f"✅ Change management consultation completed")
+        print("✅ Change management consultation completed")
         
         print("🎉 Complete healthcare administrator workflow successful!")
         
@@ -345,7 +341,7 @@ class TestUserStoryHealthcareAdministrator:
 class TestUserStoryCrossScenarioIntegration:
     """User story testing cross-scenario integration and complex workflows"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_mixed_scenario_workflow(self):
         """Test workflow using all three scenarios together"""
         expert_scenario = ExpertConsultationScenario()
@@ -372,7 +368,7 @@ class TestUserStoryCrossScenarioIntegration:
         
         industry_result = await industry_scenario.submit_analysis_request(smart_city_request)
         assert industry_result['success'] is True
-        print(f"✅ Smart city analysis completed")
+        print("✅ Smart city analysis completed")
         
         # Step 2: Academic research on smart city technologies
         print("🎓 Step 2: Academic research on smart city technologies...")
@@ -388,7 +384,7 @@ class TestUserStoryCrossScenarioIntegration:
         
         paper_result = await academic_scenario.submit_research_paper(research_paper)
         assert paper_result['success'] is True
-        print(f"✅ Research paper submitted")
+        print("✅ Research paper submitted")
         
         # Step 3: Technical consultation on smart city architecture
         print("🔧 Step 3: Technical architecture consultation...")
@@ -406,7 +402,7 @@ class TestUserStoryCrossScenarioIntegration:
         
         tech_result = await expert_scenario.handle_consultation(tech_request)
         assert tech_result['success'] is True
-        print(f"✅ Technical consultation completed")
+        print("✅ Technical consultation completed")
         
         # Step 4: Policy and governance consultation
         print="🏛️ Step 4: Policy and governance consultation..."
@@ -424,7 +420,7 @@ class TestUserStoryCrossScenarioIntegration:
         
         policy_result = await expert_scenario.handle_consultation(policy_request)
         assert policy_result['success'] is True
-        print(f"✅ Policy consultation completed")
+        print("✅ Policy consultation completed")
         
         # Step 5: Sustainability consultation
         print="🌱 Step 5: Sustainability consultation..."
@@ -442,7 +438,7 @@ class TestUserStoryCrossScenarioIntegration:
         
         sustainability_result = await expert_scenario.handle_consultation(sustainability_request)
         assert sustainability_result['success'] is True
-        print(f"✅ Sustainability consultation completed")
+        print("✅ Sustainability consultation completed")
         
         print("🎉 Complete cross-scenario workflow successful!")
         
@@ -458,7 +454,7 @@ class TestUserStoryCrossScenarioIntegration:
 class TestUserStoryPerformanceAndReliability:
     """Test performance and reliability of user workflows"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_concurrent_user_workflows(self):
         """Test multiple concurrent user workflows"""
         import time

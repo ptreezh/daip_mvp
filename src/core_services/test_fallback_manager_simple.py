@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-降级管理器简化测试
+"""降级管理器简化测试
 
 按照新规则创建的简化测试，文件长度<400行
 """
 
 import asyncio
-from datetime import datetime
 
-from consensus_models import (
-    ConsensusInput, ConsensusRequest, FailureContext
-)
 from algorithm_registry import AlgorithmRegistry
 from algorithm_selector import AlgorithmSelector
-from fallback_manager_core import FallbackManager, FallbackConfig, CircuitBreakerState
+from consensus_models import ConsensusInput, ConsensusRequest, FailureContext
+from fallback_manager_core import CircuitBreakerState, FallbackConfig, FallbackManager
 from fallback_manager_utils import FallbackManagerUtils
 from test_algorithm_registry import MockConsensusAlgorithm
 

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-加权投票共识算法适配器
+"""加权投票共识算法适配器
 
 适配现有的WeightedVotingConsensus算法到统一共识调度器接口。
 保持原有的认知多样性计算逻辑，支持专家权重、置信度权重和多样性权重。
@@ -19,35 +17,26 @@
 - 创新和创意评估
 """
 
-import asyncio
-import math
-from typing import Any, Dict, List, Optional, Set
 from datetime import datetime
+from typing import Any, Optional
 
-from consensus_algorithm_interface import (
-    ConsensusAlgorithm, ConsensusContext, AlgorithmCapabilities
-)
-from consensus_models import (
-    ConsensusInput, ConsensusResult, AlgorithmMetadata, 
-    ValidationResult, AlgorithmType
-)
+from advanced_consensus_algorithms import ConsensusInput as LegacyConsensusInput
+from advanced_consensus_algorithms import ConsensusResult as LegacyConsensusResult
 
 # 导入现有的WeightedVotingConsensus实现
-from advanced_consensus_algorithms import (
-    WeightedVotingConsensus, ConsensusInput as LegacyConsensusInput,
-    ConsensusResult as LegacyConsensusResult
-)
+from advanced_consensus_algorithms import WeightedVotingConsensus
+from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm, ConsensusContext
+from consensus_models import AlgorithmMetadata, AlgorithmType, ConsensusInput, ConsensusResult, ValidationResult
 
 
 class WeightedVotingAlgorithm(ConsensusAlgorithm):
-    """
-    加权投票共识算法适配器
+    """加权投票共识算法适配器
     
     包装现有的WeightedVotingConsensus实现，提供统一接口。
     保持原有的认知多样性计算和多维权重逻辑。
     """
     
-    def __init__(self, configuration: Optional[Dict[str, Any]] = None):
+    def __init__(self, configuration: Optional[dict[str, Any]] = None):
         super().__init__("weighted_voting", configuration)
         
         # 从配置中获取权重参数
@@ -63,10 +52,9 @@ class WeightedVotingAlgorithm(ConsensusAlgorithm):
         )
         
     async def calculate(self, 
-                       inputs: List[ConsensusInput], 
+                       inputs: list[ConsensusInput], 
                        context: ConsensusContext) -> ConsensusResult:
-        """
-        执行加权投票共识计算
+        """执行加权投票共识计算
         
         Args:
             inputs: 统一格式的共识输入列表
@@ -107,7 +95,7 @@ class WeightedVotingAlgorithm(ConsensusAlgorithm):
             context.set_metric("algorithm_error", str(e))
             raise RuntimeError(f"加权投票算法执行失败: {e}")
     
-    def _convert_inputs_to_legacy(self, inputs: List[ConsensusInput]) -> List[LegacyConsensusInput]:
+    def _convert_inputs_to_legacy(self, inputs: list[ConsensusInput]) -> list[LegacyConsensusInput]:
         """将统一格式输入转换为遗留格式"""
         legacy_inputs = []
         
@@ -132,7 +120,7 @@ class WeightedVotingAlgorithm(ConsensusAlgorithm):
         
         return legacy_inputs
     
-    def _build_legacy_context(self, context: ConsensusContext) -> Optional[Dict[str, Any]]:
+    def _build_legacy_context(self, context: ConsensusContext) -> Optional[dict[str, Any]]:
         """构建遗留算法的上下文信息"""
         legacy_context = {}
         
@@ -148,9 +136,8 @@ class WeightedVotingAlgorithm(ConsensusAlgorithm):
     
     def _convert_result_from_legacy(self, 
                                    legacy_result: LegacyConsensusResult,
-                                   original_inputs: List[ConsensusInput]) -> ConsensusResult:
+                                   original_inputs: list[ConsensusInput]) -> ConsensusResult:
         """将遗留格式结果转换为统一格式"""
-        
         # 构建推理轨迹
         reasoning_trace = {
             "algorithm": "weighted_voting",
@@ -229,7 +216,7 @@ class WeightedVotingAlgorithm(ConsensusAlgorithm):
             max_participants=None
         )
     
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> ValidationResult:
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> ValidationResult:
         """验证输入数据"""
         errors = []
         warnings = []
@@ -273,7 +260,7 @@ class WeightedVotingAlgorithm(ConsensusAlgorithm):
             }
         )
     
-    def validate_configuration(self, config: Dict[str, Any]) -> ValidationResult:
+    def validate_configuration(self, config: dict[str, Any]) -> ValidationResult:
         """验证配置参数"""
         errors = []
         warnings = []
@@ -316,7 +303,7 @@ class WeightedVotingAlgorithm(ConsensusAlgorithm):
         
         return base_time + diversity_factor + weight_factor
     
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> dict[str, Any]:
         """获取算法健康状态"""
         base_status = super().get_health_status()
         

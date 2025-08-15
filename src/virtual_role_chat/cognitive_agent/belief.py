@@ -1,5 +1,4 @@
-"""
-Implementation of the BeliefSystem class.
+"""Implementation of the BeliefSystem class.
 
 This module defines the BeliefSystem class, which encapsulates the
 belief structure of a cognitive agent, including values, principles,
@@ -7,50 +6,46 @@ and belief updating mechanisms.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 
 class Belief(BaseModel):
-    """
-    Representation of a single belief held by an agent.
+    """Representation of a single belief held by an agent.
     """
     id: str
     content: str
     confidence: float = Field(ge=0.0, le=1.0)
-    sources: List[str] = Field(default_factory=list)
-    related_beliefs: List[str] = Field(default_factory=list)
+    sources: list[str] = Field(default_factory=list)
+    related_beliefs: list[str] = Field(default_factory=list)
     last_updated: str  # ISO format timestamp
     update_count: int = 0
 
 
 class Value(BaseModel):
-    """
-    Representation of a value held by an agent.
+    """Representation of a value held by an agent.
     """
     id: str
     name: str
     description: str
     importance: float = Field(ge=0.0, le=1.0)
-    related_values: List[str] = Field(default_factory=list)
+    related_values: list[str] = Field(default_factory=list)
 
 
 class Principle(BaseModel):
-    """
-    Representation of a principle derived from values.
+    """Representation of a principle derived from values.
     """
     id: str
     name: str
     description: str
-    derived_from: List[str]  # Value IDs
+    derived_from: list[str]  # Value IDs
     strength: float = Field(ge=0.0, le=1.0)
-    application_domains: List[str] = Field(default_factory=list)
+    application_domains: list[str] = Field(default_factory=list)
 
 
 class BeliefSystem:
-    """
-    System that encapsulates the belief structure of a cognitive agent.
+    """System that encapsulates the belief structure of a cognitive agent.
     
     The BeliefSystem defines the agent's values, principles, and beliefs,
     as well as mechanisms for updating beliefs and resolving conflicts.
@@ -62,10 +57,9 @@ class BeliefSystem:
         self,
         structure_type: str,
         agent_id: str,
-        values: Dict[str, float] = None
+        values: dict[str, float] = None
     ):
-        """
-        Initialize a belief system.
+        """Initialize a belief system.
         
         Args:
             structure_type: Type of belief structure (e.g., 'hierarchical', 'networked')
@@ -84,9 +78,8 @@ class BeliefSystem:
         self.logger.info(f"Initialized {structure_type} belief system for agent {agent_id}")
         self.logger.debug(f"Loaded {len(self.values)} values and {len(self.principles)} principles")
     
-    def _initialize_values(self, value_importances: Dict[str, float]) -> Dict[str, Value]:
-        """
-        Initialize values based on provided importance levels.
+    def _initialize_values(self, value_importances: dict[str, float]) -> dict[str, Value]:
+        """Initialize values based on provided importance levels.
         
         Args:
             value_importances: Dictionary mapping value names to importance levels
@@ -126,9 +119,8 @@ class BeliefSystem:
         
         return values
     
-    def _add_value_relationships(self, values: Dict[str, Value]) -> None:
-        """
-        Add relationships between values.
+    def _add_value_relationships(self, values: dict[str, Value]) -> None:
+        """Add relationships between values.
         
         Args:
             values: Dictionary of values to update with relationships
@@ -157,9 +149,8 @@ class BeliefSystem:
                     if related_id in values
                 ]
     
-    def _initialize_principles(self) -> Dict[str, Principle]:
-        """
-        Initialize principles based on the agent's values.
+    def _initialize_principles(self) -> dict[str, Principle]:
+        """Initialize principles based on the agent's values.
         
         Returns:
             Dictionary mapping principle IDs to Principle objects
@@ -228,9 +219,8 @@ class BeliefSystem:
         
         return principles
     
-    async def filter(self, reasoning_result: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Filter reasoning results through the belief system.
+    async def filter(self, reasoning_result: dict[str, Any]) -> dict[str, Any]:
+        """Filter reasoning results through the belief system.
         
         This method ensures that conclusions align with the agent's values and principles,
         adjusting confidence levels and potentially modifying conclusions that conflict
@@ -275,9 +265,8 @@ class BeliefSystem:
         
         return filtered_result
     
-    def _check_value_alignment(self, conclusion: Dict[str, Any]) -> Dict[str, float]:
-        """
-        Check how well a conclusion aligns with the agent's values.
+    def _check_value_alignment(self, conclusion: dict[str, Any]) -> dict[str, float]:
+        """Check how well a conclusion aligns with the agent's values.
         
         Args:
             conclusion: Conclusion to check
@@ -291,9 +280,8 @@ class BeliefSystem:
         # For now, we'll just return a placeholder alignment
         return {value_id: 0.5 for value_id in self.values}
     
-    def _check_principle_alignment(self, conclusion: Dict[str, Any]) -> Dict[str, float]:
-        """
-        Check how well a conclusion aligns with the agent's principles.
+    def _check_principle_alignment(self, conclusion: dict[str, Any]) -> dict[str, float]:
+        """Check how well a conclusion aligns with the agent's principles.
         
         Args:
             conclusion: Conclusion to check
@@ -307,9 +295,8 @@ class BeliefSystem:
         # For now, we'll just return a placeholder alignment
         return {principle_id: 0.5 for principle_id in self.principles}
     
-    def _check_belief_consistency(self, conclusion: Dict[str, Any]) -> Dict[str, float]:
-        """
-        Check how consistent a conclusion is with existing beliefs.
+    def _check_belief_consistency(self, conclusion: dict[str, Any]) -> dict[str, float]:
+        """Check how consistent a conclusion is with existing beliefs.
         
         Args:
             conclusion: Conclusion to check
@@ -325,13 +312,12 @@ class BeliefSystem:
     
     def _adjust_conclusion(
         self,
-        conclusion: Dict[str, Any],
-        value_alignment: Dict[str, float],
-        principle_alignment: Dict[str, float],
-        belief_consistency: Dict[str, float]
-    ) -> Dict[str, Any]:
-        """
-        Adjust a conclusion based on alignments with values, principles, and beliefs.
+        conclusion: dict[str, Any],
+        value_alignment: dict[str, float],
+        principle_alignment: dict[str, float],
+        belief_consistency: dict[str, float]
+    ) -> dict[str, Any]:
+        """Adjust a conclusion based on alignments with values, principles, and beliefs.
         
         Args:
             conclusion: Conclusion to adjust
@@ -350,9 +336,8 @@ class BeliefSystem:
         adjusted["belief_filtered"] = True
         return adjusted
     
-    def update_belief(self, belief_content: str, confidence: float, sources: List[str]) -> str:
-        """
-        Update or create a belief based on new information.
+    def update_belief(self, belief_content: str, confidence: float, sources: list[str]) -> str:
+        """Update or create a belief based on new information.
         
         Args:
             belief_content: Content of the belief
@@ -377,7 +362,6 @@ class BeliefSystem:
             self.logger.debug(f"Updated existing belief {belief_id}")
         else:
             # Create new belief
-            from datetime import datetime
             self.beliefs[belief_id] = Belief(
                 id=belief_id,
                 content=belief_content,
@@ -392,8 +376,7 @@ class BeliefSystem:
         return belief_id
     
     def _get_timestamp(self) -> str:
-        """
-        Get current timestamp in ISO format.
+        """Get current timestamp in ISO format.
         
         Returns:
             Current timestamp string
@@ -401,9 +384,8 @@ class BeliefSystem:
         from datetime import datetime
         return datetime.now().isoformat()
     
-    def get_state(self) -> Dict[str, Any]:
-        """
-        Get the current state of the belief system.
+    def get_state(self) -> dict[str, Any]:
+        """Get the current state of the belief system.
         
         Returns:
             Dictionary containing the belief system's state
@@ -415,9 +397,8 @@ class BeliefSystem:
             "belief_count": len(self.beliefs)
         }
     
-    def update_state(self, state_updates: Dict[str, Any]) -> None:
-        """
-        Update the state of the belief system.
+    def update_state(self, state_updates: dict[str, Any]) -> None:
+        """Update the state of the belief system.
         
         Args:
             state_updates: Dictionary containing state updates

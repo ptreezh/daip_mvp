@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""
-Quick test for academic research scenario functionality
+"""Quick test for academic research scenario functionality
 """
 
 import asyncio
-import sys
 import os
+import sys
 from datetime import datetime
 
 # Add the project root to the Python path
@@ -14,11 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 async def test_academic_research_scenario():
     """Test academic research scenario with minimal setup"""
     try:
-        from src.core_services.academic_research_scenario import (
-            AcademicResearchScenario, 
-            ResearchPaper, 
-            ResearchType
-        )
+        from src.core_services.academic_research_scenario import AcademicResearchScenario, ResearchPaper, ResearchType
         
         print("Testing Academic Research Scenario...")
         

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多角色辩论系统
+"""多角色辩论系统
 
 基于设计文档实现的真实多角色辩论系统，支持：
 - 从真实角色库加载认知代理
@@ -10,13 +8,13 @@
 - 透明度监控和真实性验证
 """
 
-import logging
 import asyncio
+import logging
 import uuid
-from datetime import datetime
-from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +42,8 @@ class ArgumentType(Enum):
 class CognitiveProfile:
     """认知档案"""
     thinking_style: str
-    value_system: List[str]
-    expertise_areas: List[str]
+    value_system: list[str]
+    expertise_areas: list[str]
     reasoning_approach: str
     decision_making_style: str
     communication_style: str
@@ -60,11 +58,11 @@ class DebateArgument:
     content: str
     argument_type: ArgumentType
     confidence_score: float
-    reasoning_chain: List[str]
-    evidence_sources: List[str]
+    reasoning_chain: list[str]
+    evidence_sources: list[str]
     timestamp: datetime
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         return {
             "argument_id": self.argument_id,
@@ -84,13 +82,13 @@ class DebateSession:
     """辩论会话"""
     debate_id: str
     topic: str
-    participating_roles: List[str]
-    cognitive_profiles: Dict[str, CognitiveProfile]
+    participating_roles: list[str]
+    cognitive_profiles: dict[str, CognitiveProfile]
     phase: DebatePhase
-    arguments: List[DebateArgument]
-    consensus_points: List[str]
-    conflicts: List[Dict[str, Any]]
-    metrics: Dict[str, Any]
+    arguments: list[DebateArgument]
+    consensus_points: list[str]
+    conflicts: list[dict[str, Any]]
+    metrics: dict[str, Any]
     start_time: datetime
     end_time: Optional[datetime] = None
 
@@ -99,8 +97,7 @@ class MultiRoleDebateSystem:
     """多角色辩论系统"""
     
     def __init__(self, llm_integrator, role_manager):
-        """
-        初始化多角色辩论系统
+        """初始化多角色辩论系统
         
         Args:
             llm_integrator: LLM集成器，用于真实LLM调用
@@ -110,20 +107,19 @@ class MultiRoleDebateSystem:
         self.role_manager = role_manager
         
         # 辩论会话管理
-        self.active_debates: Dict[str, DebateSession] = {}
-        self.debate_history: List[Dict[str, Any]] = []
+        self.active_debates: dict[str, DebateSession] = {}
+        self.debate_history: list[dict[str, Any]] = []
         
         logger.info("MultiRoleDebateSystem initialized")
     
     async def start_debate(
         self,
         debate_topic: str,
-        participating_roles: List[str],
+        participating_roles: list[str],
         debate_format: str = "structured",
         time_limit_minutes: int = 30
-    ) -> Dict[str, Any]:
-        """
-        启动多角色辩论
+    ) -> dict[str, Any]:
+        """启动多角色辩论
         
         Args:
             debate_topic: 辩论主题
@@ -219,10 +215,9 @@ class MultiRoleDebateSystem:
     async def _analyze_cognitive_profile(
         self, 
         role_id: str, 
-        role_data: Dict[str, Any]
+        role_data: dict[str, Any]
     ) -> CognitiveProfile:
-        """
-        分析角色认知档案 - 简化版本，避免LLM解析问题
+        """分析角色认知档案 - 简化版本，避免LLM解析问题
         
         Args:
             role_id: 角色ID
@@ -266,10 +261,9 @@ class MultiRoleDebateSystem:
     
     def _calculate_cognitive_diversity(
         self, 
-        cognitive_profiles: Dict[str, CognitiveProfile]
+        cognitive_profiles: dict[str, CognitiveProfile]
     ) -> float:
-        """
-        计算认知多样性分数
+        """计算认知多样性分数
         
         Args:
             cognitive_profiles: 认知档案字典
@@ -308,9 +302,8 @@ class MultiRoleDebateSystem:
         debate_id: str,
         round_topic: str,
         max_arguments_per_role: int = 2
-    ) -> Dict[str, Any]:
-        """
-        进行一轮辩论
+    ) -> dict[str, Any]:
+        """进行一轮辩论
         
         Args:
             debate_id: 辩论ID
@@ -373,8 +366,7 @@ class MultiRoleDebateSystem:
         role_id: str,
         topic: str
     ) -> Optional[DebateArgument]:
-        """
-        为特定角色生成论证
+        """为特定角色生成论证
         
         Args:
             debate_session: 辩论会话
@@ -487,7 +479,7 @@ class MultiRoleDebateSystem:
         
         return None
     
-    def _format_existing_arguments(self, arguments: List[DebateArgument]) -> str:
+    def _format_existing_arguments(self, arguments: list[DebateArgument]) -> str:
         """格式化已有论证"""
         if not arguments:
             return "暂无已有论证"
@@ -498,7 +490,7 @@ class MultiRoleDebateSystem:
         
         return "\n".join(formatted)
     
-    def _analyze_argument_conflicts(self, arguments: List[DebateArgument]) -> List[Dict[str, Any]]:
+    def _analyze_argument_conflicts(self, arguments: list[DebateArgument]) -> list[dict[str, Any]]:
         """分析论证冲突"""
         conflicts = []
         
@@ -516,7 +508,7 @@ class MultiRoleDebateSystem:
         
         return conflicts
     
-    def _identify_consensus_points(self, arguments: List[DebateArgument]) -> List[str]:
+    def _identify_consensus_points(self, arguments: list[DebateArgument]) -> list[str]:
         """识别共识点"""
         consensus_points = []
         
@@ -528,7 +520,7 @@ class MultiRoleDebateSystem:
         
         return consensus_points
     
-    def _measure_displayed_diversity(self, arguments: List[DebateArgument]) -> float:
+    def _measure_displayed_diversity(self, arguments: list[DebateArgument]) -> float:
         """测量显示的认知多样性"""
         if not arguments:
             return 0.0
@@ -543,9 +535,8 @@ class MultiRoleDebateSystem:
         
         return (type_diversity + role_diversity) / 2.0
     
-    async def conclude_debate(self, debate_id: str) -> Dict[str, Any]:
-        """
-        结束辩论并生成总结
+    async def conclude_debate(self, debate_id: str) -> dict[str, Any]:
+        """结束辩论并生成总结
         
         Args:
             debate_id: 辩论ID
@@ -582,7 +573,7 @@ class MultiRoleDebateSystem:
         
         return summary
     
-    def get_debate_status(self, debate_id: str) -> Dict[str, Any]:
+    def get_debate_status(self, debate_id: str) -> dict[str, Any]:
         """获取辩论状态"""
         if debate_id not in self.active_debates:
             return {"error": "Debate not found"}
@@ -602,7 +593,7 @@ class MultiRoleDebateSystem:
             "duration_minutes": (datetime.now() - debate_session.start_time).total_seconds() / 60
         }
     
-    def list_active_debates(self) -> List[Dict[str, Any]]:
+    def list_active_debates(self) -> list[dict[str, Any]]:
         """列出活跃的辩论"""
         return [
             {

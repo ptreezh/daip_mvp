@@ -1,21 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-降级管理器工具模块
+"""降级管理器工具模块
 
 包含FallbackManager的工具方法和统计功能。
 文件长度限制: <400行
 """
 
 import logging
-from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable
 from collections import defaultdict
+from collections.abc import Callable
+from datetime import datetime
+from typing import Any, Optional
 
-from fallback_manager_core import (
-    FallbackManager, FallbackStrategy, CircuitBreakerState
-)
-
+from fallback_manager_core import CircuitBreakerState, FallbackManager, FallbackStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +25,7 @@ class FallbackManagerUtils:
     def update_fallback_strategy(self,
                                 strategy: FallbackStrategy,
                                 config: Optional[Any] = None) -> bool:
-        """
-        更新降级策略
+        """更新降级策略
         
         Args:
             strategy: 新的降级策略
@@ -61,9 +56,8 @@ class FallbackManagerUtils:
         if listener in self.fallback_manager.event_listeners:
             self.fallback_manager.event_listeners.remove(listener)
             
-    def get_fallback_stats(self) -> Dict[str, Any]:
-        """
-        获取降级统计信息
+    def get_fallback_stats(self) -> dict[str, Any]:
+        """获取降级统计信息
         
         Returns:
             统计信息字典
@@ -112,9 +106,8 @@ class FallbackManagerUtils:
             }
         }
         
-    def get_algorithm_reliability(self, algorithm_id: str) -> Dict[str, Any]:
-        """
-        获取算法可靠性信息
+    def get_algorithm_reliability(self, algorithm_id: str) -> dict[str, Any]:
+        """获取算法可靠性信息
         
         Args:
             algorithm_id: 算法ID
@@ -168,8 +161,7 @@ class FallbackManagerUtils:
         }
         
     def reset_circuit_breaker(self, algorithm_id: str) -> bool:
-        """
-        重置算法的熔断器
+        """重置算法的熔断器
         
         Args:
             algorithm_id: 算法ID
@@ -198,9 +190,8 @@ class FallbackManagerUtils:
         self.fallback_manager.fallback_events.clear()
         logger.info("Fallback event history cleared")
         
-    def export_events(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
-        """
-        导出降级事件
+    def export_events(self, limit: Optional[int] = None) -> list[dict[str, Any]]:
+        """导出降级事件
         
         Args:
             limit: 导出数量限制
@@ -234,9 +225,8 @@ class FallbackManagerUtils:
             
         return exported_events
         
-    def analyze_failure_patterns(self) -> Dict[str, Any]:
-        """
-        分析失败模式
+    def analyze_failure_patterns(self) -> dict[str, Any]:
+        """分析失败模式
         
         Returns:
             失败模式分析结果

@@ -1,19 +1,24 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Transparency Monitor Tests
+"""Personal Intelligence Hub - Transparency Monitor Tests
 
 测试透明度监控组件功能
 """
 
-import pytest
-from unittest.mock import Mock, patch
 from datetime import datetime
+from unittest.mock import patch
+
+import pytest
 
 from personal_intelligence_hub.components.transparency_monitor import TransparencyMonitor
 from personal_intelligence_hub.models.transparency_models import (
-    SystemStatus, AgentStatusInfo, LLMCall, AgentStatus, 
-    TokenUsage, MemoryOperation, MemoryOperationType, MemoryType
+    AgentStatus,
+    AgentStatusInfo,
+    LLMCall,
+    MemoryOperation,
+    MemoryOperationType,
+    MemoryType,
+    SystemStatus,
+    TokenUsage,
 )
 
 

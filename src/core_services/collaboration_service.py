@@ -2,9 +2,7 @@ import logging
 import time
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from src.models import Task, TaskBase, WikiEntryRequest
 
@@ -12,8 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class CollaborationService:
-    """
-    Service layer for handling collaboration features like Wiki and Tasks.
+    """Service layer for handling collaboration features like Wiki and Tasks.
     """
 
     def __init__(self, app_state: Any): # Use Any to avoid circular import type hint
@@ -42,7 +39,7 @@ class CollaborationService:
 
     def list_tasks(
         self, stage: Optional[str], assigned_to: Optional[str], status: Optional[str]
-    ) -> List[Task]:
+    ) -> list[Task]:
         """List and filter all collaborative tasks."""
         tasks = list(self.app_state.tasks_db.values())
         if stage:
@@ -76,10 +73,10 @@ class CollaborationService:
         logger.info(f"Updated task {task_id}: {update_data}")
         return task
 
-    def get_collaboration_users(self) -> List[Dict[str, Any]]:
+    def get_collaboration_users(self) -> list[dict[str, Any]]:
         """Get the list of collaboration users (mock data)."""
         return self.app_state.collaboration_users
 
-    def get_collaboration_projects(self) -> List[Dict[str, Any]]:
+    def get_collaboration_projects(self) -> list[dict[str, Any]]:
         """Get the list of collaboration projects (mock data)."""
         return self.app_state.collaboration_projects

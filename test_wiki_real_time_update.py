@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证Wiki实时更新机制
+"""验证Wiki实时更新机制
 """
 
-import sys
-import os
 import asyncio
+import sys
+
 sys.path.append('src')
 
 def test_wiki_service():
@@ -28,7 +26,7 @@ def test_wiki_service():
         assert hasattr(wiki_service, 'get_entry'), "缺少get_entry方法"
         
         print(f"   Wiki目录: {wiki_service._wiki_directory}")
-        print(f"   向量数据库: 已初始化")
+        print("   向量数据库: 已初始化")
         print(f"   集合名称: {wiki_service.chroma_collection.name}")
         
         print("✅ WikiService验证通过")
@@ -271,7 +269,7 @@ def test_change_tracking():
         assert "frequent_contributors" in patterns, "变更模式分析缺少frequent_contributors"
         assert "change_types" in patterns, "变更模式分析缺少change_types"
         
-        print(f"   变更模式分析: 完成")
+        print("   变更模式分析: 完成")
         print(f"   活跃贡献者: {len(patterns['frequent_contributors'])}")
         print(f"   变更类型: {len(patterns['change_types'])}")
         

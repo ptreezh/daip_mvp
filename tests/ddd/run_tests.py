@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 12:30:00
+"""@Time    : 2025-08-06 12:30:00
 @Author  : DAIP-LIVE Team
 @File    : run_tests.py
 @Description:
@@ -8,11 +6,12 @@
     Provides quick test running with basic reporting.
 """
 
-import sys
 import os
 import subprocess
+import sys
 import time
 from pathlib import Path
+
 
 def run_tests():
     """Run the DDD test suite"""

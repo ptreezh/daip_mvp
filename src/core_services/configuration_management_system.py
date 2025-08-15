@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:15:00
+"""@Time    : 2025-08-06 10:15:00
 @Author  : DAIP-LIVE Team
 @File    : configuration_management_system.py
 @Description:
@@ -9,17 +7,17 @@
 """
 
 import json
-import yaml
-import os
 import logging
+import os
 import threading
-from typing import Dict, List, Any, Optional, Union, TypeVar, Generic
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-import jsonschema
-from jsonschema import validate, ValidationError
+from typing import Any, Optional, TypeVar, Union
+
+import yaml
+from jsonschema import ValidationError, validate
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -65,7 +63,7 @@ class ConfigValue:
     source: str
     is_sensitive: bool = False
     is_required: bool = False
-    validation_rules: Optional[Dict[str, Any]] = None
+    validation_rules: Optional[dict[str, Any]] = None
     description: str = ""
     last_modified: datetime = field(default_factory=datetime.now)
 
@@ -75,7 +73,7 @@ class ConfigSchema:
     """Configuration schema definition."""
     name: str
     version: str
-    schema: Dict[str, Any]
+    schema: dict[str, Any]
     description: str = ""
     environment: Optional[Environment] = None
 
@@ -85,10 +83,10 @@ class ConfigurationManager:
     
     def __init__(self, environment: Environment = Environment.DEVELOPMENT):
         self.environment = environment
-        self.config_values: Dict[str, ConfigValue] = {}
-        self.config_schemas: Dict[str, ConfigSchema] = {}
-        self.config_sources: List[ConfigSource] = []
-        self.watchers: Dict[str, List[callable]] = {}
+        self.config_values: dict[str, ConfigValue] = {}
+        self.config_schemas: dict[str, ConfigSchema] = {}
+        self.config_sources: list[ConfigSource] = []
+        self.watchers: dict[str, list[callable]] = {}
         self.lock = threading.Lock()
         self.config_dir = Path("config")
         self.cache_dir = Path("cache/config")
@@ -250,7 +248,7 @@ class ConfigurationManager:
             return False
         
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 if file_path.suffix.lower() in ['.yaml', '.yml']:
                     config_data = yaml.safe_load(f)
                 else:
@@ -314,10 +312,11 @@ class ConfigurationManager:
         
         return loaded_count > 0
     
-    def load_config_from_remote(self, url: str, headers: Optional[Dict[str, str]] = None):
+    def load_config_from_remote(self, url: str, headers: Optional[dict[str, str]] = None):
         """Load configuration from remote source."""
-        import aiohttp
         import asyncio
+
+        import aiohttp
         
         async def _load_remote():
             try:
@@ -346,7 +345,7 @@ class ConfigurationManager:
         
         return asyncio.run(_load_remote())
     
-    def _merge_config(self, config_data: Dict[str, Any], source: str):
+    def _merge_config(self, config_data: dict[str, Any], source: str):
         """Merge configuration data with existing configuration."""
         for key, value in config_data.items():
             if isinstance(value, dict):
@@ -401,7 +400,7 @@ class ConfigurationManager:
         
         return config_value.value
     
-    def get_config_section(self, prefix: str) -> Dict[str, Any]:
+    def get_config_section(self, prefix: str) -> dict[str, Any]:
         """Get configuration section with given prefix."""
         section = {}
         
@@ -425,7 +424,7 @@ class ConfigurationManager:
         # Notify watchers
         self._notify_watchers(key, value)
     
-    def validate_config(self, schema_name: str = None) -> Dict[str, Any]:
+    def validate_config(self, schema_name: str = None) -> dict[str, Any]:
         """Validate configuration against schema."""
         validation_results = {
             "valid": True,
@@ -503,7 +502,7 @@ class ConfigurationManager:
         
         logger.info(f"Configuration saved to {file_path}")
     
-    def get_config_sources(self) -> List[Dict[str, Any]]:
+    def get_config_sources(self) -> list[dict[str, Any]]:
         """Get configuration sources information."""
         return [
             {
@@ -516,7 +515,7 @@ class ConfigurationManager:
             for source in self.config_sources
         ]
     
-    def get_config_stats(self) -> Dict[str, Any]:
+    def get_config_stats(self) -> dict[str, Any]:
         """Get configuration statistics."""
         total_configs = len(self.config_values)
         source_counts = {}
@@ -608,5 +607,5 @@ if __name__ == "__main__":
     print(f"\nConfiguration Statistics: {stats}")
     
     # Export configuration
-    print(f"\nConfiguration Export (YAML):")
+    print("\nConfiguration Export (YAML):")
     print(config.export_config('yaml'))

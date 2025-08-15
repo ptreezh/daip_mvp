@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 22:00:00
+"""@Time    : 2025-08-03 22:00:00
 @Author  : DAIP-LIVE Team
 @File    : service_integration_manager.py
 @Description:
@@ -14,14 +12,13 @@
     4. 状态监控 - 实时监控集成状态
 """
 
-import asyncio
 import logging
 import os
 import sys
-from pathlib import Path
-from typing import Any, Dict, Optional, List
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional
 
 # 确保项目根目录在路径中
 project_root = Path(__file__).parents[2]
@@ -50,8 +47,7 @@ class IntegrationConfig:
     validate_before_integration: bool = True
 
 class ServiceIntegrationManager:
-    """
-    新服务集成管理器
+    """新服务集成管理器
     
     负责安全地将新开发的服务集成到现有AppState中，
     确保向后兼容性和系统稳定性。
@@ -60,7 +56,7 @@ class ServiceIntegrationManager:
     def __init__(self, app_state: Any, config: IntegrationConfig = None):
         self.app_state = app_state
         self.config = config or IntegrationConfig()
-        self.integration_status: Dict[str, ServiceIntegrationStatus] = {}
+        self.integration_status: dict[str, ServiceIntegrationStatus] = {}
         self.base_dir = getattr(app_state, 'base_dir', os.getcwd())
         
         # 初始化集成状态
@@ -85,9 +81,8 @@ class ServiceIntegrationManager:
                 status="not_started"
             )
     
-    async def safe_integrate_all_services(self) -> Dict[str, Any]:
-        """
-        安全集成所有新服务
+    async def safe_integrate_all_services(self) -> dict[str, Any]:
+        """安全集成所有新服务
         
         Returns:
             集成结果汇总
@@ -143,7 +138,7 @@ class ServiceIntegrationManager:
         logger.info(f"集成完成: {integration_results['successful_integrations']}/{integration_results['total_services']} 成功")
         return integration_results
     
-    async def _integrate_prompt_building_service(self) -> Dict[str, Any]:
+    async def _integrate_prompt_building_service(self) -> dict[str, Any]:
         """集成提示词构建服务"""
         service_name = "prompt_building_service"
         status = self.integration_status[service_name]
@@ -209,7 +204,7 @@ class ServiceIntegrationManager:
             logger.error(f"集成提示词构建服务失败: {e}")
             return {"success": False, "error": str(e), "integrated": False}
     
-    async def _integrate_autonomous_role_creation(self) -> Dict[str, Any]:
+    async def _integrate_autonomous_role_creation(self) -> dict[str, Any]:
         """集成自主角色创建系统"""
         service_name = "autonomous_role_creation_system"
         status = self.integration_status[service_name]
@@ -271,7 +266,7 @@ class ServiceIntegrationManager:
             logger.error(f"集成自主角色创建系统失败: {e}")
             return {"success": False, "error": str(e), "integrated": False}
     
-    async def _integrate_enhanced_memory_manager(self) -> Dict[str, Any]:
+    async def _integrate_enhanced_memory_manager(self) -> dict[str, Any]:
         """集成增强记忆管理器"""
         service_name = "enhanced_memory_manager"
         status = self.integration_status[service_name]
@@ -320,7 +315,7 @@ class ServiceIntegrationManager:
             logger.error(f"集成增强记忆管理器失败: {e}")
             return {"success": False, "error": str(e), "integrated": False}
     
-    async def _integrate_interactive_experience_optimizer(self) -> Dict[str, Any]:
+    async def _integrate_interactive_experience_optimizer(self) -> dict[str, Any]:
         """集成交互体验优化器"""
         service_name = "interactive_experience_optimizer"
         status = self.integration_status[service_name]
@@ -369,11 +364,12 @@ class ServiceIntegrationManager:
             logger.error(f"集成交互体验优化器失败: {e}")
             return {"success": False, "error": str(e), "integrated": False}
     
-    async def _validate_prompt_building_service(self) -> Dict[str, Any]:
+    async def _validate_prompt_building_service(self) -> dict[str, Any]:
         """验证提示词构建服务"""
         try:
-            from src.core_services.prompt_building_service import create_prompt_building_service
             import tempfile
+
+            from src.core_services.prompt_building_service import create_prompt_building_service
             
             # 创建临时实例进行验证
             temp_dir = tempfile.mkdtemp()
@@ -388,11 +384,12 @@ class ServiceIntegrationManager:
         except Exception as e:
             return {"valid": False, "error": str(e)}
     
-    async def _validate_autonomous_role_creation(self) -> Dict[str, Any]:
+    async def _validate_autonomous_role_creation(self) -> dict[str, Any]:
         """验证自主角色创建系统"""
         try:
-            from src.core_services.autonomous_role_creation_system import create_autonomous_role_creation_system
             import tempfile
+
+            from src.core_services.autonomous_role_creation_system import create_autonomous_role_creation_system
             
             # 创建临时实例进行验证
             temp_dir = tempfile.mkdtemp()
@@ -407,7 +404,7 @@ class ServiceIntegrationManager:
         except Exception as e:
             return {"valid": False, "error": str(e)}
     
-    def get_integration_status(self) -> Dict[str, Any]:
+    def get_integration_status(self) -> dict[str, Any]:
         """获取集成状态汇总"""
         return {
             "services": {
@@ -425,7 +422,7 @@ class ServiceIntegrationManager:
             ) / len(self.integration_status) if self.integration_status else 0.0
         }
     
-    async def health_check_integrated_services(self) -> Dict[str, Any]:
+    async def health_check_integrated_services(self) -> dict[str, Any]:
         """健康检查已集成的服务"""
         health_results = {}
         
@@ -460,7 +457,7 @@ def create_service_integration_manager(app_state: Any, config: IntegrationConfig
     return ServiceIntegrationManager(app_state, config)
 
 # 快速集成函数
-async def quick_integrate_new_services(app_state: Any) -> Dict[str, Any]:
+async def quick_integrate_new_services(app_state: Any) -> dict[str, Any]:
     """快速集成新服务的便捷函数"""
     manager = create_service_integration_manager(app_state)
     return await manager.safe_integrate_all_services()

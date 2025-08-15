@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-DAIP-LIVE 修复版Lona应用
+"""DAIP-LIVE 修复版Lona应用
 简化依赖，确保可运行
 """
 
-import sys
 import os
+import sys
 import threading
-import webbrowser
 import time
+import webbrowser
 
 # 添加项目路径
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -28,7 +26,7 @@ def create_fixed_lona_app():
     """创建修复版Lona应用"""
     try:
         from lona import LonaApp, View
-        from lona.html import HTML, Div, H1, H2, P, Button, TextInput, Pre
+        from lona.html import H1, H2, HTML, Button, Div, P, Pre, TextInput
         
         app = LonaApp(__file__)
         
@@ -384,16 +382,16 @@ def start_lona_server(port=8082):
         return False
     
     try:
-        print(f"🚀 DAIP-LIVE Lona演示服务器启动中...")
+        print("🚀 DAIP-LIVE Lona演示服务器启动中...")
         print(f"📍 访问地址: http://localhost:{port}")
-        print(f"🎭 Lona框架驱动，纯Python前后端")
-        print(f"=" * 60)
-        print(f"✨ Lona版特性:")
-        print(f"  • 🐍 纯Python Web框架")
-        print(f"  • 🔄 实时状态管理")
-        print(f"  • 💬 交互式组件")
-        print(f"  • 🛠️ 简化开发流程")
-        print(f"=" * 60)
+        print("🎭 Lona框架驱动，纯Python前后端")
+        print("=" * 60)
+        print("✨ Lona版特性:")
+        print("  • 🐍 纯Python Web框架")
+        print("  • 🔄 实时状态管理")
+        print("  • 💬 交互式组件")
+        print("  • 🛠️ 简化开发流程")
+        print("=" * 60)
         
         # 自动打开浏览器
         threading.Timer(1.5, lambda: webbrowser.open(f'http://localhost:{port}')).start()

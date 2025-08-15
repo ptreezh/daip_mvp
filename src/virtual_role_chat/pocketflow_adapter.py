@@ -1,14 +1,13 @@
-"""
-PocketFlow adapter for the Virtual Role Chat System.
+"""PocketFlow adapter for the Virtual Role Chat System.
 
 This module provides integration with PocketFlow for workflow orchestration.
 It will be fully implemented in a later task.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
-from .workflow import ConversationWorkflow, WorkflowExecution, WorkflowEvent
+from .workflow import ConversationWorkflow
 
 # Placeholder for PocketFlow integration
 workflow_engine = None
@@ -24,7 +23,7 @@ class WorkflowEngineImpl:
         """Create a new workflow definition."""
         return f"workflow_{workflow.id}"
     
-    def start_workflow(self, workflow_id: str, session_id: str, context: Optional[Dict[str, Any]] = None) -> str:
+    def start_workflow(self, workflow_id: str, session_id: str, context: Optional[dict[str, Any]] = None) -> str:
         """Start a workflow execution."""
         return f"execution_{workflow_id}_{session_id}"
 
@@ -35,7 +34,7 @@ class PocketFlowAdapter:
     def __init__(self):
         logging.warning("This is a placeholder implementation. PocketFlow integration will be implemented in a later task.")
     
-    def adapt_role_manager(self, role_manager: Any) -> Dict[str, Any]:
+    def adapt_role_manager(self, role_manager: Any) -> dict[str, Any]:
         """Adapt RoleManager for workflow use."""
         return {"role_manager": role_manager}
     

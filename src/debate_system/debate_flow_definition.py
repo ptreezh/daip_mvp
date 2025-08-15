@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多轮辩论系统流程定义
+"""多轮辩论系统流程定义
 
 定义辩论的各个阶段、流程控制和状态管理。
 支持灵活的辩论格式和自定义规则。
 """
 
-from enum import Enum
-from typing import Dict, List, Optional, Any, Set
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
 import uuid
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
 
 
 class DebatePhase(Enum):
@@ -83,12 +81,12 @@ class DebateParticipant:
     name: str
     role: ParticipantRole
     side: Optional[str] = None
-    expertise_areas: List[str] = field(default_factory=list)
+    expertise_areas: list[str] = field(default_factory=list)
     credibility_score: float = 0.5
-    participation_history: List[str] = field(default_factory=list)
+    participation_history: list[str] = field(default_factory=list)
     is_active: bool = True
     joined_at: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -101,13 +99,13 @@ class DebateContribution:
     content: str = ""
     contribution_type: str = "statement"
     timestamp: datetime = field(default_factory=datetime.now)
-    references: List[str] = field(default_factory=list)
-    evidence: List[Dict[str, Any]] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    references: list[str] = field(default_factory=list)
+    evidence: list[dict[str, Any]] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     quality_score: Optional[float] = None
     relevance_score: Optional[float] = None
     impact_score: Optional[float] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -117,13 +115,13 @@ class DebateRound:
     current_phase: DebatePhase = DebatePhase.PREPARATION
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
-    contributions: List[DebateContribution] = field(default_factory=list)
-    phase_history: List[Dict[str, Any]] = field(default_factory=list)
-    consensus_attempts: List[Dict[str, Any]] = field(default_factory=list)
+    contributions: list[DebateContribution] = field(default_factory=list)
+    phase_history: list[dict[str, Any]] = field(default_factory=list)
+    consensus_attempts: list[dict[str, Any]] = field(default_factory=list)
     round_summary: Optional[str] = None
-    key_points: List[str] = field(default_factory=list)
-    unresolved_issues: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    key_points: list[str] = field(default_factory=list)
+    unresolved_issues: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -135,14 +133,14 @@ class DebateSession:
     description: str = ""
     rules: DebateRules = field(default_factory=DebateRules)
     status: DebateStatus = DebateStatus.CREATED
-    participants: List[DebateParticipant] = field(default_factory=list)
-    rounds: List[DebateRound] = field(default_factory=list)
+    participants: list[DebateParticipant] = field(default_factory=list)
+    rounds: list[DebateRound] = field(default_factory=list)
     current_round: int = 0
     created_at: datetime = field(default_factory=datetime.now)
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     moderator_id: Optional[str] = None
-    final_consensus: Optional[Dict[str, Any]] = None
-    debate_metrics: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    final_consensus: Optional[dict[str, Any]] = None
+    debate_metrics: dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)

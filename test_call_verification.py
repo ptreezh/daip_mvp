@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证LLM调用验证机制
+"""验证LLM调用验证机制
 """
 
-import sys
-import os
 import asyncio
+import sys
+
 sys.path.append('src')
 
 def test_call_verification():
@@ -37,9 +35,10 @@ def test_call_verification():
 def test_signature_generation():
     """测试签名生成"""
     try:
+        from datetime import datetime
+
         from src.real_demo_system.call_verification import CallVerificationSystem
         from src.real_demo_system.real_llm_integrator import LLMCallRecord
-        from datetime import datetime
         
         verifier = CallVerificationSystem()
         
@@ -73,9 +72,10 @@ def test_signature_generation():
 def test_call_verification_process():
     """测试调用验证流程"""
     try:
+        from datetime import datetime
+
         from src.real_demo_system.call_verification import CallVerificationSystem
         from src.real_demo_system.real_llm_integrator import LLMCallRecord
-        from datetime import datetime
         
         verifier = CallVerificationSystem()
         
@@ -142,7 +142,7 @@ def test_integrity_check():
 async def test_llm_integration_verification():
     """测试LLM集成服务的验证功能"""
     try:
-        from src.real_demo_system.llm_integration_service import LLMIntegrationService, LLMBackend
+        from src.real_demo_system.llm_integration_service import LLMBackend, LLMIntegrationService
         
         service = LLMIntegrationService()
         

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 17:30:00
+"""@Time    : 2025-08-03 17:30:00
 @Author  : DAIP-LIVE Team
 @File    : knowledge_retrieval_visualization.py
 @Description:
@@ -17,8 +15,8 @@
 
 import asyncio
 import logging
-import json
 import uuid
+
 # 延迟加载的可视化库
 _plotly_go = None
 _plotly_px = None
@@ -128,9 +126,8 @@ def _get_numpy():
 
 
 # 导入现有组件
-from src.core_services.memory_agent import MemAgent, Memory, MemoryType
 from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
-from src.virtual_role_chat.sskg.knowledge_graph import KnowledgeGraph
+from src.core_services.memory_agent import MemAgent
 from src.core_services.role_manager import RoleManager
 
 logger = logging.getLogger(__name__)
@@ -351,7 +348,6 @@ class KnowledgeRetrievalEngine:
                                         analysis_scope: str = "global",
                                         pattern_types: List[str] = None) -> Dict[str, Any]:
         """知识模式发现"""
-        
         if pattern_types is None:
             pattern_types = ["clusters", "communities", "temporal_patterns", "emerging_concepts"]
         
@@ -395,7 +391,6 @@ class KnowledgeRetrievalEngine:
                                             depth: int = 3,
                                             layout_algorithm: str = "force_directed") -> Dict[str, Any]:
         """构建交互式知识地图"""
-        
         # 1. 确定地图范围
         if focus_concept:
             subgraph_nodes = await self._get_concept_neighborhood(focus_concept, depth)
@@ -457,7 +452,6 @@ class KnowledgeRetrievalEngine:
     
     async def _build_initial_knowledge_graph(self):
         """构建初始知识图谱"""
-        
         # 1. 从记忆中提取知识节点
         all_memories = await self.mem_agent.get_all_memories()
         
@@ -500,7 +494,6 @@ class KnowledgeRetrievalEngine:
     
     async def _semantic_retrieval(self, query: RetrievalQuery) -> Dict[str, Any]:
         """语义检索"""
-        
         # 1. 计算查询向量
         query_embedding = await self._get_query_embedding(query.query_text)
         
@@ -517,7 +510,7 @@ class KnowledgeRetrievalEngine:
                     matching_nodes.append(node)
         
         # 3. 排序
-        sorted_pairs = sorted(zip(similarities, matching_nodes), key=lambda x: x[0], reverse=True)
+        sorted_pairs = sorted(zip(similarities, matching_nodes, strict=False), key=lambda x: x[0], reverse=True)
         
         # 4. 提取相关关系
         related_relations = []
@@ -534,7 +527,6 @@ class KnowledgeRetrievalEngine:
     
     async def _conceptual_retrieval(self, query: RetrievalQuery) -> Dict[str, Any]:
         """概念检索"""
-        
         # 1. 提取查询概念
         query_concepts = await self._extract_concepts(query.query_text)
         
@@ -552,7 +544,7 @@ class KnowledgeRetrievalEngine:
                 scores.append(score)
         
         # 3. 排序和筛选
-        sorted_pairs = sorted(zip(scores, matching_nodes), key=lambda x: x[0], reverse=True)
+        sorted_pairs = sorted(zip(scores, matching_nodes, strict=False), key=lambda x: x[0], reverse=True)
         
         return {
             "nodes": [node for _, node in sorted_pairs[:query.max_results]],
@@ -562,7 +554,6 @@ class KnowledgeRetrievalEngine:
     
     async def _temporal_retrieval(self, query: RetrievalQuery) -> Dict[str, Any]:
         """时间检索"""
-        
         # 1. 解析时间约束
         time_filters = query.filters.get("temporal", {})
         start_time = time_filters.get("start_time")
@@ -590,7 +581,7 @@ class KnowledgeRetrievalEngine:
                 scores.append(score)
         
         # 3. 排序
-        sorted_pairs = sorted(zip(scores, matching_nodes), key=lambda x: x[0], reverse=True)
+        sorted_pairs = sorted(zip(scores, matching_nodes, strict=False), key=lambda x: x[0], reverse=True)
         
         return {
             "nodes": [node for _, node in sorted_pairs[:query.max_results]],
@@ -600,7 +591,6 @@ class KnowledgeRetrievalEngine:
     
     async def _associative_retrieval(self, query: RetrievalQuery) -> Dict[str, Any]:
         """关联检索"""
-        
         # 1. 从查询中识别种子节点
         seed_nodes = await self._identify_seed_nodes(query.query_text)
         
@@ -627,7 +617,7 @@ class KnowledgeRetrievalEngine:
                         scores.append(score)
         
         # 3. 去重和排序
-        unique_pairs = list(set(zip(scores, [node.node_id for node in associated_nodes])))
+        unique_pairs = list(set(zip(scores, [node.node_id for node in associated_nodes], strict=False)))
         sorted_pairs = sorted(unique_pairs, key=lambda x: x[0], reverse=True)
         
         final_nodes = [self.knowledge_nodes[node_id] for _, node_id in sorted_pairs[:query.max_results]]
@@ -641,7 +631,6 @@ class KnowledgeRetrievalEngine:
     
     async def _multi_modal_retrieval(self, query: RetrievalQuery) -> Dict[str, Any]:
         """多模态检索"""
-        
         # 1. 执行多种检索模式
         semantic_results = await self._semantic_retrieval(query)
         conceptual_results = await self._conceptual_retrieval(query)
@@ -698,7 +687,6 @@ class KnowledgeRetrievalEngine:
     
     async def _exploratory_retrieval(self, query: RetrievalQuery) -> Dict[str, Any]:
         """探索性检索"""
-        
         # 1. 随机游走发现
         random_walk_nodes = await self._random_walk_discovery(query.query_text)
         
@@ -719,7 +707,7 @@ class KnowledgeRetrievalEngine:
         scores = [node.importance for node in unique_nodes]
         
         # 6. 排序
-        sorted_pairs = sorted(zip(scores, unique_nodes), key=lambda x: x[0], reverse=True)
+        sorted_pairs = sorted(zip(scores, unique_nodes, strict=False), key=lambda x: x[0], reverse=True)
         
         return {
             "nodes": [node for _, node in sorted_pairs[:query.max_results]],
@@ -745,7 +733,6 @@ class KnowledgeRetrievalEngine:
 
     def get_retrieval_statistics(self) -> Dict[str, Any]:
         """获取检索统计信息"""
-        
         return {
             "knowledge_base_stats": {
                 "total_nodes": len(self.knowledge_nodes),
@@ -787,7 +774,6 @@ class KnowledgeVisualizationEngine:
                                    results: Dict[str, Any],
                                    query: RetrievalQuery) -> Dict[str, Any]:
         """生成可视化数据"""
-        
         if viz_type == VisualizationType.KNOWLEDGE_GRAPH:
             return await self._create_knowledge_graph_viz(results, query)
         elif viz_type == VisualizationType.CONCEPT_MAP:
@@ -805,7 +791,6 @@ class KnowledgeVisualizationEngine:
     
     async def _create_knowledge_graph_viz(self, results: Dict[str, Any], query: RetrievalQuery) -> Dict[str, Any]:
         """创建知识图谱可视化"""
-        
         nodes = results["nodes"]
         relations = results.get("relations", [])
         
@@ -899,7 +884,6 @@ class KnowledgeVisualizationEngine:
                                    edges_data: List[Dict],
                                    layout_algorithm: str) -> Dict[str, Any]:
         """创建交互式地图"""
-        
         # 使用Plotly创建交互式网络图
         fig = go.Figure()
         
@@ -968,7 +952,6 @@ class KnowledgeQualityAssessor:
     
     async def assess_results(self, results: Dict[str, Any]) -> Dict[str, Any]:
         """评估检索结果质量"""
-        
         nodes = results["nodes"]
         scores = results["scores"]
         

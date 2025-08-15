@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.2.2 - 透明度监控系统集成测试
+"""V0.2.2 - 透明度监控系统集成测试
 
 测试增强透明度监控系统的集成功能
 """
 
 import asyncio
-import pytest
 import logging
-from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock, patch
-from typing import Dict, Any
+from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # 设置测试日志
 logging.basicConfig(level=logging.INFO)
@@ -21,10 +19,15 @@ logger = logging.getLogger(__name__)
 class TestTransparencyMonitoringIntegration:
     """透明度监控系统集成测试"""
     
-    @pytest.fixture
+    @pytest.fixture()
     async def mock_personal_assistant(self):
         """模拟PersonalAssistant服务"""
-        from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService, WorkflowType, IntentResult, TeamProposal
+        from personal_intelligence_hub.services.personal_assistant import (
+            IntentResult,
+            PersonalAssistantService,
+            TeamProposal,
+            WorkflowType,
+        )
         
         mock_assistant = Mock(spec=PersonalAssistantService)
         
@@ -52,10 +55,14 @@ class TestTransparencyMonitoringIntegration:
         
         return mock_assistant
     
-    @pytest.fixture
+    @pytest.fixture()
     async def mock_backend_service(self):
         """模拟后端服务"""
-        from personal_intelligence_hub.services.backend_integration import BackendIntegrationService, ServiceHealthStatus, ServiceStatus
+        from personal_intelligence_hub.services.backend_integration import (
+            BackendIntegrationService,
+            ServiceHealthStatus,
+            ServiceStatus,
+        )
         
         mock_backend = Mock(spec=BackendIntegrationService)
         
@@ -72,7 +79,7 @@ class TestTransparencyMonitoringIntegration:
         
         return mock_backend
     
-    @pytest.fixture
+    @pytest.fixture()
     async def transparency_monitor(self):
         """创建透明度监控器"""
         from frontend.components.transparency_monitor import TransparencyMonitor
@@ -84,7 +91,7 @@ class TestTransparencyMonitoringIntegration:
         
         await monitor.stop_monitoring()
     
-    @pytest.fixture
+    @pytest.fixture()
     async def monitoring_integration(self, mock_personal_assistant):
         """创建监控集成服务"""
         from personal_intelligence_hub.services.monitoring_integration import MonitoringIntegrationService
@@ -277,7 +284,7 @@ class TestTransparencyMonitoringIntegration:
     async def test_websocket_integration(self, transparency_monitor):
         """测试WebSocket集成"""
         from frontend.services.enhanced_transparency_integration import EnhancedTransparencyIntegration, MonitoringLevel
-        from frontend.services.websocket_manager import WebSocketMessage, MessageType
+        from frontend.services.websocket_manager import MessageType, WebSocketMessage
         
         integration = EnhancedTransparencyIntegration(transparency_monitor, MonitoringLevel.DETAILED)
         
@@ -316,7 +323,11 @@ class TestTransparencyMonitoringIntegration:
     
     async def test_performance_metrics_calculation(self, transparency_monitor):
         """测试性能指标计算"""
-        from frontend.services.enhanced_transparency_integration import EnhancedTransparencyIntegration, MonitoringLevel, LLMCallMetrics
+        from frontend.services.enhanced_transparency_integration import (
+            EnhancedTransparencyIntegration,
+            LLMCallMetrics,
+            MonitoringLevel,
+        )
         
         integration = EnhancedTransparencyIntegration(transparency_monitor, MonitoringLevel.DETAILED)
         
@@ -378,7 +389,11 @@ class TestTransparencyMonitoringIntegration:
     
     async def test_cache_cleanup(self, transparency_monitor):
         """测试缓存清理"""
-        from frontend.services.enhanced_transparency_integration import EnhancedTransparencyIntegration, MonitoringLevel, LLMCallMetrics
+        from frontend.services.enhanced_transparency_integration import (
+            EnhancedTransparencyIntegration,
+            LLMCallMetrics,
+            MonitoringLevel,
+        )
         
         integration = EnhancedTransparencyIntegration(transparency_monitor, MonitoringLevel.DETAILED)
         integration.cache_size = 5  # 设置小的缓存大小
@@ -404,9 +419,9 @@ class TestIntegrationScenarios:
     
     async def test_end_to_end_monitoring_flow(self):
         """测试端到端监控流程"""
-        from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService
+        from frontend.components.enhanced_monitoring_dashboard import MonitoringLevel, get_enhanced_monitoring_dashboard
         from personal_intelligence_hub.services.monitoring_integration import initialize_monitoring_integration
-        from frontend.components.enhanced_monitoring_dashboard import get_enhanced_monitoring_dashboard, MonitoringLevel
+        from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService
         
         # 创建PersonalAssistant服务
         personal_assistant = PersonalAssistantService()

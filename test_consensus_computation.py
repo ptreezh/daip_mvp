@@ -1,24 +1,21 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证共识计算展示
+"""验证共识计算展示
 """
 
-import sys
-import os
 import asyncio
+import sys
+
 sys.path.append('src')
 
 def test_advanced_consensus_algorithms():
     """测试高级共识算法"""
     try:
         from src.core_services.advanced_consensus_algorithms import (
-            WeightedVotingConsensus, 
             BayesianConsensus,
             CognitiveDiversityPreservingConsensus,
             ConsensusAlgorithmType,
             ConsensusInput,
-            ConsensusResult
+            WeightedVotingConsensus,
         )
         
         # 测试加权投票共识
@@ -47,10 +44,10 @@ def test_advanced_consensus_algorithms():
         assert consensus_input.agent_id == "test_agent", "ConsensusInput创建失败"
         assert consensus_input.confidence == 0.8, "ConsensusInput置信度设置失败"
         
-        print(f"   加权投票共识: 创建成功")
-        print(f"   贝叶斯共识: 创建成功")
-        print(f"   认知多样性共识: 创建成功")
-        print(f"   数据结构: 验证通过")
+        print("   加权投票共识: 创建成功")
+        print("   贝叶斯共识: 创建成功")
+        print("   认知多样性共识: 创建成功")
+        print("   数据结构: 验证通过")
         
         print("✅ AdvancedConsensusAlgorithms验证通过")
         return True
@@ -112,8 +109,6 @@ async def test_consensus_computation_demo():
     try:
         from src.core_services.advanced_consensus_algorithms import (
             WeightedVotingConsensus,
-            ConsensusAlgorithmType,
-            ConsensusInput
         )
         from src.core_services.role_manager import RoleManager
         
@@ -121,13 +116,13 @@ async def test_consensus_computation_demo():
         role_manager = RoleManager()
         
         # 由于实际算法实现可能有复杂性，我们先测试基本功能
-        print(f"   角色管理器加载: 成功")
+        print("   角色管理器加载: 成功")
         print(f"   加载角色数量: {len(role_manager._roles)}")
         
         # 测试共识算法类的创建
         try:
             consensus = WeightedVotingConsensus()
-            print(f"   加权投票共识算法: 创建成功")
+            print("   加权投票共识算法: 创建成功")
             print(f"   算法类型: {consensus.algorithm_type}")
         except Exception as e:
             print(f"   加权投票共识算法创建失败: {e}")
@@ -150,7 +145,7 @@ async def test_consensus_computation_demo():
         try:
             from src.core_services.advanced_consensus_algorithms import BayesianConsensus
             bayesian_consensus = BayesianConsensus()
-            print(f"   贝叶斯共识算法: 创建成功")
+            print("   贝叶斯共识算法: 创建成功")
         except Exception as e:
             print(f"   贝叶斯共识算法创建失败: {e}")
         

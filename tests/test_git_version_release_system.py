@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 16:00:00
+"""@Time    : 2025-08-05 16:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_git_version_release_system.py
 @Description:
@@ -8,30 +6,27 @@
     Git版本发布系统综合测试
 """
 
-import asyncio
-import pytest
-import tempfile
 import os
 import shutil
 import subprocess
-import json
-from unittest.mock import Mock, patch, AsyncMock
+import tempfile
 from datetime import datetime
-from pathlib import Path
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from src.core_services.git_version_release_system import (
-    VersionReleaseSystem,
-    VersionInfo,
-    ReleaseType,
-    ReleaseStatus,
+    ChangelogManager,
+    GitManager,
     ReleaseConfig,
     ReleaseInfo,
-    ReleaseAsset,
-    GitManager,
-    ChangelogManager,
     ReleaseManager,
+    ReleaseStatus,
+    ReleaseType,
+    VersionInfo,
+    VersionReleaseSystem,
     get_version_release_system,
-    initialize_version_release_system
+    initialize_version_release_system,
 )
 
 
@@ -272,7 +267,7 @@ class TestChangelogManager:
         
         assert os.path.exists(self.changelog_file)
         
-        with open(self.changelog_file, 'r') as f:
+        with open(self.changelog_file) as f:
             content = f.read()
             assert new_changelog in content
             assert "# Changelog" in content
@@ -288,7 +283,7 @@ class TestChangelogManager:
         
         self.changelog_manager.update_changelog_file(new_changelog, "1.0.0")
         
-        with open(self.changelog_file, 'r') as f:
+        with open(self.changelog_file) as f:
             content = f.read()
             assert content.startswith(new_changelog)
             assert "## [v0.9.0]" in content
@@ -306,7 +301,7 @@ class TestReleaseManager:
         """Clean up test environment."""
         shutil.rmtree(self.temp_dir)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_prepare_release(self):
         """Test preparing release."""
         with patch.object(self.release_manager.git_manager, 'get_latest_tag') as mock_get_tag, \
@@ -331,7 +326,7 @@ class TestReleaseManager:
             assert release_config.tag_name == "v0.3.11"
             assert release_config.release_notes == "Release notes"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_prepare_release_no_existing_tag(self):
         """Test preparing release when no existing tag exists."""
         with patch.object(self.release_manager.git_manager, 'get_latest_tag') as mock_get_tag, \
@@ -352,7 +347,7 @@ class TestReleaseManager:
             assert release_config.version.patch == 0
             assert release_config.tag_name == "v1.0.0"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_create_release_assets(self):
         """Test creating release assets."""
         # Create test directory structure
@@ -395,7 +390,7 @@ class TestReleaseManager:
                 assert asset.size > 0
                 assert asset.checksum is not None
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_release_clean_working_tree(self):
         """Test executing release with clean working tree."""
         with patch.object(self.release_manager.git_manager, 'get_working_tree_status') as mock_status, \
@@ -431,7 +426,7 @@ class TestReleaseManager:
             mock_commit.assert_called_once()
             mock_tag.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_release_dirty_working_tree(self):
         """Test executing release with dirty working tree."""
         with patch.object(self.release_manager.git_manager, 'get_working_tree_status') as mock_status:
@@ -452,7 +447,7 @@ class TestReleaseManager:
             
             assert "Working directory is not clean" in str(exc_info.value)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_publish_release(self):
         """Test publishing release."""
         release_info = ReleaseInfo(
@@ -475,7 +470,7 @@ class TestReleaseManager:
             mock_git.assert_any_call(["push", "origin", "main"])
             mock_git.assert_any_call(["push", "origin", "v1.0.0"])
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_rollback_release(self):
         """Test rolling back release."""
         release_info = ReleaseInfo(
@@ -511,7 +506,7 @@ class TestVersionReleaseSystem:
         }
         self.system = VersionReleaseSystem(self.config)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_initialize(self):
         """Test system initialization."""
         with patch.object(self.system.production_system, 'initialize') as mock_init:
@@ -522,7 +517,7 @@ class TestVersionReleaseSystem:
             assert self.system.is_initialized is True
             mock_init.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_create_release_not_initialized(self):
         """Test creating release when system is not initialized."""
         with pytest.raises(Exception) as exc_info:
@@ -533,7 +528,7 @@ class TestVersionReleaseSystem:
         
         assert "System not initialized" in str(exc_info.value)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_create_release_success(self):
         """Test successful release creation."""
         self.system.is_initialized = True
@@ -580,7 +575,7 @@ class TestVersionReleaseSystem:
             mock_execute.assert_called_once()
             mock_publish.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_create_hotfix_release(self):
         """Test creating hotfix release."""
         self.system.is_initialized = True
@@ -601,7 +596,7 @@ class TestVersionReleaseSystem:
                 auto_publish=True
             )
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_get_release_statistics(self):
         """Test getting release statistics."""
         # Mock release history
@@ -656,7 +651,7 @@ class TestGlobalFunctions:
         system2 = get_version_release_system()
         assert system is system2
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_initialize_version_release_system(self):
         """Test initializing version release system."""
         config = {"repo_path": "."}
@@ -672,7 +667,7 @@ class TestGlobalFunctions:
 class TestIntegrationScenarios:
     """Integration test scenarios."""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_complete_release_workflow(self):
         """Test complete release workflow from preparation to publishing."""
         # This is an integration test that would require a real git repository

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : redis_client.py
 @Description:
@@ -8,16 +6,16 @@
     Handles Redis connections, caching operations, and pub/sub messaging.
 """
 
-import json
 import asyncio
-from typing import Dict, Any, List, Optional, Set, Callable
-from datetime import datetime, timedelta
+import json
 import logging
-import pickle
+from collections.abc import Callable
+from datetime import datetime
+from typing import Any, Optional, Set
 
 try:
     import redis.asyncio as redis
-    from redis.exceptions import RedisError, ConnectionError
+    from redis.exceptions import ConnectionError, RedisError
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
@@ -69,7 +67,7 @@ class RedisManager:
         }
         
         # 事件处理器
-        self.event_handlers: Dict[str, List[Callable]] = {}
+        self.event_handlers: dict[str, list[Callable]] = {}
         
         # 后台任务
         self._health_check_task: Optional[asyncio.Task] = None
@@ -188,7 +186,7 @@ class RedisManager:
         except Exception as e:
             logging.error(f"Error in pubsub listener: {e}")
     
-    async def _handle_pubsub_message(self, message: Dict[str, Any]):
+    async def _handle_pubsub_message(self, message: dict[str, Any]):
         """处理Pub/Sub消息"""
         try:
             channel = message["channel"]
@@ -323,12 +321,12 @@ class RedisManager:
             return False
     
     # 会话管理
-    async def save_session(self, session_id: str, session_data: Dict[str, Any]) -> bool:
+    async def save_session(self, session_id: str, session_data: dict[str, Any]) -> bool:
         """保存会话数据"""
         key = f"session:{session_id}"
         return await self.set(key, session_data, self.config["session_ttl"])
     
-    async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+    async def get_session(self, session_id: str) -> Optional[dict[str, Any]]:
         """获取会话数据"""
         key = f"session:{session_id}"
         return await self.get(key)
@@ -338,9 +336,9 @@ class RedisManager:
         key = f"session:{session_id}"
         return await self.delete(key)
     
-    async def get_user_sessions(self, user_id: str) -> List[str]:
+    async def get_user_sessions(self, user_id: str) -> list[str]:
         """获取用户的所有会话ID"""
-        pattern = f"session:*"
+        pattern = "session:*"
         session_keys = await self.redis_client.keys(pattern)
         
         user_sessions = []
@@ -389,7 +387,7 @@ class RedisManager:
             return 0
     
     # 任务队列
-    async def enqueue_task(self, queue_name: str, task_data: Dict[str, Any]) -> bool:
+    async def enqueue_task(self, queue_name: str, task_data: dict[str, Any]) -> bool:
         """将任务加入队列"""
         if not self.redis_client:
             return False
@@ -407,7 +405,7 @@ class RedisManager:
             logging.error(f"Error enqueuing task to {queue_name}: {e}")
             return False
     
-    async def dequeue_task(self, queue_name: str, timeout: int = 5) -> Optional[Dict[str, Any]]:
+    async def dequeue_task(self, queue_name: str, timeout: int = 5) -> Optional[dict[str, Any]]:
         """从队列中取出任务"""
         if not self.redis_client:
             return None
@@ -440,7 +438,7 @@ class RedisManager:
             return 0
     
     # Pub/Sub
-    async def publish(self, channel: str, message: Dict[str, Any]) -> bool:
+    async def publish(self, channel: str, message: dict[str, Any]) -> bool:
         """发布消息"""
         if not self.redis_client:
             return False
@@ -565,7 +563,7 @@ class RedisManager:
             return False
     
     # 统计信息
-    async def get_stats(self) -> Dict[str, Any]:
+    async def get_stats(self) -> dict[str, Any]:
         """获取统计信息"""
         uptime = (datetime.now() - self.stats["start_time"]).total_seconds()
         
@@ -602,7 +600,7 @@ class RedisManager:
             "is_running": self._is_running
         }
     
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """健康检查"""
         try:
             if not self.redis_client:

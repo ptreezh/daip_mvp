@@ -1,13 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-21 14:40:00
+"""@Time    : 2025-07-21 14:40:00
 @Author  : DAIP-LIVE Team
 @File    : setup.py
 @Description: Setup script for installing the DAIP-LIVE CLI
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="daip-mvp-project",

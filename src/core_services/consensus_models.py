@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-统一共识调度器核心数据模型
+"""统一共识调度器核心数据模型
 
 提供统一的数据模型类，用于标准化所有共识算法的输入输出格式。
 解决当前系统中数据模型不一致的问题。
@@ -20,12 +18,10 @@
 - 序列化友好：支持JSON序列化和反序列化
 """
 
-import json
-from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
-from dataclasses import dataclass, field
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, Field, validator
 
@@ -60,11 +56,11 @@ class QualityRequirements:
 class ConsensusInput(BaseModel):
     """标准化的共识输入数据模型"""
     agent_id: str = Field(..., description="参与者ID")
-    position: Union[str, float, Dict[str, Any]] = Field(..., description="立场或观点")
+    position: Union[str, float, dict[str, Any]] = Field(..., description="立场或观点")
     confidence: float = Field(..., ge=0.0, le=1.0, description="置信度 (0.0-1.0)")
     reasoning: Optional[str] = Field(None, description="推理过程")
-    evidence: Optional[List[str]] = Field(default_factory=list, description="支持证据")
-    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="元数据")
+    evidence: Optional[list[str]] = Field(default_factory=list, description="支持证据")
+    metadata: Optional[dict[str, Any]] = Field(default_factory=dict, description="元数据")
     timestamp: datetime = Field(default_factory=datetime.now, description="时间戳")
     
     class Config:
@@ -75,9 +71,9 @@ class ConsensusInput(BaseModel):
 
 class ConsensusRequest(BaseModel):
     """统一的共识计算请求"""
-    inputs: List[ConsensusInput] = Field(..., min_items=1, description="共识输入列表")
+    inputs: list[ConsensusInput] = Field(..., min_items=1, description="共识输入列表")
     algorithm_preference: Optional[str] = Field(None, description="首选算法ID")
-    context: Optional[Dict[str, Any]] = Field(default_factory=dict, description="上下文信息")
+    context: Optional[dict[str, Any]] = Field(default_factory=dict, description="上下文信息")
     session_id: Optional[str] = Field(None, description="会话ID")
     timeout: float = Field(default=30.0, gt=0, description="超时时间(秒)")
     quality_requirements: Optional[QualityRequirements] = Field(None, description="质量要求")
@@ -93,9 +89,9 @@ class ConsensusResult(BaseModel):
     """共识计算结果"""
     consensus_value: Any = Field(..., description="共识结果值")
     confidence: float = Field(..., ge=0.0, le=1.0, description="结果置信度")
-    participants: List[str] = Field(..., description="参与者ID列表")
-    reasoning_trace: Dict[str, Any] = Field(default_factory=dict, description="推理轨迹")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="结果元数据")
+    participants: list[str] = Field(..., description="参与者ID列表")
+    reasoning_trace: dict[str, Any] = Field(default_factory=dict, description="推理轨迹")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="结果元数据")
 
 
 class ConsensusResponse(BaseModel):
@@ -120,21 +116,21 @@ class AlgorithmMetadata(BaseModel):
     version: str = Field(..., description="算法版本")
     description: str = Field(..., description="算法描述")
     algorithm_type: AlgorithmType = Field(..., description="算法类型")
-    input_types: List[str] = Field(..., description="支持的输入类型")
-    output_types: List[str] = Field(..., description="输出类型")
+    input_types: list[str] = Field(..., description="支持的输入类型")
+    output_types: list[str] = Field(..., description="输出类型")
     complexity: str = Field(..., description="复杂度等级: low/medium/high")
     accuracy: float = Field(..., ge=0.0, le=1.0, description="准确性评分")
     performance: str = Field(..., description="性能等级: fast/medium/slow")
-    requirements: List[str] = Field(default_factory=list, description="依赖要求")
-    configuration_schema: Dict[str, Any] = Field(default_factory=dict, description="配置模式")
+    requirements: list[str] = Field(default_factory=list, description="依赖要求")
+    configuration_schema: dict[str, Any] = Field(default_factory=dict, description="配置模式")
 
 
 class ValidationResult(BaseModel):
     """数据验证结果"""
     is_valid: bool = Field(..., description="是否有效")
-    errors: List[str] = Field(default_factory=list, description="错误列表")
-    warnings: List[str] = Field(default_factory=list, description="警告列表")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="验证元数据")
+    errors: list[str] = Field(default_factory=list, description="错误列表")
+    warnings: list[str] = Field(default_factory=list, description="警告列表")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="验证元数据")
 
 
 class AlgorithmSelection(BaseModel):
@@ -142,7 +138,7 @@ class AlgorithmSelection(BaseModel):
     algorithm_id: str = Field(..., description="选中的算法ID")
     confidence: float = Field(..., ge=0.0, le=1.0, description="选择置信度")
     reasoning: str = Field(..., description="选择理由")
-    alternatives: List[str] = Field(default_factory=list, description="备选算法")
+    alternatives: list[str] = Field(default_factory=list, description="备选算法")
     selection_time: float = Field(..., ge=0, description="选择耗时(秒)")
 
 
@@ -153,4 +149,4 @@ class FailureContext(BaseModel):
     error_message: str = Field(..., description="错误消息")
     execution_time: float = Field(..., ge=0, description="执行时间(秒)")
     retry_count: int = Field(default=0, ge=0, description="重试次数")
-    context: Dict[str, Any] = Field(default_factory=dict, description="失败上下文")
+    context: dict[str, Any] = Field(default_factory=dict, description="失败上下文")

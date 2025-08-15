@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-透明度监控系统集成测试
+"""透明度监控系统集成测试
 
 测试透明度监控组件与工作流选择机制的集成，验证监控数据的准确性和实时性
 """
@@ -10,8 +8,10 @@ import asyncio
 import sys
 import time
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any
+
 from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService
+
 
 class TransparencyIntegrationTester:
     """透明度监控集成测试器"""
@@ -44,7 +44,7 @@ class TransparencyIntegrationTester:
             print(f"❌ 设置透明度监控组件失败: {e}")
             return False
     
-    async def _on_llm_call_logged(self, call_data: Dict[str, Any]):
+    async def _on_llm_call_logged(self, call_data: dict[str, Any]):
         """LLM调用记录回调"""
         self.test_results.append({
             "type": "llm_call",
@@ -53,7 +53,7 @@ class TransparencyIntegrationTester:
         })
         print(f"📡 LLM调用已记录: {call_data.get('model', 'unknown')} - {call_data.get('response_time', 0):.2f}s")
     
-    async def _on_workflow_update(self, workflow_data: Dict[str, Any]):
+    async def _on_workflow_update(self, workflow_data: dict[str, Any]):
         """工作流更新回调"""
         self.test_results.append({
             "type": "workflow_update",
@@ -62,7 +62,7 @@ class TransparencyIntegrationTester:
         })
         print(f"🔄 工作流状态更新: {workflow_data.get('workflow_id', 'unknown')} - {workflow_data.get('status', 'unknown')}")
     
-    async def _on_system_status_change(self, status_data: Dict[str, Any]):
+    async def _on_system_status_change(self, status_data: dict[str, Any]):
         """系统状态变更回调"""
         self.test_results.append({
             "type": "system_status",
@@ -287,7 +287,7 @@ class TransparencyIntegrationTester:
             print(f"❌ 错误监控异常: 期望{len(error_scenarios)}个错误，实际{error_count}个")
             return False
     
-    async def generate_integration_report(self, test_results: Dict[str, Any]):
+    async def generate_integration_report(self, test_results: dict[str, Any]):
         """生成集成测试报告"""
         print("\\n" + "="*60)
         print("📋 V0.2.2 透明度监控系统集成测试报告")
@@ -297,12 +297,12 @@ class TransparencyIntegrationTester:
         total_tests = len(test_results)
         passed_tests = sum(1 for result in test_results.values() if result)
         
-        print(f"\\n📊 测试统计:")
+        print("\\n📊 测试统计:")
         print(f"总测试项: {total_tests}")
         print(f"通过测试: {passed_tests}")
         print(f"测试通过率: {(passed_tests/total_tests*100):.1f}%")
         
-        print(f"\\n📋 详细结果:")
+        print("\\n📋 详细结果:")
         for test_name, result in test_results.items():
             status = "✅ 通过" if result else "❌ 失败"
             print(f"{test_name}: {status}")
@@ -312,7 +312,7 @@ class TransparencyIntegrationTester:
         workflow_updates = len([r for r in self.test_results if r["type"] == "workflow_update"])
         system_updates = len([r for r in self.test_results if r["type"] == "system_status"])
         
-        print(f"\\n📡 监控数据统计:")
+        print("\\n📡 监控数据统计:")
         print(f"LLM调用记录: {llm_calls}")
         print(f"工作流更新: {workflow_updates}")
         print(f"系统状态更新: {system_updates}")
@@ -321,13 +321,13 @@ class TransparencyIntegrationTester:
         # 性能指标
         if self.transparency_monitor:
             metrics = self.transparency_monitor.system_metrics["performance_metrics"]
-            print(f"\\n⚡ 性能指标:")
+            print("\\n⚡ 性能指标:")
             print(f"平均响应时间: {metrics['avg_response_time']:.2f}s")
             print(f"成功率: {metrics['success_rate']:.1f}%")
             print(f"吞吐量: {metrics['throughput']:.1f}/min")
         
         # V0.2.2任务目标达成情况
-        print(f"\\n🎯 V0.2.2任务目标达成情况:")
+        print("\\n🎯 V0.2.2任务目标达成情况:")
         
         requirements = {
             "现有组件复用": True,  # 基于现有TransparencyMonitor

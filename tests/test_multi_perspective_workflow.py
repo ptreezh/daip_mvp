@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 15:30:00
+"""@Time    : 2025-07-24 15:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_multi_perspective_workflow.py
 @Description:
     Unit tests for the MultiPerspectiveSynthesisWorkflow class.
 """
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 
 from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
 
@@ -15,12 +14,12 @@ from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWo
 class TestMultiPerspectiveSynthesisWorkflow:
     """Test cases for MultiPerspectiveSynthesisWorkflow."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def workflow(self):
         """Create a MultiPerspectiveSynthesisWorkflow instance for testing."""
         return MultiPerspectiveSynthesisWorkflow("test_workflow")
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_services(self):
         """Create mock services for testing."""
         services = {
@@ -77,7 +76,7 @@ class TestMultiPerspectiveSynthesisWorkflow:
         assert workflow.config["parallel_exploration"]["max_parallel_experts"] == 5
         assert workflow.config["parallel_exploration"]["default_expert_role"] == "专家"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_execute_success(self, workflow, mock_services):
         """Test successful workflow execution."""
         # Mock all node executions to return success
@@ -111,7 +110,7 @@ class TestMultiPerspectiveSynthesisWorkflow:
             assert result["confidence"] == 0.8
             assert "execution_details" in result
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_execute_decomposition_failure(self, workflow, mock_services):
         """Test workflow execution when decomposition fails."""
         # Mock decomposition to fail
@@ -127,7 +126,7 @@ class TestMultiPerspectiveSynthesisWorkflow:
             assert "error" in result
             assert "Task decomposition failed" in result["error"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_execute_exploration_failure(self, workflow, mock_services):
         """Test workflow execution when exploration fails."""
         # Mock decomposition to succeed but exploration to fail
@@ -149,7 +148,7 @@ class TestMultiPerspectiveSynthesisWorkflow:
             assert "error" in result
             assert "Parallel exploration failed" in result["error"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_execute_synthesis_failure(self, workflow, mock_services):
         """Test workflow execution when synthesis fails."""
         # Mock decomposition and exploration to succeed but synthesis to fail
@@ -176,7 +175,7 @@ class TestMultiPerspectiveSynthesisWorkflow:
             assert "error" in result
             assert "Viewpoint synthesis failed" in result["error"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_class_method(self, mock_services):
         """Test the class method for executing a workflow."""
         # Mock the workflow execute method

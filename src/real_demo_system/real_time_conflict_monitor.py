@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-实时冲突监控器
+"""实时冲突监控器
 
 实时监控知识冲突的出现
 """
 
 import logging
-from typing import Any, Dict, List, Optional
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +42,7 @@ class RealTimeConflictMonitor:
             logger.error(f"启动监控失败: {e}")
             return None
     
-    def detect_emerging_conflicts(self, new_knowledge: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def detect_emerging_conflicts(self, new_knowledge: dict[str, Any]) -> list[dict[str, Any]]:
         """检测新兴冲突"""
         try:
             emerging_conflicts = []
@@ -74,7 +72,7 @@ class RealTimeConflictMonitor:
             logger.error(f"检测新兴冲突失败: {e}")
             return []
     
-    def send_conflict_alert(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def send_conflict_alert(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """发送冲突警报"""
         try:
             alert_id = str(uuid.uuid4())
@@ -96,7 +94,7 @@ class RealTimeConflictMonitor:
             logger.error(f"发送冲突警报失败: {e}")
             return {"success": False, "error": str(e)}
     
-    def _initialize_monitoring_rules(self) -> Dict[str, Any]:
+    def _initialize_monitoring_rules(self) -> dict[str, Any]:
         """初始化监控规则"""
         return {
             "contradiction_detection": {

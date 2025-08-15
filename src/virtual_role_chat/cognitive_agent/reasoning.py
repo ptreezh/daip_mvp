@@ -1,5 +1,4 @@
-"""
-Implementation of the ReasoningFramework class.
+"""Implementation of the ReasoningFramework class.
 
 This module defines the ReasoningFramework class, which encapsulates the
 reasoning capabilities of a cognitive agent, including inference rules,
@@ -7,51 +6,47 @@ heuristics, and cognitive biases.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 
 class InferenceRule(BaseModel):
-    """
-    Representation of an inference rule used in reasoning.
+    """Representation of an inference rule used in reasoning.
     """
     id: str
     name: str
     description: str
     pattern: str  # A pattern representation of the rule
     confidence: float = Field(ge=0.0, le=1.0)
-    domains: List[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
 
 
 class Heuristic(BaseModel):
-    """
-    Representation of a heuristic used in reasoning.
+    """Representation of a heuristic used in reasoning.
     """
     id: str
     name: str
     description: str
-    trigger_conditions: List[str]
+    trigger_conditions: list[str]
     application_strategy: str
     confidence: float = Field(ge=0.0, le=1.0)
-    domains: List[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
 
 
 class CognitiveBias(BaseModel):
-    """
-    Representation of a cognitive bias that influences reasoning.
+    """Representation of a cognitive bias that influences reasoning.
     """
     id: str
     name: str
     description: str
     influence_pattern: str
     strength: float = Field(ge=0.0, le=1.0)
-    domains: List[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
 
 
 class ReasoningFramework:
-    """
-    Framework that encapsulates the reasoning capabilities of a cognitive agent.
+    """Framework that encapsulates the reasoning capabilities of a cognitive agent.
     
     The ReasoningFramework defines how an agent processes information, makes
     inferences, applies heuristics, and is influenced by cognitive biases.
@@ -63,11 +58,10 @@ class ReasoningFramework:
         self,
         framework_type: str,
         agent_id: str,
-        domain_expertise: Dict[str, float] = None,
-        cognitive_biases: List[str] = None
+        domain_expertise: dict[str, float] = None,
+        cognitive_biases: list[str] = None
     ):
-        """
-        Initialize a reasoning framework.
+        """Initialize a reasoning framework.
         
         Args:
             framework_type: Type of reasoning framework (e.g., 'analytical', 'intuitive')
@@ -90,9 +84,8 @@ class ReasoningFramework:
         self.logger.debug(f"Loaded {len(self.inference_rules)} inference rules, "
                          f"{len(self.heuristics)} heuristics, and {len(self.biases)} biases")
     
-    def _load_inference_rules(self) -> Dict[str, InferenceRule]:
-        """
-        Load inference rules appropriate for this reasoning framework.
+    def _load_inference_rules(self) -> dict[str, InferenceRule]:
+        """Load inference rules appropriate for this reasoning framework.
         
         Returns:
             Dictionary mapping rule IDs to InferenceRule objects
@@ -157,9 +150,8 @@ class ReasoningFramework:
         
         return rules
     
-    def _load_heuristics(self) -> Dict[str, Heuristic]:
-        """
-        Load heuristics appropriate for this reasoning framework.
+    def _load_heuristics(self) -> dict[str, Heuristic]:
+        """Load heuristics appropriate for this reasoning framework.
         
         Returns:
             Dictionary mapping heuristic IDs to Heuristic objects
@@ -203,9 +195,8 @@ class ReasoningFramework:
         
         return heuristics
     
-    def _load_cognitive_biases(self) -> Dict[str, CognitiveBias]:
-        """
-        Load cognitive biases that influence this reasoning framework.
+    def _load_cognitive_biases(self) -> dict[str, CognitiveBias]:
+        """Load cognitive biases that influence this reasoning framework.
         
         Returns:
             Dictionary mapping bias IDs to CognitiveBias objects
@@ -247,12 +238,11 @@ class ReasoningFramework:
     
     async def apply(
         self,
-        task: Dict[str, Any],
-        relevant_knowledge: Dict[str, Any],
-        domain_knowledge: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        Apply the reasoning framework to a task.
+        task: dict[str, Any],
+        relevant_knowledge: dict[str, Any],
+        domain_knowledge: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Apply the reasoning framework to a task.
         
         This method implements the core reasoning process:
         1. Identify relevant inference rules and heuristics
@@ -286,17 +276,17 @@ class ReasoningFramework:
         refined_conclusions = self._apply_heuristics(
             relevant_heuristics, initial_conclusions, task
         )
-        self.logger.debug(f"Refined conclusions using heuristics")
+        self.logger.debug("Refined conclusions using heuristics")
         
         # 4. Apply cognitive biases to modify conclusions
         biased_conclusions = self._apply_cognitive_biases(
             refined_conclusions, task
         )
-        self.logger.debug(f"Applied cognitive biases to conclusions")
+        self.logger.debug("Applied cognitive biases to conclusions")
         
         # 5. Evaluate confidence in conclusions
         final_conclusions = self._evaluate_confidence(biased_conclusions)
-        self.logger.debug(f"Evaluated confidence in conclusions")
+        self.logger.debug("Evaluated confidence in conclusions")
         
         return {
             "conclusions": final_conclusions,
@@ -309,9 +299,8 @@ class ReasoningFramework:
             }
         }
     
-    def _identify_relevant_rules(self, task: Dict[str, Any]) -> List[InferenceRule]:
-        """
-        Identify inference rules relevant to the task.
+    def _identify_relevant_rules(self, task: dict[str, Any]) -> list[InferenceRule]:
+        """Identify inference rules relevant to the task.
         
         Args:
             task: Task information
@@ -325,9 +314,8 @@ class ReasoningFramework:
         # For now, we'll just return all rules
         return list(self.inference_rules.values())
     
-    def _identify_relevant_heuristics(self, task: Dict[str, Any]) -> List[Heuristic]:
-        """
-        Identify heuristics relevant to the task.
+    def _identify_relevant_heuristics(self, task: dict[str, Any]) -> list[Heuristic]:
+        """Identify heuristics relevant to the task.
         
         Args:
             task: Task information
@@ -343,13 +331,12 @@ class ReasoningFramework:
     
     def _apply_inference_rules(
         self,
-        rules: List[InferenceRule],
-        task: Dict[str, Any],
-        relevant_knowledge: Dict[str, Any],
-        domain_knowledge: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
-        """
-        Apply inference rules to generate conclusions.
+        rules: list[InferenceRule],
+        task: dict[str, Any],
+        relevant_knowledge: dict[str, Any],
+        domain_knowledge: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+        """Apply inference rules to generate conclusions.
         
         Args:
             rules: List of inference rules to apply
@@ -373,12 +360,11 @@ class ReasoningFramework:
     
     def _apply_heuristics(
         self,
-        heuristics: List[Heuristic],
-        conclusions: List[Dict[str, Any]],
-        task: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
-        """
-        Apply heuristics to refine conclusions.
+        heuristics: list[Heuristic],
+        conclusions: list[dict[str, Any]],
+        task: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+        """Apply heuristics to refine conclusions.
         
         Args:
             heuristics: List of heuristics to apply
@@ -396,11 +382,10 @@ class ReasoningFramework:
     
     def _apply_cognitive_biases(
         self,
-        conclusions: List[Dict[str, Any]],
-        task: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
-        """
-        Apply cognitive biases to modify conclusions.
+        conclusions: list[dict[str, Any]],
+        task: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+        """Apply cognitive biases to modify conclusions.
         
         Args:
             conclusions: Conclusions to modify
@@ -417,10 +402,9 @@ class ReasoningFramework:
     
     def _evaluate_confidence(
         self,
-        conclusions: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
-        """
-        Evaluate confidence in conclusions.
+        conclusions: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """Evaluate confidence in conclusions.
         
         Args:
             conclusions: Conclusions to evaluate
@@ -436,10 +420,9 @@ class ReasoningFramework:
     
     def _calculate_overall_confidence(
         self,
-        conclusions: List[Dict[str, Any]]
+        conclusions: list[dict[str, Any]]
     ) -> float:
-        """
-        Calculate overall confidence in the reasoning results.
+        """Calculate overall confidence in the reasoning results.
         
         Args:
             conclusions: Final conclusions
@@ -453,9 +436,8 @@ class ReasoningFramework:
         # For now, we'll just return a placeholder value
         return 0.8
     
-    def get_state(self) -> Dict[str, Any]:
-        """
-        Get the current state of the reasoning framework.
+    def get_state(self) -> dict[str, Any]:
+        """Get the current state of the reasoning framework.
         
         Returns:
             Dictionary containing the framework's state
@@ -468,9 +450,8 @@ class ReasoningFramework:
             "active_heuristics": [heuristic.id for heuristic in self.heuristics.values()]
         }
     
-    def update_state(self, state_updates: Dict[str, Any]) -> None:
-        """
-        Update the state of the reasoning framework.
+    def update_state(self, state_updates: dict[str, Any]) -> None:
+        """Update the state of the reasoning framework.
         
         Args:
             state_updates: Dictionary containing state updates

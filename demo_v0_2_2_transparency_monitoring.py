@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.2.2 - 透明度监控系统集成演示
+"""V0.2.2 - 透明度监控系统集成演示
 
 演示增强透明度监控系统的完整功能
 """
 
 import asyncio
 import logging
-from datetime import datetime
-from typing import Dict, Any
 
 # 配置日志
 logging.basicConfig(
@@ -50,7 +46,8 @@ async def demo_transparency_monitoring_integration():
         # 4. 创建增强透明度集成
         logger.info("📋 步骤4: 创建增强透明度集成")
         from frontend.services.enhanced_transparency_integration import (
-            get_enhanced_transparency_integration, MonitoringLevel
+            MonitoringLevel,
+            get_enhanced_transparency_integration,
         )
         
         enhanced_integration = await get_enhanced_transparency_integration(

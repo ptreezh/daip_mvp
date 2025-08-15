@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.1.1 组件集成验证测试
+"""V0.1.1 组件集成验证测试
 验证PersonalAssistant与核心组件的协作流程
 """
 
@@ -9,8 +7,6 @@ import asyncio
 import logging
 import sys
 import time
-from datetime import datetime
-from typing import Dict, Any
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -105,8 +101,7 @@ async def test_role_manager_integration():
     print("="*60)
     
     try:
-        from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService
-        from personal_intelligence_hub.services.personal_assistant import WorkflowType
+        from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService, WorkflowType
         
         assistant = PersonalAssistantService()
         

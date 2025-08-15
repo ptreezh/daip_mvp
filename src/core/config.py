@@ -1,12 +1,11 @@
-"""
-系统配置管理
+"""系统配置管理
 处理环境变量、配置文件和系统设置
 """
 
-import os
-from typing import Optional, Dict, Any
-from pydantic import BaseSettings, Field
 from pathlib import Path
+from typing import Any, Optional
+
+from pydantic import BaseSettings, Field
 
 
 class DatabaseConfig(BaseSettings):
@@ -121,7 +120,7 @@ class AppConfig:
         for directory in directories:
             directory.mkdir(parents=True, exist_ok=True)
     
-    def get_llm_config(self, provider: Optional[str] = None) -> Dict[str, Any]:
+    def get_llm_config(self, provider: Optional[str] = None) -> dict[str, Any]:
         """获取LLM配置"""
         provider = provider or self.llm.default_provider
         
@@ -150,7 +149,7 @@ class AppConfig:
         
         return config
     
-    def get_database_config(self) -> Dict[str, Any]:
+    def get_database_config(self) -> dict[str, Any]:
         """获取数据库配置"""
         return {
             "url": self.database.url,
@@ -158,7 +157,7 @@ class AppConfig:
             "max_overflow": self.database.max_overflow
         }
     
-    def get_redis_config(self) -> Dict[str, Any]:
+    def get_redis_config(self) -> dict[str, Any]:
         """获取Redis配置"""
         return {
             "url": self.redis.url,

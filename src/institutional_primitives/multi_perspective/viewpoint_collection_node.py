@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 16:30:00
+"""@Time    : 2025-07-24 16:30:00
 @Author  : DAIP-LIVE Team
 @File    : viewpoint_collection_node.py
 @Description:
@@ -8,32 +6,30 @@
 """
 import logging
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
-from ..base import InstitutionalPrimitive, ExecutionContext
+from ..base import ExecutionContext, InstitutionalPrimitive
 from .models import ExpertViewpoint, ViewpointCollection
 
 logger = logging.getLogger(__name__)
 
 
 class ViewpointCollectionNode(InstitutionalPrimitive):
-    """
-    观点收集节点 - Gathers all expert perspectives with analysis of conflicts and consensus.
+    """观点收集节点 - Gathers all expert perspectives with analysis of conflicts and consensus.
     
     Collects all expert viewpoints and analyzes them for conflicts, consensus areas,
     and coverage to prepare for synthesis.
     """
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.min_viewpoints = config.get("min_viewpoints", 2) if config else 2
         self.conflict_threshold = config.get("conflict_threshold", 0.3) if config else 0.3
         self.consensus_threshold = config.get("consensus_threshold", 0.7) if config else 0.7
         self.analyze_coverage = config.get("analyze_coverage", True) if config else True
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute viewpoint collection and analysis.
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        """Execute viewpoint collection and analysis.
         
         Args:
             inputs: Should contain 'viewpoints' to collect and analyze
@@ -114,7 +110,7 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
                 "error": str(e)
             }
     
-    def _analyze_conflicts(self, viewpoints: List[ExpertViewpoint]) -> List[Dict[str, Any]]:
+    def _analyze_conflicts(self, viewpoints: list[ExpertViewpoint]) -> list[dict[str, Any]]:
         """Analyze conflicts between viewpoints."""
         conflicts = []
         
@@ -184,7 +180,7 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
         else:
             return "content_disagreement"
     
-    def _identify_consensus_areas(self, viewpoints: List[ExpertViewpoint]) -> List[str]:
+    def _identify_consensus_areas(self, viewpoints: list[ExpertViewpoint]) -> list[str]:
         """Identify areas of consensus among viewpoints."""
         consensus_areas = []
         
@@ -207,7 +203,7 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
         
         return consensus_areas[:5]  # Limit to top 5 consensus areas
     
-    def _extract_common_keywords(self, viewpoints: List[ExpertViewpoint]) -> List[str]:
+    def _extract_common_keywords(self, viewpoints: list[ExpertViewpoint]) -> list[str]:
         """Extract common keywords from viewpoints."""
         # Simple keyword extraction - in practice would use more sophisticated NLP
         important_keywords = [
@@ -225,7 +221,7 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
         # Return keywords sorted by frequency
         return sorted(keyword_counts.keys(), key=lambda k: keyword_counts[k], reverse=True)[:10]
     
-    def _find_evidence_consensus(self, viewpoints: List[ExpertViewpoint]) -> List[str]:
+    def _find_evidence_consensus(self, viewpoints: list[ExpertViewpoint]) -> list[str]:
         """Find consensus in supporting evidence."""
         evidence_consensus = []
         
@@ -262,7 +258,7 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
         
         return len(intersection) / len(union) if union else 0.0
     
-    def _analyze_coverage(self, viewpoints: List[ExpertViewpoint], topic: str) -> Dict[str, Any]:
+    def _analyze_coverage(self, viewpoints: list[ExpertViewpoint], topic: str) -> dict[str, Any]:
         """Analyze coverage of the topic by viewpoints."""
         coverage_analysis = {
             "perspectives_covered": [],
@@ -298,10 +294,10 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
     
     def _calculate_quality_score(
         self, 
-        viewpoints: List[ExpertViewpoint], 
-        conflicts: List[Dict[str, Any]], 
-        consensus_areas: List[str],
-        coverage_analysis: Dict[str, Any]
+        viewpoints: list[ExpertViewpoint], 
+        conflicts: list[dict[str, Any]], 
+        consensus_areas: list[str],
+        coverage_analysis: dict[str, Any]
     ) -> float:
         """Calculate overall quality score for the viewpoint collection."""
         if not viewpoints:
@@ -339,7 +335,7 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
         
         return quality_score
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         """Return input schema for the viewpoint collection node."""
         return {
             "type": "object",
@@ -357,7 +353,7 @@ class ViewpointCollectionNode(InstitutionalPrimitive):
             "required": ["viewpoints"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         """Return output schema for the viewpoint collection node."""
         return {
             "type": "object",

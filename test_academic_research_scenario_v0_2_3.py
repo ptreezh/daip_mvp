@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.2.3 学术研究场景核心功能测试
+"""V0.2.3 学术研究场景核心功能测试
 
 测试学术研究场景的完整功能，包括：
 - 工作流配置优化
@@ -14,7 +12,6 @@ V0.2.3 学术研究场景核心功能测试
 import asyncio
 import logging
 from datetime import datetime
-from typing import Dict, Any
 
 # 配置日志
 logging.basicConfig(
@@ -42,7 +39,7 @@ async def test_academic_research_scenario():
     try:
         # 1. 测试场景初始化
         logger.info("📋 测试1: 学术研究场景初始化")
-        from src.scenarios.academic_research_scenario import AcademicResearchScenario, AcademicResearchConfig
+        from src.scenarios.academic_research_scenario import AcademicResearchConfig, AcademicResearchScenario
         
         scenario = AcademicResearchScenario()
         
@@ -285,7 +282,7 @@ async def demo_academic_research_workflow():
     logger.info("🎓 开始学术研究工作流演示")
     
     try:
-        from src.scenarios.academic_research_scenario import AcademicResearchScenario, AcademicResearchConfig
+        from src.scenarios.academic_research_scenario import AcademicResearchConfig, AcademicResearchScenario
         
         # 创建场景实例
         scenario = AcademicResearchScenario()

@@ -1,5 +1,4 @@
-"""
-Parallel execution manager for the Institutional Primitives System.
+"""Parallel execution manager for the Institutional Primitives System.
 
 This module implements parallel execution capabilities for the workflow engine,
 allowing multiple nodes to be executed concurrently with controlled concurrency.
@@ -7,15 +6,15 @@ allowing multiple nodes to be executed concurrently with controlled concurrency.
 
 import asyncio
 import logging
+from collections.abc import Callable, Coroutine
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple, Callable, Coroutine
+from typing import Any, Optional
 
-from .base import ExecutionContext, ExecutionStep, ExecutionTrace
+from .base import ExecutionTrace
 
 
 class ParallelExecutionGroup:
-    """
-    Group of nodes that can be executed in parallel.
+    """Group of nodes that can be executed in parallel.
     
     This class manages the concurrent execution of a group of nodes,
     with controlled concurrency and error handling.
@@ -27,8 +26,7 @@ class ParallelExecutionGroup:
         max_concurrency: int = 5,
         timeout: Optional[float] = None
     ):
-        """
-        Initialize a parallel execution group.
+        """Initialize a parallel execution group.
         
         Args:
             group_id: Unique identifier for the group
@@ -40,18 +38,17 @@ class ParallelExecutionGroup:
         self.timeout = timeout
         self.semaphore = asyncio.Semaphore(max_concurrency)
         self.logger = logging.getLogger(__name__)
-        self.tasks: Set[asyncio.Task] = set()
-        self.results: Dict[str, Any] = {}
-        self.errors: Dict[str, Exception] = {}
+        self.tasks: set[asyncio.Task] = set()
+        self.results: dict[str, Any] = {}
+        self.errors: dict[str, Exception] = {}
     
     async def execute_node(
         self,
         node_id: str,
-        execute_func: Callable[[str], Coroutine[Any, Any, Dict[str, Any]]],
+        execute_func: Callable[[str], Coroutine[Any, Any, dict[str, Any]]],
         trace: ExecutionTrace
-    ) -> Dict[str, Any]:
-        """
-        Execute a node with concurrency control.
+    ) -> dict[str, Any]:
+        """Execute a node with concurrency control.
         
         Args:
             node_id: ID of the node to execute
@@ -84,12 +81,11 @@ class ParallelExecutionGroup:
     
     async def execute_all(
         self,
-        node_ids: List[str],
-        execute_func: Callable[[str], Coroutine[Any, Any, Dict[str, Any]]],
+        node_ids: list[str],
+        execute_func: Callable[[str], Coroutine[Any, Any, dict[str, Any]]],
         trace: ExecutionTrace
-    ) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Exception]]:
-        """
-        Execute multiple nodes in parallel.
+    ) -> tuple[dict[str, dict[str, Any]], dict[str, Exception]]:
+        """Execute multiple nodes in parallel.
         
         Args:
             node_ids: List of node IDs to execute
@@ -130,8 +126,7 @@ class ParallelExecutionGroup:
 
 
 class ParallelExecutionManager:
-    """
-    Manager for parallel execution of workflow nodes.
+    """Manager for parallel execution of workflow nodes.
     
     This class coordinates the parallel execution of nodes across
     multiple execution groups.
@@ -139,7 +134,7 @@ class ParallelExecutionManager:
     
     def __init__(self):
         """Initialize the parallel execution manager."""
-        self.execution_groups: Dict[str, ParallelExecutionGroup] = {}
+        self.execution_groups: dict[str, ParallelExecutionGroup] = {}
         self.logger = logging.getLogger(__name__)
     
     def create_execution_group(
@@ -148,8 +143,7 @@ class ParallelExecutionManager:
         max_concurrency: int = 5,
         timeout: Optional[float] = None
     ) -> ParallelExecutionGroup:
-        """
-        Create a new parallel execution group.
+        """Create a new parallel execution group.
         
         Args:
             group_id: Optional group ID (generated if not provided)
@@ -179,14 +173,13 @@ class ParallelExecutionManager:
     
     async def execute_nodes_in_parallel(
         self,
-        node_ids: List[str],
-        execute_func: Callable[[str], Coroutine[Any, Any, Dict[str, Any]]],
+        node_ids: list[str],
+        execute_func: Callable[[str], Coroutine[Any, Any, dict[str, Any]]],
         trace: ExecutionTrace,
         max_concurrency: int = 5,
         timeout: Optional[float] = None
-    ) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Exception]]:
-        """
-        Execute multiple nodes in parallel.
+    ) -> tuple[dict[str, dict[str, Any]], dict[str, Exception]]:
+        """Execute multiple nodes in parallel.
         
         Args:
             node_ids: List of node IDs to execute
@@ -207,9 +200,8 @@ class ParallelExecutionManager:
         # Execute nodes in parallel
         return await group.execute_all(node_ids, execute_func, trace)
     
-    def get_group_status(self, group_id: str) -> Optional[Dict[str, Any]]:
-        """
-        Get the status of a parallel execution group.
+    def get_group_status(self, group_id: str) -> Optional[dict[str, Any]]:
+        """Get the status of a parallel execution group.
         
         Args:
             group_id: ID of the execution group
@@ -231,8 +223,7 @@ class ParallelExecutionManager:
         }
     
     def cleanup_group(self, group_id: str) -> bool:
-        """
-        Clean up a parallel execution group.
+        """Clean up a parallel execution group.
         
         Args:
             group_id: ID of the execution group

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-22 14:00:00
+"""@Time    : 2025-07-22 14:00:00
 @Author  : DAIP-LIVE Team
 @File    : enhanced_sskg_manager.py
 @Description:
@@ -8,16 +6,15 @@
     storage interface for all system memory types including role memories, wiki content,
     user memories, session states, project states, and memory banks.
 """
-import logging
 import json
+import logging
 import uuid
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Optional
 
 import networkx as nx
-import numpy as np
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -62,7 +59,7 @@ class KnowledgeNode(BaseModel):
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
     confidence: float = 1.0
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
     version: int = 1
 
 
@@ -72,26 +69,25 @@ class KnowledgeRelation(BaseModel):
     target_id: str
     relation_type: RelationType
     confidence: float = 1.0
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
     created_at: datetime = Field(default_factory=datetime.now)
 
 
 class KnowledgeQuery(BaseModel):
     """Model for querying the SSKG."""
-    node_types: Optional[List[NodeType]] = None
+    node_types: Optional[list[NodeType]] = None
     content_query: Optional[str] = None
-    relation_types: Optional[List[RelationType]] = None
+    relation_types: Optional[list[RelationType]] = None
     min_confidence: float = 0.0
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
-    metadata_filters: Dict[str, Any] = {}
+    metadata_filters: dict[str, Any] = {}
     limit: int = 10
     include_relations: bool = False
 
 
 class EnhancedSSKGManager:
-    """
-    Enhanced Semantic Structured Knowledge Graph Manager that provides a unified
+    """Enhanced Semantic Structured Knowledge Graph Manager that provides a unified
     storage interface for all system memory types.
     """
 
@@ -101,8 +97,7 @@ class EnhancedSSKGManager:
         vector_store_path: Optional[Path] = None,
         enable_vector_search: bool = True
     ):
-        """
-        Initialize the Enhanced SSKG Manager.
+        """Initialize the Enhanced SSKG Manager.
         
         Args:
             graph_path: Path to the graph file for persistence
@@ -177,8 +172,7 @@ class EnhancedSSKGManager:
                 logger.error(f"Failed to save graph to {self.graph_path}: {e}")
     
     def add_node(self, node: KnowledgeNode) -> str:
-        """
-        Add a node to the SSKG.
+        """Add a node to the SSKG.
         
         Args:
             node: The node to add
@@ -233,8 +227,7 @@ class EnhancedSSKGManager:
         return node.id
     
     def add_relation(self, relation: KnowledgeRelation) -> bool:
-        """
-        Add a relation between two nodes in the SSKG.
+        """Add a relation between two nodes in the SSKG.
         
         Args:
             relation: The relation to add
@@ -244,7 +237,7 @@ class EnhancedSSKGManager:
         """
         # Check if nodes exist
         if not self.graph.has_node(relation.source_id) or not self.graph.has_node(relation.target_id):
-            logger.error(f"Cannot add relation: one or both nodes do not exist")
+            logger.error("Cannot add relation: one or both nodes do not exist")
             return False
         
         # Add edge to graph
@@ -261,8 +254,7 @@ class EnhancedSSKGManager:
         return True    
         
     def get_node(self, node_id: str) -> Optional[KnowledgeNode]:
-        """
-        Get a node from the SSKG by ID.
+        """Get a node from the SSKG by ID.
         
         Args:
             node_id: The ID of the node to get
@@ -290,9 +282,8 @@ class EnhancedSSKGManager:
             logger.error(f"Error parsing node data: {e}")
             return None
     
-    def update_node(self, node_id: str, updates: Dict[str, Any]) -> bool:
-        """
-        Update a node in the SSKG.
+    def update_node(self, node_id: str, updates: dict[str, Any]) -> bool:
+        """Update a node in the SSKG.
         
         Args:
             node_id: The ID of the node to update
@@ -354,8 +345,7 @@ class EnhancedSSKGManager:
         return True
     
     def delete_node(self, node_id: str) -> bool:
-        """
-        Delete a node from the SSKG.
+        """Delete a node from the SSKG.
         
         Args:
             node_id: The ID of the node to delete
@@ -379,9 +369,8 @@ class EnhancedSSKGManager:
         
         logger.debug(f"Deleted node: {node_id}")
         return True    
-    def query(self, query: KnowledgeQuery) -> List[KnowledgeNode]:
-        """
-        Query the SSKG for nodes matching the given criteria.
+    def query(self, query: KnowledgeQuery) -> list[KnowledgeNode]:
+        """Query the SSKG for nodes matching the given criteria.
         
         Args:
             query: The query parameters
@@ -485,10 +474,9 @@ class EnhancedSSKGManager:
                 break
         
         return results   
-    def get_related_nodes(self, node_id: str, relation_types: Optional[List[RelationType]] = None, 
-                      direction: str = "outgoing", limit: int = 10) -> List[Tuple[KnowledgeNode, RelationType]]:
-        """
-        Get nodes related to the given node.
+    def get_related_nodes(self, node_id: str, relation_types: Optional[list[RelationType]] = None, 
+                      direction: str = "outgoing", limit: int = 10) -> list[tuple[KnowledgeNode, RelationType]]:
+        """Get nodes related to the given node.
         
         Args:
             node_id: The ID of the node to get related nodes for
@@ -539,9 +527,8 @@ class EnhancedSSKGManager:
         
         return results
     
-    def resolve_conflicts(self, node_ids: List[str]) -> Optional[KnowledgeNode]:
-        """
-        Resolve conflicts between multiple nodes.
+    def resolve_conflicts(self, node_ids: list[str]) -> Optional[KnowledgeNode]:
+        """Resolve conflicts between multiple nodes.
         
         Args:
             node_ids: List of conflicting node IDs
@@ -600,9 +587,8 @@ class EnhancedSSKGManager:
 # Domain-specific adapter methods
     
     def store_memory(self, content: str, memory_type: str, owner_id: str, 
-                    importance: float = 0.5, metadata: Dict[str, Any] = None) -> str:
-        """
-        Store a memory in the SSKG.
+                    importance: float = 0.5, metadata: dict[str, Any] = None) -> str:
+        """Store a memory in the SSKG.
         
         Args:
             content: The memory content
@@ -642,9 +628,8 @@ class EnhancedSSKGManager:
     
     def retrieve_memories(self, owner_id: Optional[str] = None, memory_type: Optional[str] = None,
                          content_query: Optional[str] = None, min_importance: float = 0.0,
-                         limit: int = 10) -> List[KnowledgeNode]:
-        """
-        Retrieve memories from the SSKG.
+                         limit: int = 10) -> list[KnowledgeNode]:
+        """Retrieve memories from the SSKG.
         
         Args:
             owner_id: Optional ID of the memory owner
@@ -674,9 +659,8 @@ class EnhancedSSKGManager:
         # Execute query
         return self.query(query)
     
-    def store_wiki_content(self, page_id: str, content: str, metadata: Dict[str, Any] = None) -> str:
-        """
-        Store wiki content in the SSKG.
+    def store_wiki_content(self, page_id: str, content: str, metadata: dict[str, Any] = None) -> str:
+        """Store wiki content in the SSKG.
         
         Args:
             page_id: ID of the wiki page
@@ -717,8 +701,7 @@ class EnhancedSSKGManager:
             return self.add_node(wiki_node)
     
     def retrieve_wiki_content(self, page_id: str) -> Optional[KnowledgeNode]:
-        """
-        Retrieve wiki content from the SSKG.
+        """Retrieve wiki content from the SSKG.
         
         Args:
             page_id: ID of the wiki page
@@ -733,9 +716,8 @@ class EnhancedSSKGManager:
         ))
         
         return results[0] if results else None    
-    def store_session_state(self, session_id: str, state: Dict[str, Any]) -> str:
-        """
-        Store session state in the SSKG.
+    def store_session_state(self, session_id: str, state: dict[str, Any]) -> str:
+        """Store session state in the SSKG.
         
         Args:
             session_id: ID of the session
@@ -778,9 +760,8 @@ class EnhancedSSKGManager:
             # Add to graph
             return self.add_node(session_node)
     
-    def retrieve_session_state(self, session_id: str) -> Optional[Dict[str, Any]]:
-        """
-        Retrieve session state from the SSKG.
+    def retrieve_session_state(self, session_id: str) -> Optional[dict[str, Any]]:
+        """Retrieve session state from the SSKG.
         
         Args:
             session_id: ID of the session
@@ -803,9 +784,8 @@ class EnhancedSSKGManager:
             logger.error(f"Failed to parse session state for session {session_id}")
             return None
     
-    def store_project_state(self, project_id: str, state: Dict[str, Any]) -> str:
-        """
-        Store project state in the SSKG.
+    def store_project_state(self, project_id: str, state: dict[str, Any]) -> str:
+        """Store project state in the SSKG.
         
         Args:
             project_id: ID of the project
@@ -848,9 +828,8 @@ class EnhancedSSKGManager:
             # Add to graph
             return self.add_node(project_node)
     
-    def retrieve_project_state(self, project_id: str) -> Optional[Dict[str, Any]]:
-        """
-        Retrieve project state from the SSKG.
+    def retrieve_project_state(self, project_id: str) -> Optional[dict[str, Any]]:
+        """Retrieve project state from the SSKG.
         
         Args:
             project_id: ID of the project

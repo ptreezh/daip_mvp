@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 11:00:00
+"""@Time    : 2025-08-06 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_integration_scenarios.py
 @Description:
@@ -8,36 +6,51 @@
     Tests complete user workflows and system integration patterns.
 """
 
-import pytest
-from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
-from unittest.mock import Mock, AsyncMock, patch
 import asyncio
-import json
+import os
 
 # Import from previous test files
 import sys
-import os
+from datetime import datetime
+from typing import Any, Optional
+
+import pytest
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from test_dual_entrance_domain_model import (
-    UserId, SessionId, UserPreferences, TransparencyData, UserIntervention,
-    User, Session, EntranceType, SessionStatus, IntentType,
-    EntranceManager, DomainEventPublisher
+    DomainEventPublisher,
+    EntranceType,
+    IntentType,
+    Session,
+    SessionId,
+    SessionStatus,
+    TransparencyData,
+    User,
+    UserId,
+    UserIntervention,
+    UserPreferences,
+)
+from test_entrance_use_cases import (
+    CreateSessionUseCase,
+    GetTransparencyDataUseCase,
+    HandleUserInterventionUseCase,
+    MultiAgentService,
+    ProcessForumRequestUseCase,
+    ProcessSecretariatRequestUseCase,
+    SessionRepository,
+    SwitchEntranceUseCase,
+    TransparencyService,
+    UserRepository,
+    WorkflowService,
 )
 
-from test_entrance_use_cases import (
-    UserRepository, SessionRepository, TransparencyService, WorkflowService,
-    MultiAgentService, CreateSessionUseCase, SwitchEntranceUseCase,
-    ProcessSecretariatRequestUseCase, ProcessForumRequestUseCase,
-    HandleUserInterventionUseCase, GetTransparencyDataUseCase
-)
 
 # Integration Test Infrastructure
 class TestUserRepository(UserRepository):
     """Test implementation of UserRepository"""
     def __init__(self):
-        self.users: Dict[str, User] = {}
+        self.users: dict[str, User] = {}
     
     def save(self, user: User) -> None:
         self.users[user.user_id.value] = user
@@ -45,13 +58,13 @@ class TestUserRepository(UserRepository):
     def find_by_id(self, user_id: UserId) -> Optional[User]:
         return self.users.get(user_id.value)
     
-    def find_by_preferences(self, preferences: UserPreferences) -> List[User]:
+    def find_by_preferences(self, preferences: UserPreferences) -> list[User]:
         return [user for user in self.users.values() if user.preferences == preferences]
 
 class TestSessionRepository(SessionRepository):
     """Test implementation of SessionRepository"""
     def __init__(self):
-        self.sessions: Dict[str, Session] = {}
+        self.sessions: dict[str, Session] = {}
     
     def save(self, session: Session) -> None:
         self.sessions[session.session_id.value] = session
@@ -63,18 +76,18 @@ class TestSessionRepository(SessionRepository):
             return None
         return session
     
-    def find_by_user(self, user_id: UserId) -> List[Session]:
+    def find_by_user(self, user_id: UserId) -> list[Session]:
         return [session for session in self.sessions.values() 
                 if session.user_id == user_id]
     
-    def find_active_sessions(self) -> List[Session]:
+    def find_active_sessions(self) -> list[Session]:
         return [session for session in self.sessions.values() 
                 if session.status == SessionStatus.ACTIVE and not session.is_expired()]
 
 class TestTransparencyService(TransparencyService):
     """Test implementation of TransparencyService"""
     def __init__(self):
-        self.workflow_data: Dict[str, TransparencyData] = {}
+        self.workflow_data: dict[str, TransparencyData] = {}
     
     async def get_workflow_transparency(self, workflow_id: str) -> TransparencyData:
         # Simulate database delay
@@ -143,7 +156,7 @@ class TestWorkflowService(WorkflowService):
     def __init__(self):
         self.workflow_counter = 0
     
-    async def execute_workflow(self, intent_type: IntentType, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute_workflow(self, intent_type: IntentType, context: dict[str, Any]) -> dict[str, Any]:
         # Simulate workflow execution
         await asyncio.sleep(0.5)
         
@@ -196,7 +209,7 @@ class TestWorkflowService(WorkflowService):
         
         return result
     
-    async def get_workflow_status(self, workflow_id: str) -> Dict[str, Any]:
+    async def get_workflow_status(self, workflow_id: str) -> dict[str, Any]:
         # Simulate database lookup
         await asyncio.sleep(0.1)
         
@@ -211,10 +224,10 @@ class TestWorkflowService(WorkflowService):
 class TestMultiAgentService(MultiAgentService):
     """Test implementation of MultiAgentService"""
     def __init__(self):
-        self.collaborations: Dict[str, Dict[str, Any]] = {}
-        self.interventions: List[Dict[str, Any]] = []
+        self.collaborations: dict[str, dict[str, Any]] = {}
+        self.interventions: list[dict[str, Any]] = []
     
-    async def start_collaboration(self, topic: str, context: Dict[str, Any]) -> str:
+    async def start_collaboration(self, topic: str, context: dict[str, Any]) -> str:
         # Simulate collaboration setup
         await asyncio.sleep(0.3)
         
@@ -299,7 +312,7 @@ class TestMultiAgentService(MultiAgentService):
         
         return True
     
-    async def get_consensus_metrics(self, session_id: str) -> Dict[str, float]:
+    async def get_consensus_metrics(self, session_id: str) -> dict[str, float]:
         # Simulate consensus calculation
         await asyncio.sleep(0.1)
         
@@ -324,7 +337,7 @@ class TestMultiAgentService(MultiAgentService):
 class TestIntegrationScenarios:
     """Test suite for integration scenarios"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def test_infrastructure(self):
         """Setup test infrastructure"""
         user_repo = TestUserRepository()
@@ -341,7 +354,7 @@ class TestIntegrationScenarios:
             "multi_agent_service": multi_agent_service
         }
     
-    @pytest.fixture
+    @pytest.fixture()
     def use_cases(self, test_infrastructure):
         """Setup use cases"""
         return {
@@ -372,7 +385,7 @@ class TestIntegrationScenarios:
             )
         }
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_complete_secretariat_workflow(self, test_infrastructure, use_cases):
         """Test complete Secretariat workflow from start to finish"""
         # Step 1: Create Secretariat session
@@ -407,7 +420,7 @@ class TestIntegrationScenarios:
         assert len(user.session_history) == 1
         assert session_id in [s.value for s in user.session_history]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_complete_forum_workflow(self, test_infrastructure, use_cases):
         """Test complete Forum workflow from start to finish"""
         # Step 1: Create Forum session
@@ -454,7 +467,7 @@ class TestIntegrationScenarios:
         user_messages = [msg for msg in collaboration["messages"] if msg["agent"] == "user"]
         assert len(user_messages) == 2
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_entrance_switching_workflow(self, test_infrastructure, use_cases):
         """Test workflow for switching between entrances"""
         # Step 1: Create initial Secretariat session
@@ -511,7 +524,7 @@ class TestIntegrationScenarios:
         assert len(session.interventions) == 1  # Interventions preserved
         assert session.transparency_data is not None
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_concurrent_sessions_workflow(self, test_infrastructure, use_cases):
         """Test handling multiple concurrent sessions"""
         # Step 1: Create multiple sessions for same user
@@ -565,7 +578,7 @@ class TestIntegrationScenarios:
         assert secretariat_session_id in active_session_ids
         assert forum_session_id in active_session_ids
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_error_recovery_workflow(self, test_infrastructure, use_cases):
         """Test error recovery and graceful degradation"""
         # Step 1: Create session
@@ -607,7 +620,7 @@ class TestIntegrationScenarios:
         assert session.entrance_type == EntranceType.FORUM
         assert session.status == SessionStatus.ACTIVE
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_performance_under_load(self, test_infrastructure, use_cases):
         """Test system performance under simulated load"""
         # Step 1: Create multiple users and sessions

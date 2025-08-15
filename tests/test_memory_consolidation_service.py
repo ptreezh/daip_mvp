@@ -1,38 +1,37 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-23 11:30:00
+"""@Time    : 2025-07-23 11:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_memory_consolidation_service.py
 @Description:
     Unit tests for MemoryConsolidationService.
 """
-import pytest
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
+import pytest
+
+from src.core_services.memory_agent import MemAgent, Memory, MemoryType
 from src.core_services.memory_consolidation_service import (
-    MemoryConsolidationService, 
-    MemoryConflict, 
-    SharingPolicy, 
-    ConflictResolutionStrategy
+    ConflictResolutionStrategy,
+    MemoryConflict,
+    MemoryConsolidationService,
+    SharingPolicy,
 )
-from src.core_services.memory_agent import MemAgent, Memory, MemoryType, MemoryQuery
 
 
 class TestMemoryConsolidationService:
     """Test cases for MemoryConsolidationService."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_mem_agent(self):
         """Create a mock MemAgent for testing."""
         return Mock(spec=MemAgent)
     
-    @pytest.fixture
+    @pytest.fixture()
     def consolidation_service(self, mock_mem_agent):
         """Create a MemoryConsolidationService instance for testing."""
         return MemoryConsolidationService(mock_mem_agent)
     
-    @pytest.fixture
+    @pytest.fixture()
     def sample_memories(self):
         """Create sample memories for testing."""
         return [

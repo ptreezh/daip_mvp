@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多角色对话功能验证脚本
+"""多角色对话功能验证脚本
 
 验证多角色对话引擎的基本功能和组件集成。
 """
 
 import asyncio
-import sys
 import os
-from datetime import datetime
+import sys
 
 # 添加项目根目录到路径
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -23,14 +20,17 @@ def test_imports():
         sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
         
         from multi_role_dialogue_engine import (
-            MultiRoleDialogueEngine, RoleSelector, ConversationManager,
-            ConvergenceDetector, DialogueState, ConversationTurn, RoleContext
+            ConvergenceDetector,
+            ConversationManager,
+            ConversationTurn,
+            DialogueState,
+            MultiRoleDialogueEngine,
+            RoleContext,
+            RoleSelector,
         )
         print("✅ 多角色对话引擎模块导入成功")
         
-        from debate_flow_definition import (
-            DebateSession, DebateRules, DebateParticipant, ParticipantRole
-        )
+        from debate_flow_definition import DebateParticipant, DebateRules, DebateSession, ParticipantRole
         print("✅ 辩论流程定义模块导入成功")
         
         from participant_management import ParticipantManager
@@ -48,10 +48,8 @@ def test_basic_functionality():
     print("🧪 测试基本功能...")
     
     try:
-        from multi_role_dialogue_engine import (
-            RoleContext, DialogueContext, DialogueTurn, ConversationTurn
-        )
-        from debate_flow_definition import ParticipantRole, DebatePhase
+        from debate_flow_definition import DebatePhase, ParticipantRole
+        from multi_role_dialogue_engine import ConversationTurn, DialogueContext, DialogueTurn, RoleContext
         
         # 测试角色上下文创建
         role_context = RoleContext(
@@ -105,10 +103,8 @@ async def test_convergence_detector():
     print("🧪 测试收敛检测器...")
     
     try:
-        from multi_role_dialogue_engine import (
-            ConvergenceDetector, DialogueContext, DialogueTurn, ConversationTurn
-        )
         from debate_flow_definition import DebatePhase
+        from multi_role_dialogue_engine import ConvergenceDetector, ConversationTurn, DialogueContext, DialogueTurn
         
         # 创建收敛检测器
         detector = ConvergenceDetector()
@@ -171,8 +167,9 @@ def test_role_selector():
     print("🧪 测试角色选择器...")
     
     try:
+        from unittest.mock import AsyncMock, Mock
+
         from multi_role_dialogue_engine import RoleSelector
-        from unittest.mock import Mock, AsyncMock
         
         # 创建模拟角色管理器
         mock_role_manager = Mock()
@@ -224,11 +221,10 @@ async def test_conversation_manager():
     print("🧪 测试对话管理器...")
     
     try:
-        from multi_role_dialogue_engine import (
-            ConversationManager, RoleContext, DialogueContext
-        )
-        from debate_flow_definition import ParticipantRole, DebatePhase
-        from unittest.mock import Mock, AsyncMock
+        from unittest.mock import AsyncMock, Mock
+
+        from debate_flow_definition import DebatePhase, ParticipantRole
+        from multi_role_dialogue_engine import ConversationManager, DialogueContext, RoleContext
         
         # 创建模拟组件
         mock_cognitive_agent = Mock()

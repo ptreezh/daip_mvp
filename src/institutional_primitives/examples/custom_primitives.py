@@ -1,18 +1,23 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 05:30:00
+"""@Time    : 2025-07-25 05:30:00
 @Author  : DAIP-LIVE Team
 @File    : custom_primitives.py
 @Description:
     Example custom primitives demonstrating the plugin interface system.
 """
 import asyncio
-from typing import Any, Dict
 from datetime import datetime
+from typing import Any
 
-from ..plugin_interface import CustomPrimitiveBase, PluginInterface, PluginMetadata
 from ..base import ExecutionContext
-from ..service_adapters import ServiceAdapter, ServiceAdapterMetadata, ServiceType, AdapterCapability, ServiceRequest, ServiceResponse
+from ..plugin_interface import CustomPrimitiveBase, PluginInterface, PluginMetadata
+from ..service_adapters import (
+    AdapterCapability,
+    ServiceAdapter,
+    ServiceAdapterMetadata,
+    ServiceRequest,
+    ServiceResponse,
+    ServiceType,
+)
 
 
 class SentimentAnalysisPrimitive(CustomPrimitiveBase):
@@ -21,7 +26,7 @@ class SentimentAnalysisPrimitive(CustomPrimitiveBase):
     def get_primitive_type(self) -> str:
         return "sentiment_analysis"
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -38,7 +43,7 @@ class SentimentAnalysisPrimitive(CustomPrimitiveBase):
             "required": ["text"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -61,7 +66,7 @@ class SentimentAnalysisPrimitive(CustomPrimitiveBase):
             "required": ["sentiment", "confidence"]
         }
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         """Execute sentiment analysis."""
         text = inputs.get("text", "")
         language = inputs.get("language", "en")
@@ -106,7 +111,7 @@ class DataTransformationPrimitive(CustomPrimitiveBase):
     def get_primitive_type(self) -> str:
         return "data_transformation"
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -127,7 +132,7 @@ class DataTransformationPrimitive(CustomPrimitiveBase):
             "required": ["data", "transformation"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -142,7 +147,7 @@ class DataTransformationPrimitive(CustomPrimitiveBase):
             "required": ["transformed_data"]
         }
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         """Execute data transformation."""
         data = inputs.get("data", [])
         transformation = inputs.get("transformation", "filter")
@@ -296,18 +301,18 @@ class ExampleCustomPrimitivesPlugin(PluginInterface):
             service_adapters=["mock_external_service"]
         )
     
-    def get_primitive_classes(self) -> Dict[str, type]:
+    def get_primitive_classes(self) -> dict[str, type]:
         return {
             "sentiment_analysis": SentimentAnalysisPrimitive,
             "data_transformation": DataTransformationPrimitive
         }
     
-    def get_service_adapters(self) -> Dict[str, Any]:
+    def get_service_adapters(self) -> dict[str, Any]:
         return {
             "mock_external_service": MockExternalServiceAdapter
         }
     
-    def initialize(self, context: Dict[str, Any]) -> bool:
+    def initialize(self, context: dict[str, Any]) -> bool:
         """Initialize the plugin."""
         # Plugin-specific initialization
         return True

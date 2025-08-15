@@ -1,16 +1,18 @@
-"""
-Personal Intelligence Hub - Transparency Monitor Component
+"""Personal Intelligence Hub - Transparency Monitor Component
 
 实时透明度监控面板组件
 """
 
-from lona.html import HTML, Div, H3, P, Span, Button
 from datetime import datetime
-from typing import List, Optional
+
+from lona.html import H3, HTML, Button, Div, P, Span
 
 from personal_intelligence_hub.models.transparency_models import (
-    SystemStatus, AgentStatusInfo, LLMCall, AgentStatus, 
-    TokenUsage, MemoryOperation, OperationLog
+    AgentStatus,
+    AgentStatusInfo,
+    LLMCall,
+    SystemStatus,
+    TokenUsage,
 )
 
 
@@ -19,7 +21,7 @@ class TransparencyMonitor:
     
     def __init__(self):
         self.system_status = SystemStatus(active_agents=[])
-        self.operation_logs: List = []
+        self.operation_logs: list = []
         self.backend_service = None
         self.auto_refresh = True
         self.refresh_interval = 5  # 5秒刷新一次

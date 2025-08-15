@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-演化可视化
+"""演化可视化
 
 提供知识演化过程的可视化展示
 """
 
 import logging
-from typing import Any, Dict, List, Optional
-from datetime import datetime
 import uuid
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +29,7 @@ class EvolutionVisualization:
             "quality_trend": {"type": "line_chart", "y_axis": "quality_score"}
         }
     
-    def create_evolution_timeline(self, evolution_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def create_evolution_timeline(self, evolution_data: list[dict[str, Any]]) -> dict[str, Any]:
         """创建演化时间线"""
         try:
             timeline_id = str(uuid.uuid4())
@@ -65,7 +62,7 @@ class EvolutionVisualization:
             logger.error(f"创建演化时间线失败: {e}")
             return {"error": str(e)}
     
-    def generate_lineage_graph(self, lineage_data: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_lineage_graph(self, lineage_data: dict[str, Any]) -> dict[str, Any]:
         """生成谱系图"""
         try:
             graph_id = str(uuid.uuid4())
@@ -93,7 +90,7 @@ class EvolutionVisualization:
             logger.error(f"生成谱系图失败: {e}")
             return {"error": str(e)}
     
-    def create_quality_trend_chart(self, quality_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def create_quality_trend_chart(self, quality_data: list[dict[str, Any]]) -> dict[str, Any]:
         """创建质量趋势图"""
         try:
             chart_id = str(uuid.uuid4())

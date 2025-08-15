@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-共识数据验证和序列化工具
+"""共识数据验证和序列化工具
 
 提供统一的数据验证、序列化和反序列化功能。
 确保数据格式的一致性和完整性。
@@ -23,20 +21,22 @@
 import json
 import re
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union, Type
-from pydantic import ValidationError
+from typing import Any
 
 from consensus_models import (
-    ConsensusInput, ConsensusRequest, ConsensusResponse,
-    AlgorithmMetadata, ValidationResult, QualityRequirements
+    AlgorithmMetadata,
+    ConsensusInput,
+    ConsensusRequest,
+    ValidationResult,
 )
+from pydantic import ValidationError
 
 
 class ConsensusDataValidator:
     """共识数据验证器"""
     
     @staticmethod
-    def validate_consensus_input(data: Dict[str, Any]) -> ValidationResult:
+    def validate_consensus_input(data: dict[str, Any]) -> ValidationResult:
         """验证共识输入数据"""
         errors = []
         warnings = []
@@ -80,7 +80,7 @@ class ConsensusDataValidator:
         )
         
     @staticmethod
-    def validate_consensus_request(data: Dict[str, Any]) -> ValidationResult:
+    def validate_consensus_request(data: dict[str, Any]) -> ValidationResult:
         """验证共识请求数据"""
         errors = []
         warnings = []
@@ -132,7 +132,7 @@ class ConsensusDataValidator:
         )
         
     @staticmethod
-    def validate_algorithm_metadata(data: Dict[str, Any]) -> ValidationResult:
+    def validate_algorithm_metadata(data: dict[str, Any]) -> ValidationResult:
         """验证算法元数据"""
         errors = []
         warnings = []
@@ -191,7 +191,7 @@ class ConsensusDataSerializer:
         return json.dumps(obj, default=json_encoder, ensure_ascii=False, indent=2)
         
     @staticmethod
-    def deserialize_from_json(json_str: str, target_type: Type) -> Any:
+    def deserialize_from_json(json_str: str, target_type: type) -> Any:
         """从JSON字符串反序列化对象"""
         try:
             data = json.loads(json_str)
@@ -212,7 +212,7 @@ class ConsensusDataSerializer:
             raise ValueError(f"反序列化失败: {str(e)}")
             
     @staticmethod
-    def _convert_datetime_fields(data: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_datetime_fields(data: dict[str, Any]) -> dict[str, Any]:
         """转换datetime字段"""
         datetime_fields = ["timestamp", "created_at", "updated_at"]
         
@@ -226,8 +226,8 @@ class ConsensusDataSerializer:
         return data
         
     @staticmethod
-    def convert_legacy_format(legacy_data: Dict[str, Any], 
-                            source_format: str) -> Dict[str, Any]:
+    def convert_legacy_format(legacy_data: dict[str, Any], 
+                            source_format: str) -> dict[str, Any]:
         """转换旧版本数据格式"""
         if source_format == "debate_turn":
             # 转换DebateTurn格式到ConsensusInput
@@ -265,7 +265,7 @@ class ConsensusDataConverter:
     """共识数据格式转换器"""
     
     @staticmethod
-    def to_standard_format(data: Any, source_type: str = "auto") -> Dict[str, Any]:
+    def to_standard_format(data: Any, source_type: str = "auto") -> dict[str, Any]:
         """转换为标准格式"""
         if source_type == "auto":
             source_type = ConsensusDataConverter._detect_format(data)
@@ -292,9 +292,9 @@ class ConsensusDataConverter:
             return "unknown"
             
     @staticmethod
-    def batch_convert(data_list: List[Any], 
-                     target_type: Type,
-                     source_format: str = "auto") -> List[Any]:
+    def batch_convert(data_list: list[Any], 
+                     target_type: type,
+                     source_format: str = "auto") -> list[Any]:
         """批量转换数据"""
         results = []
         errors = []

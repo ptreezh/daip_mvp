@@ -1,25 +1,22 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Test suite for Advanced Consensus Algorithms
+"""Test suite for Advanced Consensus Algorithms
 
 This module contains unit tests for the advanced consensus algorithms,
 including weighted voting, Bayesian consensus, and cognitive diversity
 preserving consensus.
 """
 
-import pytest
 from datetime import datetime
-from unittest.mock import Mock, patch
+
+import pytest
 
 from src.core_services.advanced_consensus_algorithms import (
-    ConsensusInput,
-    ConsensusResult,
-    ConsensusAlgorithmType,
-    WeightedVotingConsensus,
     BayesianConsensus,
     CognitiveDiversityPreservingConsensus,
-    EmergentInsight
+    ConsensusAlgorithmType,
+    ConsensusInput,
+    ConsensusResult,
+    WeightedVotingConsensus,
 )
 
 

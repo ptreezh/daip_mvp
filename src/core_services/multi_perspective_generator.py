@@ -1,26 +1,24 @@
-"""
-@Time: 2025-08-04
+"""@Time: 2025-08-04
 @Author: Claude Code
 @File: multi_perspective_generator.py
 @Description: Multi-perspective intelligent generator for V0.3.6 with graceful degradation
 """
 
-import asyncio
 import json
 import logging
-import time
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Set, Tuple, Callable
-from dataclasses import dataclass, field
-from enum import Enum
 import threading
-from collections import defaultdict, deque
+import time
 import uuid
-import weakref
+from collections import defaultdict, deque
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
 
 from ..core_services.enhanced_sskg_manager import EnhancedSSKGManager
 from ..core_services.memory_agent import MemAgent
-from ..core_services.smart_reviewer_allocator import SmartReviewerAllocator, ReviewerProfile
+from ..core_services.smart_reviewer_allocator import SmartReviewerAllocator
 
 logger = logging.getLogger(__name__)
 
@@ -69,11 +67,11 @@ class Perspective:
     confidence: float
     weight: float
     created_at: datetime
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    related_perspectives: List[str] = field(default_factory=list)
-    supporting_evidence: List[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    related_perspectives: list[str] = field(default_factory=list)
+    supporting_evidence: list[str] = field(default_factory=list)
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert perspective to dictionary"""
         return {
             'perspective_id': self.perspective_id,
@@ -95,15 +93,15 @@ class Perspective:
 class PerspectiveConflict:
     """Represents a conflict between perspectives"""
     conflict_id: str
-    perspective_ids: List[str]
+    perspective_ids: list[str]
     conflict_type: str
     description: str
     severity: float  # 0.0 to 1.0
     detected_at: datetime
-    resolution_suggestions: List[str]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    resolution_suggestions: list[str]
+    metadata: dict[str, Any] = field(default_factory=dict)
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert conflict to dictionary"""
         return {
             'conflict_id': self.conflict_id,
@@ -122,16 +120,16 @@ class SynthesisResult:
     """Result of multi-perspective synthesis"""
     synthesis_id: str
     topic: str
-    perspectives: List[Perspective]
-    conflicts: List[PerspectiveConflict]
+    perspectives: list[Perspective]
+    conflicts: list[PerspectiveConflict]
     synthesized_content: str
     consensus_score: float
     confidence_score: float
     synthesis_strategy: SynthesisStrategy
     created_at: datetime
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert synthesis result to dictionary"""
         return {
             'synthesis_id': self.synthesis_id,
@@ -148,8 +146,7 @@ class SynthesisResult:
 
 
 class MultiPerspectiveGenerator:
-    """
-    Multi-perspective intelligent generator with graceful degradation
+    """Multi-perspective intelligent generator with graceful degradation
     Generates and synthesizes multiple perspectives on complex topics
     """
     
@@ -161,21 +158,21 @@ class MultiPerspectiveGenerator:
         self.allocator = allocator
         
         # Perspective generation
-        self.perspective_templates: Dict[PerspectiveType, Dict[str, Any]] = {}
-        self.perspective_weights: Dict[PerspectiveType, float] = {}
+        self.perspective_templates: dict[PerspectiveType, dict[str, Any]] = {}
+        self.perspective_weights: dict[PerspectiveType, float] = {}
         self._initialize_perspective_templates()
         
         # Active synthesis sessions
-        self.active_syntheses: Dict[str, SynthesisResult] = {}
+        self.active_syntheses: dict[str, SynthesisResult] = {}
         self.synthesis_history: deque = deque(maxlen=1000)
         
         # Conflict detection
-        self.conflict_detectors: Dict[str, Callable] = {}
-        self.conflict_history: List[PerspectiveConflict] = []
+        self.conflict_detectors: dict[str, Callable] = {}
+        self.conflict_history: list[PerspectiveConflict] = []
         
         # Performance tracking
-        self.generation_times: Dict[str, List[float]] = defaultdict(list)
-        self.synthesis_times: Dict[str, List[float]] = defaultdict(list)
+        self.generation_times: dict[str, list[float]] = defaultdict(list)
+        self.synthesis_times: dict[str, list[float]] = defaultdict(list)
         
         # Graceful degradation settings
         self.max_generation_time = 60.0  # seconds
@@ -187,8 +184,8 @@ class MultiPerspectiveGenerator:
         self._lock = threading.Lock()
         
         # Event handlers
-        self.perspective_handlers: Dict[str, Callable] = {}
-        self.synthesis_handlers: Dict[str, Callable] = {}
+        self.perspective_handlers: dict[str, Callable] = {}
+        self.synthesis_handlers: dict[str, Callable] = {}
         
         # Configuration
         self.min_confidence_threshold = 0.6
@@ -210,8 +207,8 @@ class MultiPerspectiveGenerator:
         
     async def generate_perspectives(self,
                                    topic: str,
-                                   perspective_types: List[PerspectiveType],
-                                   context: Dict[str, Any] = None) -> List[Perspective]:
+                                   perspective_types: list[PerspectiveType],
+                                   context: dict[str, Any] = None) -> list[Perspective]:
         """Generate multiple perspectives on a topic"""
         try:
             start_time = time.time()
@@ -256,7 +253,7 @@ class MultiPerspectiveGenerator:
             
     async def synthesize_perspectives(self,
                                    topic: str,
-                                   perspectives: List[Perspective],
+                                   perspectives: list[Perspective],
                                    strategy: SynthesisStrategy = None) -> SynthesisResult:
         """Synthesize multiple perspectives into a unified result"""
         try:
@@ -326,7 +323,7 @@ class MultiPerspectiveGenerator:
             
     async def get_perspective_suggestions(self,
                                        topic: str,
-                                       existing_perspectives: List[Perspective] = None) -> List[PerspectiveType]:
+                                       existing_perspectives: list[Perspective] = None) -> list[PerspectiveType]:
         """Suggest relevant perspective types for a topic"""
         try:
             suggestions = []
@@ -363,7 +360,7 @@ class MultiPerspectiveGenerator:
             
     async def get_synthesis_history(self,
                                   limit: int = 50,
-                                  perspective_type: PerspectiveType = None) -> List[Dict[str, Any]]:
+                                  perspective_type: PerspectiveType = None) -> list[dict[str, Any]]:
         """Get synthesis history with optional filtering"""
         try:
             with self._lock:
@@ -385,7 +382,7 @@ class MultiPerspectiveGenerator:
             logger.error(f"Error getting synthesis history: {e}")
             return []
             
-    async def get_system_stats(self) -> Dict[str, Any]:
+    async def get_system_stats(self) -> dict[str, Any]:
         """Get system statistics"""
         try:
             with self._lock:
@@ -425,7 +422,7 @@ class MultiPerspectiveGenerator:
     async def _generate_single_perspective(self,
                                          topic: str,
                                          perspective_type: PerspectiveType,
-                                         context: Dict[str, Any]) -> Optional[Perspective]:
+                                         context: dict[str, Any]) -> Optional[Perspective]:
         """Generate a single perspective"""
         try:
             # Get perspective template
@@ -476,7 +473,7 @@ class MultiPerspectiveGenerator:
             
     async def _get_relevant_knowledge(self,
                                     topic: str,
-                                    perspective_type: PerspectiveType) -> List[Dict[str, Any]]:
+                                    perspective_type: PerspectiveType) -> list[dict[str, Any]]:
         """Get relevant knowledge from SSKG for perspective generation"""
         try:
             # Query SSKG for relevant knowledge
@@ -501,9 +498,9 @@ class MultiPerspectiveGenerator:
     async def _generate_perspective_content(self,
                                          topic: str,
                                          perspective_type: PerspectiveType,
-                                         template: Dict[str, Any],
-                                         knowledge: List[Dict[str, Any]],
-                                         context: Dict[str, Any]) -> str:
+                                         template: dict[str, Any],
+                                         knowledge: list[dict[str, Any]],
+                                         context: dict[str, Any]) -> str:
         """Generate perspective content using template and knowledge"""
         try:
             # Build prompt using template
@@ -548,7 +545,7 @@ from the viewpoint of {template.get('viewpoint', 'standard analysis')}.
             
     def _calculate_perspective_confidence(self,
                                         content: str,
-                                        knowledge: List[Dict[str, Any]],
+                                        knowledge: list[dict[str, Any]],
                                         perspective_type: PerspectiveType) -> float:
         """Calculate confidence score for a perspective"""
         try:
@@ -583,7 +580,7 @@ from the viewpoint of {template.get('viewpoint', 'standard analysis')}.
             
     # Private methods for synthesis
     async def _detect_perspective_conflicts(self,
-                                           perspectives: List[Perspective]) -> List[PerspectiveConflict]:
+                                           perspectives: list[Perspective]) -> list[PerspectiveConflict]:
         """Detect conflicts between perspectives"""
         try:
             conflicts = []
@@ -648,7 +645,7 @@ from the viewpoint of {template.get('viewpoint', 'standard analysis')}.
             logger.error(f"Error checking perspective conflict: {e}")
             return None
             
-    async def _weighted_average_synthesis(self, perspectives: List[Perspective]) -> str:
+    async def _weighted_average_synthesis(self, perspectives: list[Perspective]) -> str:
         """Synthesize using weighted average approach"""
         try:
             # Calculate total weight
@@ -688,7 +685,7 @@ The perspectives above provide complementary insights into the topic. Each persp
             logger.error(f"Error in weighted average synthesis: {e}")
             return "Error in weighted average synthesis."
             
-    async def _consensus_building_synthesis(self, perspectives: List[Perspective]) -> str:
+    async def _consensus_building_synthesis(self, perspectives: list[Perspective]) -> str:
         """Synthesize using consensus building approach"""
         try:
             # Find common themes
@@ -729,8 +726,8 @@ Beyond the consensus, each perspective brings unique insights:
             return "Error in consensus building synthesis."
             
     async def _conflict_resolution_synthesis(self,
-                                           perspectives: List[Perspective],
-                                           conflicts: List[PerspectiveConflict]) -> str:
+                                           perspectives: list[Perspective],
+                                           conflicts: list[PerspectiveConflict]) -> str:
         """Synthesize with explicit conflict resolution"""
         try:
             synthesis = f"""# Conflict-Resolution Synthesis
@@ -778,7 +775,7 @@ After resolving conflicts, the integrated perspective emerges:
             logger.error(f"Error in conflict resolution synthesis: {e}")
             return "Error in conflict resolution synthesis."
             
-    async def _hierarchical_synthesis(self, perspectives: List[Perspective]) -> str:
+    async def _hierarchical_synthesis(self, perspectives: list[Perspective]) -> str:
         """Synthesize using hierarchical approach"""
         try:
             # Sort perspectives by weight (hierarchy)
@@ -825,8 +822,8 @@ The hierarchical approach gives primary consideration to the most relevant persp
             return "Error in hierarchical synthesis."
             
     async def _adaptive_synthesis(self,
-                                perspectives: List[Perspective],
-                                conflicts: List[PerspectiveConflict]) -> str:
+                                perspectives: list[Perspective],
+                                conflicts: list[PerspectiveConflict]) -> str:
         """Synthesize using adaptive approach"""
         try:
             # Choose strategy based on context
@@ -845,7 +842,7 @@ The hierarchical approach gives primary consideration to the most relevant persp
             return "Error in adaptive synthesis."
             
     # Helper methods
-    def _calculate_consensus_score(self, perspectives: List[Perspective]) -> float:
+    def _calculate_consensus_score(self, perspectives: list[Perspective]) -> float:
         """Calculate consensus score among perspectives"""
         try:
             if len(perspectives) <= 1:
@@ -868,7 +865,7 @@ The hierarchical approach gives primary consideration to the most relevant persp
             return 0.5
             
     def _calculate_confidence_score(self,
-                                  perspectives: List[Perspective],
+                                  perspectives: list[Perspective],
                                   synthesized_content: str) -> float:
         """Calculate confidence score for synthesis result"""
         try:
@@ -891,7 +888,7 @@ The hierarchical approach gives primary consideration to the most relevant persp
             logger.error(f"Error calculating confidence score: {e}")
             return 0.5
             
-    def _extract_keywords(self, text: str) -> List[str]:
+    def _extract_keywords(self, text: str) -> list[str]:
         """Extract keywords from text"""
         # Simple keyword extraction
         words = text.lower().split()
@@ -899,7 +896,7 @@ The hierarchical approach gives primary consideration to the most relevant persp
         return list(set(keywords))[:10]  # Top 10 unique keywords
         
     def _calculate_perspective_relevance(self,
-                                       keywords: List[str],
+                                       keywords: list[str],
                                        perspective_type: PerspectiveType) -> float:
         """Calculate relevance of perspective type to topic keywords"""
         try:
@@ -928,7 +925,7 @@ The hierarchical approach gives primary consideration to the most relevant persp
             logger.error(f"Error calculating perspective relevance: {e}")
             return 0.5
             
-    async def _extract_common_themes(self, perspectives: List[Perspective]) -> List[str]:
+    async def _extract_common_themes(self, perspectives: list[Perspective]) -> list[str]:
         """Extract common themes from perspectives"""
         try:
             # Simple theme extraction
@@ -942,7 +939,7 @@ The hierarchical approach gives primary consideration to the most relevant persp
             logger.error(f"Error extracting common themes: {e}")
             return []
             
-    async def _identify_agreements(self, perspectives: List[Perspective]) -> List[str]:
+    async def _identify_agreements(self, perspectives: list[Perspective]) -> list[str]:
         """Identify areas of agreement among perspectives"""
         try:
             # Simple agreement detection
@@ -964,7 +961,7 @@ The hierarchical approach gives primary consideration to the most relevant persp
             
     async def _generate_conflict_resolution(self,
                                           conflict: PerspectiveConflict,
-                                          perspectives: List[Perspective]) -> str:
+                                          perspectives: list[Perspective]) -> str:
         """Generate resolution for a specific conflict"""
         try:
             # Find the conflicting perspectives
@@ -995,7 +992,7 @@ The conflict between {persp1.perspective_type.value} and {persp2.perspective_typ
             
     async def _generate_basic_perspectives(self,
                                          topic: str,
-                                         perspective_types: List[PerspectiveType]) -> List[Perspective]:
+                                         perspective_types: list[PerspectiveType]) -> list[Perspective]:
         """Generate basic perspectives for graceful degradation"""
         try:
             perspectives = []
@@ -1023,7 +1020,7 @@ The conflict between {persp1.perspective_type.value} and {persp2.perspective_typ
             
     async def _generate_basic_synthesis(self,
                                        topic: str,
-                                       perspectives: List[Perspective]) -> SynthesisResult:
+                                       perspectives: list[Perspective]) -> SynthesisResult:
         """Generate basic synthesis for graceful degradation"""
         try:
             basic_content = f"Basic synthesis of {len(perspectives)} perspectives on {topic}."
@@ -1151,19 +1148,19 @@ Provide a comprehensive ethical analysis covering:
             
     # Conflict detection methods
     async def _detect_semantic_conflicts(self,
-                                        perspectives: List[Perspective]) -> List[PerspectiveConflict]:
+                                        perspectives: list[Perspective]) -> list[PerspectiveConflict]:
         """Detect semantic conflicts between perspectives"""
         # This would implement more sophisticated semantic analysis
         return []
         
     async def _detect_sentiment_conflicts(self,
-                                         perspectives: List[Perspective]) -> List[PerspectiveConflict]:
+                                         perspectives: list[Perspective]) -> list[PerspectiveConflict]:
         """Detect sentiment conflicts between perspectives"""
         # This would implement sentiment analysis
         return []
         
     async def _detect_factual_conflicts(self,
-                                       perspectives: List[Perspective]) -> List[PerspectiveConflict]:
+                                       perspectives: list[Perspective]) -> list[PerspectiveConflict]:
         """Detect factual conflicts between perspectives"""
         # This would implement fact-checking and consistency analysis
         return []

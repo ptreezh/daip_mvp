@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证LLM集成服务
+"""验证LLM集成服务
 """
 
-import sys
-import os
 import asyncio
+import sys
+
 sys.path.append('src')
 
 def test_llm_integration_service():
     """测试LLM集成服务"""
     try:
-        from src.real_demo_system.llm_integration_service import LLMIntegrationService, LLMBackend
+        from src.real_demo_system.llm_integration_service import LLMBackend, LLMIntegrationService
         
         # 创建服务
         service = LLMIntegrationService()
@@ -41,7 +39,7 @@ def test_llm_integration_service():
 async def test_llm_generate():
     """测试LLM生成功能"""
     try:
-        from src.real_demo_system.llm_integration_service import LLMIntegrationService, LLMBackend
+        from src.real_demo_system.llm_integration_service import LLMBackend, LLMIntegrationService
         
         service = LLMIntegrationService()
         

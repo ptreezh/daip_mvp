@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Integration tests for Token Management Service with other services
+"""Integration tests for Token Management Service with other services
 """
 
+from unittest.mock import AsyncMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock
 
 from src.config import TokenManagementConfig
 from src.core_services.token_management_service import TokenManagementService
@@ -14,7 +13,7 @@ from src.kernel.llm_interface import LLMConfig, LLMFactory
 class TestTokenManagementIntegration:
     """Test token management integration with other services."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def token_config(self):
         """Create a test token management configuration."""
         return TokenManagementConfig(
@@ -24,12 +23,12 @@ class TestTokenManagementIntegration:
             compression_threshold=0.8
         )
     
-    @pytest.fixture
+    @pytest.fixture()
     def token_service(self, token_config):
         """Create a token management service."""
         return TokenManagementService(token_config)
     
-    @pytest.fixture
+    @pytest.fixture()
     def llm_config(self):
         """Create a test LLM configuration."""
         return LLMConfig(
@@ -46,7 +45,7 @@ class TestTokenManagementIntegration:
         assert llm_interface.token_service is token_service
         assert llm_interface.config == llm_config
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_llm_interface_token_tracking_mock(self, llm_config, token_service):
         """Test LLM interface token tracking with mocked responses."""
         # Create LLM interface with token service

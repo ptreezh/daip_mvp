@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Personal Assistant Service
+"""Personal Intelligence Hub - Personal Assistant Service
 
 个人助手服务，负责处理用户交互、意图分析、工作流编排等核心功能
 """
 
 import logging
-import asyncio
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-import uuid
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
-from personal_intelligence_hub.models.chat_models import ChatMessage, MessageType
+from personal_intelligence_hub.models.chat_models import ChatMessage
 from personal_intelligence_hub.services.backend_integration import get_backend_service
 
 # 配置日志
@@ -40,7 +36,7 @@ class IntentResult:
 @dataclass
 class TeamProposal:
     """团队提议"""
-    agents: List[str]
+    agents: list[str]
     diversity_score: float
     rationale: str
     confirmation_message: str
@@ -50,7 +46,7 @@ class PersonalAssistantService:
     """个人助手服务主类"""
     
     def __init__(self):
-        self.conversation_contexts: Dict[str, Any] = {}
+        self.conversation_contexts: dict[str, Any] = {}
         self.backend_service = None
         logger.info("Personal Assistant Service 初始化完成")
     
@@ -59,7 +55,7 @@ class PersonalAssistantService:
         if self.backend_service is None:
             self.backend_service = await get_backend_service()
     
-    async def analyze_intent(self, user_input: str, context: Optional[Dict] = None) -> IntentResult:
+    async def analyze_intent(self, user_input: str, context: Optional[dict] = None) -> IntentResult:
         """分析用户意图"""
         try:
             await self._ensure_backend_service()
@@ -222,7 +218,7 @@ class PersonalAssistantService:
         
         return original_name
     
-    async def _local_consensus_calculation(self, inputs: List[Dict[str, Any]]) -> str:
+    async def _local_consensus_calculation(self, inputs: list[dict[str, Any]]) -> str:
         """本地共识计算实现 - 使用高级共识算法"""
         try:
             if not inputs:
@@ -275,7 +271,7 @@ class PersonalAssistantService:
             logger.warning(f"高级共识计算失败: {e}，使用简单算法")
             return await self._simple_consensus_calculation(inputs)
     
-    async def _simple_consensus_calculation(self, inputs: List[Dict[str, Any]]) -> str:
+    async def _simple_consensus_calculation(self, inputs: list[dict[str, Any]]) -> str:
         """简单共识计算实现（降级版本）"""
         try:
             # 简化的共识算法：基于置信度加权平均
@@ -325,7 +321,7 @@ class PersonalAssistantService:
             logger.error(f"简单共识计算失败: {e}")
             return f"共识计算失败：{str(e)}"
     
-    async def _select_optimal_team(self, available_roles: List[Dict], workflow_type: WorkflowType, topic: str) -> List[Dict]:
+    async def _select_optimal_team(self, available_roles: list[dict], workflow_type: WorkflowType, topic: str) -> list[dict]:
         """从可用角色中选择最优团队"""
         # 验证输入数据类型
         if not isinstance(available_roles, list):
@@ -370,7 +366,7 @@ class PersonalAssistantService:
         
         return selected_roles[:3]  # 最多3个角色
     
-    def _calculate_team_diversity(self, team_agents: List[Dict]) -> float:
+    def _calculate_team_diversity(self, team_agents: list[dict]) -> float:
         """计算团队多样性评分"""
         if not team_agents:
             return 0.0
@@ -473,7 +469,7 @@ class PersonalAssistantService:
             logger.error(f"处理消息失败: {e}")
             return f"抱歉，处理您的请求时出错：{str(e)}"
     
-    def get_conversation_context(self, session_id: str) -> Dict[str, Any]:
+    def get_conversation_context(self, session_id: str) -> dict[str, Any]:
         """获取对话上下文"""
         if session_id not in self.conversation_contexts:
             self.conversation_contexts[session_id] = {

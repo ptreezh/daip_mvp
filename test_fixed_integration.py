@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-修复后的V0.1.3集成测试
+"""修复后的V0.1.3集成测试
 
 测试修复后的PersonalAssistantService功能
 """
@@ -28,7 +26,7 @@ async def test_fixed_message_history():
     try:
         # 第一条消息
         response1 = await service.process_message("我想讨论AI的发展", session_id)
-        print(f"第1条消息处理完成")
+        print("第1条消息处理完成")
         
         # 检查消息历史
         context = service.get_conversation_context(session_id)
@@ -51,7 +49,7 @@ async def test_fixed_message_history():
         
         # 第二条消息
         response2 = await service.process_message("请详细分析", session_id)
-        print(f"第2条消息处理完成")
+        print("第2条消息处理完成")
         
         # 再次检查消息历史
         context = service.get_conversation_context(session_id)
@@ -217,7 +215,7 @@ async def main():
         "性能要求验证"
     ]
     
-    for i, (name, result) in enumerate(zip(test_names, results)):
+    for i, (name, result) in enumerate(zip(test_names, results, strict=False)):
         status = "✅ 通过" if result else "❌ 失败"
         print(f"   {i+1}. {name}: {status}")
     

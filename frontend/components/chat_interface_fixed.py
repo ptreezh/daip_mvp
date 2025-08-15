@@ -1,23 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-聊天界面组件 - 修复版本
+"""聊天界面组件 - 修复版本
 
 基于Lona框架的正确实现，面向真正的工程可用性
 """
 
-import asyncio
 import logging
-from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
+from lona.html import HTML, Button, Div, Span, TextInput
 from lona.html.widget import Widget
-from lona.html import HTML, Div, TextInput, Button, P, Span, H3, Pre, Code
-
-from services.personal_assistant import PersonalAssistantService, ConversationContext
-from services.websocket_manager import websocket_manager, MessageType, WebSocketMessage
-from components.rich_text_renderer import rich_text_renderer
+from services.personal_assistant import PersonalAssistantService
+from services.websocket_manager import MessageType, WebSocketMessage, websocket_manager
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -38,7 +33,7 @@ class ChatMessage:
     """聊天消息数据类"""
     
     def __init__(self, sender: str, content: str, message_type: MessageType = MessageType.TEXT, 
-                 metadata: Optional[Dict[str, Any]] = None):
+                 metadata: Optional[dict[str, Any]] = None):
         self.id = f"msg_{datetime.now().timestamp()}"
         self.sender = sender
         self.content = content
@@ -54,7 +49,7 @@ class ChatInterface(Widget):
         super().__init__()
         
         self.assistant_service = assistant_service
-        self.messages: List[ChatMessage] = []
+        self.messages: list[ChatMessage] = []
         self.session_id = session_id or f"session_{datetime.now().timestamp()}"
         self.is_processing = False
         
@@ -268,7 +263,7 @@ class ChatInterface(Widget):
             self.messages.append(error_msg)
     
     # 集成演示相关方法
-    async def set_demo_scenario(self, scenario_key: str, scenario_data: Dict[str, Any]):
+    async def set_demo_scenario(self, scenario_key: str, scenario_data: dict[str, Any]):
         """设置演示场景"""
         self.current_scenario = scenario_key
         self.demo_active = True
@@ -285,7 +280,7 @@ class ChatInterface(Widget):
         )
         self.messages.append(scenario_msg)
     
-    async def add_context(self, context_data: Dict[str, Any]):
+    async def add_context(self, context_data: dict[str, Any]):
         """添加上下文信息"""
         self.context_data.update(context_data)
         
@@ -359,7 +354,7 @@ class ChatInterface(Widget):
             _class=message_class
         )
     
-    def get_demo_context(self) -> Dict[str, Any]:
+    def get_demo_context(self) -> dict[str, Any]:
         """获取演示上下文"""
         return {
             "session_id": self.session_id,

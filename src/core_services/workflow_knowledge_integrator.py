@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 22:30:00
+"""@Time    : 2025-07-24 22:30:00
 @Author  : DAIP-LIVE Team
 @File    : workflow_knowledge_integrator.py
 @Description:
@@ -8,19 +6,16 @@
     into Critical Review and Multi-perspective Synthesis workflows.
 """
 import logging
-import asyncio
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from .knowledge_persistence_service import (
-    KnowledgePersistenceService,
-    KnowledgePersistenceResult
-)
 from .enhanced_sskg_manager import EnhancedSSKGManager
-from .wiki_service import WikiService
 from .knowledge_conflict_resolver import KnowledgeConflictResolver
+from .knowledge_persistence_service import KnowledgePersistenceResult, KnowledgePersistenceService
+from .wiki_service import WikiService
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +32,7 @@ class WorkflowIntegrationConfig(BaseModel):
 
 
 class WorkflowKnowledgeIntegrator:
-    """
-    Integrates knowledge persistence into workflow execution.
+    """Integrates knowledge persistence into workflow execution.
     
     This service implements requirement 6.1 and 6.2 by automatically
     persisting validated facts and synthesis results from workflows.
@@ -50,8 +44,7 @@ class WorkflowKnowledgeIntegrator:
         wiki_service: WikiService,
         config: WorkflowIntegrationConfig = None
     ):
-        """
-        Initialize the workflow knowledge integrator.
+        """Initialize the workflow knowledge integrator.
         
         Args:
             sskg_manager: Enhanced SSKG manager for knowledge storage
@@ -78,19 +71,18 @@ class WorkflowKnowledgeIntegrator:
         )
         
         # Callback registry for notifications
-        self.persistence_callbacks: List[Callable[[str, KnowledgePersistenceResult], None]] = []
-        self.conflict_callbacks: List[Callable[[str, List[str]], None]] = []
+        self.persistence_callbacks: list[Callable[[str, KnowledgePersistenceResult], None]] = []
+        self.conflict_callbacks: list[Callable[[str, list[str]], None]] = []
         
         logger.info("WorkflowKnowledgeIntegrator initialized")
     
     async def integrate_critical_review_workflow(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str,
         workflow_instance: Any = None
-    ) -> Dict[str, Any]:
-        """
-        Integrate knowledge persistence into Critical Review workflow results.
+    ) -> dict[str, Any]:
+        """Integrate knowledge persistence into Critical Review workflow results.
         
         Args:
             workflow_result: Result from Critical Review workflow
@@ -158,12 +150,11 @@ class WorkflowKnowledgeIntegrator:
     
     async def integrate_multi_perspective_workflow(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str,
         workflow_instance: Any = None
-    ) -> Dict[str, Any]:
-        """
-        Integrate knowledge persistence into Multi-perspective Synthesis workflow results.
+    ) -> dict[str, Any]:
+        """Integrate knowledge persistence into Multi-perspective Synthesis workflow results.
         
         Args:
             workflow_result: Result from Multi-perspective Synthesis workflow
@@ -209,7 +200,7 @@ class WorkflowKnowledgeIntegrator:
                         except Exception as e:
                             logger.error(f"Conflict callback failed: {e}")
                 
-                logger.info(f"Successfully integrated synthesis result from Multi-perspective workflow")
+                logger.info("Successfully integrated synthesis result from Multi-perspective workflow")
             
             # Enable cross-session knowledge sharing if configured
             if self.config.enable_cross_session_sharing:
@@ -225,11 +216,10 @@ class WorkflowKnowledgeIntegrator:
     
     async def _get_related_knowledge(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         workflow_type: str
-    ) -> Dict[str, Any]:
-        """
-        Get related knowledge from previous sessions for cross-session sharing.
+    ) -> dict[str, Any]:
+        """Get related knowledge from previous sessions for cross-session sharing.
         
         Args:
             workflow_result: Current workflow result
@@ -308,8 +298,7 @@ class WorkflowKnowledgeIntegrator:
         self,
         callback: Callable[[str, KnowledgePersistenceResult], None]
     ) -> None:
-        """
-        Add a callback for persistence events.
+        """Add a callback for persistence events.
         
         Args:
             callback: Function to call when knowledge is persisted
@@ -318,10 +307,9 @@ class WorkflowKnowledgeIntegrator:
     
     def add_conflict_callback(
         self,
-        callback: Callable[[str, List[str]], None]
+        callback: Callable[[str, list[str]], None]
     ) -> None:
-        """
-        Add a callback for conflict events.
+        """Add a callback for conflict events.
         
         Args:
             callback: Function to call when conflicts are detected
@@ -340,7 +328,7 @@ class WorkflowKnowledgeIntegrator:
     
     def remove_conflict_callback(
         self,
-        callback: Callable[[str, List[str]], None]
+        callback: Callable[[str, list[str]], None]
     ) -> None:
         """Remove a conflict callback."""
         try:
@@ -358,8 +346,7 @@ class WorkflowKnowledgeIntegrator:
         notify_on_conflicts: bool = None,
         enable_cross_session_sharing: bool = None
     ) -> None:
-        """
-        Configure integration behavior.
+        """Configure integration behavior.
         
         Args:
             auto_persist_facts: Whether to automatically persist facts
@@ -396,9 +383,8 @@ class WorkflowKnowledgeIntegrator:
         
         logger.info("Workflow knowledge integration configuration updated")
     
-    def get_integration_statistics(self) -> Dict[str, Any]:
-        """
-        Get statistics about knowledge integration.
+    def get_integration_statistics(self) -> dict[str, Any]:
+        """Get statistics about knowledge integration.
         
         Returns:
             Dictionary containing integration statistics
@@ -433,12 +419,11 @@ class WorkflowKnowledgeIntegrator:
     async def search_knowledge(
         self,
         query: str,
-        knowledge_types: List[str] = None,
+        knowledge_types: list[str] = None,
         min_confidence: float = 0.5,
         limit: int = 10
-    ) -> Dict[str, Any]:
-        """
-        Search for knowledge across all persisted content.
+    ) -> dict[str, Any]:
+        """Search for knowledge across all persisted content.
         
         Args:
             query: Search query

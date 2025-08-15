@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - 启动脚本
+"""Personal Intelligence Hub - 启动脚本
 
 快速启动Personal Intelligence Hub应用
 """
 
 import os
 import sys
-import asyncio
 from pathlib import Path
 
 # 添加项目根目录到Python路径

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-调试算法注册问题
+"""调试算法注册问题
 """
 
 import sys
+
 sys.path.append('src')
 sys.path.append('src/core_services')
 
@@ -13,9 +12,9 @@ def debug_algorithm_registration():
     
     try:
         # 导入所需模块
-        from unified_consensus_dispatcher import UnifiedConsensusDispatcher
         from algorithm_registry import AlgorithmRegistry
         from simple_majority_algorithm import SimpleMajorityAlgorithm
+        from unified_consensus_dispatcher import UnifiedConsensusDispatcher
         
         print("✅ 模块导入成功")
         

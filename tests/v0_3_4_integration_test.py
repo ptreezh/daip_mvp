@@ -1,28 +1,26 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: DAIP-LIVE
 @File: v0_3_4_integration_test.py
 @Description: V0.3.4 知识检索和可视化系统集成测试
 """
 
 import asyncio
-import json
 import logging
 import time
-from typing import Dict, List, Any
-from datetime import datetime, timedelta
 import unittest
-from unittest.mock import Mock, patch
+from datetime import datetime, timedelta
+from unittest.mock import Mock
+
+from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
+from src.core_services.knowledge_association_engine import KnowledgeAssociationEngine
+from src.core_services.knowledge_history_tracker import KnowledgeHistoryTracker
+from src.core_services.knowledge_retrieval_optimizer import KnowledgeRetrievalOptimizer
+from src.core_services.knowledge_retrieval_service import KnowledgeRetrievalService
+from src.core_services.knowledge_visualization_engine import KnowledgeVisualizationEngine
+from src.core_services.memory_agent import MemAgent
 
 # 导入V0.3.4组件
 from src.core_services.smart_recommendation_engine import SmartRecommendationEngine
-from src.core_services.knowledge_association_engine import KnowledgeAssociationEngine
-from src.core_services.knowledge_visualization_engine import KnowledgeVisualizationEngine
-from src.core_services.knowledge_retrieval_optimizer import KnowledgeRetrievalOptimizer
-from src.core_services.knowledge_history_tracker import KnowledgeHistoryTracker
-from src.core_services.knowledge_retrieval_service import KnowledgeRetrievalService
-from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
-from src.core_services.memory_agent import MemAgent
 
 
 class V0_3_4_IntegrationTest(unittest.TestCase):
@@ -71,7 +69,7 @@ class V0_3_4_IntegrationTest(unittest.TestCase):
         self.test_knowledge_data = self._create_test_knowledge_data()
         self.test_user_context = self._create_test_user_context()
         
-    def _create_test_knowledge_data(self) -> List[Dict]:
+    def _create_test_knowledge_data(self) -> list[dict]:
         """创建测试知识数据"""
         return [
             {
@@ -106,7 +104,7 @@ class V0_3_4_IntegrationTest(unittest.TestCase):
             }
         ]
     
-    def _create_test_user_context(self) -> Dict:
+    def _create_test_user_context(self) -> dict:
         """创建测试用户上下文"""
         return {
             "user_id": "test_user_001",
@@ -148,7 +146,7 @@ class V0_3_4_IntegrationTest(unittest.TestCase):
             # 性能要求：响应时间 < 2秒
             self.assertLess(execution_time, 2.0)
             
-            print(f"✓ 智能推荐测试通过")
+            print("✓ 智能推荐测试通过")
             print(f"  - 推荐项目数: {len(recommendation_result.knowledge_items)}")
             print(f"  - 推荐置信度: {recommendation_result.confidence:.2f}")
             print(f"  - 执行时间: {execution_time:.3f}秒")
@@ -181,7 +179,7 @@ class V0_3_4_IntegrationTest(unittest.TestCase):
             # 性能要求：响应时间 < 3秒
             self.assertLess(execution_time, 3.0)
             
-            print(f"✓ 知识关联测试通过")
+            print("✓ 知识关联测试通过")
             print(f"  - 发现关联数: {len(associations)}")
             print(f"  - 执行时间: {execution_time:.3f}秒")
             
@@ -215,7 +213,7 @@ class V0_3_4_IntegrationTest(unittest.TestCase):
             # 性能要求：响应时间 < 5秒
             self.assertLess(execution_time, 5.0)
             
-            print(f"✓ 知识可视化测试通过")
+            print("✓ 知识可视化测试通过")
             print(f"  - 节点数: {graph_result['stats']['total_nodes']}")
             print(f"  - 边数: {graph_result['stats']['total_edges']}")
             print(f"  - 执行时间: {execution_time:.3f}秒")
@@ -254,7 +252,7 @@ class V0_3_4_IntegrationTest(unittest.TestCase):
             metrics = await self.retrieval_optimizer.get_performance_metrics()
             self.assertIsNotNone(metrics)
             
-            print(f"✓ 检索优化测试通过")
+            print("✓ 检索优化测试通过")
             print(f"  - 搜索结果数: {len(results)}")
             print(f"  - 执行时间: {execution_time:.3f}秒")
             print(f"  - 缓存命中率: {metrics.cache_hit_rate:.2f}")
@@ -298,7 +296,7 @@ class V0_3_4_IntegrationTest(unittest.TestCase):
             # 性能要求：响应时间 < 1秒
             self.assertLess(execution_time, 1.0)
             
-            print(f"✓ 历史追溯测试通过")
+            print("✓ 历史追溯测试通过")
             print(f"  - 版本ID: {version_id}")
             print(f"  - 版本历史数: {len(history)}")
             print(f"  - 执行时间: {execution_time:.3f}秒")
@@ -363,7 +361,7 @@ class V0_3_4_IntegrationTest(unittest.TestCase):
             # 性能要求：整体流程 < 10秒
             self.assertLess(total_time, 10.0)
             
-            print(f"✓ 组件集成测试通过")
+            print("✓ 组件集成测试通过")
             print(f"  - 搜索结果: {len(search_results)}")
             print(f"  - 推荐结果: {len(recommendation_result.knowledge_items)}")
             print(f"  - 图谱节点: {graph_result['stats']['total_nodes']}")
@@ -400,8 +398,8 @@ class V0_3_4_IntegrationTest(unittest.TestCase):
             process = psutil.Process()
             memory_usage = process.memory_info().rss / 1024 / 1024  # MB
             
-            print(f"✓ 性能基准测试通过")
-            print(f"  - 并发查询数: 5")
+            print("✓ 性能基准测试通过")
+            print("  - 并发查询数: 5")
             print(f"  - 总执行时间: {total_time:.3f}秒")
             print(f"  - 平均响应时间: {total_time/5:.3f}秒")
             print(f"  - 内存使用: {memory_usage:.1f}MB")
@@ -438,10 +436,10 @@ class V0_3_4_IntegrationTest(unittest.TestCase):
             )
             self.assertIsNotNone(fallback_result)
             
-            print(f"✓ 错误处理测试通过")
-            print(f"  - 空查询处理: 正常")
-            print(f"  - 无效ID处理: 正常")
-            print(f"  - 服务降级: 正常")
+            print("✓ 错误处理测试通过")
+            print("  - 空查询处理: 正常")
+            print("  - 无效ID处理: 正常")
+            print("  - 服务降级: 正常")
             
         except Exception as e:
             print(f"✗ 错误处理测试失败: {e}")
@@ -485,7 +483,7 @@ class V0_3_4_IntegrationTest(unittest.TestCase):
             trace_result = await self.history_tracker.trace_knowledge_evolution(knowledge_id)
             self.assertEqual(len(trace_result.timeline), 2)
             
-            print(f"✓ 数据一致性测试通过")
+            print("✓ 数据一致性测试通过")
             print(f"  - 版本数量: {len(history)}")
             print(f"  - 版本差异: {comparison['differences']['change_percentage']:.2f}%")
             print(f"  - 演化事件: {len(trace_result.evolution_events)}")
@@ -528,7 +526,7 @@ class V0_3_4_IntegrationTest(unittest.TestCase):
             self.assertGreaterEqual(len(results), 50)
             self.assertLess(processing_time, 3.0)  # 大规模数据 < 3秒
             
-            print(f"✓ 系统可扩展性测试通过")
+            print("✓ 系统可扩展性测试通过")
             print(f"  - 数据集大小: {len(large_dataset)}")
             print(f"  - 处理结果数: {len(results)}")
             print(f"  - 处理时间: {processing_time:.3f}秒")

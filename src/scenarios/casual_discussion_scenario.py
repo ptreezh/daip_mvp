@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-02 20:00:00
+"""@Time    : 2025-08-02 20:00:00
 @Author  : DAIP-LIVE Team
 @File    : casual_discussion_scenario.py
 @Description:
@@ -16,19 +14,18 @@
 
 import asyncio
 import logging
-import time
-import json
 import uuid
-from typing import Dict, List, Any, Optional
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from typing import Any, Optional
+
+from src.core_services.integrated_llm_manager import IntegratedLLMManager
+from src.core_services.memory_agent import MemAgent
 
 # 导入项目核心组件
 from src.core_services.role_manager import RoleManager
-from src.core_services.integrated_llm_manager import IntegratedLLMManager
-from src.virtual_role_chat.cognitive_agent.agent import CognitiveAgent, CognitiveProfile
 from src.core_services.wiki_service import WikiService
-from src.core_services.memory_agent import MemAgent
+from src.virtual_role_chat.cognitive_agent.agent import CognitiveAgent, CognitiveProfile
 
 logger = logging.getLogger(__name__)
 
@@ -50,10 +47,10 @@ class DiscussionTopic:
     """讨论话题"""
     topic_id: str
     main_topic: str
-    subtopics: List[str]
+    subtopics: list[str]
     current_direction: str
     interest_score: float
-    participant_engagement: Dict[str, float]
+    participant_engagement: dict[str, float]
     created_at: str
 
 
@@ -64,13 +61,12 @@ class SocialInteraction:
     type: str  # like, emoji_reaction, highlight, comment
     participant_id: str
     target_content: str
-    reaction_data: Dict[str, Any]
+    reaction_data: dict[str, Any]
     timestamp: str
 
 
 class CasualDiscussionScenario:
-    """
-    轻松讨论场景 - V0.2.7核心功能实现
+    """轻松讨论场景 - V0.2.7核心功能实现
     
     专注于营造轻松愉快的讨论氛围：
     - 自然流畅的对话体验
@@ -122,9 +118,8 @@ class CasualDiscussionScenario:
         
         logger.info(f"轻松讨论场景初始化完成: {self.scenario_id}")
     
-    def _initialize_casual_roles(self) -> List[Dict[str, Any]]:
+    def _initialize_casual_roles(self) -> list[dict[str, Any]]:
         """初始化轻松讨论专用角色"""
-        
         casual_roles = [
             {
                 "role_id": "friendly_conversationalist",
@@ -169,9 +164,9 @@ class CasualDiscussionScenario:
     async def start_casual_discussion(
         self,
         initial_topic: str,
-        user_preferences: Optional[Dict[str, Any]] = None,
+        user_preferences: Optional[dict[str, Any]] = None,
         config: Optional[CasualDiscussionConfig] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """开始轻松讨论"""
         if config is None:
             config = CasualDiscussionConfig()
@@ -267,8 +262,8 @@ class CasualDiscussionScenario:
     async def _analyze_and_expand_topic(
         self,
         initial_topic: str,
-        user_preferences: Optional[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        user_preferences: Optional[dict[str, Any]]
+    ) -> dict[str, Any]:
         """分析和扩展话题"""
         logger.info("分析和扩展讨论话题...")
         
@@ -323,9 +318,9 @@ class CasualDiscussionScenario:
     
     async def _select_discussion_participants(
         self,
-        topic_analysis: Dict[str, Any],
+        topic_analysis: dict[str, Any],
         config: CasualDiscussionConfig
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """选择讨论参与者"""
         logger.info("选择轻松讨论参与者...")
         
@@ -369,10 +364,10 @@ class CasualDiscussionScenario:
         self,
         discussion_id: str,
         initial_topic: str,
-        topic_analysis: Dict[str, Any],
-        participants: List[Dict[str, Any]],
+        topic_analysis: dict[str, Any],
+        participants: list[dict[str, Any]],
         config: CasualDiscussionConfig
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """初始化讨论环境"""
         logger.info("初始化轻松讨论环境...")
         
@@ -409,9 +404,9 @@ class CasualDiscussionScenario:
     
     async def _conduct_casual_discussion(
         self,
-        discussion_context: Dict[str, Any],
+        discussion_context: dict[str, Any],
         config: CasualDiscussionConfig
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """进行轻松讨论"""
         logger.info("开始轻松讨论...")
         
@@ -483,13 +478,12 @@ class CasualDiscussionScenario:
     
     async def _generate_casual_contribution(
         self,
-        participant: Dict[str, Any],
+        participant: dict[str, Any],
         topic: DiscussionTopic,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         round_num: int
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成参与者的轻松发言"""
-        
         participant_prompt = f"""
         你是{participant['name']}，性格特点：{participant['personality']}
         
@@ -552,12 +546,11 @@ class CasualDiscussionScenario:
     
     async def _generate_social_interactions(
         self,
-        contribution: Dict[str, Any],
-        participants: List[Dict[str, Any]],
+        contribution: dict[str, Any],
+        participants: list[dict[str, Any]],
         config: CasualDiscussionConfig
-    ) -> List[SocialInteraction]:
+    ) -> list[SocialInteraction]:
         """生成社交互动"""
-        
         interactions = []
         
         # 随机生成一些社交互动
@@ -606,11 +599,10 @@ class CasualDiscussionScenario:
     
     async def _process_social_interactions(
         self,
-        discussion_result: Dict[str, Any],
+        discussion_result: dict[str, Any],
         config: CasualDiscussionConfig
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """处理社交互动数据"""
-        
         all_interactions = []
         for round_data in discussion_result.get("discussion_rounds", []):
             all_interactions.extend(round_data.get("social_interactions", []))
@@ -636,11 +628,10 @@ class CasualDiscussionScenario:
     
     async def _track_topic_evolution(
         self,
-        discussion_result: Dict[str, Any],
+        discussion_result: dict[str, Any],
         initial_topic: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """跟踪话题演进"""
-        
         rounds = discussion_result.get("discussion_rounds", [])
         topic_flow = []
         
@@ -672,12 +663,11 @@ class CasualDiscussionScenario:
     
     async def _update_user_interests(
         self,
-        user_preferences: Optional[Dict[str, Any]],
-        discussion_result: Dict[str, Any],
-        topic_evolution: Dict[str, Any]
+        user_preferences: Optional[dict[str, Any]],
+        discussion_result: dict[str, Any],
+        topic_evolution: dict[str, Any]
     ):
         """更新用户兴趣档案"""
-        
         if not user_preferences:
             return
         
@@ -721,7 +711,7 @@ class CasualDiscussionScenario:
                     return line.strip()
         return "通用话题"
     
-    def _extract_expansion_directions(self, response: str) -> List[str]:
+    def _extract_expansion_directions(self, response: str) -> list[str]:
         """提取话题扩展方向"""
         directions = []
         lines = response.split('\n')
@@ -730,7 +720,7 @@ class CasualDiscussionScenario:
                 directions.append(line.strip())
         return directions[:5] if directions else ["基本讨论"]
     
-    def _extract_subtopics(self, response: str) -> List[str]:
+    def _extract_subtopics(self, response: str) -> list[str]:
         """提取子话题"""
         subtopics = []
         lines = response.split('\n')
@@ -756,7 +746,7 @@ class CasualDiscussionScenario:
         else:
             return "casual"
     
-    def _should_transition_topic(self, contribution: Dict[str, Any], current_topic: DiscussionTopic) -> bool:
+    def _should_transition_topic(self, contribution: dict[str, Any], current_topic: DiscussionTopic) -> bool:
         """判断是否应该转换话题"""
         content = contribution.get("content", "")
         
@@ -764,7 +754,7 @@ class CasualDiscussionScenario:
         transition_indicators = ["另外", "顺便说", "这让我想到", "说到这个", "换个角度"]
         return any(indicator in content for indicator in transition_indicators)
     
-    def _calculate_engagement_score(self, discussion_result: Dict[str, Any]) -> float:
+    def _calculate_engagement_score(self, discussion_result: dict[str, Any]) -> float:
         """计算参与度分数"""
         rounds = discussion_result.get("discussion_rounds", [])
         if not rounds:
@@ -773,13 +763,13 @@ class CasualDiscussionScenario:
         total_engagement = sum(round_data.get("engagement_level", 0.5) for round_data in rounds)
         return total_engagement / len(rounds)
     
-    def _calculate_fun_factor(self, discussion_result: Dict[str, Any], social_summary: Dict[str, Any]) -> float:
+    def _calculate_fun_factor(self, discussion_result: dict[str, Any], social_summary: dict[str, Any]) -> float:
         """计算趣味因子"""
         base_fun = self._calculate_engagement_score(discussion_result)
         social_boost = social_summary.get("social_engagement_score", 0) * 0.3
         return min(base_fun + social_boost, 1.0)
     
-    def _assess_style_consistency(self, content: str, participant: Dict[str, Any]) -> float:
+    def _assess_style_consistency(self, content: str, participant: dict[str, Any]) -> float:
         """评估风格一致性"""
         # 简化实现
         expected_patterns = participant.get("conversation_patterns", [])
@@ -805,7 +795,7 @@ class CasualDiscussionScenario:
         relevance_count = sum(1 for word in topic_words if word.lower() in content_lower)
         return min(relevance_count / len(topic_words) if topic_words else 0.5, 1.0)
     
-    def _calculate_round_engagement(self, round_results: List[Dict[str, Any]]) -> float:
+    def _calculate_round_engagement(self, round_results: list[dict[str, Any]]) -> float:
         """计算轮次参与度"""
         if not round_results:
             return 0.5
@@ -813,7 +803,7 @@ class CasualDiscussionScenario:
         total_engagement = sum(result.get("engagement_score", 0.5) for result in round_results)
         return total_engagement / len(round_results)
     
-    def _assess_discussion_quality(self, discussion_rounds: List[Dict[str, Any]]) -> Dict[str, float]:
+    def _assess_discussion_quality(self, discussion_rounds: list[dict[str, Any]]) -> dict[str, float]:
         """评估讨论质量"""
         if not discussion_rounds:
             return {"overall": 0.5, "naturalness": 0.5, "engagement": 0.5, "fun": 0.5}
@@ -828,7 +818,7 @@ class CasualDiscussionScenario:
             "fun": avg_engagement * 1.1 if avg_engagement < 0.9 else 1.0
         }
     
-    def _calculate_participant_engagement(self, discussion_rounds: List[Dict[str, Any]]) -> Dict[str, float]:
+    def _calculate_participant_engagement(self, discussion_rounds: list[dict[str, Any]]) -> dict[str, float]:
         """计算参与者参与度"""
         participant_scores = {}
         
@@ -849,7 +839,7 @@ class CasualDiscussionScenario:
         
         return participant_scores
     
-    def _track_topic_evolution_in_discussion(self, discussion_rounds: List[Dict[str, Any]]) -> List[str]:
+    def _track_topic_evolution_in_discussion(self, discussion_rounds: list[dict[str, Any]]) -> list[str]:
         """跟踪讨论中的话题演进"""
         evolution = []
         
@@ -860,7 +850,7 @@ class CasualDiscussionScenario:
         
         return evolution
     
-    def _identify_popular_content(self, interactions: List[SocialInteraction]) -> List[Dict[str, Any]]:
+    def _identify_popular_content(self, interactions: list[SocialInteraction]) -> list[dict[str, Any]]:
         """识别受欢迎的内容"""
         content_popularity = {}
         
@@ -885,7 +875,7 @@ class CasualDiscussionScenario:
         
         return [{"content": content, "popularity": stats} for content, stats in sorted_content[:5]]
     
-    def _assess_social_atmosphere(self, interactions: List[SocialInteraction]) -> str:
+    def _assess_social_atmosphere(self, interactions: list[SocialInteraction]) -> str:
         """评估社交氛围"""
         if not interactions:
             return "neutral"
@@ -900,7 +890,7 @@ class CasualDiscussionScenario:
         else:
             return "neutral"
     
-    def _extract_topic_keywords(self, content: str) -> List[str]:
+    def _extract_topic_keywords(self, content: str) -> list[str]:
         """提取话题关键词"""
         # 简化的关键词提取
         import re
@@ -914,7 +904,7 @@ class CasualDiscussionScenario:
         
         return keywords[:5]  # 返回前5个关键词
     
-    def _calculate_topic_drift(self, initial_topic: str, topic_flow: List[Dict[str, Any]]) -> float:
+    def _calculate_topic_drift(self, initial_topic: str, topic_flow: list[dict[str, Any]]) -> float:
         """计算话题漂移程度"""
         if not topic_flow:
             return 0.0
@@ -931,7 +921,7 @@ class CasualDiscussionScenario:
         # 漂移分数 = 1 - 重叠度
         return 1 - (overlap / total_unique) if total_unique > 0 else 0.5
     
-    def _count_natural_transitions(self, topic_flow: List[Dict[str, Any]]) -> int:
+    def _count_natural_transitions(self, topic_flow: list[dict[str, Any]]) -> int:
         """统计自然转换次数"""
         if len(topic_flow) < 2:
             return 0
@@ -948,7 +938,7 @@ class CasualDiscussionScenario:
         
         return transitions
     
-    def _infer_style_preference(self, discussion_result: Dict[str, Any]) -> str:
+    def _infer_style_preference(self, discussion_result: dict[str, Any]) -> str:
         """推断风格偏好"""
         quality = discussion_result.get("discussion_quality", {})
         
@@ -959,7 +949,7 @@ class CasualDiscussionScenario:
         else:
             return "casual"
     
-    def _infer_social_preference(self, discussion_result: Dict[str, Any]) -> str:
+    def _infer_social_preference(self, discussion_result: dict[str, Any]) -> str:
         """推断社交偏好"""
         social_interactions = discussion_result.get("social_interactions", [])
         
@@ -972,11 +962,10 @@ class CasualDiscussionScenario:
     
     async def _adjust_discussion_direction(
         self,
-        discussion_context: Dict[str, Any],
-        round_results: List[Dict[str, Any]]
+        discussion_context: dict[str, Any],
+        round_results: list[dict[str, Any]]
     ):
         """动态调整讨论方向"""
-        
         # 分析当前轮次的参与度
         avg_engagement = sum(r.get("engagement_score", 0.5) for r in round_results) / len(round_results)
         
@@ -993,12 +982,11 @@ class CasualDiscussionScenario:
     
     async def _suggest_topic_transition(
         self,
-        contribution: Dict[str, Any],
+        contribution: dict[str, Any],
         current_topic: DiscussionTopic,
-        context: Dict[str, Any]
+        context: dict[str, Any]
     ) -> Optional[str]:
         """建议话题转换"""
-        
         content = contribution.get("content", "")
         
         # 从发言中提取可能的新话题方向
@@ -1033,13 +1021,12 @@ class CasualDiscussionScenario:
 # 便捷函数
 async def start_casual_discussion(
     topic: str,
-    user_preferences: Optional[Dict[str, Any]] = None,
+    user_preferences: Optional[dict[str, Any]] = None,
     max_participants: int = 4,
     humor_level: float = 0.7,
     social_elements: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """便捷的轻松讨论启动函数"""
-    
     config = CasualDiscussionConfig(
         max_participants=max_participants,
         humor_level=humor_level,
@@ -1077,7 +1064,7 @@ async def main():
     )
     
     if result["success"]:
-        print(f"\n轻松讨论完成！")
+        print("\n轻松讨论完成！")
         print(f"讨论ID: {result['discussion_id']}")
         print(f"参与者: {len(result['selected_participants'])}位")
         print(f"讨论轮次: {len(result['discussion_result']['discussion_rounds'])}轮")

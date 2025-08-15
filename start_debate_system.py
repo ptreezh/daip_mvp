@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-真实多轮辩论系统 V0.1.0 启动脚本
+"""真实多轮辩论系统 V0.1.0 启动脚本
 """
 
 import asyncio
@@ -18,9 +16,9 @@ async def main():
     
     try:
         # 导入核心组件
+        from src.debate_system.debate_flow_definition import DebateSession
         from src.debate_system.debate_state_manager import DebateStateManager
         from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
-        from src.debate_system.debate_flow_definition import DebateSession
         
         print("✅ 核心组件导入成功")
         

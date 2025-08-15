@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 11:00:00
+"""@Time    : 2025-08-05 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : validate_v0_3_7_implementation.py
 @Description:
@@ -11,21 +9,16 @@
 import asyncio
 import json
 import logging
+import os
+import sys
 import time
 from datetime import datetime
-from typing import Dict, Any, List
-import sys
-import os
+from typing import Any
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.core_services.performance_monitoring_system import (
-    PerformanceMonitoringSystem,
-    SystemResourceMonitor,
-    PerformanceOptimizationEngine,
-    PerformanceMetric
-)
+from src.core_services.performance_monitoring_system import PerformanceMonitoringSystem
 
 # Configure logging
 logging.basicConfig(
@@ -48,7 +41,7 @@ class V0_3_7Validator:
         }
         self.monitoring_system = None
     
-    async def validate_implementation(self) -> Dict[str, Any]:
+    async def validate_implementation(self) -> dict[str, Any]:
         """Validate V0.3.7 implementation."""
         logger.info("Starting V0.3.7 Performance Monitoring System validation")
         
@@ -124,10 +117,10 @@ class V0_3_7Validator:
             # Test imports
             try:
                 from src.core_services.performance_monitoring_system import (
+                    PerformanceMetric,
                     PerformanceMonitoringSystem,
-                    SystemResourceMonitor,
                     PerformanceOptimizationEngine,
-                    PerformanceMetric
+                    SystemResourceMonitor,
                 )
                 test_result["details"]["imports_successful"] = True
             except ImportError as e:

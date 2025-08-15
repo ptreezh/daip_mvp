@@ -1,31 +1,26 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-测试工作流引擎功能
+"""测试工作流引擎功能
 验证CriticalReviewWorkflow批判性审查、MultiPerspectiveWorkflow多视角综合、制度原语正确执行
 """
 
-import sys
-import os
-import asyncio
 import logging
-import tempfile
+import os
 import shutil
-from pathlib import Path
-from datetime import datetime
+import sys
+import tempfile
 
 # 添加src目录到Python路径
 sys.path.append('src')
 
-from src.workflows.critical_review_workflow import CriticalReviewWorkflow
-from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
-from src.institutional_primitives.workflow_engine import WorkflowEngine
 # from src.institutional_primitives.primitives import (
 #     CriticalReviewPrimitive, 
 #     MultiPerspectivePrimitive,
 #     ConsensusPrimitive
 # )
 from src.core_services.role_manager import RoleManager
+from src.institutional_primitives.workflow_engine import WorkflowEngine
+from src.workflows.critical_review_workflow import CriticalReviewWorkflow
+from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -41,7 +36,7 @@ def test_critical_review_workflow():
         # 创建临时目录用于测试
         test_dir = tempfile.mkdtemp(prefix="critical_review_test_")
         
-        print(f"\n🔧 初始化CriticalReviewWorkflow...")
+        print("\n🔧 初始化CriticalReviewWorkflow...")
         
         # 初始化角色管理器
         role_manager = RoleManager()
@@ -52,7 +47,7 @@ def test_critical_review_workflow():
             config={"output_dir": test_dir}
         )
         
-        print(f"✅ CriticalReviewWorkflow初始化成功")
+        print("✅ CriticalReviewWorkflow初始化成功")
         print(f"   输出目录: {test_dir}")
         print(f"   角色管理器: {type(role_manager).__name__}")
         
@@ -64,8 +59,8 @@ def test_critical_review_workflow():
         算法偏见、责任归属等伦理挑战。
         """
         
-        print(f"\n📝 执行批判性审查...")
-        print(f"   测试内容: AI医疗诊断伦理分析")
+        print("\n📝 执行批判性审查...")
+        print("   测试内容: AI医疗诊断伦理分析")
         
         # 执行批判性审查
         if hasattr(workflow, 'execute'):
@@ -113,9 +108,9 @@ def test_critical_review_workflow():
                     "完善相关法律法规"
                 ]
             }
-            print(f"   ⚠️ 使用模拟结果（工作流方法未找到）")
+            print("   ⚠️ 使用模拟结果（工作流方法未找到）")
         
-        print(f"\n📊 批判性审查结果:")
+        print("\n📊 批判性审查结果:")
         if isinstance(result, dict):
             if "critical_reviews" in result:
                 for review in result["critical_reviews"]:
@@ -126,7 +121,7 @@ def test_critical_review_workflow():
                 print(f"\n   📋 总体评估: {result['overall_assessment']}")
             
             if "recommendations" in result:
-                print(f"\n   💡 建议:")
+                print("\n   💡 建议:")
                 for i, rec in enumerate(result["recommendations"], 1):
                     print(f"      {i}. {rec}")
         else:
@@ -155,7 +150,7 @@ def test_multi_perspective_workflow():
         # 创建临时目录用于测试
         test_dir = tempfile.mkdtemp(prefix="multi_perspective_test_")
         
-        print(f"\n🔧 初始化MultiPerspectiveWorkflow...")
+        print("\n🔧 初始化MultiPerspectiveWorkflow...")
         
         # 初始化角色管理器
         role_manager = RoleManager()
@@ -166,14 +161,14 @@ def test_multi_perspective_workflow():
             config={"output_dir": test_dir}
         )
         
-        print(f"✅ MultiPerspectiveWorkflow初始化成功")
+        print("✅ MultiPerspectiveWorkflow初始化成功")
         print(f"   输出目录: {test_dir}")
         print(f"   角色管理器: {type(role_manager).__name__}")
         
         # 测试用例：远程工作政策分析
         test_question = "企业应该如何制定远程工作政策来平衡员工福利和工作效率？"
         
-        print(f"\n📝 执行多视角分析...")
+        print("\n📝 执行多视角分析...")
         print(f"   测试问题: {test_question}")
         
         # 定义分析视角
@@ -252,9 +247,9 @@ def test_multi_perspective_workflow():
                     ]
                 }
             }
-            print(f"   ⚠️ 使用模拟结果（工作流方法未找到）")
+            print("   ⚠️ 使用模拟结果（工作流方法未找到）")
         
-        print(f"\n📊 多视角分析结果:")
+        print("\n📊 多视角分析结果:")
         if isinstance(result, dict):
             if "perspective_analyses" in result:
                 for analysis in result["perspective_analyses"]:
@@ -267,13 +262,13 @@ def test_multi_perspective_workflow():
             
             if "synthesis" in result:
                 synthesis = result["synthesis"]
-                print(f"\n   🔄 综合分析:")
+                print("\n   🔄 综合分析:")
                 if "common_themes" in synthesis:
                     print(f"      共同主题: {', '.join(synthesis['common_themes'])}")
                 if "conflicts" in synthesis:
                     print(f"      观点冲突: {', '.join(synthesis['conflicts'])}")
                 if "recommendations" in synthesis:
-                    print(f"      综合建议:")
+                    print("      综合建议:")
                     for i, rec in enumerate(synthesis["recommendations"], 1):
                         print(f"        {i}. {rec}")
         else:
@@ -299,16 +294,16 @@ def test_workflow_engine():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 初始化WorkflowEngine...")
+        print("\n🔧 初始化WorkflowEngine...")
         
         # 初始化工作流引擎
         engine = WorkflowEngine()
         
-        print(f"✅ WorkflowEngine初始化成功")
+        print("✅ WorkflowEngine初始化成功")
         print(f"   引擎类型: {type(engine).__name__}")
         
         # 测试制度原语注册
-        print(f"\n📝 测试制度原语注册...")
+        print("\n📝 测试制度原语注册...")
         
         # 检查是否有注册的原语
         if hasattr(engine, 'primitives') or hasattr(engine, 'registered_primitives'):
@@ -319,10 +314,10 @@ def test_workflow_engine():
                 for name, primitive in (primitives.items() if isinstance(primitives, dict) else enumerate(primitives)):
                     print(f"     - {name}: {type(primitive).__name__}")
         else:
-            print(f"   ⚠️ 未找到原语注册信息")
+            print("   ⚠️ 未找到原语注册信息")
         
         # 测试工作流执行
-        print(f"\n🚀 测试工作流执行...")
+        print("\n🚀 测试工作流执行...")
         
         # 创建简单的测试工作流
         test_workflow_config = {
@@ -350,11 +345,11 @@ def test_workflow_engine():
         # 尝试执行工作流
         if hasattr(engine, 'execute_workflow'):
             result = engine.execute_workflow(test_workflow_config)
-            print(f"   ✅ 工作流执行成功")
+            print("   ✅ 工作流执行成功")
             print(f"   结果类型: {type(result)}")
         elif hasattr(engine, 'run'):
             result = engine.run(test_workflow_config)
-            print(f"   ✅ 工作流运行成功")
+            print("   ✅ 工作流运行成功")
             print(f"   结果类型: {type(result)}")
         else:
             # 模拟工作流执行
@@ -365,9 +360,9 @@ def test_workflow_engine():
                 "execution_time": "0.5s",
                 "output": "测试工作流执行完成"
             }
-            print(f"   ⚠️ 使用模拟执行结果")
+            print("   ⚠️ 使用模拟执行结果")
         
-        print(f"\n📊 工作流执行结果:")
+        print("\n📊 工作流执行结果:")
         if isinstance(result, dict):
             for key, value in result.items():
                 print(f"   {key}: {value}")
@@ -389,13 +384,13 @@ def test_institutional_primitives():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 测试制度原语导入...")
+        print("\n🔧 测试制度原语导入...")
         
         # 测试批判性审查原语
         try:
             from src.institutional_primitives.critical_review_nodes import GenerationNode
             critical_primitive = GenerationNode("test_generation", {})
-            print(f"   ✅ CriticalReview节点导入成功")
+            print("   ✅ CriticalReview节点导入成功")
             print(f"      类型: {type(critical_primitive).__name__}")
         except ImportError as e:
             print(f"   ⚠️ CriticalReview节点导入失败: {e}")
@@ -405,7 +400,7 @@ def test_institutional_primitives():
         try:
             from src.institutional_primitives.multi_perspective_nodes import TaskDecompositionNode
             multi_primitive = TaskDecompositionNode("test_decomposition", {})
-            print(f"   ✅ MultiPerspective节点导入成功")
+            print("   ✅ MultiPerspective节点导入成功")
             print(f"      类型: {type(multi_primitive).__name__}")
         except ImportError as e:
             print(f"   ⚠️ MultiPerspective节点导入失败: {e}")
@@ -415,14 +410,14 @@ def test_institutional_primitives():
         try:
             from src.institutional_primitives.consensus_node import ConsensusNode
             consensus_primitive = ConsensusNode("test_consensus", {})
-            print(f"   ✅ Consensus节点导入成功")
+            print("   ✅ Consensus节点导入成功")
             print(f"      类型: {type(consensus_primitive).__name__}")
         except ImportError as e:
             print(f"   ⚠️ Consensus节点导入失败: {e}")
             consensus_primitive = None
         
         # 测试原语执行
-        print(f"\n🚀 测试原语执行...")
+        print("\n🚀 测试原语执行...")
         
         primitives_tested = 0
         primitives_success = 0
@@ -435,10 +430,10 @@ def test_institutional_primitives():
                         "content": "AI技术在教育中的应用",
                         "review_aspects": ["技术可行性", "教育效果"]
                     })
-                    print(f"   ✅ CriticalReviewPrimitive执行成功")
+                    print("   ✅ CriticalReviewPrimitive执行成功")
                     primitives_success += 1
                 else:
-                    print(f"   ⚠️ CriticalReviewPrimitive没有execute方法")
+                    print("   ⚠️ CriticalReviewPrimitive没有execute方法")
                 primitives_tested += 1
             except Exception as e:
                 print(f"   ❌ CriticalReviewPrimitive执行失败: {e}")
@@ -452,10 +447,10 @@ def test_institutional_primitives():
                         "question": "如何提高在线教育质量？",
                         "perspectives": ["教师", "学生", "技术专家"]
                     })
-                    print(f"   ✅ MultiPerspectivePrimitive执行成功")
+                    print("   ✅ MultiPerspectivePrimitive执行成功")
                     primitives_success += 1
                 else:
-                    print(f"   ⚠️ MultiPerspectivePrimitive没有execute方法")
+                    print("   ⚠️ MultiPerspectivePrimitive没有execute方法")
                 primitives_tested += 1
             except Exception as e:
                 print(f"   ❌ MultiPerspectivePrimitive执行失败: {e}")
@@ -469,16 +464,16 @@ def test_institutional_primitives():
                         "options": ["方案A", "方案B", "方案C"],
                         "criteria": ["可行性", "成本", "效果"]
                     })
-                    print(f"   ✅ ConsensusPrimitive执行成功")
+                    print("   ✅ ConsensusPrimitive执行成功")
                     primitives_success += 1
                 else:
-                    print(f"   ⚠️ ConsensusPrimitive没有execute方法")
+                    print("   ⚠️ ConsensusPrimitive没有execute方法")
                 primitives_tested += 1
             except Exception as e:
                 print(f"   ❌ ConsensusPrimitive执行失败: {e}")
                 primitives_tested += 1
         
-        print(f"\n📊 制度原语测试结果:")
+        print("\n📊 制度原语测试结果:")
         print(f"   测试原语数量: {primitives_tested}")
         print(f"   成功执行数量: {primitives_success}")
         print(f"   成功率: {primitives_success/primitives_tested*100:.1f}%" if primitives_tested > 0 else "   成功率: N/A")
@@ -498,7 +493,7 @@ def test_workflow_integration():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 测试工作流间协作...")
+        print("\n🔧 测试工作流间协作...")
         
         # 创建临时目录用于测试
         test_dir = tempfile.mkdtemp(prefix="workflow_integration_test_")
@@ -512,7 +507,7 @@ def test_workflow_integration():
         print(f"   测试场景: {decision_topic}")
         
         # 第一步：多视角分析
-        print(f"\n   步骤1: 多视角分析...")
+        print("\n   步骤1: 多视角分析...")
         multi_workflow = MultiPerspectiveSynthesisWorkflow(
             workflow_id="integration_multi",
             config={"output_dir": test_dir}
@@ -531,7 +526,7 @@ def test_workflow_integration():
         print(f"      ✅ 多视角分析完成，获得{len(multi_result['perspectives'])}个视角")
         
         # 第二步：批判性审查
-        print(f"\n   步骤2: 批判性审查...")
+        print("\n   步骤2: 批判性审查...")
         critical_workflow = CriticalReviewWorkflow(
             workflow_id="integration_critical",
             config={"output_dir": test_dir}
@@ -551,7 +546,7 @@ def test_workflow_integration():
         print(f"      ✅ 批判性审查完成，总体评分: {critical_result['overall_score']}")
         
         # 第三步：结果整合
-        print(f"\n   步骤3: 结果整合...")
+        print("\n   步骤3: 结果整合...")
         
         integrated_result = {
             "topic": decision_topic,
@@ -566,12 +561,12 @@ def test_workflow_integration():
             "confidence_level": 0.75
         }
         
-        print(f"      ✅ 结果整合完成")
+        print("      ✅ 结果整合完成")
         print(f"      最终建议: {integrated_result['final_recommendation']['strategy']}")
         print(f"      置信度: {integrated_result['confidence_level']}")
         
         # 验证工作流协作效果
-        print(f"\n📊 工作流协作验证:")
+        print("\n📊 工作流协作验证:")
         
         # 检查数据流连续性
         data_continuity = (

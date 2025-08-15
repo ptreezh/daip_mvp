@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-演化模式分析器
+"""演化模式分析器
 
 分析知识演化的模式和趋势
 """
 
 import logging
-from typing import Any, Dict, List, Optional
-from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +24,7 @@ class EvolutionPatternAnalyzer:
         }
         self.analysis_history = []
     
-    def identify_evolution_patterns(self, evolution_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def identify_evolution_patterns(self, evolution_data: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """识别演化模式"""
         try:
             patterns = []
@@ -71,7 +68,7 @@ class EvolutionPatternAnalyzer:
             logger.error(f"识别演化模式失败: {e}")
             return []
     
-    def predict_evolution_trends(self, historical_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def predict_evolution_trends(self, historical_data: list[dict[str, Any]]) -> dict[str, Any]:
         """预测演化趋势"""
         try:
             if not historical_data:
@@ -94,7 +91,7 @@ class EvolutionPatternAnalyzer:
             logger.error(f"预测演化趋势失败: {e}")
             return {"error": str(e)}
     
-    def analyze_knowledge_lifecycle(self, evolution_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def analyze_knowledge_lifecycle(self, evolution_data: list[dict[str, Any]]) -> dict[str, Any]:
         """分析知识生命周期"""
         try:
             if not evolution_data:
@@ -127,13 +124,13 @@ class EvolutionPatternAnalyzer:
             logger.error(f"分析知识生命周期失败: {e}")
             return {"error": str(e)}
     
-    def _detect_incremental_growth(self, change_types: List[str]) -> bool:
+    def _detect_incremental_growth(self, change_types: list[str]) -> bool:
         """检测渐进式增长"""
         growth_types = ["enhancement", "refinement", "expansion"]
         growth_count = sum(1 for ct in change_types if ct in growth_types)
         return growth_count >= len(change_types) * 0.6
     
-    def _detect_rapid_expansion(self, evolution_data: List[Dict[str, Any]]) -> bool:
+    def _detect_rapid_expansion(self, evolution_data: list[dict[str, Any]]) -> bool:
         """检测快速扩展"""
         if len(evolution_data) < 3:
             return False
@@ -144,13 +141,13 @@ class EvolutionPatternAnalyzer:
         
         return expansion_count >= 2 and len(evolution_data) >= 3
     
-    def _detect_refinement_cycle(self, change_types: List[str]) -> bool:
+    def _detect_refinement_cycle(self, change_types: list[str]) -> bool:
         """检测优化循环"""
         refinement_types = ["refinement", "correction"]
         refinement_count = sum(1 for ct in change_types if ct in refinement_types)
         return refinement_count >= 2
     
-    def _predict_next_change(self, recent_changes: List[str]) -> str:
+    def _predict_next_change(self, recent_changes: list[str]) -> str:
         """预测下一个变化"""
         if not recent_changes:
             return "enhancement"
@@ -168,7 +165,7 @@ class EvolutionPatternAnalyzer:
         
         return prediction_map.get(last_change, "enhancement")
     
-    def _assess_maturity(self, change_types: List[str]) -> List[str]:
+    def _assess_maturity(self, change_types: list[str]) -> list[str]:
         """评估成熟度指标"""
         indicators = []
         
@@ -183,7 +180,7 @@ class EvolutionPatternAnalyzer:
         
         return indicators
     
-    def _calculate_health_score(self, evolution_data: List[Dict[str, Any]]) -> float:
+    def _calculate_health_score(self, evolution_data: list[dict[str, Any]]) -> float:
         """计算健康分数"""
         if not evolution_data:
             return 0.0

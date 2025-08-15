@@ -1,5 +1,4 @@
-"""
-Unified Storage Adapters for the Semantic Structured Knowledge Graph (SSKG).
+"""Unified Storage Adapters for the Semantic Structured Knowledge Graph (SSKG).
 
 This module implements domain-specific adapters that map different memory types
 to SSKG representations while maintaining semantic integrity and consistent access patterns.
@@ -10,9 +9,7 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Union
-
-from pydantic import BaseModel, Field
+from typing import Any, Optional
 
 try:
     from src.core_services.enhanced_sskg_manager import (
@@ -20,11 +17,10 @@ try:
         KnowledgeNode,
         KnowledgeRelation,
         NodeType,
-        RelationType
+        RelationType,
     )
 except ImportError:
     # For testing purposes
-    from typing import Literal
     
     class NodeType(str, Enum):
         """Types of nodes in the SSKG."""
@@ -59,16 +55,14 @@ logger = logging.getLogger(__name__)
 
 
 class StorageAdapter(ABC):
-    """
-    Abstract base class for all storage adapters.
+    """Abstract base class for all storage adapters.
     
     Storage adapters provide a consistent interface for mapping domain-specific
     data structures to SSKG representations while maintaining semantic integrity.
     """
     
     def __init__(self, sskg_manager: 'EnhancedSSKGManager'):
-        """
-        Initialize the storage adapter.
+        """Initialize the storage adapter.
         
         Args:
             sskg_manager: The SSKG manager to use for storage operations
@@ -78,8 +72,7 @@ class StorageAdapter(ABC):
     
     @abstractmethod
     def store(self, data: Any, **kwargs) -> str:
-        """
-        Store data in the SSKG.
+        """Store data in the SSKG.
         
         Args:
             data: The data to store
@@ -92,8 +85,7 @@ class StorageAdapter(ABC):
     
     @abstractmethod
     def retrieve(self, identifier: str, **kwargs) -> Optional[Any]:
-        """
-        Retrieve data from the SSKG.
+        """Retrieve data from the SSKG.
         
         Args:
             identifier: The identifier of the data to retrieve
@@ -106,8 +98,7 @@ class StorageAdapter(ABC):
     
     @abstractmethod
     def update(self, identifier: str, data: Any, **kwargs) -> bool:
-        """
-        Update data in the SSKG.
+        """Update data in the SSKG.
         
         Args:
             identifier: The identifier of the data to update
@@ -121,8 +112,7 @@ class StorageAdapter(ABC):
     
     @abstractmethod
     def delete(self, identifier: str, **kwargs) -> bool:
-        """
-        Delete data from the SSKG.
+        """Delete data from the SSKG.
         
         Args:
             identifier: The identifier of the data to delete
@@ -134,9 +124,8 @@ class StorageAdapter(ABC):
         pass 
    
     def _create_node(self, node_type: NodeType, content: str, 
-                    confidence: float = 1.0, metadata: Dict[str, Any] = None) -> str:
-        """
-        Helper method to create a node in the SSKG.
+                    confidence: float = 1.0, metadata: dict[str, Any] = None) -> str:
+        """Helper method to create a node in the SSKG.
         
         Args:
             node_type: Type of the node
@@ -158,9 +147,8 @@ class StorageAdapter(ABC):
     
     def _create_relation(self, source_id: str, target_id: str, 
                         relation_type: RelationType, confidence: float = 1.0,
-                        metadata: Dict[str, Any] = None) -> bool:
-        """
-        Helper method to create a relation in the SSKG.
+                        metadata: dict[str, Any] = None) -> bool:
+        """Helper method to create a relation in the SSKG.
         
         Args:
             source_id: ID of the source node
@@ -183,16 +171,14 @@ class StorageAdapter(ABC):
 
 
 class RoleMemoryAdapter(StorageAdapter):
-    """
-    Storage adapter for virtual role memories and identities.
+    """Storage adapter for virtual role memories and identities.
     
     This adapter manages the storage and retrieval of role-specific memories,
     personality traits, and cognitive frameworks.
     """
     
-    def store(self, role_data: Dict[str, Any], **kwargs) -> str:
-        """
-        Store role memory data in the SSKG.
+    def store(self, role_data: dict[str, Any], **kwargs) -> str:
+        """Store role memory data in the SSKG.
         
         Args:
             role_data: Dictionary containing role information
@@ -243,9 +229,8 @@ class RoleMemoryAdapter(StorageAdapter):
         self.logger.info(f"Stored role {role_id} with {len(memories)} memories")
         return role_node_id 
    
-    def _store_role_memory(self, memory_data: Dict[str, Any], role_id: str) -> Optional[str]:
-        """
-        Store a single role memory.
+    def _store_role_memory(self, memory_data: dict[str, Any], role_id: str) -> Optional[str]:
+        """Store a single role memory.
         
         Args:
             memory_data: Memory data dictionary
@@ -273,9 +258,8 @@ class RoleMemoryAdapter(StorageAdapter):
             metadata=memory_metadata
         )
     
-    def retrieve(self, role_id: str, **kwargs) -> Optional[Dict[str, Any]]:
-        """
-        Retrieve role data from the SSKG.
+    def retrieve(self, role_id: str, **kwargs) -> Optional[dict[str, Any]]:
+        """Retrieve role data from the SSKG.
         
         Args:
             role_id: ID of the role to retrieve
@@ -325,9 +309,8 @@ class RoleMemoryAdapter(StorageAdapter):
         
         return role_data    
 
-    def update(self, role_id: str, role_data: Dict[str, Any], **kwargs) -> bool:
-        """
-        Update role data in the SSKG.
+    def update(self, role_id: str, role_data: dict[str, Any], **kwargs) -> bool:
+        """Update role data in the SSKG.
         
         Args:
             role_id: ID of the role to update
@@ -364,8 +347,7 @@ class RoleMemoryAdapter(StorageAdapter):
         })
     
     def delete(self, role_id: str, **kwargs) -> bool:
-        """
-        Delete role data from the SSKG.
+        """Delete role data from the SSKG.
         
         Args:
             role_id: ID of the role to delete
@@ -401,16 +383,14 @@ class RoleMemoryAdapter(StorageAdapter):
         # Delete role node
         return self.sskg_manager.delete_node(role_node.id)
 class WikiAdapter(StorageAdapter):
-    """
-    Storage adapter for wiki content and structured documentation.
+    """Storage adapter for wiki content and structured documentation.
     
     This adapter manages the storage and retrieval of wiki pages,
     documentation, and structured knowledge content.
     """
     
-    def store(self, wiki_data: Dict[str, Any], **kwargs) -> str:
-        """
-        Store wiki content in the SSKG.
+    def store(self, wiki_data: dict[str, Any], **kwargs) -> str:
+        """Store wiki content in the SSKG.
         
         Args:
             wiki_data: Dictionary containing wiki information
@@ -472,8 +452,7 @@ class WikiAdapter(StorageAdapter):
         return wiki_node_id
     
     def _get_or_create_category(self, category: str) -> str:
-        """
-        Get or create a category node.
+        """Get or create a category node.
         
         Args:
             category: Category name
@@ -504,8 +483,7 @@ class WikiAdapter(StorageAdapter):
         )
     
     def _get_or_create_tag(self, tag: str) -> str:
-        """
-        Get or create a tag node.
+        """Get or create a tag node.
         
         Args:
             tag: Tag name
@@ -535,9 +513,8 @@ class WikiAdapter(StorageAdapter):
             }
         )
     
-    def retrieve(self, page_id: str, **kwargs) -> Optional[Dict[str, Any]]:
-        """
-        Retrieve wiki content from the SSKG.
+    def retrieve(self, page_id: str, **kwargs) -> Optional[dict[str, Any]]:
+        """Retrieve wiki content from the SSKG.
         
         Args:
             page_id: ID of the wiki page to retrieve
@@ -568,9 +545,8 @@ class WikiAdapter(StorageAdapter):
             "updated_at": wiki_node.metadata.get("updated_at", "")
         }    
 
-    def update(self, page_id: str, wiki_data: Dict[str, Any], **kwargs) -> bool:
-        """
-        Update wiki content in the SSKG.
+    def update(self, page_id: str, wiki_data: dict[str, Any], **kwargs) -> bool:
+        """Update wiki content in the SSKG.
         
         Args:
             page_id: ID of the wiki page to update
@@ -607,8 +583,7 @@ class WikiAdapter(StorageAdapter):
         })
     
     def delete(self, page_id: str, **kwargs) -> bool:
-        """
-        Delete wiki content from the SSKG.
+        """Delete wiki content from the SSKG.
         
         Args:
             page_id: ID of the wiki page to delete
@@ -632,16 +607,14 @@ class WikiAdapter(StorageAdapter):
 
 
 class SessionAdapter(StorageAdapter):
-    """
-    Storage adapter for conversation states and session data.
+    """Storage adapter for conversation states and session data.
     
     This adapter manages the storage and retrieval of session states,
     conversation history, and user interaction data.
     """
     
-    def store(self, session_data: Dict[str, Any], **kwargs) -> str:
-        """
-        Store session data in the SSKG.
+    def store(self, session_data: dict[str, Any], **kwargs) -> str:
+        """Store session data in the SSKG.
         
         Args:
             session_data: Dictionary containing session information
@@ -685,9 +658,8 @@ class SessionAdapter(StorageAdapter):
         self.logger.info(f"Stored session {session_id}")
         return session_node_id    
 
-    def retrieve(self, session_id: str, **kwargs) -> Optional[Dict[str, Any]]:
-        """
-        Retrieve session data from the SSKG.
+    def retrieve(self, session_id: str, **kwargs) -> Optional[dict[str, Any]]:
+        """Retrieve session data from the SSKG.
         
         Args:
             session_id: ID of the session to retrieve
@@ -724,9 +696,8 @@ class SessionAdapter(StorageAdapter):
             "updated_at": session_node.metadata.get("updated_at", "")
         }
     
-    def update(self, session_id: str, session_data: Dict[str, Any], **kwargs) -> bool:
-        """
-        Update session data in the SSKG.
+    def update(self, session_id: str, session_data: dict[str, Any], **kwargs) -> bool:
+        """Update session data in the SSKG.
         
         Args:
             session_id: ID of the session to update
@@ -767,8 +738,7 @@ class SessionAdapter(StorageAdapter):
         })
     
     def delete(self, session_id: str, **kwargs) -> bool:
-        """
-        Delete session data from the SSKG.
+        """Delete session data from the SSKG.
         
         Args:
             session_id: ID of the session to delete
@@ -792,16 +762,14 @@ class SessionAdapter(StorageAdapter):
 
 
 class StorageAdapterManager:
-    """
-    Manager for all storage adapters.
+    """Manager for all storage adapters.
     
     This class provides a unified interface for accessing different storage adapters
     and managing their lifecycle.
     """
     
     def __init__(self, sskg_manager: 'EnhancedSSKGManager'):
-        """
-        Initialize the storage adapter manager.
+        """Initialize the storage adapter manager.
         
         Args:
             sskg_manager: The SSKG manager to use for storage operations
@@ -815,8 +783,7 @@ class StorageAdapterManager:
         self.logger = logging.getLogger(__name__)
     
     def get_adapter(self, adapter_type: str) -> Optional[StorageAdapter]:
-        """
-        Get a storage adapter by type.
+        """Get a storage adapter by type.
         
         Args:
             adapter_type: Type of the adapter
@@ -827,8 +794,7 @@ class StorageAdapterManager:
         return self.adapters.get(adapter_type)
     
     def register_adapter(self, adapter_type: str, adapter: StorageAdapter):
-        """
-        Register a new storage adapter.
+        """Register a new storage adapter.
         
         Args:
             adapter_type: Type of the adapter
@@ -837,9 +803,8 @@ class StorageAdapterManager:
         self.adapters[adapter_type] = adapter
         self.logger.info(f"Registered storage adapter: {adapter_type}")
     
-    def list_adapters(self) -> List[str]:
-        """
-        List all registered adapter types.
+    def list_adapters(self) -> list[str]:
+        """List all registered adapter types.
         
         Returns:
             List of adapter types
@@ -847,8 +812,7 @@ class StorageAdapterManager:
         return list(self.adapters.keys())
     
     def store_data(self, adapter_type: str, data: Any, **kwargs) -> Optional[str]:
-        """
-        Store data using the specified adapter.
+        """Store data using the specified adapter.
         
         Args:
             adapter_type: Type of adapter to use
@@ -870,8 +834,7 @@ class StorageAdapterManager:
             return None
     
     def retrieve_data(self, adapter_type: str, identifier: str, **kwargs) -> Optional[Any]:
-        """
-        Retrieve data using the specified adapter.
+        """Retrieve data using the specified adapter.
         
         Args:
             adapter_type: Type of adapter to use

@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-智能助手启动脚本
+"""智能助手启动脚本
 
 一键启动完整的智能助手系统
 """
 
-import sys
 import asyncio
+import sys
 from pathlib import Path
 
 # 添加项目根目录到路径

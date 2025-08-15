@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多轮辩论系统Web界面
+"""多轮辩论系统Web界面
 
 基于现有ChatInterface和TransparencyMonitor组件，
 为多轮辩论系统提供专门的Web界面。
@@ -16,20 +14,31 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
+from lona.html import (
+    H2,
+    H3,
+    HTML,
+    A,
+    Button,
+    Div,
+    Nav,
+    Option,
+    P,
+    Select,
+    Span,
+    TextInput,
+)
 from lona.html.widget import Widget
-from lona.html import HTML, Div, H1, H2, H3, P, Span, Button, TextInput, Select, Option
-from lona.html import Table, Tr, Td, Th, THead, TBody
-from lona.html import Nav, Ul, Li, A
 
 # 导入现有组件
 try:
     from frontend.components.chat_interface import ChatInterface, ChatMessage, MessageType
     from frontend.components.transparency_monitor import TransparencyMonitor
-    from frontend.services.websocket_manager import websocket_manager, WebSocketMessage
+    from frontend.services.websocket_manager import WebSocketMessage, websocket_manager
 except ImportError:
     # 如果无法导入，创建占位符类
     class ChatInterface:
@@ -44,9 +53,10 @@ except ImportError:
             pass
 
 # 导入辩论系统组件
-from multi_role_dialogue_engine import MultiRoleDialogueEngine, DialogueState, ConversationTurn
-from .debate_flow_definition import DebateSession, DebateStatus, DebatePhase, ParticipantRole
 from debate_state_manager import DebateStateManager
+from multi_role_dialogue_engine import MultiRoleDialogueEngine
+
+from .debate_flow_definition import DebateSession, DebateStatus
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +83,7 @@ class DebateWebInterface(Widget):
         # 界面状态
         self.current_mode = DebateInterfaceMode.SETUP
         self.active_session: Optional[DebateSession] = None
-        self.session_history: List[Dict[str, Any]] = []
+        self.session_history: list[dict[str, Any]] = []
         
         # 子组件
         self.chat_interface = None
@@ -274,7 +284,7 @@ class DebateWebInterface(Widget):
         except Exception as e:
             logger.error(f"切换模式失败: {e}")
     
-    async def handle_agent_update(self, agent_data: Dict[str, Any]):
+    async def handle_agent_update(self, agent_data: dict[str, Any]):
         """处理代理状态更新"""
         try:
             if self.chat_interface:
@@ -296,7 +306,7 @@ class DebateWebInterface(Widget):
         except Exception as e:
             logger.error(f"处理代理更新失败: {e}")
     
-    async def handle_workflow_update(self, workflow_data: Dict[str, Any]):
+    async def handle_workflow_update(self, workflow_data: dict[str, Any]):
         """处理工作流更新"""
         try:
             if self.chat_interface:
@@ -604,7 +614,7 @@ class MockPersonalAssistantService:
             logger.error(f"处理消息失败: {e}")
             return f"❌ 处理消息时出现错误: {str(e)}"
     
-    def update_conversation_context(self, session_id: str, context: Dict[str, Any]):
+    def update_conversation_context(self, session_id: str, context: dict[str, Any]):
         """更新对话上下文"""
         if session_id not in self.conversation_contexts:
             self.conversation_contexts[session_id] = []

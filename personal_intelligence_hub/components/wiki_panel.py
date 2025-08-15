@@ -1,18 +1,20 @@
-"""
-Personal Intelligence Hub - Wiki Panel Component
+"""Personal Intelligence Hub - Wiki Panel Component
 
 Wiki知识库面板组件
 """
 
 # from lona import Component  # Lona doesn't have Component class
-from lona.html import HTML, Div, H3, P, TextInput, Button, Span, H4, Ul, Li
 from datetime import datetime
-from typing import List, Optional, Dict, Any
-import json
+
+from lona.html import H3, H4, HTML, Button, Div, P, Span, TextInput
 
 from personal_intelligence_hub.models.wiki_models import (
-    WikiPage, WikiUpdate, WikiSearchResult, ConsensusNodeFact,
-    WikiUpdateSource, WikiPageStatus
+    ConsensusNodeFact,
+    WikiPage,
+    WikiPageStatus,
+    WikiSearchResult,
+    WikiUpdate,
+    WikiUpdateSource,
 )
 
 

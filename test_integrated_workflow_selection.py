@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-集成工作流选择测试
+"""集成工作流选择测试
 
 测试集成了增强工作流选择器的PersonalAssistant，验证是否达到V0.2.1任务要求
 """
 
 import asyncio
 import sys
-from typing import List, Dict, Any
+from typing import Any
+
 from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService, WorkflowType
+
 
 class IntegratedWorkflowTester:
     """集成工作流选择测试器"""
@@ -103,7 +103,7 @@ class IntegratedWorkflowTester:
             }
         ]
     
-    async def test_integrated_accuracy(self) -> Dict[str, Any]:
+    async def test_integrated_accuracy(self) -> dict[str, Any]:
         """测试集成后的准确性"""
         print("🧪 测试集成工作流选择准确性...")
         
@@ -170,13 +170,13 @@ class IntegratedWorkflowTester:
         # 计算准确率
         accuracy = (correct_predictions / total_predictions * 100) if total_predictions > 0 else 0
         
-        print(f"\n📊 测试总结:")
+        print("\n📊 测试总结:")
         print(f"总测试用例: {total_predictions}")
         print(f"正确预测: {correct_predictions}")
         print(f"准确率: {accuracy:.1f}%")
         
         # 分类统计
-        print(f"\n📋 分类统计:")
+        print("\n📋 分类统计:")
         for category, stats in category_stats.items():
             cat_accuracy = (stats['correct'] / stats['total'] * 100) if stats['total'] > 0 else 0
             print(f"{category}: {cat_accuracy:.1f}% ({stats['correct']}/{stats['total']})")
@@ -189,7 +189,7 @@ class IntegratedWorkflowTester:
             "results": results
         }
     
-    async def test_performance(self) -> Dict[str, Any]:
+    async def test_performance(self) -> dict[str, Any]:
         """测试性能"""
         print("\n⚡ 测试性能...")
         
@@ -257,15 +257,15 @@ async def main():
     accuracy_met = accuracy_results['accuracy'] >= accuracy_target
     performance_met = performance_results['average_response_time_ms'] < performance_target
     
-    print(f"\n🎯 V0.2.1任务目标达成情况:")
+    print("\n🎯 V0.2.1任务目标达成情况:")
     print(f"工作流选择准确率≥95%: {'✅ 达成' if accuracy_met else '❌ 未达成'}")
     print(f"响应时间<5秒: {'✅ 达成' if performance_met else '❌ 未达成'}")
     
     # 架构优化说明
-    print(f"\n🏗️ 架构优化说明:")
-    print(f"- 消除了冗余设计：删除独立的EnhancedWorkflowSelector")
-    print(f"- 集成到现有PersonalAssistant的降级策略中")
-    print(f"- 保持了原有的LLM优先 + 智能降级的架构")
+    print("\n🏗️ 架构优化说明:")
+    print("- 消除了冗余设计：删除独立的EnhancedWorkflowSelector")
+    print("- 集成到现有PersonalAssistant的降级策略中")
+    print("- 保持了原有的LLM优先 + 智能降级的架构")
     print(f"- 提升了降级策略的准确率从83.3%到{accuracy_results['accuracy']:.1f}%")
     
     if accuracy_met and performance_met:

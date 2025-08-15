@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 11:00:00
+"""@Time    : 2025-08-05 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : quick_web_test.py
 @Description:
@@ -8,13 +6,14 @@
     用于快速验证Web界面的当前状态和基本功能
 """
 
-import sys
-import os
-import subprocess
-import time
-import requests
 import json
+import subprocess
+import sys
+import time
 from pathlib import Path
+
+import requests
+
 
 def check_environment():
     """检查环境"""

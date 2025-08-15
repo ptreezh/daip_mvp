@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-角色清理工具
+"""角色清理工具
 
 分析角色文件，处理过长和重复的角色名称：
 1. 简化过长的角色名称
@@ -11,10 +9,9 @@
 
 import json
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Tuple
 from collections import defaultdict
-import difflib
+from pathlib import Path
+from typing import Any
 
 # 添加项目路径
 project_root = Path(__file__).parent
@@ -42,7 +39,7 @@ class RoleCleanupTool:
         # 加载角色数据
         for role_file in self.role_files:
             try:
-                with open(role_file, 'r', encoding='utf-8') as f:
+                with open(role_file, encoding='utf-8') as f:
                     data = json.load(f)
                     
                 # 处理不同的数据格式
@@ -227,7 +224,7 @@ class RoleCleanupTool:
             except Exception as e:
                 print(f"  ❌ 合并失败: {e}")
     
-    def calculate_completeness_score(self, role_data: Dict[str, Any]) -> float:
+    def calculate_completeness_score(self, role_data: dict[str, Any]) -> float:
         """计算角色数据的完整性分数"""
         score = 0.0
         
@@ -249,7 +246,7 @@ class RoleCleanupTool:
         
         return score
     
-    def merge_role_data(self, primary_data: Dict[str, Any], secondary_data_list: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def merge_role_data(self, primary_data: dict[str, Any], secondary_data_list: list[dict[str, Any]]) -> dict[str, Any]:
         """合并角色数据"""
         merged = primary_data.copy()
         
@@ -290,7 +287,7 @@ class RoleCleanupTool:
         print(f"执行更改: {len(self.changes_made)}")
         
         if self.changes_made:
-            print(f"\n🔧 执行的更改:")
+            print("\n🔧 执行的更改:")
             for change in self.changes_made:
                 print(f"  • {change}")
         
@@ -336,7 +333,7 @@ class RoleCleanupTool:
         # 生成报告
         self.generate_report()
         
-        print(f"\n🎉 角色清理完成！")
+        print("\n🎉 角色清理完成！")
         if self.changes_made:
             print("建议重新运行系统分析以验证修复效果。")
 

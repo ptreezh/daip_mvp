@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-知识冲突解决器
+"""知识冲突解决器
 
 自动识别和处理知识矛盾
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
-from datetime import datetime
-import uuid
 import re
+import uuid
+from datetime import datetime
 from difflib import SequenceMatcher
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +32,7 @@ class KnowledgeConflictResolver:
             "confidence_conflicts": "置信度冲突"
         }
     
-    def detect_conflicts(self, knowledge_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def detect_conflicts(self, knowledge_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """检测知识冲突"""
         try:
             conflicts = []
@@ -69,7 +67,7 @@ class KnowledgeConflictResolver:
             logger.error(f"检测知识冲突失败: {e}")
             return []
     
-    def resolve_conflict(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def resolve_conflict(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """解决冲突"""
         try:
             conflict_type = conflict.get("conflict_type", "unknown")
@@ -106,7 +104,7 @@ class KnowledgeConflictResolver:
             logger.error(f"解决冲突失败: {e}")
             return {"error": str(e)}
     
-    def validate_resolution(self, resolution: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_resolution(self, resolution: dict[str, Any]) -> dict[str, Any]:
         """验证解决方案"""
         try:
             validation_result = {
@@ -176,7 +174,7 @@ class KnowledgeConflictResolver:
             logger.error(f"验证解决方案失败: {e}")
             return {"is_valid": False, "error": str(e)}
     
-    def _initialize_detection_rules(self) -> Dict[str, callable]:
+    def _initialize_detection_rules(self) -> dict[str, callable]:
         """初始化冲突检测规则"""
         return {
             "contradictory_claims": self._detect_contradictory_claims,
@@ -186,7 +184,7 @@ class KnowledgeConflictResolver:
             "confidence_conflicts": self._detect_confidence_conflicts
         }
     
-    def _initialize_resolution_strategies(self) -> Dict[str, callable]:
+    def _initialize_resolution_strategies(self) -> dict[str, callable]:
         """初始化解决策略"""
         return {
             "evidence_weighting": self._resolve_by_evidence_weighting,
@@ -196,7 +194,7 @@ class KnowledgeConflictResolver:
             "synthesis": self._resolve_by_synthesis
         }
     
-    def _detect_contradictory_claims(self, item1: Dict[str, Any], item2: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def _detect_contradictory_claims(self, item1: dict[str, Any], item2: dict[str, Any]) -> Optional[dict[str, Any]]:
         """检测矛盾声明"""
         try:
             content1 = item1.get("content", "").lower()
@@ -246,7 +244,7 @@ class KnowledgeConflictResolver:
             logger.error(f"检测矛盾声明失败: {e}")
             return None
     
-    def _detect_inconsistent_data(self, item1: Dict[str, Any], item2: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def _detect_inconsistent_data(self, item1: dict[str, Any], item2: dict[str, Any]) -> Optional[dict[str, Any]]:
         """检测数据不一致"""
         try:
             # 检查相同主题的不同数据
@@ -276,7 +274,7 @@ class KnowledgeConflictResolver:
             logger.error(f"检测数据不一致失败: {e}")
             return None
     
-    def _detect_temporal_conflicts(self, item1: Dict[str, Any], item2: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def _detect_temporal_conflicts(self, item1: dict[str, Any], item2: dict[str, Any]) -> Optional[dict[str, Any]]:
         """检测时间冲突"""
         try:
             timestamp1 = item1.get("timestamp")
@@ -312,7 +310,7 @@ class KnowledgeConflictResolver:
             logger.error(f"检测时间冲突失败: {e}")
             return None
     
-    def _detect_source_disagreement(self, item1: Dict[str, Any], item2: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def _detect_source_disagreement(self, item1: dict[str, Any], item2: dict[str, Any]) -> Optional[dict[str, Any]]:
         """检测来源分歧"""
         try:
             source1 = item1.get("source", "")
@@ -348,7 +346,7 @@ class KnowledgeConflictResolver:
             logger.error(f"检测来源分歧失败: {e}")
             return None
     
-    def _detect_confidence_conflicts(self, item1: Dict[str, Any], item2: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def _detect_confidence_conflicts(self, item1: dict[str, Any], item2: dict[str, Any]) -> Optional[dict[str, Any]]:
         """检测置信度冲突"""
         try:
             confidence1 = item1.get("confidence", 0.5)
@@ -379,7 +377,7 @@ class KnowledgeConflictResolver:
             logger.error(f"检测置信度冲突失败: {e}")
             return None
     
-    def _select_resolution_strategy(self, conflict: Dict[str, Any]) -> str:
+    def _select_resolution_strategy(self, conflict: dict[str, Any]) -> str:
         """选择解决策略"""
         conflict_type = conflict.get("conflict_type", "unknown")
         severity = conflict.get("severity", "medium")
@@ -401,7 +399,7 @@ class KnowledgeConflictResolver:
         else:
             return "synthesis"  # 默认策略
     
-    def _resolve_by_evidence_weighting(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def _resolve_by_evidence_weighting(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """基于证据权重解决冲突"""
         try:
             conflicting_items = conflict.get("conflicting_items", [])
@@ -449,7 +447,7 @@ class KnowledgeConflictResolver:
             logger.error(f"基于证据权重解决冲突失败: {e}")
             return {"error": str(e)}
     
-    def _resolve_by_source_credibility(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def _resolve_by_source_credibility(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """基于来源可信度解决冲突"""
         try:
             conflicting_items = conflict.get("conflicting_items", [])
@@ -486,7 +484,7 @@ class KnowledgeConflictResolver:
             logger.error(f"基于来源可信度解决冲突失败: {e}")
             return {"error": str(e)}
     
-    def _resolve_by_temporal_priority(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def _resolve_by_temporal_priority(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """基于时间优先级解决冲突"""
         try:
             conflicting_items = conflict.get("conflicting_items", [])
@@ -521,7 +519,7 @@ class KnowledgeConflictResolver:
             logger.error(f"基于时间优先级解决冲突失败: {e}")
             return {"error": str(e)}
     
-    def _resolve_by_confidence(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def _resolve_by_confidence(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """基于置信度解决冲突"""
         try:
             conflicting_items = conflict.get("conflicting_items", [])
@@ -541,7 +539,7 @@ class KnowledgeConflictResolver:
             logger.error(f"基于置信度解决冲突失败: {e}")
             return {"error": str(e)}
     
-    def _resolve_by_synthesis(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+    def _resolve_by_synthesis(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """通过综合解决冲突"""
         try:
             conflicting_items = conflict.get("conflicting_items", [])
@@ -587,7 +585,7 @@ class KnowledgeConflictResolver:
         sentiment_score = (positive_count - negative_count) / total_words
         return max(0.0, min(1.0, sentiment_score + 0.5))  # 归一化到0-1
     
-    def _check_internal_consistency(self, resolution: Dict[str, Any]) -> bool:
+    def _check_internal_consistency(self, resolution: dict[str, Any]) -> bool:
         """检查内部一致性"""
         try:
             content = resolution.get("resolved_content", "")
@@ -606,7 +604,7 @@ class KnowledgeConflictResolver:
             logger.error(f"检查内部一致性失败: {e}")
             return False
     
-    def _find_common_themes(self, viewpoints: List[str]) -> str:
+    def _find_common_themes(self, viewpoints: list[str]) -> str:
         """寻找共同主题"""
         try:
             # 简单的关键词提取和共同点识别
@@ -632,7 +630,7 @@ class KnowledgeConflictResolver:
             logger.error(f"寻找共同主题失败: {e}")
             return "存在一定共识"
     
-    def _identify_differences(self, viewpoints: List[str]) -> str:
+    def _identify_differences(self, viewpoints: list[str]) -> str:
         """识别差异点"""
         try:
             if len(viewpoints) < 2:
@@ -656,7 +654,7 @@ class KnowledgeConflictResolver:
             logger.error(f"识别差异点失败: {e}")
             return "存在观点差异"
     
-    def get_conflict_statistics(self) -> Dict[str, Any]:
+    def get_conflict_statistics(self) -> dict[str, Any]:
         """获取冲突统计"""
         try:
             stats = {

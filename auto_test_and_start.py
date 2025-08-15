@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-DAIP-LIVE 自动化测试和启动脚本
+"""DAIP-LIVE 自动化测试和启动脚本
 智能检测环境，自动选择最佳可用的演示系统
 """
 
-import sys
 import os
-import time
 import socket
+import subprocess
+import sys
 import threading
 import webbrowser
-import subprocess
 from datetime import datetime
+
 
 class DAIPAutoTester:
     """DAIP自动化测试器"""
@@ -22,10 +20,10 @@ class DAIPAutoTester:
         self.available_servers = []
         self.test_results = {}
         
-        print(f"🚀 DAIP-LIVE 自动化测试系统启动")
+        print("🚀 DAIP-LIVE 自动化测试系统启动")
         print(f"📁 项目路径: {self.project_root}")
         print(f"🐍 Python版本: {sys.version}")
-        print(f"=" * 70)
+        print("=" * 70)
     
     def check_port_available(self, port):
         """检查端口是否可用"""
@@ -125,13 +123,11 @@ class DAIPAutoTester:
         # 测试核心服务导入
         try:
             sys.path.insert(0, self.project_root)
-            from src.core_services.role_manager import RoleManager
             backend_tests['role_manager'] = "✅ 可导入"
         except Exception as e:
             backend_tests['role_manager'] = f"❌ 导入失败: {str(e)[:50]}"
         
         try:
-            from src.core_services.intent_analysis_service import BasicIntentAnalysisService
             backend_tests['intent_service'] = "✅ 可导入"
         except Exception as e:
             backend_tests['intent_service'] = f"❌ 导入失败: {str(e)[:50]}"
@@ -196,7 +192,7 @@ class DAIPAutoTester:
         print(f"\\n🚀 启动 {name}...")
         print(f"📍 访问地址: http://localhost:{port}")
         print(f"📄 脚本路径: {script}")
-        print(f"=" * 70)
+        print("=" * 70)
         
         # 自动打开浏览器
         threading.Timer(2.0, lambda: webbrowser.open(f'http://localhost:{port}')).start()
@@ -314,7 +310,6 @@ class DAIPAutoTester:
         # 使用Python内置服务器
         import http.server
         import socketserver
-        from io import StringIO
         
         class EmergencyHandler(http.server.SimpleHTTPRequestHandler):
             def do_GET(self):
@@ -326,10 +321,10 @@ class DAIPAutoTester:
         port = 8088
         try:
             with socketserver.TCPServer(("", port), EmergencyHandler) as httpd:
-                print(f"🆘 紧急服务器启动成功!")
+                print("🆘 紧急服务器启动成功!")
                 print(f"📍 访问地址: http://localhost:{port}")
-                print(f"🔧 这是一个基础HTML页面，包含问题诊断和解决方案")
-                print(f"按 Ctrl+C 停止服务器")
+                print("🔧 这是一个基础HTML页面，包含问题诊断和解决方案")
+                print("按 Ctrl+C 停止服务器")
                 
                 webbrowser.open(f'http://localhost:{port}')
                 httpd.serve_forever()

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-智能助手主应用
+"""智能助手主应用
 
 一个完整的、工程可用的智能助手系统
 支持用户对话、任务分析、多角色辩论、共识计算、Wiki协同
@@ -10,22 +8,22 @@
 import asyncio
 import logging
 import sys
-from pathlib import Path
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 # 添加项目根目录到路径
 sys.path.append(str(Path(__file__).parent.parent))
 
 # 导入核心服务
-from src.core_services.role_manager import RoleManager
-from src.core_services.integrated_llm_manager import IntegratedLLMManager
-from src.core_services.wiki_service import WikiService
-from src.core_services.memory_agent import MemAgent
-from src.core_services.intent_analysis_service import BasicIntentAnalysisService
-from src.core_services.universal_context_service import UniversalContextService
 from src.core_services.advanced_consensus_algorithms import AdvancedConsensusAlgorithms
+from src.core_services.integrated_llm_manager import IntegratedLLMManager
+from src.core_services.intent_analysis_service import BasicIntentAnalysisService
+from src.core_services.memory_agent import MemAgent
+from src.core_services.role_manager import RoleManager
 from src.core_services.synthesis_engine import SynthesisEngine
+from src.core_services.universal_context_service import UniversalContextService
+from src.core_services.wiki_service import WikiService
 
 # 配置日志
 logging.basicConfig(
@@ -93,8 +91,8 @@ class IntelligentAssistant:
         for role in list(available_roles.values())[:5]:  # 显示前5个角色
             print(f"  • {role.name}: {role.description[:50]}...")
         
-        print(f"\n📚 知识库状态: 已准备就绪")
-        print(f"🧠 记忆系统: 已激活")
+        print("\n📚 知识库状态: 已准备就绪")
+        print("🧠 记忆系统: 已激活")
         print("="*60)
     
     async def start_conversation(self):
@@ -159,7 +157,7 @@ class IntelligentAssistant:
         # 步骤2: 提示词优化
         print("🔧 步骤2: 优化提示词...")
         optimized_prompt = await self._optimize_prompt(user_input, intent_result)
-        print(f"✅ 提示词优化完成")
+        print("✅ 提示词优化完成")
         print(f"   原始: {user_input[:50]}...")
         print(f"   优化: {optimized_prompt[:50]}...")
         
@@ -196,7 +194,7 @@ class IntelligentAssistant:
         # 显示系统指标
         self._display_system_metrics()
     
-    async def _analyze_intent(self, user_input: str) -> Dict[str, Any]:
+    async def _analyze_intent(self, user_input: str) -> dict[str, Any]:
         """分析用户意图"""
         try:
             # 使用意图分析服务
@@ -222,7 +220,7 @@ class IntelligentAssistant:
                 "requires_debate": False
             }
     
-    async def _optimize_prompt(self, original_prompt: str, intent_result: Dict[str, Any]) -> str:
+    async def _optimize_prompt(self, original_prompt: str, intent_result: dict[str, Any]) -> str:
         """优化提示词"""
         try:
             # 使用上下文优化引擎
@@ -243,7 +241,7 @@ class IntelligentAssistant:
             logger.error(f"提示词优化失败: {e}")
             return f"请分析：{original_prompt}"
     
-    async def _organize_multi_role_discussion(self, prompt: str, intent_result: Dict[str, Any]) -> Dict[str, Any]:
+    async def _organize_multi_role_discussion(self, prompt: str, intent_result: dict[str, Any]) -> dict[str, Any]:
         """组织多角色讨论"""
         try:
             print("  🎯 选择合适的角色...")
@@ -333,7 +331,7 @@ class IntelligentAssistant:
             logger.error(f"LLM调用失败: {e}")
             return f"作为{role.name}，我正在分析这个问题，但遇到了一些技术困难。"
     
-    async def _single_role_response(self, prompt: str, intent_result: Dict[str, Any]) -> Dict[str, Any]:
+    async def _single_role_response(self, prompt: str, intent_result: dict[str, Any]) -> dict[str, Any]:
         """单一角色响应"""
         try:
             # 选择最合适的角色
@@ -358,7 +356,7 @@ class IntelligentAssistant:
             logger.error(f"单一角色响应失败: {e}")
             return {"error": str(e)}
     
-    async def _compute_consensus(self, debate_result: Dict[str, Any]) -> Dict[str, Any]:
+    async def _compute_consensus(self, debate_result: dict[str, Any]) -> dict[str, Any]:
         """计算共识"""
         try:
             if "results" not in debate_result:
@@ -400,7 +398,7 @@ class IntelligentAssistant:
             logger.error(f"共识计算失败: {e}")
             return debate_result
     
-    def _simple_synthesis(self, viewpoints: List[Dict[str, Any]]) -> str:
+    def _simple_synthesis(self, viewpoints: list[dict[str, Any]]) -> str:
         """简单的观点综合"""
         synthesis = "综合各方观点，我们可以得出以下结论：\n\n"
         
@@ -411,7 +409,7 @@ class IntelligentAssistant:
         
         return synthesis
     
-    async def _save_to_wiki(self, original_query: str, result: Dict[str, Any]):
+    async def _save_to_wiki(self, original_query: str, result: dict[str, Any]):
         """保存到Wiki知识库"""
         try:
             # 构建Wiki条目
@@ -442,7 +440,7 @@ class IntelligentAssistant:
         except Exception as e:
             logger.error(f"保存到Wiki失败: {e}")
     
-    async def _update_memory(self, user_input: str, result: Dict[str, Any]):
+    async def _update_memory(self, user_input: str, result: dict[str, Any]):
         """更新记忆系统"""
         try:
             # 构建记忆条目
@@ -463,7 +461,7 @@ class IntelligentAssistant:
         except Exception as e:
             logger.error(f"更新记忆失败: {e}")
     
-    def _display_final_result(self, result: Dict[str, Any]):
+    def _display_final_result(self, result: dict[str, Any]):
         """显示最终结果"""
         print("\n" + "="*60)
         print("🎉 处理完成！结果如下：")

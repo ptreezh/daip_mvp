@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-增强监控仪表板
+"""增强监控仪表板
 
 V0.2.2 - 透明度监控系统集成
 提供统一的监控界面，集成TransparencyMonitor和EnhancedTransparencyIntegration
@@ -9,16 +7,16 @@ V0.2.2 - 透明度监控系统集成
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime
+from typing import Any, Optional
+
+from lona.html import H2, H3, HTML, Div, P, Span
 from lona.html.widget import Widget
-from lona.html import HTML, Div, H2, H3, P, Span, Pre, Code, Button, Table, Tr, Td, Th
 
 from frontend.components.transparency_monitor import TransparencyMonitor
 from frontend.services.enhanced_transparency_integration import (
-    EnhancedTransparencyIntegration, 
     MonitoringLevel,
-    get_enhanced_transparency_integration
+    get_enhanced_transparency_integration,
 )
 
 logger = logging.getLogger(__name__)
@@ -152,7 +150,7 @@ class EnhancedMonitoringDashboard(Widget):
         except Exception as e:
             logger.error(f"Error updating dashboard data: {e}")
     
-    def _generate_system_overview(self, monitoring_stats: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_system_overview(self, monitoring_stats: dict[str, Any]) -> dict[str, Any]:
         """生成系统概览"""
         try:
             return {
@@ -168,7 +166,7 @@ class EnhancedMonitoringDashboard(Widget):
             logger.error(f"Error generating system overview: {e}")
             return {}
     
-    def _format_system_health(self, health_data: Optional[Dict[str, Any]]) -> str:
+    def _format_system_health(self, health_data: Optional[dict[str, Any]]) -> str:
         """格式化系统健康状态"""
         if not health_data:
             return "🟡 未知"
@@ -201,7 +199,7 @@ class EnhancedMonitoringDashboard(Widget):
         except Exception:
             return "00:00:00"
     
-    def _get_recent_activities(self) -> List[Dict[str, Any]]:
+    def _get_recent_activities(self) -> list[dict[str, Any]]:
         """获取最近活动"""
         activities = []
         

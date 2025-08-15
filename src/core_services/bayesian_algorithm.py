@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-贝叶斯共识算法适配器
+"""贝叶斯共识算法适配器
 
 适配现有的BayesianConsensus算法到统一共识调度器接口。
 保持贝叶斯更新的数学逻辑，支持先验强度的配置化。
@@ -19,35 +17,25 @@
 - 需要考虑先验知识的场景
 """
 
-import asyncio
-import math
-from typing import Any, Dict, List, Optional, Set, Tuple
 from datetime import datetime
-
-from consensus_algorithm_interface import (
-    ConsensusAlgorithm, ConsensusContext, AlgorithmCapabilities
-)
-from consensus_models import (
-    ConsensusInput, ConsensusResult, AlgorithmMetadata, 
-    ValidationResult, AlgorithmType
-)
+from typing import Any, Optional
 
 # 导入现有的BayesianConsensus实现
-from advanced_consensus_algorithms import (
-    BayesianConsensus, ConsensusInput as LegacyConsensusInput,
-    ConsensusResult as LegacyConsensusResult
-)
+from advanced_consensus_algorithms import BayesianConsensus
+from advanced_consensus_algorithms import ConsensusInput as LegacyConsensusInput
+from advanced_consensus_algorithms import ConsensusResult as LegacyConsensusResult
+from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm, ConsensusContext
+from consensus_models import AlgorithmMetadata, AlgorithmType, ConsensusInput, ConsensusResult, ValidationResult
 
 
 class BayesianAlgorithm(ConsensusAlgorithm):
-    """
-    贝叶斯共识算法适配器
+    """贝叶斯共识算法适配器
     
     包装现有的BayesianConsensus实现，提供统一接口。
     保持贝叶斯更新的数学逻辑和先验强度配置。
     """
     
-    def __init__(self, configuration: Optional[Dict[str, Any]] = None):
+    def __init__(self, configuration: Optional[dict[str, Any]] = None):
         super().__init__("bayesian_consensus", configuration)
         
         # 从配置中获取先验强度参数
@@ -59,10 +47,9 @@ class BayesianAlgorithm(ConsensusAlgorithm):
         )
         
     async def calculate(self, 
-                       inputs: List[ConsensusInput], 
+                       inputs: list[ConsensusInput], 
                        context: ConsensusContext) -> ConsensusResult:
-        """
-        执行贝叶斯共识计算
+        """执行贝叶斯共识计算
         
         Args:
             inputs: 统一格式的共识输入列表
@@ -104,7 +91,7 @@ class BayesianAlgorithm(ConsensusAlgorithm):
             context.set_metric("algorithm_error", str(e))
             raise RuntimeError(f"贝叶斯共识算法执行失败: {e}")
     
-    def _convert_inputs_to_legacy(self, inputs: List[ConsensusInput]) -> List[LegacyConsensusInput]:
+    def _convert_inputs_to_legacy(self, inputs: list[ConsensusInput]) -> list[LegacyConsensusInput]:
         """将统一格式输入转换为遗留格式"""
         legacy_inputs = []
         
@@ -124,7 +111,7 @@ class BayesianAlgorithm(ConsensusAlgorithm):
         
         return legacy_inputs
     
-    def _build_legacy_context(self, context: ConsensusContext) -> Optional[Dict[str, Any]]:
+    def _build_legacy_context(self, context: ConsensusContext) -> Optional[dict[str, Any]]:
         """构建遗留算法的上下文信息"""
         legacy_context = {}
         
@@ -139,9 +126,8 @@ class BayesianAlgorithm(ConsensusAlgorithm):
     
     def _convert_result_from_legacy(self, 
                                    legacy_result: LegacyConsensusResult,
-                                   original_inputs: List[ConsensusInput]) -> ConsensusResult:
+                                   original_inputs: list[ConsensusInput]) -> ConsensusResult:
         """将遗留格式结果转换为统一格式"""
-        
         # 构建推理轨迹
         reasoning_trace = {
             "algorithm": "bayesian_consensus",
@@ -218,7 +204,7 @@ class BayesianAlgorithm(ConsensusAlgorithm):
             max_participants=None
         )
     
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> ValidationResult:
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> ValidationResult:
         """验证输入数据"""
         errors = []
         warnings = []
@@ -236,7 +222,7 @@ class BayesianAlgorithm(ConsensusAlgorithm):
                 low_confidence_count += 1
         
         if low_confidence_count > len(inputs) * 0.5:
-            warnings.append(f"超过一半的输入置信度较低(<0.3)，可能影响贝叶斯更新效果")
+            warnings.append("超过一半的输入置信度较低(<0.3)，可能影响贝叶斯更新效果")
         
         # 检查数据类型一致性（贝叶斯算法对类型敏感）
         position_types = set(type(inp.position).__name__ for inp in inputs)
@@ -263,7 +249,7 @@ class BayesianAlgorithm(ConsensusAlgorithm):
             }
         )
     
-    def validate_configuration(self, config: Dict[str, Any]) -> ValidationResult:
+    def validate_configuration(self, config: dict[str, Any]) -> ValidationResult:
         """验证配置参数"""
         errors = []
         warnings = []
@@ -300,7 +286,7 @@ class BayesianAlgorithm(ConsensusAlgorithm):
         
         return base_time + bayesian_factor + prior_factor
     
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> dict[str, Any]:
         """获取算法健康状态"""
         base_status = super().get_health_status()
         
@@ -318,7 +304,7 @@ class BayesianAlgorithm(ConsensusAlgorithm):
         
         return base_status
     
-    def get_convergence_info(self, inputs: List[ConsensusInput]) -> Dict[str, Any]:
+    def get_convergence_info(self, inputs: list[ConsensusInput]) -> dict[str, Any]:
         """获取贝叶斯收敛信息"""
         if not inputs:
             return {"convergence_possible": False, "reason": "no_inputs"}

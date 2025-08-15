@@ -1,14 +1,11 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-23 14:00:00
+"""@Time    : 2025-07-23 14:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_consensus_revision_nodes.py
 @Description:
     Unit tests for ConsensusNode and RevisionNode implementations.
 """
+
 import pytest
-from unittest.mock import Mock, AsyncMock
-from datetime import datetime
 
 from src.institutional_primitives.consensus_node import ConsensusNode
 from src.institutional_primitives.revision_node import RevisionNode

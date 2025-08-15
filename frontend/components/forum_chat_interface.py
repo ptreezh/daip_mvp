@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 @Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team

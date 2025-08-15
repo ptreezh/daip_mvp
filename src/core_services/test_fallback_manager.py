@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-降级管理器测试
+"""降级管理器测试
 
 验证FallbackManager的所有功能，包括降级策略、重试机制和熔断器。
 """
 
 import asyncio
-import pytest
-from datetime import datetime, timedelta
-from typing import List, Dict, Any
 
-from consensus_models import (
-    ConsensusInput, ConsensusRequest, ConsensusResult, FailureContext
-)
-from consensus_algorithm_interface import ConsensusAlgorithm, ConsensusContext
+import pytest
 from algorithm_registry import AlgorithmRegistry
 from algorithm_selector import AlgorithmSelector
+from consensus_algorithm_interface import ConsensusContext
+from consensus_models import ConsensusInput, ConsensusRequest, ConsensusResult, FailureContext
 from fallback_manager import (
-    FallbackManager, FallbackConfig, FallbackStrategy, RetryStrategy,
-    CircuitBreakerState, PriorityChainRule, SimilarityBasedRule
+    CircuitBreakerState,
+    FallbackConfig,
+    FallbackManager,
+    FallbackStrategy,
+    PriorityChainRule,
+    RetryStrategy,
+    SimilarityBasedRule,
 )
 from test_algorithm_registry import MockConsensusAlgorithm
 
@@ -31,7 +30,7 @@ class FailingAlgorithm(MockConsensusAlgorithm):
         super().__init__(algorithm_id)
         self.failure_message = failure_message
         
-    async def calculate(self, inputs: List[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
+    async def calculate(self, inputs: list[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
         raise RuntimeError(self.failure_message)
 
 
@@ -43,7 +42,7 @@ class UnstableAlgorithm(MockConsensusAlgorithm):
         self.failure_rate = failure_rate
         self.call_count = 0
         
-    async def calculate(self, inputs: List[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
+    async def calculate(self, inputs: list[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
         self.call_count += 1
         
         # 基于调用次数决定是否失败
@@ -181,7 +180,7 @@ class TestFallbackManager:
         assert len(candidates) <= 3
         assert "failing_algo" not in candidates
         
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_fallback_success(self):
         """测试成功的降级执行"""
         failure_context = FailureContext(
@@ -208,7 +207,7 @@ class TestFallbackManager:
         assert response.result is not None
         assert response.execution_time > 0
         
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_fallback_failure(self):
         """测试失败的降级执行"""
         failure_context = FailureContext(
@@ -234,7 +233,7 @@ class TestFallbackManager:
         assert response.fallback_used is True
         assert response.error is not None
         
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_retry_mechanism(self):
         """测试重试机制"""
         # 配置重试
@@ -266,7 +265,7 @@ class TestFallbackManager:
         # 不稳定算法最终应该成功（经过重试）
         assert response.success is True or response.success is False  # 取决于随机性
         
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_circuit_breaker(self):
         """测试熔断器机制"""
         failure_context = FailureContext(

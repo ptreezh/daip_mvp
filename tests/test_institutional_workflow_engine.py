@@ -1,12 +1,10 @@
-"""
-Unit tests for the Institutional Primitives Workflow Engine.
+"""Unit tests for the Institutional Primitives Workflow Engine.
 """
 
 import asyncio
-import logging
+from typing import Any
+
 import pytest
-from datetime import datetime
-from typing import Any, Dict
 
 from src.institutional_primitives.base import ExecutionContext, InstitutionalPrimitive
 from src.institutional_primitives.registry import PrimitiveRegistry
@@ -15,21 +13,19 @@ from src.institutional_primitives.workflow_engine import (
     WorkflowEdge,
     WorkflowEngine,
     WorkflowNode,
-    WorkflowResult,
-    WorkflowStatus
 )
 
 
 class TestPrimitive(InstitutionalPrimitive):
     """Test primitive for workflow testing."""
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.execution_count = 0
         self.should_fail = config.get('should_fail', False) if config else False
         self.delay = config.get('delay', 0.0) if config else 0.0
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         """Test execution."""
         self.execution_count += 1
         
@@ -45,7 +41,7 @@ class TestPrimitive(InstitutionalPrimitive):
             "node_id": context.node_id
         }
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -53,7 +49,7 @@ class TestPrimitive(InstitutionalPrimitive):
             }
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -68,14 +64,14 @@ class TestPrimitive(InstitutionalPrimitive):
 class SlowPrimitive(InstitutionalPrimitive):
     """Slow primitive for testing timeouts."""
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         await asyncio.sleep(0.5)  # 0.5 second delay
         return {"result": "slow_result"}
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {"type": "object", "properties": {}}
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {"result": {"type": "string"}},
@@ -83,7 +79,7 @@ class SlowPrimitive(InstitutionalPrimitive):
         }
 
 
-@pytest.fixture
+@pytest.fixture()
 def primitive_registry():
     """Create test primitive registry."""
     registry = PrimitiveRegistry()
@@ -92,13 +88,13 @@ def primitive_registry():
     return registry
 
 
-@pytest.fixture
+@pytest.fixture()
 def workflow_engine(primitive_registry):
     """Create test workflow engine."""
     return WorkflowEngine(primitive_registry=primitive_registry)
 
 
-@pytest.fixture
+@pytest.fixture()
 def simple_workflow():
     """Create simple test workflow."""
     return WorkflowDefinition(
@@ -126,7 +122,7 @@ def simple_workflow():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def parallel_workflow():
     """Create parallel test workflow."""
     return WorkflowDefinition(
@@ -147,7 +143,7 @@ def parallel_workflow():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def failing_workflow():
     """Create workflow with a failing node."""
     return WorkflowDefinition(
@@ -165,7 +161,7 @@ def failing_workflow():
 class TestWorkflowEngine:
     """Test the workflow engine."""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_simple_workflow(self, workflow_engine, simple_workflow):
         """Test executing a simple workflow."""
         result = await workflow_engine.execute_workflow(
@@ -178,7 +174,7 @@ class TestWorkflowEngine:
         assert "result" in result.outputs
         assert "Processed: test_data" in result.outputs["result"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_parallel_workflow(self, workflow_engine, parallel_workflow):
         """Test executing a workflow with parallel execution."""
         result = await workflow_engine.execute_workflow(
@@ -189,7 +185,7 @@ class TestWorkflowEngine:
         assert result.status == "completed"
         assert len(result.execution_trace.steps) == 4
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_failing_workflow(self, workflow_engine, failing_workflow):
         """Test executing a workflow with a failing node."""
         result = await workflow_engine.execute_workflow(failing_workflow)
@@ -197,7 +193,7 @@ class TestWorkflowEngine:
         assert result.status == "failed"
         assert any(step.status == "failed" for step in result.execution_trace.steps)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_get_workflow_status(self, workflow_engine, simple_workflow):
         """Test getting workflow status."""
         # Start workflow execution
@@ -220,7 +216,7 @@ class TestWorkflowEngine:
         # Wait for completion
         await execution_task
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_pause_and_resume_workflow(self, workflow_engine):
         """Test pausing and resuming a workflow."""
         slow_workflow = WorkflowDefinition(
@@ -265,7 +261,7 @@ class TestWorkflowEngine:
         result = await execution_task
         assert result.status == "completed"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_cancel_workflow(self, workflow_engine):
         """Test cancelling a workflow."""
         slow_workflow = WorkflowDefinition(

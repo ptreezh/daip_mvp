@@ -1,11 +1,7 @@
 import asyncio
 import logging
 import uuid
-from typing import Any, Dict
-
-from fastapi import HTTPException, UploadFile
-
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import HTTPException, UploadFile
 
@@ -24,8 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentService:
-    """
-    Service layer for handling document processing, including uploading,
+    """Service layer for handling document processing, including uploading,
     parsing, and retrieving task results.
     """
 
@@ -37,9 +32,8 @@ class DocumentService:
 
     async def process_uploaded_document(
         self, file: UploadFile, chunk_strategy: str, chunk_size: int, chunk_overlap: int
-    ) -> Dict[str, Any]:
-        """
-        Handles the entire document upload and parsing workflow.
+    ) -> dict[str, Any]:
+        """Handles the entire document upload and parsing workflow.
         Returns a dictionary with the task_id and a summary message.
         """
         task_id = str(uuid.uuid4())
@@ -78,7 +72,7 @@ class DocumentService:
             "message": f"Document parsed successfully, created {len(result.chunks)} chunks.",
         }
 
-    def get_parsing_task_result(self, task_id: str) -> Dict[str, Any]:
+    def get_parsing_task_result(self, task_id: str) -> dict[str, Any]:
         """Retrieves and formats the result of a specific parsing task."""
         if task_id not in self.app_state.parsing_tasks:
             raise HTTPException(status_code=404, detail="Task not found")

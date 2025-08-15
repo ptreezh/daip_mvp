@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 15:45:00
+"""@Time    : 2025-08-06 15:45:00
 @Author  : DAIP-LIVE Team
 @File    : quick_forum_test.py
 @Description:
@@ -10,17 +8,18 @@
 
 import asyncio
 import sys
-import os
 from pathlib import Path
 
 # 添加项目根目录到Python路径
 project_root = Path(__file__).resolve().parent
 sys.path.insert(0, str(project_root))
 
-from src.core_services.forum_service import forum_service
-from src.core_services.forum_service import ForumSession, DebateOrchestrator, UserInterventionManager, ConsensusTracker
-from src.api.routers.forum import forum_router
-from src.app_state import app_state
+from src.core_services.forum_service import (
+    ConsensusTracker,
+    DebateOrchestrator,
+    UserInterventionManager,
+    forum_service,
+)
 
 
 async def test_forum_service_basic():

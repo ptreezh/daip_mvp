@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-简单多数投票算法测试
+"""简单多数投票算法测试
 
 测试SimpleMajorityAlgorithm的各种功能和边界情况。
 """
 
 import asyncio
 import sys
-import os
-from datetime import datetime
 
 # 添加src路径
 sys.path.append('src')
@@ -21,8 +17,6 @@ async def test_simple_majority_algorithm():
     
     try:
         from simple_majority_algorithm import SimpleMajorityAlgorithm
-        from consensus_algorithm_interface import ConsensusContext
-        from consensus_models import ConsensusInput, ConsensusRequest
         
         # 创建算法实例
         algorithm = SimpleMajorityAlgorithm()
@@ -59,8 +53,8 @@ async def test_categorical_consensus(algorithm):
     """测试分类共识"""
     print("\n📊 测试分类共识...")
     
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 创建测试输入
     inputs = [
@@ -85,8 +79,8 @@ async def test_numerical_consensus(algorithm):
     """测试数值共识"""
     print("\n🔢 测试数值共识...")
     
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 创建测试输入
     inputs = [
@@ -110,8 +104,8 @@ async def test_complex_consensus(algorithm):
     """测试复杂类型共识"""
     print("\n🔧 测试复杂类型共识...")
     
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 创建测试输入
     inputs = [
@@ -134,8 +128,8 @@ async def test_edge_cases(algorithm):
     """测试边界情况"""
     print("\n⚠️ 测试边界情况...")
     
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 测试单个输入
     single_input = [ConsensusInput(agent_id="agent1", position="唯一选项", confidence=0.8)]
@@ -179,8 +173,8 @@ async def test_configuration():
     print("✅ 配置验证通过")
     
     # 测试配置效果
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     inputs = [
         ConsensusInput(agent_id="agent1", position="选项A", confidence=0.9),

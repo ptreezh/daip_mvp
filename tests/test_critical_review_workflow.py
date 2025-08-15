@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 10:30:00
+"""@Time    : 2025-07-24 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_critical_review_workflow.py
 @Description:
     Unit tests for the CriticalReviewWorkflow class.
 """
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 
 from src.workflows.critical_review_workflow import CriticalReviewWorkflow
 
@@ -15,12 +14,12 @@ from src.workflows.critical_review_workflow import CriticalReviewWorkflow
 class TestCriticalReviewWorkflow:
     """Test cases for CriticalReviewWorkflow."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def workflow(self):
         """Create a CriticalReviewWorkflow instance for testing."""
         return CriticalReviewWorkflow("test_workflow")
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_services(self):
         """Create mock services for testing."""
         services = {
@@ -89,7 +88,7 @@ class TestCriticalReviewWorkflow:
         assert workflow.config["fact_extraction"]["min_confidence"] == 0.6
         assert workflow.config["revision"]["revision_role"] == "创作者"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_execute_success(self, workflow, mock_services):
         """Test successful workflow execution."""
         # Mock all node executions to return success
@@ -112,7 +111,7 @@ class TestCriticalReviewWorkflow:
             assert result["facts_needing_revision"] == 1
             assert "execution_details" in result
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_execute_no_revision_needed(self, workflow, mock_services):
         """Test workflow execution when no revision is needed."""
         # Mock all node executions to return success, but with no facts needing revision
@@ -132,7 +131,7 @@ class TestCriticalReviewWorkflow:
             assert result["revision_needed"] is False
             assert result["facts_needing_revision"] == 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_execute_generation_failure(self, workflow, mock_services):
         """Test workflow execution when generation fails."""
         # Mock generation to fail
@@ -144,7 +143,7 @@ class TestCriticalReviewWorkflow:
             assert "error" in result
             assert "Generation" in result["error"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_execute_fact_extraction_failure(self, workflow, mock_services):
         """Test workflow execution when fact extraction fails."""
         # Mock generation to succeed but fact extraction to fail
@@ -158,7 +157,7 @@ class TestCriticalReviewWorkflow:
             assert "error" in result
             assert "Fact extraction" in result["error"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_class_method(self, mock_services):
         """Test the class method for executing a workflow."""
         # Mock the workflow execute method

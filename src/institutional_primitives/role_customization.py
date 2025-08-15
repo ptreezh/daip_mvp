@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 07:00:00
+"""@Time    : 2025-07-25 07:00:00
 @Author  : DAIP-LIVE Team
 @File    : role_customization.py
 @Description:
@@ -8,12 +6,11 @@
     Implements requirement 7.4 - dynamic role configuration capabilities.
 """
 import logging
-import json
-from typing import Any, Dict, List, Optional, Callable, Union
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -92,10 +89,10 @@ class ExpertiseProfile(BaseModel):
     """Expertise profile for a role."""
     domain: str
     level: ExpertiseLevel
-    specializations: List[str] = Field(default_factory=list)
+    specializations: list[str] = Field(default_factory=list)
     years_experience: Optional[int] = None
-    key_skills: List[str] = Field(default_factory=list)
-    knowledge_areas: List[str] = Field(default_factory=list)
+    key_skills: list[str] = Field(default_factory=list)
+    knowledge_areas: list[str] = Field(default_factory=list)
     
     def get_expertise_description(self) -> str:
         """Generate an expertise description."""
@@ -116,7 +113,7 @@ class RolePromptTemplate(BaseModel):
     task_prompt_template: str
     interaction_prompt_template: str
     context_prompt_template: str
-    variables: Dict[str, Any] = Field(default_factory=dict)
+    variables: dict[str, Any] = Field(default_factory=dict)
     
     def render_prompt(self, prompt_type: str, **kwargs) -> str:
         """Render a prompt with variables."""
@@ -164,23 +161,23 @@ class RoleConfiguration(BaseModel):
     
     # Constraints and preferences
     max_response_length: int = Field(gt=0, default=1000)
-    preferred_evidence_types: List[str] = Field(default_factory=list)
+    preferred_evidence_types: list[str] = Field(default_factory=list)
     communication_style: str = "professional"
     
     # Metadata
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
     version: str = "1.0.0"
-    tags: List[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
     
-    def update_configuration(self, updates: Dict[str, Any]) -> None:
+    def update_configuration(self, updates: dict[str, Any]) -> None:
         """Update role configuration."""
         for key, value in updates.items():
             if hasattr(self, key):
                 setattr(self, key, value)
         self.updated_at = datetime.now()
     
-    def get_role_context(self) -> Dict[str, Any]:
+    def get_role_context(self) -> dict[str, Any]:
         """Get role context for LLM interactions."""
         return {
             "role_id": self.role_id,
@@ -203,19 +200,19 @@ class RoleTemplate(BaseModel):
     
     # Template parameters
     default_config: RoleConfiguration
-    customizable_fields: List[str] = Field(default_factory=list)
-    required_fields: List[str] = Field(default_factory=list)
+    customizable_fields: list[str] = Field(default_factory=list)
+    required_fields: list[str] = Field(default_factory=list)
     
     # Metadata
     author: str
     version: str = "1.0.0"
     created_at: datetime = Field(default_factory=datetime.now)
-    tags: List[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
     
     def create_role_from_template(
         self,
         role_id: str,
-        customizations: Dict[str, Any] = None
+        customizations: dict[str, Any] = None
     ) -> RoleConfiguration:
         """Create a role configuration from this template."""
         # Start with default configuration
@@ -239,8 +236,7 @@ class RoleTemplate(BaseModel):
 
 
 class RoleConfigurationManager:
-    """
-    Manager for role configurations and templates.
+    """Manager for role configurations and templates.
     
     This class provides dynamic role configuration capabilities,
     allowing for custom prompts, expertise profiles, and interaction patterns.
@@ -248,9 +244,9 @@ class RoleConfigurationManager:
     
     def __init__(self):
         """Initialize the role configuration manager."""
-        self.configurations: Dict[str, RoleConfiguration] = {}
-        self.templates: Dict[str, RoleTemplate] = {}
-        self.active_roles: Dict[str, str] = {}  # role_instance_id -> config_id
+        self.configurations: dict[str, RoleConfiguration] = {}
+        self.templates: dict[str, RoleTemplate] = {}
+        self.active_roles: dict[str, str] = {}  # role_instance_id -> config_id
         
         # Initialize with standard templates
         self._initialize_standard_templates()
@@ -393,8 +389,7 @@ class RoleConfigurationManager:
         logger.info("Initialized standard role templates")
     
     def register_role_template(self, template: RoleTemplate) -> bool:
-        """
-        Register a role template.
+        """Register a role template.
         
         Args:
             template: Role template to register
@@ -413,10 +408,9 @@ class RoleConfigurationManager:
         self,
         template_id: str,
         role_id: str,
-        customizations: Dict[str, Any] = None
+        customizations: dict[str, Any] = None
     ) -> Optional[RoleConfiguration]:
-        """
-        Create a role configuration from a template.
+        """Create a role configuration from a template.
         
         Args:
             template_id: ID of the template to use
@@ -445,8 +439,7 @@ class RoleConfigurationManager:
             return None
     
     def register_role_configuration(self, config: RoleConfiguration) -> bool:
-        """
-        Register a role configuration.
+        """Register a role configuration.
         
         Args:
             config: Role configuration to register
@@ -468,10 +461,9 @@ class RoleConfigurationManager:
     def update_role_configuration(
         self,
         role_id: str,
-        updates: Dict[str, Any]
+        updates: dict[str, Any]
     ) -> bool:
-        """
-        Update a role configuration.
+        """Update a role configuration.
         
         Args:
             role_id: ID of the role to update
@@ -495,22 +487,21 @@ class RoleConfigurationManager:
             logger.error(f"Error updating role configuration: {e}")
             return False
     
-    def list_role_configurations(self) -> List[RoleConfiguration]:
+    def list_role_configurations(self) -> list[RoleConfiguration]:
         """List all role configurations."""
         return list(self.configurations.values())
     
-    def list_role_templates(self) -> List[RoleTemplate]:
+    def list_role_templates(self) -> list[RoleTemplate]:
         """List all role templates."""
         return list(self.templates.values())
     
     def search_templates(
         self,
         category: str = None,
-        tags: List[str] = None,
+        tags: list[str] = None,
         query: str = None
-    ) -> List[RoleTemplate]:
-        """
-        Search role templates by criteria.
+    ) -> list[RoleTemplate]:
+        """Search role templates by criteria.
         
         Args:
             category: Template category to filter by
@@ -544,8 +535,7 @@ class RoleConfigurationManager:
         return results
     
     def activate_role(self, role_instance_id: str, config_id: str) -> bool:
-        """
-        Activate a role with a specific configuration.
+        """Activate a role with a specific configuration.
         
         Args:
             role_instance_id: ID of the role instance
@@ -583,8 +573,7 @@ class RoleConfigurationManager:
         prompt_type: str,
         **kwargs
     ) -> str:
-        """
-        Get a rendered prompt for a role.
+        """Get a rendered prompt for a role.
         
         Args:
             role_id: ID of the role configuration
@@ -605,14 +594,14 @@ class RoleConfigurationManager:
         
         return config.prompt_template.render_prompt(prompt_type, **render_kwargs)
     
-    def export_configuration(self, role_id: str) -> Optional[Dict[str, Any]]:
+    def export_configuration(self, role_id: str) -> Optional[dict[str, Any]]:
         """Export a role configuration to dictionary."""
         config = self.configurations.get(role_id)
         if config:
             return config.dict()
         return None
     
-    def import_configuration(self, config_data: Dict[str, Any]) -> bool:
+    def import_configuration(self, config_data: dict[str, Any]) -> bool:
         """Import a role configuration from dictionary."""
         try:
             config = RoleConfiguration(**config_data)
@@ -621,7 +610,7 @@ class RoleConfigurationManager:
             logger.error(f"Error importing configuration: {e}")
             return False
     
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """Get system status information."""
         return {
             "total_configurations": len(self.configurations),

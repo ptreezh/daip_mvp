@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-真实LLM上下文优化器
+"""真实LLM上下文优化器
 
 使用真实LLM进行智能上下文优化和验证
 """
 
-import logging
 import asyncio
-import json
+import logging
 import time
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime
 from dataclasses import dataclass
+from typing import Any, Optional
+
 import aiohttp
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +35,7 @@ class OptimizationResult:
     optimized_response: LLMResponse
     improvement_score: float
     optimization_reasoning: str
-    metrics: Dict[str, Any]
+    metrics: dict[str, Any]
 
 
 class RealLLMClient:
@@ -168,12 +164,11 @@ class IntelligentContextOptimizer:
     async def optimize_context_with_llm(
         self,
         user_query: str,
-        conversation_history: List[Dict[str, Any]],
-        available_context: Dict[str, Any],
+        conversation_history: list[dict[str, Any]],
+        available_context: dict[str, Any],
         target_model: str = "llama3:instruct"
     ) -> OptimizationResult:
         """使用LLM进行智能上下文优化"""
-        
         # 1. 构建原始上下文
         original_context = self._build_original_context(
             user_query, conversation_history, available_context
@@ -219,8 +214,8 @@ class IntelligentContextOptimizer:
     def _build_original_context(
         self,
         user_query: str,
-        conversation_history: List[Dict[str, Any]],
-        available_context: Dict[str, Any]
+        conversation_history: list[dict[str, Any]],
+        available_context: dict[str, Any]
     ) -> str:
         """构建原始上下文"""
         context_parts = []
@@ -253,7 +248,6 @@ class IntelligentContextOptimizer:
     
     async def _llm_optimize_context(self, user_query: str, original_context: str) -> str:
         """使用LLM优化上下文"""
-        
         optimization_prompt = f"""你是一个专业的上下文优化专家。请分析以下用户问题和原始上下文，然后生成一个优化后的上下文，使其更加相关、简洁和有效。
 
 用户问题: {user_query}
@@ -287,9 +281,8 @@ class IntelligentContextOptimizer:
         user_query: str,
         original_response: LLMResponse,
         optimized_response: LLMResponse
-    ) -> Tuple[float, str]:
+    ) -> tuple[float, str]:
         """使用LLM评估优化效果"""
-        
         evaluation_prompt = f"""你是一个专业的AI回答质量评估专家。请比较以下两个AI回答的质量，并给出优化效果评分。
 
 用户问题: {user_query}
@@ -354,9 +347,8 @@ class IntelligentContextOptimizer:
         optimized_context: str,
         original_response: LLMResponse,
         optimized_response: LLMResponse
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """计算详细指标"""
-        
         return {
             "context_compression_ratio": 1 - len(optimized_context) / len(original_context) if len(original_context) > 0 else 0,
             "token_efficiency": {
@@ -465,19 +457,19 @@ class RealLLMContextValidator:
                 results.append(result)
                 
                 # 显示结果
-                print(f"✅ 优化成功")
+                print("✅ 优化成功")
                 print(f"📊 改进评分: {result.improvement_score:.3f}")
                 print(f"🗜️  上下文压缩: {result.metrics['context_compression_ratio']*100:.1f}%")
                 print(f"⚡ Token节省: {result.metrics['token_efficiency']['token_savings']}")
                 print(f"⏱️  时间差异: {result.metrics['response_time']['time_difference']:.3f}s")
                 
-                print(f"\n🧠 优化理由:")
+                print("\n🧠 优化理由:")
                 print(f"   {result.optimization_reasoning}")
                 
-                print(f"\n📝 原始回答 (前200字符):")
+                print("\n📝 原始回答 (前200字符):")
                 print(f"   {result.original_response.content[:200]}...")
                 
-                print(f"\n✨ 优化后回答 (前200字符):")
+                print("\n✨ 优化后回答 (前200字符):")
                 print(f"   {result.optimized_response.content[:200]}...")
                 
             except Exception as e:
@@ -491,9 +483,9 @@ class RealLLMContextValidator:
         
         return results
     
-    async def _generate_comprehensive_report(self, results: List[OptimizationResult]):
+    async def _generate_comprehensive_report(self, results: list[OptimizationResult]):
         """生成综合报告"""
-        print(f"\n📊 综合验证报告")
+        print("\n📊 综合验证报告")
         print("=" * 60)
         
         if not results:
@@ -507,7 +499,7 @@ class RealLLMContextValidator:
         
         successful_optimizations = sum(1 for r in results if r.improvement_score > 0)
         
-        print(f"📈 整体表现:")
+        print("📈 整体表现:")
         print(f"   测试用例数: {len(results)}")
         print(f"   成功优化数: {successful_optimizations}")
         print(f"   成功率: {successful_optimizations/len(results)*100:.1f}%")
@@ -527,20 +519,20 @@ class RealLLMContextValidator:
         
         print(f"   可靠性评估: {reliability}")
         
-        print(f"\n🎯 关键发现:")
+        print("\n🎯 关键发现:")
         if avg_compression > 0.2:
             print(f"   ✅ 显著的上下文压缩效果 ({avg_compression*100:.1f}%)")
         if avg_token_savings > 50:
             print(f"   ✅ 明显的Token使用优化 (节省{avg_token_savings:.0f}个)")
         if successful_optimizations == len(results):
-            print(f"   ✅ 所有测试用例都获得改进")
+            print("   ✅ 所有测试用例都获得改进")
         
-        print(f"\n💡 验证结论:")
+        print("\n💡 验证结论:")
         if avg_improvement > 0.1:
-            print(f"   🎉 真实LLM验证显示优化系统有效！")
+            print("   🎉 真实LLM验证显示优化系统有效！")
             print(f"   📊 平均改进评分 {avg_improvement:.3f} 表明优化确实提升了回答质量")
         else:
-            print(f"   ⚠️  优化效果有限，需要进一步改进算法")
+            print("   ⚠️  优化效果有限，需要进一步改进算法")
 
 
 async def main():
@@ -550,7 +542,7 @@ async def main():
     try:
         results = await validator.run_comprehensive_validation()
         
-        print(f"\n🔍 真实性验证:")
+        print("\n🔍 真实性验证:")
         print("=" * 60)
         print("✅ 使用了真实的LLM模型进行优化和验证")
         print("✅ 通过LLM智能分析和优化上下文")

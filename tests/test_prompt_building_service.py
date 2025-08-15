@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 19:45:00
+"""@Time    : 2025-08-03 19:45:00
 @Author  : DAIP-LIVE Team
 @File    : test_prompt_building_service.py
 @Description:
@@ -9,24 +7,21 @@
 """
 
 import asyncio
-import unittest
-from unittest.mock import Mock, AsyncMock, patch
-import tempfile
 import shutil
+import tempfile
+import unittest
 from pathlib import Path
-import json
+from unittest.mock import AsyncMock, Mock, patch
 
 from src.core_services.prompt_building_service import (
-    PromptBuildingService,
-    ContextSpec,
     ContextConstraints,
-    OptimizationGoals,
-    OptimizationGoal,
-    TemplateRequirements,
-    ContextSource,
+    ContextSpec,
     ContextType,
+    OptimizationGoal,
+    OptimizationGoals,
+    PromptBuildingService,
+    TokenCounter,
     create_prompt_building_service,
-    TokenCounter
 )
 
 

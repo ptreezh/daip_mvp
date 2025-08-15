@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-交互式用户演示
+"""交互式用户演示
 
 为真实用户提供交互式的辩论系统体验，包括：
 - 用户友好的界面
@@ -12,10 +10,8 @@
 
 import asyncio
 import sys
-import time
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, List
+from pathlib import Path
 
 # 添加项目路径
 project_root = Path(__file__).parent
@@ -82,9 +78,9 @@ class InteractiveUserDemo:
         print("🔧 正在初始化辩论系统...")
         
         try:
+            from src.core_services.role_manager import RoleManager
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-            from src.core_services.role_manager import RoleManager
             
             # 创建系统组件
             llm_integrator = RealLLMIntegrator()
@@ -120,12 +116,12 @@ class InteractiveUserDemo:
         
         # 推荐相关专家角色
         recommended_roles = self.recommend_roles_for_topic(topic)
-        print(f"\n🎓 为此话题推荐的专家角色:")
+        print("\n🎓 为此话题推荐的专家角色:")
         for i, role_info in enumerate(recommended_roles[:5], 1):
             print(f"{i}. {role_info['name']}")
         
         # 让用户选择角色
-        print(f"\n请选择参与辩论的专家 (输入数字，用逗号分隔，如: 1,2):")
+        print("\n请选择参与辩论的专家 (输入数字，用逗号分隔，如: 1,2):")
         role_choice = input("选择角色: ").strip()
         
         try:
@@ -143,7 +139,7 @@ class InteractiveUserDemo:
             return
         
         # 开始辩论
-        print(f"\n🚀 正在启动辩论...")
+        print("\n🚀 正在启动辩论...")
         print("⏳ 专家们正在分析话题和准备观点，请稍候...")
         
         try:
@@ -174,7 +170,7 @@ class InteractiveUserDemo:
         except Exception as e:
             print(f"❌ 辩论启动异常: {e}")
     
-    def recommend_roles_for_topic(self, topic: str) -> List[Dict[str, str]]:
+    def recommend_roles_for_topic(self, topic: str) -> list[dict[str, str]]:
         """根据话题推荐相关角色"""
         # 简化的角色推荐逻辑
         all_roles = []
@@ -218,7 +214,7 @@ class InteractiveUserDemo:
         print("-" * 30)
         
         # 基本状态信息
-        print(f"🔧 系统版本: V0.1.0")
+        print("🔧 系统版本: V0.1.0")
         print(f"📅 启动时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"🎓 可用专家: {len(self.debate_system.role_manager._roles)} 个")
         print(f"💬 活跃辩论: {len(self.debate_system.active_debates)} 个")
@@ -226,14 +222,14 @@ class InteractiveUserDemo:
         
         # 当前辩论状态
         if self.current_debate_id:
-            print(f"\n🎯 当前辩论:")
+            print("\n🎯 当前辩论:")
             status = self.debate_system.get_debate_status(self.current_debate_id)
             if status:
                 print(f"   ID: {self.current_debate_id}")
                 print(f"   阶段: {status.get('phase', 'unknown')}")
                 print(f"   参与者: {len(status.get('participating_roles', []))} 位")
         else:
-            print(f"\n🎯 当前无活跃辩论")
+            print("\n🎯 当前无活跃辩论")
         
         input("\n按回车键继续...")
     
@@ -265,15 +261,15 @@ class InteractiveUserDemo:
             await asyncio.sleep(1)  # 模拟处理时间
         
         # 显示结果摘要
-        print(f"\n🎉 辩论结果摘要:")
-        print(f"   💡 产生了多个有价值的观点")
-        print(f"   🤝 专家们在某些方面达成了共识")
-        print(f"   🔍 识别了需要进一步讨论的分歧点")
-        print(f"   📈 整体讨论质量评分: 85%")
+        print("\n🎉 辩论结果摘要:")
+        print("   💡 产生了多个有价值的观点")
+        print("   🤝 专家们在某些方面达成了共识")
+        print("   🔍 识别了需要进一步讨论的分歧点")
+        print("   📈 整体讨论质量评分: 85%")
     
     async def collect_debate_feedback(self, topic: str):
         """收集用户对辩论的反馈"""
-        print(f"\n📝 请为这次辩论提供反馈")
+        print("\n📝 请为这次辩论提供反馈")
         print("-" * 30)
         
         feedback = {}
@@ -378,7 +374,7 @@ class InteractiveUserDemo:
             # 如果文件已存在，加载现有反馈
             existing_feedback = []
             if feedback_file.exists():
-                with open(feedback_file, 'r', encoding='utf-8') as f:
+                with open(feedback_file, encoding='utf-8') as f:
                     existing_feedback = json.load(f)
             
             # 添加新反馈

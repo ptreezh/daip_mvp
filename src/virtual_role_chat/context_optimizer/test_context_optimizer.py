@@ -1,18 +1,24 @@
-"""
-Unit tests for the Task Context Optimizer.
+"""Unit tests for the Task Context Optimizer.
 """
 
 import unittest
-from unittest.mock import MagicMock, patch
 
-from .optimizer import TaskContextOptimizer
 from .models import (
-    TaskType, TaskRequirement, ContextElement, TaskDetectionResult,
-    OptimizedContext, ContextOptimizationConfig, ElementType, RequirementType
+    ContextElement,
+    ContextOptimizationConfig,
+    ElementType,
+    OptimizedContext,
+    RequirementType,
+    TaskDetectionResult,
+    TaskRequirement,
+    TaskType,
 )
+from .optimizer import TaskContextOptimizer
 from .strategies import (
-    PatternBasedTaskDetection, RelevanceBasedPrioritization,
-    SmartTruncationCompression, ProportionalBlending
+    PatternBasedTaskDetection,
+    ProportionalBlending,
+    RelevanceBasedPrioritization,
+    SmartTruncationCompression,
 )
 
 

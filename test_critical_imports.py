@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test script to validate all critical imports work correctly
+"""Test script to validate all critical imports work correctly
 """
 
 import sys
@@ -65,19 +64,19 @@ def test_critical_imports():
     print(f"Failed imports: {len(failed)}")
     
     if failed:
-        print(f"\nFAILED IMPORTS:")
+        print("\nFAILED IMPORTS:")
         for module in failed:
             print(f"   - {module}")
         return False
     
-    print(f"\nALL CRITICAL IMPORTS SUCCESSFUL!")
+    print("\nALL CRITICAL IMPORTS SUCCESSFUL!")
     
     # Performance summary
     total_time = sum(import_times.values())
     avg_time = total_time / len(import_times)
     slowest = max(import_times.items(), key=lambda x: x[1])
     
-    print(f"\nPERFORMANCE SUMMARY:")
+    print("\nPERFORMANCE SUMMARY:")
     print(f"   Total import time: {total_time:.2f}s")
     print(f"   Average import time: {avg_time:.2f}s")
     print(f"   Slowest module: {slowest[0]} ({slowest[1]:.2f}s)")

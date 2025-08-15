@@ -12,7 +12,6 @@ from src.models import (
 )
 from src.protocols.debate_protocol import DebateProtocol
 
-
 router = APIRouter(
     prefix="/protocols",
     tags=["Protocol Management"],
@@ -23,8 +22,7 @@ logger = logging.getLogger(__name__)
 
 @router.post("/generate_intelligent")
 async def generate_intelligent_protocol(state: AppStateDep, req: IntelligentProtocolRequest):
-    """
-    Intelligently generate a DAIP protocol using an LLM.
+    """Intelligently generate a DAIP protocol using an LLM.
     Supports natural language understanding, multi-stage decomposition, and role assignment.
     """
     try:
@@ -61,8 +59,7 @@ async def generate_intelligent_protocol(state: AppStateDep, req: IntelligentProt
 
 @router.post("/classify_task")
 async def classify_task(state: AppStateDep, user_request: str = Body(..., embed=True)):
-    """
-    Classify a user's request as either content creation or document analysis.
+    """Classify a user's request as either content creation or document analysis.
     """
     try:
         # Check if the task classifier is available
@@ -162,8 +159,7 @@ async def run_debate(
     config: DebateConfig,
     state: AppStateDep,
 ):
-    """
-    Run a full, multi-round debate based on the provided configuration.
+    """Run a full, multi-round debate based on the provided configuration.
 
     This endpoint orchestrates a debate by:
     1.  Initializing the `DebateProtocol` with required system services.

@@ -1,25 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-优化版PersonalAssistantService
+"""优化版PersonalAssistantService
 基于V0.1.1的发现进行性能和稳定性优化
 """
 
 import asyncio
+import json
 import logging
 import time
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
 from datetime import datetime, timedelta
-from enum import Enum
-import json
+from typing import Any, Optional
+
+from personal_intelligence_hub.services.personal_assistant import IntentResult, TeamProposal, WorkflowType
 
 # 导入原有组件
 from personal_intelligence_hub.services.personal_assistant import (
     PersonalAssistantService as BasePersonalAssistantService,
-    WorkflowType,
-    IntentResult,
-    TeamProposal
 )
 
 logger = logging.getLogger(__name__)
@@ -43,8 +38,8 @@ class OptimizedPersonalAssistantService(BasePersonalAssistantService):
         super().__init__()
         
         # 添加缓存机制
-        self.intent_cache: Dict[str, CacheEntry] = {}
-        self.team_cache: Dict[str, CacheEntry] = {}
+        self.intent_cache: dict[str, CacheEntry] = {}
+        self.team_cache: dict[str, CacheEntry] = {}
         self.role_cache: Optional[CacheEntry] = None
         
         # 性能监控
@@ -79,7 +74,7 @@ class OptimizedPersonalAssistantService(BasePersonalAssistantService):
         if self.role_cache and self.role_cache.is_expired():
             self.role_cache = None
     
-    async def analyze_intent(self, user_input: str, context: Optional[Dict] = None) -> IntentResult:
+    async def analyze_intent(self, user_input: str, context: Optional[dict] = None) -> IntentResult:
         """优化版意图分析 - 添加缓存和性能监控"""
         self.performance_metrics["analyze_intent_calls"] += 1
         
@@ -291,7 +286,7 @@ class OptimizedPersonalAssistantService(BasePersonalAssistantService):
             # 提供更友好的错误消息
             return f"抱歉，处理您的请求时遇到了问题。我正在使用备用策略为您提供帮助。\n\n原始请求: {user_input[:100]}{'...' if len(user_input) > 100 else ''}"
     
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """获取性能指标"""
         cache_hit_rate_intent = (
             self.performance_metrics["analyze_intent_cache_hits"] / 
@@ -338,7 +333,7 @@ async def test_optimized_assistant():
         print(f"📝 响应长度: {len(result)}字符")
     
     # 显示性能指标
-    print(f"\n📊 性能指标:")
+    print("\n📊 性能指标:")
     metrics = assistant.get_performance_metrics()
     for key, value in metrics.items():
         print(f"   {key}: {value}")

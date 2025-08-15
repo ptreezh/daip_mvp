@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-自动上下文优化演示
+"""自动上下文优化演示
 
 展示基于多面嵌入技术的智能上下文优化效果
 """
 
-import sys
 import asyncio
-import json
-from datetime import datetime
+import sys
+
 sys.path.append('src')
 
 async def demo_context_optimization():
@@ -17,10 +14,7 @@ async def demo_context_optimization():
     print("🚀 自动上下文优化演示")
     print("=" * 60)
     
-    from src.core_services.context_optimization_engine import (
-        ContextOptimizationEngine, 
-        ContextOptimizationRequest
-    )
+    from src.core_services.context_optimization_engine import ContextOptimizationEngine, ContextOptimizationRequest
     
     # 创建上下文优化引擎
     engine = ContextOptimizationEngine()
@@ -114,20 +108,20 @@ async def demo_context_optimization():
         optimized_context = await engine.optimize_context(request)
         
         # 显示优化结果
-        print(f"📊 优化统计:")
+        print("📊 优化统计:")
         print(f"   原始上下文大小: {optimized_context.original_context_size}")
         print(f"   优化后大小: {optimized_context.optimized_context_size}")
         print(f"   压缩率: {(1 - optimized_context.optimized_context_size / optimized_context.original_context_size) * 100:.1f}%")
         print(f"   优化置信度: {optimized_context.confidence_score:.3f}")
         
-        print(f"🧠 优化理由:")
+        print("🧠 优化理由:")
         print(f"   {optimized_context.optimization_reasoning}")
         
-        print(f"📝 优化后的上下文 (前500字符):")
+        print("📝 优化后的上下文 (前500字符):")
         prompt_preview = optimized_context.optimized_prompt[:500]
         print(f"   {prompt_preview}...")
         
-        print(f"🔗 选中的上下文元素:")
+        print("🔗 选中的上下文元素:")
         for i, element in enumerate(optimized_context.context_elements[:5]):  # 显示前5个
             print(f"   {i+1}. [{element.element_type}] {element.content[:60]}... (相关性: {element.relevance_score:.3f})")
         
@@ -162,9 +156,9 @@ async def demo_context_optimization():
     
     print("✨ 优化后的智能上下文:")
     print(f"   - 选择了最相关的 {adaptive_result.optimized_context_size} 个上下文元素")
-    print(f"   - 根据用户专业背景(医生)调整了详细程度")
-    print(f"   - 基于历史兴趣(AI医疗伦理)优化了内容重点")
-    print(f"   - 考虑了任务复杂度和用户经验水平")
+    print("   - 根据用户专业背景(医生)调整了详细程度")
+    print("   - 基于历史兴趣(AI医疗伦理)优化了内容重点")
+    print("   - 考虑了任务复杂度和用户经验水平")
     print()
     
     print("🎯 优化带来的好处:")

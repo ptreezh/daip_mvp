@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-集成LLM系统演示
+"""集成LLM系统演示
 
 展示所有虚拟角色都使用智能上下文优化的完整系统
 """
 
-import sys
 import asyncio
-import json
-from datetime import datetime
+import sys
+
 sys.path.append('src')
 
 async def demo_integrated_llm_system():
@@ -96,7 +93,7 @@ async def demo_integrated_llm_system():
                 }
             ],
             "positions": {
-                role_id: f"基于第一轮分析的立场" for role_id in participating_roles
+                role_id: "基于第一轮分析的立场" for role_id in participating_roles
             },
             "rules": [
                 "基于专业背景提出观点",

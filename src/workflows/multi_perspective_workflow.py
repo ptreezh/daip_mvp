@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 15:00:00
+"""@Time    : 2025-07-24 15:00:00
 @Author  : DAIP-LIVE Team
 @File    : multi_perspective_workflow.py
 @Description:
@@ -8,33 +6,30 @@
     all institutional primitive nodes for comprehensive knowledge synthesis.
 """
 import logging
-import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from src.institutional_primitives.multi_perspective import (
-    TaskDecompositionNode,
-    ParallelExplorationNode,
-    ViewpointCollectionNode,
-    EnhancedSynthesisNode,
-    IterativeRefinementNode
-)
 from src.institutional_primitives.base import ExecutionContext
+from src.institutional_primitives.multi_perspective import (
+    EnhancedSynthesisNode,
+    IterativeRefinementNode,
+    ParallelExplorationNode,
+    TaskDecompositionNode,
+    ViewpointCollectionNode,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class MultiPerspectiveSynthesisWorkflow:
-    """
-    多视角综合工作流 - Orchestrates the complete Multi-perspective Synthesis Workflow.
+    """多视角综合工作流 - Orchestrates the complete Multi-perspective Synthesis Workflow.
     
     Implements a comprehensive framework to overcome single-LLM perspective limitations
     by orchestrating diverse expert viewpoints with true cognitive independence
     into synthesized knowledge.
     """
     
-    def __init__(self, workflow_id: str, config: Dict[str, Any] = None):
-        """
-        Initialize the Multi-perspective Synthesis Workflow.
+    def __init__(self, workflow_id: str, config: dict[str, Any] = None):
+        """Initialize the Multi-perspective Synthesis Workflow.
         
         Args:
             workflow_id: Unique identifier for this workflow instance
@@ -113,12 +108,11 @@ class MultiPerspectiveSynthesisWorkflow:
     async def execute(
         self,
         topic: str,
-        perspectives: List[str] = None,
-        services: Dict[str, Any] = None,
+        perspectives: list[str] = None,
+        services: dict[str, Any] = None,
         execution_id: str = None
-    ) -> Dict[str, Any]:
-        """
-        Execute the complete Multi-perspective Synthesis Workflow.
+    ) -> dict[str, Any]:
+        """Execute the complete Multi-perspective Synthesis Workflow.
         
         Args:
             topic: The complex topic to analyze
@@ -222,7 +216,7 @@ class MultiPerspectiveSynthesisWorkflow:
                 "execution_id": context.execution_id
             }
     
-    def _create_error_result(self, error_message: str, step_result: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_error_result(self, error_message: str, step_result: dict[str, Any]) -> dict[str, Any]:
         """Create a standardized error result."""
         return {
             "success": False,
@@ -235,13 +229,12 @@ class MultiPerspectiveSynthesisWorkflow:
     async def execute_multi_perspective_synthesis(
         cls,
         topic: str,
-        perspectives: List[str] = None,
-        services: Dict[str, Any] = None,
-        workflow_config: Dict[str, Any] = None,
+        perspectives: list[str] = None,
+        services: dict[str, Any] = None,
+        workflow_config: dict[str, Any] = None,
         workflow_id: str = "multi_perspective"
-    ) -> Dict[str, Any]:
-        """
-        Convenience method to execute a Multi-perspective Synthesis Workflow.
+    ) -> dict[str, Any]:
+        """Convenience method to execute a Multi-perspective Synthesis Workflow.
         
         Args:
             topic: The complex topic to analyze

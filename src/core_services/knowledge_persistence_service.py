@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 22:00:00
+"""@Time    : 2025-07-24 22:00:00
 @Author  : DAIP-LIVE Team
 @File    : knowledge_persistence_service.py
 @Description:
@@ -10,19 +8,13 @@
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
-from .enhanced_sskg_manager import (
-    EnhancedSSKGManager, 
-    KnowledgeNode, 
-    KnowledgeRelation, 
-    NodeType, 
-    RelationType
-)
-from .wiki_service import WikiService
+from .enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeNode, KnowledgeRelation, NodeType, RelationType
 from .knowledge_conflict_resolver import KnowledgeConflictResolver
+from .wiki_service import WikiService
 
 logger = logging.getLogger(__name__)
 
@@ -32,13 +24,13 @@ class ValidatedFact(BaseModel):
     id: str
     content: str
     confidence_score: float = Field(ge=0.0, le=1.0)
-    evidence_sources: List[str] = Field(default_factory=list)
+    evidence_sources: list[str] = Field(default_factory=list)
     validation_timestamp: datetime = Field(default_factory=datetime.now)
     original_content: Optional[str] = None
     revision_applied: bool = False
     credibility_threshold: float = 0.7
-    reviewer_roles: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    reviewer_roles: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class SynthesisResult(BaseModel):
@@ -46,15 +38,15 @@ class SynthesisResult(BaseModel):
     id: str
     topic: str
     synthesis_content: str
-    perspectives: List[str] = Field(default_factory=list)
-    expert_attributions: Dict[str, List[str]] = Field(default_factory=dict)
-    supporting_evidence: List[str] = Field(default_factory=list)
+    perspectives: list[str] = Field(default_factory=list)
+    expert_attributions: dict[str, list[str]] = Field(default_factory=dict)
+    supporting_evidence: list[str] = Field(default_factory=list)
     synthesis_rationale: str = ""
     quality_score: float = Field(ge=0.0, le=1.0, default=0.0)
     confidence: float = Field(ge=0.0, le=1.0, default=0.0)
     synthesis_timestamp: datetime = Field(default_factory=datetime.now)
     refinement_iterations: int = 0
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class KnowledgePersistenceResult(BaseModel):
@@ -62,16 +54,15 @@ class KnowledgePersistenceResult(BaseModel):
     success: bool
     persisted_node_id: Optional[str] = None
     wiki_page_id: Optional[str] = None
-    conflicts_detected: List[str] = Field(default_factory=list)
-    conflicts_resolved: List[str] = Field(default_factory=list)
+    conflicts_detected: list[str] = Field(default_factory=list)
+    conflicts_resolved: list[str] = Field(default_factory=list)
     error_message: Optional[str] = None
     persistence_timestamp: datetime = Field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class KnowledgePersistenceService:
-    """
-    Service for automatically persisting validated knowledge from workflows.
+    """Service for automatically persisting validated knowledge from workflows.
     
     This service implements requirement 6.1 and 6.2:
     - Automatic fact persistence from Critical Review
@@ -85,8 +76,7 @@ class KnowledgePersistenceService:
         wiki_service: WikiService,
         conflict_resolver: Optional[KnowledgeConflictResolver] = None
     ):
-        """
-        Initialize the knowledge persistence service.
+        """Initialize the knowledge persistence service.
         
         Args:
             sskg_manager: Enhanced SSKG manager for knowledge storage
@@ -106,11 +96,10 @@ class KnowledgePersistenceService:
     
     async def persist_critical_review_results(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
-    ) -> List[KnowledgePersistenceResult]:
-        """
-        Persist validated facts from Critical Review workflow.
+    ) -> list[KnowledgePersistenceResult]:
+        """Persist validated facts from Critical Review workflow.
         
         Args:
             workflow_result: Result from Critical Review workflow
@@ -152,11 +141,10 @@ class KnowledgePersistenceService:
     
     async def persist_synthesis_results(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
     ) -> KnowledgePersistenceResult:
-        """
-        Persist synthesis results from Multi-perspective Synthesis workflow.
+        """Persist synthesis results from Multi-perspective Synthesis workflow.
         
         Args:
             workflow_result: Result from Multi-perspective Synthesis workflow
@@ -193,9 +181,9 @@ class KnowledgePersistenceService:
     
     def _extract_validated_facts(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
-    ) -> List[ValidatedFact]:
+    ) -> list[ValidatedFact]:
         """Extract validated facts from Critical Review workflow result."""
         validated_facts = []
         
@@ -266,7 +254,7 @@ class KnowledgePersistenceService:
     
     def _extract_synthesis_result(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
     ) -> SynthesisResult:
         """Extract synthesis result from Multi-perspective Synthesis workflow result."""
@@ -493,8 +481,8 @@ class KnowledgePersistenceService:
     
     async def _create_critical_review_wiki_page(
         self,
-        validated_facts: List[ValidatedFact],
-        workflow_result: Dict[str, Any],
+        validated_facts: list[ValidatedFact],
+        workflow_result: dict[str, Any],
         execution_id: str
     ) -> Optional[str]:
         """Create a wiki page summarizing Critical Review results."""
@@ -506,7 +494,7 @@ class KnowledgePersistenceService:
             content_parts = []
             content_parts.append(f"# Critical Review Results - {execution_id}")
             content_parts.append(f"\n**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            content_parts.append(f"**Workflow Type:** Critical Review")
+            content_parts.append("**Workflow Type:** Critical Review")
             
             # Add original content
             original_content = workflow_result.get("original_content", "")
@@ -534,7 +522,7 @@ class KnowledgePersistenceService:
                 content_parts.append(f"\n## Revised Content\n\n{revised_content}")
             
             # Add statistics
-            content_parts.append(f"\n## Statistics")
+            content_parts.append("\n## Statistics")
             content_parts.append(f"- **Facts Extracted:** {workflow_result.get('facts_extracted', 0)}")
             content_parts.append(f"- **Facts Reviewed:** {workflow_result.get('facts_reviewed', 0)}")
             content_parts.append(f"- **Facts Validated:** {len(validated_facts)}")
@@ -563,7 +551,7 @@ class KnowledgePersistenceService:
     async def _create_synthesis_wiki_page(
         self,
         synthesis: SynthesisResult,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
     ) -> Optional[str]:
         """Create a wiki page for Multi-perspective Synthesis results."""
@@ -581,7 +569,7 @@ class KnowledgePersistenceService:
             
             # Add perspectives
             if synthesis.perspectives:
-                content_parts.append(f"\n## Perspectives Analyzed")
+                content_parts.append("\n## Perspectives Analyzed")
                 for perspective in synthesis.perspectives:
                     content_parts.append(f"- {perspective}")
             
@@ -590,13 +578,13 @@ class KnowledgePersistenceService:
             
             # Add key insights
             if synthesis.supporting_evidence:
-                content_parts.append(f"\n## Key Insights")
+                content_parts.append("\n## Key Insights")
                 for i, insight in enumerate(synthesis.supporting_evidence, 1):
                     content_parts.append(f"{i}. {insight}")
             
             # Add expert contributions
             if synthesis.expert_attributions:
-                content_parts.append(f"\n## Expert Contributions")
+                content_parts.append("\n## Expert Contributions")
                 for expert, contributions in synthesis.expert_attributions.items():
                     content_parts.append(f"\n### {expert}")
                     for contribution in contributions:
@@ -607,7 +595,7 @@ class KnowledgePersistenceService:
                 content_parts.append(f"\n## Synthesis Rationale\n\n{synthesis.synthesis_rationale}")
             
             # Add metadata
-            content_parts.append(f"\n## Metadata")
+            content_parts.append("\n## Metadata")
             content_parts.append(f"- **Refinement Iterations:** {synthesis.refinement_iterations}")
             content_parts.append(f"- **Perspectives Count:** {len(synthesis.perspectives)}")
             content_parts.append(f"- **Expert Contributions:** {len(synthesis.expert_attributions)}")
@@ -638,8 +626,7 @@ class KnowledgePersistenceService:
         auto_resolve_conflicts: bool = True,
         create_wiki_pages: bool = True
     ) -> None:
-        """
-        Configure persistence behavior.
+        """Configure persistence behavior.
         
         Args:
             min_confidence_threshold: Minimum confidence score for fact persistence
@@ -653,7 +640,7 @@ class KnowledgePersistenceService:
         logger.info(f"Knowledge persistence configured: threshold={min_confidence_threshold}, "
                    f"auto_resolve={auto_resolve_conflicts}, wiki_pages={create_wiki_pages}")
     
-    def get_persistence_statistics(self) -> Dict[str, Any]:
+    def get_persistence_statistics(self) -> dict[str, Any]:
         """Get statistics about persisted knowledge."""
         try:
             # Query for facts from critical review

@@ -1,13 +1,16 @@
-"""
-Simple test script to validate the core data models.
+"""Simple test script to validate the core data models.
 """
 
 from datetime import datetime
-import json
 
 from src.virtual_role_chat.models import (
-    ChatRoomConfig, ChatRoom, ChatMessage, ChatSession, 
-    ValidationResult, SubTopic, TransparencyLevel
+    ChatMessage,
+    ChatRoom,
+    ChatRoomConfig,
+    ChatSession,
+    SubTopic,
+    TransparencyLevel,
+    ValidationResult,
 )
 
 

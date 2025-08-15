@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : domain_services.py
 @Description:
@@ -8,17 +6,12 @@
     These services contain business logic that doesn't naturally fit within entities or value objects.
 """
 
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime
 import asyncio
-from abc import ABC, abstractmethod
+from datetime import datetime
+from typing import Any, Optional
 
-from .entities import User, Session, Task, Message, Debate
-from .value_objects import (
-    EntranceType, IntentType, ConsensusLevel, UserPreference, 
-    TaskPriority, TimeInterval
-)
-from .aggregates import SessionAggregate, TaskAggregate, DebateAggregate
+from .entities import User
+from .value_objects import ConsensusLevel, EntranceType
 
 
 class EntranceSelectorService:
@@ -45,7 +38,7 @@ class EntranceSelectorService:
             }
         }
     
-    async def select_entrance(self, user: User, context: Dict[str, Any]) -> EntranceType:
+    async def select_entrance(self, user: User, context: dict[str, Any]) -> EntranceType:
         """选择最适合的入口类型"""
         # 1. 检查用户明确的偏好
         if user.preferred_entrance:
@@ -60,7 +53,7 @@ class EntranceSelectorService:
         
         return prediction
     
-    async def _extract_context_features(self, user: User, context: Dict[str, Any]) -> Dict[str, float]:
+    async def _extract_context_features(self, user: User, context: dict[str, Any]) -> dict[str, float]:
         """提取上下文特征"""
         features = {}
         
@@ -81,7 +74,7 @@ class EntranceSelectorService:
         
         return features
     
-    def _analyze_time_sensitivity(self, context: Dict[str, Any]) -> float:
+    def _analyze_time_sensitivity(self, context: dict[str, Any]) -> float:
         """分析时间敏感性"""
         time_sensitive_keywords = ["紧急", "立即", "马上", "快速", " ASAP", "urgent"]
         query = context.get("query", "").lower()
@@ -99,7 +92,7 @@ class EntranceSelectorService:
         
         return 0.3  # 默认低时间敏感性
     
-    def _analyze_query_complexity(self, context: Dict[str, Any]) -> float:
+    def _analyze_query_complexity(self, context: dict[str, Any]) -> float:
         """分析查询复杂性"""
         query = context.get("query", "")
         
@@ -124,7 +117,7 @@ class EntranceSelectorService:
         
         return min(final_score, 1.0)
     
-    def _assess_user_expertise(self, user: User, context: Dict[str, Any]) -> float:
+    def _assess_user_expertise(self, user: User, context: dict[str, Any]) -> float:
         """评估用户专业水平"""
         # 基于用户历史活动
         user_history = self.behavior_history.get(user.user_id, {})
@@ -193,7 +186,7 @@ class EntranceSelectorService:
         
         return forum_preference
     
-    async def _predict_optimal_entrance(self, features: Dict[str, float]) -> EntranceType:
+    async def _predict_optimal_entrance(self, features: dict[str, float]) -> EntranceType:
         """预测最优入口类型"""
         # 应用规则引擎
         forum_score = 0.5  # 基础分数
@@ -219,7 +212,7 @@ class EntranceSelectorService:
         # 最终决策
         return EntranceType.FORUM if forum_score > 0.5 else EntranceType.SECRETARIAT
     
-    def _record_selection_history(self, user_id: str, entrance: EntranceType, features: Dict[str, float]):
+    def _record_selection_history(self, user_id: str, entrance: EntranceType, features: dict[str, float]):
         """记录选择历史"""
         if user_id not in self.behavior_history:
             self.behavior_history[user_id] = {
@@ -242,7 +235,7 @@ class EntranceSelectorService:
             if recent_selections:
                 recent_selections[-1]["satisfaction"] = satisfaction
     
-    def get_user_preferences(self, user_id: str) -> Dict[str, Any]:
+    def get_user_preferences(self, user_id: str) -> dict[str, Any]:
         """获取用户偏好数据"""
         return self.behavior_history.get(user_id, {})
 
@@ -259,7 +252,7 @@ class WorkflowOrchestratorService:
             "summarization": self._create_summarization_workflow
         }
     
-    async def plan_workflow(self, intent: Dict[str, Any]) -> Dict[str, Any]:
+    async def plan_workflow(self, intent: dict[str, Any]) -> dict[str, Any]:
         """规划工作流"""
         intent_type = intent.get("type", "analysis")
         content = intent.get("content", "")
@@ -284,7 +277,7 @@ class WorkflowOrchestratorService:
             "intent": intent
         }
     
-    def _create_analysis_workflow(self, content: str, intent: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _create_analysis_workflow(self, content: str, intent: dict[str, Any]) -> list[dict[str, Any]]:
         """创建分析工作流"""
         return [
             {
@@ -329,7 +322,7 @@ class WorkflowOrchestratorService:
             }
         ]
     
-    def _create_discussion_workflow(self, content: str, intent: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _create_discussion_workflow(self, content: str, intent: dict[str, Any]) -> list[dict[str, Any]]:
         """创建讨论工作流"""
         return [
             {
@@ -366,7 +359,7 @@ class WorkflowOrchestratorService:
             }
         ]
     
-    def _create_evaluation_workflow(self, content: str, intent: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _create_evaluation_workflow(self, content: str, intent: dict[str, Any]) -> list[dict[str, Any]]:
         """创建评估工作流"""
         return [
             {
@@ -403,7 +396,7 @@ class WorkflowOrchestratorService:
             }
         ]
     
-    def _create_summarization_workflow(self, content: str, intent: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _create_summarization_workflow(self, content: str, intent: dict[str, Any]) -> list[dict[str, Any]]:
         """创建总结工作流"""
         return [
             {
@@ -440,11 +433,11 @@ class WorkflowOrchestratorService:
             }
         ]
     
-    def _estimate_duration(self, workflow_steps: List[Dict[str, Any]]) -> float:
+    def _estimate_duration(self, workflow_steps: list[dict[str, Any]]) -> float:
         """估算工作流执行时间"""
         return sum(step.get("estimated_time", 0) for step in workflow_steps)
     
-    def _determine_required_agents(self, intent: Dict[str, Any]) -> List[str]:
+    def _determine_required_agents(self, intent: dict[str, Any]) -> list[str]:
         """确定所需的Agent"""
         intent_type = intent.get("type", "analysis")
         
@@ -468,7 +461,7 @@ class WorkflowOrchestratorService:
         
         return list(set(agents))  # 去重
     
-    async def start_workflow(self, workflow_id: str, workflow_plan: Dict[str, Any]) -> bool:
+    async def start_workflow(self, workflow_id: str, workflow_plan: dict[str, Any]) -> bool:
         """启动工作流"""
         if workflow_id in self.active_workflows:
             return False
@@ -484,7 +477,7 @@ class WorkflowOrchestratorService:
         
         return True
     
-    async def execute_step(self, workflow_id: str, step_id: str) -> Dict[str, Any]:
+    async def execute_step(self, workflow_id: str, step_id: str) -> dict[str, Any]:
         """执行工作流步骤"""
         if workflow_id not in self.active_workflows:
             raise ValueError(f"Workflow {workflow_id} not found")
@@ -522,7 +515,7 @@ class WorkflowOrchestratorService:
         
         return result
     
-    def get_workflow_progress(self, workflow_id: str) -> Dict[str, Any]:
+    def get_workflow_progress(self, workflow_id: str) -> dict[str, Any]:
         """获取工作流进度"""
         if workflow_id not in self.active_workflows:
             raise ValueError(f"Workflow {workflow_id} not found")
@@ -588,7 +581,7 @@ class UserInterventionService:
         }
         self.optimization_history = {}
     
-    async def optimize_input(self, raw_input: str, intent_type: str, context: Dict[str, Any]) -> str:
+    async def optimize_input(self, raw_input: str, intent_type: str, context: dict[str, Any]) -> str:
         """优化用户输入"""
         if intent_type not in self.intervention_patterns:
             return raw_input
@@ -601,7 +594,7 @@ class UserInterventionService:
         
         return optimized_input
     
-    async def _optimize_comment(self, raw_input: str, context: Dict[str, Any]) -> str:
+    async def _optimize_comment(self, raw_input: str, context: dict[str, Any]) -> str:
         """优化评论输入"""
         # 确保评论具有建设性
         constructive_phrases = [
@@ -615,7 +608,7 @@ class UserInterventionService:
         
         return raw_input
     
-    async def _optimize_question(self, raw_input: str, context: Dict[str, Any]) -> str:
+    async def _optimize_question(self, raw_input: str, context: dict[str, Any]) -> str:
         """优化问题输入"""
         # 确保问题清晰明确
         question_words = ["什么", "如何", "为什么", "怎么样", "是否", "能否", "what", "how", "why", "whether"]
@@ -626,7 +619,7 @@ class UserInterventionService:
         
         return raw_input
     
-    async def _optimize_suggestion(self, raw_input: str, context: Dict[str, Any]) -> str:
+    async def _optimize_suggestion(self, raw_input: str, context: dict[str, Any]) -> str:
         """优化建议输入"""
         # 确保建议具有可操作性
         action_phrases = ["建议", "推荐", "可以考虑", "或许可以", "suggest", "recommend", "consider"]
@@ -636,7 +629,7 @@ class UserInterventionService:
         
         return raw_input
     
-    async def _optimize_correction(self, raw_input: str, context: Dict[str, Any]) -> str:
+    async def _optimize_correction(self, raw_input: str, context: dict[str, Any]) -> str:
         """优化纠正输入"""
         # 确保纠正具有礼貌性
         polite_phrases = ["抱歉", "不好意思", "我想指出", "可能有个小错误", "sorry", "excuse me", "I'd like to point out"]
@@ -646,7 +639,7 @@ class UserInterventionService:
         
         return raw_input
     
-    async def integrate_intervention(self, debate_id: str, user_intervention: Dict[str, Any]) -> Dict[str, Any]:
+    async def integrate_intervention(self, debate_id: str, user_intervention: dict[str, Any]) -> dict[str, Any]:
         """集成用户干预到讨论中"""
         # 分析干预的影响
         impact_analysis = await self._analyze_intervention_impact(user_intervention)
@@ -665,7 +658,7 @@ class UserInterventionService:
             "timestamp": datetime.now()
         }
     
-    async def _analyze_intervention_impact(self, intervention: Dict[str, Any]) -> Dict[str, Any]:
+    async def _analyze_intervention_impact(self, intervention: dict[str, Any]) -> dict[str, Any]:
         """分析干预影响"""
         content = intervention.get("content", "")
         intent = intervention.get("intent", "comment")
@@ -707,7 +700,7 @@ class UserInterventionService:
         constructive_count = sum(1 for word in constructive_words if word in content)
         return min(constructive_count / 2, 1.0)
     
-    async def _generate_integration_suggestions(self, intervention: Dict[str, Any], impact_analysis: Dict[str, Any]) -> List[str]:
+    async def _generate_integration_suggestions(self, intervention: dict[str, Any], impact_analysis: dict[str, Any]) -> list[str]:
         """生成集成建议"""
         suggestions = []
         
@@ -725,7 +718,7 @@ class UserInterventionService:
         
         return suggestions
     
-    def _calculate_impact_score(self, impact_analysis: Dict[str, Any]) -> float:
+    def _calculate_impact_score(self, impact_analysis: dict[str, Any]) -> float:
         """计算影响分数"""
         weights = {
             "constructiveness": 0.4,
@@ -741,7 +734,7 @@ class UserInterventionService:
         
         return min(score, 1.0)
     
-    def _record_optimization(self, original: str, optimized: str, intent_type: str, context: Dict[str, Any]):
+    def _record_optimization(self, original: str, optimized: str, intent_type: str, context: dict[str, Any]):
         """记录优化历史"""
         timestamp = datetime.now()
         
@@ -755,7 +748,7 @@ class UserInterventionService:
             "context": context
         })
     
-    def get_optimization_stats(self) -> Dict[str, Any]:
+    def get_optimization_stats(self) -> dict[str, Any]:
         """获取优化统计信息"""
         total_optimizations = sum(len(records) for records in self.optimization_history.values())
         
@@ -808,7 +801,7 @@ class ConsensusTrackingService:
         
         return ConsensusLevel(consensus_score)
     
-    async def _simple_majority_consensus(self, debate_data: Dict[str, Any]) -> float:
+    async def _simple_majority_consensus(self, debate_data: dict[str, Any]) -> float:
         """简单多数共识算法"""
         messages = debate_data.get("messages", [])
         
@@ -829,7 +822,7 @@ class ConsensusTrackingService:
         agree_count = sum(1 for pos in positions.values() if pos == "agree")
         return agree_count / len(positions)
     
-    def _extract_message_position(self, message: Dict[str, Any]) -> Optional[str]:
+    def _extract_message_position(self, message: dict[str, Any]) -> Optional[str]:
         """提取消息立场"""
         content = message.get("content", "").lower()
         
@@ -846,7 +839,7 @@ class ConsensusTrackingService:
         else:
             return "neutral"
     
-    async def _weighted_voting_consensus(self, debate_data: Dict[str, Any]) -> float:
+    async def _weighted_voting_consensus(self, debate_data: dict[str, Any]) -> float:
         """加权投票共识算法"""
         messages = debate_data.get("messages", [])
         
@@ -884,7 +877,7 @@ class ConsensusTrackingService:
         else:
             return 0.5  # 其他权重较低
     
-    async def _sentiment_analysis_consensus(self, debate_data: Dict[str, Any]) -> float:
+    async def _sentiment_analysis_consensus(self, debate_data: dict[str, Any]) -> float:
         """情感分析共识算法"""
         messages = debate_data.get("messages", [])
         
@@ -908,7 +901,7 @@ class ConsensusTrackingService:
         consensus = 1.0 - min(sentiment_variance, 1.0)
         return max(0.0, consensus)
     
-    def _analyze_message_sentiment(self, message: Dict[str, Any]) -> float:
+    def _analyze_message_sentiment(self, message: dict[str, Any]) -> float:
         """分析消息情感"""
         content = message.get("content", "")
         
@@ -949,7 +942,7 @@ class ConsensusTrackingService:
         if agent_id not in debate_data["participants"]:
             debate_data["participants"].append(agent_id)
     
-    async def add_message(self, debate_id: str, message: Dict[str, Any]):
+    async def add_message(self, debate_id: str, message: dict[str, Any]):
         """添加消息"""
         if debate_id not in self.active_debates:
             self.active_debates[debate_id] = {
@@ -965,7 +958,7 @@ class ConsensusTrackingService:
         if sender and sender not in debate_data["participants"]:
             debate_data["participants"].append(sender)
     
-    async def extract_key_arguments(self, debate_id: str) -> List[Dict[str, Any]]:
+    async def extract_key_arguments(self, debate_id: str) -> list[dict[str, Any]]:
         """提取关键论点"""
         if debate_id not in self.active_debates:
             return []
@@ -1007,7 +1000,7 @@ class ConsensusTrackingService:
         
         return min((keyword_count * 0.6 + length_factor * 0.4), 1.0)
     
-    def get_debate_summary(self, debate_id: str) -> Dict[str, Any]:
+    def get_debate_summary(self, debate_id: str) -> dict[str, Any]:
         """获取辩论摘要"""
         if debate_id not in self.active_debates:
             return {}

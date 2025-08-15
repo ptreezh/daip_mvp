@@ -1,30 +1,29 @@
+"""Unit tests for workflow orchestration engine.
 """
-Unit tests for workflow orchestration engine.
-"""
+
+import asyncio
+import shutil
+import tempfile
+from datetime import datetime
+from typing import Any
 
 import pytest
-import asyncio
-import tempfile
-import shutil
-from typing import Dict, Any
-from datetime import datetime
 
-from src.virtual_role_chat.workflow_engine.models import (
-    WorkflowDefinition,
-    WorkflowNode,
-    WorkflowEdge,
-    WorkflowStatus,
-    NodeStatus
-)
-from src.virtual_role_chat.workflow_engine.engine import WorkflowEngine
-from src.virtual_role_chat.workflow_engine.state_manager import StateManager
-from src.virtual_role_chat.workflow_engine.execution_manager import ExecutionManager
 from src.virtual_role_chat.institutional_primitives.base import (
-    InstitutionalPrimitive,
     ExecutionContext,
-    ExecutionResult
+    ExecutionResult,
+    InstitutionalPrimitive,
 )
 from src.virtual_role_chat.institutional_primitives.registry import PrimitiveRegistry
+from src.virtual_role_chat.workflow_engine.engine import WorkflowEngine
+from src.virtual_role_chat.workflow_engine.execution_manager import ExecutionManager
+from src.virtual_role_chat.workflow_engine.models import (
+    WorkflowDefinition,
+    WorkflowEdge,
+    WorkflowNode,
+    WorkflowStatus,
+)
+from src.virtual_role_chat.workflow_engine.state_manager import StateManager
 
 
 class TestPrimitive(InstitutionalPrimitive):
@@ -36,7 +35,7 @@ class TestPrimitive(InstitutionalPrimitive):
         self.should_fail = config.get('should_fail', False) if config else False
         self.delay = config.get('delay', 0.0) if config else 0.0
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> ExecutionResult:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> ExecutionResult:
         """Test execution."""
         self.execution_count += 1
         
@@ -58,7 +57,7 @@ class TestPrimitive(InstitutionalPrimitive):
             }
         )
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -66,7 +65,7 @@ class TestPrimitive(InstitutionalPrimitive):
             }
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -81,17 +80,17 @@ class TestPrimitive(InstitutionalPrimitive):
 class SlowPrimitive(InstitutionalPrimitive):
     """Slow primitive for testing timeouts."""
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> ExecutionResult:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> ExecutionResult:
         await asyncio.sleep(2.0)  # 2 second delay
         return ExecutionResult(
             success=True,
             outputs={"result": "slow_result"}
         )
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {"type": "object", "properties": {}}
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {"result": {"type": "string"}},
@@ -99,7 +98,7 @@ class SlowPrimitive(InstitutionalPrimitive):
         }
 
 
-@pytest.fixture
+@pytest.fixture()
 def temp_dir():
     """Create temporary directory for testing."""
     temp_dir = tempfile.mkdtemp()
@@ -107,7 +106,7 @@ def temp_dir():
     shutil.rmtree(temp_dir)
 
 
-@pytest.fixture
+@pytest.fixture()
 def primitive_registry():
     """Create test primitive registry."""
     registry = PrimitiveRegistry()
@@ -116,13 +115,13 @@ def primitive_registry():
     return registry
 
 
-@pytest.fixture
+@pytest.fixture()
 def state_manager(temp_dir):
     """Create test state manager."""
     return StateManager(temp_dir)
 
 
-@pytest.fixture
+@pytest.fixture()
 def workflow_engine(primitive_registry, state_manager):
     """Create test workflow engine."""
     return WorkflowEngine(
@@ -132,7 +131,7 @@ def workflow_engine(primitive_registry, state_manager):
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def simple_workflow():
     """Create simple test workflow."""
     return WorkflowDefinition(
@@ -161,7 +160,7 @@ def simple_workflow():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def parallel_workflow():
     """Create parallel test workflow."""
     return WorkflowDefinition(
@@ -251,7 +250,7 @@ class TestWorkflowModels:
 class TestStateManager:
     """Test workflow state management."""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_save_and_load_execution_state(self, state_manager, simple_workflow):
         """Test saving and loading execution state."""
         from src.virtual_role_chat.workflow_engine.models import WorkflowExecution
@@ -273,13 +272,13 @@ class TestStateManager:
         assert loaded_execution.status == WorkflowStatus.RUNNING
         assert loaded_execution.parameters == {"test_param": "test_value"}
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_load_nonexistent_execution(self, state_manager):
         """Test loading non-existent execution."""
         execution = await state_manager.load_execution_state("nonexistent")
         assert execution is None
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_delete_execution_state(self, state_manager, simple_workflow):
         """Test deleting execution state."""
         from src.virtual_role_chat.workflow_engine.models import WorkflowExecution
@@ -298,7 +297,7 @@ class TestStateManager:
         loaded = await state_manager.load_execution_state(execution.execution_id)
         assert loaded is None
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_list_executions(self, state_manager, simple_workflow):
         """Test listing executions."""
         from src.virtual_role_chat.workflow_engine.models import WorkflowExecution
@@ -325,7 +324,7 @@ class TestStateManager:
 class TestExecutionManager:
     """Test workflow execution management."""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_single_node(self, primitive_registry):
         """Test executing a single node."""
         from src.virtual_role_chat.workflow_engine.models import WorkflowExecution
@@ -346,7 +345,7 @@ class TestExecutionManager:
         assert node.id in execution.completed_nodes
         assert node.id in execution.node_outputs
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_node_failure(self, primitive_registry):
         """Test executing a node that fails."""
         from src.virtual_role_chat.workflow_engine.models import WorkflowExecution
@@ -364,7 +363,7 @@ class TestExecutionManager:
         assert len(result.errors) > 0
         assert node.id in execution.failed_nodes
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_nodes_parallel(self, primitive_registry):
         """Test parallel node execution."""
         from src.virtual_role_chat.workflow_engine.models import WorkflowExecution
@@ -397,7 +396,7 @@ class TestExecutionManager:
 class TestWorkflowEngine:
     """Test main workflow engine."""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_simple_workflow(self, workflow_engine, simple_workflow):
         """Test executing a simple sequential workflow."""
         result = await workflow_engine.execute_workflow(
@@ -412,7 +411,7 @@ class TestWorkflowEngine:
         assert "node1.result" in result.outputs
         assert "node2.result" in result.outputs
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_parallel_workflow(self, workflow_engine, parallel_workflow):
         """Test executing a workflow with parallel nodes."""
         result = await workflow_engine.execute_workflow(parallel_workflow)
@@ -422,7 +421,7 @@ class TestWorkflowEngine:
         assert result.metrics.successful_nodes == 4
         assert result.metrics.failed_nodes == 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_workflow_with_failure(self, workflow_engine):
         """Test executing a workflow with node failure."""
         failing_workflow = WorkflowDefinition(
@@ -440,7 +439,7 @@ class TestWorkflowEngine:
         assert result.metrics.failed_nodes > 0
         assert len(result.errors) > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_invalid_workflow(self, workflow_engine):
         """Test executing an invalid workflow."""
         invalid_workflow = WorkflowDefinition(
@@ -454,7 +453,7 @@ class TestWorkflowEngine:
         assert result.status == WorkflowStatus.FAILED
         assert len(result.errors) > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_timeout(self, workflow_engine):
         """Test workflow node timeout."""
         timeout_workflow = WorkflowDefinition(
@@ -468,7 +467,7 @@ class TestWorkflowEngine:
         assert result.status == WorkflowStatus.FAILED
         assert any("timeout" in error.lower() for error in result.errors)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_pause_and_resume_workflow(self, workflow_engine):
         """Test pausing and resuming workflow execution."""
         slow_workflow = WorkflowDefinition(
@@ -506,7 +505,7 @@ class TestWorkflowEngine:
         result = await execution_task
         assert result.status in [WorkflowStatus.COMPLETED, WorkflowStatus.FAILED]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_cancel_workflow(self, workflow_engine):
         """Test cancelling workflow execution."""
         slow_workflow = WorkflowDefinition(
@@ -533,7 +532,7 @@ class TestWorkflowEngine:
         result = await execution_task
         assert result.status == WorkflowStatus.CANCELLED
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_get_execution_details(self, workflow_engine, simple_workflow):
         """Test getting execution details."""
         result = await workflow_engine.execute_workflow(simple_workflow)

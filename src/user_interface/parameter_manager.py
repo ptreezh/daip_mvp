@@ -1,23 +1,19 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 19:30:00
+"""@Time    : 2025-07-24 19:30:00
 @Author  : DAIP-LIVE Team
 @File    : parameter_manager.py
 @Description:
     Parameter management for user intervention and workflow customization.
 """
 import asyncio
-import json
 import logging
-from typing import Any, Dict, List, Optional, Union, Callable
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any, Optional, Union
 
 from rich.console import Console
-from rich.prompt import Prompt, Confirm, IntPrompt, FloatPrompt
+from rich.prompt import Confirm, FloatPrompt, IntPrompt, Prompt
 from rich.table import Table
-from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn
 
 logger = logging.getLogger(__name__)
 
@@ -40,12 +36,12 @@ class ParameterDefinition:
     param_type: ParameterType
     description: str
     default: Any = None
-    choices: Optional[List[str]] = None
+    choices: Optional[list[str]] = None
     min_value: Optional[Union[int, float]] = None
     max_value: Optional[Union[int, float]] = None
     required: bool = True
     validator: Optional[Callable[[Any], bool]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class ParameterManager:
@@ -54,15 +50,15 @@ class ParameterManager:
     def __init__(self, console: Console = None):
         """Initialize the parameter manager."""
         self.console = console or Console()
-        self.parameter_history: Dict[str, Any] = {}
-        self.validation_errors: List[str] = []
+        self.parameter_history: dict[str, Any] = {}
+        self.validation_errors: list[str] = []
     
     async def collect_parameters(
         self,
-        parameter_definitions: List[ParameterDefinition],
-        context: Dict[str, Any] = None,
+        parameter_definitions: list[ParameterDefinition],
+        context: dict[str, Any] = None,
         allow_skip: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Collect parameters from user based on definitions."""
         self.console.print("\n[blue]📝 Parameter Configuration[/blue]")
         
@@ -189,7 +185,7 @@ class ParameterManager:
             default=param_def.default if param_def.default is not None else True
         )
     
-    def _collect_list_parameter(self, param_def: ParameterDefinition) -> List[str]:
+    def _collect_list_parameter(self, param_def: ParameterDefinition) -> list[str]:
         """Collect a list parameter."""
         while True:
             default_str = ""
@@ -225,7 +221,7 @@ class ParameterManager:
             default=str(param_def.default) if param_def.default else None
         )
     
-    def _collect_range_parameter(self, param_def: ParameterDefinition) -> Dict[str, Union[int, float]]:
+    def _collect_range_parameter(self, param_def: ParameterDefinition) -> dict[str, Union[int, float]]:
         """Collect a range parameter (min, max values)."""
         self.console.print(f"Enter range for {param_def.name}")
         
@@ -263,8 +259,8 @@ class ParameterManager:
     
     def _validate_parameters(
         self,
-        parameters: Dict[str, Any],
-        parameter_definitions: List[ParameterDefinition]
+        parameters: dict[str, Any],
+        parameter_definitions: list[ParameterDefinition]
     ) -> bool:
         """Validate all collected parameters."""
         self.validation_errors.clear()
@@ -297,7 +293,7 @@ class ParameterManager:
     def create_parameter_preset(
         self,
         preset_name: str,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         description: str = ""
     ) -> bool:
         """Create a parameter preset for reuse."""
@@ -314,7 +310,7 @@ class ParameterManager:
         self.console.print(f"[green]✅ Created parameter preset: {preset_name}[/green]")
         return True
     
-    def load_parameter_preset(self, preset_name: str) -> Dict[str, Any]:
+    def load_parameter_preset(self, preset_name: str) -> dict[str, Any]:
         """Load a parameter preset."""
         preset_key = f"preset_{preset_name}"
         
@@ -326,7 +322,7 @@ class ParameterManager:
         self.console.print(f"[red]❌ Parameter preset not found: {preset_name}[/red]")
         return {}
     
-    def list_parameter_presets(self) -> List[str]:
+    def list_parameter_presets(self) -> list[str]:
         """List available parameter presets."""
         presets = []
         for key in self.parameter_history.keys():
@@ -336,7 +332,7 @@ class ParameterManager:
         
         return presets
     
-    def display_parameter_summary(self, parameters: Dict[str, Any]) -> None:
+    def display_parameter_summary(self, parameters: dict[str, Any]) -> None:
         """Display a summary of collected parameters."""
         self.console.print("\n[blue]📋 Parameter Summary[/blue]")
         
@@ -357,9 +353,9 @@ class ParameterManager:
     
     async def interactive_parameter_adjustment(
         self,
-        current_parameters: Dict[str, Any],
-        parameter_definitions: List[ParameterDefinition]
-    ) -> Dict[str, Any]:
+        current_parameters: dict[str, Any],
+        parameter_definitions: list[ParameterDefinition]
+    ) -> dict[str, Any]:
         """Allow interactive adjustment of existing parameters."""
         self.console.print("\n[blue]🔧 Interactive Parameter Adjustment[/blue]")
         

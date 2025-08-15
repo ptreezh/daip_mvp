@@ -1,5 +1,4 @@
-"""
-SSKG Manager - Main interface for the Semantic Structured Knowledge Graph.
+"""SSKG Manager - Main interface for the Semantic Structured Knowledge Graph.
 
 This module provides the main interface for interacting with the SSKG system,
 including knowledge storage, retrieval, conflict resolution, and semantic search.
@@ -7,27 +6,31 @@ including knowledge storage, retrieval, conflict resolution, and semantic search
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from .models import (
-    KnowledgeFact, KnowledgeRelation, KnowledgeQuery, ConflictResolution,
-    Memory, MemoryQuery, WikiPage, SessionState, ProjectState,
-    SearchResult, SSKGStats, ConflictResolutionStrategy
+    ConflictResolution,
+    ConflictResolutionStrategy,
+    KnowledgeFact,
+    KnowledgeQuery,
+    Memory,
+    MemoryQuery,
+    ProjectState,
+    SessionState,
+    WikiPage,
 )
 from .storage import SSKGStorage
 
 
 class SSKGManager:
-    """
-    Main manager class for the Semantic Structured Knowledge Graph.
+    """Main manager class for the Semantic Structured Knowledge Graph.
     
     This class provides a unified interface for all SSKG operations including
     knowledge storage, retrieval, conflict resolution, and semantic search.
     """
     
     def __init__(self, storage: Optional[SSKGStorage] = None):
-        """
-        Initialize the SSKG manager.
+        """Initialize the SSKG manager.
         
         Args:
             storage: Storage backend (defaults to SQLite storage)
@@ -45,8 +48,7 @@ class SSKGManager:
     # Knowledge Fact Operations
     
     def store_fact(self, fact: KnowledgeFact) -> str:
-        """
-        Store a knowledge fact with automatic conflict detection.
+        """Store a knowledge fact with automatic conflict detection.
         
         Args:
             fact: Knowledge fact to store
@@ -66,9 +68,8 @@ class SSKGManager:
         
         return self.storage.store_fact(fact)
     
-    def retrieve_facts(self, query: KnowledgeQuery) -> List[KnowledgeFact]:
-        """
-        Retrieve knowledge facts based on query criteria.
+    def retrieve_facts(self, query: KnowledgeQuery) -> list[KnowledgeFact]:
+        """Retrieve knowledge facts based on query criteria.
         
         Args:
             query: Query specification
@@ -78,9 +79,8 @@ class SSKGManager:
         """
         return self.storage.search_facts(query)
     
-    def update_fact(self, fact_id: str, updates: Dict[str, Any]) -> bool:
-        """
-        Update a knowledge fact.
+    def update_fact(self, fact_id: str, updates: dict[str, Any]) -> bool:
+        """Update a knowledge fact.
         
         Args:
             fact_id: ID of the fact to update
@@ -105,8 +105,7 @@ class SSKGManager:
         return True
     
     def delete_fact(self, fact_id: str) -> bool:
-        """
-        Delete a knowledge fact.
+        """Delete a knowledge fact.
         
         Args:
             fact_id: ID of the fact to delete
@@ -121,11 +120,10 @@ class SSKGManager:
     def search_knowledge(
         self, 
         query: str, 
-        filters: Dict[str, Any] = None, 
+        filters: dict[str, Any] = None, 
         limit: int = 10
-    ) -> List[KnowledgeFact]:
-        """
-        Perform semantic search for knowledge.
+    ) -> list[KnowledgeFact]:
+        """Perform semantic search for knowledge.
         
         Args:
             query: Search query string
@@ -155,10 +153,9 @@ class SSKGManager:
     def get_related_facts(
         self, 
         fact_id: str, 
-        relation_types: List[str] = None
-    ) -> List[KnowledgeFact]:
-        """
-        Get facts related to a specific fact.
+        relation_types: list[str] = None
+    ) -> list[KnowledgeFact]:
+        """Get facts related to a specific fact.
         
         Args:
             fact_id: ID of the source fact
@@ -180,9 +177,8 @@ class SSKGManager:
         
         return related_facts
     
-    def resolve_conflicts(self, conflicting_facts: List[str]) -> ConflictResolution:
-        """
-        Resolve conflicts between knowledge facts.
+    def resolve_conflicts(self, conflicting_facts: list[str]) -> ConflictResolution:
+        """Resolve conflicts between knowledge facts.
         
         Args:
             conflicting_facts: List of fact IDs that are in conflict
@@ -205,8 +201,7 @@ class SSKGManager:
     # Memory Operations
     
     def store_memory(self, memory: Memory, memory_type: str) -> str:
-        """
-        Store a memory item.
+        """Store a memory item.
         
         Args:
             memory: Memory to store
@@ -217,9 +212,8 @@ class SSKGManager:
         """
         return self.storage.store_memory(memory)
     
-    def retrieve_memories(self, query: MemoryQuery) -> List[Memory]:
-        """
-        Retrieve memories based on query criteria.
+    def retrieve_memories(self, query: MemoryQuery) -> list[Memory]:
+        """Retrieve memories based on query criteria.
         
         Args:
             query: Memory query specification
@@ -231,9 +225,8 @@ class SSKGManager:
     
     # Session and Project State Operations
     
-    def store_session_state(self, session_id: str, state: Dict[str, Any]) -> bool:
-        """
-        Store session state.
+    def store_session_state(self, session_id: str, state: dict[str, Any]) -> bool:
+        """Store session state.
         
         Args:
             session_id: Session identifier
@@ -248,9 +241,8 @@ class SSKGManager:
         )
         return self.storage.store_session_state(session_state)
     
-    def retrieve_session_state(self, session_id: str) -> Dict[str, Any]:
-        """
-        Retrieve session state.
+    def retrieve_session_state(self, session_id: str) -> dict[str, Any]:
+        """Retrieve session state.
         
         Args:
             session_id: Session identifier
@@ -261,9 +253,8 @@ class SSKGManager:
         session_state = self.storage.retrieve_session_state(session_id)
         return session_state.state_data if session_state else {}
     
-    def store_project_state(self, project_id: str, state: Dict[str, Any]) -> bool:
-        """
-        Store project state.
+    def store_project_state(self, project_id: str, state: dict[str, Any]) -> bool:
+        """Store project state.
         
         Args:
             project_id: Project identifier
@@ -279,9 +270,8 @@ class SSKGManager:
         )
         return self.storage.store_project_state(project_state)
     
-    def retrieve_project_state(self, project_id: str) -> Dict[str, Any]:
-        """
-        Retrieve project state.
+    def retrieve_project_state(self, project_id: str) -> dict[str, Any]:
+        """Retrieve project state.
         
         Args:
             project_id: Project identifier
@@ -298,10 +288,9 @@ class SSKGManager:
         self, 
         page_id: str, 
         content: str, 
-        metadata: Dict[str, Any]
+        metadata: dict[str, Any]
     ) -> bool:
-        """
-        Store wiki page content.
+        """Store wiki page content.
         
         Args:
             page_id: Page identifier
@@ -321,8 +310,7 @@ class SSKGManager:
         return self.storage.store_wiki_page(wiki_page)
     
     def retrieve_wiki_content(self, page_id: str) -> WikiPage:
-        """
-        Retrieve wiki page content.
+        """Retrieve wiki page content.
         
         Args:
             page_id: Page identifier
@@ -334,9 +322,8 @@ class SSKGManager:
     
     # Private helper methods
     
-    def _detect_conflicts(self, fact: KnowledgeFact) -> List[KnowledgeFact]:
-        """
-        Detect potential conflicts with existing facts.
+    def _detect_conflicts(self, fact: KnowledgeFact) -> list[KnowledgeFact]:
+        """Detect potential conflicts with existing facts.
         
         Args:
             fact: Fact to check for conflicts
@@ -364,8 +351,7 @@ class SSKGManager:
         return conflicts
     
     def _are_conflicting(self, fact1: KnowledgeFact, fact2: KnowledgeFact) -> bool:
-        """
-        Determine if two facts are conflicting.
+        """Determine if two facts are conflicting.
         
         Args:
             fact1: First fact
@@ -384,8 +370,7 @@ class SSKGManager:
                 abs(fact1.confidence - fact2.confidence) > 0.3)
     
     def _calculate_content_similarity(self, content1: str, content2: str) -> float:
-        """
-        Calculate similarity between two content strings.
+        """Calculate similarity between two content strings.
         
         Args:
             content1: First content string
@@ -406,9 +391,8 @@ class SSKGManager:
         
         return intersection / union if union > 0 else 0.0
     
-    def _resolve_confidence_conflict(self, facts: List[KnowledgeFact]) -> ConflictResolution:
-        """
-        Resolve conflict by choosing the fact with highest confidence.
+    def _resolve_confidence_conflict(self, facts: list[KnowledgeFact]) -> ConflictResolution:
+        """Resolve conflict by choosing the fact with highest confidence.
         
         Args:
             facts: List of conflicting facts
@@ -426,9 +410,8 @@ class SSKGManager:
             reasoning=f"Selected fact with highest confidence ({resolved_fact.confidence})"
         )
     
-    def _resolve_temporal_conflict(self, facts: List[KnowledgeFact]) -> ConflictResolution:
-        """
-        Resolve conflict by choosing the most recent fact.
+    def _resolve_temporal_conflict(self, facts: list[KnowledgeFact]) -> ConflictResolution:
+        """Resolve conflict by choosing the most recent fact.
         
         Args:
             facts: List of conflicting facts
@@ -446,9 +429,8 @@ class SSKGManager:
             reasoning=f"Selected most recent fact (timestamp: {resolved_fact.timestamp})"
         )
     
-    def _resolve_source_conflict(self, facts: List[KnowledgeFact]) -> ConflictResolution:
-        """
-        Resolve conflict by choosing the fact from the most reliable source.
+    def _resolve_source_conflict(self, facts: list[KnowledgeFact]) -> ConflictResolution:
+        """Resolve conflict by choosing the fact from the most reliable source.
         
         Args:
             facts: List of conflicting facts

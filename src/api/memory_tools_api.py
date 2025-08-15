@@ -1,11 +1,10 @@
 # @AI-Generated: 2024-07-23, Confidence: 0.99, Model: Gemini-Code-Assist
-"""
-API Endpoints for Memory Bank and Memory Management.
+"""API Endpoints for Memory Bank and Memory Management.
 This module unifies the old /tools/memory and /memory endpoints into a single
 set of services that use the new AppState and RoleMemoryBank.
 """
 from dataclasses import asdict
-from typing import Any, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel

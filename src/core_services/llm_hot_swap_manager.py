@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 17:00:00
+"""@Time    : 2025-08-03 17:00:00
 @Author  : DAIP-LIVE Team
 @File    : llm_hot_swap_manager.py
 @Description:
@@ -17,19 +15,17 @@
 
 import asyncio
 import logging
-import json
 import uuid
-from typing import Dict, List, Any, Optional, Type, Union
-from datetime import datetime, timedelta
-from dataclasses import dataclass, field
-from enum import Enum
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
 
-from src.kernel.llm_interface import LLMInterface, LLMConfig
-from src.kernel.llm_scheduler import LLMScheduler, LLMRequest
-from src.core_services.memory_agent import MemAgent, Memory
-from src.core_services.role_manager import RoleManager
 from src.core_services.integrated_llm_manager import IntegratedLLMManager, RoleContext
+from src.core_services.memory_agent import MemAgent
+from src.core_services.role_manager import RoleManager
+from src.kernel.llm_interface import LLMConfig, LLMInterface
 
 logger = logging.getLogger(__name__)
 
@@ -55,12 +51,12 @@ class LLMInstance:
     config: LLMConfig
     interface: LLMInterface
     status: LLMStatus = LLMStatus.STANDBY
-    performance_metrics: Dict[str, float] = field(default_factory=dict)
+    performance_metrics: dict[str, float] = field(default_factory=dict)
     error_count: int = 0
     last_error: Optional[str] = None
     created_at: datetime = field(default_factory=datetime.now)
     last_used: Optional[datetime] = None
-    active_contexts: Dict[str, Any] = field(default_factory=dict)
+    active_contexts: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class ContextMigrationRecord:
@@ -68,12 +64,12 @@ class ContextMigrationRecord:
     migration_id: str
     source_llm: str
     target_llm: str
-    role_contexts: List[str]
+    role_contexts: list[str]
     start_time: datetime
     end_time: Optional[datetime] = None
     success: bool = False
-    migration_data: Dict[str, Any] = field(default_factory=dict)
-    rollback_data: Optional[Dict[str, Any]] = None
+    migration_data: dict[str, Any] = field(default_factory=dict)
+    rollback_data: Optional[dict[str, Any]] = None
 
 @dataclass
 class SwapConfiguration:
@@ -101,23 +97,23 @@ class LLMHotSwapManager:
         self.integrated_llm_manager = integrated_llm_manager
         
         # LLM实例管理
-        self.llm_instances: Dict[str, LLMInstance] = {}
+        self.llm_instances: dict[str, LLMInstance] = {}
         self.active_llm_id: Optional[str] = None
-        self.standby_llm_ids: List[str] = []
+        self.standby_llm_ids: list[str] = []
         
         # 上下文保持
-        self.role_contexts: Dict[str, RoleContext] = {}
-        self.context_snapshots: Dict[str, Dict[str, Any]] = {}
+        self.role_contexts: dict[str, RoleContext] = {}
+        self.context_snapshots: dict[str, dict[str, Any]] = {}
         
         # 迁移管理
-        self.migration_records: List[ContextMigrationRecord] = []
-        self.active_migrations: Dict[str, ContextMigrationRecord] = {}
+        self.migration_records: list[ContextMigrationRecord] = []
+        self.active_migrations: dict[str, ContextMigrationRecord] = {}
         
         # 性能监控
         self.performance_tracker = LLMPerformanceTracker()
         
         # 兼容性适配器
-        self.compatibility_adapters: Dict[str, "LLMCompatibilityAdapter"] = {}
+        self.compatibility_adapters: dict[str, "LLMCompatibilityAdapter"] = {}
         
         # 配置
         self.swap_config = SwapConfiguration()
@@ -127,7 +123,6 @@ class LLMHotSwapManager:
     
     def _initialize_hot_swap_system(self):
         """初始化热插拔系统"""
-        
         # 启动后台监控任务
         asyncio.create_task(self._health_monitoring_loop())
         asyncio.create_task(self._performance_monitoring_loop())
@@ -143,7 +138,6 @@ class LLMHotSwapManager:
                           instance_id: Optional[str] = None,
                           set_as_active: bool = False) -> str:
         """注册LLM实例"""
-        
         if instance_id is None:
             instance_id = f"llm_{config.provider}_{config.model}_{uuid.uuid4().hex[:8]}"
         
@@ -189,9 +183,8 @@ class LLMHotSwapManager:
     async def hot_swap_llm(self, 
                           target_llm_id: str,
                           strategy: SwapStrategy = SwapStrategy.GRACEFUL,
-                          config: Optional[SwapConfiguration] = None) -> Dict[str, Any]:
+                          config: Optional[SwapConfiguration] = None) -> dict[str, Any]:
         """热插拔LLM"""
-        
         if config:
             self.swap_config = config
         
@@ -310,9 +303,8 @@ class LLMHotSwapManager:
     async def _migrate_contexts_and_state(self, 
                                          source_llm_id: Optional[str],
                                          target_llm_id: str, 
-                                         migration_record: ContextMigrationRecord) -> Dict[str, Any]:
+                                         migration_record: ContextMigrationRecord) -> dict[str, Any]:
         """迁移上下文和状态"""
-        
         target_instance = self.llm_instances[target_llm_id]
         
         # 1. 迁移角色上下文
@@ -373,7 +365,6 @@ class LLMHotSwapManager:
                                    role_context: RoleContext,
                                    target_config: LLMConfig) -> RoleContext:
         """适配上下文格式"""
-        
         # 获取目标LLM的兼容性适配器
         adapter_key = f"{target_config.provider}_{target_config.model}"
         adapter = self.compatibility_adapters.get(adapter_key)
@@ -388,10 +379,9 @@ class LLMHotSwapManager:
         return adapted_context
     
     async def _migrate_conversation_history(self, 
-                                           history: List[Dict[str, Any]],
-                                           target_instance: LLMInstance) -> List[Dict[str, Any]]:
+                                           history: list[dict[str, Any]],
+                                           target_instance: LLMInstance) -> list[dict[str, Any]]:
         """迁移对话历史"""
-        
         migrated_history = []
         
         for message in history:
@@ -414,10 +404,9 @@ class LLMHotSwapManager:
         return migrated_history
     
     async def _migrate_memory_context(self, 
-                                     memory_context: Dict[str, Any],
-                                     target_instance: LLMInstance) -> Dict[str, Any]:
+                                     memory_context: dict[str, Any],
+                                     target_instance: LLMInstance) -> dict[str, Any]:
         """迁移记忆上下文"""
-        
         migrated_memory = {}
         
         for key, value in memory_context.items():
@@ -437,9 +426,8 @@ class LLMHotSwapManager:
     
     async def preserve_virtual_expert_continuity(self, 
                                                 migration_id: str,
-                                                role_id: str) -> Dict[str, Any]:
+                                                role_id: str) -> dict[str, Any]:
         """保持虚拟专家连续性"""
-        
         migration_record = self.active_migrations.get(migration_id)
         if not migration_record:
             return {"error": "迁移记录不存在"}
@@ -475,9 +463,8 @@ class LLMHotSwapManager:
             )
         }
     
-    async def _create_expert_snapshot(self, role_context: RoleContext) -> Dict[str, Any]:
+    async def _create_expert_snapshot(self, role_context: RoleContext) -> dict[str, Any]:
         """创建专家快照"""
-        
         return {
             "role_id": role_context.role_id,
             "role_name": role_context.role_name,
@@ -497,9 +484,8 @@ class LLMHotSwapManager:
             "snapshot_timestamp": datetime.now().isoformat()
         }
     
-    async def get_swap_status(self) -> Dict[str, Any]:
+    async def get_swap_status(self) -> dict[str, Any]:
         """获取切换状态"""
-        
         return {
             "active_llm": self.active_llm_id,
             "available_llms": list(self.llm_instances.keys()),
@@ -550,12 +536,11 @@ class LLMHotSwapManager:
                 await asyncio.sleep(600)
     
     def _calculate_continuity_score(self, 
-                                   memory_preservation: Dict[str, Any],
-                                   personality_preservation: Dict[str, Any],
-                                   history_integrity: Dict[str, Any],
-                                   role_consistency: Dict[str, Any]) -> float:
+                                   memory_preservation: dict[str, Any],
+                                   personality_preservation: dict[str, Any],
+                                   history_integrity: dict[str, Any],
+                                   role_consistency: dict[str, Any]) -> float:
         """计算连续性评分"""
-        
         memory_score = memory_preservation.get("preservation_rate", 0)
         personality_score = personality_preservation.get("consistency_score", 0)
         history_score = history_integrity.get("integrity_score", 0)
@@ -583,8 +568,8 @@ class LLMCompatibilityAdapter(ABC):
     
     @abstractmethod
     async def adapt_message_format(self, 
-                                 message: Dict[str, Any],
-                                 target_config: LLMConfig) -> Dict[str, Any]:
+                                 message: dict[str, Any],
+                                 target_config: LLMConfig) -> dict[str, Any]:
         """适配消息格式"""
         pass
 
@@ -595,7 +580,7 @@ class LLMPerformanceTracker:
         self.metrics_history = {}
         self.performance_trends = {}
     
-    async def collect_metrics(self, llm_instances: Dict[str, LLMInstance]):
+    async def collect_metrics(self, llm_instances: dict[str, LLMInstance]):
         """收集性能指标"""
         for llm_id, instance in llm_instances.items():
             if llm_id not in self.metrics_history:
@@ -634,7 +619,7 @@ class LLMPerformanceTracker:
                 "stability_score": self._calculate_stability_score(recent_metrics)
             }
     
-    def _calculate_stability_score(self, metrics: List[Dict[str, Any]]) -> float:
+    def _calculate_stability_score(self, metrics: list[dict[str, Any]]) -> float:
         """计算稳定性评分"""
         if len(metrics) < 2:
             return 1.0

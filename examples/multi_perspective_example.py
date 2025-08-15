@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 16:00:00
+"""@Time    : 2025-07-24 16:00:00
 @Author  : DAIP-LIVE Team
 @File    : multi_perspective_example.py
 @Description:
@@ -8,14 +6,13 @@
 """
 import asyncio
 import logging
-from typing import Dict, Any, List
+from typing import Any
 
-from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
 from src.core_services.llm_interface import EnhancedLLMInterface
 from src.core_services.role_manager import RoleManager
-from src.kernel.tool_executor import ToolExecutor
 from src.core_services.synthesis_engine import SynthesisEngine
-
+from src.kernel.tool_executor import ToolExecutor
+from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
 
 # Configure logging
 logging.basicConfig(
@@ -25,9 +22,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def setup_services() -> Dict[str, Any]:
-    """
-    Set up and initialize required services.
+async def setup_services() -> dict[str, Any]:
+    """Set up and initialize required services.
     
     Returns:
         Dictionary of service instances
@@ -77,9 +73,8 @@ async def setup_services() -> Dict[str, Any]:
     }
 
 
-def research_tool(topic: str, perspective: str = None, questions: List[str] = None) -> str:
-    """
-    Simulated research tool that would normally fetch information from external sources.
+def research_tool(topic: str, perspective: str = None, questions: list[str] = None) -> str:
+    """Simulated research tool that would normally fetch information from external sources.
     
     Args:
         topic: The topic to research

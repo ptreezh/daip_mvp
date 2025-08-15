@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 14:00:00
+"""@Time    : 2025-08-05 14:00:00
 @Author  : DAIP-LIVE Team
 @File    : production_ready_preparation_system.py
 @Description:
@@ -8,31 +6,27 @@
     生产就绪准备系统
 """
 
-import asyncio
+import hashlib
 import json
 import logging
-import time
-import threading
-from typing import Dict, List, Optional, Any, Callable, Union
-from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict, field
-from enum import Enum
 import os
-import sys
 import shutil
 import subprocess
-import platform
-import psutil
-import yaml
-from concurrent.futures import ThreadPoolExecutor
-import hashlib
+import sys
+import time
 import uuid
 import zipfile
-import tempfile
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
 
+import psutil
+
+from .comprehensive_quality_validation_system import get_comprehensive_quality_validator
+from .enterprise_error_handling_system import get_enterprise_error_handler
 from .performance_monitoring_system import PerformanceMonitoringSystem
-from .enterprise_error_handling_system import EnterpriseErrorHandler, get_enterprise_error_handler
-from .comprehensive_quality_validation_system import ComprehensiveQualityValidator, get_comprehensive_quality_validator
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +67,7 @@ class DeploymentConfig:
     health_check_enabled: bool
     monitoring_enabled: bool
     backup_enabled: bool
-    config_overrides: Dict[str, Any] = field(default_factory=dict)
+    config_overrides: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -109,7 +103,7 @@ class MonitoringConfig:
     metrics_endpoint: str
     health_endpoint: str
     log_level: str
-    alert_channels: List[str]
+    alert_channels: list[str]
     dashboard_url: Optional[str] = None
 
 
@@ -123,18 +117,18 @@ class SecurityConfig:
     rate_limiting: bool
     api_key_required: bool
     cors_enabled: bool
-    cors_origins: List[str]
+    cors_origins: list[str]
 
 
 class DeploymentManager:
     """Deployment manager."""
     
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
-        self.deployment_history: List[Dict[str, Any]] = []
-        self.active_deployments: Dict[str, DeploymentConfig] = {}
+        self.deployment_history: list[dict[str, Any]] = []
+        self.active_deployments: dict[str, DeploymentConfig] = {}
         self.executor = ThreadPoolExecutor(max_workers=4)
-        self.health_checks: Dict[str, HealthCheck] = {}
+        self.health_checks: dict[str, HealthCheck] = {}
         self._initialize_health_checks()
     
     def _initialize_health_checks(self):
@@ -179,7 +173,7 @@ class DeploymentManager:
                                 environment: DeploymentEnvironment,
                                 strategy: DeploymentStrategy,
                                 version: str,
-                                config_overrides: Optional[Dict[str, Any]] = None) -> DeploymentConfig:
+                                config_overrides: Optional[dict[str, Any]] = None) -> DeploymentConfig:
         """Prepare deployment configuration."""
         deployment_id = str(uuid.uuid4())
         build_number = self._generate_build_number()
@@ -252,7 +246,7 @@ class DeploymentManager:
         # Check database, external services, etc.
         return True
     
-    async def execute_deployment(self, deployment_config: DeploymentConfig) -> Dict[str, Any]:
+    async def execute_deployment(self, deployment_config: DeploymentConfig) -> dict[str, Any]:
         """Execute deployment."""
         deployment_result = {
             "deployment_id": deployment_config.deployment_id,
@@ -322,7 +316,7 @@ class DeploymentManager:
         
         return deployment_result
     
-    async def _create_backup(self, deployment_config: DeploymentConfig) -> Dict[str, Any]:
+    async def _create_backup(self, deployment_config: DeploymentConfig) -> dict[str, Any]:
         """Create backup."""
         backup_result = {
             "step": "create_backup",
@@ -373,7 +367,7 @@ class DeploymentManager:
         
         return backup_result
     
-    async def _prepare_environment(self, deployment_config: DeploymentConfig) -> Dict[str, Any]:
+    async def _prepare_environment(self, deployment_config: DeploymentConfig) -> dict[str, Any]:
         """Prepare deployment environment."""
         env_result = {
             "step": "prepare_environment",
@@ -425,7 +419,7 @@ class DeploymentManager:
         
         return env_result
     
-    async def _deploy_application(self, deployment_config: DeploymentConfig) -> Dict[str, Any]:
+    async def _deploy_application(self, deployment_config: DeploymentConfig) -> dict[str, Any]:
         """Deploy application."""
         deploy_result = {
             "step": "deploy_application",
@@ -463,7 +457,7 @@ class DeploymentManager:
         
         return deploy_result
     
-    async def _run_health_checks(self, deployment_config: DeploymentConfig) -> Dict[str, Any]:
+    async def _run_health_checks(self, deployment_config: DeploymentConfig) -> dict[str, Any]:
         """Run health checks."""
         health_result = {
             "step": "run_health_checks",
@@ -512,7 +506,7 @@ class DeploymentManager:
         
         return health_result
     
-    async def _execute_health_check(self, health_check: HealthCheck) -> Dict[str, Any]:
+    async def _execute_health_check(self, health_check: HealthCheck) -> dict[str, Any]:
         """Execute individual health check."""
         result = {
             "passed": False,
@@ -565,7 +559,7 @@ class DeploymentManager:
         result["response_time"] = time.time() - start_time
         return result
     
-    async def _enable_monitoring(self, deployment_config: DeploymentConfig) -> Dict[str, Any]:
+    async def _enable_monitoring(self, deployment_config: DeploymentConfig) -> dict[str, Any]:
         """Enable monitoring."""
         monitoring_result = {
             "step": "enable_monitoring",
@@ -631,7 +625,7 @@ class DeploymentManager:
         except Exception as e:
             logger.error(f"Rollback failed: {e}")
     
-    def _find_previous_deployment(self, environment: DeploymentEnvironment) -> Optional[Dict[str, Any]]:
+    def _find_previous_deployment(self, environment: DeploymentEnvironment) -> Optional[dict[str, Any]]:
         """Find previous successful deployment."""
         for deployment in reversed(self.deployment_history):
             if (deployment.get("success") and 
@@ -644,7 +638,7 @@ class DeploymentManager:
         # Implementation for restoring from backup
         pass
     
-    async def _restart_previous_version(self, deployment: Dict[str, Any]):
+    async def _restart_previous_version(self, deployment: dict[str, Any]):
         """Restart previous version."""
         # Implementation for restarting previous version
         pass
@@ -664,12 +658,12 @@ class DeploymentManager:
         # Implementation for verifying application is running
         return True
     
-    async def _apply_config_overrides(self, deploy_dir: str, config_overrides: Dict[str, Any]):
+    async def _apply_config_overrides(self, deploy_dir: str, config_overrides: dict[str, Any]):
         """Apply configuration overrides."""
         # Implementation for applying configuration overrides
         pass
     
-    def get_deployment_status(self, deployment_id: str) -> Optional[Dict[str, Any]]:
+    def get_deployment_status(self, deployment_id: str) -> Optional[dict[str, Any]]:
         """Get deployment status."""
         for deployment in self.deployment_history:
             if deployment.get("deployment_id") == deployment_id:
@@ -678,7 +672,7 @@ class DeploymentManager:
     
     def get_deployment_history(self, 
                              environment: Optional[DeploymentEnvironment] = None,
-                             limit: int = 10) -> List[Dict[str, Any]]:
+                             limit: int = 10) -> list[dict[str, Any]]:
         """Get deployment history."""
         history = self.deployment_history
         
@@ -687,7 +681,7 @@ class DeploymentManager:
         
         return history[-limit:]
     
-    def get_system_health(self) -> Dict[str, Any]:
+    def get_system_health(self) -> dict[str, Any]:
         """Get system health status."""
         health_status = {
             "status": HealthStatus.HEALTHY.value,
@@ -725,7 +719,7 @@ class DeploymentManager:
 class ProductionReadySystem:
     """Production-ready system."""
     
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.deployment_manager = DeploymentManager(config)
         self.monitoring_system = None
@@ -758,7 +752,7 @@ class ProductionReadySystem:
             logger.error(f"Production-ready system initialization failed: {e}")
             raise
     
-    async def deploy_to_production(self, version: str, config_overrides: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def deploy_to_production(self, version: str, config_overrides: Optional[dict[str, Any]] = None) -> dict[str, Any]:
         """Deploy to production."""
         if not self.is_initialized:
             raise Exception("System not initialized")
@@ -776,7 +770,7 @@ class ProductionReadySystem:
         
         return deployment_result
     
-    async def run_production_checks(self) -> Dict[str, Any]:
+    async def run_production_checks(self) -> dict[str, Any]:
         """Run production readiness checks."""
         checks = {
             "timestamp": datetime.now().isoformat(),
@@ -898,7 +892,7 @@ def get_production_ready_system() -> ProductionReadySystem:
     return _production_ready_system
 
 
-async def initialize_production_ready_system(config: Dict[str, Any]):
+async def initialize_production_ready_system(config: dict[str, Any]):
     """Initialize production-ready system."""
     global _production_ready_system
     _production_ready_system = ProductionReadySystem(config)

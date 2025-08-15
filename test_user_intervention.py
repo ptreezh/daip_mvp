@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证用户干预机制
+"""验证用户干预机制
 """
 
-import sys
-import os
 import asyncio
+import sys
+
 sys.path.append('src')
 
 def test_user_intervention_handler():
     """测试用户干预处理器"""
     try:
-        from src.cli.user_intervention import UserInterventionHandler
         import asyncio
+
+        from src.cli.user_intervention import UserInterventionHandler
         
         # 创建命令队列
         command_queue = asyncio.Queue()
@@ -40,8 +39,9 @@ def test_user_intervention_handler():
 def test_workflow_steering():
     """测试工作流引导"""
     try:
-        from src.user_interface.workflow_steering import WorkflowSteering
         from rich.console import Console
+
+        from src.user_interface.workflow_steering import WorkflowSteering
         
         # 创建工作流引导
         console = Console()
@@ -67,8 +67,9 @@ def test_workflow_steering():
 def test_parameter_manager():
     """测试参数管理器"""
     try:
-        from src.user_interface.parameter_manager import ParameterManager, ParameterDefinition, ParameterType
         from rich.console import Console
+
+        from src.user_interface.parameter_manager import ParameterDefinition, ParameterManager, ParameterType
         
         # 创建参数管理器
         console = Console()
@@ -97,7 +98,7 @@ def test_parameter_manager():
         try:
             # 这些方法可能是私有的，我们测试公共接口
             validation_result = True  # 假设验证通过
-            print(f"   参数定义创建: 成功")
+            print("   参数定义创建: 成功")
         except Exception as e:
             print(f"   参数验证测试跳过: {e}")
         
@@ -119,8 +120,8 @@ def test_parameter_manager():
         loaded_params = manager.load_parameter_preset("test_preset")
         assert loaded_params == test_params
         
-        print(f"   参数预设创建: 成功")
-        print(f"   参数验证: 通过")
+        print("   参数预设创建: 成功")
+        print("   参数验证: 通过")
         print(f"   预设参数数量: {len(test_params)}")
         
         print("✅ ParameterManager验证通过")
@@ -133,8 +134,9 @@ def test_parameter_manager():
 def test_workflow_customizer():
     """测试工作流定制器"""
     try:
-        from src.user_interface.workflow_customizer import WorkflowCustomizer
         from rich.console import Console
+
+        from src.user_interface.workflow_customizer import WorkflowCustomizer
         
         # 创建工作流定制器
         console = Console()
@@ -168,7 +170,7 @@ def test_workflow_customizer():
         
         print(f"   配置模板数量: {len(templates)}")
         print(f"   critical_review配置项: {len(templates['critical_review'])}")
-        print(f"   自定义配置保存: 成功")
+        print("   自定义配置保存: 成功")
         
         print("✅ WorkflowCustomizer验证通过")
         return True
@@ -180,10 +182,12 @@ def test_workflow_customizer():
 async def test_intervention_scenarios():
     """测试干预场景"""
     try:
-        from src.cli.user_intervention import UserInterventionHandler
-        from src.user_interface.workflow_steering import WorkflowSteering, SteeringAction
-        from rich.console import Console
         import asyncio
+
+        from rich.console import Console
+
+        from src.cli.user_intervention import UserInterventionHandler
+        from src.user_interface.workflow_steering import SteeringAction, WorkflowSteering
         
         # 创建组件
         command_queue = asyncio.Queue()
@@ -201,7 +205,7 @@ async def test_intervention_scenarios():
         handler.stop_listening()
         assert handler.running == False, "干预处理器未正确停止"
         
-        print(f"     干预处理器启停: 成功")
+        print("     干预处理器启停: 成功")
         
         # 场景2: 工作流引导点注册
         print("\n   场景2: 工作流引导点")
@@ -221,7 +225,7 @@ async def test_intervention_scenarios():
         assert point.name == "角色选择", "引导点名称不正确"
         assert point.workflow_step == "initialization", "引导点步骤不正确"
         
-        print(f"     引导点注册: 成功")
+        print("     引导点注册: 成功")
         print(f"     可用操作: {len(point.available_actions)}")
         
         # 场景3: 检查点管理
@@ -244,7 +248,7 @@ async def test_intervention_scenarios():
         checkpoints = steering.get_available_checkpoints()
         assert "test_checkpoint" in checkpoints, "检查点创建失败"
         
-        print(f"     检查点创建: 成功")
+        print("     检查点创建: 成功")
         print(f"     可用检查点: {len(checkpoints)}")
         
         print("✅ 干预场景验证通过")
@@ -257,8 +261,8 @@ async def test_intervention_scenarios():
 def test_transparency_integration():
     """测试透明度集成"""
     try:
+
         from src.user_interface.transparency_controller import TransparencyController
-        from rich.console import Console
         
         # 创建透明度控制器
         transparency = TransparencyController()

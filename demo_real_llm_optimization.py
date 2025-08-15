@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-真实LLM上下文优化演示
+"""真实LLM上下文优化演示
 
 展示使用真实LLM进行智能上下文优化的完整过程
 """
 
-import sys
 import asyncio
-import json
+import sys
+
 sys.path.append('src')
 
 async def demo_real_llm_optimization():
@@ -85,11 +83,11 @@ async def demo_real_llm_optimization():
         }
     }
     
-    print(f"📋 用户查询:")
+    print("📋 用户查询:")
     print(f"   {user_query}")
     print()
     
-    print(f"📚 上下文信息:")
+    print("📚 上下文信息:")
     print(f"   对话历史: {len(conversation_history)} 轮")
     print(f"   相关知识: {len(available_context['relevant_knowledge'])} 条")
     print(f"   领域知识: {len(available_context['domain_knowledge'])} 个领域")

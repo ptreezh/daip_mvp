@@ -1,25 +1,28 @@
-# -*- coding: utf-8 -*-
-"""
-Institutional Primitives Implementation for Multi-Agent Collaboration
+"""Institutional Primitives Implementation for Multi-Agent Collaboration
 
 Implements the core institutional primitives that orchestrate multi-agent workflows.
 Each primitive represents a fundamental operation in the collaboration system.
 """
 
-import asyncio
 import logging
-from typing import Any, Dict, List, Optional, Union
-from datetime import datetime
-from dataclasses import dataclass, field
-from enum import Enum
 import uuid
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional, Union
 
 # Import from multi-agent collaboration system
 try:
     from .multi_agent_collaboration_system import (
-        InstitutionalPrimitive, AgentMessage, ConsensusInput, ConsensusResult,
-        CollaborationSession, AgentProfile, WorkflowStep, CollaborativeTask
+        AgentMessage,
+        AgentProfile,
+        CollaborationSession,
+        CollaborativeTask,
+        ConsensusInput,
+        ConsensusResult,
+        InstitutionalPrimitive,
+        WorkflowStep,
     )
 except ImportError:
     # Define basic types if multi-agent system not available
@@ -38,10 +41,10 @@ except ImportError:
     class AgentMessage:
         message_id: str
         sender_id: str
-        receiver_id: Union[str, List[str]]
+        receiver_id: Union[str, list[str]]
         message_type: str
         content: Any
-        context: Dict[str, Any] = field(default_factory=dict)
+        context: dict[str, Any] = field(default_factory=dict)
         priority: int = 1
         requires_response: bool = False
         response_to: Optional[str] = None
@@ -51,10 +54,10 @@ except ImportError:
     @dataclass
     class ConsensusInput:
         agent_id: str
-        position: Union[str, float, Dict[str, Any]]
+        position: Union[str, float, dict[str, Any]]
         confidence: float
         reasoning: str
-        evidence: List[str] = field(default_factory=list)
+        evidence: list[str] = field(default_factory=list)
         weight: float = 1.0
         timestamp: datetime = field(default_factory=datetime.now)
     
@@ -62,11 +65,11 @@ except ImportError:
     class ConsensusResult:
         consensus_value: Any
         confidence: float
-        participants: List[str]
+        participants: list[str]
         consensus_method: str
-        reasoning_trace: List[str]
+        reasoning_trace: list[str]
         conflict_resolution: Optional[str] = None
-        metadata: Dict[str, Any] = field(default_factory=dict)
+        metadata: dict[str, Any] = field(default_factory=dict)
         computation_time: float = 0.0
 
 logger = logging.getLogger(__name__)
@@ -78,25 +81,25 @@ class PrimitiveContext:
     primitive_type: InstitutionalPrimitive
     session_id: str
     execution_id: str
-    inputs: Dict[str, Any]
-    assigned_agents: List[str]
+    inputs: dict[str, Any]
+    assigned_agents: list[str]
     start_time: datetime = field(default_factory=datetime.now)
     end_time: Optional[datetime] = None
     status: str = "pending"
-    results: Dict[str, Any] = field(default_factory=dict)
+    results: dict[str, Any] = field(default_factory=dict)
     error: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class PrimitiveResult:
     """Result of institutional primitive execution"""
     success: bool
-    outputs: Dict[str, Any]
+    outputs: dict[str, Any]
     execution_time: float
-    messages_generated: List[AgentMessage] = field(default_factory=list)
-    next_primitives: List[InstitutionalPrimitive] = field(default_factory=list)
+    messages_generated: list[AgentMessage] = field(default_factory=list)
+    next_primitives: list[InstitutionalPrimitive] = field(default_factory=list)
     error: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 class InstitutionalPrimitiveBase(ABC):
     """Base class for all institutional primitives"""
@@ -109,18 +112,18 @@ class InstitutionalPrimitiveBase(ABC):
     async def execute(
         self,
         context: PrimitiveContext,
-        services: Dict[str, Any]
+        services: dict[str, Any]
     ) -> PrimitiveResult:
         """Execute the institutional primitive"""
         pass
     
     @abstractmethod
-    def validate_inputs(self, inputs: Dict[str, Any]) -> bool:
+    def validate_inputs(self, inputs: dict[str, Any]) -> bool:
         """Validate primitive inputs"""
         pass
     
     @abstractmethod
-    def get_required_capabilities(self) -> List[str]:
+    def get_required_capabilities(self) -> list[str]:
         """Get required agent capabilities for this primitive"""
         pass
 
@@ -151,7 +154,7 @@ class InterpretIntentPrimitive(InstitutionalPrimitiveBase):
     async def execute(
         self,
         context: PrimitiveContext,
-        services: Dict[str, Any]
+        services: dict[str, Any]
     ) -> PrimitiveResult:
         """Execute intent interpretation"""
         start_time = datetime.now()
@@ -197,22 +200,21 @@ class InterpretIntentPrimitive(InstitutionalPrimitiveBase):
                 error=str(e)
             )
     
-    def validate_inputs(self, inputs: Dict[str, Any]) -> bool:
+    def validate_inputs(self, inputs: dict[str, Any]) -> bool:
         """Validate inputs for intent interpretation"""
         return "user_input" in inputs and isinstance(inputs["user_input"], str)
     
-    def get_required_capabilities(self) -> List[str]:
+    def get_required_capabilities(self) -> list[str]:
         """Get required capabilities"""
         return ["intent_analysis", "nlp_processing", "pattern_recognition"]
     
     async def _analyze_intent(
         self, 
         user_input: str, 
-        context: Dict[str, Any],
-        services: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        context: dict[str, Any],
+        services: dict[str, Any]
+    ) -> dict[str, Any]:
         """Analyze user intent using NLP and pattern matching"""
-        
         # Use existing intent analysis service if available
         if "intent_analysis_service" in services:
             intent_service = services["intent_analysis_service"]
@@ -245,7 +247,7 @@ class InterpretIntentPrimitive(InstitutionalPrimitiveBase):
             "sentiment": self._analyze_sentiment(user_input)
         }
     
-    def _extract_entities(self, text: str) -> List[Dict[str, Any]]:
+    def _extract_entities(self, text: str) -> list[dict[str, Any]]:
         """Extract entities from text (simplified)"""
         entities = []
         
@@ -276,9 +278,9 @@ class InterpretIntentPrimitive(InstitutionalPrimitiveBase):
     
     async def _determine_requirements(
         self, 
-        intent_analysis: Dict[str, Any],
-        services: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        intent_analysis: dict[str, Any],
+        services: dict[str, Any]
+    ) -> dict[str, Any]:
         """Determine collaboration requirements based on intent"""
         primary_intent = intent_analysis.get("primary_intent", "general")
         complexity = intent_analysis.get("complexity_score", 0.0)
@@ -313,9 +315,9 @@ class InterpretIntentPrimitive(InstitutionalPrimitiveBase):
     
     async def _generate_questions(
         self, 
-        intent_analysis: Dict[str, Any],
-        services: Dict[str, Any]
-    ) -> List[str]:
+        intent_analysis: dict[str, Any],
+        services: dict[str, Any]
+    ) -> list[str]:
         """Generate clarifying questions for ambiguous intents"""
         confidence = intent_analysis.get("confidence", 0.0)
         questions = []
@@ -337,7 +339,7 @@ class FormTeamPrimitive(InstitutionalPrimitiveBase):
     async def execute(
         self,
         context: PrimitiveContext,
-        services: Dict[str, Any]
+        services: dict[str, Any]
     ) -> PrimitiveResult:
         """Execute team formation"""
         start_time = datetime.now()
@@ -384,23 +386,22 @@ class FormTeamPrimitive(InstitutionalPrimitiveBase):
                 error=str(e)
             )
     
-    def validate_inputs(self, inputs: Dict[str, Any]) -> bool:
+    def validate_inputs(self, inputs: dict[str, Any]) -> bool:
         """Validate inputs for team formation"""
         return "task_requirements" in inputs and "collaboration_mode" in inputs
     
-    def get_required_capabilities(self) -> List[str]:
+    def get_required_capabilities(self) -> list[str]:
         """Get required capabilities"""
         return ["team_formation", "expertise_matching", "optimization"]
     
     async def _form_team(
         self,
-        task_requirements: Dict[str, Any],
+        task_requirements: dict[str, Any],
         collaboration_mode: str,
-        constraints: Dict[str, Any],
-        services: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        constraints: dict[str, Any],
+        services: dict[str, Any]
+    ) -> dict[str, Any]:
         """Form optimal team based on requirements"""
-        
         # Use existing team formation service if available
         if "team_formation_engine" in services:
             engine = services["team_formation_engine"]
@@ -437,9 +438,9 @@ class FormTeamPrimitive(InstitutionalPrimitiveBase):
     
     def _determine_specializations(
         self, 
-        task_requirements: Dict[str, Any], 
+        task_requirements: dict[str, Any], 
         collaboration_mode: str
-    ) -> List[str]:
+    ) -> list[str]:
         """Determine required specializations"""
         specializations = []
         
@@ -457,9 +458,9 @@ class FormTeamPrimitive(InstitutionalPrimitiveBase):
     def _find_agents_by_specialization(
         self, 
         specialization: str, 
-        agent_registry: Dict[str, Any],
-        constraints: Dict[str, Any]
-    ) -> List[str]:
+        agent_registry: dict[str, Any],
+        constraints: dict[str, Any]
+    ) -> list[str]:
         """Find agents with specific specialization"""
         # Simplified implementation
         # In real implementation, would query agent registry
@@ -467,8 +468,8 @@ class FormTeamPrimitive(InstitutionalPrimitiveBase):
     
     def _select_best_agent(
         self, 
-        candidate_agents: List[str], 
-        constraints: Dict[str, Any]
+        candidate_agents: list[str], 
+        constraints: dict[str, Any]
     ) -> str:
         """Select best agent from candidates"""
         # Simplified implementation
@@ -485,7 +486,7 @@ class ExecuteWorkflowPrimitive(InstitutionalPrimitiveBase):
     async def execute(
         self,
         context: PrimitiveContext,
-        services: Dict[str, Any]
+        services: dict[str, Any]
     ) -> PrimitiveResult:
         """Execute workflow"""
         start_time = datetime.now()
@@ -530,22 +531,21 @@ class ExecuteWorkflowPrimitive(InstitutionalPrimitiveBase):
                 error=str(e)
             )
     
-    def validate_inputs(self, inputs: Dict[str, Any]) -> bool:
+    def validate_inputs(self, inputs: dict[str, Any]) -> bool:
         """Validate inputs for workflow execution"""
         return "workflow_definition" in inputs and isinstance(inputs["workflow_definition"], dict)
     
-    def get_required_capabilities(self) -> List[str]:
+    def get_required_capabilities(self) -> list[str]:
         """Get required capabilities"""
         return ["workflow_execution", "task_management", "process_orchestration"]
     
     async def _execute_workflow(
         self,
-        workflow_definition: Dict[str, Any],
-        parameters: Dict[str, Any],
-        services: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        workflow_definition: dict[str, Any],
+        parameters: dict[str, Any],
+        services: dict[str, Any]
+    ) -> dict[str, Any]:
         """Execute workflow steps"""
-        
         # Use existing workflow orchestrator if available
         if "workflow_orchestrator" in services:
             orchestrator = services["workflow_orchestrator"]
@@ -579,10 +579,10 @@ class ExecuteWorkflowPrimitive(InstitutionalPrimitiveBase):
     
     async def _execute_step(
         self,
-        step: Dict[str, Any],
-        parameters: Dict[str, Any],
-        services: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        step: dict[str, Any],
+        parameters: dict[str, Any],
+        services: dict[str, Any]
+    ) -> dict[str, Any]:
         """Execute a single workflow step"""
         # Simplified step execution
         # In real implementation, would delegate to appropriate primitive
@@ -595,7 +595,7 @@ class ExecuteWorkflowPrimitive(InstitutionalPrimitiveBase):
         else:
             return {"status": "completed", "result": "Step executed"}
     
-    def _load_workflow_templates(self) -> Dict[str, Any]:
+    def _load_workflow_templates(self) -> dict[str, Any]:
         """Load workflow templates"""
         return {
             "secretariat_meeting": {
@@ -623,7 +623,7 @@ class MultiAgentCollaboratePrimitive(InstitutionalPrimitiveBase):
     async def execute(
         self,
         context: PrimitiveContext,
-        services: Dict[str, Any]
+        services: dict[str, Any]
     ) -> PrimitiveResult:
         """Execute multi-agent collaboration"""
         start_time = datetime.now()
@@ -673,24 +673,23 @@ class MultiAgentCollaboratePrimitive(InstitutionalPrimitiveBase):
                 error=str(e)
             )
     
-    def validate_inputs(self, inputs: Dict[str, Any]) -> bool:
+    def validate_inputs(self, inputs: dict[str, Any]) -> bool:
         """Validate inputs for multi-agent collaboration"""
         return "participants" in inputs and "collaboration_type" in inputs and "topic" in inputs
     
-    def get_required_capabilities(self) -> List[str]:
+    def get_required_capabilities(self) -> list[str]:
         """Get required capabilities"""
         return ["collaboration_facilitation", "communication_management", "conflict_resolution"]
     
     async def _facilitate_collaboration(
         self,
-        participants: List[str],
+        participants: list[str],
         collaboration_type: str,
         topic: str,
-        rules: Dict[str, Any],
-        services: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        rules: dict[str, Any],
+        services: dict[str, Any]
+    ) -> dict[str, Any]:
         """Facilitate collaboration between agents"""
-        
         # Get communication bus
         communication_bus = services.get("communication_bus")
         
@@ -753,7 +752,7 @@ class MultiAgentCollaboratePrimitive(InstitutionalPrimitiveBase):
             "messages": messages
         }
     
-    def _extract_key_insights(self, transcript: List[Dict[str, Any]]) -> List[str]:
+    def _extract_key_insights(self, transcript: list[dict[str, Any]]) -> list[str]:
         """Extract key insights from collaboration transcript"""
         # Simplified insight extraction
         insights = []
@@ -773,7 +772,7 @@ class MultiAgentCollaboratePrimitive(InstitutionalPrimitiveBase):
         
         return insights
     
-    def _identify_agreements(self, transcript: List[Dict[str, Any]]) -> List[str]:
+    def _identify_agreements(self, transcript: list[dict[str, Any]]) -> list[str]:
         """Identify points of agreement"""
         agreements = []
         
@@ -787,7 +786,7 @@ class MultiAgentCollaboratePrimitive(InstitutionalPrimitiveBase):
         
         return agreements
     
-    def _identify_disagreements(self, transcript: List[Dict[str, Any]]) -> List[str]:
+    def _identify_disagreements(self, transcript: list[dict[str, Any]]) -> list[str]:
         """Identify points of disagreement"""
         disagreements = []
         
@@ -803,9 +802,9 @@ class MultiAgentCollaboratePrimitive(InstitutionalPrimitiveBase):
     
     def _calculate_participation_metrics(
         self, 
-        transcript: List[Dict[str, Any]], 
-        participants: List[str]
-    ) -> Dict[str, Any]:
+        transcript: list[dict[str, Any]], 
+        participants: list[str]
+    ) -> dict[str, Any]:
         """Calculate participation metrics"""
         participant_contributions = {p: 0 for p in participants}
         
@@ -832,7 +831,7 @@ class ComputeConsensusPrimitive(InstitutionalPrimitiveBase):
     async def execute(
         self,
         context: PrimitiveContext,
-        services: Dict[str, Any]
+        services: dict[str, Any]
     ) -> PrimitiveResult:
         """Execute consensus computation"""
         start_time = datetime.now()
@@ -879,23 +878,22 @@ class ComputeConsensusPrimitive(InstitutionalPrimitiveBase):
                 error=str(e)
             )
     
-    def validate_inputs(self, inputs: Dict[str, Any]) -> bool:
+    def validate_inputs(self, inputs: dict[str, Any]) -> bool:
         """Validate inputs for consensus computation"""
         return "agent_inputs" in inputs and isinstance(inputs["agent_inputs"], list)
     
-    def get_required_capabilities(self) -> List[str]:
+    def get_required_capabilities(self) -> list[str]:
         """Get required capabilities"""
         return ["consensus_computation", "opinion_synthesis", "conflict_resolution"]
     
     async def _compute_consensus(
         self,
-        agent_inputs: List[Dict[str, Any]],
+        agent_inputs: list[dict[str, Any]],
         consensus_method: str,
-        config: Dict[str, Any],
-        services: Dict[str, Any]
+        config: dict[str, Any],
+        services: dict[str, Any]
     ) -> ConsensusResult:
         """Compute consensus from agent inputs"""
-        
         # Convert inputs to ConsensusInput objects
         consensus_inputs = []
         for input_data in agent_inputs:
@@ -919,7 +917,7 @@ class ComputeConsensusPrimitive(InstitutionalPrimitiveBase):
     
     async def _simple_consensus_computation(
         self,
-        inputs: List[ConsensusInput],
+        inputs: list[ConsensusInput],
         method: str
     ) -> ConsensusResult:
         """Simple consensus computation fallback"""
@@ -971,7 +969,7 @@ class GenerateReportPrimitive(InstitutionalPrimitiveBase):
     async def execute(
         self,
         context: PrimitiveContext,
-        services: Dict[str, Any]
+        services: dict[str, Any]
     ) -> PrimitiveResult:
         """Execute report generation"""
         start_time = datetime.now()
@@ -1019,23 +1017,22 @@ class GenerateReportPrimitive(InstitutionalPrimitiveBase):
                 error=str(e)
             )
     
-    def validate_inputs(self, inputs: Dict[str, Any]) -> bool:
+    def validate_inputs(self, inputs: dict[str, Any]) -> bool:
         """Validate inputs for report generation"""
         return "collaboration_data" in inputs and "report_type" in inputs
     
-    def get_required_capabilities(self) -> List[str]:
+    def get_required_capabilities(self) -> list[str]:
         """Get required capabilities"""
         return ["report_generation", "content_synthesis", "document_creation"]
     
     async def _generate_report(
         self,
-        collaboration_data: Dict[str, Any],
+        collaboration_data: dict[str, Any],
         report_type: str,
         template: str,
-        services: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        services: dict[str, Any]
+    ) -> dict[str, Any]:
         """Generate comprehensive report"""
-        
         # Extract key information from collaboration data
         session_info = collaboration_data.get("session", {})
         transcript = collaboration_data.get("transcript", [])
@@ -1071,14 +1068,13 @@ class GenerateReportPrimitive(InstitutionalPrimitiveBase):
     
     def _generate_report_content(
         self,
-        session_info: Dict[str, Any],
-        transcript: List[Dict[str, Any]],
-        consensus_results: Dict[str, Any],
-        participant_metrics: Dict[str, Any],
+        session_info: dict[str, Any],
+        transcript: list[dict[str, Any]],
+        consensus_results: dict[str, Any],
+        participant_metrics: dict[str, Any],
         report_type: str
     ) -> str:
         """Generate the main report content"""
-        
         session_title = session_info.get("session_name", "Collaboration Session")
         session_date = session_info.get("created_at", datetime.now().isoformat())
         
@@ -1127,9 +1123,9 @@ focusing on the topic: "{session_info.get('topic', 'General discussion')}".
     
     def _extract_key_findings(
         self,
-        transcript: List[Dict[str, Any]],
-        consensus_results: Dict[str, Any]
-    ) -> List[str]:
+        transcript: list[dict[str, Any]],
+        consensus_results: dict[str, Any]
+    ) -> list[str]:
         """Extract key findings from collaboration data"""
         findings = []
         
@@ -1152,10 +1148,10 @@ focusing on the topic: "{session_info.get('topic', 'General discussion')}".
     
     def _generate_recommendations(
         self,
-        session_info: Dict[str, Any],
-        consensus_results: Dict[str, Any],
-        key_findings: List[str]
-    ) -> List[str]:
+        session_info: dict[str, Any],
+        consensus_results: dict[str, Any],
+        key_findings: list[str]
+    ) -> list[str]:
         """Generate actionable recommendations"""
         recommendations = []
         
@@ -1201,14 +1197,13 @@ class InstitutionalPrimitiveFactory:
         """Register a new primitive"""
         self.primitives[primitive_type] = primitive_instance
     
-    def list_primitives(self) -> List[InstitutionalPrimitive]:
+    def list_primitives(self) -> list[InstitutionalPrimitive]:
         """List all available primitives"""
         return list(self.primitives.keys())
 
 # Example usage
 async def example_primitive_execution():
     """Example of how to execute institutional primitives"""
-    
     # Initialize factory
     factory = InstitutionalPrimitiveFactory()
     

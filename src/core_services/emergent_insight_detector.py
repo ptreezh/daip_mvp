@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Emergent Insight Detector
+"""Emergent Insight Detector
 
 This module implements sophisticated algorithms for detecting emergent insights
 that arise from collective intelligence processes, identifying patterns of
@@ -12,12 +10,11 @@ Requirements: 11.5, 11.8, 11.10
 
 import logging
 import re
-from typing import Any, Dict, List, Optional, Set, Tuple
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
-import numpy as np
 from pydantic import BaseModel, Field
 
 
@@ -47,8 +44,8 @@ class InsightCandidate:
     insight_type: InsightType
     emergence_pattern: EmergencePattern
     emergence_score: float
-    contributing_agents: List[str]
-    source_positions: List[str]
+    contributing_agents: list[str]
+    source_positions: list[str]
     novelty_score: float
     coherence_score: float
     evidence_strength: float
@@ -64,9 +61,9 @@ class EmergentInsight(BaseModel):
     novelty_score: float = Field(ge=0.0, le=1.0)
     coherence_score: float = Field(ge=0.0, le=1.0)
     evidence_strength: float = Field(ge=0.0, le=1.0)
-    contributing_agents: List[str]
-    source_positions: List[str]
-    synthesis_trace: Dict[str, Any]
+    contributing_agents: list[str]
+    source_positions: list[str]
+    synthesis_trace: dict[str, Any]
     validation_score: float = Field(ge=0.0, le=1.0)
     timestamp: datetime
 
@@ -94,7 +91,7 @@ class ConceptExtractor:
             r'\bdepends?\s+on\b', r'\brequires?\b', r'\benables?\b'
         ]
     
-    def extract_concepts(self, text: str) -> Set[str]:
+    def extract_concepts(self, text: str) -> set[str]:
         """Extract concepts from text."""
         concepts = set()
         
@@ -112,7 +109,7 @@ class ConceptExtractor:
         
         return concepts
     
-    def extract_relationships(self, text: str) -> List[Tuple[str, str, str]]:
+    def extract_relationships(self, text: str) -> list[tuple[str, str, str]]:
         """Extract relationships from text (subject, relation, object)."""
         relationships = []
         
@@ -177,10 +174,10 @@ class NoveltyDetector:
     def __init__(self):
         self.logger = logging.getLogger("novelty_detector")
         self.concept_extractor = ConceptExtractor()
-        self.known_concepts: Set[str] = set()
-        self.concept_frequencies: Dict[str, int] = {}
+        self.known_concepts: set[str] = set()
+        self.concept_frequencies: dict[str, int] = {}
     
-    def update_knowledge_base(self, texts: List[str]) -> None:
+    def update_knowledge_base(self, texts: list[str]) -> None:
         """Update the knowledge base with new texts."""
         for text in texts:
             concepts = self.concept_extractor.extract_concepts(text)
@@ -189,7 +186,7 @@ class NoveltyDetector:
             for concept in concepts:
                 self.concept_frequencies[concept] = self.concept_frequencies.get(concept, 0) + 1
     
-    def calculate_novelty_score(self, text: str, source_texts: List[str]) -> float:
+    def calculate_novelty_score(self, text: str, source_texts: list[str]) -> float:
         """Calculate novelty score of text compared to source texts."""
         # Extract concepts from the text
         text_concepts = self.concept_extractor.extract_concepts(text)
@@ -223,8 +220,8 @@ class NoveltyDetector:
     def detect_novel_combinations(
         self,
         text: str,
-        source_texts: List[str]
-    ) -> List[Tuple[str, float]]:
+        source_texts: list[str]
+    ) -> list[tuple[str, float]]:
         """Detect novel combinations of known concepts."""
         text_concepts = self.concept_extractor.extract_concepts(text)
         source_concepts = set()
@@ -278,7 +275,7 @@ class CoherenceAnalyzer:
     def calculate_coherence_score(
         self,
         text: str,
-        source_texts: List[str]
+        source_texts: list[str]
     ) -> float:
         """Calculate coherence score of text."""
         # Extract concepts and relationships
@@ -301,8 +298,8 @@ class CoherenceAnalyzer:
     
     def _calculate_internal_coherence(
         self,
-        concepts: Set[str],
-        relationships: List[Tuple[str, str, str]]
+        concepts: set[str],
+        relationships: list[tuple[str, str, str]]
     ) -> float:
         """Calculate internal coherence of concepts and relationships."""
         if not concepts:
@@ -323,7 +320,7 @@ class CoherenceAnalyzer:
         
         return 0.7 * connection_ratio + 0.3 * relationship_density
     
-    def _calculate_source_coherence(self, text: str, source_texts: List[str]) -> float:
+    def _calculate_source_coherence(self, text: str, source_texts: list[str]) -> float:
         """Calculate coherence with source texts."""
         if not source_texts:
             return 0.5  # Neutral score when no sources
@@ -362,10 +359,10 @@ class EmergentInsightDetector:
     def detect_emergent_insights(
         self,
         consensus_result: str,
-        source_positions: List[str],
-        contributing_agents: List[str],
-        context: Optional[Dict[str, Any]] = None
-    ) -> List[EmergentInsight]:
+        source_positions: list[str],
+        contributing_agents: list[str],
+        context: Optional[dict[str, Any]] = None
+    ) -> list[EmergentInsight]:
         """Detect emergent insights from consensus process."""
         self.logger.info(f"Detecting emergent insights from consensus with {len(source_positions)} source positions")
         
@@ -393,10 +390,10 @@ class EmergentInsightDetector:
     def _generate_insight_candidates(
         self,
         consensus_result: str,
-        source_positions: List[str],
-        contributing_agents: List[str],
-        context: Optional[Dict[str, Any]] = None
-    ) -> List[InsightCandidate]:
+        source_positions: list[str],
+        contributing_agents: list[str],
+        context: Optional[dict[str, Any]] = None
+    ) -> list[InsightCandidate]:
         """Generate insight candidates."""
         candidates = []
         
@@ -429,9 +426,9 @@ class EmergentInsightDetector:
     def _detect_synthesis_emergence(
         self,
         consensus_result: str,
-        source_positions: List[str],
-        contributing_agents: List[str]
-    ) -> List[InsightCandidate]:
+        source_positions: list[str],
+        contributing_agents: list[str]
+    ) -> list[InsightCandidate]:
         """Detect synthesis emergence insights."""
         candidates = []
         
@@ -478,9 +475,9 @@ class EmergentInsightDetector:
     def _detect_contradiction_resolution(
         self,
         consensus_result: str,
-        source_positions: List[str],
-        contributing_agents: List[str]
-    ) -> List[InsightCandidate]:
+        source_positions: list[str],
+        contributing_agents: list[str]
+    ) -> list[InsightCandidate]:
         """Detect contradiction resolution insights."""
         candidates = []
         
@@ -514,9 +511,9 @@ class EmergentInsightDetector:
     def _detect_novel_concept_creation(
         self,
         consensus_result: str,
-        source_positions: List[str],
-        contributing_agents: List[str]
-    ) -> List[InsightCandidate]:
+        source_positions: list[str],
+        contributing_agents: list[str]
+    ) -> list[InsightCandidate]:
         """Detect novel concept creation insights."""
         candidates = []
         
@@ -545,9 +542,9 @@ class EmergentInsightDetector:
     def _detect_pattern_discovery(
         self,
         consensus_result: str,
-        source_positions: List[str],
-        contributing_agents: List[str]
-    ) -> List[InsightCandidate]:
+        source_positions: list[str],
+        contributing_agents: list[str]
+    ) -> list[InsightCandidate]:
         """Detect pattern discovery insights."""
         candidates = []
         
@@ -590,7 +587,7 @@ class EmergentInsightDetector:
     def _determine_emergence_pattern(
         self,
         consensus_result: str,
-        source_positions: List[str]
+        source_positions: list[str]
     ) -> EmergencePattern:
         """Determine the pattern of emergence."""
         # Simple heuristics for pattern determination
@@ -614,7 +611,7 @@ class EmergentInsightDetector:
         else:
             return EmergencePattern.ADDITIVE
     
-    def _has_contradiction_resolution(self, consensus_result: str, source_positions: List[str]) -> bool:
+    def _has_contradiction_resolution(self, consensus_result: str, source_positions: list[str]) -> bool:
         """Check if consensus resolves contradictions."""
         contradictions = self._find_contradictions(source_positions)
         return len(contradictions) > 0
@@ -622,7 +619,7 @@ class EmergentInsightDetector:
     def _calculate_emergence_score(
         self,
         consensus_result: str,
-        source_positions: List[str],
+        source_positions: list[str],
         emergence_pattern: EmergencePattern
     ) -> float:
         """Calculate emergence score."""
@@ -651,7 +648,7 @@ class EmergentInsightDetector:
         
         return min(emergence_score, 1.0)
     
-    def _find_contradictions(self, source_positions: List[str]) -> List[Tuple[str, str]]:
+    def _find_contradictions(self, source_positions: list[str]) -> list[tuple[str, str]]:
         """Find contradictory positions."""
         contradictions = []
         
@@ -678,7 +675,7 @@ class EmergentInsightDetector:
     def _calculate_resolution_score(
         self,
         consensus_result: str,
-        contradictions: List[Tuple[str, str]]
+        contradictions: list[tuple[str, str]]
     ) -> float:
         """Calculate how well consensus resolves contradictions."""
         if not contradictions:
@@ -701,7 +698,7 @@ class EmergentInsightDetector:
     def _calculate_evidence_strength(
         self,
         consensus_result: str,
-        source_positions: List[str]
+        source_positions: list[str]
     ) -> float:
         """Calculate evidence strength for the insight."""
         # Evidence strength based on source diversity and consensus coherence
@@ -788,7 +785,7 @@ class EmergentInsightDetector:
                         f"novelty={self.novelty_threshold}, coherence={self.coherence_threshold}, "
                         f"evidence={self.evidence_threshold}")
     
-    def get_insight_statistics(self) -> Dict[str, Any]:
+    def get_insight_statistics(self) -> dict[str, Any]:
         """Get statistics about insight detection."""
         return {
             "thresholds": {

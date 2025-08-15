@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 20:05:00
+"""@Time    : 2025-08-05 20:05:00
 @Author  : DAIP-LIVE Team
 @File    : web_interface_test.py
 @Description:
@@ -9,16 +7,14 @@
 """
 
 import asyncio
-import json
 import logging
-import sys
 import os
+import sys
 import time
 import traceback
-from typing import Dict, Any, List
-from datetime import datetime
+from typing import Any
+
 import aiohttp
-import requests
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -49,7 +45,7 @@ class WebInterfaceTester:
         if self.session:
             await self.session.close()
     
-    async def run_all_tests(self) -> Dict[str, Any]:
+    async def run_all_tests(self) -> dict[str, Any]:
         """Run all web interface tests"""
         print("Starting Web Interface Comprehensive Tests")
         print("=" * 60)
@@ -94,7 +90,7 @@ class WebInterfaceTester:
         
         return self.generate_test_summary()
     
-    async def test_health_check(self) -> Dict[str, Any]:
+    async def test_health_check(self) -> dict[str, Any]:
         """Test health check endpoint"""
         async with self.session.get(f"{self.base_url}/health") as response:
             if response.status == 200:
@@ -109,7 +105,7 @@ class WebInterfaceTester:
             else:
                 raise Exception(f"Health check failed with status {response.status}")
     
-    async def test_system_status(self) -> Dict[str, Any]:
+    async def test_system_status(self) -> dict[str, Any]:
         """Test system status endpoint"""
         async with self.session.get(f"{self.base_url}/status") as response:
             if response.status == 200:
@@ -124,7 +120,7 @@ class WebInterfaceTester:
             else:
                 raise Exception(f"System status failed with status {response.status}")
     
-    async def test_web_interface(self) -> Dict[str, Any]:
+    async def test_web_interface(self) -> dict[str, Any]:
         """Test web interface accessibility"""
         async with self.session.get(f"{self.base_url}/") as response:
             if response.status == 200:
@@ -140,7 +136,7 @@ class WebInterfaceTester:
             else:
                 raise Exception(f"Web interface failed with status {response.status}")
     
-    async def test_api_documentation(self) -> Dict[str, Any]:
+    async def test_api_documentation(self) -> dict[str, Any]:
         """Test API documentation accessibility"""
         async with self.session.get(f"{self.base_url}/docs") as response:
             if response.status == 200:
@@ -154,7 +150,7 @@ class WebInterfaceTester:
             else:
                 raise Exception(f"API documentation failed with status {response.status}")
     
-    async def test_scenario_list(self) -> Dict[str, Any]:
+    async def test_scenario_list(self) -> dict[str, Any]:
         """Test scenario list endpoint"""
         async with self.session.get(f"{self.base_url}/scenarios") as response:
             if response.status == 200:
@@ -171,7 +167,7 @@ class WebInterfaceTester:
             else:
                 raise Exception(f"Scenario list failed with status {response.status}")
     
-    async def test_smart_chat(self) -> Dict[str, Any]:
+    async def test_smart_chat(self) -> dict[str, Any]:
         """Test smart chat functionality"""
         payload = {
             "user_input": "AI在教育中的应用研究",
@@ -200,7 +196,7 @@ class WebInterfaceTester:
             else:
                 raise Exception(f"Smart chat failed with status {response.status}")
     
-    async def test_academic_research(self) -> Dict[str, Any]:
+    async def test_academic_research(self) -> dict[str, Any]:
         """Test academic research scenario"""
         payload = {
             "topic": "人工智能在医疗诊断中的应用研究",
@@ -232,7 +228,7 @@ class WebInterfaceTester:
             else:
                 raise Exception(f"Academic research scenario failed with status {response.status}")
     
-    async def test_expert_consultation(self) -> Dict[str, Any]:
+    async def test_expert_consultation(self) -> dict[str, Any]:
         """Test expert consultation scenario"""
         payload = {
             "topic": "是否应该采用微服务架构",
@@ -263,7 +259,7 @@ class WebInterfaceTester:
             else:
                 raise Exception(f"Expert consultation scenario failed with status {response.status}")
     
-    async def test_casual_discussion(self) -> Dict[str, Any]:
+    async def test_casual_discussion(self) -> dict[str, Any]:
         """Test casual discussion scenario"""
         payload = {
             "topic": "最近有什么好电影推荐",
@@ -294,7 +290,7 @@ class WebInterfaceTester:
             else:
                 raise Exception(f"Casual discussion scenario failed with status {response.status}")
     
-    async def test_error_handling(self) -> Dict[str, Any]:
+    async def test_error_handling(self) -> dict[str, Any]:
         """Test error handling"""
         # Test with invalid scenario type
         payload = {
@@ -321,7 +317,7 @@ class WebInterfaceTester:
                     "unexpected_status": response.status
                 }
     
-    async def test_response_time(self) -> Dict[str, Any]:
+    async def test_response_time(self) -> dict[str, Any]:
         """Test response time performance"""
         test_payloads = [
             {"user_input": "简单测试"},
@@ -351,7 +347,7 @@ class WebInterfaceTester:
             "performance_acceptable": all(rt < 5.0 for rt in response_times)  # All under 5 seconds
         }
     
-    async def test_data_validation(self) -> Dict[str, Any]:
+    async def test_data_validation(self) -> dict[str, Any]:
         """Test data validation"""
         # Test with empty input
         empty_payload = {"user_input": ""}
@@ -373,7 +369,7 @@ class WebInterfaceTester:
                     "status_code": response.status
                 }
     
-    def generate_test_summary(self) -> Dict[str, Any]:
+    def generate_test_summary(self) -> dict[str, Any]:
         """Generate comprehensive test summary"""
         total_duration = time.time() - self.start_time
         
@@ -394,7 +390,7 @@ class WebInterfaceTester:
         
         return summary
     
-    def _extract_performance_metrics(self) -> Dict[str, Any]:
+    def _extract_performance_metrics(self) -> dict[str, Any]:
         """Extract performance metrics from test results"""
         response_times = []
         
@@ -417,7 +413,7 @@ class WebInterfaceTester:
         else:
             return {"error": "No response time data available"}
     
-    def _calculate_functionality_coverage(self) -> Dict[str, Any]:
+    def _calculate_functionality_coverage(self) -> dict[str, Any]:
         """Calculate functionality coverage"""
         coverage_areas = {
             "basic_access": ["Health Check", "System Status", "Web Interface Access", "API Documentation"],
@@ -437,7 +433,7 @@ class WebInterfaceTester:
         
         return coverage_results
     
-    def print_test_summary(self, summary: Dict[str, Any]):
+    def print_test_summary(self, summary: dict[str, Any]):
         """Print detailed test summary"""
         print("\n" + "=" * 60)
         print("WEB INTERFACE COMPREHENSIVE TEST SUMMARY")
@@ -448,12 +444,12 @@ class WebInterfaceTester:
         print(f"Success Rate: {summary['success_rate']:.1%}")
         print(f"Total Duration: {summary['total_duration']:.2f}s")
         
-        print(f"\nFunctionality Coverage:")
+        print("\nFunctionality Coverage:")
         coverage = summary['functionality_coverage']
         for area, data in coverage.items():
             print(f"   {area.replace('_', ' ').title()}: {data['coverage']:.1%} ({data['passed']}/{data['total']})")
         
-        print(f"\nPerformance Metrics:")
+        print("\nPerformance Metrics:")
         metrics = summary['performance_metrics']
         if "error" not in metrics:
             print(f"   Average Response Time: {metrics['average_response_time']:.2f}s")
@@ -464,12 +460,12 @@ class WebInterfaceTester:
             print(f"   {metrics['error']}")
         
         if summary['failed_tests'] > 0:
-            print(f"\nFailed Tests:")
+            print("\nFailed Tests:")
             for test_name, result in summary['test_results'].items():
                 if result['status'] == 'failed':
                     print(f"   • {test_name}: {result['error']}")
         
-        print(f"\nRecommendations:")
+        print("\nRecommendations:")
         if summary['overall_status'] == 'success':
             print("   • All web interface tests passed")
             print("   • System is ready for production use")
@@ -499,12 +495,12 @@ async def main():
                     print("Server is running and accessible")
                 else:
                     print(f"Server returned status {response.status}")
-                    return
+                    return None
     except Exception as e:
         print(f"Cannot connect to server at {base_url}: {e}")
         print("Please start the server first:")
         print("  python web_demo_app.py")
-        return
+        return None
     
     async with WebInterfaceTester(base_url) as tester:
         try:

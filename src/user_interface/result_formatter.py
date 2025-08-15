@@ -1,24 +1,20 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 18:00:00
+"""@Time    : 2025-07-24 18:00:00
 @Author  : DAIP-LIVE Team
 @File    : result_formatter.py
 @Description:
     Result formatting for different output formats.
 """
+import csv
+import io
 import json
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-import csv
-import io
+from typing import Any
 
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
-from rich.syntax import Syntax
+from rich.table import Table
 from rich.tree import Tree
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
 
 
 class ResultFormatter:
@@ -30,11 +26,11 @@ class ResultFormatter:
             "json", "markdown", "html", "xml", "csv", "yaml", "text"
         ]
     
-    def format_as_json(self, result: Dict[str, Any], indent: int = 2) -> str:
+    def format_as_json(self, result: dict[str, Any], indent: int = 2) -> str:
         """Format result as JSON string."""
         return json.dumps(result, indent=indent, ensure_ascii=False, default=str)
     
-    def format_as_markdown(self, result: Dict[str, Any]) -> str:
+    def format_as_markdown(self, result: dict[str, Any]) -> str:
         """Format result as Markdown string."""
         if not result.get("success", False):
             return f"# Workflow Failed\n\n**Error:** {result.get('error', 'Unknown error')}\n"
@@ -47,7 +43,7 @@ class ResultFormatter:
         else:
             return self._format_generic_markdown(result)
     
-    def display_critical_review_result(self, result: Dict[str, Any], console: Console) -> None:
+    def display_critical_review_result(self, result: dict[str, Any], console: Console) -> None:
         """Display Critical Review Workflow result using Rich."""
         if not result.get("success", False):
             console.print(Panel(
@@ -59,7 +55,7 @@ class ResultFormatter:
         
         # Main result panel
         console.print(Panel(
-            f"[green]Critical Review Completed Successfully[/green]",
+            "[green]Critical Review Completed Successfully[/green]",
             title="Critical Review Workflow",
             border_style="green"
         ))
@@ -108,7 +104,7 @@ class ResultFormatter:
         if "revision_summary" in result:
             console.print(f"\n[blue]Revision Summary:[/blue] {result['revision_summary']}")
     
-    def display_multi_perspective_result(self, result: Dict[str, Any], console: Console) -> None:
+    def display_multi_perspective_result(self, result: dict[str, Any], console: Console) -> None:
         """Display Multi-perspective Synthesis Workflow result using Rich."""
         if not result.get("success", False):
             console.print(Panel(
@@ -120,7 +116,7 @@ class ResultFormatter:
         
         # Main result panel
         console.print(Panel(
-            f"[green]Multi-perspective Analysis Completed Successfully[/green]",
+            "[green]Multi-perspective Analysis Completed Successfully[/green]",
             title="Multi-perspective Synthesis Workflow",
             border_style="green"
         ))
@@ -173,7 +169,7 @@ class ResultFormatter:
         # Viewpoint analysis
         if "viewpoint_analysis" in result:
             analysis = result["viewpoint_analysis"]
-            console.print(f"\n[blue]Viewpoint Analysis:[/blue]")
+            console.print("\n[blue]Viewpoint Analysis:[/blue]")
             console.print(f"  Conflicts: {len(analysis.get('conflicts', []))}")
             console.print(f"  Consensus Areas: {len(analysis.get('consensus_areas', []))}")
             console.print(f"  Collection Quality: {analysis.get('quality_score', 0.0):.2f}")
@@ -188,7 +184,7 @@ class ResultFormatter:
             
             console.print(tree)
     
-    def _format_critical_review_markdown(self, result: Dict[str, Any]) -> str:
+    def _format_critical_review_markdown(self, result: dict[str, Any]) -> str:
         """Format Critical Review result as Markdown."""
         md = "# Critical Review Workflow Results\n\n"
         
@@ -231,7 +227,7 @@ class ResultFormatter:
         
         return md
     
-    def _format_multi_perspective_markdown(self, result: Dict[str, Any]) -> str:
+    def _format_multi_perspective_markdown(self, result: dict[str, Any]) -> str:
         """Format Multi-perspective Synthesis result as Markdown."""
         md = "# Multi-perspective Synthesis Workflow Results\n\n"
         
@@ -304,7 +300,7 @@ class ResultFormatter:
         
         return md
     
-    def format_as_html(self, result: Dict[str, Any]) -> str:
+    def format_as_html(self, result: dict[str, Any]) -> str:
         """Format result as HTML string."""
         html = """<!DOCTYPE html>
 <html>
@@ -368,7 +364,7 @@ class ResultFormatter:
 """
         return html
     
-    def format_as_xml(self, result: Dict[str, Any]) -> str:
+    def format_as_xml(self, result: dict[str, Any]) -> str:
         """Format result as XML string."""
         root = ET.Element("workflow_result")
         
@@ -394,7 +390,7 @@ class ResultFormatter:
         
         return ET.tostring(root, encoding='unicode', method='xml')
     
-    def format_as_csv(self, result: Dict[str, Any]) -> str:
+    def format_as_csv(self, result: dict[str, Any]) -> str:
         """Format result as CSV string (for tabular data)."""
         output = io.StringIO()
         
@@ -424,7 +420,7 @@ class ResultFormatter:
         
         return output.getvalue()
     
-    def format_as_yaml(self, result: Dict[str, Any]) -> str:
+    def format_as_yaml(self, result: dict[str, Any]) -> str:
         """Format result as YAML string."""
         try:
             import yaml
@@ -433,7 +429,7 @@ class ResultFormatter:
             # Fallback to simple YAML-like format
             return self._simple_yaml_format(result)
     
-    def format_as_text(self, result: Dict[str, Any]) -> str:
+    def format_as_text(self, result: dict[str, Any]) -> str:
         """Format result as plain text."""
         lines = []
         lines.append("WORKFLOW RESULTS")
@@ -486,7 +482,7 @@ class ResultFormatter:
     
     def format_with_traceability(
         self, 
-        result: Dict[str, Any], 
+        result: dict[str, Any], 
         format_type: str = "json",
         include_reasoning: bool = True,
         include_confidence: bool = True,
@@ -526,7 +522,7 @@ class ResultFormatter:
     
     def display_with_transparency(
         self, 
-        result: Dict[str, Any], 
+        result: dict[str, Any], 
         console: Console,
         transparency_level: str = "detailed"
     ) -> None:
@@ -541,7 +537,7 @@ class ResultFormatter:
             # Default to moderate
             self._display_moderate_transparency(result, console)
     
-    def _format_generic_markdown(self, result: Dict[str, Any]) -> str:
+    def _format_generic_markdown(self, result: dict[str, Any]) -> str:
         """Format generic result as Markdown."""
         md = "# Workflow Results\n\n"
         
@@ -560,7 +556,7 @@ class ResultFormatter:
         
         return md  
   
-    def _format_critical_review_html(self, result: Dict[str, Any]) -> str:
+    def _format_critical_review_html(self, result: dict[str, Any]) -> str:
         """Format Critical Review result as HTML."""
         html = """
     <div class="section">
@@ -616,7 +612,7 @@ class ResultFormatter:
 """
         return html
     
-    def _format_multi_perspective_html(self, result: Dict[str, Any]) -> str:
+    def _format_multi_perspective_html(self, result: dict[str, Any]) -> str:
         """Format Multi-perspective result as HTML."""
         html = """
     <div class="section">
@@ -650,7 +646,7 @@ class ResultFormatter:
 """
         return html
     
-    def _format_generic_html(self, result: Dict[str, Any]) -> str:
+    def _format_generic_html(self, result: dict[str, Any]) -> str:
         """Format generic result as HTML."""
         html = """
     <div class="section">
@@ -668,7 +664,7 @@ class ResultFormatter:
 """
         return html
     
-    def _format_execution_trace_html(self, trace: List[Dict[str, Any]]) -> str:
+    def _format_execution_trace_html(self, trace: list[dict[str, Any]]) -> str:
         """Format execution trace as HTML."""
         html = """
     <div class="section">
@@ -719,7 +715,7 @@ class ResultFormatter:
             elem = ET.SubElement(parent, key)
             elem.text = str(value)
     
-    def _simple_yaml_format(self, data: Dict[str, Any], indent: int = 0) -> str:
+    def _simple_yaml_format(self, data: dict[str, Any], indent: int = 0) -> str:
         """Simple YAML-like formatting without external dependencies."""
         lines = []
         prefix = "  " * indent
@@ -741,7 +737,7 @@ class ResultFormatter:
         
         return "\n".join(lines)
     
-    def _extract_reasoning_trace(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _extract_reasoning_trace(self, result: dict[str, Any]) -> list[dict[str, Any]]:
         """Extract reasoning trace from result."""
         reasoning_trace = []
         
@@ -765,7 +761,7 @@ class ResultFormatter:
         
         return reasoning_trace
     
-    def _extract_confidence_analysis(self, result: Dict[str, Any]) -> Dict[str, Any]:
+    def _extract_confidence_analysis(self, result: dict[str, Any]) -> dict[str, Any]:
         """Extract confidence analysis from result."""
         analysis = {
             "overall_confidence": 0.0,
@@ -798,7 +794,7 @@ class ResultFormatter:
         
         return analysis
     
-    def _extract_source_attribution(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _extract_source_attribution(self, result: dict[str, Any]) -> list[dict[str, Any]]:
         """Extract source attribution from result."""
         sources = []
         
@@ -817,7 +813,7 @@ class ResultFormatter:
         
         return sources
     
-    def _format_traceable_markdown(self, result: Dict[str, Any]) -> str:
+    def _format_traceable_markdown(self, result: dict[str, Any]) -> str:
         """Format result with traceability as Markdown."""
         md = self.format_as_markdown(result)
         
@@ -851,7 +847,7 @@ class ResultFormatter:
         
         return md
     
-    def _format_traceable_html(self, result: Dict[str, Any]) -> str:
+    def _format_traceable_html(self, result: dict[str, Any]) -> str:
         """Format result with traceability as HTML."""
         html = self.format_as_html(result)
         
@@ -904,11 +900,11 @@ class ResultFormatter:
         html = html.replace("</body>", traceability_html + "</body>")
         return html
     
-    def _display_minimal_transparency(self, result: Dict[str, Any], console: Console) -> None:
+    def _display_minimal_transparency(self, result: dict[str, Any], console: Console) -> None:
         """Display result with minimal transparency."""
         if not result.get("success", False):
             console.print(Panel(
-                f"[red]Workflow Failed[/red]",
+                "[red]Workflow Failed[/red]",
                 title="Error",
                 border_style="red"
             ))
@@ -934,7 +930,7 @@ class ResultFormatter:
                 border_style="green"
             ))
     
-    def _display_moderate_transparency(self, result: Dict[str, Any], console: Console) -> None:
+    def _display_moderate_transparency(self, result: dict[str, Any], console: Console) -> None:
         """Display result with moderate transparency."""
         # Show key reasoning steps and confidence scores
         if "synthesis" in result and "perspectives" in result:
@@ -948,7 +944,7 @@ class ResultFormatter:
                 border_style="blue"
             ))
     
-    def _display_detailed_transparency(self, result: Dict[str, Any], console: Console) -> None:
+    def _display_detailed_transparency(self, result: dict[str, Any], console: Console) -> None:
         """Display result with detailed transparency."""
         # Show complete processing chains and detailed metrics
         self._display_moderate_transparency(result, console)
@@ -995,11 +991,11 @@ class ResultFormatter:
                 for item in confidence_analysis["low_confidence_items"]:
                     console.print(f"  - {item['fact_id']}: {item['score']:.3f}")
     
-    def get_supported_formats(self) -> List[str]:
+    def get_supported_formats(self) -> list[str]:
         """Get list of supported output formats."""
         return self.supported_formats.copy()
     
-    def format_result(self, result: Dict[str, Any], format_type: str = "json") -> str:
+    def format_result(self, result: dict[str, Any], format_type: str = "json") -> str:
         """Format result in the specified format."""
         if format_type not in self.supported_formats:
             raise ValueError(f"Unsupported format: {format_type}. Supported formats: {self.supported_formats}")

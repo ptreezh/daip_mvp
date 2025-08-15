@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 09:00:00
+"""@Time    : 2025-07-25 09:00:00
 @Author  : DAIP-LIVE Team
 @File    : demo_customization.py
 @Description:
     Demonstration of role and consensus customization capabilities.
 """
 import asyncio
-from role_customization import (
-    RoleConfigurationManager, ExpertiseProfile, RolePersonality,
-    ExpertiseLevel, CognitiveStyle, InteractionMode
-)
-from consensus_customization import (
-    ConsensusManager, ConsensusInput
-)
+
+from consensus_customization import ConsensusInput, ConsensusManager
 from performance_optimization import PerformanceOptimizationManager
+from role_customization import (
+    CognitiveStyle,
+    ExpertiseLevel,
+    ExpertiseProfile,
+    InteractionMode,
+    RoleConfigurationManager,
+    RolePersonality,
+)
 
 
 async def demo_role_customization():
@@ -61,7 +62,7 @@ async def demo_role_customization():
         "system",
         domain="ai_ethics"
     )
-    print(f"\n📝 Generated System Prompt:")
+    print("\n📝 Generated System Prompt:")
     print(f"   {system_prompt[:100]}...")
     
     return role_manager
@@ -148,14 +149,14 @@ def demo_performance_optimization():
     
     result = optimization_manager.validate_and_optimize_configuration(test_config)
     
-    print(f"✅ Configuration Validation:")
+    print("✅ Configuration Validation:")
     print(f"   Valid: {result['validation']['is_valid']}")
     print(f"   Errors: {len(result['validation']['errors'])}")
     print(f"   Warnings: {len(result['validation']['warnings'])}")
     print(f"   Optimization Suggestions: {len(result['optimization_suggestions'])}")
     
     if result['optimization_suggestions']:
-        print(f"\n💡 Top Optimization Suggestion:")
+        print("\n💡 Top Optimization Suggestion:")
         suggestion = result['optimization_suggestions'][0]
         print(f"   {suggestion['title']}: {suggestion['description']}")
     
@@ -210,7 +211,7 @@ async def demo_integration():
     # Calculate consensus
     result = await consensus_manager.calculate_consensus("weighted_expert", inputs)
     
-    print(f"\n🏛️ Committee Decision:")
+    print("\n🏛️ Committee Decision:")
     print(f"   Consensus: {result.consensus_value}")
     print(f"   Confidence: {result.confidence:.3f}")
     print(f"   Agreement Level: {result.agreement_level:.3f}")

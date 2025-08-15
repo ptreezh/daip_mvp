@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub 启动脚本
+"""Personal Intelligence Hub 启动脚本
 
 用于启动Lona Web应用的便捷脚本
 """
 
-import sys
 import os
+import sys
 
 # 添加当前目录到Python路径
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

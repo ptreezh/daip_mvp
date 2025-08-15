@@ -1,21 +1,20 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 10:00:00
+"""@Time    : 2025-07-25 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_synthesis_engine.py
 @Description:
     Unit tests for the SynthesisEngine.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from src.core_services.synthesis_engine import SynthesisEngine
+import pytest
+
 from src.core_services import prompts
-from src.models import DebateTurn
+from src.core_services.synthesis_engine import SynthesisEngine
 from src.kernel.llm_interface import LLMInterface
+from src.models import DebateTurn
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_llm_interface():
     """Fixture for a mocked LLM interface."""
     mock_interface = MagicMock(spec=LLMInterface)
@@ -25,7 +24,7 @@ def mock_llm_interface():
     return mock_interface
 
 
-@pytest.fixture
+@pytest.fixture()
 def debate_history():
     """Fixture for a sample debate history."""
     return [
@@ -34,7 +33,7 @@ def debate_history():
     ]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_summarize_context_success(mock_llm_interface, debate_history):
     """Tests successful context summarization."""
     # Arrange
@@ -54,7 +53,7 @@ async def test_summarize_context_success(mock_llm_interface, debate_history):
     assert "AI will solve all our problems." in messages[1]['content']
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_summarize_context_empty_history(mock_llm_interface):
     """Tests summarization with no history."""
     # Arrange
@@ -68,7 +67,7 @@ async def test_summarize_context_empty_history(mock_llm_interface):
     mock_llm_interface.generate.assert_not_called()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_synthesize_opinions_success(mock_llm_interface, debate_history):
     """Tests successful opinion synthesis."""
     # Arrange

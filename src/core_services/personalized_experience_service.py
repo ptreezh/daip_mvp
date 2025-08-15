@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-个性化体验定制服务
+"""个性化体验定制服务
 
 提供个性化的用户体验定制功能
 """
 
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime
-import json
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -38,10 +35,10 @@ class UserProfile:
     user_id: str
     personalization_level: PersonalizationLevel
     experience_theme: ExperienceTheme
-    preferences: Dict[str, Any]
-    interaction_history: List[Dict[str, Any]]
+    preferences: dict[str, Any]
+    interaction_history: list[dict[str, Any]]
     learning_style: str
-    expertise_areas: List[str]
+    expertise_areas: list[str]
     created_at: str
     last_updated: str
 
@@ -51,8 +48,8 @@ class PersonalizationRule:
     """个性化规则"""
     rule_id: str
     name: str
-    condition: Dict[str, Any]
-    action: Dict[str, Any]
+    condition: dict[str, Any]
+    action: dict[str, Any]
     priority: int
     is_active: bool
 
@@ -72,9 +69,9 @@ class PersonalizedExperienceService:
     def create_user_profile(
         self,
         user_id: str,
-        initial_preferences: Dict[str, Any] = None,
+        initial_preferences: dict[str, Any] = None,
         personalization_level: PersonalizationLevel = PersonalizationLevel.BASIC
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建用户档案"""
         try:
             # 检查用户是否已存在
@@ -118,8 +115,8 @@ class PersonalizedExperienceService:
     def customize_experience(
         self,
         user_id: str,
-        customization_request: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        customization_request: dict[str, Any]
+    ) -> dict[str, Any]:
         """定制用户体验"""
         try:
             if user_id not in self.user_profiles:
@@ -171,7 +168,7 @@ class PersonalizedExperienceService:
         self,
         user_id: str,
         interface_type: str = "default"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """获取个性化界面配置"""
         try:
             if user_id not in self.user_profiles:
@@ -204,8 +201,8 @@ class PersonalizedExperienceService:
     def adapt_to_user_behavior(
         self,
         user_id: str,
-        behavior_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        behavior_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """根据用户行为自适应调整"""
         try:
             if user_id not in self.user_profiles:
@@ -260,7 +257,7 @@ class PersonalizedExperienceService:
         self,
         user_id: str,
         analytics_type: str = "comprehensive"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """获取体验分析"""
         try:
             if user_id not in self.user_profiles:
@@ -302,7 +299,7 @@ class PersonalizedExperienceService:
             logger.error(f"获取体验分析失败: {e}")
             return {"error": str(e)}
     
-    def _initialize_experience_templates(self) -> Dict[str, Any]:
+    def _initialize_experience_templates(self) -> dict[str, Any]:
         """初始化体验模板"""
         return {
             "professional": {
@@ -331,7 +328,7 @@ class PersonalizedExperienceService:
             }
         }
     
-    def _initialize_customization_options(self) -> Dict[str, Any]:
+    def _initialize_customization_options(self) -> dict[str, Any]:
         """初始化定制选项"""
         return {
             "themes": list(ExperienceTheme),
@@ -359,7 +356,7 @@ class PersonalizedExperienceService:
                 "automation_level": "extensive"
             })
     
-    def _get_available_customizations(self, personalization_level: PersonalizationLevel) -> List[str]:
+    def _get_available_customizations(self, personalization_level: PersonalizationLevel) -> list[str]:
         """获取可用的定制选项"""
         base_customizations = ["theme", "layout", "content_format"]
         
@@ -371,7 +368,7 @@ class PersonalizedExperienceService:
         
         return base_customizations
     
-    def _generate_initial_recommendations(self, user_profile: UserProfile) -> List[str]:
+    def _generate_initial_recommendations(self, user_profile: UserProfile) -> list[str]:
         """生成初始推荐"""
         recommendations = []
         
@@ -390,11 +387,11 @@ class PersonalizedExperienceService:
         
         return recommendations
     
-    def _update_preferences(self, user_profile: UserProfile, preferences_data: Dict[str, Any]):
+    def _update_preferences(self, user_profile: UserProfile, preferences_data: dict[str, Any]):
         """更新用户偏好"""
         user_profile.preferences.update(preferences_data)
     
-    def _update_theme(self, user_profile: UserProfile, theme_data: Dict[str, Any]):
+    def _update_theme(self, user_profile: UserProfile, theme_data: dict[str, Any]):
         """更新主题"""
         theme_name = theme_data.get("theme")
         if theme_name:
@@ -403,7 +400,7 @@ class PersonalizedExperienceService:
             except ValueError:
                 logger.warning(f"无效的主题名称: {theme_name}")
     
-    def _update_personalization_level(self, user_profile: UserProfile, level_data: Dict[str, Any]):
+    def _update_personalization_level(self, user_profile: UserProfile, level_data: dict[str, Any]):
         """更新个性化级别"""
         level_name = level_data.get("level")
         if level_name:
@@ -412,19 +409,19 @@ class PersonalizedExperienceService:
             except ValueError:
                 logger.warning(f"无效的个性化级别: {level_name}")
     
-    def _update_learning_style(self, user_profile: UserProfile, style_data: Dict[str, Any]):
+    def _update_learning_style(self, user_profile: UserProfile, style_data: dict[str, Any]):
         """更新学习风格"""
         learning_style = style_data.get("style")
         if learning_style in self.customization_options["learning_styles"]:
             user_profile.learning_style = learning_style
     
-    def _update_expertise_areas(self, user_profile: UserProfile, expertise_data: Dict[str, Any]):
+    def _update_expertise_areas(self, user_profile: UserProfile, expertise_data: dict[str, Any]):
         """更新专业领域"""
         expertise_areas = expertise_data.get("areas", [])
         if isinstance(expertise_areas, list):
             user_profile.expertise_areas = expertise_areas
     
-    def _generate_personalized_config(self, user_profile: UserProfile) -> Dict[str, Any]:
+    def _generate_personalized_config(self, user_profile: UserProfile) -> dict[str, Any]:
         """生成个性化配置"""
         return {
             "user_id": user_profile.user_id,
@@ -437,7 +434,7 @@ class PersonalizedExperienceService:
             "content_config": self._get_content_config_for_profile(user_profile)
         }
     
-    def _record_customization_history(self, user_profile: UserProfile, customization_request: Dict[str, Any]):
+    def _record_customization_history(self, user_profile: UserProfile, customization_request: dict[str, Any]):
         """记录定制历史"""
         history_entry = {
             "timestamp": datetime.now().isoformat(),
@@ -448,7 +445,7 @@ class PersonalizedExperienceService:
         
         user_profile.interaction_history.append(history_entry)
     
-    def _generate_experience_recommendations(self, user_profile: UserProfile) -> List[str]:
+    def _generate_experience_recommendations(self, user_profile: UserProfile) -> list[str]:
         """生成体验推荐"""
         recommendations = []
         
@@ -466,7 +463,7 @@ class PersonalizedExperienceService:
         
         return recommendations
     
-    def _get_default_interface_config(self, interface_type: str) -> Dict[str, Any]:
+    def _get_default_interface_config(self, interface_type: str) -> dict[str, Any]:
         """获取默认界面配置"""
         return {
             "interface_type": interface_type,
@@ -478,11 +475,11 @@ class PersonalizedExperienceService:
             "accessibility": {"level": "standard"}
         }
     
-    def _get_theme_config(self, experience_theme: ExperienceTheme) -> Dict[str, Any]:
+    def _get_theme_config(self, experience_theme: ExperienceTheme) -> dict[str, Any]:
         """获取主题配置"""
         return self.experience_templates.get(experience_theme.value, self.experience_templates["professional"])
     
-    def _get_layout_config(self, user_profile: UserProfile) -> Dict[str, Any]:
+    def _get_layout_config(self, user_profile: UserProfile) -> dict[str, Any]:
         """获取布局配置"""
         layout_preference = user_profile.preferences.get("layout", "standard")
         
@@ -494,7 +491,7 @@ class PersonalizedExperienceService:
         
         return layout_configs.get(layout_preference, layout_configs["standard"])
     
-    def _get_component_config(self, user_profile: UserProfile) -> Dict[str, Any]:
+    def _get_component_config(self, user_profile: UserProfile) -> dict[str, Any]:
         """获取组件配置"""
         components = ["header", "main", "footer"]
         
@@ -506,7 +503,7 @@ class PersonalizedExperienceService:
         
         return {"enabled_components": components}
     
-    def _get_interaction_config(self, user_profile: UserProfile) -> Dict[str, Any]:
+    def _get_interaction_config(self, user_profile: UserProfile) -> dict[str, Any]:
         """获取交互配置"""
         return {
             "style": user_profile.experience_theme.value,
@@ -514,7 +511,7 @@ class PersonalizedExperienceService:
             "feedback_level": user_profile.preferences.get("feedback_level", "normal")
         }
     
-    def _get_content_preferences(self, user_profile: UserProfile) -> Dict[str, Any]:
+    def _get_content_preferences(self, user_profile: UserProfile) -> dict[str, Any]:
         """获取内容偏好"""
         return {
             "format": user_profile.preferences.get("content_format", "mixed"),
@@ -522,7 +519,7 @@ class PersonalizedExperienceService:
             "expertise_level": user_profile.personalization_level.value
         }
     
-    def _get_accessibility_config(self, user_profile: UserProfile) -> Dict[str, Any]:
+    def _get_accessibility_config(self, user_profile: UserProfile) -> dict[str, Any]:
         """获取无障碍配置"""
         accessibility_prefs = user_profile.preferences.get("accessibility", {})
         
@@ -533,7 +530,7 @@ class PersonalizedExperienceService:
             "keyboard_navigation": accessibility_prefs.get("keyboard_navigation", True)
         }
     
-    def _apply_personalization_rules(self, interface_config: Dict[str, Any], user_profile: UserProfile) -> Dict[str, Any]:
+    def _apply_personalization_rules(self, interface_config: dict[str, Any], user_profile: UserProfile) -> dict[str, Any]:
         """应用个性化规则"""
         for rule in self.personalization_rules:
             if rule.is_active and self._evaluate_rule_condition(rule.condition, user_profile):
@@ -541,18 +538,18 @@ class PersonalizedExperienceService:
         
         return interface_config
     
-    def _evaluate_rule_condition(self, condition: Dict[str, Any], user_profile: UserProfile) -> bool:
+    def _evaluate_rule_condition(self, condition: dict[str, Any], user_profile: UserProfile) -> bool:
         """评估规则条件"""
         # 简化的条件评估实现
         return True  # 默认所有规则都适用
     
-    def _apply_rule_action(self, interface_config: Dict[str, Any], action: Dict[str, Any]) -> Dict[str, Any]:
+    def _apply_rule_action(self, interface_config: dict[str, Any], action: dict[str, Any]) -> dict[str, Any]:
         """应用规则动作"""
         # 简化的动作应用实现
         interface_config.update(action)
         return interface_config
     
-    def _analyze_user_behavior(self, behavior_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _analyze_user_behavior(self, behavior_data: dict[str, Any]) -> dict[str, Any]:
         """分析用户行为"""
         return {
             "interaction_frequency": behavior_data.get("interaction_count", 0),
@@ -562,7 +559,7 @@ class PersonalizedExperienceService:
             "confidence": 0.7  # 简化的置信度计算
         }
     
-    def _generate_adaptations(self, user_profile: UserProfile, behavior_analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_adaptations(self, user_profile: UserProfile, behavior_analysis: dict[str, Any]) -> list[dict[str, Any]]:
         """生成适应性调整"""
         adaptations = []
         
@@ -584,7 +581,7 @@ class PersonalizedExperienceService:
         
         return adaptations
     
-    def _apply_adaptation(self, user_profile: UserProfile, adaptation: Dict[str, Any]):
+    def _apply_adaptation(self, user_profile: UserProfile, adaptation: dict[str, Any]):
         """应用适应性调整"""
         adaptation_type = adaptation["type"]
         action = adaptation["action"]
@@ -598,7 +595,7 @@ class PersonalizedExperienceService:
         elif adaptation_type == "interface_complexity" and action == "simplify":
             user_profile.preferences["interface_complexity"] = "simple"
     
-    def _analyze_usage_patterns(self, user_profile: UserProfile) -> Dict[str, Any]:
+    def _analyze_usage_patterns(self, user_profile: UserProfile) -> dict[str, Any]:
         """分析使用模式"""
         if not user_profile.interaction_history:
             return {"pattern": "insufficient_data"}
@@ -614,7 +611,7 @@ class PersonalizedExperienceService:
             "most_used_features": ["customization", "personalization"]  # 简化实现
         }
     
-    def _analyze_preference_evolution(self, user_profile: UserProfile) -> Dict[str, Any]:
+    def _analyze_preference_evolution(self, user_profile: UserProfile) -> dict[str, Any]:
         """分析偏好演化"""
         return {
             "preference_stability": "stable",  # 简化实现
@@ -622,7 +619,7 @@ class PersonalizedExperienceService:
             "evolution_trend": "consistent"
         }
     
-    def _analyze_personalization_effectiveness(self, user_profile: UserProfile) -> Dict[str, Any]:
+    def _analyze_personalization_effectiveness(self, user_profile: UserProfile) -> dict[str, Any]:
         """分析个性化效果"""
         return {
             "effectiveness_score": 0.8,  # 简化实现
@@ -630,7 +627,7 @@ class PersonalizedExperienceService:
             "adaptation_success_rate": 0.9
         }
     
-    def _generate_improvement_recommendations(self, user_profile: UserProfile) -> List[str]:
+    def _generate_improvement_recommendations(self, user_profile: UserProfile) -> list[str]:
         """生成改进推荐"""
         recommendations = []
         
@@ -645,7 +642,7 @@ class PersonalizedExperienceService:
         
         return recommendations
     
-    def _generate_overall_insights(self, user_profile: UserProfile, analytics: Dict[str, Any]) -> List[str]:
+    def _generate_overall_insights(self, user_profile: UserProfile, analytics: dict[str, Any]) -> list[str]:
         """生成总体洞察"""
         insights = []
         
@@ -700,7 +697,7 @@ class PersonalizedExperienceService:
         
         return min(1.0, base_score + level_bonus + preference_bonus + history_bonus)
     
-    def _get_interface_config_for_profile(self, user_profile: UserProfile) -> Dict[str, Any]:
+    def _get_interface_config_for_profile(self, user_profile: UserProfile) -> dict[str, Any]:
         """为档案获取界面配置"""
         return {
             "layout": user_profile.preferences.get("layout", "standard"),
@@ -708,7 +705,7 @@ class PersonalizedExperienceService:
             "complexity": user_profile.preferences.get("interface_complexity", "standard")
         }
     
-    def _get_content_config_for_profile(self, user_profile: UserProfile) -> Dict[str, Any]:
+    def _get_content_config_for_profile(self, user_profile: UserProfile) -> dict[str, Any]:
         """为档案获取内容配置"""
         return {
             "format": user_profile.preferences.get("content_format", "mixed"),

@@ -1,64 +1,65 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: Claude Code
 @File: v0_3_5_critical_review_api.py
 @Description: FastAPI integration for V0.3.5 Critical Review Workflow
 """
 
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
-from fastapi.responses import HTMLResponse, FileResponse
-from typing import Dict, List, Optional, Any
-from datetime import datetime
-import json
 import asyncio
+from datetime import datetime
+from typing import Any, Optional
+
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
+
+from src.core_services.automated_report_generator import (
+    AutomatedReportGenerator,
+    ReportFormat,
+    ReportRequest,
+    ReportType,
+)
+from src.core_services.collaborative_review_environment import CollaborativeReviewEnvironment
+from src.core_services.conflict_resolution_system import ConflictResolutionSystem
+from src.core_services.multidimensional_assessment_engine import MultidimensionalAssessmentEngine
+from src.core_services.review_analytics import ReviewAnalytics
 
 # Import V0.3.5 components
 from src.core_services.smart_reviewer_allocator import SmartReviewerAllocator
-from src.core_services.multidimensional_assessment_engine import MultidimensionalAssessmentEngine
-from src.core_services.collaborative_review_environment import CollaborativeReviewEnvironment
-from src.core_services.conflict_resolution_system import ConflictResolutionSystem
-from src.core_services.review_analytics import ReviewAnalytics
-from src.core_services.automated_report_generator import (
-    AutomatedReportGenerator, 
-    ReportRequest, 
-    ReportType, 
-    ReportFormat
-)
+
 
 # Pydantic models for API
 class ReviewerSelectionRequest(BaseModel):
     content_type: str
-    content_tags: List[str]
+    content_tags: list[str]
     required_count: int
-    context: Optional[Dict[str, Any]] = None
+    context: Optional[dict[str, Any]] = None
 
 class AssessmentRequest(BaseModel):
     content: str
     content_type: str
     assessor_id: str
-    context: Optional[Dict[str, Any]] = None
+    context: Optional[dict[str, Any]] = None
 
 class SessionCreationRequest(BaseModel):
     session_name: str
-    participants: List[str]
+    participants: list[str]
     content_type: str
     initial_content: Optional[str] = None
-    settings: Optional[Dict[str, Any]] = None
+    settings: Optional[dict[str, Any]] = None
 
 class CommentRequest(BaseModel):
     session_id: str
     user_id: str
     content: str
     parent_comment_id: Optional[str] = None
-    position: Optional[Dict[str, Any]] = None
+    position: Optional[dict[str, Any]] = None
 
 class ReportGenerationRequest(BaseModel):
     report_type: str
     report_format: str
     template_id: Optional[str] = None
-    data_sources: Dict[str, Any]
-    parameters: Optional[Dict[str, Any]] = None
+    data_sources: dict[str, Any]
+    parameters: Optional[dict[str, Any]] = None
     priority: str = "normal"
 
 # Initialize components
@@ -91,7 +92,7 @@ async def shutdown_event():
 
 # === Smart Reviewer Allocator Endpoints ===
 
-@router.post("/reviewers/select", response_model=Dict[str, Any])
+@router.post("/reviewers/select", response_model=dict[str, Any])
 async def select_reviewers(request: ReviewerSelectionRequest):
     """Select optimal reviewers for content"""
     try:
@@ -110,7 +111,7 @@ async def select_reviewers(request: ReviewerSelectionRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/reviewers/pool", response_model=Dict[str, Any])
+@router.get("/reviewers/pool", response_model=dict[str, Any])
 async def get_reviewer_pool():
     """Get current reviewer pool"""
     try:
@@ -122,8 +123,8 @@ async def get_reviewer_pool():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/reviewers/add", response_model=Dict[str, Any])
-async def add_reviewer(reviewer_id: str, reviewer_data: Dict[str, Any]):
+@router.post("/reviewers/add", response_model=dict[str, Any])
+async def add_reviewer(reviewer_id: str, reviewer_data: dict[str, Any]):
     """Add a new reviewer to the pool"""
     try:
         result = allocator.add_reviewer(reviewer_id, reviewer_data)
@@ -137,7 +138,7 @@ async def add_reviewer(reviewer_id: str, reviewer_data: Dict[str, Any]):
 
 # === Multidimensional Assessment Engine Endpoints ===
 
-@router.post("/assessment/assess", response_model=Dict[str, Any])
+@router.post("/assessment/assess", response_model=dict[str, Any])
 async def assess_content(request: AssessmentRequest):
     """Assess content using multidimensional criteria"""
     try:
@@ -152,7 +153,7 @@ async def assess_content(request: AssessmentRequest):
             raise HTTPException(status_code=400, detail=result['error'])
             
         # Record assessment metric
-        from src.core_services.review_analytics import ReviewMetric, MetricType, AnalysisScope
+        from src.core_services.review_analytics import AnalysisScope, MetricType, ReviewMetric
         
         metric = ReviewMetric(
             metric_id=f"assessment_{result['assessment_id']}",
@@ -175,8 +176,8 @@ async def assess_content(request: AssessmentRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/assessment/batch", response_model=List[Dict[str, Any]])
-async def batch_assess_content(requests: List[AssessmentRequest]):
+@router.post("/assessment/batch", response_model=list[dict[str, Any]])
+async def batch_assess_content(requests: list[AssessmentRequest]):
     """Batch assess multiple content items"""
     try:
         # Convert to engine format
@@ -196,7 +197,7 @@ async def batch_assess_content(requests: List[AssessmentRequest]):
         if successful_results:
             avg_score = sum(r['overall_score'] for r in successful_results) / len(successful_results)
             
-            from src.core_services.review_analytics import ReviewMetric, MetricType, AnalysisScope
+            from src.core_services.review_analytics import AnalysisScope, MetricType, ReviewMetric
             
             metric = ReviewMetric(
                 metric_id=f"batch_assessment_{datetime.now().isoformat()}",
@@ -218,7 +219,7 @@ async def batch_assess_content(requests: List[AssessmentRequest]):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/assessment/criteria/{content_type}", response_model=Dict[str, Any])
+@router.get("/assessment/criteria/{content_type}", response_model=dict[str, Any])
 async def get_assessment_criteria(content_type: str):
     """Get assessment criteria for content type"""
     try:
@@ -233,7 +234,7 @@ async def get_assessment_criteria(content_type: str):
 
 # === Collaborative Review Environment Endpoints ===
 
-@router.post("/sessions/create", response_model=Dict[str, Any])
+@router.post("/sessions/create", response_model=dict[str, Any])
 async def create_review_session(request: SessionCreationRequest):
     """Create a new collaborative review session"""
     try:
@@ -249,7 +250,7 @@ async def create_review_session(request: SessionCreationRequest):
             raise HTTPException(status_code=400, detail=result['error'])
             
         # Record session creation metric
-        from src.core_services.review_analytics import ReviewMetric, MetricType, AnalysisScope
+        from src.core_services.review_analytics import AnalysisScope, MetricType, ReviewMetric
         
         metric = ReviewMetric(
             metric_id=f"session_{result['session_id']}",
@@ -272,7 +273,7 @@ async def create_review_session(request: SessionCreationRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/sessions/{session_id}", response_model=Dict[str, Any])
+@router.get("/sessions/{session_id}", response_model=dict[str, Any])
 async def get_session_info(session_id: str):
     """Get session information"""
     try:
@@ -289,7 +290,7 @@ async def get_session_info(session_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/sessions/{session_id}/join", response_model=Dict[str, Any])
+@router.post("/sessions/{session_id}/join", response_model=dict[str, Any])
 async def join_session(session_id: str, user_id: str):
     """Join a review session"""
     try:
@@ -303,7 +304,7 @@ async def join_session(session_id: str, user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/sessions/{session_id}/leave", response_model=Dict[str, Any])
+@router.post("/sessions/{session_id}/leave", response_model=dict[str, Any])
 async def leave_session(session_id: str, user_id: str):
     """Leave a review session"""
     try:
@@ -317,7 +318,7 @@ async def leave_session(session_id: str, user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/sessions/comments", response_model=Dict[str, Any])
+@router.post("/sessions/comments", response_model=dict[str, Any])
 async def add_comment(request: CommentRequest):
     """Add a comment to a review session"""
     try:
@@ -333,7 +334,7 @@ async def add_comment(request: CommentRequest):
             raise HTTPException(status_code=400, detail=result['error'])
             
         # Record comment metric
-        from src.core_services.review_analytics import ReviewMetric, MetricType, AnalysisScope
+        from src.core_services.review_analytics import AnalysisScope, MetricType, ReviewMetric
         
         metric = ReviewMetric(
             metric_id=f"comment_{result['comment_id']}",
@@ -356,7 +357,7 @@ async def add_comment(request: CommentRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/sessions/{session_id}/comments", response_model=List[Dict[str, Any]])
+@router.get("/sessions/{session_id}/comments", response_model=list[dict[str, Any]])
 async def get_session_comments(session_id: str):
     """Get all comments for a session"""
     try:
@@ -367,7 +368,7 @@ async def get_session_comments(session_id: str):
 
 # === Conflict Resolution System Endpoints ===
 
-@router.get("/conflicts/system-stats", response_model=Dict[str, Any])
+@router.get("/conflicts/system-stats", response_model=dict[str, Any])
 async def get_conflict_system_stats():
     """Get conflict resolution system statistics"""
     try:
@@ -375,7 +376,7 @@ async def get_conflict_system_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/conflicts/{conflict_id}/status", response_model=Dict[str, Any])
+@router.get("/conflicts/{conflict_id}/status", response_model=dict[str, Any])
 async def get_conflict_status(conflict_id: str):
     """Get conflict resolution status"""
     try:
@@ -384,7 +385,7 @@ async def get_conflict_status(conflict_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/conflicts/{conflict_id}/resolve", response_model=Dict[str, Any])
+@router.post("/conflicts/{conflict_id}/resolve", response_model=dict[str, Any])
 async def resolve_conflict(conflict_id: str, strategy: Optional[str] = None):
     """Manually resolve a conflict"""
     try:
@@ -413,7 +414,7 @@ async def resolve_conflict(conflict_id: str, strategy: Optional[str] = None):
 
 # === Review Analytics Endpoints ===
 
-@router.get("/analytics/system-stats", response_model=Dict[str, Any])
+@router.get("/analytics/system-stats", response_model=dict[str, Any])
 async def get_analytics_system_stats():
     """Get review analytics system statistics"""
     try:
@@ -421,7 +422,7 @@ async def get_analytics_system_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/analytics/metrics/{scope}/{scope_id}", response_model=List[Dict[str, Any]])
+@router.get("/analytics/metrics/{scope}/{scope_id}", response_model=list[dict[str, Any]])
 async def get_scope_metrics(scope: str, scope_id: str):
     """Get metrics for a specific scope"""
     try:
@@ -437,7 +438,7 @@ async def get_scope_metrics(scope: str, scope_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/analytics/insights/{scope}/{scope_id}", response_model=List[Dict[str, Any]])
+@router.get("/analytics/insights/{scope}/{scope_id}", response_model=list[dict[str, Any]])
 async def get_scope_insights(scope: str, scope_id: str):
     """Get insights for a specific scope"""
     try:
@@ -453,7 +454,7 @@ async def get_scope_insights(scope: str, scope_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/analytics/reports/generate", response_model=Dict[str, Any])
+@router.post("/analytics/reports/generate", response_model=dict[str, Any])
 async def generate_analytics_report(
     scope: str,
     scope_id: str,
@@ -483,7 +484,7 @@ async def generate_analytics_report(
 
 # === Automated Report Generator Endpoints ===
 
-@router.post("/reports/generate", response_model=Dict[str, Any])
+@router.post("/reports/generate", response_model=dict[str, Any])
 async def generate_report(request: ReportGenerationRequest):
     """Generate an automated report"""
     try:
@@ -517,7 +518,7 @@ async def generate_report(request: ReportGenerationRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/reports/status/{request_id}", response_model=Dict[str, Any])
+@router.get("/reports/status/{request_id}", response_model=dict[str, Any])
 async def get_report_status(request_id: str):
     """Get report generation status"""
     try:
@@ -542,7 +543,7 @@ async def download_report(report_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/reports/templates", response_model=List[Dict[str, Any]])
+@router.get("/reports/templates", response_model=list[dict[str, Any]])
 async def list_report_templates():
     """List available report templates"""
     try:
@@ -553,12 +554,12 @@ async def list_report_templates():
 
 # === Workflow Orchestration Endpoints ===
 
-@router.post("/workflow/start", response_model=Dict[str, Any])
+@router.post("/workflow/start", response_model=dict[str, Any])
 async def start_critical_review_workflow(
     content: str,
     content_type: str,
     required_reviewers: int = 3,
-    content_tags: Optional[List[str]] = None
+    content_tags: Optional[list[str]] = None
 ):
     """Start a complete critical review workflow"""
     try:
@@ -626,7 +627,7 @@ async def start_critical_review_workflow(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/workflow/status/{workflow_id}", response_model=Dict[str, Any])
+@router.get("/workflow/status/{workflow_id}", response_model=dict[str, Any])
 async def get_workflow_status(workflow_id: str):
     """Get workflow status (placeholder implementation)"""
     try:
@@ -642,7 +643,7 @@ async def get_workflow_status(workflow_id: str):
 
 # === Health Check and System Status ===
 
-@router.get("/health", response_model=Dict[str, Any])
+@router.get("/health", response_model=dict[str, Any])
 async def health_check():
     """Health check for all V0.3.5 components"""
     try:

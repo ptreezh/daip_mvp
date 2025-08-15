@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 17:00:00
+"""@Time    : 2025-07-24 17:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_enhanced_multi_perspective_workflow.py
 @Description:
     Integration tests for the enhanced Multi-perspective Synthesis Workflow.
 """
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 
 from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
 
@@ -15,7 +14,7 @@ from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWo
 class TestEnhancedMultiPerspectiveWorkflow:
     """Integration tests for the enhanced Multi-perspective Synthesis Workflow."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_services(self):
         """Create comprehensive mock services."""
         services = {
@@ -101,7 +100,7 @@ class TestEnhancedMultiPerspectiveWorkflow:
         
         return services
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_enhanced_workflow_complete_execution(self, mock_services):
         """Test complete execution of the enhanced workflow."""
         workflow = MultiPerspectiveSynthesisWorkflow("enhanced_test", {
@@ -150,7 +149,7 @@ class TestEnhancedMultiPerspectiveWorkflow:
         assert "conflicts" in viewpoint_analysis
         assert "consensus_areas" in viewpoint_analysis
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_enhanced_workflow_with_refinement(self, mock_services):
         """Test workflow execution with iterative refinement."""
         # Configure synthesis engine to return low-quality synthesis initially
@@ -206,7 +205,7 @@ class TestEnhancedMultiPerspectiveWorkflow:
         # Verify synthesis engine was called multiple times
         assert len(synthesis_calls) >= 2
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_enhanced_workflow_error_handling(self, mock_services):
         """Test error handling in the enhanced workflow."""
         # Configure services to fail at different stages
@@ -230,7 +229,7 @@ class TestEnhancedMultiPerspectiveWorkflow:
             assert result["success"] is False
             assert "Viewpoint collection failed" in result["error"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_enhanced_workflow_quality_assessment(self, mock_services):
         """Test quality assessment functionality."""
         workflow = MultiPerspectiveSynthesisWorkflow("quality_test", {
@@ -262,7 +261,7 @@ class TestEnhancedMultiPerspectiveWorkflow:
         assert "coherence_score" in quality_assessment
         assert "overall_score" in quality_assessment
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_enhanced_workflow_conflict_analysis(self, mock_services):
         """Test conflict analysis in viewpoint collection."""
         # Configure services to generate conflicting viewpoints

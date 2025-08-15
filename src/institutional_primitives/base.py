@@ -1,5 +1,4 @@
-"""
-Base classes for the Institutional Primitives System.
+"""Base classes for the Institutional Primitives System.
 
 This module defines the core abstractions for institutional primitives,
 including the base InstitutionalPrimitive class and execution context.
@@ -7,20 +6,19 @@ including the base InstitutionalPrimitive class and execution context.
 
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
 
 class ExecutionContext(BaseModel):
-    """
-    Context for primitive execution, containing workflow state and available services.
+    """Context for primitive execution, containing workflow state and available services.
     """
     execution_id: str
     workflow_id: str
     node_id: str
-    services: Dict[str, Any] = Field(default_factory=dict)  # Available DAIP-LIVE services
-    state: Dict[str, Any] = Field(default_factory=dict)  # Workflow state
+    services: dict[str, Any] = Field(default_factory=dict)  # Available DAIP-LIVE services
+    state: dict[str, Any] = Field(default_factory=dict)  # Workflow state
     parent_context: Optional["ExecutionContext"] = None
     start_time: datetime = Field(default_factory=datetime.now)
     end_time: Optional[datetime] = None
@@ -54,32 +52,30 @@ class ExecutionContext(BaseModel):
 
 
 class ExecutionStep(BaseModel):
-    """
-    Record of a single execution step in the workflow.
+    """Record of a single execution step in the workflow.
     """
     node_id: str
     node_type: str
-    inputs: Dict[str, Any]
-    outputs: Dict[str, Any]
+    inputs: dict[str, Any]
+    outputs: dict[str, Any]
     start_time: datetime
     end_time: datetime
     duration_ms: float
     status: str  # completed, failed
     error: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ExecutionTrace(BaseModel):
-    """
-    Complete trace of workflow execution, including all steps and metrics.
+    """Complete trace of workflow execution, including all steps and metrics.
     """
     execution_id: str
     workflow_id: str
-    steps: List[ExecutionStep] = Field(default_factory=list)
+    steps: list[ExecutionStep] = Field(default_factory=list)
     start_time: datetime
     end_time: Optional[datetime] = None
     status: str  # running, completed, failed, cancelled
-    metrics: Dict[str, Any] = Field(default_factory=dict)
+    metrics: dict[str, Any] = Field(default_factory=dict)
     
     def add_step(self, step: ExecutionStep) -> None:
         """Add an execution step to the trace."""
@@ -102,8 +98,7 @@ class ExecutionTrace(BaseModel):
 
 
 class InstitutionalPrimitive(ABC):
-    """
-    Base class for all institutional primitives.
+    """Base class for all institutional primitives.
     
     Institutional primitives are standardized workflow nodes that encapsulate
     atomic capabilities like fact extraction, opinion synthesis, and voting.
@@ -111,9 +106,8 @@ class InstitutionalPrimitive(ABC):
     within AI collaboration systems.
     """
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
-        """
-        Initialize the institutional primitive.
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
+        """Initialize the institutional primitive.
         
         Args:
             primitive_id: Unique identifier for this primitive instance
@@ -123,9 +117,8 @@ class InstitutionalPrimitive(ABC):
         self.config = config or {}
     
     @abstractmethod
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute the primitive with given inputs and context.
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        """Execute the primitive with given inputs and context.
         
         Args:
             inputs: Input data for the primitive
@@ -137,9 +130,8 @@ class InstitutionalPrimitive(ABC):
         pass
     
     @abstractmethod
-    def get_input_schema(self) -> Dict[str, Any]:
-        """
-        Return JSON schema for expected inputs.
+    def get_input_schema(self) -> dict[str, Any]:
+        """Return JSON schema for expected inputs.
         
         Returns:
             JSON schema describing the expected input format
@@ -147,18 +139,16 @@ class InstitutionalPrimitive(ABC):
         pass
     
     @abstractmethod
-    def get_output_schema(self) -> Dict[str, Any]:
-        """
-        Return JSON schema for produced outputs.
+    def get_output_schema(self) -> dict[str, Any]:
+        """Return JSON schema for produced outputs.
         
         Returns:
             JSON schema describing the produced output format
         """
         pass
     
-    def validate_inputs(self, inputs: Dict[str, Any]) -> bool:
-        """
-        Validate that the inputs match the expected schema.
+    def validate_inputs(self, inputs: dict[str, Any]) -> bool:
+        """Validate that the inputs match the expected schema.
         
         Args:
             inputs: Input data to validate
@@ -170,9 +160,8 @@ class InstitutionalPrimitive(ABC):
         # For now, we'll just return True
         return True
     
-    def validate_outputs(self, outputs: Dict[str, Any]) -> bool:
-        """
-        Validate that the outputs match the expected schema.
+    def validate_outputs(self, outputs: dict[str, Any]) -> bool:
+        """Validate that the outputs match the expected schema.
         
         Args:
             outputs: Output data to validate
@@ -184,9 +173,8 @@ class InstitutionalPrimitive(ABC):
         # For now, we'll just return True
         return True
     
-    def get_metadata(self) -> Dict[str, Any]:
-        """
-        Get metadata about this primitive.
+    def get_metadata(self) -> dict[str, Any]:
+        """Get metadata about this primitive.
         
         Returns:
             Dictionary containing metadata about this primitive
@@ -201,21 +189,19 @@ class InstitutionalPrimitive(ABC):
 
 
 class PrimitiveInfo(BaseModel):
-    """
-    Information about a registered primitive type.
+    """Information about a registered primitive type.
     """
     type: str
     name: str
     description: str
-    input_schema: Dict[str, Any]
-    output_schema: Dict[str, Any]
+    input_schema: dict[str, Any]
+    output_schema: dict[str, Any]
     version: str
 
 
 class ValidationResult(BaseModel):
-    """
-    Result of validating a primitive definition.
+    """Result of validating a primitive definition.
     """
     is_valid: bool
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)

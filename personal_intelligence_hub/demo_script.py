@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - 演示脚本
+"""Personal Intelligence Hub - 演示脚本
 
 展示Personal Intelligence Hub的所有功能和技术亮点
 """
@@ -14,11 +12,10 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService
-from personal_intelligence_hub.services.backend_integration import get_backend_service
+
 from personal_intelligence_hub.components.transparency_monitor import TransparencyMonitor
-from personal_intelligence_hub.models.chat_models import ChatMessage, MessageType
-from datetime import datetime
+from personal_intelligence_hub.services.backend_integration import get_backend_service
+from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService
 
 
 class PersonalIntelligenceHubDemo:
@@ -232,7 +229,7 @@ class PersonalIntelligenceHubDemo:
             
             # 显示会话上下文
             context = self.assistant.get_conversation_context(self.session_id)
-            print(f"\n📊 会话状态:")
+            print("\n📊 会话状态:")
             print(f"   活跃代理: {context.get('active_agents', [])}")
             print(f"   消息历史: {len(context.get('message_history', []))} 条")
             

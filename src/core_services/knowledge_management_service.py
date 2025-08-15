@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 00:15:00
+"""@Time    : 2025-07-25 00:15:00
 @Author  : DAIP-LIVE Team
 @File    : knowledge_management_service.py
 @Description:
@@ -8,22 +6,19 @@
     components for complete knowledge lifecycle management.
 """
 import logging
-import asyncio
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from .enhanced_sskg_manager import EnhancedSSKGManager
-from .wiki_service import WikiService
+from .knowledge_conflict_resolver import KnowledgeConflictResolver
+from .knowledge_evolution_manager import EvolutionStrategy, KnowledgeEvolutionManager
 from .knowledge_persistence_service import KnowledgePersistenceService
 from .knowledge_retrieval_service import KnowledgeRetrievalService, SearchScope
-from .knowledge_evolution_manager import KnowledgeEvolutionManager, EvolutionStrategy
-from .workflow_knowledge_integrator import (
-    WorkflowKnowledgeIntegrator,
-    WorkflowIntegrationConfig
-)
-from .knowledge_conflict_resolver import KnowledgeConflictResolver
+from .wiki_service import WikiService
+from .workflow_knowledge_integrator import WorkflowIntegrationConfig, WorkflowKnowledgeIntegrator
 
 logger = logging.getLogger(__name__)
 
@@ -52,8 +47,7 @@ class KnowledgeManagementConfig(BaseModel):
 
 
 class KnowledgeManagementService:
-    """
-    Comprehensive Knowledge Management Service.
+    """Comprehensive Knowledge Management Service.
     
     This service provides a unified interface for all knowledge management
     operations, implementing the complete requirements for task 10:
@@ -71,8 +65,7 @@ class KnowledgeManagementService:
         wiki_service: WikiService,
         config: KnowledgeManagementConfig = None
     ):
-        """
-        Initialize the knowledge management service.
+        """Initialize the knowledge management service.
         
         Args:
             sskg_manager: Enhanced SSKG manager for knowledge storage
@@ -121,7 +114,7 @@ class KnowledgeManagementService:
         self._configure_services()
         
         # Callback registry
-        self.knowledge_callbacks: List[Callable[[str, Dict[str, Any]], None]] = []
+        self.knowledge_callbacks: list[Callable[[str, dict[str, Any]], None]] = []
         
         logger.info("KnowledgeManagementService initialized")
     
@@ -157,11 +150,10 @@ class KnowledgeManagementService:
     
     async def integrate_critical_review_workflow(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
-    ) -> Dict[str, Any]:
-        """
-        Integrate Critical Review workflow with knowledge management.
+    ) -> dict[str, Any]:
+        """Integrate Critical Review workflow with knowledge management.
         
         Args:
             workflow_result: Result from Critical Review workflow
@@ -187,11 +179,10 @@ class KnowledgeManagementService:
     
     async def integrate_multi_perspective_workflow(
         self,
-        workflow_result: Dict[str, Any],
+        workflow_result: dict[str, Any],
         execution_id: str
-    ) -> Dict[str, Any]:
-        """
-        Integrate Multi-perspective Synthesis workflow with knowledge management.
+    ) -> dict[str, Any]:
+        """Integrate Multi-perspective Synthesis workflow with knowledge management.
         
         Args:
             workflow_result: Result from Multi-perspective Synthesis workflow
@@ -224,10 +215,9 @@ class KnowledgeManagementService:
         min_confidence: float = None,
         limit: int = 10,
         include_related: bool = True,
-        expertise_domains: List[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Search for knowledge across all persisted content.
+        expertise_domains: list[str] = None
+    ) -> dict[str, Any]:
+        """Search for knowledge across all persisted content.
         
         Args:
             query: Search query
@@ -278,12 +268,11 @@ class KnowledgeManagementService:
     
     async def get_cross_session_knowledge(
         self,
-        session_context: Dict[str, Any],
+        session_context: dict[str, Any],
         time_window_days: int = 30,
         min_relevance: float = 0.6
-    ) -> Dict[str, Any]:
-        """
-        Get relevant knowledge from previous sessions.
+    ) -> dict[str, Any]:
+        """Get relevant knowledge from previous sessions.
         
         Args:
             session_context: Context of the current session
@@ -301,9 +290,8 @@ class KnowledgeManagementService:
     
     # Knowledge Quality and Evolution Methods
     
-    async def assess_knowledge_quality(self, node_id: str) -> Dict[str, Any]:
-        """
-        Assess the quality of a knowledge node.
+    async def assess_knowledge_quality(self, node_id: str) -> dict[str, Any]:
+        """Assess the quality of a knowledge node.
         
         Args:
             node_id: ID of the knowledge node
@@ -324,9 +312,8 @@ class KnowledgeManagementService:
             "metadata": assessment.metadata
         }
     
-    async def run_knowledge_evolution_cycle(self) -> Dict[str, Any]:
-        """
-        Run a knowledge evolution cycle.
+    async def run_knowledge_evolution_cycle(self) -> dict[str, Any]:
+        """Run a knowledge evolution cycle.
         
         Returns:
             Evolution cycle results
@@ -345,10 +332,9 @@ class KnowledgeManagementService:
         node_id: str,
         reason: str,
         new_content: Optional[str] = None,
-        metadata_updates: Dict[str, Any] = None
+        metadata_updates: dict[str, Any] = None
     ) -> Optional[str]:
-        """
-        Manually evolve a knowledge node.
+        """Manually evolve a knowledge node.
         
         Args:
             node_id: ID of the node to evolve
@@ -380,9 +366,8 @@ class KnowledgeManagementService:
     
     # Statistics and Monitoring Methods
     
-    def get_comprehensive_statistics(self) -> Dict[str, Any]:
-        """
-        Get comprehensive statistics about knowledge management.
+    def get_comprehensive_statistics(self) -> dict[str, Any]:
+        """Get comprehensive statistics about knowledge management.
         
         Returns:
             Complete statistics from all components
@@ -418,8 +403,7 @@ class KnowledgeManagementService:
     # Configuration Methods
     
     def update_configuration(self, **config_updates) -> None:
-        """
-        Update knowledge management configuration.
+        """Update knowledge management configuration.
         
         Args:
             **config_updates: Configuration parameters to update
@@ -438,14 +422,14 @@ class KnowledgeManagementService:
     
     def add_knowledge_callback(
         self,
-        callback: Callable[[str, Dict[str, Any]], None]
+        callback: Callable[[str, dict[str, Any]], None]
     ) -> None:
         """Add a callback for knowledge events."""
         self.knowledge_callbacks.append(callback)
     
     def remove_knowledge_callback(
         self,
-        callback: Callable[[str, Dict[str, Any]], None]
+        callback: Callable[[str, dict[str, Any]], None]
     ) -> None:
         """Remove a knowledge callback."""
         try:
@@ -453,7 +437,7 @@ class KnowledgeManagementService:
         except ValueError:
             pass
     
-    def _notify_callbacks(self, event_type: str, event_data: Dict[str, Any]) -> None:
+    def _notify_callbacks(self, event_type: str, event_data: dict[str, Any]) -> None:
         """Notify all registered callbacks about knowledge events."""
         for callback in self.knowledge_callbacks:
             try:
@@ -463,9 +447,8 @@ class KnowledgeManagementService:
     
     # Utility Methods
     
-    async def health_check(self) -> Dict[str, Any]:
-        """
-        Perform a health check of all knowledge management components.
+    async def health_check(self) -> dict[str, Any]:
+        """Perform a health check of all knowledge management components.
         
         Returns:
             Health status of all components

@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-交互式演示体验程序
+"""交互式演示体验程序
 让用户真正参与演示过程
 """
 
-import sys
 import asyncio
+import sys
+
 sys.path.append('.')
 
-from src.real_demo_system.interactive_demo_flow import InteractiveDemoFlow
 from src.real_demo_system.demo_types import DemoScenarioType
+from src.real_demo_system.interactive_demo_flow import InteractiveDemoFlow
 
 
 class InteractiveDemoExperience:
@@ -130,7 +129,7 @@ class InteractiveDemoExperience:
             return
         
         self.current_demo_id = start_result['demo_id']
-        print(f"✅ 演示启动成功!")
+        print("✅ 演示启动成功!")
         print(f"   演示ID: {start_result['demo_id']}")
         print(f"   总步骤数: {start_result['total_steps']}")
         
@@ -145,7 +144,7 @@ class InteractiveDemoExperience:
                 print(f"⏱️ 已运行时间: {status['elapsed_time']:.1f}秒")
             
             # 询问用户是否继续
-            print(f"\n🎯 准备执行下一步...")
+            print("\n🎯 准备执行下一步...")
             next_step = self.demo_flow._get_next_step_info()
             if next_step:
                 print(f"下一步: {next_step['step_name']}")
@@ -230,7 +229,7 @@ class InteractiveDemoExperience:
         self.print_section("第4步: 演示结果分析")
         
         result = self.demo_result
-        print(f"🎉 演示成功完成!")
+        print("🎉 演示成功完成!")
         print(f"   总时长: {result['total_duration']:.1f}秒")
         print(f"   完成步骤: {result['completed_steps']}")
         print(f"   摘要: {result['summary']}")
@@ -239,35 +238,35 @@ class InteractiveDemoExperience:
         if 'analysis_report' in result:
             report = result['analysis_report']
             
-            print(f"\n📊 质量评估:")
+            print("\n📊 质量评估:")
             quality = report.get('quality_assessment', {})
             print(f"   总体质量分数: {quality.get('overall_quality_score', 0):.2f}")
             print(f"   教育价值: {quality.get('educational_value', 0):.2f}")
             print(f"   技术演示: {quality.get('technical_demonstration', 0):.2f}")
             print(f"   用户体验: {quality.get('user_experience', 0):.2f}")
             
-            print(f"\n📈 执行统计:")
+            print("\n📈 执行统计:")
             stats = report.get('execution_statistics', {})
             print(f"   成功率: {stats.get('success_rate', 0):.2%}")
             print(f"   平均步骤时长: {stats.get('avg_step_duration', 0):.1f}秒")
             
-            print(f"\n👥 用户参与:")
+            print("\n👥 用户参与:")
             engagement = report.get('user_engagement', {})
             print(f"   交互次数: {engagement.get('total_interactions', 0)}")
             print(f"   参与度分数: {engagement.get('engagement_score', 0):.2f}")
             
-            print(f"\n💡 洞察:")
+            print("\n💡 洞察:")
             insights = report.get('insights', [])
             for insight in insights:
                 print(f"   • {insight}")
             
-            print(f"\n🔧 建议:")
+            print("\n🔧 建议:")
             recommendations = report.get('recommendations', [])
             for rec in recommendations:
                 print(f"   • {rec}")
         
         # 查看历史
-        print(f"\n📚 演示历史:")
+        print("\n📚 演示历史:")
         history = self.demo_flow.get_demo_history()
         for i, record in enumerate(history, 1):
             print(f"   {i}. {record['scenario_name']}")
@@ -275,7 +274,7 @@ class InteractiveDemoExperience:
             print(f"      时长: {record['duration']:.1f}秒")
             print(f"      质量分数: {record['quality_score']:.2f}")
         
-        print(f"\n🎉 感谢你参与 Personal Intelligence Hub 演示!")
+        print("\n🎉 感谢你参与 Personal Intelligence Hub 演示!")
         print("这展示了AI多角色协作决策的真实能力")
 
 

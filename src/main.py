@@ -7,7 +7,6 @@
 """
 
 import logging
-import os
 import sys
 from pathlib import Path
 
@@ -18,28 +17,26 @@ from fastapi.responses import JSONResponse
 # Add project root to the Python path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.config import settings
-from src.protocols.consensus_strategies import (
-    ConsensusStrategyFactory,
-    SimpleMajorityVoteStrategy,
-)
-from src.api import dependencies
+from src.api import dependencies, scenario_api, user_profile_api
 from src.api.routers import (
     advanced,
     chat,
     collaboration,
+    ddd,
     documents,
+    forum,
     knowledge_management_api,
     protocols,
     roles,
     tools,
     virtual_team,
-    ddd,
-    forum,
 )
-from src.api import user_profile_api
-from src.api import scenario_api
 from src.app_state import AppState
+from src.config import settings
+from src.protocols.consensus_strategies import (
+    ConsensusStrategyFactory,
+    SimpleMajorityVoteStrategy,
+)
 
 logging.basicConfig(level=settings.log_level)
 logger = logging.getLogger(__name__)
@@ -64,8 +61,7 @@ app.add_middleware(
 
 @app.exception_handler(ValueError)
 async def value_error_exception_handler(request: Request, exc: ValueError):
-    """
-    Handles validation errors (e.g., from service layer checks).
+    """Handles validation errors (e.g., from service layer checks).
     Returns a 400 Bad Request response.
     """
     logger.warning(f"Validation error for request {request.url.path}: {exc}")
@@ -77,8 +73,7 @@ async def value_error_exception_handler(request: Request, exc: ValueError):
 
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
-    """
-    Handles any other unhandled exceptions.
+    """Handles any other unhandled exceptions.
     Returns a 500 Internal Server Error to prevent leaking details.
     """
     logger.error(f"Unhandled exception for request {request.url.path}: {exc}", exc_info=True)
@@ -145,8 +140,8 @@ async def detailed_status():
     Returns:
         dict: Detailed status information about all system components
     """
-    from datetime import datetime
     import os
+    from datetime import datetime
     
     status_info = {
         "timestamp": datetime.now().isoformat(),

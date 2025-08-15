@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.2.3 学术研究场景简化测试
+"""V0.2.3 学术研究场景简化测试
 
 专注于核心功能测试，避免复杂的依赖问题
 """
 
 import asyncio
 import logging
-from datetime import datetime
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)

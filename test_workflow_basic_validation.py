@@ -1,26 +1,19 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-工作流引擎基本功能验证
+"""工作流引擎基本功能验证
 专注于验证工作流的初始化、配置和基本结构
 """
 
-import sys
-import os
 import asyncio
 import logging
-import tempfile
-import shutil
-from pathlib import Path
-from datetime import datetime
+import sys
 
 # 添加src目录到Python路径
 sys.path.append('src')
 
-from src.workflows.critical_review_workflow import CriticalReviewWorkflow
-from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
 from src.core_services.role_manager import RoleManager
 from src.institutional_primitives.base import ExecutionContext
+from src.workflows.critical_review_workflow import CriticalReviewWorkflow
+from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -33,7 +26,7 @@ def test_workflow_initialization():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 测试CriticalReviewWorkflow初始化...")
+        print("\n🔧 测试CriticalReviewWorkflow初始化...")
         
         # 测试批判性审查工作流初始化
         critical_workflow = CriticalReviewWorkflow(
@@ -55,7 +48,7 @@ def test_workflow_initialization():
             }
         )
         
-        print(f"   ✅ CriticalReviewWorkflow初始化成功")
+        print("   ✅ CriticalReviewWorkflow初始化成功")
         print(f"      工作流ID: {critical_workflow.workflow_id}")
         print(f"      配置项数量: {len(critical_workflow.config)}")
         
@@ -75,7 +68,7 @@ def test_workflow_initialization():
             else:
                 print(f"      {node_name}: ❌ 未初始化")
         
-        print(f"\n🔧 测试MultiPerspectiveSynthesisWorkflow初始化...")
+        print("\n🔧 测试MultiPerspectiveSynthesisWorkflow初始化...")
         
         # 测试多视角工作流初始化
         multi_workflow = MultiPerspectiveSynthesisWorkflow(
@@ -97,7 +90,7 @@ def test_workflow_initialization():
             }
         )
         
-        print(f"   ✅ MultiPerspectiveSynthesisWorkflow初始化成功")
+        print("   ✅ MultiPerspectiveSynthesisWorkflow初始化成功")
         print(f"      工作流ID: {multi_workflow.workflow_id}")
         print(f"      配置项数量: {len(multi_workflow.config)}")
         
@@ -131,7 +124,7 @@ def test_execution_context_creation():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 创建执行上下文...")
+        print("\n🔧 创建执行上下文...")
         
         # 创建角色管理器
         role_manager = RoleManager()
@@ -153,7 +146,7 @@ def test_execution_context_creation():
             state={"test_key": "test_value"}
         )
         
-        print(f"   ✅ 执行上下文创建成功")
+        print("   ✅ 执行上下文创建成功")
         print(f"      执行ID: {context.execution_id}")
         print(f"      工作流ID: {context.workflow_id}")
         print(f"      节点ID: {context.node_id}")
@@ -164,14 +157,14 @@ def test_execution_context_creation():
         # 测试子上下文创建
         child_context = context.create_child_context("child_node")
         
-        print(f"\n   ✅ 子上下文创建成功")
+        print("\n   ✅ 子上下文创建成功")
         print(f"      子节点ID: {child_context.node_id}")
         print(f"      父上下文: {child_context.parent_context is not None}")
         print(f"      继承服务: {len(child_context.services)}")
         
         # 测试状态管理
         context.mark_started()
-        print(f"\n   ✅ 状态管理测试")
+        print("\n   ✅ 状态管理测试")
         print(f"      启动后状态: {context.status}")
         
         context.mark_completed()
@@ -193,18 +186,18 @@ def test_role_manager_integration():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 初始化角色管理器...")
+        print("\n🔧 初始化角色管理器...")
         
         role_manager = RoleManager()
         
-        print(f"   ✅ 角色管理器初始化成功")
+        print("   ✅ 角色管理器初始化成功")
         print(f"      角色目录: {role_manager.roles_dir}")
         print(f"      加载角色数量: {len(role_manager.roles)}")
         
         # 测试获取特定角色
         test_roles = ["事实核查员", "逻辑分析师", "领域专家", "战略规划师"]
         
-        print(f"\n   🔍 测试角色获取...")
+        print("\n   🔍 测试角色获取...")
         for role_name in test_roles:
             role = role_manager.get_role(role_name)
             if role:
@@ -216,8 +209,8 @@ def test_role_manager_integration():
         # 测试角色推荐
         if hasattr(role_manager, 'recommend_roles'):
             recommended = role_manager.recommend_roles("AI伦理分析", max_roles=3)
-            print(f"\n   💡 角色推荐测试:")
-            print(f"      查询: AI伦理分析")
+            print("\n   💡 角色推荐测试:")
+            print("      查询: AI伦理分析")
             print(f"      推荐角色数: {len(recommended) if recommended else 0}")
             
             if recommended:
@@ -240,7 +233,7 @@ def test_workflow_configuration():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 测试配置合并和验证...")
+        print("\n🔧 测试配置合并和验证...")
         
         # 测试批判性审查工作流配置
         custom_config = {
@@ -260,7 +253,7 @@ def test_workflow_configuration():
             config=custom_config
         )
         
-        print(f"   ✅ 自定义配置应用成功")
+        print("   ✅ 自定义配置应用成功")
         print(f"      生成配置: {workflow.config.get('generation', {})}")
         print(f"      事实提取配置: {workflow.config.get('fact_extraction', {})}")
         
@@ -289,7 +282,7 @@ def test_workflow_configuration():
             config=multi_config
         )
         
-        print(f"\n   ✅ 多视角工作流配置成功")
+        print("\n   ✅ 多视角工作流配置成功")
         print(f"      任务分解配置: {multi_workflow.config.get('task_decomposition', {})}")
         print(f"      综合配置: {multi_workflow.config.get('enhanced_synthesis', {})}")
         
@@ -308,7 +301,7 @@ async def test_workflow_structure_validation():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 验证工作流执行结构...")
+        print("\n🔧 验证工作流执行结构...")
         
         # 创建工作流
         workflow = CriticalReviewWorkflow(
@@ -336,7 +329,7 @@ async def test_workflow_structure_validation():
                 print(f"   ❌ 方法 {method_name}: 不存在")
         
         # 测试节点连接性
-        print(f"\n   🔗 测试节点连接性...")
+        print("\n   🔗 测试节点连接性...")
         
         nodes = [
             workflow.generation_node,
@@ -358,7 +351,7 @@ async def test_workflow_structure_validation():
         print(f"   连接节点数: {connected_nodes}/{len(nodes)}")
         
         # 测试多视角工作流结构
-        print(f"\n   🔧 验证多视角工作流结构...")
+        print("\n   🔧 验证多视角工作流结构...")
         
         multi_workflow = MultiPerspectiveSynthesisWorkflow(
             workflow_id="test_multi_structure",

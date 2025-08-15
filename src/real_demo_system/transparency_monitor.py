@@ -1,5 +1,4 @@
-"""
-透明度监控系统
+"""透明度监控系统
 
 提供实时的LLM调用透明度监控，包括调用状态、参数、Token消耗、成本和响应时间的详细展示。
 """
@@ -7,12 +6,13 @@
 import asyncio
 import json
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Callable
-from dataclasses import dataclass, asdict
 from collections import defaultdict, deque
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from typing import Any
 
-from .real_llm_integrator import RealLLMIntegrator, LLMCallRecord
+from .real_llm_integrator import LLMCallRecord, RealLLMIntegrator
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +23,9 @@ class TransparencyEvent:
     event_id: str
     event_type: str  # call_started, call_completed, call_failed, metrics_updated
     timestamp: datetime
-    data: Dict[str, Any]
+    data: dict[str, Any]
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data['timestamp'] = self.timestamp.isoformat()
         return data
@@ -40,7 +40,7 @@ class RealTimeMetrics:
     success_rate_last_hour: float = 0.0
     total_cost_today: float = 0.0
     total_tokens_today: int = 0
-    provider_distribution: Dict[str, int] = None
+    provider_distribution: dict[str, int] = None
     
     def __post_init__(self):
         if self.provider_distribution is None:
@@ -48,24 +48,22 @@ class RealTimeMetrics:
 
 
 class TransparencyMonitor:
-    """
-    透明度监控系统
+    """透明度监控系统
     
     提供LLM调用的完整透明度监控，包括实时状态显示、性能指标跟踪、
     成本分析和调用验证功能。
     """
     
     def __init__(self, llm_integrator: RealLLMIntegrator):
-        """
-        初始化透明度监控器
+        """初始化透明度监控器
         
         Args:
             llm_integrator: LLM集成器实例
         """
         self.llm_integrator = llm_integrator
         self.events: deque = deque(maxlen=1000)  # 保留最近1000个事件
-        self.active_calls: Dict[str, Dict[str, Any]] = {}
-        self.subscribers: List[Callable] = []
+        self.active_calls: dict[str, dict[str, Any]] = {}
+        self.subscribers: list[Callable] = []
         self.real_time_metrics = RealTimeMetrics()
         
         # 启动监控任务
@@ -152,10 +150,9 @@ class TransparencyMonitor:
         provider: str,
         model: str,
         prompt: str,
-        parameters: Dict[str, Any]
+        parameters: dict[str, Any]
     ):
-        """
-        监控LLM调用开始
+        """监控LLM调用开始
         
         Args:
             call_id: 调用ID
@@ -187,8 +184,7 @@ class TransparencyMonitor:
         logger.info(f"Monitoring LLM call started: {call_id}")
     
     async def record_llm_call_completion(self, record: LLMCallRecord):
-        """
-        记录LLM调用完成
+        """记录LLM调用完成
         
         Args:
             record: 调用记录
@@ -214,7 +210,7 @@ class TransparencyMonitor:
         
         logger.info(f"LLM call completed: {record.call_id}, success: {record.success}")
     
-    async def _emit_event(self, event_type: str, data: Dict[str, Any]):
+    async def _emit_event(self, event_type: str, data: dict[str, Any]):
         """发送事件"""
         event = TransparencyEvent(
             event_id=f"{datetime.now().timestamp()}_{event_type}",
@@ -236,8 +232,7 @@ class TransparencyMonitor:
                 logger.error(f"Error notifying subscriber: {e}")
     
     def subscribe(self, callback: Callable):
-        """
-        订阅透明度事件
+        """订阅透明度事件
         
         Args:
             callback: 回调函数
@@ -251,7 +246,7 @@ class TransparencyMonitor:
             self.subscribers.remove(callback)
             logger.info(f"Subscriber removed, total: {len(self.subscribers)}")
     
-    def get_real_time_status(self) -> Dict[str, Any]:
+    def get_real_time_status(self) -> dict[str, Any]:
         """获取实时状态"""
         return {
             "timestamp": datetime.now().isoformat(),
@@ -270,9 +265,8 @@ class TransparencyMonitor:
             "recent_events_count": len(self.events)
         }
     
-    def get_call_transparency_report(self, call_id: str) -> Dict[str, Any]:
-        """
-        获取特定调用的透明度报告
+    def get_call_transparency_report(self, call_id: str) -> dict[str, Any]:
+        """获取特定调用的透明度报告
         
         Args:
             call_id: 调用ID
@@ -311,7 +305,7 @@ class TransparencyMonitor:
         }
     
     def _calculate_transparency_score(
-        self, record: LLMCallRecord, events: List[Dict[str, Any]]
+        self, record: LLMCallRecord, events: list[dict[str, Any]]
     ) -> float:
         """计算透明度分数"""
         score = 0.0
@@ -335,7 +329,7 @@ class TransparencyMonitor:
         
         return min(score, 100.0)
     
-    def get_performance_dashboard(self) -> Dict[str, Any]:
+    def get_performance_dashboard(self) -> dict[str, Any]:
         """获取性能仪表板数据"""
         now = datetime.now()
         
@@ -371,7 +365,7 @@ class TransparencyMonitor:
         
         return dashboard_data
     
-    def get_audit_summary(self) -> Dict[str, Any]:
+    def get_audit_summary(self) -> dict[str, Any]:
         """获取审计摘要"""
         total_records = len(self.llm_integrator.call_records)
         
@@ -404,9 +398,8 @@ class TransparencyMonitor:
             "transparency_metrics": asdict(self.real_time_metrics)
         }
     
-    async def generate_transparency_certificate(self, call_id: str) -> Dict[str, Any]:
-        """
-        生成透明度证书
+    async def generate_transparency_certificate(self, call_id: str) -> dict[str, Any]:
+        """生成透明度证书
         
         Args:
             call_id: 调用ID

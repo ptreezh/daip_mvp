@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-测试RoleManager真实角色加载功能
+"""测试RoleManager真实角色加载功能
 验证从roles/目录加载所有角色定义，确保角色认知差异和专业特征正确加载
 """
 
-import sys
-import os
-from pathlib import Path
-import json
 import logging
+import sys
 
 # 添加src目录到Python路径
 sys.path.append('src')
 
-from src.core_services.role_manager import RoleManager, Role
+from src.core_services.role_manager import RoleManager
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -73,7 +68,7 @@ def test_role_manager_loading():
         print(f"\n... 还有 {len(roles) - 10} 个角色未显示")
     
     # 显示统计信息
-    print(f"\n📊 角色类型统计:")
+    print("\n📊 角色类型统计:")
     for role_type, count in role_types.items():
         print(f"   {role_type}: {count} 个")
     
@@ -118,7 +113,7 @@ def test_specific_role_loading():
     
     # 分析认知差异
     if len(loaded_roles) >= 2:
-        print(f"\n🔍 认知差异分析:")
+        print("\n🔍 认知差异分析:")
         print("-" * 40)
         
         for i, role in enumerate(loaded_roles):
@@ -145,7 +140,7 @@ def test_specific_role_loading():
             if found_features:
                 print(f"   认知特征: {', '.join(found_features)}")
             else:
-                print(f"   认知特征: 通用型")
+                print("   认知特征: 通用型")
             
             # 分析专业领域
             if "能力" in role.__dict__ and role.capabilities:
@@ -170,7 +165,7 @@ def test_role_system_prompts():
     prompt_lengths = []
     unique_prompts = set()
     
-    print(f"\n📝 系统提示分析 (前5个角色):")
+    print("\n📝 系统提示分析 (前5个角色):")
     print("-" * 50)
     
     for i, role in enumerate(roles[:5]):
@@ -201,7 +196,7 @@ def test_role_system_prompts():
     avg_length = sum(prompt_lengths) / len(prompt_lengths) if prompt_lengths else 0
     uniqueness_ratio = len(unique_prompts) / len(roles) if roles else 0
     
-    print(f"\n📊 整体统计:")
+    print("\n📊 整体统计:")
     print(f"   平均提示长度: {avg_length:.0f} 字符")
     print(f"   提示唯一性: {uniqueness_ratio:.2%}")
     print(f"   总角色数量: {len(roles)}")

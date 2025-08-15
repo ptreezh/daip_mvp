@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证原始学术研究场景的功能
+"""验证原始学术研究场景的功能
 """
 
 import asyncio
 import sys
 import traceback
 from pathlib import Path
-from datetime import datetime
 
 # 添加项目根目录到路径
 project_root = Path(__file__).parent
@@ -32,10 +29,7 @@ async def validate_original_academic_scenario():
         print("\n1️⃣ 验证组件导入...")
         
         try:
-            from src.scenarios.academic_research_scenario import (
-                AcademicResearchScenario,
-                AcademicResearchConfig
-            )
+            from src.scenarios.academic_research_scenario import AcademicResearchConfig, AcademicResearchScenario
             print("   ✅ 原始组件导入成功")
             validation_results["imports"] = True
         except ImportError as e:

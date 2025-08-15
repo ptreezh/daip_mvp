@@ -1,19 +1,17 @@
-# -*- coding: utf-8 -*-
+"""Tests for Token Management Service
 """
-Tests for Token Management Service
-"""
+
 
 import pytest
-from datetime import datetime, timedelta
 
 from src.config import TokenManagementConfig
-from src.core_services.token_management_service import TokenManagementService, TokenUsage, ContextWindow
+from src.core_services.token_management_service import ContextWindow, TokenManagementService, TokenUsage
 
 
 class TestTokenManagementService:
     """Test cases for TokenManagementService."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def config(self):
         """Create a test configuration."""
         return TokenManagementConfig(
@@ -25,7 +23,7 @@ class TestTokenManagementService:
             compression_threshold=0.8
         )
     
-    @pytest.fixture
+    @pytest.fixture()
     def service(self, config):
         """Create a TokenManagementService instance."""
         return TokenManagementService(config)

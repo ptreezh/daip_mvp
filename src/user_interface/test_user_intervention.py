@@ -1,24 +1,20 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 19:30:00
+"""@Time    : 2025-07-24 19:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_user_intervention.py
 @Description:
     Tests for user intervention and customization functionality.
 """
 import asyncio
-import pytest
 import tempfile
-import json
 from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
 
+import pytest
 from rich.console import Console
 
-from .interactive_controller import InteractiveController
-from .parameter_manager import ParameterManager, ParameterDefinition, ParameterType
-from .workflow_steering import WorkflowSteering, SteeringAction, SteeringPoint
 from .configuration_manager import ConfigurationManager
+from .interactive_controller import InteractiveController
+from .parameter_manager import ParameterDefinition, ParameterManager, ParameterType
+from .workflow_steering import SteeringAction, WorkflowSteering
 
 
 class TestParameterManager:
@@ -442,7 +438,7 @@ class TestInteractiveController:
         assert history[0]["parameters"] == {"test": "value"}
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_integration_workflow():
     """Test integration of all components in a workflow scenario."""
     temp_dir = tempfile.mkdtemp()

@@ -1,5 +1,4 @@
-"""
-Intent Analysis Service for understanding user goals and motivations.
+"""Intent Analysis Service for understanding user goals and motivations.
 
 This service provides functionality for analyzing user input to understand goals,
 identify context requirements, predict conversation flow, and detect personalization
@@ -9,7 +8,7 @@ opportunities. It serves as a key component of the Human User Intelligence Layer
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -17,21 +16,19 @@ logger = logging.getLogger(__name__)
 
 
 class IntentAnalysis(BaseModel):
-    """
-    Represents the result of analyzing user intent.
+    """Represents the result of analyzing user intent.
     """
     user_input: str
     detected_intent: str
     confidence: float = Field(ge=0.0, le=1.0)
-    context_requirements: List[str] = Field(default_factory=list)
-    suggested_enhancements: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    context_requirements: list[str] = Field(default_factory=list)
+    suggested_enhancements: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
 class IntentAnalysisServiceInterface(ABC):
-    """
-    Abstract interface for intent analysis services.
+    """Abstract interface for intent analysis services.
     
     This interface defines the contract that all intent analysis services must implement.
     It provides methods for analyzing user intent, predicting user needs, and tracking
@@ -43,10 +40,9 @@ class IntentAnalysisServiceInterface(ABC):
         self, 
         user_input: str, 
         user_id: str, 
-        conversation_context: List[Dict[str, Any]]
+        conversation_context: list[dict[str, Any]]
     ) -> IntentAnalysis:
-        """
-        Analyze user intent and provide enhancement suggestions.
+        """Analyze user intent and provide enhancement suggestions.
         
         Args:
             user_input: The user's input text
@@ -63,9 +59,8 @@ class IntentAnalysisServiceInterface(ABC):
         self, 
         user_id: str, 
         current_context: str
-    ) -> List[str]:
-        """
-        Predict what the user might need based on their profile and context.
+    ) -> list[str]:
+        """Predict what the user might need based on their profile and context.
         
         Args:
             user_id: The ID of the user
@@ -83,8 +78,7 @@ class IntentAnalysisServiceInterface(ABC):
         intent: str, 
         confidence: float
     ) -> bool:
-        """
-        Track intent patterns for a user over time.
+        """Track intent patterns for a user over time.
         
         Args:
             user_id: The ID of the user
@@ -101,9 +95,8 @@ class IntentAnalysisServiceInterface(ABC):
         self, 
         user_id: str, 
         limit: int = 5
-    ) -> List[Tuple[str, float]]:
-        """
-        Get the most common intents for a user.
+    ) -> list[tuple[str, float]]:
+        """Get the most common intents for a user.
         
         Args:
             user_id: The ID of the user
@@ -116,8 +109,7 @@ class IntentAnalysisServiceInterface(ABC):
 
 
 class BasicIntentAnalysisService(IntentAnalysisServiceInterface):
-    """
-    Basic implementation of the IntentAnalysisService interface.
+    """Basic implementation of the IntentAnalysisService interface.
     
     This implementation provides simple intent analysis functionality without
     requiring advanced NLP capabilities. It serves as a placeholder that can
@@ -125,8 +117,7 @@ class BasicIntentAnalysisService(IntentAnalysisServiceInterface):
     """
     
     def __init__(self, user_profile_service, llm_interface=None):
-        """
-        Initialize the BasicIntentAnalysisService.
+        """Initialize the BasicIntentAnalysisService.
         
         Args:
             user_profile_service: The UserProfileService instance to use
@@ -140,10 +131,9 @@ class BasicIntentAnalysisService(IntentAnalysisServiceInterface):
         self, 
         user_input: str, 
         user_id: str, 
-        conversation_context: List[Dict[str, Any]]
+        conversation_context: list[dict[str, Any]]
     ) -> IntentAnalysis:
-        """
-        Analyze user intent using simple keyword matching.
+        """Analyze user intent using simple keyword matching.
         
         Args:
             user_input: The user's input text
@@ -216,9 +206,8 @@ class BasicIntentAnalysisService(IntentAnalysisServiceInterface):
         self, 
         user_id: str, 
         current_context: str
-    ) -> List[str]:
-        """
-        Predict user needs based on profile and context.
+    ) -> list[str]:
+        """Predict user needs based on profile and context.
         
         Args:
             user_id: The ID of the user
@@ -252,8 +241,7 @@ class BasicIntentAnalysisService(IntentAnalysisServiceInterface):
         intent: str, 
         confidence: float
     ) -> bool:
-        """
-        Track intent patterns using the user profile service.
+        """Track intent patterns using the user profile service.
         
         Args:
             user_id: The ID of the user
@@ -274,9 +262,8 @@ class BasicIntentAnalysisService(IntentAnalysisServiceInterface):
         self, 
         user_id: str, 
         limit: int = 5
-    ) -> List[Tuple[str, float]]:
-        """
-        Get common intents from the user profile.
+    ) -> list[tuple[str, float]]:
+        """Get common intents from the user profile.
         
         Args:
             user_id: The ID of the user

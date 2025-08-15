@@ -1,30 +1,20 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 17:00:00
+"""@Time    : 2025-07-24 17:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_multi_perspective_workflow_integration.py
 @Description:
     Integration tests for the complete Multi-perspective Synthesis Workflow.
 """
+from unittest.mock import AsyncMock, Mock
+
 import pytest
-import asyncio
-from datetime import datetime
-from unittest.mock import Mock, AsyncMock, patch
 
 from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
-from src.institutional_primitives.multi_perspective import (
-    TaskDecompositionNode,
-    ParallelExplorationNode,
-    ViewpointCollectionNode,
-    EnhancedSynthesisNode,
-    IterativeRefinementNode
-)
 
 
 class TestMultiPerspectiveWorkflowIntegration:
     """Integration tests for the complete Multi-perspective Synthesis Workflow."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_services(self):
         """Create mock services with realistic responses."""
         services = {
@@ -157,7 +147,7 @@ class TestMultiPerspectiveWorkflowIntegration:
         
         return services
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_complete_workflow_execution(self, mock_services):
         """Test the complete workflow execution from start to finish."""
         # Create workflow
@@ -236,7 +226,7 @@ class TestMultiPerspectiveWorkflowIntegration:
         assert "社会" in result["perspectives"]
         assert "技术" in result["perspectives"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_with_refinement(self, mock_services):
         """Test workflow execution that triggers refinement."""
         # Configure synthesis to need refinement
@@ -293,7 +283,7 @@ class TestMultiPerspectiveWorkflowIntegration:
         assert len(final_synthesis) > 200  # Should be more substantial after refinement
         assert "深层次" in final_synthesis or "根本机制" in final_synthesis  # Should show depth improvement
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_error_handling(self, mock_services):
         """Test workflow error handling when a step fails."""
         # Make task decomposition fail
@@ -312,7 +302,7 @@ class TestMultiPerspectiveWorkflowIntegration:
         assert "error" in result
         assert "Task decomposition failed" in result["error"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_workflow_class_method(self, mock_services):
         """Test the convenience class method."""
         result = await MultiPerspectiveSynthesisWorkflow.execute_multi_perspective_synthesis(

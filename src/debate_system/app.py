@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多轮辩论系统Web应用程序
+"""多轮辩论系统Web应用程序
 
 基于Lona框架的完整Web应用程序，集成了多角色对话引擎、
 状态管理、WebSocket实时通信等功能。
@@ -15,7 +13,6 @@ http://localhost:8080
 
 import asyncio
 import logging
-import os
 import sys
 from pathlib import Path
 
@@ -27,16 +24,16 @@ sys.path.insert(0, str(project_root))
 # Lona框架导入
 try:
     from lona import App, Route
-    from lona.html import HTML, H1, P, Div
+    from lona.html import H1, HTML, Div, P
     from lona.view import LonaView
 except ImportError:
     print("❌ 未安装Lona框架，请运行: pip install lona")
     sys.exit(1)
 
 # 导入辩论系统组件
-from web_interface import DebateWebInterface
-from multi_role_dialogue_engine import MultiRoleDialogueEngine
 from debate_state_manager import DebateStateManager
+from multi_role_dialogue_engine import MultiRoleDialogueEngine
+from web_interface import DebateWebInterface
 from websocket_manager import debate_websocket_manager
 
 # 配置日志
@@ -224,7 +221,7 @@ class MockMemoryAgent:
     
     async def retrieve_memory(self, key: str):
         """检索记忆"""
-        return None
+        return
 
 class MockParticipantManager:
     """模拟参与者管理器"""

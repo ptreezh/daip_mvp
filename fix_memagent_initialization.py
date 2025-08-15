@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-修复MemAgent初始化问题的脚本
+"""修复MemAgent初始化问题的脚本
 """
 
 import sys
@@ -14,11 +12,10 @@ sys.path.insert(0, str(project_root))
 
 def fix_integrated_llm_manager():
     """修复IntegratedLLMManager中的MemAgent初始化问题"""
-    
     file_path = "src/core_services/integrated_llm_manager.py"
     
     # 读取原文件
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding='utf-8') as f:
         content = f.read()
     
     # 查找并替换有问题的初始化代码
@@ -97,11 +94,10 @@ def fix_integrated_llm_manager():
 
 def fix_academic_research_scenario():
     """修复AcademicResearchScenario中的MemAgent初始化问题"""
-    
     file_path = "src/scenarios/academic_research_scenario.py"
     
     # 读取原文件
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding='utf-8') as f:
         content = f.read()
     
     # 查找并替换有问题的初始化代码
@@ -158,7 +154,6 @@ def fix_academic_research_scenario():
 
 def create_dependency_validator():
     """创建依赖关系验证器"""
-    
     validator_code = '''#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """

@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-辩论状态管理系统
+"""辩论状态管理系统
 
 管理辩论会话的状态、持久化、恢复和同步。
 支持分布式环境下的状态一致性和实时更新。
 """
 
 import asyncio
-import json
 import pickle
-from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Any, Callable, Set
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
-from enum import Enum
-import uuid
 import threading
+import uuid
+from abc import ABC, abstractmethod
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
 
 from .debate_flow_definition import (
-    DebateSession, DebateRound, DebateContribution, 
-    DebateStatus, DebatePhase, DebateParticipant
+    DebateContribution,
+    DebateParticipant,
+    DebatePhase,
+    DebateSession,
+    DebateStatus,
 )
 
 
@@ -46,9 +46,9 @@ class StateChange:
     change_type: StateChangeType = StateChangeType.CUSTOM
     timestamp: datetime = field(default_factory=datetime.now)
     actor_id: Optional[str] = None
-    previous_state: Optional[Dict[str, Any]] = None
-    new_state: Optional[Dict[str, Any]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    previous_state: Optional[dict[str, Any]] = None
+    new_state: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
     version: int = 1
 
 
@@ -58,11 +58,11 @@ class StateSnapshot:
     snapshot_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     session_id: str = ""
     timestamp: datetime = field(default_factory=datetime.now)
-    session_state: Dict[str, Any] = field(default_factory=dict)
-    participant_states: Dict[str, Any] = field(default_factory=dict)
+    session_state: dict[str, Any] = field(default_factory=dict)
+    participant_states: dict[str, Any] = field(default_factory=dict)
     version: int = 1
     checksum: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class StateStorage(ABC):
@@ -96,7 +96,7 @@ class StateStorage(ABC):
     @abstractmethod
     async def list_sessions(self, 
                            status: Optional[DebateStatus] = None,
-                           limit: int = 100) -> List[str]:
+                           limit: int = 100) -> list[str]:
         """列出会话ID"""
         pass
 
@@ -105,8 +105,8 @@ class MemoryStateStorage(StateStorage):
     """内存状态存储实现"""
     
     def __init__(self):
-        self.sessions: Dict[str, DebateSession] = {}
-        self.snapshots: Dict[str, StateSnapshot] = {}
+        self.sessions: dict[str, DebateSession] = {}
+        self.snapshots: dict[str, StateSnapshot] = {}
         self._lock = threading.RLock()
     
     async def save_session(self, session: DebateSession) -> bool:
@@ -164,7 +164,7 @@ class MemoryStateStorage(StateStorage):
     
     async def list_sessions(self, 
                            status: Optional[DebateStatus] = None,
-                           limit: int = 100) -> List[str]:
+                           limit: int = 100) -> list[str]:
         """列出会话ID"""
         with self._lock:
             session_ids = []
@@ -177,8 +177,7 @@ class MemoryStateStorage(StateStorage):
 
 
 class DebateStateManager:
-    """
-    辩论状态管理器
+    """辩论状态管理器
     
     负责辩论会话的状态管理、持久化、同步和通知。
     支持分布式环境下的状态一致性和实时更新。
@@ -188,15 +187,15 @@ class DebateStateManager:
         self.storage = storage or MemoryStateStorage()
         
         # 内存缓存
-        self.session_cache: Dict[str, DebateSession] = {}
+        self.session_cache: dict[str, DebateSession] = {}
         self.cache_lock = threading.RLock()
         
         # 状态变更历史
-        self.change_history: List[StateChange] = []
+        self.change_history: list[StateChange] = []
         self.history_lock = threading.RLock()
         
         # 快照管理
-        self.snapshots: Dict[str, List[str]] = {}  # session_id -> snapshot_ids
+        self.snapshots: dict[str, list[str]] = {}  # session_id -> snapshot_ids
         
         # 配置
         self.auto_save_interval = 60  # 自动保存间隔（秒）
@@ -432,7 +431,7 @@ class DebateStateManager:
     
     async def create_snapshot(self,
                             session_id: str,
-                            metadata: Optional[Dict[str, Any]] = None) -> Optional[str]:
+                            metadata: Optional[dict[str, Any]] = None) -> Optional[str]:
         """创建状态快照"""
         try:
             session = await self.get_session(session_id)
@@ -471,7 +470,7 @@ class DebateStateManager:
     
     async def get_session_history(self,
                                 session_id: str,
-                                limit: int = 100) -> List[StateChange]:
+                                limit: int = 100) -> list[StateChange]:
         """获取会话历史"""
         with self.history_lock:
             history = [
@@ -484,11 +483,11 @@ class DebateStateManager:
             
             return history[:limit]
     
-    async def get_active_sessions(self) -> List[str]:
+    async def get_active_sessions(self) -> list[str]:
         """获取活跃会话列表"""
         return await self.storage.list_sessions(DebateStatus.ACTIVE)
     
-    async def get_session_metrics(self, session_id: str) -> Optional[Dict[str, Any]]:
+    async def get_session_metrics(self, session_id: str) -> Optional[dict[str, Any]]:
         """获取会话指标"""
         session = await self.get_session(session_id)
         if not session:
@@ -531,7 +530,7 @@ class DebateStateManager:
             if len(self.change_history) > self.max_history_size:
                 self.change_history = self.change_history[-self.max_history_size:]
     
-    async def get_system_status(self) -> Dict[str, Any]:
+    async def get_system_status(self) -> dict[str, Any]:
         """获取系统状态"""
         try:
             # 统计会话数量
@@ -574,7 +573,7 @@ if __name__ == "__main__":
         state_manager = DebateStateManager()
         
         # 创建测试会话
-        from debate_flow_definition import DebateSession, DebateParticipant, ParticipantRole
+        from debate_flow_definition import DebateParticipant, DebateSession, ParticipantRole
         
         session = DebateSession(
             title="测试辩论",

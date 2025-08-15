@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Main Application Entry Point
+"""Personal Intelligence Hub - Main Application Entry Point
 
 基于Lona Web框架的统一Python前后端应用
 提供Personal Intelligence Hub的核心用户体验
@@ -16,13 +14,13 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from lona import LonaApp, View
-from lona.html import HTML, H1, Div, P
+from lona.html import H1, HTML, Div, P
 
 # 导入组件和服务
 from personal_intelligence_hub.components.chat_interface import ChatInterface
+from personal_intelligence_hub.components.task_panel import TaskPanel
 from personal_intelligence_hub.components.transparency_monitor import TransparencyMonitor
 from personal_intelligence_hub.components.wiki_panel import WikiPanel
-from personal_intelligence_hub.components.task_panel import TaskPanel
 from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService
 
 # 创建Lona应用实例
@@ -54,7 +52,6 @@ class PersonalIntelligenceHubView(View):
     
     def handle_request(self, request):
         """处理HTTP请求并返回HTML响应"""
-        
         # 初始化组件（延迟初始化以避免循环依赖）
         if not self.chat_interface:
             self.chat_interface = ChatInterface(self.assistant_service)
@@ -147,7 +144,6 @@ class PersonalIntelligenceHubView(View):
     
     def handle_request(self, request):
         """处理HTTP请求并返回HTML响应"""
-        
         # 初始化服务
         self.assistant_service = PersonalAssistantService()
         
@@ -200,14 +196,13 @@ class PersonalIntelligenceHubView(View):
 
 def main():
     """主函数 - 启动Lona应用"""
-    
     # 配置应用设置
     app.settings.DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
     app.settings.HOST = os.getenv('HOST', 'localhost')
     app.settings.PORT = int(os.getenv('PORT', '8086'))
     
     # 启动应用
-    print(f"🎭 Personal Intelligence Hub 正在启动...")
+    print("🎭 Personal Intelligence Hub 正在启动...")
     print(f"📍 访问地址: http://{app.settings.HOST}:{app.settings.PORT}")
     print(f"🚀 主界面: http://{app.settings.HOST}:{app.settings.PORT}/hub")
     

@@ -1,5 +1,4 @@
-"""
-Implementation of the MetaCognition class.
+"""Implementation of the MetaCognition class.
 
 This module defines the MetaCognition class, which encapsulates the
 meta-cognitive capabilities of a cognitive agent, including task identification,
@@ -7,38 +6,35 @@ cognitive independence, and self-monitoring.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 
 class TaskTemplate(BaseModel):
-    """
-    Template for recognizing and handling specific task types.
+    """Template for recognizing and handling specific task types.
     """
     id: str
     name: str
     description: str
-    recognition_patterns: List[str]
-    required_capabilities: List[str]
+    recognition_patterns: list[str]
+    required_capabilities: list[str]
     handling_strategy: str
 
 
 class CognitiveStrategy(BaseModel):
-    """
-    Strategy for addressing specific cognitive challenges.
+    """Strategy for addressing specific cognitive challenges.
     """
     id: str
     name: str
     description: str
-    trigger_conditions: List[str]
-    steps: List[str]
+    trigger_conditions: list[str]
+    steps: list[str]
     effectiveness: float = Field(ge=0.0, le=1.0)
 
 
 class MetaCognition:
-    """
-    System that encapsulates the meta-cognitive capabilities of a cognitive agent.
+    """System that encapsulates the meta-cognitive capabilities of a cognitive agent.
     
     The MetaCognition system enables the agent to monitor and regulate its own
     cognitive processes, identify tasks, ensure cognitive independence, and
@@ -50,8 +46,7 @@ class MetaCognition:
         level: int,
         agent_id: str
     ):
-        """
-        Initialize a meta-cognition system.
+        """Initialize a meta-cognition system.
         
         Args:
             level: Meta-cognitive capability level (1-5)
@@ -69,9 +64,8 @@ class MetaCognition:
         self.logger.debug(f"Loaded {len(self.task_templates)} task templates and "
                          f"{len(self.cognitive_strategies)} cognitive strategies")
     
-    def _initialize_task_templates(self) -> Dict[str, TaskTemplate]:
-        """
-        Initialize task templates based on the meta-cognitive level.
+    def _initialize_task_templates(self) -> dict[str, TaskTemplate]:
+        """Initialize task templates based on the meta-cognitive level.
         
         Returns:
             Dictionary mapping template IDs to TaskTemplate objects
@@ -169,9 +163,8 @@ class MetaCognition:
         
         return templates
     
-    def _initialize_cognitive_strategies(self) -> Dict[str, CognitiveStrategy]:
-        """
-        Initialize cognitive strategies based on the meta-cognitive level.
+    def _initialize_cognitive_strategies(self) -> dict[str, CognitiveStrategy]:
+        """Initialize cognitive strategies based on the meta-cognitive level.
         
         Returns:
             Dictionary mapping strategy IDs to CognitiveStrategy objects
@@ -269,9 +262,8 @@ class MetaCognition:
         
         return strategies
     
-    async def identify_task(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Identify the task type and requirements from input data and context.
+    async def identify_task(self, input_data: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
+        """Identify the task type and requirements from input data and context.
         
         Args:
             input_data: Input data to analyze
@@ -313,9 +305,8 @@ class MetaCognition:
             "cognitive_strategies": [strategy.id for strategy in cognitive_strategies]
         }
     
-    def _match_task_type(self, query: str) -> Tuple[str, float]:
-        """
-        Match a query against task templates to identify the task type.
+    def _match_task_type(self, query: str) -> tuple[str, float]:
+        """Match a query against task templates to identify the task type.
         
         Args:
             query: Query to match
@@ -352,10 +343,9 @@ class MetaCognition:
     def _identify_relevant_strategies(
         self,
         task_type: str,
-        context: Dict[str, Any]
-    ) -> List[CognitiveStrategy]:
-        """
-        Identify cognitive strategies relevant to the task and context.
+        context: dict[str, Any]
+    ) -> list[CognitiveStrategy]:
+        """Identify cognitive strategies relevant to the task and context.
         
         Args:
             task_type: Type of task
@@ -390,11 +380,10 @@ class MetaCognition:
     
     async def ensure_independence(
         self,
-        result: Dict[str, Any],
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        Ensure cognitive independence by applying meta-cognitive strategies.
+        result: dict[str, Any],
+        context: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Ensure cognitive independence by applying meta-cognitive strategies.
         
         This method helps maintain the agent's unique cognitive perspective by:
         1. Identifying potential external influences
@@ -416,7 +405,7 @@ class MetaCognition:
         
         # Apply cognitive independence strategies
         independent_result = self._apply_independence_strategies(result, external_influences)
-        self.logger.debug(f"Applied independence strategies")
+        self.logger.debug("Applied independence strategies")
         
         # Add meta-cognitive trace
         independent_result["meta_cognitive_trace"] = {
@@ -429,11 +418,10 @@ class MetaCognition:
     
     def _identify_external_influences(
         self,
-        result: Dict[str, Any],
-        context: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
-        """
-        Identify potential external influences that might compromise cognitive independence.
+        result: dict[str, Any],
+        context: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+        """Identify potential external influences that might compromise cognitive independence.
         
         Args:
             result: Result to analyze
@@ -458,11 +446,10 @@ class MetaCognition:
     
     def _apply_independence_strategies(
         self,
-        result: Dict[str, Any],
-        external_influences: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
-        """
-        Apply strategies to enhance cognitive independence.
+        result: dict[str, Any],
+        external_influences: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        """Apply strategies to enhance cognitive independence.
         
         Args:
             result: Result to enhance
@@ -479,9 +466,8 @@ class MetaCognition:
         independent_result["independence_enhanced"] = True
         return independent_result
     
-    def get_state(self) -> Dict[str, Any]:
-        """
-        Get the current state of the meta-cognition system.
+    def get_state(self) -> dict[str, Any]:
+        """Get the current state of the meta-cognition system.
         
         Returns:
             Dictionary containing the meta-cognition system's state
@@ -492,9 +478,8 @@ class MetaCognition:
             "cognitive_strategies": list(self.cognitive_strategies.keys())
         }
     
-    def update_state(self, state_updates: Dict[str, Any]) -> None:
-        """
-        Update the state of the meta-cognition system.
+    def update_state(self, state_updates: dict[str, Any]) -> None:
+        """Update the state of the meta-cognition system.
         
         Args:
             state_updates: Dictionary containing state updates

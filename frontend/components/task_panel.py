@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-任务面板组件 - 简化版本
+"""任务面板组件 - 简化版本
 
 显示和管理任务状态，支持任务分解和跟踪
 """
 
+
+from lona.html import H3, HTML, Div, P, Span
 from lona.html.widget import Widget
-from lona.html import HTML, Div, H3, P, Span, Select, Option
-from datetime import datetime
 
 
 class TaskPanel(Widget):

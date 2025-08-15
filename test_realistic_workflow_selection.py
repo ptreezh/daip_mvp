@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-现实的工作流选择测试
+"""现实的工作流选择测试
 
 基于工作流的实际特点设定合理的期望值，而不是主观假设
 """
 
 import asyncio
 import sys
+
 from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService, WorkflowType
+
 
 class RealisticWorkflowTester:
     """现实的工作流选择测试器"""
@@ -123,7 +123,7 @@ class RealisticWorkflowTester:
                     print(f"结果: {'✅ 正确' if is_correct else '❌ 错误'}")
                 else:
                     # 模糊场景，记录但不计入准确率
-                    print(f"结果: 📝 记录 (模糊场景)")
+                    print("结果: 📝 记录 (模糊场景)")
                 
                 result = {
                     "test_case": i,
@@ -150,7 +150,7 @@ class RealisticWorkflowTester:
         # 计算明确场景的准确率
         definite_accuracy = (definite_correct / definite_total * 100) if definite_total > 0 else 0
         
-        print(f"\n📊 现实测试总结:")
+        print("\n📊 现实测试总结:")
         print(f"总测试用例: {len(self.test_cases)}")
         print(f"明确场景: {definite_total} 个")
         print(f"明确场景正确: {definite_correct} 个")
@@ -158,7 +158,7 @@ class RealisticWorkflowTester:
         
         # 分析模糊场景的表现
         ambiguous_results = [r for r in results if not r.get('is_definite', True)]
-        print(f"\n📋 模糊场景分析:")
+        print("\n📋 模糊场景分析:")
         for result in ambiguous_results:
             if 'error' not in result:
                 print(f"{result['category']}: {result['predicted']} (置信度: {result['confidence']:.2f})")
@@ -219,14 +219,14 @@ async def main():
     
     is_reasonable = accuracy_results['definite_accuracy'] >= reasonable_threshold
     
-    print(f"\n🎯 降级策略评估:")
+    print("\n🎯 降级策略评估:")
     print(f"明确场景准确率≥80%: {'✅ 合理' if is_reasonable else '❌ 需要改进'}")
     
-    print(f"\n💡 关键发现:")
-    print(f"- 当前系统是LLM优先 + 智能降级的架构")
-    print(f"- 后端LLM服务不可用时，使用增强的规则引擎")
-    print(f"- 增强规则引擎基于关键词和模式匹配，不是基于LLM")
-    print(f"- 对于明确的批判性审查和多视角讨论场景表现良好")
+    print("\n💡 关键发现:")
+    print("- 当前系统是LLM优先 + 智能降级的架构")
+    print("- 后端LLM服务不可用时，使用增强的规则引擎")
+    print("- 增强规则引擎基于关键词和模式匹配，不是基于LLM")
+    print("- 对于明确的批判性审查和多视角讨论场景表现良好")
     
     if is_reasonable:
         print("\n🎉 V0.2.1任务部分达成！降级策略在明确场景下表现合理。")

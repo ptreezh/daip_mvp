@@ -1,5 +1,4 @@
-"""
-@Time: 2025-08-05
+"""@Time: 2025-08-05
 @Author: DAIP-LIVE Team
 @File: expert_consultation_scenario.py
 @Description: Enhanced Expert Consultation Scenario with Real LLM Integration
@@ -8,18 +7,18 @@
 import asyncio
 import json
 import logging
-import aiohttp
 import time
 import uuid
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Optional
 
-from .smart_reviewer_allocator_simple import SmartReviewerAllocator, ReviewRequest, AllocationPriority
-from .multidimensional_assessment_engine import MultiDimensionalAssessmentEngine
+import aiohttp
+
 from .collaborative_review_environment import CollaborativeReviewEnvironment, ReviewSession
-from .knowledge_retrieval_service import KnowledgeRetrievalService, SearchScope
+from .multidimensional_assessment_engine import MultiDimensionalAssessmentEngine
+from .smart_reviewer_allocator_simple import AllocationPriority, SmartReviewerAllocator
 
 # Import AssessmentRequest for type compatibility
 try:
@@ -27,15 +26,15 @@ try:
 except ImportError:
     # Fallback definition if import fails
     from dataclasses import dataclass
-    from typing import List, Dict, Any
+    from typing import Any
     
     @dataclass
     class AssessmentRequest:
         id: str
         content: str
         assessment_type: str
-        dimensions: List[str]
-        context: Dict[str, Any]
+        dimensions: list[str]
+        context: dict[str, Any]
 
 
 @dataclass
@@ -81,14 +80,14 @@ class ExpertConsultationRequest:
     priority: ConsultationPriority
     requester: str
     domain: str
-    specific_areas: List[str]
+    specific_areas: list[str]
     background_context: str
-    expected_outcomes: List[str]
-    time_constraints: Dict[str, Any]
-    budget_constraints: Optional[Dict[str, Any]] = None
-    expert_requirements: List[str] = None
-    attachments: List[str] = None
-    metadata: Dict[str, Any] = None
+    expected_outcomes: list[str]
+    time_constraints: dict[str, Any]
+    budget_constraints: Optional[dict[str, Any]] = None
+    expert_requirements: list[str] = None
+    attachments: list[str] = None
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -96,14 +95,14 @@ class ExpertOpinion:
     """专家意见"""
     expert_id: str
     expert_name: str
-    expertise_areas: List[str]
+    expertise_areas: list[str]
     opinion: str
     confidence_level: float
     reasoning: str
-    recommendations: List[str]
-    potential_risks: List[str]
-    alternative_approaches: List[str]
-    estimated_effort: Optional[Dict[str, Any]] = None
+    recommendations: list[str]
+    potential_risks: list[str]
+    alternative_approaches: list[str]
+    estimated_effort: Optional[dict[str, Any]] = None
     timestamp: datetime = None
     
     def __post_init__(self):
@@ -116,14 +115,14 @@ class ConsultationSynthesis:
     """咨询综合分析"""
     consultation_id: str
     consensus_opinion: str
-    key_findings: List[str]
-    divergent_viewpoints: List[Dict[str, Any]]
-    recommendations: List[Dict[str, Any]]
-    risk_assessment: Dict[str, Any]
-    implementation_roadmap: List[Dict[str, Any]]
+    key_findings: list[str]
+    divergent_viewpoints: list[dict[str, Any]]
+    recommendations: list[dict[str, Any]]
+    risk_assessment: dict[str, Any]
+    implementation_roadmap: list[dict[str, Any]]
     confidence_score: float
-    expert_participation: Dict[str, Any]
-    quality_metrics: Dict[str, float]
+    expert_participation: dict[str, Any]
+    quality_metrics: dict[str, float]
     generated_at: datetime = None
     
     def __post_init__(self):
@@ -135,7 +134,7 @@ class RealLLMIntegrator:
     """真实LLM集成器"""
     
     def __init__(self):
-        self.call_history: List[LLMCallRecord] = []
+        self.call_history: list[LLMCallRecord] = []
         self.ollama_available = False
         self.openai_available = False
         self.logger = logging.getLogger(__name__)
@@ -404,8 +403,8 @@ class ExpertConsultationScenario:
         self.knowledge_service = None  # 可选的知识检索服务
         
         # 咨询历史
-        self.consultation_history: List[Dict[str, Any]] = []
-        self.expert_performance: Dict[str, Dict[str, Any]] = {}
+        self.consultation_history: list[dict[str, Any]] = []
+        self.expert_performance: dict[str, dict[str, Any]] = {}
         
         # 场景配置
         self.config = {
@@ -420,7 +419,7 @@ class ExpertConsultationScenario:
         
         self.logger.info("Enhanced ExpertConsultationScenario initialized")
     
-    async def handle_consultation(self, request: ExpertConsultationRequest) -> Dict[str, Any]:
+    async def handle_consultation(self, request: ExpertConsultationRequest) -> dict[str, Any]:
         """处理专家咨询请求"""
         try:
             self.logger.info(f"开始处理专家咨询: {request.title}")
@@ -476,7 +475,7 @@ class ExpertConsultationScenario:
                 "consultation_id": request.id
             }
     
-    async def _select_experts(self, request: ExpertConsultationRequest) -> Dict[str, Any]:
+    async def _select_experts(self, request: ExpertConsultationRequest) -> dict[str, Any]:
         """智能选择专家"""
         try:
             # 转换咨询类型为评审类型
@@ -545,7 +544,7 @@ class ExpertConsultationScenario:
             return {"success": False, "error": str(e)}
     
     async def _create_collaborative_session(self, request: ExpertConsultationRequest, 
-                                         expert_selection: Dict[str, Any]) -> Dict[str, Any]:
+                                         expert_selection: dict[str, Any]) -> dict[str, Any]:
         """创建协作评审会话"""
         try:
             # 创建会话描述
@@ -596,7 +595,7 @@ class ExpertConsultationScenario:
             self.logger.error(f"创建协作会话失败: {e}")
             return {"success": False, "error": str(e)}
     
-    async def _collect_expert_opinions(self, session_id: str, request: ExpertConsultationRequest) -> List[ExpertOpinion]:
+    async def _collect_expert_opinions(self, session_id: str, request: ExpertConsultationRequest) -> list[ExpertOpinion]:
         """收集专家意见"""
         try:
             opinions = []
@@ -693,7 +692,7 @@ class ExpertConsultationScenario:
             )
     
     async def _assess_consultation_quality(self, request: ExpertConsultationRequest, 
-                                         opinions: List[ExpertOpinion]) -> Dict[str, Any]:
+                                         opinions: list[ExpertOpinion]) -> dict[str, Any]:
         """评估咨询质量"""
         try:
             # 创建评估请求
@@ -732,8 +731,8 @@ class ExpertConsultationScenario:
             return {"overall_score": 0.0, "error": str(e)}
     
     async def _generate_consultation_synthesis(self, request: ExpertConsultationRequest,
-                                            opinions: List[ExpertOpinion],
-                                            assessment: Dict[str, Any]) -> ConsultationSynthesis:
+                                            opinions: list[ExpertOpinion],
+                                            assessment: dict[str, Any]) -> ConsultationSynthesis:
         """生成咨询综合分析"""
         try:
             # 分析共识和分歧
@@ -872,8 +871,8 @@ class ExpertConsultationScenario:
             )
     
     async def _record_consultation_history(self, request: ExpertConsultationRequest,
-                                         expert_selection: Dict[str, Any],
-                                         opinions: List[ExpertOpinion],
+                                         expert_selection: dict[str, Any],
+                                         opinions: list[ExpertOpinion],
                                          synthesis: ConsultationSynthesis):
         """记录咨询历史"""
         try:
@@ -921,7 +920,7 @@ class ExpertConsultationScenario:
         except Exception as e:
             self.logger.error(f"记录咨询历史失败: {e}")
     
-    def get_consultation_statistics(self) -> Dict[str, Any]:
+    def get_consultation_statistics(self) -> dict[str, Any]:
         """获取咨询统计信息"""
         try:
             if not self.consultation_history:

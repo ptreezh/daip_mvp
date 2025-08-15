@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-检查Ollama服务状态
+"""检查Ollama服务状态
 """
 
 import requests
+
 
 def check_ollama_service():
     """检查Ollama服务状态"""

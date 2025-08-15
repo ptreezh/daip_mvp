@@ -1,19 +1,18 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-04 12:00:00
+"""@Time    : 2025-07-04 12:00:00
 @Author  : DAIP-LIVE Team
 @File    : fact_extraction_service.py
 @Description:
     A service to automatically extract structured facts from text using an LLM
     and store them in the MemoryService's SSKG.
 """
-import json
 import asyncio
+import json
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from src.core_services.memory_service import MemoryService
 from src.kernel.llm_interface import LLMInterface
+
 
 class InvalidResponseTypeError(Exception):
     """Custom exception for when LLM response has an unexpected type."""
@@ -45,15 +44,13 @@ Now, analyze the following text:
 
 
 class FactExtractionService:
-    """
-    Extracts structured facts from unstructured text and saves them to the SSKG.
+    """Extracts structured facts from unstructured text and saves them to the SSKG.
     """
 
     def __init__(
         self, llm_interface: LLMInterface, memory_service: MemoryService, confidence_threshold: float = 0.75
     ):
-        """
-        Initializes the FactExtractionService.
+        """Initializes the FactExtractionService.
 
         Args:
             llm_interface: The interface to interact with the language model.
@@ -64,7 +61,7 @@ class FactExtractionService:
         self.memory_service = memory_service
         self.confidence_threshold = confidence_threshold
 
-    async def extract_and_save_facts(self, text: str, source_metadata: Dict[str, Any], max_retries: int = 3):
+    async def extract_and_save_facts(self, text: str, source_metadata: dict[str, Any], max_retries: int = 3):
         """Analyzes text, extracts facts, and saves them to the SSKG."""
         prompt = FACT_EXTRACTION_PROMPT_TEMPLATE.format(text_to_analyze=text)
         

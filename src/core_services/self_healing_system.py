@@ -1,22 +1,20 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 15:50:00
+"""@Time    : 2025-08-05 15:50:00
 @Author  : DAIP-LIVE Team
 @File    import self_healing_system.py
 @Description:
     Self-healing system for automatic recovery from common issues.
 """
 
+import importlib
 import logging
-import time
 import subprocess
 import sys
-import os
-import importlib
-from typing import Dict, List, Optional, Any, Callable
+import threading
+import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-import threading
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +48,7 @@ class RecoveryAction:
     """Recovery action information"""
     strategy: RecoveryStrategy
     description: str
-    success_criteria: List[str]
+    success_criteria: list[str]
     max_attempts: int = 3
     timeout: float = 30.0
 
@@ -69,8 +67,8 @@ class SelfHealingSystem:
     """Self-healing system for automatic issue recovery"""
     
     def __init__(self):
-        self.detected_issues: List[Issue] = []
-        self.recovery_history: List[RecoveryResult] = []
+        self.detected_issues: list[Issue] = []
+        self.recovery_history: list[RecoveryResult] = []
         self.recovery_strategies = self._define_recovery_strategies()
         self.healing_enabled = True
         self.auto_recovery = True
@@ -165,7 +163,7 @@ class SelfHealingSystem:
         
         logger.info("🔄 Self-healing system initialized")
     
-    def _define_recovery_strategies(self) -> Dict[RecoveryStrategy, Callable]:
+    def _define_recovery_strategies(self) -> dict[RecoveryStrategy, Callable]:
         """Define recovery strategy implementations"""
         return {
             RecoveryStrategy.RESTART_SERVICE: self._restart_service,
@@ -273,7 +271,7 @@ class SelfHealingSystem:
             
             return recovery_result
     
-    def _restart_service(self, issue: Issue, action: RecoveryAction) -> Dict[str, Any]:
+    def _restart_service(self, issue: Issue, action: RecoveryAction) -> dict[str, Any]:
         """Restart a failed service"""
         component = issue.component
         
@@ -294,7 +292,7 @@ class SelfHealingSystem:
             "action": "service_restart"
         }
     
-    def _reload_module(self, issue: Issue, action: RecoveryAction) -> Dict[str, Any]:
+    def _reload_module(self, issue: Issue, action: RecoveryAction) -> dict[str, Any]:
         """Reload a failed module"""
         error_message = issue.error_message
         
@@ -325,7 +323,7 @@ class SelfHealingSystem:
             logger.error(f"❌ Failed to reload module {module_name}: {str(e)}")
             raise
     
-    def _clear_cache(self, issue: Issue, action: RecoveryAction) -> Dict[str, Any]:
+    def _clear_cache(self, issue: Issue, action: RecoveryAction) -> dict[str, Any]:
         """Clear system caches"""
         logger.info(f"🧹 Clearing caches for {issue.component}")
         
@@ -354,7 +352,7 @@ class SelfHealingSystem:
             "action": "cache_clear"
         }
     
-    def _reinstall_dependency(self, issue: Issue, action: RecoveryAction) -> Dict[str, Any]:
+    def _reinstall_dependency(self, issue: Issue, action: RecoveryAction) -> dict[str, Any]:
         """Reinstall missing dependencies"""
         error_message = issue.error_message
         
@@ -394,7 +392,7 @@ class SelfHealingSystem:
             logger.error(f"❌ Error installing dependency {dependency}: {str(e)}")
             raise
     
-    def _reset_configuration(self, issue: Issue, action: RecoveryAction) -> Dict[str, Any]:
+    def _reset_configuration(self, issue: Issue, action: RecoveryAction) -> dict[str, Any]:
         """Reset configuration to defaults"""
         logger.info(f"⚙️ Resetting configuration for {issue.component}")
         
@@ -412,7 +410,7 @@ class SelfHealingSystem:
             "action": "configuration_reset"
         }
     
-    def _enable_fallback_mode(self, issue: Issue, action: RecoveryAction) -> Dict[str, Any]:
+    def _enable_fallback_mode(self, issue: Issue, action: RecoveryAction) -> dict[str, Any]:
         """Enable fallback mode for a component"""
         logger.info(f"🛟 Enabling fallback mode for {issue.component}")
         
@@ -425,7 +423,7 @@ class SelfHealingSystem:
             "action": "fallback_activation"
         }
     
-    def _skip_component(self, issue: Issue, action: RecoveryAction) -> Dict[str, Any]:
+    def _skip_component(self, issue: Issue, action: RecoveryAction) -> dict[str, Any]:
         """Skip a non-critical component"""
         logger.info(f"⏭️ Skipping component: {issue.component}")
         
@@ -471,7 +469,7 @@ class SelfHealingSystem:
         # Similar to module extraction but more specific to dependencies
         return self._extract_module_from_error(error_message)
     
-    def _check_recovery_success(self, result: Dict[str, Any], success_criteria: List[str]) -> bool:
+    def _check_recovery_success(self, result: dict[str, Any], success_criteria: list[str]) -> bool:
         """Check if recovery action was successful"""
         for criterion in success_criteria:
             if criterion == "module_loaded":
@@ -495,7 +493,7 @@ class SelfHealingSystem:
         
         return True  # Default to success if no specific criteria
     
-    def get_system_health(self) -> Dict[str, Any]:
+    def get_system_health(self) -> dict[str, Any]:
         """Get overall system health including self-healing status"""
         total_issues = len(self.detected_issues)
         resolved_issues = sum(1 for issue in self.detected_issues if issue.resolved)
@@ -640,7 +638,7 @@ if __name__ == "__main__":
     
     # Get system health
     health = healer.get_system_health()
-    print(f"\n3. System Health:")
+    print("\n3. System Health:")
     print(f"   Total issues: {health['total_issues_detected']}")
     print(f"   Resolved issues: {health['resolved_issues']}")
     print(f"   Recovery success rate: {health['success_rate']:.2%}")

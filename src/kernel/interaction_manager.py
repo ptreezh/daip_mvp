@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 11:00:00
+"""@Time    : 2025-07-24 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : interaction_manager.py
 @Description:
@@ -18,8 +16,7 @@ class InteractionManager:
     """Handles communication with a local LLM via Ollama."""
 
     def __init__(self, client: ollama.AsyncClient, model: str = "llama3:8b-instruct-q5_K_M"):
-        """
-        Initializes the InteractionManager.
+        """Initializes the InteractionManager.
 
         Args:
             client (ollama.AsyncClient): An instance of the Ollama async client.
@@ -48,6 +45,6 @@ class InteractionManager:
         except ResponseError as e:
             logger.error(f"Ollama API error for model '{self.model}': {e.error}")
             return f"Error: Could not get a response for {role_id}. The model '{self.model}' may not be available. (Details: {e.error})"
-        except Exception as e:
+        except Exception:
             logger.exception("An unexpected error occurred while communicating with Ollama.")
             return f"Error: An unexpected issue occurred while trying to contact the LLM for {role_id}."

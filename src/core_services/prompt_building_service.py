@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 19:30:00
+"""@Time    : 2025-08-03 19:30:00
 @Author  : DAIP-LIVE Team
 @File    : prompt_building_service.py
 @Description:
@@ -14,21 +12,18 @@
     - 提示词质量保证
 """
 
-import asyncio
 import hashlib
 import json
 import logging
+import sqlite3
 import time
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
-from typing import Any, Dict, List, Optional, Union, Tuple
-from pathlib import Path
-import yaml
-import sqlite3
 from collections import defaultdict
-import weakref
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +59,7 @@ class ContextSource:
     source_id: str
     source_type: ContextType
     content: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     priority: float = 1.0
     relevance_score: float = 1.0
     token_count: int = 0
@@ -75,8 +70,8 @@ class ContextConstraints:
     """上下文约束"""
     max_tokens: int = 4000
     min_relevance: float = 0.5
-    required_sources: List[str] = field(default_factory=list)
-    excluded_sources: List[str] = field(default_factory=list)
+    required_sources: list[str] = field(default_factory=list)
+    excluded_sources: list[str] = field(default_factory=list)
     preserve_order: bool = False
     allow_truncation: bool = True
 
@@ -87,20 +82,20 @@ class ContextSpec:
     scenario: str
     user_query: str
     target_role: Optional[str] = None
-    conversation_history: List[Dict[str, Any]] = field(default_factory=list)
-    required_knowledge: List[str] = field(default_factory=list)
+    conversation_history: list[dict[str, Any]] = field(default_factory=list)
+    required_knowledge: list[str] = field(default_factory=list)
     constraints: Optional[ContextConstraints] = None
 
 @dataclass
 class AssembledContext:
     """组装后的上下文"""
     context_id: str
-    sources: List[ContextSource]
+    sources: list[ContextSource]
     final_content: str
     total_tokens: int
     assembly_time_ms: float
     quality_score: float
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class PromptTemplate:
@@ -109,8 +104,8 @@ class PromptTemplate:
     name: str
     template_type: TemplateType
     content_template: str
-    variables: List[str]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    variables: list[str]
+    metadata: dict[str, Any] = field(default_factory=dict)
     version: str = "1.0"
     created_at: datetime = field(default_factory=datetime.now)
     usage_count: int = 0
@@ -119,10 +114,10 @@ class PromptTemplate:
 class TemplateRequirements:
     """模板需求"""
     scenario: str
-    role_requirements: Dict[str, Any]
-    context_requirements: Dict[str, Any]
-    performance_requirements: Dict[str, Any]
-    quality_requirements: Dict[str, Any]
+    role_requirements: dict[str, Any]
+    context_requirements: dict[str, Any]
+    performance_requirements: dict[str, Any]
+    quality_requirements: dict[str, Any]
 
 @dataclass
 class OptimizationGoals:
@@ -131,14 +126,14 @@ class OptimizationGoals:
     target_token_count: Optional[int] = None
     min_quality_score: float = 0.7
     max_processing_time_ms: float = 500.0
-    custom_objectives: Dict[str, float] = field(default_factory=dict)
+    custom_objectives: dict[str, float] = field(default_factory=dict)
 
 @dataclass
 class OptimizedPrompt:
     """优化后的提示词"""
     original_prompt: str
     optimized_prompt: str
-    optimization_report: Dict[str, Any]
+    optimization_report: dict[str, Any]
     token_reduction: int
     quality_impact: float
     processing_time_ms: float
@@ -147,9 +142,9 @@ class OptimizedPrompt:
 class PerformanceAnalysis:
     """性能分析结果"""
     prompt_id: str
-    metrics: Dict[str, float]
-    bottlenecks: List[str]
-    recommendations: List[str]
+    metrics: dict[str, float]
+    bottlenecks: list[str]
+    recommendations: list[str]
     analysis_time: datetime = field(default_factory=datetime.now)
 
 # ============= 核心接口定义 =============
@@ -161,7 +156,7 @@ class IContextAssemblyEngine(ABC):
     async def assemble_context(
         self, 
         context_spec: ContextSpec,
-        sources: List[ContextSource],
+        sources: list[ContextSource],
         constraints: ContextConstraints
     ) -> AssembledContext:
         """组装上下文"""
@@ -180,7 +175,7 @@ class IContextAssemblyEngine(ABC):
     async def validate_context_quality(
         self,
         context: AssembledContext
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """验证上下文质量"""
         pass
 
@@ -191,7 +186,7 @@ class ITemplateManager(ABC):
     async def get_template(
         self, 
         template_id: str,
-        context: Dict[str, Any]
+        context: dict[str, Any]
     ) -> PromptTemplate:
         """获取模板"""
         pass
@@ -216,8 +211,8 @@ class ITemplateManager(ABC):
     @abstractmethod
     async def list_templates(
         self,
-        filters: Dict[str, Any] = None
-    ) -> List[PromptTemplate]:
+        filters: dict[str, Any] = None
+    ) -> list[PromptTemplate]:
         """列出模板"""
         pass
 
@@ -237,7 +232,7 @@ class IOptimizationEngine(ABC):
     async def analyze_performance(
         self,
         prompt: str,
-        context: Dict[str, Any]
+        context: dict[str, Any]
     ) -> PerformanceAnalysis:
         """分析性能"""
         pass
@@ -246,8 +241,8 @@ class IOptimizationEngine(ABC):
     async def suggest_improvements(
         self,
         prompt: str,
-        performance_data: Dict[str, Any]
-    ) -> List[str]:
+        performance_data: dict[str, Any]
+    ) -> list[str]:
         """建议改进"""
         pass
 
@@ -258,16 +253,16 @@ class IQualityAssurance(ABC):
     async def validate_prompt(
         self,
         prompt: str,
-        criteria: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        criteria: dict[str, Any]
+    ) -> dict[str, Any]:
         """验证提示词"""
         pass
     
     @abstractmethod
     async def check_consistency(
         self,
-        prompts: List[str]
-    ) -> Dict[str, Any]:
+        prompts: list[str]
+    ) -> dict[str, Any]:
         """检查一致性"""
         pass
     
@@ -276,8 +271,8 @@ class IQualityAssurance(ABC):
         self,
         prompt_a: str,
         prompt_b: str,
-        test_config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        test_config: dict[str, Any]
+    ) -> dict[str, Any]:
         """运行A/B测试"""
         pass
 
@@ -300,12 +295,12 @@ class IPromptBuildingService(ABC):
         context_spec: ContextSpec,
         template_id: Optional[str] = None,
         optimization_goals: Optional[OptimizationGoals] = None
-    ) -> Tuple[str, Dict[str, Any]]:
+    ) -> tuple[str, dict[str, Any]]:
         """构建提示词并返回分析信息"""
         pass
     
     @abstractmethod
-    async def get_service_status(self) -> Dict[str, Any]:
+    async def get_service_status(self) -> dict[str, Any]:
         """获取服务状态"""
         pass
 
@@ -321,7 +316,7 @@ class ContextAssemblyEngine(IContextAssemblyEngine):
     async def assemble_context(
         self, 
         context_spec: ContextSpec,
-        sources: List[ContextSource],
+        sources: list[ContextSource],
         constraints: ContextConstraints
     ) -> AssembledContext:
         """组装上下文"""
@@ -435,7 +430,7 @@ class ContextAssemblyEngine(IContextAssemblyEngine):
     
     def _calculate_quality_score(
         self, 
-        sources: List[ContextSource], 
+        sources: list[ContextSource], 
         context_spec: ContextSpec, 
         constraints: ContextConstraints
     ) -> float:
@@ -529,7 +524,7 @@ class ContextAssemblyEngine(IContextAssemblyEngine):
     async def validate_context_quality(
         self,
         context: AssembledContext
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """验证上下文质量"""
         validation_result = {
             "is_valid": True,
@@ -595,7 +590,7 @@ class TemplateManager(ITemplateManager):
     async def get_template(
         self, 
         template_id: str,
-        context: Dict[str, Any]
+        context: dict[str, Any]
     ) -> PromptTemplate:
         """获取模板"""
         # 先检查缓存
@@ -717,7 +712,7 @@ class TemplateManager(ITemplateManager):
         
         return base_templates.get(scenario, base_templates["casual_discussion"])
     
-    def _extract_variables(self, template_content: str) -> List[str]:
+    def _extract_variables(self, template_content: str) -> list[str]:
         """从模板内容中提取变量"""
         import re
         variables = re.findall(r'\{(\w+)\}', template_content)
@@ -759,8 +754,8 @@ class TemplateManager(ITemplateManager):
     
     async def list_templates(
         self,
-        filters: Dict[str, Any] = None
-    ) -> List[PromptTemplate]:
+        filters: dict[str, Any] = None
+    ) -> list[PromptTemplate]:
         """列出模板"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -980,7 +975,7 @@ class OptimizationEngine(IOptimizationEngine):
         else:
             return 0.5  # 较大影响
     
-    def _get_applied_optimizations(self, original: str, optimized: str) -> List[str]:
+    def _get_applied_optimizations(self, original: str, optimized: str) -> list[str]:
         """获取应用的优化策略"""
         optimizations = []
         
@@ -998,7 +993,7 @@ class OptimizationEngine(IOptimizationEngine):
     async def analyze_performance(
         self,
         prompt: str,
-        context: Dict[str, Any]
+        context: dict[str, Any]
     ) -> PerformanceAnalysis:
         """分析性能"""
         metrics = {}
@@ -1054,7 +1049,7 @@ class OptimizationEngine(IOptimizationEngine):
         
         return sum(complexity_factors.values()) / len(complexity_factors)
     
-    def _calculate_relevance(self, prompt: str, context: Dict[str, Any]) -> float:
+    def _calculate_relevance(self, prompt: str, context: dict[str, Any]) -> float:
         """计算相关性"""
         if not context:
             return 0.5
@@ -1080,8 +1075,8 @@ class OptimizationEngine(IOptimizationEngine):
     async def suggest_improvements(
         self,
         prompt: str,
-        performance_data: Dict[str, Any]
-    ) -> List[str]:
+        performance_data: dict[str, Any]
+    ) -> list[str]:
         """建议改进"""
         suggestions = []
         
@@ -1115,8 +1110,8 @@ class QualityAssurance(IQualityAssurance):
     async def validate_prompt(
         self,
         prompt: str,
-        criteria: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        criteria: dict[str, Any]
+    ) -> dict[str, Any]:
         """验证提示词"""
         validation_result = {
             "is_valid": True,
@@ -1228,7 +1223,7 @@ class QualityAssurance(IQualityAssurance):
         
         return min(connections / len(non_empty_lines), 1.0)
     
-    def _check_structure(self, prompt: str) -> List[str]:
+    def _check_structure(self, prompt: str) -> list[str]:
         """检查结构问题"""
         issues = []
         
@@ -1248,7 +1243,7 @@ class QualityAssurance(IQualityAssurance):
         
         return issues
     
-    def _generate_improvement_suggestions(self, prompt: str, issues: List[str]) -> List[str]:
+    def _generate_improvement_suggestions(self, prompt: str, issues: list[str]) -> list[str]:
         """生成改进建议"""
         suggestions = []
         
@@ -1266,8 +1261,8 @@ class QualityAssurance(IQualityAssurance):
     
     async def check_consistency(
         self,
-        prompts: List[str]
-    ) -> Dict[str, Any]:
+        prompts: list[str]
+    ) -> dict[str, Any]:
         """检查一致性"""
         if len(prompts) < 2:
             return {"consistent": True, "message": "需要至少2个提示词进行比较"}
@@ -1288,7 +1283,7 @@ class QualityAssurance(IQualityAssurance):
             "recommendations": self._get_consistency_recommendations(consistency_metrics)
         }
     
-    def _check_style_consistency(self, prompts: List[str]) -> float:
+    def _check_style_consistency(self, prompts: list[str]) -> float:
         """检查风格一致性"""
         # 检查指令词使用的一致性
         instruction_patterns = []
@@ -1315,7 +1310,7 @@ class QualityAssurance(IQualityAssurance):
         
         return matches / total_checks if total_checks > 0 else 1.0
     
-    def _check_length_consistency(self, prompts: List[str]) -> float:
+    def _check_length_consistency(self, prompts: list[str]) -> float:
         """检查长度一致性"""
         lengths = [len(prompt) for prompt in prompts]
         if not lengths:
@@ -1328,7 +1323,7 @@ class QualityAssurance(IQualityAssurance):
         # CV < 0.3 认为是一致的
         return max(0, 1.0 - coefficient_of_variation / 0.3)
     
-    def _check_structure_consistency(self, prompts: List[str]) -> float:
+    def _check_structure_consistency(self, prompts: list[str]) -> float:
         """检查结构一致性"""
         structures = []
         for prompt in prompts:
@@ -1353,7 +1348,7 @@ class QualityAssurance(IQualityAssurance):
         
         return matches / total_checks if total_checks > 0 else 1.0
     
-    def _check_tone_consistency(self, prompts: List[str]) -> float:
+    def _check_tone_consistency(self, prompts: list[str]) -> float:
         """检查语调一致性"""
         tones = []
         for prompt in prompts:
@@ -1378,7 +1373,7 @@ class QualityAssurance(IQualityAssurance):
         
         return matches / total_checks if total_checks > 0 else 1.0
     
-    def _get_consistency_recommendations(self, metrics: Dict[str, float]) -> List[str]:
+    def _get_consistency_recommendations(self, metrics: dict[str, float]) -> list[str]:
         """获取一致性建议"""
         recommendations = []
         
@@ -1400,8 +1395,8 @@ class QualityAssurance(IQualityAssurance):
         self,
         prompt_a: str,
         prompt_b: str,
-        test_config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        test_config: dict[str, Any]
+    ) -> dict[str, Any]:
         """运行A/B测试"""
         test_id = f"ab_test_{int(time.time())}"
         
@@ -1459,7 +1454,7 @@ class QualityAssurance(IQualityAssurance):
         
         return result
     
-    async def _analyze_prompt_for_ab_test(self, prompt: str) -> Dict[str, Any]:
+    async def _analyze_prompt_for_ab_test(self, prompt: str) -> dict[str, Any]:
         """为A/B测试分析提示词"""
         return {
             "token_count": TokenCounter.count_tokens(prompt),
@@ -1473,7 +1468,7 @@ class QualityAssurance(IQualityAssurance):
         self, 
         winner: str, 
         confidence: float, 
-        comparison: Dict[str, Any]
+        comparison: dict[str, Any]
     ) -> str:
         """获取A/B测试建议"""
         if confidence < 0.1:
@@ -1518,8 +1513,7 @@ class PromptBuildingService(IPromptBuildingService):
                  templates_dir: str = "templates/prompts",
                  enable_caching: bool = True,
                  context_optimization_engine = None):
-        """
-        初始化提示词构建服务
+        """初始化提示词构建服务
         
         Args:
             templates_dir: 模板存储目录
@@ -1579,7 +1573,7 @@ class PromptBuildingService(IPromptBuildingService):
         context_spec: ContextSpec,
         template_id: Optional[str] = None,
         optimization_goals: Optional[OptimizationGoals] = None
-    ) -> Tuple[str, Dict[str, Any]]:
+    ) -> tuple[str, dict[str, Any]]:
         """构建提示词并返回分析信息"""
         start_time = time.time()
         
@@ -1681,7 +1675,7 @@ class PromptBuildingService(IPromptBuildingService):
             }
             raise Exception(f"提示词构建失败: {e}") from e
     
-    async def _extract_context_sources(self, context_spec: ContextSpec) -> List[ContextSource]:
+    async def _extract_context_sources(self, context_spec: ContextSpec) -> list[ContextSource]:
         """提取上下文源"""
         all_sources = []
         
@@ -1695,7 +1689,7 @@ class PromptBuildingService(IPromptBuildingService):
         
         return all_sources
     
-    async def _extract_memory_sources(self, context_spec: ContextSpec) -> List[ContextSource]:
+    async def _extract_memory_sources(self, context_spec: ContextSpec) -> list[ContextSource]:
         """提取记忆上下文源"""
         sources = []
         
@@ -1750,7 +1744,7 @@ class PromptBuildingService(IPromptBuildingService):
         
         return sources
     
-    async def _extract_conversation_sources(self, context_spec: ContextSpec) -> List[ContextSource]:
+    async def _extract_conversation_sources(self, context_spec: ContextSpec) -> list[ContextSource]:
         """提取对话上下文源"""
         sources = []
         
@@ -1768,7 +1762,7 @@ class PromptBuildingService(IPromptBuildingService):
         
         return sources
     
-    async def _extract_knowledge_sources(self, context_spec: ContextSpec) -> List[ContextSource]:
+    async def _extract_knowledge_sources(self, context_spec: ContextSpec) -> list[ContextSource]:
         """提取知识上下文源"""
         sources = []
         
@@ -1786,7 +1780,7 @@ class PromptBuildingService(IPromptBuildingService):
         
         return sources
     
-    async def _extract_role_sources(self, context_spec: ContextSpec) -> List[ContextSource]:
+    async def _extract_role_sources(self, context_spec: ContextSpec) -> list[ContextSource]:
         """提取角色上下文源"""
         sources = []
         
@@ -1805,7 +1799,7 @@ class PromptBuildingService(IPromptBuildingService):
         
         return sources
     
-    async def _extract_system_sources(self, context_spec: ContextSpec) -> List[ContextSource]:
+    async def _extract_system_sources(self, context_spec: ContextSpec) -> list[ContextSource]:
         """提取系统上下文源"""
         sources = []
         
@@ -1899,7 +1893,7 @@ class PromptBuildingService(IPromptBuildingService):
         
         return hashlib.md5("|".join(key_components).encode()).hexdigest()
     
-    async def get_service_status(self) -> Dict[str, Any]:
+    async def get_service_status(self) -> dict[str, Any]:
         """获取服务状态"""
         cache_size = len(self.prompt_cache) if self.prompt_cache else 0
         

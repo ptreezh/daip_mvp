@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.1.3 多角色对话功能集成测试
+"""V0.1.3 多角色对话功能集成测试
 
 正确的方法：测试和验证现有PersonalAssistantService的多角色对话功能
 而不是重新开发新的组件
@@ -10,18 +8,13 @@ V0.1.3 多角色对话功能集成测试
 import asyncio
 import sys
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 # 添加项目根目录到路径
 project_root = Path(__file__).parent
 sys.path.append(str(project_root))
 
-from personal_intelligence_hub.services.personal_assistant import (
-    PersonalAssistantService,
-    WorkflowType,
-    IntentResult,
-    TeamProposal
-)
+from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService, WorkflowType
 
 
 async def test_existing_personal_assistant_service():
@@ -74,7 +67,7 @@ async def test_existing_personal_assistant_service():
             {"user_id": "test_user", "message_history": []}
         )
         
-        print(f"✅ 意图分析成功")
+        print("✅ 意图分析成功")
         print(f"   - 工作流类型: {intent_result.workflowType}")
         print(f"   - 置信度: {intent_result.confidence}")
         print(f"   - 推理: {intent_result.reasoning}")
@@ -91,7 +84,7 @@ async def test_existing_personal_assistant_service():
             intent_result.workflowType
         )
         
-        print(f"✅ 团队组建成功")
+        print("✅ 团队组建成功")
         print(f"   - 团队成员: {team_proposal.agents}")
         print(f"   - 多样性评分: {team_proposal.diversity_score}")
         print(f"   - 组建理由: {team_proposal.rationale}")
@@ -108,7 +101,7 @@ async def test_existing_personal_assistant_service():
             "test_session_123"
         )
         
-        print(f"✅ 消息处理成功")
+        print("✅ 消息处理成功")
         print(f"   - 响应长度: {len(response)}字符")
         print(f"   - 响应预览: {response[:100]}...")
         
@@ -121,7 +114,7 @@ async def test_existing_personal_assistant_service():
         # 测试共识计算命令
         consensus_response = await service.execute_command("/consensus now", "test_session_123")
         
-        print(f"✅ 共识计算命令执行成功")
+        print("✅ 共识计算命令执行成功")
         print(f"   - 响应: {consensus_response[:150]}...")
         
         assert "共识计算完成" in consensus_response
@@ -130,7 +123,7 @@ async def test_existing_personal_assistant_service():
         # 测试状态查询命令
         status_response = await service.execute_command("/status", "test_session_123")
         
-        print(f"✅ 状态查询命令执行成功")
+        print("✅ 状态查询命令执行成功")
         print(f"   - 响应: {status_response[:100]}...")
         
         assert "系统状态" in status_response
@@ -138,7 +131,7 @@ async def test_existing_personal_assistant_service():
         # 测试帮助命令
         help_response = await service.execute_command("/help", "test_session_123")
         
-        print(f"✅ 帮助命令执行成功")
+        print("✅ 帮助命令执行成功")
         print(f"   - 可用命令数: {help_response.count('/')}")
         
         assert "/consensus now" in help_response
@@ -306,7 +299,7 @@ async def main():
         "组件集成测试"
     ]
     
-    for i, (name, result) in enumerate(zip(test_names, results)):
+    for i, (name, result) in enumerate(zip(test_names, results, strict=False)):
         status = "✅ 通过" if result else "❌ 失败"
         print(f"   {i+1}. {name}: {status}")
     

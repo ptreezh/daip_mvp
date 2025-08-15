@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-修复f-string问题
+"""修复f-string问题
 """
 
 from pathlib import Path
-import re
+
 
 def fix_fstring_issue():
     """修复f-string中的括号问题"""

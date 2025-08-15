@@ -1,30 +1,29 @@
-# -*- coding: utf-8 -*-
-"""
-Integration Patterns for Multi-Agent Collaboration System
+"""Integration Patterns for Multi-Agent Collaboration System
 
 Provides integration patterns and utilities for connecting the multi-agent
 collaboration system with existing DAIP services and external systems.
 """
 
 import asyncio
-import json
 import logging
-from typing import Any, Dict, List, Optional, Union, Callable
-from datetime import datetime
-from dataclasses import dataclass, field
-from enum import Enum
 import uuid
 import weakref
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional, Union
 
 from .multi_agent_collaboration_system import (
-    MultiAgentService, CollaborationSession, AgentMessage, AgentProfile,
-    CollaborationWebSocketManager, CollaborationAnalytics
+    CollaborationAnalytics,
+    CollaborationSession,
+    CollaborationWebSocketManager,
+    MultiAgentService,
 )
+
 # Import from institutional primitives with fallback
 try:
-    from .institutional_primitives import (
-        InstitutionalPrimitiveFactory, PrimitiveContext, PrimitiveResult
-    )
+    from .institutional_primitives import InstitutionalPrimitiveFactory, PrimitiveContext, PrimitiveResult
 except ImportError:
     # Define fallback classes if institutional primitives not available
     class PrimitiveContext:
@@ -79,8 +78,8 @@ class IntegrationEvent:
     event_id: str
     event_type: IntegrationEventType
     source_system: str
-    target_system: Union[str, List[str]]
-    payload: Dict[str, Any]
+    target_system: Union[str, list[str]]
+    payload: dict[str, Any]
     timestamp: datetime = field(default_factory=datetime.now)
     correlation_id: Optional[str] = None
     priority: int = 1  # 1-5, 5 being highest
@@ -91,7 +90,7 @@ class IntegrationAdapter:
     def __init__(self, adapter_id: str, target_system: str):
         self.adapter_id = adapter_id
         self.target_system = target_system
-        self.event_handlers: Dict[IntegrationEventType, List[Callable]] = {}
+        self.event_handlers: dict[IntegrationEventType, list[Callable]] = {}
         self.is_connected = False
     
     async def connect(self) -> bool:
@@ -226,7 +225,7 @@ class WebSocketIntegrationAdapter(IntegrationAdapter):
     def __init__(self, websocket_manager: CollaborationWebSocketManager):
         super().__init__("websocket_adapter", "websocket_clients")
         self.websocket_manager = websocket_manager
-        self.event_subscriptions: Dict[str, List[str]] = {}  # session_id -> subscribed clients
+        self.event_subscriptions: dict[str, list[str]] = {}  # session_id -> subscribed clients
     
     async def send_event(self, event: IntegrationEvent) -> bool:
         """Send event to WebSocket clients"""
@@ -255,9 +254,9 @@ class EventBus:
     """Central event bus for system integration"""
     
     def __init__(self):
-        self.adapters: Dict[str, IntegrationAdapter] = {}
+        self.adapters: dict[str, IntegrationAdapter] = {}
         self.event_queue: asyncio.Queue = asyncio.Queue()
-        self.event_handlers: Dict[IntegrationEventType, List[Callable]] = {}
+        self.event_handlers: dict[IntegrationEventType, list[Callable]] = {}
         self.is_running = False
     
     def register_adapter(self, adapter: IntegrationAdapter) -> None:
@@ -319,9 +318,9 @@ class ServiceRegistry:
     """Registry for managing service dependencies"""
     
     def __init__(self):
-        self.services: Dict[str, Any] = {}
-        self.service_factories: Dict[str, Callable] = {}
-        self.weak_references: Dict[str, weakref.ref] = {}
+        self.services: dict[str, Any] = {}
+        self.service_factories: dict[str, Callable] = {}
+        self.weak_references: dict[str, weakref.ref] = {}
     
     def register_service(self, service_name: str, service_instance: Any) -> None:
         """Register a service instance"""
@@ -355,7 +354,7 @@ class ServiceRegistry:
         
         return None
     
-    def list_services(self) -> List[str]:
+    def list_services(self) -> list[str]:
         """List all registered services"""
         return list(self.services.keys())
     
@@ -454,10 +453,9 @@ class MultiAgentIntegrationManager:
         self,
         user_input: str,
         user_id: str,
-        context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """Handle user request through integrated system"""
-        
         # Create session event
         session_id = str(uuid.uuid4())
         event = IntegrationEvent(
@@ -566,7 +564,7 @@ class WebSocketIntegrationHandler:
     async def handle_websocket_message(
         self, 
         websocket: Any, 
-        message: Dict[str, Any]
+        message: dict[str, Any]
     ) -> None:
         """Handle incoming WebSocket message"""
         try:
@@ -596,7 +594,7 @@ class WebSocketIntegrationHandler:
         """Handle WebSocket disconnection"""
         await self.websocket_manager.disconnect(websocket)
     
-    async def _handle_user_message(self, websocket: Any, message: Dict[str, Any]) -> None:
+    async def _handle_user_message(self, websocket: Any, message: dict[str, Any]) -> None:
         """Handle user message from WebSocket"""
         user_input = message.get("content", "")
         user_id = message.get("user_id", "unknown")
@@ -620,7 +618,7 @@ class WebSocketIntegrationHandler:
         
         await websocket.send_json(response)
     
-    async def _handle_session_command(self, websocket: Any, message: Dict[str, Any]) -> None:
+    async def _handle_session_command(self, websocket: Any, message: dict[str, Any]) -> None:
         """Handle session command from WebSocket"""
         command = message.get("command")
         session_id = message.get("session_id")
@@ -649,7 +647,7 @@ class WebSocketIntegrationHandler:
             
             await websocket.send_json(response)
     
-    async def _handle_agent_request(self, websocket: Any, message: Dict[str, Any]) -> None:
+    async def _handle_agent_request(self, websocket: Any, message: dict[str, Any]) -> None:
         """Handle agent request from WebSocket"""
         request_type = message.get("request_type")
         
@@ -737,7 +735,7 @@ class FastAPIIntegrationHelper:
         
         return websocket_endpoint
     
-    def create_api_endpoints(self) -> Dict[str, Callable]:
+    def create_api_endpoints(self) -> dict[str, Callable]:
         """Create API endpoints for multi-agent collaboration"""
         endpoints = {}
         
@@ -805,7 +803,6 @@ class FastAPIIntegrationHelper:
 # Example usage and integration
 async def example_integration():
     """Example of how to use the integration system"""
-    
     # Initialize integration manager
     from src.app_state import AppState
     app_state = AppState()

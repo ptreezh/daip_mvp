@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 16:30:00
+"""@Time    : 2025-08-03 16:30:00
 @Author  : DAIP-LIVE Team
 @File    : enhanced_memory_management.py
 @Description:
@@ -16,15 +14,13 @@
 """
 
 import asyncio
-import logging
-import json
-import uuid
 import hashlib
-from typing import Dict, List, Any, Optional, Tuple, Set
-from datetime import datetime, timedelta
+import logging
+import uuid
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
-from abc import ABC, abstractmethod
+from typing import Any, Optional
 
 # 延迟加载的机器学习库
 _numpy = None
@@ -73,8 +69,8 @@ def _get_sklearn_cosine():
     return _sklearn_cosine
 
 # 导入现有组件
-from src.core_services.memory_agent import MemAgent, Memory, MemoryType
 from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
+from src.core_services.memory_agent import MemAgent, Memory, MemoryType
 
 logger = logging.getLogger(__name__)
 
@@ -98,11 +94,11 @@ class PersonalizationLevel(Enum):
 class UserBehaviorPattern:
     """用户行为模式"""
     user_id: str
-    session_patterns: Dict[str, Any] = field(default_factory=dict)
-    preference_patterns: Dict[str, Any] = field(default_factory=dict)
-    interaction_patterns: Dict[str, Any] = field(default_factory=dict)
-    temporal_patterns: Dict[str, Any] = field(default_factory=dict)
-    context_patterns: Dict[str, Any] = field(default_factory=dict)
+    session_patterns: dict[str, Any] = field(default_factory=dict)
+    preference_patterns: dict[str, Any] = field(default_factory=dict)
+    interaction_patterns: dict[str, Any] = field(default_factory=dict)
+    temporal_patterns: dict[str, Any] = field(default_factory=dict)
+    context_patterns: dict[str, Any] = field(default_factory=dict)
     learning_velocity: float = 0.5
     confidence_score: float = 0.0
     last_updated: datetime = field(default_factory=datetime.now)
@@ -111,25 +107,25 @@ class UserBehaviorPattern:
 class ContextWindow:
     """上下文窗口"""
     window_id: str
-    content: List[Dict[str, Any]]
+    content: list[dict[str, Any]]
     start_time: datetime
     end_time: Optional[datetime] = None
     importance_score: float = 0.0
     summary: Optional[str] = None
-    key_entities: List[str] = field(default_factory=list)
-    emotions: Dict[str, float] = field(default_factory=dict)
+    key_entities: list[str] = field(default_factory=list)
+    emotions: dict[str, float] = field(default_factory=dict)
     compressed: bool = False
 
 @dataclass
 class PersonalizationProfile:
     """个性化档案"""
     user_id: str
-    preferences: Dict[str, Any] = field(default_factory=dict)
-    learned_patterns: Dict[str, Any] = field(default_factory=dict)
-    adaptation_history: List[Dict[str, Any]] = field(default_factory=list)
+    preferences: dict[str, Any] = field(default_factory=dict)
+    learned_patterns: dict[str, Any] = field(default_factory=dict)
+    adaptation_history: list[dict[str, Any]] = field(default_factory=list)
     personalization_level: PersonalizationLevel = PersonalizationLevel.BASIC
     trust_score: float = 0.5
-    privacy_settings: Dict[str, Any] = field(default_factory=dict)
+    privacy_settings: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
 
@@ -151,15 +147,15 @@ class EnhancedMemoryManager:
         self.learning_rate = learning_rate
         
         # 用户行为分析
-        self.user_patterns: Dict[str, UserBehaviorPattern] = {}
-        self.personalization_profiles: Dict[str, PersonalizationProfile] = {}
+        self.user_patterns: dict[str, UserBehaviorPattern] = {}
+        self.personalization_profiles: dict[str, PersonalizationProfile] = {}
         
         # 上下文管理
-        self.context_windows: Dict[str, List[ContextWindow]] = {}
-        self.active_contexts: Dict[str, str] = {}  # user_id -> active_window_id
+        self.context_windows: dict[str, list[ContextWindow]] = {}
+        self.active_contexts: dict[str, str] = {}  # user_id -> active_window_id
         
         # 学习系统
-        self.learning_signals: List[Tuple[str, LearningSignal, Dict[str, Any]]] = []
+        self.learning_signals: list[tuple[str, LearningSignal, dict[str, Any]]] = []
         self.adaptation_engine = AdaptationEngine(self)
         
         # 隐私保护
@@ -225,10 +221,9 @@ class EnhancedMemoryManager:
                                    user_id: str,
                                    content: str,
                                    memory_type: MemoryType = MemoryType.EPISODIC,
-                                   context: Optional[Dict[str, Any]] = None,
-                                   importance_hints: Optional[List[str]] = None) -> str:
+                                   context: Optional[dict[str, Any]] = None,
+                                   importance_hints: Optional[list[str]] = None) -> str:
         """增强的记忆存储"""
-        
         # 1. 计算动态重要性
         importance = await self._calculate_dynamic_importance(
             user_id, content, memory_type, context, importance_hints
@@ -279,9 +274,8 @@ class EnhancedMemoryManager:
                                          query: str,
                                          max_memories: int = 10,
                                          context_aware: bool = True,
-                                         personalized: bool = True) -> List[Memory]:
+                                         personalized: bool = True) -> list[Memory]:
         """智能记忆检索"""
-        
         # 1. 分析查询意图
         query_analysis = await self._analyze_query_intent(user_id, query)
         
@@ -333,9 +327,8 @@ class EnhancedMemoryManager:
     async def adaptive_context_management(self, 
                                          user_id: str,
                                          new_content: str,
-                                         force_compression: bool = False) -> Dict[str, Any]:
+                                         force_compression: bool = False) -> dict[str, Any]:
         """自适应上下文管理"""
-        
         # 1. 获取当前上下文窗口
         current_window = await self._get_current_context_window(user_id)
         
@@ -378,9 +371,8 @@ class EnhancedMemoryManager:
         
         return result
     
-    async def cross_session_continuity(self, user_id: str) -> Dict[str, Any]:
+    async def cross_session_continuity(self, user_id: str) -> dict[str, Any]:
         """跨会话连贯性管理"""
-        
         # 1. 检索用户历史会话
         historical_sessions = await self._retrieve_historical_sessions(user_id)
         
@@ -418,9 +410,8 @@ class EnhancedMemoryManager:
             "session_connection_strength": continuity_analysis.get("connection_strength", 0)
         }
     
-    async def personalized_recommendation_engine(self, user_id: str) -> Dict[str, Any]:
+    async def personalized_recommendation_engine(self, user_id: str) -> dict[str, Any]:
         """个性化推荐引擎"""
-        
         # 1. 获取用户个性化档案
         profile = await self._get_personalization_profile(user_id)
         
@@ -455,10 +446,9 @@ class EnhancedMemoryManager:
     
     async def privacy_aware_processing(self, 
                                       user_id: str,
-                                      data: Dict[str, Any],
-                                      operation: str) -> Dict[str, Any]:
+                                      data: dict[str, Any],
+                                      operation: str) -> dict[str, Any]:
         """隐私感知处理"""
-        
         # 1. 检查隐私设置
         privacy_settings = await self._get_user_privacy_settings(user_id)
         
@@ -496,8 +486,8 @@ class EnhancedMemoryManager:
                                            user_id: str,
                                            content: str,
                                            memory_type: MemoryType,
-                                           context: Optional[Dict[str, Any]],
-                                           hints: Optional[List[str]]) -> float:
+                                           context: Optional[dict[str, Any]],
+                                           hints: Optional[list[str]]) -> float:
         """计算动态重要性"""
         base_importance = 0.5
         
@@ -531,7 +521,7 @@ class EnhancedMemoryManager:
     
     async def _extract_context_information(self, 
                                           content: str,
-                                          context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+                                          context: Optional[dict[str, Any]]) -> dict[str, Any]:
         """提取上下文信息"""
         extracted = {
             "entities": await self._extract_named_entities(content),
@@ -549,7 +539,7 @@ class EnhancedMemoryManager:
     async def _personalize_memory_content(self,
                                          user_id: str,
                                          content: str,
-                                         context: Dict[str, Any]) -> str:
+                                         context: dict[str, Any]) -> str:
         """个性化记忆内容"""
         profile = await self._get_personalization_profile(user_id)
         
@@ -572,7 +562,7 @@ class EnhancedMemoryManager:
     async def _emit_learning_signal(self,
                                    user_id: str,
                                    signal_type: LearningSignal,
-                                   data: Dict[str, Any]):
+                                   data: dict[str, Any]):
         """发出学习信号"""
         signal = (user_id, signal_type, {
             **data,
@@ -604,7 +594,7 @@ class EnhancedMemoryManager:
         # 清空已处理的信号
         self.learning_signals.clear()
     
-    def get_memory_statistics(self, user_id: Optional[str] = None) -> Dict[str, Any]:
+    def get_memory_statistics(self, user_id: Optional[str] = None) -> dict[str, Any]:
         """获取记忆统计信息"""
         stats = {
             "total_memories": 0,
@@ -647,9 +637,8 @@ class AdaptationEngine:
     
     async def adapt_to_user_behavior(self, 
                                     user_id: str,
-                                    behavior_data: Dict[str, Any]) -> Dict[str, Any]:
+                                    behavior_data: dict[str, Any]) -> dict[str, Any]:
         """根据用户行为进行自适应"""
-        
         # 分析行为模式
         patterns = await self._analyze_behavior_patterns(user_id, behavior_data)
         
@@ -664,7 +653,7 @@ class AdaptationEngine:
         
         return adaptation_result
     
-    async def _analyze_behavior_patterns(self, user_id: str, behavior_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _analyze_behavior_patterns(self, user_id: str, behavior_data: dict[str, Any]) -> dict[str, Any]:
         """分析行为模式"""
         # 实现行为模式分析逻辑
         return {
@@ -674,7 +663,7 @@ class AdaptationEngine:
             "feedback_patterns": behavior_data.get("feedback_ratio", 0.5)
         }
     
-    async def _update_learning_model(self, user_id: str, patterns: Dict[str, Any]):
+    async def _update_learning_model(self, user_id: str, patterns: dict[str, Any]):
         """更新学习模型"""
         if user_id not in self.learning_models:
             self.learning_models[user_id] = {
@@ -686,7 +675,7 @@ class AdaptationEngine:
         # 更新偏好模型
         self.learning_models[user_id]["preference_model"].update(patterns)
         
-    async def _generate_adaptation_strategy(self, user_id: str, patterns: Dict[str, Any]) -> Dict[str, Any]:
+    async def _generate_adaptation_strategy(self, user_id: str, patterns: dict[str, Any]) -> dict[str, Any]:
         """生成适应策略"""
         return {
             "memory_importance_weights": await self._calculate_importance_weights(patterns),
@@ -694,7 +683,7 @@ class AdaptationEngine:
             "personalization_adjustments": await self._calculate_personalization_adjustments(patterns)
         }
     
-    async def _apply_adaptation(self, user_id: str, strategy: Dict[str, Any]) -> Dict[str, Any]:
+    async def _apply_adaptation(self, user_id: str, strategy: dict[str, Any]) -> dict[str, Any]:
         """应用适应策略"""
         # 实现适应策略应用逻辑
         return {
@@ -711,8 +700,8 @@ class PrivacyManager:
         self.encryption_keys = {}
         
     async def anonymize_data(self, 
-                            data: Dict[str, Any], 
-                            privacy_settings: Dict[str, Any]) -> Dict[str, Any]:
+                            data: dict[str, Any], 
+                            privacy_settings: dict[str, Any]) -> dict[str, Any]:
         """数据匿名化"""
         anonymized = data.copy()
         
@@ -728,7 +717,7 @@ class PrivacyManager:
         
         return anonymized
     
-    async def _high_level_anonymization(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _high_level_anonymization(self, data: dict[str, Any]) -> dict[str, Any]:
         """高级别匿名化"""
         # 移除或hash所有可识别信息
         sensitive_fields = ["name", "email", "phone", "address", "id"]
@@ -739,7 +728,7 @@ class PrivacyManager:
         
         return data
     
-    async def _medium_level_anonymization(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _medium_level_anonymization(self, data: dict[str, Any]) -> dict[str, Any]:
         """中等级别匿名化"""
         # 部分匿名化
         if "email" in data:

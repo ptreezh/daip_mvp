@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 11:15:00
+"""@Time    : 2025-08-06 11:15:00
 @Author  : DAIP-LIVE Team
 @File    : forum_context_panel.py
 @Description:
     Forum上下文面板组件 - 实时显示共识跟踪和辩论状态
 """
 
-import asyncio
 import logging
-from typing import Dict, Any, List, Optional
-from datetime import datetime
+from typing import Any
 
+from lona.html import HTML, Div
 from lona.html.widget import Widget
-from lona.html import HTML, Div, P, Span, H4, H5, Progress
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -49,7 +45,7 @@ class ForumContextPanel(Widget):
         
         logger.info(f"Forum上下文面板初始化完成，会话ID: {self.session_id}")
     
-    def update_context(self, context_data: Dict[str, Any]):
+    def update_context(self, context_data: dict[str, Any]):
         """更新上下文信息"""
         try:
             self.topic = context_data.get("topic", "")
@@ -110,20 +106,16 @@ class ForumContextPanel(Widget):
         consensus_color = self.get_consensus_color()
         consensus_description = self.get_consensus_description()
         
-        meter_content = HTML("""
+        meter_content = HTML(f"""
             <div class="consensus-header">
                 <span class="consensus-title">📊 共识度</span>
-                <span class="consensus-value">{percentage}%</span>
+                <span class="consensus-value">{consensus_percentage}%</span>
             </div>
             <div class="consensus-bar-container">
-                <div class="consensus-bar consensus-{color}" style="width: {percentage}%"></div>
+                <div class="consensus-bar consensus-{consensus_color}" style="width: {consensus_percentage}%"></div>
             </div>
-            <div class="consensus-description">{description}</div>
-        """.format(
-            percentage=consensus_percentage,
-            color=consensus_color,
-            description=consensus_description
-        ))
+            <div class="consensus-description">{consensus_description}</div>
+        """)
         
         self.consensus_meter.set_html(meter_content)
     
@@ -367,12 +359,12 @@ class ForumContextPanel(Widget):
         self.consensus_level = level
         self.update_consensus_meter()
     
-    def set_active_agents(self, agents: List[str]):
+    def set_active_agents(self, agents: list[str]):
         """设置活跃Agent"""
         self.active_agents = agents
         self.update_agents_list()
     
-    def add_key_argument(self, argument: Dict[str, Any]):
+    def add_key_argument(self, argument: dict[str, Any]):
         """添加关键论点"""
         self.key_arguments.append(argument)
         self.update_arguments_list()
@@ -397,7 +389,7 @@ class ForumContextPanel(Widget):
         self.session_duration = duration
         self.update_session_stats()
     
-    def get_context_summary(self) -> Dict[str, Any]:
+    def get_context_summary(self) -> dict[str, Any]:
         """获取上下文摘要"""
         return {
             "session_id": self.session_id,

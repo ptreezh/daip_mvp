@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : use_cases.py
 @Description:
@@ -9,22 +7,20 @@
     between entities, value objects, and domain services.
 """
 
-from typing import Dict, Any, List, Optional
-from datetime import datetime
-from abc import ABC, abstractmethod
 import asyncio
+from abc import ABC, abstractmethod
+from datetime import datetime
+from typing import Any
 
-from .entities import User, Session, Task, Message, UserMessage, AgentMessage
-from .value_objects import (
-    EntranceType, IntentType, TaskStatus, SessionStatus, 
-    MessageIntent, ConsensusLevel, UserPreference, 
-    TaskPriority, TimeInterval
-)
-from .aggregates import SessionAggregate, TaskAggregate, DebateAggregate
+from .aggregates import SessionAggregate, TaskAggregate
 from .domain_services import (
-    EntranceSelectorService, WorkflowOrchestratorService, 
-    UserInterventionService, ConsensusTrackingService
+    ConsensusTrackingService,
+    EntranceSelectorService,
+    UserInterventionService,
+    WorkflowOrchestratorService,
 )
+from .entities import AgentMessage, Session, Task, User, UserMessage
+from .value_objects import EntranceType, IntentType, MessageIntent, TaskPriority
 
 
 class BaseUseCase(ABC):
@@ -37,7 +33,7 @@ class BaseUseCase(ABC):
         self.consensus_tracker = ConsensusTrackingService()
     
     @abstractmethod
-    async def execute(self, *args, **kwargs) -> Dict[str, Any]:
+    async def execute(self, *args, **kwargs) -> dict[str, Any]:
         """执行用例"""
         pass
 
@@ -65,7 +61,7 @@ class SecretariatUseCase(BaseUseCase):
         
         return session
     
-    async def submit_task(self, session_id: str, task_request: Dict[str, Any]) -> Dict[str, Any]:
+    async def submit_task(self, session_id: str, task_request: dict[str, Any]) -> dict[str, Any]:
         """提交任务"""
         if session_id not in self.active_sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -120,7 +116,7 @@ class SecretariatUseCase(BaseUseCase):
             "session_id": session_id
         }
     
-    async def _execute_task_async(self, task_aggregate: TaskAggregate, workflow_plan: Dict[str, Any]):
+    async def _execute_task_async(self, task_aggregate: TaskAggregate, workflow_plan: dict[str, Any]):
         """异步执行任务"""
         try:
             task = task_aggregate.task
@@ -145,7 +141,7 @@ class SecretariatUseCase(BaseUseCase):
         except Exception as e:
             task_aggregate.fail_execution(str(e))
     
-    async def _generate_task_result(self, task: Task, workflow_plan: Dict[str, Any]) -> str:
+    async def _generate_task_result(self, task: Task, workflow_plan: dict[str, Any]) -> str:
         """生成任务结果"""
         # 简化的结果生成逻辑
         intent_type = task.intent_type
@@ -175,7 +171,7 @@ class SecretariatUseCase(BaseUseCase):
         
         return (length_factor * 0.4 + keyword_factor * 0.6)
     
-    async def get_task_progress(self, task_id: str) -> Dict[str, Any]:
+    async def get_task_progress(self, task_id: str) -> dict[str, Any]:
         """获取任务进度"""
         if task_id not in self.active_tasks:
             raise ValueError(f"Task {task_id} not found")
@@ -216,7 +212,7 @@ class SecretariatUseCase(BaseUseCase):
             "step_results": {}
         }
     
-    async def get_task_result(self, task_id: str) -> Dict[str, Any]:
+    async def get_task_result(self, task_id: str) -> dict[str, Any]:
         """获取任务结果"""
         if task_id not in self.active_tasks:
             raise ValueError(f"Task {task_id} not found")
@@ -236,7 +232,7 @@ class SecretariatUseCase(BaseUseCase):
             "execution_history": task_aggregate.get_execution_history()
         }
     
-    async def get_transparency_data(self, task_id: str) -> Dict[str, Any]:
+    async def get_transparency_data(self, task_id: str) -> dict[str, Any]:
         """获取透明度数据"""
         if task_id not in self.active_tasks:
             raise ValueError(f"Task {task_id} not found")
@@ -255,7 +251,7 @@ class SecretariatUseCase(BaseUseCase):
             }
         }
     
-    def _extract_agent_activities(self, task_aggregate: TaskAggregate) -> List[Dict[str, Any]]:
+    def _extract_agent_activities(self, task_aggregate: TaskAggregate) -> list[dict[str, Any]]:
         """提取Agent活动"""
         activities = []
         
@@ -271,7 +267,7 @@ class SecretariatUseCase(BaseUseCase):
         
         return activities
     
-    async def get_session_tasks(self, session_id: str) -> List[Dict[str, Any]]:
+    async def get_session_tasks(self, session_id: str) -> list[dict[str, Any]]:
         """获取会话的任务列表"""
         if session_id not in self.active_sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -292,7 +288,7 @@ class SecretariatUseCase(BaseUseCase):
             for task in tasks
         ]
     
-    async def get_system_status(self) -> Dict[str, Any]:
+    async def get_system_status(self) -> dict[str, Any]:
         """获取系统状态"""
         return {
             "status": "operational",
@@ -312,7 +308,7 @@ class ForumUseCase(BaseUseCase):
         self.active_sessions = {}
         self.active_debates = {}
     
-    async def create_forum_session(self, user: User, session_config: Dict[str, Any]) -> Session:
+    async def create_forum_session(self, user: User, session_config: dict[str, Any]) -> Session:
         """创建Forum会话"""
         topic = session_config.get("topic", "")
         if not topic:
@@ -340,7 +336,7 @@ class ForumUseCase(BaseUseCase):
         
         return session
     
-    async def start_debate(self, session_id: str) -> Dict[str, Any]:
+    async def start_debate(self, session_id: str) -> dict[str, Any]:
         """启动辩论"""
         if session_id not in self.active_sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -384,7 +380,7 @@ class ForumUseCase(BaseUseCase):
             "initial_messages": len(initial_messages)
         }
     
-    async def handle_user_intervention(self, session_id: str, intervention_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def handle_user_intervention(self, session_id: str, intervention_data: dict[str, Any]) -> dict[str, Any]:
         """处理用户干预"""
         if session_id not in self.active_sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -492,7 +488,7 @@ class ForumUseCase(BaseUseCase):
             )
             debate.add_message(error_message)
     
-    async def get_debate_context(self, session_id: str) -> Dict[str, Any]:
+    async def get_debate_context(self, session_id: str) -> dict[str, Any]:
         """获取辩论上下文"""
         if session_id not in self.active_sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -524,7 +520,7 @@ class ForumUseCase(BaseUseCase):
             "last_activity": debate.updated_at.isoformat()
         }
     
-    async def get_debate_messages(self, session_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+    async def get_debate_messages(self, session_id: str, limit: int = 50) -> list[dict[str, Any]]:
         """获取辩论消息"""
         if session_id not in self.active_sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -551,7 +547,7 @@ class ForumUseCase(BaseUseCase):
             for msg in reversed(recent_messages)  # 按时间正序返回
         ]
     
-    async def control_debate(self, session_id: str, action: str) -> Dict[str, Any]:
+    async def control_debate(self, session_id: str, action: str) -> dict[str, Any]:
         """控制辩论"""
         if session_id not in self.active_sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -585,7 +581,7 @@ class ForumUseCase(BaseUseCase):
             "timestamp": datetime.now().isoformat()
         }
     
-    async def get_participant_activities(self, session_id: str) -> Dict[str, Any]:
+    async def get_participant_activities(self, session_id: str) -> dict[str, Any]:
         """获取参与者活动"""
         if session_id not in self.active_sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -642,7 +638,7 @@ class EntranceSwitchingUseCase(BaseUseCase):
         
         return new_session_aggregate.session
     
-    async def _extract_session_context(self, session_id: str) -> Dict[str, Any]:
+    async def _extract_session_context(self, session_id: str) -> dict[str, Any]:
         """提取会话上下文"""
         # 简化的上下文提取
         return {
@@ -659,17 +655,17 @@ class EntranceSwitchingUseCase(BaseUseCase):
             }
         }
     
-    async def _restore_session_context(self, session_aggregate: SessionAggregate, context_data: Dict[str, Any]):
+    async def _restore_session_context(self, session_aggregate: SessionAggregate, context_data: dict[str, Any]):
         """恢复会话上下文"""
         # 将上下文数据添加到会话元数据中
         for key, value in context_data.items():
             session_aggregate.update_metadata(f"context_{key}", value)
     
-    async def get_session_context(self, session_id: str) -> Dict[str, Any]:
+    async def get_session_context(self, session_id: str) -> dict[str, Any]:
         """获取会话上下文"""
         return self.session_context_store.get(session_id, {})
     
-    async def get_switching_suggestions(self, user_id: str, current_entrance: EntranceType) -> List[Dict[str, Any]]:
+    async def get_switching_suggestions(self, user_id: str, current_entrance: EntranceType) -> list[dict[str, Any]]:
         """获取切换建议"""
         suggestions = []
         

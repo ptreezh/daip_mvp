@@ -1,5 +1,4 @@
-"""
-Personal Context Service for managing user-specific context and background knowledge.
+"""Personal Context Service for managing user-specific context and background knowledge.
 
 This service provides functionality for maintaining individual user profiles,
 tracking interaction patterns, storing personal background knowledge, and
@@ -10,7 +9,7 @@ of the Human User Intelligence Layer.
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -20,21 +19,19 @@ logger = logging.getLogger(__name__)
 
 
 class PersonalContext(BaseModel):
-    """
-    Represents personal context information for a user.
+    """Represents personal context information for a user.
     """
     user_id: str
-    background_knowledge: List[Dict[str, Any]] = Field(default_factory=list)
-    interaction_patterns: Dict[str, float] = Field(default_factory=dict)
-    learning_preferences: Dict[str, Any] = Field(default_factory=dict)
-    expertise_areas: List[Dict[str, Any]] = Field(default_factory=list)
-    conversation_history: List[Dict[str, Any]] = Field(default_factory=list)
+    background_knowledge: list[dict[str, Any]] = Field(default_factory=list)
+    interaction_patterns: dict[str, float] = Field(default_factory=dict)
+    learning_preferences: dict[str, Any] = Field(default_factory=dict)
+    expertise_areas: list[dict[str, Any]] = Field(default_factory=list)
+    conversation_history: list[dict[str, Any]] = Field(default_factory=list)
     last_updated: datetime = Field(default_factory=datetime.now)
 
 
 class PersonalContextServiceInterface(ABC):
-    """
-    Abstract interface for personal context services.
+    """Abstract interface for personal context services.
     
     This interface defines the contract that all personal context services must implement.
     It provides methods for managing user profiles, tracking interaction patterns,
@@ -43,8 +40,7 @@ class PersonalContextServiceInterface(ABC):
     
     @abstractmethod
     def get_user_profile(self, user_id: str) -> Optional[UserProfile]:
-        """
-        Retrieve comprehensive user profile.
+        """Retrieve comprehensive user profile.
         
         Args:
             user_id: The ID of the user
@@ -56,8 +52,7 @@ class PersonalContextServiceInterface(ABC):
     
     @abstractmethod
     def get_personal_context(self, user_id: str) -> Optional[PersonalContext]:
-        """
-        Retrieve personal context for a user.
+        """Retrieve personal context for a user.
         
         Args:
             user_id: The ID of the user
@@ -71,10 +66,9 @@ class PersonalContextServiceInterface(ABC):
     def update_user_preferences(
         self, 
         user_id: str, 
-        interaction_data: Dict[str, Any]
+        interaction_data: dict[str, Any]
     ) -> bool:
-        """
-        Learn from user interactions to improve personalization.
+        """Learn from user interactions to improve personalization.
         
         Args:
             user_id: The ID of the user
@@ -89,10 +83,9 @@ class PersonalContextServiceInterface(ABC):
     def add_background_knowledge(
         self, 
         user_id: str, 
-        knowledge_item: Dict[str, Any]
+        knowledge_item: dict[str, Any]
     ) -> bool:
-        """
-        Add background knowledge for a user.
+        """Add background knowledge for a user.
         
         Args:
             user_id: The ID of the user
@@ -108,9 +101,8 @@ class PersonalContextServiceInterface(ABC):
         self, 
         user_id: str, 
         topic: str
-    ) -> List[Dict[str, Any]]:
-        """
-        Get user's relevant background knowledge for a topic.
+    ) -> list[dict[str, Any]]:
+        """Get user's relevant background knowledge for a topic.
         
         Args:
             user_id: The ID of the user
@@ -125,10 +117,9 @@ class PersonalContextServiceInterface(ABC):
     def add_conversation_entry(
         self, 
         user_id: str, 
-        entry: Dict[str, Any]
+        entry: dict[str, Any]
     ) -> bool:
-        """
-        Add an entry to the user's conversation history.
+        """Add an entry to the user's conversation history.
         
         Args:
             user_id: The ID of the user
@@ -144,9 +135,8 @@ class PersonalContextServiceInterface(ABC):
         self, 
         user_id: str, 
         limit: int = 10
-    ) -> List[Dict[str, Any]]:
-        """
-        Get recent conversation history for a user.
+    ) -> list[dict[str, Any]]:
+        """Get recent conversation history for a user.
         
         Args:
             user_id: The ID of the user
@@ -159,8 +149,7 @@ class PersonalContextServiceInterface(ABC):
 
 
 class BasicPersonalContextService(PersonalContextServiceInterface):
-    """
-    Basic implementation of the PersonalContextService interface.
+    """Basic implementation of the PersonalContextService interface.
     
     This implementation provides simple personal context management functionality
     using the UserProfileService. It serves as a placeholder that can be replaced
@@ -168,8 +157,7 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
     """
     
     def __init__(self, user_profile_service, memory_service=None):
-        """
-        Initialize the BasicPersonalContextService.
+        """Initialize the BasicPersonalContextService.
         
         Args:
             user_profile_service: The UserProfileService instance to use
@@ -181,8 +169,7 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
         logger.info("BasicPersonalContextService initialized")
     
     def get_user_profile(self, user_id: str) -> Optional[UserProfile]:
-        """
-        Retrieve user profile using the UserProfileService.
+        """Retrieve user profile using the UserProfileService.
         
         Args:
             user_id: The ID of the user
@@ -193,8 +180,7 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
         return self.user_profile_service.get_profile(user_id)
     
     def get_personal_context(self, user_id: str) -> Optional[PersonalContext]:
-        """
-        Retrieve or create personal context for a user.
+        """Retrieve or create personal context for a user.
         
         Args:
             user_id: The ID of the user
@@ -240,10 +226,9 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
     def update_user_preferences(
         self, 
         user_id: str, 
-        interaction_data: Dict[str, Any]
+        interaction_data: dict[str, Any]
     ) -> bool:
-        """
-        Update user preferences based on interaction data.
+        """Update user preferences based on interaction data.
         
         Args:
             user_id: The ID of the user
@@ -300,10 +285,9 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
     def add_background_knowledge(
         self, 
         user_id: str, 
-        knowledge_item: Dict[str, Any]
+        knowledge_item: dict[str, Any]
     ) -> bool:
-        """
-        Add background knowledge for a user.
+        """Add background knowledge for a user.
         
         Args:
             user_id: The ID of the user
@@ -348,9 +332,8 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
         self, 
         user_id: str, 
         topic: str
-    ) -> List[Dict[str, Any]]:
-        """
-        Get user's relevant background knowledge for a topic.
+    ) -> list[dict[str, Any]]:
+        """Get user's relevant background knowledge for a topic.
         
         Args:
             user_id: The ID of the user
@@ -395,10 +378,9 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
     def add_conversation_entry(
         self, 
         user_id: str, 
-        entry: Dict[str, Any]
+        entry: dict[str, Any]
     ) -> bool:
-        """
-        Add an entry to the user's conversation history.
+        """Add an entry to the user's conversation history.
         
         Args:
             user_id: The ID of the user
@@ -441,9 +423,8 @@ class BasicPersonalContextService(PersonalContextServiceInterface):
         self, 
         user_id: str, 
         limit: int = 10
-    ) -> List[Dict[str, Any]]:
-        """
-        Get recent conversation history for a user.
+    ) -> list[dict[str, Any]]:
+        """Get recent conversation history for a user.
         
         Args:
             user_id: The ID of the user

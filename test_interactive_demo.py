@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append('.')
 
 from src.real_demo_system.interactive_demo_flow import InteractiveDemoFlow

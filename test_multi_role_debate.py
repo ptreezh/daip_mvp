@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证多角色辩论机制
+"""验证多角色辩论机制
 """
 
-import sys
-import os
 import asyncio
+import sys
+
 sys.path.append('src')
 
 def test_multi_role_debate_system():
     """测试多角色辩论系统"""
     try:
+        from src.core_services.role_manager import RoleManager
         from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
         from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-        from src.core_services.role_manager import RoleManager
         
         # 创建依赖
         llm_integrator = RealLLMIntegrator()
@@ -43,9 +41,9 @@ def test_multi_role_debate_system():
 async def test_debate_session_creation():
     """测试辩论会话创建"""
     try:
+        from src.core_services.role_manager import RoleManager
         from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
         from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-        from src.core_services.role_manager import RoleManager
         
         # 创建依赖
         llm_integrator = RealLLMIntegrator()
@@ -81,9 +79,9 @@ async def test_debate_session_creation():
 async def test_participant_management():
     """测试参与者管理"""
     try:
+        from src.core_services.role_manager import RoleManager
         from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
         from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-        from src.core_services.role_manager import RoleManager
         
         # 创建依赖
         llm_integrator = RealLLMIntegrator()
@@ -121,9 +119,9 @@ async def test_participant_management():
 async def test_debate_flow_management():
     """测试辩论流程管理"""
     try:
+        from src.core_services.role_manager import RoleManager
         from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
         from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-        from src.core_services.role_manager import RoleManager
         
         # 创建依赖
         llm_integrator = RealLLMIntegrator()
@@ -165,9 +163,9 @@ async def test_debate_flow_management():
 async def test_debate_execution():
     """测试辩论执行"""
     try:
+        from src.core_services.role_manager import RoleManager
         from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
         from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-        from src.core_services.role_manager import RoleManager
         
         # 创建依赖
         llm_integrator = RealLLMIntegrator()
@@ -211,9 +209,9 @@ async def test_debate_execution():
 async def test_debate_analysis():
     """测试辩论分析功能"""
     try:
+        from src.core_services.role_manager import RoleManager
         from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
         from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-        from src.core_services.role_manager import RoleManager
         
         # 创建依赖
         llm_integrator = RealLLMIntegrator()

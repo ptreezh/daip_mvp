@@ -1,5 +1,4 @@
-"""
-Defines a unified, pluggable interface for interacting with various Large Language Models (LLMs).
+"""Defines a unified, pluggable interface for interacting with various Large Language Models (LLMs).
 
 This module provides an abstract base class (LLMInterface) and concrete implementations
 for different LLM providers (e.g., OpenAI, Ollama). A factory class (LLMFactory)
@@ -10,7 +9,8 @@ The interface now includes token management capabilities for cost tracking and c
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, AsyncIterator, Dict, List, Optional, TYPE_CHECKING
+from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING, Any, Optional
 
 import ollama
 from openai import AsyncOpenAI
@@ -21,8 +21,7 @@ if TYPE_CHECKING:
 
 
 class LLMConfig(BaseModel):
-    """
-    Configuration model for initializing an LLM interface.
+    """Configuration model for initializing an LLM interface.
     
     Attributes:
         provider (str): The LLM provider, e.g., "openai", "ollama".
@@ -50,9 +49,8 @@ class LLMInterface(ABC):
         self.token_service = token_service
 
     @abstractmethod
-    async def generate(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> Dict[str, Any]:
-        """
-        Generates a single, non-streaming response from the LLM.
+    async def generate(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> dict[str, Any]:
+        """Generates a single, non-streaming response from the LLM.
         
         Args:
             messages: List of message dictionaries
@@ -65,9 +63,8 @@ class LLMInterface(ABC):
         pass
 
     @abstractmethod
-    async def generate_stream(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
-        """
-        Generates a response as a stream of text chunks.
+    async def generate_stream(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
+        """Generates a response as a stream of text chunks.
         
         Args:
             messages: List of message dictionaries
@@ -80,12 +77,12 @@ class LLMInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_embedding(self, text: str) -> List[float]:
+    async def get_embedding(self, text: str) -> list[float]:
         """Generates a single embedding vector for the given text."""
         pass
 
     @abstractmethod
-    async def get_embeddings(self, texts: List[str]) -> List[List[float]]:
+    async def get_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Generates embedding vectors for a list of texts."""
         pass
 
@@ -97,7 +94,7 @@ class OpenAIInterface(LLMInterface):
         super().__init__(config, token_service)
         self.client = AsyncOpenAI(api_key=config.api_key, base_url=config.base_url)
 
-    async def generate(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> Dict[str, Any]:
+    async def generate(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> dict[str, Any]:
         # Optimize context if token service is available
         if self.token_service:
             context_window = self.token_service.prepare_context_for_llm(messages, self.config.model, participant_id)
@@ -138,7 +135,7 @@ class OpenAIInterface(LLMInterface):
         
         return result
 
-    async def generate_stream(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
+    async def generate_stream(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
         # Optimize context if token service is available
         if self.token_service:
             context_window = self.token_service.prepare_context_for_llm(messages, self.config.model, participant_id)
@@ -174,13 +171,13 @@ class OpenAIInterface(LLMInterface):
                 participant_id=participant_id
             )
 
-    async def get_embedding(self, text: str) -> List[float]:
+    async def get_embedding(self, text: str) -> list[float]:
         """Generates a single embedding vector for the given text."""
         # Note: OpenAI's API can take a list, but we expose a single-text method for interface consistency.
         response = await self.client.embeddings.create(model=self.config.model, input=[text])
         return response.data[0].embedding
 
-    async def get_embeddings(self, texts: List[str]) -> List[List[float]]:
+    async def get_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Generates embedding vectors for a list of texts."""
         if not texts:
             return []
@@ -196,7 +193,7 @@ class OllamaInterface(LLMInterface):
         # The 'ollama' library uses 'host' instead of 'base_url'
         self.client = ollama.AsyncClient(host=config.base_url)
 
-    async def generate(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> Dict[str, Any]:
+    async def generate(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> dict[str, Any]:
         # Optimize context if token service is available
         if self.token_service:
             context_window = self.token_service.prepare_context_for_llm(messages, self.config.model, participant_id)
@@ -233,7 +230,7 @@ class OllamaInterface(LLMInterface):
         
         return response["message"]
 
-    async def generate_stream(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
+    async def generate_stream(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
         # Optimize context if token service is available
         if self.token_service:
             context_window = self.token_service.prepare_context_for_llm(messages, self.config.model, participant_id)
@@ -267,7 +264,7 @@ class OllamaInterface(LLMInterface):
                 participant_id=participant_id
             )
 
-    async def get_embedding(self, text: str) -> List[float]:
+    async def get_embedding(self, text: str) -> list[float]:
         """Generates a single embedding vector for the given text."""
         try:
             response = await self.client.embeddings(model=self.config.model, prompt=text)
@@ -276,7 +273,7 @@ class OllamaInterface(LLMInterface):
             logging.error(f"Ollama embedding error for model '{self.config.model}': {e}")
             return []
 
-    async def get_embeddings(self, texts: List[str]) -> List[List[float]]:
+    async def get_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Generates embedding vectors for a list of texts."""
         embeddings = []
         for text in texts:
@@ -291,8 +288,7 @@ class LLMFactory:
 
     @staticmethod
     def create(config: LLMConfig, token_service: Optional['TokenManagementService'] = None) -> LLMInterface:
-        """
-        Creates and returns an LLMInterface instance.
+        """Creates and returns an LLMInterface instance.
 
         Args:
             config (LLMConfig): The configuration object.

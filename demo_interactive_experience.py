@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-DAIP-LIVE 虚拟角色聊天系统 - 交互式演示体验
+"""DAIP-LIVE 虚拟角色聊天系统 - 交互式演示体验
 
 这个演示展示了系统的核心技术亮点：
 1. 认知独立的虚拟角色
@@ -15,20 +13,18 @@ DAIP-LIVE 虚拟角色聊天系统 - 交互式演示体验
 """
 
 import asyncio
-import json
 import logging
-from datetime import datetime
-from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
+
+from src.core_services.advanced_consensus_algorithms import ConsensusInput
+from src.core_services.collective_intelligence_manager import CollectiveIntelligenceManager
+from src.core_services.memory_service import MemoryService
+from src.core_services.wiki_service import WikiService
 
 # 导入核心组件
 from src.virtual_role_chat.cognitive_agent.agent import CognitiveAgent, CognitiveProfile
-from src.core_services.collective_intelligence_manager import CollectiveIntelligenceManager
-from src.core_services.advanced_consensus_algorithms import ConsensusInput
-from src.workflows.critical_review_workflow import CriticalReviewWorkflow
-from src.workflows.multi_perspective_workflow import MultiPerspectiveWorkflow
-from src.core_services.wiki_service import WikiService
-from src.core_services.memory_service import MemoryService
 
 
 @dataclass
@@ -38,7 +34,7 @@ class DemoScenario:
     description: str
     topic: str
     user_position: str
-    expected_insights: List[str]
+    expected_insights: list[str]
 
 
 class InteractiveDemoExperience:
@@ -73,7 +69,7 @@ class InteractiveDemoExperience:
             ]
         )
     
-    def create_virtual_agents(self) -> Dict[str, CognitiveAgent]:
+    def create_virtual_agents(self) -> dict[str, CognitiveAgent]:
         """创建具有认知独立性的虚拟角色"""
         agents = {}
         
@@ -206,7 +202,7 @@ class InteractiveDemoExperience:
         
         return agents
     
-    def create_demo_scenarios(self) -> List[DemoScenario]:
+    def create_demo_scenarios(self) -> list[DemoScenario]:
         """创建演示场景"""
         return [
             DemoScenario(
@@ -308,7 +304,7 @@ class InteractiveDemoExperience:
             except ValueError:
                 print("❌ 请输入有效数字")
     
-    def create_user_profile(self) -> Dict[str, Any]:
+    def create_user_profile(self) -> dict[str, Any]:
         """创建用户认知档案"""
         return {
             "agent_id": "user",
@@ -338,7 +334,7 @@ class InteractiveDemoExperience:
         print("="*60)
         
         # 第一阶段：用户输入和初始立场
-        print(f"\n📢 第一阶段：立场表达")
+        print("\n📢 第一阶段：立场表达")
         print(f"💭 您的立场: {scenario.user_position}")
         
         user_input = input("\n请详细阐述您的观点 (或按回车使用默认立场): ").strip()
@@ -346,7 +342,7 @@ class InteractiveDemoExperience:
             user_input = scenario.user_position
         
         # 第二阶段：虚拟角色分析和回应
-        print(f"\n🤖 第二阶段：虚拟角色分析")
+        print("\n🤖 第二阶段：虚拟角色分析")
         agent_responses = await self.get_agent_responses(scenario.topic, user_input)
         
         for agent_id, response in agent_responses.items():
@@ -357,55 +353,55 @@ class InteractiveDemoExperience:
             print(f"   🧠 推理: {response['reasoning']}")
         
         # 第三阶段：批判性审查工作流
-        print(f"\n🔍 第三阶段：批判性审查工作流")
+        print("\n🔍 第三阶段：批判性审查工作流")
         print("   正在进行事实验证和证据审查...")
         
         critical_review_results = await self.run_critical_review(user_input, agent_responses)
         
-        print(f"✅ 批判性审查完成:")
+        print("✅ 批判性审查完成:")
         print(f"   📊 验证的事实: {len(critical_review_results.get('validated_facts', []))}")
         print(f"   ⚠️  需要修正的内容: {len(critical_review_results.get('corrections', []))}")
         print(f"   🎯 整体可信度: {critical_review_results.get('credibility_score', 0):.3f}")
         
         # 第四阶段：多视角综合工作流
-        print(f"\n🔄 第四阶段：多视角综合工作流")
+        print("\n🔄 第四阶段：多视角综合工作流")
         print("   正在整合多元化专家观点...")
         
         synthesis_results = await self.run_multi_perspective_synthesis(
             scenario.topic, user_input, agent_responses
         )
         
-        print(f"🎯 多视角综合结果:")
+        print("🎯 多视角综合结果:")
         print(f"   {synthesis_results.get('synthesis', '综合观点生成中...')}")
         
         # 第五阶段：集体智慧涌现和共识形成
-        print(f"\n🚀 第五阶段：集体智慧涌现")
+        print("\n🚀 第五阶段：集体智慧涌现")
         
         consensus_inputs = self.prepare_consensus_inputs(user_input, agent_responses)
         consensus_result, emergent_insights = await self.collective_intelligence.process_collective_input(
             session_id, consensus_inputs, {"topic": scenario.topic}
         )
         
-        print(f"🤝 共识结果:")
+        print("🤝 共识结果:")
         print(f"   📝 共识内容: {consensus_result.consensus_value}")
         print(f"   💪 共识信心度: {consensus_result.confidence_level:.3f}")
         print(f"   🌈 认知多样性: {consensus_result.diversity_score:.3f}")
         print(f"   🧠 涌现洞察数量: {len(emergent_insights)}")
         
         if emergent_insights:
-            print(f"\n✨ 涌现洞察:")
+            print("\n✨ 涌现洞察:")
             for i, insight in enumerate(emergent_insights[:3], 1):  # 显示前3个
                 print(f"   {i}. {insight.content}")
                 print(f"      🎯 涌现评分: {insight.emergence_score:.3f}")
                 print(f"      🆕 新颖度: {insight.novelty_score:.3f}")
         
         # 第六阶段：知识沉淀
-        print(f"\n📚 第六阶段：知识沉淀")
+        print("\n📚 第六阶段：知识沉淀")
         await self.save_knowledge_to_wiki(scenario, consensus_result, emergent_insights)
         
         print("✅ 知识已保存到Wiki系统")
     
-    async def get_agent_responses(self, topic: str, user_input: str) -> Dict[str, Dict[str, Any]]:
+    async def get_agent_responses(self, topic: str, user_input: str) -> dict[str, dict[str, Any]]:
         """获取虚拟角色的回应"""
         responses = {}
         
@@ -423,7 +419,7 @@ class InteractiveDemoExperience:
         
         return responses
     
-    async def generate_agent_response(self, agent: CognitiveAgent, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def generate_agent_response(self, agent: CognitiveAgent, context: dict[str, Any]) -> dict[str, Any]:
         """生成单个角色的回应"""
         # 这里简化处理，实际应该调用agent.process_input
         agent_name = agent.name
@@ -459,7 +455,7 @@ class InteractiveDemoExperience:
             "agent_profile": agent.get_cognitive_state()
         }
     
-    async def run_critical_review(self, user_input: str, agent_responses: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    async def run_critical_review(self, user_input: str, agent_responses: dict[str, dict[str, Any]]) -> dict[str, Any]:
         """运行批判性审查工作流"""
         # 模拟批判性审查过程
         all_content = [user_input] + [resp["position"] for resp in agent_responses.values()]
@@ -487,8 +483,8 @@ class InteractiveDemoExperience:
         self, 
         topic: str, 
         user_input: str, 
-        agent_responses: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        agent_responses: dict[str, dict[str, Any]]
+    ) -> dict[str, Any]:
         """运行多视角综合工作流"""
         # 收集所有观点
         all_perspectives = [user_input]
@@ -516,8 +512,8 @@ class InteractiveDemoExperience:
     def prepare_consensus_inputs(
         self, 
         user_input: str, 
-        agent_responses: Dict[str, Dict[str, Any]]
-    ) -> List[ConsensusInput]:
+        agent_responses: dict[str, dict[str, Any]]
+    ) -> list[ConsensusInput]:
         """准备共识输入"""
         inputs = []
         
@@ -546,7 +542,7 @@ class InteractiveDemoExperience:
         self, 
         scenario: DemoScenario, 
         consensus_result, 
-        emergent_insights: List
+        emergent_insights: list
     ):
         """保存知识到Wiki系统"""
         # 创建Wiki页面
@@ -600,45 +596,45 @@ class InteractiveDemoExperience:
         # 获取集体智慧报告
         report = self.collective_intelligence.get_collective_intelligence_report(session_id)
         
-        print(f"\n🎯 会话信息:")
+        print("\n🎯 会话信息:")
         print(f"   📝 话题: {report['session_info']['topic']}")
         print(f"   👥 参与者: {len(report['session_info']['participants'])}")
         print(f"   ⏱️  持续时间: {report['session_info'].get('duration', 'N/A')} 小时")
         
-        print(f"\n🌈 认知多样性分析:")
+        print("\n🌈 认知多样性分析:")
         print(f"   📊 多样性评分: {report['diversity_analysis']['initial_diversity_score']:.3f}")
         print(f"   📈 多样性等级: {report['diversity_analysis']['diversity_category']}")
         
-        print(f"\n🤝 共识分析:")
+        print("\n🤝 共识分析:")
         print(f"   🔄 共识轮次: {report['consensus_analysis']['total_consensus_rounds']}")
         
-        print(f"\n✨ 洞察分析:")
+        print("\n✨ 洞察分析:")
         print(f"   💡 总洞察数: {report['insight_analysis']['total_insights']}")
         if report['insight_analysis']['top_insights']:
-            print(f"   🏆 顶级洞察:")
+            print("   🏆 顶级洞察:")
             for insight in report['insight_analysis']['top_insights'][:2]:
                 print(f"      • {insight['content']}")
         
-        print(f"\n🚀 集体智慧涌现:")
+        print("\n🚀 集体智慧涌现:")
         print(f"   📈 涌现评分: {report['intelligence_emergence']['emergence_score']:.3f}")
         print(f"   🎯 涌现等级: {report['intelligence_emergence']['emergence_category']}")
         
         if report['intelligence_emergence']['key_indicators']:
-            print(f"   🔑 关键指标:")
+            print("   🔑 关键指标:")
             for indicator in report['intelligence_emergence']['key_indicators']:
                 print(f"      ✓ {indicator}")
         
         if report['recommendations']:
-            print(f"\n💡 改进建议:")
+            print("\n💡 改进建议:")
             for rec in report['recommendations']:
                 print(f"      • {rec}")
         
         # 结束会话
         final_session = self.collective_intelligence.end_collective_intelligence_session(session_id)
         
-        print(f"\n🎉 演示完成！")
+        print("\n🎉 演示完成！")
         print(f"   最终智慧涌现评分: {final_session.intelligence_emergence_score:.3f}")
-        print(f"   感谢您体验 DAIP-LIVE 虚拟角色聊天系统！")
+        print("   感谢您体验 DAIP-LIVE 虚拟角色聊天系统！")
 
 
 async def main():

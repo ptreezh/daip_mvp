@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-实时状态监控演示
+"""实时状态监控演示
 
 展示任务3.1.2的实时状态监控功能
 包括透明度监控、WebSocket通信和系统状态实时更新
@@ -10,15 +8,12 @@
 import asyncio
 import logging
 import sys
-from datetime import datetime
-from typing import Dict, Any
-
-from lona import LonaApp, View
-from lona.html import HTML, Div, H1, H2, P, Button, Span
 
 # 导入组件和服务
 from components.transparency_monitor import TransparencyMonitor
-from services.websocket_manager import websocket_manager, realtime_manager, MessageType, WebSocketMessage
+from lona import LonaApp, View
+from lona.html import H1, H2, HTML, Button, Div, P, Span
+from services.websocket_manager import realtime_manager, websocket_manager
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

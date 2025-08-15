@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2024-07-16 10:30:00
+"""@Time    : 2024-07-16 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : llm_scheduler.py
 @Description:
@@ -13,8 +11,9 @@
 import asyncio
 import json
 import logging
+from collections.abc import Coroutine
 from dataclasses import dataclass
-from typing import Any, Coroutine, Dict, List
+from typing import Any
 
 from .interaction_manager import InteractionManager
 from .llm_interface import LLMInterface
@@ -25,13 +24,12 @@ from .tool_executor import ToolExecutor
 class LLMRequest:
     """Represents a single request to be processed by the LLM."""
 
-    history: List[Dict[str, Any]]
+    history: list[dict[str, Any]]
     future: asyncio.Future
 
 
 class LLMScheduler:
-    """
-    A scheduler that manages a queue of requests for an LLM.
+    """A scheduler that manages a queue of requests for an LLM.
 
     This class ensures that only one request is processed by the LLM at a time,
     which is critical for managing single-instance LLM resources in a concurrent
@@ -44,8 +42,7 @@ class LLMScheduler:
         tool_executor: ToolExecutor,
         interaction_manager: InteractionManager,
     ):
-        """
-        Initializes the LLMScheduler.
+        """Initializes the LLMScheduler.
 
         Args:
             llm_interface: The interface to the language model.
@@ -73,9 +70,8 @@ class LLMScheduler:
             self._worker_task = None
             logging.info("LLMScheduler worker stopped.")
 
-    async def submit_request(self, history: List[Dict[str, Any]]) -> str:
-        """
-        Submits a request to the LLM and waits for the final response.
+    async def submit_request(self, history: list[dict[str, Any]]) -> str:
+        """Submits a request to the LLM and waits for the final response.
 
         This method handles the entire lifecycle of a request, including
         potential multi-turn tool calls.

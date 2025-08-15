@@ -1,12 +1,11 @@
 import logging
-from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.dependencies import get_collaboration_service
-from src.models import Task, TaskBase, WikiEntryRequest
 from src.core_services.collaboration_service import CollaborationService
+from src.models import Task, TaskBase, WikiEntryRequest
 
 router = APIRouter(
     prefix="/collaboration",

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-增强工作流选择器测试
+"""增强工作流选择器测试
 
 测试新的增强工作流选择器，验证是否达到V0.2.1任务要求：
 - 意图识别准确率≥90%
@@ -10,12 +8,10 @@
 """
 
 import sys
-from typing import List, Dict, Any
-from src.core_services.enhanced_workflow_selector import (
-    EnhancedWorkflowSelector, 
-    WorkflowType, 
-    ScenarioType
-)
+from typing import Any
+
+from src.core_services.enhanced_workflow_selector import EnhancedWorkflowSelector, ScenarioType, WorkflowType
+
 
 class EnhancedWorkflowTester:
     """增强工作流选择器测试器"""
@@ -124,7 +120,7 @@ class EnhancedWorkflowTester:
             }
         ]
     
-    def test_accuracy(self) -> Dict[str, Any]:
+    def test_accuracy(self) -> dict[str, Any]:
         """测试准确性"""
         print("🧪 测试增强工作流选择器准确性...")
         
@@ -205,13 +201,13 @@ class EnhancedWorkflowTester:
         scenario_accuracy = (scenario_correct / total_tests * 100) if total_tests > 0 else 0
         workflow_accuracy = (workflow_correct / total_tests * 100) if total_tests > 0 else 0
         
-        print(f"\n📊 测试总结:")
+        print("\n📊 测试总结:")
         print(f"总测试用例: {total_tests}")
         print(f"场景识别准确率: {scenario_accuracy:.1f}% ({scenario_correct}/{total_tests})")
         print(f"工作流选择准确率: {workflow_accuracy:.1f}% ({workflow_correct}/{total_tests})")
         
         # 分类统计
-        print(f"\n📋 分类统计:")
+        print("\n📋 分类统计:")
         for category, stats in category_stats.items():
             scenario_acc = (stats['scenario_correct'] / stats['total'] * 100) if stats['total'] > 0 else 0
             workflow_acc = (stats['workflow_correct'] / stats['total'] * 100) if stats['total'] > 0 else 0
@@ -227,7 +223,7 @@ class EnhancedWorkflowTester:
             "results": results
         }
     
-    def test_performance(self) -> Dict[str, Any]:
+    def test_performance(self) -> dict[str, Any]:
         """测试性能"""
         print("\n⚡ 测试性能...")
         
@@ -294,7 +290,7 @@ def main():
     workflow_met = accuracy_results['workflow_accuracy'] >= workflow_target
     performance_met = performance_results['average_response_time_ms'] < performance_target
     
-    print(f"\n🎯 V0.2.1任务目标达成情况:")
+    print("\n🎯 V0.2.1任务目标达成情况:")
     print(f"场景识别准确率≥90%: {'✅ 达成' if scenario_met else '❌ 未达成'}")
     print(f"工作流选择准确率≥95%: {'✅ 达成' if workflow_met else '❌ 未达成'}")
     print(f"响应时间<5秒: {'✅ 达成' if performance_met else '❌ 未达成'}")

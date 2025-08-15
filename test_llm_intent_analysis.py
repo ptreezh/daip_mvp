@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-测试升级后的LLM意图分析服务
+"""测试升级后的LLM意图分析服务
 """
 
+
 import requests
-import json
+
 
 def test_llm_intent_analysis():
     """测试LLM意图分析服务"""

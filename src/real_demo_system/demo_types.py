@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-演示系统类型定义
+"""演示系统类型定义
 """
 
 from enum import Enum
-from typing import Dict, Any, List, Optional
-from datetime import datetime
 
 
 class DemoScenarioType(Enum):

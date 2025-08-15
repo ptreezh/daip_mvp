@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证LLM调用透明度
+"""验证LLM调用透明度
 """
 
-import sys
-import os
 import asyncio
+import sys
+
 sys.path.append('src')
 
 def test_transparency_monitor():
     """测试透明度监控"""
     try:
-        from src.real_demo_system.transparency_monitor import TransparencyMonitor
         from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
+        from src.real_demo_system.transparency_monitor import TransparencyMonitor
         
         # 创建LLM集成器和监控器
         integrator = RealLLMIntegrator()
@@ -40,9 +38,10 @@ def test_transparency_monitor():
 def test_call_logging():
     """测试调用日志记录"""
     try:
-        from src.real_demo_system.transparency_monitor import TransparencyMonitor, TransparencyEvent
-        from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
         from datetime import datetime
+
+        from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
+        from src.real_demo_system.transparency_monitor import TransparencyEvent, TransparencyMonitor
         
         integrator = RealLLMIntegrator()
         monitor = TransparencyMonitor(integrator)
@@ -72,8 +71,8 @@ def test_call_logging():
 def test_performance_tracking():
     """测试性能追踪"""
     try:
-        from src.real_demo_system.transparency_monitor import TransparencyMonitor, RealTimeMetrics
         from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
+        from src.real_demo_system.transparency_monitor import RealTimeMetrics, TransparencyMonitor
         
         integrator = RealLLMIntegrator()
         monitor = TransparencyMonitor(integrator)
@@ -101,7 +100,7 @@ def test_performance_tracking():
 async def test_llm_integration_transparency():
     """测试LLM集成服务的透明度功能"""
     try:
-        from src.real_demo_system.llm_integration_service import LLMIntegrationService, LLMBackend
+        from src.real_demo_system.llm_integration_service import LLMBackend, LLMIntegrationService
         
         service = LLMIntegrationService()
         

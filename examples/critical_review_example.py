@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 11:00:00
+"""@Time    : 2025-07-24 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : critical_review_example.py
 @Description:
@@ -8,14 +6,13 @@
 """
 import asyncio
 import logging
-from typing import Dict, Any
+from typing import Any
 
-from src.workflows.critical_review_workflow import CriticalReviewWorkflow
-from src.core_services.llm_interface import EnhancedLLMInterface
 from src.core_services.fact_extraction_service import FactExtractionService
-from src.core_services.wiki_service import WikiService
+from src.core_services.llm_interface import EnhancedLLMInterface
 from src.core_services.synthesis_engine import SynthesisEngine
-
+from src.core_services.wiki_service import WikiService
+from src.workflows.critical_review_workflow import CriticalReviewWorkflow
 
 # Configure logging
 logging.basicConfig(
@@ -25,9 +22,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def setup_services() -> Dict[str, Any]:
-    """
-    Set up and initialize required services.
+async def setup_services() -> dict[str, Any]:
+    """Set up and initialize required services.
     
     Returns:
         Dictionary of service instances

@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证用户干预机制 - 基于真实架构生成
+"""验证用户干预机制 - 基于真实架构生成
 """
 
-import sys
-import os
 import asyncio
+import sys
+
 sys.path.append('src')
 
 def test_userinterventionhandler():

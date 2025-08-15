@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-23 13:00:00
+"""@Time    : 2025-07-23 13:00:00
 @Author  : DAIP-LIVE Team
 @File    : revision_node.py
 @Description:
@@ -8,31 +6,28 @@
     Sends low-credibility content back for evidence-based revision.
 """
 import logging
-from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
-from .base import InstitutionalPrimitive, ExecutionContext
+from .base import ExecutionContext, InstitutionalPrimitive
 
 logger = logging.getLogger(__name__)
 
 
 class RevisionNode(InstitutionalPrimitive):
-    """
-    修订节点 - Sends low-credibility content back for evidence-based revision.
+    """修订节点 - Sends low-credibility content back for evidence-based revision.
     
     Sends content with low credibility scores back to the original creator role
     with evidence-based revision requirements for correction.
     """
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.revision_role = config.get("revision_role", "创作者") if config else "创作者"
         self.max_revision_attempts = config.get("max_revision_attempts", 3) if config else 3
         self.provide_evidence_details = config.get("provide_evidence_details", True) if config else True
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute content revision based on consensus results.
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        """Execute content revision based on consensus results.
         
         Args:
             inputs: Should contain 'facts_needing_revision' and other consensus data
@@ -118,13 +113,12 @@ class RevisionNode(InstitutionalPrimitive):
     
     def _prepare_revision_instructions(
         self,
-        facts_needing_revision: List[str],
-        credibility_scores: Dict[str, float],
-        consensus_details: Dict[str, Dict],
-        extracted_facts: List[Dict]
+        facts_needing_revision: list[str],
+        credibility_scores: dict[str, float],
+        consensus_details: dict[str, dict],
+        extracted_facts: list[dict]
     ) -> str:
-        """
-        Prepare detailed revision instructions based on consensus results.
+        """Prepare detailed revision instructions based on consensus results.
         
         Args:
             facts_needing_revision: List of fact IDs needing revision
@@ -154,15 +148,15 @@ class RevisionNode(InstitutionalPrimitive):
             if self.provide_evidence_details and details:
                 method = details.get("method", "unknown")
                 if method == "weighted_average":
-                    instructions += f"   评估方法：加权平均\n"
+                    instructions += "   评估方法：加权平均\n"
                     instructions += f"   支持性证据强度：{details.get('supporting_score', 0):.2f}\n"
                     instructions += f"   质疑性证据强度：{details.get('challenging_score', 0):.2f}\n"
                 elif method == "majority_vote":
-                    instructions += f"   评估方法：多数投票\n"
+                    instructions += "   评估方法：多数投票\n"
                     instructions += f"   支持票数：{details.get('supporting_votes', 0)}\n"
                     instructions += f"   质疑票数：{details.get('challenging_votes', 0)}\n"
                 elif method == "synthesis":
-                    instructions += f"   评估方法：综合分析\n"
+                    instructions += "   评估方法：综合分析\n"
                     if "reasoning" in details:
                         instructions += f"   分析理由：{details.get('reasoning', '')[:200]}...\n"
             
@@ -172,7 +166,7 @@ class RevisionNode(InstitutionalPrimitive):
         
         return instructions
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         """Return input schema for the revision node."""
         return {
             "type": "object",
@@ -194,7 +188,7 @@ class RevisionNode(InstitutionalPrimitive):
             "required": ["facts_needing_revision"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         """Return output schema for the revision node."""
         return {
             "type": "object",

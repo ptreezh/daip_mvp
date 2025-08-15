@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 11:00:00
+"""@Time    : 2025-08-06 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : forum_user_input_panel.py
 @Description:
@@ -10,11 +8,11 @@
 
 import asyncio
 import logging
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any
 
+from lona.html import HTML, Button, Div, Select, Span, Textarea
 from lona.html.widget import Widget
-from lona.html import HTML, Div, TextInput, Button, P, Span, Select, Option, Textarea
 
 from ..services.dual_entrance_websocket_manager import dual_entrance_websocket_manager
 
@@ -177,7 +175,7 @@ class ForumUserInputPanel(Widget):
             self.optimize_button.disabled = False
             self.optimize_button.value = "🔄 优化输入"
     
-    async def simulate_optimization(self) -> Dict[str, Any]:
+    async def simulate_optimization(self) -> dict[str, Any]:
         """模拟优化结果（实际应该从后端获取）"""
         original_text = self.input_text.strip()
         
@@ -298,7 +296,7 @@ class ForumUserInputPanel(Widget):
         self.input_field.value = text
         self.clear_optimization_preview()
     
-    def get_current_input(self) -> Dict[str, Any]:
+    def get_current_input(self) -> dict[str, Any]:
         """获取当前输入状态"""
         return {
             "input_text": self.input_text,

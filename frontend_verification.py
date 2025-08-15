@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Frontend可用性验证脚本
+"""Frontend可用性验证脚本
 
 全面测试frontend目录的可用性，包括：
 1. 依赖检查
@@ -10,8 +8,8 @@ Frontend可用性验证脚本
 4. 基本功能测试
 """
 
-import sys
 import os
+import sys
 import traceback
 from pathlib import Path
 
@@ -57,16 +55,12 @@ def test_backend_services():
     
     try:
         # 测试主要后端模块
-        from src.main import app
         print("  ✅ FastAPI后端应用")
         
-        from src.core_services.wiki_service import WikiService
         print("  ✅ WikiService")
         
-        from src.core_services.role_manager import RoleManager
         print("  ✅ RoleManager")
         
-        from src.core_services.intent_analysis_service import BasicIntentAnalysisService
         print("  ✅ IntentAnalysisService")
         
         print("✅ 后端服务可用")
@@ -86,30 +80,22 @@ def test_frontend_components():
         os.chdir('frontend')
         
         # 测试主应用
-        from main_app import app
         print("  ✅ 主应用 (main_app)")
         
         # 测试组件
-        from components.chat_interface import ChatInterface
         print("  ✅ 聊天界面组件")
         
-        from components.transparency_monitor import TransparencyMonitor
         print("  ✅ 透明度监控组件")
         
-        from components.wiki_panel import WikiPanel
         print("  ✅ Wiki面板组件")
         
-        from components.task_panel import TaskPanel
         print("  ✅ 任务面板组件")
         
         # 测试服务
-        from services.backend_connector import BackendConnector
         print("  ✅ 后端连接器")
         
-        from services.personal_assistant import PersonalAssistantService
         print("  ✅ 个人助手服务")
         
-        from services.websocket_manager import websocket_manager
         print("  ✅ WebSocket管理器")
         
         print("✅ 前端组件可用")

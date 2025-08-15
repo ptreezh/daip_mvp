@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-论证分析和评估系统
+"""论证分析和评估系统
 
 对辩论中的论证进行深度分析、质量评估和逻辑验证。
 支持多维度评估、实时反馈和智能建议。
@@ -15,18 +13,17 @@
 - 共识点检测
 """
 
-import re
 import asyncio
+import re
+import uuid
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Any, Set, Tuple
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-import uuid
-import math
-from collections import defaultdict
+from typing import Any, Optional
 
-from .debate_flow_definition import DebateContribution, DebateSession, DebateRound
+from .debate_flow_definition import DebateContribution, DebateSession
 
 
 class ArgumentType(Enum):
@@ -78,7 +75,7 @@ class ArgumentComponent:
     evidence_type: Optional[EvidenceType] = None
     source: Optional[str] = None
     timestamp: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -86,14 +83,14 @@ class ArgumentStructure:
     """论证结构"""
     argument_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     main_claim: str = ""
-    premises: List[ArgumentComponent] = field(default_factory=list)
-    evidence: List[ArgumentComponent] = field(default_factory=list)
-    reasoning: List[ArgumentComponent] = field(default_factory=list)
-    rebuttals: List[ArgumentComponent] = field(default_factory=list)
+    premises: list[ArgumentComponent] = field(default_factory=list)
+    evidence: list[ArgumentComponent] = field(default_factory=list)
+    reasoning: list[ArgumentComponent] = field(default_factory=list)
+    rebuttals: list[ArgumentComponent] = field(default_factory=list)
     strength_score: float = 0.0  # 论证强度 0-1
     logical_consistency: float = 0.0  # 逻辑一致性 0-1
     evidence_quality: float = 0.0  # 证据质量 0-1
-    fallacies: List[LogicalFallacy] = field(default_factory=list)
+    fallacies: list[LogicalFallacy] = field(default_factory=list)
     participant_id: str = ""
     contribution_id: str = ""
     created_at: datetime = field(default_factory=datetime.now)
@@ -117,12 +114,12 @@ class ConsensusPoint:
     """共识点"""
     consensus_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     statement: str = ""
-    supporting_arguments: List[str] = field(default_factory=list)  # argument_ids
-    supporting_participants: List[str] = field(default_factory=list)
+    supporting_arguments: list[str] = field(default_factory=list)  # argument_ids
+    supporting_participants: list[str] = field(default_factory=list)
     consensus_strength: float = 0.0  # 共识强度 0-1
     evidence_support: float = 0.0  # 证据支持度 0-1
     detected_at: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -131,15 +128,15 @@ class ArgumentAnalysisResult:
     analysis_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     contribution_id: str = ""
     session_id: str = ""
-    arguments: List[ArgumentStructure] = field(default_factory=list)
-    relations: List[ArgumentRelation] = field(default_factory=list)
-    consensus_points: List[ConsensusPoint] = field(default_factory=list)
+    arguments: list[ArgumentStructure] = field(default_factory=list)
+    relations: list[ArgumentRelation] = field(default_factory=list)
+    consensus_points: list[ConsensusPoint] = field(default_factory=list)
     overall_quality: float = 0.0  # 整体质量 0-1
     logical_coherence: float = 0.0  # 逻辑连贯性 0-1
     evidence_coverage: float = 0.0  # 证据覆盖度 0-1
     analysis_timestamp: datetime = field(default_factory=datetime.now)
     processing_time: float = 0.0  # 处理时间（秒）
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class ArgumentAnalyzer(ABC):
@@ -151,17 +148,17 @@ class ArgumentAnalyzer(ABC):
         pass
     
     @abstractmethod
-    async def analyze_session(self, session: DebateSession) -> Dict[str, ArgumentAnalysisResult]:
+    async def analyze_session(self, session: DebateSession) -> dict[str, ArgumentAnalysisResult]:
         """分析整个会话"""
         pass
     
     @abstractmethod
-    async def detect_relations(self, arguments: List[ArgumentStructure]) -> List[ArgumentRelation]:
+    async def detect_relations(self, arguments: list[ArgumentStructure]) -> list[ArgumentRelation]:
         """检测论证关系"""
         pass
     
     @abstractmethod
-    async def find_consensus(self, session: DebateSession) -> List[ConsensusPoint]:
+    async def find_consensus(self, session: DebateSession) -> list[ConsensusPoint]:
         """寻找共识点"""
         pass
 
@@ -249,7 +246,7 @@ class RuleBasedArgumentAnalyzer(ArgumentAnalyzer):
         
         return result
     
-    async def analyze_session(self, session: DebateSession) -> Dict[str, ArgumentAnalysisResult]:
+    async def analyze_session(self, session: DebateSession) -> dict[str, ArgumentAnalysisResult]:
         """分析整个会话"""
         results = {}
         
@@ -281,7 +278,7 @@ class RuleBasedArgumentAnalyzer(ArgumentAnalyzer):
         
         return results
     
-    async def detect_relations(self, arguments: List[ArgumentStructure]) -> List[ArgumentRelation]:
+    async def detect_relations(self, arguments: list[ArgumentStructure]) -> list[ArgumentRelation]:
         """检测论证关系"""
         relations = []
         
@@ -293,7 +290,7 @@ class RuleBasedArgumentAnalyzer(ArgumentAnalyzer):
         
         return relations
     
-    async def find_consensus(self, session: DebateSession) -> List[ConsensusPoint]:
+    async def find_consensus(self, session: DebateSession) -> list[ConsensusPoint]:
         """寻找共识点"""
         consensus_points = []
         
@@ -380,7 +377,7 @@ class RuleBasedArgumentAnalyzer(ArgumentAnalyzer):
         
         return structure
     
-    async def _detect_fallacies(self, content: str) -> List[LogicalFallacy]:
+    async def _detect_fallacies(self, content: str) -> list[LogicalFallacy]:
         """检测逻辑谬误"""
         fallacies = []
         
@@ -522,7 +519,7 @@ class RuleBasedArgumentAnalyzer(ArgumentAnalyzer):
         
         return None
     
-    async def _find_similar_claims(self, claims: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _find_similar_claims(self, claims: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """寻找相似的主张"""
         consensus_candidates = []
         processed_claims = set()
@@ -579,9 +576,9 @@ class ArgumentEvaluator:
     
     def __init__(self, analyzer: ArgumentAnalyzer):
         self.analyzer = analyzer
-        self.evaluation_history: List[ArgumentAnalysisResult] = []
+        self.evaluation_history: list[ArgumentAnalysisResult] = []
     
-    async def evaluate_debate_quality(self, session: DebateSession) -> Dict[str, Any]:
+    async def evaluate_debate_quality(self, session: DebateSession) -> dict[str, Any]:
         """评估辩论质量"""
         analysis_results = await self.analyzer.analyze_session(session)
         
@@ -631,7 +628,7 @@ class ArgumentEvaluator:
         
         return evaluation
     
-    def _analyze_participant_contributions(self, analysis_results: Dict[str, ArgumentAnalysisResult]) -> Dict[str, Any]:
+    def _analyze_participant_contributions(self, analysis_results: dict[str, ArgumentAnalysisResult]) -> dict[str, Any]:
         """分析参与者贡献"""
         participant_stats = defaultdict(lambda: {
             'contribution_count': 0,
@@ -658,7 +655,7 @@ class ArgumentEvaluator:
         
         return dict(participant_stats)
     
-    def _analyze_debate_progression(self, session: DebateSession, analysis_results: Dict[str, ArgumentAnalysisResult]) -> Dict[str, Any]:
+    def _analyze_debate_progression(self, session: DebateSession, analysis_results: dict[str, ArgumentAnalysisResult]) -> dict[str, Any]:
         """分析辩论进展"""
         round_qualities = []
         
@@ -684,7 +681,7 @@ class ArgumentEvaluator:
         
         return progression
     
-    def _extract_key_insights(self, analysis_results: Dict[str, ArgumentAnalysisResult]) -> List[str]:
+    def _extract_key_insights(self, analysis_results: dict[str, ArgumentAnalysisResult]) -> list[str]:
         """提取关键洞察"""
         insights = []
         

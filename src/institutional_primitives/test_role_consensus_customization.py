@@ -1,38 +1,37 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 08:30:00
+"""@Time    : 2025-07-25 08:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_role_consensus_customization.py
 @Description:
     Integration tests for role and consensus customization functionality.
     Tests requirements 7.4, 7.5, 7.6, 7.7 for task 11.2.
 """
-import pytest
-import asyncio
-import time
-from datetime import datetime
-from typing import Dict, Any, List
 
-from .role_customization import (
-    RoleConfigurationManager, RoleConfiguration, RoleTemplate,
-    ExpertiseProfile, RolePersonality, RolePromptTemplate,
-    ExpertiseLevel, CognitiveStyle, InteractionMode
-)
+import pytest
+
 from .consensus_customization import (
-    ConsensusManager, ConsensusInput, ConsensusConfiguration,
-    ConsensusType, VotingStrategy, EvidenceWeightingStrategy,
-    ConsensusResult
+    ConsensusInput,
+    ConsensusManager,
 )
 from .performance_optimization import (
-    PerformanceOptimizationManager, PerformanceProfiler, ConfigurationValidator,
-    PerformanceMetricType, BottleneckType
+    PerformanceMetricType,
+    PerformanceOptimizationManager,
+)
+from .role_customization import (
+    CognitiveStyle,
+    ExpertiseLevel,
+    ExpertiseProfile,
+    InteractionMode,
+    RoleConfiguration,
+    RoleConfigurationManager,
+    RolePersonality,
+    RolePromptTemplate,
 )
 
 
 class TestRoleCustomization:
     """Test role customization functionality (Requirement 7.4)."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def role_manager(self):
         """Create a role configuration manager for testing."""
         return RoleConfigurationManager()
@@ -140,12 +139,12 @@ class TestRoleCustomization:
 class TestConsensusCustomization:
     """Test consensus customization functionality (Requirement 7.5)."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def consensus_manager(self):
         """Create a consensus manager for testing."""
         return ConsensusManager()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_majority_vote_consensus(self, consensus_manager):
         """Test majority voting consensus mechanism."""
         # Create consensus inputs
@@ -167,7 +166,7 @@ class TestConsensusCustomization:
         assert result.agreement_level == 0.75  # 3/4 agreement
         assert result.confidence > 0.5
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_weighted_vote_consensus(self, consensus_manager):
         """Test weighted voting consensus mechanism."""
         # Create weighted consensus inputs
@@ -190,7 +189,7 @@ class TestConsensusCustomization:
 class TestPerformanceOptimization:
     """Test performance optimization functionality (Requirements 7.6, 7.7)."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def optimization_manager(self):
         """Create a performance optimization manager for testing."""
         return PerformanceOptimizationManager()
@@ -249,7 +248,7 @@ class TestPerformanceOptimization:
 class TestIntegration:
     """Test integration between role and consensus customization."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def integrated_system(self):
         """Create an integrated system for testing."""
         return {
@@ -258,7 +257,7 @@ class TestIntegration:
             "optimization_manager": PerformanceOptimizationManager()
         }
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_role_based_consensus(self, integrated_system):
         """Test consensus with role-based weighting."""
         role_manager = integrated_system["role_manager"]

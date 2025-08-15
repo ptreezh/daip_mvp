@@ -1,28 +1,25 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 01:00:00
+"""@Time    : 2025-07-25 01:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_knowledge_integration.py
 @Description:
     Integration tests for knowledge retrieval and evolution lifecycle.
     Tests requirements 6.3, 6.4, 6.5, 6.6, 6.7.
 """
-import pytest
-import asyncio
 from datetime import datetime, timedelta
-from typing import Dict, Any, List
+
+import pytest
 
 from .enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeNode, NodeType
+from .knowledge_evolution_manager import EvolutionStrategy
+from .knowledge_management_service import KnowledgeManagementConfig, KnowledgeManagementService
+from .knowledge_retrieval_service import SearchScope
 from .wiki_service import WikiService
-from .knowledge_retrieval_service import KnowledgeRetrievalService, SearchScope
-from .knowledge_evolution_manager import KnowledgeEvolutionManager, EvolutionStrategy
-from .knowledge_management_service import KnowledgeManagementService, KnowledgeManagementConfig
 
 
 class TestKnowledgeIntegration:
     """Integration tests for knowledge retrieval and evolution."""
     
-    @pytest.fixture
+    @pytest.fixture()
     async def setup_services(self):
         """Set up test services."""
         # Initialize SSKG manager
@@ -55,7 +52,7 @@ class TestKnowledgeIntegration:
             "evolution_manager": knowledge_service.evolution_manager
         }
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_cross_session_knowledge_sharing(self, setup_services):
         """Test cross-session knowledge sharing (Requirement 6.3)."""
         services = await setup_services
@@ -126,7 +123,7 @@ class TestKnowledgeIntegration:
         assert len(python_facts) > 0
         assert python_facts[0]["confidence"] == 0.9
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_semantic_search_capabilities(self, setup_services):
         """Test semantic search for validated information (Requirement 6.4)."""
         services = await setup_services
@@ -205,7 +202,7 @@ class TestKnowledgeIntegration:
                 assert hasattr(result, 'relevance_score')
                 assert hasattr(result, 'quality_metrics')
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_knowledge_quality_assessment(self, setup_services):
         """Test knowledge quality assessment metrics (Requirement 6.5)."""
         services = await setup_services
@@ -258,7 +255,7 @@ class TestKnowledgeIntegration:
         # High-quality node should have good overall score
         assert quality_assessment.overall_quality > 0.6
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_knowledge_evolution_lifecycle(self, setup_services):
         """Test knowledge evolution and lifecycle management (Requirements 6.6, 6.7)."""
         services = await setup_services
@@ -318,7 +315,7 @@ class TestKnowledgeIntegration:
         assert evolution_event.node_id == evolved_id
         assert evolution_event.event_type == "evolved"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_automatic_evolution_cycle(self, setup_services):
         """Test automatic knowledge evolution cycle (Requirement 6.7)."""
         services = await setup_services
@@ -373,7 +370,7 @@ class TestKnowledgeIntegration:
         # Should have detected some triggers
         assert len(cycle_results["evolution_triggers"]) > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_comprehensive_knowledge_statistics(self, setup_services):
         """Test comprehensive knowledge statistics and monitoring."""
         services = await setup_services
@@ -400,7 +397,7 @@ class TestKnowledgeIntegration:
         # Service should be active
         assert stats["service_status"] == "active"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_knowledge_conflict_resolution(self, setup_services):
         """Test knowledge conflict detection and resolution."""
         services = await setup_services
@@ -447,7 +444,7 @@ class TestKnowledgeIntegration:
         search_results.sort(key=lambda x: x.confidence, reverse=True)
         assert search_results[0].confidence > search_results[1].confidence
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_health_check_functionality(self, setup_services):
         """Test knowledge management health check."""
         services = await setup_services

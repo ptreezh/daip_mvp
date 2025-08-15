@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-辩论参与者管理系统
+"""辩论参与者管理系统
 
 管理辩论参与者的角色、权限、认证和行为控制。
 """
 
-from enum import Enum
-from typing import Dict, List, Optional, Set, Any
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-import uuid
+from enum import Enum
+from typing import Any, Optional
 
-from .debate_flow_definition import ParticipantRole, DebatePhase
+from .debate_flow_definition import DebatePhase, ParticipantRole
 
 
 class Permission(Enum):
@@ -50,7 +48,7 @@ class ParticipantCredentials:
     issued_at: datetime = field(default_factory=datetime.now)
     expires_at: Optional[datetime] = None
     issuer: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -65,7 +63,7 @@ class ActionRecord:
     round_number: int = 1
     phase: DebatePhase = DebatePhase.MAIN_ARGUMENTS
     success: bool = True
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
     impact_score: Optional[float] = None
 
 
@@ -73,8 +71,8 @@ class ParticipantManager:
     """参与者管理器"""
     
     def __init__(self):
-        self.participants: Dict[str, ParticipantCredentials] = {}
-        self.action_history: List[ActionRecord] = []
+        self.participants: dict[str, ParticipantCredentials] = {}
+        self.action_history: list[ActionRecord] = []
     
     def register_participant(self,
                            participant_id: str,
@@ -106,7 +104,7 @@ class ParticipantManager:
     def check_permission(self,
                         participant_id: str,
                         permission: Permission,
-                        context: Dict[str, Any]) -> bool:
+                        context: dict[str, Any]) -> bool:
         """检查参与者权限"""
         if participant_id not in self.participants:
             return False
@@ -134,7 +132,7 @@ class ParticipantManager:
                      permission_used: Permission,
                      session_id: str,
                      success: bool = True,
-                     details: Optional[Dict[str, Any]] = None) -> ActionRecord:
+                     details: Optional[dict[str, Any]] = None) -> ActionRecord:
         """记录参与者行为"""
         record = ActionRecord(
             participant_id=participant_id,

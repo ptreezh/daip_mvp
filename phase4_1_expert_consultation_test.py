@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 10:00:00
+"""@Time    : 2025-08-05 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : phase4_1_expert_consultation_test.py
 @Description:
@@ -12,18 +10,19 @@
 import asyncio
 import json
 import logging
-import time
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
-from datetime import datetime
 
 # Add project root to path
 import sys
+import time
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+from typing import Any, Optional
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from personal_intelligence_hub.services.backend_integration import BackendIntegrationService, get_backend_service
-from personal_intelligence_hub.services.websocket_manager import websocket_manager, WebSocketMessage, MessageType
+from personal_intelligence_hub.services.websocket_manager import MessageType, WebSocketMessage
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -36,14 +35,14 @@ class TestResult:
     status: str  # "PASSED", "FAILED", "ERROR"
     duration: float
     details: str
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[dict[str, Any]] = None
 
 class ExpertConsultationTester:
     """Expert consultation scenario tester"""
     
     def __init__(self):
         self.backend_service: Optional[BackendIntegrationService] = None
-        self.test_results: List[TestResult] = []
+        self.test_results: list[TestResult] = []
         self.start_time: Optional[datetime] = None
         
     async def setup(self):
@@ -642,7 +641,7 @@ class ExpertConsultationTester:
                 details=f"Test failed with error: {str(e)}"
             )
     
-    async def run_all_tests(self) -> List[TestResult]:
+    async def run_all_tests(self) -> list[TestResult]:
         """Run all expert consultation scenario tests"""
         logger.info("🚀 Starting Phase 4.1: Expert Consultation Scenario Testing")
         
@@ -673,7 +672,7 @@ class ExpertConsultationTester:
         
         return self.test_results
     
-    async def generate_report(self) -> Dict[str, Any]:
+    async def generate_report(self) -> dict[str, Any]:
         """Generate comprehensive test report"""
         total_tests = len(self.test_results)
         passed_tests = sum(1 for result in self.test_results if result.status == "PASSED")

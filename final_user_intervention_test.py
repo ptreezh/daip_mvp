@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-最终的用户干预机制验证 - 基于真实架构
+"""最终的用户干预机制验证 - 基于真实架构
 """
 
-import sys
-import os
 import asyncio
+import sys
+
 sys.path.append('src')
 
 def test_userinterventionhandler():
     """测试UserInterventionHandler"""
     try:
-        from src.cli.user_intervention import UserInterventionHandler
         import asyncio
+
+        from src.cli.user_intervention import UserInterventionHandler
         
         # 创建实例
         instance = UserInterventionHandler(command_queue=asyncio.Queue())
@@ -36,8 +35,9 @@ def test_userinterventionhandler():
 def test_workflowsteering():
     """测试WorkflowSteering"""
     try:
-        from src.user_interface.workflow_steering import WorkflowSteering
         from rich.console import Console
+
+        from src.user_interface.workflow_steering import WorkflowSteering
         
         # 创建实例
         instance = WorkflowSteering(console=Console())
@@ -61,8 +61,9 @@ def test_workflowsteering():
 def test_parametermanager():
     """测试ParameterManager"""
     try:
-        from src.user_interface.parameter_manager import ParameterManager
         from rich.console import Console
+
+        from src.user_interface.parameter_manager import ParameterManager
         
         # 创建实例
         instance = ParameterManager(console=Console())
@@ -85,8 +86,9 @@ def test_parametermanager():
 def test_workflowcustomizer():
     """测试WorkflowCustomizer"""
     try:
-        from src.user_interface.workflow_customizer import WorkflowCustomizer
         from rich.console import Console
+
+        from src.user_interface.workflow_customizer import WorkflowCustomizer
         
         # 创建实例
         instance = WorkflowCustomizer(console=Console())
@@ -109,8 +111,9 @@ def test_workflowcustomizer():
 def test_transparencycontroller():
     """测试TransparencyController"""
     try:
-        from src.user_interface.transparency_controller import TransparencyController
         from rich.console import Console
+
+        from src.user_interface.transparency_controller import TransparencyController
         
         # 创建实例
         instance = TransparencyController(console=Console())
@@ -133,8 +136,9 @@ def test_transparencycontroller():
 def test_interactivecontroller():
     """测试InteractiveController"""
     try:
-        from src.user_interface.interactive_controller import InteractiveController
         from rich.console import Console
+
+        from src.user_interface.interactive_controller import InteractiveController
         
         # 创建实例
         instance = InteractiveController(console=Console(), config_dir=".kiro/config")

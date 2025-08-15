@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-"""
-Phase 4.2: Academic Research Scenario Test - Simplified
+"""Phase 4.2: Academic Research Scenario Test - Simplified
 Test core functionality without complex dependencies
 """
 
 import asyncio
-import sys
 import os
-import json
+import sys
 from datetime import datetime
 
 # Add the project root to the Python path
@@ -16,11 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 async def test_academic_research_core():
     """Test academic research scenario core functionality"""
     try:
-        from src.core_services.academic_research_scenario import (
-            AcademicResearchScenario, 
-            ResearchPaper, 
-            ResearchType
-        )
+        from src.core_services.academic_research_scenario import AcademicResearchScenario, ResearchPaper, ResearchType
         
         print("Phase 4.2: Academic Research Scenario Test - Core Functionality")
         print("=" * 60)
@@ -149,12 +143,12 @@ async def test_academic_research_core():
         
         # Performance summary
         print("\nPerformance Summary:")
-        print(f"   - Scenario initialization: Success")
-        print(f"   - Paper creation: Success")
-        print(f"   - Initial assessment: Success")
-        print(f"   - Quality evaluation: Success")
-        print(f"   - Literature review: Success")
-        print(f"   - Statistics tracking: Success")
+        print("   - Scenario initialization: Success")
+        print("   - Paper creation: Success")
+        print("   - Initial assessment: Success")
+        print("   - Quality evaluation: Success")
+        print("   - Literature review: Success")
+        print("   - Statistics tracking: Success")
         
         # Validation results
         print("\nValidation Results:")
@@ -190,11 +184,7 @@ async def test_academic_research_core():
 async def test_academic_research_types():
     """Test different research types"""
     try:
-        from src.core_services.academic_research_scenario import (
-            AcademicResearchScenario, 
-            ResearchPaper, 
-            ResearchType
-        )
+        from src.core_services.academic_research_scenario import AcademicResearchScenario, ResearchPaper, ResearchType
         
         print("\nTesting Different Research Types:")
         print("-" * 40)

@@ -1,21 +1,17 @@
-"""
-Registry for institutional primitives.
+"""Registry for institutional primitives.
 
 This module provides a registry for institutional primitives, allowing
 for their registration, discovery, and instantiation.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Type
-
-from pydantic import BaseModel
+from typing import Any, Optional
 
 from .base import InstitutionalPrimitive, PrimitiveInfo, ValidationResult
 
 
 class PrimitiveRegistry:
-    """
-    Registry for institutional primitives.
+    """Registry for institutional primitives.
     
     This class manages the registration, discovery, and instantiation of
     institutional primitive nodes.
@@ -23,12 +19,11 @@ class PrimitiveRegistry:
     
     def __init__(self):
         """Initialize the primitive registry."""
-        self._primitives: Dict[str, Type[InstitutionalPrimitive]] = {}
+        self._primitives: dict[str, type[InstitutionalPrimitive]] = {}
         self._logger = logging.getLogger(__name__)
     
-    def register_primitive(self, primitive_type: str, primitive_class: Type[InstitutionalPrimitive]) -> bool:
-        """
-        Register a primitive type with the registry.
+    def register_primitive(self, primitive_type: str, primitive_class: type[InstitutionalPrimitive]) -> bool:
+        """Register a primitive type with the registry.
         
         Args:
             primitive_type: Type identifier for the primitive
@@ -44,9 +39,8 @@ class PrimitiveRegistry:
         self._logger.info(f"Registered primitive type '{primitive_type}'")
         return True
     
-    def get_primitive(self, primitive_type: str) -> Optional[Type[InstitutionalPrimitive]]:
-        """
-        Get a primitive class by type.
+    def get_primitive(self, primitive_type: str) -> Optional[type[InstitutionalPrimitive]]:
+        """Get a primitive class by type.
         
         Args:
             primitive_type: Type identifier for the primitive
@@ -60,9 +54,8 @@ class PrimitiveRegistry:
         
         return self._primitives[primitive_type]
     
-    def list_primitives(self) -> List[PrimitiveInfo]:
-        """
-        List all registered primitives.
+    def list_primitives(self) -> list[PrimitiveInfo]:
+        """List all registered primitives.
         
         Returns:
             List of information about registered primitives
@@ -85,9 +78,8 @@ class PrimitiveRegistry:
         
         return result
     
-    def validate_primitive(self, primitive_def: Dict[str, Any]) -> ValidationResult:
-        """
-        Validate a primitive definition.
+    def validate_primitive(self, primitive_def: dict[str, Any]) -> ValidationResult:
+        """Validate a primitive definition.
         
         Args:
             primitive_def: Definition of the primitive to validate
@@ -119,9 +111,8 @@ class PrimitiveRegistry:
         
         return result
     
-    def instantiate_primitive(self, primitive_def: Dict[str, Any]) -> Optional[InstitutionalPrimitive]:
-        """
-        Instantiate a primitive from a definition.
+    def instantiate_primitive(self, primitive_def: dict[str, Any]) -> Optional[InstitutionalPrimitive]:
+        """Instantiate a primitive from a definition.
         
         Args:
             primitive_def: Definition of the primitive to instantiate

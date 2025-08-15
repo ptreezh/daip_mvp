@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 18:30:00
+"""@Time    : 2025-07-24 18:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_api_interface.py
 @Description:
     Unit tests for API interface.
 """
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from fastapi.testclient import TestClient
 
 from src.user_interface.api_interface import APIInterface
@@ -16,17 +15,17 @@ from src.user_interface.api_interface import APIInterface
 class TestAPIInterface:
     """Test cases for APIInterface."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def api_interface(self):
         """Create an APIInterface instance for testing."""
         return APIInterface()
     
-    @pytest.fixture
+    @pytest.fixture()
     def client(self, api_interface):
         """Create a test client."""
         return TestClient(api_interface.app)
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_services(self):
         """Create mock services."""
         return {
@@ -118,8 +117,9 @@ class TestAPIInterface:
         assert response.status_code == 404
         
         # Add a mock workflow status
-        from src.user_interface.api_interface import WorkflowStatus
         from datetime import datetime
+
+        from src.user_interface.api_interface import WorkflowStatus
         
         execution_id = "test-execution-id"
         api_interface.execution_status[execution_id] = WorkflowStatus(
@@ -146,8 +146,9 @@ class TestAPIInterface:
         assert response.status_code == 404
         
         # Add a mock completed workflow
-        from src.user_interface.api_interface import WorkflowStatus
         from datetime import datetime
+
+        from src.user_interface.api_interface import WorkflowStatus
         
         execution_id = "test-completed-id"
         api_interface.execution_status[execution_id] = WorkflowStatus(
@@ -175,8 +176,9 @@ class TestAPIInterface:
         assert response.status_code == 404
         
         # Add a mock workflow status
-        from src.user_interface.api_interface import WorkflowStatus
         from datetime import datetime
+
+        from src.user_interface.api_interface import WorkflowStatus
         
         execution_id = "test-progress-id"
         api_interface.execution_status[execution_id] = WorkflowStatus(
@@ -204,8 +206,9 @@ class TestAPIInterface:
         assert response.status_code == 404
         
         # Add a mock running workflow
-        from src.user_interface.api_interface import WorkflowStatus
         from datetime import datetime
+
+        from src.user_interface.api_interface import WorkflowStatus
         
         execution_id = "test-cancel-id"
         api_interface.execution_status[execution_id] = WorkflowStatus(

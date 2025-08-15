@@ -1,18 +1,24 @@
-"""
-Unit tests for the Dynamic Context Adapter.
+"""Unit tests for the Dynamic Context Adapter.
 """
 
 import unittest
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock, patch
 
 from .dynamic_adapter import (
-    DynamicContextAdapter, TaskBoundaryDetector, CoherenceMonitor,
-    AdaptationTrigger, AdaptationAction, AdaptationEvent
+    AdaptationAction,
+    AdaptationEvent,
+    AdaptationTrigger,
+    CoherenceMonitor,
+    DynamicContextAdapter,
+    TaskBoundaryDetector,
 )
 from .models import (
-    TaskType, TaskDetectionResult, ContextElement, OptimizedContext,
-    ContextOptimizationConfig, ElementType
+    ContextElement,
+    ContextOptimizationConfig,
+    ElementType,
+    OptimizedContext,
+    TaskDetectionResult,
+    TaskType,
 )
 from .strategies import PatternBasedTaskDetection
 

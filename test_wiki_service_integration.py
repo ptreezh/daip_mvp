@@ -1,21 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-测试WikiService知识库功能
+"""测试WikiService知识库功能
 验证版本化知识存储和检索、语义搜索和向量索引功能、知识沉淀和质量评分机制
 """
 
-import sys
-import os
-from pathlib import Path
 import logging
-import tempfile
+import os
 import shutil
+import sys
+import tempfile
 
 # 添加src目录到Python路径
 sys.path.append('src')
 
-from src.core_services.wiki_service import WikiService, WikiVersion, EditStatus
+from src.core_services.wiki_service import WikiService
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -75,11 +72,11 @@ def test_wiki_basic_operations():
             print(f"   作者: {version.author}")
             print(f"   内容长度: {len(version.content)} 字符")
         else:
-            print(f"❌ 创建条目失败")
+            print("❌ 创建条目失败")
             return False
         
         # 测试2: 检索知识条目
-        print(f"\n🔍 测试检索知识条目...")
+        print("\n🔍 测试检索知识条目...")
         retrieved_entry = wiki_service.get_entry(entry_name)
         
         if retrieved_entry:
@@ -87,11 +84,11 @@ def test_wiki_basic_operations():
             print(f"   版本: {retrieved_entry.version}")
             print(f"   内容匹配: {'✅' if retrieved_entry.content.strip() == content.strip() else '❌'}")
         else:
-            print(f"❌ 检索条目失败")
+            print("❌ 检索条目失败")
             return False
         
         # 测试3: 提出编辑建议
-        print(f"\n✏️ 测试编辑建议功能...")
+        print("\n✏️ 测试编辑建议功能...")
         new_content = content + """
 
 ## 新增原则
@@ -111,26 +108,26 @@ def test_wiki_basic_operations():
         if proposal_id:
             print(f"✅ 成功创建编辑建议: {proposal_id}")
         else:
-            print(f"❌ 创建编辑建议失败")
+            print("❌ 创建编辑建议失败")
             return False
         
         # 测试4: 应用编辑建议
-        print(f"\n🔄 测试应用编辑建议...")
+        print("\n🔄 测试应用编辑建议...")
         success = wiki_service._apply_proposal(entry_name, proposal_id)
         
         if success:
-            print(f"✅ 成功应用编辑建议")
+            print("✅ 成功应用编辑建议")
             
             # 验证新版本
             updated_entry = wiki_service.get_entry(entry_name)
             if updated_entry and "隐私保护原则" in updated_entry.content:
-                print(f"✅ 新版本内容验证通过")
+                print("✅ 新版本内容验证通过")
                 print(f"   新版本: {updated_entry.version}")
             else:
-                print(f"❌ 新版本内容验证失败")
+                print("❌ 新版本内容验证失败")
                 return False
         else:
-            print(f"❌ 应用编辑建议失败")
+            print("❌ 应用编辑建议失败")
             return False
         
         return True
@@ -184,7 +181,7 @@ def test_wiki_search_functionality():
             }
         ]
         
-        print(f"\n📚 创建测试知识条目...")
+        print("\n📚 创建测试知识条目...")
         created_entries = []
         
         for entry_data in test_entries:
@@ -207,7 +204,7 @@ def test_wiki_search_functionality():
             return False
         
         # 测试语义搜索
-        print(f"\n🔍 测试语义搜索功能...")
+        print("\n🔍 测试语义搜索功能...")
         
         search_queries = [
             "神经网络",
@@ -234,7 +231,7 @@ def test_wiki_search_functionality():
                         else:
                             print(f"   {i}. {result[:100]}...")
                 else:
-                    print(f"⚠️ 没有找到相关结果")
+                    print("⚠️ 没有找到相关结果")
                     
             except Exception as e:
                 print(f"❌ 搜索查询 '{query}' 失败: {e}")
@@ -269,7 +266,7 @@ def test_wiki_versioning_system():
         entry_name = "AI发展历程"
         
         # 创建初始版本
-        print(f"\n📝 创建初始版本...")
+        print("\n📝 创建初始版本...")
         initial_content = """
 # AI发展历程
 
@@ -293,7 +290,7 @@ def test_wiki_versioning_system():
         print(f"✅ 创建初始版本: {version1.version}")
         
         # 创建第二个版本
-        print(f"\n📝 创建第二个版本...")
+        print("\n📝 创建第二个版本...")
         content_v2 = initial_content + """
 
 ## 第二阶段：连接主义AI (1980s-2000s)
@@ -311,16 +308,16 @@ def test_wiki_versioning_system():
         if proposal_id_2:
             success = wiki_service._apply_proposal(entry_name, proposal_id_2)
             if success:
-                print(f"✅ 创建第二个版本成功")
+                print("✅ 创建第二个版本成功")
             else:
-                print(f"❌ 应用第二个版本失败")
+                print("❌ 应用第二个版本失败")
                 return False
         else:
-            print(f"❌ 创建第二个版本建议失败")
+            print("❌ 创建第二个版本建议失败")
             return False
         
         # 创建第三个版本
-        print(f"\n📝 创建第三个版本...")
+        print("\n📝 创建第三个版本...")
         content_v3 = content_v2 + """
 
 ## 第三阶段：深度学习时代 (2000s-现在)
@@ -339,16 +336,16 @@ def test_wiki_versioning_system():
         if proposal_id_3:
             success = wiki_service._apply_proposal(entry_name, proposal_id_3)
             if success:
-                print(f"✅ 创建第三个版本成功")
+                print("✅ 创建第三个版本成功")
             else:
-                print(f"❌ 应用第三个版本失败")
+                print("❌ 应用第三个版本失败")
                 return False
         else:
-            print(f"❌ 创建第三个版本建议失败")
+            print("❌ 创建第三个版本建议失败")
             return False
         
         # 验证版本历史
-        print(f"\n🔍 验证版本历史...")
+        print("\n🔍 验证版本历史...")
         
         # 获取最新版本
         latest_version = wiki_service.get_entry(entry_name)
@@ -357,14 +354,14 @@ def test_wiki_versioning_system():
             print(f"   作者: {latest_version.author}")
             print(f"   包含深度学习内容: {'✅' if '深度学习时代' in latest_version.content else '❌'}")
         else:
-            print(f"❌ 获取最新版本失败")
+            print("❌ 获取最新版本失败")
             return False
         
         # 测试版本指定检索（如果支持的话）
-        print(f"\n📚 版本控制功能验证完成")
-        print(f"   - 成功创建多个版本")
-        print(f"   - 版本内容正确演化")
-        print(f"   - 版本历史可追溯")
+        print("\n📚 版本控制功能验证完成")
+        print("   - 成功创建多个版本")
+        print("   - 版本内容正确演化")
+        print("   - 版本历史可追溯")
         
         return True
         

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 10:30:00
+"""@Time    : 2025-08-05 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : phase2_basic_function_test.py
 @Description:
@@ -8,23 +6,19 @@
     包括Web应用启动、静态资源加载、基础交互等测试
 """
 
-import sys
-import subprocess
-import os
 import json
-import requests
-import time
-import threading
-import socket
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional
 import logging
+import socket
+import subprocess
+import sys
+import time
+from pathlib import Path
+
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-import psutil
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 # 配置日志
 logging.basicConfig(
@@ -326,8 +320,8 @@ class BasicFunctionTester:
                         interaction_results.append(f"✓ 输入框 ({input_type}) 输入成功")
                         logger.info(f"✓ 输入框 ({input_type}) 输入成功")
                     else:
-                        interaction_results.append(f"✗ 输入框输入失败")
-                        logger.warning(f"输入框输入失败")
+                        interaction_results.append("✗ 输入框输入失败")
+                        logger.warning("输入框输入失败")
                         
                 except Exception as e:
                     interaction_results.append(f"✗ 输入框测试失败: {e}")
@@ -526,7 +520,7 @@ class BasicFunctionTester:
         logger.info(f"测试报告已生成: {report_path}")
         return str(report_path)
     
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """生成建议"""
         recommendations = []
         

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Real Multi-Round Debate System V0.1.0 Simple Demo
+"""Real Multi-Round Debate System V0.1.0 Simple Demo
 """
 
 import asyncio
@@ -18,9 +16,9 @@ async def main():
     
     try:
         # Import core components
+        from src.debate_system.debate_flow_definition import DebateSession
         from src.debate_system.debate_state_manager import DebateStateManager
         from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
-        from src.debate_system.debate_flow_definition import DebateSession
         
         print("Core components imported successfully")
         
@@ -64,7 +62,7 @@ async def main():
         )
         
         if debate_result:
-            print(f"Demo debate started successfully!")
+            print("Demo debate started successfully!")
             print(f"  Debate ID: {debate_result.get('debate_id')}")
             print(f"  Topic: {debate_result.get('topic')}")
             print(f"  Participants: {debate_result.get('participating_roles')}")

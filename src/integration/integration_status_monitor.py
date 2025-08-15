@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 22:15:00
+"""@Time    : 2025-08-03 22:15:00
 @Author  : DAIP-LIVE Team
 @File    : integration_status_monitor.py
 @Description:
@@ -9,13 +7,13 @@
 """
 
 import asyncio
+import json
 import logging
 import time
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-import json
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +40,7 @@ class IntegrationMonitorConfig:
     metrics_file: str = "data/integration_metrics.json"
 
 class IntegrationStatusMonitor:
-    """
-    集成状态监控器
+    """集成状态监控器
     
     负责持续监控新服务的集成状态、健康状况和性能指标。
     """
@@ -57,7 +54,7 @@ class IntegrationStatusMonitor:
         self.monitor_task: Optional[asyncio.Task] = None
         
         # 健康指标
-        self.service_metrics: Dict[str, ServiceHealthMetrics] = {}
+        self.service_metrics: dict[str, ServiceHealthMetrics] = {}
         self.monitoring_start_time: Optional[datetime] = None
         
         # 初始化监控服务列表
@@ -164,7 +161,7 @@ class IntegrationStatusMonitor:
         except Exception as e:
             self._record_service_error(metrics, str(e), check_time)
     
-    async def _call_service_health_check(self, service: Any) -> Dict[str, Any]:
+    async def _call_service_health_check(self, service: Any) -> dict[str, Any]:
         """调用服务健康检查方法"""
         # 尝试不同的健康检查方法
         if hasattr(service, 'get_service_status'):
@@ -180,7 +177,7 @@ class IntegrationStatusMonitor:
     def _update_service_metrics(
         self,
         metrics: ServiceHealthMetrics,
-        health_result: Dict[str, Any],
+        health_result: dict[str, Any],
         response_time: float,
         check_time: datetime
     ):
@@ -263,7 +260,7 @@ class IntegrationStatusMonitor:
         except Exception as e:
             logger.error(f"保存指标失败: {e}")
     
-    def get_current_status(self) -> Dict[str, Any]:
+    def get_current_status(self) -> dict[str, Any]:
         """获取当前监控状态"""
         return {
             "is_monitoring": self.is_monitoring,
@@ -296,7 +293,7 @@ class IntegrationStatusMonitor:
         else:
             return "poor"
     
-    def get_service_alerts(self) -> List[Dict[str, Any]]:
+    def get_service_alerts(self) -> list[dict[str, Any]]:
         """获取服务告警"""
         alerts = []
         
@@ -342,7 +339,7 @@ class IntegrationStatusMonitor:
         
         return alerts
     
-    async def generate_health_report(self) -> Dict[str, Any]:
+    async def generate_health_report(self) -> dict[str, Any]:
         """生成健康报告"""
         alerts = self.get_service_alerts()
         status = self.get_current_status()
@@ -374,7 +371,7 @@ class IntegrationStatusMonitor:
         
         return report
     
-    def _generate_recommendations(self, alerts: List[Dict[str, Any]]) -> List[str]:
+    def _generate_recommendations(self, alerts: list[dict[str, Any]]) -> list[str]:
         """生成改进建议"""
         recommendations = []
         

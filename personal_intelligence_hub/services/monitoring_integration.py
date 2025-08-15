@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Monitoring Integration Service
+"""Personal Intelligence Hub - Monitoring Integration Service
 
 V0.2.2 - 透明度监控系统集成
 将PersonalAssistantService与透明度监控系统集成
 """
 
-import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Callable
-from datetime import datetime
-from dataclasses import dataclass
 import uuid
+from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Optional
 
-from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService, WorkflowType
 from personal_intelligence_hub.services.backend_integration import get_backend_service
+from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService, WorkflowType
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +25,7 @@ class MonitoringEvent:
     event_type: str
     timestamp: datetime
     source: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
     session_id: Optional[str] = None
 
 
@@ -36,8 +34,8 @@ class PersonalAssistantMonitoringWrapper:
     
     def __init__(self, personal_assistant: PersonalAssistantService):
         self.personal_assistant = personal_assistant
-        self.monitoring_callbacks: List[Callable] = []
-        self.session_contexts: Dict[str, Dict[str, Any]] = {}
+        self.monitoring_callbacks: list[Callable] = []
+        self.session_contexts: dict[str, dict[str, Any]] = {}
         
         # 监控统计
         self.stats = {
@@ -57,7 +55,7 @@ class PersonalAssistantMonitoringWrapper:
         self.monitoring_callbacks.append(callback)
         logger.info(f"Added monitoring callback: {callback.__name__}")
     
-    async def _emit_monitoring_event(self, event_type: str, data: Dict[str, Any], session_id: Optional[str] = None):
+    async def _emit_monitoring_event(self, event_type: str, data: dict[str, Any], session_id: Optional[str] = None):
         """发送监控事件"""
         try:
             event = MonitoringEvent(
@@ -79,7 +77,7 @@ class PersonalAssistantMonitoringWrapper:
         except Exception as e:
             logger.error(f"Error emitting monitoring event: {e}")
     
-    async def analyze_intent(self, user_input: str, context: Optional[Dict] = None) -> Any:
+    async def analyze_intent(self, user_input: str, context: Optional[dict] = None) -> Any:
         """监控包装的意图分析"""
         start_time = datetime.now()
         session_id = context.get("session_id") if context else None
@@ -260,7 +258,7 @@ class PersonalAssistantMonitoringWrapper:
             
             raise
     
-    def get_monitoring_statistics(self) -> Dict[str, Any]:
+    def get_monitoring_statistics(self) -> dict[str, Any]:
         """获取监控统计信息"""
         uptime = (datetime.now() - self.stats["start_time"]).total_seconds()
         total_operations = (
@@ -299,10 +297,10 @@ class MonitoringIntegrationService:
         self.monitoring_active = False
         
         # 事件处理器
-        self.event_handlers: Dict[str, List[Callable]] = {}
+        self.event_handlers: dict[str, list[Callable]] = {}
         
         # 监控数据缓存
-        self.recent_events: List[MonitoringEvent] = []
+        self.recent_events: list[MonitoringEvent] = []
         self.max_events = 1000
         
         logger.info("Monitoring Integration Service initialized")
@@ -364,7 +362,7 @@ class MonitoringIntegrationService:
         except Exception as e:
             logger.error(f"Error handling monitoring event: {e}")
     
-    async def get_transparency_data(self) -> Dict[str, Any]:
+    async def get_transparency_data(self) -> dict[str, Any]:
         """获取透明度数据"""
         try:
             transparency_data = {
@@ -411,7 +409,7 @@ class MonitoringIntegrationService:
             logger.error(f"Error getting transparency data: {e}")
             return {"error": str(e)}
     
-    async def log_llm_call(self, call_data: Dict[str, Any]):
+    async def log_llm_call(self, call_data: dict[str, Any]):
         """记录LLM调用（供外部调用）"""
         try:
             event = MonitoringEvent(
@@ -427,7 +425,7 @@ class MonitoringIntegrationService:
         except Exception as e:
             logger.error(f"Error logging LLM call: {e}")
     
-    async def log_workflow_event(self, workflow_data: Dict[str, Any]):
+    async def log_workflow_event(self, workflow_data: dict[str, Any]):
         """记录工作流事件（供外部调用）"""
         try:
             event = MonitoringEvent(

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 10:00:00
+"""@Time    : 2025-08-04 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : mandatory_rules_checker.py
 @Description:
@@ -9,14 +7,12 @@
     This script checks all critical rules defined in CLAUDE.md.
 """
 
-import sys
-import subprocess
-import os
-import re
-from pathlib import Path
-from typing import List, Tuple, Dict, Any
 import json
+import subprocess
+import sys
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 
 class MandatoryRulesChecker:
@@ -51,7 +47,7 @@ class MandatoryRulesChecker:
         self.warnings.append(warning)
         print(f"[WARNING] {rule} - {message}")
         
-    def run_command(self, command: List[str], cwd: Path = None) -> Tuple[bool, str]:
+    def run_command(self, command: list[str], cwd: Path = None) -> tuple[bool, str]:
         """Run a command and return success status and output"""
         try:
             result = subprocess.run(
@@ -107,7 +103,7 @@ class MandatoryRulesChecker:
                 continue
                 
             try:
-                with open(py_file, 'r', encoding='utf-8') as f:
+                with open(py_file, encoding='utf-8') as f:
                     content = f.read()
                     
                 # Check for basic header elements
@@ -184,7 +180,7 @@ class MandatoryRulesChecker:
                 "CRITICAL"
             )
             
-    def generate_report(self) -> Dict[str, Any]:
+    def generate_report(self) -> dict[str, Any]:
         """Generate a comprehensive report"""
         critical_violations = [v for v in self.violations if v["severity"] in ["CRITICAL", "ERROR"]]
         warnings = self.warnings
@@ -205,7 +201,7 @@ class MandatoryRulesChecker:
         
         return report
         
-    def run_all_checks(self) -> Dict[str, Any]:
+    def run_all_checks(self) -> dict[str, Any]:
         """Run all mandatory rule checks"""
         print("[MANDATORY RULES] Starting Mandatory Rules Check...")
         print("=" * 60)

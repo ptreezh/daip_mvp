@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-批量修复角色定义文件
+"""批量修复角色定义文件
 确保所有角色文件都有必需的字段
 """
 
+import hashlib
 import json
-import os
 import logging
 from pathlib import Path
-from typing import Dict, Any
-import hashlib
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -23,7 +19,7 @@ def generate_id_from_name(name: str) -> str:
 def fix_role_file(file_path: Path) -> bool:
     """修复单个角色文件"""
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             data = json.load(f)
         
         # 跳过非角色文件（如统计文件）
@@ -129,7 +125,7 @@ def main():
             error_count += 1
     
     # 总结
-    logger.info(f"\n📊 修复完成:")
+    logger.info("\n📊 修复完成:")
     logger.info(f"   成功: {success_count} 个文件")
     logger.info(f"   失败: {error_count} 个文件")
     logger.info(f"   总计: {len(json_files)} 个文件")

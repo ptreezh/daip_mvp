@@ -1,19 +1,15 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 15:30:00
+"""@Time    : 2025-08-04 15:30:00
 @Author  : DAIP-LIVE Team
 @File    : industry_analysis_scenario.py
 @Description:
     Industry analysis scenario with collaborative review and comprehensive market intelligence.
 """
 
-from typing import Dict, List, Any, Optional, Union
-from dataclasses import dataclass, field
-from enum import Enum
-from datetime import datetime
-import json
 import logging
-from pathlib import Path
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -61,11 +57,11 @@ class MarketData:
     """Market data structure."""
     market_size: float
     growth_rate: float
-    market_segments: List[str]
-    key_players: List[str]
-    market_trends: List[str]
-    regulatory_environment: Dict[str, Any]
-    competitive_landscape: Dict[str, Any]
+    market_segments: list[str]
+    key_players: list[str]
+    market_trends: list[str]
+    regulatory_environment: dict[str, Any]
+    competitive_landscape: dict[str, Any]
 
 
 @dataclass
@@ -74,8 +70,8 @@ class IndustryExpert:
     name: str
     expertise_area: str
     years_experience: int
-    specializations: List[str]
-    industry_focus: List[IndustryType]
+    specializations: list[str]
+    industry_focus: list[IndustryType]
     availability_score: float = 1.0
 
 
@@ -84,9 +80,9 @@ class AnalysisRequest:
     """Industry analysis request structure."""
     industry_type: IndustryType
     analysis_depth: AnalysisDepth
-    focus_areas: List[str]
+    focus_areas: list[str]
     time_horizon: str  # e.g., "1 year", "3-5 years", "10+ years"
-    specific_questions: List[str]
+    specific_questions: list[str]
     priority_level: str
     request_id: Optional[str] = None
     created_at: datetime = field(default_factory=datetime.now)
@@ -98,11 +94,11 @@ class ExpertAnalysis:
     expert_id: str
     expert_name: str
     analysis_content: str
-    key_findings: List[str]
-    recommendations: List[str]
+    key_findings: list[str]
+    recommendations: list[str]
     confidence_level: float
     analysis_date: datetime
-    supporting_data: Dict[str, Any]
+    supporting_data: dict[str, Any]
 
 
 @dataclass
@@ -111,7 +107,7 @@ class IndustryInsight:
     insight_category: str
     insight_content: str
     significance_level: str  # HIGH, MEDIUM, LOW
-    supporting_evidence: List[str]
+    supporting_evidence: list[str]
     expert_consensus: float
     timeframe: str
 
@@ -120,11 +116,11 @@ class IndustryInsight:
 class CompetitiveAnalysis:
     """Competitive analysis result."""
     market_position: MarketPosition
-    swot_analysis: Dict[str, List[str]]
-    competitive_advantages: List[str]
-    competitive_disadvantages: List[str]
-    market_opportunities: List[str]
-    market_threats: List[str]
+    swot_analysis: dict[str, list[str]]
+    competitive_advantages: list[str]
+    competitive_disadvantages: list[str]
+    market_opportunities: list[str]
+    market_threats: list[str]
 
 
 @dataclass
@@ -136,12 +132,12 @@ class IndustryReport:
     executive_summary: str
     market_analysis: MarketData
     competitive_analysis: CompetitiveAnalysis
-    key_insights: List[IndustryInsight]
-    expert_analyses: List[ExpertAnalysis]
-    recommendations: List[str]
-    risk_factors: List[str]
+    key_insights: list[IndustryInsight]
+    expert_analyses: list[ExpertAnalysis]
+    recommendations: list[str]
+    risk_factors: list[str]
     future_outlook: str
-    data_sources: List[str]
+    data_sources: list[str]
     created_at: datetime
     quality_score: float
 
@@ -151,9 +147,9 @@ class IndustryAnalysisScenario:
     
     def __init__(self):
         """Initialize the industry analysis scenario."""
-        self.expert_pool: List[IndustryExpert] = []
-        self.analysis_history: List[Dict[str, Any]] = []
-        self.industry_data_cache: Dict[str, MarketData] = {}
+        self.expert_pool: list[IndustryExpert] = []
+        self.analysis_history: list[dict[str, Any]] = []
+        self.industry_data_cache: dict[str, MarketData] = {}
         
         # Initialize expert pool
         self._initialize_expert_pool()
@@ -210,7 +206,7 @@ class IndustryAnalysisScenario:
         for expert_data in experts_data:
             self.expert_pool.append(IndustryExpert(**expert_data))
     
-    async def submit_analysis_request(self, request: AnalysisRequest) -> Dict[str, Any]:
+    async def submit_analysis_request(self, request: AnalysisRequest) -> dict[str, Any]:
         """Submit an industry analysis request."""
         logger.info(f"Submitting analysis request for {request.industry_type.value} industry")
         
@@ -253,7 +249,7 @@ class IndustryAnalysisScenario:
             "quality_score": industry_report.quality_score
         }
     
-    def _select_experts_for_analysis(self, request: AnalysisRequest) -> List[IndustryExpert]:
+    def _select_experts_for_analysis(self, request: AnalysisRequest) -> list[IndustryExpert]:
         """Select appropriate experts for the analysis request."""
         relevant_experts = []
         
@@ -361,9 +357,9 @@ class IndustryAnalysisScenario:
             competitive_landscape={"market_concentration": "Moderate", "barriers_to_entry": "Medium"}
         )
     
-    async def _conduct_expert_analysis(self, experts: List[IndustryExpert], 
+    async def _conduct_expert_analysis(self, experts: list[IndustryExpert], 
                                     request: AnalysisRequest, 
-                                    market_data: MarketData) -> List[ExpertAnalysis]:
+                                    market_data: MarketData) -> list[ExpertAnalysis]:
         """Conduct analysis by selected experts."""
         expert_analyses = []
         
@@ -380,7 +376,6 @@ class IndustryAnalysisScenario:
                                       request: AnalysisRequest, 
                                       market_data: MarketData) -> ExpertAnalysis:
         """Simulate expert analysis for demonstration purposes."""
-        
         # Generate analysis content based on expert specialization
         analysis_content = f"""
         Analysis by {expert.name} ({expert.expertise_area})
@@ -425,9 +420,8 @@ class IndustryAnalysisScenario:
     
     async def _generate_industry_report(self, request: AnalysisRequest, 
                                        market_data: MarketData, 
-                                       expert_analyses: List[ExpertAnalysis]) -> IndustryReport:
+                                       expert_analyses: list[ExpertAnalysis]) -> IndustryReport:
         """Generate comprehensive industry report."""
-        
         # Generate competitive analysis
         competitive_analysis = self._generate_competitive_analysis(market_data, expert_analyses)
         
@@ -470,9 +464,8 @@ class IndustryAnalysisScenario:
         return report
     
     def _generate_competitive_analysis(self, market_data: MarketData, 
-                                     expert_analyses: List[ExpertAnalysis]) -> CompetitiveAnalysis:
+                                     expert_analyses: list[ExpertAnalysis]) -> CompetitiveAnalysis:
         """Generate competitive analysis from market data and expert inputs."""
-        
         # Determine market position based on market concentration
         market_position = MarketPosition.LEADER if len(market_data.key_players) <= 3 else MarketPosition.CHALLENGER
         
@@ -509,9 +502,8 @@ class IndustryAnalysisScenario:
         )
     
     def _generate_key_insights(self, market_data: MarketData, 
-                             expert_analyses: List[ExpertAnalysis]) -> List[IndustryInsight]:
+                             expert_analyses: list[ExpertAnalysis]) -> list[IndustryInsight]:
         """Generate key insights from expert analyses."""
-        
         insights = []
         
         # Market growth insight
@@ -547,9 +539,8 @@ class IndustryAnalysisScenario:
         
         return insights
     
-    def _generate_recommendations(self, expert_analyses: List[ExpertAnalysis]) -> List[str]:
+    def _generate_recommendations(self, expert_analyses: list[ExpertAnalysis]) -> list[str]:
         """Generate consolidated recommendations from expert analyses."""
-        
         # Collect all recommendations from experts
         all_recommendations = []
         for analysis in expert_analyses:
@@ -571,9 +562,8 @@ class IndustryAnalysisScenario:
     
     def _generate_executive_summary(self, request: AnalysisRequest, 
                                   market_data: MarketData, 
-                                  expert_analyses: List[ExpertAnalysis]) -> str:
+                                  expert_analyses: list[ExpertAnalysis]) -> str:
         """Generate executive summary for the report."""
-        
         summary = f"""
         Executive Summary: {request.industry_type.value} Industry Analysis
         
@@ -592,9 +582,8 @@ class IndustryAnalysisScenario:
         return summary.strip()
     
     def _generate_future_outlook(self, market_data: MarketData, 
-                               expert_analyses: List[ExpertAnalysis]) -> str:
+                               expert_analyses: list[ExpertAnalysis]) -> str:
         """Generate future outlook for the industry."""
-        
         outlook = f"""
         Future Outlook (3-5 years)
         
@@ -613,9 +602,8 @@ class IndustryAnalysisScenario:
         return outlook.strip()
     
     def _generate_risk_factors(self, market_data: MarketData, 
-                             expert_analyses: List[ExpertAnalysis]) -> List[str]:
+                             expert_analyses: list[ExpertAnalysis]) -> list[str]:
         """Generate risk factors for the industry."""
-        
         return [
             "Regulatory changes and compliance requirements",
             "Economic volatility and market uncertainty",
@@ -626,9 +614,8 @@ class IndustryAnalysisScenario:
             "Cybersecurity and data privacy concerns"
         ]
     
-    def _calculate_report_quality(self, expert_analyses: List[ExpertAnalysis]) -> float:
+    def _calculate_report_quality(self, expert_analyses: list[ExpertAnalysis]) -> float:
         """Calculate overall report quality score."""
-        
         if not expert_analyses:
             return 0.0
         
@@ -641,9 +628,8 @@ class IndustryAnalysisScenario:
         
         return round(quality_score, 2)
     
-    async def get_analysis_status(self, request_id: str) -> Dict[str, Any]:
+    async def get_analysis_status(self, request_id: str) -> dict[str, Any]:
         """Get status of an analysis request."""
-        
         # Find analysis in history
         analysis_record = None
         for record in self.analysis_history:
@@ -665,9 +651,8 @@ class IndustryAnalysisScenario:
             "report_id": analysis_record.get("report_id")
         }
     
-    async def get_industry_overview(self, industry_type: IndustryType) -> Dict[str, Any]:
+    async def get_industry_overview(self, industry_type: IndustryType) -> dict[str, Any]:
         """Get quick industry overview without full analysis."""
-        
         # Get basic market data
         market_data = await self._gather_market_data(industry_type)
         
@@ -685,9 +670,8 @@ class IndustryAnalysisScenario:
             "expert_areas": list(set([expert.expertise_area for expert in relevant_experts]))
         }
     
-    def get_analysis_history(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_analysis_history(self, limit: int = 10) -> list[dict[str, Any]]:
         """Get recent analysis history."""
-        
         # Sort by completion time (most recent first)
         sorted_history = sorted(self.analysis_history, 
                               key=lambda x: x.get("completed_at", ""), 
@@ -695,9 +679,8 @@ class IndustryAnalysisScenario:
         
         return sorted_history[:limit]
     
-    def get_expert_pool_info(self) -> Dict[str, Any]:
+    def get_expert_pool_info(self) -> dict[str, Any]:
         """Get information about the expert pool."""
-        
         expertise_areas = {}
         industry_coverage = {}
         
@@ -725,7 +708,6 @@ class IndustryAnalysisScenario:
 # Example usage and testing
 async def main():
     """Main function for testing the industry analysis scenario."""
-    
     # Initialize the scenario
     scenario = IndustryAnalysisScenario()
     

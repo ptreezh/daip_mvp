@@ -1,14 +1,14 @@
-"""
-Role validation and assignment service for the Virtual Role Chat System.
+"""Role validation and assignment service for the Virtual Role Chat System.
 
 This module provides functionality to validate role existence, initialize roles
 with appropriate context, and manage role assignments in chat rooms.
 """
 
 import logging
-from typing import Dict, List, Optional, Set
+from typing import Optional
 
-from src.core_services.role_manager import RoleManager, Role
+from src.core_services.role_manager import Role, RoleManager
+
 from .models import ChatRoomConfig, ValidationResult
 
 logger = logging.getLogger(__name__)
@@ -29,9 +29,9 @@ class RoleValidator:
             role_manager: Optional RoleManager instance. If None, creates a new one.
         """
         self.role_manager = role_manager or RoleManager()
-        self._role_cache: Dict[str, Role] = {}
+        self._role_cache: dict[str, Role] = {}
     
-    def validate_roles(self, role_ids: List[str]) -> ValidationResult:
+    def validate_roles(self, role_ids: list[str]) -> ValidationResult:
         """Validate that all specified roles exist and are available.
         
         Args:
@@ -145,7 +145,7 @@ class RoleValidator:
             suggested_correction=None
         )
     
-    def initialize_roles_for_room(self, role_ids: List[str], room_context: Dict) -> Dict[str, Dict]:
+    def initialize_roles_for_room(self, role_ids: list[str], room_context: dict) -> dict[str, dict]:
         """Initialize roles with appropriate context for a chat room.
         
         Args:
@@ -173,7 +173,7 @@ class RoleValidator:
         
         return initialized_roles
     
-    def get_available_roles(self) -> List[Dict[str, str]]:
+    def get_available_roles(self) -> list[dict[str, str]]:
         """Get a list of all available roles.
         
         Returns:
@@ -190,7 +190,7 @@ class RoleValidator:
             for role in roles
         ]
     
-    def get_roles_by_capability(self, capability: str) -> List[str]:
+    def get_roles_by_capability(self, capability: str) -> list[str]:
         """Get roles that have a specific capability.
         
         Args:
@@ -208,7 +208,7 @@ class RoleValidator:
         
         return matching_roles
     
-    def suggest_roles_for_topic(self, topic: str, max_suggestions: int = 5) -> List[str]:
+    def suggest_roles_for_topic(self, topic: str, max_suggestions: int = 5) -> list[str]:
         """Suggest roles that might be relevant for a given topic.
         
         Args:
@@ -282,7 +282,7 @@ class RoleValidator:
         # Additional validation can be added here
         return True
     
-    def _validate_mode_compatibility(self, role_ids: List[str], mode: str) -> ValidationResult:
+    def _validate_mode_compatibility(self, role_ids: list[str], mode: str) -> ValidationResult:
         """Validate that roles are compatible with the chat mode.
         
         Args:
@@ -346,7 +346,7 @@ class RoleValidator:
         }
         return mode_requirements.get(mode, 10)
     
-    def _generate_role_suggestions(self, invalid_roles: List[str]) -> str:
+    def _generate_role_suggestions(self, invalid_roles: list[str]) -> str:
         """Generate suggestions for invalid or missing roles.
         
         Args:
@@ -376,7 +376,7 @@ class RoleValidator:
             available_ids = [role["id"] for role in available_roles[:5]]
             return f"Available roles include: {', '.join(available_ids)}"
     
-    def _create_role_context(self, role: Role, room_context: Dict) -> Dict:
+    def _create_role_context(self, role: Role, room_context: dict) -> dict:
         """Create initialization context for a role in a chat room.
         
         Args:

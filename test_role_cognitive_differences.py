@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证虚拟角色认知差异展示
+"""验证虚拟角色认知差异展示
 """
 
-import sys
-import os
 import asyncio
+import sys
+
 sys.path.append('src')
 
 def test_role_manager_role_loading():

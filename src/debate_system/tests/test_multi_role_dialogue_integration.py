@@ -1,30 +1,27 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多角色对话功能集成测试套件
+"""多角色对话功能集成测试套件
 
 测试多角色对话引擎与现有组件的集成，验证完整的对话流程和异常处理。
 """
 
 import asyncio
-import unittest
 import logging
-from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime
-import sys
 import os
+import sys
+import unittest
+from datetime import datetime
+from unittest.mock import AsyncMock, Mock
 
 # 添加项目根目录到路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
 
+from src.debate_system.debate_flow_definition import DebatePhase, DebateSession, ParticipantRole
 from src.debate_system.multi_role_dialogue_engine import (
-    MultiRoleDialogueEngine, RoleSelector, ConversationManager, 
-    ConvergenceDetector, DialogueState, ConversationTurn, RoleContext
+    ConversationTurn,
+    DialogueState,
+    MultiRoleDialogueEngine,
+    RoleContext,
 )
-from src.debate_system.debate_flow_definition import (
-    DebateSession, DebateRules, DebateParticipant, ParticipantRole, DebatePhase
-)
-from src.debate_system.participant_management import ParticipantManager
 
 
 class TestMultiRoleDialogueIntegration(unittest.TestCase):
@@ -175,7 +172,7 @@ class TestMultiRoleDialogueIntegration(unittest.TestCase):
         print("🧪 测试讨论收敛检测...")
         
         # 创建模拟对话历史
-        from src.debate_system.multi_role_dialogue_engine import DialogueTurn, DialogueContext
+        from src.debate_system.multi_role_dialogue_engine import DialogueContext, DialogueTurn
         
         dialogue_context = DialogueContext(
             session_id=self.test_session.session_id,

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-19 03:00:00
+"""@Time    : 2025-07-19 03:00:00
 @Author  : DAIP-LIVE Team
 @File    : main.py
 @Description: Main CLI entry point for DAIP-LIVE system.
@@ -10,7 +8,6 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
-from typing import List, Optional
 
 import typer
 from rich.console import Console
@@ -37,7 +34,7 @@ logger = logging.getLogger(__name__)
 @app.command()
 def start(
     topic: str = typer.Argument(..., help="The debate topic"),
-    roles: List[str] = typer.Option([], "--role", "-r", help="AI roles to participate in the debate"),
+    roles: list[str] = typer.Option([], "--role", "-r", help="AI roles to participate in the debate"),
     rounds: int = typer.Option(3, "--rounds", help="Number of debate rounds"),
     consensus_strategy: str = typer.Option("simple_majority_vote", "--consensus", help="Consensus strategy to use"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
@@ -264,7 +261,7 @@ def status():
             
             console.print("\n[yellow]💡 Installation Options:[/yellow]")
             # Filter out error messages that aren't actual package names
-            install_deps = [dep for dep in MISSING_DEPENDENCIES if not dep.startswith("No module named") and not "Error" in dep]
+            install_deps = [dep for dep in MISSING_DEPENDENCIES if not dep.startswith("No module named") and "Error" not in dep]
             if install_deps:
                 console.print(f"[dim]   pip install {' '.join(install_deps)}[/dim]")
             console.print("[dim]   pip install -r requirements.txt[/dim]")
@@ -375,7 +372,7 @@ def roles():
         console.print(table)
         
         # Show usage information
-        console.print(f"\n[bold]📋 Role Usage:[/bold]")
+        console.print("\n[bold]📋 Role Usage:[/bold]")
         console.print("[dim]   Use role names with the --role option when starting a debate.[/dim]")
         console.print("[dim]   Example: daip-cli start 'Topic' --role 'Expert' --role 'Critic'[/dim]")
         
@@ -391,7 +388,7 @@ def roles():
                 all_tags.update(role["tags"])
         
         if all_tags:
-            console.print(f"\n[bold]🏷️  Available Categories:[/bold]")
+            console.print("\n[bold]🏷️  Available Categories:[/bold]")
             sorted_tags = sorted(list(all_tags))
             console.print(f"[dim]   {', '.join(sorted_tags[:10])}{'...' if len(sorted_tags) > 10 else ''}[/dim]")
             

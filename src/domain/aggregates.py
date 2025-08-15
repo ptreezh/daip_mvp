@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : aggregates.py
 @Description:
@@ -8,15 +6,18 @@
     Aggregates are clusters of domain objects that can be treated as a single unit.
 """
 
-from typing import List, Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Optional
 from uuid import uuid4
 
-from .entities import User, Session, Task, Message, Debate
+from .entities import Debate, Message, Session, Task
 from .value_objects import (
-    EntranceType, IntentType, TaskStatus, SessionStatus, 
-    MessageIntent, ConsensusLevel, UserPreference, 
-    TaskPriority, TimeInterval
+    ConsensusLevel,
+    EntranceType,
+    IntentType,
+    SessionStatus,
+    TaskPriority,
+    TaskStatus,
 )
 
 
@@ -43,8 +44,8 @@ class SessionAggregate:
             metadata=self.metadata
         )
         
-        self._tasks: List[Task] = []
-        self._messages: List[Message] = []
+        self._tasks: list[Task] = []
+        self._messages: list[Message] = []
         self._debate: Optional[Debate] = None
     
     @property
@@ -53,12 +54,12 @@ class SessionAggregate:
         return self._session
     
     @property
-    def tasks(self) -> List[Task]:
+    def tasks(self) -> list[Task]:
         """获取任务列表"""
         return self._tasks.copy()
     
     @property
-    def messages(self) -> List[Message]:
+    def messages(self) -> list[Message]:
         """获取消息列表"""
         return self._messages.copy()
     
@@ -93,7 +94,7 @@ class SessionAggregate:
                 return task
         return None
     
-    def get_completed_tasks(self) -> List[Task]:
+    def get_completed_tasks(self) -> list[Task]:
         """获取已完成的任务"""
         return [task for task in self._tasks if task.status == TaskStatus.COMPLETED]
     
@@ -110,15 +111,15 @@ class SessionAggregate:
         self._update_timestamp()
         return True
     
-    def get_messages_by_sender(self, sender: str) -> List[Message]:
+    def get_messages_by_sender(self, sender: str) -> list[Message]:
         """根据发送者获取消息"""
         return [msg for msg in self._messages if msg.sender == sender]
     
-    def get_recent_messages(self, count: int = 10) -> List[Message]:
+    def get_recent_messages(self, count: int = 10) -> list[Message]:
         """获取最近的消息"""
         return sorted(self._messages, key=lambda x: x.timestamp, reverse=True)[:count]
     
-    def create_debate(self, topic: str, participants: List[str]) -> Debate:
+    def create_debate(self, topic: str, participants: list[str]) -> Debate:
         """创建辩论"""
         if self.entrance_type != EntranceType.FORUM:
             raise ValueError("Debates can only be created in Forum sessions")
@@ -244,7 +245,7 @@ class TaskAggregate:
         })
         self._update_timestamp()
     
-    def record_step(self, step_name: str, step_data: Dict[str, Any]):
+    def record_step(self, step_name: str, step_data: dict[str, Any]):
         """记录执行步骤"""
         if self._task.status != TaskStatus.RUNNING:
             raise ValueError("Task is not running")
@@ -295,11 +296,11 @@ class TaskAggregate:
         })
         self._update_timestamp()
     
-    def get_execution_history(self) -> List[Dict[str, Any]]:
+    def get_execution_history(self) -> list[dict[str, Any]]:
         """获取执行历史"""
         return self.execution_history.copy()
     
-    def get_execution_steps(self) -> List[Dict[str, Any]]:
+    def get_execution_steps(self) -> list[dict[str, Any]]:
         """获取执行步骤"""
         return [step for step in self.execution_history if step.get("event") != "started"]
     
@@ -406,7 +407,7 @@ class DebateAggregate:
         })
         self._update_timestamp()
     
-    def get_participant_activity(self, participant_id: str) -> Optional[Dict[str, Any]]:
+    def get_participant_activity(self, participant_id: str) -> Optional[dict[str, Any]]:
         """获取参与者活动记录"""
         return self.participant_activities.get(participant_id)
     
@@ -420,7 +421,7 @@ class DebateAggregate:
             key=lambda x: self.participant_activities[x]["message_count"]
         )
     
-    def get_consensus_trend(self) -> List[Dict[str, Any]]:
+    def get_consensus_trend(self) -> list[dict[str, Any]]:
         """获取共识趋势"""
         return self.consensus_history.copy()
     

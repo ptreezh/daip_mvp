@@ -1,5 +1,4 @@
-"""
-真实演示控制器
+"""真实演示控制器
 
 统一管理演示流程，协调各个组件的真实调用，实现演示会话管理。
 """
@@ -8,18 +7,20 @@ import asyncio
 import json
 import logging
 import time
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable
-from dataclasses import dataclass, asdict
-from enum import Enum
 import uuid
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
+
+from .call_verification import CallVerificationSystem
 
 # 导入真实演示系统组件
 from .real_llm_integrator import RealLLMIntegrator
 from .real_role_manager import RealRoleManager
 from .real_workflow_executor import RealWorkflowExecutor
 from .transparency_monitor import TransparencyMonitor
-from .call_verification import CallVerificationSystem
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +45,12 @@ class DemoSession:
     start_time: datetime
     end_time: Optional[datetime]
     scenario_type: str
-    participants: List[str]
-    execution_log: List[Dict[str, Any]]
-    results: Optional[Dict[str, Any]]
-    metadata: Dict[str, Any]
+    participants: list[str]
+    execution_log: list[dict[str, Any]]
+    results: Optional[dict[str, Any]]
+    metadata: dict[str, Any]
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data['status'] = self.status.value
         data['start_time'] = self.start_time.isoformat()
@@ -58,16 +59,14 @@ class DemoSession:
 
 
 class RealDemoController:
-    """
-    真实演示控制器
+    """真实演示控制器
     
     统一管理演示流程，协调各个组件的真实调用，
     实现演示会话管理和完整的透明度监控。
     """
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """
-        初始化演示控制器
+    def __init__(self, config: Optional[dict[str, Any]] = None):
+        """初始化演示控制器
         
         Args:
             config: 配置参数
@@ -82,11 +81,11 @@ class RealDemoController:
         self.verification_system = CallVerificationSystem()
         
         # 演示会话管理
-        self.active_sessions: Dict[str, DemoSession] = {}
-        self.session_history: List[DemoSession] = []
+        self.active_sessions: dict[str, DemoSession] = {}
+        self.session_history: list[DemoSession] = []
         
         # 事件订阅者
-        self.subscribers: List[Callable] = []
+        self.subscribers: list[Callable] = []
         
         # 订阅工作流事件
         self.workflow_executor.subscribe(self._handle_workflow_event)
@@ -97,11 +96,10 @@ class RealDemoController:
         self,
         session_name: str,
         scenario_type: str,
-        participants: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        participants: Optional[list[str]] = None,
+        metadata: Optional[dict[str, Any]] = None
     ) -> str:
-        """
-        创建演示会话
+        """创建演示会话
         
         Args:
             session_name: 会话名称
@@ -188,10 +186,9 @@ class RealDemoController:
         self,
         session_id: str,
         ethical_dilemma: str,
-        context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """
-        执行AI伦理决策分析场景
+        context: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
+        """执行AI伦理决策分析场景
         
         Args:
             session_id: 会话ID
@@ -347,10 +344,9 @@ class RealDemoController:
         self,
         session_id: str,
         product_description: str,
-        market_context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """
-        执行产品策略评估场景
+        market_context: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
+        """执行产品策略评估场景
         
         Args:
             session_id: 会话ID
@@ -453,7 +449,7 @@ class RealDemoController:
                 "session_id": session_id
             }
     
-    async def get_session_status(self, session_id: str) -> Optional[Dict[str, Any]]:
+    async def get_session_status(self, session_id: str) -> Optional[dict[str, Any]]:
         """获取会话状态"""
         # 检查活跃会话
         if session_id in self.active_sessions:
@@ -484,7 +480,7 @@ class RealDemoController:
         
         return True
     
-    async def _log_session_event(self, session_id: str, event_type: str, data: Dict[str, Any]):
+    async def _log_session_event(self, session_id: str, event_type: str, data: dict[str, Any]):
         """记录会话事件"""
         if session_id in self.active_sessions:
             session = self.active_sessions[session_id]
@@ -501,7 +497,7 @@ class RealDemoController:
                 "event": event
             })
     
-    async def _generate_session_certificate(self, session_id: str) -> Dict[str, Any]:
+    async def _generate_session_certificate(self, session_id: str) -> dict[str, Any]:
         """生成会话透明度证书"""
         session_data = await self.get_session_status(session_id)
         if not session_data:
@@ -534,12 +530,12 @@ class RealDemoController:
         
         return certificate
     
-    async def _handle_workflow_event(self, event: Dict[str, Any]):
+    async def _handle_workflow_event(self, event: dict[str, Any]):
         """处理工作流事件"""
         # 转发工作流事件给订阅者
         await self._emit_event("workflow_event", event)
     
-    async def _emit_event(self, event_type: str, data: Dict[str, Any]):
+    async def _emit_event(self, event_type: str, data: dict[str, Any]):
         """发送事件"""
         event = {
             "event_type": event_type,
@@ -568,7 +564,7 @@ class RealDemoController:
             self.subscribers.remove(callback)
             logger.info(f"Demo subscriber removed, total: {len(self.subscribers)}")
     
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """获取系统状态"""
         return {
             "timestamp": datetime.now().isoformat(),
@@ -588,7 +584,7 @@ class RealDemoController:
             }
         }
     
-    def get_demo_statistics(self) -> Dict[str, Any]:
+    def get_demo_statistics(self) -> dict[str, Any]:
         """获取演示统计信息"""
         all_sessions = list(self.active_sessions.values()) + self.session_history
         

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Universal Context Optimization Service for DAIP-LIVE
+"""Universal Context Optimization Service for DAIP-LIVE
 
 This service provides universal context optimization capabilities including:
 - Intelligent message compression for all participants
@@ -14,12 +12,12 @@ comprehensive context optimization for all AI participants.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
-from src.core_services.token_management_service import TokenManagementService, ContextWindow
 from src.core_services.memory_service import MemoryService
+from src.core_services.token_management_service import ContextWindow, TokenManagementService
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +25,7 @@ logger = logging.getLogger(__name__)
 class ConversationState(BaseModel):
     """Model for tracking conversation state across participants."""
     participant_id: str  # Can be user_id or role_id
-    conversation_history: List[Dict[str, Any]]
+    conversation_history: list[dict[str, Any]]
     context_window: ContextWindow
     last_updated: datetime
     session_id: Optional[str] = None
@@ -41,12 +39,11 @@ class ImportantInformation(BaseModel):
     source_message_index: int
     participant_id: str
     timestamp: datetime
-    tags: List[str] = []
+    tags: list[str] = []
 
 
 class UniversalContextService:
-    """
-    Universal Context Optimization Service for all AI participants.
+    """Universal Context Optimization Service for all AI participants.
     
     Provides intelligent context management, message compression, and
     memory consolidation to optimize LLM interactions across all roles and users.
@@ -56,7 +53,7 @@ class UniversalContextService:
         """Initialize the universal context service."""
         self.token_service = token_service
         self.memory_service = memory_service
-        self.conversation_states: Dict[str, ConversationState] = {}
+        self.conversation_states: dict[str, ConversationState] = {}
         
         # Configuration for context optimization
         self.importance_threshold = 0.5  # Minimum importance score to preserve information
@@ -68,9 +65,8 @@ class UniversalContextService:
         
         logger.info("UniversalContextService initialized")
     
-    def _calculate_importance_score(self, message: Dict[str, Any], context: List[Dict[str, Any]]) -> float:
-        """
-        Calculate importance score for a message based on content and context.
+    def _calculate_importance_score(self, message: dict[str, Any], context: list[dict[str, Any]]) -> float:
+        """Calculate importance score for a message based on content and context.
         
         Args:
             message: The message to score
@@ -113,10 +109,9 @@ class UniversalContextService:
         
         return min(score, 1.0)
     
-    def compress_conversation(self, messages: List[Dict[str, Any]], target_tokens: int, 
-                            model: str, participant_id: Optional[str] = None) -> Tuple[List[Dict[str, Any]], List[ImportantInformation]]:
-        """
-        Compress conversation while preserving key information.
+    def compress_conversation(self, messages: list[dict[str, Any]], target_tokens: int, 
+                            model: str, participant_id: Optional[str] = None) -> tuple[list[dict[str, Any]], list[ImportantInformation]]:
+        """Compress conversation while preserving key information.
         
         Args:
             messages: List of conversation messages
@@ -200,10 +195,9 @@ class UniversalContextService:
         
         return final_messages, important_info
     
-    def consolidate_memory(self, participant_id: str, conversation: List[Dict[str, Any]], 
+    def consolidate_memory(self, participant_id: str, conversation: list[dict[str, Any]], 
                           session_id: Optional[str] = None, project_id: Optional[str] = None) -> None:
-        """
-        Extract and store important information from conversation in memory.
+        """Extract and store important information from conversation in memory.
         
         Args:
             participant_id: Identifier for the participant
@@ -255,10 +249,9 @@ class UniversalContextService:
         logger.info(f"Consolidated {len(important_items)} important items to memory for {participant_id}")
     
     def prepare_context(self, participant_id: str, new_message: str, model: str,
-                       conversation_history: Optional[List[Dict[str, Any]]] = None,
+                       conversation_history: Optional[list[dict[str, Any]]] = None,
                        session_id: Optional[str] = None, project_id: Optional[str] = None) -> ContextWindow:
-        """
-        Prepare optimized context for LLM call with memory integration.
+        """Prepare optimized context for LLM call with memory integration.
         
         Args:
             participant_id: Identifier for the participant
@@ -344,8 +337,7 @@ class UniversalContextService:
         return context_window
     
     def get_conversation_summary(self, participant_id: str, model: str) -> Optional[str]:
-        """
-        Get a summary of the conversation for a participant.
+        """Get a summary of the conversation for a participant.
         
         Args:
             participant_id: Identifier for the participant
@@ -381,8 +373,7 @@ class UniversalContextService:
         return "Key conversation points:\n" + "\n".join(summary_parts)
     
     def clear_conversation_state(self, participant_id: str) -> None:
-        """
-        Clear conversation state for a participant.
+        """Clear conversation state for a participant.
         
         Args:
             participant_id: Identifier for the participant
@@ -401,9 +392,8 @@ class UniversalContextService:
             del self.conversation_states[participant_id]
             logger.info(f"Cleared conversation state for {participant_id}")
     
-    def get_context_statistics(self) -> Dict[str, Any]:
-        """
-        Get statistics about context optimization across all participants.
+    def get_context_statistics(self) -> dict[str, Any]:
+        """Get statistics about context optimization across all participants.
         
         Returns:
             Dictionary with context optimization statistics

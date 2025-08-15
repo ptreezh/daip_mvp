@@ -1,23 +1,20 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-20 00:00:00
+"""@Time    : 2025-07-20 00:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_cli_error_scenarios.py
 @Description: Tests for CLI error scenarios and edge cases.
 """
 
-import pytest
 import asyncio
-import tempfile
-import os
-from unittest.mock import MagicMock, patch, AsyncMock, mock_open
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from typer.testing import CliRunner
 
-from src.cli.main import app
 from src.cli.commands import CLIDebateHandler, run_debate_command
+from src.cli.main import app
 
 
-@pytest.fixture
+@pytest.fixture()
 def cli_runner():
     """Fixture that provides a CLI test runner."""
     return CliRunner()
@@ -112,7 +109,7 @@ class TestCLIDebateHandlerErrorScenarios:
     """Test CLIDebateHandler error handling."""
     
     @patch("src.cli.commands.AppState")
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_debate_handler_app_state_failure(self, mock_app_state):
         """Test CLIDebateHandler when AppState initialization fails."""
         mock_app_state.side_effect = Exception("Database connection failed")
@@ -124,7 +121,7 @@ class TestCLIDebateHandlerErrorScenarios:
     
     @patch("src.cli.commands.AppState")
     @patch("src.cli.commands.DebateProtocol")
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_debate_handler_protocol_failure(self, mock_debate_protocol, mock_app_state):
         """Test CLIDebateHandler when DebateProtocol initialization fails."""
         # Mock successful AppState
@@ -141,7 +138,7 @@ class TestCLIDebateHandlerErrorScenarios:
     
     @patch("src.cli.commands.AppState")
     @patch("src.cli.commands.DebateProtocol")
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_debate_handler_start_debate_failure(self, mock_debate_protocol, mock_app_state):
         """Test CLIDebateHandler when debate execution fails."""
         # Mock successful initialization
@@ -171,7 +168,7 @@ class TestCLIDebateHandlerErrorScenarios:
     
     @patch("src.cli.commands.AppState")
     @patch("src.cli.commands.DebateProtocol")
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_debate_handler_event_processing_error(self, mock_debate_protocol, mock_app_state):
         """Test CLIDebateHandler when event processing fails."""
         # Mock successful initialization
@@ -200,7 +197,7 @@ class TestRunDebateCommandErrorScenarios:
     """Test run_debate_command error handling."""
     
     @patch("src.cli.commands.MISSING_DEPENDENCIES", ["aiosqlite", "chromadb"])
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_run_debate_command_missing_dependencies(self):
         """Test run_debate_command with missing dependencies."""
         result = await run_debate_command(
@@ -215,7 +212,7 @@ class TestRunDebateCommandErrorScenarios:
     
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
     @patch("src.cli.commands.CLIDebateHandler")
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_run_debate_command_handler_failure(self, mock_handler_class):
         """Test run_debate_command when handler fails."""
         mock_handler = MagicMock()
@@ -234,7 +231,7 @@ class TestRunDebateCommandErrorScenarios:
     
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
     @patch("src.cli.commands.AppState")
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_run_debate_command_role_recommendation_failure(self, mock_app_state):
         """Test run_debate_command when role recommendation fails."""
         mock_app_state.side_effect = Exception("Role service unavailable")
@@ -260,7 +257,7 @@ class TestRunDebateCommandErrorScenarios:
     
     @patch("src.cli.commands.MISSING_DEPENDENCIES", [])
     @patch("src.cli.commands.CLIDebateHandler")
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_run_debate_command_save_failure(self, mock_handler_class):
         """Test run_debate_command when saving results fails."""
         # Mock file operations to fail

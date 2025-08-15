@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多轮辩论系统模块
+"""多轮辩论系统模块
 
 提供完整的多轮辩论功能，包括：
 - 辩论流程定义和管理
@@ -11,20 +9,25 @@
 """
 
 from .debate_flow_definition import (
-    DebatePhase, ParticipantRole, DebateStatus, DebateFormat,
-    DebateSession, DebateRound, DebateContribution, DebateParticipant,
-    DebateRules
+    DebateContribution,
+    DebateFormat,
+    DebateParticipant,
+    DebatePhase,
+    DebateRound,
+    DebateRules,
+    DebateSession,
+    DebateStatus,
+    ParticipantRole,
 )
-
-from .participant_management import (
-    Permission, ActionType, ParticipantManager,
-    ParticipantCredentials, ActionRecord
-)
-
 from .debate_state_manager import (
-    StateChangeType, StateChange, StateSnapshot,
-    DebateStateManager, StateStorage, MemoryStateStorage
+    DebateStateManager,
+    MemoryStateStorage,
+    StateChange,
+    StateChangeType,
+    StateSnapshot,
+    StateStorage,
 )
+from .participant_management import ActionRecord, ActionType, ParticipantCredentials, ParticipantManager, Permission
 
 __all__ = [
     # 辩论流程定义

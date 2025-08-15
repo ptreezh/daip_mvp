@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Wiki Panel Tests
+"""Personal Intelligence Hub - Wiki Panel Tests
 
 测试Wiki知识库面板组件功能
 """
 
-import pytest
-import asyncio
-from unittest.mock import Mock, patch
 from datetime import datetime
+from unittest.mock import patch
+
+import pytest
 
 from personal_intelligence_hub.components.wiki_panel import WikiPanel
 from personal_intelligence_hub.models.wiki_models import (
-    WikiPage, WikiUpdate, WikiSearchResult, ConsensusNodeFact,
-    WikiUpdateSource, WikiPageStatus, WikiVersion
+    ConsensusNodeFact,
+    WikiPage,
+    WikiPageStatus,
+    WikiSearchResult,
+    WikiUpdate,
+    WikiUpdateSource,
+    WikiVersion,
 )
 
 

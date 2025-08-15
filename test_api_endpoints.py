@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 11:30:00
+"""@Time    : 2025-08-05 11:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_api_endpoints.py
 @Description:
     Test API endpoint integration and functionality
 """
 
-import requests
 import json
 import time
+
+import requests
 
 BASE_URL = "http://127.0.0.1:8000"
 

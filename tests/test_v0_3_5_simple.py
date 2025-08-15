@@ -1,20 +1,17 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: Claude Code
 @File: test_v0_3_5_simple.py
 @Description: Simplified test suite for V0.3.5 Critical Review Workflow components
 """
 
 import asyncio
-import pytest
-import json
-import time
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock
-from typing import Dict, List, Any
 
 # Import the simplified components to test
 import sys
+import time
+
+import pytest
+
 sys.path.append('.')
 
 from src.core_services.smart_reviewer_allocator_simple import SmartReviewerAllocator
@@ -23,11 +20,11 @@ from src.core_services.smart_reviewer_allocator_simple import SmartReviewerAlloc
 class TestSmartReviewerAllocator:
     """Test suite for SmartReviewerAllocator"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def allocator(self):
         return SmartReviewerAllocator()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_allocator_initialization(self, allocator):
         """Test allocator initialization"""
         assert allocator is not None
@@ -35,7 +32,7 @@ class TestSmartReviewerAllocator:
         assert hasattr(allocator, 'allocation_history')
         assert len(allocator.reviewer_pool) > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_select_reviewers_basic(self, allocator):
         """Test basic reviewer selection"""
         result = await allocator.select_reviewers(
@@ -50,7 +47,7 @@ class TestSmartReviewerAllocator:
         assert 'scores' in result
         assert result['confidence_score'] > 0.0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_select_reviewers_multiple(self, allocator):
         """Test selecting multiple reviewers"""
         result = await allocator.select_reviewers(
@@ -63,7 +60,7 @@ class TestSmartReviewerAllocator:
         assert len(result['selected_reviewers']) <= 3
         assert len(result['selected_reviewers']) > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_select_reviewers_no_available(self, allocator):
         """Test reviewer selection when no reviewers available"""
         # Clear reviewer pool
@@ -78,7 +75,7 @@ class TestSmartReviewerAllocator:
         assert result['success'] is False
         assert 'No available reviewers' in result['error']
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_calculate_match_score(self, allocator):
         """Test match score calculation"""
         reviewer = {
@@ -95,7 +92,7 @@ class TestSmartReviewerAllocator:
         assert 0 <= score <= 1
         assert score > 0.5  # Should be a good match
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_pool_stats(self, allocator):
         """Test pool statistics"""
         stats = allocator.get_pool_stats()
@@ -114,7 +111,7 @@ class TestSmartReviewerAllocator:
 class TestV0_3_5BasicIntegration:
     """Basic integration tests for V0.3.5 components"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_allocator_workflow(self):
         """Test complete allocator workflow"""
         # Initialize allocator
@@ -150,7 +147,7 @@ class TestV0_3_5BasicIntegration:
             for reviewer_id in result['selected_reviewers']:
                 assert reviewer_id in allocator.reviewer_pool
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_allocator_performance(self):
         """Test allocator performance"""
         allocator = SmartReviewerAllocator()
@@ -179,7 +176,7 @@ class TestV0_3_5BasicIntegration:
         
         print(f"Performance test completed in {end_time - start_time:.2f} seconds")
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_error_handling(self):
         """Test error handling"""
         allocator = SmartReviewerAllocator()
@@ -196,7 +193,7 @@ class TestV0_3_5BasicIntegration:
         assert 'error' in result or result['success'] is True
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_comprehensive_validation():
     """Comprehensive validation test"""
     allocator = SmartReviewerAllocator()

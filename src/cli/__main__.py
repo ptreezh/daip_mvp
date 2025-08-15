@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-21 14:30:00
+"""@Time    : 2025-07-21 14:30:00
 @Author  : DAIP-LIVE Team
 @File    : __main__.py
 @Description: Entry point for running the CLI as a module (python -m src.cli)

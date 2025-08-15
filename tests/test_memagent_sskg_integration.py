@@ -1,49 +1,43 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-23 12:30:00
+"""@Time    : 2025-07-23 12:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_memagent_sskg_integration.py
 @Description:
     Unit tests for MemAgent-SSKG integration service.
 """
-import pytest
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
-from src.core_services.memagent_sskg_integration import (
-    UnifiedMemoryInterface,
-    MemoryKnowledgeMapping
-)
-from src.core_services.memory_agent import MemAgent, Memory, MemoryType, MemoryQuery
+import pytest
+
 from src.core_services.enhanced_sskg_manager import (
     EnhancedSSKGManager,
     KnowledgeNode,
-    KnowledgeQuery,
-    KnowledgeRelation,
     NodeType,
-    RelationType
+    RelationType,
 )
+from src.core_services.memagent_sskg_integration import MemoryKnowledgeMapping, UnifiedMemoryInterface
+from src.core_services.memory_agent import MemAgent, Memory, MemoryType
 
 
 class TestUnifiedMemoryInterface:
     """Test cases for UnifiedMemoryInterface."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_mem_agent(self):
         """Create a mock MemAgent for testing."""
         return Mock(spec=MemAgent)
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_sskg_manager(self):
         """Create a mock SSKG manager for testing."""
         return Mock(spec=EnhancedSSKGManager)
     
-    @pytest.fixture
+    @pytest.fixture()
     def unified_interface(self, mock_mem_agent, mock_sskg_manager):
         """Create a UnifiedMemoryInterface instance for testing."""
         return UnifiedMemoryInterface(mock_mem_agent, mock_sskg_manager)
     
-    @pytest.fixture
+    @pytest.fixture()
     def sample_memories(self):
         """Create sample memories for testing."""
         return [
@@ -67,7 +61,7 @@ class TestUnifiedMemoryInterface:
             )
         ]
     
-    @pytest.fixture
+    @pytest.fixture()
     def sample_knowledge_nodes(self):
         """Create sample knowledge nodes for testing."""
         return [

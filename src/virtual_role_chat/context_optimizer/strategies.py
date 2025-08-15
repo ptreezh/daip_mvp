@@ -1,5 +1,4 @@
-"""
-Optimization strategies for the Task Context Optimizer.
+"""Optimization strategies for the Task Context Optimizer.
 
 This module implements various strategies for task detection, context prioritization,
 compression, and blending to optimize context preparation for LLM interactions.
@@ -8,24 +7,25 @@ compression, and blending to optimize context preparation for LLM interactions.
 import logging
 import re
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 from .models import (
-    TaskType, TaskRequirement, ContextElement, TaskDetectionResult,
-    OptimizedContext, ContextOptimizationConfig, ElementType, RequirementType
+    ContextElement,
+    ContextOptimizationConfig,
+    ElementType,
+    OptimizedContext,
+    TaskDetectionResult,
+    TaskType,
 )
 
 
 class TaskDetectionStrategy(ABC):
-    """
-    Abstract base class for task detection strategies.
+    """Abstract base class for task detection strategies.
     """
     
     @abstractmethod
-    def detect_task(self, messages: List[Dict[str, Any]], context: Dict[str, Any]) -> TaskDetectionResult:
-        """
-        Detect the task type and requirements from messages and context.
+    def detect_task(self, messages: list[dict[str, Any]], context: dict[str, Any]) -> TaskDetectionResult:
+        """Detect the task type and requirements from messages and context.
         
         Args:
             messages: List of conversation messages
@@ -38,8 +38,7 @@ class TaskDetectionStrategy(ABC):
 
 
 class PatternBasedTaskDetection(TaskDetectionStrategy):
-    """
-    Task detection strategy based on pattern matching.
+    """Task detection strategy based on pattern matching.
     """
     
     def __init__(self):
@@ -47,9 +46,8 @@ class PatternBasedTaskDetection(TaskDetectionStrategy):
         self.logger = logging.getLogger(__name__)
         self.task_patterns = self._initialize_task_patterns()
     
-    def _initialize_task_patterns(self) -> Dict[TaskType, List[str]]:
-        """
-        Initialize task detection patterns.
+    def _initialize_task_patterns(self) -> dict[TaskType, list[str]]:
+        """Initialize task detection patterns.
         
         Returns:
             Dictionary mapping task types to detection patterns
@@ -83,9 +81,8 @@ class PatternBasedTaskDetection(TaskDetectionStrategy):
             ]
         }
     
-    def detect_task(self, messages: List[Dict[str, Any]], context: Dict[str, Any]) -> TaskDetectionResult:
-        """
-        Detect task type using pattern matching.
+    def detect_task(self, messages: list[dict[str, Any]], context: dict[str, Any]) -> TaskDetectionResult:
+        """Detect task type using pattern matching.
         
         Args:
             messages: List of conversation messages
@@ -121,7 +118,7 @@ class PatternBasedTaskDetection(TaskDetectionStrategy):
             task_description=text_content[:100] if text_content else f"{task_type.value} task detected"
         )
     
-    def _extract_text_content(self, messages: List[Dict[str, Any]]) -> str:
+    def _extract_text_content(self, messages: list[dict[str, Any]]) -> str:
         """Extract text content from messages."""
         text_parts = []
         for message in messages:
@@ -135,7 +132,7 @@ class PatternBasedTaskDetection(TaskDetectionStrategy):
         
         return ' '.join(text_parts).lower()
     
-    def _calculate_pattern_score(self, text: str, patterns: List[str]) -> float:
+    def _calculate_pattern_score(self, text: str, patterns: list[str]) -> float:
         """Calculate pattern matching score for a task type."""
         total_matches = 0
         for pattern in patterns:
@@ -151,19 +148,17 @@ class PatternBasedTaskDetection(TaskDetectionStrategy):
 
 
 class ContextPrioritizationStrategy(ABC):
-    """
-    Abstract base class for context prioritization strategies.
+    """Abstract base class for context prioritization strategies.
     """
     
     @abstractmethod
     def prioritize_elements(
         self,
-        elements: List[ContextElement],
+        elements: list[ContextElement],
         task_result: TaskDetectionResult,
         config: ContextOptimizationConfig
-    ) -> List[ContextElement]:
-        """
-        Prioritize context elements based on task requirements.
+    ) -> list[ContextElement]:
+        """Prioritize context elements based on task requirements.
         
         Args:
             elements: List of context elements to prioritize
@@ -177,8 +172,7 @@ class ContextPrioritizationStrategy(ABC):
 
 
 class RelevanceBasedPrioritization(ContextPrioritizationStrategy):
-    """
-    Context prioritization strategy based on relevance scoring.
+    """Context prioritization strategy based on relevance scoring.
     """
     
     def __init__(self):
@@ -187,12 +181,11 @@ class RelevanceBasedPrioritization(ContextPrioritizationStrategy):
     
     def prioritize_elements(
         self,
-        elements: List[ContextElement],
+        elements: list[ContextElement],
         task_result: TaskDetectionResult,
         config: ContextOptimizationConfig
-    ) -> List[ContextElement]:
-        """
-        Prioritize elements based on relevance to the task.
+    ) -> list[ContextElement]:
+        """Prioritize elements based on relevance to the task.
         
         Args:
             elements: List of context elements to prioritize
@@ -219,8 +212,7 @@ class RelevanceBasedPrioritization(ContextPrioritizationStrategy):
         task_result: TaskDetectionResult,
         config: ContextOptimizationConfig
     ) -> float:
-        """
-        Calculate enhanced relevance score considering task context.
+        """Calculate enhanced relevance score considering task context.
         
         Args:
             element: Context element to score
@@ -249,19 +241,17 @@ class RelevanceBasedPrioritization(ContextPrioritizationStrategy):
 
 
 class ContextCompressionStrategy(ABC):
-    """
-    Abstract base class for context compression strategies.
+    """Abstract base class for context compression strategies.
     """
     
     @abstractmethod
     def compress_context(
         self,
-        elements: List[ContextElement],
+        elements: list[ContextElement],
         target_tokens: int,
         config: ContextOptimizationConfig
-    ) -> List[ContextElement]:
-        """
-        Compress context to fit within token limits.
+    ) -> list[ContextElement]:
+        """Compress context to fit within token limits.
         
         Args:
             elements: List of context elements to compress
@@ -275,8 +265,7 @@ class ContextCompressionStrategy(ABC):
 
 
 class SmartTruncationCompression(ContextCompressionStrategy):
-    """
-    Context compression strategy using smart truncation.
+    """Context compression strategy using smart truncation.
     """
     
     def __init__(self):
@@ -285,12 +274,11 @@ class SmartTruncationCompression(ContextCompressionStrategy):
     
     def compress_context(
         self,
-        elements: List[ContextElement],
+        elements: list[ContextElement],
         target_tokens: int,
         config: ContextOptimizationConfig
-    ) -> List[ContextElement]:
-        """
-        Compress context using smart truncation strategies.
+    ) -> list[ContextElement]:
+        """Compress context using smart truncation strategies.
         
         Args:
             elements: List of context elements to compress
@@ -318,12 +306,11 @@ class SmartTruncationCompression(ContextCompressionStrategy):
     
     def _remove_low_relevance_elements(
         self,
-        elements: List[ContextElement],
+        elements: list[ContextElement],
         target_tokens: int,
         config: ContextOptimizationConfig
-    ) -> List[ContextElement]:
-        """
-        Remove elements with low relevance scores.
+    ) -> list[ContextElement]:
+        """Remove elements with low relevance scores.
         
         Args:
             elements: List of elements
@@ -353,21 +340,19 @@ class SmartTruncationCompression(ContextCompressionStrategy):
 
 
 class ContextBlendingStrategy(ABC):
-    """
-    Abstract base class for context blending strategies.
+    """Abstract base class for context blending strategies.
     """
     
     @abstractmethod
     def blend_context_sources(
         self,
         task_instructions: str,
-        background_knowledge: List[str],
-        conversation_history: List[Dict[str, Any]],
+        background_knowledge: list[str],
+        conversation_history: list[dict[str, Any]],
         max_tokens: int,
         config: ContextOptimizationConfig
     ) -> OptimizedContext:
-        """
-        Blend multiple context sources into an optimized context.
+        """Blend multiple context sources into an optimized context.
         
         Args:
             task_instructions: Task-specific instructions
@@ -383,8 +368,7 @@ class ContextBlendingStrategy(ABC):
 
 
 class ProportionalBlending(ContextBlendingStrategy):
-    """
-    Context blending strategy that allocates tokens proportionally.
+    """Context blending strategy that allocates tokens proportionally.
     """
     
     def __init__(self):
@@ -394,13 +378,12 @@ class ProportionalBlending(ContextBlendingStrategy):
     def blend_context_sources(
         self,
         task_instructions: str,
-        background_knowledge: List[str],
-        conversation_history: List[Dict[str, Any]],
+        background_knowledge: list[str],
+        conversation_history: list[dict[str, Any]],
         max_tokens: int,
         config: ContextOptimizationConfig
     ) -> OptimizedContext:
-        """
-        Blend context sources using proportional allocation.
+        """Blend context sources using proportional allocation.
         
         Args:
             task_instructions: Task-specific instructions
@@ -473,8 +456,7 @@ class ProportionalBlending(ContextBlendingStrategy):
         )
     
     def _estimate_tokens(self, text: str) -> int:
-        """
-        Estimate token count for text.
+        """Estimate token count for text.
         
         Args:
             text: Text to estimate

@@ -1,25 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-测试工作流引擎功能 - 异步版本
+"""测试工作流引擎功能 - 异步版本
 验证CriticalReviewWorkflow批判性审查、MultiPerspectiveWorkflow多视角综合、制度原语正确执行
 """
 
-import sys
-import os
 import asyncio
 import logging
-import tempfile
-import shutil
-from pathlib import Path
-from datetime import datetime
+import sys
 
 # 添加src目录到Python路径
 sys.path.append('src')
 
+from src.core_services.role_manager import RoleManager
 from src.workflows.critical_review_workflow import CriticalReviewWorkflow
 from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
-from src.core_services.role_manager import RoleManager
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -32,7 +25,7 @@ async def test_critical_review_workflow():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 初始化CriticalReviewWorkflow...")
+        print("\n🔧 初始化CriticalReviewWorkflow...")
         
         # 初始化批判性审查工作流
         workflow = CriticalReviewWorkflow(
@@ -40,7 +33,7 @@ async def test_critical_review_workflow():
             config={}
         )
         
-        print(f"✅ CriticalReviewWorkflow初始化成功")
+        print("✅ CriticalReviewWorkflow初始化成功")
         print(f"   工作流ID: {workflow.workflow_id}")
         print(f"   配置: {len(workflow.config)} 个配置项")
         
@@ -52,8 +45,8 @@ async def test_critical_review_workflow():
         算法偏见、责任归属等伦理挑战。请提供全面的分析。
         """
         
-        print(f"\n📝 执行批判性审查...")
-        print(f"   测试提示: AI医疗诊断伦理分析")
+        print("\n📝 执行批判性审查...")
+        print("   测试提示: AI医疗诊断伦理分析")
         
         # 创建模拟服务
         mock_services = {
@@ -70,7 +63,7 @@ async def test_critical_review_workflow():
                 execution_id="test_critical_001"
             )
             
-            print(f"   ✅ 批判性审查执行成功")
+            print("   ✅ 批判性审查执行成功")
             print(f"   执行ID: {result.get('execution_id', 'N/A')}")
             print(f"   成功状态: {result.get('success', False)}")
             
@@ -97,7 +90,7 @@ async def test_critical_review_workflow():
                 "facts_needing_revision": 0,
                 "execution_id": "test_critical_001_mock"
             }
-            print(f"   ✅ 使用模拟结果")
+            print("   ✅ 使用模拟结果")
         
         return result.get('success', False)
         
@@ -114,7 +107,7 @@ async def test_multi_perspective_workflow():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 初始化MultiPerspectiveSynthesisWorkflow...")
+        print("\n🔧 初始化MultiPerspectiveSynthesisWorkflow...")
         
         # 初始化多视角工作流
         workflow = MultiPerspectiveSynthesisWorkflow(
@@ -122,14 +115,14 @@ async def test_multi_perspective_workflow():
             config={}
         )
         
-        print(f"✅ MultiPerspectiveSynthesisWorkflow初始化成功")
+        print("✅ MultiPerspectiveSynthesisWorkflow初始化成功")
         print(f"   工作流ID: {workflow.workflow_id}")
         print(f"   配置: {len(workflow.config)} 个配置项")
         
         # 测试用例：远程工作政策分析
         test_topic = "企业应该如何制定远程工作政策来平衡员工福利和工作效率？"
         
-        print(f"\n📝 执行多视角分析...")
+        print("\n📝 执行多视角分析...")
         print(f"   测试主题: {test_topic}")
         
         # 定义分析视角
@@ -150,7 +143,7 @@ async def test_multi_perspective_workflow():
                 execution_id="test_multi_001"
             )
             
-            print(f"   ✅ 多视角分析执行成功")
+            print("   ✅ 多视角分析执行成功")
             print(f"   执行ID: {result.get('execution_id', 'N/A')}")
             print(f"   成功状态: {result.get('success', False)}")
             
@@ -189,7 +182,7 @@ async def test_multi_perspective_workflow():
                 "quality_score": 0.75,
                 "execution_id": "test_multi_001_mock"
             }
-            print(f"   ✅ 使用模拟结果")
+            print("   ✅ 使用模拟结果")
         
         return result.get('success', False)
         
@@ -206,7 +199,7 @@ def test_workflow_nodes():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 测试工作流节点导入...")
+        print("\n🔧 测试工作流节点导入...")
         
         nodes_tested = 0
         nodes_success = 0
@@ -214,8 +207,10 @@ def test_workflow_nodes():
         # 测试批判性审查节点
         try:
             from src.institutional_primitives.critical_review_nodes import (
-                GenerationNode, FactExtractionNode, ParallelReviewNode, 
-                EvidenceAggregationNode
+                EvidenceAggregationNode,
+                FactExtractionNode,
+                GenerationNode,
+                ParallelReviewNode,
             )
             
             generation_node = GenerationNode("test_gen", {})
@@ -223,7 +218,7 @@ def test_workflow_nodes():
             review_node = ParallelReviewNode("test_review", {})
             evidence_node = EvidenceAggregationNode("test_evidence", {})
             
-            print(f"   ✅ 批判性审查节点导入成功")
+            print("   ✅ 批判性审查节点导入成功")
             print(f"      GenerationNode: {type(generation_node).__name__}")
             print(f"      FactExtractionNode: {type(fact_node).__name__}")
             print(f"      ParallelReviewNode: {type(review_node).__name__}")
@@ -239,9 +234,11 @@ def test_workflow_nodes():
         # 测试多视角节点
         try:
             from src.institutional_primitives.multi_perspective_nodes import (
-                TaskDecompositionNode, ParallelExplorationNode,
-                ViewpointCollectionNode, EnhancedSynthesisNode,
-                IterativeRefinementNode
+                EnhancedSynthesisNode,
+                IterativeRefinementNode,
+                ParallelExplorationNode,
+                TaskDecompositionNode,
+                ViewpointCollectionNode,
             )
             
             task_node = TaskDecompositionNode("test_task", {})
@@ -250,7 +247,7 @@ def test_workflow_nodes():
             synthesis_node = EnhancedSynthesisNode("test_synthesis", {})
             refine_node = IterativeRefinementNode("test_refine", {})
             
-            print(f"   ✅ 多视角节点导入成功")
+            print("   ✅ 多视角节点导入成功")
             print(f"      TaskDecompositionNode: {type(task_node).__name__}")
             print(f"      ParallelExplorationNode: {type(explore_node).__name__}")
             print(f"      ViewpointCollectionNode: {type(viewpoint_node).__name__}")
@@ -272,7 +269,7 @@ def test_workflow_nodes():
             consensus_node = ConsensusNode("test_consensus", {})
             revision_node = RevisionNode("test_revision", {})
             
-            print(f"   ✅ 其他节点导入成功")
+            print("   ✅ 其他节点导入成功")
             print(f"      ConsensusNode: {type(consensus_node).__name__}")
             print(f"      RevisionNode: {type(revision_node).__name__}")
             
@@ -283,7 +280,7 @@ def test_workflow_nodes():
             print(f"   ❌ 其他节点导入失败: {e}")
             nodes_tested += 2
         
-        print(f"\n📊 节点测试结果:")
+        print("\n📊 节点测试结果:")
         print(f"   测试节点数量: {nodes_tested}")
         print(f"   成功导入数量: {nodes_success}")
         print(f"   成功率: {nodes_success/nodes_tested*100:.1f}%" if nodes_tested > 0 else "   成功率: N/A")
@@ -303,12 +300,12 @@ def test_workflow_engine():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 测试WorkflowEngine导入...")
+        print("\n🔧 测试WorkflowEngine导入...")
         
         # 测试工作流引擎导入
         try:
-            from src.institutional_primitives.workflow_engine import WorkflowEngine
             from src.institutional_primitives.registry import PrimitiveRegistry
+            from src.institutional_primitives.workflow_engine import WorkflowEngine
             
             # 创建原语注册表
             registry = PrimitiveRegistry()
@@ -316,16 +313,16 @@ def test_workflow_engine():
             # 初始化工作流引擎
             engine = WorkflowEngine(registry)
             
-            print(f"   ✅ WorkflowEngine导入和初始化成功")
+            print("   ✅ WorkflowEngine导入和初始化成功")
             print(f"      引擎类型: {type(engine).__name__}")
             print(f"      注册表类型: {type(registry).__name__}")
             
             # 测试引擎基本功能
             if hasattr(engine, 'register_primitive'):
-                print(f"      ✅ 支持原语注册")
+                print("      ✅ 支持原语注册")
             
             if hasattr(engine, 'execute_workflow'):
-                print(f"      ✅ 支持工作流执行")
+                print("      ✅ 支持工作流执行")
             
             if hasattr(engine, 'get_registered_primitives'):
                 primitives = engine.get_registered_primitives()
@@ -353,7 +350,7 @@ async def test_workflow_integration():
     print("=" * 60)
     
     try:
-        print(f"\n🔧 测试工作流间协作...")
+        print("\n🔧 测试工作流间协作...")
         
         # 测试场景：复杂决策分析
         decision_topic = "企业数字化转型策略制定"
@@ -361,7 +358,7 @@ async def test_workflow_integration():
         print(f"   测试场景: {decision_topic}")
         
         # 第一步：多视角分析
-        print(f"\n   步骤1: 多视角分析...")
+        print("\n   步骤1: 多视角分析...")
         multi_workflow = MultiPerspectiveSynthesisWorkflow(
             workflow_id="integration_multi",
             config={}
@@ -379,7 +376,7 @@ async def test_workflow_integration():
         print(f"      ✅ 多视角分析完成，置信度: {multi_result['confidence']}")
         
         # 第二步：批判性审查
-        print(f"\n   步骤2: 批判性审查...")
+        print("\n   步骤2: 批判性审查...")
         critical_workflow = CriticalReviewWorkflow(
             workflow_id="integration_critical",
             config={}
@@ -399,7 +396,7 @@ async def test_workflow_integration():
         print(f"      ✅ 批判性审查完成，需要修订事实: {critical_result['facts_needing_revision']}")
         
         # 第三步：结果整合
-        print(f"\n   步骤3: 结果整合...")
+        print("\n   步骤3: 结果整合...")
         
         integrated_result = {
             "topic": decision_topic,
@@ -415,13 +412,13 @@ async def test_workflow_integration():
             "workflow_chain": ["多视角分析", "批判性审查", "结果整合"]
         }
         
-        print(f"      ✅ 结果整合完成")
+        print("      ✅ 结果整合完成")
         print(f"      最终建议: {integrated_result['final_recommendation']['strategy']}")
         print(f"      置信度: {integrated_result['confidence_level']}")
         print(f"      工作流链: {' -> '.join(integrated_result['workflow_chain'])}")
         
         # 验证工作流协作效果
-        print(f"\n📊 工作流协作验证:")
+        print("\n📊 工作流协作验证:")
         
         # 检查数据流连续性
         data_continuity = (

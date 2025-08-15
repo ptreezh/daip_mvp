@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 15:30:00
+"""@Time    : 2025-08-06 15:30:00
 @Author  : DAIP-LIVE Team
 @File    : run_forum_tests.py
 @Description:
@@ -9,8 +7,8 @@
 """
 
 import asyncio
-import sys
 import os
+import sys
 from pathlib import Path
 
 # 添加项目根目录到Python路径
@@ -18,6 +16,7 @@ project_root = Path(__file__).resolve().parent
 sys.path.insert(0, str(project_root))
 
 import pytest
+
 from tests.test_forum_integration import run_forum_integration_tests
 
 

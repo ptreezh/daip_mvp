@@ -1,10 +1,11 @@
 import logging
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from src.api.dependencies import AppStateDep
+
 # TODO: These modules need to be implemented or removed
 # from src.blockchain_consensus import ConsensusAlgorithm
 # from src.cognitive_conflict_gan import ConflictIntensity
@@ -48,7 +49,7 @@ async def generate_cognitive_conflict(
 class IntentAnalysisRequest(BaseModel):
     user_input: str
     user_id: str
-    context: Optional[List] = None
+    context: Optional[list] = None
 
 @router.post("/analyze-intent")
 async def analyze_intent(state: AppStateDep, request: IntentAnalysisRequest):

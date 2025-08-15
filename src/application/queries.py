@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : queries.py
 @Description:
@@ -8,18 +6,11 @@
     These handlers implement the Query part of CQRS pattern.
 """
 
-from typing import Dict, Any, List, Optional
-from datetime import datetime
-from dataclasses import dataclass, field
-from abc import ABC, abstractmethod
 import logging
-
-from ..domain.entities import User, Session, Task, Message, Debate
-from ..domain.value_objects import (
-    EntranceType, IntentType, TaskStatus, SessionStatus, 
-    MessageIntent, ConsensusLevel, UserPreference, 
-    TaskPriority, TimeInterval
-)
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any
 
 
 @dataclass
@@ -27,7 +18,7 @@ class BaseQuery:
     """基础查询类"""
     query_id: str
     timestamp: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -119,7 +110,7 @@ class QueryResult:
         self.error = error
         self.timestamp = datetime.now()
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {
             "success": self.success,
@@ -505,7 +496,7 @@ class GetSystemStatusQueryHandler(QueryHandler):
             # 获取系统统计信息
             try:
                 async with self.db_manager.get_session() as session:
-                    from ..infrastructure.database import UserRepository, SessionRepository, TaskRepository
+                    from ..infrastructure.database import SessionRepository, TaskRepository, UserRepository
                     
                     user_repo = UserRepository(session)
                     session_repo = SessionRepository(session)
@@ -552,7 +543,7 @@ class QueryBus:
     """查询总线"""
     
     def __init__(self):
-        self.handlers: Dict[type, QueryHandler] = {}
+        self.handlers: dict[type, QueryHandler] = {}
         self.logger = logging.getLogger(self.__class__.__name__)
     
     def register_handler(self, query_type: type, handler: QueryHandler):

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 16:30:00
+"""@Time    : 2025-07-24 16:30:00
 @Author  : DAIP-LIVE Team
 @File    : parallel_exploration_node.py
 @Description:
@@ -11,32 +9,30 @@ import json
 import logging
 import re
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
-from ..base import InstitutionalPrimitive, ExecutionContext
-from .models import SubProblem, ExpertViewpoint
+from ..base import ExecutionContext, InstitutionalPrimitive
+from .models import ExpertViewpoint, SubProblem
 
 logger = logging.getLogger(__name__)
 
 
 class ParallelExplorationNode(InstitutionalPrimitive):
-    """
-    并行探索节点 - Assigns sub-problems to specialized expert AI roles for parallel exploration.
+    """并行探索节点 - Assigns sub-problems to specialized expert AI roles for parallel exploration.
     
     Implements fan-out pattern to simultaneously deploy multiple expert roles
     to analyze different aspects of a complex topic.
     """
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.max_parallel_experts = config.get("max_parallel_experts", 5) if config else 5
         self.expert_roles = config.get("expert_roles", {}) if config else {}
         self.default_expert_role = config.get("default_expert_role", "专家") if config else "专家"
         self.use_tools = config.get("use_tools", True) if config else True
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute parallel exploration of sub-problems by expert roles.
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        """Execute parallel exploration of sub-problems by expert roles.
         
         Args:
             inputs: Should contain 'sub_problems' to explore
@@ -233,7 +229,7 @@ class ParallelExplorationNode(InstitutionalPrimitive):
                 }
             )
     
-    def _select_expert_role(self, required_expertise: List[str]) -> str:
+    def _select_expert_role(self, required_expertise: list[str]) -> str:
         """Select the most appropriate expert role based on required expertise."""
         if not required_expertise or not self.expert_roles:
             return self.default_expert_role
@@ -250,7 +246,7 @@ class ParallelExplorationNode(InstitutionalPrimitive):
         
         return best_match if best_match else self.default_expert_role
     
-    def _format_questions(self, questions: List[str]) -> str:
+    def _format_questions(self, questions: list[str]) -> str:
         """Format a list of questions for the prompt."""
         return "\n".join([f"{i+1}. {q}" for i, q in enumerate(questions)])
     
@@ -259,7 +255,7 @@ class ParallelExplorationNode(InstitutionalPrimitive):
         tool_executor, 
         topic: str, 
         perspective: str, 
-        questions: List[str]
+        questions: list[str]
     ) -> str:
         """Execute research tool to gather information."""
         try:
@@ -280,7 +276,7 @@ class ParallelExplorationNode(InstitutionalPrimitive):
             logger.warning(f"Failed to execute research tool: {e}")
             return ""
     
-    def _extract_json_from_text(self, text: str) -> Dict[str, Any]:
+    def _extract_json_from_text(self, text: str) -> dict[str, Any]:
         """Extract JSON data from text response."""
         # Find JSON content between triple backticks
         json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', text)
@@ -339,7 +335,7 @@ class ParallelExplorationNode(InstitutionalPrimitive):
                 "confidence": 0.5
             }
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         """Return input schema for the parallel exploration node."""
         return {
             "type": "object",
@@ -357,7 +353,7 @@ class ParallelExplorationNode(InstitutionalPrimitive):
             "required": ["sub_problems"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         """Return output schema for the parallel exploration node."""
         return {
             "type": "object",

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-演示场景管理器
+"""演示场景管理器
 """
 
-from typing import Dict, Any, List
+from typing import Any
+
 from .demo_types import DemoScenarioType
 
 
@@ -14,7 +13,7 @@ class ScenarioManager:
     def __init__(self):
         self.scenarios = self._initialize_scenarios()
     
-    def _initialize_scenarios(self) -> Dict[str, Dict[str, Any]]:
+    def _initialize_scenarios(self) -> dict[str, dict[str, Any]]:
         """初始化演示场景"""
         return {
             DemoScenarioType.MULTI_ROLE_DEBATE.value: {
@@ -67,17 +66,17 @@ class ScenarioManager:
             }
         }
     
-    def get_available_scenarios(self) -> Dict[str, Dict[str, Any]]:
+    def get_available_scenarios(self) -> dict[str, dict[str, Any]]:
         """获取可用场景"""
         return self.scenarios.copy()
     
-    def get_scenario(self, scenario_type: str) -> Dict[str, Any]:
+    def get_scenario(self, scenario_type: str) -> dict[str, Any]:
         """获取特定场景"""
         if scenario_type not in self.scenarios:
             raise ValueError(f"未知场景类型: {scenario_type}")
         return self.scenarios[scenario_type].copy()
     
-    def validate_scenario_params(self, scenario_type: str, params: Dict[str, Any]) -> bool:
+    def validate_scenario_params(self, scenario_type: str, params: dict[str, Any]) -> bool:
         """验证场景参数"""
         if scenario_type not in self.scenarios:
             return False

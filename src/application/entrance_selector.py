@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : entrance_selector.py
 @Description:
@@ -9,16 +7,15 @@
 """
 
 import asyncio
-import json
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timedelta
-from dataclasses import dataclass, field
-from enum import Enum
 import logging
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
 
-from ..domain.entities import User
-from ..domain.value_objects import EntranceType, UserPreference
 from ..domain.domain_services import EntranceSelectorService
+from ..domain.entities import User
+from ..domain.value_objects import EntranceType
 
 
 class UserBehaviorPattern(Enum):
@@ -47,9 +44,9 @@ class UserProfile:
     preferred_interaction_style: str
     typical_session_duration: float  # 分钟
     task_complexity_preference: float  # 0.0 - 1.0
-    entrance_usage_history: Dict[EntranceType, int] = field(default_factory=dict)
+    entrance_usage_history: dict[EntranceType, int] = field(default_factory=dict)
     last_activity: datetime = field(default_factory=datetime.now)
-    satisfaction_scores: Dict[EntranceType, float] = field(default_factory=dict)
+    satisfaction_scores: dict[EntranceType, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -72,8 +69,8 @@ class SelectionResult:
     """选择结果"""
     recommended_entrance: EntranceType
     confidence: float
-    reasoning: List[str]
-    alternative_options: List[Tuple[EntranceType, float]]
+    reasoning: list[str]
+    alternative_options: list[tuple[EntranceType, float]]
     context_features: ContextFeatures
     user_profile: UserProfile
     selection_timestamp: datetime = field(default_factory=datetime.now)
@@ -87,10 +84,10 @@ class EntranceSelector:
         self.base_selector = EntranceSelectorService()
         
         # 用户画像存储
-        self.user_profiles: Dict[str, UserProfile] = {}
+        self.user_profiles: dict[str, UserProfile] = {}
         
         # 选择历史记录
-        self.selection_history: List[Dict[str, Any]] = []
+        self.selection_history: list[dict[str, Any]] = []
         
         # 机器学习模型（简化版）
         self.selection_model = self._initialize_selection_model()
@@ -167,7 +164,7 @@ class EntranceSelector:
         
         logging.info("Entrance Selector stopped")
     
-    async def select_optimal_entrance(self, user: User, context: Dict[str, Any]) -> SelectionResult:
+    async def select_optimal_entrance(self, user: User, context: dict[str, Any]) -> SelectionResult:
         """选择最优入口类型"""
         # 获取或创建用户画像
         user_profile = await self._get_or_create_user_profile(user)
@@ -243,7 +240,7 @@ class EntranceSelector:
         # 默认返回混合模式
         return UserBehaviorPattern.MIXED
     
-    async def _extract_context_features(self, user: User, context: Dict[str, Any], user_profile: UserProfile) -> ContextFeatures:
+    async def _extract_context_features(self, user: User, context: dict[str, Any], user_profile: UserProfile) -> ContextFeatures:
         """提取上下文特征"""
         # 基础特征提取
         query = context.get("query", "")
@@ -332,7 +329,7 @@ class EntranceSelector:
         
         return 0.3  # 默认低时间敏感性
     
-    def _analyze_collaboration_need(self, query: str, context: Dict[str, Any]) -> float:
+    def _analyze_collaboration_need(self, query: str, context: dict[str, Any]) -> float:
         """分析协作需求"""
         # 基于关键词
         collaboration_keywords = [
@@ -352,7 +349,7 @@ class EntranceSelector:
         
         return (keyword_score * 0.7 + participant_score * 0.3)
     
-    def _analyze_analysis_depth(self, query: str, context: Dict[str, Any]) -> float:
+    def _analyze_analysis_depth(self, query: str, context: dict[str, Any]) -> float:
         """分析分析深度"""
         # 基于关键词
         depth_keywords = [
@@ -389,7 +386,7 @@ class EntranceSelector:
         
         return max(5.0, min(120.0, estimated_duration))  # 限制在5-120分钟之间
     
-    def _analyze_interaction_frequency(self, session_history: List[Dict[str, Any]]) -> float:
+    def _analyze_interaction_frequency(self, session_history: list[dict[str, Any]]) -> float:
         """分析交互频率"""
         if not session_history:
             return 0.5
@@ -439,7 +436,7 @@ class EntranceSelector:
         else:
             return ContextComplexity.VERY_COMPLEX
     
-    async def _ml_based_selection(self, user_profile: UserProfile, features: ContextFeatures) -> Dict[str, Any]:
+    async def _ml_based_selection(self, user_profile: UserProfile, features: ContextFeatures) -> dict[str, Any]:
         """基于机器学习的选择"""
         # 计算每个入口的匹配度
         entrance_scores = {}
@@ -486,7 +483,7 @@ class EntranceSelector:
             "scores": entrance_scores
         }
     
-    def _calculate_feature_similarity(self, features: ContextFeatures, profile: Dict[str, float]) -> float:
+    def _calculate_feature_similarity(self, features: ContextFeatures, profile: dict[str, float]) -> float:
         """计算特征相似度"""
         similarity_score = 0.0
         
@@ -501,7 +498,7 @@ class EntranceSelector:
         
         return similarity_score
     
-    def _generate_reasoning(self, entrance: EntranceType, features: ContextFeatures, scores: Dict[EntranceType, float]) -> List[str]:
+    def _generate_reasoning(self, entrance: EntranceType, features: ContextFeatures, scores: dict[EntranceType, float]) -> list[str]:
         """生成选择推理"""
         reasoning = []
         
@@ -528,8 +525,8 @@ class EntranceSelector:
         
         return reasoning
     
-    async def _combine_recommendations(self, base_entrance: EntranceType, ml_result: Dict[str, Any], 
-                                    user_profile: UserProfile, features: ContextFeatures) -> Dict[str, Any]:
+    async def _combine_recommendations(self, base_entrance: EntranceType, ml_result: dict[str, Any], 
+                                    user_profile: UserProfile, features: ContextFeatures) -> dict[str, Any]:
         """综合推荐结果"""
         # 如果两者一致，直接返回
         if base_entrance == ml_result["entrance"]:
@@ -576,7 +573,7 @@ class EntranceSelector:
             "alternatives": alternatives[:3]
         }
     
-    async def _record_selection(self, user_id: str, result: SelectionResult, context: Dict[str, Any]):
+    async def _record_selection(self, user_id: str, result: SelectionResult, context: dict[str, Any]):
         """记录选择历史"""
         selection_record = {
             "user_id": user_id,
@@ -598,7 +595,7 @@ class EntranceSelector:
         if len(self.selection_history) > self.config["max_history_size"]:
             self.selection_history = self.selection_history[-self.config["max_history_size"]:]
     
-    async def _update_user_profile(self, user_id: str, result: SelectionResult, context: Dict[str, Any]):
+    async def _update_user_profile(self, user_id: str, result: SelectionResult, context: dict[str, Any]):
         """更新用户画像"""
         if user_id not in self.user_profiles:
             return
@@ -672,7 +669,7 @@ class EntranceSelector:
             except ValueError:
                 pass
     
-    def _initialize_selection_model(self) -> Dict[str, Any]:
+    def _initialize_selection_model(self) -> dict[str, Any]:
         """初始化选择模型"""
         # 简化的模型初始化
         return {
@@ -698,7 +695,7 @@ class EntranceSelector:
         # 通知基础选择器
         self.base_selector.learn_from_feedback(user_id, entrance, satisfaction)
     
-    async def get_selection_insights(self, user_id: str) -> Dict[str, Any]:
+    async def get_selection_insights(self, user_id: str) -> dict[str, Any]:
         """获取选择洞察"""
         if user_id not in self.user_profiles:
             return {"error": "User profile not found"}
@@ -754,7 +751,7 @@ class EntranceSelector:
             "last_updated": profile.last_activity.isoformat()
         }
     
-    async def get_system_statistics(self) -> Dict[str, Any]:
+    async def get_system_statistics(self) -> dict[str, Any]:
         """获取系统统计信息"""
         total_users = len(self.user_profiles)
         total_selections = len(self.selection_history)

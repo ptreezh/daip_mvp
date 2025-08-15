@@ -1,19 +1,17 @@
-"""
-Implementation of the Epistemology class.
+"""Implementation of the Epistemology class.
 
 This module defines the Epistemology class, which encapsulates the
 knowledge acquisition and validation approaches of a cognitive agent.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 
 class EvidenceStandard(BaseModel):
-    """
-    Standard for evaluating evidence in a particular domain.
+    """Standard for evaluating evidence in a particular domain.
     """
     id: str
     name: str
@@ -21,24 +19,22 @@ class EvidenceStandard(BaseModel):
     required_confidence: float = Field(ge=0.0, le=1.0)
     required_sources: int
     source_quality_threshold: float = Field(ge=0.0, le=1.0)
-    domains: List[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
 
 
 class ValidationStrategy(BaseModel):
-    """
-    Strategy for validating knowledge claims.
+    """Strategy for validating knowledge claims.
     """
     id: str
     name: str
     description: str
-    steps: List[str]
+    steps: list[str]
     effectiveness: float = Field(ge=0.0, le=1.0)
-    domains: List[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
 
 
 class Epistemology:
-    """
-    System that encapsulates the knowledge acquisition and validation approaches of a cognitive agent.
+    """System that encapsulates the knowledge acquisition and validation approaches of a cognitive agent.
     
     The Epistemology defines how an agent determines what counts as knowledge,
     how evidence is evaluated, and how claims are validated. Different agents
@@ -50,8 +46,7 @@ class Epistemology:
         approach: str,
         agent_id: str
     ):
-        """
-        Initialize an epistemology.
+        """Initialize an epistemology.
         
         Args:
             approach: Epistemological approach (e.g., 'empirical', 'rationalist')
@@ -69,9 +64,8 @@ class Epistemology:
         self.logger.debug(f"Loaded {len(self.evidence_standards)} evidence standards and "
                          f"{len(self.validation_strategies)} validation strategies")
     
-    def _initialize_evidence_standards(self) -> Dict[str, EvidenceStandard]:
-        """
-        Initialize evidence standards based on the epistemological approach.
+    def _initialize_evidence_standards(self) -> dict[str, EvidenceStandard]:
+        """Initialize evidence standards based on the epistemological approach.
         
         Returns:
             Dictionary mapping standard IDs to EvidenceStandard objects
@@ -149,9 +143,8 @@ class Epistemology:
         
         return standards
     
-    def _initialize_validation_strategies(self) -> Dict[str, ValidationStrategy]:
-        """
-        Initialize validation strategies based on the epistemological approach.
+    def _initialize_validation_strategies(self) -> dict[str, ValidationStrategy]:
+        """Initialize validation strategies based on the epistemological approach.
         
         Returns:
             Dictionary mapping strategy IDs to ValidationStrategy objects
@@ -261,10 +254,9 @@ class Epistemology:
         self,
         claim: str,
         domain: str,
-        evidence: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
-        """
-        Validate a knowledge claim using appropriate standards and strategies.
+        evidence: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        """Validate a knowledge claim using appropriate standards and strategies.
         
         Args:
             claim: The knowledge claim to validate
@@ -291,8 +283,7 @@ class Epistemology:
         return validation_result
     
     def _select_evidence_standard(self, domain: str) -> EvidenceStandard:
-        """
-        Select the most appropriate evidence standard for a domain.
+        """Select the most appropriate evidence standard for a domain.
         
         Args:
             domain: Domain of knowledge
@@ -314,8 +305,7 @@ class Epistemology:
         return max(applicable_standards, key=lambda s: s.required_confidence)
     
     def _select_validation_strategy(self, domain: str) -> ValidationStrategy:
-        """
-        Select the most appropriate validation strategy for a domain.
+        """Select the most appropriate validation strategy for a domain.
         
         Args:
             domain: Domain of knowledge
@@ -339,12 +329,11 @@ class Epistemology:
     def _apply_validation_strategy(
         self,
         claim: str,
-        evidence: List[Dict[str, Any]],
+        evidence: list[dict[str, Any]],
         standard: EvidenceStandard,
         strategy: ValidationStrategy
-    ) -> Dict[str, Any]:
-        """
-        Apply a validation strategy to evaluate a claim against evidence.
+    ) -> dict[str, Any]:
+        """Apply a validation strategy to evaluate a claim against evidence.
         
         Args:
             claim: The knowledge claim to validate
@@ -371,11 +360,10 @@ class Epistemology:
     
     def _assess_evidence_quality(
         self,
-        evidence: List[Dict[str, Any]],
+        evidence: list[dict[str, Any]],
         standard: EvidenceStandard
-    ) -> Dict[str, Any]:
-        """
-        Assess the quality of evidence against a standard.
+    ) -> dict[str, Any]:
+        """Assess the quality of evidence against a standard.
         
         Args:
             evidence: List of evidence to assess
@@ -394,9 +382,8 @@ class Epistemology:
             "overall_quality": 0.8
         }
     
-    def get_state(self) -> Dict[str, Any]:
-        """
-        Get the current state of the epistemology.
+    def get_state(self) -> dict[str, Any]:
+        """Get the current state of the epistemology.
         
         Returns:
             Dictionary containing the epistemology's state
@@ -409,9 +396,8 @@ class Epistemology:
                                     for strat_id, strat in self.validation_strategies.items()}
         }
     
-    def update_state(self, state_updates: Dict[str, Any]) -> None:
-        """
-        Update the state of the epistemology.
+    def update_state(self, state_updates: dict[str, Any]) -> None:
+        """Update the state of the epistemology.
         
         Args:
             state_updates: Dictionary containing state updates

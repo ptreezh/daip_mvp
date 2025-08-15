@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-双入口系统启动脚本
+"""双入口系统启动脚本
 
 快速启动Personal Intelligence Hub双入口系统
 """
 
-import sys
-import os
-import subprocess
-import asyncio
 import logging
+import subprocess
+import sys
 from pathlib import Path
 
 # 添加项目根目录到Python路径

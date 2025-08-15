@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-增强的工作流选择器
+"""增强的工作流选择器
 
 基于现有PersonalAssistant的工作流选择机制进行优化，提升意图识别准确率到≥90%，
 并支持学术研究、专家咨询、轻松讨论三大场景的智能识别。
@@ -9,9 +7,9 @@
 
 import logging
 import re
-from typing import Dict, List, Tuple, Optional, Any
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +36,7 @@ class EnhancedIntentResult:
     confidence: float
     reasoning: str
     topic: str
-    keywords_matched: List[str]
+    keywords_matched: list[str]
     scenario_confidence: float
 
 
@@ -51,7 +49,7 @@ class EnhancedWorkflowSelector:
         self.workflow_patterns = self._build_workflow_patterns()
         logger.info("Enhanced Workflow Selector initialized")
     
-    def _build_scenario_patterns(self) -> Dict[ScenarioType, Dict[str, Any]]:
+    def _build_scenario_patterns(self) -> dict[ScenarioType, dict[str, Any]]:
         """构建场景识别模式"""
         return {
             ScenarioType.ACADEMIC_RESEARCH: {
@@ -136,7 +134,7 @@ class EnhancedWorkflowSelector:
             }
         }
     
-    def _build_workflow_patterns(self) -> Dict[WorkflowType, Dict[str, Any]]:
+    def _build_workflow_patterns(self) -> dict[WorkflowType, dict[str, Any]]:
         """构建工作流识别模式"""
         return {
             WorkflowType.CRITICAL_REVIEW: {
@@ -174,7 +172,7 @@ class EnhancedWorkflowSelector:
             }
         }
     
-    def analyze_scenario(self, user_input: str) -> Tuple[ScenarioType, float, List[str]]:
+    def analyze_scenario(self, user_input: str) -> tuple[ScenarioType, float, list[str]]:
         """分析用户输入的场景类型"""
         input_lower = user_input.lower()
         scenario_scores = {}
@@ -229,7 +227,7 @@ class EnhancedWorkflowSelector:
         
         return best_scenario, confidence, keywords_found
     
-    def analyze_workflow(self, user_input: str, scenario_type: ScenarioType) -> Tuple[WorkflowType, float, List[str]]:
+    def analyze_workflow(self, user_input: str, scenario_type: ScenarioType) -> tuple[WorkflowType, float, list[str]]:
         """基于场景类型分析工作流类型"""
         input_lower = user_input.lower()
         workflow_scores = {}
@@ -294,7 +292,7 @@ class EnhancedWorkflowSelector:
         
         return best_workflow, confidence, keywords_found
     
-    def select_workflow(self, user_input: str, context: Optional[Dict[str, Any]] = None) -> EnhancedIntentResult:
+    def select_workflow(self, user_input: str, context: Optional[dict[str, Any]] = None) -> EnhancedIntentResult:
         """智能选择工作流"""
         try:
             # 1. 分析场景类型

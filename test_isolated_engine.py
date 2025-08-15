@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 18:35:00
+"""@Time    : 2025-08-04 18:35:00
 @Author  : DAIP-LIVE Team
 @File    : test_isolated_engine.py
 @Description:
     Test multidimensional assessment engine with minimal dependencies.
 """
 
-import sys
 import time
+
 
 def test_minimal_engine():
     """Test minimal engine without heavy dependencies"""
@@ -17,16 +15,9 @@ def test_minimal_engine():
     # Create a minimal version of the engine to test
     try:
         # Basic imports
-        import asyncio
-        import json
         import logging
-        import re
-        import statistics
-        from typing import Dict, List, Optional, Any, Tuple, Set
-        from dataclasses import dataclass, asdict
-        from datetime import datetime, timedelta
+        from dataclasses import dataclass
         from enum import Enum
-        from collections import defaultdict, Counter
         
         print("✅ Basic imports successful")
         
@@ -43,7 +34,7 @@ def test_minimal_engine():
         class AssessmentCriteria:
             dimension: AssessmentDimension
             weight: float
-            metrics: List[str]
+            metrics: list[str]
             threshold: float
             description: str
             importance: str

@@ -1,19 +1,17 @@
-"""
-Unit tests for the Storage Adapters.
+"""Unit tests for the Storage Adapters.
 """
 
 import unittest
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
+
 import pytest
 
 from src.core_services.storage_adapters import (
     RoleMemoryAdapter,
-    WikiAdapter,
     SessionAdapter,
-    ProjectAdapter,
-    MemoryBankAdapter,
-    StorageAdapterManager
+    StorageAdapterManager,
+    WikiAdapter,
 )
 
 
@@ -478,19 +476,19 @@ class TestStorageAdapterManager(unittest.TestCase):
 
 
 # Pytest-style tests
-@pytest.fixture
+@pytest.fixture()
 def mock_sskg_manager():
     """Create a mock SSKG manager."""
     return MockSSKGManager()
 
 
-@pytest.fixture
+@pytest.fixture()
 def role_adapter(mock_sskg_manager):
     """Create a role memory adapter."""
     return RoleMemoryAdapter(mock_sskg_manager)
 
 
-@pytest.fixture
+@pytest.fixture()
 def wiki_adapter(mock_sskg_manager):
     """Create a wiki adapter."""
     return WikiAdapter(mock_sskg_manager)

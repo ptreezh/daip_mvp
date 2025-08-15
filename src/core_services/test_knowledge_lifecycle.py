@@ -1,37 +1,25 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 02:00:00
+"""@Time    : 2025-07-25 02:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_knowledge_lifecycle.py
 @Description:
     Comprehensive integration tests for knowledge retrieval and evolution lifecycle.
     Implements testing for task 10.2 requirements 6.3, 6.4, 6.5, 6.6, 6.7.
 """
+from datetime import datetime
+
 import pytest
-import asyncio
-import json
-from datetime import datetime, timedelta
-from typing import Dict, Any, List
 
 from .enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeNode, NodeType
+from .knowledge_evolution_manager import EvolutionTrigger
+from .knowledge_management_service import KnowledgeManagementConfig, KnowledgeManagementService
+from .knowledge_retrieval_service import QualityMetric, SearchScope
 from .wiki_service import WikiService
-from .knowledge_retrieval_service import (
-    KnowledgeRetrievalService, 
-    SearchScope, 
-    QualityMetric
-)
-from .knowledge_evolution_manager import (
-    KnowledgeEvolutionManager, 
-    EvolutionStrategy,
-    EvolutionTrigger
-)
-from .knowledge_management_service import KnowledgeManagementService, KnowledgeManagementConfig
 
 
 class TestKnowledgeLifecycle:
     """Comprehensive tests for knowledge retrieval and evolution lifecycle."""
     
-    @pytest.fixture
+    @pytest.fixture()
     async def knowledge_ecosystem(self):
         """Set up a complete knowledge management ecosystem for testing."""
         # Initialize core components
@@ -63,7 +51,7 @@ class TestKnowledgeLifecycle:
             "evolution_manager": knowledge_service.evolution_manager
         }
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_cross_session_knowledge_sharing(self, knowledge_ecosystem):
         """Test cross-session knowledge sharing (Requirement 6.3)."""
         services = knowledge_ecosystem
@@ -110,7 +98,7 @@ class TestKnowledgeLifecycle:
         ]
         assert len(python_facts) > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_semantic_search_capabilities(self, knowledge_ecosystem):
         """Test semantic search for validated information (Requirement 6.4)."""
         services = knowledge_ecosystem
@@ -160,7 +148,7 @@ class TestKnowledgeLifecycle:
             assert hasattr(result, 'confidence')
             assert hasattr(result, 'relevance_score')
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_knowledge_quality_assessment(self, knowledge_ecosystem):
         """Test knowledge quality assessment metrics (Requirement 6.5)."""
         services = knowledge_ecosystem
@@ -201,7 +189,7 @@ class TestKnowledgeLifecycle:
             if metric in quality_assessment.quality_metrics:
                 assert 0.0 <= quality_assessment.quality_metrics[metric] <= 1.0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_knowledge_evolution_lifecycle(self, knowledge_ecosystem):
         """Test knowledge evolution and lifecycle management (Requirements 6.6, 6.7)."""
         services = knowledge_ecosystem
@@ -235,7 +223,7 @@ class TestKnowledgeLifecycle:
         assert evolved_node.content == "Updated information about modern technology"
         assert "evolution_trigger" in evolved_node.metadata
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_comprehensive_integration(self, knowledge_ecosystem):
         """Test comprehensive knowledge management integration."""
         services = knowledge_ecosystem

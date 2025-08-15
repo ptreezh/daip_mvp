@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-实时共识监控器
+"""实时共识监控器
 
 实时监控共识形成过程并提供动态反馈
 """
 
-import logging
 import asyncio
-from typing import Any, Dict, List, Optional, Callable
-from datetime import datetime
+import logging
 import uuid
+from collections.abc import Callable
+from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +26,9 @@ class RealTimeConsensusMonitor:
     
     def start_monitoring(
         self,
-        participants: List[str],
+        participants: list[str],
         topic: str,
-        session_config: Dict[str, Any] = None
+        session_config: dict[str, Any] = None
     ) -> str:
         """开始监控会话"""
         try:
@@ -60,7 +59,7 @@ class RealTimeConsensusMonitor:
             logger.error(f"启动监控会话失败: {e}")
             return None
     
-    def update_consensus_state(self, consensus_update: Dict[str, Any]) -> bool:
+    def update_consensus_state(self, consensus_update: dict[str, Any]) -> bool:
         """更新共识状态"""
         try:
             session_id = consensus_update.get("session_id")
@@ -106,7 +105,7 @@ class RealTimeConsensusMonitor:
             logger.error(f"更新共识状态失败: {e}")
             return False
     
-    def get_consensus_progress(self, session_id: str) -> Dict[str, Any]:
+    def get_consensus_progress(self, session_id: str) -> dict[str, Any]:
         """获取共识进度"""
         try:
             if session_id not in self.active_sessions:
@@ -157,11 +156,11 @@ class RealTimeConsensusMonitor:
             logger.error(f"停止监控会话失败: {e}")
             return False
     
-    def register_update_callback(self, callback: Callable[[str, Dict[str, Any]], None]) -> None:
+    def register_update_callback(self, callback: Callable[[str, dict[str, Any]], None]) -> None:
         """注册更新回调函数"""
         self.update_callbacks.append(callback)
     
-    def get_active_sessions(self) -> List[Dict[str, Any]]:
+    def get_active_sessions(self) -> list[dict[str, Any]]:
         """获取活跃会话列表"""
         return [
             {
@@ -199,7 +198,7 @@ class RealTimeConsensusMonitor:
         except Exception as e:
             logger.error(f"监控会话异常: {e}")
     
-    def _analyze_consensus_trend(self, consensus_history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_consensus_trend(self, consensus_history: list[dict[str, Any]]) -> dict[str, Any]:
         """分析共识趋势"""
         if len(consensus_history) < 2:
             return {"trend": "insufficient_data", "direction": "unknown", "rate": 0.0}
@@ -240,7 +239,7 @@ class RealTimeConsensusMonitor:
             logger.error(f"计算会话持续时间失败: {e}")
             return "unknown"
     
-    def _trigger_update_callbacks(self, session_id: str, update_data: Dict[str, Any]) -> None:
+    def _trigger_update_callbacks(self, session_id: str, update_data: dict[str, Any]) -> None:
         """触发更新回调"""
         for callback in self.update_callbacks:
             try:
@@ -248,7 +247,7 @@ class RealTimeConsensusMonitor:
             except Exception as e:
                 logger.error(f"回调函数执行失败: {e}")
     
-    def _should_trigger_auto_update(self, session: Dict[str, Any]) -> bool:
+    def _should_trigger_auto_update(self, session: dict[str, Any]) -> bool:
         """判断是否应该触发自动更新"""
         # 简单的自动更新逻辑
         last_update_time = session["consensus_history"][-1]["timestamp"] if session["consensus_history"] else session["start_time"]
@@ -287,7 +286,7 @@ class RealTimeConsensusMonitor:
         except Exception as e:
             logger.error(f"执行自动更新失败: {e}")
     
-    def _should_end_session(self, session: Dict[str, Any]) -> bool:
+    def _should_end_session(self, session: dict[str, Any]) -> bool:
         """判断会话是否应该结束"""
         # 简单的结束条件
         try:
@@ -300,7 +299,7 @@ class RealTimeConsensusMonitor:
         except Exception:
             return False
     
-    def get_session_summary(self, session_id: str) -> Dict[str, Any]:
+    def get_session_summary(self, session_id: str) -> dict[str, Any]:
         """获取会话摘要"""
         try:
             if session_id not in self.active_sessions:

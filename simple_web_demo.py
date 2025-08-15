@@ -1,23 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Simple Web Demo App - No Unicode characters
+"""Simple Web Demo App - No Unicode characters
 """
 
 import asyncio
 import logging
-import json
 import uuid
-from typing import Dict, List, Any, Optional
 from datetime import datetime
-from pathlib import Path
+from typing import Any, Optional
 
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import BaseModel
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -43,19 +38,19 @@ app.add_middleware(
 class ChatMessage(BaseModel):
     user_input: str
     scenario_type: Optional[str] = None
-    user_preferences: Optional[Dict[str, Any]] = {}
+    user_preferences: Optional[dict[str, Any]] = {}
 
 class ScenarioRequest(BaseModel):
     topic: str
     scenario_type: str
-    user_preferences: Optional[Dict[str, Any]] = {}
+    user_preferences: Optional[dict[str, Any]] = {}
 
 # Scenario simulator
 class ScenarioSimulator:
     def __init__(self):
         self.current_scenarios = {}
         
-    async def simulate_academic_research(self, topic: str, preferences: Dict[str, Any]) -> Dict[str, Any]:
+    async def simulate_academic_research(self, topic: str, preferences: dict[str, Any]) -> dict[str, Any]:
         logger.info(f"Starting academic research scenario: {topic}")
         
         await asyncio.sleep(1)
@@ -92,7 +87,7 @@ class ScenarioSimulator:
             "status": "completed"
         }
     
-    async def simulate_expert_consultation(self, question: str, preferences: Dict[str, Any]) -> Dict[str, Any]:
+    async def simulate_expert_consultation(self, question: str, preferences: dict[str, Any]) -> dict[str, Any]:
         logger.info(f"Starting expert consultation scenario: {question}")
         
         await asyncio.sleep(1)
@@ -143,7 +138,7 @@ class ScenarioSimulator:
             "status": "completed"
         }
     
-    async def simulate_casual_discussion(self, topic: str, preferences: Dict[str, Any]) -> Dict[str, Any]:
+    async def simulate_casual_discussion(self, topic: str, preferences: dict[str, Any]) -> dict[str, Any]:
         logger.info(f"Starting casual discussion scenario: {topic}")
         
         await asyncio.sleep(1)

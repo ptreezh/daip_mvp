@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-富文本渲染器
+"""富文本渲染器
 
 支持Markdown、代码高亮、工作流状态等多种内容格式的渲染
 """
 
-import re
 import logging
-from typing import Dict, Any, Union, List, Optional
-from lona.html import HTML, Div, P, Span, Pre, Code, H1, H2, H3, Strong, Em, A, Ul, Li, Br
+from typing import Any, Optional
+
+from lona.html import H1, H2, H3, HTML, Br, Code, Div, Em, P, Pre, Span, Strong
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +40,7 @@ class RichTextRenderer:
         }
     
     def render(self, content: Any, content_type: str = "text") -> HTML:
-        """
-        渲染内容
+        """渲染内容
         
         Args:
             content: 要渲染的内容
@@ -314,7 +311,7 @@ class RichTextRenderer:
         
         return Div(*elements, _class="structured-analysis")
     
-    def _render_workflow_status(self, status_data: Dict[str, Any]) -> HTML:
+    def _render_workflow_status(self, status_data: dict[str, Any]) -> HTML:
         """渲染工作流状态"""
         if not isinstance(status_data, dict):
             return P(str(status_data))
@@ -383,7 +380,7 @@ class RichTextRenderer:
         
         return Div(*elements, _class="workflow-status-card")
     
-    def render_consensus_result(self, consensus_data: Dict[str, Any]) -> HTML:
+    def render_consensus_result(self, consensus_data: dict[str, Any]) -> HTML:
         """渲染共识结果"""
         if not isinstance(consensus_data, dict):
             return P(str(consensus_data))

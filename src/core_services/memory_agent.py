@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-22 16:00:00
+"""@Time    : 2025-07-22 16:00:00
 @Author  : DAIP-LIVE Team
 @File    : memory_agent.py
 @Description:
@@ -10,18 +8,17 @@
     This implementation provides intelligent memory management for long-context
     interactions across multiple conversations using reinforcement learning techniques.
 """
-import logging
 import json
+import logging
 import random
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional
 
-import numpy as np
 from pydantic import BaseModel, Field
 
-from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeNode, KnowledgeQuery, NodeType
+from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeQuery, NodeType
 
 logger = logging.getLogger(__name__)
 
@@ -47,15 +44,15 @@ class Memory(BaseModel):
     created_at: datetime = Field(default_factory=datetime.now)
     last_accessed: datetime = Field(default_factory=datetime.now)
     access_count: int = 0
-    related_memories: List[str] = []
-    metadata: Dict[str, Any] = {}
+    related_memories: list[str] = []
+    metadata: dict[str, Any] = {}
 
 
 class MemoryQuery(BaseModel):
     """Model for querying memories."""
 
     content: str
-    memory_types: Optional[List[MemoryType]] = None
+    memory_types: Optional[list[MemoryType]] = None
     source_id: Optional[str] = None
     min_importance: float = 0.0
     min_recency: float = 0.0
@@ -66,22 +63,20 @@ class TrainingExample(BaseModel):
     """Model for RL training examples."""
 
     context: str
-    candidate_memories: List[Memory]
-    selected_memories: List[str]
+    candidate_memories: list[Memory]
+    selected_memories: list[str]
     reward: float
 
 
 class MemAgent:
-    """
-    Implementation of MemAgent based on ByteDance/Tsinghua research.
+    """Implementation of MemAgent based on ByteDance/Tsinghua research.
 
     Provides intelligent memory management for long-context interactions
     across multiple conversations using reinforcement learning techniques.
     """
 
     def __init__(self, sskg_manager: EnhancedSSKGManager, model_path: Optional[Path] = None, enable_rl: bool = True):
-        """
-        Initialize the MemAgent.
+        """Initialize the MemAgent.
 
         Args:
             sskg_manager: Enhanced SSKG manager for memory storage
@@ -115,7 +110,7 @@ class MemAgent:
             # Load model from file if available
             if self.model_path and self.model_path.exists():
                 try:
-                    with open(self.model_path, "r") as f:
+                    with open(self.model_path) as f:
                         self.rl_model = json.load(f)
                     logger.info(f"Loaded RL model from {self.model_path}")
                 except Exception as e:
@@ -127,8 +122,7 @@ class MemAgent:
             self.enable_rl = False
 
     def store_memory(self, memory: Memory) -> str:
-        """
-        Store a memory in the SSKG.
+        """Store a memory in the SSKG.
 
         Args:
             memory: The memory to store
@@ -160,9 +154,8 @@ class MemAgent:
         logger.debug(f"Stored memory {memory.id} in SSKG as node {node_id}")
         return memory.id
 
-    def retrieve_memories(self, context: str, query: Optional[MemoryQuery] = None, limit: int = 5) -> List[Memory]:
-        """
-        Retrieve memories relevant to the given context.
+    def retrieve_memories(self, context: str, query: Optional[MemoryQuery] = None, limit: int = 5) -> list[Memory]:
+        """Retrieve memories relevant to the given context.
 
         Args:
             context: The context to retrieve memories for
@@ -182,9 +175,8 @@ class MemAgent:
         else:
             return self._retrieve_memories_simple(context, query)
 
-    def _retrieve_memories_simple(self, context: str, query: MemoryQuery) -> List[Memory]:
-        """
-        Simple memory retrieval without RL.
+    def _retrieve_memories_simple(self, context: str, query: MemoryQuery) -> list[Memory]:
+        """Simple memory retrieval without RL.
 
         Args:
             context: The context to retrieve memories for
@@ -280,9 +272,8 @@ class MemAgent:
         # Return limited results
         return memories[: query.limit]
 
-    def _retrieve_memories_with_rl(self, context: str, query: MemoryQuery) -> List[Memory]:
-        """
-        RL-based memory retrieval as described in the ByteDance/Tsinghua paper.
+    def _retrieve_memories_with_rl(self, context: str, query: MemoryQuery) -> list[Memory]:
+        """RL-based memory retrieval as described in the ByteDance/Tsinghua paper.
 
         Args:
             context: The context to retrieve memories for
@@ -352,8 +343,7 @@ class MemAgent:
         return [memory for memory, _ in scored_candidates[: query.limit]]
 
     def _calculate_relevance(self, context: str, memory_content: str) -> float:
-        """
-        Calculate relevance between context and memory content.
+        """Calculate relevance between context and memory content.
 
         Args:
             context: The context
@@ -376,9 +366,8 @@ class MemAgent:
 
         return intersection / union
 
-    def consolidate_memories(self, source_id: str, memory_type: Optional[MemoryType] = None) -> List[Memory]:
-        """
-        Consolidate memories for a source.
+    def consolidate_memories(self, source_id: str, memory_type: Optional[MemoryType] = None) -> list[Memory]:
+        """Consolidate memories for a source.
 
         Args:
             source_id: ID of the memory source
@@ -491,9 +480,8 @@ class MemAgent:
 
         return consolidated_memories
 
-    def _consolidate_memory_group(self, memories: List[Memory], title: str, memory_type: MemoryType) -> Memory:
-        """
-        Consolidate a group of memories into a single memory.
+    def _consolidate_memory_group(self, memories: list[Memory], title: str, memory_type: MemoryType) -> Memory:
+        """Consolidate a group of memories into a single memory.
 
         Args:
             memories: List of memories to consolidate
@@ -530,9 +518,8 @@ class MemAgent:
 
         return consolidated
 
-    def train_memory_selector(self, training_examples: List[TrainingExample]) -> Dict[str, Any]:
-        """
-        Train the RL model for memory selection.
+    def train_memory_selector(self, training_examples: list[TrainingExample]) -> dict[str, Any]:
+        """Train the RL model for memory selection.
 
         Args:
             training_examples: List of training examples
@@ -619,8 +606,7 @@ class MemAgent:
         }
 
     def get_memory_importance(self, memory_content: str, context: str) -> float:
-        """
-        Calculate the importance of a memory in the given context.
+        """Calculate the importance of a memory in the given context.
 
         Args:
             memory_content: The memory content
@@ -651,9 +637,8 @@ class MemAgent:
 
         return min(importance, 1.0)
 
-    def organize_memories(self, memories: List[Memory]) -> Dict[str, List[Memory]]:
-        """
-        Organize memories into categories.
+    def organize_memories(self, memories: list[Memory]) -> dict[str, list[Memory]]:
+        """Organize memories into categories.
 
         Args:
             memories: List of memories to organize
@@ -685,9 +670,8 @@ class MemAgent:
 
         return by_type
 
-    def share_memories(self, source_id: str, target_id: str, memory_ids: List[str]) -> bool:
-        """
-        Share memories from one source to another.
+    def share_memories(self, source_id: str, target_id: str, memory_ids: list[str]) -> bool:
+        """Share memories from one source to another.
 
         Args:
             source_id: ID of the memory source
@@ -767,9 +751,8 @@ class MemAgent:
 
         return True
 
-    def optimize_context(self, context: str, task: str, max_tokens: int) -> Dict[str, Any]:
-        """
-        Optimize context for a specific task using MemAgent.
+    def optimize_context(self, context: str, task: str, max_tokens: int) -> dict[str, Any]:
+        """Optimize context for a specific task using MemAgent.
 
         Args:
             context: The current context
@@ -850,9 +833,8 @@ class MemAgent:
                 "compression_applied": token_counts["context"] > max_tokens * 0.7,
             }
 
-    def _extract_keywords(self, text: str) -> List[str]:
-        """
-        Extract keywords from text.
+    def _extract_keywords(self, text: str) -> list[str]:
+        """Extract keywords from text.
 
         Args:
             text: The text to extract keywords from

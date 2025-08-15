@@ -1,5 +1,4 @@
-"""
-Example usage of the Institutional Primitives Workflow Engine.
+"""Example usage of the Institutional Primitives Workflow Engine.
 
 This script demonstrates how to define and execute workflows using the
 Institutional Primitives Workflow Engine.
@@ -7,17 +6,11 @@ Institutional Primitives Workflow Engine.
 
 import asyncio
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from src.institutional_primitives.base import ExecutionContext, InstitutionalPrimitive
 from src.institutional_primitives.registry import PrimitiveRegistry
-from src.institutional_primitives.workflow_engine import (
-    WorkflowDefinition,
-    WorkflowEdge,
-    WorkflowEngine,
-    WorkflowNode
-)
-
+from src.institutional_primitives.workflow_engine import WorkflowDefinition, WorkflowEdge, WorkflowEngine, WorkflowNode
 
 # Configure logging
 logging.basicConfig(
@@ -28,11 +21,10 @@ logging.basicConfig(
 
 # Define some example primitives
 class GenerationPrimitive(InstitutionalPrimitive):
-    """
-    Primitive for generating content using an AI role.
+    """Primitive for generating content using an AI role.
     """
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         """Execute the primitive."""
         topic = inputs.get("topic", "general topic")
         role = inputs.get("role", "assistant")
@@ -46,7 +38,7 @@ class GenerationPrimitive(InstitutionalPrimitive):
             "topic": topic
         }
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -55,7 +47,7 @@ class GenerationPrimitive(InstitutionalPrimitive):
             }
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -68,11 +60,10 @@ class GenerationPrimitive(InstitutionalPrimitive):
 
 
 class FactExtractionPrimitive(InstitutionalPrimitive):
-    """
-    Primitive for extracting facts from content.
+    """Primitive for extracting facts from content.
     """
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         """Execute the primitive."""
         content = inputs.get("content", "")
         
@@ -88,7 +79,7 @@ class FactExtractionPrimitive(InstitutionalPrimitive):
             "source_content": content
         }
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -97,7 +88,7 @@ class FactExtractionPrimitive(InstitutionalPrimitive):
             "required": ["content"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -109,11 +100,10 @@ class FactExtractionPrimitive(InstitutionalPrimitive):
 
 
 class ValidationPrimitive(InstitutionalPrimitive):
-    """
-    Primitive for validating facts.
+    """Primitive for validating facts.
     """
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         """Execute the primitive."""
         facts = inputs.get("facts", [])
         
@@ -131,7 +121,7 @@ class ValidationPrimitive(InstitutionalPrimitive):
             "validated_facts": validated_facts
         }
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -140,7 +130,7 @@ class ValidationPrimitive(InstitutionalPrimitive):
             "required": ["facts"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -162,11 +152,10 @@ class ValidationPrimitive(InstitutionalPrimitive):
 
 
 class SynthesisPrimitive(InstitutionalPrimitive):
-    """
-    Primitive for synthesizing validated facts into a report.
+    """Primitive for synthesizing validated facts into a report.
     """
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         """Execute the primitive."""
         validated_facts = inputs.get("validated_facts", [])
         
@@ -180,7 +169,7 @@ class SynthesisPrimitive(InstitutionalPrimitive):
             "fact_count": len(valid_facts)
         }
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
@@ -200,7 +189,7 @@ class SynthesisPrimitive(InstitutionalPrimitive):
             "required": ["validated_facts"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {

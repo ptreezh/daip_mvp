@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 00:00:00
+"""@Time    : 2025-07-25 00:00:00
 @Author  : DAIP-LIVE Team
 @File    : knowledge_evolution_manager.py
 @Description:
@@ -8,25 +6,12 @@
     versioning, deprecation, and continuous improvement.
 """
 import logging
-import json
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
-from pydantic import BaseModel, Field
-
-from .enhanced_sskg_manager import (
-    EnhancedSSKGManager,
-    KnowledgeNode,
-    KnowledgeQuery,
-    NodeType,
-    RelationType
-)
-from .knowledge_retrieval_service import (
-    KnowledgeRetrievalService,
-    KnowledgeEvolutionEvent,
-    KnowledgeQualityAssessment
-)
+from .enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeNode, KnowledgeQuery, NodeType, RelationType
+from .knowledge_retrieval_service import KnowledgeRetrievalService
 
 logger = logging.getLogger(__name__)
 
@@ -58,8 +43,7 @@ class EvolutionTrigger(str, Enum):
 
 
 class KnowledgeEvolutionManager:
-    """
-    Manager for knowledge evolution, versioning, and lifecycle management.
+    """Manager for knowledge evolution, versioning, and lifecycle management.
     
     This service implements requirements 6.5, 6.6, and 6.7:
     - Knowledge versioning, deprecation, and evolution with audit trails
@@ -73,8 +57,7 @@ class KnowledgeEvolutionManager:
         retrieval_service: KnowledgeRetrievalService,
         evolution_strategy: EvolutionStrategy = EvolutionStrategy.HYBRID
     ):
-        """
-        Initialize the knowledge evolution manager.
+        """Initialize the knowledge evolution manager.
         
         Args:
             sskg_manager: Enhanced SSKG manager for knowledge storage
@@ -97,11 +80,10 @@ class KnowledgeEvolutionManager:
         node_id: str,
         trigger: EvolutionTrigger,
         new_content: Optional[str] = None,
-        metadata_updates: Dict[str, Any] = None,
+        metadata_updates: dict[str, Any] = None,
         reason: str = ""
     ) -> Optional[str]:
-        """
-        Evolve a knowledge node by creating a new version.
+        """Evolve a knowledge node by creating a new version.
         
         Args:
             node_id: ID of the node to evolve
@@ -191,8 +173,7 @@ class KnowledgeEvolutionManager:
         reason: str,
         replacement_id: Optional[str] = None
     ) -> bool:
-        """
-        Deprecate a knowledge node.
+        """Deprecate a knowledge node.
         
         Args:
             node_id: ID of the node to deprecate
@@ -263,8 +244,7 @@ class KnowledgeEvolutionManager:
         node_id: str,
         reason: str = "Automatic archival due to age"
     ) -> bool:
-        """
-        Archive a knowledge node.
+        """Archive a knowledge node.
         
         Args:
             node_id: ID of the node to archive
@@ -313,9 +293,8 @@ class KnowledgeEvolutionManager:
             logger.error(f"Error archiving knowledge node {node_id}: {e}")
             return False
     
-    async def run_evolution_cycle(self) -> Dict[str, Any]:
-        """
-        Run an evolution cycle to identify and process nodes that need evolution.
+    async def run_evolution_cycle(self) -> dict[str, Any]:
+        """Run an evolution cycle to identify and process nodes that need evolution.
         
         Returns:
             Summary of evolution cycle results
@@ -383,7 +362,7 @@ class KnowledgeEvolutionManager:
         
         return cycle_results
     
-    async def _check_evolution_triggers(self, node: KnowledgeNode) -> List[Dict[str, Any]]:
+    async def _check_evolution_triggers(self, node: KnowledgeNode) -> list[dict[str, Any]]:
         """Check if a node has any evolution triggers."""
         triggers = []
         
@@ -430,7 +409,7 @@ class KnowledgeEvolutionManager:
         
         return triggers
     
-    async def _process_evolution_trigger(self, node: KnowledgeNode, trigger: Dict[str, Any]) -> bool:
+    async def _process_evolution_trigger(self, node: KnowledgeNode, trigger: dict[str, Any]) -> bool:
         """Process an evolution trigger."""
         try:
             trigger_type = trigger["trigger"]
@@ -463,7 +442,7 @@ class KnowledgeEvolutionManager:
         
         return False
     
-    def get_evolution_statistics(self) -> Dict[str, Any]:
+    def get_evolution_statistics(self) -> dict[str, Any]:
         """Get statistics about knowledge evolution."""
         try:
             # Get evolution events
@@ -508,8 +487,7 @@ class KnowledgeEvolutionManager:
         auto_evolution_enabled: bool = None,
         evolution_strategy: EvolutionStrategy = None
     ) -> None:
-        """
-        Configure evolution parameters.
+        """Configure evolution parameters.
         
         Args:
             quality_threshold: Minimum quality threshold for nodes

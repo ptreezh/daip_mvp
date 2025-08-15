@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-22 17:00:00
+"""@Time    : 2025-07-22 17:00:00
 @Author  : DAIP-LIVE Team
 @File    : enhanced_llm_interface.py
 @Description:
@@ -10,17 +8,16 @@
     components to manage this complexity.
 """
 import logging
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
-from src.kernel.llm_interface import LLMInterface
 from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
 from src.core_services.memory_agent import MemAgent
 from src.core_services.task_context_optimizer import TaskContextOptimizer
 from src.core_services.token_management_service import TokenManagementService
+from src.kernel.llm_interface import LLMInterface
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +27,8 @@ class OptimizationMetadata(BaseModel):
     original_context_tokens: int
     optimized_context_tokens: int
     compression_ratio: float
-    included_memories: List[str]
-    excluded_memories: List[str]
+    included_memories: list[str]
+    excluded_memories: list[str]
     task_focus: str
     optimization_strategy: str
     processing_time_ms: float
@@ -41,14 +38,13 @@ class EnhancedLLMResponse(BaseModel):
     """Enhanced LLM response with optimization metadata."""
     content: str
     model: str
-    token_usage: Optional[Dict[str, int]] = None
+    token_usage: Optional[dict[str, int]] = None
     optimization_metadata: Optional[OptimizationMetadata] = None
-    raw_response: Optional[Dict[str, Any]] = None
+    raw_response: Optional[dict[str, Any]] = None
 
 
 class EnhancedLLMInterface:
-    """
-    Enhanced LLM Interface with integrated task-focused context optimization.
+    """Enhanced LLM Interface with integrated task-focused context optimization.
     
     This class wraps the standard LLMInterface and automatically applies
     task-focused context optimization to all LLM interactions at the lowest level.
@@ -62,8 +58,7 @@ class EnhancedLLMInterface:
         token_service: TokenManagementService,
         enable_optimization: bool = True
     ):
-        """
-        Initialize the Enhanced LLM Interface.
+        """Initialize the Enhanced LLM Interface.
         
         Args:
             base_llm_interface: The base LLM interface to wrap
@@ -89,14 +84,13 @@ class EnhancedLLMInterface:
     
     async def generate(
         self,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         model: str = "gpt-3.5-turbo",
         participant_id: Optional[str] = None,
         task_context: Optional[str] = None,
         **kwargs
-    ) -> Dict[str, Any]:
-        """
-        Generate a response using the LLM with automatic context optimization.
+    ) -> dict[str, Any]:
+        """Generate a response using the LLM with automatic context optimization.
         
         Args:
             messages: List of conversation messages
@@ -151,13 +145,12 @@ class EnhancedLLMInterface:
     
     async def _optimize_context(
         self,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         model: str,
         participant_id: Optional[str] = None,
         task_context: Optional[str] = None
-    ) -> Tuple[List[Dict[str, Any]], OptimizationMetadata]:
-        """
-        Apply task-focused context optimization to messages.
+    ) -> tuple[list[dict[str, Any]], OptimizationMetadata]:
+        """Apply task-focused context optimization to messages.
         
         Args:
             messages: Original messages
@@ -210,9 +203,8 @@ class EnhancedLLMInterface:
         
         return optimized_messages, metadata
     
-    def _detect_task_context(self, messages: List[Dict[str, Any]]) -> str:
-        """
-        Automatically detect task context from messages.
+    def _detect_task_context(self, messages: list[dict[str, Any]]) -> str:
+        """Automatically detect task context from messages.
         
         Args:
             messages: List of conversation messages
@@ -252,9 +244,8 @@ class EnhancedLLMInterface:
         self, 
         task_context: str, 
         participant_id: Optional[str] = None
-    ) -> Tuple[List[str], List[str]]:
-        """
-        Get information about memories included and excluded in optimization.
+    ) -> tuple[list[str], list[str]]:
+        """Get information about memories included and excluded in optimization.
         
         Args:
             task_context: The task context
@@ -285,8 +276,7 @@ class EnhancedLLMInterface:
         optimized_tokens: int, 
         max_tokens: int
     ) -> str:
-        """
-        Determine the optimization strategy used.
+        """Determine the optimization strategy used.
         
         Args:
             original_tokens: Original token count
@@ -321,14 +311,13 @@ class EnhancedLLMInterface:
     
     async def generate_streaming(
         self,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         model: str = "gpt-3.5-turbo",
         participant_id: Optional[str] = None,
         task_context: Optional[str] = None,
         **kwargs
     ):
-        """
-        Generate streaming response with context optimization.
+        """Generate streaming response with context optimization.
         
         Args:
             messages: List of conversation messages
@@ -366,9 +355,8 @@ class EnhancedLLMInterface:
             ):
                 yield chunk
     
-    def get_optimization_stats(self) -> Dict[str, Any]:
-        """
-        Get statistics about context optimization performance.
+    def get_optimization_stats(self) -> dict[str, Any]:
+        """Get statistics about context optimization performance.
         
         Returns:
             Dictionary with optimization statistics

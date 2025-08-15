@@ -1,5 +1,4 @@
-"""
-Test script for ChatRoomManager implementation.
+"""Test script for ChatRoomManager implementation.
 """
 
 import tempfile

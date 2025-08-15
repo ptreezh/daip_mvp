@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : validate_ddd_implementation.py
 @Description:
@@ -10,16 +8,13 @@
 """
 
 import asyncio
-import importlib
-import inspect
 import json
 import logging
-import os
 import sys
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Set, Optional, Type
-from dataclasses import dataclass, field
+from typing import Any
 
 # Add project root to Python path
 project_root = Path(__file__).resolve().parent
@@ -31,7 +26,7 @@ class ValidationResult:
     """验证结果"""
     is_valid: bool
     message: str
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.now)
 
 
@@ -39,8 +34,8 @@ class ValidationResult:
 class ValidationReport:
     """验证报告"""
     overall_score: float
-    validations: List[ValidationResult]
-    summary: Dict[str, Any] = field(default_factory=dict)
+    validations: list[ValidationResult]
+    summary: dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.now)
 
 
@@ -49,7 +44,7 @@ class DDDValidator:
     
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.validation_results: List[ValidationResult] = []
+        self.validation_results: list[ValidationResult] = []
         
         # DDD规则定义
         self.ddd_rules = {
@@ -145,14 +140,14 @@ class DDDValidator:
         total_weight = sum(rule_config["weight"] for rule_config in self.ddd_rules.values())
         weighted_score = 0
         
-        for result, rule_config in zip(self.validation_results, self.ddd_rules.values()):
+        for result, rule_config in zip(self.validation_results, self.ddd_rules.values(), strict=False):
             weight = rule_config["weight"]
             score = 1.0 if result.is_valid else 0.0
             weighted_score += score * weight
         
         return weighted_score / total_weight
     
-    def _generate_summary(self) -> Dict[str, Any]:
+    def _generate_summary(self) -> dict[str, Any]:
         """生成摘要"""
         total_rules = len(self.validation_results)
         passed_rules = sum(1 for result in self.validation_results if result.is_valid)
@@ -189,7 +184,7 @@ class DDDValidator:
             "recommendations": self._generate_recommendations()
         }
     
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """生成改进建议"""
         recommendations = []
         
@@ -450,7 +445,7 @@ class DDDValidator:
                 di_issues.append("未发现依赖注入模式")
             
             is_valid = di_found and len(di_issues) == 0
-            message = f"依赖注入检查完成"
+            message = "依赖注入检查完成"
             
             return ValidationResult(
                 is_valid=is_valid,
@@ -502,7 +497,7 @@ class DDDValidator:
                 cqr_issues.append("缺少命令或查询文件")
             
             is_valid = cqr_found and len(cqr_issues) == 0
-            message = f"CQRS模式检查完成"
+            message = "CQRS模式检查完成"
             
             return ValidationResult(
                 is_valid=is_valid,

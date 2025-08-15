@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 11:00:00
+"""@Time    : 2025-08-04 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : weight_adjuster.py
 @Description:
@@ -8,13 +6,11 @@
 """
 
 import logging
-import asyncio
-from typing import Any, Dict, List, Optional, Tuple
-from datetime import datetime
 import statistics
-import json
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -37,21 +33,19 @@ class WeightConfig:
     max_weight: float
     default_weight: float
     adjustment_factor: float
-    performance_history: List[float]
+    performance_history: list[float]
     last_adjustment: Optional[str] = None
 
 
 class DynamicWeightAdjuster:
-    """
-    动态权重调整器 - Intelligent weight adjustment for synthesis optimization.
+    """动态权重调整器 - Intelligent weight adjustment for synthesis optimization.
     
     Dynamically adjusts weights for different synthesis dimensions based on
     performance metrics, quality feedback, and contextual factors.
     """
     
-    def __init__(self, config: Dict[str, Any] = None):
-        """
-        Initialize the Dynamic Weight Adjuster.
+    def __init__(self, config: dict[str, Any] = None):
+        """Initialize the Dynamic Weight Adjuster.
         
         Args:
             config: Configuration parameters
@@ -107,12 +101,11 @@ class DynamicWeightAdjuster:
         
     async def adjust_weights(
         self,
-        quality_assessment: Dict[str, Any],
-        synthesis_result: Dict[str, Any],
-        context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
-        """
-        Adjust weights based on quality assessment and performance.
+        quality_assessment: dict[str, Any],
+        synthesis_result: dict[str, Any],
+        context: dict[str, Any] = None
+    ) -> dict[str, Any]:
+        """Adjust weights based on quality assessment and performance.
         
         Args:
             quality_assessment: Quality assessment results
@@ -181,7 +174,7 @@ class DynamicWeightAdjuster:
                 "adjusted_weights": {name: config.current_weight for name, config in self.weight_configs.items()}
             }
     
-    def _extract_dimension_scores(self, quality_assessment: Dict[str, Any]) -> Dict[str, float]:
+    def _extract_dimension_scores(self, quality_assessment: dict[str, Any]) -> dict[str, float]:
         """Extract dimension scores from quality assessment."""
         dimension_scores = {}
         
@@ -196,12 +189,11 @@ class DynamicWeightAdjuster:
     
     def _calculate_performance_metrics(
         self,
-        dimension_scores: Dict[str, float],
-        quality_assessment: Dict[str, Any],
-        synthesis_result: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        dimension_scores: dict[str, float],
+        quality_assessment: dict[str, Any],
+        synthesis_result: dict[str, Any]
+    ) -> dict[str, Any]:
         """Calculate performance metrics for weight adjustment."""
-        
         overall_score = quality_assessment.get("overall_score", 0.0)
         
         # Calculate dimension performance
@@ -254,11 +246,10 @@ class DynamicWeightAdjuster:
     
     async def _select_adjustment_strategy(
         self,
-        performance_metrics: Dict[str, Any],
-        context: Dict[str, Any] = None
+        performance_metrics: dict[str, Any],
+        context: dict[str, Any] = None
     ) -> WeightAdjustmentStrategy:
         """Select optimal weight adjustment strategy."""
-        
         overall_score = performance_metrics.get("overall_score", 0.0)
         performance_balance = performance_metrics.get("performance_balance", 0.0)
         
@@ -274,12 +265,11 @@ class DynamicWeightAdjuster:
     
     async def _perform_weight_adjustment(
         self,
-        dimension_scores: Dict[str, float],
-        performance_metrics: Dict[str, Any],
+        dimension_scores: dict[str, float],
+        performance_metrics: dict[str, Any],
         strategy: WeightAdjustmentStrategy
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Perform weight adjustment using selected strategy."""
-        
         adjustment_methods = {
             WeightAdjustmentStrategy.QUALITY_BASED: self._quality_based_adjustment,
             WeightAdjustmentStrategy.PERFORMANCE_BASED: self._performance_based_adjustment,
@@ -297,11 +287,10 @@ class DynamicWeightAdjuster:
     
     async def _quality_based_adjustment(
         self,
-        dimension_scores: Dict[str, float],
-        performance_metrics: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        dimension_scores: dict[str, float],
+        performance_metrics: dict[str, Any]
+    ) -> dict[str, Any]:
         """Quality-based weight adjustment."""
-        
         adjusted_weights = {}
         recommendations = []
         
@@ -346,11 +335,10 @@ class DynamicWeightAdjuster:
     
     async def _performance_based_adjustment(
         self,
-        dimension_scores: Dict[str, float],
-        performance_metrics: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        dimension_scores: dict[str, float],
+        performance_metrics: dict[str, Any]
+    ) -> dict[str, Any]:
         """Performance-based weight adjustment."""
-        
         adjusted_weights = {}
         recommendations = []
         
@@ -390,11 +378,10 @@ class DynamicWeightAdjuster:
     
     async def _diversity_based_adjustment(
         self,
-        dimension_scores: Dict[str, float],
-        performance_metrics: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        dimension_scores: dict[str, float],
+        performance_metrics: dict[str, Any]
+    ) -> dict[str, Any]:
         """Diversity-based weight adjustment for balance."""
-        
         adjusted_weights = {}
         recommendations = []
         
@@ -425,11 +412,10 @@ class DynamicWeightAdjuster:
     
     async def _consensus_based_adjustment(
         self,
-        dimension_scores: Dict[str, float],
-        performance_metrics: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        dimension_scores: dict[str, float],
+        performance_metrics: dict[str, Any]
+    ) -> dict[str, Any]:
         """Consensus-based weight adjustment for stable performance."""
-        
         adjusted_weights = {}
         recommendations = []
         
@@ -466,11 +452,10 @@ class DynamicWeightAdjuster:
     
     async def _adaptive_hybrid_adjustment(
         self,
-        dimension_scores: Dict[str, float],
-        performance_metrics: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        dimension_scores: dict[str, float],
+        performance_metrics: dict[str, Any]
+    ) -> dict[str, Any]:
         """Adaptive hybrid adjustment combining multiple strategies."""
-        
         adjusted_weights = {}
         recommendations = []
         
@@ -511,7 +496,7 @@ class DynamicWeightAdjuster:
             "recommendations": recommendations
         }
     
-    async def _calculate_quality_factor(self, dimension_scores: Dict[str, float]) -> Dict[str, float]:
+    async def _calculate_quality_factor(self, dimension_scores: dict[str, float]) -> dict[str, float]:
         """Calculate quality-based adjustment factors."""
         total_score = sum(dimension_scores.values()) if dimension_scores else 1.0
         
@@ -527,7 +512,7 @@ class DynamicWeightAdjuster:
         
         return factors
     
-    async def _calculate_performance_factor(self, performance_metrics: Dict[str, Any]) -> Dict[str, float]:
+    async def _calculate_performance_factor(self, performance_metrics: dict[str, Any]) -> dict[str, float]:
         """Calculate performance-based adjustment factors."""
         dimension_performance = performance_metrics.get("dimension_performance", {})
         avg_efficiency = performance_metrics.get("average_efficiency", 0.0)
@@ -542,7 +527,7 @@ class DynamicWeightAdjuster:
         
         return factors
     
-    async def _calculate_diversity_factor(self, performance_metrics: Dict[str, Any]) -> Dict[str, float]:
+    async def _calculate_diversity_factor(self, performance_metrics: dict[str, Any]) -> dict[str, float]:
         """Calculate diversity-based adjustment factors."""
         factors = {}
         target_weight = 1.0 / len(self.weight_configs)
@@ -554,7 +539,7 @@ class DynamicWeightAdjuster:
         
         return factors
     
-    def _calculate_adjustment_magnitude(self, adjusted_weights: Dict[str, float]) -> float:
+    def _calculate_adjustment_magnitude(self, adjusted_weights: dict[str, float]) -> float:
         """Calculate the magnitude of weight adjustments."""
         total_change = 0.0
         
@@ -566,7 +551,7 @@ class DynamicWeightAdjuster:
         
         return total_change / len(adjusted_weights) if adjusted_weights else 0.0
     
-    def _validate_and_normalize_weights(self, weights: Dict[str, float]) -> Dict[str, float]:
+    def _validate_and_normalize_weights(self, weights: dict[str, float]) -> dict[str, float]:
         """Validate and normalize weights to sum to 1.0."""
         # Apply bounds
         normalized_weights = {}
@@ -586,7 +571,7 @@ class DynamicWeightAdjuster:
         
         return normalized_weights
     
-    def _update_weight_configs(self, normalized_weights: Dict[str, float], performance_metrics: Dict[str, Any]):
+    def _update_weight_configs(self, normalized_weights: dict[str, float], performance_metrics: dict[str, Any]):
         """Update weight configurations with new values."""
         for dim_name, new_weight in normalized_weights.items():
             weight_config = self.weight_configs.get(dim_name)
@@ -602,7 +587,7 @@ class DynamicWeightAdjuster:
                 if len(weight_config.performance_history) > 100:
                     weight_config.performance_history = weight_config.performance_history[-50:]
     
-    def _calculate_convergence_indicators(self) -> Dict[str, Any]:
+    def _calculate_convergence_indicators(self) -> dict[str, Any]:
         """Calculate convergence indicators for weight stability."""
         if len(self.adjustment_history) < 3:
             return {"converged": False, "reason": "Insufficient history"}
@@ -624,15 +609,15 @@ class DynamicWeightAdjuster:
             "adjustment_trend": "decreasing" if len(recent_adjustments) > 1 and recent_adjustments[-1] < recent_adjustments[0] else "stable"
         }
     
-    def get_current_weights(self) -> Dict[str, float]:
+    def get_current_weights(self) -> dict[str, float]:
         """Get current weight configuration."""
         return {name: config.current_weight for name, config in self.weight_configs.items()}
     
-    def get_weight_history(self) -> Dict[str, List[Dict[str, Any]]]:
+    def get_weight_history(self) -> dict[str, list[dict[str, Any]]]:
         """Get weight adjustment history."""
         return self.adjustment_history.copy()
     
-    def get_performance_summary(self) -> Dict[str, Any]:
+    def get_performance_summary(self) -> dict[str, Any]:
         """Get performance summary."""
         if not self.adjustment_history:
             return {"message": "No adjustment history available"}
@@ -663,7 +648,7 @@ class DynamicWeightAdjuster:
             "latest_adjustment": self.adjustment_history[-1] if self.adjustment_history else None
         }
     
-    def reset_weights(self) -> Dict[str, float]:
+    def reset_weights(self) -> dict[str, float]:
         """Reset weights to default values."""
         for weight_config in self.weight_configs.values():
             weight_config.current_weight = weight_config.default_weight
@@ -671,7 +656,7 @@ class DynamicWeightAdjuster:
         
         return self.get_current_weights()
     
-    def export_weights(self) -> Dict[str, Any]:
+    def export_weights(self) -> dict[str, Any]:
         """Export weight configuration."""
         return {
             "timestamp": datetime.now().isoformat(),

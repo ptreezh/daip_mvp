@@ -1,27 +1,18 @@
-"""
-Example demonstrating knowledge conflict detection and resolution.
+"""Example demonstrating knowledge conflict detection and resolution.
 
 This script shows how to use the KnowledgeConflictResolver to detect and resolve
 conflicts between knowledge facts in the SSKG.
 """
 
 import logging
-import os
-from datetime import datetime
 from pathlib import Path
 
 from src.core_services.enhanced_sskg_manager import (
     EnhancedSSKGManager,
     KnowledgeNode,
-    KnowledgeRelation,
     NodeType,
-    RelationType
 )
-from src.core_services.knowledge_conflict_resolver import (
-    KnowledgeConflictResolver,
-    ConflictType,
-    ResolutionStrategy
-)
+from src.core_services.knowledge_conflict_resolver import KnowledgeConflictResolver, ResolutionStrategy
 
 # Configure logging
 logging.basicConfig(
@@ -161,7 +152,7 @@ def main():
             [conflicts3[0]], 
             strategy=ResolutionStrategy.SYNTHESIS
         )
-        print(f"\nResolved conflict for fact 3 using synthesis:")
+        print("\nResolved conflict for fact 3 using synthesis:")
         resolution = resolutions3[0]
         print(f"  Strategy: {resolution.resolution_strategy}")
         print(f"  Resolved node: {resolution.resolved_node_id}")

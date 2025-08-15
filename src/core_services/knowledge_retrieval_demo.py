@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 02:30:00
+"""@Time    : 2025-07-25 02:30:00
 @Author  : DAIP-LIVE Team
 @File    : knowledge_retrieval_demo.py
 @Description:
@@ -8,15 +6,13 @@
     Shows implementation of task 10.2 requirements.
 """
 import asyncio
-import json
 from datetime import datetime, timedelta
-from typing import Dict, Any
 
 from .enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeNode, NodeType
+from .knowledge_evolution_manager import EvolutionStrategy, EvolutionTrigger
+from .knowledge_management_service import KnowledgeManagementConfig, KnowledgeManagementService
+from .knowledge_retrieval_service import SearchScope
 from .wiki_service import WikiService
-from .knowledge_retrieval_service import KnowledgeRetrievalService, SearchScope
-from .knowledge_evolution_manager import KnowledgeEvolutionManager, EvolutionStrategy, EvolutionTrigger
-from .knowledge_management_service import KnowledgeManagementService, KnowledgeManagementConfig
 
 
 class KnowledgeRetrievalDemo:
@@ -288,14 +284,14 @@ class KnowledgeRetrievalDemo:
                 min_relevance=0.4
             )
             
-            print(f"   📊 Retrieved Knowledge:")
+            print("   📊 Retrieved Knowledge:")
             print(f"      • Facts: {len(cross_session_knowledge['facts'])}")
             print(f"      • Synthesis: {len(cross_session_knowledge['synthesis'])}")
             print(f"      • Connections: {len(cross_session_knowledge['knowledge_connections'])}")
             
             # Show top relevant facts
             if cross_session_knowledge['facts']:
-                print(f"   🔍 Top Relevant Fact:")
+                print("   🔍 Top Relevant Fact:")
                 top_fact = cross_session_knowledge['facts'][0]
                 print(f"      Content: {top_fact['content'][:80]}...")
                 print(f"      Confidence: {top_fact['confidence']:.2f}")
@@ -388,15 +384,15 @@ class KnowledgeRetrievalDemo:
             # Assess quality
             assessment = await self.knowledge_service.retrieval_service.assess_knowledge_quality(node_id)
             
-            print(f"   📈 Quality Assessment:")
+            print("   📈 Quality Assessment:")
             print(f"      Overall Quality: {assessment.overall_quality:.2f}")
-            print(f"      Quality Metrics:")
+            print("      Quality Metrics:")
             
             for metric, score in assessment.quality_metrics.items():
                 print(f"         • {metric.value.replace('_', ' ').title()}: {score:.2f}")
             
             if assessment.recommendations:
-                print(f"      💡 Recommendations:")
+                print("      💡 Recommendations:")
                 for rec in assessment.recommendations[:2]:  # Show top 2
                     print(f"         • {rec}")
     
@@ -429,7 +425,7 @@ class KnowledgeRetrievalDemo:
             
             if evolved_id:
                 evolved_node = self.sskg_manager.get_node(evolved_id)
-                print(f"   ✅ Evolution Successful!")
+                print("   ✅ Evolution Successful!")
                 print(f"   Evolved: {evolved_node.content}")
                 print(f"   New ID: {evolved_id}")
                 print(f"   Evolution Trigger: {evolved_node.metadata.get('evolution_trigger')}")
@@ -448,14 +444,14 @@ class KnowledgeRetrievalDemo:
         # Run evolution cycle
         cycle_results = await self.knowledge_service.evolution_manager.run_evolution_cycle()
         
-        print(f"   📊 Evolution Cycle Results:")
+        print("   📊 Evolution Cycle Results:")
         print(f"      • Nodes Evaluated: {cycle_results['nodes_evaluated']}")
         print(f"      • Nodes Evolved: {cycle_results['nodes_evolved']}")
         print(f"      • Nodes Deprecated: {cycle_results['nodes_deprecated']}")
         print(f"      • Nodes Archived: {cycle_results['nodes_archived']}")
         
         if cycle_results['evolution_triggers']:
-            print(f"      • Triggers Detected:")
+            print("      • Triggers Detected:")
             for trigger, count in cycle_results['evolution_triggers'].items():
                 print(f"         - {trigger.replace('_', ' ').title()}: {count}")
         
@@ -480,14 +476,14 @@ class KnowledgeRetrievalDemo:
         
         print(f"\n🏥 Service Status: {stats['service_status'].upper()}")
         
-        print(f"\n⚙️  Configuration:")
+        print("\n⚙️  Configuration:")
         config = stats['configuration']
         print(f"   • Auto Persist Facts: {config['auto_persist_facts']}")
         print(f"   • Evolution Strategy: {config['evolution_strategy'].title()}")
         print(f"   • Quality Threshold: {config['quality_threshold']}")
         print(f"   • Cross-Session Sharing: {config['cross_session_sharing']}")
         
-        print(f"\n📊 Knowledge Statistics:")
+        print("\n📊 Knowledge Statistics:")
         if 'retrieval' in stats:
             retrieval_stats = stats['retrieval']
             print(f"   • Total Knowledge Items: {retrieval_stats.get('total_knowledge_items', 0)}")
@@ -500,7 +496,7 @@ class KnowledgeRetrievalDemo:
                 print(f"   • Avg Confidence - Facts: {avg_conf.get('facts', 0):.2f}")
                 print(f"   • Avg Confidence - Synthesis: {avg_conf.get('synthesis', 0):.2f}")
         
-        print(f"\n🔄 Evolution Statistics:")
+        print("\n🔄 Evolution Statistics:")
         if 'evolution' in stats:
             evolution_stats = stats['evolution']
             print(f"   • Strategy: {evolution_stats.get('evolution_strategy', 'N/A').title()}")
@@ -513,12 +509,12 @@ class KnowledgeRetrievalDemo:
                 print(f"   • Recent Events (7d): {recent.get('last_week_events', 0)}")
         
         # Health check
-        print(f"\n🏥 Health Check:")
+        print("\n🏥 Health Check:")
         health_status = await self.knowledge_service.health_check()
         print(f"   Overall Status: {health_status['overall_status'].upper()}")
         
         if 'components' in health_status:
-            print(f"   Component Health:")
+            print("   Component Health:")
             for component, status in health_status['components'].items():
                 status_icon = "✅" if "healthy" in status.lower() else "⚠️"
                 print(f"      {status_icon} {component.replace('_', ' ').title()}: {status}")

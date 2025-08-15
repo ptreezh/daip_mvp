@@ -1,5 +1,4 @@
-"""
-LLM调用验证机制
+"""LLM调用验证机制
 
 提供LLM调用的完整验证功能，包括调用签名生成、哈希验证、
 调用历史审计和结果可重现性验证。
@@ -8,10 +7,10 @@ LLM调用验证机制
 import hashlib
 import json
 import logging
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
-from dataclasses import dataclass, asdict
 from enum import Enum
+from typing import Any, Optional
 
 from .real_llm_integrator import LLMCallRecord
 
@@ -33,10 +32,10 @@ class VerificationResult:
     status: VerificationStatus
     confidence_score: float
     verification_timestamp: datetime
-    details: Dict[str, Any]
+    details: dict[str, Any]
     signature: str
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data['status'] = self.status.value
         data['verification_timestamp'] = self.verification_timestamp.isoformat()
@@ -50,33 +49,31 @@ class AuditEntry:
     call_id: str
     action: str
     timestamp: datetime
-    details: Dict[str, Any]
+    details: dict[str, Any]
     hash_chain: str
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data['timestamp'] = self.timestamp.isoformat()
         return data
 
 
 class CallVerificationSystem:
-    """
-    LLM调用验证系统
+    """LLM调用验证系统
     
     提供完整的LLM调用验证功能，确保调用的真实性、完整性和可追溯性。
     """
     
     def __init__(self):
         """初始化验证系统"""
-        self.audit_log: List[AuditEntry] = []
-        self.verification_cache: Dict[str, VerificationResult] = {}
-        self.hash_chain: List[str] = []
+        self.audit_log: list[AuditEntry] = []
+        self.verification_cache: dict[str, VerificationResult] = {}
+        self.hash_chain: list[str] = []
         
         logger.info("CallVerificationSystem initialized")
     
     def generate_call_signature(self, record: LLMCallRecord) -> str:
-        """
-        生成调用签名
+        """生成调用签名
         
         Args:
             record: LLM调用记录
@@ -112,8 +109,7 @@ class CallVerificationSystem:
         return signature
     
     def verify_call_signature(self, record: LLMCallRecord, expected_signature: str) -> bool:
-        """
-        验证调用签名
+        """验证调用签名
         
         Args:
             record: LLM调用记录
@@ -139,8 +135,7 @@ class CallVerificationSystem:
         return is_valid
     
     def verify_call_integrity(self, record: LLMCallRecord) -> VerificationResult:
-        """
-        验证调用完整性
+        """验证调用完整性
         
         Args:
             record: LLM调用记录
@@ -247,9 +242,8 @@ class CallVerificationSystem:
         self, 
         original_record: LLMCallRecord, 
         reproduction_record: LLMCallRecord
-    ) -> Dict[str, Any]:
-        """
-        验证调用可重现性
+    ) -> dict[str, Any]:
+        """验证调用可重现性
         
         Args:
             original_record: 原始调用记录
@@ -323,9 +317,8 @@ class CallVerificationSystem:
         
         return len(intersection) / len(union) if union else 0.0
     
-    def generate_audit_trail(self, call_id: str) -> Dict[str, Any]:
-        """
-        生成审计轨迹
+    def generate_audit_trail(self, call_id: str) -> dict[str, Any]:
+        """生成审计轨迹
         
         Args:
             call_id: 调用ID
@@ -347,7 +340,7 @@ class CallVerificationSystem:
             "hash_chain_verification": self._verify_hash_chain(related_entries)
         }
     
-    def _verify_hash_chain(self, entries: List[AuditEntry]) -> Dict[str, Any]:
+    def _verify_hash_chain(self, entries: list[AuditEntry]) -> dict[str, Any]:
         """验证哈希链"""
         if not entries:
             return {"valid": True, "reason": "no entries"}
@@ -365,7 +358,7 @@ class CallVerificationSystem:
         
         return {"valid": True, "reason": "all hashes verified"}
     
-    def _add_audit_entry(self, call_id: str, action: str, details: Dict[str, Any]):
+    def _add_audit_entry(self, call_id: str, action: str, details: dict[str, Any]):
         """添加审计条目"""
         entry_id = f"{call_id}_{action}_{int(datetime.now().timestamp())}"
         
@@ -402,7 +395,7 @@ class CallVerificationSystem:
         entry_id: str,
         call_id: str,
         action: str,
-        details: Dict[str, Any],
+        details: dict[str, Any],
         previous_entry: Optional[AuditEntry]
     ) -> str:
         """为新条目计算哈希"""
@@ -417,7 +410,7 @@ class CallVerificationSystem:
         content_str = json.dumps(hash_content, sort_keys=True)
         return hashlib.sha256(content_str.encode()).hexdigest()
     
-    def get_verification_summary(self) -> Dict[str, Any]:
+    def get_verification_summary(self) -> dict[str, Any]:
         """获取验证摘要"""
         total_verifications = len(self.verification_cache)
         
@@ -449,9 +442,8 @@ class CallVerificationSystem:
             }
         }
     
-    def export_verification_report(self, call_id: Optional[str] = None) -> Dict[str, Any]:
-        """
-        导出验证报告
+    def export_verification_report(self, call_id: Optional[str] = None) -> dict[str, Any]:
+        """导出验证报告
         
         Args:
             call_id: 可选的特定调用ID
@@ -482,7 +474,7 @@ class CallVerificationSystem:
                 "export_timestamp": datetime.now().isoformat()
             }
     
-    def validate_system_integrity(self) -> Dict[str, Any]:
+    def validate_system_integrity(self) -> dict[str, Any]:
         """验证系统完整性"""
         integrity_checks = {
             "hash_chain_valid": True,

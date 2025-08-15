@@ -1,5 +1,4 @@
-"""
-Storage layer for the Semantic Structured Knowledge Graph (SSKG).
+"""Storage layer for the Semantic Structured Knowledge Graph (SSKG).
 
 This module implements the storage backend for the SSKG system,
 providing persistent storage and retrieval of knowledge facts, memories,
@@ -10,27 +9,31 @@ import json
 import logging
 import sqlite3
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Optional
 
 from .models import (
-    KnowledgeFact, KnowledgeRelation, KnowledgeQuery,
-    Memory, MemoryQuery, WikiPage, SessionState, ProjectState,
-    SearchResult, SSKGStats, RelationType, MemoryType
+    KnowledgeFact,
+    KnowledgeQuery,
+    KnowledgeRelation,
+    Memory,
+    MemoryQuery,
+    MemoryType,
+    ProjectState,
+    RelationType,
+    SessionState,
+    WikiPage,
 )
 
 
 class SSKGStorage:
-    """
-    Storage backend for the SSKG system using SQLite.
+    """Storage backend for the SSKG system using SQLite.
     
     This class provides persistent storage for all SSKG entities including
     knowledge facts, memories, wiki pages, sessions, and projects.
     """
     
     def __init__(self, db_path: str = "sskg.db"):
-        """
-        Initialize the SSKG storage system.
+        """Initialize the SSKG storage system.
         
         Args:
             db_path: Path to the SQLite database file
@@ -186,8 +189,7 @@ class SSKGStorage:
             conn.execute(index_sql)    
 
     def store_fact(self, fact: KnowledgeFact) -> str:
-        """
-        Store a knowledge fact in the database.
+        """Store a knowledge fact in the database.
         
         Args:
             fact: Knowledge fact to store
@@ -239,8 +241,7 @@ class SSKGStorage:
         return fact.id
     
     def retrieve_fact(self, fact_id: str) -> Optional[KnowledgeFact]:
-        """
-        Retrieve a knowledge fact by ID.
+        """Retrieve a knowledge fact by ID.
         
         Args:
             fact_id: ID of the fact to retrieve
@@ -315,9 +316,8 @@ class SSKGStorage:
             """, (access_count, last_accessed.isoformat(), fact_id))
             conn.commit()
     
-    def search_facts(self, query: KnowledgeQuery) -> List[KnowledgeFact]:
-        """
-        Search for knowledge facts based on query criteria.
+    def search_facts(self, query: KnowledgeQuery) -> list[KnowledgeFact]:
+        """Search for knowledge facts based on query criteria.
         
         Args:
             query: Search query specification
@@ -432,8 +432,7 @@ class SSKGStorage:
             return facts    
 
     def delete_fact(self, fact_id: str) -> bool:
-        """
-        Delete a knowledge fact and its relations.
+        """Delete a knowledge fact and its relations.
         
         Args:
             fact_id: ID of the fact to delete
@@ -453,8 +452,7 @@ class SSKGStorage:
             return cursor.rowcount > 0
     
     def store_memory(self, memory: Memory) -> str:
-        """
-        Store a memory item.
+        """Store a memory item.
         
         Args:
             memory: Memory to store
@@ -485,9 +483,8 @@ class SSKGStorage:
         
         return memory.id
     
-    def search_memories(self, query: MemoryQuery) -> List[Memory]:
-        """
-        Search for memories based on query criteria.
+    def search_memories(self, query: MemoryQuery) -> list[Memory]:
+        """Search for memories based on query criteria.
         
         Args:
             query: Memory query specification
@@ -564,8 +561,7 @@ class SSKGStorage:
             return memories
     
     def store_wiki_page(self, page: WikiPage) -> bool:
-        """
-        Store a wiki page.
+        """Store a wiki page.
         
         Args:
             page: Wiki page to store
@@ -593,8 +589,7 @@ class SSKGStorage:
             return True
     
     def retrieve_wiki_page(self, page_id: str) -> Optional[WikiPage]:
-        """
-        Retrieve a wiki page by ID.
+        """Retrieve a wiki page by ID.
         
         Args:
             page_id: ID of the page to retrieve
@@ -646,8 +641,7 @@ class SSKGStorage:
             conn.commit()
     
     def store_session_state(self, session: SessionState) -> bool:
-        """
-        Store session state.
+        """Store session state.
         
         Args:
             session: Session state to store
@@ -673,8 +667,7 @@ class SSKGStorage:
             return True
     
     def retrieve_session_state(self, session_id: str) -> Optional[SessionState]:
-        """
-        Retrieve session state by ID.
+        """Retrieve session state by ID.
         
         Args:
             session_id: Session ID
@@ -705,8 +698,7 @@ class SSKGStorage:
             )
     
     def store_project_state(self, project: ProjectState) -> bool:
-        """
-        Store project state.
+        """Store project state.
         
         Args:
             project: Project state to store
@@ -732,8 +724,7 @@ class SSKGStorage:
             return True
     
     def retrieve_project_state(self, project_id: str) -> Optional[ProjectState]:
-        """
-        Retrieve project state by ID.
+        """Retrieve project state by ID.
         
         Args:
             project_id: Project ID

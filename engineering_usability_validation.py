@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-工程可用性验证
+"""工程可用性验证
 验证DAIP系统的工程可用性和用户体验
 """
 
 import asyncio
-import logging
-import time
 import json
-import sys
+import logging
 import os
-from typing import Dict, List, Any
+import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 # 添加项目路径
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -31,7 +28,7 @@ class EngineeringUsabilityValidator:
         self.validation_results = {}
         self.start_time = datetime.now()
         
-    async def run_validation(self) -> Dict[str, Any]:
+    async def run_validation(self) -> dict[str, Any]:
         """运行完整的工程可用性验证"""
         print("=" * 80)
         print("🔧 DAIP-LIVE 工程可用性验证")
@@ -120,7 +117,7 @@ class EngineeringUsabilityValidator:
                 "timestamp": datetime.now().isoformat()
             }
     
-    async def validate_core_imports(self) -> Dict[str, Any]:
+    async def validate_core_imports(self) -> dict[str, Any]:
         """验证核心组件导入"""
         print("\n🔍 验证核心组件导入...")
         
@@ -168,7 +165,7 @@ class EngineeringUsabilityValidator:
             "import_details": import_tests
         }
     
-    async def validate_configurations(self) -> Dict[str, Any]:
+    async def validate_configurations(self) -> dict[str, Any]:
         """验证配置文件"""
         print("\n🔍 验证配置文件...")
         
@@ -217,7 +214,7 @@ class EngineeringUsabilityValidator:
             "config_details": config_checks
         }
     
-    async def validate_role_system(self) -> Dict[str, Any]:
+    async def validate_role_system(self) -> dict[str, Any]:
         """验证角色系统"""
         print("\n🔍 验证角色系统...")
         
@@ -234,7 +231,7 @@ class EngineeringUsabilityValidator:
                 "role_loading_success": len(available_roles) > 0
             }
             
-            print(f"  ✓ 角色管理器初始化成功")
+            print("  ✓ 角色管理器初始化成功")
             print(f"  ✓ 加载了 {len(available_roles)} 个角色")
             
             return {
@@ -249,7 +246,7 @@ class EngineeringUsabilityValidator:
                 "error": str(e)
             }
     
-    async def validate_academic_scenario(self) -> Dict[str, Any]:
+    async def validate_academic_scenario(self) -> dict[str, Any]:
         """验证学术研究场景"""
         print("\n🔍 验证学术研究场景...")
         
@@ -272,7 +269,7 @@ class EngineeringUsabilityValidator:
             success_count = sum(1 for check in validation_checks.values() if check)
             success_rate = success_count / len(validation_checks)
             
-            print(f"  ✓ 学术研究场景初始化成功")
+            print("  ✓ 学术研究场景初始化成功")
             print(f"  ✓ {success_count}/{len(validation_checks)} 组件可用")
             
             return {
@@ -288,7 +285,7 @@ class EngineeringUsabilityValidator:
                 "error": str(e)
             }
     
-    async def validate_expert_consultation(self) -> Dict[str, Any]:
+    async def validate_expert_consultation(self) -> dict[str, Any]:
         """验证专家咨询场景"""
         print("\n🔍 验证专家咨询场景...")
         
@@ -314,7 +311,7 @@ class EngineeringUsabilityValidator:
             success_count = sum(1 for check in validation_checks.values() if check)
             success_rate = success_count / len(validation_checks)
             
-            print(f"  ✓ 专家咨询场景初始化成功")
+            print("  ✓ 专家咨询场景初始化成功")
             print(f"  ✓ 加载了 {expert_count} 位专家，覆盖 {len(expert_domains)} 个领域")
             
             return {
@@ -333,7 +330,7 @@ class EngineeringUsabilityValidator:
                 "error": str(e)
             }
     
-    async def validate_file_system(self) -> Dict[str, Any]:
+    async def validate_file_system(self) -> dict[str, Any]:
         """验证文件系统结构"""
         print("\n🔍 验证文件系统结构...")
         
@@ -371,7 +368,7 @@ class EngineeringUsabilityValidator:
             "directory_details": directory_checks
         }
     
-    async def validate_dependencies(self) -> Dict[str, Any]:
+    async def validate_dependencies(self) -> dict[str, Any]:
         """验证关键依赖"""
         print("\n🔍 验证关键依赖...")
         
@@ -414,7 +411,7 @@ class EngineeringUsabilityValidator:
             "dependency_details": dependency_checks
         }
     
-    def generate_recommendations(self, detailed_results: Dict[str, Any]) -> List[str]:
+    def generate_recommendations(self, detailed_results: dict[str, Any]) -> list[str]:
         """生成改进建议"""
         recommendations = []
         
@@ -445,7 +442,7 @@ class EngineeringUsabilityValidator:
         
         return recommendations
     
-    def save_validation_report(self, report: Dict[str, Any]):
+    def save_validation_report(self, report: dict[str, Any]):
         """保存验证报告"""
         try:
             report_path = Path("engineering_usability_validation_report.json")
@@ -455,7 +452,7 @@ class EngineeringUsabilityValidator:
         except Exception as e:
             print(f"报告保存失败: {e}")
     
-    def print_validation_summary(self, report: Dict[str, Any]):
+    def print_validation_summary(self, report: dict[str, Any]):
         """打印验证摘要"""
         print("\n" + "=" * 80)
         print("📊 工程可用性验证报告")

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 16:30:00
+"""@Time    : 2025-07-24 16:30:00
 @Author  : DAIP-LIVE Team
 @File    : refinement_node.py
 @Description:
@@ -8,32 +6,30 @@
 """
 import logging
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
-from ..base import InstitutionalPrimitive, ExecutionContext
-from .models import SynthesisResult, SynthesisQuality
+from ..base import ExecutionContext, InstitutionalPrimitive
+from .models import SynthesisQuality, SynthesisResult
 
 logger = logging.getLogger(__name__)
 
 
 class IterativeRefinementNode(InstitutionalPrimitive):
-    """
-    迭代优化节点 - Iteratively refines synthesis quality through additional expert input.
+    """迭代优化节点 - Iteratively refines synthesis quality through additional expert input.
     
     Implements iterative refinement by requesting additional expert input or deeper analysis
     on specific aspects when synthesis quality is insufficient.
     """
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.max_iterations = config.get("max_iterations", 3) if config else 3
         self.quality_threshold = config.get("quality_threshold", 0.7) if config else 0.7
         self.improvement_threshold = config.get("improvement_threshold", 0.1) if config else 0.1
         self.refinement_strategies = config.get("refinement_strategies", ["depth", "breadth", "insight"]) if config else ["depth", "breadth", "insight"]
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute iterative refinement of synthesis.
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        """Execute iterative refinement of synthesis.
         
         Args:
             inputs: Should contain 'synthesis_result' to refine
@@ -181,7 +177,7 @@ class IterativeRefinementNode(InstitutionalPrimitive):
                 "error": str(e)
             }
     
-    def _identify_improvement_areas(self, quality_assessment: SynthesisQuality) -> List[str]:
+    def _identify_improvement_areas(self, quality_assessment: SynthesisQuality) -> list[str]:
         """Identify specific areas that need improvement."""
         improvement_areas = []
         
@@ -207,9 +203,9 @@ class IterativeRefinementNode(InstitutionalPrimitive):
     async def _generate_refinement_requests(
         self,
         synthesis_result: SynthesisResult,
-        improvement_areas: List[str],
+        improvement_areas: list[str],
         llm_interface
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate specific refinement requests based on improvement areas."""
         refinement_requests = []
         
@@ -296,7 +292,7 @@ class IterativeRefinementNode(InstitutionalPrimitive):
         
         return refinement_requests
     
-    def _identify_missing_perspectives(self, synthesis_result: SynthesisResult) -> List[str]:
+    def _identify_missing_perspectives(self, synthesis_result: SynthesisResult) -> list[str]:
         """Identify missing perspectives in the synthesis."""
         expected_perspectives = ["经济", "社会", "技术", "伦理", "政治", "环境", "文化", "法律"]
         covered_perspectives = synthesis_result.perspectives
@@ -307,7 +303,7 @@ class IterativeRefinementNode(InstitutionalPrimitive):
     async def _apply_refinements(
         self,
         synthesis_result: SynthesisResult,
-        refinement_requests: List[str],
+        refinement_requests: list[str],
         synthesis_engine
     ) -> str:
         """Apply refinement requests to generate improved synthesis."""
@@ -407,7 +403,7 @@ class IterativeRefinementNode(InstitutionalPrimitive):
             }
         )
     
-    def _extract_key_insights(self, synthesis: str) -> List[str]:
+    def _extract_key_insights(self, synthesis: str) -> list[str]:
         """Extract key insights from refined synthesis text."""
         import re
         
@@ -434,7 +430,7 @@ class IterativeRefinementNode(InstitutionalPrimitive):
         insights = [insight for insight in insights if len(insight) <= 200]
         return insights[:5]
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         """Return input schema for the iterative refinement node."""
         return {
             "type": "object",
@@ -447,7 +443,7 @@ class IterativeRefinementNode(InstitutionalPrimitive):
             "required": ["synthesis_result"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         """Return output schema for the iterative refinement node."""
         return {
             "type": "object",

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : personal_assistant_service.py
 @Description:
@@ -10,24 +8,23 @@
 
 import asyncio
 import json
-from typing import Dict, Any, List, Optional, Union
 from datetime import datetime
-from uuid import uuid4
+from typing import Any
 
-from ..domain.entities import User, Session, Task, Message, UserMessage, AgentMessage, SystemMessage
-from ..domain.value_objects import (
-    EntranceType, IntentType, TaskStatus, SessionStatus, 
-    MessageIntent, ConsensusLevel, UserPreference, 
-    TaskPriority, TimeInterval
-)
-from ..domain.aggregates import SessionAggregate, TaskAggregate, DebateAggregate
+from ..domain.aggregates import DebateAggregate, SessionAggregate, TaskAggregate
 from ..domain.domain_services import (
-    EntranceSelectorService, WorkflowOrchestratorService, 
-    UserInterventionService, ConsensusTrackingService
+    ConsensusTrackingService,
+    EntranceSelectorService,
+    UserInterventionService,
+    WorkflowOrchestratorService,
 )
-from .use_cases import (
-    CreateUserUseCase, CreateSessionUseCase, CreateTaskUseCase,
-    ProcessMessageUseCase, StartDebateUseCase, ExecuteTaskUseCase
+from ..domain.entities import User, UserMessage
+from ..domain.value_objects import (
+    EntranceType,
+    IntentType,
+    MessageIntent,
+    TaskStatus,
+    UserPreference,
 )
 
 
@@ -47,10 +44,10 @@ class PersonalAssistantService:
         self.entrance_switching_use_case = EntranceSwitchingUseCase()
         
         # 用户和会话管理
-        self.users: Dict[str, User] = {}
-        self.sessions: Dict[str, SessionAggregate] = {}
-        self.tasks: Dict[str, TaskAggregate] = {}
-        self.debates: Dict[str, DebateAggregate] = {}
+        self.users: dict[str, User] = {}
+        self.sessions: dict[str, SessionAggregate] = {}
+        self.tasks: dict[str, TaskAggregate] = {}
+        self.debates: dict[str, DebateAggregate] = {}
         
         # 服务状态
         self.is_initialized = False
@@ -149,7 +146,7 @@ class PersonalAssistantService:
             }
         }
     
-    async def _log_system_event(self, event_type: str, data: Dict[str, Any]):
+    async def _log_system_event(self, event_type: str, data: dict[str, Any]):
         """记录系统事件"""
         event_data = {
             "event_type": event_type,
@@ -159,7 +156,7 @@ class PersonalAssistantService:
         # 这里可以集成到日志系统
         print(f"[SYSTEM EVENT] {json.dumps(event_data, ensure_ascii=False, indent=2)}")
     
-    async def create_session(self, user_id: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def create_session(self, user_id: str, context: dict[str, Any] = None) -> dict[str, Any]:
         """创建会话"""
         if not self.is_initialized:
             await self.initialize()
@@ -205,7 +202,7 @@ class PersonalAssistantService:
             "message": f"已创建{selected_entrance.value}会话"
         }
     
-    async def process_user_input(self, session_id: str, user_input: Dict[str, Any]) -> Dict[str, Any]:
+    async def process_user_input(self, session_id: str, user_input: dict[str, Any]) -> dict[str, Any]:
         """处理用户输入"""
         if session_id not in self.sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -219,7 +216,7 @@ class PersonalAssistantService:
         else:
             return await self._process_forum_input(session_aggregate, user_input)
     
-    async def _process_secretariat_input(self, session_aggregate: SessionAggregate, user_input: Dict[str, Any]) -> Dict[str, Any]:
+    async def _process_secretariat_input(self, session_aggregate: SessionAggregate, user_input: dict[str, Any]) -> dict[str, Any]:
         """处理Secretariat输入"""
         content = user_input.get("content", "").strip()
         if not content:
@@ -259,7 +256,7 @@ class PersonalAssistantService:
             "message": f"任务已创建，预计需要 {result['estimated_duration']:.1f} 秒完成"
         }
     
-    async def _process_forum_input(self, session_aggregate: SessionAggregate, user_input: Dict[str, Any]) -> Dict[str, Any]:
+    async def _process_forum_input(self, session_aggregate: SessionAggregate, user_input: dict[str, Any]) -> dict[str, Any]:
         """处理Forum输入"""
         # 处理用户干预
         intervention_data = {
@@ -304,7 +301,7 @@ class PersonalAssistantService:
         # 默认为评论意图
         return IntentType.COMMENT
     
-    async def get_session_status(self, session_id: str) -> Dict[str, Any]:
+    async def get_session_status(self, session_id: str) -> dict[str, Any]:
         """获取会话状态"""
         if session_id not in self.sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -353,7 +350,7 @@ class PersonalAssistantService:
         
         return status_data
     
-    async def get_task_status(self, task_id: str) -> Dict[str, Any]:
+    async def get_task_status(self, task_id: str) -> dict[str, Any]:
         """获取任务状态"""
         # 尝试从Secretariat用例获取
         try:
@@ -374,7 +371,7 @@ class PersonalAssistantService:
         
         raise ValueError(f"Task {task_id} not found")
     
-    async def get_transparency_data(self, session_id: str) -> Dict[str, Any]:
+    async def get_transparency_data(self, session_id: str) -> dict[str, Any]:
         """获取透明度数据"""
         if session_id not in self.sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -435,7 +432,7 @@ class PersonalAssistantService:
         
         return transparency_data
     
-    async def switch_entrance(self, session_id: str, target_entrance: str) -> Dict[str, Any]:
+    async def switch_entrance(self, session_id: str, target_entrance: str) -> dict[str, Any]:
         """切换入口"""
         if session_id not in self.sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -466,7 +463,7 @@ class PersonalAssistantService:
             "message": f"已切换到{target_entrance}入口"
         }
     
-    async def get_entrance_suggestions(self, session_id: str) -> List[Dict[str, Any]]:
+    async def get_entrance_suggestions(self, session_id: str) -> list[dict[str, Any]]:
         """获取入口切换建议"""
         if session_id not in self.sessions:
             raise ValueError(f"Session {session_id} not found")
@@ -483,7 +480,7 @@ class PersonalAssistantService:
         
         return suggestions
     
-    async def get_system_health(self) -> Dict[str, Any]:
+    async def get_system_health(self) -> dict[str, Any]:
         """获取系统健康状态"""
         return {
             "service_status": "healthy" if self.is_initialized else "initializing",
@@ -527,7 +524,7 @@ class PersonalAssistantService:
         
         return len(expired_sessions)
     
-    async def get_user_statistics(self, user_id: str) -> Dict[str, Any]:
+    async def get_user_statistics(self, user_id: str) -> dict[str, Any]:
         """获取用户统计信息"""
         user_sessions = [s for s in self.sessions.values() if s.user_id == user_id]
         

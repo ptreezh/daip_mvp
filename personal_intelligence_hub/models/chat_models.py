@@ -1,13 +1,12 @@
-"""
-Personal Intelligence Hub - Chat Models
+"""Personal Intelligence Hub - Chat Models
 
 聊天相关的数据模型
 """
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, Dict, Any
 from enum import Enum
+from typing import Any, Optional
 
 
 class MessageType(Enum):
@@ -27,7 +26,7 @@ class ChatMessage:
     content: str
     timestamp: datetime
     message_type: MessageType = MessageType.TEXT
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[dict[str, Any]] = None
     
     def __post_init__(self):
         if self.metadata is None:

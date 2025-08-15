@@ -1,18 +1,27 @@
-"""
-Interfaces for the Virtual Role Chat System.
+"""Interfaces for the Virtual Role Chat System.
 
 This module defines the interfaces for the main components of the Virtual Role Chat System,
 including ChatRoomManager, ChatSessionService, RoleInteractionEngine, and ChatAnalyticsService.
 """
 
-from abc import ABC, abstractmethod
-from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Protocol, runtime_checkable
+from typing import Any, Literal, Optional, Protocol, runtime_checkable
 
 from .models import (
-    ChatMessage, ChatRoom, ChatRoomConfig, ChatRoomID, ChatRoomSummary, ChatSession,
-    QualityIssue, QualityMetrics, ResolutionResult, RolePerformance, SessionID,
-    SessionMetrics, SessionSummary, SubTopic, TransparencyLevel, ValidationResult
+    ChatMessage,
+    ChatRoom,
+    ChatRoomConfig,
+    ChatRoomID,
+    ChatRoomSummary,
+    QualityIssue,
+    QualityMetrics,
+    ResolutionResult,
+    RolePerformance,
+    SessionID,
+    SessionMetrics,
+    SessionSummary,
+    SubTopic,
+    TransparencyLevel,
+    ValidationResult,
 )
 
 
@@ -74,7 +83,7 @@ class ChatRoomManagerInterface(Protocol):
         """
         ...
     
-    def list_chat_rooms(self) -> List[ChatRoomSummary]:
+    def list_chat_rooms(self) -> list[ChatRoomSummary]:
         """List all chat rooms.
         
         Returns:
@@ -158,7 +167,7 @@ class ChatSessionServiceInterface(Protocol):
         """
         ...
     
-    def get_messages(self, session_id: SessionID, limit: int = 50, offset: int = 0) -> List[ChatMessage]:
+    def get_messages(self, session_id: SessionID, limit: int = 50, offset: int = 0) -> list[ChatMessage]:
         """Get messages from a chat session.
         
         Args:
@@ -250,7 +259,7 @@ class RoleInteractionEngineInterface(Protocol):
         """
         ...
     
-    def get_next_role(self, session_id: SessionID, context: Optional[Dict[str, Any]] = None) -> str:
+    def get_next_role(self, session_id: SessionID, context: Optional[dict[str, Any]] = None) -> str:
         """Get the next role that should respond.
         
         Args:
@@ -280,7 +289,7 @@ class RoleInteractionEngineInterface(Protocol):
         """
         ...
     
-    def resolve_conflict(self, session_id: SessionID, conflicting_statements: List[str]) -> ResolutionResult:
+    def resolve_conflict(self, session_id: SessionID, conflicting_statements: list[str]) -> ResolutionResult:
         """Resolve conflicting statements.
         
         Args:
@@ -309,7 +318,7 @@ class RoleInteractionEngineInterface(Protocol):
         """
         ...
     
-    def decompose_complex_topic(self, session_id: SessionID, topic: str) -> List[SubTopic]:
+    def decompose_complex_topic(self, session_id: SessionID, topic: str) -> list[SubTopic]:
         """Decompose a complex topic into simpler sub-topics.
         
         Args:
@@ -324,7 +333,7 @@ class RoleInteractionEngineInterface(Protocol):
         """
         ...
     
-    def assign_subtopics_to_roles(self, session_id: SessionID, subtopics: List[SubTopic]) -> Dict[str, List[str]]:
+    def assign_subtopics_to_roles(self, session_id: SessionID, subtopics: list[SubTopic]) -> dict[str, list[str]]:
         """Assign sub-topics to roles based on expertise.
         
         Args:
@@ -401,7 +410,7 @@ class ChatAnalyticsServiceInterface(Protocol):
         """
         ...
     
-    def detect_quality_issues(self, session_id: SessionID) -> List[QualityIssue]:
+    def detect_quality_issues(self, session_id: SessionID) -> list[QualityIssue]:
         """Detect quality issues in a conversation.
         
         Args:
@@ -415,7 +424,7 @@ class ChatAnalyticsServiceInterface(Protocol):
         """
         ...
     
-    def generate_analytics_report(self, session_id: SessionID) -> Dict[str, Any]:
+    def generate_analytics_report(self, session_id: SessionID) -> dict[str, Any]:
         """Generate a comprehensive analytics report for a chat session.
         
         Args:

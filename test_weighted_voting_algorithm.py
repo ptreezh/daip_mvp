@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-加权投票共识算法测试
+"""加权投票共识算法测试
 
 测试WeightedVotingAlgorithm的各种功能，包括认知多样性计算。
 """
 
 import asyncio
 import sys
-import os
-from datetime import datetime
 
 # 添加src路径
 sys.path.append('src')
@@ -21,8 +17,6 @@ async def test_weighted_voting_algorithm():
     
     try:
         from weighted_voting_algorithm import WeightedVotingAlgorithm
-        from consensus_algorithm_interface import ConsensusContext
-        from consensus_models import ConsensusInput
         
         # 创建算法实例
         algorithm = WeightedVotingAlgorithm()
@@ -60,8 +54,8 @@ async def test_basic_weighted_voting(algorithm):
     """测试基本加权投票功能"""
     print("\n📊 测试基本加权投票...")
     
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 创建测试输入（不同置信度）
     inputs = [
@@ -107,8 +101,8 @@ async def test_cognitive_diversity_weighting(algorithm):
     """测试认知多样性权重"""
     print("\n🧠 测试认知多样性权重...")
     
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 创建包含认知档案的输入
     inputs = [
@@ -175,8 +169,8 @@ async def test_expertise_weighting(algorithm):
     """测试专家权重"""
     print("\n👨‍🔬 测试专家权重...")
     
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 创建包含不同专家水平的输入
     inputs = [
@@ -233,9 +227,8 @@ async def test_configuration(algorithm):
     """测试配置功能"""
     print("\n⚙️ 测试配置功能...")
     
-    from weighted_voting_algorithm import WeightedVotingAlgorithm
     from consensus_models import ConsensusInput
-    from consensus_algorithm_interface import ConsensusContext
+    from weighted_voting_algorithm import WeightedVotingAlgorithm
     
     # 测试自定义权重配置
     config = {
@@ -275,9 +268,8 @@ async def test_edge_cases():
     """测试边界情况"""
     print("\n⚠️ 测试边界情况...")
     
-    from weighted_voting_algorithm import WeightedVotingAlgorithm
     from consensus_models import ConsensusInput
-    from consensus_algorithm_interface import ConsensusContext
+    from weighted_voting_algorithm import WeightedVotingAlgorithm
     
     algorithm = WeightedVotingAlgorithm()
     

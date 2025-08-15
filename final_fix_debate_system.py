@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-彻底修复multi_role_debate_system.py的问题
+"""彻底修复multi_role_debate_system.py的问题
 """
 
-from pathlib import Path
 import re
+from pathlib import Path
+
 
 def fix_debate_system():
     """彻底修复辩论系统文件"""

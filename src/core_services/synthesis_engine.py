@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 11:00:00
+"""@Time    : 2025-07-24 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : synthesis_engine.py
 @Description:
@@ -8,11 +6,11 @@
     summarization and synthesis.
 """
 import logging
-from typing import List
 
-from src.models import DebateTurn
-from . import prompts
 from src.kernel.llm_interface import LLMInterface
+from src.models import DebateTurn
+
+from . import prompts
 
 logger = logging.getLogger(__name__)
 
@@ -21,15 +19,14 @@ class SynthesisEngine:
     """Uses an LLM to summarize and synthesize debate content."""
 
     def __init__(self, llm_interface: LLMInterface):
-        """
-        Initializes the SynthesisEngine.
+        """Initializes the SynthesisEngine.
 
         Args:
             llm_interface: An instance of a class that adheres to the LLMInterface.
         """
         self.llm_interface = llm_interface
 
-    async def summarize_context(self, history: List[DebateTurn]) -> str:
+    async def summarize_context(self, history: list[DebateTurn]) -> str:
         """Summarizes the debate history for context using an LLM."""
         if not history:
             return "The debate has just started."
@@ -57,7 +54,7 @@ class SynthesisEngine:
             logger.exception("An unexpected error occurred during context summarization.")
             return f"Error: An unexpected issue occurred during summarization. Details: {e}"
 
-    async def synthesize_opinions(self, topic: str, history: List[DebateTurn]) -> str:
+    async def synthesize_opinions(self, topic: str, history: list[DebateTurn]) -> str:
         """Synthesizes the final conclusion of the debate using an LLM."""
         if not history:
             return "No debate history available to synthesize."

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-工作流选择准确性测试
+"""工作流选择准确性测试
 
 测试现有PersonalAssistant的工作流选择机制，验证意图识别准确率和工作流选择正确率
 """
 
 import asyncio
 import sys
-from typing import List, Dict, Any
+from typing import Any
+
 from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService, WorkflowType
+
 
 class WorkflowSelectionTester:
     """工作流选择测试器"""
@@ -64,7 +64,7 @@ class WorkflowSelectionTester:
             }
         ]
     
-    async def test_intent_analysis_accuracy(self) -> Dict[str, Any]:
+    async def test_intent_analysis_accuracy(self) -> dict[str, Any]:
         """测试意图分析准确性"""
         print("🧪 测试意图分析准确性...")
         
@@ -133,7 +133,7 @@ class WorkflowSelectionTester:
             "results": results
         }
         
-        print(f"\n📊 测试总结:")
+        print("\n📊 测试总结:")
         print(f"总测试用例: {len(self.test_cases)}")
         print(f"有效预测: {total_predictions}")
         print(f"正确预测: {correct_predictions}")
@@ -141,7 +141,7 @@ class WorkflowSelectionTester:
         
         return summary
     
-    async def test_workflow_selection_performance(self) -> Dict[str, Any]:
+    async def test_workflow_selection_performance(self) -> dict[str, Any]:
         """测试工作流选择性能"""
         print("\n⚡ 测试工作流选择性能...")
         
@@ -181,7 +181,7 @@ class WorkflowSelectionTester:
             "results": performance_results
         }
     
-    async def test_scenario_adaptation(self) -> Dict[str, Any]:
+    async def test_scenario_adaptation(self) -> dict[str, Any]:
         """测试场景适配逻辑"""
         print("\n🎯 测试场景适配逻辑...")
         
@@ -265,7 +265,7 @@ async def main():
     accuracy_met = accuracy_results['accuracy'] >= accuracy_target
     performance_met = performance_results['average_response_time_ms'] < performance_target
     
-    print(f"\n🎯 V0.2.1任务目标达成情况:")
+    print("\n🎯 V0.2.1任务目标达成情况:")
     print(f"意图识别准确率≥90%: {'✅ 达成' if accuracy_met else '❌ 未达成'}")
     print(f"响应时间<5秒: {'✅ 达成' if performance_met else '❌ 未达成'}")
     

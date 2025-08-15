@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.2.3 - 学术研究场景核心功能测试
+"""V0.2.3 - 学术研究场景核心功能测试
 
 测试学术研究场景的完整功能实现
 """
 
 import asyncio
-import pytest
 import logging
-from datetime import datetime
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # 设置测试日志
 logging.basicConfig(level=logging.INFO)
@@ -20,10 +18,10 @@ logger = logging.getLogger(__name__)
 class TestAcademicResearchScenario:
     """学术研究场景测试"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_role_manager(self):
         """模拟角色管理器"""
-        from src.core_services.role_manager import RoleManager, Role
+        from src.core_services.role_manager import Role, RoleManager
         
         mock_manager = Mock(spec=RoleManager)
         
@@ -55,7 +53,7 @@ class TestAcademicResearchScenario:
         mock_manager.list_roles.return_value = test_roles
         return mock_manager
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_workflow_result(self):
         """模拟工作流结果"""
         return {
@@ -132,7 +130,7 @@ class TestAcademicResearchScenario:
     
     async def test_academic_research_scenario_integration(self, mock_role_manager):
         """测试学术研究场景集成"""
-        from src.scenarios.academic_research_scenario import AcademicResearchScenario, AcademicResearchConfig
+        from src.scenarios.academic_research_scenario import AcademicResearchConfig, AcademicResearchScenario
         
         # 模拟依赖
         with patch('src.scenarios.academic_research_scenario.MultiPerspectiveSynthesisWorkflow') as mock_workflow_class:
@@ -177,7 +175,11 @@ class TestAcademicResearchScenario:
     
     async def test_quality_assessment(self):
         """测试质量评估功能"""
-        from src.scenarios.academic_research_scenario import AcademicResearchScenario, AcademicReport, AcademicResearchConfig
+        from src.scenarios.academic_research_scenario import (
+            AcademicReport,
+            AcademicResearchConfig,
+            AcademicResearchScenario,
+        )
         
         scenario = AcademicResearchScenario()
         config = AcademicResearchConfig()
@@ -219,7 +221,9 @@ class TestAcademicResearchScenario:
     async def test_report_refinement(self, mock_workflow_result):
         """测试报告优化功能"""
         from src.scenarios.academic_research_scenario import (
-            AcademicResearchScenario, AcademicReport, AcademicResearchConfig
+            AcademicReport,
+            AcademicResearchConfig,
+            AcademicResearchScenario,
         )
         
         scenario = AcademicResearchScenario()

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 15:30:00
+"""@Time    : 2025-08-05 15:30:00
 @Author  : DAIP-LIVE Team
 @File    : import_health_checker.py
 @Description:
@@ -8,10 +6,9 @@
 """
 
 import logging
-import sys
 import time
-from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +135,7 @@ class ImportHealthChecker:
             }
         ]
         
-        self.results: List[ImportCheckResult] = []
+        self.results: list[ImportCheckResult] = []
     
     def check_import(self, import_config: dict) -> ImportCheckResult:
         """Check a single import"""
@@ -166,7 +163,7 @@ class ImportHealthChecker:
                 is_critical=import_config["is_critical"]
             )
     
-    def validate_all_imports(self) -> Tuple[bool, List[ImportCheckResult]]:
+    def validate_all_imports(self) -> tuple[bool, list[ImportCheckResult]]:
         """Validate all imports and return overall status"""
         logger.info("🔍 Starting import health check...")
         
@@ -201,7 +198,7 @@ class ImportHealthChecker:
         
         return overall_success, self.results
     
-    def get_health_summary(self) -> Dict:
+    def get_health_summary(self) -> dict:
         """Get a summary of import health status"""
         if not self.results:
             return {"status": "not_checked", "message": "Import health check not performed"}
@@ -268,7 +265,7 @@ class ImportHealthChecker:
             error_message = self._format_critical_failure_message(critical_failures)
             raise ImportError(error_message)
     
-    def _format_critical_failure_message(self, failures: List[ImportCheckResult]) -> str:
+    def _format_critical_failure_message(self, failures: list[ImportCheckResult]) -> str:
         """Format a user-friendly error message for critical failures"""
         message = [
             "❌ Critical Import Failures Detected",

@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-共识可视化模块
+"""共识可视化模块
 
 提供共识形成过程的实时可视化展示
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
-import json
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +28,9 @@ class ConsensusVisualization:
     
     def create_consensus_chart(
         self,
-        consensus_data: Dict[str, Any],
+        consensus_data: dict[str, Any],
         chart_type: str = "convergence_chart"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建共识图表"""
         try:
             chart_config = {
@@ -61,8 +58,8 @@ class ConsensusVisualization:
     
     def show_convergence_process(
         self,
-        process_data: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        process_data: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """展示共识收敛过程"""
         try:
             convergence_visualization = {
@@ -105,8 +102,8 @@ class ConsensusVisualization:
     
     def display_quality_metrics(
         self,
-        quality_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        quality_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """显示质量指标"""
         try:
             metrics_display = {
@@ -144,7 +141,7 @@ class ConsensusVisualization:
             logger.error(f"显示质量指标失败: {e}")
             return {"error": str(e)}
     
-    def _create_convergence_chart(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_convergence_chart(self, data: dict[str, Any]) -> dict[str, Any]:
         """创建收敛图表"""
         return {
             "chart_type": "line_chart",
@@ -155,7 +152,7 @@ class ConsensusVisualization:
             "confidence_bands": True
         }
     
-    def _create_agreement_matrix(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_agreement_matrix(self, data: dict[str, Any]) -> dict[str, Any]:
         """创建同意度矩阵"""
         return {
             "chart_type": "heatmap",
@@ -164,7 +161,7 @@ class ConsensusVisualization:
             "color_scale": "consensus_agreement"
         }
     
-    def _create_consensus_timeline(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_consensus_timeline(self, data: dict[str, Any]) -> dict[str, Any]:
         """创建共识时间线"""
         return {
             "chart_type": "timeline",
@@ -173,7 +170,7 @@ class ConsensusVisualization:
             "interactive": True
         }
     
-    def _create_default_chart(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_default_chart(self, data: dict[str, Any]) -> dict[str, Any]:
         """创建默认图表"""
         return {
             "chart_type": "bar_chart",
@@ -211,7 +208,7 @@ class ConsensusVisualization:
         
         return viz_types.get(metric_name, "bar_chart")
     
-    def _generate_quality_recommendations(self, quality_data: Dict[str, Any]) -> List[str]:
+    def _generate_quality_recommendations(self, quality_data: dict[str, Any]) -> list[str]:
         """生成质量改进建议"""
         recommendations = []
         
@@ -232,7 +229,7 @@ class ConsensusVisualization:
         
         return recommendations
     
-    def get_visualization_history(self) -> List[Dict[str, Any]]:
+    def get_visualization_history(self) -> list[dict[str, Any]]:
         """获取可视化历史"""
         return self.visualization_history.copy()
     

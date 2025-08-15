@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : commands.py
 @Description:
@@ -8,18 +6,13 @@
     These handlers implement the Command part of CQRS pattern.
 """
 
-from typing import Dict, Any, Optional
-from datetime import datetime
-from dataclasses import dataclass, field
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any
 
-from ..domain.entities import User, Session, Task, Message, Debate
-from ..domain.value_objects import (
-    EntranceType, IntentType, TaskStatus, SessionStatus, 
-    MessageIntent, ConsensusLevel, UserPreference, 
-    TaskPriority, TimeInterval
-)
+from ..domain.value_objects import EntranceType, IntentType, MessageIntent, TaskPriority
 
 
 @dataclass
@@ -27,7 +20,7 @@ class BaseCommand:
     """基础命令类"""
     command_id: str
     timestamp: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -37,14 +30,14 @@ class CreateUserCommand(BaseCommand):
     username: str = ""
     email: str = ""
     preferred_entrance: EntranceType = EntranceType.SECRETARIAT
-    preferences: Dict[str, Any] = field(default_factory=dict)
+    preferences: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class CreateSessionCommand(BaseCommand):
     """创建会话命令"""
     user_id: str = ""
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -54,7 +47,7 @@ class CreateTaskCommand(BaseCommand):
     content: str = ""
     intent_type: IntentType = IntentType.COMMENT
     priority: TaskPriority = field(default_factory=lambda: TaskPriority("normal"))
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -64,7 +57,7 @@ class ProcessMessageCommand(BaseCommand):
     content: str = ""
     sender: str = ""
     message_intent: MessageIntent = field(default_factory=lambda: MessageIntent.COMMENT)
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -104,7 +97,7 @@ class ExecuteTaskCommand(BaseCommand):
 class UpdateUserPreferencesCommand(BaseCommand):
     """更新用户偏好命令"""
     user_id: str = ""
-    preferences: Dict[str, Any] = field(default_factory=dict)
+    preferences: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -123,7 +116,7 @@ class CommandResult:
         self.error = error
         self.timestamp = datetime.now()
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {
             "success": self.success,
@@ -285,7 +278,7 @@ class CommandBus:
     """命令总线"""
     
     def __init__(self):
-        self.handlers: Dict[type, CommandHandler] = {}
+        self.handlers: dict[type, CommandHandler] = {}
         self.logger = logging.getLogger(self.__class__.__name__)
     
     def register_handler(self, command_type: type, handler: CommandHandler):
@@ -367,7 +360,7 @@ class CommandDispatcher:
     
     async def create_user(self, user_id: str, username: str, email: str, 
                          preferred_entrance: EntranceType, 
-                         preferences: Dict[str, Any] = None) -> CommandResult:
+                         preferences: dict[str, Any] = None) -> CommandResult:
         """创建用户"""
         command = CreateUserCommand(
             command_id=f"create_user_{user_id}",
@@ -380,7 +373,7 @@ class CommandDispatcher:
         
         return await self.dispatch_command(command)
     
-    async def create_session(self, user_id: str, context: Dict[str, Any] = None) -> CommandResult:
+    async def create_session(self, user_id: str, context: dict[str, Any] = None) -> CommandResult:
         """创建会话"""
         command = CreateSessionCommand(
             command_id=f"create_session_{user_id}",
@@ -391,7 +384,7 @@ class CommandDispatcher:
         return await self.dispatch_command(command)
     
     async def create_task(self, session_id: str, content: str, intent_type: IntentType,
-                         priority: TaskPriority = None, context: Dict[str, Any] = None) -> CommandResult:
+                         priority: TaskPriority = None, context: dict[str, Any] = None) -> CommandResult:
         """创建任务"""
         command = CreateTaskCommand(
             command_id=f"create_task_{session_id}",
@@ -405,7 +398,7 @@ class CommandDispatcher:
         return await self.dispatch_command(command)
     
     async def process_message(self, session_id: str, content: str, sender: str,
-                             message_intent: MessageIntent = None, context: Dict[str, Any] = None) -> CommandResult:
+                             message_intent: MessageIntent = None, context: dict[str, Any] = None) -> CommandResult:
         """处理消息"""
         command = ProcessMessageCommand(
             command_id=f"process_message_{session_id}",

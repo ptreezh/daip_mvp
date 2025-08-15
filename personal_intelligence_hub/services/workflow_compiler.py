@@ -1,17 +1,17 @@
-"""
-Personal Intelligence Hub - Workflow Compiler Service
+"""Personal Intelligence Hub - Workflow Compiler Service
 
 自然语言工作流编译器服务
 """
 
 import re
-import yaml
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
 from datetime import datetime
+from typing import Any
 
 from personal_intelligence_hub.models.workflow_models import (
-    WorkflowDefinition, WorkflowStep, StepType, WorkflowValidationResult
+    StepType,
+    WorkflowDefinition,
+    WorkflowStep,
+    WorkflowValidationResult,
 )
 
 
@@ -58,7 +58,7 @@ class WorkflowCompiler:
             
             return workflow
             
-        except Exception as e:
+        except Exception:
             # 返回默认工作流
             return self._create_default_workflow(description)
     
@@ -73,7 +73,7 @@ class WorkflowCompiler:
         
         return "critical_review"  # 默认模式
     
-    def _extract_steps(self, description: str, pattern: str) -> List[WorkflowStep]:
+    def _extract_steps(self, description: str, pattern: str) -> list[WorkflowStep]:
         """提取工作流步骤"""
         steps = []
         
@@ -112,7 +112,7 @@ class WorkflowCompiler:
         }
         return step_mapping.get(step_name, StepType.ANALYSIS)
     
-    def _get_agent_roles_for_step(self, step_type: str) -> List[str]:
+    def _get_agent_roles_for_step(self, step_type: str) -> list[str]:
         """获取步骤的代理角色"""
         role_mapping = {
             "analyze": ["Analyst-AI", "Research-AI"],
@@ -125,7 +125,7 @@ class WorkflowCompiler:
         }
         return role_mapping.get(step_type, ["General-AI"])
     
-    def _get_validation_criteria(self, step_type: str) -> Dict[str, Any]:
+    def _get_validation_criteria(self, step_type: str) -> dict[str, Any]:
         """获取验证标准"""
         criteria_mapping = {
             "analyze": {"completeness": 0.9, "accuracy": 0.85},
@@ -138,7 +138,7 @@ class WorkflowCompiler:
         }
         return criteria_mapping.get(step_type, {"quality": 0.8})
     
-    def _generate_workflow(self, description: str, steps: List[WorkflowStep]) -> WorkflowDefinition:
+    def _generate_workflow(self, description: str, steps: list[WorkflowStep]) -> WorkflowDefinition:
         """生成工作流定义"""
         return WorkflowDefinition(
             id=f"workflow_{int(datetime.now().timestamp())}",
@@ -234,7 +234,7 @@ class WorkflowCompiler:
             suggestions=self._generate_suggestions(issues)
         )
     
-    def _has_circular_dependency(self, steps: List[WorkflowStep]) -> bool:
+    def _has_circular_dependency(self, steps: list[WorkflowStep]) -> bool:
         """检查循环依赖"""
         # 简化的循环检测
         visited = set()
@@ -264,7 +264,7 @@ class WorkflowCompiler:
         
         return False
     
-    def _generate_suggestions(self, issues: List[str]) -> List[str]:
+    def _generate_suggestions(self, issues: list[str]) -> list[str]:
         """生成改进建议"""
         suggestions = []
         
@@ -278,7 +278,7 @@ class WorkflowCompiler:
         
         return suggestions
     
-    def preview_workflow(self, workflow: WorkflowDefinition) -> Dict[str, Any]:
+    def preview_workflow(self, workflow: WorkflowDefinition) -> dict[str, Any]:
         """预览工作流"""
         return {
             "name": workflow.name,

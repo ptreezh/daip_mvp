@@ -1,17 +1,23 @@
-"""
-Test script to validate the core data models and interfaces.
+"""Test script to validate the core data models and interfaces.
 """
 
 from datetime import datetime
-from typing import Dict, Any
 
 from src.virtual_role_chat.models import (
-    ChatRoomConfig, ChatRoom, ChatMessage, ChatSession, 
-    ValidationResult, SubTopic, TransparencyLevel
+    ChatMessage,
+    ChatRoom,
+    ChatRoomConfig,
+    ChatSession,
+    SubTopic,
+    TransparencyLevel,
+    ValidationResult,
 )
 from src.virtual_role_chat.workflow import (
-    WorkflowEvent, WorkflowEventType, ConversationWorkflow,
-    FREE_FORM_WORKFLOW, STRUCTURED_WORKFLOW, DEBATE_WORKFLOW
+    DEBATE_WORKFLOW,
+    FREE_FORM_WORKFLOW,
+    STRUCTURED_WORKFLOW,
+    WorkflowEvent,
+    WorkflowEventType,
 )
 
 
@@ -133,9 +139,6 @@ def test_interface_compatibility():
     # Import interfaces to ensure they're properly defined
     from src.virtual_role_chat.interfaces import (
         ChatRoomManagerInterface,
-        ChatSessionServiceInterface,
-        RoleInteractionEngineInterface,
-        ChatAnalyticsServiceInterface
     )
     
     print("✓ All interfaces imported successfully")

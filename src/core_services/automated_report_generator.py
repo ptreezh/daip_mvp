@@ -1,5 +1,4 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: Claude Code
 @File: automated_report_generator.py
 @Description: Automated report generator for collaborative review processes with graceful degradation
@@ -8,17 +7,17 @@
 import asyncio
 import json
 import logging
-import time
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Set, Tuple, Callable
-from dataclasses import dataclass, field
-from enum import Enum
 import threading
-from pathlib import Path
+import time
 import uuid
-from jinja2 import Template, Environment, BaseLoader
-import io
-import base64
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Optional
+
+from jinja2 import BaseLoader, Environment
 
 logger = logging.getLogger(__name__)
 
@@ -60,11 +59,11 @@ class ReportTemplate:
     template_type: ReportType
     template_format: ReportFormat
     template_content: str
-    required_data: List[str]
+    required_data: list[str]
     created_at: datetime
     version: str = "1.0"
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert template to dictionary"""
         return {
             'template_id': self.template_id,
@@ -86,14 +85,14 @@ class ReportRequest:
     report_type: ReportType
     report_format: ReportFormat
     template_id: Optional[str]
-    data_sources: Dict[str, Any]
-    parameters: Dict[str, Any]
+    data_sources: dict[str, Any]
+    parameters: dict[str, Any]
     requested_by: str
     requested_at: datetime
     priority: str = "normal"
     callback_url: Optional[str] = None
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert request to dictionary"""
         return {
             'request_id': self.request_id,
@@ -121,9 +120,9 @@ class ReportResult:
     download_url: Optional[str]
     error_message: Optional[str]
     generation_time: float
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert result to dictionary"""
         return {
             'request_id': self.request_id,
@@ -140,8 +139,7 @@ class ReportResult:
 
 
 class AutomatedReportGenerator:
-    """
-    Automated report generator with graceful degradation
+    """Automated report generator with graceful degradation
     Generates various types of reports from review data
     """
     
@@ -152,20 +150,20 @@ class AutomatedReportGenerator:
         # Background processing
         self._running = False
         self._lock = threading.Lock()
-        self.workers: List[asyncio.Task] = []
+        self.workers: list[asyncio.Task] = []
         
         # Templates storage
-        self.templates: Dict[str, ReportTemplate] = {}
+        self.templates: dict[str, ReportTemplate] = {}
         self._initialize_default_templates()
         
         # Request processing
-        self.active_requests: Dict[str, ReportRequest] = {}
-        self.completed_reports: Dict[str, ReportResult] = {}
+        self.active_requests: dict[str, ReportRequest] = {}
+        self.completed_reports: dict[str, ReportResult] = {}
         self.request_queue = asyncio.Queue()
         
         # Performance tracking
-        self.generation_times: Dict[str, List[float]] = {}
-        self.success_rates: Dict[str, float] = {}
+        self.generation_times: dict[str, list[float]] = {}
+        self.success_rates: dict[str, float] = {}
         
         # Graceful degradation settings
         self.max_generation_time = 30.0  # seconds
@@ -176,7 +174,7 @@ class AutomatedReportGenerator:
         self.jinja_env = Environment(loader=BaseLoader())
         
         # Event handlers
-        self.completion_handlers: Dict[str, Callable] = {}
+        self.completion_handlers: dict[str, Callable] = {}
         
     async def start(self) -> None:
         """Start the report generator"""
@@ -238,7 +236,7 @@ class AutomatedReportGenerator:
                 
             return request.request_id
             
-    async def get_report_status(self, request_id: str) -> Dict[str, Any]:
+    async def get_report_status(self, request_id: str) -> dict[str, Any]:
         """Get report generation status"""
         with self._lock:
             if request_id in self.active_requests:
@@ -266,7 +264,7 @@ class AutomatedReportGenerator:
             
         if result and result.file_path:
             try:
-                with open(result.file_path, 'r', encoding='utf-8') as f:
+                with open(result.file_path, encoding='utf-8') as f:
                     return f.read()
             except Exception as e:
                 logger.error(f"Error reading report file: {e}")
@@ -291,12 +289,12 @@ class AutomatedReportGenerator:
         with self._lock:
             return self.templates.get(template_id)
             
-    async def list_templates(self) -> List[Dict[str, Any]]:
+    async def list_templates(self) -> list[dict[str, Any]]:
         """List all available templates"""
         with self._lock:
             return [template.to_dict() for template in self.templates.values()]
             
-    async def get_system_stats(self) -> Dict[str, Any]:
+    async def get_system_stats(self) -> dict[str, Any]:
         """Get system statistics"""
         with self._lock:
             active_requests = len(self.active_requests)
@@ -465,7 +463,7 @@ class AutomatedReportGenerator:
         # Use fallback template
         return await self.get_template(self.fallback_template_id)
         
-    async def _collect_report_data(self, request: ReportRequest) -> Dict[str, Any]:
+    async def _collect_report_data(self, request: ReportRequest) -> dict[str, Any]:
         """Collect data for report generation"""
         try:
             data = {}
@@ -502,7 +500,7 @@ class AutomatedReportGenerator:
                 }
             }
             
-    async def _collect_from_source(self, source_name: str, source_config: Dict[str, Any]) -> Dict[str, Any]:
+    async def _collect_from_source(self, source_name: str, source_config: dict[str, Any]) -> dict[str, Any]:
         """Collect data from a specific source"""
         # This would integrate with various data sources in a real implementation
         # For now, return mock data
@@ -536,7 +534,7 @@ class AutomatedReportGenerator:
             return {'message': f'Unknown source: {source_name}'}
             
     async def _generate_report_content(self, request: ReportRequest, template: Optional[ReportTemplate], 
-                                     data: Dict[str, Any]) -> str:
+                                     data: dict[str, Any]) -> str:
         """Generate report content using template"""
         try:
             if not template:
@@ -563,7 +561,7 @@ class AutomatedReportGenerator:
             # Graceful degradation: use basic template
             return await self._generate_basic_report(request, data)
             
-    async def _generate_basic_report(self, request: ReportRequest, data: Dict[str, Any]) -> str:
+    async def _generate_basic_report(self, request: ReportRequest, data: dict[str, Any]) -> str:
         """Generate basic report without template"""
         if request.report_format == ReportFormat.HTML:
             return f"""

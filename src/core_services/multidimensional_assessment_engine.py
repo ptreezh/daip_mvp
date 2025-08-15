@@ -1,5 +1,4 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: DAIP-LIVE
 @File: multidimensional_assessment_engine.py
 @Description: V0.3.5 多维度评估引擎 - 基于多维度指标的智能质量评估系统
@@ -10,15 +9,15 @@ import json
 import logging
 import re
 import statistics
-from typing import Dict, List, Optional, Any, Tuple, Set, TYPE_CHECKING
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
+from dataclasses import asdict, dataclass
+from datetime import datetime
 from enum import Enum
+from typing import TYPE_CHECKING, Any, Optional
 
 # Type checking imports to avoid circular dependencies
 if TYPE_CHECKING:
-    from ..core_services.knowledge_retrieval_service import KnowledgeRetrievalService
     from ..core_services.enhanced_sskg_manager import EnhancedSSKGManager
+    from ..core_services.knowledge_retrieval_service import KnowledgeRetrievalService
     from ..core_services.memory_agent import MemAgent
 
 # Heavy dependencies - lazy loaded
@@ -27,10 +26,11 @@ if TYPE_CHECKING:
 # networkx - lazy loaded
 # spacy - lazy loaded
 # textstat - basic text statistics, keep for now
-from textstat import flesch_reading_ease, flesch_kincaid_grade
-from collections import defaultdict, Counter
 import threading
 import time
+from collections import Counter
+
+from textstat import flesch_kincaid_grade, flesch_reading_ease
 
 # Core services - lazy loaded to avoid circular dependencies and improve startup performance
 
@@ -71,7 +71,7 @@ class AssessmentCriteria:
     """评估标准"""
     dimension: AssessmentDimension
     weight: float                           # 权重 (0-1)
-    metrics: List[str]                      # 评估指标
+    metrics: list[str]                      # 评估指标
     threshold: float                        # 阈值
     description: str                        # 描述
     importance: str                         # 重要性
@@ -84,8 +84,8 @@ class MetricResult:
     value: float
     score: float                           # 标准化分数 (0-1)
     confidence: float                      # 置信度 (0-1)
-    evidence: List[str]                    # 证据
-    details: Dict[str, Any] = None
+    evidence: list[str]                    # 证据
+    details: dict[str, Any] = None
 
 
 @dataclass
@@ -94,11 +94,11 @@ class DimensionResult:
     dimension: AssessmentDimension
     score: float                           # 维度分数 (0-1)
     level: QualityLevel                    # 质量等级
-    metrics: List[MetricResult]            # 指标结果
+    metrics: list[MetricResult]            # 指标结果
     summary: str                           # 总结
-    strengths: List[str]                   # 优势
-    weaknesses: List[str]                  # 不足
-    suggestions: List[str]                 # 建议
+    strengths: list[str]                   # 优势
+    weaknesses: list[str]                  # 不足
+    suggestions: list[str]                 # 建议
 
 
 @dataclass
@@ -109,12 +109,12 @@ class AssessmentResult:
     content_type: ContentType
     overall_score: float                    # 总分 (0-1)
     overall_level: QualityLevel             # 总体等级
-    dimensions: Dict[str, DimensionResult]  # 维度结果
+    dimensions: dict[str, DimensionResult]  # 维度结果
     confidence: float                       # 总体置信度
     assessment_time: datetime
     assessor: str
-    criteria: Dict[str, AssessmentCriteria]  # 使用的标准
-    metadata: Dict[str, Any] = None
+    criteria: dict[str, AssessmentCriteria]  # 使用的标准
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -126,8 +126,8 @@ class ContentToAssess:
     content_type: ContentType
     author: str
     submission_date: datetime
-    keywords: List[str]
-    metadata: Dict[str, Any] = None
+    keywords: list[str]
+    metadata: dict[str, Any] = None
 
 
 class MultiDimensionalAssessmentEngine:
@@ -191,7 +191,7 @@ class MultiDimensionalAssessmentEngine:
         # 启动后台任务
         self._start_background_tasks()
     
-    def _initialize_assessment_criteria(self) -> Dict[str, AssessmentCriteria]:
+    def _initialize_assessment_criteria(self) -> dict[str, AssessmentCriteria]:
         """初始化评估标准"""
         return {
             "academic_quality": AssessmentCriteria(
@@ -262,7 +262,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def assess_content(self, 
                           content: ContentToAssess,
-                          custom_criteria: Dict[str, AssessmentCriteria] = None) -> AssessmentResult:
+                          custom_criteria: dict[str, AssessmentCriteria] = None) -> AssessmentResult:
         """多维度评估内容"""
         try:
             self.logger.info(f"开始多维度评估: {content.id}")
@@ -335,7 +335,7 @@ class MultiDimensionalAssessmentEngine:
                 metadata={"error": str(e)}
             )
     
-    async def _preprocess_content(self, content: ContentToAssess) -> Dict[str, Any]:
+    async def _preprocess_content(self, content: ContentToAssess) -> dict[str, Any]:
         """预处理内容"""
         try:
             processed = {
@@ -395,7 +395,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_dimension(self, 
                               content: ContentToAssess,
-                              processed_content: Dict[str, Any],
+                              processed_content: dict[str, Any],
                               criteria: AssessmentCriteria) -> DimensionResult:
         """评估单个维度"""
         try:
@@ -435,7 +435,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_academic_quality(self, 
                                       content: ContentToAssess,
-                                      processed_content: Dict[str, Any],
+                                      processed_content: dict[str, Any],
                                       criteria: AssessmentCriteria) -> DimensionResult:
         """评估学术质量"""
         try:
@@ -511,7 +511,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_theoretical_foundation(self, 
                                            content: ContentToAssess,
-                                           processed_content: Dict[str, Any]) -> float:
+                                           processed_content: dict[str, Any]) -> float:
         """评估理论基础"""
         try:
             score = 0.0
@@ -554,7 +554,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_methodology_rigor(self, 
                                       content: ContentToAssess,
-                                      processed_content: Dict[str, Any]) -> float:
+                                      processed_content: dict[str, Any]) -> float:
         """评估方法论严谨性"""
         try:
             score = 0.0
@@ -597,7 +597,7 @@ class MultiDimensionalAssessmentEngine:
     
     def _assess_logical_coherence(self, 
                                 content: ContentToAssess,
-                                processed_content: Dict[str, Any]) -> float:
+                                processed_content: dict[str, Any]) -> float:
         """评估逻辑连贯性"""
         try:
             score = 0.0
@@ -644,7 +644,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_citation_quality(self, 
                                       content: ContentToAssess,
-                                      processed_content: Dict[str, Any]) -> float:
+                                      processed_content: dict[str, Any]) -> float:
         """评估引用质量"""
         try:
             score = 0.0
@@ -693,7 +693,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_technical_implementation(self, 
                                             content: ContentToAssess,
-                                            processed_content: Dict[str, Any],
+                                            processed_content: dict[str, Any],
                                             criteria: AssessmentCriteria) -> DimensionResult:
         """评估技术实现"""
         try:
@@ -769,7 +769,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_code_quality(self, 
                                  content: ContentToAssess,
-                                 processed_content: Dict[str, Any]) -> float:
+                                 processed_content: dict[str, Any]) -> float:
         """评估代码质量"""
         try:
             score = 0.0
@@ -815,7 +815,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_performance(self, 
                                 content: ContentToAssess,
-                                processed_content: Dict[str, Any]) -> float:
+                                processed_content: dict[str, Any]) -> float:
         """评估性能表现"""
         try:
             score = 0.0
@@ -852,7 +852,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_scalability(self, 
                                 content: ContentToAssess,
-                                processed_content: Dict[str, Any]) -> float:
+                                processed_content: dict[str, Any]) -> float:
         """评估可扩展性"""
         try:
             score = 0.0
@@ -895,7 +895,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_maintainability(self, 
                                     content: ContentToAssess,
-                                    processed_content: Dict[str, Any]) -> float:
+                                    processed_content: dict[str, Any]) -> float:
         """评估可维护性"""
         try:
             score = 0.0
@@ -926,7 +926,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_practicality(self, 
                                   content: ContentToAssess,
-                                  processed_content: Dict[str, Any],
+                                  processed_content: dict[str, Any],
                                   criteria: AssessmentCriteria) -> DimensionResult:
         """评估实用性"""
         try:
@@ -1002,7 +1002,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_applicability(self, 
                                  content: ContentToAssess,
-                                 processed_content: Dict[str, Any]) -> float:
+                                 processed_content: dict[str, Any]) -> float:
         """评估应用价值"""
         try:
             score = 0.0
@@ -1045,7 +1045,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_usability(self, 
                              content: ContentToAssess,
-                             processed_content: Dict[str, Any]) -> float:
+                             processed_content: dict[str, Any]) -> float:
         """评估可用性"""
         try:
             score = 0.0
@@ -1088,7 +1088,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_cost_effectiveness(self, 
                                       content: ContentToAssess,
-                                      processed_content: Dict[str, Any]) -> float:
+                                      processed_content: dict[str, Any]) -> float:
         """评估成本效益"""
         try:
             score = 0.0
@@ -1131,7 +1131,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_real_world_value(self, 
                                       content: ContentToAssess,
-                                      processed_content: Dict[str, Any]) -> float:
+                                      processed_content: dict[str, Any]) -> float:
         """评估实际价值"""
         try:
             score = 0.0
@@ -1174,7 +1174,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_documentation_quality(self, 
                                           content: ContentToAssess,
-                                          processed_content: Dict[str, Any],
+                                          processed_content: dict[str, Any],
                                           criteria: AssessmentCriteria) -> DimensionResult:
         """评估文档质量"""
         try:
@@ -1250,7 +1250,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_completeness(self, 
                                  content: ContentToAssess,
-                                 processed_content: Dict[str, Any]) -> float:
+                                 processed_content: dict[str, Any]) -> float:
         """评估完整性"""
         try:
             score = 0.0
@@ -1291,7 +1291,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_clarity(self, 
                             content: ContentToAssess,
-                            processed_content: Dict[str, Any]) -> float:
+                            processed_content: dict[str, Any]) -> float:
         """评估清晰度"""
         try:
             score = 0.0
@@ -1335,7 +1335,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_structure(self, 
                              content: ContentToAssess,
-                             processed_content: Dict[str, Any]) -> float:
+                             processed_content: dict[str, Any]) -> float:
         """评估结构"""
         try:
             score = 0.0
@@ -1369,7 +1369,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_readability(self, 
                                 content: ContentToAssess,
-                                processed_content: Dict[str, Any]) -> float:
+                                processed_content: dict[str, Any]) -> float:
         """评估可读性"""
         try:
             score = 0.0
@@ -1437,7 +1437,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_ethics_compliance(self, 
                                        content: ContentToAssess,
-                                       processed_content: Dict[str, Any],
+                                       processed_content: dict[str, Any],
                                        criteria: AssessmentCriteria) -> DimensionResult:
         """评估伦理合规"""
         try:
@@ -1513,7 +1513,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_privacy_protection(self, 
                                        content: ContentToAssess,
-                                       processed_content: Dict[str, Any]) -> float:
+                                       processed_content: dict[str, Any]) -> float:
         """评估隐私保护"""
         try:
             score = 0.0
@@ -1550,7 +1550,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_security_measures(self, 
                                        content: ContentToAssess,
-                                       processed_content: Dict[str, Any]) -> float:
+                                       processed_content: dict[str, Any]) -> float:
         """评估安全措施"""
         try:
             score = 0.0
@@ -1587,7 +1587,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_regulatory_compliance(self, 
                                           content: ContentToAssess,
-                                          processed_content: Dict[str, Any]) -> float:
+                                          processed_content: dict[str, Any]) -> float:
         """评估合规性"""
         try:
             score = 0.0
@@ -1624,7 +1624,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_ethical_considerations(self, 
                                            content: ContentToAssess,
-                                           processed_content: Dict[str, Any]) -> float:
+                                           processed_content: dict[str, Any]) -> float:
         """评估伦理考量"""
         try:
             score = 0.0
@@ -1661,7 +1661,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_innovation(self, 
                                 content: ContentToAssess,
-                                processed_content: Dict[str, Any],
+                                processed_content: dict[str, Any],
                                 criteria: AssessmentCriteria) -> DimensionResult:
         """评估创新性"""
         try:
@@ -1737,7 +1737,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_novelty(self, 
                            content: ContentToAssess,
-                           processed_content: Dict[str, Any]) -> float:
+                           processed_content: dict[str, Any]) -> float:
         """评估新颖性"""
         try:
             score = 0.0
@@ -1774,7 +1774,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_creativity(self, 
                               content: ContentToAssess,
-                              processed_content: Dict[str, Any]) -> float:
+                              processed_content: dict[str, Any]) -> float:
         """评估创造性"""
         try:
             score = 0.0
@@ -1817,7 +1817,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_originality(self, 
                                 content: ContentToAssess,
-                                processed_content: Dict[str, Any]) -> float:
+                                processed_content: dict[str, Any]) -> float:
         """评估原创性"""
         try:
             score = 0.0
@@ -1860,7 +1860,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_advancement(self, 
                                 content: ContentToAssess,
-                                processed_content: Dict[str, Any]) -> float:
+                                processed_content: dict[str, Any]) -> float:
         """评估进步性"""
         try:
             score = 0.0
@@ -1903,7 +1903,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_reproducibility(self, 
                                      content: ContentToAssess,
-                                     processed_content: Dict[str, Any],
+                                     processed_content: dict[str, Any],
                                      criteria: AssessmentCriteria) -> DimensionResult:
         """评估可复现性"""
         try:
@@ -1979,7 +1979,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_data_availability(self, 
                                       content: ContentToAssess,
-                                      processed_content: Dict[str, Any]) -> float:
+                                      processed_content: dict[str, Any]) -> float:
         """评估数据可用性"""
         try:
             score = 0.0
@@ -2022,7 +2022,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_method_transparency(self, 
                                         content: ContentToAssess,
-                                        processed_content: Dict[str, Any]) -> float:
+                                        processed_content: dict[str, Any]) -> float:
         """评估方法透明度"""
         try:
             score = 0.0
@@ -2065,7 +2065,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_experiment_repeatability(self, 
                                              content: ContentToAssess,
-                                             processed_content: Dict[str, Any]) -> float:
+                                             processed_content: dict[str, Any]) -> float:
         """评估实验可重复性"""
         try:
             score = 0.0
@@ -2108,7 +2108,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_code_accessibility(self, 
                                         content: ContentToAssess,
-                                        processed_content: Dict[str, Any]) -> float:
+                                        processed_content: dict[str, Any]) -> float:
         """评估代码可访问性"""
         try:
             score = 0.0
@@ -2151,7 +2151,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_impact(self, 
                            content: ContentToAssess,
-                           processed_content: Dict[str, Any],
+                           processed_content: dict[str, Any],
                            criteria: AssessmentCriteria) -> DimensionResult:
         """评估影响力"""
         try:
@@ -2227,7 +2227,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_reach(self, 
                           content: ContentToAssess,
-                          processed_content: Dict[str, Any]) -> float:
+                          processed_content: dict[str, Any]) -> float:
         """评估影响范围"""
         try:
             score = 0.0
@@ -2270,7 +2270,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_influence(self, 
                               content: ContentToAssess,
-                              processed_content: Dict[str, Any]) -> float:
+                              processed_content: dict[str, Any]) -> float:
         """评估影响力"""
         try:
             score = 0.0
@@ -2313,7 +2313,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_citation_potential(self, 
                                         content: ContentToAssess,
-                                        processed_content: Dict[str, Any]) -> float:
+                                        processed_content: dict[str, Any]) -> float:
         """评估引用潜力"""
         try:
             score = 0.0
@@ -2356,7 +2356,7 @@ class MultiDimensionalAssessmentEngine:
     
     async def _assess_practical_implications(self, 
                                            content: ContentToAssess,
-                                           processed_content: Dict[str, Any]) -> float:
+                                           processed_content: dict[str, Any]) -> float:
         """评估实际意义"""
         try:
             score = 0.0
@@ -2398,8 +2398,8 @@ class MultiDimensionalAssessmentEngine:
             return 0.0
     
     def _calculate_overall_score(self, 
-                                dimension_results: List[DimensionResult],
-                                criteria: Dict[str, AssessmentCriteria]) -> float:
+                                dimension_results: list[DimensionResult],
+                                criteria: dict[str, AssessmentCriteria]) -> float:
         """计算总体分数"""
         try:
             weighted_sum = 0.0
@@ -2433,7 +2433,7 @@ class MultiDimensionalAssessmentEngine:
         else:
             return QualityLevel.POOR
     
-    def _calculate_assessment_confidence(self, dimension_results: List[DimensionResult]) -> float:
+    def _calculate_assessment_confidence(self, dimension_results: list[DimensionResult]) -> float:
         """计算评估置信度"""
         try:
             if not dimension_results:
@@ -2464,9 +2464,9 @@ class MultiDimensionalAssessmentEngine:
     
     def _generate_dimension_summary(self, 
                                    dimension_name: str,
-                                   metrics: List[MetricResult],
+                                   metrics: list[MetricResult],
                                    score: float,
-                                   level: QualityLevel) -> Tuple[str, List[str], List[str], List[str]]:
+                                   level: QualityLevel) -> tuple[str, list[str], list[str], list[str]]:
         """生成维度总结"""
         try:
             # 基本总结
@@ -2600,7 +2600,7 @@ class MultiDimensionalAssessmentEngine:
         except Exception as e:
             self.logger.error(f"评估模型优化失败: {e}")
     
-    async def get_assessment_statistics(self) -> Dict[str, Any]:
+    async def get_assessment_statistics(self) -> dict[str, Any]:
         """获取评估统计信息"""
         try:
             stats = {
@@ -2645,8 +2645,8 @@ class MultiDimensionalAssessmentEngine:
             return {}
     
     async def create_custom_criteria(self, 
-                                   dimension_weights: Dict[str, float],
-                                   custom_thresholds: Dict[str, float] = None) -> Dict[str, AssessmentCriteria]:
+                                   dimension_weights: dict[str, float],
+                                   custom_thresholds: dict[str, float] = None) -> dict[str, AssessmentCriteria]:
         """创建自定义评估标准"""
         try:
             custom_criteria = {}
@@ -2691,7 +2691,7 @@ class MultiDimensionalAssessmentEngine:
         try:
             report_lines = []
             report_lines.append("=" * 60)
-            report_lines.append(f"多维度评估报告")
+            report_lines.append("多维度评估报告")
             report_lines.append("=" * 60)
             report_lines.append(f"评估ID: {assessment_result.id}")
             report_lines.append(f"内容ID: {assessment_result.content_id}")
@@ -2761,7 +2761,7 @@ class MultiDimensionalAssessmentEngine:
             html_lines.append("</head>")
             html_lines.append("<body>")
             html_lines.append("    <div class='header'>")
-            html_lines.append(f"        <h1>多维度评估报告</h1>")
+            html_lines.append("        <h1>多维度评估报告</h1>")
             html_lines.append(f"        <p>评估ID: {assessment_result.id}</p>")
             html_lines.append(f"        <p>内容ID: {assessment_result.content_id}</p>")
             html_lines.append(f"        <p>内容类型: {assessment_result.content_type.value}</p>")
@@ -2792,7 +2792,7 @@ class MultiDimensionalAssessmentEngine:
             html_lines.append("    <div class='section'>")
             html_lines.append("        <h2>详细分析</h2>")
             for dim_name, dim_result in assessment_result.dimensions.items():
-                html_lines.append(f"        <div class='metric'>")
+                html_lines.append("        <div class='metric'>")
                 html_lines.append(f"            <h3>{dim_name}维度</h3>")
                 html_lines.append(f"            <p><strong>总结:</strong> {dim_result.summary}</p>")
                 html_lines.append(f"            <p><strong>优势:</strong> <span class='strength'>{', '.join(dim_result.strengths)}</span></p>")
@@ -2885,22 +2885,22 @@ VGG、ResNet等网络架构不断推动着该领域的发展。
     assessment_result = await assessment_engine.assess_content(content)
     
     # 输出结果
-    print(f"评估结果:")
+    print("评估结果:")
     print(f"  总分: {assessment_result.overall_score:.3f}")
     print(f"  等级: {assessment_result.overall_level.value}")
     print(f"  置信度: {assessment_result.confidence:.3f}")
     
-    print(f"\n各维度分数:")
+    print("\n各维度分数:")
     for dim_name, dim_result in assessment_result.dimensions.items():
         print(f"  {dim_name}: {dim_result.score:.3f} ({dim_result.level.value})")
     
     # 生成报告
     report = assessment_engine.export_assessment_report(assessment_result, "text")
-    print(f"\n详细报告已生成")
+    print("\n详细报告已生成")
     
     # 获取统计信息
     stats = await assessment_engine.get_assessment_statistics()
-    print(f"\n评估统计:")
+    print("\n评估统计:")
     print(f"  总评估次数: {stats['total_assessments']}")
     print(f"  平均分数: {stats['average_score']:.3f}")
 

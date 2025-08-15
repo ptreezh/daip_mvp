@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-双入口WebSocket通信管理器
+"""双入口WebSocket通信管理器
 
 支持Secretariat和Forum两种入口模式的实时通信
 提供统一的WebSocket接口和消息处理机制
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, List, Optional, Any, Callable, Union
+import uuid
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass, asdict
-import uuid
+from typing import Any, Optional
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -67,13 +65,13 @@ class BaseMessage:
     session_id: str
     timestamp: datetime
     entrance_type: EntranceType
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     
     def __post_init__(self):
         if self.timestamp is None:
             self.timestamp = datetime.now()
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         return {
             "message_id": self.message_id,
@@ -85,7 +83,7 @@ class BaseMessage:
         }
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'BaseMessage':
+    def from_dict(cls, data: dict[str, Any]) -> 'BaseMessage':
         """从字典创建消息对象"""
         return cls(
             message_id=data["message_id"],
@@ -102,7 +100,7 @@ class SecretariatTaskMessage(BaseMessage):
     """Secretariat任务消息"""
     content: str
     priority: str = "normal"
-    context: Optional[Dict[str, Any]] = None
+    context: Optional[dict[str, Any]] = None
     
     def __post_init__(self):
         super().__post_init__()
@@ -114,8 +112,8 @@ class SecretariatTaskMessage(BaseMessage):
 class ForumSessionMessage(BaseMessage):
     """Forum会话消息"""
     topic: str
-    participants: List[str]
-    settings: Optional[Dict[str, Any]] = None
+    participants: list[str]
+    settings: Optional[dict[str, Any]] = None
     
     def __post_init__(self):
         super().__post_init__()
@@ -126,7 +124,7 @@ class ForumSessionMessage(BaseMessage):
 @dataclass
 class UserInterventionMessage(BaseMessage):
     """用户干预消息"""
-    message: Dict[str, Any]
+    message: dict[str, Any]
     intent: str = "comment"
     target_agent: Optional[str] = None
     
@@ -140,7 +138,7 @@ class UserInterventionMessage(BaseMessage):
 class ForumSessionStartMessage(BaseMessage):
     """Forum会话开始消息"""
     topic: str
-    selected_agents: List[str]
+    selected_agents: list[str]
     user_id: str
     
     def __post_init__(self):
@@ -152,7 +150,7 @@ class ForumSessionStartMessage(BaseMessage):
 @dataclass
 class ForumContextUpdateMessage(BaseMessage):
     """Forum上下文更新消息"""
-    context_data: Dict[str, Any]
+    context_data: dict[str, Any]
     
     def __post_init__(self):
         super().__post_init__()
@@ -165,7 +163,7 @@ class ForumDebateStatusMessage(BaseMessage):
     """Forum辩论状态消息"""
     debate_status: str
     current_round: int
-    active_agents: List[str]
+    active_agents: list[str]
     message_count: int
     
     def __post_init__(self):
@@ -179,7 +177,7 @@ class OptimizeUserInputMessage(BaseMessage):
     """优化用户输入消息"""
     input_text: str
     intent: str
-    context: Optional[Dict[str, Any]] = None
+    context: Optional[dict[str, Any]] = None
     
     def __post_init__(self):
         super().__post_init__()
@@ -190,7 +188,7 @@ class OptimizeUserInputMessage(BaseMessage):
 @dataclass
 class ForumUserInterventionMessage(BaseMessage):
     """Forum用户干预消息"""
-    message: Dict[str, Any]
+    message: dict[str, Any]
     
     def __post_init__(self):
         super().__post_init__()
@@ -210,12 +208,12 @@ class DualEntranceWebSocketManager:
         self.retry_delay = 5
         
         # 会话管理
-        self.active_sessions: Dict[str, Dict[str, Any]] = {}
-        self.session_types: Dict[str, EntranceType] = {}
+        self.active_sessions: dict[str, dict[str, Any]] = {}
+        self.session_types: dict[str, EntranceType] = {}
         
         # 消息处理器
-        self.message_handlers: Dict[MessageType, List[Callable]] = {}
-        self.entrance_handlers: Dict[EntranceType, Dict[MessageType, List[Callable]]] = {}
+        self.message_handlers: dict[MessageType, list[Callable]] = {}
+        self.entrance_handlers: dict[EntranceType, dict[MessageType, list[Callable]]] = {}
         
         # 消息队列
         self.outgoing_queue = asyncio.Queue()
@@ -300,7 +298,7 @@ class DualEntranceWebSocketManager:
             return False
     
     async def create_session(self, entrance_type: EntranceType, user_id: str, 
-                           initial_context: Optional[Dict[str, Any]] = None) -> str:
+                           initial_context: Optional[dict[str, Any]] = None) -> str:
         """创建会话"""
         session_id = f"{entrance_type.value}_{uuid.uuid4().hex[:8]}"
         
@@ -338,7 +336,7 @@ class DualEntranceWebSocketManager:
     
     async def send_secretariat_task(self, session_id: str, content: str, 
                                   priority: str = "normal",
-                                  context: Optional[Dict[str, Any]] = None) -> bool:
+                                  context: Optional[dict[str, Any]] = None) -> bool:
         """发送Secretariat任务"""
         if session_id not in self.session_types:
             logger.error(f"会话不存在: {session_id}")
@@ -363,8 +361,8 @@ class DualEntranceWebSocketManager:
         return await self.send_message(task_message)
     
     async def create_forum_session(self, user_id: str, topic: str,
-                                 participants: List[str],
-                                 settings: Optional[Dict[str, Any]] = None) -> str:
+                                 participants: list[str],
+                                 settings: Optional[dict[str, Any]] = None) -> str:
         """创建Forum会话"""
         session_id = await self.create_session(
             EntranceType.FORUM, user_id, {"topic": topic}
@@ -386,7 +384,7 @@ class DualEntranceWebSocketManager:
         
         return session_id
     
-    async def send_user_intervention(self, session_id: str, message: Dict[str, Any],
+    async def send_user_intervention(self, session_id: str, message: dict[str, Any],
                                    intent: str = "comment",
                                    target_agent: Optional[str] = None) -> bool:
         """发送用户干预"""
@@ -413,7 +411,7 @@ class DualEntranceWebSocketManager:
         return await self.send_message(intervention_message)
     
     async def send_forum_session_start(self, session_id: str, topic: str,
-                                      selected_agents: List[str],
+                                      selected_agents: list[str],
                                       user_id: str = "default_user") -> bool:
         """发送Forum会话开始消息"""
         if session_id not in self.session_types:
@@ -439,7 +437,7 @@ class DualEntranceWebSocketManager:
         return await self.send_message(session_start_message)
     
     async def send_forum_context_update(self, session_id: str,
-                                      context_data: Dict[str, Any]) -> bool:
+                                      context_data: dict[str, Any]) -> bool:
         """发送Forum上下文更新消息"""
         if session_id not in self.session_types:
             logger.error(f"会话不存在: {session_id}")
@@ -460,7 +458,7 @@ class DualEntranceWebSocketManager:
     async def send_forum_debate_status(self, session_id: str,
                                      debate_status: str,
                                      current_round: int,
-                                     active_agents: List[str],
+                                     active_agents: list[str],
                                      message_count: int) -> bool:
         """发送Forum辩论状态消息"""
         if session_id not in self.session_types:
@@ -485,7 +483,7 @@ class DualEntranceWebSocketManager:
     async def send_optimize_user_input(self, session_id: str,
                                       input_text: str,
                                       intent: str,
-                                      context: Optional[Dict[str, Any]] = None) -> bool:
+                                      context: Optional[dict[str, Any]] = None) -> bool:
         """发送优化用户输入消息"""
         optimize_message = OptimizeUserInputMessage(
             message_id=f"msg_{uuid.uuid4().hex[:8]}",
@@ -502,7 +500,7 @@ class DualEntranceWebSocketManager:
         return await self.send_message(optimize_message)
     
     async def send_forum_user_intervention(self, session_id: str,
-                                         message: Dict[str, Any]) -> bool:
+                                         message: dict[str, Any]) -> bool:
         """发送Forum用户干预消息"""
         if session_id not in self.session_types:
             logger.error(f"会话不存在: {session_id}")
@@ -520,7 +518,7 @@ class DualEntranceWebSocketManager:
         
         return await self.send_message(forum_intervention_message)
     
-    async def send_dict_message(self, message_data: Dict[str, Any]) -> bool:
+    async def send_dict_message(self, message_data: dict[str, Any]) -> bool:
         """发送简单字典消息（向后兼容）"""
         try:
             # 创建基础消息
@@ -679,7 +677,7 @@ class DualEntranceWebSocketManager:
                 logger.error(f"连接监控错误: {e}")
                 await asyncio.sleep(5)
     
-    def get_connection_status(self) -> Dict[str, Any]:
+    def get_connection_status(self) -> dict[str, Any]:
         """获取连接状态"""
         return {
             "connected": self.is_connected,
@@ -691,11 +689,11 @@ class DualEntranceWebSocketManager:
             "stats": self.stats
         }
     
-    def get_session_info(self, session_id: str) -> Optional[Dict[str, Any]]:
+    def get_session_info(self, session_id: str) -> Optional[dict[str, Any]]:
         """获取会话信息"""
         return self.active_sessions.get(session_id)
     
-    def get_entrance_sessions(self, entrance_type: EntranceType) -> List[str]:
+    def get_entrance_sessions(self, entrance_type: EntranceType) -> list[str]:
         """获取特定入口类型的会话列表"""
         return [
             session_id for session_id, etype in self.session_types.items()

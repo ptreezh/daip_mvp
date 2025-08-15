@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-WebSocket管理器
+"""WebSocket管理器
 
 为多轮辩论系统提供实时通信支持。
 处理客户端-服务器之间的双向通信，支持实时状态更新。
@@ -16,12 +14,12 @@ WebSocket管理器
 import asyncio
 import json
 import logging
-from typing import Dict, List, Optional, Any, Callable, Set
-from dataclasses import dataclass, asdict
+import uuid
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-import uuid
-import weakref
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +58,7 @@ class MessageType(Enum):
 class WebSocketMessage:
     """WebSocket消息数据结构"""
     type: MessageType
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     session_id: Optional[str] = None
     timestamp: datetime = None
     message_id: str = None
@@ -71,7 +69,7 @@ class WebSocketMessage:
         if self.message_id is None:
             self.message_id = str(uuid.uuid4())
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         return {
             "type": self.type.value,
@@ -82,7 +80,7 @@ class WebSocketMessage:
         }
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'WebSocketMessage':
+    def from_dict(cls, data: dict[str, Any]) -> 'WebSocketMessage':
         """从字典创建消息"""
         return cls(
             type=MessageType(data["type"]),
@@ -101,8 +99,8 @@ class WebSocketConnection:
         self.session_id = session_id or str(uuid.uuid4())
         self.connected_at = datetime.now()
         self.last_heartbeat = datetime.now()
-        self.subscriptions: Set[MessageType] = set()
-        self.metadata: Dict[str, Any] = {}
+        self.subscriptions: set[MessageType] = set()
+        self.metadata: dict[str, Any] = {}
         self.message_count = 0
         self.is_active = True
     
@@ -153,7 +151,7 @@ class WebSocketConnection:
         """更新心跳时间"""
         self.last_heartbeat = datetime.now()
     
-    def get_connection_info(self) -> Dict[str, Any]:
+    def get_connection_info(self) -> dict[str, Any]:
         """获取连接信息"""
         return {
             "session_id": self.session_id,
@@ -170,9 +168,9 @@ class DebateWebSocketManager:
     """辩论系统WebSocket管理器"""
     
     def __init__(self):
-        self.connections: Dict[str, WebSocketConnection] = {}
-        self.message_handlers: Dict[MessageType, List[Callable]] = {}
-        self.session_connections: Dict[str, Set[str]] = {}  # session_id -> connection_ids
+        self.connections: dict[str, WebSocketConnection] = {}
+        self.message_handlers: dict[MessageType, list[Callable]] = {}
+        self.session_connections: dict[str, set[str]] = {}  # session_id -> connection_ids
         
         # 消息队列
         self.outgoing_queue: asyncio.Queue = asyncio.Queue()
@@ -453,7 +451,7 @@ class DebateWebSocketManager:
                 logger.error(f"清理循环错误: {e}")
                 await asyncio.sleep(30)
     
-    def get_connection_status(self) -> Dict[str, Any]:
+    def get_connection_status(self) -> dict[str, Any]:
         """获取连接状态"""
         current_time = datetime.now()
         uptime = (current_time - self.start_time).total_seconds()
@@ -468,7 +466,7 @@ class DebateWebSocketManager:
             "connections": [conn.get_connection_info() for conn in self.connections.values()]
         }
     
-    async def send_debate_status_update(self, session_id: str, status_data: Dict[str, Any]):
+    async def send_debate_status_update(self, session_id: str, status_data: dict[str, Any]):
         """发送辩论状态更新"""
         message = WebSocketMessage(
             type=MessageType.DEBATE_STATUS,
@@ -477,7 +475,7 @@ class DebateWebSocketManager:
         )
         await self.send_message(message)
     
-    async def send_agent_status_update(self, agent_data: Dict[str, Any]):
+    async def send_agent_status_update(self, agent_data: dict[str, Any]):
         """发送代理状态更新"""
         message = WebSocketMessage(
             type=MessageType.AGENT_STATUS,
@@ -485,7 +483,7 @@ class DebateWebSocketManager:
         )
         await self.broadcast_message(message, MessageType.AGENT_STATUS)
     
-    async def send_workflow_status_update(self, workflow_data: Dict[str, Any]):
+    async def send_workflow_status_update(self, workflow_data: dict[str, Any]):
         """发送工作流状态更新"""
         message = WebSocketMessage(
             type=MessageType.WORKFLOW_STATUS,
@@ -493,7 +491,7 @@ class DebateWebSocketManager:
         )
         await self.broadcast_message(message, MessageType.WORKFLOW_STATUS)
     
-    async def send_monitoring_data(self, monitoring_data: Dict[str, Any]):
+    async def send_monitoring_data(self, monitoring_data: dict[str, Any]):
         """发送监控数据"""
         message = WebSocketMessage(
             type=MessageType.MONITORING_DATA,

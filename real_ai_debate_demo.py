@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-真实AI辩论演示
+"""真实AI辩论演示
 展示真正的多角色AI辩论过程
 """
 
-import sys
 import asyncio
+import sys
+
 sys.path.append('.')
 
-from src.real_demo_system.interactive_demo_flow import InteractiveDemoFlow
 from src.real_demo_system.demo_types import DemoScenarioType
+from src.real_demo_system.interactive_demo_flow import InteractiveDemoFlow
 
 
 async def run_real_ai_debate():
@@ -72,17 +71,17 @@ async def run_real_ai_debate():
             # 显示分析报告
             if "analysis_report" in step_result:
                 report = step_result["analysis_report"]
-                print(f"\n📊 质量评估:")
+                print("\n📊 质量评估:")
                 quality = report.get("quality_assessment", {})
                 print(f"   • 总体质量分数: {quality.get('overall_quality_score', 0):.2f}")
                 print(f"   • 教育价值: {quality.get('educational_value', 0):.2f}")
                 print(f"   • 技术演示: {quality.get('technical_demonstration', 0):.2f}")
                 
-                print(f"\n💡 关键洞察:")
+                print("\n💡 关键洞察:")
                 for insight in report.get("insights", []):
                     print(f"   • {insight}")
                 
-                print(f"\n🔧 改进建议:")
+                print("\n🔧 改进建议:")
                 for rec in report.get("recommendations", []):
                     print(f"   • {rec}")
             
@@ -128,7 +127,7 @@ async def run_real_ai_debate():
                 consensus = result["consensus_result"]
                 print(f"   置信度: {consensus['confidence_score']:.2f}")
                 print(f"   一致性: {consensus['agreement_level']}")
-                print(f"   共识内容:")
+                print("   共识内容:")
                 print(f"   {consensus['final_position']}")
             
             if "analysis_results" in result:
@@ -149,7 +148,7 @@ async def run_real_ai_debate():
             # 给用户一些时间阅读
             await asyncio.sleep(2)
     
-    print(f"\n🎉 演示完成！这展示了AI多角色协作决策的真实能力。")
+    print("\n🎉 演示完成！这展示了AI多角色协作决策的真实能力。")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 13:30:00
+"""@Time    : 2025-08-05 13:30:00
 @Author  : DAIP-LIVE Team
 @File    : validate_v0_3_9_implementation.py
 @Description:
@@ -11,11 +9,11 @@
 import asyncio
 import json
 import logging
+import os
+import sys
 import time
 from datetime import datetime
-from typing import Dict, Any, List
-import sys
-import os
+from typing import Any
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -23,12 +21,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.core_services.comprehensive_quality_validation_system import (
     ComprehensiveQualityValidator,
     QualityMetric,
-    ValidationLevel,
     QualityScore,
-    get_comprehensive_quality_validator
+    ValidationLevel,
 )
+from src.core_services.enterprise_error_handling_system import get_enterprise_error_handler
 from src.core_services.performance_monitoring_system import PerformanceMonitoringSystem
-from src.core_services.enterprise_error_handling_system import EnterpriseErrorHandler, get_enterprise_error_handler
 
 # Configure logging
 logging.basicConfig(
@@ -53,7 +50,7 @@ class V0_3_9Validator:
         self.monitoring_system = None
         self.error_handler = None
     
-    async def validate_implementation(self) -> Dict[str, Any]:
+    async def validate_implementation(self) -> dict[str, Any]:
         """Validate V0.3.9 implementation."""
         logger.info("Starting V0.3.9 Comprehensive Quality Validation System validation")
         
@@ -137,9 +134,9 @@ class V0_3_9Validator:
                 from src.core_services.comprehensive_quality_validation_system import (
                     ComprehensiveQualityValidator,
                     QualityMetric,
-                    ValidationLevel,
                     QualityScore,
-                    get_comprehensive_quality_validator
+                    ValidationLevel,
+                    get_comprehensive_quality_validator,
                 )
                 test_result["details"]["imports_successful"] = True
             except ImportError as e:
@@ -479,7 +476,7 @@ class V0_3_9Validator:
             ]
             
             grade_tests = []
-            for score, expected_grade in zip(test_scores, expected_grades):
+            for score, expected_grade in zip(test_scores, expected_grades, strict=False):
                 actual_grade = self.quality_validator._determine_quality_grade(score)
                 grade_tests.append({
                     "score": score,

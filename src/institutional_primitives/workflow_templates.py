@@ -1,20 +1,18 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 04:30:00
+"""@Time    : 2025-07-25 04:30:00
 @Author  : DAIP-LIVE Team
 @File    : workflow_templates.py
 @Description:
     Template-based workflow definition system.
     Implements requirement 7.2 - template-based workflow definition with parameterization.
 """
-import logging
 import json
-import yaml
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+import logging
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import Any, Optional
 
+import yaml
 from pydantic import BaseModel, Field, validator
 
 logger = logging.getLogger(__name__)
@@ -40,7 +38,7 @@ class TemplateParameter(BaseModel):
     description: str
     default: Optional[Any] = None
     required: bool = True
-    constraints: Dict[str, Any] = Field(default_factory=dict)  # min, max, choices, etc.
+    constraints: dict[str, Any] = Field(default_factory=dict)  # min, max, choices, etc.
     
     @validator('default')
     def validate_default(cls, v, values):
@@ -69,10 +67,10 @@ class WorkflowNode(BaseModel):
     """Definition of a workflow node in a template."""
     id: str
     type: str  # Primitive type
-    config: Dict[str, Any] = Field(default_factory=dict)
-    inputs: List[str] = Field(default_factory=list)
-    outputs: List[str] = Field(default_factory=list)
-    conditions: Dict[str, Any] = Field(default_factory=dict)  # Conditional execution
+    config: dict[str, Any] = Field(default_factory=dict)
+    inputs: list[str] = Field(default_factory=list)
+    outputs: list[str] = Field(default_factory=list)
+    conditions: dict[str, Any] = Field(default_factory=dict)  # Conditional execution
     parallel_group: Optional[str] = None  # For parallel execution grouping
 
 
@@ -81,7 +79,7 @@ class WorkflowEdge(BaseModel):
     from_node: str
     to_node: str
     condition: Optional[str] = None  # Conditional edge
-    data_mapping: Dict[str, str] = Field(default_factory=dict)  # Output -> Input mapping
+    data_mapping: dict[str, str] = Field(default_factory=dict)  # Output -> Input mapping
 
 
 class WorkflowTemplate(BaseModel):
@@ -94,16 +92,16 @@ class WorkflowTemplate(BaseModel):
     updated_at: datetime = Field(default_factory=datetime.now)
     
     # Template parameters
-    parameters: List[TemplateParameter] = Field(default_factory=list)
+    parameters: list[TemplateParameter] = Field(default_factory=list)
     
     # Workflow structure
-    nodes: List[WorkflowNode] = Field(default_factory=list)
-    edges: List[WorkflowEdge] = Field(default_factory=list)
+    nodes: list[WorkflowNode] = Field(default_factory=list)
+    edges: list[WorkflowEdge] = Field(default_factory=list)
     
     # Metadata
-    tags: List[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
     category: str = "general"
-    use_cases: List[str] = Field(default_factory=list)
+    use_cases: list[str] = Field(default_factory=list)
     
     def get_parameter(self, name: str) -> Optional[TemplateParameter]:
         """Get a parameter by name."""
@@ -119,7 +117,7 @@ class WorkflowTemplate(BaseModel):
                 return node
         return None
     
-    def validate_structure(self) -> List[str]:
+    def validate_structure(self) -> list[str]:
         """Validate the workflow structure and return any errors."""
         errors = []
         
@@ -143,7 +141,7 @@ class WorkflowTemplate(BaseModel):
 
 class TemplateParameterValues(BaseModel):
     """Values for template parameters."""
-    values: Dict[str, Any] = Field(default_factory=dict)
+    values: dict[str, Any] = Field(default_factory=dict)
     
     def get(self, name: str, default: Any = None) -> Any:
         """Get a parameter value."""
@@ -163,8 +161,8 @@ class WorkflowInstance(BaseModel):
     created_at: datetime = Field(default_factory=datetime.now)
     
     # Instantiated workflow structure
-    nodes: List[WorkflowNode] = Field(default_factory=list)
-    edges: List[WorkflowEdge] = Field(default_factory=list)
+    nodes: list[WorkflowNode] = Field(default_factory=list)
+    edges: list[WorkflowEdge] = Field(default_factory=list)
     
     # Runtime information
     status: str = "created"  # created, running, completed, failed
@@ -174,22 +172,20 @@ class WorkflowInstance(BaseModel):
 
 
 class TemplateEngine:
-    """
-    Engine for processing workflow templates and creating instances.
+    """Engine for processing workflow templates and creating instances.
     
     This class handles template parameterization, validation, and instantiation.
     """
     
     def __init__(self):
         """Initialize the template engine."""
-        self.templates: Dict[str, WorkflowTemplate] = {}
-        self.instances: Dict[str, WorkflowInstance] = {}
+        self.templates: dict[str, WorkflowTemplate] = {}
+        self.instances: dict[str, WorkflowInstance] = {}
         
         logger.info("TemplateEngine initialized")
     
     def register_template(self, template: WorkflowTemplate) -> bool:
-        """
-        Register a workflow template.
+        """Register a workflow template.
         
         Args:
             template: Template to register
@@ -210,8 +206,7 @@ class TemplateEngine:
         return True
     
     def load_template_from_file(self, file_path: str) -> Optional[WorkflowTemplate]:
-        """
-        Load a template from a YAML or JSON file.
+        """Load a template from a YAML or JSON file.
         
         Args:
             file_path: Path to the template file
@@ -225,7 +220,7 @@ class TemplateEngine:
                 logger.error(f"Template file not found: {file_path}")
                 return None
             
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(path, encoding='utf-8') as f:
                 if path.suffix.lower() in ['.yaml', '.yml']:
                     data = yaml.safe_load(f)
                 elif path.suffix.lower() == '.json':
@@ -265,8 +260,7 @@ class TemplateEngine:
             return None
     
     def save_template_to_file(self, template: WorkflowTemplate, file_path: str, format: str = "yaml") -> bool:
-        """
-        Save a template to a file.
+        """Save a template to a file.
         
         Args:
             template: Template to save
@@ -312,8 +306,7 @@ class TemplateEngine:
             return False
     
     def get_template(self, name: str, version: str = None) -> Optional[WorkflowTemplate]:
-        """
-        Get a template by name and version.
+        """Get a template by name and version.
         
         Args:
             name: Template name
@@ -339,13 +332,12 @@ class TemplateEngine:
             matching_templates.sort(key=lambda x: x[1].version, reverse=True)
             return matching_templates[0][1]
     
-    def list_templates(self) -> List[WorkflowTemplate]:
+    def list_templates(self) -> list[WorkflowTemplate]:
         """List all registered templates."""
         return list(self.templates.values())
     
-    def validate_parameters(self, template: WorkflowTemplate, parameter_values: TemplateParameterValues) -> List[str]:
-        """
-        Validate parameter values against template parameter definitions.
+    def validate_parameters(self, template: WorkflowTemplate, parameter_values: TemplateParameterValues) -> list[str]:
+        """Validate parameter values against template parameter definitions.
         
         Args:
             template: Template to validate against
@@ -395,8 +387,7 @@ class TemplateEngine:
         return errors
     
     def instantiate_template(self, template_name: str, parameter_values: TemplateParameterValues, instance_id: str = None, template_version: str = None) -> Optional[WorkflowInstance]:
-        """
-        Create a workflow instance from a template.
+        """Create a workflow instance from a template.
         
         Args:
             template_name: Name of the template to instantiate
@@ -518,7 +509,7 @@ class TemplateEngine:
         """Get a workflow instance by ID."""
         return self.instances.get(instance_id)
     
-    def list_instances(self) -> List[WorkflowInstance]:
+    def list_instances(self) -> list[WorkflowInstance]:
         """List all workflow instances."""
         return list(self.instances.values())
     
@@ -532,22 +523,20 @@ class TemplateEngine:
 
 
 class TemplateLibrary:
-    """
-    Library for managing workflow templates.
+    """Library for managing workflow templates.
     
     This class provides higher-level functionality for template management,
     including categorization, search, and template sharing.
     """
     
     def __init__(self, template_engine: TemplateEngine):
-        """
-        Initialize the template library.
+        """Initialize the template library.
         
         Args:
             template_engine: Template engine to use
         """
         self.engine = template_engine
-        self.template_directories: List[str] = []
+        self.template_directories: list[str] = []
         
         logger.info("TemplateLibrary initialized")
     
@@ -557,9 +546,8 @@ class TemplateLibrary:
             self.template_directories.append(directory)
             logger.info(f"Added template directory: {directory}")
     
-    def discover_templates(self) -> Dict[str, bool]:
-        """
-        Discover and load templates from registered directories.
+    def discover_templates(self) -> dict[str, bool]:
+        """Discover and load templates from registered directories.
         
         Returns:
             Dictionary mapping template files to loading success status
@@ -587,9 +575,8 @@ class TemplateLibrary:
         
         return results
     
-    def search_templates(self, query: str = None, category: str = None, tags: List[str] = None) -> List[WorkflowTemplate]:
-        """
-        Search templates by various criteria.
+    def search_templates(self, query: str = None, category: str = None, tags: list[str] = None) -> list[WorkflowTemplate]:
+        """Search templates by various criteria.
         
         Args:
             query: Text query to search in name and description
@@ -623,14 +610,14 @@ class TemplateLibrary:
         
         return results
     
-    def get_template_categories(self) -> List[str]:
+    def get_template_categories(self) -> list[str]:
         """Get all template categories."""
         categories = set()
         for template in self.engine.list_templates():
             categories.add(template.category)
         return sorted(list(categories))
     
-    def get_template_tags(self) -> List[str]:
+    def get_template_tags(self) -> list[str]:
         """Get all template tags."""
         tags = set()
         for template in self.engine.list_templates():
@@ -638,8 +625,7 @@ class TemplateLibrary:
         return sorted(list(tags))
     
     def create_template_from_instance(self, instance: WorkflowInstance, template_name: str, description: str) -> WorkflowTemplate:
-        """
-        Create a new template from an existing workflow instance.
+        """Create a new template from an existing workflow instance.
         
         Args:
             instance: Workflow instance to create template from

@@ -1,5 +1,4 @@
-"""
-真实演示系统测试脚本
+"""真实演示系统测试脚本
 
 测试已实现的真实演示系统组件，验证LLM集成器、角色管理器和透明度监控的功能。
 """
@@ -7,16 +6,16 @@
 import asyncio
 import json
 import logging
+import os
+import sys
 from datetime import datetime
 
-import sys
-import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from real_demo_system.call_verification import CallVerificationSystem
 from real_demo_system.real_llm_integrator import RealLLMIntegrator
 from real_demo_system.real_role_manager import RealRoleManager
 from real_demo_system.transparency_monitor import TransparencyMonitor
-from real_demo_system.call_verification import CallVerificationSystem
 
 # 设置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -147,7 +146,7 @@ async def test_transparency_monitor(llm_integrator):
         print(json.dumps(report, indent=2, ensure_ascii=False))
         
         # 生成透明度证书
-        print(f"\n3. 透明度证书:")
+        print("\n3. 透明度证书:")
         certificate = await monitor.generate_transparency_certificate(call_id)
         print(json.dumps(certificate, indent=2, ensure_ascii=False))
     
@@ -179,11 +178,11 @@ def test_call_verification(llm_integrator):
         verification_result = verification_system.verify_call_integrity(record)
         print(json.dumps(verification_result.to_dict(), indent=2, ensure_ascii=False))
         
-        print(f"\n2. 生成调用签名:")
+        print("\n2. 生成调用签名:")
         signature = verification_system.generate_call_signature(record)
         print(f"签名: {signature}")
         
-        print(f"\n3. 审计轨迹:")
+        print("\n3. 审计轨迹:")
         audit_trail = verification_system.generate_audit_trail(record.call_id)
         print(json.dumps(audit_trail, indent=2, ensure_ascii=False))
     

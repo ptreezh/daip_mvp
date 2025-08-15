@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证研究方法论指导系统
+"""验证研究方法论指导系统
 """
 
 import asyncio
 import sys
 import traceback
 from pathlib import Path
-from datetime import datetime
 
 # 添加项目根目录到路径
 project_root = Path(__file__).parent
@@ -33,16 +30,13 @@ async def validate_research_methodology_guide():
         print("\n1️⃣ 验证组件导入...")
         
         try:
+            from src.scenarios.enhanced_academic_research_scenario import ResearchMethodology, ResearchQuestion
             from src.scenarios.research_methodology_guide import (
-                ResearchMethodologyGuideSystem,
-                ResearchDomain,
-                ResearchComplexity,
                 MethodologyRecommendation,
-                ResearchDesign
-            )
-            from src.scenarios.enhanced_academic_research_scenario import (
-                ResearchMethodology,
-                ResearchQuestion
+                ResearchComplexity,
+                ResearchDesign,
+                ResearchDomain,
+                ResearchMethodologyGuideSystem,
             )
             print("   ✅ 组件导入成功")
             validation_results["imports"] = True
@@ -119,7 +113,7 @@ async def validate_research_methodology_guide():
             assert len(research_design.data_collection_methods) > 0
             assert len(research_design.timeline) > 0
             
-            print(f"   ✅ 研究设计创建成功")
+            print("   ✅ 研究设计创建成功")
             print(f"      方法论: {research_design.methodology.value}")
             print(f"      研究设计: {research_design.study_design}")
             print(f"      数据收集方法: {len(research_design.data_collection_methods)} 种")
@@ -143,7 +137,7 @@ async def validate_research_methodology_guide():
             assert "Research Methodology" in methodology_report
             assert "Study Design" in methodology_report
             
-            print(f"   ✅ 方法论报告生成成功")
+            print("   ✅ 方法论报告生成成功")
             print(f"      报告长度: {len(methodology_report)} 字符")
             print(f"      包含章节: {'✅' if 'Study Design' in methodology_report else '❌'}")
             print(f"      包含数据收集: {'✅' if 'Data Collection' in methodology_report else '❌'}")

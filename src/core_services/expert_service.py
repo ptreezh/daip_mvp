@@ -1,9 +1,7 @@
 import json
 import logging
 import os
-from typing import Any, Dict, List
-
-from typing import Any, Dict, List
+from typing import Any
 
 try:
     from src.role_utils import standardize_role_dict
@@ -16,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExpertService:
-    """
-    A service layer for managing experts (roles).
+    """A service layer for managing experts (roles).
     It encapsulates the business logic for expert creation, searching,
     and batch operations, interacting with the AppState and underlying libraries.
     """
@@ -27,7 +24,7 @@ class ExpertService:
         if not ROLE_UTILS_AVAILABLE:
             logger.warning("role_utils not available. Some functionalities will be disabled.")
 
-    def get_all_experts(self) -> List[Any]:
+    def get_all_experts(self) -> list[Any]:
         """Retrieves all experts from the role details."""
         # Convert role details to expert-like objects
         experts = []
@@ -40,9 +37,8 @@ class ExpertService:
             experts.append(expert)
         return experts
 
-    def create_expert(self, expert_data: Dict[str, Any]) -> Any:
-        """
-        Creates a single expert, handles validation and saving.
+    def create_expert(self, expert_data: dict[str, Any]) -> Any:
+        """Creates a single expert, handles validation and saving.
         Raises ValueError if the expert already exists.
         """
         if not ROLE_UTILS_AVAILABLE:
@@ -76,10 +72,9 @@ class ExpertService:
         return expert
 
     def batch_import_experts(
-        self, roles_data: List[Dict[str, Any]], overwrite: bool, validate_only: bool
-    ) -> Dict[str, Any]:
-        """
-        Batch imports experts from a list of dictionaries.
+        self, roles_data: list[dict[str, Any]], overwrite: bool, validate_only: bool
+    ) -> dict[str, Any]:
+        """Batch imports experts from a list of dictionaries.
         Handles standardization, file writing, validation, and state reloading.
         """
         if not ROLE_UTILS_AVAILABLE:
@@ -125,7 +120,7 @@ class ExpertService:
 
         return results
 
-    def search_experts_by_embedding(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+    def search_experts_by_embedding(self, query: str, top_k: int = 5) -> list[dict[str, Any]]:
         """Searches for experts using vector embeddings and returns a formatted list."""
         search_results = self.app_state.search_roles_by_vector(query, top_k)
         reformatted_results = [

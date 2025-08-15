@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 18:30:00
+"""@Time    : 2025-07-24 18:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_cli_interface.py
 @Description:
     Unit tests for CLI interface.
 """
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from click.testing import CliRunner
 
 from src.user_interface.cli_interface import CLIInterface, cli
@@ -16,12 +15,12 @@ from src.user_interface.cli_interface import CLIInterface, cli
 class TestCLIInterface:
     """Test cases for CLIInterface."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def cli_interface(self):
         """Create a CLIInterface instance for testing."""
         return CLIInterface()
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_services(self):
         """Create mock services."""
         return {
@@ -33,7 +32,7 @@ class TestCLIInterface:
             "wiki_service": AsyncMock()
         }
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_setup_services(self, cli_interface):
         """Test service setup."""
         with patch('src.user_interface.cli_interface.EnhancedLLMInterface'), \
@@ -53,7 +52,7 @@ class TestCLIInterface:
             assert "fact_extraction_service" in services
             assert "wiki_service" in services
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_critical_review(self, cli_interface, mock_services):
         """Test Critical Review Workflow execution."""
         with patch.object(cli_interface, 'setup_services', return_value=mock_services), \
@@ -80,7 +79,7 @@ class TestCLIInterface:
             assert "original_content" in result
             mock_workflow.execute.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_execute_multi_perspective(self, cli_interface, mock_services):
         """Test Multi-perspective Synthesis Workflow execution."""
         with patch.object(cli_interface, 'setup_services', return_value=mock_services), \

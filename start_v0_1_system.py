@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-DAIP-LIVE V0.1 最小可体验版本
+"""DAIP-LIVE V0.1 最小可体验版本
 基于现有Personal Intelligence Hub的完整系统启动脚本
 按照.kiro/specs/real-multi-round-debate-system规范执行
 """
 
-import os
-import sys
 import subprocess
-import time
+import sys
 import webbrowser
 from pathlib import Path
+
 
 def check_environment():
     """检查运行环境"""

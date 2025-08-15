@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 09:00:00
+"""@Time    : 2025-08-06 09:00:00
 @Author  : DAIP-LIVE Team
 @File    : service_monitoring_system.py
 @Description:
@@ -9,17 +7,16 @@
 """
 
 import asyncio
-import json
 import logging
 import time
-import psutil
-import aiohttp
-import threading
-from typing import Dict, List, Optional, Any, Callable
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from pathlib import Path
+from typing import Any, Optional
+
+import aiohttp
+import psutil
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -51,7 +48,7 @@ class ServiceHealth:
     response_time: float
     last_check: datetime
     error_message: Optional[str] = None
-    metrics: Dict[str, Any] = field(default_factory=dict)
+    metrics: dict[str, Any] = field(default_factory=dict)
     consecutive_failures: int = 0
 
 
@@ -77,20 +74,20 @@ class ServiceConfig:
     timeout: int = 10  # seconds
     max_consecutive_failures: int = 3
     restart_command: Optional[str] = None
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
 
 
 class ServiceMonitoringSystem:
     """Service monitoring and auto-recovery system."""
     
     def __init__(self):
-        self.services: Dict[str, ServiceConfig] = {}
-        self.health_data: Dict[str, ServiceHealth] = {}
-        self.alerts: List[ServiceAlert] = []
-        self.recovery_actions: Dict[str, Callable] = {}
+        self.services: dict[str, ServiceConfig] = {}
+        self.health_data: dict[str, ServiceHealth] = {}
+        self.alerts: list[ServiceAlert] = []
+        self.recovery_actions: dict[str, Callable] = {}
         self.monitoring_active = False
         self.monitoring_task = None
-        self.alert_handlers: List[Callable] = []
+        self.alert_handlers: list[Callable] = []
         
         logger.info("Service Monitoring System initialized")
     
@@ -189,7 +186,7 @@ class ServiceMonitoringSystem:
             logger.error(f"Error checking health for {service_name}: {e}")
             await self._generate_alert(service_name, ServiceStatus.UNHEALTHY, str(e))
     
-    async def _check_dependencies(self, dependencies: List[str]) -> bool:
+    async def _check_dependencies(self, dependencies: list[str]) -> bool:
         """Check if service dependencies are healthy."""
         for dep_name in dependencies:
             if dep_name in self.health_data:
@@ -225,7 +222,7 @@ class ServiceMonitoringSystem:
         except Exception as e:
             return ServiceStatus.UNHEALTHY, 0.0, str(e)
     
-    async def _collect_service_metrics(self, service_name: str) -> Dict[str, Any]:
+    async def _collect_service_metrics(self, service_name: str) -> dict[str, Any]:
         """Collect metrics for a service."""
         metrics = {}
         
@@ -338,13 +335,13 @@ class ServiceMonitoringSystem:
         """Get health information for a specific service."""
         return self.health_data.get(service_name)
     
-    def get_all_services_health(self) -> Dict[str, ServiceHealth]:
+    def get_all_services_health(self) -> dict[str, ServiceHealth]:
         """Get health information for all services."""
         return self.health_data.copy()
     
     def get_alerts(self, service_name: Optional[str] = None, 
                   level: Optional[AlertLevel] = None,
-                  resolved: Optional[bool] = None) -> List[ServiceAlert]:
+                  resolved: Optional[bool] = None) -> list[ServiceAlert]:
         """Get alerts with optional filtering."""
         alerts = self.alerts.copy()
         
@@ -366,7 +363,7 @@ class ServiceMonitoringSystem:
             self.alerts[alert_id].resolution_time = datetime.now()
             logger.info(f"Alert resolved: {self.alerts[alert_id].message}")
     
-    def get_system_summary(self) -> Dict[str, Any]:
+    def get_system_summary(self) -> dict[str, Any]:
         """Get system monitoring summary."""
         total_services = len(self.services)
         healthy_services = sum(1 for h in self.health_data.values() if h.status == ServiceStatus.HEALTHY)

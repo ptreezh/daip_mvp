@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-统一共识调度器核心数据模型集成测试
+"""统一共识调度器核心数据模型集成测试
 
 验证所有组件的集成工作情况，确保满足任务要求。
 """
 
 import sys
 import traceback
-from datetime import datetime
-from typing import Dict, Any, List
 
+from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm, ConsensusContext
 from consensus_models import (
-    ConsensusInput, ConsensusRequest, ConsensusResponse, ConsensusResult,
-    AlgorithmMetadata, ValidationResult, AlgorithmType, QualityRequirements
+    AlgorithmMetadata,
+    AlgorithmType,
+    ConsensusInput,
+    ConsensusRequest,
+    ConsensusResponse,
+    ConsensusResult,
+    QualityRequirements,
+    ValidationResult,
 )
-from consensus_algorithm_interface import (
-    ConsensusAlgorithm, ConsensusContext, AlgorithmCapabilities
-)
-from consensus_validation import (
-    ConsensusDataValidator, ConsensusDataSerializer, ConsensusDataConverter
-)
+from consensus_validation import ConsensusDataSerializer, ConsensusDataValidator
 
 
 class MockConsensusAlgorithm(ConsensusAlgorithm):
@@ -29,7 +27,7 @@ class MockConsensusAlgorithm(ConsensusAlgorithm):
     def __init__(self):
         super().__init__("mock_algorithm", {"test_param": "test_value"})
         
-    async def calculate(self, inputs: List[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
+    async def calculate(self, inputs: list[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
         """模拟共识计算"""
         # 简单的多数投票逻辑
         positions = [inp.position for inp in inputs]
@@ -81,7 +79,7 @@ class MockConsensusAlgorithm(ConsensusAlgorithm):
             max_participants=100
         )
         
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> ValidationResult:
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> ValidationResult:
         """验证输入"""
         if not inputs:
             return ValidationResult(is_valid=False, errors=["输入列表为空"])

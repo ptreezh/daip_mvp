@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 10:30:00
+"""@Time    : 2025-08-05 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_v0_3_7_performance_monitoring.py
 @Description:
@@ -9,28 +7,24 @@
 """
 
 import asyncio
+from datetime import datetime
+from unittest.mock import Mock, patch
+
 import pytest
-import json
-import time
-from unittest.mock import Mock, patch, AsyncMock
-from datetime import datetime, timedelta
-import tempfile
-import os
 
 from src.core_services.performance_monitoring_system import (
+    PerformanceAlert,
     PerformanceMonitoringSystem,
-    SystemResourceMonitor,
     PerformanceOptimizationEngine,
     SystemResource,
-    PerformanceAlert,
-    PerformanceMetric
+    SystemResourceMonitor,
 )
 
 
 class TestSystemResourceMonitor:
     """Test System Resource Monitor."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def resource_monitor(self):
         """Create resource monitor instance."""
         config = {
@@ -178,7 +172,7 @@ class TestSystemResourceMonitor:
 class TestPerformanceOptimizationEngine:
     """Test Performance Optimization Engine."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def optimization_engine(self):
         """Create optimization engine instance."""
         config = {
@@ -194,7 +188,7 @@ class TestPerformanceOptimizationEngine:
         assert len(optimization_engine.optimization_strategies) > 0
         assert len(optimization_engine.benchmarks) > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_memory_optimization(self, optimization_engine):
         """Test memory optimization."""
         result = await optimization_engine._optimize_memory_management()
@@ -202,7 +196,7 @@ class TestPerformanceOptimizationEngine:
         assert isinstance(result, dict)
         assert "success" in result
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_cpu_optimization(self, optimization_engine):
         """Test CPU optimization."""
         result = await optimization_engine._optimize_cpu_usage()
@@ -210,7 +204,7 @@ class TestPerformanceOptimizationEngine:
         assert isinstance(result, dict)
         assert "success" in result
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_cache_optimization(self, optimization_engine):
         """Test cache optimization."""
         result = await optimization_engine._optimize_cache_usage()
@@ -263,7 +257,7 @@ class TestPerformanceOptimizationEngine:
 class TestPerformanceMonitoringSystem:
     """Test Performance Monitoring System."""
     
-    @pytest.fixture
+    @pytest.fixture()
     async def monitoring_system(self):
         """Create monitoring system instance."""
         config = {
@@ -275,14 +269,14 @@ class TestPerformanceMonitoringSystem:
         yield system
         system.stop()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_initialization(self, monitoring_system):
         """Test monitoring system initialization."""
         assert monitoring_system.is_initialized is True
         assert monitoring_system.optimization_engine is not None
         assert monitoring_system.startup_time is not None
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_system_health_check(self, monitoring_system):
         """Test system health check."""
         health = await monitoring_system.get_system_health()
@@ -292,7 +286,7 @@ class TestPerformanceMonitoringSystem:
         assert "uptime_seconds" in health
         assert "last_check" in health
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_performance_report(self, monitoring_system):
         """Test performance report generation."""
         report = await monitoring_system.get_performance_report()
@@ -305,7 +299,7 @@ class TestPerformanceMonitoringSystem:
         assert "optimization_summary" in report
         assert "recommendations" in report
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_optimization_execution(self, monitoring_system):
         """Test optimization execution."""
         result = await monitoring_system.execute_optimization("memory_management")
@@ -313,7 +307,7 @@ class TestPerformanceMonitoringSystem:
         assert isinstance(result, dict)
         assert "success" in result
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_recommendation_generation(self, monitoring_system):
         """Test recommendation generation."""
         system_health = {"status": "critical", "cpu_usage": 85, "memory_usage": 90}
@@ -331,7 +325,7 @@ class TestPerformanceMonitoringSystem:
 class TestPerformanceMonitoringIntegration:
     """Test integration scenarios."""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_full_monitoring_cycle(self):
         """Test full monitoring cycle."""
         config = {
@@ -360,7 +354,7 @@ class TestPerformanceMonitoringIntegration:
         finally:
             monitoring_system.stop()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_alert_handling(self):
         """Test alert handling scenario."""
         config = {
@@ -391,7 +385,7 @@ class TestPerformanceMonitoringIntegration:
         finally:
             monitoring_system.stop()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_performance_data_export(self):
         """Test performance data export."""
         config = {
@@ -427,7 +421,7 @@ class TestPerformanceMonitoringIntegration:
 class TestPerformanceMonitoringErrorHandling:
     """Test error handling scenarios."""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_uninitialized_system(self):
         """Test behavior with uninitialized system."""
         monitoring_system = PerformanceMonitoringSystem()
@@ -439,7 +433,7 @@ class TestPerformanceMonitoringErrorHandling:
         report = await monitoring_system.get_performance_report()
         assert "error" in report
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_optimization_failure(self):
         """Test optimization failure handling."""
         config = {
@@ -472,7 +466,7 @@ class TestPerformanceMonitoringErrorHandling:
             assert metrics.memory_percent == 0.0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_performance_monitoring_system_comprehensive():
     """Comprehensive test of the performance monitoring system."""
     config = {

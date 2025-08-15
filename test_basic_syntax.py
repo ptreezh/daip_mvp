@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 19:10:00
+"""@Time    : 2025-08-04 19:10:00
 @Author  : DAIP-LIVE Team
 @File    : test_basic_syntax.py
 @Description:
     Test basic syntax and module structure.
 """
 
-import sys
-import traceback
 
 def test_basic_syntax():
     """Test basic syntax of key files"""
@@ -26,7 +22,7 @@ def test_basic_syntax():
     for file_path in files_to_test:
         print(f"\nTesting {file_path}...")
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
             
             # Try to compile the code

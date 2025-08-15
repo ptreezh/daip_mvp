@@ -1,32 +1,31 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: DAIP-LIVE
 @File: knowledge_retrieval_optimizer.py
 @Description: V0.3.4 知识检索优化器 - 多级缓存、查询优化和性能提升
 """
 
 import asyncio
+import hashlib
 import json
 import logging
+import pickle
+import threading
 import time
-from typing import Dict, List, Optional, Any, Tuple, Union
-from dataclasses import dataclass, asdict
+from collections import OrderedDict, defaultdict, deque
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-import hashlib
-import threading
-from concurrent.futures import ThreadPoolExecutor
-import functools
-from collections import defaultdict, OrderedDict, deque
+from typing import Any, Optional
+
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import pickle
 
-from ..core_services.knowledge_retrieval_service import KnowledgeRetrievalService
 from ..core_services.enhanced_sskg_manager import EnhancedSSKGManager
+from ..core_services.knowledge_retrieval_service import KnowledgeRetrievalService
 from ..core_services.memory_agent import MemAgent
-from ..virtual_role_chat.sskg.models import KnowledgeFact, KnowledgeQuery, SearchResult
+from ..virtual_role_chat.sskg.models import KnowledgeFact, SearchResult
 
 
 class CacheLevel(Enum):
@@ -55,7 +54,7 @@ class CacheEntry:
     ttl: int
     access_count: int
     size_bytes: int
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -66,7 +65,7 @@ class QueryMetrics:
     execution_time: float
     cache_hit: bool
     result_count: int
-    optimization_applied: List[str]
+    optimization_applied: list[str]
     timestamp: datetime
 
 
@@ -79,8 +78,8 @@ class PerformanceMetrics:
     throughput_qps: float
     memory_usage_mb: float
     error_rate: float
-    top_queries: List[Dict[str, Any]]
-    optimization_stats: Dict[str, Dict[str, float]]
+    top_queries: list[dict[str, Any]]
+    optimization_stats: dict[str, dict[str, float]]
 
 
 class KnowledgeRetrievalOptimizer:
@@ -131,9 +130,9 @@ class KnowledgeRetrievalOptimizer:
     
     async def optimized_search(self, 
                              query: str,
-                             filters: Dict[str, Any] = None,
+                             filters: dict[str, Any] = None,
                              limit: int = 10,
-                             optimization_strategies: List[OptimizationStrategy] = None) -> List[SearchResult]:
+                             optimization_strategies: list[OptimizationStrategy] = None) -> list[SearchResult]:
         """优化搜索"""
         if optimization_strategies is None:
             optimization_strategies = [
@@ -252,7 +251,7 @@ class KnowledgeRetrievalOptimizer:
             
             return fallback_results
     
-    async def build_semantic_index(self, knowledge_facts: List[KnowledgeFact] = None):
+    async def build_semantic_index(self, knowledge_facts: list[KnowledgeFact] = None):
         """构建语义索引"""
         try:
             if knowledge_facts is None:
@@ -280,7 +279,7 @@ class KnowledgeRetrievalOptimizer:
     async def semantic_similarity_search(self, 
                                        query: str,
                                        threshold: float = 0.3,
-                                       limit: int = 10) -> List[SearchResult]:
+                                       limit: int = 10) -> list[SearchResult]:
         """语义相似性搜索"""
         try:
             if not self.index_built:
@@ -430,7 +429,7 @@ class KnowledgeRetrievalOptimizer:
         except Exception as e:
             self.logger.error(f"缓存优化失败: {e}")
     
-    async def _get_cached_result(self, query: str, filters: Dict[str, Any], limit: int) -> Optional[List[SearchResult]]:
+    async def _get_cached_result(self, query: str, filters: dict[str, Any], limit: int) -> Optional[list[SearchResult]]:
         """获取缓存结果"""
         try:
             cache_key = self._generate_cache_key(query, filters, limit)
@@ -464,7 +463,7 @@ class KnowledgeRetrievalOptimizer:
             self.logger.error(f"获取缓存结果失败: {e}")
             return None
     
-    async def _cache_result(self, query: str, filters: Dict[str, Any], limit: int, results: List[SearchResult]):
+    async def _cache_result(self, query: str, filters: dict[str, Any], limit: int, results: list[SearchResult]):
         """缓存结果"""
         try:
             cache_key = self._generate_cache_key(query, filters, limit)
@@ -509,7 +508,7 @@ class KnowledgeRetrievalOptimizer:
                                key=lambda k: self.l2_cache[k].access_count)
             del self.l2_cache[min_access_key]
     
-    async def _get_l3_cache(self, key: str) -> Optional[List[SearchResult]]:
+    async def _get_l3_cache(self, key: str) -> Optional[list[SearchResult]]:
         """获取L3缓存"""
         try:
             if not hasattr(self, '_l3_cache'):
@@ -554,7 +553,7 @@ class KnowledgeRetrievalOptimizer:
         except Exception as e:
             self.logger.error(f"保存L3缓存失败: {e}")
     
-    def _generate_cache_key(self, query: str, filters: Dict[str, Any], limit: int) -> str:
+    def _generate_cache_key(self, query: str, filters: dict[str, Any], limit: int) -> str:
         """生成缓存键"""
         cache_data = {
             'query': query,
@@ -568,7 +567,7 @@ class KnowledgeRetrievalOptimizer:
         return hashlib.md5(f"{query}_{time.time()}".encode()).hexdigest()
     
     def _record_query_metrics(self, query_id: str, query: str, execution_time: float,
-                            cache_hit: bool, result_count: int, optimizations: List[str]):
+                            cache_hit: bool, result_count: int, optimizations: list[str]):
         """记录查询指标"""
         metrics = QueryMetrics(
             query_id=query_id,
@@ -589,7 +588,7 @@ class KnowledgeRetrievalOptimizer:
             if cache_hit:
                 self.performance_stats[opt]['cache_hits'] += 1
     
-    def _merge_search_results(self, results: List) -> List[SearchResult]:
+    def _merge_search_results(self, results: list) -> list[SearchResult]:
         """合并搜索结果"""
         try:
             merged = []
@@ -617,7 +616,7 @@ class KnowledgeRetrievalOptimizer:
             self.logger.error(f"合并搜索结果失败: {e}")
             return []
     
-    def _apply_filters(self, results: List[SearchResult], filters: Dict[str, Any]) -> List[SearchResult]:
+    def _apply_filters(self, results: list[SearchResult], filters: dict[str, Any]) -> list[SearchResult]:
         """应用过滤器"""
         try:
             filtered = results
@@ -655,14 +654,14 @@ class KnowledgeRetrievalOptimizer:
             return False
         return True
     
-    def _serialize_results(self, results: List[SearchResult]) -> Any:
+    def _serialize_results(self, results: list[SearchResult]) -> Any:
         """序列化结果"""
         try:
             return [self._serialize_result(r) for r in results]
         except Exception:
             return results
     
-    def _serialize_result(self, result: SearchResult) -> Dict[str, Any]:
+    def _serialize_result(self, result: SearchResult) -> dict[str, Any]:
         """序列化单个结果"""
         try:
             return {
@@ -747,7 +746,7 @@ class QueryOptimizer:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
     
-    def optimize(self, query: str, filters: Dict[str, Any] = None) -> Any:
+    def optimize(self, query: str, filters: dict[str, Any] = None) -> Any:
         """优化查询"""
         try:
             # 创建优化后的查询对象
@@ -776,7 +775,7 @@ class QueryOptimizer:
         
         return ' '.join(keywords)
     
-    def _optimize_filters(self, filters: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _optimize_filters(self, filters: dict[str, Any] = None) -> dict[str, Any]:
         """优化过滤器"""
         if filters is None:
             return {}
@@ -790,7 +789,7 @@ class QueryOptimizer:
         
         return optimized
     
-    def _expand_query_terms(self, query: str) -> List[str]:
+    def _expand_query_terms(self, query: str) -> list[str]:
         """扩展查询词"""
         # 简化的同义词扩展
         expansion_map = {
@@ -809,7 +808,7 @@ class QueryOptimizer:
         
         return expanded
     
-    def _calculate_weight_factors(self, query: str) -> Dict[str, float]:
+    def _calculate_weight_factors(self, query: str) -> dict[str, float]:
         """计算权重因子"""
         words = query.split()
         
@@ -838,8 +837,8 @@ class ResultRanker:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
     
-    def rank_results(self, results: List[SearchResult], query: str, 
-                    optimized_query: Any) -> List[SearchResult]:
+    def rank_results(self, results: list[SearchResult], query: str, 
+                    optimized_query: Any) -> list[SearchResult]:
         """排序结果"""
         try:
             if not results:
@@ -888,9 +887,9 @@ class OptimizedQuery:
     """优化后的查询"""
     original_query: str
     query_text: str
-    filters: Dict[str, Any]
-    expansion_terms: List[str]
-    weight_factors: Dict[str, float]
+    filters: dict[str, Any]
+    expansion_terms: list[str]
+    weight_factors: dict[str, float]
 
 
 # 使用示例

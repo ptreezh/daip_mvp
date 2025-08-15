@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-个人助手服务 - 简化版本
+"""个人助手服务 - 简化版本
 
 负责处理用户交互、意图分析、工作流编排等核心功能
 作为用户与后端服务之间的智能中介
 """
 
 import logging
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
 from .backend_connector import BackendConnector
 
@@ -31,7 +29,7 @@ class ConversationContext:
     """对话上下文"""
     user_id: str
     session_id: str
-    message_history: List[Dict[str, Any]]
+    message_history: list[dict[str, Any]]
     current_topic: Optional[str] = None
     active_workflow: Optional[str] = None
     
@@ -45,7 +43,7 @@ class PersonalAssistantService:
     
     def __init__(self, backend_connector: BackendConnector):
         self.backend = backend_connector
-        self.conversation_contexts: Dict[str, ConversationContext] = {}
+        self.conversation_contexts: dict[str, ConversationContext] = {}
         
         logger.info("个人助手服务初始化完成")
     
@@ -93,7 +91,7 @@ class PersonalAssistantService:
             )
         return self.conversation_contexts[session_id]
     
-    def update_conversation_context(self, session_id: str, message: Dict[str, Any]):
+    def update_conversation_context(self, session_id: str, message: dict[str, Any]):
         """更新对话上下文"""
         context = self.get_conversation_context(session_id)
         context.message_history.append(message)

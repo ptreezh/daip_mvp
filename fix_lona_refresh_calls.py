@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-"""
-修复Lona框架中错误的refresh()调用
+"""修复Lona框架中错误的refresh()调用
 
 根据Lona框架的正确使用方式，UI会自动更新，不需要手动refresh
 """
 
-import os
 import re
 from pathlib import Path
 
+
 def fix_refresh_calls():
     """移除所有错误的refresh()调用"""
-    
     frontend_dir = Path("frontend")
     
     # 需要修复的文件列表
@@ -32,7 +30,7 @@ def fix_refresh_calls():
         print(f"🔧 修复文件: {full_path}")
         
         # 读取文件内容
-        with open(full_path, 'r', encoding='utf-8') as f:
+        with open(full_path, encoding='utf-8') as f:
             content = f.read()
         
         # 移除 await self.refresh() 调用
@@ -56,7 +54,6 @@ def fix_refresh_calls():
 
 def add_lona_compatibility_note():
     """在组件中添加Lona兼容性说明"""
-    
     note = '''
 # Lona框架说明:
 # Lona会自动检测数据变化并更新UI，无需手动调用refresh()
@@ -65,7 +62,7 @@ def add_lona_compatibility_note():
     
     chat_interface_path = Path("frontend/components/chat_interface.py")
     if chat_interface_path.exists():
-        with open(chat_interface_path, 'r', encoding='utf-8') as f:
+        with open(chat_interface_path, encoding='utf-8') as f:
             content = f.read()
         
         # 在文件开头添加说明（在imports之后）

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 21:00:00
+"""@Time    : 2025-07-24 21:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_transparency.py
 @Description:
@@ -9,15 +7,13 @@
 """
 import asyncio
 import json
-from datetime import datetime
-from pathlib import Path
 
 from rich.console import Console
 from rich.panel import Panel
 
-from .transparency_controller import TransparencyController
-from .result_formatter import ResultFormatter
 from .feedback_collector import FeedbackCollector
+from .result_formatter import ResultFormatter
+from .transparency_controller import TransparencyController
 
 
 def create_sample_critical_review_result():

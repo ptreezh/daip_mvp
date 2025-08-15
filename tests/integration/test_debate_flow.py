@@ -1,24 +1,23 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-20 12:00:00
+"""@Time    : 2025-07-20 12:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_debate_flow.py
 @Description: Integration tests for basic debate flow functionality.
 """
 
-import pytest
 import asyncio
-from unittest.mock import MagicMock, AsyncMock, patch
-from src.app_state import AppState
-from src.protocols.debate_protocol import DebateProtocol
-from src.models import DebateConfig, DebateTurn
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
 from src.kernel.core import Kernel
+from src.models import DebateConfig
+from src.protocols.debate_protocol import DebateProtocol
 
 # Mark all tests in this file as asyncio
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_kernel():
     """Fixture for a mocked Kernel with its components."""
     kernel = MagicMock(spec=Kernel)
@@ -34,13 +33,13 @@ def mock_kernel():
     return kernel
 
 
-@pytest.fixture
+@pytest.fixture()
 def event_queue():
     """Fixture for a new asyncio.Queue for each test."""
     return asyncio.Queue()
 
 
-@pytest.fixture
+@pytest.fixture()
 def simple_debate_config():
     """Fixture for a simple DebateConfig."""
     return DebateConfig(

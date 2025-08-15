@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 01:15:00
+"""@Time    : 2025-07-25 01:15:00
 @Author  : DAIP-LIVE Team
 @File    : knowledge_management_api.py
 @Description:
     API endpoints for knowledge management functionality.
 """
 
-from fastapi import APIRouter, HTTPException, Depends
-from typing import Dict, List, Any, Optional
 import logging
+from typing import Any
+
+from fastapi import APIRouter
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +36,7 @@ async def search_knowledge(query: str, limit: int = 10):
 
 
 @router.post("/create")
-async def create_knowledge_entry(data: Dict[str, Any]):
+async def create_knowledge_entry(data: dict[str, Any]):
     """创建知识条目"""
     return {
         "id": "knowledge_001",

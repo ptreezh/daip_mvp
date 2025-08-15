@@ -1,32 +1,29 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 10:00:00
+"""@Time    : 2025-07-24 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_critical_review_workflow_integration.py
 @Description:
     Integration tests for the complete Critical Review Workflow.
     Tests the end-to-end flow from content generation to revision.
 """
-import pytest
-import asyncio
-from datetime import datetime
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock
 
-from src.institutional_primitives.critical_review_nodes import (
-    GenerationNode,
-    FactExtractionNode,
-    ParallelReviewNode,
-    EvidenceAggregationNode
-)
-from src.institutional_primitives.consensus_node import ConsensusNode
-from src.institutional_primitives.revision_node import RevisionNode
+import pytest
+
 from src.institutional_primitives.base import ExecutionContext
+from src.institutional_primitives.consensus_node import ConsensusNode
+from src.institutional_primitives.critical_review_nodes import (
+    EvidenceAggregationNode,
+    FactExtractionNode,
+    GenerationNode,
+    ParallelReviewNode,
+)
+from src.institutional_primitives.revision_node import RevisionNode
 
 
 class TestCriticalReviewWorkflowIntegration:
     """Integration tests for the complete Critical Review Workflow."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_context(self):
         """Create a mock execution context with shared state."""
         context = Mock(spec=ExecutionContext)
@@ -38,7 +35,7 @@ class TestCriticalReviewWorkflowIntegration:
         context.mark_failed = Mock()
         return context
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_llm_interface(self):
         """Create a mock LLM interface."""
         llm = AsyncMock()
@@ -86,7 +83,7 @@ class TestCriticalReviewWorkflowIntegration:
         llm.generate.side_effect = generate_side_effect
         return llm
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_fact_extraction_service(self):
         """Create a mock fact extraction service."""
         service = AsyncMock()
@@ -122,7 +119,7 @@ class TestCriticalReviewWorkflowIntegration:
         ]
         return service
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_wiki_service(self):
         """Create a mock wiki service."""
         service = AsyncMock()
@@ -135,7 +132,7 @@ class TestCriticalReviewWorkflowIntegration:
         ]
         return service
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_synthesis_engine(self):
         """Create a mock synthesis engine."""
         engine = AsyncMock()
@@ -156,7 +153,7 @@ class TestCriticalReviewWorkflowIntegration:
         engine.synthesize_opinions.side_effect = synthesize_side_effect
         return engine
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_critical_review_workflow_integration(
         self, 
         mock_context, 
@@ -239,7 +236,7 @@ class TestCriticalReviewWorkflowIntegration:
         assert "1500-2000亿美元" in revision_result["revised_content"]
         assert "5000亿美元" not in revision_result["revised_content"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_critical_review_workflow_no_revision_needed(
         self, 
         mock_context, 
@@ -299,7 +296,7 @@ class TestCriticalReviewWorkflowIntegration:
         assert revision_result["revision_needed"] is False
         assert "No revision needed" in revision_result["revision_summary"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_critical_review_workflow_error_handling(
         self, 
         mock_context, 

@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-简化工程可用性验证
+"""简化工程可用性验证
 快速验证DAIP系统的基本可用性
 """
 
-import os
-import sys
 import json
+import sys
 from datetime import datetime
 from pathlib import Path
+
 
 def check_file_structure():
     """检查文件结构"""
@@ -51,7 +49,7 @@ def check_python_syntax():
     for file_path in key_files:
         if Path(file_path).exists():
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
                 compile(content, file_path, 'exec')
                 results[file_path] = True
@@ -85,7 +83,7 @@ def check_role_files():
     valid_roles = 0
     for role_file in json_files[:10]:  # 检查前10个
         try:
-            with open(role_file, 'r', encoding='utf-8') as f:
+            with open(role_file, encoding='utf-8') as f:
                 role_data = json.load(f)
             if 'name' in role_data and 'description' in role_data:
                 valid_roles += 1
@@ -138,7 +136,7 @@ def analyze_test_quality():
     for test_file in test_files:
         if Path(test_file).exists():
             try:
-                with open(test_file, 'r', encoding='utf-8') as f:
+                with open(test_file, encoding='utf-8') as f:
                     content = f.read()
                 
                 # 简单质量指标
@@ -286,7 +284,7 @@ def print_assessment_summary(report):
     for i, rec in enumerate(report["recommendations"], 1):
         print(f"  {i}. {rec}")
     
-    print(f"\n📊 报告已保存: engineering_assessment_report.json")
+    print("\n📊 报告已保存: engineering_assessment_report.json")
     print("=" * 60)
 
 if __name__ == "__main__":

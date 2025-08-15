@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Wiki Models
+"""Personal Intelligence Hub - Wiki Models
 
 Wiki相关的数据模型
 """
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from typing import Any
 
 
 class WikiUpdateSource(Enum):
@@ -39,8 +37,8 @@ class WikiPage:
     created_at: datetime
     updated_at: datetime
     status: WikiPageStatus = WikiPageStatus.DRAFT
-    tags: List[str] = None
-    metadata: Dict[str, Any] = None
+    tags: list[str] = None
+    metadata: dict[str, Any] = None
     
     def __post_init__(self):
         if self.tags is None:
@@ -69,7 +67,7 @@ class WikiUpdate:
     content: str
     quality_score: float
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
     
     def __post_init__(self):
         if self.metadata is None:
@@ -82,9 +80,9 @@ class ConsensusNodeFact:
     id: str
     content: str
     confidence: float
-    source_agents: List[str]
+    source_agents: list[str]
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
     
     def __post_init__(self):
         if self.metadata is None:

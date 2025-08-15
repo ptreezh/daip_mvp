@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Task Panel Tests
+"""Personal Intelligence Hub - Task Panel Tests
 
 测试任务管理面板组件功能
 """
 
-import pytest
-import asyncio
-from unittest.mock import Mock, patch
 from datetime import datetime
+from unittest.mock import patch
+
+import pytest
 
 from personal_intelligence_hub.components.task_panel import TaskPanel
 from personal_intelligence_hub.models.task_models import (
-    Task, TaskStatus, TaskPriority, TaskUpdate, TaskDecompositionNode,
-    TaskAssignment, TaskProgress, TaskUpdateSource
+    Task,
+    TaskAssignment,
+    TaskDecompositionNode,
+    TaskPriority,
+    TaskProgress,
+    TaskStatus,
+    TaskUpdate,
+    TaskUpdateSource,
 )
 
 

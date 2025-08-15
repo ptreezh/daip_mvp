@@ -1,5 +1,4 @@
-"""
-Main workflow orchestration engine.
+"""Main workflow orchestration engine.
 
 This module implements the core WorkflowEngine that orchestrates the execution
 of institutional workflows by coordinating primitive nodes and managing
@@ -7,28 +6,20 @@ execution state.
 """
 
 import asyncio
-from typing import Dict, Any, Optional, List
-from datetime import datetime
 import logging
+from datetime import datetime
+from typing import Any, Optional
 
 from ..institutional_primitives import PrimitiveRegistry, get_global_registry
-from .models import (
-    WorkflowDefinition,
-    WorkflowExecution,
-    WorkflowResult,
-    WorkflowStatus,
-    ExecutionMetrics,
-    NodeStatus
-)
-from .state_manager import StateManager
 from .execution_manager import ExecutionManager
+from .models import ExecutionMetrics, NodeStatus, WorkflowDefinition, WorkflowExecution, WorkflowResult, WorkflowStatus
+from .state_manager import StateManager
 
 logger = logging.getLogger(__name__)
 
 
 class WorkflowEngine:
-    """
-    Main workflow orchestration engine.
+    """Main workflow orchestration engine.
     
     Orchestrates the execution of institutional workflows by coordinating
     primitive nodes, managing execution state, and providing workflow
@@ -39,11 +30,10 @@ class WorkflowEngine:
         self,
         primitive_registry: Optional[PrimitiveRegistry] = None,
         state_manager: Optional[StateManager] = None,
-        services: Optional[Dict[str, Any]] = None,
+        services: Optional[dict[str, Any]] = None,
         max_concurrency: int = 5
     ):
-        """
-        Initialize the workflow engine.
+        """Initialize the workflow engine.
         
         Args:
             primitive_registry: Registry for institutional primitives
@@ -57,16 +47,15 @@ class WorkflowEngine:
         self.execution_manager = ExecutionManager(self.primitive_registry, max_concurrency)
         
         # Active executions
-        self._active_executions: Dict[str, WorkflowExecution] = {}
-        self._execution_tasks: Dict[str, asyncio.Task] = {}
+        self._active_executions: dict[str, WorkflowExecution] = {}
+        self._execution_tasks: dict[str, asyncio.Task] = {}
     
     async def execute_workflow(
         self, 
         workflow_def: WorkflowDefinition, 
-        params: Optional[Dict[str, Any]] = None
+        params: Optional[dict[str, Any]] = None
     ) -> WorkflowResult:
-        """
-        Execute a workflow definition.
+        """Execute a workflow definition.
         
         Args:
             workflow_def: Workflow definition to execute
@@ -131,8 +120,7 @@ class WorkflowEngine:
         return result
     
     async def _execute_workflow_async(self, execution: WorkflowExecution) -> None:
-        """
-        Asynchronously execute a workflow.
+        """Asynchronously execute a workflow.
         
         Args:
             execution: Workflow execution to run
@@ -207,8 +195,7 @@ class WorkflowEngine:
             await self.state_manager.save_execution_state(execution)
     
     async def get_workflow_status(self, execution_id: str) -> Optional[WorkflowStatus]:
-        """
-        Get the status of a workflow execution.
+        """Get the status of a workflow execution.
         
         Args:
             execution_id: ID of the execution
@@ -228,8 +215,7 @@ class WorkflowEngine:
         return None
     
     async def pause_workflow(self, execution_id: str) -> bool:
-        """
-        Pause a running workflow execution.
+        """Pause a running workflow execution.
         
         Args:
             execution_id: ID of the execution to pause
@@ -266,8 +252,7 @@ class WorkflowEngine:
             return False
     
     async def resume_workflow(self, execution_id: str) -> bool:
-        """
-        Resume a paused workflow execution.
+        """Resume a paused workflow execution.
         
         Args:
             execution_id: ID of the execution to resume
@@ -304,8 +289,7 @@ class WorkflowEngine:
             return False
     
     async def cancel_workflow(self, execution_id: str) -> bool:
-        """
-        Cancel a workflow execution.
+        """Cancel a workflow execution.
         
         Args:
             execution_id: ID of the execution to cancel
@@ -342,8 +326,7 @@ class WorkflowEngine:
             return False
     
     async def _build_workflow_result(self, execution: WorkflowExecution) -> WorkflowResult:
-        """
-        Build a WorkflowResult from execution state.
+        """Build a WorkflowResult from execution state.
         
         Args:
             execution: Workflow execution
@@ -385,9 +368,8 @@ class WorkflowEngine:
             errors=errors
         )
     
-    def get_active_executions(self) -> List[str]:
-        """
-        Get list of active workflow execution IDs.
+    def get_active_executions(self) -> list[str]:
+        """Get list of active workflow execution IDs.
         
         Returns:
             List of execution IDs
@@ -395,8 +377,7 @@ class WorkflowEngine:
         return list(self._active_executions.keys())
     
     async def get_execution_details(self, execution_id: str) -> Optional[WorkflowExecution]:
-        """
-        Get detailed information about a workflow execution.
+        """Get detailed information about a workflow execution.
         
         Args:
             execution_id: ID of the execution
@@ -412,8 +393,7 @@ class WorkflowEngine:
         return await self.state_manager.load_execution_state(execution_id)
     
     async def cleanup_completed_executions(self, max_age_days: int = 7) -> int:
-        """
-        Clean up old completed workflow executions.
+        """Clean up old completed workflow executions.
         
         Args:
             max_age_days: Maximum age in days for completed executions
@@ -423,9 +403,8 @@ class WorkflowEngine:
         """
         return await self.state_manager.cleanup_old_executions(max_age_days)
     
-    def get_engine_statistics(self) -> Dict[str, Any]:
-        """
-        Get engine statistics.
+    def get_engine_statistics(self) -> dict[str, Any]:
+        """Get engine statistics.
         
         Returns:
             Dictionary of engine statistics

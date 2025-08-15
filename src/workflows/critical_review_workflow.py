@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 10:00:00
+"""@Time    : 2025-07-24 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : critical_review_workflow.py
 @Description:
@@ -8,34 +6,31 @@
     all institutional primitive nodes for systematic fact validation.
 """
 import logging
-import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from src.institutional_primitives.critical_review_nodes import (
-    GenerationNode,
-    FactExtractionNode,
-    ParallelReviewNode,
-    EvidenceAggregationNode
-)
-from src.institutional_primitives.consensus_node import ConsensusNode
-from src.institutional_primitives.revision_node import RevisionNode
 from src.institutional_primitives.base import ExecutionContext
+from src.institutional_primitives.consensus_node import ConsensusNode
+from src.institutional_primitives.critical_review_nodes import (
+    EvidenceAggregationNode,
+    FactExtractionNode,
+    GenerationNode,
+    ParallelReviewNode,
+)
+from src.institutional_primitives.revision_node import RevisionNode
 
 logger = logging.getLogger(__name__)
 
 
 class CriticalReviewWorkflow:
-    """
-    批判性审查工作流 - Orchestrates the complete Critical Review Workflow.
+    """批判性审查工作流 - Orchestrates the complete Critical Review Workflow.
     
     Implements a systematic approach to combat LLM hallucinations through
     multi-role fact validation, epistemological verification, and
     evidence-based revision processes.
     """
     
-    def __init__(self, workflow_id: str, config: Dict[str, Any] = None):
-        """
-        Initialize the Critical Review Workflow.
+    def __init__(self, workflow_id: str, config: dict[str, Any] = None):
+        """Initialize the Critical Review Workflow.
         
         Args:
             workflow_id: Unique identifier for this workflow instance
@@ -117,11 +112,10 @@ class CriticalReviewWorkflow:
         self,
         prompt: str,
         role_context: str = "",
-        services: Dict[str, Any] = None,
+        services: dict[str, Any] = None,
         execution_id: str = None
-    ) -> Dict[str, Any]:
-        """
-        Execute the complete Critical Review Workflow.
+    ) -> dict[str, Any]:
+        """Execute the complete Critical Review Workflow.
         
         Args:
             prompt: The prompt for content generation
@@ -225,7 +219,7 @@ class CriticalReviewWorkflow:
                 "execution_id": context.execution_id
             }
     
-    def _create_error_result(self, error_message: str, step_result: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_error_result(self, error_message: str, step_result: dict[str, Any]) -> dict[str, Any]:
         """Create a standardized error result."""
         return {
             "success": False,
@@ -239,12 +233,11 @@ class CriticalReviewWorkflow:
         cls,
         prompt: str,
         role_context: str = "",
-        services: Dict[str, Any] = None,
-        workflow_config: Dict[str, Any] = None,
+        services: dict[str, Any] = None,
+        workflow_config: dict[str, Any] = None,
         workflow_id: str = "critical_review"
-    ) -> Dict[str, Any]:
-        """
-        Convenience method to execute a Critical Review Workflow.
+    ) -> dict[str, Any]:
+        """Convenience method to execute a Critical Review Workflow.
         
         Args:
             prompt: The prompt for content generation

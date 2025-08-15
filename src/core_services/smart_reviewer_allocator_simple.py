@@ -1,21 +1,15 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: Claude Code
 @File: smart_reviewer_allocator_simple.py
 @Description: Simplified version of SmartReviewerAllocator for testing without external dependencies
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from collections import defaultdict, Counter
-import threading
-import time
-import random
+from typing import Any
 
 
 class ReviewerSpecialization(Enum):
@@ -56,11 +50,11 @@ class ReviewRequest:
     submission_date: datetime
     deadline: datetime
     required_reviewers: int
-    expertise_areas: List[str]
+    expertise_areas: list[str]
     complexity_level: str
     priority: AllocationPriority
-    keywords: List[str]
-    metadata: Dict[str, Any] = None
+    keywords: list[str]
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -69,19 +63,19 @@ class ReviewerProfile:
     id: str
     name: str
     email: str
-    specializations: List[ReviewerSpecialization]
+    specializations: list[ReviewerSpecialization]
     experience_level: ExperienceLevel
-    expertise_keywords: List[str]
+    expertise_keywords: list[str]
     availability_score: float  # 0-1
     current_workload: int      # 当前评审任务数
     max_workload: int         # 最大工作负载
-    review_history: List[Dict]  # 评审历史
-    performance_metrics: Dict[str, float]
+    review_history: list[dict]  # 评审历史
+    performance_metrics: dict[str, float]
     response_time_avg: float   # 平均响应时间(小时)
     quality_score: float      # 历史质量评分
-    conflicts_of_interest: List[str]  # 利益冲突
+    conflicts_of_interest: list[str]  # 利益冲突
     last_active: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -100,13 +94,13 @@ class AllocationCriteria:
 class AllocationResult:
     """分配结果"""
     review_request_id: str
-    allocated_reviewers: List[ReviewerProfile]
-    allocation_scores: List[float]
-    allocation_reasons: List[str]
+    allocated_reviewers: list[ReviewerProfile]
+    allocation_scores: list[float]
+    allocation_reasons: list[str]
     total_candidates: int
     selection_process: str
     confidence_score: float
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 
 class SmartReviewerAllocator:
@@ -148,9 +142,9 @@ class SmartReviewerAllocator:
     
     async def select_reviewers(self, 
                             content_type: str,
-                            content_tags: List[str],
+                            content_tags: list[str],
                             required_count: int,
-                            context: Dict[str, Any] = None) -> Dict[str, Any]:
+                            context: dict[str, Any] = None) -> dict[str, Any]:
         """智能分配评审员"""
         try:
             self.logger.info(f"开始分配评审员: {content_type}")
@@ -233,7 +227,7 @@ class SmartReviewerAllocator:
     
     async def _filter_candidates(self, 
                                review_request: ReviewRequest,
-                               criteria: AllocationCriteria) -> List[ReviewerProfile]:
+                               criteria: AllocationCriteria) -> list[ReviewerProfile]:
         """筛选候选评审员"""
         try:
             candidates = []
@@ -338,7 +332,7 @@ class SmartReviewerAllocator:
     
     async def _calculate_expertise_scores(self, 
                                        review_request: ReviewRequest,
-                                       candidates: List[ReviewerProfile]) -> Dict[str, float]:
+                                       candidates: list[ReviewerProfile]) -> dict[str, float]:
         """计算专业匹配分数"""
         try:
             scores = {}
@@ -365,8 +359,8 @@ class SmartReviewerAllocator:
             return {candidate.id: 0.0 for candidate in candidates}
     
     def _calculate_workload_scores(self, 
-                                 candidates: List[ReviewerProfile],
-                                 criteria: AllocationCriteria) -> Dict[str, float]:
+                                 candidates: list[ReviewerProfile],
+                                 criteria: AllocationCriteria) -> dict[str, float]:
         """计算工作负载分数"""
         try:
             scores = {}
@@ -399,8 +393,8 @@ class SmartReviewerAllocator:
             return {candidate.id: 0.0 for candidate in candidates}
     
     def _calculate_quality_scores(self, 
-                                candidates: List[ReviewerProfile],
-                                criteria: AllocationCriteria) -> Dict[str, float]:
+                                candidates: list[ReviewerProfile],
+                                criteria: AllocationCriteria) -> dict[str, float]:
         """计算质量分数"""
         try:
             scores = {}
@@ -427,7 +421,7 @@ class SmartReviewerAllocator:
     
     def _calculate_conflict_scores(self, 
                                   review_request: ReviewRequest,
-                                  candidates: List[ReviewerProfile]) -> Dict[str, float]:
+                                  candidates: list[ReviewerProfile]) -> dict[str, float]:
         """计算冲突分数"""
         try:
             scores = {}
@@ -448,10 +442,10 @@ class SmartReviewerAllocator:
             return {candidate.id: 1.0 for candidate in candidates}
     
     def _calculate_final_scores(self, 
-                              expertise_scores: Dict[str, float],
-                              workload_scores: Dict[str, float],
-                              quality_scores: Dict[str, float],
-                              conflict_scores: Dict[str, float]) -> Dict[str, float]:
+                              expertise_scores: dict[str, float],
+                              workload_scores: dict[str, float],
+                              quality_scores: dict[str, float],
+                              conflict_scores: dict[str, float]) -> dict[str, float]:
         """计算最终综合分数"""
         try:
             final_scores = {}
@@ -480,7 +474,7 @@ class SmartReviewerAllocator:
             self.logger.error(f"计算最终分数失败: {e}")
             return {}
     
-    def _calculate_match_score(self, reviewer: Dict[str, Any], required_skills: List[str], content_type: str) -> float:
+    def _calculate_match_score(self, reviewer: dict[str, Any], required_skills: list[str], content_type: str) -> float:
         """计算匹配分数 (简化版本)"""
         try:
             # 基础分数
@@ -573,7 +567,7 @@ class SmartReviewerAllocator:
         except Exception as e:
             self.logger.error(f"加载评审员档案失败: {e}")
     
-    def get_pool_stats(self) -> Dict[str, Any]:
+    def get_pool_stats(self) -> dict[str, Any]:
         """获取评审员池统计信息"""
         try:
             return {

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 16:00:00
+"""@Time    : 2025-08-05 16:00:00
 @Author  : DAIP-LIVE Team
 @File    : enhanced_app_state.py
 @Description:
@@ -8,27 +6,26 @@
 """
 
 import logging
-import time
-from typing import Any, Optional
-import sys
 import os
+import sys
+import time
+from typing import Any
 
 # Add the project root to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import UX enhancement modules
-from src.core_services.import_health_checker import ImportHealthChecker, validate_imports_on_startup
-from src.core_services.user_friendly_errors import ErrorHandler, create_error_context, safe_import
 from src.core_services.graceful_degradation import GracefulAppState
-from src.core_services.startup_progress import StartupProgressTracker, startup_step, optional_startup_step
-from src.core_services.self_healing_system import get_self_healing_system, auto_recover
+from src.core_services.import_health_checker import ImportHealthChecker
+from src.core_services.self_healing_system import auto_recover, get_self_healing_system
+from src.core_services.startup_progress import StartupProgressTracker, optional_startup_step, startup_step
+from src.core_services.user_friendly_errors import ErrorHandler, create_error_context
 
 logger = logging.getLogger(__name__)
 
 
 class EnhancedAppState(GracefulAppState):
-    """
-    Enhanced application state with comprehensive UX improvements.
+    """Enhanced application state with comprehensive UX improvements.
     Inherits from GracefulAppState and adds UX features.
     """
     
@@ -263,7 +260,7 @@ class EnhancedAppState(GracefulAppState):
     def _initialize_llm_interface_with_ux(self):
         """Initialize LLM interface with UX features"""
         try:
-            from src.kernel.llm_interface import LLMFactory, LLMConfig
+            from src.kernel.llm_interface import LLMConfig, LLMFactory
             
             config = LLMConfig(
                 provider=self.settings.llm.provider,
@@ -423,7 +420,7 @@ class EnhancedAppState(GracefulAppState):
             
             for role_file in role_files:
                 try:
-                    with open(role_file, 'r', encoding='utf-8') as f:
+                    with open(role_file, encoding='utf-8') as f:
                         role_data = json.load(f)
                     loaded_roles += 1
                 except Exception as e:

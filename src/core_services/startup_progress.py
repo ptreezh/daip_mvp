@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 15:45:00
+"""@Time    : 2025-08-05 15:45:00
 @Author  : DAIP-LIVE Team
 @File    : startup_progress.py
 @Description:
@@ -8,12 +6,12 @@
 """
 
 import logging
-import time
 import threading
-from typing import Dict, List, Optional, Callable
+import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-import sys
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +63,7 @@ class StartupProgress:
     current_phase: StartupPhase = StartupPhase.PRE_INITIALIZATION
     overall_progress: float = 0.0
     estimated_remaining_time: float = 0.0
-    steps: List[StartupStep] = field(default_factory=list)
+    steps: list[StartupStep] = field(default_factory=list)
 
 
 class StartupProgressTracker:
@@ -76,7 +74,7 @@ class StartupProgressTracker:
         self.enable_logging = enable_logging
         self.progress = StartupProgress()
         self.current_step_index = 0
-        self.phase_step_counts: Dict[StartupPhase, int] = {}
+        self.phase_step_counts: dict[StartupPhase, int] = {}
         self.lock = threading.Lock()
         
         # Define startup steps
@@ -383,7 +381,7 @@ class StartupProgressTracker:
         with self.lock:
             return self.progress
     
-    def get_progress_summary(self) -> Dict:
+    def get_progress_summary(self) -> dict:
         """Get a summary of current progress"""
         with self.lock:
             return {

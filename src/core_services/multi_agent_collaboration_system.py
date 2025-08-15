@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Multi-Agent Collaboration System for Personal Intelligence Hub
+"""Multi-Agent Collaboration System for Personal Intelligence Hub
 
 Technical Specifications and Architecture Design
 
@@ -9,13 +7,13 @@ the multi-agent collaboration system that supports both Secretariat automation
 and Forum debate functionality.
 """
 
-from typing import Any, Dict, List, Optional, Union, Set, Tuple
-from dataclasses import dataclass, field
-from enum import Enum
-from datetime import datetime
-import uuid
 import asyncio
+import uuid
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional, Union
 
 # ============================================================================
 # Core Data Models
@@ -87,12 +85,12 @@ class AgentProfile:
     agent_id: str
     name: str
     agent_type: AgentType
-    specializations: List[AgentSpecialization]
-    expertise_domains: List[str]
+    specializations: list[AgentSpecialization]
+    expertise_domains: list[str]
     communication_style: str
-    personality_traits: Dict[str, float]
-    capabilities: List[str]
-    performance_metrics: Dict[str, float] = field(default_factory=dict)
+    personality_traits: dict[str, float]
+    capabilities: list[str]
+    performance_metrics: dict[str, float] = field(default_factory=dict)
     availability: bool = True
     max_concurrent_tasks: int = 3
     created_at: datetime = field(default_factory=datetime.now)
@@ -104,12 +102,12 @@ class AgentCapability:
     capability_id: str
     name: str
     description: str
-    input_types: List[str]
-    output_types: List[str]
+    input_types: list[str]
+    output_types: list[str]
     complexity_score: float
-    required_expertise: List[str]
+    required_expertise: list[str]
     performance_threshold: float
-    resource_requirements: Dict[str, Any] = field(default_factory=dict)
+    resource_requirements: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class CollaborationSession:
@@ -118,25 +116,25 @@ class CollaborationSession:
     session_name: str
     collaboration_mode: CollaborationMode
     initiator_id: str
-    participants: List[str]
+    participants: list[str]
     topic: str
-    objectives: List[str]
-    institutional_primitives: List[InstitutionalPrimitive]
+    objectives: list[str]
+    institutional_primitives: list[InstitutionalPrimitive]
     consensus_method: ConsensusMethod
-    constraints: List[str] = field(default_factory=list)
+    constraints: list[str] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
     status: str = "active"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class AgentMessage:
     """Message exchanged between agents"""
     message_id: str
     sender_id: str
-    receiver_id: Union[str, List[str]]  # Single agent or broadcast
+    receiver_id: Union[str, list[str]]  # Single agent or broadcast
     message_type: str
     content: Any
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
     priority: int = 1  # 1-5, 5 being highest
     requires_response: bool = False
     response_to: Optional[str] = None
@@ -147,10 +145,10 @@ class AgentMessage:
 class ConsensusInput:
     """Input for consensus computation"""
     agent_id: str
-    position: Union[str, float, Dict[str, Any]]
+    position: Union[str, float, dict[str, Any]]
     confidence: float
     reasoning: str
-    evidence: List[str] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)
     weight: float = 1.0
     timestamp: datetime = field(default_factory=datetime.now)
 
@@ -159,11 +157,11 @@ class ConsensusResult:
     """Result of consensus computation"""
     consensus_value: Any
     confidence: float
-    participants: List[str]
+    participants: list[str]
     consensus_method: ConsensusMethod
-    reasoning_trace: List[str]
+    reasoning_trace: list[str]
     conflict_resolution: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     computation_time: float = 0.0
 
 @dataclass
@@ -171,10 +169,10 @@ class WorkflowStep:
     """Single step in a collaborative workflow"""
     step_id: str
     primitive_type: InstitutionalPrimitive
-    assigned_agents: List[str]
-    inputs: Dict[str, Any]
-    expected_outputs: List[str]
-    dependencies: List[str] = field(default_factory=list)
+    assigned_agents: list[str]
+    inputs: dict[str, Any]
+    expected_outputs: list[str]
+    dependencies: list[str] = field(default_factory=list)
     timeout_seconds: float = 300.0
     retry_count: int = 0
     max_retries: int = 3
@@ -189,10 +187,10 @@ class CollaborativeTask:
     title: str
     description: str
     session_id: str
-    workflow_steps: List[WorkflowStep]
+    workflow_steps: list[WorkflowStep]
     priority: int
     estimated_duration: float
-    assigned_team: List[str]
+    assigned_team: list[str]
     progress: float = 0.0
     status: str = "pending"
     created_at: datetime = field(default_factory=datetime.now)
@@ -221,10 +219,9 @@ class IntentInterpreter:
     async def interpret_intent(
         self, 
         user_input: str, 
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        Interpret user intent and determine collaboration mode
+        context: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Interpret user intent and determine collaboration mode
         
         Returns:
             Dict containing:
@@ -251,12 +248,11 @@ class TeamFormationEngine:
     
     async def form_team(
         self,
-        task_requirements: Dict[str, Any],
+        task_requirements: dict[str, Any],
         collaboration_mode: CollaborationMode,
-        constraints: Dict[str, Any] = None
-    ) -> List[str]:
-        """
-        Form optimal team for given requirements
+        constraints: dict[str, Any] = None
+    ) -> list[str]:
+        """Form optimal team for given requirements
         
         Args:
             task_requirements: Task specifications and needs
@@ -269,19 +265,19 @@ class TeamFormationEngine:
         # Implementation would use optimization algorithms
         pass
     
-    def _match_by_expertise(self, requirements: Dict[str, Any]) -> List[str]:
+    def _match_by_expertise(self, requirements: dict[str, Any]) -> list[str]:
         """Match agents based on expertise requirements"""
         pass
     
-    def _match_by_performance(self, requirements: Dict[str, Any]) -> List[str]:
+    def _match_by_performance(self, requirements: dict[str, Any]) -> list[str]:
         """Match agents based on historical performance"""
         pass
     
-    def _match_by_diversity(self, requirements: Dict[str, Any]) -> List[str]:
+    def _match_by_diversity(self, requirements: dict[str, Any]) -> list[str]:
         """Match agents to maximize cognitive diversity"""
         pass
     
-    def _match_by_load(self, requirements: Dict[str, Any]) -> List[str]:
+    def _match_by_load(self, requirements: dict[str, Any]) -> list[str]:
         """Match agents based on current workload"""
         pass
 
@@ -290,9 +286,9 @@ class WorkflowOrchestrator:
     
     def __init__(self):
         self.workflow_templates = self._load_workflow_templates()
-        self.active_workflows: Dict[str, Dict[str, Any]] = {}
+        self.active_workflows: dict[str, dict[str, Any]] = {}
     
-    def _load_workflow_templates(self) -> Dict[str, Any]:
+    def _load_workflow_templates(self) -> dict[str, Any]:
         """Load workflow templates"""
         return {
             "secretariat_meeting": {
@@ -313,11 +309,10 @@ class WorkflowOrchestrator:
     
     async def execute_workflow(
         self,
-        workflow_definition: Dict[str, Any],
+        workflow_definition: dict[str, Any],
         session_context: CollaborationSession
-    ) -> Dict[str, Any]:
-        """
-        Execute a collaborative workflow
+    ) -> dict[str, Any]:
+        """Execute a collaborative workflow
         
         Args:
             workflow_definition: Workflow specification
@@ -361,9 +356,9 @@ class WorkflowOrchestrator:
     
     async def _execute_workflow_steps(
         self,
-        execution_context: Dict[str, Any],
+        execution_context: dict[str, Any],
         session_context: CollaborationSession
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Execute individual workflow steps"""
         results = {}
         
@@ -387,10 +382,10 @@ class WorkflowOrchestrator:
     
     async def _execute_primitive(
         self,
-        step: Dict[str, Any],
+        step: dict[str, Any],
         session_context: CollaborationSession,
-        execution_context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        execution_context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Execute a single institutional primitive"""
         primitive_type = step["primitive_type"]
         
@@ -424,12 +419,11 @@ class ConsensusEngine:
     
     async def compute_consensus(
         self,
-        inputs: List[ConsensusInput],
+        inputs: list[ConsensusInput],
         method: ConsensusMethod,
-        context: Dict[str, Any] = None
+        context: dict[str, Any] = None
     ) -> ConsensusResult:
-        """
-        Compute consensus from multiple agent inputs
+        """Compute consensus from multiple agent inputs
         
         Args:
             inputs: List of agent opinions/positions
@@ -466,9 +460,9 @@ class ConsensusAlgorithm(ABC):
     @abstractmethod
     async def compute(
         self, 
-        inputs: List[ConsensusInput], 
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        inputs: list[ConsensusInput], 
+        context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Compute consensus from inputs"""
         pass
 
@@ -477,9 +471,9 @@ class SimpleMajorityAlgorithm(ConsensusAlgorithm):
     
     async def compute(
         self, 
-        inputs: List[ConsensusInput], 
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        inputs: list[ConsensusInput], 
+        context: dict[str, Any]
+    ) -> dict[str, Any]:
         # Implementation for simple majority voting
         pass
 
@@ -488,9 +482,9 @@ class WeightedVotingAlgorithm(ConsensusAlgorithm):
     
     async def compute(
         self, 
-        inputs: List[ConsensusInput], 
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        inputs: list[ConsensusInput], 
+        context: dict[str, Any]
+    ) -> dict[str, Any]:
         # Implementation for weighted voting
         pass
 
@@ -499,9 +493,9 @@ class BayesianConsensusAlgorithm(ConsensusAlgorithm):
     
     async def compute(
         self, 
-        inputs: List[ConsensusInput], 
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        inputs: list[ConsensusInput], 
+        context: dict[str, Any]
+    ) -> dict[str, Any]:
         # Implementation for Bayesian consensus
         pass
 
@@ -510,9 +504,9 @@ class CognitiveDiversityAlgorithm(ConsensusAlgorithm):
     
     async def compute(
         self, 
-        inputs: List[ConsensusInput], 
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        inputs: list[ConsensusInput], 
+        context: dict[str, Any]
+    ) -> dict[str, Any]:
         # Implementation for cognitive diversity consensus
         pass
 
@@ -521,9 +515,9 @@ class DelphiMethodAlgorithm(ConsensusAlgorithm):
     
     async def compute(
         self, 
-        inputs: List[ConsensusInput], 
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        inputs: list[ConsensusInput], 
+        context: dict[str, Any]
+    ) -> dict[str, Any]:
         # Implementation for Delphi method
         pass
 
@@ -532,9 +526,9 @@ class NominalGroupAlgorithm(ConsensusAlgorithm):
     
     async def compute(
         self, 
-        inputs: List[ConsensusInput], 
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        inputs: list[ConsensusInput], 
+        context: dict[str, Any]
+    ) -> dict[str, Any]:
         # Implementation for nominal group technique
         pass
 
@@ -546,9 +540,9 @@ class AgentCommunicationBus:
     """Handles communication between agents"""
     
     def __init__(self):
-        self.message_queues: Dict[str, asyncio.Queue] = {}
-        self.message_handlers: Dict[str, callable] = {}
-        self.broadcast_subscriptions: Dict[str, Set[str]] = {}
+        self.message_queues: dict[str, asyncio.Queue] = {}
+        self.message_handlers: dict[str, callable] = {}
+        self.broadcast_subscriptions: dict[str, set[str]] = {}
     
     async def send_message(
         self,
@@ -638,10 +632,9 @@ class MultiAgentService:
         self,
         user_input: str,
         user_id: str,
-        context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
-        """
-        Handle user request and initiate appropriate collaboration
+        context: dict[str, Any] = None
+    ) -> dict[str, Any]:
+        """Handle user request and initiate appropriate collaboration
         
         Args:
             user_input: User's request
@@ -700,7 +693,7 @@ class MultiAgentService:
                 "intent_analysis": {"primary_intent": "general", "confidence": 0.5}
             }
     
-    def _determine_primitives(self, intent_result: Dict[str, Any]) -> List[InstitutionalPrimitive]:
+    def _determine_primitives(self, intent_result: dict[str, Any]) -> list[InstitutionalPrimitive]:
         """Determine required institutional primitives based on intent"""
         primitives = [
             InstitutionalPrimitive.INTERPRET_INTENT,
@@ -719,7 +712,7 @@ class MultiAgentService:
         
         return primitives
     
-    def _determine_consensus_method(self, intent_result: Dict[str, Any]) -> ConsensusMethod:
+    def _determine_consensus_method(self, intent_result: dict[str, Any]) -> ConsensusMethod:
         """Determine appropriate consensus method"""
         if intent_result["collaboration_mode"] == CollaborationMode.FORUM_DEBATE:
             return ConsensusMethod.COGNITIVE_DIVERSITY
@@ -728,9 +721,9 @@ class MultiAgentService:
     
     def _create_workflow_definition(
         self, 
-        intent_result: Dict[str, Any], 
+        intent_result: dict[str, Any], 
         session: CollaborationSession
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create workflow definition based on intent and session"""
         # Implementation would create appropriate workflow steps
         pass
@@ -739,8 +732,8 @@ class AgentRegistry:
     """Registry for managing agent profiles and capabilities"""
     
     def __init__(self):
-        self.agents: Dict[str, AgentProfile] = {}
-        self.capabilities: Dict[str, AgentCapability] = {}
+        self.agents: dict[str, AgentProfile] = {}
+        self.capabilities: dict[str, AgentCapability] = {}
     
     def register_agent(self, agent_profile: AgentProfile) -> None:
         """Register an agent profile"""
@@ -750,7 +743,7 @@ class AgentRegistry:
         """Get agent profile by ID"""
         return self.agents.get(agent_id)
     
-    def find_agents_by_capability(self, capability: str) -> List[AgentProfile]:
+    def find_agents_by_capability(self, capability: str) -> list[AgentProfile]:
         """Find agents with specific capability"""
         return [
             agent for agent in self.agents.values()
@@ -760,7 +753,7 @@ class AgentRegistry:
     def find_agents_by_specialization(
         self, 
         specialization: AgentSpecialization
-    ) -> List[AgentProfile]:
+    ) -> list[AgentProfile]:
         """Find agents with specific specialization"""
         return [
             agent for agent in self.agents.values()
@@ -775,8 +768,8 @@ class CollaborationWebSocketManager:
     """Manages WebSocket connections for real-time collaboration updates"""
     
     def __init__(self):
-        self.active_connections: Dict[str, Set[Any]] = {}  # session_id -> connections
-        self.connection_managers: Dict[str, Any] = {}  # connection_id -> manager
+        self.active_connections: dict[str, set[Any]] = {}  # session_id -> connections
+        self.connection_managers: dict[str, Any] = {}  # connection_id -> manager
     
     async def connect(
         self, 
@@ -806,7 +799,7 @@ class CollaborationWebSocketManager:
     async def broadcast_to_session(
         self, 
         session_id: str, 
-        message: Dict[str, Any]
+        message: dict[str, Any]
     ) -> None:
         """Broadcast message to all connections in a session"""
         if session_id in self.active_connections:
@@ -825,7 +818,7 @@ class CollaborationWebSocketManager:
         self, 
         session_id: str, 
         user_id: str, 
-        message: Dict[str, Any]
+        message: dict[str, Any]
     ) -> None:
         """Send message to specific user in session"""
         if session_id in self.active_connections:
@@ -845,8 +838,8 @@ class CollaborationAnalytics:
     """Analytics and monitoring for collaboration sessions"""
     
     def __init__(self):
-        self.session_metrics: Dict[str, Dict[str, Any]] = {}
-        self.agent_performance: Dict[str, Dict[str, Any]] = {}
+        self.session_metrics: dict[str, dict[str, Any]] = {}
+        self.agent_performance: dict[str, dict[str, Any]] = {}
     
     def record_session_start(self, session: CollaborationSession) -> None:
         """Record session start metrics"""
@@ -862,7 +855,7 @@ class CollaborationAnalytics:
         self, 
         session_id: str, 
         agent_id: str, 
-        contribution: Dict[str, Any]
+        contribution: dict[str, Any]
     ) -> None:
         """Record agent contribution to session"""
         if session_id in self.session_metrics:
@@ -889,7 +882,7 @@ class CollaborationAnalytics:
                 "timestamp": datetime.now()
             })
     
-    def get_session_summary(self, session_id: str) -> Dict[str, Any]:
+    def get_session_summary(self, session_id: str) -> dict[str, Any]:
         """Get session performance summary"""
         if session_id not in self.session_metrics:
             return {}
@@ -931,7 +924,6 @@ class CollaborationAnalytics:
 # Example integration with existing DAIP services
 async def example_integration():
     """Example showing how to integrate with existing DAIP services"""
-    
     # Initialize the multi-agent service
     from src.app_state import AppState
     app_state = AppState()

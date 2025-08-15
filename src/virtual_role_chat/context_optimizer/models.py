@@ -1,13 +1,12 @@
-"""
-Data models for the Task Context Optimizer.
+"""Data models for the Task Context Optimizer.
 
 This module defines the data models used by the task context optimization system,
 including task requirements, context elements, and optimization results.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple
 from enum import Enum
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -48,8 +47,7 @@ class ElementType(str, Enum):
 
 
 class TaskRequirement(BaseModel):
-    """
-    Representation of a requirement for task execution.
+    """Representation of a requirement for task execution.
     """
     requirement_type: RequirementType
     content: str
@@ -57,12 +55,11 @@ class TaskRequirement(BaseModel):
     domain: Optional[str] = None
     specificity: float = Field(ge=0.0, le=1.0, default=0.5, description="How specific this requirement is")
     urgency: float = Field(ge=0.0, le=1.0, default=0.5, description="How urgent this requirement is")
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ContextElement(BaseModel):
-    """
-    Individual element within a context.
+    """Individual element within a context.
     """
     id: str
     content: str
@@ -72,12 +69,11 @@ class ContextElement(BaseModel):
     token_count: int = Field(ge=0, description="Estimated token count")
     source: str = Field(description="Source of this context element")
     timestamp: datetime = Field(default_factory=datetime.now)
-    dependencies: List[str] = Field(default_factory=list, description="IDs of elements this depends on")
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    dependencies: list[str] = Field(default_factory=list, description="IDs of elements this depends on")
+    metadata: dict[str, Any] = Field(default_factory=dict)
     
     def get_priority_score(self) -> float:
-        """
-        Calculate priority score based on relevance, importance, and other factors.
+        """Calculate priority score based on relevance, importance, and other factors.
         
         Returns:
             Priority score (0.0-1.0)
@@ -101,30 +97,28 @@ class ContextElement(BaseModel):
 
 
 class TaskDetectionResult(BaseModel):
-    """
-    Result of task detection analysis.
+    """Result of task detection analysis.
     """
     task_type: TaskType
     confidence: float = Field(ge=0.0, le=1.0)
     task_description: str
-    detected_goals: List[str] = Field(default_factory=list)
-    detected_constraints: List[str] = Field(default_factory=list)
+    detected_goals: list[str] = Field(default_factory=list)
+    detected_constraints: list[str] = Field(default_factory=list)
     domain: Optional[str] = None
     complexity: float = Field(ge=0.0, le=1.0, default=0.5)
     urgency: float = Field(ge=0.0, le=1.0, default=0.5)
-    requirements: List[TaskRequirement] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    requirements: list[TaskRequirement] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class OptimizedContext(BaseModel):
+    """Result of context optimization.
     """
-    Result of context optimization.
-    """
-    elements: List[ContextElement]
+    elements: list[ContextElement]
     total_tokens: int
     task_focus: str
-    optimization_metrics: Dict[str, float] = Field(default_factory=dict)
-    excluded_elements: List[ContextElement] = Field(default_factory=list)
+    optimization_metrics: dict[str, float] = Field(default_factory=dict)
+    excluded_elements: list[ContextElement] = Field(default_factory=list)
     compression_ratio: float = Field(ge=0.0, le=1.0, default=1.0)
     coherence_score: float = Field(ge=0.0, le=1.0, default=1.0)
     completeness_score: float = Field(ge=0.0, le=1.0, default=1.0)
@@ -132,8 +126,7 @@ class OptimizedContext(BaseModel):
     processing_time_ms: float = 0.0
     
     def get_context_string(self) -> str:
-        """
-        Generate the optimized context as a string.
+        """Generate the optimized context as a string.
         
         Returns:
             Formatted context string
@@ -179,8 +172,7 @@ class OptimizedContext(BaseModel):
 
 
 class ContextOptimizationConfig(BaseModel):
-    """
-    Configuration for context optimization.
+    """Configuration for context optimization.
     """
     max_tokens: int = 4000
     min_relevance_threshold: float = Field(ge=0.0, le=1.0, default=0.3)
@@ -193,10 +185,10 @@ class ContextOptimizationConfig(BaseModel):
     diversity_weight: float = Field(ge=0.0, le=1.0, default=0.1)
     
     # Task-specific settings
-    task_specific_weights: Dict[TaskType, Dict[str, float]] = Field(default_factory=dict)
+    task_specific_weights: dict[TaskType, dict[str, float]] = Field(default_factory=dict)
     
     # Element type priorities
-    element_type_priorities: Dict[ElementType, float] = Field(
+    element_type_priorities: dict[ElementType, float] = Field(
         default_factory=lambda: {
             ElementType.INSTRUCTION: 1.0,
             ElementType.CONSTRAINT: 0.9,
@@ -210,16 +202,15 @@ class ContextOptimizationConfig(BaseModel):
 
 
 class ContextAnalysisResult(BaseModel):
-    """
-    Result of context analysis before optimization.
+    """Result of context analysis before optimization.
     """
     total_elements: int
     total_tokens: int
-    element_type_distribution: Dict[ElementType, int]
+    element_type_distribution: dict[ElementType, int]
     average_relevance: float
     average_importance: float
     complexity_score: float = Field(ge=0.0, le=1.0)
     coherence_score: float = Field(ge=0.0, le=1.0)
     redundancy_score: float = Field(ge=0.0, le=1.0)
-    coverage_gaps: List[str] = Field(default_factory=list)
-    optimization_recommendations: List[str] = Field(default_factory=list)
+    coverage_gaps: list[str] = Field(default_factory=list)
+    optimization_recommendations: list[str] = Field(default_factory=list)

@@ -1,21 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-验证自动上下文优化系统
+"""验证自动上下文优化系统
 """
 
-import sys
-import os
 import asyncio
+import sys
+
 sys.path.append('src')
 
 async def test_context_optimization_engine():
     """测试上下文优化引擎"""
     try:
-        from src.core_services.context_optimization_engine import (
-            ContextOptimizationEngine, 
-            ContextOptimizationRequest
-        )
+        from src.core_services.context_optimization_engine import ContextOptimizationEngine
         
         # 创建上下文优化引擎
         engine = ContextOptimizationEngine()
@@ -233,10 +228,7 @@ async def test_context_aggregator():
 async def test_full_context_optimization():
     """测试完整的上下文优化流程"""
     try:
-        from src.core_services.context_optimization_engine import (
-            ContextOptimizationEngine, 
-            ContextOptimizationRequest
-        )
+        from src.core_services.context_optimization_engine import ContextOptimizationEngine, ContextOptimizationRequest
         
         # 创建上下文优化引擎
         engine = ContextOptimizationEngine()
@@ -305,10 +297,7 @@ async def test_full_context_optimization():
 async def test_optimization_strategies():
     """测试不同的优化策略"""
     try:
-        from src.core_services.context_optimization_engine import (
-            ContextOptimizationEngine, 
-            ContextOptimizationRequest
-        )
+        from src.core_services.context_optimization_engine import ContextOptimizationEngine, ContextOptimizationRequest
         
         # 创建上下文优化引擎
         engine = ContextOptimizationEngine()

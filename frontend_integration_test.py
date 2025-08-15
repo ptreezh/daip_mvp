@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 08:30:00
+"""@Time    : 2025-08-06 08:30:00
 @Author  : DAIP-LIVE Team
 @File    : frontend_integration_test.py
 @Description:
@@ -12,18 +10,14 @@
 """
 
 import asyncio
-import sys
-import os
 import json
-import time
 import logging
-import traceback
-from pathlib import Path
-from typing import Dict, List, Any, Optional
+import sys
+import time
 from datetime import datetime
-import aiohttp
+from pathlib import Path
+
 import requests
-from concurrent.futures import ThreadPoolExecutor
 
 # Add project path
 project_root = Path(__file__).parent

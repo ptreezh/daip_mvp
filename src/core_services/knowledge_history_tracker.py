@@ -1,26 +1,24 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: DAIP-LIVE
 @Description: V0.3.4 知识历史追溯系统 - 完整的知识变化追踪和版本控制
 """
 
 import asyncio
+import hashlib
 import json
 import logging
-from typing import Dict, List, Optional, Any, Tuple, Union
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
-from enum import Enum
-import uuid
-from collections import defaultdict, deque
-import hashlib
 import threading
 import time
+import uuid
+from collections import defaultdict
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any
 
-from ..core_services.knowledge_retrieval_service import KnowledgeRetrievalService
 from ..core_services.enhanced_sskg_manager import EnhancedSSKGManager
+from ..core_services.knowledge_retrieval_service import KnowledgeRetrievalService
 from ..core_services.memory_agent import MemAgent
-from ..virtual_role_chat.sskg.models import KnowledgeFact, KnowledgeRelation, SearchResult
 
 
 class TraceType(Enum):
@@ -54,10 +52,10 @@ class KnowledgeVersion:
     author: str
     change_type: ChangeType
     change_summary: str
-    parent_versions: List[str]
-    child_versions: List[str]
+    parent_versions: list[str]
+    child_versions: list[str]
     confidence: float
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -69,8 +67,8 @@ class EvolutionEvent:
     timestamp: datetime
     description: str
     impact_score: float
-    affected_knowledge: List[str]
-    metadata: Dict[str, Any] = None
+    affected_knowledge: list[str]
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -82,7 +80,7 @@ class CitationLink:
     strength: float
     timestamp: datetime
     context: str = ""
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -92,10 +90,10 @@ class LineageNode:
     knowledge_id: str
     content: str
     timestamp: datetime
-    parent_ids: List[str]
-    children_ids: List[str]
+    parent_ids: list[str]
+    children_ids: list[str]
     branch_type: str
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -103,13 +101,13 @@ class TraceResult:
     """追溯结果"""
     trace_type: TraceType
     knowledge_id: str
-    timeline: List[KnowledgeVersion]
-    evolution_events: List[EvolutionEvent]
-    citation_links: List[CitationLink]
+    timeline: list[KnowledgeVersion]
+    evolution_events: list[EvolutionEvent]
+    citation_links: list[CitationLink]
     lineage_tree: LineageNode
-    statistics: Dict[str, Any]
-    insights: List[str]
-    metadata: Dict[str, Any] = None
+    statistics: dict[str, Any]
+    insights: list[str]
+    metadata: dict[str, Any] = None
 
 
 class KnowledgeHistoryTracker:
@@ -156,7 +154,7 @@ class KnowledgeHistoryTracker:
                                    author: str,
                                    change_type: ChangeType,
                                    change_summary: str = "",
-                                   metadata: Dict[str, Any] = None) -> str:
+                                   metadata: dict[str, Any] = None) -> str:
         """追踪知识变更"""
         try:
             # 生成版本ID
@@ -208,7 +206,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"追踪知识变更失败: {e}")
             return ""
     
-    async def get_version_history(self, knowledge_id: str) -> List[KnowledgeVersion]:
+    async def get_version_history(self, knowledge_id: str) -> list[KnowledgeVersion]:
         """获取版本历史"""
         try:
             # 从内存获取
@@ -279,7 +277,7 @@ class KnowledgeHistoryTracker:
     
     async def compare_versions(self, 
                               version_id1: str, 
-                              version_id2: str) -> Dict[str, Any]:
+                              version_id2: str) -> dict[str, Any]:
         """比较版本差异"""
         try:
             version1 = self.version_index.get(version_id1)
@@ -359,7 +357,7 @@ class KnowledgeHistoryTracker:
     
     async def analyze_evolution_patterns(self, 
                                        knowledge_id: str,
-                                       time_period: int = 30) -> Dict[str, Any]:
+                                       time_period: int = 30) -> dict[str, Any]:
         """分析演化模式"""
         try:
             # 获取时间范围内的版本
@@ -551,7 +549,7 @@ class KnowledgeHistoryTracker:
         unique_string = f"{knowledge_id}_{timestamp}_{uuid.uuid4().hex[:8]}"
         return hashlib.md5(unique_string.encode()).hexdigest()
     
-    def _get_parent_versions(self, knowledge_id: str) -> List[str]:
+    def _get_parent_versions(self, knowledge_id: str) -> list[str]:
         """获取父版本"""
         current_version = self.knowledge_index.get(knowledge_id)
         if current_version:
@@ -649,7 +647,7 @@ class KnowledgeHistoryTracker:
         except Exception as e:
             self.logger.error(f"分析引用关系失败: {e}")
     
-    def _calculate_version_differences(self, version1: KnowledgeVersion, version2: KnowledgeVersion) -> Dict[str, Any]:
+    def _calculate_version_differences(self, version1: KnowledgeVersion, version2: KnowledgeVersion) -> dict[str, Any]:
         """计算版本差异"""
         try:
             old_words = set(version1.content.split())
@@ -727,7 +725,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"构建谱系树失败: {e}")
             return None
     
-    def _analyze_change_frequency(self, versions: List[KnowledgeVersion]) -> Dict[str, float]:
+    def _analyze_change_frequency(self, versions: list[KnowledgeVersion]) -> dict[str, float]:
         """分析变更频率"""
         try:
             if len(versions) < 2:
@@ -754,7 +752,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"分析变更频率失败: {e}")
             return {"changes_per_day": 0.0, "average_interval": 0.0}
     
-    def _analyze_contributors(self, versions: List[KnowledgeVersion]) -> Dict[str, Any]:
+    def _analyze_contributors(self, versions: list[KnowledgeVersion]) -> dict[str, Any]:
         """分析贡献者"""
         try:
             contributors = defaultdict(lambda: {"count": 0, "last_contribution": None})
@@ -781,7 +779,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"分析贡献者失败: {e}")
             return {}
     
-    def _analyze_content_evolution(self, versions: List[KnowledgeVersion]) -> Dict[str, Any]:
+    def _analyze_content_evolution(self, versions: list[KnowledgeVersion]) -> dict[str, Any]:
         """分析内容演化"""
         try:
             if not versions:
@@ -826,7 +824,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"分析内容演化失败: {e}")
             return {}
     
-    def _analyze_confidence_trend(self, versions: List[KnowledgeVersion]) -> Dict[str, Any]:
+    def _analyze_confidence_trend(self, versions: list[KnowledgeVersion]) -> dict[str, Any]:
         """分析置信度趋势"""
         try:
             if not versions:
@@ -847,7 +845,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"分析置信度趋势失败: {e}")
             return {}
     
-    def _identify_evolution_patterns(self, versions: List[KnowledgeVersion]) -> List[str]:
+    def _identify_evolution_patterns(self, versions: list[KnowledgeVersion]) -> list[str]:
         """识别演化模式"""
         try:
             patterns = []
@@ -889,7 +887,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"识别演化模式失败: {e}")
             return []
     
-    async def _generate_insights(self, result: TraceResult) -> List[str]:
+    async def _generate_insights(self, result: TraceResult) -> list[str]:
         """生成洞察"""
         insights = []
         
@@ -922,7 +920,7 @@ class KnowledgeHistoryTracker:
         
         return insights
     
-    def _calculate_average_time_between_versions(self, versions: List[KnowledgeVersion]) -> float:
+    def _calculate_average_time_between_versions(self, versions: list[KnowledgeVersion]) -> float:
         """计算版本间平均时间"""
         if len(versions) < 2:
             return 0.0
@@ -933,7 +931,7 @@ class KnowledgeHistoryTracker:
         
         return total_time / (len(versions) - 1)
     
-    def _find_most_active_author(self, versions: List[KnowledgeVersion]) -> str:
+    def _find_most_active_author(self, versions: list[KnowledgeVersion]) -> str:
         """查找最活跃的作者"""
         author_counts = defaultdict(int)
         for version in versions:
@@ -943,7 +941,7 @@ class KnowledgeHistoryTracker:
             return max(author_counts, key=author_counts.get)
         return "unknown"
     
-    def _calculate_change_type_distribution(self, versions: List[KnowledgeVersion]) -> Dict[str, float]:
+    def _calculate_change_type_distribution(self, versions: list[KnowledgeVersion]) -> dict[str, float]:
         """计算变更类型分布"""
         change_types = defaultdict(int)
         for version in versions:
@@ -955,7 +953,7 @@ class KnowledgeHistoryTracker:
         
         return {change_type: count / total * 100 for change_type, count in change_types.items()}
     
-    def _analyze_citation_network(self, knowledge_id: str) -> Dict[str, Any]:
+    def _analyze_citation_network(self, knowledge_id: str) -> dict[str, Any]:
         """分析引用网络"""
         try:
             links = self.citation_links.get(knowledge_id, [])
@@ -983,7 +981,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"分析引用网络失败: {e}")
             return {"network_density": 0.0, "centrality": 0.0}
     
-    async def _analyze_knowledge_influence(self, knowledge_id: str) -> Dict[str, Any]:
+    async def _analyze_knowledge_influence(self, knowledge_id: str) -> dict[str, Any]:
         """分析知识影响"""
         try:
             # 简化的影响分析
@@ -1011,7 +1009,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"分析知识影响失败: {e}")
             return {}
     
-    async def _get_influenced_versions(self, knowledge_id: str) -> List[str]:
+    async def _get_influenced_versions(self, knowledge_id: str) -> list[str]:
         """获取被影响的版本"""
         try:
             influenced = []
@@ -1028,7 +1026,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"获取被影响的版本失败: {e}")
             return []
     
-    def _analyze_temporal_trends(self, versions: List[KnowledgeVersion]) -> Dict[str, Any]:
+    def _analyze_temporal_trends(self, versions: list[KnowledgeVersion]) -> dict[str, Any]:
         """分析时间趋势"""
         try:
             if not versions:
@@ -1057,7 +1055,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"分析时间趋势失败: {e}")
             return {}
     
-    def _analyze_lineage_statistics(self, lineage: LineageNode) -> Dict[str, Any]:
+    def _analyze_lineage_statistics(self, lineage: LineageNode) -> dict[str, Any]:
         """分析谱系统计"""
         try:
             if not lineage:
@@ -1097,7 +1095,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"分析谱系统计失败: {e}")
             return {}
     
-    def _export_to_csv(self, history_data: Dict[str, Any]) -> str:
+    def _export_to_csv(self, history_data: dict[str, Any]) -> str:
         """导出为CSV格式"""
         try:
             import csv
@@ -1124,7 +1122,7 @@ class KnowledgeHistoryTracker:
             self.logger.error(f"导出CSV失败: {e}")
             return ""
     
-    async def _load_version_history(self, knowledge_id: str) -> List[KnowledgeVersion]:
+    async def _load_version_history(self, knowledge_id: str) -> list[KnowledgeVersion]:
         """加载版本历史"""
         # 简化实现，实际应该从持久化存储加载
         return []

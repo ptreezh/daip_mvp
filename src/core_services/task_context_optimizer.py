@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-22 15:00:00
+"""@Time    : 2025-07-22 15:00:00
 @Author  : DAIP-LIVE Team
 @File    : task_context_optimizer.py
 @Description:
@@ -11,13 +9,13 @@ import logging
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
-from src.core_services.token_management_service import TokenManagementService
 from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeQuery, NodeType
 from src.core_services.memory_agent import MemAgent
+from src.core_services.token_management_service import TokenManagementService
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +44,7 @@ class TaskRequirement(BaseModel):
     requirement_type: RequirementType
     content: str
     importance: float = Field(ge=0.0, le=1.0)
-    keywords: List[str] = []
+    keywords: list[str] = []
 
 
 class ContextElement(BaseModel):
@@ -55,21 +53,20 @@ class ContextElement(BaseModel):
     element_type: ElementType
     relevance_score: float = Field(ge=0.0, le=1.0)
     token_count: int
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
 
 class OptimizedContext(BaseModel):
     """Model for optimized context."""
-    elements: List[ContextElement]
+    elements: list[ContextElement]
     total_tokens: int
     task_focus: str
-    optimization_metrics: Dict[str, float]
-    excluded_elements: List[ContextElement] = []
+    optimization_metrics: dict[str, float]
+    excluded_elements: list[ContextElement] = []
 
 
 class TaskContextOptimizer:
-    """
-    Task-focused context optimization service that enhances context preparation
+    """Task-focused context optimization service that enhances context preparation
     by focusing on current task requirements and essential background information.
     """
     
@@ -79,8 +76,7 @@ class TaskContextOptimizer:
         sskg_manager: EnhancedSSKGManager,
         mem_agent: Optional[MemAgent] = None
     ):
-        """
-        Initialize the Task Context Optimizer.
+        """Initialize the Task Context Optimizer.
         
         Args:
             token_service: Service for token counting and management
@@ -117,9 +113,8 @@ class TaskContextOptimizer:
         
         logger.info("TaskContextOptimizer initialized")
     
-    def extract_task_requirements(self, task: str) -> List[TaskRequirement]:
-        """
-        Extract requirements from a task description.
+    def extract_task_requirements(self, task: str) -> list[TaskRequirement]:
+        """Extract requirements from a task description.
         
         Args:
             task: The task description
@@ -165,11 +160,10 @@ class TaskContextOptimizer:
     
     def prioritize_context_elements(
         self, 
-        context_elements: List[Dict[str, Any]], 
-        task_requirements: List[TaskRequirement]
-    ) -> List[ContextElement]:
-        """
-        Prioritize context elements based on task requirements.
+        context_elements: list[dict[str, Any]], 
+        task_requirements: list[TaskRequirement]
+    ) -> list[ContextElement]:
+        """Prioritize context elements based on task requirements.
         
         Args:
             context_elements: List of context elements (messages, knowledge, etc.)
@@ -247,12 +241,11 @@ class TaskContextOptimizer:
     def blend_context_sources(
         self,
         task_instructions: str,
-        background_knowledge: List[str],
-        conversation_history: List[Dict[str, Any]],
+        background_knowledge: list[str],
+        conversation_history: list[dict[str, Any]],
         max_tokens: int
     ) -> OptimizedContext:
-        """
-        Blend multiple context sources into an optimized context.
+        """Blend multiple context sources into an optimized context.
         
         Args:
             task_instructions: Task instructions
@@ -357,11 +350,10 @@ class TaskContextOptimizer:
         ) 
     def maintain_task_coherence(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         task: str
-    ) -> List[Dict[str, Any]]:
-        """
-        Maintain task coherence by preserving causal relationships and dependencies.
+    ) -> list[dict[str, Any]]:
+        """Maintain task coherence by preserving causal relationships and dependencies.
         
         Args:
             context: List of context elements
@@ -455,11 +447,10 @@ class TaskContextOptimizer:
     
     def delineate_task_boundaries(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         current_task: str
-    ) -> List[Dict[str, Any]]:
-        """
-        Clearly delineate task boundaries in the context.
+    ) -> list[dict[str, Any]]:
+        """Clearly delineate task boundaries in the context.
         
         Args:
             context: List of context elements
@@ -505,7 +496,7 @@ class TaskContextOptimizer:
                     if task_index > 0:
                         boundary_marker = {
                             "role": "system",
-                            "content": f"--- End of Previous Task ---\n\n",
+                            "content": "--- End of Previous Task ---\n\n",
                             "metadata": {"type": "boundary_marker"}
                         }
                         modified_context.append(boundary_marker)
@@ -514,7 +505,7 @@ class TaskContextOptimizer:
                     if task_index == current_task_index:
                         current_task_marker = {
                             "role": "system",
-                            "content": f"--- CURRENT ACTIVE TASK ---\n\n",
+                            "content": "--- CURRENT ACTIVE TASK ---\n\n",
                             "metadata": {"type": "current_task_marker"}
                         }
                         modified_context.append(current_task_marker)
@@ -526,7 +517,7 @@ class TaskContextOptimizer:
                 if i == task_boundaries[-1]:
                     end_marker = {
                         "role": "system",
-                        "content": f"\n\n--- Focus on the current task above ---",
+                        "content": "\n\n--- Focus on the current task above ---",
                         "metadata": {"type": "end_marker"}
                     }
                     modified_context.append(end_marker)
@@ -538,12 +529,11 @@ class TaskContextOptimizer:
     
     def optimize_context_for_task(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         task: str,
         max_tokens: int
     ) -> OptimizedContext:
-        """
-        Optimize context for a specific task.
+        """Optimize context for a specific task.
         
         Args:
             context: List of context elements
@@ -616,12 +606,11 @@ class TaskContextOptimizer:
     
     def prepare_context_for_llm(
         self,
-        context: List[Dict[str, Any]],
+        context: list[dict[str, Any]],
         task: str,
         model: str
-    ) -> List[Dict[str, Any]]:
-        """
-        Prepare optimized context for LLM call.
+    ) -> list[dict[str, Any]]:
+        """Prepare optimized context for LLM call.
         
         Args:
             context: List of context messages

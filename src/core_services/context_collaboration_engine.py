@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-上下文协作创建引擎
+"""上下文协作创建引擎
 
 支持用户与系统协作优化提示和上下文
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime
-import json
 import re
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +39,9 @@ class CollaborationSession:
     collaboration_type: CollaborationType
     original_context: str
     current_context: str
-    iterations: List[Dict[str, Any]]
-    quality_scores: List[float]
-    user_preferences: Dict[str, Any]
+    iterations: list[dict[str, Any]]
+    quality_scores: list[float]
+    user_preferences: dict[str, Any]
     created_at: str
     last_updated: str
 
@@ -102,8 +99,8 @@ class ContextCollaborationEngine:
         user_id: str,
         initial_context: str,
         collaboration_type: CollaborationType,
-        user_preferences: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        user_preferences: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """开始协作会话"""
         try:
             session_id = f"collab_{user_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -168,8 +165,8 @@ class ContextCollaborationEngine:
     def process_user_input(
         self,
         session_id: str,
-        user_input: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        user_input: dict[str, Any]
+    ) -> dict[str, Any]:
         """处理用户输入"""
         try:
             if session_id not in self.active_sessions:
@@ -252,7 +249,7 @@ class ContextCollaborationEngine:
         self,
         session_id: str,
         context_type: str = "general"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """获取个性化推荐"""
         try:
             if session_id not in self.active_sessions:
@@ -291,8 +288,8 @@ class ContextCollaborationEngine:
     def finalize_collaboration(
         self,
         session_id: str,
-        user_satisfaction: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        user_satisfaction: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """完成协作"""
         try:
             if session_id not in self.active_sessions:
@@ -334,7 +331,7 @@ class ContextCollaborationEngine:
     def _apply_suggestions(
         self,
         context: str,
-        suggestions: List[Dict[str, Any]]
+        suggestions: list[dict[str, Any]]
     ) -> str:
         """应用建议"""
         modified_context = context
@@ -357,9 +354,9 @@ class ContextCollaborationEngine:
     
     def _update_user_preferences(
         self,
-        current_preferences: Dict[str, Any],
-        feedback: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        current_preferences: dict[str, Any],
+        feedback: dict[str, Any]
+    ) -> dict[str, Any]:
         """更新用户偏好"""
         updated_preferences = current_preferences.copy()
         
@@ -384,7 +381,7 @@ class ContextCollaborationEngine:
         
         return updated_preferences
     
-    def _calculate_collaboration_progress(self, session: CollaborationSession) -> Dict[str, Any]:
+    def _calculate_collaboration_progress(self, session: CollaborationSession) -> dict[str, Any]:
         """计算协作进度"""
         if not session.quality_scores:
             return {"progress": 0.0, "status": "starting"}
@@ -419,8 +416,8 @@ class ContextCollaborationEngine:
     def _generate_next_steps(
         self,
         session: CollaborationSession,
-        suggestions: List[Dict[str, Any]]
-    ) -> List[str]:
+        suggestions: list[dict[str, Any]]
+    ) -> list[str]:
         """生成下一步建议"""
         next_steps = []
         
@@ -453,7 +450,7 @@ class ContextCollaborationEngine:
         
         return next_steps
     
-    def _calculate_collaboration_stats(self, session: CollaborationSession) -> Dict[str, Any]:
+    def _calculate_collaboration_stats(self, session: CollaborationSession) -> dict[str, Any]:
         """计算协作统计"""
         stats = {
             "total_iterations": len(session.iterations),
@@ -500,9 +497,9 @@ class ContextCollaborationEngine:
     
     def _filter_applicable_suggestions(
         self,
-        suggestions: List[Dict[str, Any]],
+        suggestions: list[dict[str, Any]],
         current_context: str
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """过滤适用的建议"""
         applicable = []
         
@@ -516,7 +513,7 @@ class ContextCollaborationEngine:
     def _save_collaboration_experience(
         self,
         session: CollaborationSession,
-        report: Dict[str, Any]
+        report: dict[str, Any]
     ):
         """保存协作经验"""
         # 简化实现，实际应该保存到持久化存储
@@ -556,7 +553,7 @@ class ContextQualityEvaluator:
             }
         }
     
-    def evaluate_context(self, context: str) -> Dict[str, Any]:
+    def evaluate_context(self, context: str) -> dict[str, Any]:
         """评估上下文质量"""
         try:
             scores = {}
@@ -596,7 +593,7 @@ class ContextQualityEvaluator:
                 "error": str(e)
             }
     
-    def _evaluate_clarity(self, context: str) -> Tuple[float, str]:
+    def _evaluate_clarity(self, context: str) -> tuple[float, str]:
         """评估清晰度"""
         # 简化的清晰度评估
         score = 0.5
@@ -621,7 +618,7 @@ class ContextQualityEvaluator:
         
         return min(1.0, max(0.0, score)), feedback
     
-    def _evaluate_completeness(self, context: str) -> Tuple[float, str]:
+    def _evaluate_completeness(self, context: str) -> tuple[float, str]:
         """评估完整性"""
         score = 0.5
         feedback = "基础完整性评估"
@@ -648,7 +645,7 @@ class ContextQualityEvaluator:
         
         return min(1.0, max(0.0, score)), feedback
     
-    def _evaluate_relevance(self, context: str) -> Tuple[float, str]:
+    def _evaluate_relevance(self, context: str) -> tuple[float, str]:
         """评估相关性"""
         score = 0.6  # 默认中等相关性
         feedback = "相关性评估"
@@ -666,7 +663,7 @@ class ContextQualityEvaluator:
         
         return min(1.0, max(0.0, score)), feedback
     
-    def _evaluate_structure(self, context: str) -> Tuple[float, str]:
+    def _evaluate_structure(self, context: str) -> tuple[float, str]:
         """评估结构性"""
         score = 0.5
         feedback = "结构性评估"
@@ -692,7 +689,7 @@ class ContextQualityEvaluator:
         
         return min(1.0, max(0.0, score)), feedback
     
-    def _evaluate_specificity(self, context: str) -> Tuple[float, str]:
+    def _evaluate_specificity(self, context: str) -> tuple[float, str]:
         """评估具体性"""
         score = 0.5
         feedback = "具体性评估"
@@ -721,9 +718,9 @@ class ContextQualityEvaluator:
     
     def _generate_improvement_suggestions(
         self,
-        scores: Dict[str, float],
-        feedback: Dict[str, str]
-    ) -> List[str]:
+        scores: dict[str, float],
+        feedback: dict[str, str]
+    ) -> list[str]:
         """生成改进建议"""
         suggestions = []
         
@@ -806,8 +803,8 @@ class ContextSuggestionGenerator:
         self,
         context: str,
         collaboration_type: CollaborationType,
-        user_preferences: Dict[str, Any] = None
-    ) -> List[Dict[str, Any]]:
+        user_preferences: dict[str, Any] = None
+    ) -> list[dict[str, Any]]:
         """生成建议"""
         try:
             suggestions = []
@@ -862,7 +859,7 @@ class ContextSuggestionGenerator:
             logger.error(f"生成建议失败: {e}")
             return []
     
-    def _generate_detailed_description(self, template: Dict[str, Any], context: str) -> str:
+    def _generate_detailed_description(self, template: dict[str, Any], context: str) -> str:
         """生成详细描述"""
         base_description = template["suggestion"]
         
@@ -882,7 +879,7 @@ class ContextSuggestionGenerator:
             return match.group(0)[:100] + "..." if len(match.group(0)) > 100 else match.group(0)
         return ""
     
-    def _generate_suggested_text(self, context: str, template: Dict[str, Any]) -> str:
+    def _generate_suggested_text(self, context: str, template: dict[str, Any]) -> str:
         """生成建议文本"""
         # 简化实现，实际应该基于具体模板生成
         if "段落" in template["suggestion"]:
@@ -894,7 +891,7 @@ class ContextSuggestionGenerator:
         
         return context  # 默认返回原文本
     
-    def _generate_reasoning(self, template: Dict[str, Any], collaboration_type: CollaborationType) -> str:
+    def _generate_reasoning(self, template: dict[str, Any], collaboration_type: CollaborationType) -> str:
         """生成推理说明"""
         base_reasoning = f"基于{collaboration_type.value}的需求，"
         
@@ -909,7 +906,7 @@ class ContextSuggestionGenerator:
         
         return base_reasoning
     
-    def _calculate_impact_score(self, template: Dict[str, Any], context: str) -> float:
+    def _calculate_impact_score(self, template: dict[str, Any], context: str) -> float:
         """计算影响分数"""
         base_score = template["confidence"]
         
@@ -929,7 +926,7 @@ class ContextSuggestionGenerator:
         context: str,
         collaboration_type: CollaborationType,
         start_id: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成特定类型的建议"""
         suggestions = []
         
@@ -965,9 +962,9 @@ class ContextSuggestionGenerator:
     
     def _filter_by_preferences(
         self,
-        suggestions: List[Dict[str, Any]],
-        user_preferences: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        suggestions: list[dict[str, Any]],
+        user_preferences: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """根据用户偏好过滤建议"""
         filtered_suggestions = []
         
@@ -1000,10 +997,10 @@ class PersonalizationEngine:
         self,
         user_id: str,
         current_context: str,
-        user_preferences: Dict[str, Any],
-        collaboration_history: List[Dict[str, Any]],
+        user_preferences: dict[str, Any],
+        collaboration_history: list[dict[str, Any]],
         context_type: str = "general"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成个性化推荐"""
         try:
             # 分析用户历史行为
@@ -1050,7 +1047,7 @@ class PersonalizationEngine:
                 "error": str(e)
             }
     
-    def _analyze_user_behavior(self, collaboration_history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_user_behavior(self, collaboration_history: list[dict[str, Any]]) -> dict[str, Any]:
         """分析用户行为"""
         if not collaboration_history:
             return {"pattern": "insufficient_data"}
@@ -1081,7 +1078,7 @@ class PersonalizationEngine:
             "total_iterations": len(collaboration_history)
         }
     
-    def _determine_user_type(self, action_counts: Dict[str, int]) -> str:
+    def _determine_user_type(self, action_counts: dict[str, int]) -> str:
         """确定用户类型"""
         total_actions = sum(action_counts.values())
         if total_actions == 0:
@@ -1100,10 +1097,10 @@ class PersonalizationEngine:
     def _generate_personalized_suggestions(
         self,
         context: str,
-        user_preferences: Dict[str, Any],
-        behavior_analysis: Dict[str, Any],
+        user_preferences: dict[str, Any],
+        behavior_analysis: dict[str, Any],
         context_type: str
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成个性化建议"""
         suggestions = []
         
@@ -1139,8 +1136,8 @@ class PersonalizationEngine:
     
     def _calculate_recommendation_confidence(
         self,
-        user_preferences: Dict[str, Any],
-        behavior_analysis: Dict[str, Any]
+        user_preferences: dict[str, Any],
+        behavior_analysis: dict[str, Any]
     ) -> float:
         """计算推荐置信度"""
         base_confidence = 0.5
@@ -1167,8 +1164,8 @@ class PersonalizationEngine:
     
     def _generate_recommendation_reasoning(
         self,
-        behavior_analysis: Dict[str, Any],
-        user_preferences: Dict[str, Any]
+        behavior_analysis: dict[str, Any],
+        user_preferences: dict[str, Any]
     ) -> str:
         """生成推荐理由"""
         user_type = behavior_analysis.get("user_type", "balanced_collaborator")

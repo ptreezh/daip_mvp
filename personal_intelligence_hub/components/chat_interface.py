@@ -1,15 +1,15 @@
-"""
-Personal Intelligence Hub - Chat Interface Component
+"""Personal Intelligence Hub - Chat Interface Component
 
 核心聊天对话界面组件
 """
 
-from lona.html import HTML, Div, H3, P, TextInput, Button
-from datetime import datetime
 import logging
+from datetime import datetime
+
+from lona.html import H3, HTML, Button, Div, TextInput
+
 logger = logging.getLogger(__name__)
 
-from typing import List, Optional
 
 from personal_intelligence_hub.models.chat_models import ChatMessage, MessageType
 
@@ -20,7 +20,7 @@ class ChatInterface:
     def __init__(self, assistant_service, session_id: str = None):
         self.assistant_service = assistant_service
         self.session_id = session_id
-        self.messages: List[ChatMessage] = []
+        self.messages: list[ChatMessage] = []
         
         # 创建UI元素
         self.message_input = TextInput(

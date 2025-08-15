@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Transparency Models
+"""Personal Intelligence Hub - Transparency Models
 
 透明度监控相关的数据模型
 """
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from typing import Any, Optional
 
 
 class AgentStatus(Enum):
@@ -98,7 +96,7 @@ class OperationLog:
     timestamp: datetime
     operation: str
     component: str
-    details: Dict[str, Any]
+    details: dict[str, Any]
     duration: float
     success: bool
 
@@ -106,10 +104,10 @@ class OperationLog:
 @dataclass
 class SystemStatus:
     """系统状态"""
-    active_agents: List[AgentStatusInfo]
-    current_workflow: Optional[Dict[str, Any]] = None
-    memory_operations: List[MemoryOperation] = None
-    llm_calls: List[LLMCall] = None
+    active_agents: list[AgentStatusInfo]
+    current_workflow: Optional[dict[str, Any]] = None
+    memory_operations: list[MemoryOperation] = None
+    llm_calls: list[LLMCall] = None
     token_usage: Optional[TokenUsage] = None
     
     def __post_init__(self):

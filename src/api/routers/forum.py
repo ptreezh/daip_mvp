@@ -1,21 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 14:00:00
+"""@Time    : 2025-08-06 14:00:00
 @Author  : DAIP-LIVE Team
 @File    : forum_api.py
 @Description:
     Forum模式API端点 - 处理会话管理、用户干预和多智能体协作的HTTP接口
 """
 
-from typing import Dict, List, Optional, Any
-from datetime import datetime
 import logging
+from datetime import datetime
+from typing import Any, Optional
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from ..app_state import app_state
 from ..core.exceptions import ForumServiceError
 from ..core_services.forum_service import forum_service
 
@@ -31,13 +28,13 @@ class ForumSessionRequest(BaseModel):
     """Forum会话请求模型"""
     topic: str = Field(..., description="讨论话题")
     user_id: str = Field(default="default_user", description="用户ID")
-    settings: Optional[Dict[str, Any]] = Field(default=None, description="会话设置")
+    settings: Optional[dict[str, Any]] = Field(default=None, description="会话设置")
 
 
 class UserInterventionRequest(BaseModel):
     """用户干预请求模型"""
     session_id: str = Field(..., description="会话ID")
-    message: Dict[str, Any] = Field(..., description="用户消息")
+    message: dict[str, Any] = Field(..., description="用户消息")
     intent: str = Field(default="comment", description="干预意图")
 
 
@@ -53,7 +50,7 @@ class ForumSessionResponse(BaseModel):
     topic: str
     status: str
     start_time: str
-    active_agents: List[str]
+    active_agents: list[str]
     message_count: int
     user_intervention_count: int
     consensus_level: float
@@ -74,8 +71,8 @@ class SessionContextResponse(BaseModel):
     topic: str
     status: str
     consensus_level: float
-    active_agents: List[str]
-    key_arguments: List[Dict[str, Any]]
+    active_agents: list[str]
+    key_arguments: list[dict[str, Any]]
     message_count: int
     user_intervention_count: int
     start_time: str
@@ -315,7 +312,7 @@ async def get_session_messages(session_id: str):
 
 
 @forum_router.post("/session/{session_id}/optimize")
-async def optimize_user_input(session_id: str, input_data: Dict[str, Any]):
+async def optimize_user_input(session_id: str, input_data: dict[str, Any]):
     """优化用户输入"""
     try:
         user_input = input_data.get("input", "")

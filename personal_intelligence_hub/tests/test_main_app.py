@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Main App Tests
+"""Personal Intelligence Hub - Main App Tests
 
 测试主应用入口点和基本功能
 """
 
-import pytest
 from unittest.mock import Mock, patch
 
-from personal_intelligence_hub.main_app import app, PersonalIntelligenceHubView, IndexView
+import pytest
+
+from personal_intelligence_hub.main_app import IndexView, PersonalIntelligenceHubView, app
 
 
 class TestMainApp:

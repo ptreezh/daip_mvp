@@ -1,5 +1,4 @@
-"""
-真实演示系统集成测试
+"""真实演示系统集成测试
 
 测试完整的演示系统集成，包括AI伦理决策分析场景的端到端执行。
 """
@@ -7,11 +6,12 @@
 import asyncio
 import json
 import logging
-from datetime import datetime
+import os
 
 # 导入演示系统组件
 import sys
-import os
+from datetime import datetime
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from real_demo_system.real_demo_controller import RealDemoController
@@ -86,7 +86,7 @@ async def test_ai_ethics_scenario():
             context=context
         )
         
-        print(f"\n4. 场景执行结果:")
+        print("\n4. 场景执行结果:")
         print(f"成功: {result['success']}")
         
         if result['success']:
@@ -95,7 +95,7 @@ async def test_ai_ethics_scenario():
             
             # 显示批判性审查结果
             if result['critical_review']['success']:
-                print(f"\n批判性审查:")
+                print("\n批判性审查:")
                 print(f"  - 原始内容长度: {len(result['critical_review']['original_content'])}")
                 print(f"  - 最终内容长度: {len(result['critical_review']['final_content'])}")
                 print(f"  - 是否需要修订: {result['critical_review']['revision_needed']}")
@@ -104,7 +104,7 @@ async def test_ai_ethics_scenario():
             
             # 显示多视角分析结果
             if result['multi_perspective']['success']:
-                print(f"\n多视角分析:")
+                print("\n多视角分析:")
                 print(f"  - 分析主题: {result['multi_perspective']['topic']}")
                 print(f"  - 视角数量: {len(result['multi_perspective']['perspectives'])}")
                 print(f"  - 置信度: {result['multi_perspective']['confidence']}")
@@ -112,7 +112,7 @@ async def test_ai_ethics_scenario():
             
             # 显示综合分析
             if result['synthesis']['call_record']['success']:
-                print(f"\n综合分析:")
+                print("\n综合分析:")
                 print(f"  - 调用ID: {result['synthesis']['call_record']['call_id']}")
                 print(f"  - 响应时间: {result['synthesis']['call_record']['duration_ms']}ms")
                 print(f"  - 输入Token: {result['synthesis']['call_record']['input_tokens']}")
@@ -121,7 +121,7 @@ async def test_ai_ethics_scenario():
                 print(f"  - 响应预览: {result['synthesis']['response'][:300]}...")
             
             # 显示验证结果
-            print(f"\n验证结果:")
+            print("\n验证结果:")
             for verification in result['verification_results']:
                 print(f"  - 类型: {verification['type']}")
                 if verification['type'] == 'llm_call':
@@ -133,7 +133,7 @@ async def test_ai_ethics_scenario():
                     print(f"    透明度分数: {verification['verification']['transparency_score']}")
             
             # 显示透明度证书
-            print(f"\n透明度证书:")
+            print("\n透明度证书:")
             cert = result['transparency_certificate']
             print(f"  - 证书ID: {cert['certificate_id']}")
             print(f"  - 颁发时间: {cert['issued_at']}")
@@ -148,12 +148,12 @@ async def test_ai_ethics_scenario():
         traceback.print_exc()
     
     # 获取系统状态
-    print(f"\n5. 系统状态:")
+    print("\n5. 系统状态:")
     system_status = demo_controller.get_system_status()
     print(json.dumps(system_status, indent=2, ensure_ascii=False))
     
     # 获取演示统计
-    print(f"\n6. 演示统计:")
+    print("\n6. 演示统计:")
     demo_stats = demo_controller.get_demo_statistics()
     print(json.dumps(demo_stats, indent=2, ensure_ascii=False))
     
@@ -210,7 +210,7 @@ async def test_product_strategy_scenario(demo_controller):
             market_context=market_context
         )
         
-        print(f"\n3. 场景执行结果:")
+        print("\n3. 场景执行结果:")
         print(f"成功: {result['success']}")
         
         if result['success']:
@@ -219,7 +219,7 @@ async def test_product_strategy_scenario(demo_controller):
             
             # 显示策略分析结果
             if result['strategy_analysis']['success']:
-                print(f"\n策略分析:")
+                print("\n策略分析:")
                 print(f"  - 分析主题: {result['strategy_analysis']['topic']}")
                 print(f"  - 分析视角: {result['strategy_analysis']['perspectives']}")
                 print(f"  - 置信度: {result['strategy_analysis']['confidence']}")
@@ -227,7 +227,7 @@ async def test_product_strategy_scenario(demo_controller):
             
             # 显示策略建议
             if result['strategy_recommendations']['call_record']['success']:
-                print(f"\n策略建议:")
+                print("\n策略建议:")
                 print(f"  - 调用ID: {result['strategy_recommendations']['call_record']['call_id']}")
                 print(f"  - 响应时间: {result['strategy_recommendations']['call_record']['duration_ms']}ms")
                 print(f"  - 建议长度: {len(result['strategy_recommendations']['response'])}")

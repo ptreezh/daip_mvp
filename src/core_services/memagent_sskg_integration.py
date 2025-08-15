@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-23 12:00:00
+"""@Time    : 2025-07-23 12:00:00
 @Author  : DAIP-LIVE Team
 @File    : memagent_sskg_integration.py
 @Description:
@@ -10,19 +8,19 @@
 """
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
-from src.core_services.memory_agent import MemAgent, Memory, MemoryType, MemoryQuery
 from src.core_services.enhanced_sskg_manager import (
-    EnhancedSSKGManager, 
-    KnowledgeNode, 
-    KnowledgeQuery, 
+    EnhancedSSKGManager,
+    KnowledgeNode,
+    KnowledgeQuery,
     KnowledgeRelation,
-    NodeType, 
-    RelationType
+    NodeType,
+    RelationType,
 )
+from src.core_services.memory_agent import MemAgent, Memory, MemoryQuery, MemoryType
 
 logger = logging.getLogger(__name__)
 
@@ -34,20 +32,18 @@ class MemoryKnowledgeMapping(BaseModel):
     mapping_type: str  # "direct", "derived", "consolidated"
     confidence: float
     created_at: datetime
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
 
 class UnifiedMemoryInterface:
-    """
-    Unified interface for memory retrieval across MemAgent and SSKG systems.
+    """Unified interface for memory retrieval across MemAgent and SSKG systems.
     
     Provides seamless access to memories stored in both systems with
     automatic cross-referencing and knowledge transformation.
     """
     
     def __init__(self, mem_agent: MemAgent, sskg_manager: EnhancedSSKGManager):
-        """
-        Initialize the unified memory interface.
+        """Initialize the unified memory interface.
         
         Args:
             mem_agent: The MemAgent instance
@@ -57,7 +53,7 @@ class UnifiedMemoryInterface:
         self.sskg_manager = sskg_manager
         
         # Mapping between memories and knowledge nodes
-        self.memory_knowledge_mappings: Dict[str, MemoryKnowledgeMapping] = {}
+        self.memory_knowledge_mappings: dict[str, MemoryKnowledgeMapping] = {}
         
         # Statistics
         self.integration_stats = {
@@ -72,14 +68,13 @@ class UnifiedMemoryInterface:
     def unified_memory_retrieval(
         self,
         context: str,
-        memory_types: Optional[List[MemoryType]] = None,
+        memory_types: Optional[list[MemoryType]] = None,
         source_id: Optional[str] = None,
         min_importance: float = 0.0,
         include_knowledge: bool = True,
         limit: int = 10
-    ) -> List[Memory]:
-        """
-        Unified memory retrieval that searches both MemAgent and SSKG.
+    ) -> list[Memory]:
+        """Unified memory retrieval that searches both MemAgent and SSKG.
         
         Args:
             context: The context to search for
@@ -129,11 +124,11 @@ class UnifiedMemoryInterface:
     def _retrieve_knowledge_as_memories(
         self,
         context: str,
-        memory_types: Optional[List[MemoryType]],
+        memory_types: Optional[list[MemoryType]],
         source_id: Optional[str],
         min_importance: float,
         limit: int
-    ) -> List[Memory]:
+    ) -> list[Memory]:
         """Retrieve knowledge nodes from SSKG and convert to Memory objects."""
         # Build SSKG query
         node_types = [NodeType.MEMORY, NodeType.FACT, NodeType.CONCEPT]
@@ -228,7 +223,7 @@ class UnifiedMemoryInterface:
         else:
             return 0.2
     
-    def _deduplicate_memories(self, memories: List[Memory]) -> List[Memory]:
+    def _deduplicate_memories(self, memories: list[Memory]) -> list[Memory]:
         """Remove duplicate memories based on content similarity."""
         unique_memories = []
         seen_contents = set()
@@ -248,8 +243,7 @@ class UnifiedMemoryInterface:
         memory: Memory, 
         create_relations: bool = True
     ) -> Optional[str]:
-        """
-        Transform a memory into a knowledge node in SSKG.
+        """Transform a memory into a knowledge node in SSKG.
         
         Args:
             memory: The memory to transform
@@ -382,7 +376,7 @@ class UnifiedMemoryInterface:
         # Default to related_to for similar content
         return RelationType.RELATED_TO
     
-    def create_cross_references(self, memory_id: str, knowledge_node_ids: List[str]):
+    def create_cross_references(self, memory_id: str, knowledge_node_ids: list[str]):
         """Create explicit cross-references between memory and knowledge nodes."""
         try:
             # Get the memory
@@ -427,7 +421,7 @@ class UnifiedMemoryInterface:
         """Get the knowledge mapping for a memory."""
         return self.memory_knowledge_mappings.get(memory_id)
     
-    def get_related_knowledge_for_memory(self, memory_id: str) -> List[KnowledgeNode]:
+    def get_related_knowledge_for_memory(self, memory_id: str) -> list[KnowledgeNode]:
         """Get knowledge nodes related to a specific memory."""
         try:
             # Get the mapping
@@ -515,7 +509,7 @@ class UnifiedMemoryInterface:
             logger.error(f"Error synchronizing memory to knowledge: {e}")
             return False
     
-    def get_integration_stats(self) -> Dict[str, Any]:
+    def get_integration_stats(self) -> dict[str, Any]:
         """Get integration statistics."""
         return {
             **self.integration_stats,

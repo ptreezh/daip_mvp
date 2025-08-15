@@ -1,22 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Test suite for Cognitive Diversity Evaluator
+"""Test suite for Cognitive Diversity Evaluator
 
 This module contains unit tests for the cognitive diversity evaluation functionality,
 including cognitive distance calculation, diversity scoring, and consistency tracking.
 """
 
+from datetime import datetime
+
 import pytest
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
 
 from src.core_services.cognitive_diversity_evaluator import (
-    CognitiveDiversityEvaluator,
-    DiversityMetric,
     CognitiveDistance,
+    CognitiveDiversityEvaluator,
+    ConsistencyTracker,
+    DiversityMetric,
     DiversityScore,
-    ConsistencyTracker
 )
 
 

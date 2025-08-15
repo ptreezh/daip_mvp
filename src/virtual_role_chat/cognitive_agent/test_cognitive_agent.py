@@ -1,17 +1,15 @@
-"""
-Unit tests for the CognitiveAgent class and its components.
+"""Unit tests for the CognitiveAgent class and its components.
 """
 
-import asyncio
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from .agent import CognitiveAgent, CognitiveProfile
-from .reasoning import ReasoningFramework
 from .belief import BeliefSystem
 from .epistemology import Epistemology
-from .metacognition import MetaCognition
 from .memory import AgentMemory
+from .metacognition import MetaCognition
+from .reasoning import ReasoningFramework
 
 
 class TestCognitiveAgent(unittest.TestCase):

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : ollama_service.py
 @Description:
@@ -10,11 +8,13 @@
 
 import asyncio
 import json
-from typing import Dict, Any, List, Optional, Union, AsyncGenerator
-from datetime import datetime
 import logging
-import aiohttp
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Optional
+
+import aiohttp
 
 try:
     import ollama
@@ -32,20 +32,20 @@ class LLMMessage:
     """LLM消息"""
     role: str
     content: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class LLMRequest:
     """LLM请求"""
     model: str
-    messages: List[LLMMessage]
+    messages: list[LLMMessage]
     temperature: float = 0.7
     max_tokens: int = 2000
     top_p: float = 0.9
     stream: bool = False
-    tools: Optional[List[Dict[str, Any]]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tools: Optional[list[dict[str, Any]]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -54,8 +54,8 @@ class LLMResponse:
     model: str
     content: str
     finish_reason: str
-    usage: Dict[str, int]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    usage: dict[str, int]
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
 
 
@@ -66,7 +66,7 @@ class LLMModel:
     size: str
     modified_at: datetime
     digest: str
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 class OllamaService:
@@ -78,7 +78,7 @@ class OllamaService:
         
         self.base_url = base_url
         self.client: Optional[ollama.Client] = None
-        self.available_models: List[LLMModel] = []
+        self.available_models: list[LLMModel] = []
         self.default_model = "llama3.2:latest"
         
         # 统计信息
@@ -106,7 +106,7 @@ class OllamaService:
         
         # 请求队列
         self.request_queue: asyncio.Queue = asyncio.Queue()
-        self.active_requests: Dict[str, asyncio.Task] = {}
+        self.active_requests: dict[str, asyncio.Task] = {}
         
         # 后台任务
         self._model_refresh_task: Optional[asyncio.Task] = None
@@ -394,7 +394,7 @@ class OllamaService:
             }
         )
     
-    async def _ollama_list(self) -> List[Dict[str, Any]]:
+    async def _ollama_list(self) -> list[dict[str, Any]]:
         """获取Ollama可用模型列表"""
         try:
             async with aiohttp.ClientSession() as session:
@@ -408,7 +408,7 @@ class OllamaService:
             logging.error(f"Failed to get Ollama models: {e}")
             return []
     
-    async def _ollama_list_local(self) -> List[Dict[str, Any]]:
+    async def _ollama_list_local(self) -> list[dict[str, Any]]:
         """获取本地Ollama模型列表"""
         try:
             models = self.client.list()
@@ -454,11 +454,11 @@ class OllamaService:
                 return model
         return None
     
-    async def list_models(self) -> List[LLMModel]:
+    async def list_models(self) -> list[LLMModel]:
         """列出所有可用模型"""
         return self.available_models
     
-    async def get_system_info(self) -> Dict[str, Any]:
+    async def get_system_info(self) -> dict[str, Any]:
         """获取系统信息"""
         try:
             # 获取系统信息
@@ -491,7 +491,7 @@ class OllamaService:
             logging.error(f"Failed to get system info: {e}")
             return {"error": str(e)}
     
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """健康检查"""
         try:
             # 测试基本功能
@@ -527,7 +527,7 @@ class OllamaService:
                 "last_check": datetime.now().isoformat()
             }
     
-    async def get_stats(self) -> Dict[str, Any]:
+    async def get_stats(self) -> dict[str, Any]:
         """获取统计信息"""
         uptime = (datetime.now() - self.stats["start_time"]).total_seconds()
         
@@ -588,7 +588,7 @@ async def close_ollama_service():
 # 便捷函数
 async def generate_llm_response(
     model: str,
-    messages: List[LLMMessage],
+    messages: list[LLMMessage],
     temperature: float = 0.7,
     max_tokens: int = 2000,
     base_url: str = None
@@ -608,7 +608,7 @@ async def generate_llm_response(
 
 async def generate_llm_response_stream(
     model: str,
-    messages: List[LLMMessage],
+    messages: list[LLMMessage],
     temperature: float = 0.7,
     max_tokens: int = 2000,
     base_url: str = None
@@ -635,7 +635,7 @@ class DAIPWorkflowIntegrator:
         self.ollama_service = ollama_service
         self.workflow_templates = self._load_workflow_templates()
     
-    def _load_workflow_templates(self) -> Dict[str, Any]:
+    def _load_workflow_templates(self) -> dict[str, Any]:
         """加载工作流模板"""
         return {
             "academic_research": {
@@ -676,7 +676,7 @@ class DAIPWorkflowIntegrator:
             }
         }
     
-    async def execute_workflow(self, workflow_name: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute_workflow(self, workflow_name: str, input_data: dict[str, Any]) -> dict[str, Any]:
         """执行工作流"""
         if workflow_name not in self.workflow_templates:
             raise ValueError(f"Unknown workflow: {workflow_name}")
@@ -711,7 +711,7 @@ class DAIPWorkflowIntegrator:
             "execution_time": (datetime.now() - context["start_time"]).total_seconds()
         }
     
-    async def _execute_workflow_step(self, step_name: str, context: Dict[str, Any], input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_workflow_step(self, step_name: str, context: dict[str, Any], input_data: dict[str, Any]) -> dict[str, Any]:
         """执行工作流步骤"""
         # 根据步骤类型生成不同的提示
         if step_name == "文献综述":
@@ -775,7 +775,7 @@ class DAIPWorkflowIntegrator:
             "execution_time": (datetime.now() - context["start_time"]).total_seconds()
         }
     
-    async def _generate_workflow_summary(self, context: Dict[str, Any]) -> str:
+    async def _generate_workflow_summary(self, context: dict[str, Any]) -> str:
         """生成工作流摘要"""
         summary_prompt = f"""请为以下工作流生成摘要：
 

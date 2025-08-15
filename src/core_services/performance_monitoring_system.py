@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 10:00:00
+"""@Time    : 2025-08-05 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : performance_monitoring_system.py
 @Description:
@@ -10,20 +8,18 @@
 
 import asyncio
 import logging
-import psutil
-import time
-import threading
-from typing import Dict, List, Optional, Any, Callable
-from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
-from enum import Enum
-import json
 import statistics
-from concurrent.futures import ThreadPoolExecutor
-import queue
-import weakref
+import threading
+import time
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Optional
 
-from ..subagents.dynamic_weight.performance_monitor import PerformanceMonitor, PerformanceMetric, PerformanceDataPoint
+import psutil
+
+from ..subagents.dynamic_weight.performance_monitor import PerformanceMetric, PerformanceMonitor
 
 logger = logging.getLogger(__name__)
 
@@ -74,13 +70,13 @@ class PerformanceAlertData:
     value: float
     threshold: float
     severity: str
-    suggested_actions: List[str]
+    suggested_actions: list[str]
 
 
 class SystemResourceMonitor:
     """System resource monitoring."""
     
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         self.config = config or {}
         self.monitoring_interval = self.config.get("monitoring_interval", 5.0)  # seconds
         self.is_monitoring = False
@@ -114,7 +110,7 @@ class SystemResourceMonitor:
         
         logger.info("System Resource Monitor initialized")
     
-    def _initialize_baselines(self) -> Dict[str, Any]:
+    def _initialize_baselines(self) -> dict[str, Any]:
         """Initialize performance baselines."""
         return {
             "cpu_normal": 30.0,
@@ -315,7 +311,7 @@ class SystemResourceMonitor:
         )
     
     def _get_suggested_actions(self, resource_type: SystemResource, alert_type: PerformanceAlert, 
-                              value: float, threshold: float) -> List[str]:
+                              value: float, threshold: float) -> list[str]:
         """Get suggested actions for alerts."""
         actions = []
         
@@ -395,7 +391,7 @@ class SystemResourceMonitor:
         """Get current system metrics."""
         return self.metrics_history[-1] if self.metrics_history else None
     
-    def get_metrics_history(self, hours: int = 24) -> List[SystemMetrics]:
+    def get_metrics_history(self, hours: int = 24) -> list[SystemMetrics]:
         """Get metrics history for specified hours."""
         cutoff_time = datetime.now() - timedelta(hours=hours)
         return [
@@ -403,7 +399,7 @@ class SystemResourceMonitor:
             if datetime.fromisoformat(metrics.timestamp) > cutoff_time
         ]
     
-    def get_performance_summary(self) -> Dict[str, Any]:
+    def get_performance_summary(self) -> dict[str, Any]:
         """Get performance summary."""
         if not self.metrics_history:
             return {"error": "No metrics data available"}
@@ -460,7 +456,7 @@ class SystemResourceMonitor:
         except Exception as e:
             logger.error(f"Cache optimization failed: {e}")
     
-    def optimize_performance(self, optimization_type: str = "auto") -> Dict[str, Any]:
+    def optimize_performance(self, optimization_type: str = "auto") -> dict[str, Any]:
         """Optimize system performance."""
         results = {"optimizations": [], "success": True}
         
@@ -484,7 +480,7 @@ class SystemResourceMonitor:
         
         return results
     
-    def export_performance_data(self) -> Dict[str, Any]:
+    def export_performance_data(self) -> dict[str, Any]:
         """Export performance data."""
         return {
             "export_timestamp": datetime.now().isoformat(),
@@ -503,7 +499,7 @@ class SystemResourceMonitor:
 class PerformanceOptimizationEngine:
     """Performance optimization engine."""
     
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         self.config = config or {}
         self.resource_monitor = SystemResourceMonitor(config)
         self.performance_monitor = PerformanceMonitor(config)
@@ -526,7 +522,7 @@ class PerformanceOptimizationEngine:
         
         logger.info("Performance Optimization Engine initialized")
     
-    def _initialize_benchmarks(self) -> Dict[str, Any]:
+    def _initialize_benchmarks(self) -> dict[str, Any]:
         """Initialize performance benchmarks."""
         return {
             "response_time": {"target": 1.0, "maximum": 5.0},
@@ -584,7 +580,7 @@ class PerformanceOptimizationEngine:
         except Exception as e:
             logger.error(f"Auto-optimization failed: {e}")
     
-    def _needs_optimization(self, performance_summary: Dict[str, Any]) -> bool:
+    def _needs_optimization(self, performance_summary: dict[str, Any]) -> bool:
         """Check if optimization is needed."""
         try:
             current_metrics = performance_summary.get("current_metrics", {})
@@ -610,7 +606,7 @@ class PerformanceOptimizationEngine:
             logger.error(f"Error checking optimization need: {e}")
             return False
     
-    def _determine_optimization_strategy(self, performance_summary: Dict[str, Any]) -> str:
+    def _determine_optimization_strategy(self, performance_summary: dict[str, Any]) -> str:
         """Determine optimization strategy."""
         try:
             current_metrics = performance_summary.get("current_metrics", {})
@@ -630,7 +626,7 @@ class PerformanceOptimizationEngine:
             logger.error(f"Error determining optimization strategy: {e}")
             return "cache_optimization"
     
-    async def _execute_optimization_strategy(self, strategy: str) -> Dict[str, Any]:
+    async def _execute_optimization_strategy(self, strategy: str) -> dict[str, Any]:
         """Execute optimization strategy."""
         try:
             if strategy in self.optimization_strategies:
@@ -643,7 +639,7 @@ class PerformanceOptimizationEngine:
             logger.error(f"Error executing optimization strategy: {e}")
             return {"success": False, "error": str(e)}
     
-    async def _optimize_memory_management(self) -> Dict[str, Any]:
+    async def _optimize_memory_management(self) -> dict[str, Any]:
         """Optimize memory management."""
         try:
             # Perform memory cleanup
@@ -663,7 +659,7 @@ class PerformanceOptimizationEngine:
             logger.error(f"Memory optimization failed: {e}")
             return {"success": False, "error": str(e)}
     
-    async def _optimize_cpu_usage(self) -> Dict[str, Any]:
+    async def _optimize_cpu_usage(self) -> dict[str, Any]:
         """Optimize CPU usage."""
         try:
             # Perform CPU optimization
@@ -683,7 +679,7 @@ class PerformanceOptimizationEngine:
             logger.error(f"CPU optimization failed: {e}")
             return {"success": False, "error": str(e)}
     
-    async def _optimize_io_operations(self) -> Dict[str, Any]:
+    async def _optimize_io_operations(self) -> dict[str, Any]:
         """Optimize I/O operations."""
         try:
             # This would implement I/O optimization
@@ -695,7 +691,7 @@ class PerformanceOptimizationEngine:
             logger.error(f"I/O optimization failed: {e}")
             return {"success": False, "error": str(e)}
     
-    async def _optimize_network_usage(self) -> Dict[str, Any]:
+    async def _optimize_network_usage(self) -> dict[str, Any]:
         """Optimize network usage."""
         try:
             # This would implement network optimization
@@ -707,7 +703,7 @@ class PerformanceOptimizationEngine:
             logger.error(f"Network optimization failed: {e}")
             return {"success": False, "error": str(e)}
     
-    async def _optimize_cache_usage(self) -> Dict[str, Any]:
+    async def _optimize_cache_usage(self) -> dict[str, Any]:
         """Optimize cache usage."""
         try:
             # Perform cache optimization
@@ -756,7 +752,7 @@ class PerformanceOptimizationEngine:
         except Exception as e:
             logger.error(f"Immediate optimization failed: {e}")
     
-    def get_optimization_summary(self) -> Dict[str, Any]:
+    def get_optimization_summary(self) -> dict[str, Any]:
         """Get optimization summary."""
         try:
             # Get performance summary from resource monitor
@@ -793,8 +789,7 @@ class PerformanceOptimizationEngine:
 
 
 class PerformanceMonitoringSystem:
-    """
-    V0.3.7 Performance Monitoring and Optimization System
+    """V0.3.7 Performance Monitoring and Optimization System
     企业级性能监控和优化系统
     
     Features:
@@ -805,7 +800,7 @@ class PerformanceMonitoringSystem:
     - Integration with existing monitoring components
     """
     
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         self.config = config or {}
         self.optimization_engine = PerformanceOptimizationEngine(config)
         self.is_initialized = False
@@ -838,7 +833,7 @@ class PerformanceMonitoringSystem:
             logger.error(f"Failed to initialize performance monitoring system: {e}")
             raise
     
-    async def get_system_health(self) -> Dict[str, Any]:
+    async def get_system_health(self) -> dict[str, Any]:
         """Get system health status."""
         try:
             if not self.is_initialized:
@@ -881,7 +876,7 @@ class PerformanceMonitoringSystem:
             logger.error(f"Error getting system health: {e}")
             return {"status": "error", "error": str(e)}
     
-    async def get_performance_report(self) -> Dict[str, Any]:
+    async def get_performance_report(self) -> dict[str, Any]:
         """Get comprehensive performance report."""
         try:
             if not self.is_initialized:
@@ -909,7 +904,7 @@ class PerformanceMonitoringSystem:
             logger.error(f"Error generating performance report: {e}")
             return {"error": str(e)}
     
-    def _get_performance_metrics(self) -> Dict[str, Any]:
+    def _get_performance_metrics(self) -> dict[str, Any]:
         """Get performance metrics."""
         try:
             # Update uptime
@@ -922,8 +917,8 @@ class PerformanceMonitoringSystem:
             logger.error(f"Error getting performance metrics: {e}")
             return {}
     
-    def _generate_recommendations(self, system_health: Dict[str, Any], 
-                                 optimization_summary: Dict[str, Any]) -> List[str]:
+    def _generate_recommendations(self, system_health: dict[str, Any], 
+                                 optimization_summary: dict[str, Any]) -> list[str]:
         """Generate performance recommendations."""
         recommendations = []
         
@@ -967,7 +962,7 @@ class PerformanceMonitoringSystem:
         
         return recommendations[:5]  # Return top 5 recommendations
     
-    async def execute_optimization(self, optimization_type: str = "auto") -> Dict[str, Any]:
+    async def execute_optimization(self, optimization_type: str = "auto") -> dict[str, Any]:
         """Execute performance optimization."""
         try:
             if not self.is_initialized:
@@ -1003,7 +998,7 @@ _performance_monitoring_system: Optional[PerformanceMonitoringSystem] = None
 
 
 async def get_performance_monitoring_system(
-    config: Dict[str, Any] = None
+    config: dict[str, Any] = None
 ) -> PerformanceMonitoringSystem:
     """Get global performance monitoring system instance."""
     global _performance_monitoring_system

@@ -1,45 +1,47 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: Claude Code
 @File: test_v0_3_5_critical_review.py
 @Description: Comprehensive test suite for V0.3.5 Critical Review Workflow components
 """
 
 import asyncio
-import pytest
-import json
-import time
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock
-from typing import Dict, List, Any
 
 # Import the components to test
 import sys
+from datetime import datetime
+
+import pytest
+
 sys.path.append('.')
 
-from src.core_services.smart_reviewer_allocator import SmartReviewerAllocator
-from src.core_services.multidimensional_assessment_engine import MultidimensionalAssessmentEngine
+from src.core_services.automated_report_generator import (
+    AutomatedReportGenerator,
+    ReportFormat,
+    ReportRequest,
+    ReportType,
+)
 from src.core_services.collaborative_review_environment import CollaborativeReviewEnvironment
-from src.core_services.conflict_resolution_system import ConflictResolutionSystem, Conflict, ConflictType
-from src.core_services.review_analytics import ReviewAnalytics, ReviewMetric, MetricType
-from src.core_services.automated_report_generator import AutomatedReportGenerator, ReportRequest, ReportType, ReportFormat
+from src.core_services.conflict_resolution_system import Conflict, ConflictResolutionSystem, ConflictType
+from src.core_services.multidimensional_assessment_engine import MultidimensionalAssessmentEngine
+from src.core_services.review_analytics import MetricType, ReviewAnalytics, ReviewMetric
+from src.core_services.smart_reviewer_allocator import SmartReviewerAllocator
 
 
 class TestSmartReviewerAllocator:
     """Test suite for SmartReviewerAllocator"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def allocator(self):
         return SmartReviewerAllocator()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_allocator_initialization(self, allocator):
         """Test allocator initialization"""
         assert allocator is not None
         assert hasattr(allocator, 'reviewer_pool')
         assert hasattr(allocator, 'allocation_history')
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_select_reviewers_basic(self, allocator):
         """Test basic reviewer selection"""
         # Mock reviewer pool
@@ -66,7 +68,7 @@ class TestSmartReviewerAllocator:
         assert len(result['selected_reviewers']) == 1
         assert 'allocation_id' in result
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_select_reviewers_no_available(self, allocator):
         """Test reviewer selection when no reviewers available"""
         allocator.reviewer_pool = {}
@@ -80,7 +82,7 @@ class TestSmartReviewerAllocator:
         assert result['success'] is False
         assert 'No available reviewers' in result['error']
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_calculate_match_score(self, allocator):
         """Test match score calculation"""
         reviewer = {
@@ -102,18 +104,18 @@ class TestSmartReviewerAllocator:
 class TestMultidimensionalAssessmentEngine:
     """Test suite for MultidimensionalAssessmentEngine"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def engine(self):
         return MultidimensionalAssessmentEngine()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_engine_initialization(self, engine):
         """Test engine initialization"""
         assert engine is not None
         assert hasattr(engine, 'assessment_criteria')
         assert hasattr(engine, 'weight_configs')
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_assess_content_basic(self, engine):
         """Test basic content assessment"""
         result = await engine.assess_content(
@@ -128,7 +130,7 @@ class TestMultidimensionalAssessmentEngine:
         assert 'dimension_scores' in result
         assert 0 <= result['overall_score'] <= 1
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_assess_content_invalid_type(self, engine):
         """Test assessment with invalid content type"""
         result = await engine.assess_content(
@@ -140,7 +142,7 @@ class TestMultidimensionalAssessmentEngine:
         assert result['success'] is False
         assert 'Unsupported content type' in result['error']
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_batch_assessment(self, engine):
         """Test batch assessment"""
         requests = [
@@ -163,18 +165,18 @@ class TestMultidimensionalAssessmentEngine:
 class TestCollaborativeReviewEnvironment:
     """Test suite for CollaborativeReviewEnvironment"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def environment(self):
         return CollaborativeReviewEnvironment()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_environment_initialization(self, environment):
         """Test environment initialization"""
         assert environment is not None
         assert hasattr(environment, 'active_sessions')
         assert hasattr(environment, 'event_handlers')
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_create_session(self, environment):
         """Test session creation"""
         result = await environment.create_session(
@@ -187,7 +189,7 @@ class TestCollaborativeReviewEnvironment:
         assert 'session_id' in result
         assert result['session_name'] == "Test Session"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_join_session(self, environment):
         """Test joining a session"""
         # First create a session
@@ -207,7 +209,7 @@ class TestCollaborativeReviewEnvironment:
         assert join_result['success'] is True
         assert join_result['user_id'] == "user2"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_add_comment(self, environment):
         """Test adding comments"""
         # Create session
@@ -233,18 +235,18 @@ class TestCollaborativeReviewEnvironment:
 class TestConflictResolutionSystem:
     """Test suite for ConflictResolutionSystem"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def resolver(self):
         return ConflictResolutionSystem()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_resolver_initialization(self, resolver):
         """Test resolver initialization"""
         assert resolver is not None
         assert hasattr(resolver, 'active_conflicts')
         assert hasattr(resolver, 'resolved_conflicts')
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_detect_concurrent_edit_conflict(self, resolver):
         """Test concurrent edit conflict detection"""
         operations = [
@@ -268,7 +270,7 @@ class TestConflictResolutionSystem:
         assert conflict.conflict_type == ConflictType.CONCURRENT_EDIT
         assert len(conflict.user_ids) == 2
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_submit_conflict(self, resolver):
         """Test conflict submission"""
         conflict = Conflict(
@@ -286,7 +288,7 @@ class TestConflictResolutionSystem:
         assert conflict_id == "test_conflict"
         assert conflict_id in resolver.active_conflicts
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_resolve_conflict(self, resolver):
         """Test conflict resolution"""
         # Create and submit conflict
@@ -316,18 +318,18 @@ class TestConflictResolutionSystem:
 class TestReviewAnalytics:
     """Test suite for ReviewAnalytics"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def analytics(self):
         return ReviewAnalytics()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_analytics_initialization(self, analytics):
         """Test analytics initialization"""
         assert analytics is not None
         assert hasattr(analytics, 'metrics_history')
         assert hasattr(analytics, 'insights_history')
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_record_metric(self, analytics):
         """Test metric recording"""
         metric = ReviewMetric(
@@ -344,7 +346,7 @@ class TestReviewAnalytics:
         assert metric_id == "test_metric"
         assert len(analytics.metrics_history) == 1
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_calculate_session_metrics(self, analytics):
         """Test session metrics calculation"""
         metrics = await analytics.calculate_session_metrics("test_session")
@@ -357,7 +359,7 @@ class TestReviewAnalytics:
             assert hasattr(metric, 'value')
             assert 0 <= metric.value <= 1
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_generate_insights(self, analytics):
         """Test insight generation"""
         # Record some metrics first
@@ -386,11 +388,11 @@ class TestReviewAnalytics:
 class TestAutomatedReportGenerator:
     """Test suite for AutomatedReportGenerator"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def generator(self, tmp_path):
         return AutomatedReportGenerator(output_dir=str(tmp_path))
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_generator_initialization(self, generator):
         """Test generator initialization"""
         assert generator is not None
@@ -398,7 +400,7 @@ class TestAutomatedReportGenerator:
         assert hasattr(generator, 'active_requests')
         assert len(generator.templates) > 0  # Should have default templates
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_generate_html_report(self, generator):
         """Test HTML report generation"""
         request = ReportRequest(
@@ -426,7 +428,7 @@ class TestAutomatedReportGenerator:
         # Wait for processing (in real test, would need to wait for worker)
         await asyncio.sleep(0.1)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_create_template(self, generator):
         """Test template creation"""
         from src.core_services.automated_report_generator import ReportTemplate
@@ -451,7 +453,7 @@ class TestAutomatedReportGenerator:
 class TestV0_3_5Integration:
     """Integration tests for V0.3.5 components"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_full_workflow_integration(self):
         """Test complete workflow integration"""
         # Initialize all components
@@ -504,7 +506,7 @@ class TestV0_3_5Integration:
             assert assessment_result['success'] is True
             
             # Step 4: Record metrics
-            from src.core_services.review_analytics import ReviewMetric, MetricType
+            from src.core_services.review_analytics import MetricType, ReviewMetric
             
             metric = ReviewMetric(
                 metric_id="integration_test_metric",
@@ -526,7 +528,7 @@ class TestV0_3_5Integration:
             assert isinstance(insights, list)
             
             # Step 6: Generate report
-            from src.core_services.automated_report_generator import ReportRequest, ReportType, ReportFormat
+            from src.core_services.automated_report_generator import ReportFormat, ReportRequest, ReportType
             
             report_request = ReportRequest(
                 request_id="integration_test_report",
@@ -555,7 +557,7 @@ class TestV0_3_5Integration:
             await analytics.stop()
             await generator.stop()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_error_handling_and_graceful_degradation(self):
         """Test error handling and graceful degradation"""
         # Test with failing components
@@ -583,7 +585,7 @@ class TestV0_3_5Integration:
         assert 'error' in result
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_performance_benchmarks():
     """Performance benchmark tests"""
     import time

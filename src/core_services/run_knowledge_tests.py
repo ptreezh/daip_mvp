@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 03:00:00
+"""@Time    : 2025-07-25 03:00:00
 @Author  : DAIP-LIVE Team
 @File    : run_knowledge_tests.py
 @Description:
@@ -9,7 +7,6 @@
 """
 import asyncio
 import sys
-import os
 from pathlib import Path
 
 # Add the project root to the Python path
@@ -27,10 +24,9 @@ async def run_basic_functionality_test():
     try:
         # Import required modules
         from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeNode, NodeType
+        from src.core_services.knowledge_management_service import KnowledgeManagementConfig, KnowledgeManagementService
+        from src.core_services.knowledge_retrieval_service import SearchScope
         from src.core_services.wiki_service import WikiService
-        from src.core_services.knowledge_retrieval_service import KnowledgeRetrievalService, SearchScope
-        from src.core_services.knowledge_evolution_manager import KnowledgeEvolutionManager, EvolutionStrategy
-        from src.core_services.knowledge_management_service import KnowledgeManagementService, KnowledgeManagementConfig
         
         print("✅ All required modules imported successfully")
         

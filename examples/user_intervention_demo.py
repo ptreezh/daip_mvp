@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 19:30:00
+"""@Time    : 2025-07-24 19:30:00
 @Author  : DAIP-LIVE Team
 @File    : user_intervention_demo.py
 @Description:
@@ -9,7 +7,6 @@
 """
 import asyncio
 import sys
-import os
 from pathlib import Path
 
 # Add src to path
@@ -18,10 +15,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
-
 from user_interface.interactive_controller import InteractiveController
 from user_interface.parameter_manager import ParameterDefinition, ParameterType
-from user_interface.workflow_steering import SteeringAction
 
 
 async def demo_parameter_collection():
@@ -260,7 +255,7 @@ async def demo_integration_scenario():
         for i, config in enumerate(configs, 1):
             console.print(f"  {i}. {config}")
         
-        from rich.prompt import Prompt, Confirm
+        from rich.prompt import Confirm, Prompt
         if Confirm.ask("Use existing configuration?"):
             choice = Prompt.ask(
                 "Select configuration",

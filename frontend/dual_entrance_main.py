@@ -1,32 +1,30 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - 双入口主界面
+"""Personal Intelligence Hub - 双入口主界面
 
 基于Lona Web框架的统一入口界面
 支持Secretariat和Forum两种用户交互模式
 """
 
-from lona import LonaApp, View
-from lona.html import HTML, Div, H1, H2, Head, Title, Link, Button, P, Span
-from lona.html import TextInput, Select, Option, Form
 import asyncio
 import logging
 import uuid
+
+from lona import LonaApp, View
+from lona.html import H1, H2, HTML, Button, Div, Form, Head, Link, Option, P, Select, TextInput, Title
 
 # 配置日志
 logger = logging.getLogger(__name__)
 
 # 导入现有组件
 from components.chat_interface import ChatInterface
+from components.task_panel import TaskPanel
 from components.transparency_monitor import TransparencyMonitor
 from components.wiki_panel import WikiPanel
-from components.task_panel import TaskPanel
+from services.backend_connector import BackendConnector
 
 # 导入服务
 from services.personal_assistant import PersonalAssistantService
-from services.backend_connector import BackendConnector
-from services.websocket_manager import websocket_manager, realtime_manager
+from services.websocket_manager import websocket_manager
 
 # 创建Lona应用实例
 app = LonaApp(__file__)

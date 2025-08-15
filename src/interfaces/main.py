@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : main.py
 @Description:
@@ -8,43 +6,33 @@
     Creates and configures the FastAPI app with all routers and middleware.
 """
 
-import asyncio
-import json
-from contextlib import asynccontextmanager
-from typing import Dict, Any, Optional
-from datetime import datetime
 import logging
 import os
+from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Depends, Request, Response, WebSocket, WebSocketDisconnect
+import uvicorn
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.openapi.utils import get_openapi
 from starlette.middleware.base import BaseHTTPMiddleware
-import uvicorn
 
-from ..application import (
-    PersonalAssistantService, SessionManager, TaskOrchestrator, 
-    EntranceSelector, WebSocketManager
-)
+from ..application import EntranceSelector, PersonalAssistantService, SessionManager, TaskOrchestrator, WebSocketManager
 from ..infrastructure import (
-    get_database_manager, get_redis_manager, get_vector_store_manager,
-    close_database_connection, close_redis_connection, close_vector_store_connection
+    close_database_connection,
+    close_redis_connection,
+    close_vector_store_connection,
+    get_database_manager,
+    get_redis_manager,
+    get_vector_store_manager,
 )
-from .models import (
-    ErrorResponse, SuccessResponse, HealthResponse, 
-    SystemConfig, WebSocketMessage, WebSocketConnection
-)
-from .routers import (
-    users_router, sessions_router, tasks_router, 
-    messages_router, websocket_router, admin_router
-)
-from .dependencies import get_current_user, get_session_manager
+from .models import ErrorResponse, HealthResponse, SuccessResponse, SystemConfig
+from .routers import admin_router, messages_router, sessions_router, tasks_router, users_router, websocket_router
 from .websocket_manager import WebSocketEndpoint
-
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -195,7 +183,6 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     """创建FastAPI应用"""
-    
     # 创建应用
     app = FastAPI(
         title=APP_CONFIG["title"],

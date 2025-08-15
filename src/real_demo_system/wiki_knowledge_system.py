@@ -1,18 +1,16 @@
-"""
-Wiki知识沉淀系统
+"""Wiki知识沉淀系统
 
 实现知识的积累、管理和检索，将辩论结果和分析过程沉淀为可复用的知识。
 """
 
-import asyncio
+import hashlib
 import json
 import logging
-import hashlib
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
-from dataclasses import dataclass, asdict
 from enum import Enum
 from pathlib import Path
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -43,16 +41,16 @@ class KnowledgeEntry:
     content: str
     knowledge_type: KnowledgeType
     status: KnowledgeStatus
-    tags: List[str]
-    related_entries: List[str]
-    source_data: Dict[str, Any]
+    tags: list[str]
+    related_entries: list[str]
+    source_data: dict[str, Any]
     quality_score: float
     created_at: datetime
     updated_at: datetime
     version: int
-    contributors: List[str]
+    contributors: list[str]
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data['knowledge_type'] = self.knowledge_type.value
         data['status'] = self.status.value
@@ -64,21 +62,19 @@ class KnowledgeEntry:
 @dataclass
 class KnowledgeGraph:
     """知识图谱"""
-    nodes: Dict[str, Dict[str, Any]]
-    edges: List[Dict[str, Any]]
-    clusters: Dict[str, List[str]]
+    nodes: dict[str, dict[str, Any]]
+    edges: list[dict[str, Any]]
+    clusters: dict[str, list[str]]
 
 
 class WikiKnowledgeSystem:
-    """
-    Wiki知识沉淀系统
+    """Wiki知识沉淀系统
     
     负责将辩论结果、分析过程和洞察沉淀为结构化的知识库。
     """
     
     def __init__(self, storage_path: str = "data/wiki_knowledge"):
-        """
-        初始化知识系统
+        """初始化知识系统
         
         Args:
             storage_path: 知识存储路径
@@ -87,10 +83,10 @@ class WikiKnowledgeSystem:
         self.storage_path.mkdir(parents=True, exist_ok=True)
         
         # 知识库
-        self.knowledge_entries: Dict[str, KnowledgeEntry] = {}
+        self.knowledge_entries: dict[str, KnowledgeEntry] = {}
         self.knowledge_graph = KnowledgeGraph(nodes={}, edges=[], clusters={})
-        self.tag_index: Dict[str, Set[str]] = {}
-        self.search_index: Dict[str, Set[str]] = {}
+        self.tag_index: dict[str, set[str]] = {}
+        self.search_index: dict[str, set[str]] = {}
         
         # 加载现有知识
         self._load_existing_knowledge()
@@ -102,7 +98,7 @@ class WikiKnowledgeSystem:
         try:
             knowledge_file = self.storage_path / "knowledge_entries.json"
             if knowledge_file.exists():
-                with open(knowledge_file, 'r', encoding='utf-8') as f:
+                with open(knowledge_file, encoding='utf-8') as f:
                     data = json.load(f)
                     
                 for entry_data in data.get('entries', []):
@@ -144,11 +140,10 @@ class WikiKnowledgeSystem:
     
     async def distill_debate_knowledge(
         self, 
-        debate_transcript: Dict[str, Any],
-        consensus_result: Dict[str, Any]
+        debate_transcript: dict[str, Any],
+        consensus_result: dict[str, Any]
     ) -> str:
-        """
-        从辩论中提炼知识
+        """从辩论中提炼知识
         
         Args:
             debate_transcript: 辩论记录
@@ -255,7 +250,7 @@ class WikiKnowledgeSystem:
             logger.error(f"Failed to distill debate knowledge: {e}")
             return ""
     
-    def _summarize_debate_transcript(self, transcript: List[Dict[str, Any]]) -> str:
+    def _summarize_debate_transcript(self, transcript: list[dict[str, Any]]) -> str:
         """总结辩论记录"""
         if not transcript:
             return "无辩论记录"
@@ -277,7 +272,7 @@ class WikiKnowledgeSystem:
         
         return "\n".join(summary_parts)
     
-    def _extract_tags_from_content(self, content: str) -> List[str]:
+    def _extract_tags_from_content(self, content: str) -> list[str]:
         """从内容中提取标签"""
         # 简化的标签提取
         tags = []
@@ -319,11 +314,10 @@ class WikiKnowledgeSystem:
         self,
         title: str,
         analysis_content: str,
-        source_data: Dict[str, Any],
-        tags: Optional[List[str]] = None
+        source_data: dict[str, Any],
+        tags: Optional[list[str]] = None
     ) -> str:
-        """
-        创建分析知识条目
+        """创建分析知识条目
         
         Args:
             title: 知识标题
@@ -370,12 +364,11 @@ class WikiKnowledgeSystem:
     def search_knowledge(
         self,
         query: str,
-        knowledge_types: Optional[List[KnowledgeType]] = None,
-        tags: Optional[List[str]] = None,
+        knowledge_types: Optional[list[KnowledgeType]] = None,
+        tags: Optional[list[str]] = None,
         limit: int = 10
-    ) -> List[Dict[str, Any]]:
-        """
-        搜索知识
+    ) -> list[dict[str, Any]]:
+        """搜索知识
         
         Args:
             query: 搜索查询
@@ -433,7 +426,7 @@ class WikiKnowledgeSystem:
         self, 
         entry: KnowledgeEntry, 
         query: str, 
-        tags: Optional[List[str]]
+        tags: Optional[list[str]]
     ) -> float:
         """计算相关性分数"""
         score = 0.0
@@ -464,13 +457,13 @@ class WikiKnowledgeSystem:
         
         return min(score, 1.0)
     
-    def get_knowledge_by_id(self, entry_id: str) -> Optional[Dict[str, Any]]:
+    def get_knowledge_by_id(self, entry_id: str) -> Optional[dict[str, Any]]:
         """根据ID获取知识条目"""
         if entry_id in self.knowledge_entries:
             return self.knowledge_entries[entry_id].to_dict()
         return None
     
-    def get_related_knowledge(self, entry_id: str, limit: int = 5) -> List[Dict[str, Any]]:
+    def get_related_knowledge(self, entry_id: str, limit: int = 5) -> list[dict[str, Any]]:
         """获取相关知识"""
         if entry_id not in self.knowledge_entries:
             return []
@@ -505,7 +498,7 @@ class WikiKnowledgeSystem:
         
         return results[:limit]
     
-    def get_knowledge_statistics(self) -> Dict[str, Any]:
+    def get_knowledge_statistics(self) -> dict[str, Any]:
         """获取知识库统计信息"""
         total_entries = len(self.knowledge_entries)
         
@@ -541,7 +534,7 @@ class WikiKnowledgeSystem:
             ).isoformat()
         }
     
-    def export_knowledge_graph(self) -> Dict[str, Any]:
+    def export_knowledge_graph(self) -> dict[str, Any]:
         """导出知识图谱"""
         # 构建节点
         nodes = {}

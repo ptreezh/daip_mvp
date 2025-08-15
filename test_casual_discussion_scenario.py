@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-02 20:05:00
+"""@Time    : 2025-08-02 20:05:00
 @Author  : DAIP-LIVE Team
 @File    : test_casual_discussion_scenario.py
 @Description:
@@ -16,15 +14,15 @@
 """
 
 import asyncio
+import json
 import logging
 import time
-import json
-from typing import Dict, List, Any
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 # 导入待测试组件
-from src.scenarios.casual_discussion_scenario import CasualDiscussionScenario, CasualDiscussionConfig
+from src.scenarios.casual_discussion_scenario import CasualDiscussionConfig, CasualDiscussionScenario
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -38,7 +36,7 @@ class CasualDiscussionQualityAssurance:
         self.test_results = {}
         self.scenario = CasualDiscussionScenario()
         
-    async def run_all_tests(self) -> Dict[str, Any]:
+    async def run_all_tests(self) -> dict[str, Any]:
         """运行所有质量保证测试"""
         logger.info("=" * 60)
         logger.info("🎭 开始轻松讨论场景质量保证测试")
@@ -95,7 +93,7 @@ class CasualDiscussionQualityAssurance:
         
         return final_report
     
-    async def test_functional_completeness(self) -> Dict[str, Any]:
+    async def test_functional_completeness(self) -> dict[str, Any]:
         """功能完整性测试 - 完成"最近看的好电影"轻松讨论案例"""
         logger.info("执行最近看的好电影轻松讨论案例...")
         
@@ -166,7 +164,7 @@ class CasualDiscussionQualityAssurance:
                 "details": "功能完整性测试执行失败"
             }
     
-    async def test_naturalness_and_fun(self) -> Dict[str, Any]:
+    async def test_naturalness_and_fun(self) -> dict[str, Any]:
         """自然性和趣味性测试 - 验证对话的自然流畅性和趣味性"""
         logger.info("执行自然性和趣味性测试...")
         
@@ -273,7 +271,7 @@ class CasualDiscussionQualityAssurance:
                 "details": "自然性和趣味性测试执行失败"
             }
     
-    async def test_topic_transition(self) -> Dict[str, Any]:
+    async def test_topic_transition(self) -> dict[str, Any]:
         """话题转换机制测试 - 测试话题切换的平滑性和相关性"""
         logger.info("执行话题转换机制测试...")
         
@@ -346,7 +344,7 @@ class CasualDiscussionQualityAssurance:
                 "details": "话题转换机制测试执行失败"
             }
     
-    async def test_social_interactions(self) -> Dict[str, Any]:
+    async def test_social_interactions(self) -> dict[str, Any]:
         """社交互动功能测试 - 验证表情、点赞、高亮等社交元素"""
         logger.info("执行社交互动功能测试...")
         
@@ -433,7 +431,7 @@ class CasualDiscussionQualityAssurance:
                 "details": "社交互动功能测试执行失败"
             }
     
-    async def test_user_experience(self) -> Dict[str, Any]:
+    async def test_user_experience(self) -> dict[str, Any]:
         """用户体验流程测试 - 确认轻松愉快的讨论氛围和用户参与度"""
         logger.info("执行用户体验流程测试...")
         
@@ -548,7 +546,7 @@ class CasualDiscussionQualityAssurance:
                 "details": "用户体验流程测试执行失败"
             }
     
-    async def test_performance_stability(self) -> Dict[str, Any]:
+    async def test_performance_stability(self) -> dict[str, Any]:
         """性能和稳定性测试 - 确保轻松模式下的响应速度和系统稳定性"""
         logger.info("执行性能和稳定性测试...")
         
@@ -646,7 +644,7 @@ class CasualDiscussionQualityAssurance:
                 "details": "性能和稳定性测试执行失败"
             }
     
-    async def test_atmosphere_creation(self) -> Dict[str, Any]:
+    async def test_atmosphere_creation(self) -> dict[str, Any]:
         """氛围营造能力测试 - 验证轻松愉快讨论氛围的营造效果"""
         logger.info("执行氛围营造能力测试...")
         
@@ -752,7 +750,7 @@ class CasualDiscussionQualityAssurance:
             }
     
     # 辅助方法
-    def _check_movie_topic_relevance(self, result: Dict[str, Any]) -> bool:
+    def _check_movie_topic_relevance(self, result: dict[str, Any]) -> bool:
         """检查电影话题相关性"""
         discussion_rounds = result.get("discussion_result", {}).get("discussion_rounds", [])
         movie_keywords = ["电影", "影片", "导演", "演员", "剧情", "票房", "影院"]
@@ -766,7 +764,7 @@ class CasualDiscussionQualityAssurance:
         
         return False
     
-    def _assess_conversation_flow(self, discussion_rounds: List[Dict[str, Any]]) -> bool:
+    def _assess_conversation_flow(self, discussion_rounds: list[dict[str, Any]]) -> bool:
         """评估对话流畅性"""
         if len(discussion_rounds) < 2:
             return False
@@ -785,7 +783,7 @@ class CasualDiscussionQualityAssurance:
         
         return True
     
-    def _assess_humor_appropriateness(self, discussion_rounds: List[Dict[str, Any]], expected_level: float) -> bool:
+    def _assess_humor_appropriateness(self, discussion_rounds: list[dict[str, Any]], expected_level: float) -> bool:
         """评估幽默程度的适当性"""
         humor_indicators = ["😂", "哈哈", "好笑", "有趣", "搞笑", "逗", "🤣"]
         total_humor_count = 0
@@ -807,7 +805,7 @@ class CasualDiscussionQualityAssurance:
         
         return abs(humor_ratio - expected_ratio) <= 0.2
     
-    def _assess_emoji_naturalness(self, discussion_rounds: List[Dict[str, Any]]) -> bool:
+    def _assess_emoji_naturalness(self, discussion_rounds: list[dict[str, Any]]) -> bool:
         """评估表情符号使用的自然性"""
         total_emoji = 0
         total_contributions = 0
@@ -826,7 +824,7 @@ class CasualDiscussionQualityAssurance:
         emoji_ratio = total_emoji / total_contributions
         return 0.1 <= emoji_ratio <= 1.0
     
-    def _assess_topic_consistency(self, discussion_rounds: List[Dict[str, Any]], original_topic: str) -> bool:
+    def _assess_topic_consistency(self, discussion_rounds: list[dict[str, Any]], original_topic: str) -> bool:
         """评估话题一致性"""
         topic_keywords = set(original_topic.lower().split())
         
@@ -846,7 +844,7 @@ class CasualDiscussionQualityAssurance:
         
         return True
     
-    def _assess_style_diversity(self, discussion_rounds: List[Dict[str, Any]]) -> bool:
+    def _assess_style_diversity(self, discussion_rounds: list[dict[str, Any]]) -> bool:
         """评估参与者风格多样性"""
         participant_styles = {}
         
@@ -872,7 +870,7 @@ class CasualDiscussionQualityAssurance:
         style_variance = max(avg_styles) - min(avg_styles)
         return style_variance > 0.1
     
-    def _assess_engagement_sustainability(self, discussion_rounds: List[Dict[str, Any]]) -> bool:
+    def _assess_engagement_sustainability(self, discussion_rounds: list[dict[str, Any]]) -> bool:
         """评估参与度持续性"""
         engagement_levels = [round_data.get("engagement_level", 0.5) for round_data in discussion_rounds]
         
@@ -888,7 +886,7 @@ class CasualDiscussionQualityAssurance:
         # 允许部分下降，但不能超过一半的轮次
         return declining_count <= len(engagement_levels) / 2
     
-    def _check_transition_relevance(self, topic_evolution: Dict[str, Any]) -> bool:
+    def _check_transition_relevance(self, topic_evolution: dict[str, Any]) -> bool:
         """检查话题转换的相关性"""
         topic_flow = topic_evolution.get("topic_flow", [])
         
@@ -907,7 +905,7 @@ class CasualDiscussionQualityAssurance:
         
         return True
     
-    def _assess_transition_smoothness(self, discussion_rounds: List[Dict[str, Any]]) -> bool:
+    def _assess_transition_smoothness(self, discussion_rounds: list[dict[str, Any]]) -> bool:
         """评估话题转换的平滑性"""
         for round_data in discussion_rounds:
             contributions = round_data.get("contributions", [])
@@ -921,7 +919,7 @@ class CasualDiscussionQualityAssurance:
         
         return True
     
-    def _check_participant_adaptation(self, discussion_rounds: List[Dict[str, Any]]) -> bool:
+    def _check_participant_adaptation(self, discussion_rounds: list[dict[str, Any]]) -> bool:
         """检查参与者对话题转换的适应性"""
         participant_relevance = {}
         
@@ -943,7 +941,7 @@ class CasualDiscussionQualityAssurance:
         
         return True
     
-    def _calculate_transition_smoothness(self, discussion_rounds: List[Dict[str, Any]]) -> float:
+    def _calculate_transition_smoothness(self, discussion_rounds: list[dict[str, Any]]) -> float:
         """计算话题转换平滑度"""
         smoothness_scores = []
         
@@ -964,7 +962,7 @@ class CasualDiscussionQualityAssurance:
         
         return sum(smoothness_scores) / len(smoothness_scores) if smoothness_scores else 0.5
     
-    def _assess_contextual_coherence(self, topic_evolution: Dict[str, Any]) -> float:
+    def _assess_contextual_coherence(self, topic_evolution: dict[str, Any]) -> float:
         """评估上下文连贯性"""
         topic_flow = topic_evolution.get("topic_flow", [])
         
@@ -983,7 +981,7 @@ class CasualDiscussionQualityAssurance:
         
         return sum(coherence_scores) / len(coherence_scores) if coherence_scores else 0.5
     
-    def _extract_transition_examples(self, discussion_rounds: List[Dict[str, Any]]) -> List[str]:
+    def _extract_transition_examples(self, discussion_rounds: list[dict[str, Any]]) -> list[str]:
         """提取话题转换示例"""
         examples = []
         
@@ -1001,7 +999,7 @@ class CasualDiscussionQualityAssurance:
         
         return examples[:3]  # 返回前3个示例
     
-    def _calculate_emoji_usage_rate(self, discussion_rounds: List[Dict[str, Any]]) -> float:
+    def _calculate_emoji_usage_rate(self, discussion_rounds: list[dict[str, Any]]) -> float:
         """计算表情符号使用率"""
         total_emoji = 0
         total_contributions = 0
@@ -1015,7 +1013,7 @@ class CasualDiscussionQualityAssurance:
         
         return total_emoji / total_contributions if total_contributions > 0 else 0
     
-    def _assess_participation_encouragement(self, discussion_rounds: List[Dict[str, Any]], social_summary: Dict[str, Any]) -> bool:
+    def _assess_participation_encouragement(self, discussion_rounds: list[dict[str, Any]], social_summary: dict[str, Any]) -> bool:
         """评估社交元素对参与的促进作用"""
         interaction_stats = social_summary.get("interaction_stats", {})
         total_interactions = interaction_stats.get("total_interactions", 0)
@@ -1029,7 +1027,7 @@ class CasualDiscussionQualityAssurance:
         # 简化检查：有社交互动且参与度较高
         return total_interactions > 0 and sum(engagement_levels) / len(engagement_levels) > 0.6
     
-    def _check_casual_tone_maintenance(self, discussion_rounds: List[Dict[str, Any]]) -> bool:
+    def _check_casual_tone_maintenance(self, discussion_rounds: list[dict[str, Any]]) -> bool:
         """检查轻松语调的维持"""
         formal_indicators = ["此外", "因此", "综上所述", "总而言之", "基于以上分析"]
         
@@ -1044,7 +1042,7 @@ class CasualDiscussionQualityAssurance:
         
         return True
     
-    def _assess_atmosphere_comfort(self, result: Dict[str, Any], user_preferences: Dict[str, Any]) -> float:
+    def _assess_atmosphere_comfort(self, result: dict[str, Any], user_preferences: dict[str, Any]) -> float:
         """评估氛围舒适度"""
         social_preference = user_preferences.get("social_interaction_preference", "moderate")
         actual_interactions = result.get("social_summary", {}).get("interaction_stats", {}).get("total_interactions", 0)
@@ -1057,7 +1055,7 @@ class CasualDiscussionQualityAssurance:
         else:  # moderate
             return 1.0 if 3 <= actual_interactions <= 12 else 0.8
     
-    def _assess_content_appropriateness(self, result: Dict[str, Any], user_preferences: Dict[str, Any]) -> float:
+    def _assess_content_appropriateness(self, result: dict[str, Any], user_preferences: dict[str, Any]) -> float:
         """评估内容适当性"""
         humor_tolerance = user_preferences.get("humor_tolerance", 0.7)
         actual_fun_factor = result.get("metadata", {}).get("fun_factor", 0)
@@ -1070,7 +1068,7 @@ class CasualDiscussionQualityAssurance:
         else:
             return 0.5
     
-    def _assess_interaction_comfort(self, result: Dict[str, Any], user_preferences: Dict[str, Any]) -> float:
+    def _assess_interaction_comfort(self, result: dict[str, Any], user_preferences: dict[str, Any]) -> float:
         """评估互动舒适度"""
         discussion_style = user_preferences.get("discussion_style", "casual")
         engagement_score = result.get("metadata", {}).get("engagement_score", 0)
@@ -1083,7 +1081,7 @@ class CasualDiscussionQualityAssurance:
         else:  # balanced/casual
             return 1.0 if engagement_score >= 0.6 else 0.8
     
-    def _assess_topic_engagement(self, result: Dict[str, Any]) -> float:
+    def _assess_topic_engagement(self, result: dict[str, Any]) -> float:
         """评估话题参与度"""
         topic_evolution = result.get("topic_evolution", {})
         natural_transitions = topic_evolution.get("natural_transitions", 0)
@@ -1097,7 +1095,7 @@ class CasualDiscussionQualityAssurance:
         else:
             return 0.6
     
-    def _estimate_user_satisfaction(self, result: Dict[str, Any], user_preferences: Dict[str, Any]) -> float:
+    def _estimate_user_satisfaction(self, result: dict[str, Any], user_preferences: dict[str, Any]) -> float:
         """估算用户满意度"""
         comfort = self._assess_atmosphere_comfort(result, user_preferences)
         appropriateness = self._assess_content_appropriateness(result, user_preferences)
@@ -1107,7 +1105,7 @@ class CasualDiscussionQualityAssurance:
         # 综合评分
         return (comfort * 0.3 + appropriateness * 0.25 + interaction * 0.25 + engagement * 0.2)
     
-    def _estimate_memory_usage(self, result: Dict[str, Any]) -> float:
+    def _estimate_memory_usage(self, result: dict[str, Any]) -> float:
         """估算内存使用量（简化）"""
         # 简化的内存估算
         discussion_rounds = len(result.get("discussion_result", {}).get("discussion_rounds", []))
@@ -1118,7 +1116,7 @@ class CasualDiscussionQualityAssurance:
         estimated_memory = discussion_rounds * participants + social_interactions * 0.1
         return estimated_memory
     
-    def _assess_energy_level_match(self, discussion_rounds: List[Dict[str, Any]], expected_energy: str) -> bool:
+    def _assess_energy_level_match(self, discussion_rounds: list[dict[str, Any]], expected_energy: str) -> bool:
         """评估能量级别匹配"""
         avg_engagement = sum(round_data.get("engagement_level", 0.5) for round_data in discussion_rounds) / len(discussion_rounds) if discussion_rounds else 0.5
         
@@ -1129,7 +1127,7 @@ class CasualDiscussionQualityAssurance:
         else:  # medium
             return 0.5 <= avg_engagement <= 0.8
     
-    def _assess_humor_level_match(self, discussion_rounds: List[Dict[str, Any]], expected_humor: float) -> bool:
+    def _assess_humor_level_match(self, discussion_rounds: list[dict[str, Any]], expected_humor: float) -> bool:
         """评估幽默程度匹配"""
         humor_indicators = ["😂", "哈哈", "好笑", "有趣", "搞笑"]
         total_humor = 0
@@ -1148,7 +1146,7 @@ class CasualDiscussionQualityAssurance:
         
         return abs(actual_humor_ratio - expected_ratio) <= 0.2
     
-    def _assess_emotional_tone(self, discussion_rounds: List[Dict[str, Any]]) -> str:
+    def _assess_emotional_tone(self, discussion_rounds: list[dict[str, Any]]) -> str:
         """评估情感语调"""
         positive_indicators = ["开心", "高兴", "棒", "好", "喜欢", "😊", "👍"]
         negative_indicators = ["难过", "糟糕", "不好", "失望", "😢"]
@@ -1170,7 +1168,7 @@ class CasualDiscussionQualityAssurance:
         else:
             return "neutral"
     
-    def _assess_participant_comfort_level(self, discussion_rounds: List[Dict[str, Any]]) -> float:
+    def _assess_participant_comfort_level(self, discussion_rounds: list[dict[str, Any]]) -> float:
         """评估参与者舒适度"""
         comfort_indicators = ["我觉得", "我想", "我认为", "个人认为"]
         total_comfort_expressions = 0
@@ -1186,7 +1184,7 @@ class CasualDiscussionQualityAssurance:
         
         return total_comfort_expressions / total_contributions if total_contributions > 0 else 0.5
     
-    def _assess_conversation_naturalness(self, discussion_rounds: List[Dict[str, Any]]) -> float:
+    def _assess_conversation_naturalness(self, discussion_rounds: list[dict[str, Any]]) -> float:
         """评估对话自然性"""
         natural_indicators = ["对了", "是啊", "确实", "我也是", "哈哈"]
         total_natural_expressions = 0
@@ -1202,7 +1200,7 @@ class CasualDiscussionQualityAssurance:
         
         return min(total_natural_expressions / total_contributions if total_contributions > 0 else 0.5, 1.0)
     
-    def _calculate_atmosphere_score(self, assessment: Dict[str, Any], expected_atmosphere: str) -> float:
+    def _calculate_atmosphere_score(self, assessment: dict[str, Any], expected_atmosphere: str) -> float:
         """计算氛围评分"""
         base_score = 0.0
         
@@ -1230,9 +1228,8 @@ class CasualDiscussionQualityAssurance:
         
         return min(base_score, 1.0)
     
-    async def generate_final_report(self, overall_success: bool) -> Dict[str, Any]:
+    async def generate_final_report(self, overall_success: bool) -> dict[str, Any]:
         """生成最终质量保证报告"""
-        
         # 统计测试结果
         total_tests = len(self.test_results)
         passed_tests = sum(1 for result in self.test_results.values() if result.get("success", False))
@@ -1275,7 +1272,7 @@ class CasualDiscussionQualityAssurance:
         
         return report
     
-    async def save_report(self, report: Dict[str, Any]):
+    async def save_report(self, report: dict[str, Any]):
         """保存质量保证报告"""
         try:
             report_path = Path("v0_2_7_casual_discussion_quality_report.json")
@@ -1306,7 +1303,7 @@ async def main():
             status = "✅" if passed else "❌"
             print(f"  {check}: {status}")
         
-        print(f"\n💡 建议:")
+        print("\n💡 建议:")
         for rec in final_report['recommendations']:
             print(f"  • {rec}")
         

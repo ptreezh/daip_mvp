@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-项目架构映射工具
+"""项目架构映射工具
 用于生成完整的项目结构、类定义、方法签名等信息
 """
 
-import os
 import ast
-import importlib.util
-from pathlib import Path
-from typing import Dict, List, Any
 import json
+from pathlib import Path
+from typing import Any
+
 
 class ProjectArchitectureMapper:
     """项目架构映射器"""
@@ -47,7 +44,7 @@ class ProjectArchitectureMapper:
     def _analyze_file(self, file_path: Path):
         """分析单个Python文件"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
             
             tree = ast.parse(content)
@@ -91,7 +88,7 @@ class ProjectArchitectureMapper:
             module_parts = module_parts[:-1]
         return ".".join(module_parts)
     
-    def _analyze_class(self, node: ast.ClassDef) -> Dict[str, Any]:
+    def _analyze_class(self, node: ast.ClassDef) -> dict[str, Any]:
         """分析类定义"""
         methods = []
         attributes = []
@@ -119,7 +116,7 @@ class ProjectArchitectureMapper:
             "decorators": [self._get_decorator_name(d) for d in node.decorator_list]
         }
     
-    def _analyze_function(self, node: ast.FunctionDef) -> Dict[str, Any]:
+    def _analyze_function(self, node: ast.FunctionDef) -> dict[str, Any]:
         """分析函数定义"""
         return {
             "name": node.name,
@@ -128,7 +125,7 @@ class ProjectArchitectureMapper:
             "decorators": [self._get_decorator_name(d) for d in node.decorator_list]
         }
     
-    def _analyze_import(self, node) -> Dict[str, Any]:
+    def _analyze_import(self, node) -> dict[str, Any]:
         """分析导入语句"""
         if isinstance(node, ast.Import):
             return {
@@ -160,7 +157,7 @@ class ProjectArchitectureMapper:
             return f"{base.value.id}.{base.attr}"
         return str(base)
     
-    def generate_interface_map(self) -> Dict[str, Any]:
+    def generate_interface_map(self) -> dict[str, Any]:
         """生成接口映射"""
         interface_map = {
             "available_classes": {},

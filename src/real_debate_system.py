@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-真实的多轮辩论系统
+"""真实的多轮辩论系统
 
 基于真实LLM调用的多角色深度辩论系统
 支持5轮以上辩论，每次发言500字以上，最终生成5000字以上综合报告
@@ -10,11 +8,11 @@
 import asyncio
 import logging
 import sys
-import json
-import requests
-from pathlib import Path
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+import requests
 
 # 添加项目根目录到路径
 sys.path.append(str(Path(__file__).parent.parent))
@@ -58,7 +56,7 @@ class RealDebateSystem:
     
     async def start_debate(self, topic: str):
         """启动真实的多轮辩论"""
-        print(f"\n🎭 启动真实多轮辩论")
+        print("\n🎭 启动真实多轮辩论")
         print(f"📋 辩论主题: {topic}")
         print("=" * 80)
         
@@ -81,7 +79,7 @@ class RealDebateSystem:
         print("\n🎉 辩论完成！")
         return final_report
     
-    async def _select_relevant_roles(self, topic: str) -> List[Dict[str, Any]]:
+    async def _select_relevant_roles(self, topic: str) -> list[dict[str, Any]]:
         """根据话题选择相关角色"""
         print("🎯 正在选择与话题相关的角色...")
         
@@ -140,7 +138,7 @@ class RealDebateSystem:
         
         return relevant_roles[:5]
     
-    def _extract_topic_keywords(self, topic: str) -> List[str]:
+    def _extract_topic_keywords(self, topic: str) -> list[str]:
         """提取话题关键词"""
         # 简单的关键词提取
         keywords = []
@@ -153,7 +151,7 @@ class RealDebateSystem:
         
         return keywords
     
-    def _calculate_role_relevance(self, role, role_type: str, keywords: List[str]) -> float:
+    def _calculate_role_relevance(self, role, role_type: str, keywords: list[str]) -> float:
         """计算角色与话题的相关性"""
         score = 0.0
         
@@ -171,7 +169,7 @@ class RealDebateSystem:
         
         return score
     
-    async def _conduct_multi_round_debate(self, topic: str, participants: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _conduct_multi_round_debate(self, topic: str, participants: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """进行多轮辩论"""
         print(f"\n💭 开始多轮辩论 (最少{self.debate_config['min_rounds']}轮)")
         
@@ -230,7 +228,7 @@ class RealDebateSystem:
         print(f"\n✅ 辩论结束，共进行了 {current_round} 轮")
         return debate_history
     
-    async def _get_initial_position(self, participant: Dict[str, Any], topic: str) -> str:
+    async def _get_initial_position(self, participant: dict[str, Any], topic: str) -> str:
         """获取参与者的初始立场"""
         role = participant['role']
         context = f"""
@@ -244,7 +242,7 @@ class RealDebateSystem:
         position = await self._call_real_llm(role, context, 0)
         return position
     
-    def _build_debate_context(self, topic: str, history: List[Dict[str, Any]], current_participant: Dict[str, Any], round_num: int) -> str:
+    def _build_debate_context(self, topic: str, history: list[dict[str, Any]], current_participant: dict[str, Any], round_num: int) -> str:
         """构建辩论上下文"""
         role = current_participant['role']
         
@@ -351,7 +349,7 @@ class RealDebateSystem:
 
 这种谨慎而全面的方法虽然可能需要更多时间，但能够确保我们做出明智的决策，避免不必要的风险和负面后果。"""
     
-    async def _should_continue_debate(self, history: List[Dict[str, Any]], current_round: int) -> bool:
+    async def _should_continue_debate(self, history: list[dict[str, Any]], current_round: int) -> bool:
         """判断是否应该继续辩论"""
         if current_round >= self.debate_config['max_rounds']:
             return False
@@ -362,7 +360,7 @@ class RealDebateSystem:
         
         return False
     
-    async def _calculate_consensus_and_divergence(self, debate_history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _calculate_consensus_and_divergence(self, debate_history: list[dict[str, Any]]) -> dict[str, Any]:
         """计算共识和分歧"""
         print("\n🤝 计算共识和分歧...")
         
@@ -399,7 +397,7 @@ class RealDebateSystem:
         print(f"✅ 共识分数: {consensus_score:.2f}")
         return result
     
-    async def _generate_comprehensive_report(self, topic: str, debate_history: List[Dict[str, Any]], consensus_result: Dict[str, Any]) -> str:
+    async def _generate_comprehensive_report(self, topic: str, debate_history: list[dict[str, Any]], consensus_result: dict[str, Any]) -> str:
         """生成综合报告"""
         print("\n📝 生成综合报告...")
         

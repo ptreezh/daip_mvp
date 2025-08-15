@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 16:00:00
+"""@Time    : 2025-08-04 16:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_scenario_integration.py
 @Description:
@@ -8,17 +6,16 @@
     Tests the interaction between scenarios and core system components.
 """
 
-import pytest
 import asyncio
-import json
 from datetime import datetime
-from unittest.mock import Mock, patch, AsyncMock
-from typing import Dict, List, Any
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Import system components
 from src.app_state import AppState
-from src.core_services.expert_consultation_scenario import ExpertConsultationScenario
 from src.core_services.academic_research_scenario import AcademicResearchScenario
+from src.core_services.expert_consultation_scenario import ExpertConsultationScenario
 from src.core_services.industry_analysis_scenario import IndustryAnalysisScenario
 from src.core_services.smart_reviewer_allocator_simple import SmartReviewerAllocator
 
@@ -26,30 +23,30 @@ from src.core_services.smart_reviewer_allocator_simple import SmartReviewerAlloc
 class TestScenarioSystemIntegration:
     """Integration tests for scenario system integration"""
     
-    @pytest.fixture
+    @pytest.fixture()
     async def app_state(self):
         """Create application state for testing"""
         app_state = AppState()
         await app_state.initialize()
         return app_state
     
-    @pytest.fixture
+    @pytest.fixture()
     def expert_scenario(self):
         return ExpertConsultationScenario()
     
-    @pytest.fixture
+    @pytest.fixture()
     def academic_scenario(self):
         return AcademicResearchScenario()
     
-    @pytest.fixture
+    @pytest.fixture()
     def industry_scenario(self):
         return IndustryAnalysisScenario()
     
-    @pytest.fixture
+    @pytest.fixture()
     def reviewer_allocator(self):
         return SmartReviewerAllocator()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_app_state_initialization(self, app_state):
         """Test that app state initializes correctly"""
         assert app_state is not None
@@ -58,11 +55,15 @@ class TestScenarioSystemIntegration:
         assert hasattr(app_state, 'wiki_service')
         assert hasattr(app_state, 'synthesis_engine')
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_scenario_allocator_integration(self, expert_scenario, reviewer_allocator):
         """Test integration between scenarios and reviewer allocator"""
         # Test that expert scenario can use allocator
-        from src.core_services.expert_consultation_scenario import ExpertConsultationRequest, ConsultationType, PriorityLevel
+        from src.core_services.expert_consultation_scenario import (
+            ConsultationType,
+            ExpertConsultationRequest,
+            PriorityLevel,
+        )
         
         request = ExpertConsultationRequest(
             consultation_type=ConsultationType.TECHNICAL_REVIEW,
@@ -81,7 +82,7 @@ class TestScenarioSystemIntegration:
             assert result['success'] is True
             mock_select.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_memory_service_integration(self, app_state, expert_scenario):
         """Test integration with memory service"""
         # Test that scenarios can interact with memory service
@@ -100,7 +101,7 @@ class TestScenarioSystemIntegration:
             assert result['success'] is True
             mock_store.assert_called_once_with(test_data)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_wiki_service_integration(self, app_state, academic_scenario):
         """Test integration with wiki service"""
         # Test that academic scenario can use wiki service
@@ -118,7 +119,7 @@ class TestScenarioSystemIntegration:
             assert result['success'] is True
             assert 'page_id' in result
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_synthesis_engine_integration(self, app_state, expert_scenario):
         """Test integration with synthesis engine"""
         # Test that scenarios can use synthesis engine
@@ -140,13 +141,17 @@ class TestScenarioSystemIntegration:
             assert 'synthesis' in result
             mock_synthesize.assert_called_once_with(expert_opinions)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_cross_scenario_data_sharing(self, expert_scenario, academic_scenario, industry_scenario):
         """Test data sharing between scenarios"""
         # Test that scenarios can share context and data
         
         # Expert consultation generates data
-        from src.core_services.expert_consultation_scenario import ExpertConsultationRequest, ConsultationType, PriorityLevel
+        from src.core_services.expert_consultation_scenario import (
+            ConsultationType,
+            ExpertConsultationRequest,
+            PriorityLevel,
+        )
         
         expert_request = ExpertConsultationRequest(
             consultation_type=ConsultationType.TECHNICAL_REVIEW,
@@ -166,7 +171,7 @@ class TestScenarioSystemIntegration:
         assert academic_result['success'] is True
         
         # Industry analysis uses related context
-        from src.core_services.industry_analysis_scenario import AnalysisRequest, IndustryType, AnalysisDepth
+        from src.core_services.industry_analysis_scenario import AnalysisDepth, AnalysisRequest, IndustryType
         
         industry_request = AnalysisRequest(
             industry_type=IndustryType.HEALTHCARE,
@@ -185,12 +190,16 @@ class TestScenarioSystemIntegration:
         assert 'review_id' in academic_result
         assert 'report_id' in industry_result
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_concurrent_scenario_execution(self, expert_scenario, academic_scenario, industry_scenario):
         """Test concurrent execution of multiple scenarios"""
         # Prepare requests for all scenarios
-        from src.core_services.expert_consultation_scenario import ExpertConsultationRequest, ConsultationType, PriorityLevel
-        from src.core_services.industry_analysis_scenario import AnalysisRequest, IndustryType, AnalysisDepth
+        from src.core_services.expert_consultation_scenario import (
+            ConsultationType,
+            ExpertConsultationRequest,
+            PriorityLevel,
+        )
+        from src.core_services.industry_analysis_scenario import AnalysisDepth, AnalysisRequest, IndustryType
         
         expert_request = ExpertConsultationRequest(
             consultation_type=ConsultationType.TECHNICAL_REVIEW,
@@ -226,10 +235,13 @@ class TestScenarioSystemIntegration:
                 pytest.fail(f"Scenario {i} failed with exception: {result}")
             assert result['success'] is True, f"Scenario {i} failed: {result}"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_error_handling_and_recovery(self, expert_scenario):
         """Test error handling and recovery in scenarios"""
-        from src.core_services.expert_consultation_scenario import ExpertConsultationRequest, ConsultationType, PriorityLevel
+        from src.core_services.expert_consultation_scenario import (
+            ExpertConsultationRequest,
+            PriorityLevel,
+        )
         
         # Test with invalid request
         invalid_request = ExpertConsultationRequest(
@@ -249,13 +261,17 @@ class TestScenarioSystemIntegration:
             # If it throws exception, it should be handled gracefully
             assert isinstance(e, (ValueError, TypeError))
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_scenario_performance_under_load(self, expert_scenario, academic_scenario):
         """Test scenario performance under load"""
         import time
-        
+
         # Create multiple requests
-        from src.core_services.expert_consultation_scenario import ExpertConsultationRequest, ConsultationType, PriorityLevel
+        from src.core_services.expert_consultation_scenario import (
+            ConsultationType,
+            ExpertConsultationRequest,
+            PriorityLevel,
+        )
         
         requests = []
         for i in range(10):
@@ -286,12 +302,16 @@ class TestScenarioSystemIntegration:
         
         print(f"Load test completed: {len(requests)} requests in {total_time:.2f} seconds")
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_resource_cleanup(self, expert_scenario, academic_scenario, industry_scenario):
         """Test that scenarios clean up resources properly"""
         # Test that scenarios can handle multiple requests without memory leaks
-        from src.core_services.expert_consultation_scenario import ExpertConsultationRequest, ConsultationType, PriorityLevel
-        from src.core_services.industry_analysis_scenario import AnalysisRequest, IndustryType, AnalysisDepth
+        from src.core_services.expert_consultation_scenario import (
+            ConsultationType,
+            ExpertConsultationRequest,
+            PriorityLevel,
+        )
+        from src.core_services.industry_analysis_scenario import AnalysisDepth, AnalysisRequest, IndustryType
         
         # Make multiple requests
         for i in range(5):
@@ -325,7 +345,7 @@ class TestScenarioSystemIntegration:
         assert len(expert_history) <= 10
         assert len(industry_history) <= 10
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_configuration_propagation(self, expert_scenario, academic_scenario, industry_scenario):
         """Test that configuration changes propagate correctly"""
         # Test that scenarios can be configured and maintain configuration
@@ -341,7 +361,11 @@ class TestScenarioSystemIntegration:
         assert len(industry_scenario.expert_pool) > 0
         
         # Test that scenarios maintain their state
-        from src.core_services.expert_consultation_scenario import ExpertConsultationRequest, ConsultationType, PriorityLevel
+        from src.core_services.expert_consultation_scenario import (
+            ConsultationType,
+            ExpertConsultationRequest,
+            PriorityLevel,
+        )
         
         request = ExpertConsultationRequest(
             consultation_type=ConsultationType.TECHNICAL_REVIEW,
@@ -361,7 +385,7 @@ class TestScenarioSystemIntegration:
 class TestScenarioAPISimulation:
     """Simulate API interactions with scenarios"""
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_api_request_simulation(self):
         """Test simulated API requests to scenarios"""
         expert_scenario = ExpertConsultationScenario()
@@ -403,7 +427,11 @@ class TestScenarioAPISimulation:
         results = []
         for call in api_calls:
             if call["endpoint"] == "/expert-consultation":
-                from src.core_services.expert_consultation_scenario import ExpertConsultationRequest, ConsultationType, PriorityLevel
+                from src.core_services.expert_consultation_scenario import (
+                    ConsultationType,
+                    ExpertConsultationRequest,
+                    PriorityLevel,
+                )
                 
                 request = ExpertConsultationRequest(
                     consultation_type=ConsultationType.TECHNICAL_REVIEW,
@@ -421,7 +449,7 @@ class TestScenarioAPISimulation:
                 )
                 
             elif call["endpoint"] == "/industry-analysis":
-                from src.core_services.industry_analysis_scenario import AnalysisRequest, IndustryType, AnalysisDepth
+                from src.core_services.industry_analysis_scenario import AnalysisDepth, AnalysisRequest, IndustryType
                 
                 request = AnalysisRequest(
                     industry_type=IndustryType.TECHNOLOGY,

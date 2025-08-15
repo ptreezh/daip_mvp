@@ -1,18 +1,13 @@
-"""
-Role Memory Adapter for the SSKG.
+"""Role Memory Adapter for the SSKG.
 
 This module implements the storage adapter for virtual role memories and identities.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 try:
-    from src.core_services.enhanced_sskg_manager import (
-        KnowledgeQuery,
-        NodeType,
-        RelationType
-    )
+    from src.core_services.enhanced_sskg_manager import KnowledgeQuery, NodeType, RelationType
 except ImportError:
     # For testing purposes
     from enum import Enum
@@ -31,16 +26,14 @@ from .base import StorageAdapter
 
 
 class RoleMemoryAdapter(StorageAdapter):
-    """
-    Storage adapter for virtual role memories and identities.
+    """Storage adapter for virtual role memories and identities.
     
     This adapter manages the storage and retrieval of role-specific memories,
     personality traits, and cognitive frameworks.
     """
     
-    def store(self, role_data: Dict[str, Any], **kwargs) -> str:
-        """
-        Store role memory data in the SSKG.
+    def store(self, role_data: dict[str, Any], **kwargs) -> str:
+        """Store role memory data in the SSKG.
         
         Args:
             role_data: Dictionary containing role information
@@ -91,9 +84,8 @@ class RoleMemoryAdapter(StorageAdapter):
         self.logger.info(f"Stored role {role_id} with {len(memories)} memories")
         return role_node_id
     
-    def _store_role_memory(self, memory_data: Dict[str, Any], role_id: str) -> Optional[str]:
-        """
-        Store a single role memory.
+    def _store_role_memory(self, memory_data: dict[str, Any], role_id: str) -> Optional[str]:
+        """Store a single role memory.
         
         Args:
             memory_data: Memory data dictionary
@@ -121,9 +113,8 @@ class RoleMemoryAdapter(StorageAdapter):
             metadata=memory_metadata
         )
     
-    def retrieve(self, role_id: str, **kwargs) -> Optional[Dict[str, Any]]:
-        """
-        Retrieve role data from the SSKG.
+    def retrieve(self, role_id: str, **kwargs) -> Optional[dict[str, Any]]:
+        """Retrieve role data from the SSKG.
         
         Args:
             role_id: ID of the role to retrieve
@@ -158,9 +149,8 @@ class RoleMemoryAdapter(StorageAdapter):
         
         return role_data
     
-    def _retrieve_role_memories(self, role_id: str) -> List[Dict[str, Any]]:
-        """
-        Retrieve memories for a role.
+    def _retrieve_role_memories(self, role_id: str) -> list[dict[str, Any]]:
+        """Retrieve memories for a role.
         
         Args:
             role_id: ID of the role
@@ -187,9 +177,8 @@ class RoleMemoryAdapter(StorageAdapter):
         
         return memories
     
-    def update(self, role_id: str, role_data: Dict[str, Any], **kwargs) -> bool:
-        """
-        Update role data in the SSKG.
+    def update(self, role_id: str, role_data: dict[str, Any], **kwargs) -> bool:
+        """Update role data in the SSKG.
         
         Args:
             role_id: ID of the role to update
@@ -238,8 +227,7 @@ class RoleMemoryAdapter(StorageAdapter):
         return success
     
     def delete(self, role_id: str, **kwargs) -> bool:
-        """
-        Delete role data from the SSKG.
+        """Delete role data from the SSKG.
         
         Args:
             role_id: ID of the role to delete
@@ -281,9 +269,8 @@ class RoleMemoryAdapter(StorageAdapter):
         
         return success
     
-    def list_all(self, **kwargs) -> List[str]:
-        """
-        List all role IDs.
+    def list_all(self, **kwargs) -> list[str]:
+        """List all role IDs.
         
         Args:
             **kwargs: Additional parameters

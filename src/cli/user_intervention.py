@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-21 10:00:00
+"""@Time    : 2025-07-21 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : user_intervention.py
 @Description: User intervention functionality for the CLI interface.
 """
 
 import asyncio
-import threading
 import logging
 import msvcrt  # Windows-specific keyboard input module
+import threading
+
 from rich.console import Console
 from rich.prompt import Prompt
 
@@ -25,8 +24,7 @@ class UserInterventionHandler:
     """Handles user intervention in CLI debates."""
     
     def __init__(self, command_queue):
-        """
-        Initialize the user intervention handler.
+        """Initialize the user intervention handler.
         
         Args:
             command_queue: Queue to send commands to the debate protocol
@@ -212,7 +210,7 @@ class UserInterventionHandler:
             metadata={"type": "pause", "duration": pause_duration}
         )
         await self.command_queue.put(command)
-        console.print(f"[yellow]Workflow pause requested.[/yellow]")
+        console.print("[yellow]Workflow pause requested.[/yellow]")
     
     async def _display_current_state(self):
         """Display current workflow state."""

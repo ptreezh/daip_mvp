@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : websocket_manager.py
 @Description:
@@ -10,14 +8,15 @@
 
 import asyncio
 import json
-from typing import Dict, Any, List, Optional, Set, Callable
-from datetime import datetime
-from uuid import uuid4
 import logging
+from collections.abc import Callable
+from datetime import datetime
+from typing import Any, Optional
+from uuid import uuid4
 
 try:
-    from websockets.server import WebSocketServerProtocol
     from websockets.exceptions import ConnectionClosed, WebSocketException
+    from websockets.server import WebSocketServerProtocol
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
     WEBSOCKETS_AVAILABLE = False
@@ -25,8 +24,7 @@ except ImportError:
     class WebSocketServerProtocol:
         pass
 
-from ..domain.entities import User, Session, Message
-from ..domain.value_objects import EntranceType, SessionStatus, MessageIntent
+from ..domain.value_objects import EntranceType
 
 
 class WebSocketConnection:
@@ -41,9 +39,9 @@ class WebSocketConnection:
         self.connected_at = datetime.now()
         self.last_activity = datetime.now()
         self.is_authenticated = False
-        self.subscriptions: Set[str] = set()
+        self.subscriptions: set[str] = set()
     
-    async def send_json(self, data: Dict[str, Any]):
+    async def send_json(self, data: dict[str, Any]):
         """发送JSON数据"""
         if not WEBSOCKETS_AVAILABLE:
             return
@@ -95,13 +93,13 @@ class WebSocketManager:
     """WebSocket管理器 - 实时通信管理"""
     
     def __init__(self):
-        self.connections: Dict[str, WebSocketConnection] = {}
-        self.session_connections: Dict[str, Set[str]] = {}
-        self.user_connections: Dict[str, Set[str]] = {}
-        self.channel_subscribers: Dict[str, Set[str]] = {}
+        self.connections: dict[str, WebSocketConnection] = {}
+        self.session_connections: dict[str, set[str]] = {}
+        self.user_connections: dict[str, set[str]] = {}
+        self.channel_subscribers: dict[str, set[str]] = {}
         
         # 事件处理器
-        self.event_handlers: Dict[str, List[Callable]] = {}
+        self.event_handlers: dict[str, list[Callable]] = {}
         
         # 统计信息
         self.stats = {
@@ -264,7 +262,7 @@ class WebSocketManager:
         }
         return handlers.get(message_type)
     
-    async def _handle_authenticate(self, connection: WebSocketConnection, data: Dict[str, Any]):
+    async def _handle_authenticate(self, connection: WebSocketConnection, data: dict[str, Any]):
         """处理认证请求"""
         user_id = data.get("user_id")
         token = data.get("token")
@@ -300,7 +298,7 @@ class WebSocketManager:
             "connection_id": connection.connection_id
         })
     
-    async def _handle_subscribe(self, connection: WebSocketConnection, data: Dict[str, Any]):
+    async def _handle_subscribe(self, connection: WebSocketConnection, data: dict[str, Any]):
         """处理订阅请求"""
         if not connection.is_authenticated:
             await connection.send_json({
@@ -333,7 +331,7 @@ class WebSocketManager:
             "message": f"已订阅频道: {channel}"
         })
     
-    async def _handle_unsubscribe(self, connection: WebSocketConnection, data: Dict[str, Any]):
+    async def _handle_unsubscribe(self, connection: WebSocketConnection, data: dict[str, Any]):
         """处理取消订阅请求"""
         channel = data.get("channel")
         if not channel:
@@ -357,7 +355,7 @@ class WebSocketManager:
             "message": f"已取消订阅频道: {channel}"
         })
     
-    async def _handle_join_session(self, connection: WebSocketConnection, data: Dict[str, Any]):
+    async def _handle_join_session(self, connection: WebSocketConnection, data: dict[str, Any]):
         """处理加入会话请求"""
         if not connection.is_authenticated:
             await connection.send_json({
@@ -445,7 +443,7 @@ class WebSocketManager:
             "connection_id": connection.connection_id
         })
     
-    async def _handle_leave_session(self, connection: WebSocketConnection, data: Dict[str, Any]):
+    async def _handle_leave_session(self, connection: WebSocketConnection, data: dict[str, Any]):
         """处理离开会话请求"""
         session_id = connection.session_id
         if not session_id:
@@ -486,7 +484,7 @@ class WebSocketManager:
                 "connection_id": connection.connection_id
             })
     
-    async def _handle_send_message(self, connection: WebSocketConnection, data: Dict[str, Any]):
+    async def _handle_send_message(self, connection: WebSocketConnection, data: dict[str, Any]):
         """处理发送消息请求"""
         if not connection.is_authenticated:
             await connection.send_json({
@@ -537,7 +535,7 @@ class WebSocketManager:
             "message": message_data
         })
     
-    async def _handle_ping(self, connection: WebSocketConnection, data: Dict[str, Any]):
+    async def _handle_ping(self, connection: WebSocketConnection, data: dict[str, Any]):
         """处理ping请求"""
         await connection.send_json({
             "type": "pong",
@@ -545,7 +543,7 @@ class WebSocketManager:
             "message": "Pong"
         })
     
-    async def _handle_get_status(self, connection: WebSocketConnection, data: Dict[str, Any]):
+    async def _handle_get_status(self, connection: WebSocketConnection, data: dict[str, Any]):
         """处理获取状态请求"""
         status_data = {
             "type": "status",
@@ -596,7 +594,7 @@ class WebSocketManager:
         
         logging.info(f"Connection cleaned up: {connection_id}")
     
-    async def broadcast_to_session(self, session_id: str, message: Dict[str, Any]):
+    async def broadcast_to_session(self, session_id: str, message: dict[str, Any]):
         """向会话中的所有连接广播消息"""
         if not self.config["enable_broadcasting"]:
             return
@@ -604,7 +602,7 @@ class WebSocketManager:
         session_channel = f"session_{session_id}"
         await self.broadcast_to_channel(session_channel, message)
     
-    async def broadcast_to_user(self, user_id: str, message: Dict[str, Any]):
+    async def broadcast_to_user(self, user_id: str, message: dict[str, Any]):
         """向用户的所有连接广播消息"""
         if not self.config["enable_broadcasting"]:
             return
@@ -615,7 +613,7 @@ class WebSocketManager:
         user_channel = f"user_{user_id}"
         await self.broadcast_to_channel(user_channel, message)
     
-    async def broadcast_to_channel(self, channel: str, message: Dict[str, Any]):
+    async def broadcast_to_channel(self, channel: str, message: dict[str, Any]):
         """向频道的所有订阅者广播消息"""
         if not self.config["enable_broadcasting"]:
             return
@@ -639,7 +637,7 @@ class WebSocketManager:
         for connection_id in failed_connections:
             await self._cleanup_connection(connection_id)
     
-    async def broadcast_to_all(self, message: Dict[str, Any]):
+    async def broadcast_to_all(self, message: dict[str, Any]):
         """向所有连接广播消息"""
         if not self.config["enable_broadcasting"]:
             return
@@ -664,7 +662,7 @@ class WebSocketManager:
             self.event_handlers[event_type] = []
         self.event_handlers[event_type].append(handler)
     
-    async def _trigger_event(self, event_type: str, data: Dict[str, Any]):
+    async def _trigger_event(self, event_type: str, data: dict[str, Any]):
         """触发事件"""
         if event_type in self.event_handlers:
             for handler in self.event_handlers[event_type]:
@@ -730,7 +728,7 @@ class WebSocketManager:
             except Exception as e:
                 logging.error(f"Error in ping task: {e}")
     
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取统计信息"""
         uptime = (datetime.now() - self.stats["start_time"]).total_seconds()
         
@@ -746,7 +744,7 @@ class WebSocketManager:
             "is_running": self._is_running
         }
     
-    def get_connection_info(self, connection_id: str) -> Optional[Dict[str, Any]]:
+    def get_connection_info(self, connection_id: str) -> Optional[dict[str, Any]]:
         """获取连接信息"""
         if connection_id not in self.connections:
             return None
@@ -764,7 +762,7 @@ class WebSocketManager:
             "is_active": connection.is_active()
         }
     
-    def get_session_connections(self, session_id: str) -> List[Dict[str, Any]]:
+    def get_session_connections(self, session_id: str) -> list[dict[str, Any]]:
         """获取会话的所有连接"""
         if session_id not in self.session_connections:
             return []
@@ -777,7 +775,7 @@ class WebSocketManager:
         
         return connections_info
     
-    def get_user_connections(self, user_id: str) -> List[Dict[str, Any]]:
+    def get_user_connections(self, user_id: str) -> list[dict[str, Any]]:
         """获取用户的所有连接"""
         if user_id not in self.user_connections:
             return []

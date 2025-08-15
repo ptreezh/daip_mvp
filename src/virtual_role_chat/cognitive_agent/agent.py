@@ -1,5 +1,4 @@
-"""
-Core implementation of the CognitiveAgent class.
+"""Core implementation of the CognitiveAgent class.
 
 This module defines the CognitiveAgent class, which is the foundation of the
 cognitive independence framework. Each agent maintains its own reasoning framework,
@@ -7,20 +6,19 @@ belief system, epistemology, and meta-cognitive capabilities.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
-from .reasoning import ReasoningFramework
 from .belief import BeliefSystem
 from .epistemology import Epistemology
-from .metacognition import MetaCognition
 from .memory import AgentMemory
+from .metacognition import MetaCognition
+from .reasoning import ReasoningFramework
 
 
 class CognitiveProfile(BaseModel):
-    """
-    Profile defining the cognitive characteristics of an agent.
+    """Profile defining the cognitive characteristics of an agent.
     """
     reasoning_style: str = Field(
         description="The dominant reasoning style (e.g., 'analytical', 'intuitive', 'pragmatic')"
@@ -35,23 +33,22 @@ class CognitiveProfile(BaseModel):
         description="The level of metacognitive capability (1-5)",
         ge=1, le=5
     )
-    cognitive_biases: List[str] = Field(
+    cognitive_biases: list[str] = Field(
         default_factory=list,
         description="List of cognitive biases that influence the agent's reasoning"
     )
-    values: Dict[str, float] = Field(
+    values: dict[str, float] = Field(
         default_factory=dict,
         description="Dictionary of values and their importance (0.0-1.0)"
     )
-    domain_expertise: Dict[str, float] = Field(
+    domain_expertise: dict[str, float] = Field(
         default_factory=dict,
         description="Dictionary of domains and expertise levels (0.0-1.0)"
     )
 
 
 class CognitiveAgent:
-    """
-    Core cognitive agent class that enables true cognitive independence.
+    """Core cognitive agent class that enables true cognitive independence.
     
     Each CognitiveAgent maintains its own reasoning framework, belief system,
     epistemology, and meta-cognitive capabilities, allowing it to function as
@@ -63,10 +60,9 @@ class CognitiveAgent:
         agent_id: str,
         name: str,
         profile: CognitiveProfile,
-        initial_knowledge: Optional[Dict[str, Any]] = None
+        initial_knowledge: Optional[dict[str, Any]] = None
     ):
-        """
-        Initialize a cognitive agent with its core components.
+        """Initialize a cognitive agent with its core components.
         
         Args:
             agent_id: Unique identifier for this agent
@@ -89,8 +85,7 @@ class CognitiveAgent:
         self.logger.info(f"Cognitive agent '{name}' ({agent_id}) initialized")
     
     def _initialize_reasoning_framework(self) -> ReasoningFramework:
-        """
-        Initialize the reasoning framework based on the agent's profile.
+        """Initialize the reasoning framework based on the agent's profile.
         
         Returns:
             Initialized reasoning framework
@@ -104,8 +99,7 @@ class CognitiveAgent:
         )
     
     def _initialize_belief_system(self) -> BeliefSystem:
-        """
-        Initialize the belief system based on the agent's profile.
+        """Initialize the belief system based on the agent's profile.
         
         Returns:
             Initialized belief system
@@ -118,8 +112,7 @@ class CognitiveAgent:
         )
     
     def _initialize_epistemology(self) -> Epistemology:
-        """
-        Initialize the epistemology based on the agent's profile.
+        """Initialize the epistemology based on the agent's profile.
         
         Returns:
             Initialized epistemology
@@ -131,8 +124,7 @@ class CognitiveAgent:
         )
     
     def _initialize_meta_cognition(self) -> MetaCognition:
-        """
-        Initialize the meta-cognition based on the agent's profile.
+        """Initialize the meta-cognition based on the agent's profile.
         
         Returns:
             Initialized meta-cognition
@@ -143,9 +135,8 @@ class CognitiveAgent:
             agent_id=self.agent_id
         )
     
-    def _initialize_memory(self, initial_knowledge: Optional[Dict[str, Any]] = None) -> AgentMemory:
-        """
-        Initialize the agent memory with optional initial knowledge.
+    def _initialize_memory(self, initial_knowledge: Optional[dict[str, Any]] = None) -> AgentMemory:
+        """Initialize the agent memory with optional initial knowledge.
         
         Args:
             initial_knowledge: Initial knowledge to populate the memory with
@@ -153,7 +144,7 @@ class CognitiveAgent:
         Returns:
             Initialized agent memory
         """
-        self.logger.debug(f"Initializing agent memory")
+        self.logger.debug("Initializing agent memory")
         memory = AgentMemory(agent_id=self.agent_id)
         
         if initial_knowledge:
@@ -163,9 +154,8 @@ class CognitiveAgent:
         
         return memory
     
-    async def process_input(self, input_data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Process input through the cognitive pipeline.
+    async def process_input(self, input_data: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
+        """Process input through the cognitive pipeline.
         
         This method implements the core cognitive processing pipeline:
         1. Task identification through meta-cognition
@@ -197,27 +187,26 @@ class CognitiveAgent:
         reasoning_result = await self.reasoning_framework.apply(
             task, relevant_knowledge, domain_knowledge
         )
-        self.logger.debug(f"Applied reasoning framework")
+        self.logger.debug("Applied reasoning framework")
         
         # 4. Belief system filtering
         belief_aligned_result = await self.belief_system.filter(reasoning_result)
-        self.logger.debug(f"Filtered through belief system")
+        self.logger.debug("Filtered through belief system")
         
         # 5. Ensure cognitive independence
         independent_perspective = await self.meta_cognition.ensure_independence(
             belief_aligned_result, context
         )
-        self.logger.debug(f"Ensured cognitive independence")
+        self.logger.debug("Ensured cognitive independence")
         
         # 6. Update memory
         await self.memory.update(task, independent_perspective)
-        self.logger.debug(f"Updated agent memory")
+        self.logger.debug("Updated agent memory")
         
         return independent_perspective
     
-    async def _retrieve_domain_knowledge(self, task: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Retrieve domain-specific knowledge relevant to the task.
+    async def _retrieve_domain_knowledge(self, task: dict[str, Any]) -> dict[str, Any]:
+        """Retrieve domain-specific knowledge relevant to the task.
         
         Args:
             task: Task information
@@ -229,9 +218,8 @@ class CognitiveAgent:
         # based on the agent's domain expertise
         return {}
     
-    def get_cognitive_state(self) -> Dict[str, Any]:
-        """
-        Get the current cognitive state of the agent.
+    def get_cognitive_state(self) -> dict[str, Any]:
+        """Get the current cognitive state of the agent.
         
         Returns:
             Dictionary containing the agent's cognitive state
@@ -247,9 +235,8 @@ class CognitiveAgent:
             "memory_stats": self.memory.get_stats()
         }
     
-    def update_cognitive_state(self, state_updates: Dict[str, Any]) -> None:
-        """
-        Update the cognitive state of the agent.
+    def update_cognitive_state(self, state_updates: dict[str, Any]) -> None:
+        """Update the cognitive state of the agent.
         
         Args:
             state_updates: Dictionary containing state updates

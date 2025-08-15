@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : use_cases.py
 @Description:
@@ -8,25 +6,30 @@
     These use cases orchestrate domain services and implement business workflows.
 """
 
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
+from datetime import datetime
+from typing import Any
 
-from ..domain.entities import User, Session, Task, Message, Debate
-from ..domain.value_objects import (
-    EntranceType, IntentType, TaskStatus, SessionStatus, 
-    MessageIntent, ConsensusLevel, UserPreference, 
-    TaskPriority, TimeInterval
-)
-from ..domain.aggregates import SessionAggregate, TaskAggregate, DebateAggregate
+from ..domain.aggregates import DebateAggregate, SessionAggregate, TaskAggregate
 from ..domain.domain_services import (
-    EntranceSelectorService, WorkflowOrchestratorService, 
-    UserInterventionService, ConsensusTrackingService
+    ConsensusTrackingService,
+    EntranceSelectorService,
+    UserInterventionService,
+    WorkflowOrchestratorService,
+)
+from ..domain.entities import User
+from ..domain.value_objects import (
+    EntranceType,
+    IntentType,
+    MessageIntent,
+    SessionStatus,
+    TaskPriority,
+    TaskStatus,
+    UserPreference,
 )
 from ..infrastructure.database import DatabaseManager
 from ..infrastructure.redis_client import RedisManager
-from ..infrastructure.vector_store import VectorStoreManager
 
 
 class UseCaseResult:
@@ -38,7 +41,7 @@ class UseCaseResult:
         self.error = error
         self.timestamp = datetime.now()
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {
             "success": self.success,
@@ -67,7 +70,7 @@ class CreateUserUseCase(BaseUseCase):
     
     async def execute(self, user_id: str, username: str, email: str, 
                      preferred_entrance: EntranceType, 
-                     preferences: Dict[str, Any] = None) -> UseCaseResult:
+                     preferences: dict[str, Any] = None) -> UseCaseResult:
         """执行创建用户用例"""
         try:
             async with self.db_manager.get_session() as session:
@@ -134,7 +137,7 @@ class CreateSessionUseCase(BaseUseCase):
         super().__init__(db_manager, redis_client)
         self.entrance_selector = entrance_selector
     
-    async def execute(self, user_id: str, context: Dict[str, Any] = None) -> UseCaseResult:
+    async def execute(self, user_id: str, context: dict[str, Any] = None) -> UseCaseResult:
         """执行创建会话用例"""
         try:
             async with self.db_manager.get_session() as session:
@@ -199,7 +202,7 @@ class CreateSessionUseCase(BaseUseCase):
                     "status": session_aggregate.session.status.value,
                     "created_at": session_aggregate.session.created_at.isoformat(),
                     "selected_entrance": selected_entrance.value,
-                    "selection_reasoning": f"智能选择基于用户偏好和上下文分析"
+                    "selection_reasoning": "智能选择基于用户偏好和上下文分析"
                 })
                 
         except Exception as e:
@@ -216,7 +219,7 @@ class CreateTaskUseCase(BaseUseCase):
         self.workflow_orchestrator = workflow_orchestrator
     
     async def execute(self, session_id: str, content: str, intent_type: IntentType,
-                     priority: TaskPriority = None, context: Dict[str, Any] = None) -> UseCaseResult:
+                     priority: TaskPriority = None, context: dict[str, Any] = None) -> UseCaseResult:
         """执行创建任务用例"""
         try:
             async with self.db_manager.get_session() as session:
@@ -295,7 +298,7 @@ class ProcessMessageUseCase(BaseUseCase):
         self.user_intervention = user_intervention
     
     async def execute(self, session_id: str, content: str, sender: str,
-                     message_intent: MessageIntent = None, context: Dict[str, Any] = None) -> UseCaseResult:
+                     message_intent: MessageIntent = None, context: dict[str, Any] = None) -> UseCaseResult:
         """执行处理消息用例"""
         try:
             async with self.db_manager.get_session() as session:
@@ -318,7 +321,7 @@ class ProcessMessageUseCase(BaseUseCase):
                     )
                 
                 # 创建消息实体
-                from ..domain.entities import UserMessage, AgentMessage, SystemMessage
+                from ..domain.entities import AgentMessage, SystemMessage, UserMessage
                 
                 if sender.startswith("user_"):
                     message = UserMessage(
@@ -397,7 +400,7 @@ class StartDebateUseCase(BaseUseCase):
         super().__init__(db_manager, redis_client)
         self.consensus_tracker = consensus_tracker
     
-    async def execute(self, session_id: str, topic: str, participants: List[str]) -> UseCaseResult:
+    async def execute(self, session_id: str, topic: str, participants: list[str]) -> UseCaseResult:
         """执行开始辩论用例"""
         try:
             async with self.db_manager.get_session() as session:

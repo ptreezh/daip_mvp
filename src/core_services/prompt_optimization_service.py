@@ -1,5 +1,4 @@
-"""
-Prompt Optimization Service for enhancing prompts based on user profile and intent.
+"""Prompt Optimization Service for enhancing prompts based on user profile and intent.
 
 This service provides functionality for enhancing prompts based on user profile and intent analysis,
 adding relevant context and background information, optimizing for user's communication style and
@@ -10,30 +9,27 @@ component of the Human User Intelligence Layer.
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from pydantic import BaseModel, Field
 
-from src.core_services.intent_analysis_service import IntentAnalysis
 from src.core_services.user_profile_service import UserProfile
 
 logger = logging.getLogger(__name__)
 
 
 class ContextOptimization(BaseModel):
-    """
-    Represents the result of optimizing a prompt with context.
+    """Represents the result of optimizing a prompt with context.
     """
     original_prompt: str
     optimized_prompt: str
-    added_context: List[str] = Field(default_factory=list)
-    personalization_factors: Dict[str, Any] = Field(default_factory=dict)
+    added_context: list[str] = Field(default_factory=list)
+    personalization_factors: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
 class PromptOptimizationServiceInterface(ABC):
-    """
-    Abstract interface for prompt optimization services.
+    """Abstract interface for prompt optimization services.
     
     This interface defines the contract that all prompt optimization services must implement.
     It provides methods for optimizing prompts based on user profile and intent analysis,
@@ -45,10 +41,9 @@ class PromptOptimizationServiceInterface(ABC):
         self, 
         original_prompt: str, 
         user_id: str, 
-        context: Dict[str, Any]
+        context: dict[str, Any]
     ) -> ContextOptimization:
-        """
-        Optimize prompt based on user profile and intent.
+        """Optimize prompt based on user profile and intent.
         
         Args:
             original_prompt: The original prompt to optimize
@@ -67,8 +62,7 @@ class PromptOptimizationServiceInterface(ABC):
         user_profile: UserProfile, 
         topic: str
     ) -> str:
-        """
-        Add relevant personal context to enhance understanding.
+        """Add relevant personal context to enhance understanding.
         
         Args:
             prompt: The prompt to enhance
@@ -87,8 +81,7 @@ class PromptOptimizationServiceInterface(ABC):
         expertise_level: str, 
         topic: str
     ) -> str:
-        """
-        Adapt prompt to user's expertise level.
+        """Adapt prompt to user's expertise level.
         
         Args:
             prompt: The prompt to adapt
@@ -104,10 +97,9 @@ class PromptOptimizationServiceInterface(ABC):
     def optimize_for_communication_style(
         self, 
         prompt: str, 
-        communication_preferences: Dict[str, Any]
+        communication_preferences: dict[str, Any]
     ) -> str:
-        """
-        Optimize prompt for user's communication style.
+        """Optimize prompt for user's communication style.
         
         Args:
             prompt: The prompt to optimize
@@ -120,8 +112,7 @@ class PromptOptimizationServiceInterface(ABC):
 
 
 class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
-    """
-    Basic implementation of the PromptOptimizationService interface.
+    """Basic implementation of the PromptOptimizationService interface.
     
     This implementation provides simple prompt optimization functionality
     using the user profile and intent analysis. It serves as a placeholder
@@ -129,8 +120,7 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
     """
     
     def __init__(self, intent_service, personal_context_service, llm_interface=None):
-        """
-        Initialize the BasicPromptOptimizationService.
+        """Initialize the BasicPromptOptimizationService.
         
         Args:
             intent_service: The IntentAnalysisService instance to use
@@ -146,10 +136,9 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
         self, 
         original_prompt: str, 
         user_id: str, 
-        context: Dict[str, Any]
+        context: dict[str, Any]
     ) -> ContextOptimization:
-        """
-        Optimize prompt based on user profile and intent.
+        """Optimize prompt based on user profile and intent.
         
         Args:
             original_prompt: The original prompt to optimize
@@ -242,8 +231,7 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
         user_profile: UserProfile, 
         topic: str
     ) -> str:
-        """
-        Add relevant personal context to enhance understanding.
+        """Add relevant personal context to enhance understanding.
         
         Args:
             prompt: The prompt to enhance
@@ -283,8 +271,7 @@ Based on the above context, please respond to: {prompt}"""
         expertise_level: str, 
         topic: str
     ) -> str:
-        """
-        Adapt prompt to user's expertise level.
+        """Adapt prompt to user's expertise level.
         
         Args:
             prompt: The prompt to adapt
@@ -309,10 +296,9 @@ Based on the above context, please respond to: {prompt}"""
     def optimize_for_communication_style(
         self, 
         prompt: str, 
-        communication_preferences: Dict[str, Any]
+        communication_preferences: dict[str, Any]
     ) -> str:
-        """
-        Optimize prompt for user's communication style.
+        """Optimize prompt for user's communication style.
         
         Args:
             prompt: The prompt to optimize

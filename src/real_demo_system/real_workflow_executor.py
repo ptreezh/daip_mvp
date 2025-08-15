@@ -1,5 +1,4 @@
-"""
-真实工作流执行器
+"""真实工作流执行器
 
 集成真实的CriticalReviewWorkflow和MultiPerspectiveWorkflow，
 实现工作流执行状态监控和透明度功能。
@@ -8,15 +7,17 @@
 import asyncio
 import json
 import logging
-import time
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable
-from dataclasses import dataclass, asdict
-from enum import Enum
+import os
 
 # 导入现有的工作流
 import sys
-import os
+import time
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from workflows.critical_review_workflow import CriticalReviewWorkflow
@@ -43,12 +44,12 @@ class WorkflowExecution:
     start_time: datetime
     end_time: Optional[datetime]
     duration_ms: Optional[int]
-    inputs: Dict[str, Any]
-    outputs: Optional[Dict[str, Any]]
+    inputs: dict[str, Any]
+    outputs: Optional[dict[str, Any]]
     error_message: Optional[str]
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data['status'] = self.status.value
         data['start_time'] = self.start_time.isoformat()
@@ -64,7 +65,7 @@ class WorkflowMetrics:
     failed_executions: int = 0
     average_duration_ms: float = 0.0
     success_rate: float = 0.0
-    workflow_type_distribution: Dict[str, int] = None
+    workflow_type_distribution: dict[str, int] = None
     
     def __post_init__(self):
         if self.workflow_type_distribution is None:
@@ -92,16 +93,14 @@ class WorkflowMetrics:
 
 
 class RealWorkflowExecutor:
-    """
-    真实工作流执行器
+    """真实工作流执行器
     
     集成真实的CriticalReviewWorkflow和MultiPerspectiveWorkflow，
     提供工作流执行状态监控和透明度功能。
     """
     
     def __init__(self, llm_integrator=None, role_manager=None):
-        """
-        初始化工作流执行器
+        """初始化工作流执行器
         
         Args:
             llm_integrator: LLM集成器实例
@@ -111,14 +110,14 @@ class RealWorkflowExecutor:
         self.role_manager = role_manager
         
         # 执行记录和指标
-        self.executions: Dict[str, WorkflowExecution] = {}
+        self.executions: dict[str, WorkflowExecution] = {}
         self.metrics = WorkflowMetrics()
         
         # 活跃执行
-        self.active_executions: Dict[str, Dict[str, Any]] = {}
+        self.active_executions: dict[str, dict[str, Any]] = {}
         
         # 事件订阅者
-        self.subscribers: List[Callable] = []
+        self.subscribers: list[Callable] = []
         
         logger.info("RealWorkflowExecutor initialized")
     
@@ -126,11 +125,10 @@ class RealWorkflowExecutor:
         self,
         prompt: str,
         role_context: str = "",
-        workflow_config: Optional[Dict[str, Any]] = None,
+        workflow_config: Optional[dict[str, Any]] = None,
         execution_id: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        执行批判性审查工作流
+    ) -> dict[str, Any]:
+        """执行批判性审查工作流
         
         Args:
             prompt: 输入提示
@@ -264,12 +262,11 @@ class RealWorkflowExecutor:
     async def execute_multi_perspective(
         self,
         topic: str,
-        perspectives: Optional[List[str]] = None,
-        workflow_config: Optional[Dict[str, Any]] = None,
+        perspectives: Optional[list[str]] = None,
+        workflow_config: Optional[dict[str, Any]] = None,
         execution_id: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        执行多视角综合工作流
+    ) -> dict[str, Any]:
+        """执行多视角综合工作流
         
         Args:
             topic: 分析主题
@@ -401,8 +398,7 @@ class RealWorkflowExecutor:
             }
     
     async def cancel_execution(self, execution_id: str) -> bool:
-        """
-        取消工作流执行
+        """取消工作流执行
         
         Args:
             execution_id: 执行ID
@@ -438,7 +434,7 @@ class RealWorkflowExecutor:
         logger.info(f"Workflow execution cancelled: {execution_id}")
         return True
     
-    def get_execution_status(self, execution_id: str) -> Optional[Dict[str, Any]]:
+    def get_execution_status(self, execution_id: str) -> Optional[dict[str, Any]]:
         """获取执行状态"""
         if execution_id not in self.executions:
             return None
@@ -452,7 +448,7 @@ class RealWorkflowExecutor:
         
         return status_info
     
-    def get_all_executions(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+    def get_all_executions(self, limit: Optional[int] = None) -> list[dict[str, Any]]:
         """获取所有执行记录"""
         executions = list(self.executions.values())
         executions.sort(key=lambda x: x.start_time, reverse=True)
@@ -462,17 +458,16 @@ class RealWorkflowExecutor:
         
         return [execution.to_dict() for execution in executions]
     
-    def get_active_executions(self) -> Dict[str, Dict[str, Any]]:
+    def get_active_executions(self) -> dict[str, dict[str, Any]]:
         """获取活跃执行"""
         return self.active_executions.copy()
     
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """获取性能指标"""
         return asdict(self.metrics)
     
-    def get_execution_transparency_report(self, execution_id: str) -> Dict[str, Any]:
-        """
-        获取执行透明度报告
+    def get_execution_transparency_report(self, execution_id: str) -> dict[str, Any]:
+        """获取执行透明度报告
         
         Args:
             execution_id: 执行ID
@@ -528,19 +523,19 @@ class RealWorkflowExecutor:
         
         return min(score, 100.0)
     
-    def _calculate_inputs_hash(self, inputs: Dict[str, Any]) -> str:
+    def _calculate_inputs_hash(self, inputs: dict[str, Any]) -> str:
         """计算输入哈希"""
         import hashlib
         inputs_str = json.dumps(inputs, sort_keys=True)
         return hashlib.sha256(inputs_str.encode()).hexdigest()
     
-    def _calculate_outputs_hash(self, outputs: Dict[str, Any]) -> str:
+    def _calculate_outputs_hash(self, outputs: dict[str, Any]) -> str:
         """计算输出哈希"""
         import hashlib
         outputs_str = json.dumps(outputs, sort_keys=True)
         return hashlib.sha256(outputs_str.encode()).hexdigest()
     
-    async def _emit_event(self, event_type: str, data: Dict[str, Any]):
+    async def _emit_event(self, event_type: str, data: dict[str, Any]):
         """发送事件"""
         event = {
             "event_type": event_type,
@@ -569,7 +564,7 @@ class RealWorkflowExecutor:
             self.subscribers.remove(callback)
             logger.info(f"Workflow subscriber removed, total: {len(self.subscribers)}")
     
-    def get_workflow_statistics(self) -> Dict[str, Any]:
+    def get_workflow_statistics(self) -> dict[str, Any]:
         """获取工作流统计信息"""
         now = datetime.now()
         
@@ -594,7 +589,7 @@ class RealWorkflowExecutor:
             "average_duration_seconds": self.metrics.average_duration_ms / 1000 if self.metrics.average_duration_ms > 0 else 0
         }
     
-    def export_execution_log(self) -> Dict[str, Any]:
+    def export_execution_log(self) -> dict[str, Any]:
         """导出执行日志"""
         return {
             "export_timestamp": datetime.now().isoformat(),

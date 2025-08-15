@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-个人知识图谱
+"""个人知识图谱
 
 管理用户的个人知识网络和关系
 """
 
 import logging
-from typing import Any, Dict, List, Optional
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +44,7 @@ class PersonalKnowledgeGraph:
         concept: str,
         node_type: str = "concept",
         importance: float = 0.5,
-        metadata: Dict[str, Any] = None
+        metadata: dict[str, Any] = None
     ) -> str:
         """添加知识节点"""
         try:
@@ -125,7 +123,7 @@ class PersonalKnowledgeGraph:
         query: str,
         query_type: str = "concept_search",
         max_results: int = 10
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """查询知识"""
         try:
             results = []
@@ -176,7 +174,7 @@ class PersonalKnowledgeGraph:
             logger.error(f"查询知识失败: {e}")
             return []
     
-    def get_knowledge_summary(self) -> Dict[str, Any]:
+    def get_knowledge_summary(self) -> dict[str, Any]:
         """获取知识摘要"""
         try:
             # 计算统计信息
@@ -235,7 +233,7 @@ class PersonalKnowledgeGraph:
                 return node_id
         return None
     
-    def _get_related_nodes(self, node_id: str) -> List[str]:
+    def _get_related_nodes(self, node_id: str) -> list[str]:
         """获取相关节点"""
         related_nodes = []
         
@@ -255,7 +253,7 @@ class PersonalKnowledgeGraph:
                 return relationship["strength"]
         return 0.0
     
-    def _calculate_relevance(self, query: str, node_data: Dict[str, Any]) -> float:
+    def _calculate_relevance(self, query: str, node_data: dict[str, Any]) -> float:
         """计算相关性分数"""
         try:
             concept = node_data["concept"].lower()

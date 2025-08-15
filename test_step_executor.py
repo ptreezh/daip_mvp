@@ -1,8 +1,10 @@
-import sys
 import asyncio
+import sys
+
 sys.path.append('.')
 
 from src.real_demo_system.step_executor import StepExecutor
+
 
 async def test():
     executor = StepExecutor()

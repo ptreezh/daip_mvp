@@ -1,21 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-同行评议模拟机制
+"""同行评议模拟机制
 
 V0.2.3 - 学术研究场景核心功能
 模拟真实的同行评议过程，提供多角度的学术评价
 """
 
-import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
-from enum import Enum
-import json
 import random
-from pathlib import Path
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any
 
 from src.scenarios.enhanced_academic_research_scenario import PeerReviewCriteria, PeerReviewFeedback
 
@@ -48,10 +43,10 @@ class ReviewerProfile:
     """评议者档案"""
     reviewer_id: str
     name: str
-    expertise_areas: List[ReviewerExpertise]
+    expertise_areas: list[ReviewerExpertise]
     experience_level: str  # junior, mid-career, senior
     review_style: str  # constructive, critical, balanced, encouraging
-    bias_tendencies: List[str]  # methodological_purist, innovation_focused, etc.
+    bias_tendencies: list[str]  # methodological_purist, innovation_focused, etc.
     average_review_time: int  # days
     review_thoroughness: float  # 0-1 scale
     
@@ -62,17 +57,17 @@ class ManuscriptSection:
     section_name: str
     content: str
     word_count: int
-    quality_indicators: Dict[str, float]
+    quality_indicators: dict[str, float]
 
 
 @dataclass
 class ReviewAssignment:
     """评议分配"""
     manuscript_id: str
-    reviewer_profiles: List[ReviewerProfile]
+    reviewer_profiles: list[ReviewerProfile]
     review_deadline: datetime
     review_type: str  # initial, revision, final
-    special_instructions: List[str]
+    special_instructions: list[str]
 
 
 class PeerReviewSimulator:
@@ -85,7 +80,7 @@ class PeerReviewSimulator:
         
         logger.info("Peer Review Simulator initialized")
     
-    def _initialize_reviewer_database(self) -> List[ReviewerProfile]:
+    def _initialize_reviewer_database(self) -> list[ReviewerProfile]:
         """初始化评议者数据库"""
         return [
             ReviewerProfile(
@@ -140,7 +135,7 @@ class PeerReviewSimulator:
             )
         ]
     
-    def _initialize_criteria_weights(self) -> Dict[ReviewerExpertise, Dict[PeerReviewCriteria, float]]:
+    def _initialize_criteria_weights(self) -> dict[ReviewerExpertise, dict[PeerReviewCriteria, float]]:
         """初始化评议标准权重"""
         return {
             ReviewerExpertise.METHODOLOGY_EXPERT: {
@@ -182,7 +177,7 @@ class PeerReviewSimulator:
             }
         }
     
-    def _initialize_review_templates(self) -> Dict[str, Dict[str, str]]:
+    def _initialize_review_templates(self) -> dict[str, dict[str, str]]:
         """初始化评议模板"""
         return {
             "constructive": {
@@ -215,7 +210,7 @@ class PeerReviewSimulator:
             }
         }
     
-    async def assign_reviewers(self, manuscript_sections: List[ManuscriptSection],
+    async def assign_reviewers(self, manuscript_sections: list[ManuscriptSection],
                              research_domain: str,
                              num_reviewers: int = 3) -> ReviewAssignment:
         """分配评议者"""
@@ -243,9 +238,9 @@ class PeerReviewSimulator:
             logger.error(f"Error assigning reviewers: {e}")
             raise
     
-    async def _select_suitable_reviewers(self, manuscript_sections: List[ManuscriptSection],
+    async def _select_suitable_reviewers(self, manuscript_sections: list[ManuscriptSection],
                                        research_domain: str,
-                                       num_reviewers: int) -> List[ReviewerProfile]:
+                                       num_reviewers: int) -> list[ReviewerProfile]:
         """选择合适的评议者"""
         # 分析稿件需求
         manuscript_needs = await self._analyze_manuscript_needs(manuscript_sections)
@@ -281,7 +276,7 @@ class PeerReviewSimulator:
         
         return selected_reviewers
     
-    async def _analyze_manuscript_needs(self, manuscript_sections: List[ManuscriptSection]) -> Dict[str, float]:
+    async def _analyze_manuscript_needs(self, manuscript_sections: list[ManuscriptSection]) -> dict[str, float]:
         """分析稿件评议需求"""
         needs = {
             "methodology_complexity": 0.0,
@@ -330,7 +325,7 @@ class PeerReviewSimulator:
         return needs
     
     async def _calculate_reviewer_suitability(self, reviewer: ReviewerProfile,
-                                            manuscript_needs: Dict[str, float],
+                                            manuscript_needs: dict[str, float],
                                             research_domain: str) -> float:
         """计算评议者适合度"""
         score = 0.0
@@ -365,7 +360,7 @@ class PeerReviewSimulator:
         
         return max(0.0, min(1.0, score))
     
-    async def _generate_special_instructions(self, manuscript_sections: List[ManuscriptSection]) -> List[str]:
+    async def _generate_special_instructions(self, manuscript_sections: list[ManuscriptSection]) -> list[str]:
         """生成特殊评议指导"""
         instructions = []
         
@@ -390,7 +385,7 @@ class PeerReviewSimulator:
         return instructions
     
     async def conduct_peer_review(self, assignment: ReviewAssignment,
-                                manuscript_sections: List[ManuscriptSection]) -> List[PeerReviewFeedback]:
+                                manuscript_sections: list[ManuscriptSection]) -> list[PeerReviewFeedback]:
         """进行同行评议"""
         try:
             logger.info(f"Conducting peer review with {len(assignment.reviewer_profiles)} reviewers")
@@ -409,7 +404,7 @@ class PeerReviewSimulator:
             return []
     
     async def _generate_individual_review(self, reviewer: ReviewerProfile,
-                                        manuscript_sections: List[ManuscriptSection]) -> PeerReviewFeedback:
+                                        manuscript_sections: list[ManuscriptSection]) -> PeerReviewFeedback:
         """生成个人评议"""
         try:
             # 根据评议者特点评估各项标准
@@ -450,7 +445,7 @@ class PeerReviewSimulator:
             raise
     
     async def _evaluate_criteria(self, reviewer: ReviewerProfile,
-                               manuscript_sections: List[ManuscriptSection]) -> Dict[PeerReviewCriteria, float]:
+                               manuscript_sections: list[ManuscriptSection]) -> dict[PeerReviewCriteria, float]:
         """评估各项标准"""
         scores = {}
         
@@ -484,7 +479,7 @@ class PeerReviewSimulator:
         return scores
     
     async def _evaluate_single_criterion(self, criterion: PeerReviewCriteria,
-                                       manuscript_sections: List[ManuscriptSection]) -> float:
+                                       manuscript_sections: list[ManuscriptSection]) -> float:
         """评估单个标准"""
         # 简化的标准评估（实际实现中会更复杂）
         base_scores = {
@@ -503,7 +498,7 @@ class PeerReviewSimulator:
         return base_scores.get(criterion, 0.7)
     
     async def _calculate_overall_score(self, reviewer: ReviewerProfile,
-                                     criteria_scores: Dict[PeerReviewCriteria, float]) -> float:
+                                     criteria_scores: dict[PeerReviewCriteria, float]) -> float:
         """计算总体分数"""
         # 根据评议者专业领域加权平均
         weights = {}
@@ -526,7 +521,7 @@ class PeerReviewSimulator:
         return weighted_sum / max(sum(weights.values()), 1.0)
     
     async def _identify_manuscript_strengths(self, reviewer: ReviewerProfile,
-                                           manuscript_sections: List[ManuscriptSection]) -> List[str]:
+                                           manuscript_sections: list[ManuscriptSection]) -> list[str]:
         """识别稿件优点"""
         strengths = []
         
@@ -555,7 +550,7 @@ class PeerReviewSimulator:
         return strengths[:4]  # 限制优点数量
     
     async def _identify_manuscript_weaknesses(self, reviewer: ReviewerProfile,
-                                            manuscript_sections: List[ManuscriptSection]) -> List[str]:
+                                            manuscript_sections: list[ManuscriptSection]) -> list[str]:
         """识别稿件弱点"""
         weaknesses = []
         
@@ -585,7 +580,7 @@ class PeerReviewSimulator:
         return weaknesses[:5]  # 限制弱点数量
     
     async def _generate_improvement_suggestions(self, reviewer: ReviewerProfile,
-                                              weaknesses: List[str]) -> List[str]:
+                                              weaknesses: list[str]) -> list[str]:
         """生成改进建议"""
         suggestions = []
         
@@ -610,7 +605,7 @@ class PeerReviewSimulator:
         return suggestions[:6]  # 限制建议数量
     
     async def _generate_detailed_comments(self, reviewer: ReviewerProfile,
-                                        manuscript_sections: List[ManuscriptSection]) -> Dict[str, str]:
+                                        manuscript_sections: list[ManuscriptSection]) -> dict[str, str]:
         """生成详细评论"""
         comments = {}
         
@@ -642,7 +637,7 @@ class PeerReviewSimulator:
             return ReviewDecision.REJECT.value
     
     async def _calculate_confidence_level(self, reviewer: ReviewerProfile,
-                                        manuscript_sections: List[ManuscriptSection]) -> float:
+                                        manuscript_sections: list[ManuscriptSection]) -> float:
         """计算信心水平"""
         base_confidence = 0.8
         
@@ -659,7 +654,7 @@ class PeerReviewSimulator:
         
         return max(0.5, min(1.0, confidence))
     
-    async def synthesize_reviews(self, reviews: List[PeerReviewFeedback]) -> Dict[str, Any]:
+    async def synthesize_reviews(self, reviews: list[PeerReviewFeedback]) -> dict[str, Any]:
         """综合评议结果"""
         try:
             logger.info(f"Synthesizing {len(reviews)} peer reviews")
@@ -732,7 +727,7 @@ class PeerReviewSimulator:
             logger.error(f"Error synthesizing reviews: {e}")
             return {"error": "Error synthesizing reviews"}
     
-    async def generate_review_report(self, synthesis: Dict[str, Any]) -> str:
+    async def generate_review_report(self, synthesis: dict[str, Any]) -> str:
         """生成评议报告"""
         try:
             logger.info("Generating peer review report")

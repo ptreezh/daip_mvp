@@ -1,5 +1,4 @@
-"""
-Session Management Service for handling user authentication and session tracking.
+"""Session Management Service for handling user authentication and session tracking.
 
 This service provides functionality for authenticating users, creating and managing sessions,
 and handling session-related security concerns. It works closely with the UserProfileService
@@ -10,14 +9,12 @@ import hashlib
 import hmac
 import json
 import logging
-import os
 import secrets
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from src.core_services.user_profile_service import UserProfile, UserProfileService, UserSession
 
@@ -25,16 +22,14 @@ logger = logging.getLogger(__name__)
 
 
 class AuthenticationRequest(BaseModel):
-    """
-    Model for authentication requests.
+    """Model for authentication requests.
     """
     username: str
     password: str
 
 
 class AuthenticationResponse(BaseModel):
-    """
-    Model for authentication responses.
+    """Model for authentication responses.
     """
     success: bool
     user_id: Optional[str] = None
@@ -44,8 +39,7 @@ class AuthenticationResponse(BaseModel):
 
 
 class SessionManagementService:
-    """
-    Service for managing user authentication and sessions.
+    """Service for managing user authentication and sessions.
     
     This service provides functionality for authenticating users, creating and managing sessions,
     and handling session-related security concerns. It works closely with the UserProfileService
@@ -59,8 +53,7 @@ class SessionManagementService:
         session_expiry_minutes: int = 60,
         token_secret: Optional[str] = None
     ):
-        """
-        Initialize the SessionManagementService.
+        """Initialize the SessionManagementService.
         
         Args:
             user_profile_service: The UserProfileService instance to use
@@ -86,9 +79,8 @@ class SessionManagementService:
         
         logger.info(f"SessionManagementService initialized with auth directory: {self.auth_data_dir}")
     
-    def _hash_password(self, password: str, salt: Optional[str] = None) -> Tuple[str, str]:
-        """
-        Hash a password using PBKDF2 with SHA-256.
+    def _hash_password(self, password: str, salt: Optional[str] = None) -> tuple[str, str]:
+        """Hash a password using PBKDF2 with SHA-256.
         
         Args:
             password: The password to hash
@@ -110,8 +102,7 @@ class SessionManagementService:
         return key, salt
     
     def _verify_password(self, stored_hash: str, stored_salt: str, provided_password: str) -> bool:
-        """
-        Verify a password against a stored hash.
+        """Verify a password against a stored hash.
         
         Args:
             stored_hash: The stored password hash
@@ -124,23 +115,21 @@ class SessionManagementService:
         key, _ = self._hash_password(provided_password, stored_salt)
         return hmac.compare_digest(key, stored_hash)
     
-    def _load_credentials(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Load user credentials from storage.
+    def _load_credentials(self) -> dict[str, dict[str, Any]]:
+        """Load user credentials from storage.
         
         Returns:
             Dictionary of user credentials indexed by user_id
         """
         try:
-            with open(self.credentials_file, "r", encoding="utf-8") as f:
+            with open(self.credentials_file, encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:
             logger.error(f"Error loading credentials: {e}")
             return {}
     
-    def _save_credentials(self, credentials: Dict[str, Dict[str, Any]]) -> None:
-        """
-        Save user credentials to storage.
+    def _save_credentials(self, credentials: dict[str, dict[str, Any]]) -> None:
+        """Save user credentials to storage.
         
         Args:
             credentials: Dictionary of user credentials indexed by user_id
@@ -151,9 +140,8 @@ class SessionManagementService:
         except Exception as e:
             logger.error(f"Error saving credentials: {e}")
     
-    def register_user(self, username: str, password: str, **profile_data) -> Tuple[bool, str, Optional[UserProfile]]:
-        """
-        Register a new user.
+    def register_user(self, username: str, password: str, **profile_data) -> tuple[bool, str, Optional[UserProfile]]:
+        """Register a new user.
         
         Args:
             username: The username for the new user
@@ -187,8 +175,7 @@ class SessionManagementService:
         return True, "User registered successfully", profile
     
     def authenticate(self, username: str, password: str) -> AuthenticationResponse:
-        """
-        Authenticate a user and create a session.
+        """Authenticate a user and create a session.
         
         Args:
             username: The username to authenticate
@@ -246,9 +233,8 @@ class SessionManagementService:
             expires_at=session.expires_at
         )
     
-    def validate_session(self, session_id: str) -> Tuple[bool, Optional[str], Optional[UserSession]]:
-        """
-        Validate a session.
+    def validate_session(self, session_id: str) -> tuple[bool, Optional[str], Optional[UserSession]]:
+        """Validate a session.
         
         Args:
             session_id: The ID of the session to validate
@@ -269,8 +255,7 @@ class SessionManagementService:
         return True, session.user_id, session
     
     def end_session(self, session_id: str) -> bool:
-        """
-        End a session.
+        """End a session.
         
         Args:
             session_id: The ID of the session to end
@@ -281,8 +266,7 @@ class SessionManagementService:
         return self.user_profile_service.end_session(session_id)
     
     def end_all_user_sessions(self, user_id: str) -> int:
-        """
-        End all sessions for a user.
+        """End all sessions for a user.
         
         Args:
             user_id: The ID of the user
@@ -299,9 +283,8 @@ class SessionManagementService:
                 
         return count
     
-    def change_password(self, user_id: str, current_password: str, new_password: str) -> Tuple[bool, str]:
-        """
-        Change a user's password.
+    def change_password(self, user_id: str, current_password: str, new_password: str) -> tuple[bool, str]:
+        """Change a user's password.
         
         Args:
             user_id: The ID of the user
@@ -339,9 +322,8 @@ class SessionManagementService:
         logger.info(f"Password changed for user {user_id}")
         return True, "Password changed successfully"
     
-    def reset_password(self, username: str, new_password: str) -> Tuple[bool, str]:
-        """
-        Reset a user's password (admin function).
+    def reset_password(self, username: str, new_password: str) -> tuple[bool, str]:
+        """Reset a user's password (admin function).
         
         Args:
             username: The username of the user
@@ -377,8 +359,7 @@ class SessionManagementService:
         return True, "Password reset successfully"
     
     def generate_token(self, user_id: str, expiry_minutes: int = 60) -> str:
-        """
-        Generate an authentication token for a user.
+        """Generate an authentication token for a user.
         
         Args:
             user_id: The ID of the user
@@ -410,9 +391,8 @@ class SessionManagementService:
         token = f"{payload_b64}.{signature}"
         return token
     
-    def validate_token(self, token: str) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
-        """
-        Validate an authentication token.
+    def validate_token(self, token: str) -> tuple[bool, Optional[str], Optional[dict[str, Any]]]:
+        """Validate an authentication token.
         
         Args:
             token: The token to validate

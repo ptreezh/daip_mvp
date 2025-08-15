@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.2.2 - 透明度监控系统集成验证
+"""V0.2.2 - 透明度监控系统集成验证
 
 验证增强透明度监控系统的实现
 """
 
 import asyncio
 import logging
-from datetime import datetime
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -32,10 +29,12 @@ async def validate_transparency_monitoring_integration():
         # 1. 验证增强透明度集成
         logger.info("📋 验证增强透明度集成...")
         try:
-            from frontend.services.enhanced_transparency_integration import (
-                EnhancedTransparencyIntegration, MonitoringLevel, LLMCallMetrics
-            )
             from frontend.components.transparency_monitor import TransparencyMonitor
+            from frontend.services.enhanced_transparency_integration import (
+                EnhancedTransparencyIntegration,
+                LLMCallMetrics,
+                MonitoringLevel,
+            )
             
             # 创建透明度监控器
             monitor = TransparencyMonitor()
@@ -73,9 +72,7 @@ async def validate_transparency_monitoring_integration():
         # 2. 验证监控仪表板
         logger.info("📋 验证监控仪表板...")
         try:
-            from frontend.components.enhanced_monitoring_dashboard import (
-                EnhancedMonitoringDashboard, MonitoringLevel
-            )
+            from frontend.components.enhanced_monitoring_dashboard import EnhancedMonitoringDashboard, MonitoringLevel
             
             # 创建仪表板
             dashboard = EnhancedMonitoringDashboard(MonitoringLevel.DETAILED)
@@ -100,7 +97,7 @@ async def validate_transparency_monitoring_integration():
         logger.info("📋 验证PersonalAssistant监控...")
         try:
             from personal_intelligence_hub.services.monitoring_integration import (
-                PersonalAssistantMonitoringWrapper, MonitoringIntegrationService
+                PersonalAssistantMonitoringWrapper,
             )
             from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService
             
@@ -136,7 +133,10 @@ async def validate_transparency_monitoring_integration():
         logger.info("📋 验证WebSocket集成...")
         try:
             from frontend.services.websocket_manager import (
-                LonaWebSocketManager, RealtimeUpdateManager, WebSocketMessage, MessageType
+                LonaWebSocketManager,
+                MessageType,
+                RealtimeUpdateManager,
+                WebSocketMessage,
             )
             
             # 创建WebSocket管理器
@@ -242,7 +242,7 @@ async def validate_integration_components():
     
     for component_name, file_path in components.items():
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
                 if len(content) > 1000:  # 确保文件有实质内容
                     logger.info(f"✅ {component_name}: {len(content)}字符")

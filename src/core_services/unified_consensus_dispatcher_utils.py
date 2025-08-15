@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-统一共识调度器工具模块
+"""统一共识调度器工具模块
 
 包含调度器的管理方法、指标收集和配置功能。
 文件长度限制: <400行
@@ -11,14 +9,11 @@ import asyncio
 import logging
 import time
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Any, Optional
 
-from consensus_models import AlgorithmMetadata
 from consensus_algorithm_interface import ConsensusAlgorithm
-from unified_consensus_dispatcher import (
-    UnifiedConsensusDispatcher, DispatcherMetrics, RequestContext
-)
-
+from consensus_models import AlgorithmMetadata
+from unified_consensus_dispatcher import DispatcherMetrics, UnifiedConsensusDispatcher
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +28,7 @@ class DispatcherManager:
                           algorithm_id: str, 
                           algorithm: ConsensusAlgorithm,
                           metadata: Optional[AlgorithmMetadata] = None) -> bool:
-        """
-        注册算法
+        """注册算法
         
         Args:
             algorithm_id: 算法ID
@@ -67,8 +61,7 @@ class DispatcherManager:
             return False
             
     def unregister_algorithm(self, algorithm_id: str) -> bool:
-        """
-        注销算法
+        """注销算法
         
         Args:
             algorithm_id: 算法ID
@@ -88,9 +81,8 @@ class DispatcherManager:
             logger.error(f"Failed to unregister algorithm {algorithm_id}: {str(e)}")
             return False
             
-    def get_available_algorithms(self) -> List[Dict[str, Any]]:
-        """
-        获取可用算法列表
+    def get_available_algorithms(self) -> list[dict[str, Any]]:
+        """获取可用算法列表
         
         Returns:
             算法信息列表
@@ -119,9 +111,8 @@ class DispatcherManager:
             logger.error(f"Failed to get available algorithms: {str(e)}")
             return []
             
-    def get_algorithm_details(self, algorithm_id: str) -> Optional[Dict[str, Any]]:
-        """
-        获取算法详细信息
+    def get_algorithm_details(self, algorithm_id: str) -> Optional[dict[str, Any]]:
+        """获取算法详细信息
         
         Args:
             algorithm_id: 算法ID
@@ -178,9 +169,8 @@ class MetricsCollector:
     def __init__(self, dispatcher: UnifiedConsensusDispatcher):
         self.dispatcher = dispatcher
         
-    def get_metrics(self) -> Dict[str, Any]:
-        """
-        获取调度器指标
+    def get_metrics(self) -> dict[str, Any]:
+        """获取调度器指标
         
         Returns:
             指标字典
@@ -215,7 +205,7 @@ class MetricsCollector:
             "timestamp": datetime.now().isoformat()
         }
         
-    def _get_fallback_stats(self) -> Dict[str, Any]:
+    def _get_fallback_stats(self) -> dict[str, Any]:
         """获取降级统计"""
         if self.dispatcher.fallback_manager:
             from fallback_manager_utils import FallbackManagerUtils
@@ -229,9 +219,8 @@ class MetricsCollector:
         self.dispatcher.metrics = DispatcherMetrics()
         logger.info("Dispatcher metrics reset")
         
-    def get_active_requests(self) -> List[Dict[str, Any]]:
-        """
-        获取活跃请求信息
+    def get_active_requests(self) -> list[dict[str, Any]]:
+        """获取活跃请求信息
         
         Returns:
             活跃请求列表
@@ -258,9 +247,8 @@ class ConfigurationManager:
     def __init__(self, dispatcher: UnifiedConsensusDispatcher):
         self.dispatcher = dispatcher
         
-    def update_config(self, config_updates: Dict[str, Any]) -> bool:
-        """
-        更新配置
+    def update_config(self, config_updates: dict[str, Any]) -> bool:
+        """更新配置
         
         Args:
             config_updates: 配置更新字典
@@ -308,9 +296,8 @@ class ConfigurationManager:
             logger.error(f"Failed to update configuration: {str(e)}")
             return False
             
-    def get_config(self) -> Dict[str, Any]:
-        """
-        获取当前配置
+    def get_config(self) -> dict[str, Any]:
+        """获取当前配置
         
         Returns:
             配置字典
@@ -328,8 +315,7 @@ class ConfigurationManager:
         }
         
     def export_config(self) -> str:
-        """
-        导出配置为JSON字符串
+        """导出配置为JSON字符串
         
         Returns:
             JSON配置字符串
@@ -338,8 +324,7 @@ class ConfigurationManager:
         return json.dumps(self.get_config(), indent=2)
         
     def import_config(self, config_json: str) -> bool:
-        """
-        从JSON字符串导入配置
+        """从JSON字符串导入配置
         
         Args:
             config_json: JSON配置字符串

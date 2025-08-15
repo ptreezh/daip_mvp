@@ -1,29 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 14:30:00
+"""@Time    : 2025-08-06 14:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_forum_api.py
 @Description:
     Forum API端点测试 - 验证Forum模式的所有HTTP接口功能
 """
 
-import pytest
-import asyncio
-from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime
+from unittest.mock import AsyncMock, patch
 
+import pytest
 from fastapi.testclient import TestClient
-from fastapi import FastAPI
 
-from src.main import app
-from src.api.routers.forum import (
-    ForumSessionRequest,
-    UserInterventionRequest,
-    SessionControlRequest
-)
-from src.core_services.forum_service import forum_service, ForumSession
 from src.core.exceptions import ForumServiceError
+from src.core_services.forum_service import ForumSession, forum_service
+from src.main import app
 
 
 class TestForumAPI:
@@ -119,7 +110,7 @@ class TestForumAPI:
         with patch.object(forum_service, 'get_session_context', new_callable=AsyncMock) as mock_get:
             mock_get.return_value = None
             
-            response = self.client.get(f"/api/forum/session/nonexistent_session")
+            response = self.client.get("/api/forum/session/nonexistent_session")
             
             assert response.status_code == 404
             assert "Session not found" in response.json()["detail"]
@@ -453,7 +444,7 @@ class TestForumAPI:
                 "intent": "comment"
             }
             
-            response = self.client.post(f"/api/forum/session/nonexistent_session/optimize", json=request_data)
+            response = self.client.post("/api/forum/session/nonexistent_session/optimize", json=request_data)
             
             assert response.status_code == 404
             assert "Session not found" in response.json()["detail"]

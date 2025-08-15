@@ -1,19 +1,18 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-20 00:00:00
+"""@Time    : 2025-07-20 00:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_cli_commands.py
 @Description: Unit tests for CLI command implementations.
 """
 
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 from typer.testing import CliRunner
 
 from src.cli.main import app
 
 
-@pytest.fixture
+@pytest.fixture()
 def cli_runner():
     """Fixture that provides a CLI test runner."""
     return CliRunner()

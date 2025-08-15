@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-清理本次对话中生成的临时脚本文件
+"""清理本次对话中生成的临时脚本文件
 """
 
-import os
-import sys
 import shutil
 from pathlib import Path
 
@@ -76,7 +72,7 @@ def cleanup_files():
     print(f"删除失败: {len(failed_files)} 个文件")
     
     if failed_files:
-        print(f"\n以下文件删除失败:")
+        print("\n以下文件删除失败:")
         for file in failed_files:
             print(f"   - {file}")
     
@@ -89,7 +85,7 @@ def cleanup_files():
         ".crush"
     ]
     
-    print(f"\n检查临时目录...")
+    print("\n检查临时目录...")
     for dirname in temp_dirs:
         dir_path = project_root / dirname
         if dir_path.exists():

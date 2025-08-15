@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-学术研究场景核心功能 - V0.2.3
+"""学术研究场景核心功能 - V0.2.3
 
 真正基于项目核心功能的学术研究场景实现：
 - 使用真实的CognitiveAgent和IntegratedLLMManager
@@ -11,22 +9,22 @@
 - 支持万字级学术报告生成
 """
 
-import asyncio
 import logging
-from typing import Dict, List, Optional, Any
-from datetime import datetime
-from dataclasses import dataclass, asdict
 import uuid
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from typing import Any, Optional
+
+from src.core_services.advanced_consensus_algorithms import ConsensusInput, WeightedVotingConsensus
+from src.core_services.integrated_llm_manager import IntegratedLLMManager
+from src.core_services.knowledge_persistence_service import KnowledgePersistenceService
+from src.core_services.memory_agent import MemAgent
+from src.core_services.role_manager import RoleManager
+from src.core_services.wiki_service import WikiService
+from src.virtual_role_chat.cognitive_agent.agent import CognitiveAgent, CognitiveProfile
 
 # 导入项目核心组件
 from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
-from src.virtual_role_chat.cognitive_agent.agent import CognitiveAgent, CognitiveProfile
-from src.core_services.integrated_llm_manager import IntegratedLLMManager
-from src.core_services.role_manager import RoleManager
-from src.core_services.wiki_service import WikiService
-from src.core_services.advanced_consensus_algorithms import WeightedVotingConsensus, ConsensusInput
-from src.core_services.memory_agent import MemAgent
-from src.core_services.knowledge_persistence_service import KnowledgePersistenceService
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +105,7 @@ class AcademicResearchScenario:
         self, 
         topic: str, 
         config: Optional[AcademicResearchConfig] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """执行完整的学术研究流程"""
         if config is None:
             config = AcademicResearchConfig()
@@ -190,7 +188,7 @@ class AcademicResearchScenario:
         topic: str, 
         config: AcademicResearchConfig, 
         research_id: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """使用认知代理进行研究规划"""
         logger.info("Starting cognitive research planning...")
         
@@ -247,8 +245,8 @@ class AcademicResearchScenario:
     async def _assemble_academic_expert_team(
         self, 
         topic: str, 
-        research_plan: Dict[str, Any]
-    ) -> List[Any]:
+        research_plan: dict[str, Any]
+    ) -> list[Any]:
         """基于角色管理器组建学术专家团队"""
         logger.info("Assembling academic expert team...")
         
@@ -285,10 +283,10 @@ class AcademicResearchScenario:
     async def _execute_multi_perspective_analysis(
         self, 
         topic: str, 
-        expert_team: List[Any], 
+        expert_team: list[Any], 
         config: AcademicResearchConfig, 
         research_id: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """使用多视角综合工作流执行深度分析"""
         logger.info("Executing multi-perspective synthesis workflow...")
         
@@ -370,9 +368,9 @@ class AcademicResearchScenario:
     
     async def _wiki_collaborative_creation(
         self, 
-        synthesis_result: Dict[str, Any], 
+        synthesis_result: dict[str, Any], 
         research_id: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Wiki协作知识创造"""
         logger.info("Starting Wiki collaborative knowledge creation...")
         
@@ -459,10 +457,10 @@ class AcademicResearchScenario:
 
     async def _compute_academic_consensus(
         self, 
-        synthesis_result: Dict[str, Any], 
-        expert_team: List[Any], 
+        synthesis_result: dict[str, Any], 
+        expert_team: list[Any], 
         research_id: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """使用共识算法计算学术共识"""
         logger.info("Computing academic consensus...")
         
@@ -552,11 +550,11 @@ class AcademicResearchScenario:
     
     async def _generate_comprehensive_report(
         self, 
-        synthesis_result: Dict[str, Any], 
-        wiki_collaboration_result: Optional[Dict[str, Any]], 
-        consensus_result: Optional[Dict[str, Any]], 
+        synthesis_result: dict[str, Any], 
+        wiki_collaboration_result: Optional[dict[str, Any]], 
+        consensus_result: Optional[dict[str, Any]], 
         config: AcademicResearchConfig
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成万字级综合学术报告"""
         logger.info("Generating comprehensive academic report...")
         
@@ -661,7 +659,7 @@ class AcademicResearchScenario:
             }
     
     # 辅助方法
-    def _extract_research_questions(self, planning_result: Dict[str, Any]) -> List[str]:
+    def _extract_research_questions(self, planning_result: dict[str, Any]) -> list[str]:
         """从规划结果中提取研究问题"""
         response = planning_result.get("response", "")
         # 简化实现：从响应中提取问题
@@ -672,7 +670,7 @@ class AcademicResearchScenario:
                 questions.append(line.strip())
         return questions[:5]  # 最多5个问题
     
-    def _extract_required_expertise(self, planning_result: Dict[str, Any]) -> List[str]:
+    def _extract_required_expertise(self, planning_result: dict[str, Any]) -> list[str]:
         """提取所需专业领域"""
         response = planning_result.get("response", "")
         # 简化实现：提取专业领域关键词
@@ -683,7 +681,7 @@ class AcademicResearchScenario:
                 found_expertise.append(keyword)
         return found_expertise[:5]
     
-    def _extract_methodology(self, planning_result: Dict[str, Any]) -> str:
+    def _extract_methodology(self, planning_result: dict[str, Any]) -> str:
         """提取研究方法论"""
         response = planning_result.get("response", "")
         if "方法" in response:
@@ -693,11 +691,11 @@ class AcademicResearchScenario:
             return '\n'.join(methodology_lines[:3])
         return "多视角综合分析方法"
     
-    def _extract_expected_structure(self, planning_result: Dict[str, Any]) -> List[str]:
+    def _extract_expected_structure(self, planning_result: dict[str, Any]) -> list[str]:
         """提取预期结构"""
         return ["摘要", "引言", "文献综述", "研究方法", "结果与分析", "讨论", "结论", "参考文献"]
     
-    def _extract_quality_criteria(self, planning_result: Dict[str, Any]) -> List[str]:
+    def _extract_quality_criteria(self, planning_result: dict[str, Any]) -> list[str]:
         """提取质量标准"""
         return ["学术严谨性", "逻辑一致性", "证据充分性", "创新性", "实用性"]
     
@@ -737,7 +735,7 @@ class AcademicResearchScenario:
         role_name = role.name.lower()
         return any(keyword in role_name for keyword in academic_keywords)
     
-    def _format_expert_contributions(self, expert_contributions: Dict[str, Any]) -> str:
+    def _format_expert_contributions(self, expert_contributions: dict[str, Any]) -> str:
         """格式化专家贡献"""
         formatted = ""
         for expert_name, contribution in expert_contributions.items():
@@ -748,7 +746,7 @@ class AcademicResearchScenario:
                 formatted += str(contribution)
         return formatted
     
-    def _format_wiki_collaboration(self, wiki_result: Optional[Dict[str, Any]]) -> str:
+    def _format_wiki_collaboration(self, wiki_result: Optional[dict[str, Any]]) -> str:
         """格式化Wiki协作结果"""
         if not wiki_result or not wiki_result.get("success"):
             return "Wiki协作功能未启用或执行失败"
@@ -760,7 +758,7 @@ Wiki协作成果：
 - 协作时间：{wiki_result.get('collaboration_metadata', {}).get('creation_time', '未知')}
 """
     
-    def _format_consensus_result(self, consensus_result: Optional[Dict[str, Any]]) -> str:
+    def _format_consensus_result(self, consensus_result: Optional[dict[str, Any]]) -> str:
         """格式化共识结果"""
         if not consensus_result or not consensus_result.get("success"):
             return "共识计算功能未启用或执行失败"
@@ -777,7 +775,7 @@ Wiki协作成果：
     def _assess_report_quality(
         self, 
         report_content: str, 
-        synthesis_result: Dict[str, Any], 
+        synthesis_result: dict[str, Any], 
         target_word_count: int
     ) -> float:
         """评估报告质量"""
@@ -808,7 +806,7 @@ Wiki协作成果：
     async def _expand_report_content(
         self, 
         original_content: str, 
-        synthesis_result: Dict[str, Any], 
+        synthesis_result: dict[str, Any], 
         additional_words_needed: int
     ) -> str:
         """扩展报告内容"""
@@ -839,11 +837,11 @@ Wiki协作成果：
     
     async def _enhance_synthesis_for_academic_research(
         self,
-        synthesis_result: Dict[str, Any],
-        expert_team: List[Any],
+        synthesis_result: dict[str, Any],
+        expert_team: list[Any],
         config: AcademicResearchConfig,
         research_id: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """增强综合结果以支持学术研究需求"""
         logger.info("Enhancing synthesis result for academic research...")
         
@@ -890,10 +888,10 @@ Wiki协作成果：
     async def _fallback_analysis(
         self,
         topic: str,
-        expert_team: List[Any],
+        expert_team: list[Any],
         config: AcademicResearchConfig,
         research_id: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """降级分析方法"""
         logger.info("Executing fallback analysis...")
         
@@ -950,8 +948,8 @@ Wiki协作成果：
     
     async def _assess_academic_quality(
         self,
-        synthesis_result: Dict[str, Any],
-        expert_team: List[Any],
+        synthesis_result: dict[str, Any],
+        expert_team: list[Any],
         config: AcademicResearchConfig
     ) -> float:
         """评估学术质量"""
@@ -977,10 +975,10 @@ Wiki协作成果：
     
     async def _generate_academic_references(
         self,
-        synthesis_result: Dict[str, Any],
-        expert_team: List[Any],
+        synthesis_result: dict[str, Any],
+        expert_team: list[Any],
         research_id: str
-    ) -> List[Dict[str, str]]:
+    ) -> list[dict[str, str]]:
         """生成学术引用和参考文献"""
         references = []
         
@@ -1012,10 +1010,10 @@ Wiki协作成果：
     
     async def _identify_research_gaps(
         self,
-        synthesis_result: Dict[str, Any],
+        synthesis_result: dict[str, Any],
         topic: str,
         config: AcademicResearchConfig
-    ) -> List[str]:
+    ) -> list[str]:
         """识别研究空白和未来方向"""
         gaps_prompt = f"""
         基于以下研究综合结果，识别研究空白和未来研究方向：
@@ -1054,7 +1052,7 @@ Wiki协作成果：
             logger.error(f"Failed to identify research gaps: {e}")
             return ["需要进一步的实证研究", "跨学科视角的整合", "长期影响的追踪研究"]
     
-    def _calculate_expert_diversity(self, expert_team: List[Any]) -> float:
+    def _calculate_expert_diversity(self, expert_team: list[Any]) -> float:
         """计算专家多样性得分"""
         if not expert_team:
             return 0.0
@@ -1070,7 +1068,7 @@ Wiki协作成果：
         diversity_score = len(unique_keywords) / (len(expert_team) * 5)
         return min(diversity_score, 1.0)
     
-    def _assess_content_depth(self, synthesis_result: Dict[str, Any]) -> float:
+    def _assess_content_depth(self, synthesis_result: dict[str, Any]) -> float:
         """评估内容深度"""
         synthesis = synthesis_result.get("synthesis", {})
         key_insights = synthesis_result.get("key_insights", [])
@@ -1082,7 +1080,7 @@ Wiki协作成果：
         
         return min(depth_count / len(depth_indicators), 1.0)
     
-    def _assess_logical_consistency(self, synthesis_result: Dict[str, Any]) -> float:
+    def _assess_logical_consistency(self, synthesis_result: dict[str, Any]) -> float:
         """评估逻辑一致性"""
         # 简化实现：基于结构完整性
         required_elements = ["synthesis", "key_insights", "expert_contributions"]
@@ -1090,7 +1088,7 @@ Wiki协作成果：
         
         return present_elements / len(required_elements)
     
-    def _assess_innovation(self, synthesis_result: Dict[str, Any]) -> float:
+    def _assess_innovation(self, synthesis_result: dict[str, Any]) -> float:
         """评估创新性"""
         innovation_keywords = ["创新", "新颖", "突破", "发现", "洞察", "独特", "原创"]
         
@@ -1099,7 +1097,7 @@ Wiki协作成果：
         
         return min(innovation_count / len(innovation_keywords), 1.0)
     
-    def _assess_evidence_strength(self, synthesis_result: Dict[str, Any]) -> float:
+    def _assess_evidence_strength(self, synthesis_result: dict[str, Any]) -> float:
         """评估证据强度"""
         evidence_keywords = ["证据", "数据", "研究", "实验", "调查", "统计", "案例", "文献"]
         
@@ -1108,7 +1106,7 @@ Wiki协作成果：
         
         return min(evidence_count / 5, 1.0)  # 标准化到0-1
     
-    def _extract_theoretical_framework(self, synthesis_result: Dict[str, Any]) -> str:
+    def _extract_theoretical_framework(self, synthesis_result: dict[str, Any]) -> str:
         """提取理论框架"""
         synthesis = synthesis_result.get("synthesis", {})
         content = str(synthesis)
@@ -1124,7 +1122,7 @@ Wiki协作成果：
         
         return "。".join(theory_sentences[:3]) if theory_sentences else "多视角综合分析理论框架"
     
-    def _extract_practical_implications(self, synthesis_result: Dict[str, Any]) -> List[str]:
+    def _extract_practical_implications(self, synthesis_result: dict[str, Any]) -> list[str]:
         """提取实践意义"""
         synthesis = synthesis_result.get("synthesis", {})
         content = str(synthesis)
@@ -1139,7 +1137,7 @@ Wiki协作成果：
         
         return implications[:5]  # 最多5个实践意义
     
-    def _extract_insights_from_response(self, response: str) -> List[str]:
+    def _extract_insights_from_response(self, response: str) -> list[str]:
         """从响应中提取洞察"""
         insights = []
         lines = response.split('\n')
@@ -1150,7 +1148,7 @@ Wiki协作成果：
         
         return insights[:8]  # 最多8个洞察
     
-    def _extract_report_sections(self, report_content: str) -> Dict[str, str]:
+    def _extract_report_sections(self, report_content: str) -> dict[str, str]:
         """提取报告各部分"""
         sections = {}
         current_section = "introduction"
@@ -1179,7 +1177,7 @@ async def conduct_academic_research(
     quality_threshold: float = 0.8,
     enable_wiki_collaboration: bool = True,
     enable_consensus_computation: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """便捷的学术研究函数"""
     config = AcademicResearchConfig(
         target_word_count=target_word_count,

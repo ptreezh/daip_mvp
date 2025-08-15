@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-智能测试生成器
+"""智能测试生成器
 基于真实的项目架构生成准确的测试代码
 """
 
 import json
-from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Optional
+
 
 class SmartTestGenerator:
     """智能测试生成器"""
@@ -16,25 +14,25 @@ class SmartTestGenerator:
         self.interface_map = self._load_interface_map()
         self.architecture_map = self._load_architecture_map()
     
-    def _load_interface_map(self) -> Dict[str, Any]:
+    def _load_interface_map(self) -> dict[str, Any]:
         """加载接口映射"""
         try:
-            with open("interface_map.json", 'r', encoding='utf-8') as f:
+            with open("interface_map.json", encoding='utf-8') as f:
                 return json.load(f)
         except FileNotFoundError:
             print("❌ interface_map.json 未找到，请先运行 project_architecture_map.py")
             return {}
     
-    def _load_architecture_map(self) -> Dict[str, Any]:
+    def _load_architecture_map(self) -> dict[str, Any]:
         """加载架构映射"""
         try:
-            with open("architecture_map.json", 'r', encoding='utf-8') as f:
+            with open("architecture_map.json", encoding='utf-8') as f:
                 return json.load(f)
         except FileNotFoundError:
             print("❌ architecture_map.json 未找到，请先运行 project_architecture_map.py")
             return {}
     
-    def find_class_info(self, class_name: str) -> Optional[Dict[str, Any]]:
+    def find_class_info(self, class_name: str) -> Optional[dict[str, Any]]:
         """查找类信息"""
         if class_name in self.interface_map.get("available_classes", {}):
             class_info = self.interface_map["available_classes"][class_name]
@@ -107,7 +105,6 @@ class SmartTestGenerator:
     
     def generate_user_intervention_test(self) -> str:
         """生成用户干预机制的准确测试"""
-        
         # 查找相关类
         relevant_classes = [
             "UserInterventionHandler",
@@ -141,7 +138,7 @@ sys.path.append('src')
             test_code += self.generate_class_test(class_name) + "\n\n"
         
         # 生成主测试函数
-        test_code += f'''async def main():
+        test_code += '''async def main():
     """主验证函数"""
     print("🚀 开始验证用户干预机制")
     
@@ -184,7 +181,7 @@ if __name__ == "__main__":
         
         return test_code
     
-    def list_available_classes(self, pattern: str = "") -> List[str]:
+    def list_available_classes(self, pattern: str = "") -> list[str]:
         """列出可用的类"""
         classes = list(self.interface_map.get("available_classes", {}).keys())
         if pattern:

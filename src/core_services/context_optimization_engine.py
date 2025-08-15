@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-上下文优化引擎
+"""上下文优化引擎
 
 基于多面嵌入技术的自动上下文优化系统
 """
 
 import logging
-import numpy as np
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime, timedelta
-from dataclasses import dataclass
-from collections import defaultdict
-import json
 import re
+from collections import defaultdict
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Optional
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +27,7 @@ class ContextElement:
     source: str
     timestamp: datetime
     embedding: Optional[np.ndarray] = None
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -41,9 +39,9 @@ class ContextOptimizationRequest:
     """上下文优化请求"""
     user_id: str
     current_query: str
-    conversation_history: List[Dict[str, Any]]
+    conversation_history: list[dict[str, Any]]
     current_task: Optional[str] = None
-    available_context: Dict[str, Any] = None
+    available_context: dict[str, Any] = None
     optimization_strategy: str = "adaptive"
 
     def __post_init__(self):
@@ -55,13 +53,13 @@ class ContextOptimizationRequest:
 class OptimizedContext:
     """优化后的上下文"""
     optimized_prompt: str
-    context_elements: List[ContextElement]
-    relevance_scores: Dict[str, float]
+    context_elements: list[ContextElement]
+    relevance_scores: dict[str, float]
     optimization_reasoning: str
     confidence_score: float
     original_context_size: int
     optimized_context_size: int
-    optimization_metrics: Dict[str, Any] = None
+    optimization_metrics: dict[str, Any] = None
 
     def __post_init__(self):
         if self.optimization_metrics is None:
@@ -154,7 +152,7 @@ class MultiAspectEmbeddingModel:
         
         return solution_vector
     
-    def encode_context(self, context_info: Dict[str, Any]) -> np.ndarray:
+    def encode_context(self, context_info: dict[str, Any]) -> np.ndarray:
         """编码上下文"""
         context_vector = np.zeros(self.embedding_dim)
         
@@ -178,8 +176,8 @@ class MultiAspectEmbeddingModel:
     def encode_multi_aspect(
         self, 
         text: str, 
-        context_info: Dict[str, Any] = None
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        context_info: dict[str, Any] = None
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """多面嵌入编码"""
         if context_info is None:
             context_info = {}
@@ -199,7 +197,7 @@ class ConversationHistoryAnalyzer:
         self.embedding_model = MultiAspectEmbeddingModel()
         logger.info("对话历史分析器初始化完成")
     
-    async def analyze(self, conversation_history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def analyze(self, conversation_history: list[dict[str, Any]]) -> dict[str, Any]:
         """分析对话历史"""
         try:
             if not conversation_history:
@@ -237,7 +235,7 @@ class ConversationHistoryAnalyzer:
             logger.error(f"对话历史分析失败: {e}")
             return {"error": str(e)}
     
-    def _analyze_conversation_patterns(self, history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_conversation_patterns(self, history: list[dict[str, Any]]) -> dict[str, Any]:
         """分析对话模式"""
         patterns = {
             "question_types": defaultdict(int),
@@ -272,7 +270,7 @@ class ConversationHistoryAnalyzer:
         
         return dict(patterns)
     
-    def _analyze_user_preferences(self, history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_user_preferences(self, history: list[dict[str, Any]]) -> dict[str, Any]:
         """分析用户偏好"""
         preferences = {
             "preferred_response_style": "balanced",
@@ -309,7 +307,7 @@ class ConversationHistoryAnalyzer:
         
         return dict(preferences)
     
-    def _analyze_success_indicators(self, history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_success_indicators(self, history: list[dict[str, Any]]) -> dict[str, Any]:
         """分析成功指标"""
         success_indicators = {
             "satisfaction_signals": 0,
@@ -344,7 +342,7 @@ class ConversationHistoryAnalyzer:
         
         return success_indicators
     
-    def _extract_key_topics(self, history: List[Dict[str, Any]]) -> List[str]:
+    def _extract_key_topics(self, history: list[dict[str, Any]]) -> list[str]:
         """提取关键主题"""
         topic_counts = defaultdict(int)
         
@@ -369,7 +367,7 @@ class ConversationHistoryAnalyzer:
         sorted_topics = sorted(topic_counts.items(), key=lambda x: x[1], reverse=True)
         return [topic for topic, count in sorted_topics[:5]]
     
-    def _analyze_time_patterns(self, history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_time_patterns(self, history: list[dict[str, Any]]) -> dict[str, Any]:
         """分析时间模式"""
         time_patterns = {
             "session_duration": 0.0,
@@ -418,7 +416,7 @@ class ConversationHistoryAnalyzer:
         
         return len(intersection) / len(union) if union else 0.0
     
-    def _calculate_analysis_confidence(self, history: List[Dict[str, Any]]) -> float:
+    def _calculate_analysis_confidence(self, history: list[dict[str, Any]]) -> float:
         """计算分析置信度"""
         if not history:
             return 0.0
@@ -451,7 +449,7 @@ class TaskAnalyzer:
         
         logger.info("任务分析器初始化完成")
     
-    async def analyze(self, current_query: str, current_task: Optional[str] = None) -> Dict[str, Any]:
+    async def analyze(self, current_query: str, current_task: Optional[str] = None) -> dict[str, Any]:
         """分析当前任务"""
         try:
             # 识别任务类型
@@ -520,7 +518,7 @@ class TaskAnalyzer:
         else:
             return "low"
     
-    def _extract_task_keywords(self, query: str) -> List[str]:
+    def _extract_task_keywords(self, query: str) -> list[str]:
         """提取任务关键词"""
         # 简化的关键词提取
         important_words = []
@@ -538,7 +536,7 @@ class TaskAnalyzer:
         
         return list(set(important_words))[:10]  # 返回前10个关键词
     
-    def _analyze_required_resources(self, query: str, task_type: str) -> Dict[str, Any]:
+    def _analyze_required_resources(self, query: str, task_type: str) -> dict[str, Any]:
         """分析所需资源"""
         resources = {
             "roles": [],
@@ -621,10 +619,10 @@ class ContextAggregator:
     
     async def aggregate(
         self,
-        available_context: Dict[str, Any],
-        history_insights: Dict[str, Any],
-        task_insights: Dict[str, Any]
-    ) -> List[ContextElement]:
+        available_context: dict[str, Any],
+        history_insights: dict[str, Any],
+        task_insights: dict[str, Any]
+    ) -> list[ContextElement]:
         """聚合上下文信息"""
         try:
             context_elements = []
@@ -655,7 +653,7 @@ class ContextAggregator:
             logger.error(f"上下文聚合失败: {e}")
             return []
     
-    def _process_history_context(self, history_insights: Dict[str, Any]) -> List[ContextElement]:
+    def _process_history_context(self, history_insights: dict[str, Any]) -> list[ContextElement]:
         """处理历史上下文"""
         elements = []
         
@@ -692,7 +690,7 @@ class ContextAggregator:
         
         return elements
     
-    def _process_task_context(self, task_insights: Dict[str, Any]) -> List[ContextElement]:
+    def _process_task_context(self, task_insights: dict[str, Any]) -> list[ContextElement]:
         """处理任务上下文"""
         elements = []
         
@@ -726,7 +724,7 @@ class ContextAggregator:
         
         return elements
     
-    def _process_environment_context(self, available_context: Dict[str, Any]) -> List[ContextElement]:
+    def _process_environment_context(self, available_context: dict[str, Any]) -> list[ContextElement]:
         """处理环境上下文"""
         elements = []
         
@@ -746,7 +744,7 @@ class ContextAggregator:
         
         return elements
     
-    def _process_knowledge_context(self, available_context: Dict[str, Any]) -> List[ContextElement]:
+    def _process_knowledge_context(self, available_context: dict[str, Any]) -> list[ContextElement]:
         """处理知识上下文"""
         elements = []
         
@@ -767,7 +765,7 @@ class ContextAggregator:
         
         return elements
     
-    def _filter_and_rank_elements(self, elements: List[ContextElement]) -> List[ContextElement]:
+    def _filter_and_rank_elements(self, elements: list[ContextElement]) -> list[ContextElement]:
         """过滤和排序上下文元素"""
         # 按相关性分数排序
         sorted_elements = sorted(elements, key=lambda x: x.relevance_score, reverse=True)
@@ -853,9 +851,9 @@ class ContextOptimizationEngine:
     async def _adaptive_optimization_strategy(
         self,
         request: ContextOptimizationRequest,
-        context_elements: List[ContextElement],
-        history_insights: Dict[str, Any],
-        task_insights: Dict[str, Any]
+        context_elements: list[ContextElement],
+        history_insights: dict[str, Any],
+        task_insights: dict[str, Any]
     ) -> OptimizedContext:
         """自适应优化策略"""
         # 根据用户历史和任务特征动态调整优化参数
@@ -927,9 +925,9 @@ class ContextOptimizationEngine:
     async def _focused_optimization_strategy(
         self,
         request: ContextOptimizationRequest,
-        context_elements: List[ContextElement],
-        history_insights: Dict[str, Any],
-        task_insights: Dict[str, Any]
+        context_elements: list[ContextElement],
+        history_insights: dict[str, Any],
+        task_insights: dict[str, Any]
     ) -> OptimizedContext:
         """聚焦优化策略"""
         # 专注于当前任务最相关的上下文
@@ -982,9 +980,9 @@ class ContextOptimizationEngine:
     async def _comprehensive_optimization_strategy(
         self,
         request: ContextOptimizationRequest,
-        context_elements: List[ContextElement],
-        history_insights: Dict[str, Any],
-        task_insights: Dict[str, Any]
+        context_elements: list[ContextElement],
+        history_insights: dict[str, Any],
+        task_insights: dict[str, Any]
     ) -> OptimizedContext:
         """综合优化策略"""
         # 保留更多背景信息，支持复杂分析
@@ -1047,7 +1045,7 @@ class ContextOptimizationEngine:
             }
         )
     
-    def _calculate_user_experience(self, history_insights: Dict[str, Any]) -> float:
+    def _calculate_user_experience(self, history_insights: dict[str, Any]) -> float:
         """计算用户经验水平"""
         total_conversations = history_insights.get("total_conversations", 0)
         success_rate = history_insights.get("success_indicators", {}).get("task_completion_rate", 0.0)
@@ -1068,10 +1066,10 @@ class ContextOptimizationEngine:
     
     def _select_relevant_elements(
         self, 
-        elements: List[ContextElement], 
+        elements: list[ContextElement], 
         query: str, 
         max_elements: int
-    ) -> List[ContextElement]:
+    ) -> list[ContextElement]:
         """选择相关的上下文元素"""
         # 计算查询嵌入
         query_pattern, query_goal, _, _ = self.embedding_model.encode_multi_aspect(query)
@@ -1112,10 +1110,10 @@ class ContextOptimizationEngine:
     def _generate_optimized_prompt(
         self,
         query: str,
-        elements: List[ContextElement],
+        elements: list[ContextElement],
         detail_level: str,
-        history_insights: Dict[str, Any],
-        task_insights: Dict[str, Any]
+        history_insights: dict[str, Any],
+        task_insights: dict[str, Any]
     ) -> str:
         """生成优化后的提示"""
         prompt_parts = []
@@ -1165,8 +1163,8 @@ class ContextOptimizationEngine:
     def _generate_focused_prompt(
         self,
         query: str,
-        elements: List[ContextElement],
-        task_insights: Dict[str, Any]
+        elements: list[ContextElement],
+        task_insights: dict[str, Any]
     ) -> str:
         """生成聚焦的提示"""
         prompt_parts = []
@@ -1190,9 +1188,9 @@ class ContextOptimizationEngine:
     def _generate_comprehensive_prompt(
         self,
         query: str,
-        elements: List[ContextElement],
-        history_insights: Dict[str, Any],
-        task_insights: Dict[str, Any]
+        elements: list[ContextElement],
+        history_insights: dict[str, Any],
+        task_insights: dict[str, Any]
     ) -> str:
         """生成综合的提示"""
         prompt_parts = []
@@ -1269,9 +1267,9 @@ class ContextOptimizationEngine:
     
     def _calculate_optimization_confidence(
         self,
-        selected_elements: List[ContextElement],
-        history_insights: Dict[str, Any],
-        task_insights: Dict[str, Any]
+        selected_elements: list[ContextElement],
+        history_insights: dict[str, Any],
+        task_insights: dict[str, Any]
     ) -> float:
         """计算优化置信度"""
         if not selected_elements:

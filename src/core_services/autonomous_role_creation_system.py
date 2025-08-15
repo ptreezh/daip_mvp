@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 20:00:00
+"""@Time    : 2025-08-03 20:00:00
 @Author  : DAIP-LIVE Team
 @File    : autonomous_role_creation_system.py
 @Description:
@@ -15,20 +13,17 @@
 """
 
 import asyncio
-import logging
 import json
+import logging
+import sqlite3
 import time
-import hashlib
+import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union, Tuple, Set
 from pathlib import Path
-import yaml
-import sqlite3
-from collections import defaultdict
-import uuid
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -75,10 +70,10 @@ class RoleRequirement:
     task_description: str  # 任务描述
     expertise_level: ExpertiseLevel
     interaction_style: InteractionStyle
-    required_capabilities: List[str] = field(default_factory=list)
-    context_info: Dict[str, Any] = field(default_factory=dict)
-    quality_requirements: Dict[str, float] = field(default_factory=dict)
-    constraints: Dict[str, Any] = field(default_factory=dict)
+    required_capabilities: list[str] = field(default_factory=list)
+    context_info: dict[str, Any] = field(default_factory=dict)
+    quality_requirements: dict[str, float] = field(default_factory=dict)
+    constraints: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class RoleCapability:
@@ -87,9 +82,9 @@ class RoleCapability:
     name: str
     description: str
     skill_level: float  # 0.0-1.0
-    keywords: List[str] = field(default_factory=list)
-    prerequisites: List[str] = field(default_factory=list)
-    related_domains: List[str] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
+    prerequisites: list[str] = field(default_factory=list)
+    related_domains: list[str] = field(default_factory=list)
 
 @dataclass
 class RolePersonality:
@@ -111,18 +106,18 @@ class GeneratedRole:
     domain: str
     description: str
     system_prompt: str
-    capabilities: List[RoleCapability]
+    capabilities: list[RoleCapability]
     personality: RolePersonality
     expertise_level: ExpertiseLevel
     interaction_style: InteractionStyle
-    keywords: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    keywords: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     version: str = "1.0"
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
     status: RoleStatus = RoleStatus.DRAFT
     usage_count: int = 0
-    performance_metrics: Dict[str, float] = field(default_factory=dict)
+    performance_metrics: dict[str, float] = field(default_factory=dict)
 
 @dataclass
 class RoleTemplate:
@@ -131,8 +126,8 @@ class RoleTemplate:
     name: str
     role_type: RoleType
     template_content: str
-    variables: List[str]
-    applicability_rules: Dict[str, Any]
+    variables: list[str]
+    applicability_rules: dict[str, Any]
     quality_score: float
     usage_count: int = 0
     created_at: datetime = field(default_factory=datetime.now)
@@ -142,18 +137,18 @@ class RoleGenerationRequest:
     """角色生成请求"""
     request_id: str
     requirements: RoleRequirement
-    preferences: Dict[str, Any] = field(default_factory=dict)
-    constraints: Dict[str, Any] = field(default_factory=dict)
-    reference_roles: List[str] = field(default_factory=list)  # 参考角色ID列表
+    preferences: dict[str, Any] = field(default_factory=dict)
+    constraints: dict[str, Any] = field(default_factory=dict)
+    reference_roles: list[str] = field(default_factory=list)  # 参考角色ID列表
 
 @dataclass
 class RoleGenerationResult:
     """角色生成结果"""
     request_id: str
     generated_role: GeneratedRole
-    generation_process: Dict[str, Any]
-    quality_assessment: Dict[str, Any]
-    alternatives: List[GeneratedRole] = field(default_factory=list)
+    generation_process: dict[str, Any]
+    quality_assessment: dict[str, Any]
+    alternatives: list[GeneratedRole] = field(default_factory=list)
     generation_time_ms: float = 0.0
     confidence_score: float = 0.0
 
@@ -167,7 +162,7 @@ class IRoleIntelligenceEngine(ABC):
         self, 
         domain: str, 
         task_description: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """分析领域需求"""
         pass
     
@@ -175,7 +170,7 @@ class IRoleIntelligenceEngine(ABC):
     async def infer_capabilities(
         self, 
         requirements: RoleRequirement
-    ) -> List[RoleCapability]:
+    ) -> list[RoleCapability]:
         """推理所需能力"""
         pass
     
@@ -183,7 +178,7 @@ class IRoleIntelligenceEngine(ABC):
     async def generate_personality(
         self, 
         requirements: RoleRequirement,
-        capabilities: List[RoleCapability]
+        capabilities: list[RoleCapability]
     ) -> RolePersonality:
         """生成角色性格"""
         pass
@@ -192,7 +187,7 @@ class IRoleIntelligenceEngine(ABC):
     async def optimize_role_definition(
         self, 
         role: GeneratedRole,
-        feedback: Dict[str, Any]
+        feedback: dict[str, Any]
     ) -> GeneratedRole:
         """优化角色定义"""
         pass
@@ -204,7 +199,7 @@ class IRoleTemplateGenerator(ABC):
     async def generate_system_prompt(
         self, 
         role: GeneratedRole,
-        context: Dict[str, Any]
+        context: dict[str, Any]
     ) -> str:
         """生成系统提示词"""
         pass
@@ -223,7 +218,7 @@ class IRoleTemplateGenerator(ABC):
     async def adapt_template(
         self, 
         template: RoleTemplate,
-        specific_requirements: Dict[str, Any]
+        specific_requirements: dict[str, Any]
     ) -> RoleTemplate:
         """适配模板"""
         pass
@@ -235,7 +230,7 @@ class IRoleValidator(ABC):
     async def validate_role_definition(
         self, 
         role: GeneratedRole
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """验证角色定义"""
         pass
     
@@ -243,8 +238,8 @@ class IRoleValidator(ABC):
     async def assess_role_quality(
         self, 
         role: GeneratedRole,
-        test_scenarios: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        test_scenarios: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """评估角色质量"""
         pass
     
@@ -252,8 +247,8 @@ class IRoleValidator(ABC):
     async def check_role_uniqueness(
         self, 
         new_role: GeneratedRole,
-        existing_roles: List[GeneratedRole]
-    ) -> Dict[str, Any]:
+        existing_roles: list[GeneratedRole]
+    ) -> dict[str, Any]:
         """检查角色唯一性"""
         pass
 
@@ -279,8 +274,8 @@ class IRolePersistenceManager(ABC):
     @abstractmethod
     async def list_roles(
         self, 
-        filters: Dict[str, Any] = None
-    ) -> List[GeneratedRole]:
+        filters: dict[str, Any] = None
+    ) -> list[GeneratedRole]:
         """列出角色"""
         pass
     
@@ -315,8 +310,8 @@ class IAutonomousRoleCreationSystem(ABC):
     async def suggest_role_improvements(
         self, 
         role_id: str,
-        usage_feedback: Dict[str, Any]
-    ) -> List[str]:
+        usage_feedback: dict[str, Any]
+    ) -> list[str]:
         """建议角色改进"""
         pass
     
@@ -324,13 +319,13 @@ class IAutonomousRoleCreationSystem(ABC):
     async def generate_role_variants(
         self, 
         base_role_id: str,
-        variation_requirements: Dict[str, Any]
-    ) -> List[GeneratedRole]:
+        variation_requirements: dict[str, Any]
+    ) -> list[GeneratedRole]:
         """生成角色变体"""
         pass
     
     @abstractmethod
-    async def get_system_status(self) -> Dict[str, Any]:
+    async def get_system_status(self) -> dict[str, Any]:
         """获取系统状态"""
         pass
 
@@ -344,7 +339,7 @@ class RoleIntelligenceEngine(IRoleIntelligenceEngine):
         self.capability_patterns = self._load_capability_patterns()
         self.personality_templates = self._load_personality_templates()
     
-    def _load_domain_knowledge(self) -> Dict[str, Any]:
+    def _load_domain_knowledge(self) -> dict[str, Any]:
         """加载领域知识库"""
         return {
             "technology": {
@@ -369,7 +364,7 @@ class RoleIntelligenceEngine(IRoleIntelligenceEngine):
             }
         }
     
-    def _load_capability_patterns(self) -> Dict[str, List[str]]:
+    def _load_capability_patterns(self) -> dict[str, list[str]]:
         """加载能力模式"""
         return {
             "analytical": ["data_analysis", "critical_thinking", "pattern_recognition"],
@@ -380,7 +375,7 @@ class RoleIntelligenceEngine(IRoleIntelligenceEngine):
             "research": ["literature_review", "experimental_design", "data_collection"]
         }
     
-    def _load_personality_templates(self) -> Dict[str, RolePersonality]:
+    def _load_personality_templates(self) -> dict[str, RolePersonality]:
         """加载性格模板"""
         return {
             "analytical_expert": RolePersonality(
@@ -416,7 +411,7 @@ class RoleIntelligenceEngine(IRoleIntelligenceEngine):
         self, 
         domain: str, 
         task_description: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """分析领域需求"""
         domain_info = self.domain_knowledge.get(domain.lower(), {})
         
@@ -441,7 +436,7 @@ class RoleIntelligenceEngine(IRoleIntelligenceEngine):
             "confidence_score": 0.8  # 简化实现
         }
     
-    def _extract_task_keywords(self, task_description: str) -> List[str]:
+    def _extract_task_keywords(self, task_description: str) -> list[str]:
         """提取任务关键词"""
         # 简化的关键词提取
         action_words = ["分析", "设计", "开发", "研究", "评估", "优化", "管理", "教学", "咨询"]
@@ -458,9 +453,9 @@ class RoleIntelligenceEngine(IRoleIntelligenceEngine):
     
     def _infer_core_capabilities(
         self, 
-        domain_info: Dict[str, Any], 
-        task_keywords: List[str]
-    ) -> List[str]:
+        domain_info: dict[str, Any], 
+        task_keywords: list[str]
+    ) -> list[str]:
         """推断核心能力"""
         capabilities = set()
         
@@ -508,8 +503,8 @@ class RoleIntelligenceEngine(IRoleIntelligenceEngine):
     
     def _recommend_role_type(
         self, 
-        task_keywords: List[str], 
-        domain_info: Dict[str, Any]
+        task_keywords: list[str], 
+        domain_info: dict[str, Any]
     ) -> RoleType:
         """推荐角色类型"""
         if any(word in task_keywords for word in ["分析", "评估", "研究"]):
@@ -526,7 +521,7 @@ class RoleIntelligenceEngine(IRoleIntelligenceEngine):
     async def infer_capabilities(
         self, 
         requirements: RoleRequirement
-    ) -> List[RoleCapability]:
+    ) -> list[RoleCapability]:
         """推理所需能力"""
         domain_analysis = await self.analyze_domain_requirements(
             requirements.domain, 
@@ -586,7 +581,7 @@ class RoleIntelligenceEngine(IRoleIntelligenceEngine):
     async def generate_personality(
         self, 
         requirements: RoleRequirement,
-        capabilities: List[RoleCapability]
+        capabilities: list[RoleCapability]
     ) -> RolePersonality:
         """生成角色性格"""
         # 基于交互风格选择基础性格模板
@@ -626,7 +621,7 @@ class RoleIntelligenceEngine(IRoleIntelligenceEngine):
     async def optimize_role_definition(
         self, 
         role: GeneratedRole,
-        feedback: Dict[str, Any]
+        feedback: dict[str, Any]
     ) -> GeneratedRole:
         """优化角色定义"""
         optimized_role = role
@@ -664,7 +659,7 @@ class RoleTemplateGenerator(IRoleTemplateGenerator):
         self.system_prompt_templates = self._load_system_prompt_templates()
         self.role_templates = self._load_role_templates()
     
-    def _load_system_prompt_templates(self) -> Dict[str, str]:
+    def _load_system_prompt_templates(self) -> dict[str, str]:
         """加载系统提示词模板"""
         return {
             "expert": """你是一位{domain}领域的{expertise_level}专家，名为{name}。
@@ -755,7 +750,7 @@ class RoleTemplateGenerator(IRoleTemplateGenerator):
 运用你{expertise_level}级别的专业技能，帮助用户实现创意目标。"""
         }
     
-    def _load_role_templates(self) -> Dict[str, Dict[str, Any]]:
+    def _load_role_templates(self) -> dict[str, dict[str, Any]]:
         """加载角色模板"""
         return {
             "technology_expert": {
@@ -793,7 +788,7 @@ class RoleTemplateGenerator(IRoleTemplateGenerator):
     async def generate_system_prompt(
         self, 
         role: GeneratedRole,
-        context: Dict[str, Any]
+        context: dict[str, Any]
     ) -> str:
         """生成系统提示词"""
         # 选择合适的模板
@@ -876,7 +871,7 @@ class RoleTemplateGenerator(IRoleTemplateGenerator):
     async def adapt_template(
         self, 
         template: RoleTemplate,
-        specific_requirements: Dict[str, Any]
+        specific_requirements: dict[str, Any]
     ) -> RoleTemplate:
         """适配模板"""
         adapted_template = template
@@ -908,7 +903,7 @@ class RoleValidator(IRoleValidator):
         self.validation_rules = self._load_validation_rules()
         self.quality_metrics = self._load_quality_metrics()
     
-    def _load_validation_rules(self) -> Dict[str, Any]:
+    def _load_validation_rules(self) -> dict[str, Any]:
         """加载验证规则"""
         return {
             "required_fields": ["name", "description", "system_prompt", "capabilities"],
@@ -931,7 +926,7 @@ class RoleValidator(IRoleValidator):
             }
         }
     
-    def _load_quality_metrics(self) -> Dict[str, Dict[str, Any]]:
+    def _load_quality_metrics(self) -> dict[str, dict[str, Any]]:
         """加载质量指标"""
         return {
             "clarity": {
@@ -955,7 +950,7 @@ class RoleValidator(IRoleValidator):
     async def validate_role_definition(
         self, 
         role: GeneratedRole
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """验证角色定义"""
         validation_result = {
             "is_valid": True,
@@ -995,7 +990,7 @@ class RoleValidator(IRoleValidator):
         
         return validation_result
     
-    def _validate_name(self, name: str) -> List[str]:
+    def _validate_name(self, name: str) -> list[str]:
         """验证角色名称"""
         errors = []
         constraints = self.validation_rules["name_constraints"]
@@ -1012,7 +1007,7 @@ class RoleValidator(IRoleValidator):
         
         return errors
     
-    def _validate_description(self, description: str) -> List[str]:
+    def _validate_description(self, description: str) -> list[str]:
         """验证角色描述"""
         errors = []
         constraints = self.validation_rules["description_constraints"]
@@ -1025,7 +1020,7 @@ class RoleValidator(IRoleValidator):
         
         return errors
     
-    def _validate_capabilities(self, capabilities: List[RoleCapability]) -> List[str]:
+    def _validate_capabilities(self, capabilities: list[RoleCapability]) -> list[str]:
         """验证角色能力"""
         errors = []
         constraints = self.validation_rules["capabilities_constraints"]
@@ -1048,7 +1043,7 @@ class RoleValidator(IRoleValidator):
         
         return errors
     
-    def _validate_system_prompt(self, system_prompt: str) -> List[str]:
+    def _validate_system_prompt(self, system_prompt: str) -> list[str]:
         """验证系统提示词"""
         errors = []
         constraints = self.validation_rules["system_prompt_constraints"]
@@ -1075,7 +1070,7 @@ class RoleValidator(IRoleValidator):
         self, 
         role: GeneratedRole, 
         metric_name: str, 
-        metric_config: Dict[str, Any]
+        metric_config: dict[str, Any]
     ) -> float:
         """评估单个质量指标"""
         if metric_name == "clarity":
@@ -1174,8 +1169,8 @@ class RoleValidator(IRoleValidator):
     async def assess_role_quality(
         self, 
         role: GeneratedRole,
-        test_scenarios: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        test_scenarios: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """评估角色质量"""
         assessment = {
             "overall_score": 0.0,
@@ -1212,8 +1207,8 @@ class RoleValidator(IRoleValidator):
     async def _run_test_scenario(
         self, 
         role: GeneratedRole, 
-        scenario: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        scenario: dict[str, Any]
+    ) -> dict[str, Any]:
         """运行测试场景"""
         # 简化的测试场景执行
         test_query = scenario.get("query", "请介绍你的专业能力")
@@ -1234,7 +1229,7 @@ class RoleValidator(IRoleValidator):
             "passed": keyword_score >= 0.6
         }
     
-    def _generate_quality_recommendations(self, metric_scores: Dict[str, float]) -> List[str]:
+    def _generate_quality_recommendations(self, metric_scores: dict[str, float]) -> list[str]:
         """生成质量改进建议"""
         recommendations = []
         
@@ -1258,8 +1253,8 @@ class RoleValidator(IRoleValidator):
     async def check_role_uniqueness(
         self, 
         new_role: GeneratedRole,
-        existing_roles: List[GeneratedRole]
-    ) -> Dict[str, Any]:
+        existing_roles: list[GeneratedRole]
+    ) -> dict[str, Any]:
         """检查角色唯一性"""
         uniqueness_result = {
             "is_unique": True,
@@ -1671,7 +1666,7 @@ class RolePersistenceManager(IRolePersistenceManager):
         if not json_file_path.exists():
             return None
         
-        with open(json_file_path, 'r', encoding='utf-8') as f:
+        with open(json_file_path, encoding='utf-8') as f:
             role_dict = json.load(f)
         
         # 重建能力对象
@@ -1726,7 +1721,7 @@ class RolePersistenceManager(IRolePersistenceManager):
         
         return role
     
-    async def list_roles(self, filters: Dict[str, Any] = None) -> List[GeneratedRole]:
+    async def list_roles(self, filters: dict[str, Any] = None) -> list[GeneratedRole]:
         """列出角色"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -1795,7 +1790,7 @@ class RolePersistenceManager(IRolePersistenceManager):
             logger.error(f"归档角色失败: {role_id}, 错误: {e}")
             return False
     
-    async def get_role_statistics(self) -> Dict[str, Any]:
+    async def get_role_statistics(self) -> dict[str, Any]:
         """获取角色统计信息"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -1997,7 +1992,7 @@ class AutonomousRoleCreationSystem(IAutonomousRoleCreationSystem):
     def _generate_role_name(
         self, 
         requirements: RoleRequirement, 
-        domain_analysis: Dict[str, Any]
+        domain_analysis: dict[str, Any]
     ) -> str:
         """生成角色名称"""
         role_type = domain_analysis["recommended_role_type"]
@@ -2031,7 +2026,7 @@ class AutonomousRoleCreationSystem(IAutonomousRoleCreationSystem):
     def _generate_description(
         self, 
         requirements: RoleRequirement, 
-        capabilities: List[RoleCapability]
+        capabilities: list[RoleCapability]
     ) -> str:
         """生成角色描述"""
         capability_names = [cap.name for cap in capabilities[:5]]
@@ -2069,8 +2064,8 @@ class AutonomousRoleCreationSystem(IAutonomousRoleCreationSystem):
     async def suggest_role_improvements(
         self, 
         role_id: str,
-        usage_feedback: Dict[str, Any]
-    ) -> List[str]:
+        usage_feedback: dict[str, Any]
+    ) -> list[str]:
         """建议角色改进"""
         try:
             # 加载角色
@@ -2109,8 +2104,8 @@ class AutonomousRoleCreationSystem(IAutonomousRoleCreationSystem):
     async def generate_role_variants(
         self, 
         base_role_id: str,
-        variation_requirements: Dict[str, Any]
-    ) -> List[GeneratedRole]:
+        variation_requirements: dict[str, Any]
+    ) -> list[GeneratedRole]:
         """生成角色变体"""
         try:
             # 加载基础角色
@@ -2232,7 +2227,7 @@ class AutonomousRoleCreationSystem(IAutonomousRoleCreationSystem):
         # 简化实现，返回None
         return None
     
-    async def get_system_status(self) -> Dict[str, Any]:
+    async def get_system_status(self) -> dict[str, Any]:
         """获取系统状态"""
         try:
             # 获取角色统计
@@ -2286,7 +2281,7 @@ async def create_role_from_description(
     task_description: str,
     expertise_level: str = "advanced",
     interaction_style: str = "professional",
-    additional_capabilities: List[str] = None
+    additional_capabilities: list[str] = None
 ) -> RoleGenerationResult:
     """从描述创建角色的便捷函数"""
     system = create_autonomous_role_creation_system()
@@ -2334,7 +2329,7 @@ async def example_usage():
     # 生成角色
     result = await system.create_role(request)
     
-    print(f"角色创建结果:")
+    print("角色创建结果:")
     print(f"- 角色ID: {result.generated_role.role_id}")
     print(f"- 角色名称: {result.generated_role.name}")
     print(f"- 专业领域: {result.generated_role.domain}")

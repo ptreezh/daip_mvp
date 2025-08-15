@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 09:45:00
+"""@Time    : 2025-08-06 09:45:00
 @Author  : DAIP-LIVE Team
 @File    : service_discovery_registry.py
 @Description:
@@ -9,17 +7,15 @@
 """
 
 import asyncio
-import json
 import logging
-import time
-import uuid
-from typing import Dict, List, Optional, Any, Set
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
-from enum import Enum
-import aiohttp
 import threading
-from pathlib import Path
+import uuid
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
+
+import aiohttp
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -51,7 +47,7 @@ class ServiceInstance:
     port: int
     status: ServiceStatus
     health_check_url: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     registration_type: RegistrationType = RegistrationType.DYNAMIC
     registered_at: datetime = field(default_factory=datetime.now)
     last_heartbeat: datetime = field(default_factory=datetime.now)
@@ -70,17 +66,17 @@ class ServiceEndpoint:
     method: str
     description: str
     version: str = "1.0"
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class ServiceQuery:
     """Service discovery query."""
     service_name: Optional[str] = None
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     status: Optional[ServiceStatus] = None
-    metadata_filter: Dict[str, Any] = field(default_factory=dict)
+    metadata_filter: dict[str, Any] = field(default_factory=dict)
     version_constraint: Optional[str] = None
 
 
@@ -88,12 +84,12 @@ class ServiceRegistry:
     """Central service registry for DAIP-LIVE."""
     
     def __init__(self):
-        self.services: Dict[str, List[ServiceInstance]] = {}
-        self.endpoints: Dict[str, List[ServiceEndpoint]] = {}
+        self.services: dict[str, list[ServiceInstance]] = {}
+        self.endpoints: dict[str, list[ServiceEndpoint]] = {}
         self.service_lock = threading.Lock()
         self.heartbeat_monitor = None
         self.monitoring_active = False
-        self.event_subscribers: List[callable] = []
+        self.event_subscribers: list[callable] = []
         
         logger.info("Service Registry initialized")
     
@@ -204,7 +200,7 @@ class ServiceRegistry:
         
         return True
     
-    def discover_services(self, query: ServiceQuery = None) -> List[ServiceInstance]:
+    def discover_services(self, query: ServiceQuery = None) -> list[ServiceInstance]:
         """Discover services based on query."""
         if query is None:
             query = ServiceQuery()
@@ -238,7 +234,7 @@ class ServiceRegistry:
     
     def discover_endpoints(self, service_name: str = None, 
                           endpoint_type: str = None,
-                          tags: List[str] = None) -> List[ServiceEndpoint]:
+                          tags: list[str] = None) -> list[ServiceEndpoint]:
         """Discover service endpoints."""
         results = []
         
@@ -258,12 +254,12 @@ class ServiceRegistry:
         
         return results
     
-    def get_service_instances(self, service_name: str) -> List[ServiceInstance]:
+    def get_service_instances(self, service_name: str) -> list[ServiceInstance]:
         """Get all instances of a specific service."""
         with self.service_lock:
             return self.services.get(service_name, []).copy()
     
-    def get_service_endpoints(self, service_name: str) -> List[ServiceEndpoint]:
+    def get_service_endpoints(self, service_name: str) -> list[ServiceEndpoint]:
         """Get all endpoints of a specific service."""
         return self.endpoints.get(service_name, []).copy()
     
@@ -326,7 +322,7 @@ class ServiceRegistry:
             
             return False
     
-    def get_registry_stats(self) -> Dict[str, Any]:
+    def get_registry_stats(self) -> dict[str, Any]:
         """Get registry statistics."""
         with self.service_lock:
             total_services = len(self.services)
@@ -352,7 +348,7 @@ class ServiceRegistry:
         """Subscribe to registry events."""
         self.event_subscribers.append(callback)
     
-    def _notify_subscribers(self, event_type: str, data: Dict[str, Any]):
+    def _notify_subscribers(self, event_type: str, data: dict[str, Any]):
         """Notify subscribers of registry events."""
         event = {
             "event_type": event_type,
@@ -434,7 +430,7 @@ class ServiceDiscoveryClient:
     
     async def register_service(self, service_name: str, host: str, port: int,
                              health_check_url: str = "/health",
-                             metadata: Dict[str, Any] = None,
+                             metadata: dict[str, Any] = None,
                              health_check_interval: int = 30) -> bool:
         """Register a service with the registry."""
         instance = ServiceInstance(
@@ -471,7 +467,7 @@ class ServiceDiscoveryClient:
             logger.error(f"Failed to deregister service: {e}")
             return False
     
-    async def discover_service(self, service_name: str) -> List[ServiceInstance]:
+    async def discover_service(self, service_name: str) -> list[ServiceInstance]:
         """Discover instances of a service."""
         try:
             async with self.session.get(

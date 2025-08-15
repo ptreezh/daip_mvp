@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-算法注册测试
+"""算法注册测试
 
 测试算法注册过程，找出为什么没有可用算法的问题。
 """
 
 import sys
-import os
 
 # 添加src路径
 sys.path.append('src')
@@ -20,9 +17,9 @@ def test_algorithm_registration():
     try:
         # 导入所需模块
         from algorithm_registry import AlgorithmRegistry
+        from bayesian_algorithm import BayesianAlgorithm
         from simple_majority_algorithm import SimpleMajorityAlgorithm
         from weighted_voting_algorithm import WeightedVotingAlgorithm
-        from bayesian_algorithm import BayesianAlgorithm
         from workflow_consensus_algorithm import WorkflowConsensusAlgorithm
         
         print("✅ 所有算法模块导入成功")
@@ -56,7 +53,7 @@ def test_algorithm_registration():
         
         # 检查注册结果
         registered_algorithms = registry.get_algorithm_ids()
-        print(f"\n📊 注册结果:")
+        print("\n📊 注册结果:")
         print(f"   已注册算法数量: {len(registered_algorithms)}")
         
         for alg_id in registered_algorithms:

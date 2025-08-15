@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Test Runner
+"""Personal Intelligence Hub - Test Runner
 
 测试运行脚本，提供便捷的测试执行方式
 """
 
-import sys
-import subprocess
-from pathlib import Path
 import argparse
+import subprocess
+import sys
+from pathlib import Path
 
 
 def run_tests(test_type="all", verbose=False, coverage=False):
     """运行测试"""
-    
     # 基础pytest命令
     cmd = ["python", "-m", "pytest"]
     

@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 18:00:00
+"""@Time    : 2025-07-24 18:00:00
 @Author  : DAIP-LIVE Team
 @File    : progress_monitor.py
 @Description:
     Progress monitoring for workflow execution.
 """
-import asyncio
 import logging
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
@@ -26,7 +24,7 @@ class ProgressStep(BaseModel):
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     error: Optional[str] = None
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
 
 class WorkflowProgress(BaseModel):
@@ -35,10 +33,10 @@ class WorkflowProgress(BaseModel):
     workflow_name: str
     overall_progress: float  # 0.0 to 1.0
     current_step: str
-    steps: List[ProgressStep] = []
+    steps: list[ProgressStep] = []
     started_at: datetime
     estimated_completion: Optional[datetime] = None
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
 
 class ProgressMonitor:
@@ -46,14 +44,14 @@ class ProgressMonitor:
     
     def __init__(self):
         """Initialize the progress monitor."""
-        self.active_workflows: Dict[str, WorkflowProgress] = {}
-        self.progress_callbacks: Dict[str, List[Callable]] = {}
+        self.active_workflows: dict[str, WorkflowProgress] = {}
+        self.progress_callbacks: dict[str, list[Callable]] = {}
     
     def start_workflow(
         self,
         execution_id: str,
         workflow_name: str,
-        steps: List[Dict[str, str]]
+        steps: list[dict[str, str]]
     ) -> WorkflowProgress:
         """Start monitoring a workflow."""
         # Create progress steps
@@ -122,7 +120,7 @@ class ProgressMonitor:
         self,
         execution_id: str,
         step_id: str,
-        metadata: Dict[str, Any] = None
+        metadata: dict[str, Any] = None
     ) -> None:
         """Mark a step as completed."""
         self.update_step_progress(execution_id, step_id, 1.0, "completed")
@@ -139,7 +137,7 @@ class ProgressMonitor:
         execution_id: str,
         step_id: str,
         error: str,
-        metadata: Dict[str, Any] = None
+        metadata: dict[str, Any] = None
     ) -> None:
         """Mark a step as failed."""
         self.update_step_progress(execution_id, step_id, 0.0, "failed", error)
@@ -155,7 +153,7 @@ class ProgressMonitor:
         """Get current progress for a workflow."""
         return self.active_workflows.get(execution_id)
     
-    def complete_workflow(self, execution_id: str, metadata: Dict[str, Any] = None) -> None:
+    def complete_workflow(self, execution_id: str, metadata: dict[str, Any] = None) -> None:
         """Mark a workflow as completed."""
         if execution_id not in self.active_workflows:
             return
@@ -177,7 +175,7 @@ class ProgressMonitor:
         # Notify callbacks
         self._notify_callbacks(execution_id, workflow)
     
-    def fail_workflow(self, execution_id: str, error: str, metadata: Dict[str, Any] = None) -> None:
+    def fail_workflow(self, execution_id: str, error: str, metadata: dict[str, Any] = None) -> None:
         """Mark a workflow as failed."""
         if execution_id not in self.active_workflows:
             return
@@ -260,11 +258,11 @@ class ProgressMonitor:
                 except Exception as e:
                     logger.error(f"Progress callback failed: {e}")
     
-    def get_active_workflows(self) -> List[WorkflowProgress]:
+    def get_active_workflows(self) -> list[WorkflowProgress]:
         """Get all currently active workflows."""
         return list(self.active_workflows.values())
     
-    def get_workflow_summary(self, execution_id: str) -> Optional[Dict[str, Any]]:
+    def get_workflow_summary(self, execution_id: str) -> Optional[dict[str, Any]]:
         """Get a summary of workflow progress."""
         workflow = self.get_workflow_progress(execution_id)
         if not workflow:

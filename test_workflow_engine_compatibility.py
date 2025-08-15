@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-WorkflowEngine兼容层测试
+"""WorkflowEngine兼容层测试
 
 测试WorkflowEngine与统一共识调度器的集成兼容性。
 """
 
 import asyncio
 import sys
-import os
-from datetime import datetime
 
 # 添加src路径
 sys.path.append('src')

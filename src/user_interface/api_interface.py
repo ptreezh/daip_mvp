@@ -1,22 +1,19 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 18:00:00
+"""@Time    : 2025-07-24 18:00:00
 @Author  : DAIP-LIVE Team
 @File    : api_interface.py
 @Description:
     REST API interface for the Virtual Role Chat System workflows.
 """
-import asyncio
 import json
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
+import uvicorn
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
-import uvicorn
 
 from ..workflows.critical_review_workflow import CriticalReviewWorkflow
 from ..workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
@@ -32,15 +29,15 @@ class CriticalReviewRequest(BaseModel):
     """Request model for Critical Review Workflow."""
     content: str = Field(..., description="Content to review")
     role_context: str = Field("", description="Additional context for the creator role")
-    config: Dict[str, Any] = Field(default_factory=dict, description="Workflow configuration")
+    config: dict[str, Any] = Field(default_factory=dict, description="Workflow configuration")
     execution_id: Optional[str] = Field(None, description="Optional execution ID for tracking")
 
 
 class MultiPerspectiveRequest(BaseModel):
     """Request model for Multi-perspective Synthesis Workflow."""
     topic: str = Field(..., description="Topic to analyze")
-    perspectives: List[str] = Field(default_factory=list, description="List of perspectives to consider")
-    config: Dict[str, Any] = Field(default_factory=dict, description="Workflow configuration")
+    perspectives: list[str] = Field(default_factory=list, description="List of perspectives to consider")
+    config: dict[str, Any] = Field(default_factory=dict, description="Workflow configuration")
     execution_id: Optional[str] = Field(None, description="Optional execution ID for tracking")
 
 
@@ -48,7 +45,7 @@ class WorkflowResponse(BaseModel):
     """Response model for workflow execution."""
     success: bool
     execution_id: str
-    result: Optional[Dict[str, Any]] = None
+    result: Optional[dict[str, Any]] = None
     error: Optional[str] = None
     started_at: datetime
     completed_at: Optional[datetime] = None
@@ -62,7 +59,7 @@ class WorkflowStatus(BaseModel):
     current_step: str
     started_at: datetime
     completed_at: Optional[datetime] = None
-    result: Optional[Dict[str, Any]] = None
+    result: Optional[dict[str, Any]] = None
     error: Optional[str] = None
 
 
@@ -79,20 +76,20 @@ class APIInterface:
         self.progress_monitor = ProgressMonitor()
         self.result_formatter = ResultFormatter()
         self.transparency_controller = TransparencyController()
-        self.execution_status: Dict[str, WorkflowStatus] = {}
+        self.execution_status: dict[str, WorkflowStatus] = {}
         
         # Set up routes
         self._setup_routes()
     
-    async def setup_services(self) -> Dict[str, Any]:
+    async def setup_services(self) -> dict[str, Any]:
         """Set up required services for workflow execution."""
         try:
+            from ..core_services.fact_extraction_service import FactExtractionService
             from ..core_services.llm_interface import EnhancedLLMInterface
             from ..core_services.role_manager import RoleManager
-            from ..kernel.tool_executor import ToolExecutor
             from ..core_services.synthesis_engine import SynthesisEngine
-            from ..core_services.fact_extraction_service import FactExtractionService
             from ..core_services.wiki_service import WikiService
+            from ..kernel.tool_executor import ToolExecutor
             
             # Initialize services
             llm_interface = EnhancedLLMInterface()
@@ -339,7 +336,7 @@ class APIInterface:
                 )
         
         @self.app.post("/workflows/{execution_id}/feedback")
-        async def submit_workflow_feedback(execution_id: str, feedback_data: Dict[str, Any]):
+        async def submit_workflow_feedback(execution_id: str, feedback_data: dict[str, Any]):
             """Submit feedback for a workflow execution."""
             if execution_id not in self.execution_status:
                 raise HTTPException(status_code=404, detail="Execution not found")
@@ -385,7 +382,7 @@ class APIInterface:
         @self.app.post("/workflows/{execution_id}/validate")
         async def validate_workflow_result(
             execution_id: str,
-            validation_criteria: Dict[str, Any] = None
+            validation_criteria: dict[str, Any] = None
         ):
             """Validate workflow result quality."""
             if execution_id not in self.execution_status:

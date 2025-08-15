@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 12:00:00
+"""@Time    : 2025-08-06 12:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_runner.py
 @Description:
@@ -8,14 +6,14 @@
     Provides comprehensive test execution and reporting.
 """
 
-import pytest
-import asyncio
-import sys
+import json
 import os
+import sys
 import time
 from datetime import datetime
-from typing import Dict, Any, List
-import json
+from typing import Any
+
+import pytest
 
 # Add current directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -28,7 +26,7 @@ class TestRunner:
         self.start_time = None
         self.end_time = None
         
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all DDD tests and return comprehensive report"""
         print("🚀 Starting DDD Test Suite for Personal Intelligence Hub")
         print("=" * 60)
@@ -81,7 +79,7 @@ class TestRunner:
         
         return overall_results
     
-    def _run_test_module(self, module_name: str) -> Dict[str, Any]:
+    def _run_test_module(self, module_name: str) -> dict[str, Any]:
         """Run a specific test module"""
         try:
             # Run pytest programmatically
@@ -136,7 +134,7 @@ class TestRunner:
         }
         return coverage_map.get(component, 0.0)
     
-    def print_report(self, results: Dict[str, Any]):
+    def print_report(self, results: dict[str, Any]):
         """Print comprehensive test report"""
         print("\n" + "=" * 60)
         print("📊 DDD TEST EXECUTION REPORT")
@@ -145,7 +143,7 @@ class TestRunner:
         print(f"\n⏱️  Execution Time: {results['execution_time']:.2f} seconds")
         print(f"📅 Run Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
-        print(f"\n🎯 OVERALL RESULTS:")
+        print("\n🎯 OVERALL RESULTS:")
         print(f"   Total Tests: {results['total_tests']}")
         print(f"   ✅ Passed: {results['passed_tests']}")
         print(f"   ❌ Failed: {results['failed_tests']}")
@@ -154,12 +152,12 @@ class TestRunner:
         success_rate = (results['passed_tests'] / results['total_tests']) * 100 if results['total_tests'] > 0 else 0
         print(f"   📈 Success Rate: {success_rate:.1f}%")
         
-        print(f"\n📋 TEST SUITES:")
+        print("\n📋 TEST SUITES:")
         for module, result in results['test_suites'].items():
             status_icon = "✅" if result['status'] == "PASSED" else "❌"
             print(f"   {status_icon} {module}: {result['passed']}/{result['total']} passed")
         
-        print(f"\n🔍 COVERAGE ANALYSIS:")
+        print("\n🔍 COVERAGE ANALYSIS:")
         coverage = results['coverage']
         print(f"   Domain Model: {coverage['domain_model']*100:.1f}%")
         print(f"   Use Cases: {coverage['use_cases']*100:.1f}%")
@@ -167,7 +165,7 @@ class TestRunner:
         print(f"   Overall: {coverage['overall']*100:.1f}%")
         
         # Quality assessment
-        print(f"\n🏆 QUALITY ASSESSMENT:")
+        print("\n🏆 QUALITY ASSESSMENT:")
         
         if success_rate >= 95 and coverage['overall'] >= 0.85:
             print("   🌟 EXCELLENT - High quality, ready for production")
@@ -179,7 +177,7 @@ class TestRunner:
             print("   🚨 NEEDS IMPROVEMENT - Quality below acceptable standards")
         
         # Recommendations
-        print(f"\n💡 RECOMMENDATIONS:")
+        print("\n💡 RECOMMENDATIONS:")
         
         if results['failed_tests'] > 0:
             print("   • Fix failing tests before deployment")
@@ -196,7 +194,7 @@ class TestRunner:
         
         print("\n" + "=" * 60)
     
-    def save_report(self, results: Dict[str, Any], filename: str = "ddd_test_report.json"):
+    def save_report(self, results: dict[str, Any], filename: str = "ddd_test_report.json"):
         """Save test report to JSON file"""
         report_data = {
             "metadata": {
@@ -220,7 +218,7 @@ class TestRunner:
         
         print(f"📄 Test report saved to: {filename}")
     
-    def _calculate_test_effectiveness(self, results: Dict[str, Any]) -> float:
+    def _calculate_test_effectiveness(self, results: dict[str, Any]) -> float:
         """Calculate test effectiveness score"""
         if results['total_tests'] == 0:
             return 0.0
@@ -230,7 +228,7 @@ class TestRunner:
         
         return (success_rate * 0.6 + coverage * 0.4)
     
-    def _calculate_maintainability_score(self, results: Dict[str, Any]) -> float:
+    def _calculate_maintainability_score(self, results: dict[str, Any]) -> float:
         """Calculate maintainability score based on test structure"""
         # Higher score for good test organization and coverage
         coverage = results['coverage']['overall']
@@ -238,7 +236,7 @@ class TestRunner:
         
         return (coverage * 0.7 + test_count_factor * 0.3)
     
-    def _calculate_reliability_score(self, results: Dict[str, Any]) -> float:
+    def _calculate_reliability_score(self, results: dict[str, Any]) -> float:
         """Calculate reliability score"""
         if results['total_tests'] == 0:
             return 0.0

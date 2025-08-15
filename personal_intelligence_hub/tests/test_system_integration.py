@@ -1,24 +1,21 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - System Integration Tests
+"""Personal Intelligence Hub - System Integration Tests
 
 系统集成测试
 """
 
-import pytest
-import asyncio
-from unittest.mock import Mock, patch
 from datetime import datetime
 
-from personal_intelligence_hub.main_app import PersonalIntelligenceHubView, IndexView
+import pytest
+
 from personal_intelligence_hub.components.chat_interface import ChatInterface
+from personal_intelligence_hub.components.task_panel import TaskPanel
 from personal_intelligence_hub.components.transparency_monitor import TransparencyMonitor
 from personal_intelligence_hub.components.wiki_panel import WikiPanel
-from personal_intelligence_hub.components.task_panel import TaskPanel
+from personal_intelligence_hub.main_app import IndexView, PersonalIntelligenceHubView
+from personal_intelligence_hub.models.workflow_models import StepType, WorkflowDefinition
 from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService
 from personal_intelligence_hub.services.workflow_compiler import WorkflowCompiler
-from personal_intelligence_hub.models.workflow_models import WorkflowDefinition, StepType
 
 
 class TestSystemIntegration:
@@ -76,7 +73,7 @@ class TestSystemIntegration:
         self.transparency_monitor.system_status.active_agents = []
         
         # 模拟代理状态更新
-        from personal_intelligence_hub.models.transparency_models import AgentStatusInfo, AgentStatus
+        from personal_intelligence_hub.models.transparency_models import AgentStatus, AgentStatusInfo
         agent = AgentStatusInfo(
             agent_id="test_agent",
             name="Test Agent",
@@ -128,9 +125,9 @@ class TestSystemIntegration:
     def test_model_consistency(self):
         """测试模型一致性"""
         # 测试所有数据模型的一致性
+        from personal_intelligence_hub.models.task_models import Task
         from personal_intelligence_hub.models.transparency_models import SystemStatus
         from personal_intelligence_hub.models.wiki_models import WikiPage
-        from personal_intelligence_hub.models.task_models import Task
         from personal_intelligence_hub.models.workflow_models import WorkflowDefinition
         
         # 验证所有模型可以实例化

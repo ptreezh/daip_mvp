@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多轮辩论系统全面质量检查和端到端测试套件
+"""多轮辩论系统全面质量检查和端到端测试套件
 
 执行完整的系统测试，包括：
 - 代码质量审查
@@ -12,16 +10,15 @@
 """
 
 import asyncio
-import time
-import sys
-import os
-import logging
-import subprocess
-import psutil
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
 import json
+import logging
+import sys
+import time
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+import psutil
 
 # 添加项目根目录到路径
 current_dir = Path(__file__).parent
@@ -51,7 +48,7 @@ class TestResult:
         """开始测试"""
         self.start_time = datetime.now()
     
-    def finish(self, passed: bool, error_message: str = "", details: Dict = None):
+    def finish(self, passed: bool, error_message: str = "", details: dict = None):
         """结束测试"""
         self.end_time = datetime.now()
         self.passed = passed
@@ -60,7 +57,7 @@ class TestResult:
         if self.start_time:
             self.duration = (self.end_time - self.start_time).total_seconds()
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {
             "test_name": self.test_name,
@@ -77,12 +74,12 @@ class ComprehensiveTestSuite:
     """全面测试套件"""
     
     def __init__(self):
-        self.test_results: List[TestResult] = []
+        self.test_results: list[TestResult] = []
         self.start_time = None
         self.end_time = None
         self.system_info = self._collect_system_info()
     
-    def _collect_system_info(self) -> Dict[str, Any]:
+    def _collect_system_info(self) -> dict[str, Any]:
         """收集系统信息"""
         return {
             "python_version": sys.version,
@@ -93,7 +90,7 @@ class ComprehensiveTestSuite:
             "timestamp": datetime.now().isoformat()
         }
     
-    async def run_all_tests(self) -> Dict[str, Any]:
+    async def run_all_tests(self) -> dict[str, Any]:
         """运行所有测试"""
         self.start_time = datetime.now()
         logger.info("🚀 开始全面质量检查和端到端测试...")
@@ -138,7 +135,7 @@ class ComprehensiveTestSuite:
             
             for py_file in python_files:
                 try:
-                    with open(py_file, 'r', encoding='utf-8') as f:
+                    with open(py_file, encoding='utf-8') as f:
                         compile(f.read(), py_file, 'exec')
                 except SyntaxError as e:
                     syntax_errors.append(f"{py_file}: {e}")
@@ -152,7 +149,7 @@ class ComprehensiveTestSuite:
             
             for py_file in python_files:
                 try:
-                    with open(py_file, 'r', encoding='utf-8') as f:
+                    with open(py_file, encoding='utf-8') as f:
                         code_metrics["total_lines"] += len(f.readlines())
                 except:
                     pass
@@ -212,8 +209,8 @@ class ComprehensiveTestSuite:
         result.start()
         
         try:
-            from multi_role_dialogue_engine import MultiRoleDialogueEngine
             from debate_state_manager import DebateStateManager
+            from multi_role_dialogue_engine import MultiRoleDialogueEngine
             from websocket_manager import DebateWebSocketManager
             
             # 创建模拟组件
@@ -265,9 +262,9 @@ class ComprehensiveTestSuite:
         result.start()
         
         try:
-            from web_interface import DebateWebInterface, DebateInterfaceMode
-            from multi_role_dialogue_engine import MultiRoleDialogueEngine
             from debate_state_manager import DebateStateManager
+            from multi_role_dialogue_engine import MultiRoleDialogueEngine
+            from web_interface import DebateInterfaceMode, DebateWebInterface
             
             # 创建模拟组件
             class MockComponent:
@@ -327,7 +324,7 @@ class ComprehensiveTestSuite:
         result.start()
         
         try:
-            from websocket_manager import DebateWebSocketManager, WebSocketMessage, MessageType
+            from websocket_manager import DebateWebSocketManager, MessageType, WebSocketMessage
             
             # 创建WebSocket管理器
             ws_manager = DebateWebSocketManager()
@@ -370,11 +367,12 @@ class ComprehensiveTestSuite:
         result.start()
         
         try:
+            from debate_flow_definition import DebatePhase, DebateSession
             from multi_role_dialogue_engine import (
-                MultiRoleDialogueEngine, RoleSelector, ConversationManager, 
-                ConvergenceDetector, DialogueContext, DialogueTurn
+                ConvergenceDetector,
+                DialogueContext,
+                MultiRoleDialogueEngine,
             )
-            from debate_flow_definition import DebateSession, ParticipantRole, DebatePhase
             
             # 创建模拟组件
             class MockRoleManager:
@@ -443,8 +441,8 @@ class ComprehensiveTestSuite:
         result.start()
         
         try:
+            from debate_flow_definition import DebateParticipant, DebateSession, ParticipantRole
             from debate_state_manager import DebateStateManager
-            from debate_flow_definition import DebateSession, DebateParticipant, ParticipantRole
             
             # 创建状态管理器
             state_manager = DebateStateManager()
@@ -507,8 +505,6 @@ class ComprehensiveTestSuite:
             startup_start = time.time()
             
             from multi_role_dialogue_engine import MultiRoleDialogueEngine
-            from debate_state_manager import DebateStateManager
-            from websocket_manager import DebateWebSocketManager
             
             startup_time = time.time() - startup_start
             
@@ -688,8 +684,8 @@ class ComprehensiveTestSuite:
         result.start()
         
         try:
-            from debate_state_manager import DebateStateManager
             from debate_flow_definition import DebateSession
+            from debate_state_manager import DebateStateManager
             
             state_manager = DebateStateManager()
             
@@ -738,9 +734,9 @@ class ComprehensiveTestSuite:
         result.start()
         
         try:
-            from multi_role_dialogue_engine import MultiRoleDialogueEngine
-            from debate_state_manager import DebateStateManager
             from debate_flow_definition import DebateSession
+            from debate_state_manager import DebateStateManager
+            from multi_role_dialogue_engine import MultiRoleDialogueEngine
             
             # 创建完整的工作流
             class MockRoleManager:
@@ -824,7 +820,7 @@ class ComprehensiveTestSuite:
         self.test_results.append(result)
         logger.info(f"✅ 端到端工作流测试: {'通过' if result.passed else '失败'}")
     
-    def _generate_test_report(self) -> Dict[str, Any]:
+    def _generate_test_report(self) -> dict[str, Any]:
         """生成测试报告"""
         total_tests = len(self.test_results)
         passed_tests = sum(1 for r in self.test_results if r.passed)
@@ -849,7 +845,7 @@ class ComprehensiveTestSuite:
         
         return report
     
-    def _check_quality_gates(self) -> Dict[str, Any]:
+    def _check_quality_gates(self) -> dict[str, Any]:
         """检查质量门禁"""
         gates = {}
         

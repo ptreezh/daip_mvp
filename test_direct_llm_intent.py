@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-直接测试LLM意图分析功能
+"""直接测试LLM意图分析功能
 绕过后端服务，直接调用LLM进行意图分析
 """
 
 import asyncio
-import sys
 import json
 import re
+import sys
 from pathlib import Path
 
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.kernel.llm_interface import LLMConfig, LLMFactory
+
 
 class DirectLLMIntentAnalyzer:
     """直接LLM意图分析器"""
@@ -186,7 +185,7 @@ async def test_direct_llm_intent():
             if scenario_correct:
                 correct_scenario += 1
             
-            print(f"\n📊 分析结果:")
+            print("\n📊 分析结果:")
             print(f"预测工作流: {result['workflow_type']} {'✅' if workflow_correct else '❌'}")
             print(f"预测场景: {result['scenario']} {'✅' if scenario_correct else '❌'}")
             print(f"置信度: {result['confidence']:.2f}")
@@ -233,7 +232,7 @@ async def test_direct_llm_intent():
     workflow_met = workflow_accuracy >= workflow_target
     scenario_met = scenario_accuracy >= scenario_target
     
-    print(f"\n🎯 V0.2.1任务目标达成情况:")
+    print("\n🎯 V0.2.1任务目标达成情况:")
     print(f"工作流选择准确率≥95%: {'✅ 达成' if workflow_met else '❌ 未达成'}")
     print(f"场景识别准确率≥90%: {'✅ 达成' if scenario_met else '❌ 未达成'}")
     

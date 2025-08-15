@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-02 17:30:00
+"""@Time    : 2025-08-02 17:30:00
 @Author  : DAIP-LIVE Team
 @File    : automated_system_test.py
 @Description:
@@ -15,28 +13,26 @@
 """
 
 import asyncio
-import logging
-import time
 import json
+import logging
+import os
 import subprocess
-import threading
-import webbrowser
-import requests
-from typing import Dict, List, Any, Optional
+import time
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Optional
+
 import psutil
-import signal
-import os
+import requests
 
 # Selenium for browser automation
 try:
     from selenium import webdriver
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.support.ui import WebDriverWait
-    from selenium.webdriver.support import expected_conditions as EC
     from selenium.webdriver.chrome.options import Options as ChromeOptions
     from selenium.webdriver.common.action_chains import ActionChains
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.support.ui import WebDriverWait
     SELENIUM_AVAILABLE = True
 except ImportError:
     SELENIUM_AVAILABLE = False
@@ -58,7 +54,7 @@ class ServiceManager:
             "quick_delivery": 8090
         }
     
-    async def start_personal_intelligence_hub(self) -> Dict[str, Any]:
+    async def start_personal_intelligence_hub(self) -> dict[str, Any]:
         """启动Personal Intelligence Hub服务"""
         logger.info("🚀 启动Personal Intelligence Hub服务...")
         
@@ -107,7 +103,7 @@ class ServiceManager:
             logger.error(f"❌ Personal Intelligence Hub 启动异常: {e}")
             return {"success": False, "error": str(e)}
     
-    async def start_quick_delivery_demo(self) -> Dict[str, Any]:
+    async def start_quick_delivery_demo(self) -> dict[str, Any]:
         """启动快速交付演示服务"""
         logger.info("🚀 启动快速交付演示服务...")
         
@@ -240,7 +236,7 @@ class BrowserAutomationTester:
             logger.error(f"❌ 浏览器设置失败: {e}")
             return False
     
-    async def test_user_stories(self, service_url: str) -> List[Dict[str, Any]]:
+    async def test_user_stories(self, service_url: str) -> list[dict[str, Any]]:
         """测试用户故事"""
         if not self.driver:
             return [{"error": "浏览器未初始化"}]
@@ -309,7 +305,7 @@ class BrowserAutomationTester:
         
         return results
     
-    async def _test_homepage_access(self, service_url: str) -> Dict[str, Any]:
+    async def _test_homepage_access(self, service_url: str) -> dict[str, Any]:
         """测试主页访问"""
         try:
             self.driver.get(service_url)
@@ -342,7 +338,7 @@ class BrowserAutomationTester:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    async def _test_expert_consultation(self, service_url: str) -> Dict[str, Any]:
+    async def _test_expert_consultation(self, service_url: str) -> dict[str, Any]:
         """测试专家咨询场景"""
         try:
             # 模拟用户进行专家咨询
@@ -370,7 +366,7 @@ class BrowserAutomationTester:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    async def _test_academic_research(self, service_url: str) -> Dict[str, Any]:
+    async def _test_academic_research(self, service_url: str) -> dict[str, Any]:
         """测试学术研究场景"""
         try:
             self.driver.get(service_url)
@@ -394,7 +390,7 @@ class BrowserAutomationTester:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    async def _test_ui_responsiveness(self, service_url: str) -> Dict[str, Any]:
+    async def _test_ui_responsiveness(self, service_url: str) -> dict[str, Any]:
         """测试界面响应性"""
         try:
             start_time = time.time()
@@ -420,7 +416,7 @@ class BrowserAutomationTester:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    async def _test_error_handling(self, service_url: str) -> Dict[str, Any]:
+    async def _test_error_handling(self, service_url: str) -> dict[str, Any]:
         """测试错误处理"""
         try:
             # 访问不存在的页面
@@ -463,7 +459,7 @@ class AutomatedSystemTester:
         self.browser_tester = BrowserAutomationTester()
         self.test_results = {}
         
-    async def run_complete_test_suite(self) -> Dict[str, Any]:
+    async def run_complete_test_suite(self) -> dict[str, Any]:
         """运行完整测试套件"""
         logger.info("=" * 80)
         logger.info("🧪 开始完整自动化系统测试")
@@ -510,7 +506,7 @@ class AutomatedSystemTester:
             # 清理资源
             await self._cleanup_resources()
     
-    async def _test_service_startup(self) -> Dict[str, Any]:
+    async def _test_service_startup(self) -> dict[str, Any]:
         """测试服务启动"""
         logger.info("🚀 测试服务启动...")
         
@@ -535,7 +531,7 @@ class AutomatedSystemTester:
             "primary_service": self._get_primary_service_url(results)
         }
     
-    def _get_primary_service_url(self, service_results: Dict[str, Any]) -> Optional[str]:
+    def _get_primary_service_url(self, service_results: dict[str, Any]) -> Optional[str]:
         """获取主要服务URL"""
         if service_results.get("personal_hub", {}).get("success"):
             return service_results["personal_hub"]["url"]
@@ -543,7 +539,7 @@ class AutomatedSystemTester:
             return service_results["quick_delivery"]["url"]
         return None
     
-    async def _test_browser_automation(self) -> Dict[str, Any]:
+    async def _test_browser_automation(self) -> dict[str, Any]:
         """测试浏览器自动化"""
         logger.info("🌐 测试浏览器自动化...")
         
@@ -588,7 +584,7 @@ class AutomatedSystemTester:
             "tested_url": primary_url
         }
     
-    async def _test_api_endpoints(self) -> Dict[str, Any]:
+    async def _test_api_endpoints(self) -> dict[str, Any]:
         """测试API端点"""
         logger.info("🔌 测试API端点...")
         
@@ -647,7 +643,7 @@ class AutomatedSystemTester:
             "success_rate": successful_endpoints / len(results) if results else 0
         }
     
-    async def _test_performance(self) -> Dict[str, Any]:
+    async def _test_performance(self) -> dict[str, Any]:
         """测试性能"""
         logger.info("⚡ 测试系统性能...")
         
@@ -702,7 +698,7 @@ class AutomatedSystemTester:
             "details": performance_results
         }
     
-    def _get_memory_usage(self) -> Dict[str, Any]:
+    def _get_memory_usage(self) -> dict[str, Any]:
         """获取内存使用情况"""
         memory = psutil.virtual_memory()
         return {
@@ -716,7 +712,7 @@ class AutomatedSystemTester:
         """获取CPU使用率"""
         return psutil.cpu_percent(interval=1)
     
-    def _get_disk_usage(self) -> Dict[str, Any]:
+    def _get_disk_usage(self) -> dict[str, Any]:
         """获取磁盘使用情况"""
         disk = psutil.disk_usage('.')
         return {
@@ -725,7 +721,7 @@ class AutomatedSystemTester:
             "percent_used": (disk.used / disk.total) * 100
         }
     
-    def _calculate_performance_score(self, memory: Dict, cpu: float, response_time: float) -> float:
+    def _calculate_performance_score(self, memory: dict, cpu: float, response_time: float) -> float:
         """计算性能分数"""
         # 内存分数 (低使用率更好)
         memory_score = max(0, 1 - memory["percent_used"] / 100)
@@ -739,7 +735,7 @@ class AutomatedSystemTester:
         # 综合分数
         return (memory_score * 0.3 + cpu_score * 0.3 + response_score * 0.4)
     
-    async def _test_engineering_usability(self) -> Dict[str, Any]:
+    async def _test_engineering_usability(self) -> dict[str, Any]:
         """测试工程可用性"""
         logger.info("🔧 测试工程可用性...")
         
@@ -776,16 +772,15 @@ class AutomatedSystemTester:
     
     async def _generate_comprehensive_report(
         self, 
-        service_results: Dict[str, Any],
-        browser_results: Dict[str, Any], 
-        api_results: Dict[str, Any],
-        performance_results: Dict[str, Any],
-        engineering_results: Dict[str, Any],
+        service_results: dict[str, Any],
+        browser_results: dict[str, Any], 
+        api_results: dict[str, Any],
+        performance_results: dict[str, Any],
+        engineering_results: dict[str, Any],
         start_time: datetime,
         end_time: datetime
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成综合测试报告"""
-        
         # 保存测试结果
         self.test_results = {
             "service_startup": service_results,
@@ -831,7 +826,7 @@ class AutomatedSystemTester:
         
         return report
     
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """生成改进建议"""
         recommendations = []
         
@@ -857,7 +852,7 @@ class AutomatedSystemTester:
         
         return recommendations
     
-    async def _save_test_report(self, report: Dict[str, Any]):
+    async def _save_test_report(self, report: dict[str, Any]):
         """保存测试报告"""
         try:
             report_path = Path("automated_system_test_report.json")

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:00:00
+"""@Time    : 2025-08-06 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : api_gateway.py
 @Description:
@@ -9,22 +7,22 @@
 """
 
 import asyncio
-import json
+import hashlib
 import logging
 import time
 import uuid
-from typing import Dict, List, Optional, Any, Callable
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
+
 import aiohttp
-from aiohttp import web
 import jwt
-import hashlib
-from pathlib import Path
+from aiohttp import web
 
 # Import service registry
-from .service_discovery_registry import ServiceRegistry, ServiceInstance, ServiceQuery
+from .service_discovery_registry import ServiceInstance, ServiceRegistry
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -68,7 +66,7 @@ class RouteConfig:
     auth_required: bool = True
     rate_limit: Optional[int] = None
     timeout: Optional[int] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -78,8 +76,8 @@ class GatewayRequest:
     timestamp: datetime
     method: str
     path: str
-    headers: Dict[str, str]
-    body: Optional[Dict[str, Any]]
+    headers: dict[str, str]
+    body: Optional[dict[str, Any]]
     client_ip: str
     user_agent: str
     user_id: Optional[str] = None
@@ -90,7 +88,7 @@ class GatewayResponse:
     """Gateway response wrapper."""
     request_id: str
     status_code: int
-    headers: Dict[str, str]
+    headers: dict[str, str]
     body: Any
     processing_time: float
     service_name: str
@@ -106,7 +104,7 @@ class GatewayMetrics:
     average_response_time: float = 0.0
     requests_per_second: float = 0.0
     active_connections: int = 0
-    service_metrics: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    service_metrics: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 class RateLimiter:
@@ -115,7 +113,7 @@ class RateLimiter:
     def __init__(self, requests_per_window: int, window_size: int):
         self.requests_per_window = requests_per_window
         self.window_size = window_size
-        self.requests: Dict[str, List[float]] = {}
+        self.requests: dict[str, list[float]] = {}
     
     def is_allowed(self, client_id: str) -> bool:
         """Check if request is allowed based on rate limit."""
@@ -146,9 +144,9 @@ class AuthenticationManager:
     def __init__(self, secret_key: str, algorithm: str = "HS256"):
         self.secret_key = secret_key
         self.algorithm = algorithm
-        self.api_keys: Dict[str, Dict[str, Any]] = {}
+        self.api_keys: dict[str, dict[str, Any]] = {}
     
-    def generate_jwt(self, user_id: str, payload: Dict[str, Any] = None) -> str:
+    def generate_jwt(self, user_id: str, payload: dict[str, Any] = None) -> str:
         """Generate JWT token."""
         current_time = datetime.utcnow()
         
@@ -163,7 +161,7 @@ class AuthenticationManager:
         
         return jwt.encode(jwt_payload, self.secret_key, algorithm=self.algorithm)
     
-    def verify_jwt(self, token: str) -> Optional[Dict[str, Any]]:
+    def verify_jwt(self, token: str) -> Optional[dict[str, Any]]:
         """Verify JWT token."""
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
@@ -175,13 +173,13 @@ class AuthenticationManager:
             logger.warning("Invalid JWT token")
             return None
     
-    def validate_api_key(self, api_key: str) -> Optional[Dict[str, Any]]:
+    def validate_api_key(self, api_key: str) -> Optional[dict[str, Any]]:
         """Validate API key."""
         if api_key in self.api_keys:
             return self.api_keys[api_key]
         return None
     
-    def add_api_key(self, api_key: str, user_id: str, permissions: List[str] = None):
+    def add_api_key(self, api_key: str, user_id: str, permissions: list[str] = None):
         """Add API key."""
         self.api_keys[api_key] = {
             "user_id": user_id,
@@ -203,8 +201,8 @@ class APIGateway:
         )
         self.auth_manager = AuthenticationManager(config.secret_key, config.jwt_algorithm)
         self.metrics = GatewayMetrics()
-        self.event_handlers: Dict[GatewayEventType, List[Callable]] = {}
-        self.routes: Dict[str, RouteConfig] = {}
+        self.event_handlers: dict[GatewayEventType, list[Callable]] = {}
+        self.routes: dict[str, RouteConfig] = {}
         
         # Setup routes
         self._setup_routes()
@@ -238,7 +236,7 @@ class APIGateway:
             self.event_handlers[event_type] = []
         self.event_handlers[event_type].append(handler)
     
-    def _emit_event(self, event_type: GatewayEventType, data: Dict[str, Any]):
+    def _emit_event(self, event_type: GatewayEventType, data: dict[str, Any]):
         """Emit gateway event."""
         if event_type in self.event_handlers:
             event_data = {
@@ -496,7 +494,7 @@ class APIGateway:
             return request_path.startswith(route_path[:-1])
         return request_path == route_path
     
-    async def _authenticate(self, request: web.Request) -> Optional[Dict[str, Any]]:
+    async def _authenticate(self, request: web.Request) -> Optional[dict[str, Any]]:
         """Authenticate request."""
         auth_header = request.headers.get("Authorization", "")
         

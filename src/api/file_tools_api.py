@@ -1,12 +1,10 @@
 # @AI-Generated: 2024-07-23, Confidence: 0.99, Model: Gemini-Code-Assist
-"""
-API Endpoints for File System Operations.
+"""API Endpoints for File System Operations.
 """
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-
 from tools.file_tools import (
     list_files,
     make_dir,

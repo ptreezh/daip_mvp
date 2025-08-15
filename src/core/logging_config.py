@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : logging_config.py
 @Description:
@@ -8,15 +6,15 @@
     Supports structured logging, multiple outputs, and log rotation.
 """
 
+import json
 import logging
 import logging.handlers
-import json
 import sys
-from typing import Dict, Any, Optional, List
-from pathlib import Path
-from datetime import datetime
 import traceback
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional
 
 
 @dataclass
@@ -97,7 +95,7 @@ class PerformanceLogFilter(logging.Filter):
         
         return True
     
-    def update_metrics(self, metrics: Dict[str, Any]):
+    def update_metrics(self, metrics: dict[str, Any]):
         """更新性能指标"""
         self.performance_metrics.update(metrics)
 
@@ -117,7 +115,7 @@ class RequestLogFilter(logging.Filter):
         
         return True
     
-    def update_request_details(self, details: Dict[str, Any]):
+    def update_request_details(self, details: dict[str, Any]):
         """更新请求详情"""
         self.request_details.update(details)
 
@@ -208,15 +206,15 @@ class DAIPLogger:
         else:
             return int(size_str)
     
-    def update_performance_metrics(self, metrics: Dict[str, Any]):
+    def update_performance_metrics(self, metrics: dict[str, Any]):
         """更新性能指标"""
         self.performance_filter.update_metrics(metrics)
     
-    def update_request_details(self, details: Dict[str, Any]):
+    def update_request_details(self, details: dict[str, Any]):
         """更新请求详情"""
         self.request_filter.update_request_details(details)
     
-    def log_performance_metrics(self, logger_name: str, metrics: Dict[str, Any]):
+    def log_performance_metrics(self, logger_name: str, metrics: dict[str, Any]):
         """记录性能指标"""
         logger = self.get_logger(logger_name)
         
@@ -238,7 +236,7 @@ class DAIPLogger:
             if handler.level <= logging.INFO:
                 handler.emit(record)
     
-    def log_request_details(self, logger_name: str, details: Dict[str, Any]):
+    def log_request_details(self, logger_name: str, details: dict[str, Any]):
         """记录请求详情"""
         logger = self.get_logger(logger_name)
         
@@ -260,7 +258,7 @@ class DAIPLogger:
             if handler.level <= logging.INFO:
                 handler.emit(record)
     
-    def set_context(self, context: Dict[str, Any]):
+    def set_context(self, context: dict[str, Any]):
         """设置日志上下文"""
         self.update_performance_metrics(context.get("performance_metrics", {}))
         self.update_request_details(context.get("request_details", {}))
@@ -309,19 +307,19 @@ def setup_logging(config: LoggingConfig = None):
     return root_logger
 
 
-def log_performance_metrics(metrics: Dict[str, Any], logger_name: str = "daip.performance"):
+def log_performance_metrics(metrics: dict[str, Any], logger_name: str = "daip.performance"):
     """记录性能指标的便捷函数"""
     manager = get_logger_manager()
     manager.log_performance_metrics(logger_name, metrics)
 
 
-def log_request_details(details: Dict[str, Any], logger_name: str = "daip.requests"):
+def log_request_details(details: dict[str, Any], logger_name: str = "daip.requests"):
     """记录请求详情的便捷函数"""
     manager = get_logger_manager()
     manager.log_request_details(logger_name, details)
 
 
-def set_log_context(context: Dict[str, Any]):
+def set_log_context(context: dict[str, Any]):
     """设置日志上下文的便捷函数"""
     manager = get_logger_manager()
     manager.set_context(context)
@@ -340,7 +338,7 @@ class RequestLogger:
         self.logger = get_logger(logger_name)
         self.manager = get_logger_manager()
     
-    def log_request(self, method: str, url: str, headers: Dict[str, str] = None, 
+    def log_request(self, method: str, url: str, headers: dict[str, str] = None, 
                    body: Any = None, client_ip: str = None):
         """记录请求"""
         details = {
@@ -379,7 +377,7 @@ class PerformanceLogger:
     
     def log_operation(self, operation: str, duration: float, 
                      memory_usage: int = None, cpu_usage: float = None,
-                     additional_metrics: Dict[str, Any] = None):
+                     additional_metrics: dict[str, Any] = None):
         """记录操作性能"""
         metrics = {
             "operation": operation,

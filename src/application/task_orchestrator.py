@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : task_orchestrator.py
 @Description:
@@ -9,20 +7,16 @@
 """
 
 import asyncio
-import json
-from typing import Dict, Any, List, Optional, Set, Callable
-from datetime import datetime, timedelta
-from uuid import uuid4
-from enum import Enum
 import logging
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Optional
+from uuid import uuid4
 
-from ..domain.entities import Task, Message
-from ..domain.value_objects import (
-    IntentType, TaskStatus, TaskPriority, TimeInterval
-)
-from ..domain.aggregates import TaskAggregate, SessionAggregate
+from ..domain.aggregates import TaskAggregate
 from ..domain.domain_services import WorkflowOrchestratorService
+from ..domain.value_objects import IntentType, TaskPriority, TaskStatus
 
 
 class TaskState(Enum):
@@ -61,9 +55,9 @@ class TaskEvent:
     task_id: str
     session_id: str
     timestamp: datetime
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {
             "event_id": self.event_id,
@@ -94,9 +88,9 @@ class TaskExecutionResult:
     result: Optional[str] = None
     error: Optional[str] = None
     execution_time: float = 0.0
-    resource_usage: Dict[str, Any] = field(default_factory=dict)
-    steps_executed: List[Dict[str, Any]] = field(default_factory=list)
-    output_files: List[str] = field(default_factory=list)
+    resource_usage: dict[str, Any] = field(default_factory=dict)
+    steps_executed: list[dict[str, Any]] = field(default_factory=list)
+    output_files: list[str] = field(default_factory=list)
     completed_at: Optional[datetime] = None
 
 
@@ -126,15 +120,15 @@ class TaskOrchestrator:
         self.workflow_orchestrator = WorkflowOrchestratorService()
         
         # 任务存储
-        self.tasks: Dict[str, TaskAggregate] = {}
-        self.session_tasks: Dict[str, Set[str]] = {}  # session_id -> task_ids
+        self.tasks: dict[str, TaskAggregate] = {}
+        self.session_tasks: dict[str, set[str]] = {}  # session_id -> task_ids
         
         # 任务队列
         self.task_queue: asyncio.Queue = asyncio.Queue()
         self.priority_queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
         
         # 执行中的任务
-        self.running_tasks: Dict[str, asyncio.Task] = {}
+        self.running_tasks: dict[str, asyncio.Task] = {}
         
         # 资源管理
         self.available_resources = {
@@ -144,10 +138,10 @@ class TaskOrchestrator:
             "network_bandwidth": 100.0,
             "storage_mb": 10240
         }
-        self.allocated_resources: Dict[str, ResourceRequirement] = {}
+        self.allocated_resources: dict[str, ResourceRequirement] = {}
         
         # 事件历史
-        self.event_history: List[TaskEvent] = []
+        self.event_history: list[TaskEvent] = []
         
         # 统计信息
         self.stats = {
@@ -164,7 +158,7 @@ class TaskOrchestrator:
         }
         
         # 任务监听器
-        self.task_listeners: Dict[str, List[callable]] = {}
+        self.task_listeners: dict[str, list[callable]] = {}
         
         # 后台任务
         self._queue_processor_task: Optional[asyncio.Task] = None
@@ -223,7 +217,7 @@ class TaskOrchestrator:
         logging.info("Task Orchestrator stopped")
     
     async def create_task(self, session_id: str, content: str, intent_type: IntentType, 
-                         priority: TaskPriority = None, context: Dict[str, Any] = None) -> TaskAggregate:
+                         priority: TaskPriority = None, context: dict[str, Any] = None) -> TaskAggregate:
         """创建新任务"""
         if not priority:
             priority = TaskPriority("normal")
@@ -272,16 +266,16 @@ class TaskOrchestrator:
         """获取任务"""
         return self.tasks.get(task_id)
     
-    async def get_session_tasks(self, session_id: str) -> List[TaskAggregate]:
+    async def get_session_tasks(self, session_id: str) -> list[TaskAggregate]:
         """获取会话的所有任务"""
         task_ids = self.session_tasks.get(session_id, set())
         return [self.tasks[task_id] for task_id in task_ids if task_id in self.tasks]
     
-    async def get_running_tasks(self) -> List[TaskAggregate]:
+    async def get_running_tasks(self) -> list[TaskAggregate]:
         """获取运行中的任务"""
         return [task for task in self.tasks.values() if task.task.status == TaskStatus.RUNNING]
     
-    async def get_queued_tasks(self) -> List[TaskAggregate]:
+    async def get_queued_tasks(self) -> list[TaskAggregate]:
         """获取队列中的任务"""
         return [task for task in self.tasks.values() if task.task.status == TaskStatus.PENDING]
     
@@ -360,7 +354,7 @@ class TaskOrchestrator:
         logging.info(f"Cancelled task {task_id} (reason: {reason})")
         return True
     
-    async def get_task_status(self, task_id: str) -> Dict[str, Any]:
+    async def get_task_status(self, task_id: str) -> dict[str, Any]:
         """获取任务状态"""
         task_aggregate = await self.get_task(task_id)
         if not task_aggregate:
@@ -620,7 +614,7 @@ class TaskOrchestrator:
         
         return (length_factor * 0.4 + keyword_factor * 0.6)
     
-    async def _generate_task_result(self, task_aggregate: TaskAggregate, workflow_plan: Dict[str, Any]) -> str:
+    async def _generate_task_result(self, task_aggregate: TaskAggregate, workflow_plan: dict[str, Any]) -> str:
         """生成任务结果"""
         intent_type = task_aggregate.task.intent_type
         content = task_aggregate.task.content
@@ -854,7 +848,7 @@ class TaskOrchestrator:
                 except Exception as e:
                     logging.error(f"Error in task listener for {task_id}: {e}")
     
-    async def _record_event(self, event_type: TaskEventType, task_id: str, session_id: str, data: Dict[str, Any] = None):
+    async def _record_event(self, event_type: TaskEventType, task_id: str, session_id: str, data: dict[str, Any] = None):
         """记录事件"""
         if not self.config.enable_event_logging:
             return
@@ -874,7 +868,7 @@ class TaskOrchestrator:
         if len(self.event_history) > self.config.max_event_history:
             self.event_history = self.event_history[-self.config.max_event_history:]
     
-    async def get_task_events(self, task_id: str, limit: int = 100) -> List[Dict[str, Any]]:
+    async def get_task_events(self, task_id: str, limit: int = 100) -> list[dict[str, Any]]:
         """获取任务事件历史"""
         task_events = [
             event for event in self.event_history 
@@ -887,7 +881,7 @@ class TaskOrchestrator:
         
         return [event.to_dict() for event in recent_events]
     
-    async def get_system_statistics(self) -> Dict[str, Any]:
+    async def get_system_statistics(self) -> dict[str, Any]:
         """获取系统统计信息"""
         uptime = (datetime.now() - self.stats["start_time"]).total_seconds()
         
@@ -933,7 +927,7 @@ class TaskOrchestrator:
             "is_running": self._is_running
         }
     
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """健康检查"""
         return {
             "status": "healthy",

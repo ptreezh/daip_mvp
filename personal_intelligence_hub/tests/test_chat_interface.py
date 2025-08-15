@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Chat Interface Tests
+"""Personal Intelligence Hub - Chat Interface Tests
 
 测试聊天界面组件功能
 """
 
-import pytest
-from unittest.mock import Mock, patch
 from datetime import datetime
+from unittest.mock import Mock, patch
+
+import pytest
 
 from personal_intelligence_hub.models.chat_models import ChatMessage, MessageType
 

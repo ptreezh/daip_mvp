@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : vector_store.py
 @Description:
@@ -9,12 +7,12 @@
 """
 
 import asyncio
-import json
-from typing import Dict, Any, List, Optional, Tuple, Set
-from datetime import datetime
 import logging
-import numpy as np
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Optional
+
+import numpy as np
 
 try:
     import chromadb
@@ -36,8 +34,8 @@ class VectorDocument:
     """向量文档"""
     id: str
     content: str
-    metadata: Dict[str, Any]
-    embedding: Optional[List[float]] = None
+    metadata: dict[str, Any]
+    embedding: Optional[list[float]] = None
     created_at: datetime = None
     
     def __post_init__(self):
@@ -50,17 +48,17 @@ class SearchResult:
     """搜索结果"""
     document: VectorDocument
     score: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class EmbeddingProvider:
     """嵌入提供者基类"""
     
-    async def embed(self, text: str) -> List[float]:
+    async def embed(self, text: str) -> list[float]:
         """生成文本嵌入"""
         raise NotImplementedError
     
-    async def embed_batch(self, texts: List[str]) -> List[List[float]]:
+    async def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """批量生成文本嵌入"""
         raise NotImplementedError
 
@@ -71,7 +69,7 @@ class MockEmbeddingProvider(EmbeddingProvider):
     def __init__(self, dimension: int = 384):
         self.dimension = dimension
     
-    async def embed(self, text: str) -> List[float]:
+    async def embed(self, text: str) -> list[float]:
         """生成模拟嵌入"""
         # 使用文本的哈希值作为伪随机种子
         import hashlib
@@ -88,7 +86,7 @@ class MockEmbeddingProvider(EmbeddingProvider):
         
         return embedding
     
-    async def embed_batch(self, texts: List[str]) -> List[List[float]]:
+    async def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """批量生成模拟嵌入"""
         return await asyncio.gather(*[self.embed(text) for text in texts])
 
@@ -101,7 +99,7 @@ class OllamaEmbeddingProvider(EmbeddingProvider):
         self.base_url = base_url
         self.dimension = 768  # nomic-embed-text的维度
     
-    async def embed(self, text: str) -> List[float]:
+    async def embed(self, text: str) -> list[float]:
         """使用Ollama生成嵌入"""
         try:
             import aiohttp
@@ -134,7 +132,7 @@ class OllamaEmbeddingProvider(EmbeddingProvider):
             mock_provider = MockEmbeddingProvider(self.dimension)
             return await mock_provider.embed(text)
     
-    async def embed_batch(self, texts: List[str]) -> List[List[float]]:
+    async def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """批量生成Ollama嵌入"""
         return await asyncio.gather(*[self.embed(text) for text in texts])
 
@@ -167,7 +165,7 @@ class VectorStoreManager:
         }
         
         # 嵌入缓存
-        self.embedding_cache: Dict[str, List[float]] = {}
+        self.embedding_cache: dict[str, list[float]] = {}
         self.max_cache_size = 10000
         
         # 配置参数
@@ -215,7 +213,7 @@ class VectorStoreManager:
             logging.error(f"Failed to initialize vector store: {e}")
             raise
     
-    async def add_document(self, document: VectorDocument, embedding: List[float] = None) -> bool:
+    async def add_document(self, document: VectorDocument, embedding: list[float] = None) -> bool:
         """添加文档到向量存储"""
         if not self.is_initialized:
             await self.initialize()
@@ -251,7 +249,7 @@ class VectorStoreManager:
             logging.error(f"Error adding document {document.id}: {e}")
             return False
     
-    async def add_documents_batch(self, documents: List[VectorDocument]) -> int:
+    async def add_documents_batch(self, documents: list[VectorDocument]) -> int:
         """批量添加文档"""
         if not documents:
             return 0
@@ -277,7 +275,7 @@ class VectorStoreManager:
             
             # 更新缓存
             if self.config["enable_cache"]:
-                for doc, embedding in zip(documents, embeddings):
+                for doc, embedding in zip(documents, embeddings, strict=False):
                     self._update_embedding_cache(doc.content, embedding)
             
             # 更新统计
@@ -291,7 +289,7 @@ class VectorStoreManager:
             return 0
     
     async def search(self, query: str, limit: int = None, 
-                   filter_metadata: Dict[str, Any] = None) -> List[SearchResult]:
+                   filter_metadata: dict[str, Any] = None) -> list[SearchResult]:
         """搜索相似文档"""
         if not self.is_initialized:
             await self.initialize()
@@ -357,11 +355,11 @@ class VectorStoreManager:
             return []
     
     async def semantic_search(self, query: str, limit: int = None,
-                           filter_metadata: Dict[str, Any] = None) -> List[SearchResult]:
+                           filter_metadata: dict[str, Any] = None) -> list[SearchResult]:
         """语义搜索（别名）"""
         return await self.search(query, limit, filter_metadata)
     
-    async def find_similar_documents(self, document_id: str, limit: int = None) -> List[SearchResult]:
+    async def find_similar_documents(self, document_id: str, limit: int = None) -> list[SearchResult]:
         """查找相似文档"""
         if not self.is_initialized:
             await self.initialize()
@@ -406,7 +404,7 @@ class VectorStoreManager:
             return None
     
     async def update_document(self, document_id: str, new_content: str = None,
-                            new_metadata: Dict[str, Any] = None) -> bool:
+                            new_metadata: dict[str, Any] = None) -> bool:
         """更新文档"""
         if not self.is_initialized:
             await self.initialize()
@@ -465,7 +463,7 @@ class VectorStoreManager:
             logging.error(f"Error deleting document {document_id}: {e}")
             return False
     
-    async def delete_documents_by_metadata(self, filter_metadata: Dict[str, Any]) -> int:
+    async def delete_documents_by_metadata(self, filter_metadata: dict[str, Any]) -> int:
         """根据元数据删除文档"""
         if not self.is_initialized:
             await self.initialize()
@@ -494,7 +492,7 @@ class VectorStoreManager:
             logging.error(f"Error deleting documents by metadata: {e}")
             return 0
     
-    async def get_all_documents(self, limit: int = 100, offset: int = 0) -> List[VectorDocument]:
+    async def get_all_documents(self, limit: int = 100, offset: int = 0) -> list[VectorDocument]:
         """获取所有文档"""
         if not self.is_initialized:
             await self.initialize()
@@ -524,7 +522,7 @@ class VectorStoreManager:
             logging.error(f"Error getting all documents: {e}")
             return []
     
-    async def get_collection_stats(self) -> Dict[str, Any]:
+    async def get_collection_stats(self) -> dict[str, Any]:
         """获取集合统计信息"""
         if not self.is_initialized:
             await self.initialize()
@@ -585,7 +583,7 @@ class VectorStoreManager:
             logging.error(f"Error clearing collection: {e}")
             return False
     
-    async def _get_embedding(self, text: str) -> List[float]:
+    async def _get_embedding(self, text: str) -> list[float]:
         """获取文本嵌入"""
         if self.config["enable_cache"] and text in self.embedding_cache:
             self.stats["embedding_cache_hits"] += 1
@@ -599,7 +597,7 @@ class VectorStoreManager:
         
         return embedding
     
-    async def _get_embeddings_batch(self, texts: List[str]) -> List[List[float]]:
+    async def _get_embeddings_batch(self, texts: list[str]) -> list[list[float]]:
         """批量获取文本嵌入"""
         if self.config["enable_cache"]:
             # 检查缓存
@@ -621,14 +619,14 @@ class VectorStoreManager:
                 new_embeddings = await self.embedding_provider.embed_batch(uncached_texts)
                 
                 # 更新缓存
-                for text, embedding in zip(uncached_texts, new_embeddings):
+                for text, embedding in zip(uncached_texts, new_embeddings, strict=False):
                     self._update_embedding_cache(text, embedding)
                 
                 # 合并结果
                 all_embeddings = [None] * len(texts)
                 for idx, embedding in cached_embeddings:
                     all_embeddings[idx] = embedding
-                for idx, embedding in zip(uncached_indices, new_embeddings):
+                for idx, embedding in zip(uncached_indices, new_embeddings, strict=False):
                     all_embeddings[idx] = embedding
                 
                 return all_embeddings
@@ -637,7 +635,7 @@ class VectorStoreManager:
         else:
             return await self.embedding_provider.embed_batch(texts)
     
-    def _update_embedding_cache(self, text: str, embedding: List[float]):
+    def _update_embedding_cache(self, text: str, embedding: list[float]):
         """更新嵌入缓存"""
         if len(self.embedding_cache) >= self.max_cache_size:
             # 简单的LRU缓存清理
@@ -646,7 +644,7 @@ class VectorStoreManager:
         
         self.embedding_cache[text] = embedding
     
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """健康检查"""
         try:
             if not self.is_initialized:

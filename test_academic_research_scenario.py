@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-02 16:00:00  
+"""@Time    : 2025-08-02 16:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_academic_research_scenario.py
 @Description:
@@ -16,15 +14,15 @@
 """
 
 import asyncio
+import json
 import logging
 import time
-import json
-from typing import Dict, List, Any
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 # 导入待测试组件
-from src.scenarios.academic_research_scenario import AcademicResearchScenario, AcademicResearchConfig
+from src.scenarios.academic_research_scenario import AcademicResearchConfig, AcademicResearchScenario
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -38,7 +36,7 @@ class AcademicResearchQualityAssurance:
         self.test_results = {}
         self.scenario = AcademicResearchScenario()
         
-    async def run_all_tests(self) -> Dict[str, Any]:
+    async def run_all_tests(self) -> dict[str, Any]:
         """运行所有质量保证测试"""
         logger.info("=" * 60)
         logger.info("🎓 开始学术研究场景质量保证测试")
@@ -94,7 +92,7 @@ class AcademicResearchQualityAssurance:
         
         return final_report
     
-    async def test_functional_completeness(self) -> Dict[str, Any]:
+    async def test_functional_completeness(self) -> dict[str, Any]:
         """功能完整性测试 - 完成AI在教育中的应用研究案例"""
         logger.info("执行AI在教育中的应用研究案例...")
         
@@ -155,7 +153,7 @@ class AcademicResearchQualityAssurance:
                 "details": "功能完整性测试执行失败"
             }
     
-    async def test_performance_benchmarks(self) -> Dict[str, Any]:
+    async def test_performance_benchmarks(self) -> dict[str, Any]:
         """性能基准测试 - 验证万字级报告生成性能"""
         logger.info("执行性能基准测试...")
         
@@ -224,7 +222,7 @@ class AcademicResearchQualityAssurance:
                 "details": "性能基准测试执行失败"
             }
     
-    async def test_cognitive_diversity(self) -> Dict[str, Any]:
+    async def test_cognitive_diversity(self) -> dict[str, Any]:
         """认知差异验证 - 确认不同角色的观点差异性"""
         logger.info("执行认知差异验证...")
         
@@ -292,7 +290,7 @@ class AcademicResearchQualityAssurance:
                 "details": "认知差异验证执行失败"
             }
     
-    async def test_knowledge_persistence(self) -> Dict[str, Any]:
+    async def test_knowledge_persistence(self) -> dict[str, Any]:
         """知识沉淀验证 - 验证WikiService集成"""
         logger.info("执行知识沉淀验证...")
         
@@ -356,7 +354,7 @@ class AcademicResearchQualityAssurance:
                 "details": "知识沉淀验证执行失败"
             }
     
-    async def test_user_experience(self) -> Dict[str, Any]:
+    async def test_user_experience(self) -> dict[str, Any]:
         """用户体验测试 - 验证流程易用性和完整性"""
         logger.info("执行用户体验测试...")
         
@@ -430,7 +428,7 @@ class AcademicResearchQualityAssurance:
                 "details": "用户体验测试执行失败"
             }
     
-    async def test_integration_stability(self) -> Dict[str, Any]:
+    async def test_integration_stability(self) -> dict[str, Any]:
         """集成稳定性测试 - 验证组件协作稳定性"""
         logger.info("执行集成稳定性测试...")
         
@@ -509,9 +507,8 @@ class AcademicResearchQualityAssurance:
                 "details": "集成稳定性测试执行失败"
             }
     
-    async def generate_final_report(self, overall_success: bool) -> Dict[str, Any]:
+    async def generate_final_report(self, overall_success: bool) -> dict[str, Any]:
         """生成最终质量保证报告"""
-        
         # 统计测试结果
         total_tests = len(self.test_results)
         passed_tests = sum(1 for result in self.test_results.values() if result.get("success", False))
@@ -553,7 +550,7 @@ class AcademicResearchQualityAssurance:
         
         return report
     
-    async def save_report(self, report: Dict[str, Any]):
+    async def save_report(self, report: dict[str, Any]):
         """保存质量保证报告"""
         try:
             report_path = Path("v0_2_4_academic_research_quality_report.json")
@@ -584,7 +581,7 @@ async def main():
             status = "✅" if passed else "❌"
             print(f"  {check}: {status}")
         
-        print(f"\n💡 建议:")
+        print("\n💡 建议:")
         for rec in final_report['recommendations']:
             print(f"  • {rec}")
         

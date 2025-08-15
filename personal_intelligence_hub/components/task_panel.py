@@ -1,18 +1,18 @@
-"""
-Personal Intelligence Hub - Task Panel Component
+"""Personal Intelligence Hub - Task Panel Component
 
 任务管理面板组件
 """
 
-from lona import View
-from lona.html import HTML, Div, H3, H4, P, Button, Select, Option, Span, TextInput
 from datetime import datetime
-from typing import List, Optional, Dict, Any
-import json
+
+from lona import View
+from lona.html import H3, H4, HTML, Button, Div, Option, P, Select, TextInput
 
 from personal_intelligence_hub.models.task_models import (
-    Task, TaskStatus, TaskPriority, TaskUpdate, TaskDecompositionNode,
-    TaskUpdateSource
+    Task,
+    TaskDecompositionNode,
+    TaskPriority,
+    TaskStatus,
 )
 
 
@@ -20,9 +20,9 @@ class TaskPanel(View):
     """任务面板组件"""
     
     def __init__(self):
-        self.tasks: List[Task] = []
+        self.tasks: list[Task] = []
         self.selected_project = None
-        self.task_decompositions: List[TaskDecompositionNode] = []
+        self.task_decompositions: list[TaskDecompositionNode] = []
         
         # 创建UI元素
         self.refresh_button = Button("刷新任务", _class="task-refresh-button")
@@ -169,15 +169,15 @@ class TaskPanel(View):
         
         await self.refresh()
     
-    def get_root_tasks(self) -> List[Task]:
+    def get_root_tasks(self) -> list[Task]:
         """获取根任务（没有父任务的任务）"""
         return [task for task in self.tasks if task.parent_id is None]
     
-    def get_subtasks(self, parent_id: str) -> List[Task]:
+    def get_subtasks(self, parent_id: str) -> list[Task]:
         """获取子任务"""
         return [task for task in self.tasks if task.parent_id == parent_id]
     
-    def get_task_dependencies(self, task_id: str) -> List[Task]:
+    def get_task_dependencies(self, task_id: str) -> list[Task]:
         """获取任务依赖"""
         task = next((t for t in self.tasks if t.id == task_id), None)
         if task:

@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-真实LLM执行器
+"""真实LLM执行器
 调用真实的大模型进行角色辩论
 """
 
-import logging
 import asyncio
-from typing import Dict, Any, List
-from datetime import datetime
+import logging
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +56,7 @@ class RealLLMExecutor:
             }
         }
     
-    async def execute_real_debate_step(self, step_name: str, step_data: Dict[str, Any], topic: str) -> Dict[str, Any]:
+    async def execute_real_debate_step(self, step_name: str, step_data: dict[str, Any], topic: str) -> dict[str, Any]:
         """执行真实的辩论步骤"""
         try:
             if step_name == "scenario_setup":
@@ -81,7 +78,7 @@ class RealLLMExecutor:
             logger.error(f"执行真实辩论步骤失败: {e}")
             return {"error": str(e)}
     
-    async def _setup_debate_scenario(self, topic: str) -> Dict[str, Any]:
+    async def _setup_debate_scenario(self, topic: str) -> dict[str, Any]:
         """设置辩论场景"""
         return {
             "action": "真实场景设置",
@@ -100,7 +97,7 @@ class RealLLMExecutor:
             }
         }
     
-    async def _select_and_initialize_roles(self) -> Dict[str, Any]:
+    async def _select_and_initialize_roles(self) -> dict[str, Any]:
         """选择和初始化角色"""
         selected_roles = []
         
@@ -128,7 +125,7 @@ class RealLLMExecutor:
             }
         }
     
-    async def _initialize_debate_positions(self, topic: str) -> Dict[str, Any]:
+    async def _initialize_debate_positions(self, topic: str) -> dict[str, Any]:
         """初始化辩论立场"""
         # 模拟每个角色生成初始立场
         positions = []
@@ -162,7 +159,7 @@ class RealLLMExecutor:
             }
         }
     
-    async def _conduct_debate_rounds(self, topic: str) -> Dict[str, Any]:
+    async def _conduct_debate_rounds(self, topic: str) -> dict[str, Any]:
         """进行辩论轮次"""
         rounds_data = []
         
@@ -239,7 +236,7 @@ class RealLLMExecutor:
             }
         }
     
-    async def _form_consensus(self, topic: str) -> Dict[str, Any]:
+    async def _form_consensus(self, topic: str) -> dict[str, Any]:
         """形成共识"""
         print("\n🤝 共识形成阶段")
         await asyncio.sleep(2.0)
@@ -284,7 +281,7 @@ class RealLLMExecutor:
             }
         }
     
-    async def _analyze_debate_results(self) -> Dict[str, Any]:
+    async def _analyze_debate_results(self) -> dict[str, Any]:
         """分析辩论结果"""
         await asyncio.sleep(1.0)
         

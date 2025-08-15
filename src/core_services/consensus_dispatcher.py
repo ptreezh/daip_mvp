@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-统一共识计算调度器
+"""统一共识计算调度器
 
 负责协调系统中所有共识计算实现，提供统一的调度入口
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Union
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional, Union
+
+from src.protocols.consensus_strategies import ConsensusStrategyFactory, SimpleMajorityVoteStrategy
 
 from .advanced_consensus_algorithms import (
-    ConsensusInput, ConsensusResult, ConsensusAlgorithmType,
-    WeightedVotingConsensus, BayesianConsensus, CognitiveDiversityPreservingConsensus
+    BayesianConsensus,
+    CognitiveDiversityPreservingConsensus,
+    ConsensusInput,
+    ConsensusResult,
+    WeightedVotingConsensus,
 )
-from src.protocols.consensus_strategies import SimpleMajorityVoteStrategy, ConsensusStrategyFactory
 
 logger = logging.getLogger(__name__)
 
@@ -53,12 +55,11 @@ class UnifiedConsensusDispatcher:
     
     async def calculate_consensus(
         self,
-        inputs: List[Dict[str, Any]],
+        inputs: list[dict[str, Any]],
         method: ConsensusMethod = ConsensusMethod.AUTO_SELECT,
-        context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """
-        统一的共识计算入口
+        context: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
+        """统一的共识计算入口
         
         Args:
             inputs: 输入数据列表
@@ -98,11 +99,10 @@ class UnifiedConsensusDispatcher:
     
     def _select_optimal_method(
         self,
-        inputs: List[Dict[str, Any]],
-        context: Optional[Dict[str, Any]] = None
+        inputs: list[dict[str, Any]],
+        context: Optional[dict[str, Any]] = None
     ) -> ConsensusMethod:
         """自动选择最优的共识计算方法"""
-        
         # 基于输入数量选择
         if len(inputs) <= 3:
             return ConsensusMethod.SIMPLE_MAJORITY
@@ -111,7 +111,7 @@ class UnifiedConsensusDispatcher:
         else:
             return ConsensusMethod.DIVERSITY_PRESERVING
     
-    async def _execute_simple_majority(self, inputs: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _execute_simple_majority(self, inputs: list[dict[str, Any]]) -> dict[str, Any]:
         """执行简单多数投票"""
         # 转换为SimpleMajorityVoteStrategy期望的格式
         from src.models import DebateTurn
@@ -141,12 +141,11 @@ class UnifiedConsensusDispatcher:
     
     async def _execute_advanced_consensus(
         self,
-        inputs: List[Dict[str, Any]],
+        inputs: list[dict[str, Any]],
         method: ConsensusMethod,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[dict[str, Any]] = None
     ) -> ConsensusResult:
         """执行高级共识算法"""
-        
         # 转换为ConsensusInput格式
         consensus_inputs = []
         for input_data in inputs:
@@ -168,9 +167,8 @@ class UnifiedConsensusDispatcher:
         result = algorithm.calculate_consensus(consensus_inputs, context)
         return result
     
-    def _unify_result_format(self, result: Union[Dict[str, Any], ConsensusResult], method: ConsensusMethod) -> Dict[str, Any]:
+    def _unify_result_format(self, result: Union[dict[str, Any], ConsensusResult], method: ConsensusMethod) -> dict[str, Any]:
         """统一结果格式"""
-        
         if isinstance(result, ConsensusResult):
             # 高级算法结果
             return {
@@ -193,7 +191,7 @@ class UnifiedConsensusDispatcher:
                 "timestamp": datetime.now().isoformat()
             }
     
-    def _calculate_strength_from_votes(self, votes: Dict[str, int]) -> float:
+    def _calculate_strength_from_votes(self, votes: dict[str, int]) -> float:
         """从投票结果计算共识强度"""
         if not votes:
             return 0.0
@@ -205,11 +203,11 @@ class UnifiedConsensusDispatcher:
         max_votes = max(votes.values())
         return max_votes / total_votes
     
-    def get_available_methods(self) -> List[str]:
+    def get_available_methods(self) -> list[str]:
         """获取可用的共识计算方法"""
         return [method.value for method in ConsensusMethod]
     
-    def get_method_info(self, method: ConsensusMethod) -> Dict[str, Any]:
+    def get_method_info(self, method: ConsensusMethod) -> dict[str, Any]:
         """获取方法信息"""
         method_info = {
             ConsensusMethod.SIMPLE_MAJORITY: {

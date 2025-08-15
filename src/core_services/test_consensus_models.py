@@ -1,28 +1,25 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-统一共识调度器核心数据模型测试
+"""统一共识调度器核心数据模型测试
 
 验证数据模型的正确性、验证逻辑和序列化功能。
 确保所有组件能够正常工作并满足需求。
 """
 
-import json
-import pytest
 from datetime import datetime
-from typing import Dict, Any
 
+import pytest
+from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusContext
 from consensus_models import (
-    ConsensusInput, ConsensusRequest, ConsensusResponse, ConsensusResult,
-    AlgorithmMetadata, ValidationResult, AlgorithmSelection, FailureContext,
-    AlgorithmType, QualityPriority, QualityRequirements
+    AlgorithmMetadata,
+    AlgorithmType,
+    ConsensusInput,
+    ConsensusRequest,
+    ConsensusResponse,
+    ConsensusResult,
+    QualityPriority,
+    QualityRequirements,
 )
-from consensus_algorithm_interface import (
-    ConsensusAlgorithm, ConsensusContext, AlgorithmCapabilities
-)
-from consensus_validation import (
-    ConsensusDataValidator, ConsensusDataSerializer, ConsensusDataConverter
-)
+from consensus_validation import ConsensusDataSerializer, ConsensusDataValidator
 
 
 class TestConsensusModels:

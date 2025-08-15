@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 09:30:00
+"""@Time    : 2025-08-06 09:30:00
 @Author  : DAIP-LIVE Team
 @File    : end_to_end_integration_tests.py
 @Description:
@@ -10,19 +8,17 @@
 
 import asyncio
 import json
-import pytest
-import aiohttp
-import time
 import logging
-import tempfile
 import shutil
-from pathlib import Path
-from typing import Dict, List, Any, Optional, AsyncGenerator
+import sys
+import time
 from dataclasses import dataclass
 from datetime import datetime
-import subprocess
-import sys
-import os
+from pathlib import Path
+from typing import Any, Optional
+
+import aiohttp
+import pytest
 
 # Add project path
 project_root = Path(__file__).parent
@@ -49,7 +45,7 @@ class TestResult:
     success: bool
     execution_time: float
     error_message: Optional[str] = None
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[dict[str, Any]] = None
 
 
 class EndToEndTestSuite:
@@ -57,7 +53,7 @@ class EndToEndTestSuite:
     
     def __init__(self, config: TestConfig):
         self.config = config
-        self.results: List[TestResult] = []
+        self.results: list[TestResult] = []
         self.test_data_dir = Path("test_data")
         self.session = None
         logger.info("End-to-End Test Suite initialized")
@@ -80,7 +76,7 @@ class EndToEndTestSuite:
             shutil.rmtree(self.test_data_dir)
             logger.info("Test data cleaned up")
     
-    async def run_all_tests(self) -> List[TestResult]:
+    async def run_all_tests(self) -> list[TestResult]:
         """Run all end-to-end tests."""
         logger.info("Starting end-to-end integration tests")
         
@@ -483,7 +479,7 @@ class EndToEndTestSuite:
         ) as response:
             assert response.status in [200, 400, 422]
     
-    def generate_test_report(self) -> Dict[str, Any]:
+    def generate_test_report(self) -> dict[str, Any]:
         """Generate comprehensive test report."""
         total_tests = len(self.results)
         successful_tests = sum(1 for r in self.results if r.success)
@@ -519,7 +515,7 @@ class EndToEndTestSuite:
         return report
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_end_to_end_integration():
     """Main end-to-end integration test."""
     config = TestConfig()
@@ -558,4 +554,4 @@ if __name__ == "__main__":
     with open("end_to_end_test_report.json", "w") as f:
         json.dump(report, f, indent=2)
     
-    print(f"\nTest report saved to: end_to_end_test_report.json")
+    print("\nTest report saved to: end_to_end_test_report.json")

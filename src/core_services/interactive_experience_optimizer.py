@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 16:00:00
+"""@Time    : 2025-08-03 16:00:00
 @Author  : DAIP-LIVE Team
 @File    : interactive_experience_optimizer.py
 @Description:
@@ -17,13 +15,12 @@
 
 import asyncio
 import logging
-import json
 import time
-from typing import Dict, List, Any, Optional, Callable, Union
-from datetime import datetime, timedelta
+from collections.abc import Callable
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from enum import Enum
-from abc import ABC, abstractmethod
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +59,7 @@ class PerformanceMetric:
     response_level: ResponseLevel
     user_id: str = "default"
     component: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class UserAction:
@@ -72,7 +69,7 @@ class UserAction:
     action_type: InteractionType
     target_component: str
     timestamp: datetime
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
     success: bool = True
     error_info: Optional[str] = None
 
@@ -85,8 +82,8 @@ class UserPreference:
     font_size: str = "normal"
     animation_enabled: bool = True
     sound_enabled: bool = False
-    shortcuts: Dict[str, str] = field(default_factory=dict)
-    layout_config: Dict[str, Any] = field(default_factory=dict)
+    shortcuts: dict[str, str] = field(default_factory=dict)
+    layout_config: dict[str, Any] = field(default_factory=dict)
     updated_at: datetime = field(default_factory=datetime.now)
 
 class InteractiveExperienceOptimizer:
@@ -94,20 +91,20 @@ class InteractiveExperienceOptimizer:
     
     def __init__(self):
         # 性能监控
-        self.performance_metrics: List[PerformanceMetric] = []
+        self.performance_metrics: list[PerformanceMetric] = []
         self.response_time_threshold = 0.2  # 200ms
         
         # 用户行为分析
-        self.user_actions: List[UserAction] = []
-        self.user_preferences: Dict[str, UserPreference] = {}
+        self.user_actions: list[UserAction] = []
+        self.user_preferences: dict[str, UserPreference] = {}
         
         # 错误处理
-        self.error_handlers: Dict[str, Callable] = {}
-        self.recovery_strategies: Dict[str, Callable] = {}
+        self.error_handlers: dict[str, Callable] = {}
+        self.recovery_strategies: dict[str, Callable] = {}
         
         # 操作引导
-        self.tutorial_steps: List[Dict[str, Any]] = []
-        self.tooltip_registry: Dict[str, str] = {}
+        self.tutorial_steps: list[dict[str, Any]] = []
+        self.tooltip_registry: dict[str, str] = {}
         
         # 性能优化
         self.cache_manager = CacheManager()
@@ -245,7 +242,7 @@ class InteractiveExperienceOptimizer:
                                   action_id: str,
                                   success: bool = True,
                                   error_info: Optional[str] = None,
-                                  metadata: Optional[Dict[str, Any]] = None):
+                                  metadata: Optional[dict[str, Any]] = None):
         """完成交互记录"""
         # 查找对应的用户操作
         action = next((a for a in self.user_actions if a.action_id == action_id), None)
@@ -298,7 +295,7 @@ class InteractiveExperienceOptimizer:
                           component: str,
                           severity: ErrorSeverity = ErrorSeverity.ERROR,
                           user_id: str = "default",
-                          context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                          context: Optional[dict[str, Any]] = None) -> dict[str, Any]:
         """统一错误处理"""
         error_info = {
             "error_type": error_type,
@@ -344,7 +341,7 @@ class InteractiveExperienceOptimizer:
         
         return friendly_messages.get(error_type, f"系统错误：{error_message}")
     
-    def _get_recovery_suggestions(self, error_type: str, component: str) -> List[str]:
+    def _get_recovery_suggestions(self, error_type: str, component: str) -> list[str]:
         """获取恢复建议"""
         suggestions_map = {
             "network_error": [
@@ -371,7 +368,7 @@ class InteractiveExperienceOptimizer:
         
         return suggestions_map.get(error_type, ["刷新页面重试", "联系技术支持"])
     
-    async def _handle_network_error(self, error_info: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_network_error(self, error_info: dict[str, Any]) -> dict[str, Any]:
         """处理网络错误"""
         return {
             "action": "show_notification",
@@ -382,7 +379,7 @@ class InteractiveExperienceOptimizer:
             "retry_delay": 5
         }
     
-    async def _handle_validation_error(self, error_info: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_validation_error(self, error_info: dict[str, Any]) -> dict[str, Any]:
         """处理验证错误"""
         return {
             "action": "highlight_field",
@@ -391,7 +388,7 @@ class InteractiveExperienceOptimizer:
             "show_examples": True
         }
     
-    async def _handle_permission_error(self, error_info: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_permission_error(self, error_info: dict[str, Any]) -> dict[str, Any]:
         """处理权限错误"""
         return {
             "action": "show_login_prompt",
@@ -399,7 +396,7 @@ class InteractiveExperienceOptimizer:
             "redirect_after_login": True
         }
     
-    async def _handle_timeout_error(self, error_info: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_timeout_error(self, error_info: dict[str, Any]) -> dict[str, Any]:
         """处理超时错误"""
         return {
             "action": "show_retry_dialog",
@@ -408,7 +405,7 @@ class InteractiveExperienceOptimizer:
             "show_progress": True
         }
     
-    async def _handle_unknown_error(self, error_info: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_unknown_error(self, error_info: dict[str, Any]) -> dict[str, Any]:
         """处理未知错误"""
         return {
             "action": "show_fallback_ui",
@@ -419,7 +416,7 @@ class InteractiveExperienceOptimizer:
     
     async def provide_user_guidance(self, 
                                    user_id: str,
-                                   context: str = "initial") -> Dict[str, Any]:
+                                   context: str = "initial") -> dict[str, Any]:
         """提供用户指导"""
         user_pref = self.user_preferences.get(user_id, UserPreference(user_id=user_id))
         
@@ -441,7 +438,7 @@ class InteractiveExperienceOptimizer:
             # 根据用户行为提供智能提示
             return await self._get_smart_guidance(user_id)
     
-    async def _get_feature_discovery_guidance(self, user_id: str) -> Dict[str, Any]:
+    async def _get_feature_discovery_guidance(self, user_id: str) -> dict[str, Any]:
         """获取功能发现指导"""
         # 分析用户还未使用的功能
         unused_features = await self._analyze_unused_features(user_id)
@@ -453,7 +450,7 @@ class InteractiveExperienceOptimizer:
             "dismissible": True
         }
     
-    async def _get_error_recovery_guidance(self, user_id: str) -> Dict[str, Any]:
+    async def _get_error_recovery_guidance(self, user_id: str) -> dict[str, Any]:
         """获取错误恢复指导"""
         return {
             "show_help_overlay": True,
@@ -462,7 +459,7 @@ class InteractiveExperienceOptimizer:
             "visual_indicators": True
         }
     
-    async def _get_smart_guidance(self, user_id: str) -> Dict[str, Any]:
+    async def _get_smart_guidance(self, user_id: str) -> dict[str, Any]:
         """获取智能指导"""
         # 基于用户行为模式提供建议
         user_pattern = await self._analyze_user_pattern(user_id)
@@ -485,7 +482,7 @@ class InteractiveExperienceOptimizer:
         else:
             return {"show_guidance": False}
     
-    async def optimize_user_preferences(self, user_id: str, interaction_data: Dict[str, Any]):
+    async def optimize_user_preferences(self, user_id: str, interaction_data: dict[str, Any]):
         """优化用户偏好"""
         if user_id not in self.user_preferences:
             self.user_preferences[user_id] = UserPreference(user_id=user_id)
@@ -611,7 +608,7 @@ class InteractiveExperienceOptimizer:
             pass
         # ... 其他优化操作
     
-    def get_performance_report(self) -> Dict[str, Any]:
+    def get_performance_report(self) -> dict[str, Any]:
         """获取性能报告"""
         if not self.performance_metrics:
             return {"status": "no_data"}
@@ -644,7 +641,7 @@ class InteractiveExperienceOptimizer:
         
         return report
     
-    def _get_component_performance_summary(self, metrics: List[PerformanceMetric]) -> Dict[str, Any]:
+    def _get_component_performance_summary(self, metrics: list[PerformanceMetric]) -> dict[str, Any]:
         """获取组件性能汇总"""
         component_stats = {}
         
@@ -664,7 +661,7 @@ class InteractiveExperienceOptimizer:
         
         return summary
     
-    def _calculate_performance_grade(self, response_times: List[float]) -> str:
+    def _calculate_performance_grade(self, response_times: list[float]) -> str:
         """计算性能等级"""
         avg_time = sum(response_times) / len(response_times)
         
@@ -679,7 +676,7 @@ class InteractiveExperienceOptimizer:
         else:
             return "D"
     
-    def _get_performance_recommendations(self, metrics: List[PerformanceMetric]) -> List[str]:
+    def _get_performance_recommendations(self, metrics: list[PerformanceMetric]) -> list[str]:
         """获取性能建议"""
         recommendations = []
         
@@ -712,8 +709,8 @@ class CacheManager:
     """缓存管理器"""
     
     def __init__(self):
-        self.cache: Dict[str, Any] = {}
-        self.cache_timestamps: Dict[str, datetime] = {}
+        self.cache: dict[str, Any] = {}
+        self.cache_timestamps: dict[str, datetime] = {}
         self.default_ttl = timedelta(minutes=30)
     
     def get(self, key: str) -> Optional[Any]:
@@ -755,7 +752,7 @@ class LazyLoadManager:
     
     def __init__(self):
         self.loaded_components: set = set()
-        self.loading_queue: List[str] = []
+        self.loading_queue: list[str] = []
     
     def register_component(self, component_id: str, load_trigger: str = "visible"):
         """注册懒加载组件"""
@@ -768,7 +765,7 @@ class LazyLoadManager:
         if component_id in self.loading_queue:
             self.loading_queue.remove(component_id)
     
-    def get_pending_loads(self) -> List[str]:
+    def get_pending_loads(self) -> list[str]:
         """获取待加载组件"""
         return self.loading_queue.copy()
 

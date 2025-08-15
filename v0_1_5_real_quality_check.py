@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.1.5 真实多轮辩论系统质量检查
+"""V0.1.5 真实多轮辩论系统质量检查
 
 基于项目记忆中的真实架构进行质量验证
 """
 
 import asyncio
-import sys
-import os
-from pathlib import Path
-from typing import Dict, List, Any
 import json
+import sys
 import time
+from pathlib import Path
 
 # 添加项目路径
 project_root = Path(__file__).parent
@@ -38,7 +34,10 @@ class RealQualityChecker:
     async def check_personal_assistant_service(self):
         """检查PersonalAssistantService"""
         try:
-            from personal_intelligence_hub.services.personal_assistant import PersonalAssistantService, WorkflowType, IntentResult
+            from personal_intelligence_hub.services.personal_assistant import (
+                IntentResult,
+                PersonalAssistantService,
+            )
             
             # 创建服务实例
             service = PersonalAssistantService()
@@ -149,7 +148,6 @@ class RealQualityChecker:
             if checks["chat_interface_exists"]:
                 try:
                     sys.path.insert(0, str(Path("frontend")))
-                    from components.chat_interface import ChatInterface
                     checks["chat_interface_importable"] = True
                 except:
                     checks["chat_interface_importable"] = False
@@ -333,7 +331,7 @@ class RealQualityChecker:
         with open("v0_1_5_real_quality_report.json", "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
         
-        print(f"\n详细报告已保存: v0_1_5_real_quality_report.json")
+        print("\n详细报告已保存: v0_1_5_real_quality_report.json")
         
         if overall_passed:
             print("\n🎉 V0.1.5质量检查通过！真实多轮辩论系统已准备就绪！")

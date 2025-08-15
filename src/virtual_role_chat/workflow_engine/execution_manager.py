@@ -1,38 +1,29 @@
-"""
-Execution management for workflow nodes.
+"""Execution management for workflow nodes.
 
 This module handles the execution of individual workflow nodes,
 including parallel execution, dependency management, and error handling.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional, Set
-from datetime import datetime
 import logging
+from datetime import datetime
+from typing import Any, Optional
 
-from ..institutional_primitives import InstitutionalPrimitive, ExecutionContext, PrimitiveRegistry
-from .models import (
-    WorkflowExecution, 
-    WorkflowNode, 
-    ExecutionStep, 
-    NodeStatus,
-    ParallelExecutionGroup
-)
+from ..institutional_primitives import ExecutionContext, PrimitiveRegistry
+from .models import ExecutionStep, NodeStatus, WorkflowExecution, WorkflowNode
 
 logger = logging.getLogger(__name__)
 
 
 class ExecutionManager:
-    """
-    Manages the execution of workflow nodes.
+    """Manages the execution of workflow nodes.
     
     Handles node execution, dependency resolution, parallel execution,
     and error handling for workflow orchestration.
     """
     
     def __init__(self, primitive_registry: PrimitiveRegistry, max_concurrency: int = 5):
-        """
-        Initialize the execution manager.
+        """Initialize the execution manager.
         
         Args:
             primitive_registry: Registry for institutional primitives
@@ -41,16 +32,15 @@ class ExecutionManager:
         self.primitive_registry = primitive_registry
         self.max_concurrency = max_concurrency
         self._execution_semaphore = asyncio.Semaphore(max_concurrency)
-        self._active_executions: Dict[str, asyncio.Task] = {}
+        self._active_executions: dict[str, asyncio.Task] = {}
     
     async def execute_node(
         self, 
         node: WorkflowNode, 
         execution: WorkflowExecution,
-        services: Dict[str, Any]
+        services: dict[str, Any]
     ) -> ExecutionStep:
-        """
-        Execute a single workflow node.
+        """Execute a single workflow node.
         
         Args:
             node: Node to execute
@@ -128,12 +118,11 @@ class ExecutionManager:
     
     async def execute_nodes_parallel(
         self,
-        nodes: List[WorkflowNode],
+        nodes: list[WorkflowNode],
         execution: WorkflowExecution,
-        services: Dict[str, Any]
-    ) -> List[ExecutionStep]:
-        """
-        Execute multiple nodes in parallel.
+        services: dict[str, Any]
+    ) -> list[ExecutionStep]:
+        """Execute multiple nodes in parallel.
         
         Args:
             nodes: List of nodes to execute
@@ -202,9 +191,8 @@ class ExecutionManager:
         self, 
         node: WorkflowNode, 
         execution: WorkflowExecution
-    ) -> Dict[str, Any]:
-        """
-        Prepare inputs for node execution from dependencies and parameters.
+    ) -> dict[str, Any]:
+        """Prepare inputs for node execution from dependencies and parameters.
         
         Args:
             node: Node to prepare inputs for
@@ -240,8 +228,7 @@ class ExecutionManager:
         return inputs
     
     async def cancel_node_execution(self, node_id: str) -> bool:
-        """
-        Cancel execution of a specific node.
+        """Cancel execution of a specific node.
         
         Args:
             node_id: ID of the node to cancel
@@ -265,8 +252,7 @@ class ExecutionManager:
         return False
     
     async def cancel_all_executions(self) -> int:
-        """
-        Cancel all active node executions.
+        """Cancel all active node executions.
         
         Returns:
             Number of executions cancelled
@@ -279,9 +265,8 @@ class ExecutionManager:
         
         return cancelled_count
     
-    def get_active_executions(self) -> List[str]:
-        """
-        Get list of currently executing node IDs.
+    def get_active_executions(self) -> list[str]:
+        """Get list of currently executing node IDs.
         
         Returns:
             List of node IDs currently executing
@@ -289,8 +274,7 @@ class ExecutionManager:
         return list(self._active_executions.keys())
     
     def is_node_executing(self, node_id: str) -> bool:
-        """
-        Check if a node is currently executing.
+        """Check if a node is currently executing.
         
         Args:
             node_id: ID of the node to check
@@ -301,8 +285,7 @@ class ExecutionManager:
         return node_id in self._active_executions
     
     async def wait_for_node(self, node_id: str, timeout: Optional[float] = None) -> bool:
-        """
-        Wait for a specific node to complete execution.
+        """Wait for a specific node to complete execution.
         
         Args:
             node_id: ID of the node to wait for
@@ -329,9 +312,8 @@ class ExecutionManager:
             logger.error(f"Error waiting for node {node_id}: {e}")
             return False
     
-    def get_execution_statistics(self) -> Dict[str, Any]:
-        """
-        Get execution statistics.
+    def get_execution_statistics(self) -> dict[str, Any]:
+        """Get execution statistics.
         
         Returns:
             Dictionary of execution statistics

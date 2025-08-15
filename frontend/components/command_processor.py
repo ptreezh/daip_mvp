@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-命令处理器
+"""命令处理器
 
 处理聊天界面中的特殊命令，如 /consensus now, /status 等
 """
 
 import logging
-from typing import Dict, Any, Optional, Callable
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -44,9 +42,8 @@ class CommandProcessor:
             '/?': '/help',
         }
     
-    async def process_command(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        处理命令
+    async def process_command(self, command: str, context: dict[str, Any]) -> dict[str, Any]:
+        """处理命令
         
         Args:
             command: 命令字符串
@@ -94,7 +91,7 @@ class CommandProcessor:
         
         return command
     
-    async def _handle_consensus(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_consensus(self, command: str, context: dict[str, Any]) -> dict[str, Any]:
         """处理共识命令"""
         parts = command.split()
         
@@ -123,7 +120,7 @@ class CommandProcessor:
                 "type": "system_info"
             }
     
-    async def _handle_status(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_status(self, command: str, context: dict[str, Any]) -> dict[str, Any]:
         """处理状态命令"""
         # 获取系统状态信息
         websocket_manager = context.get("websocket_manager")
@@ -161,7 +158,7 @@ class CommandProcessor:
             "type": "system_info"
         }
     
-    async def _handle_help(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_help(self, command: str, context: dict[str, Any]) -> dict[str, Any]:
         """处理帮助命令"""
         help_content = """🆘 **Personal Intelligence Hub 帮助**
 
@@ -200,7 +197,7 @@ class CommandProcessor:
             "type": "system_info"
         }
     
-    async def _handle_clear(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_clear(self, command: str, context: dict[str, Any]) -> dict[str, Any]:
         """处理清空命令"""
         return {
             "success": True,
@@ -209,7 +206,7 @@ class CommandProcessor:
             "action": "clear_chat"
         }
     
-    async def _handle_debug(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_debug(self, command: str, context: dict[str, Any]) -> dict[str, Any]:
         """处理调试命令"""
         debug_info = []
         
@@ -234,7 +231,7 @@ class CommandProcessor:
             "type": "system_info"
         }
     
-    async def _handle_export(self, command: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_export(self, command: str, context: dict[str, Any]) -> dict[str, Any]:
         """处理导出命令"""
         chat_interface = context.get("chat_interface")
         
@@ -251,7 +248,7 @@ class CommandProcessor:
             
             # 生成导出内容
             export_content = []
-            export_content.append(f"# Personal Intelligence Hub 对话导出")
+            export_content.append("# Personal Intelligence Hub 对话导出")
             export_content.append(f"导出时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             export_content.append(f"会话ID: {context.get('session_id', 'Unknown')}")
             export_content.append(f"消息总数: {len(message_history)}")
@@ -286,7 +283,7 @@ class CommandProcessor:
                 "type": "error"
             }
     
-    def get_available_commands(self) -> Dict[str, str]:
+    def get_available_commands(self) -> dict[str, str]:
         """获取可用命令列表"""
         return {
             "/consensus": "共识计算相关命令",

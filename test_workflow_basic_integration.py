@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-基础工作流集成测试
+"""基础工作流集成测试
 验证工作流类是否能正确导入和初始化，以及基本结构是否完整
 """
 
-import sys
-import os
-from pathlib import Path
 import logging
+import sys
 
 # 添加src目录到Python路径
 sys.path.append('src')
@@ -26,23 +22,18 @@ def test_workflow_imports():
     try:
         # 测试批判性审查工作流导入
         print("\n📦 测试批判性审查工作流导入...")
-        from src.workflows.critical_review_workflow import CriticalReviewWorkflow
         print("✅ CriticalReviewWorkflow 导入成功")
         
         # 测试多视角综合工作流导入
         print("\n📦 测试多视角综合工作流导入...")
-        from src.workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
         print("✅ MultiPerspectiveSynthesisWorkflow 导入成功")
         
         # 测试制度原语导入
         print("\n📦 测试制度原语导入...")
-        from src.institutional_primitives.base import InstitutionalPrimitive, ExecutionContext
         print("✅ InstitutionalPrimitive 和 ExecutionContext 导入成功")
         
-        from src.institutional_primitives.consensus_node import ConsensusNode
         print("✅ ConsensusNode 导入成功")
         
-        from src.institutional_primitives.revision_node import RevisionNode
         print("✅ RevisionNode 导入成功")
         
         return True
@@ -66,40 +57,40 @@ def test_workflow_initialization():
         # 测试批判性审查工作流初始化
         print("\n🔧 测试批判性审查工作流初始化...")
         cr_workflow = CriticalReviewWorkflow("test_cr_workflow")
-        print(f"✅ CriticalReviewWorkflow 初始化成功")
+        print("✅ CriticalReviewWorkflow 初始化成功")
         print(f"   工作流ID: {cr_workflow.workflow_id}")
         print(f"   配置项数量: {len(cr_workflow.config)}")
         
         # 检查工作流节点
         if hasattr(cr_workflow, 'generation_node'):
-            print(f"   ✅ 包含 generation_node")
+            print("   ✅ 包含 generation_node")
         if hasattr(cr_workflow, 'fact_extraction_node'):
-            print(f"   ✅ 包含 fact_extraction_node")
+            print("   ✅ 包含 fact_extraction_node")
         if hasattr(cr_workflow, 'parallel_review_node'):
-            print(f"   ✅ 包含 parallel_review_node")
+            print("   ✅ 包含 parallel_review_node")
         if hasattr(cr_workflow, 'consensus_node'):
-            print(f"   ✅ 包含 consensus_node")
+            print("   ✅ 包含 consensus_node")
         if hasattr(cr_workflow, 'revision_node'):
-            print(f"   ✅ 包含 revision_node")
+            print("   ✅ 包含 revision_node")
         
         # 测试多视角综合工作流初始化
         print("\n🔧 测试多视角综合工作流初始化...")
         mp_workflow = MultiPerspectiveSynthesisWorkflow("test_mp_workflow")
-        print(f"✅ MultiPerspectiveSynthesisWorkflow 初始化成功")
+        print("✅ MultiPerspectiveSynthesisWorkflow 初始化成功")
         print(f"   工作流ID: {mp_workflow.workflow_id}")
         print(f"   配置项数量: {len(mp_workflow.config)}")
         
         # 检查工作流节点
         if hasattr(mp_workflow, 'task_decomposition_node'):
-            print(f"   ✅ 包含 task_decomposition_node")
+            print("   ✅ 包含 task_decomposition_node")
         if hasattr(mp_workflow, 'parallel_exploration_node'):
-            print(f"   ✅ 包含 parallel_exploration_node")
+            print("   ✅ 包含 parallel_exploration_node")
         if hasattr(mp_workflow, 'viewpoint_collection_node'):
-            print(f"   ✅ 包含 viewpoint_collection_node")
+            print("   ✅ 包含 viewpoint_collection_node")
         if hasattr(mp_workflow, 'enhanced_synthesis_node'):
-            print(f"   ✅ 包含 enhanced_synthesis_node")
+            print("   ✅ 包含 enhanced_synthesis_node")
         if hasattr(mp_workflow, 'iterative_refinement_node'):
-            print(f"   ✅ 包含 iterative_refinement_node")
+            print("   ✅ 包含 iterative_refinement_node")
         
         return True
         
@@ -132,7 +123,7 @@ def test_execution_context():
             state={"step": 1, "data": "test"}
         )
         
-        print(f"✅ ExecutionContext 创建成功")
+        print("✅ ExecutionContext 创建成功")
         print(f"   执行ID: {context.execution_id}")
         print(f"   工作流ID: {context.workflow_id}")
         print(f"   节点ID: {context.node_id}")
@@ -143,7 +134,7 @@ def test_execution_context():
         # 测试子上下文创建
         print("\n🔧 测试子上下文创建...")
         child_context = context.create_child_context("child_node")
-        print(f"✅ 子上下文创建成功")
+        print("✅ 子上下文创建成功")
         print(f"   子节点ID: {child_context.node_id}")
         print(f"   父上下文存在: {child_context.parent_context is not None}")
         
@@ -173,18 +164,17 @@ def test_institutional_primitives():
     try:
         from src.institutional_primitives.consensus_node import ConsensusNode
         from src.institutional_primitives.revision_node import RevisionNode
-        from src.institutional_primitives.base import ExecutionContext
         
         # 测试共识节点
         print("\n🔧 测试共识节点...")
         consensus_node = ConsensusNode("test_consensus", {})
-        print(f"✅ ConsensusNode 创建成功")
+        print("✅ ConsensusNode 创建成功")
         print(f"   节点类型: {type(consensus_node).__name__}")
         
         # 测试修订节点
         print("\n🔧 测试修订节点...")
         revision_node = RevisionNode("test_revision", {})
-        print(f"✅ RevisionNode 创建成功")
+        print("✅ RevisionNode 创建成功")
         print(f"   节点类型: {type(revision_node).__name__}")
         
         return True
@@ -219,7 +209,7 @@ def test_workflow_configuration():
         }
         
         cr_workflow = CriticalReviewWorkflow("test_custom_cr", custom_config)
-        print(f"✅ 自定义配置应用成功")
+        print("✅ 自定义配置应用成功")
         print(f"   生成角色名: {cr_workflow.config['generation']['role_name']}")
         print(f"   共识方法: {cr_workflow.config['consensus']['consensus_method']}")
         print(f"   可信度阈值: {cr_workflow.config['consensus']['credibility_threshold']}")
@@ -238,7 +228,7 @@ def test_workflow_configuration():
         }
         
         mp_workflow = MultiPerspectiveSynthesisWorkflow("test_custom_mp", mp_config)
-        print(f"✅ 自定义配置应用成功")
+        print("✅ 自定义配置应用成功")
         print(f"   默认视角: {mp_workflow.config['task_decomposition']['default_perspectives']}")
         print(f"   综合方法: {mp_workflow.config['enhanced_synthesis']['synthesis_method']}")
         print(f"   质量阈值: {mp_workflow.config['enhanced_synthesis']['quality_threshold']}")

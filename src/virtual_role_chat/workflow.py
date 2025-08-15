@@ -1,18 +1,18 @@
-"""
-PocketFlow workflow interfaces and integration points for the Virtual Role Chat System.
+"""PocketFlow workflow interfaces and integration points for the Virtual Role Chat System.
 
 This module defines the interfaces and models for integrating PocketFlow as a lightweight
 workflow engine to orchestrate role interactions and conversation flows.
 """
 
-from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Protocol, runtime_checkable, Union
+from typing import Any, Optional, Protocol, runtime_checkable
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+
 try:
-    from pocketflow import Workflow, WorkflowEngine, WorkflowStep as PFWorkflowStep
+    from pocketflow import Workflow, WorkflowEngine
+    from pocketflow import WorkflowStep as PFWorkflowStep
     POCKETFLOW_AVAILABLE = True
 except ImportError:
     POCKETFLOW_AVAILABLE = False
@@ -24,7 +24,7 @@ except ImportError:
     class PFWorkflowStep:
         pass
 
-from .models import ChatMessage, SessionID
+from .models import SessionID
 
 
 class WorkflowState(str, Enum):
@@ -56,8 +56,8 @@ class WorkflowEvent(BaseModel):
     type: WorkflowEventType
     session_id: SessionID
     timestamp: datetime
-    data: Dict[str, Any] = {}
-    metadata: Dict[str, Any] = {}
+    data: dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
 
 class WorkflowAction(BaseModel):
@@ -65,8 +65,8 @@ class WorkflowAction(BaseModel):
     id: str
     name: str
     type: str  # e.g., "role_response", "validation", "synthesis"
-    parameters: Dict[str, Any] = {}
-    dependencies: List[str] = []  # IDs of actions this depends on
+    parameters: dict[str, Any] = {}
+    dependencies: list[str] = []  # IDs of actions this depends on
     timeout_seconds: Optional[int] = None
 
 
@@ -75,9 +75,9 @@ class WorkflowStep(BaseModel):
     id: str
     name: str
     description: str = ""
-    actions: List[WorkflowAction] = []
-    conditions: Dict[str, Any] = {}  # Conditions for step execution
-    next_steps: List[str] = []  # IDs of possible next steps
+    actions: list[WorkflowAction] = []
+    conditions: dict[str, Any] = {}  # Conditions for step execution
+    next_steps: list[str] = []  # IDs of possible next steps
 
 
 class ConversationWorkflow(BaseModel):
@@ -87,9 +87,9 @@ class ConversationWorkflow(BaseModel):
     description: str = ""
     mode: str  # "free_form", "structured", "debate"
     initial_step: str
-    steps: List[WorkflowStep] = []
-    global_conditions: Dict[str, Any] = {}
-    metadata: Dict[str, Any] = {}
+    steps: list[WorkflowStep] = []
+    global_conditions: dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
 
 class WorkflowExecution(BaseModel):
@@ -101,8 +101,8 @@ class WorkflowExecution(BaseModel):
     current_step: Optional[str] = None
     start_time: datetime
     end_time: Optional[datetime] = None
-    context: Dict[str, Any] = {}
-    events: List[WorkflowEvent] = []
+    context: dict[str, Any] = {}
+    events: list[WorkflowEvent] = []
     error_message: Optional[str] = None
 
 
@@ -114,7 +114,7 @@ class TaskDecomposition(BaseModel):
     complexity_threshold: float = 0.7  # Above this, decompose
     max_subtasks: int = 5
     strategy_type: str  # "expertise_based", "sequential", "parallel"
-    parameters: Dict[str, Any] = {}
+    parameters: dict[str, Any] = {}
 
 
 class ProcessingChain(BaseModel):
@@ -122,12 +122,12 @@ class ProcessingChain(BaseModel):
     id: str
     name: str
     description: str = ""
-    tasks: List[str]  # Task IDs in execution order
+    tasks: list[str]  # Task IDs in execution order
     execution_mode: str  # "sequential", "parallel", "adaptive"
     current_task: Optional[str] = None
-    completed_tasks: List[str] = []
-    failed_tasks: List[str] = []
-    metadata: Dict[str, Any] = {}
+    completed_tasks: list[str] = []
+    failed_tasks: list[str] = []
+    metadata: dict[str, Any] = {}
 
 
 @runtime_checkable
@@ -145,7 +145,7 @@ class WorkflowEngineInterface(Protocol):
         """
         ...
     
-    def start_workflow(self, workflow_id: str, session_id: SessionID, context: Optional[Dict[str, Any]] = None) -> str:
+    def start_workflow(self, workflow_id: str, session_id: SessionID, context: Optional[dict[str, Any]] = None) -> str:
         """Start a workflow execution.
         
         Args:
@@ -214,7 +214,7 @@ class WorkflowEngineInterface(Protocol):
         """
         ...
     
-    def get_execution_context(self, execution_id: str) -> Dict[str, Any]:
+    def get_execution_context(self, execution_id: str) -> dict[str, Any]:
         """Get the context of a workflow execution.
         
         Args:
@@ -230,7 +230,7 @@ class WorkflowEngineInterface(Protocol):
 class WorkflowStateManagerInterface(Protocol):
     """Interface for managing workflow state."""
     
-    def save_state(self, execution_id: str, state: Dict[str, Any]) -> bool:
+    def save_state(self, execution_id: str, state: dict[str, Any]) -> bool:
         """Save workflow state.
         
         Args:
@@ -242,7 +242,7 @@ class WorkflowStateManagerInterface(Protocol):
         """
         ...
     
-    def load_state(self, execution_id: str) -> Dict[str, Any]:
+    def load_state(self, execution_id: str) -> dict[str, Any]:
         """Load workflow state.
         
         Args:
@@ -269,7 +269,7 @@ class WorkflowStateManagerInterface(Protocol):
 class TaskDecompositionServiceInterface(Protocol):
     """Interface for task decomposition services."""
     
-    def analyze_complexity(self, task: str, context: Dict[str, Any]) -> float:
+    def analyze_complexity(self, task: str, context: dict[str, Any]) -> float:
         """Analyze the complexity of a task.
         
         Args:
@@ -281,7 +281,7 @@ class TaskDecompositionServiceInterface(Protocol):
         """
         ...
     
-    def decompose_task(self, task: str, strategy: TaskDecomposition, context: Dict[str, Any]) -> List[str]:
+    def decompose_task(self, task: str, strategy: TaskDecomposition, context: dict[str, Any]) -> list[str]:
         """Decompose a task into subtasks.
         
         Args:
@@ -294,7 +294,7 @@ class TaskDecompositionServiceInterface(Protocol):
         """
         ...
     
-    def create_processing_chain(self, tasks: List[str], execution_mode: str) -> ProcessingChain:
+    def create_processing_chain(self, tasks: list[str], execution_mode: str) -> ProcessingChain:
         """Create a processing chain from tasks.
         
         Args:
@@ -311,7 +311,7 @@ class TaskDecompositionServiceInterface(Protocol):
 class WorkflowAdapterInterface(Protocol):
     """Interface for adapting DAIP-LIVE components to PocketFlow workflows."""
     
-    def adapt_role_manager(self, role_manager: Any) -> Dict[str, Any]:
+    def adapt_role_manager(self, role_manager: Any) -> dict[str, Any]:
         """Adapt RoleManager for workflow use.
         
         Args:
@@ -322,7 +322,7 @@ class WorkflowAdapterInterface(Protocol):
         """
         ...
     
-    def adapt_memory_service(self, memory_service: Any) -> Dict[str, Any]:
+    def adapt_memory_service(self, memory_service: Any) -> dict[str, Any]:
         """Adapt MemoryService for workflow use.
         
         Args:
@@ -333,7 +333,7 @@ class WorkflowAdapterInterface(Protocol):
         """
         ...
     
-    def adapt_synthesis_engine(self, synthesis_engine: Any) -> Dict[str, Any]:
+    def adapt_synthesis_engine(self, synthesis_engine: Any) -> dict[str, Any]:
         """Adapt SynthesisEngine for workflow use.
         
         Args:
@@ -344,7 +344,7 @@ class WorkflowAdapterInterface(Protocol):
         """
         ...
     
-    def adapt_fact_services(self, fact_extraction: Any, fact_validation: Any) -> Dict[str, Any]:
+    def adapt_fact_services(self, fact_extraction: Any, fact_validation: Any) -> dict[str, Any]:
         """Adapt fact extraction and validation services for workflow use.
         
         Args:

@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-集成演示系统启动脚本
+"""集成演示系统启动脚本
 
 启动DAIP-LIVE真实演示系统，包含所有集成组件
 """
 
-import sys
-import os
 import asyncio
 import logging
+import sys
 from pathlib import Path
 
 # 添加项目根目录到Python路径

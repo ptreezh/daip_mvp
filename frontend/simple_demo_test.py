@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-简化的演示测试 - 验证基本功能
+"""简化的演示测试 - 验证基本功能
 """
 
 from lona import LonaApp, View
-from lona.html import HTML, Div, H1, P
+from lona.html import H1, HTML, Div, P
 
 app = LonaApp(__file__)
 

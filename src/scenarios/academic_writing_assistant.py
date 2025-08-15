@@ -1,23 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-学术写作辅助工具
+"""学术写作辅助工具
 
 V0.2.3 - 学术研究场景核心功能
 提供全面的学术写作指导和辅助功能
 """
 
-import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from enum import Enum
-import json
-import re
-from pathlib import Path
+from typing import Any, Optional
 
-from src.scenarios.enhanced_academic_research_scenario import WritingSection, LiteratureItem
+from src.scenarios.enhanced_academic_research_scenario import WritingSection
 
 logger = logging.getLogger(__name__)
 
@@ -60,12 +53,12 @@ class WritingGuideline:
     """写作指导"""
     section_type: WritingSectionType
     purpose: str
-    structure: List[str]
-    key_elements: List[str]
-    word_count_range: Tuple[int, int]
-    common_mistakes: List[str]
-    best_practices: List[str]
-    example_phrases: List[str]
+    structure: list[str]
+    key_elements: list[str]
+    word_count_range: tuple[int, int]
+    common_mistakes: list[str]
+    best_practices: list[str]
+    example_phrases: list[str]
 
 
 @dataclass
@@ -73,11 +66,11 @@ class WritingFeedback:
     """写作反馈"""
     section_type: WritingSectionType
     overall_score: float
-    strengths: List[str]
-    weaknesses: List[str]
-    suggestions: List[str]
-    grammar_issues: List[str]
-    style_issues: List[str]
+    strengths: list[str]
+    weaknesses: list[str]
+    suggestions: list[str]
+    grammar_issues: list[str]
+    style_issues: list[str]
     structure_feedback: str
     clarity_score: float
     coherence_score: float
@@ -87,7 +80,7 @@ class WritingFeedback:
 @dataclass
 class Citation:
     """引用"""
-    authors: List[str]
+    authors: list[str]
     title: str
     year: int
     venue: str
@@ -107,7 +100,7 @@ class AcademicWritingAssistant:
         
         logger.info("Academic Writing Assistant initialized")
     
-    def _initialize_writing_guidelines(self) -> Dict[WritingSectionType, WritingGuideline]:
+    def _initialize_writing_guidelines(self) -> dict[WritingSectionType, WritingGuideline]:
         """初始化写作指导"""
         return {
             WritingSectionType.ABSTRACT: WritingGuideline(
@@ -317,7 +310,7 @@ class AcademicWritingAssistant:
             )
         }
     
-    def _initialize_style_templates(self) -> Dict[WritingStyle, Dict[str, Any]]:
+    def _initialize_style_templates(self) -> dict[WritingStyle, dict[str, Any]]:
         """初始化写作风格模板"""
         return {
             WritingStyle.JOURNAL_ARTICLE: {
@@ -351,7 +344,7 @@ class AcademicWritingAssistant:
             }
         }
     
-    def _initialize_citation_formatters(self) -> Dict[CitationStyle, Dict[str, str]]:
+    def _initialize_citation_formatters(self) -> dict[CitationStyle, dict[str, str]]:
         """初始化引用格式"""
         return {
             CitationStyle.APA: {
@@ -443,7 +436,7 @@ class AcademicWritingAssistant:
             academic_tone_score=0.5
         )
     
-    async def _analyze_grammar(self, content: str) -> List[str]:
+    async def _analyze_grammar(self, content: str) -> list[str]:
         """分析语法问题"""
         issues = []
         
@@ -474,7 +467,7 @@ class AcademicWritingAssistant:
         
         return issues[:10]  # 限制问题数量
     
-    async def _analyze_style(self, content: str, writing_style: WritingStyle) -> List[str]:
+    async def _analyze_style(self, content: str, writing_style: WritingStyle) -> list[str]:
         """分析写作风格问题"""
         issues = []
         style_template = self.style_templates.get(writing_style, {})
@@ -648,7 +641,7 @@ class AcademicWritingAssistant:
         
         return max(0.0, min(1.0, score))
     
-    async def _identify_strengths(self, section: WritingSection, guideline: WritingGuideline) -> List[str]:
+    async def _identify_strengths(self, section: WritingSection, guideline: WritingGuideline) -> list[str]:
         """识别写作优点"""
         strengths = []
         
@@ -686,7 +679,7 @@ class AcademicWritingAssistant:
         
         return strengths if strengths else ["Content is provided and readable"]
     
-    async def _identify_weaknesses(self, section: WritingSection, guideline: WritingGuideline) -> List[str]:
+    async def _identify_weaknesses(self, section: WritingSection, guideline: WritingGuideline) -> list[str]:
         """识别写作弱点"""
         weaknesses = []
         
@@ -724,7 +717,7 @@ class AcademicWritingAssistant:
     
     async def _generate_suggestions(self, section: WritingSection, 
                                   guideline: WritingGuideline, 
-                                  weaknesses: List[str]) -> List[str]:
+                                  weaknesses: list[str]) -> list[str]:
         """生成改进建议"""
         suggestions = []
         
@@ -761,12 +754,12 @@ class AcademicWritingAssistant:
             
             template_parts = [
                 f"# {section_type.value.replace('_', ' ').title()} Template",
-                f"",
+                "",
                 f"**Purpose**: {guideline.purpose}",
                 f"**Word Count**: {guideline.word_count_range[0]}-{guideline.word_count_range[1]} words",
                 f"**Writing Style**: {style_info.get('tone', 'Academic formal')}",
-                f"",
-                f"## Structure",
+                "",
+                "## Structure",
                 ""
             ]
             
@@ -817,8 +810,8 @@ class AcademicWritingAssistant:
             logger.error(f"Error generating writing template: {e}")
             return "Error generating template"
     
-    async def format_citations(self, citations: List[Citation], 
-                             citation_style: CitationStyle = CitationStyle.APA) -> Dict[str, List[str]]:
+    async def format_citations(self, citations: list[Citation], 
+                             citation_style: CitationStyle = CitationStyle.APA) -> dict[str, list[str]]:
         """格式化引用"""
         try:
             logger.info(f"Formatting {len(citations)} citations in {citation_style.value} style")
@@ -881,7 +874,7 @@ class AcademicWritingAssistant:
             logger.error(f"Error formatting citations: {e}")
             return {"error": ["Error formatting citations"]}
     
-    def _format_authors(self, authors: List[str], citation_style: CitationStyle) -> str:
+    def _format_authors(self, authors: list[str], citation_style: CitationStyle) -> str:
         """格式化作者名单"""
         if not authors:
             return "Unknown Author"
@@ -909,17 +902,17 @@ class AcademicWritingAssistant:
             logger.info("Generating writing feedback report")
             
             report_sections = [
-                f"# Writing Analysis Report",
-                f"",
+                "# Writing Analysis Report",
+                "",
                 f"**Section Type**: {feedback.section_type.value.replace('_', ' ').title()}",
                 f"**Overall Score**: {feedback.overall_score:.2f}/1.00",
-                f"",
-                f"## Score Breakdown",
+                "",
+                "## Score Breakdown",
                 f"- **Clarity**: {feedback.clarity_score:.2f}/1.00",
                 f"- **Coherence**: {feedback.coherence_score:.2f}/1.00", 
                 f"- **Academic Tone**: {feedback.academic_tone_score:.2f}/1.00",
-                f"",
-                f"## Strengths",
+                "",
+                "## Strengths",
                 ""
             ]
             

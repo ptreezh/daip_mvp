@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-修复剩余的语法错误
+"""修复剩余的语法错误
 """
 
 import re

@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-统一共识调度器测试
+"""统一共识调度器测试
 
 按照新规则创建的简化测试，文件长度<400行
 """
 
 import asyncio
-from datetime import datetime
 
 from consensus_models import ConsensusInput, ConsensusRequest
-from unified_consensus_dispatcher import UnifiedConsensusDispatcher, DispatcherConfig
-from unified_consensus_dispatcher_utils import DispatcherManager, MetricsCollector, ConfigurationManager
 from test_algorithm_registry import MockConsensusAlgorithm
+from unified_consensus_dispatcher import DispatcherConfig, UnifiedConsensusDispatcher
+from unified_consensus_dispatcher_utils import ConfigurationManager, DispatcherManager, MetricsCollector
 
 
 class SlowAlgorithm(MockConsensusAlgorithm):

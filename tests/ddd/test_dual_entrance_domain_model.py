@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:00:00
+"""@Time    : 2025-08-06 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_dual_entrance_domain_model.py
 @Description:
@@ -8,12 +6,14 @@
     Tests core domain entities, value objects, aggregates, and domain services.
 """
 
-import pytest
-from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass
-from enum import Enum
 import uuid
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Optional
+
+import pytest
+
 
 # Domain Models
 class EntranceType(Enum):
@@ -50,11 +50,11 @@ class UserPreferences:
 @dataclass
 class TransparencyData:
     """Transparency data - Value Object"""
-    workflow_steps: List[Dict[str, Any]]
-    agent_contributions: List[Dict[str, Any]]
-    consensus_metrics: Dict[str, float]
-    performance_data: Dict[str, Any]
-    knowledge_sources: List[Dict[str, Any]]
+    workflow_steps: list[dict[str, Any]]
+    agent_contributions: list[dict[str, Any]]
+    consensus_metrics: dict[str, float]
+    performance_data: dict[str, Any]
+    knowledge_sources: list[dict[str, Any]]
     
     def __post_init__(self):
         if not isinstance(self.workflow_steps, list):
@@ -109,7 +109,7 @@ class User:
         self.preferences = preferences
         self.created_at = datetime.now()
         self.last_active = datetime.now()
-        self.session_history: List[SessionId] = []
+        self.session_history: list[SessionId] = []
     
     def update_preferences(self, preferences: UserPreferences):
         """Update user preferences"""
@@ -122,7 +122,7 @@ class User:
             self.session_history.append(session_id)
         self.last_active = datetime.now()
     
-    def get_active_sessions(self) -> List[SessionId]:
+    def get_active_sessions(self) -> list[SessionId]:
         """Get active sessions (simplified)"""
         return self.session_history[-5:]  # Last 5 sessions
 
@@ -135,9 +135,9 @@ class Session:
         self.status = SessionStatus.ACTIVE
         self.created_at = datetime.now()
         self.expires_at = datetime.now() + timedelta(hours=24)
-        self.context: Dict[str, Any] = {}
+        self.context: dict[str, Any] = {}
         self.transparency_data: Optional[TransparencyData] = None
-        self.interventions: List[UserIntervention] = []
+        self.interventions: list[UserIntervention] = []
     
     def switch_entrance(self, new_entrance: EntranceType):
         """Switch entrance type"""
@@ -191,8 +191,8 @@ class Session:
 class EntranceManager:
     """Entrance manager - Domain Service"""
     def __init__(self):
-        self.active_sessions: Dict[SessionId, Session] = {}
-        self.user_preferences: Dict[UserId, UserPreferences] = {}
+        self.active_sessions: dict[SessionId, Session] = {}
+        self.user_preferences: dict[UserId, UserPreferences] = {}
     
     def create_session(self, user_id: UserId, entrance_type: EntranceType) -> Session:
         """Create new session"""
@@ -263,7 +263,7 @@ class UserInterventionAddedEvent:
 class DomainEventPublisher:
     """Domain event publisher - Domain Service"""
     def __init__(self):
-        self.subscribers: Dict[str, List] = {}
+        self.subscribers: dict[str, list] = {}
     
     def subscribe(self, event_type: str, handler):
         """Subscribe to domain events"""

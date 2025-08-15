@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-后端连接器服务 - 简化版本
+"""后端连接器服务 - 简化版本
 
 负责与现有DAIP-LIVE后端服务的API集成
 提供统一的服务接口供前端组件使用
 """
 
 import logging
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
+from typing import Optional
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -26,16 +24,13 @@ class BackendConfig:
 
 # Import the actual services from src/core_services
 # Alias them to avoid naming conflicts with the mock classes that will be removed.
-from src.core_services.wiki_service import WikiService as RealWikiService
-from src.core_services.task_manager import TaskManager as RealTaskManager
-
-from src.core_services.workflow_knowledge_integrator import WorkflowKnowledgeIntegrator
 from src.core_services.consensus_algorithm_selector import ConsensusAlgorithmSelector
-
 from src.core_services.intent_analysis_service import BasicIntentAnalysisService
-from src.core_services.user_profile_service import UserProfileService
-
 from src.core_services.role_manager import RoleManager
+from src.core_services.task_manager import TaskManager as RealTaskManager
+from src.core_services.user_profile_service import UserProfileService
+from src.core_services.wiki_service import WikiService as RealWikiService
+from src.core_services.workflow_knowledge_integrator import WorkflowKnowledgeIntegrator
 
 
 class BackendConnector:
@@ -55,7 +50,7 @@ class BackendConnector:
         self.task_service = RealTaskManager(task_directory="daip_mvp_project/memory_bank/tasks/")
 
         # Initialize WorkflowKnowledgeIntegrator and ConsensusAlgorithmSelector
-        from src.core_services.sskg_manager import SSKGManager # Import here to avoid circular dependency
+        from src.core_services.sskg_manager import SSKGManager  # Import here to avoid circular dependency
         sskg_manager = SSKGManager() # Assuming default constructor is sufficient
         self.workflow_integrator = WorkflowKnowledgeIntegrator(sskg_manager=sskg_manager, wiki_service=self.wiki_service)
         self.consensus_selector = ConsensusAlgorithmSelector()
@@ -72,7 +67,7 @@ class BackendConnector:
         
 
         
-        logger.info(f"BackendConnector initialized. Using actual services from src/core_services.")
+        logger.info("BackendConnector initialized. Using actual services from src/core_services.")
     
     async def health_check(self) -> bool:
         """Health check for backend services."""

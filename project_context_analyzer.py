@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-项目上下文分析器
+"""项目上下文分析器
 
 在开始任何编码任务前，必须使用此工具进行全面的项目上下文分析
 确保充分理解现有实现、接口依赖和架构约束
 """
 
 import json
-import os
+import logging
 import sys
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-import logging
+from typing import Any
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,7 +31,7 @@ class ProjectContextAnalyzer:
         self.context = {}
         self.analysis_report = {}
     
-    def analyze_full_context(self, task_description: str) -> Dict[str, Any]:
+    def analyze_full_context(self, task_description: str) -> dict[str, Any]:
         """执行完整的项目上下文分析"""
         logger.info("🔍 开始项目上下文分析...")
         
@@ -68,10 +65,10 @@ class ProjectContextAnalyzer:
             if doc_path.exists():
                 try:
                     if doc.endswith('.json'):
-                        with open(doc_path, 'r', encoding='utf-8') as f:
+                        with open(doc_path, encoding='utf-8') as f:
                             self.context['documents'][doc] = json.load(f)
                     else:
-                        with open(doc_path, 'r', encoding='utf-8') as f:
+                        with open(doc_path, encoding='utf-8') as f:
                             self.context['documents'][doc] = f.read()
                     logger.info(f"✅ 已读取: {doc}")
                 except Exception as e:
@@ -189,7 +186,7 @@ class ProjectContextAnalyzer:
             'required_dependencies': self._identify_required_dependencies(task_description)
         }
     
-    def _extract_project_overview(self) -> Dict[str, Any]:
+    def _extract_project_overview(self) -> dict[str, Any]:
         """提取项目概述"""
         project_summary = self.context['documents'].get('PROJECT_SUMMARY.md', '')
         impl_summary = self.context['documents'].get('IMPLEMENTATION_SUMMARY.md', '')
@@ -201,7 +198,7 @@ class ProjectContextAnalyzer:
             'key_technologies': self._extract_key_technologies(project_summary)
         }
     
-    def _summarize_architecture(self) -> Dict[str, Any]:
+    def _summarize_architecture(self) -> dict[str, Any]:
         """总结架构信息"""
         arch = self.context.get('architecture', {})
         return {
@@ -211,7 +208,7 @@ class ProjectContextAnalyzer:
             'key_services': arch.get('core_services', [])[:10]  # 前10个核心服务
         }
     
-    def _summarize_interfaces(self) -> Dict[str, Any]:
+    def _summarize_interfaces(self) -> dict[str, Any]:
         """总结接口信息"""
         interfaces = self.context.get('interfaces', {})
         return {
@@ -221,7 +218,7 @@ class ProjectContextAnalyzer:
             'key_services': list(interfaces.get('service_classes', {}).keys())[:10]
         }
     
-    def _generate_recommendations(self, task_description: str) -> List[str]:
+    def _generate_recommendations(self, task_description: str) -> list[str]:
         """生成建议"""
         recommendations = []
         
@@ -244,7 +241,7 @@ class ProjectContextAnalyzer:
         
         return recommendations
     
-    def _assess_risks(self, task_description: str) -> List[str]:
+    def _assess_risks(self, task_description: str) -> list[str]:
         """评估风险"""
         risks = []
         
@@ -260,7 +257,7 @@ class ProjectContextAnalyzer:
         
         return risks
     
-    def _identify_required_dependencies(self, task_description: str) -> List[Dict[str, str]]:
+    def _identify_required_dependencies(self, task_description: str) -> list[dict[str, str]]:
         """识别必需依赖"""
         dependencies = []
         
@@ -277,7 +274,7 @@ class ProjectContextAnalyzer:
         return dependencies
     
     # 辅助方法
-    def _extract_module_dependencies(self, modules: Dict) -> Dict[str, List[str]]:
+    def _extract_module_dependencies(self, modules: dict) -> dict[str, list[str]]:
         """提取模块依赖关系"""
         dependencies = {}
         for module_name, module_info in modules.items():
@@ -291,7 +288,7 @@ class ProjectContextAnalyzer:
             dependencies[module_name] = deps
         return dependencies
     
-    def _group_classes_by_module(self, classes: Dict) -> Dict[str, List[str]]:
+    def _group_classes_by_module(self, classes: dict) -> dict[str, list[str]]:
         """按模块分组类"""
         grouped = {}
         for class_name, class_info in classes.items():
@@ -301,7 +298,7 @@ class ProjectContextAnalyzer:
             grouped[module].append(class_name)
         return grouped
     
-    def _find_service_classes(self, classes: Dict) -> Dict[str, Dict]:
+    def _find_service_classes(self, classes: dict) -> dict[str, dict]:
         """查找服务类"""
         services = {}
         for class_name, class_info in classes.items():
@@ -309,7 +306,7 @@ class ProjectContextAnalyzer:
                 services[class_name] = class_info
         return services
     
-    def _find_model_classes(self, classes: Dict) -> Dict[str, Dict]:
+    def _find_model_classes(self, classes: dict) -> dict[str, dict]:
         """查找模型类"""
         models = {}
         for class_name, class_info in classes.items():
@@ -318,7 +315,7 @@ class ProjectContextAnalyzer:
                 models[class_name] = class_info
         return models
     
-    def _find_exception_classes(self, classes: Dict) -> Dict[str, Dict]:
+    def _find_exception_classes(self, classes: dict) -> dict[str, dict]:
         """查找异常类"""
         exceptions = {}
         for class_name, class_info in classes.items():
@@ -326,7 +323,7 @@ class ProjectContextAnalyzer:
                 exceptions[class_name] = class_info
         return exceptions
     
-    def _extract_keywords_from_task(self, task_description: str) -> List[str]:
+    def _extract_keywords_from_task(self, task_description: str) -> list[str]:
         """从任务描述中提取关键词"""
         # 简单的关键词提取，可以根据需要改进
         keywords = []
@@ -357,7 +354,7 @@ class ProjectContextAnalyzer:
             return "虚拟角色聊天系统"
         return "未知项目类型"
     
-    def _extract_main_features(self, summary: str) -> List[str]:
+    def _extract_main_features(self, summary: str) -> list[str]:
         """提取主要功能"""
         features = []
         if '认知代理' in summary:
@@ -374,7 +371,7 @@ class ProjectContextAnalyzer:
             return "部分完成"
         return "状态未知"
     
-    def _extract_key_technologies(self, summary: str) -> List[str]:
+    def _extract_key_technologies(self, summary: str) -> list[str]:
         """提取关键技术"""
         technologies = []
         if 'LLM' in summary or 'llm' in summary:
@@ -395,26 +392,26 @@ class ProjectContextAnalyzer:
         
         print(f"\n🎯 任务描述: {report['task_description']}")
         
-        print(f"\n📋 项目概述:")
+        print("\n📋 项目概述:")
         overview = report['project_overview']
         print(f"  • 项目类型: {overview['project_type']}")
         print(f"  • 主要功能: {', '.join(overview['main_features'])}")
         print(f"  • 实现状态: {overview['implementation_status']}")
         print(f"  • 关键技术: {', '.join(overview['key_technologies'])}")
         
-        print(f"\n🏗️ 架构总结:")
+        print("\n🏗️ 架构总结:")
         arch = report['architecture_summary']
         print(f"  • 总模块数: {arch['total_modules']}")
         print(f"  • 核心服务: {arch['core_services_count']} 个")
         print(f"  • 前端模块: {arch['frontend_modules_count']} 个")
         
-        print(f"\n🔗 接口总结:")
+        print("\n🔗 接口总结:")
         interfaces = report['interface_summary']
         print(f"  • 总类数: {interfaces['total_classes']}")
         print(f"  • 服务类: {interfaces['service_classes_count']} 个")
         print(f"  • 模型类: {interfaces['model_classes_count']} 个")
         
-        print(f"\n🎯 相关实现:")
+        print("\n🎯 相关实现:")
         related = report['related_implementations']
         print(f"  • 相关模块: {len(related.get('related_modules', []))} 个")
         print(f"  • 相关类: {len(related.get('related_classes', []))} 个")
@@ -424,15 +421,15 @@ class ProjectContextAnalyzer:
             for module in related['related_modules'][:5]:  # 显示前5个
                 print(f"    - {module['name']}")
         
-        print(f"\n💡 建议:")
+        print("\n💡 建议:")
         for rec in report['recommendations']:
             print(f"  • {rec}")
         
-        print(f"\n⚠️ 风险评估:")
+        print("\n⚠️ 风险评估:")
         for risk in report['risk_assessment']:
             print(f"  • {risk}")
         
-        print(f"\n📦 必需依赖:")
+        print("\n📦 必需依赖:")
         for dep in report['required_dependencies'][:10]:  # 显示前10个
             print(f"  • {dep['name']} ({dep['module']})")
         

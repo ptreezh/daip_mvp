@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Personal Assistant Service Tests
+"""Personal Intelligence Hub - Personal Assistant Service Tests
 
 测试个人助手服务功能
 """
 
+from unittest.mock import patch
+
 import pytest
-import asyncio
-from unittest.mock import Mock, AsyncMock, patch
 
 from personal_intelligence_hub.services.personal_assistant import (
-    PersonalAssistantService, WorkflowType, IntentResult, TeamProposal
+    IntentResult,
+    PersonalAssistantService,
+    TeamProposal,
+    WorkflowType,
 )
 
 
@@ -26,7 +27,7 @@ class TestPersonalAssistantService:
         """测试服务初始化"""
         assert self.service.conversation_contexts == {}
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_analyze_intent_critical_review(self):
         """测试意图分析 - 批判性审查"""
         user_input = "请帮我分析这个方案的可行性"
@@ -39,7 +40,7 @@ class TestPersonalAssistantService:
         assert "分析" in result.reasoning
         assert result.topic == user_input
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_analyze_intent_multi_perspective(self):
         """测试意图分析 - 多视角讨论"""
         user_input = "我们来讨论一下这个问题的不同观点"
@@ -52,7 +53,7 @@ class TestPersonalAssistantService:
         assert "多角度" in result.reasoning
         assert result.topic == user_input
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_analyze_intent_default(self):
         """测试意图分析 - 默认情况"""
         user_input = "你好，我需要帮助"
@@ -64,7 +65,7 @@ class TestPersonalAssistantService:
         assert result.confidence == 0.6
         assert "默认" in result.reasoning
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_analyze_intent_with_context(self):
         """测试带上下文的意图分析"""
         user_input = "继续分析"
@@ -75,7 +76,7 @@ class TestPersonalAssistantService:
         assert isinstance(result, IntentResult)
         assert result.topic == user_input
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_assemble_team_critical_review(self):
         """测试团队组建 - 批判性审查"""
         topic = "AI伦理问题"
@@ -91,7 +92,7 @@ class TestPersonalAssistantService:
         assert topic in team.rationale
         assert "继续吗？" in team.confirmation_message
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_assemble_team_multi_perspective(self):
         """测试团队组建 - 多视角讨论"""
         topic = "气候变化政策"
@@ -107,7 +108,7 @@ class TestPersonalAssistantService:
         assert len(team.agents) == 4
         assert team.diversity_score == 0.85
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_assemble_team_custom(self):
         """测试团队组建 - 自定义工作流"""
         topic = "技术评估"
@@ -120,7 +121,7 @@ class TestPersonalAssistantService:
         assert "Analyst-AI" in team.agents
         assert len(team.agents) == 2
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_process_message_complete_flow(self):
         """测试完整的消息处理流程"""
         user_input = "请分析这个技术方案的风险"
@@ -135,7 +136,7 @@ class TestPersonalAssistantService:
         assert "继续吗？" in response
         assert "置信度" in response
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_process_message_error_handling(self):
         """测试消息处理错误处理"""
         # 通过Mock引发异常来测试错误处理

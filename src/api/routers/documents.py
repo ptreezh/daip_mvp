@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from fastapi import (
@@ -12,6 +11,7 @@ from fastapi import (
 )
 
 from src.api.dependencies import AppStateDep, get_document_service
+from src.core_services.document_service import DocumentService
 from src.models import (
     DocumentAnalysisRequest,
     DocumentAnalysisResponse,
@@ -19,7 +19,6 @@ from src.models import (
     DocumentUploadResponse,
 )
 
-from src.core_services.document_service import DocumentService
 # 导入文档解析器
 try:
     from src.document_parser import (

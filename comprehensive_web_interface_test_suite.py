@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 22:45:00
+"""@Time    : 2025-08-05 22:45:00
 @Author  : DAIP-LIVE Team
 @File    : comprehensive_web_interface_test_suite.py
 @Description:
@@ -24,19 +22,15 @@
 """
 
 import asyncio
-import sys
-import os
 import json
-import time
 import logging
+import sys
+import time
 import unittest
-import traceback
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
-import aiohttp
+from pathlib import Path
+
 import requests
-from concurrent.futures import ThreadPoolExecutor
 
 # 添加项目路径
 project_root = Path(__file__).parent
@@ -281,8 +275,8 @@ class WebApplicationFunctionalityTest(WebInterfaceTestSuite):
         logger.info("🧪 测试3: 聊天界面初始化测试")
         
         try:
-            from frontend.services.backend_connector import BackendConnector
             from frontend.components.chat_interface import ChatInterface
+            from frontend.services.backend_connector import BackendConnector
             
             # 创建后端连接器和聊天界面
             backend_connector = BackendConnector()
@@ -629,7 +623,7 @@ def run_comprehensive_test_suite():
     total_tests = len(all_results)
     total_success_rate = total_success / total_tests if total_tests > 0 else 0
     
-    print(f"\n🎯 总体统计")
+    print("\n🎯 总体统计")
     print("=" * 40)
     print(f"总测试数: {total_tests}")
     print(f"成功测试: {total_success}")
@@ -643,7 +637,7 @@ def run_comprehensive_test_suite():
     print(f"平均测试时间: {avg_time:.2f}秒")
     
     # 测试结果评估
-    print(f"\n🏆 测试结果评估")
+    print("\n🏆 测试结果评估")
     print("=" * 40)
     
     if total_success_rate >= 0.95:

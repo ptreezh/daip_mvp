@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-知识质量评分器
+"""知识质量评分器
 
 评估知识条目的质量和可信度
 """
 
 import logging
-from typing import Any, Dict, List, Optional
-from datetime import datetime
 import re
 import statistics
+from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +38,7 @@ class KnowledgeQualityScorer:
             "relevance": 0.10
         }
     
-    def score_knowledge(self, knowledge_data: Dict[str, Any]) -> Dict[str, Any]:
+    def score_knowledge(self, knowledge_data: dict[str, Any]) -> dict[str, Any]:
         """评估知识质量"""
         try:
             score_result = {
@@ -81,7 +79,7 @@ class KnowledgeQualityScorer:
             logger.error(f"评估知识质量失败: {e}")
             return {"error": str(e)}
     
-    def evaluate_accuracy(self, knowledge_data: Dict[str, Any]) -> float:
+    def evaluate_accuracy(self, knowledge_data: dict[str, Any]) -> float:
         """评估准确性"""
         try:
             accuracy_score = 0.0
@@ -112,7 +110,7 @@ class KnowledgeQualityScorer:
             logger.error(f"评估准确性失败: {e}")
             return 0.0
     
-    def assess_completeness(self, knowledge_data: Dict[str, Any]) -> float:
+    def assess_completeness(self, knowledge_data: dict[str, Any]) -> float:
         """评估完整性"""
         try:
             completeness_score = 0.0
@@ -152,7 +150,7 @@ class KnowledgeQualityScorer:
             logger.error(f"评估完整性失败: {e}")
             return 0.0
     
-    def _evaluate_reliability(self, knowledge_data: Dict[str, Any]) -> float:
+    def _evaluate_reliability(self, knowledge_data: dict[str, Any]) -> float:
         """评估可靠性"""
         try:
             reliability_score = 0.0
@@ -195,7 +193,7 @@ class KnowledgeQualityScorer:
             logger.error(f"评估可靠性失败: {e}")
             return 0.0
     
-    def _evaluate_clarity(self, knowledge_data: Dict[str, Any]) -> float:
+    def _evaluate_clarity(self, knowledge_data: dict[str, Any]) -> float:
         """评估清晰度"""
         try:
             clarity_score = 0.0
@@ -241,7 +239,7 @@ class KnowledgeQualityScorer:
             logger.error(f"评估清晰度失败: {e}")
             return 0.0
     
-    def _evaluate_currency(self, knowledge_data: Dict[str, Any]) -> float:
+    def _evaluate_currency(self, knowledge_data: dict[str, Any]) -> float:
         """评估时效性"""
         try:
             # 获取最后更新时间
@@ -258,7 +256,7 @@ class KnowledgeQualityScorer:
             logger.error(f"评估时效性失败: {e}")
             return 0.0
     
-    def _evaluate_relevance(self, knowledge_data: Dict[str, Any]) -> float:
+    def _evaluate_relevance(self, knowledge_data: dict[str, Any]) -> float:
         """评估相关性"""
         try:
             relevance_score = 0.0
@@ -292,7 +290,7 @@ class KnowledgeQualityScorer:
             logger.error(f"评估相关性失败: {e}")
             return 0.0
     
-    def _assess_evidence_quality(self, evidence: List[str]) -> float:
+    def _assess_evidence_quality(self, evidence: list[str]) -> float:
         """评估证据质量"""
         if not evidence:
             return 0.0
@@ -310,7 +308,7 @@ class KnowledgeQualityScorer:
         
         return min(quality_score / len(evidence), 1.0)
     
-    def _assess_source_credibility(self, sources: List[str]) -> float:
+    def _assess_source_credibility(self, sources: list[str]) -> float:
         """评估来源可信度"""
         if not sources:
             return 0.0
@@ -390,7 +388,7 @@ class KnowledgeQualityScorer:
             logger.error(f"计算可读性失败: {e}")
             return 0.0
     
-    def _calculate_keyword_density(self, content: str, keywords: List[str]) -> float:
+    def _calculate_keyword_density(self, content: str, keywords: list[str]) -> float:
         """计算关键词密度"""
         try:
             if not content or not keywords:
@@ -430,7 +428,7 @@ class KnowledgeQualityScorer:
         else:
             return "需要改进"
     
-    def _generate_recommendations(self, scores: Dict[str, float]) -> List[str]:
+    def _generate_recommendations(self, scores: dict[str, float]) -> list[str]:
         """生成改进建议"""
         recommendations = []
         
@@ -457,7 +455,7 @@ class KnowledgeQualityScorer:
         
         return recommendations
     
-    def get_scoring_statistics(self) -> Dict[str, Any]:
+    def get_scoring_statistics(self) -> dict[str, Any]:
         """获取评分统计"""
         try:
             if not self.scoring_history:

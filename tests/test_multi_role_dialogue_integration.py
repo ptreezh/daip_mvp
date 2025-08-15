@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多角色对话功能集成测试
+"""多角色对话功能集成测试
 
 测试多角色对话管理器的核心功能：
 1. 角色选择和匹配
@@ -11,27 +9,23 @@
 5. 会话状态管理
 """
 
-import pytest
-import asyncio
 import sys
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 # 添加项目根目录到路径
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
-from src.core_services.multi_role_dialogue_manager import (
-    MultiRoleDialogueManager,
-    DialogueParticipant,
-    DialogueSession
-)
+from src.core_services.multi_role_dialogue_manager import DialogueSession, MultiRoleDialogueManager
 
 
 class TestMultiRoleDialogueIntegration:
     """多角色对话集成测试"""
     
-    @pytest.fixture
+    @pytest.fixture()
     async def dialogue_manager(self):
         """创建对话管理器实例"""
         manager = MultiRoleDialogueManager()
@@ -48,7 +42,7 @@ class TestMultiRoleDialogueIntegration:
         await manager.initialize()
         return manager
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_roles(self):
         """创建模拟角色"""
         from src.core_services.role_manager import Role
@@ -77,7 +71,7 @@ class TestMultiRoleDialogueIntegration:
             )
         ]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_start_dialogue_session(self, dialogue_manager, mock_roles):
         """测试启动对话会话"""
         # 设置mock
@@ -99,7 +93,7 @@ class TestMultiRoleDialogueIntegration:
         # 验证会话已添加到活跃会话中
         assert session.session_id in dialogue_manager.active_sessions
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_conduct_dialogue_round(self, dialogue_manager, mock_roles):
         """测试进行对话轮次"""
         # 设置mock
@@ -131,7 +125,7 @@ class TestMultiRoleDialogueIntegration:
         assert len(session.rounds) == 1
         assert session.convergence_score > 0
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_user_intervention(self, dialogue_manager, mock_roles):
         """测试用户干预功能"""
         # 设置mock
@@ -161,7 +155,7 @@ class TestMultiRoleDialogueIntegration:
         assert session.user_interventions[0]["content"] == "我认为还需要考虑实际应用中的挑战"
         assert session.user_interventions[0]["type"] == "comment"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_role_selection_optimization(self, dialogue_manager, mock_roles):
         """测试角色选择优化"""
         # 扩展mock角色列表，包含更多专业角色
@@ -180,7 +174,7 @@ class TestMultiRoleDialogueIntegration:
         participant_names = [p.role_name for p in session.participants]
         assert any("AI" in name or "伦理" in name for name in participant_names)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_llm_call_optimization(self, dialogue_manager, mock_roles):
         """测试LLM调用优化"""
         dialogue_manager.role_manager.list_roles.return_value = mock_roles
@@ -211,7 +205,7 @@ class TestMultiRoleDialogueIntegration:
         # 验证LLM管理器被正确调用
         assert dialogue_manager.llm_manager.call_llm_for_role.call_count == len(session.participants)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_convergence_calculation(self, dialogue_manager, mock_roles):
         """测试收敛度计算"""
         dialogue_manager.role_manager.list_roles.return_value = mock_roles
@@ -237,7 +231,7 @@ class TestMultiRoleDialogueIntegration:
         assert round2_convergence > round1_convergence
         assert 0 <= round2_convergence <= 1
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_error_handling(self, dialogue_manager, mock_roles):
         """测试错误处理机制"""
         dialogue_manager.role_manager.list_roles.return_value = mock_roles
@@ -258,7 +252,7 @@ class TestMultiRoleDialogueIntegration:
             assert "error" in response
             assert "技术问题" in response["response"] or "系统错误" in response["response"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_session_management(self, dialogue_manager, mock_roles):
         """测试会话管理功能"""
         dialogue_manager.role_manager.list_roles.return_value = mock_roles
@@ -285,7 +279,7 @@ class TestMultiRoleDialogueIntegration:
         active_sessions = dialogue_manager.list_active_sessions()
         assert len(active_sessions) == 1
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_performance_requirements(self, dialogue_manager, mock_roles):
         """测试性能要求"""
         import time

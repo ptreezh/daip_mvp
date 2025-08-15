@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 16:30:00
+"""@Time    : 2025-07-24 16:30:00
 @Author  : DAIP-LIVE Team
 @File    : synthesis_node.py
 @Description:
@@ -9,23 +7,22 @@
 import logging
 import re
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
-from ..base import InstitutionalPrimitive, ExecutionContext
-from .models import ViewpointCollection, SynthesisQuality, SynthesisResult
+from ..base import ExecutionContext, InstitutionalPrimitive
+from .models import SynthesisQuality, SynthesisResult, ViewpointCollection
 
 logger = logging.getLogger(__name__)
 
 
 class EnhancedSynthesisNode(InstitutionalPrimitive):
-    """
-    增强观点综合节点 - Synthesizes diverse expert viewpoints with quality assessment.
+    """增强观点综合节点 - Synthesizes diverse expert viewpoints with quality assessment.
     
     Uses SynthesisEngine to merge diverse and potentially conflicting viewpoints
     into a comprehensive, insightful, and nuanced synthesis report with quality assessment.
     """
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.synthesis_method = config.get("synthesis_method", "dialectical") if config else "dialectical"
         self.min_confidence_threshold = config.get("min_confidence_threshold", 0.6) if config else 0.6
@@ -33,9 +30,8 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
         self.quality_threshold = config.get("quality_threshold", 0.7) if config else 0.7
         self.max_synthesis_length = config.get("max_synthesis_length", 2000) if config else 2000
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute enhanced synthesis of viewpoint collection.
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        """Execute enhanced synthesis of viewpoint collection.
         
         Args:
             inputs: Should contain 'viewpoint_collection' to synthesize
@@ -138,7 +134,7 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
                 "error": str(e)
             }
     
-    def _prepare_enhanced_synthesis_input(self, collection: ViewpointCollection) -> List[Dict[str, Any]]:
+    def _prepare_enhanced_synthesis_input(self, collection: ViewpointCollection) -> list[dict[str, Any]]:
         """Prepare enhanced synthesis input with conflict and consensus awareness."""
         from src.models import DebateTurn
         
@@ -273,7 +269,7 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
             }
         )
     
-    def _extract_key_insights(self, synthesis: str) -> List[str]:
+    def _extract_key_insights(self, synthesis: str) -> list[str]:
         """Extract key insights from synthesis text."""
         insights = []
         
@@ -309,7 +305,7 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
         insights = [insight for insight in insights if len(insight) <= 200]
         return insights[:5]  # Return at most 5 insights
     
-    def _create_expert_contributions(self, viewpoints: List) -> Dict[str, List[str]]:
+    def _create_expert_contributions(self, viewpoints: list) -> dict[str, list[str]]:
         """Create expert contribution mapping."""
         expert_contributions = {}
         
@@ -337,7 +333,7 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
         else:
             return f"提供了{perspective}角度的分析"
     
-    def _calculate_synthesis_confidence(self, viewpoints: List, quality_assessment: SynthesisQuality) -> float:
+    def _calculate_synthesis_confidence(self, viewpoints: list, quality_assessment: SynthesisQuality) -> float:
         """Calculate overall confidence in the synthesis."""
         if not viewpoints:
             return 0.0
@@ -374,7 +370,7 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
         
         return final_confidence
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         """Return input schema for the enhanced synthesis node."""
         return {
             "type": "object",
@@ -391,7 +387,7 @@ class EnhancedSynthesisNode(InstitutionalPrimitive):
             "required": ["viewpoint_collection"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         """Return output schema for the enhanced synthesis node."""
         return {
             "type": "object",

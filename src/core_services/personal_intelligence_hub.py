@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Dual-Entrance Personal Intelligence Hub Implementation
+"""Dual-Entrance Personal Intelligence Hub Implementation
 
 Implements the core dual-entrance architecture with:
 1. The Secretariat - Streamlined, result-oriented interface
@@ -12,20 +10,21 @@ academic research, and industry analysis.
 
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional, Union, Tuple
-from datetime import datetime
-from dataclasses import dataclass, field
-from enum import Enum
 import uuid
-import json
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional, Union
 
 # Import existing DAIP services
 from .multi_agent_collaboration_system import (
-    MultiAgentService, CollaborationSession, AgentProfile,
-    InstitutionalPrimitive, ConsensusMethod, CollaborationMode
+    CollaborationMode,
+    CollaborationSession,
+    ConsensusMethod,
+    InstitutionalPrimitive,
+    MultiAgentService,
 )
-from .institutional_primitives import InstitutionalPrimitiveFactory, PrimitiveContext
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +48,7 @@ class UserRequest:
     user_id: str
     content: str
     entrance_type: EntranceType
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.now)
     priority: int = 1
 
@@ -62,7 +61,7 @@ class HubResponse:
     intent_type: IntentType
     success: bool
     content: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     execution_time: float = 0.0
     session_id: Optional[str] = None
 
@@ -80,7 +79,7 @@ class BaseEntrance(ABC):
         pass
     
     @abstractmethod
-    async def get_interface_config(self) -> Dict[str, Any]:
+    async def get_interface_config(self) -> dict[str, Any]:
         """Get interface configuration"""
         pass
 
@@ -90,7 +89,7 @@ class SecretariatEntrance(BaseEntrance):
     def __init__(self, multi_agent_service: MultiAgentService):
         super().__init__(EntranceType.SECRETARIAT, multi_agent_service)
         self.task_queue = asyncio.Queue()
-        self.active_tasks: Dict[str, asyncio.Task] = {}
+        self.active_tasks: dict[str, asyncio.Task] = {}
         
     async def process_request(self, request: UserRequest) -> HubResponse:
         """Process request through Secretariat automation"""
@@ -141,9 +140,8 @@ class SecretariatEntrance(BaseEntrance):
                 execution_time=(datetime.now() - start_time).total_seconds()
             )
     
-    async def _recognize_intent(self, request: UserRequest) -> Dict[str, Any]:
+    async def _recognize_intent(self, request: UserRequest) -> dict[str, Any]:
         """Recognize user intent with high accuracy"""
-        
         # Use existing intent analysis service if available
         if hasattr(self.multi_agent_service, 'intent_interpreter'):
             try:
@@ -174,7 +172,7 @@ class SecretariatEntrance(BaseEntrance):
         }
         return mapping.get(primary_intent, IntentType.CASUAL_DISCUSSION)
     
-    async def _fallback_intent_recognition(self, content: str) -> Dict[str, Any]:
+    async def _fallback_intent_recognition(self, content: str) -> dict[str, Any]:
         """Fallback intent recognition using keyword matching"""
         content_lower = content.lower()
         
@@ -217,7 +215,7 @@ class SecretariatEntrance(BaseEntrance):
             "complexity": 0.1
         }
     
-    async def _route_to_scenario(self, request: UserRequest, intent_result: Dict[str, Any]) -> Dict[str, Any]:
+    async def _route_to_scenario(self, request: UserRequest, intent_result: dict[str, Any]) -> dict[str, Any]:
         """Route request to appropriate scenario"""
         intent_type = intent_result["intent_type"]
         
@@ -246,9 +244,8 @@ class SecretariatEntrance(BaseEntrance):
                 "required_agents": ["assistant"]
             }
     
-    async def _execute_automated_workflow(self, request: UserRequest, scenario_result: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_automated_workflow(self, request: UserRequest, scenario_result: dict[str, Any]) -> dict[str, Any]:
         """Execute automated workflow without user intervention"""
-        
         # Create collaboration session
         session = CollaborationSession(
             session_id=str(uuid.uuid4()),
@@ -284,7 +281,7 @@ class SecretariatEntrance(BaseEntrance):
             "automated": True
         }
     
-    async def _generate_streamlined_response(self, execution_result: Dict[str, Any]) -> str:
+    async def _generate_streamlined_response(self, execution_result: dict[str, Any]) -> str:
         """Generate streamlined, result-oriented response"""
         scenario = execution_result["scenario"]
         
@@ -297,7 +294,7 @@ class SecretariatEntrance(BaseEntrance):
         else:
             return "✅ 您的请求已处理完成。"
     
-    async def get_interface_config(self) -> Dict[str, Any]:
+    async def get_interface_config(self) -> dict[str, Any]:
         """Get Secretariat interface configuration"""
         return {
             "type": "secretariat",
@@ -317,8 +314,8 @@ class ForumEntrance(BaseEntrance):
     
     def __init__(self, multi_agent_service: MultiAgentService):
         super().__init__(EntranceType.FORUM, multi_agent_service)
-        self.active_debates: Dict[str, Dict[str, Any]] = {}
-        self.expert_panels: Dict[str, List[str]] = {}
+        self.active_debates: dict[str, dict[str, Any]] = {}
+        self.expert_panels: dict[str, list[str]] = {}
         
     async def process_request(self, request: UserRequest) -> HubResponse:
         """Process request through Forum interaction"""
@@ -368,12 +365,12 @@ class ForumEntrance(BaseEntrance):
                 execution_time=(datetime.now() - start_time).total_seconds()
             )
     
-    async def _recognize_intent(self, request: UserRequest) -> Dict[str, Any]:
+    async def _recognize_intent(self, request: UserRequest) -> dict[str, Any]:
         """Recognize intent for Forum discussions"""
         # Similar to Secretariat but optimized for discussions
         return await self.secretariat._fallback_intent_recognition(request.content)
     
-    async def _form_expert_panel(self, request: UserRequest, intent_result: Dict[str, Any]) -> Dict[str, Any]:
+    async def _form_expert_panel(self, request: UserRequest, intent_result: dict[str, Any]) -> dict[str, Any]:
         """Form expert panel based on intent"""
         intent_type = intent_result["intent_type"]
         
@@ -411,11 +408,10 @@ class ForumEntrance(BaseEntrance):
     async def _initiate_interactive_session(
         self, 
         request: UserRequest, 
-        intent_result: Dict[str, Any], 
-        panel_result: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        intent_result: dict[str, Any], 
+        panel_result: dict[str, Any]
+    ) -> dict[str, Any]:
         """Initiate interactive debate session"""
-        
         session_id = str(uuid.uuid4())
         
         # Create collaboration session for debate
@@ -454,7 +450,7 @@ class ForumEntrance(BaseEntrance):
             "max_rounds": 3
         }
     
-    async def _generate_process_response(self, session_result: Dict[str, Any]) -> str:
+    async def _generate_process_response(self, session_result: dict[str, Any]) -> str:
         """Generate process-oriented response for Forum"""
         session_id = session_result["session_id"]
         panel_size = session_result["panel_size"]
@@ -480,7 +476,7 @@ class ForumEntrance(BaseEntrance):
 
 准备开始专家讨论..."""
     
-    async def get_interface_config(self) -> Dict[str, Any]:
+    async def get_interface_config(self) -> dict[str, Any]:
         """Get Forum interface configuration"""
         return {
             "type": "forum",
@@ -507,7 +503,7 @@ class PersonalIntelligenceHub:
         self.forum = ForumEntrance(self.multi_agent_service)
         
         # Request routing
-        self.request_history: List[Dict[str, Any]] = []
+        self.request_history: list[dict[str, Any]] = []
         
         logger.info("Personal Intelligence Hub initialized")
     
@@ -516,10 +512,9 @@ class PersonalIntelligenceHub:
         user_input: str, 
         user_id: str, 
         entrance_type: Union[EntranceType, str] = EntranceType.SECRETARIAT,
-        context: Dict[str, Any] = None
+        context: dict[str, Any] = None
     ) -> HubResponse:
         """Process user request through specified entrance"""
-        
         # Normalize entrance type
         if isinstance(entrance_type, str):
             entrance_type = EntranceType(entrance_type)
@@ -552,10 +547,9 @@ class PersonalIntelligenceHub:
         self, 
         user_input: str, 
         user_id: str, 
-        context: Dict[str, Any] = None
-    ) -> Tuple[HubResponse, EntranceType]:
+        context: dict[str, Any] = None
+    ) -> tuple[HubResponse, EntranceType]:
         """Automatically route request to best entrance"""
-        
         # Simple routing logic based on content
         content_lower = user_input.lower()
         
@@ -569,14 +563,14 @@ class PersonalIntelligenceHub:
         response = await self.process_request(user_input, user_id, entrance_type, context)
         return response, entrance_type
     
-    def get_entrance_configs(self) -> Dict[str, Dict[str, Any]]:
+    def get_entrance_configs(self) -> dict[str, dict[str, Any]]:
         """Get configurations for both entrances"""
         return {
             "secretariat": self.secretariat.get_interface_config(),
             "forum": self.forum.get_interface_config()
         }
     
-    def get_request_history(self, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_request_history(self, user_id: Optional[str] = None) -> list[dict[str, Any]]:
         """Get request history, optionally filtered by user"""
         if user_id:
             return [

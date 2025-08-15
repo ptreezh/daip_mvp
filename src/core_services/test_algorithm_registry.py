@@ -1,24 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-算法注册表测试
+"""算法注册表测试
 
 验证AlgorithmRegistry的所有功能，包括注册、发现、验证和健康检查。
 """
 
 import asyncio
-import pytest
-from datetime import datetime
-from typing import List, Dict, Any
+from typing import Any
 
-from consensus_models import (
-    ConsensusInput, ConsensusResult, AlgorithmMetadata, 
-    ValidationResult, AlgorithmType
-)
-from consensus_algorithm_interface import (
-    ConsensusAlgorithm, ConsensusContext, AlgorithmCapabilities
-)
-from algorithm_registry import AlgorithmRegistry, AlgorithmInfo, RegistryStats
+import pytest
+from algorithm_registry import AlgorithmRegistry
+from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm, ConsensusContext
+from consensus_models import AlgorithmMetadata, AlgorithmType, ConsensusInput, ConsensusResult, ValidationResult
 
 
 class MockConsensusAlgorithm(ConsensusAlgorithm):
@@ -29,7 +21,7 @@ class MockConsensusAlgorithm(ConsensusAlgorithm):
         self.should_fail = should_fail
         self.calculate_called = False
         
-    async def calculate(self, inputs: List[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
+    async def calculate(self, inputs: list[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
         """模拟共识计算"""
         self.calculate_called = True
         
@@ -83,13 +75,13 @@ class MockConsensusAlgorithm(ConsensusAlgorithm):
             max_participants=100
         )
         
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> ValidationResult:
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> ValidationResult:
         """验证输入"""
         if not inputs:
             return ValidationResult(is_valid=False, errors=["Empty inputs"])
         return ValidationResult(is_valid=True)
         
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> dict[str, Any]:
         """获取健康状态"""
         if self.should_fail:
             return {"status": "unhealthy", "reason": "Mock failure"}
@@ -236,7 +228,7 @@ class TestAlgorithmRegistry:
         assert "normal" in min_participant_algorithms
         assert "special" not in min_participant_algorithms  # 需要至少2个参与者
         
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_health_check(self):
         """测试健康检查"""
         healthy_algo = MockConsensusAlgorithm("healthy", should_fail=False)
@@ -314,7 +306,7 @@ class TestAlgorithmRegistry:
         self.registry.register("test_algo2", algorithm)
         assert len(events) == 2  # 没有新事件
         
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_health_monitoring(self):
         """测试健康监控"""
         algorithm = MockConsensusAlgorithm("test_algo")

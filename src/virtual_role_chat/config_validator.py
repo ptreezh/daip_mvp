@@ -1,13 +1,11 @@
-"""
-Configuration validation for the Virtual Role Chat System.
+"""Configuration validation for the Virtual Role Chat System.
 
 This module provides functionality to validate chat room configurations,
 including mode-specific validation and interaction rules validation.
 """
 
-import json
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Any
 
 from .models import ChatRoomConfig, ValidationResult
 
@@ -106,7 +104,7 @@ class ConfigValidator:
             suggested_correction=None
         )
     
-    def _validate_mode_config(self, mode: str, interaction_rules: Dict[str, Any]) -> ValidationResult:
+    def _validate_mode_config(self, mode: str, interaction_rules: dict[str, Any]) -> ValidationResult:
         """Validate mode-specific configuration.
         
         Args:
@@ -180,7 +178,7 @@ class ConfigValidator:
             suggested_correction=None
         )
     
-    def _validate_structured_mode(self, interaction_rules: Dict[str, Any]) -> ValidationResult:
+    def _validate_structured_mode(self, interaction_rules: dict[str, Any]) -> ValidationResult:
         """Validate structured mode configuration.
         
         Args:
@@ -231,7 +229,7 @@ class ConfigValidator:
             suggested_correction=None
         )
     
-    def _validate_debate_mode(self, interaction_rules: Dict[str, Any]) -> ValidationResult:
+    def _validate_debate_mode(self, interaction_rules: dict[str, Any]) -> ValidationResult:
         """Validate debate mode configuration.
         
         Args:
@@ -308,7 +306,7 @@ class ConfigValidator:
             suggested_correction=None
         )
     
-    def generate_mode_template(self, mode: str) -> Dict[str, Any]:
+    def generate_mode_template(self, mode: str) -> dict[str, Any]:
         """Generate a template configuration for a specific mode.
         
         Args:
@@ -351,7 +349,7 @@ class ConfigValidator:
                 "moderation_level": "moderate"
             }
     
-    def get_mode_schema(self, mode: str) -> Dict[str, List[str]]:
+    def get_mode_schema(self, mode: str) -> dict[str, list[str]]:
         """Get the schema for a specific mode.
         
         Args:
@@ -368,7 +366,7 @@ class ConfigValidator:
         
         return self.MODE_SCHEMAS[mode]
     
-    def get_valid_modes(self) -> List[str]:
+    def get_valid_modes(self) -> list[str]:
         """Get all valid chat room modes.
         
         Returns:
@@ -376,7 +374,7 @@ class ConfigValidator:
         """
         return self.VALID_MODES
     
-    def get_mode_requirements(self, mode: str) -> Dict[str, Any]:
+    def get_mode_requirements(self, mode: str) -> dict[str, Any]:
         """Get requirements for a specific chat mode.
         
         Args:
@@ -399,7 +397,7 @@ class ConfigValidator:
             }
         }
     
-    def suggest_rules_for_mode(self, mode: str) -> Dict[str, Any]:
+    def suggest_rules_for_mode(self, mode: str) -> dict[str, Any]:
         """Get suggested rules for a specific mode.
         
         Args:
@@ -413,7 +411,7 @@ class ConfigValidator:
         
         return self.generate_mode_template(mode)
     
-    def _validate_interaction_rules(self, rules: Dict[str, Any], mode: str) -> ValidationResult:
+    def _validate_interaction_rules(self, rules: dict[str, Any], mode: str) -> ValidationResult:
         """Validate interaction rules for a specific mode.
         
         Args:

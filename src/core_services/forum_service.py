@@ -1,25 +1,19 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:45:00
+"""@Time    : 2025-08-06 10:45:00
 @Author  : DAIP-LIVE Team
 @File    : forum_service.py
 @Description:
     Forum模式后端服务 - 管理Forum会话、用户干预和多智能体协作
 """
 
-import asyncio
 import logging
 import uuid
-from typing import Dict, List, Optional, Any
-from datetime import datetime
 from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Optional
 
 from ..api.dependencies import get_app_state
-from ..core.exceptions import ForumServiceError, DebateOrchestrationError
-from ..core_services.multi_agent_collaboration_system import MultiAgentService
-from ..core_services.role_manager import RoleManager
-from ..core_services.memory_service import MemoryService
+from ..core.exceptions import DebateOrchestrationError, ForumServiceError
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -32,20 +26,20 @@ class ForumSession:
     topic: str
     start_time: datetime
     status: str = "active"  # active, paused, completed
-    participants: List[str] = field(default_factory=list)
-    messages: List[Dict[str, Any]] = field(default_factory=list)
-    active_agents: List[str] = field(default_factory=list)
+    participants: list[str] = field(default_factory=list)
+    messages: list[dict[str, Any]] = field(default_factory=list)
+    active_agents: list[str] = field(default_factory=list)
     consensus_level: float = 0.0
-    key_arguments: List[Dict[str, Any]] = field(default_factory=list)
-    user_interventions: List[Dict[str, Any]] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    key_arguments: list[dict[str, Any]] = field(default_factory=list)
+    user_interventions: list[dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class ForumService:
     """Forum服务 - 管理Forum会话和多智能体协作"""
     
     def __init__(self):
-        self.active_sessions: Dict[str, ForumSession] = {}
+        self.active_sessions: dict[str, ForumSession] = {}
         self.debate_orchestrator = DebateOrchestrator()
         self.user_intervention_manager = UserInterventionManager()
         self.consensus_tracker = ConsensusTracker()
@@ -91,7 +85,7 @@ class ForumService:
             logger.error(f"启动Forum会话失败: {e}")
             raise ForumServiceError(f"Failed to start forum session: {str(e)}")
     
-    async def handle_user_intervention(self, session_id: str, user_message: Dict[str, Any]) -> Dict[str, Any]:
+    async def handle_user_intervention(self, session_id: str, user_message: dict[str, Any]) -> dict[str, Any]:
         """处理用户干预"""
         try:
             if session_id not in self.active_sessions:
@@ -138,7 +132,7 @@ class ForumService:
             logger.error(f"处理用户干预失败: {e}")
             raise ForumServiceError(f"Failed to handle user intervention: {str(e)}")
     
-    async def get_session_context(self, session_id: str) -> Optional[Dict[str, Any]]:
+    async def get_session_context(self, session_id: str) -> Optional[dict[str, Any]]:
         """获取会话上下文"""
         try:
             if session_id not in self.active_sessions:
@@ -205,7 +199,7 @@ class ForumService:
             logger.error(f"恢复会话失败: {e}")
             return False
     
-    async def end_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+    async def end_session(self, session_id: str) -> Optional[dict[str, Any]]:
         """结束会话"""
         try:
             if session_id not in self.active_sessions:
@@ -240,7 +234,7 @@ class ForumService:
             logger.error(f"结束会话失败: {e}")
             return None
     
-    async def _select_agents_for_topic(self, topic: str) -> List[str]:
+    async def _select_agents_for_topic(self, topic: str) -> list[str]:
         """为话题选择合适的Agent组合"""
         try:
             # 延迟加载角色管理器
@@ -266,7 +260,7 @@ class ForumService:
             # 回退到默认角色
             return ["technical_expert", "business_analyst", "research_scientist"]
     
-    async def _save_session_to_memory(self, session: ForumSession, consensus_result: Dict[str, Any]):
+    async def _save_session_to_memory(self, session: ForumSession, consensus_result: dict[str, Any]):
         """保存会话到记忆服务"""
         try:
             # 延迟加载记忆服务
@@ -291,7 +285,7 @@ class ForumService:
         except Exception as e:
             logger.error(f"保存会话到记忆失败: {e}")
     
-    def get_active_sessions(self) -> List[Dict[str, Any]]:
+    def get_active_sessions(self) -> list[dict[str, Any]]:
         """获取所有活跃会话"""
         return [
             {
@@ -305,7 +299,7 @@ class ForumService:
             for session in self.active_sessions.values()
         ]
     
-    def get_session_statistics(self) -> Dict[str, Any]:
+    def get_session_statistics(self) -> dict[str, Any]:
         """获取Forum服务统计信息"""
         total_sessions = len(self.active_sessions)
         active_sessions = len([s for s in self.active_sessions.values() if s.status == "active"])
@@ -325,12 +319,12 @@ class DebateOrchestrator:
     """辩论编排器 - 管理多智能体辩论过程"""
     
     def __init__(self):
-        self.active_debates: Dict[str, Dict[str, Any]] = {}
+        self.active_debates: dict[str, dict[str, Any]] = {}
         self.multi_agent_service = None
         
         logger.info("辩论编排器初始化完成")
     
-    async def start_debate(self, session_id: str, topic: str, agents: List[str]):
+    async def start_debate(self, session_id: str, topic: str, agents: list[str]):
         """启动辩论"""
         try:
             debate_config = {
@@ -440,7 +434,7 @@ class DebateOrchestrator:
         except Exception as e:
             logger.error(f"结束辩论失败: {e}")
     
-    def get_debate_status(self, session_id: str) -> Optional[Dict[str, Any]]:
+    def get_debate_status(self, session_id: str) -> Optional[dict[str, Any]]:
         """获取辩论状态"""
         if session_id not in self.active_debates:
             return None
@@ -488,7 +482,7 @@ class UserInterventionManager:
 class InputOptimizer:
     """输入优化器 - 优化用户输入以提高协作效果"""
     
-    async def optimize(self, user_input: str, config: Dict[str, Any]) -> Dict[str, Any]:
+    async def optimize(self, user_input: str, config: dict[str, Any]) -> dict[str, Any]:
         """优化用户输入"""
         try:
             # 基于意图和上下文优化输入
@@ -574,11 +568,11 @@ class ConsensusTracker:
     """共识跟踪器 - 实时跟踪和计算共识"""
     
     def __init__(self):
-        self.consensus_data: Dict[str, Dict[str, Any]] = {}
+        self.consensus_data: dict[str, dict[str, Any]] = {}
         
         logger.info("共识跟踪器初始化完成")
     
-    async def update_with_message(self, session_id: str, message: Dict[str, Any]):
+    async def update_with_message(self, session_id: str, message: dict[str, Any]):
         """根据消息更新共识"""
         try:
             if session_id not in self.consensus_data:
@@ -599,7 +593,7 @@ class ConsensusTracker:
         except Exception as e:
             logger.error(f"更新共识失败: {e}")
     
-    async def update_with_intervention(self, session_id: str, intervention: Dict[str, Any]):
+    async def update_with_intervention(self, session_id: str, intervention: dict[str, Any]):
         """根据用户干预更新共识"""
         try:
             if session_id not in self.consensus_data:
@@ -618,14 +612,14 @@ class ConsensusTracker:
         
         return self.consensus_data[session_id]["consensus_level"]
     
-    async def get_key_arguments(self, session_id: str) -> List[Dict[str, Any]]:
+    async def get_key_arguments(self, session_id: str) -> list[dict[str, Any]]:
         """获取关键论点"""
         if session_id not in self.consensus_data:
             return []
         
         return self.consensus_data[session_id]["key_arguments"]
     
-    async def get_final_consensus(self, session_id: str) -> Dict[str, Any]:
+    async def get_final_consensus(self, session_id: str) -> dict[str, Any]:
         """获取最终共识结果"""
         if session_id not in self.consensus_data:
             return {"consensus_level": 0.0, "summary": "No consensus data"}
@@ -674,7 +668,7 @@ class ConsensusTracker:
         except Exception as e:
             logger.error(f"重新计算共识失败: {e}")
     
-    def _is_agreement_message(self, message: Dict[str, Any]) -> bool:
+    def _is_agreement_message(self, message: dict[str, Any]) -> bool:
         """判断是否为同意消息"""
         content = message.get("content", "").lower()
         

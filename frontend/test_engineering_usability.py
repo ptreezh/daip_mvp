@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-工程可用性测试 - 任务3.1.1
+"""工程可用性测试 - 任务3.1.1
 
 专注于真实的工程可用性，不做任何模拟或妥协
 """
 
-import sys
-import os
-import asyncio
-import unittest
 import logging
+import sys
+import unittest
 from pathlib import Path
 
 # 添加项目路径
@@ -32,7 +28,7 @@ class EngineeringUsabilityTest(unittest.TestCase):
         
         try:
             # 测试能否导入启动脚本
-            from start_integrated_demo import main, check_dependencies, check_backend_services
+            from start_integrated_demo import check_dependencies
             
             # 测试依赖检查
             deps_ok = check_dependencies()
@@ -52,9 +48,9 @@ class EngineeringUsabilityTest(unittest.TestCase):
         logger.info("🧪 测试2: 组件真实功能测试")
         
         try:
+            from components.chat_interface_fixed import ChatInterface
             from services.backend_connector import BackendConnector
             from services.personal_assistant import PersonalAssistantService
-            from components.chat_interface_fixed import ChatInterface
             
             # 测试真实的服务初始化
             backend_connector = BackendConnector()
@@ -119,8 +115,8 @@ class EngineeringUsabilityTest(unittest.TestCase):
         logger.info("🧪 测试4: WebSocket初始化设计测试")
         
         try:
-            from services.websocket_manager import websocket_manager
             from integrated_demo_app import IntegratedDemoView
+            from services.websocket_manager import websocket_manager
             
             # 验证WebSocket管理器存在
             self.assertIsNotNone(websocket_manager)
@@ -154,7 +150,7 @@ class EngineeringUsabilityTest(unittest.TestCase):
             self.assertTrue(css_file.exists(), "demo.css文件不存在")
             
             # 检查CSS文件内容
-            with open(css_file, 'r', encoding='utf-8') as f:
+            with open(css_file, encoding='utf-8') as f:
                 css_content = f.read()
             
             # 验证关键CSS类存在
@@ -186,7 +182,7 @@ class EngineeringUsabilityTest(unittest.TestCase):
             self.assertTrue(readme_file.exists(), "README文件不存在")
             
             # 检查README内容
-            with open(readme_file, 'r', encoding='utf-8') as f:
+            with open(readme_file, encoding='utf-8') as f:
                 readme_content = f.read()
             
             # 验证关键章节存在
@@ -242,7 +238,7 @@ def run_engineering_usability_test():
         print("✅ 系统可以真实运行和使用")
         return True
     else:
-        print(f"\n❌ 工程可用性测试失败！")
+        print("\n❌ 工程可用性测试失败！")
         print("❌ 任务3.1.1未真正完成")
         print("❌ 需要修复工程可用性问题")
         

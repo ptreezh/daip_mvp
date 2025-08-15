@@ -1,24 +1,21 @@
-"""
-@Time: 2025-08-04
+"""@Time: 2025-08-04
 @Author: Claude Code
 @File: academic_research_scenario.py
 @Description: Academic Research Scenario using V0.3.5 Critical Review components
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-import re
+from typing import Any, Optional
 
-from .smart_reviewer_allocator_simple import SmartReviewerAllocator, ReviewRequest, AllocationPriority
-from .multidimensional_assessment_engine import MultiDimensionalAssessmentEngine
+from .automated_report_generator import AutomatedReportGenerator, ReportFormat, ReportRequest
 from .collaborative_review_environment import CollaborativeReviewEnvironment, ReviewSession
-from .conflict_resolution_system import ConflictResolutionSystem, Conflict, ConflictType
-from .automated_report_generator import AutomatedReportGenerator, ReportRequest, ReportFormat
+from .conflict_resolution_system import ConflictResolutionSystem
+from .multidimensional_assessment_engine import MultiDimensionalAssessmentEngine
+from .smart_reviewer_allocator_simple import SmartReviewerAllocator
 
 
 class ResearchType(Enum):
@@ -55,17 +52,17 @@ class ResearchPaper:
     id: str
     title: str
     abstract: str
-    authors: List[str]
-    keywords: List[str]
+    authors: list[str]
+    keywords: list[str]
     research_type: ResearchType
     methodology: str
-    data_sources: List[str]
-    findings: List[str]
-    limitations: List[str]
-    references: List[Dict[str, str]]
+    data_sources: list[str]
+    findings: list[str]
+    limitations: list[str]
+    references: list[dict[str, str]]
     word_count: int
     submission_date: datetime
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -74,14 +71,14 @@ class ResearchProposal:
     id: str
     title: str
     research_question: str
-    objectives: List[str]
+    objectives: list[str]
     methodology: str
-    expected_outcomes: List[str]
-    timeline: Dict[str, Any]
-    budget: Optional[Dict[str, Any]] = None
-    ethical_considerations: List[str] = None
+    expected_outcomes: list[str]
+    timeline: dict[str, Any]
+    budget: Optional[dict[str, Any]] = None
+    ethical_considerations: list[str] = None
     literature_review: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -91,12 +88,12 @@ class PeerReview:
     paper_id: str
     reviewer_id: str
     reviewer_name: str
-    expertise_areas: List[str]
+    expertise_areas: list[str]
     overall_assessment: str
-    detailed_comments: Dict[str, str]
-    strengths: List[str]
-    weaknesses: List[str]
-    suggestions: List[str]
+    detailed_comments: dict[str, str]
+    strengths: list[str]
+    weaknesses: list[str]
+    suggestions: list[str]
     recommendation: str  # "accept", "minor_revision", "major_revision", "reject"
     confidence_score: float
     review_date: datetime = None
@@ -112,10 +109,10 @@ class ResearchAssessment:
     paper_id: str
     assessment_id: str
     overall_score: float
-    dimension_scores: Dict[str, float]
-    quality_metrics: Dict[str, Any]
-    validity_assessment: Dict[str, Any]
-    significance_assessment: Dict[str, Any]
+    dimension_scores: dict[str, float]
+    quality_metrics: dict[str, Any]
+    validity_assessment: dict[str, Any]
+    significance_assessment: dict[str, Any]
     methodological_rigor: float
     originality_score: float
     clarity_score: float
@@ -133,14 +130,14 @@ class ResearchSynthesis:
     """研究综合分析"""
     synthesis_id: str
     research_topic: str
-    key_findings: List[Dict[str, Any]]
-    methodology_analysis: Dict[str, Any]
-    theoretical_framework: Dict[str, Any]
-    empirical_evidence: List[Dict[str, Any]]
-    research_gaps: List[str]
-    future_directions: List[str]
-    practical_implications: List[str]
-    quality_assessment: Dict[str, Any]
+    key_findings: list[dict[str, Any]]
+    methodology_analysis: dict[str, Any]
+    theoretical_framework: dict[str, Any]
+    empirical_evidence: list[dict[str, Any]]
+    research_gaps: list[str]
+    future_directions: list[str]
+    practical_implications: list[str]
+    quality_assessment: dict[str, Any]
     confidence_level: float
     generated_at: datetime = None
     
@@ -163,8 +160,8 @@ class AcademicResearchScenario:
         self.report_generator = AutomatedReportGenerator()
         
         # 研究历史
-        self.research_history: List[Dict[str, Any]] = []
-        self.reviewer_performance: Dict[str, Dict[str, Any]] = {}
+        self.research_history: list[dict[str, Any]] = []
+        self.reviewer_performance: dict[str, dict[str, Any]] = {}
         
         # 学术标准配置
         self.academic_standards = {
@@ -184,7 +181,7 @@ class AcademicResearchScenario:
         
         self.logger.info("AcademicResearchScenario initialized")
     
-    async def submit_research_paper(self, paper: ResearchPaper) -> Dict[str, Any]:
+    async def submit_research_paper(self, paper: ResearchPaper) -> dict[str, Any]:
         """提交研究论文"""
         try:
             self.logger.info(f"处理研究论文提交: {paper.title}")
@@ -257,7 +254,7 @@ class AcademicResearchScenario:
                 "paper_id": paper.id
             }
     
-    async def conduct_literature_review(self, topic: str, scope: Dict[str, Any]) -> Dict[str, Any]:
+    async def conduct_literature_review(self, topic: str, scope: dict[str, Any]) -> dict[str, Any]:
         """进行文献综述"""
         try:
             self.logger.info(f"开始文献综述: {topic}")
@@ -310,7 +307,7 @@ class AcademicResearchScenario:
             self.logger.error(f"文献综述失败: {e}")
             return {"success": False, "error": str(e), "topic": topic}
     
-    async def _initial_paper_assessment(self, paper: ResearchPaper) -> Dict[str, Any]:
+    async def _initial_paper_assessment(self, paper: ResearchPaper) -> dict[str, Any]:
         """论文初步评估"""
         try:
             assessment = {
@@ -371,7 +368,7 @@ class AcademicResearchScenario:
             self.logger.error(f"论文初步评估失败: {e}")
             return {"meets_standards": False, "error": str(e)}
     
-    def _assess_abstract_quality(self, abstract: str) -> Dict[str, Any]:
+    def _assess_abstract_quality(self, abstract: str) -> dict[str, Any]:
         """评估摘要质量"""
         sentences = abstract.split('.')
         word_count = len(abstract.split())
@@ -396,7 +393,7 @@ class AcademicResearchScenario:
         indicator_count = sum(1 for indicator in clarity_indicators if indicator in methodology.lower())
         return min(1.0, indicator_count / 5.0)
     
-    def _assess_findings_significance(self, findings: List[str]) -> float:
+    def _assess_findings_significance(self, findings: list[str]) -> float:
         """评估研究发现的重要性"""
         if not findings:
             return 0.0
@@ -423,7 +420,7 @@ class AcademicResearchScenario:
         completeness = sum(1 for element in structure_elements if element and len(str(element)) > 0)
         return completeness / len(structure_elements)
     
-    async def _select_peer_reviewers(self, paper: ResearchPaper) -> Dict[str, Any]:
+    async def _select_peer_reviewers(self, paper: ResearchPaper) -> dict[str, Any]:
         """选择同行评议专家"""
         try:
             # 转换研究类型为评审类型
@@ -474,7 +471,7 @@ class AcademicResearchScenario:
             return {"success": False, "error": str(e)}
     
     async def _create_peer_review_session(self, paper: ResearchPaper, 
-                                        reviewer_selection: Dict[str, Any]) -> Dict[str, Any]:
+                                        reviewer_selection: dict[str, Any]) -> dict[str, Any]:
         """创建同行评议会话"""
         try:
             # 创建会话描述
@@ -522,7 +519,7 @@ class AcademicResearchScenario:
             self.logger.error(f"创建同行评议会话失败: {e}")
             return {"success": False, "error": str(e)}
     
-    async def _conduct_peer_review(self, session_id: str, paper: ResearchPaper) -> List[PeerReview]:
+    async def _conduct_peer_review(self, session_id: str, paper: ResearchPaper) -> list[PeerReview]:
         """执行同行评议"""
         try:
             peer_reviews = []
@@ -685,7 +682,7 @@ class AcademicResearchScenario:
         return min(1.0, indicator_count / 3.0)
     
     async def _academic_quality_assessment(self, paper: ResearchPaper, 
-                                        peer_reviews: List[PeerReview]) -> Dict[str, Any]:
+                                        peer_reviews: list[PeerReview]) -> dict[str, Any]:
         """学术质量评估"""
         try:
             # 创建评估请求
@@ -741,8 +738,8 @@ class AcademicResearchScenario:
             return {"overall_score": 0.0, "recommendation": "reject", "error": str(e)}
     
     async def _generate_research_synthesis(self, paper: ResearchPaper,
-                                         peer_reviews: List[PeerReview],
-                                         academic_assessment: Dict[str, Any]) -> ResearchSynthesis:
+                                         peer_reviews: list[PeerReview],
+                                         academic_assessment: dict[str, Any]) -> ResearchSynthesis:
         """生成研究综合分析"""
         try:
             # 提取关键发现
@@ -841,8 +838,8 @@ class AcademicResearchScenario:
             )
     
     async def _generate_research_report(self, paper: ResearchPaper,
-                                      peer_reviews: List[PeerReview],
-                                      synthesis: ResearchSynthesis) -> Dict[str, Any]:
+                                      peer_reviews: list[PeerReview],
+                                      synthesis: ResearchSynthesis) -> dict[str, Any]:
         """生成研究报告"""
         try:
             # 创建报告请求
@@ -879,9 +876,9 @@ class AcademicResearchScenario:
             return {"error": str(e)}
     
     async def _record_research_history(self, paper: ResearchPaper,
-                                     reviewer_selection: Dict[str, Any],
-                                     peer_reviews: List[PeerReview],
-                                     academic_assessment: Dict[str, Any],
+                                     reviewer_selection: dict[str, Any],
+                                     peer_reviews: list[PeerReview],
+                                     academic_assessment: dict[str, Any],
                                      synthesis: ResearchSynthesis):
         """记录研究历史"""
         try:
@@ -932,7 +929,7 @@ class AcademicResearchScenario:
         except Exception as e:
             self.logger.error(f"记录研究历史失败: {e}")
     
-    def get_research_statistics(self) -> Dict[str, Any]:
+    def get_research_statistics(self) -> dict[str, Any]:
         """获取研究统计信息"""
         try:
             if not self.research_history:
@@ -987,7 +984,7 @@ class AcademicResearchScenario:
             self.logger.error(f"获取研究统计失败: {e}")
             return {"error": str(e)}
     
-    async def _analyze_research_topic(self, topic: str) -> Dict[str, Any]:
+    async def _analyze_research_topic(self, topic: str) -> dict[str, Any]:
         """分析研究主题"""
         # 简化的主题分析
         return {
@@ -998,7 +995,7 @@ class AcademicResearchScenario:
             "estimated_scope": "广泛"
         }
     
-    async def _search_literature(self, topic: str, scope: Dict[str, Any]) -> Dict[str, Any]:
+    async def _search_literature(self, topic: str, scope: dict[str, Any]) -> dict[str, Any]:
         """搜索文献"""
         # 简化的文献搜索
         return {
@@ -1016,7 +1013,7 @@ class AcademicResearchScenario:
             ]
         }
     
-    async def _assess_literature_quality(self, literature_results: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _assess_literature_quality(self, literature_results: list[dict[str, Any]]) -> dict[str, Any]:
         """评估文献质量"""
         if not literature_results:
             return {"average_quality": 0.0, "quality_distribution": {}}
@@ -1033,7 +1030,7 @@ class AcademicResearchScenario:
             }
         }
     
-    async def _thematic_classification(self, literature_results: List[Dict[str, Any]], topic: str) -> Dict[str, Any]:
+    async def _thematic_classification(self, literature_results: list[dict[str, Any]], topic: str) -> dict[str, Any]:
         """主题分类"""
         return {
             "themes": ["主题1", "主题2", "主题3"],
@@ -1041,7 +1038,7 @@ class AcademicResearchScenario:
             "emerging_trends": ["趋势1", "趋势2"]
         }
     
-    async def _analyze_research_trends(self, literature_results: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _analyze_research_trends(self, literature_results: list[dict[str, Any]]) -> dict[str, Any]:
         """分析研究趋势"""
         return {
             "trends": ["趋势分析1", "趋势分析2"],
@@ -1049,7 +1046,7 @@ class AcademicResearchScenario:
             "declining_areas": ["衰退领域1"]
         }
     
-    async def _identify_research_gaps(self, thematic_analysis: Dict[str, Any], trend_analysis: Dict[str, Any]) -> List[str]:
+    async def _identify_research_gaps(self, thematic_analysis: dict[str, Any], trend_analysis: dict[str, Any]) -> list[str]:
         """识别研究差距"""
         return [
             "研究差距1：理论框架不完善",
@@ -1057,10 +1054,10 @@ class AcademicResearchScenario:
             "研究差距3：跨学科研究缺乏"
         ]
     
-    async def _generate_literature_review_report(self, topic: str, topic_analysis: Dict[str, Any],
-                                               literature_search: Dict[str, Any], quality_assessment: Dict[str, Any],
-                                               thematic_analysis: Dict[str, Any], trend_analysis: Dict[str, Any],
-                                               research_gaps: List[str]) -> Dict[str, Any]:
+    async def _generate_literature_review_report(self, topic: str, topic_analysis: dict[str, Any],
+                                               literature_search: dict[str, Any], quality_assessment: dict[str, Any],
+                                               thematic_analysis: dict[str, Any], trend_analysis: dict[str, Any],
+                                               research_gaps: list[str]) -> dict[str, Any]:
         """生成文献综述报告"""
         return {
             "title": f"文献综述：{topic}",

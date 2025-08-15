@@ -4,7 +4,6 @@ from src.kernel.tool_executor import ToolExecutor
 
 from .file_system_tools import list_files, read_file, write_file
 from .kanban_tools import create_task, list_tasks, update_task
-from .wiki_tools import list_wiki_entries, read_wiki_entry, search_wiki, write_wiki_entry
 from .tool_definitions import (
     CREATE_TASK_DEF,
     LIST_FILES_DEF,
@@ -17,11 +16,11 @@ from .tool_definitions import (
     WRITE_FILE_DEF,
     WRITE_WIKI_ENTRY_DEF,
 )
+from .wiki_tools import list_wiki_entries, read_wiki_entry, search_wiki, write_wiki_entry
 
 
 def register_all_tools(executor: ToolExecutor) -> None:
-    """
-    Registers all available tools with the provided ToolExecutor instance.
+    """Registers all available tools with the provided ToolExecutor instance.
 
     This function acts as a single entry point for tool registration, making
     it easy to initialize the system's capabilities.

@@ -1,20 +1,18 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-04 11:00:00
+"""@Time    : 2025-07-04 11:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_memory_service.py
 @Description:
     Unit tests for the MemoryService, including SSKG integration.
 """
-from pathlib import Path
 import sqlite3
+from pathlib import Path
 
 import pytest
 
-from src.core_services.memory_service import MemoryService, MemoryEntry
+from src.core_services.memory_service import MemoryService
 
 
-@pytest.fixture
+@pytest.fixture()
 def temp_memory_dir(tmp_path: Path) -> str:
     """Create a temporary directory for memory data."""
     return str(tmp_path)
@@ -24,8 +22,7 @@ class TestMemoryServiceSSKG:
     """Test suite for the SSKG functionality within MemoryService."""
 
     def test_add_and_query_fact(self, temp_memory_dir: str):
-        """
-        Tests adding a single fact and querying it back with a specific predicate.
+        """Tests adding a single fact and querying it back with a specific predicate.
         """
         # Arrange
         memory_service = MemoryService(data_dir=temp_memory_dir)
@@ -43,8 +40,7 @@ class TestMemoryServiceSSKG:
         assert fact["metadata"]["source"] == "test"
 
     def test_query_by_subject_only(self, temp_memory_dir: str):
-        """
-        Tests querying for all facts related to a single subject.
+        """Tests querying for all facts related to a single subject.
         """
         # Arrange
         memory_service = MemoryService(data_dir=temp_memory_dir)

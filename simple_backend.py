@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 11:58:00
+"""@Time    : 2025-08-06 11:58:00
 @Author  : DAIP-LIVE Team
 @File    : simple_backend.py
 @Description:
@@ -9,10 +7,10 @@
 """
 
 import logging
+from datetime import datetime
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from datetime import datetime
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

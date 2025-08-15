@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-逐步验证工作流引擎功能
+"""逐步验证工作流引擎功能
 """
 
 import sys
-import os
+
 sys.path.append('src')
 
 def test_role_manager():
@@ -156,8 +154,8 @@ def test_multi_perspective_workflow():
 def test_workflow_engine():
     """测试工作流引擎"""
     try:
-        from src.institutional_primitives.workflow_engine import WorkflowEngine
         from src.institutional_primitives.registry import PrimitiveRegistry
+        from src.institutional_primitives.workflow_engine import WorkflowEngine
         
         # 创建注册表和引擎
         registry = PrimitiveRegistry()

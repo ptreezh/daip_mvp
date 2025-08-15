@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.2.3 学术研究场景核心功能简化验证脚本
+"""V0.2.3 学术研究场景核心功能简化验证脚本
 
 验证文献检索、方法论指导、写作辅助和同行评议功能的完整实现
 """
@@ -9,8 +7,8 @@ V0.2.3 学术研究场景核心功能简化验证脚本
 import asyncio
 import sys
 import traceback
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # 添加项目根目录到路径
 project_root = Path(__file__).parent
@@ -39,11 +37,11 @@ async def validate_v0_2_3_implementation():
         try:
             from src.scenarios.enhanced_academic_research_scenario_complete import (
                 EnhancedAcademicResearchScenario,
-                ResearchMethodology,
-                LiteratureType,
                 LiteratureItem,
+                LiteratureType,
+                ResearchMethodology,
                 ResearchQuestion,
-                WritingSection
+                WritingSection,
             )
             print("   ✅ 主要组件导入成功")
             validation_results["component_imports"] = True

@@ -1,5 +1,4 @@
-"""
-Core data models for the Virtual Role Chat System.
+"""Core data models for the Virtual Role Chat System.
 
 This module defines the Pydantic models used throughout the Virtual Role Chat System,
 including ChatRoom, ChatSession, ChatMessage, and related types.
@@ -7,10 +6,9 @@ including ChatRoom, ChatSession, ChatMessage, and related types.
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel
 
 # Type aliases for improved readability
 ChatRoomID = str
@@ -22,9 +20,9 @@ class ChatRoomConfig(BaseModel):
     name: str
     description: str = ""
     topic: str
-    roles: List[str]  # Role IDs
+    roles: list[str]  # Role IDs
     mode: Literal["free_form", "structured", "debate"] = "free_form"
-    interaction_rules: Dict[str, Any] = {}  # Mode-specific configuration
+    interaction_rules: dict[str, Any] = {}  # Mode-specific configuration
 
 
 class ChatRoom(BaseModel):
@@ -55,7 +53,7 @@ class ChatMessage(BaseModel):
     sender_type: Literal["role", "user", "system"]
     content: str
     timestamp: datetime
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
 
 class ChatSession(BaseModel):
@@ -65,8 +63,8 @@ class ChatSession(BaseModel):
     start_time: datetime
     end_time: Optional[datetime] = None
     status: Literal["active", "paused", "completed"] = "active"
-    messages: List[ChatMessage] = []
-    metadata: Dict[str, Any] = {}
+    messages: list[ChatMessage] = []
+    metadata: dict[str, Any] = {}
 
 
 class SessionSummary(BaseModel):
@@ -76,9 +74,9 @@ class SessionSummary(BaseModel):
     start_time: datetime
     end_time: Optional[datetime]
     message_count: int
-    participant_roles: List[str]
+    participant_roles: list[str]
     topic: str
-    key_points: List[str] = []
+    key_points: list[str] = []
 
 
 class ValidationResult(BaseModel):
@@ -94,7 +92,7 @@ class ResolutionResult(BaseModel):
     resolved_statement: str
     confidence: float
     reasoning: str
-    supporting_facts: List[str] = []
+    supporting_facts: list[str] = []
 
 
 class SubTopic(BaseModel):
@@ -103,7 +101,7 @@ class SubTopic(BaseModel):
     parent_topic_id: Optional[str]
     content: str
     complexity: float
-    required_expertise: List[str]
+    required_expertise: list[str]
 
 
 class TransparencyLevel(str, Enum):
@@ -118,7 +116,7 @@ class SessionMetrics(BaseModel):
     message_count: int
     average_response_time: float
     topic_coherence: float
-    engagement_distribution: Dict[str, float]  # Role ID to engagement percentage
+    engagement_distribution: dict[str, float]  # Role ID to engagement percentage
 
 
 class RolePerformance(BaseModel):
@@ -143,6 +141,6 @@ class QualityIssue(BaseModel):
     issue_type: str
     severity: float
     description: str
-    affected_messages: List[str]
+    affected_messages: list[str]
     suggested_action: str
 

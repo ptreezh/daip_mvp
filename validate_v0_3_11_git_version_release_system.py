@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 16:30:00
+"""@Time    : 2025-08-05 16:30:00
 @Author  : DAIP-LIVE Team
 @File    : validate_v0_3_11_git_version_release_system.py
 @Description:
@@ -12,31 +10,27 @@ import asyncio
 import json
 import logging
 import os
-import sys
-import tempfile
 import shutil
 import subprocess
+import sys
+import tempfile
 from datetime import datetime
-from typing import Dict, List, Any, Optional
-from pathlib import Path
-from unittest.mock import patch, Mock, AsyncMock
+from typing import Any
+from unittest.mock import AsyncMock, Mock, patch
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
 from core_services.git_version_release_system import (
-    VersionReleaseSystem,
-    VersionInfo,
-    ReleaseType,
-    ReleaseStatus,
+    ChangelogManager,
+    GitManager,
     ReleaseConfig,
     ReleaseInfo,
-    ReleaseAsset,
-    GitManager,
-    ChangelogManager,
     ReleaseManager,
-    get_version_release_system,
-    initialize_version_release_system,
+    ReleaseStatus,
+    ReleaseType,
+    VersionInfo,
+    VersionReleaseSystem,
 )
 
 # Configure logging
@@ -59,7 +53,7 @@ class GitVersionReleaseSystemValidator:
         }
         self.temp_dir = None
 
-    async def validate_system(self) -> Dict[str, Any]:
+    async def validate_system(self) -> dict[str, Any]:
         """Run complete validation of the Git Version Release System."""
         logger.info("Starting v0.3.11 Git Version Release System validation...")
 
@@ -266,7 +260,7 @@ class GitVersionReleaseSystemValidator:
             changelog_manager.update_changelog_file(new_changelog, "1.0.0")
 
             assert os.path.exists(changelog_file)
-            with open(changelog_file, "r") as f:
+            with open(changelog_file) as f:
                 content = f.read()
                 assert new_changelog in content
                 assert "# Changelog" in content
@@ -279,7 +273,7 @@ class GitVersionReleaseSystemValidator:
 
             changelog_manager.update_changelog_file(new_changelog, "1.0.0")
 
-            with open(changelog_file, "r") as f:
+            with open(changelog_file) as f:
                 content = f.read()
                 assert content.startswith(new_changelog)
                 assert "## [v0.9.0]" in content
@@ -703,7 +697,7 @@ class GitVersionReleaseSystemValidator:
                 print(f"  - {warning}")
 
         if self.validation_results["recommendations"]:
-            print(f"\nRecommendations:")
+            print("\nRecommendations:")
             for rec in self.validation_results["recommendations"]:
                 print(f"  - {rec}")
 

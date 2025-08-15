@@ -1,5 +1,4 @@
-"""
-Test script for chat room configuration validation.
+"""Test script for chat room configuration validation.
 """
 
 from src.virtual_role_chat.config_validator import ConfigValidator

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 10:00:00
+"""@Time    : 2025-08-04 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : synthesis_agent.py
 @Description:
@@ -8,29 +6,25 @@
 """
 
 import logging
-import asyncio
-from typing import Any, Dict, List, Optional, Tuple
-from datetime import datetime
-import json
 import statistics
+from datetime import datetime
+from typing import Any
 
-from ...kernel.llm_interface import LLMInterface
 from ...core_services.consensus_quality_evaluator import ConsensusQualityEvaluator
+from ...kernel.llm_interface import LLMInterface
 
 logger = logging.getLogger(__name__)
 
 
 class IntelligentSynthesisAgent:
-    """
-    智能综合代理 - Advanced multi-perspective synthesis with cognitive intelligence.
+    """智能综合代理 - Advanced multi-perspective synthesis with cognitive intelligence.
     
     Implements intelligent synthesis algorithms that go beyond simple text combination
     to create truly insightful, cognitively-aware consensus with conflict resolution.
     """
     
-    def __init__(self, llm_interface: LLMInterface, config: Dict[str, Any] = None):
-        """
-        Initialize the Intelligent Synthesis Agent.
+    def __init__(self, llm_interface: LLMInterface, config: dict[str, Any] = None):
+        """Initialize the Intelligent Synthesis Agent.
         
         Args:
             llm_interface: LLM interface for synthesis operations
@@ -66,13 +60,12 @@ class IntelligentSynthesisAgent:
     async def synthesize_intelligently(
         self,
         topic: str,
-        viewpoints: List[Dict[str, Any]],
-        conflicts: List[Dict[str, Any]] = None,
-        consensus_areas: List[str] = None,
+        viewpoints: list[dict[str, Any]],
+        conflicts: list[dict[str, Any]] = None,
+        consensus_areas: list[str] = None,
         synthesis_strategy: str = "adaptive"
-    ) -> Dict[str, Any]:
-        """
-        Perform intelligent multi-perspective synthesis.
+    ) -> dict[str, Any]:
+        """Perform intelligent multi-perspective synthesis.
         
         Args:
             topic: The topic being analyzed
@@ -157,7 +150,7 @@ class IntelligentSynthesisAgent:
                 "confidence": 0.0
             }
     
-    async def _preprocess_viewpoints(self, viewpoints: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _preprocess_viewpoints(self, viewpoints: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Pre-process viewpoints for cognitive analysis."""
         processed = []
         
@@ -178,7 +171,7 @@ class IntelligentSynthesisAgent:
         
         return processed
     
-    async def _extract_cognitive_features(self, viewpoint: Dict[str, Any]) -> Dict[str, Any]:
+    async def _extract_cognitive_features(self, viewpoint: dict[str, Any]) -> dict[str, Any]:
         """Extract cognitive features from viewpoint."""
         content = viewpoint.get("viewpoint", viewpoint.get("content", ""))
         
@@ -218,7 +211,7 @@ class IntelligentSynthesisAgent:
         complexity_score = min(indicator_count / 10, 1.0)  # Normalize to 0-1
         return complexity_score
     
-    def _calculate_evidence_strength(self, viewpoint: Dict[str, Any]) -> float:
+    def _calculate_evidence_strength(self, viewpoint: dict[str, Any]) -> float:
         """Calculate evidence strength."""
         evidence = viewpoint.get("supporting_evidence", [])
         
@@ -262,7 +255,7 @@ class IntelligentSynthesisAgent:
         insight_score = sum(1 for indicator in insight_indicators if indicator in content)
         return min(insight_score / 5, 1.0)
     
-    async def _calculate_viewpoint_quality(self, viewpoint: Dict[str, Any], cognitive_features: Dict[str, Any]) -> float:
+    async def _calculate_viewpoint_quality(self, viewpoint: dict[str, Any], cognitive_features: dict[str, Any]) -> float:
         """Calculate overall viewpoint quality."""
         # Weight different features
         weights = {
@@ -281,7 +274,7 @@ class IntelligentSynthesisAgent:
         
         return min(weighted_score, 1.0)
     
-    async def _analyze_cognitive_patterns(self, viewpoints: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _analyze_cognitive_patterns(self, viewpoints: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze cognitive patterns across viewpoints."""
         if not viewpoints:
             return {"patterns": [], "diversity_score": 0.0, "convergence_score": 0.0}
@@ -309,7 +302,7 @@ class IntelligentSynthesisAgent:
             "bias_risk_score": bias_patterns.get("overall_bias_risk", 0.0)
         }
     
-    def _calculate_cognitive_diversity(self, features: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _calculate_cognitive_diversity(self, features: list[dict[str, Any]]) -> dict[str, Any]:
         """Calculate cognitive diversity metrics."""
         if not features:
             return {"overall_diversity": 0.0}
@@ -335,7 +328,7 @@ class IntelligentSynthesisAgent:
             )[:3]
         }
     
-    def _identify_convergence_patterns(self, viewpoints: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _identify_convergence_patterns(self, viewpoints: list[dict[str, Any]]) -> dict[str, Any]:
         """Identify convergence patterns in viewpoints."""
         convergence_areas = []
         convergence_strength = 0.0
@@ -358,7 +351,7 @@ class IntelligentSynthesisAgent:
             "common_keywords": common_keywords
         }
     
-    def _find_common_keywords(self, texts: List[str]) -> List[str]:
+    def _find_common_keywords(self, texts: list[str]) -> list[str]:
         """Find common keywords across texts."""
         if not texts:
             return []
@@ -380,7 +373,7 @@ class IntelligentSynthesisAgent:
         
         return common_words[:10]  # Return top 10 common words
     
-    def _detect_cognitive_biases(self, viewpoints: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _detect_cognitive_biases(self, viewpoints: list[dict[str, Any]]) -> dict[str, Any]:
         """Detect potential cognitive biases."""
         bias_patterns = {
             "confirmation_bias": 0.0,
@@ -415,7 +408,7 @@ class IntelligentSynthesisAgent:
             "recommendations": self._generate_bias_recommendations(bias_patterns)
         }
     
-    def _generate_bias_recommendations(self, bias_patterns: Dict[str, Any]) -> List[str]:
+    def _generate_bias_recommendations(self, bias_patterns: dict[str, Any]) -> list[str]:
         """Generate recommendations for addressing cognitive biases."""
         recommendations = []
         
@@ -433,7 +426,7 @@ class IntelligentSynthesisAgent:
         
         return recommendations
     
-    async def _select_optimal_strategy(self, viewpoints: List[Dict[str, Any]], cognitive_analysis: Dict[str, Any]) -> str:
+    async def _select_optimal_strategy(self, viewpoints: list[dict[str, Any]], cognitive_analysis: dict[str, Any]) -> str:
         """Select optimal synthesis strategy based on analysis."""
         diversity_score = cognitive_analysis.get("diversity_score", 0.0)
         convergence_score = cognitive_analysis.get("convergence_score", 0.0)
@@ -452,11 +445,11 @@ class IntelligentSynthesisAgent:
     async def _perform_synthesis(
         self,
         topic: str,
-        viewpoints: List[Dict[str, Any]],
-        conflicts: List[Dict[str, Any]] = None,
-        consensus_areas: List[str] = None,
+        viewpoints: list[dict[str, Any]],
+        conflicts: list[dict[str, Any]] = None,
+        consensus_areas: list[str] = None,
         strategy: str = "adaptive"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Perform synthesis using selected strategy."""
         if strategy in self.synthesis_strategies:
             return await self.synthesis_strategies[strategy](
@@ -469,10 +462,10 @@ class IntelligentSynthesisAgent:
     async def _adaptive_synthesis(
         self,
         topic: str,
-        viewpoints: List[Dict[str, Any]],
-        conflicts: List[Dict[str, Any]] = None,
-        consensus_areas: List[str] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        conflicts: list[dict[str, Any]] = None,
+        consensus_areas: list[str] = None
+    ) -> dict[str, Any]:
         """Adaptive synthesis that combines multiple strategies."""
         # Prepare synthesis input
         synthesis_input = self._prepare_synthesis_input(topic, viewpoints, conflicts, consensus_areas)
@@ -498,10 +491,10 @@ class IntelligentSynthesisAgent:
     def _prepare_synthesis_input(
         self,
         topic: str,
-        viewpoints: List[Dict[str, Any]],
-        conflicts: List[Dict[str, Any]] = None,
-        consensus_areas: List[str] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        conflicts: list[dict[str, Any]] = None,
+        consensus_areas: list[str] = None
+    ) -> dict[str, Any]:
         """Prepare synthesis input data."""
         return {
             "topic": topic,
@@ -512,7 +505,7 @@ class IntelligentSynthesisAgent:
             "cognitive_features": [vp.get("cognitive_features", {}) for vp in viewpoints]
         }
     
-    def _create_adaptive_synthesis_prompt(self, synthesis_input: Dict[str, Any]) -> str:
+    def _create_adaptive_synthesis_prompt(self, synthesis_input: dict[str, Any]) -> str:
         """Create adaptive synthesis prompt."""
         prompt = f"""你是一个智能综合专家，需要综合多位专家的观点来产生深度洞察。
 
@@ -564,7 +557,7 @@ class IntelligentSynthesisAgent:
         
         return prompt
     
-    def _calculate_synthesis_confidence(self, viewpoints: List[Dict[str, Any]]) -> float:
+    def _calculate_synthesis_confidence(self, viewpoints: list[dict[str, Any]]) -> float:
         """Calculate confidence in synthesis."""
         if not viewpoints:
             return 0.0
@@ -577,10 +570,10 @@ class IntelligentSynthesisAgent:
     async def _dialectical_synthesis(
         self,
         topic: str,
-        viewpoints: List[Dict[str, Any]],
-        conflicts: List[Dict[str, Any]] = None,
-        consensus_areas: List[str] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        conflicts: list[dict[str, Any]] = None,
+        consensus_areas: list[str] = None
+    ) -> dict[str, Any]:
         """Dialectical synthesis focusing on conflict resolution."""
         # Placeholder for dialectical synthesis implementation
         return await self._adaptive_synthesis(topic, viewpoints, conflicts, consensus_areas)
@@ -588,10 +581,10 @@ class IntelligentSynthesisAgent:
     async def _integrative_synthesis(
         self,
         topic: str,
-        viewpoints: List[Dict[str, Any]],
-        conflicts: List[Dict[str, Any]] = None,
-        consensus_areas: List[str] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        conflicts: list[dict[str, Any]] = None,
+        consensus_areas: list[str] = None
+    ) -> dict[str, Any]:
         """Integrative synthesis focusing on perspective integration."""
         # Placeholder for integrative synthesis implementation
         return await self._adaptive_synthesis(topic, viewpoints, conflicts, consensus_areas)
@@ -599,19 +592,19 @@ class IntelligentSynthesisAgent:
     async def _hierarchical_synthesis(
         self,
         topic: str,
-        viewpoints: List[Dict[str, Any]],
-        conflicts: List[Dict[str, Any]] = None,
-        consensus_areas: List[str] = None
-    ) -> Dict[str, Any]:
+        viewpoints: list[dict[str, Any]],
+        conflicts: list[dict[str, Any]] = None,
+        consensus_areas: list[str] = None
+    ) -> dict[str, Any]:
         """Hierarchical synthesis focusing on structured organization."""
         # Placeholder for hierarchical synthesis implementation
         return await self._adaptive_synthesis(topic, viewpoints, conflicts, consensus_areas)
     
     async def _enhance_synthesis(
         self,
-        synthesis_result: Dict[str, Any],
-        cognitive_analysis: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        synthesis_result: dict[str, Any],
+        cognitive_analysis: dict[str, Any]
+    ) -> dict[str, Any]:
         """Enhance synthesis with cognitive insights."""
         enhanced_synthesis = synthesis_result.copy()
         
@@ -631,7 +624,7 @@ class IntelligentSynthesisAgent:
         
         return enhanced_synthesis
     
-    def _generate_cognitive_insights(self, cognitive_analysis: Dict[str, Any]) -> str:
+    def _generate_cognitive_insights(self, cognitive_analysis: dict[str, Any]) -> str:
         """Generate cognitive insights from analysis."""
         insights = []
         
@@ -655,9 +648,9 @@ class IntelligentSynthesisAgent:
     
     async def _assess_synthesis_quality(
         self,
-        synthesis_result: Dict[str, Any],
-        viewpoints: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        synthesis_result: dict[str, Any],
+        viewpoints: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """Assess synthesis quality."""
         # Prepare consensus data for quality evaluation
         consensus_data = {
@@ -680,10 +673,10 @@ class IntelligentSynthesisAgent:
     
     async def _generate_meta_insights(
         self,
-        synthesis_result: Dict[str, Any],
-        cognitive_analysis: Dict[str, Any],
-        quality_assessment: Dict[str, Any]
-    ) -> List[str]:
+        synthesis_result: dict[str, Any],
+        cognitive_analysis: dict[str, Any],
+        quality_assessment: dict[str, Any]
+    ) -> list[str]:
         """Generate meta-insights about the synthesis process."""
         meta_insights = []
         
@@ -702,11 +695,11 @@ class IntelligentSynthesisAgent:
         
         return meta_insights
     
-    def get_synthesis_history(self) -> List[Dict[str, Any]]:
+    def get_synthesis_history(self) -> list[dict[str, Any]]:
         """Get synthesis history."""
         return self.synthesis_history.copy()
     
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get performance metrics."""
         if not self.synthesis_history:
             return {"message": "No synthesis history available"}

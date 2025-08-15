@@ -1,18 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-19 03:30:00
+"""@Time    : 2025-07-19 03:30:00
 @Author  : DAIP-LIVE Team
 @File    : commands.py
 @Description: CLI command implementations for DAIP-LIVE system.
 """
 
 import asyncio
-import logging
 import importlib.util
-from typing import List
+import logging
 
 from rich.console import Console
-from rich.live import Live
 from rich.panel import Panel
 from rich.text import Text
 
@@ -149,7 +145,7 @@ class CLIDebateHandler:
             logger.error(f"Service initialization failed: {e}", exc_info=True)
             return False
     
-    async def start_debate(self, topic: str, roles: List[str], rounds: int, consensus_strategy: str, verbose: bool):
+    async def start_debate(self, topic: str, roles: list[str], rounds: int, consensus_strategy: str, verbose: bool):
         """Start and manage a debate session."""
         if not await self.initialize():
             return False
@@ -310,7 +306,7 @@ class CLIDebateHandler:
             logger.error(f"Event processing error: {e}", exc_info=True)
 
 
-async def run_debate_command(topic: str, roles: List[str], rounds: int, consensus_strategy: str, verbose: bool, save_results: bool = False, output_file: str = "debate_results.txt"):
+async def run_debate_command(topic: str, roles: list[str], rounds: int, consensus_strategy: str, verbose: bool, save_results: bool = False, output_file: str = "debate_results.txt"):
     """Run the debate command asynchronously."""
     # Check for missing dependencies
     if MISSING_DEPENDENCIES:
@@ -390,7 +386,7 @@ async def run_debate_command(topic: str, roles: List[str], rounds: int, consensu
         handler = ResultCapturingDebateHandler(debate_result)
         
         # Show debate configuration summary
-        console.print(f"[dim]📋 Configuration Summary:[/dim]")
+        console.print("[dim]📋 Configuration Summary:[/dim]")
         console.print(f"[dim]   • Topic: {topic[:60]}{'...' if len(topic) > 60 else ''}[/dim]")
         console.print(f"[dim]   • Participants: {len(roles)} role(s) - {', '.join(roles[:3])}{'...' if len(roles) > 3 else ''}[/dim]")
         console.print(f"[dim]   • Rounds: {rounds} | Strategy: {consensus_strategy}[/dim]")
@@ -408,9 +404,9 @@ async def run_debate_command(topic: str, roles: List[str], rounds: int, consensu
         # Save results if requested
         if save_results and success:
             try:
-                from datetime import datetime
                 import json
                 import os
+                from datetime import datetime
                 
                 # Add timestamp
                 debate_result["timestamp"] = datetime.now().isoformat()

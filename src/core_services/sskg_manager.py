@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-04 10:00:00
+"""@Time    : 2025-07-04 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : sskg_manager.py
 @Description:
@@ -8,7 +6,7 @@
 """
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import networkx as nx
 
@@ -16,14 +14,12 @@ logger = logging.getLogger(__name__)
 
 
 class SSKGManager:
-    """
-    Manages the storage, retrieval, and querying of structured knowledge
+    """Manages the storage, retrieval, and querying of structured knowledge
     in a semantic graph, with persistence to a file.
     """
 
     def __init__(self, graph_path: Optional[Path] = None):
-        """
-        Initializes the SSKGManager.
+        """Initializes the SSKGManager.
 
         Args:
             graph_path (Optional[Path]): Path to the graph file for persistence.
@@ -60,12 +56,12 @@ class SSKGManager:
             except Exception as e:
                 logger.error(f"Failed to save graph to {self.graph_path}: {e}")
 
-    def add_fact(self, subject: str, predicate: str, obj: str, metadata: Optional[Dict[str, Any]] = None):
+    def add_fact(self, subject: str, predicate: str, obj: str, metadata: Optional[dict[str, Any]] = None):
         """Adds a structured fact (a triple) to the knowledge graph."""
         self.graph.add_edge(subject, obj, key=predicate, **(metadata or {}))
         logger.debug("Added fact: (%s, %s, %s)", subject, predicate, obj)
 
-    def query(self, subject: str, predicate: Optional[str] = None) -> List[Dict[str, Any]]:
+    def query(self, subject: str, predicate: Optional[str] = None) -> list[dict[str, Any]]:
         """Queries the graph for facts related to a subject."""
         results = []
         if self.graph.has_node(subject):

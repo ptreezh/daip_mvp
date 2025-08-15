@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-LLM集成服务
+"""LLM集成服务
 提供统一的LLM调用接口，支持多后端、透明度监控和调用验证
 """
 
-import asyncio
 import hashlib
 import hmac
 import json
 import logging
 import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
-from dataclasses import dataclass, asdict
 from enum import Enum
+from typing import Any, Optional
 
 import ollama
 
@@ -38,8 +35,8 @@ class LLMCall:
     prompt: str
     response: str
     duration: float
-    token_usage: Dict[str, int]
-    metadata: Dict[str, Any]
+    token_usage: dict[str, int]
+    metadata: dict[str, Any]
     signature: str
     hash: str
 
@@ -51,8 +48,8 @@ class LLMResponse:
     model: str
     backend: str
     duration: float
-    token_usage: Dict[str, int]
-    metadata: Dict[str, Any]
+    token_usage: dict[str, int]
+    metadata: dict[str, Any]
     call_record: Optional[LLMCall] = None
 
 
@@ -60,14 +57,13 @@ class LLMIntegrationService:
     """LLM集成服务"""
     
     def __init__(self, secret_key: str = "daip_live_secret"):
-        """
-        初始化LLM集成服务
+        """初始化LLM集成服务
         
         Args:
             secret_key: 用于调用签名的密钥
         """
         self.secret_key = secret_key.encode()
-        self.call_history: List[LLMCall] = []
+        self.call_history: list[LLMCall] = []
         self.available_models = {}
         self._initialize_backends()
     
@@ -95,9 +91,8 @@ class LLMIntegrationService:
             logger.error(f"Failed to initialize Ollama: {e}")
             self.available_models[LLMBackend.OLLAMA] = []
     
-    def get_available_models(self, backend: LLMBackend = None) -> Dict[str, List[Dict]]:
-        """
-        获取可用模型列表
+    def get_available_models(self, backend: LLMBackend = None) -> dict[str, list[dict]]:
+        """获取可用模型列表
         
         Args:
             backend: 指定后端，None表示所有后端
@@ -110,8 +105,7 @@ class LLMIntegrationService:
         return self.available_models
     
     def _select_model(self, backend: LLMBackend, model: str = None, task: str = "generation") -> str:
-        """
-        选择合适的模型
+        """选择合适的模型
         
         Args:
             backend: 后端类型
@@ -160,8 +154,8 @@ class LLMIntegrationService:
         prompt: str,
         response: str,
         duration: float,
-        token_usage: Dict[str, int],
-        metadata: Dict[str, Any]
+        token_usage: dict[str, int],
+        metadata: dict[str, Any]
     ) -> LLMCall:
         """创建调用记录"""
         timestamp = datetime.now().isoformat()
@@ -213,8 +207,7 @@ class LLMIntegrationService:
         max_tokens: int = None,
         **kwargs
     ) -> LLMResponse:
-        """
-        生成文本
+        """生成文本
         
         Args:
             prompt: 输入提示
@@ -297,9 +290,8 @@ class LLMIntegrationService:
         text: str,
         model: str = None,
         backend: LLMBackend = LLMBackend.OLLAMA
-    ) -> List[float]:
-        """
-        生成文本嵌入
+    ) -> list[float]:
+        """生成文本嵌入
         
         Args:
             text: 输入文本
@@ -347,7 +339,7 @@ class LLMIntegrationService:
             logger.error(f"Embedding failed: {e}")
             raise
     
-    def get_call_statistics(self) -> Dict[str, Any]:
+    def get_call_statistics(self) -> dict[str, Any]:
         """获取调用统计信息"""
         if not self.call_history:
             return {
@@ -384,7 +376,7 @@ class LLMIntegrationService:
             'backend_stats': backend_stats
         }
     
-    def get_call_history(self, limit: int = None) -> List[Dict[str, Any]]:
+    def get_call_history(self, limit: int = None) -> list[dict[str, Any]]:
         """获取调用历史"""
         history = self.call_history
         if limit:
@@ -392,7 +384,7 @@ class LLMIntegrationService:
         
         return [asdict(call) for call in history]
     
-    def verify_call_integrity(self) -> Dict[str, Any]:
+    def verify_call_integrity(self) -> dict[str, Any]:
         """验证调用完整性"""
         if not self.call_history:
             return {'valid': True, 'message': 'No calls to verify'}
@@ -414,7 +406,7 @@ class LLMIntegrationService:
             'message': f'All {len(self.call_history)} calls verified successfully'
         }
     
-    def export_transparency_report(self) -> Dict[str, Any]:
+    def export_transparency_report(self) -> dict[str, Any]:
         """导出透明度报告"""
         stats = self.get_call_statistics()
         integrity = self.verify_call_integrity()
@@ -447,13 +439,13 @@ async def generate_text(prompt: str, **kwargs) -> str:
     return response.content
 
 
-async def generate_embedding(text: str, **kwargs) -> List[float]:
+async def generate_embedding(text: str, **kwargs) -> list[float]:
     """便捷的嵌入生成函数"""
     service = get_llm_service()
     return await service.embed(text, **kwargs)
 
 
-def get_transparency_report() -> Dict[str, Any]:
+def get_transparency_report() -> dict[str, Any]:
     """获取透明度报告"""
     service = get_llm_service()
     return service.export_transparency_report()

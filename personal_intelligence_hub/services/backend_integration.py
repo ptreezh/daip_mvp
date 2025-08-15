@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Backend Integration Service
+"""Personal Intelligence Hub - Backend Integration Service
 
 集成现有DAIP-LIVE后端服务的统一接口层
 """
 
 import logging
-import httpx
-import asyncio
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
+
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +51,10 @@ class BackendIntegrationService:
             base_url=self.config.base_url,
             timeout=self.config.timeout
         )
-        self.service_status: Dict[str, ServiceHealthStatus] = {}
+        self.service_status: dict[str, ServiceHealthStatus] = {}
         logger.info(f"Backend Integration Service initialized with base URL: {self.config.base_url}")
     
-    async def check_backend_health(self) -> Dict[str, ServiceHealthStatus]:
+    async def check_backend_health(self) -> dict[str, ServiceHealthStatus]:
         """检查后端服务健康状态"""
         try:
             start_time = datetime.now()
@@ -107,7 +105,7 @@ class BackendIntegrationService:
         
         return self.service_status
     
-    async def get_available_roles(self) -> List[Dict[str, Any]]:
+    async def get_available_roles(self) -> list[dict[str, Any]]:
         """获取可用的认知代理角色"""
         try:
             # 首先尝试获取详细角色信息
@@ -145,7 +143,7 @@ class BackendIntegrationService:
             logger.error(f"Error getting roles: {e}")
             return []
     
-    async def analyze_intent(self, user_input: str, user_id: str, context: List[Dict] = None) -> Dict[str, Any]:
+    async def analyze_intent(self, user_input: str, user_id: str, context: list[dict] = None) -> dict[str, Any]:
         """调用意图分析服务"""
         try:
             payload = {
@@ -167,7 +165,7 @@ class BackendIntegrationService:
             logger.error(f"Error in intent analysis: {e}")
             return {"error": str(e)}
     
-    async def start_workflow(self, workflow_type: str, participants: List[str], topic: str) -> Dict[str, Any]:
+    async def start_workflow(self, workflow_type: str, participants: list[str], topic: str) -> dict[str, Any]:
         """启动工作流执行"""
         try:
             payload = {
@@ -190,7 +188,7 @@ class BackendIntegrationService:
             logger.error(f"Error starting workflow: {e}")
             return {"error": str(e)}
     
-    async def get_workflow_status(self, workflow_id: str) -> Dict[str, Any]:
+    async def get_workflow_status(self, workflow_id: str) -> dict[str, Any]:
         """获取工作流状态"""
         try:
             response = await self.client.get(f"/api/collaboration/workflow/{workflow_id}/status")
@@ -206,7 +204,7 @@ class BackendIntegrationService:
             logger.error(f"Error getting workflow status: {e}")
             return {"error": str(e)}
     
-    async def execute_consensus(self, inputs: List[Dict[str, Any]], algorithm_type: str = "simple_majority_vote") -> Dict[str, Any]:
+    async def execute_consensus(self, inputs: list[dict[str, Any]], algorithm_type: str = "simple_majority_vote") -> dict[str, Any]:
         """执行共识计算 - 使用工具管理器"""
         try:
             # 尝试使用工具管理器的共识策略
@@ -239,7 +237,7 @@ class BackendIntegrationService:
             logger.error(f"Error in consensus calculation: {e}")
             return {"error": str(e)}
     
-    async def search_wiki(self, query: str, limit: int = 10) -> List[Dict[str, Any]]:
+    async def search_wiki(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
         """搜索Wiki知识库"""
         try:
             params = {"query": query, "limit": limit}
@@ -256,7 +254,7 @@ class BackendIntegrationService:
             logger.error(f"Error in wiki search: {e}")
             return []
     
-    async def get_memory_context(self, user_id: str, topic: str) -> Dict[str, Any]:
+    async def get_memory_context(self, user_id: str, topic: str) -> dict[str, Any]:
         """获取记忆上下文"""
         try:
             params = {"user_id": user_id, "topic": topic}

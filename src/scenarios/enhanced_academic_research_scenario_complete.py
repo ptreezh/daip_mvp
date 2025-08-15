@@ -1,21 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-完整的增强学术研究场景
+"""完整的增强学术研究场景
 
 V0.2.3 - 学术研究场景核心功能
 集成文献检索、方法论指导、写作辅助和同行评议功能
 """
 
-import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
-import json
-import re
-from pathlib import Path
+from typing import Any, Optional
 
 # 导入基础组件
 from src.core_services.virtual_team_service import VirtualTeamService
@@ -56,21 +50,21 @@ class LiteratureType(Enum):
 class LiteratureItem:
     """文献条目"""
     title: str
-    authors: List[str]
+    authors: list[str]
     publication_year: int
     venue: str
     literature_type: LiteratureType
     abstract: str
-    keywords: List[str]
+    keywords: list[str]
     doi: Optional[str] = None
     url: Optional[str] = None
     citation_count: int = 0
     relevance_score: float = 0.0
     quality_score: float = 0.0
     summary: Optional[str] = None
-    key_findings: List[str] = None
+    key_findings: list[str] = None
     methodology: Optional[str] = None
-    limitations: List[str] = None
+    limitations: list[str] = None
     
     def __post_init__(self):
         if self.key_findings is None:
@@ -84,13 +78,13 @@ class ResearchQuestion:
     """研究问题"""
     question: str
     research_type: str
-    methodology_suggestions: List[ResearchMethodology]
+    methodology_suggestions: list[ResearchMethodology]
     background: str
     significance: str
     feasibility_score: float
     novelty_score: float
-    sub_questions: List[str] = None
-    hypotheses: List[str] = None
+    sub_questions: list[str] = None
+    hypotheses: list[str] = None
     
     def __post_init__(self):
         if self.sub_questions is None:
@@ -106,10 +100,10 @@ class WritingSection:
     title: str
     content: str
     word_count: int
-    suggestions: List[str]
+    suggestions: list[str]
     quality_score: float
     completeness: float
-    references: List[str] = None
+    references: list[str] = None
     
     def __post_init__(self):
         if self.references is None:
@@ -159,7 +153,7 @@ class EnhancedAcademicResearchScenario:
     
     async def start_research_project(self, research_question: str, 
                                    domain: str = "computer_science",
-                                   complexity: str = "intermediate") -> Dict[str, Any]:
+                                   complexity: str = "intermediate") -> dict[str, Any]:
         """启动研究项目"""
         try:
             logger.info(f"Starting research project: {research_question}")
@@ -225,7 +219,7 @@ class EnhancedAcademicResearchScenario:
             logger.error(f"Error starting research project: {e}")
             return {"error": f"Failed to start research project: {str(e)}"}
     
-    async def design_study(self, methodology_choice: str = None) -> Dict[str, Any]:
+    async def design_study(self, methodology_choice: str = None) -> dict[str, Any]:
         """设计研究"""
         try:
             if not self.current_research_project:
@@ -271,7 +265,7 @@ class EnhancedAcademicResearchScenario:
     
     async def write_manuscript_section(self, section_type: str, 
                                      content: str = None,
-                                     writing_style: str = "journal_article") -> Dict[str, Any]:
+                                     writing_style: str = "journal_article") -> dict[str, Any]:
         """写作稿件章节"""
         try:
             if not self.current_research_project:
@@ -332,7 +326,7 @@ class EnhancedAcademicResearchScenario:
             logger.error(f"Error writing manuscript section: {e}")
             return {"error": f"Failed to analyze manuscript section: {str(e)}"}
     
-    async def conduct_peer_review(self, num_reviewers: int = 3) -> Dict[str, Any]:
+    async def conduct_peer_review(self, num_reviewers: int = 3) -> dict[str, Any]:
         """进行同行评议"""
         try:
             if not self.current_research_project:
@@ -376,7 +370,7 @@ class EnhancedAcademicResearchScenario:
             logger.error(f"Error conducting peer review: {e}")
             return {"error": f"Failed to conduct peer review: {str(e)}"}
     
-    async def get_project_status(self) -> Dict[str, Any]:
+    async def get_project_status(self) -> dict[str, Any]:
         """获取项目状态"""
         try:
             if not self.current_research_project:
@@ -500,7 +494,7 @@ class EnhancedAcademicResearchScenario:
 class SimpleLiteratureEngine:
     """简化的文献搜索引擎"""
     
-    async def search_literature(self, query: str) -> List[LiteratureItem]:
+    async def search_literature(self, query: str) -> list[LiteratureItem]:
         """搜索文献"""
         # 模拟文献搜索结果
         mock_results = [
@@ -534,7 +528,7 @@ class SimpleLiteratureEngine:
         
         return mock_results
     
-    async def generate_literature_review(self, literature_items: List[LiteratureItem], 
+    async def generate_literature_review(self, literature_items: list[LiteratureItem], 
                                        research_question: str) -> str:
         """生成文献综述"""
         return f"""# Literature Review
@@ -562,7 +556,7 @@ class SimpleMethodologyGuide:
     """简化的方法论指导"""
     
     async def recommend_methodology(self, research_question: ResearchQuestion, 
-                                  domain: str, complexity: str) -> List[str]:
+                                  domain: str, complexity: str) -> list[str]:
         """推荐方法论"""
         recommendations = [
             "Mixed Methods - Combines quantitative and qualitative approaches",
@@ -572,7 +566,7 @@ class SimpleMethodologyGuide:
         return recommendations
     
     async def create_research_design(self, research_question: ResearchQuestion,
-                                   methodology: str, domain: str) -> Dict[str, Any]:
+                                   methodology: str, domain: str) -> dict[str, Any]:
         """创建研究设计"""
         return {
             "study_design": f"{methodology.replace('_', ' ').title()} research design",
@@ -630,7 +624,7 @@ class SimpleWritingAssistant:
         
         return templates.get(section_type, f"Template for {section_type} section")
     
-    async def analyze_writing(self, content: str, section_type: str) -> Dict[str, Any]:
+    async def analyze_writing(self, content: str, section_type: str) -> dict[str, Any]:
         """分析写作质量"""
         word_count = len(content.split())
         
@@ -660,8 +654,8 @@ class SimpleWritingAssistant:
 class SimplePeerReviewSimulator:
     """简化的同行评议模拟器"""
     
-    async def conduct_review(self, manuscript_sections: Dict[str, Any], 
-                           domain: str, num_reviewers: int) -> Dict[str, Any]:
+    async def conduct_review(self, manuscript_sections: dict[str, Any], 
+                           domain: str, num_reviewers: int) -> dict[str, Any]:
         """进行同行评议"""
         # 模拟评议结果
         return {

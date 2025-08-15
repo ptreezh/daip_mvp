@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : ddd.py
 @Description:
@@ -8,33 +6,35 @@
     These endpoints implement the CQRS pattern with proper separation of concerns.
 """
 
-from typing import Dict, Any, List, Optional
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, Depends, Query, Path
+from typing import Any, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
-from ...domain.value_objects import (
-    EntranceType, IntentType, TaskStatus, SessionStatus, 
-    MessageIntent, ConsensusLevel, UserPreference, 
-    TaskPriority, TimeInterval
-)
 from ...application.commands import (
-    CommandDispatcher, CreateUserCommand, CreateSessionCommand,
-    CreateTaskCommand, ProcessMessageCommand, StartDebateCommand,
-    ExecuteTaskCommand
+    CommandDispatcher,
 )
 from ...application.queries import (
-    QueryDispatcher, GetUserQuery, GetSessionQuery, GetTaskQuery,
-    GetSessionTasksQuery, GetSessionMessagesQuery, GetUserSessionsQuery,
-    GetSystemStatusQuery
+    QueryDispatcher,
 )
 from ...application.use_cases import UseCaseFactory
+from ...domain.domain_services import (
+    ConsensusTrackingService,
+    EntranceSelectorService,
+    UserInterventionService,
+    WorkflowOrchestratorService,
+)
+from ...domain.value_objects import (
+    EntranceType,
+    IntentType,
+    MessageIntent,
+    SessionStatus,
+    TaskPriority,
+    TaskStatus,
+)
 from ...infrastructure.database import get_database_manager
 from ...infrastructure.redis_client import get_redis_manager
-from ...domain.domain_services import (
-    EntranceSelectorService, WorkflowOrchestratorService,
-    UserInterventionService, ConsensusTrackingService
-)
 
 
 # Pydantic models for API requests/responses
@@ -44,13 +44,13 @@ class UserCreateRequest(BaseModel):
     username: str = Field(..., description="用户名")
     email: str = Field(..., description="邮箱")
     preferred_entrance: str = Field(..., description="首选入口类型")
-    preferences: Dict[str, Any] = Field(default_factory=dict, description="用户偏好")
+    preferences: dict[str, Any] = Field(default_factory=dict, description="用户偏好")
 
 
 class SessionCreateRequest(BaseModel):
     """会话创建请求"""
     user_id: str = Field(..., description="用户ID")
-    context: Dict[str, Any] = Field(default_factory=dict, description="上下文信息")
+    context: dict[str, Any] = Field(default_factory=dict, description="上下文信息")
 
 
 class TaskCreateRequest(BaseModel):
@@ -59,7 +59,7 @@ class TaskCreateRequest(BaseModel):
     content: str = Field(..., description="任务内容")
     intent_type: str = Field(..., description="意图类型")
     priority: str = Field(default="normal", description="任务优先级")
-    context: Dict[str, Any] = Field(default_factory=dict, description="上下文信息")
+    context: dict[str, Any] = Field(default_factory=dict, description="上下文信息")
 
 
 class MessageProcessRequest(BaseModel):
@@ -68,14 +68,14 @@ class MessageProcessRequest(BaseModel):
     content: str = Field(..., description="消息内容")
     sender: str = Field(..., description="发送者")
     message_intent: str = Field(default="comment", description="消息意图")
-    context: Dict[str, Any] = Field(default_factory=dict, description="上下文信息")
+    context: dict[str, Any] = Field(default_factory=dict, description="上下文信息")
 
 
 class DebateStartRequest(BaseModel):
     """辩论开始请求"""
     session_id: str = Field(..., description="会话ID")
     topic: str = Field(..., description="辩论主题")
-    participants: List[str] = Field(..., description="参与者列表")
+    participants: list[str] = Field(..., description="参与者列表")
 
 
 class UserResponse(BaseModel):
@@ -85,7 +85,7 @@ class UserResponse(BaseModel):
     email: str
     preferred_entrance: str
     is_active: bool
-    preferences: Dict[str, Any]
+    preferences: dict[str, Any]
     created_at: str
     updated_at: str
 
@@ -98,7 +98,7 @@ class SessionResponse(BaseModel):
     status: str
     created_at: str
     updated_at: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class TaskResponse(BaseModel):
@@ -113,7 +113,7 @@ class TaskResponse(BaseModel):
     created_at: str
     updated_at: str
     completed_at: Optional[str] = None
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class MessageResponse(BaseModel):
@@ -134,7 +134,7 @@ class DebateResponse(BaseModel):
     debate_id: str
     session_id: str
     topic: str
-    participants: List[str]
+    participants: list[str]
     status: str
     created_at: str
     consensus_level: float
@@ -144,8 +144,8 @@ class SystemStatusResponse(BaseModel):
     """系统状态响应"""
     timestamp: str
     overall_status: str
-    services: Dict[str, Any]
-    statistics: Dict[str, Any]
+    services: dict[str, Any]
+    statistics: dict[str, Any]
 
 
 # 全局依赖注入
@@ -212,7 +212,7 @@ router = APIRouter(prefix="/api/v1/ddd", tags=["DDD"])
 
 
 # 用户相关端点
-@router.post("/users", response_model=Dict[str, Any])
+@router.post("/users", response_model=dict[str, Any])
 async def create_user(
     request: UserCreateRequest,
     command_dispatcher: CommandDispatcher = Depends(get_command_dispatcher)
@@ -255,7 +255,7 @@ async def get_user(
 
 
 # 会话相关端点
-@router.post("/sessions", response_model=Dict[str, Any])
+@router.post("/sessions", response_model=dict[str, Any])
 async def create_session(
     request: SessionCreateRequest,
     command_dispatcher: CommandDispatcher = Depends(get_command_dispatcher)
@@ -294,7 +294,7 @@ async def get_session(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/users/{user_id}/sessions", response_model=List[SessionResponse])
+@router.get("/users/{user_id}/sessions", response_model=list[SessionResponse])
 async def get_user_sessions(
     user_id: str = Path(..., description="用户ID"),
     limit: int = Query(50, ge=1, le=100, description="限制数量"),
@@ -315,7 +315,7 @@ async def get_user_sessions(
 
 
 # 任务相关端点
-@router.post("/tasks", response_model=Dict[str, Any])
+@router.post("/tasks", response_model=dict[str, Any])
 async def create_task(
     request: TaskCreateRequest,
     command_dispatcher: CommandDispatcher = Depends(get_command_dispatcher)
@@ -357,7 +357,7 @@ async def get_task(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/sessions/{session_id}/tasks", response_model=List[TaskResponse])
+@router.get("/sessions/{session_id}/tasks", response_model=list[TaskResponse])
 async def get_session_tasks(
     session_id: str = Path(..., description="会话ID"),
     limit: int = Query(50, ge=1, le=100, description="限制数量"),
@@ -377,7 +377,7 @@ async def get_session_tasks(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/tasks/{task_id}/execute", response_model=Dict[str, Any])
+@router.post("/tasks/{task_id}/execute", response_model=dict[str, Any])
 async def execute_task(
     task_id: str = Path(..., description="任务ID"),
     command_dispatcher: CommandDispatcher = Depends(get_command_dispatcher)
@@ -396,7 +396,7 @@ async def execute_task(
 
 
 # 消息相关端点
-@router.post("/messages", response_model=Dict[str, Any])
+@router.post("/messages", response_model=dict[str, Any])
 async def process_message(
     request: MessageProcessRequest,
     command_dispatcher: CommandDispatcher = Depends(get_command_dispatcher)
@@ -420,7 +420,7 @@ async def process_message(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/sessions/{session_id}/messages", response_model=List[MessageResponse])
+@router.get("/sessions/{session_id}/messages", response_model=list[MessageResponse])
 async def get_session_messages(
     session_id: str = Path(..., description="会话ID"),
     limit: int = Query(50, ge=1, le=100, description="限制数量"),
@@ -441,7 +441,7 @@ async def get_session_messages(
 
 
 # 辩论相关端点
-@router.post("/debates", response_model=Dict[str, Any])
+@router.post("/debates", response_model=dict[str, Any])
 async def start_debate(
     request: DebateStartRequest,
     command_dispatcher: CommandDispatcher = Depends(get_command_dispatcher)

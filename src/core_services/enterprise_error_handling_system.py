@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 12:00:00
+"""@Time    : 2025-08-05 12:00:00
 @Author  : DAIP-LIVE Team
 @File    : enterprise_error_handling_system.py
 @Description:
@@ -9,34 +7,20 @@
 """
 
 import asyncio
-import logging
-import traceback
-import time
-import threading
-from typing import Dict, List, Optional, Any, Callable, Union
-from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict, field
-from enum import Enum
-import json
 import inspect
-import weakref
-from concurrent.futures import ThreadPoolExecutor
-import queue
-import uuid
+import json
+import logging
 import sys
-import os
-
-from ..core.exceptions import (
-    DAIPException,
-    SystemError,
-    ValidationError,
-    ConfigurationError,
-    ResourceError,
-    TimeoutError,
-    LLMError,
-    MemoryError,
-    WorkflowError
-)
+import threading
+import time
+import traceback
+import uuid
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -90,9 +74,9 @@ class ErrorContext:
     user_id: Optional[str] = None
     session_id: Optional[str] = None
     correlation_id: Optional[str] = None
-    additional_data: Dict[str, Any] = field(default_factory=dict)
+    additional_data: dict[str, Any] = field(default_factory=dict)
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "error_id": self.error_id,
@@ -174,12 +158,12 @@ class CircuitBreaker:
 class ErrorRecoveryManager:
     """Error recovery manager."""
     
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
-        self.recovery_actions: Dict[str, List[RecoveryAction]] = {}
-        self.circuit_breakers: Dict[str, CircuitBreaker] = {}
-        self.recovery_history: List[Dict[str, Any]] = []
-        self.active_recoveries: Dict[str, asyncio.Task] = {}
+        self.recovery_actions: dict[str, list[RecoveryAction]] = {}
+        self.circuit_breakers: dict[str, CircuitBreaker] = {}
+        self.recovery_history: list[dict[str, Any]] = []
+        self.active_recoveries: dict[str, asyncio.Task] = {}
         self.executor = ThreadPoolExecutor(max_workers=4)
         self._initialize_recovery_actions()
         self._initialize_circuit_breakers()
@@ -248,7 +232,7 @@ class ErrorRecoveryManager:
         self.circuit_breakers["database_calls"] = CircuitBreaker(failure_threshold=3, recovery_timeout=30.0)
         self.circuit_breakers["external_services"] = CircuitBreaker(failure_threshold=5, recovery_timeout=120.0)
     
-    async def handle_error(self, error_context: ErrorContext) -> Dict[str, Any]:
+    async def handle_error(self, error_context: ErrorContext) -> dict[str, Any]:
         """Handle error with recovery actions."""
         recovery_id = str(uuid.uuid4())
         recovery_result = {
@@ -384,7 +368,7 @@ class ErrorRecoveryManager:
         """Get circuit breaker by name."""
         return self.circuit_breakers.get(name, CircuitBreaker())
     
-    def get_recovery_statistics(self) -> Dict[str, Any]:
+    def get_recovery_statistics(self) -> dict[str, Any]:
         """Get recovery statistics."""
         total_recoveries = len(self.recovery_history)
         successful_recoveries = len([r for r in self.recovery_history if r["successful"]])
@@ -408,10 +392,10 @@ class ErrorRecoveryManager:
 class EnterpriseErrorHandler:
     """Enterprise-level error handler."""
     
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
-        self.error_history: List[ErrorContext] = []
-        self.error_statistics: Dict[str, Any] = {}
+        self.error_history: list[ErrorContext] = []
+        self.error_statistics: dict[str, Any] = {}
         self.recovery_manager = ErrorRecoveryManager(config)
         self.alert_thresholds = config.get("alert_thresholds", {
             ErrorSeverity.LOW: 100,
@@ -444,9 +428,8 @@ class EnterpriseErrorHandler:
                      user_id: Optional[str] = None,
                      session_id: Optional[str] = None,
                      correlation_id: Optional[str] = None,
-                     additional_data: Optional[Dict[str, Any]] = None) -> ErrorContext:
+                     additional_data: Optional[dict[str, Any]] = None) -> ErrorContext:
         """Capture and handle error."""
-        
         # Create error context
         error_context = ErrorContext(
             error_id=str(uuid.uuid4()),
@@ -553,7 +536,7 @@ class EnterpriseErrorHandler:
         # Here you would integrate with external alerting systems
         # For now, just log the alert
     
-    def get_error_statistics(self) -> Dict[str, Any]:
+    def get_error_statistics(self) -> dict[str, Any]:
         """Get error statistics."""
         with self.lock:
             return {
@@ -568,7 +551,7 @@ class EnterpriseErrorHandler:
                          component: Optional[str] = None,
                          severity: Optional[ErrorSeverity] = None,
                          category: Optional[ErrorCategory] = None,
-                         hours: Optional[int] = None) -> List[Dict[str, Any]]:
+                         hours: Optional[int] = None) -> list[dict[str, Any]]:
         """Get filtered error history."""
         filtered_errors = self.error_history
         
@@ -731,7 +714,7 @@ def handle_enterprise_error(component: str, operation: str,
     return ErrorHandlingDecorator(component, operation, severity, category)
 
 
-def initialize_enterprise_error_handler(config: Dict[str, Any]):
+def initialize_enterprise_error_handler(config: dict[str, Any]):
     """Initialize enterprise error handler."""
     global _enterprise_error_handler
     _enterprise_error_handler = EnterpriseErrorHandler(config)

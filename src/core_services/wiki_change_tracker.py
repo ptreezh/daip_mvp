@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Wiki变更追踪器
+"""Wiki变更追踪器
 
 追踪和分析Wiki知识库的变更模式
 """
 
 import logging
-from typing import Any, Dict, List, Optional
-from datetime import datetime, timedelta
 import uuid
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
+from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +23,7 @@ class WikiChangeTracker:
         self.change_patterns = {}
         self.contributors = {}  # {contributor_id: contributor_info}
     
-    def track_change(self, change_data: Dict[str, Any]) -> str:
+    def track_change(self, change_data: dict[str, Any]) -> str:
         """追踪变更"""
         try:
             change_id = str(uuid.uuid4())
@@ -94,7 +92,7 @@ class WikiChangeTracker:
         contributor: str = None,
         change_type: str = None,
         limit: int = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """获取变更历史"""
         try:
             filtered_history = self.change_history.copy()
@@ -122,7 +120,7 @@ class WikiChangeTracker:
             logger.error(f"获取变更历史失败: {e}")
             return []
     
-    def analyze_change_patterns(self) -> Dict[str, Any]:
+    def analyze_change_patterns(self) -> dict[str, Any]:
         """分析变更模式"""
         try:
             if not self.change_history:
@@ -143,7 +141,7 @@ class WikiChangeTracker:
             logger.error(f"分析变更模式失败: {e}")
             return {"error": str(e)}
     
-    def get_entity_change_summary(self, entity_id: str) -> Dict[str, Any]:
+    def get_entity_change_summary(self, entity_id: str) -> dict[str, Any]:
         """获取实体变更摘要"""
         try:
             if entity_id not in self.tracked_entities:
@@ -170,7 +168,7 @@ class WikiChangeTracker:
             logger.error(f"获取实体变更摘要失败: {e}")
             return {"error": str(e)}
     
-    def get_contributor_profile(self, contributor: str) -> Dict[str, Any]:
+    def get_contributor_profile(self, contributor: str) -> dict[str, Any]:
         """获取贡献者档案"""
         try:
             if contributor not in self.contributors:
@@ -198,7 +196,7 @@ class WikiChangeTracker:
             logger.error(f"获取贡献者档案失败: {e}")
             return {"error": str(e)}
     
-    def _calculate_impact_score(self, change_data: Dict[str, Any]) -> float:
+    def _calculate_impact_score(self, change_data: dict[str, Any]) -> float:
         """计算变更影响分数"""
         try:
             impact_score = 0.0
@@ -233,7 +231,7 @@ class WikiChangeTracker:
             logger.error(f"计算影响分数失败: {e}")
             return 0.0
     
-    def _calculate_change_size(self, change_data: Dict[str, Any]) -> str:
+    def _calculate_change_size(self, change_data: dict[str, Any]) -> str:
         """计算变更大小"""
         try:
             old_content = change_data.get("old_content", "")
@@ -263,7 +261,7 @@ class WikiChangeTracker:
             logger.error(f"计算变更大小失败: {e}")
             return "unknown"
     
-    def _analyze_frequent_contributors(self) -> List[Dict[str, Any]]:
+    def _analyze_frequent_contributors(self) -> list[dict[str, Any]]:
         """分析频繁贡献者"""
         contributor_stats = []
         
@@ -280,7 +278,7 @@ class WikiChangeTracker:
         contributor_stats.sort(key=lambda x: x["activity_score"], reverse=True)
         return contributor_stats[:10]  # 返回前10名
     
-    def _analyze_change_types(self) -> Dict[str, Any]:
+    def _analyze_change_types(self) -> dict[str, Any]:
         """分析变更类型"""
         type_counter = Counter(change["change_type"] for change in self.change_history)
         
@@ -290,7 +288,7 @@ class WikiChangeTracker:
             "total_types": len(type_counter)
         }
     
-    def _analyze_temporal_patterns(self) -> Dict[str, Any]:
+    def _analyze_temporal_patterns(self) -> dict[str, Any]:
         """分析时间模式"""
         try:
             if not self.change_history:
@@ -322,7 +320,7 @@ class WikiChangeTracker:
             logger.error(f"分析时间模式失败: {e}")
             return {}
     
-    def _analyze_entity_activity(self) -> List[Dict[str, Any]]:
+    def _analyze_entity_activity(self) -> list[dict[str, Any]]:
         """分析实体活跃度"""
         entity_stats = []
         
@@ -339,7 +337,7 @@ class WikiChangeTracker:
         entity_stats.sort(key=lambda x: x["activity_score"], reverse=True)
         return entity_stats[:10]  # 返回前10名
     
-    def _calculate_change_velocity(self) -> Dict[str, float]:
+    def _calculate_change_velocity(self) -> dict[str, float]:
         """计算变更速度"""
         try:
             if len(self.change_history) < 2:
@@ -370,7 +368,7 @@ class WikiChangeTracker:
             logger.error(f"计算变更速度失败: {e}")
             return {"daily_velocity": 0.0, "weekly_velocity": 0.0}
     
-    def _analyze_collaboration_patterns(self) -> Dict[str, Any]:
+    def _analyze_collaboration_patterns(self) -> dict[str, Any]:
         """分析协作模式"""
         try:
             # 找出协作实体（多个贡献者修改的实体）
@@ -466,7 +464,7 @@ class WikiChangeTracker:
             logger.error(f"计算贡献者频率失败: {e}")
             return 0.0
     
-    def _identify_contributor_expertise(self, contributor: str) -> List[str]:
+    def _identify_contributor_expertise(self, contributor: str) -> list[str]:
         """识别贡献者专长领域"""
         try:
             contributor_changes = self.get_change_history(contributor=contributor)

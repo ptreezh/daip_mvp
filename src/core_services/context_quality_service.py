@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-上下文质量评估服务
+"""上下文质量评估服务
 
 提供上下文质量评估和建议功能
 """
 
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 import re
-import json
+from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +38,8 @@ class ContextQualityService:
         self,
         context: str,
         context_type: str = "general",
-        evaluation_criteria: List[str] = None
-    ) -> Dict[str, Any]:
+        evaluation_criteria: list[str] = None
+    ) -> dict[str, Any]:
         """评估上下文质量"""
         try:
             # 选择评估标准
@@ -98,8 +95,8 @@ class ContextQualityService:
         self,
         context: str,
         target_quality_level: str = "good",
-        focus_areas: List[str] = None
-    ) -> Dict[str, Any]:
+        focus_areas: list[str] = None
+    ) -> dict[str, Any]:
         """获取质量改进建议"""
         try:
             # 当前质量评估
@@ -158,8 +155,8 @@ class ContextQualityService:
         self,
         original_context: str,
         modified_context: str,
-        comparison_focus: List[str] = None
-    ) -> Dict[str, Any]:
+        comparison_focus: list[str] = None
+    ) -> dict[str, Any]:
         """比较上下文版本"""
         try:
             # 评估两个版本的质量
@@ -216,7 +213,7 @@ class ContextQualityService:
     
     def _calculate_overall_score(
         self,
-        metric_scores: Dict[str, float],
+        metric_scores: dict[str, float],
         context_type: str
     ) -> float:
         """计算综合质量分数"""
@@ -233,7 +230,7 @@ class ContextQualityService:
         
         return weighted_sum / total_weight if total_weight > 0 else 0.0
     
-    def _get_metric_weights(self, context_type: str) -> Dict[str, float]:
+    def _get_metric_weights(self, context_type: str) -> dict[str, float]:
         """获取指标权重"""
         weight_configs = {
             "prompt": {
@@ -270,10 +267,10 @@ class ContextQualityService:
     
     def _generate_improvement_suggestions(
         self,
-        metric_scores: Dict[str, float],
-        detailed_analysis: Dict[str, Any],
+        metric_scores: dict[str, float],
+        detailed_analysis: dict[str, Any],
         context_type: str
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成改进建议"""
         suggestions = []
         
@@ -296,10 +293,10 @@ class ContextQualityService:
     
     def _identify_priority_areas(
         self,
-        metric_scores: Dict[str, float],
+        metric_scores: dict[str, float],
         target_score: float,
-        focus_areas: List[str] = None
-    ) -> List[str]:
+        focus_areas: list[str] = None
+    ) -> list[str]:
         """识别优先改进领域"""
         priority_areas = []
         
@@ -321,9 +318,9 @@ class ContextQualityService:
     def _generate_targeted_suggestions(
         self,
         context: str,
-        priority_areas: List[str],
-        detailed_analysis: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        priority_areas: list[str],
+        detailed_analysis: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """生成针对性建议"""
         targeted_suggestions = []
         
@@ -343,7 +340,7 @@ class ContextQualityService:
         
         return targeted_suggestions
     
-    def _generate_improvement_examples(self, area: str, context: str) -> List[str]:
+    def _generate_improvement_examples(self, area: str, context: str) -> list[str]:
         """生成改进示例"""
         examples = []
         
@@ -382,9 +379,9 @@ class ContextQualityService:
     
     def _estimate_improvement_potential(
         self,
-        metric_scores: Dict[str, float],
-        targeted_suggestions: List[Dict[str, Any]]
-    ) -> Dict[str, float]:
+        metric_scores: dict[str, float],
+        targeted_suggestions: list[dict[str, Any]]
+    ) -> dict[str, float]:
         """估算改进潜力"""
         potential = {}
         
@@ -412,7 +409,7 @@ class ContextQualityService:
         
         return potential
     
-    def _estimate_improvement_effort(self, priority_areas: List[str]) -> str:
+    def _estimate_improvement_effort(self, priority_areas: list[str]) -> str:
         """估算改进工作量"""
         if len(priority_areas) <= 1:
             return "low"
@@ -423,8 +420,8 @@ class ContextQualityService:
     
     def _generate_comparison_summary(
         self,
-        improvements: Dict[str, Any],
-        regressions: Dict[str, Any],
+        improvements: dict[str, Any],
+        regressions: dict[str, Any],
         overall_change: float
     ) -> str:
         """生成比较摘要"""
@@ -450,8 +447,8 @@ class ContextQualityService:
     def _generate_version_recommendation(
         self,
         overall_change: float,
-        improvements: Dict[str, Any],
-        regressions: Dict[str, Any]
+        improvements: dict[str, Any],
+        regressions: dict[str, Any]
     ) -> str:
         """生成版本推荐"""
         if overall_change > 0.1:
@@ -484,7 +481,7 @@ class ContextQualityService:
 class ReadabilityAnalyzer:
     """可读性分析器"""
     
-    def analyze(self, context: str, context_type: str) -> tuple[float, Dict[str, Any]]:
+    def analyze(self, context: str, context_type: str) -> tuple[float, dict[str, Any]]:
         """分析可读性"""
         score = 0.5
         analysis = {"issues": [], "suggestions": []}
@@ -528,7 +525,7 @@ class ReadabilityAnalyzer:
 class CompletenessAnalyzer:
     """完整性分析器"""
     
-    def analyze(self, context: str, context_type: str) -> tuple[float, Dict[str, Any]]:
+    def analyze(self, context: str, context_type: str) -> tuple[float, dict[str, Any]]:
         """分析完整性"""
         score = 0.5
         analysis = {"issues": [], "suggestions": []}
@@ -572,7 +569,7 @@ class CompletenessAnalyzer:
 class CoherenceAnalyzer:
     """连贯性分析器"""
     
-    def analyze(self, context: str, context_type: str) -> tuple[float, Dict[str, Any]]:
+    def analyze(self, context: str, context_type: str) -> tuple[float, dict[str, Any]]:
         """分析连贯性"""
         score = 0.5
         analysis = {"issues": [], "suggestions": []}
@@ -607,7 +604,7 @@ class CoherenceAnalyzer:
 class SpecificityAnalyzer:
     """具体性分析器"""
     
-    def analyze(self, context: str, context_type: str) -> tuple[float, Dict[str, Any]]:
+    def analyze(self, context: str, context_type: str) -> tuple[float, dict[str, Any]]:
         """分析具体性"""
         score = 0.5
         analysis = {"issues": [], "suggestions": []}
@@ -655,7 +652,7 @@ class SpecificityAnalyzer:
 class ActionabilityAnalyzer:
     """可操作性分析器"""
     
-    def analyze(self, context: str, context_type: str) -> tuple[float, Dict[str, Any]]:
+    def analyze(self, context: str, context_type: str) -> tuple[float, dict[str, Any]]:
         """分析可操作性"""
         score = 0.5
         analysis = {"issues": [], "suggestions": []}

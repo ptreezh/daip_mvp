@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-增强的上下文优化验证
+"""增强的上下文优化验证
 
 通过真实LLM调用验证优化效果
 """
 
-import sys
 import asyncio
-import json
+import sys
 import time
-from typing import Dict, List, Any, Tuple
+from typing import Any
+
 sys.path.append('src')
 
 class LLMContextValidator:
@@ -41,10 +39,7 @@ class LLMContextValidator:
         print("🔬 开始真实LLM验证")
         print("=" * 60)
         
-        from src.core_services.context_optimization_engine import (
-            ContextOptimizationEngine, 
-            ContextOptimizationRequest
-        )
+        from src.core_services.context_optimization_engine import ContextOptimizationEngine, ContextOptimizationRequest
         
         engine = ContextOptimizationEngine()
         results = []
@@ -115,7 +110,7 @@ class LLMContextValidator:
         
         return results
     
-    def _generate_realistic_history(self, test_case: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_realistic_history(self, test_case: dict[str, Any]) -> list[dict[str, Any]]:
         """生成真实的对话历史"""
         if test_case["complexity"] == "high":
             return [
@@ -157,7 +152,7 @@ class LLMContextValidator:
                 }
             ]
     
-    def _generate_realistic_context(self, test_case: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_realistic_context(self, test_case: dict[str, Any]) -> dict[str, Any]:
         """生成真实的上下文"""
         base_context = {
             "relevant_knowledge": [
@@ -178,7 +173,7 @@ class LLMContextValidator:
         
         return base_context
     
-    def _create_baseline_context(self, available_context: Dict[str, Any]) -> str:
+    def _create_baseline_context(self, available_context: dict[str, Any]) -> str:
         """创建基线上下文（未优化）"""
         context_parts = ["请回答以下问题："]
         
@@ -192,7 +187,7 @@ class LLMContextValidator:
         
         return "\n".join(context_parts)
     
-    async def _simulate_llm_call(self, query: str, context: str) -> Dict[str, Any]:
+    async def _simulate_llm_call(self, query: str, context: str) -> dict[str, Any]:
         """模拟LLM调用（实际应该调用真实LLM）"""
         # 这里应该调用真实的LLM API
         # 目前只是模拟响应
@@ -209,12 +204,11 @@ class LLMContextValidator:
     
     def _evaluate_response_quality(
         self, 
-        test_case: Dict[str, Any],
-        original_response: Dict[str, Any],
-        optimized_response: Dict[str, Any]
-    ) -> Dict[str, float]:
+        test_case: dict[str, Any],
+        original_response: dict[str, Any],
+        optimized_response: dict[str, Any]
+    ) -> dict[str, float]:
         """评估响应质量"""
-        
         # 相关性改进
         relevance_improvement = (
             optimized_response["relevance_score"] - 
@@ -247,7 +241,7 @@ class LLMContextValidator:
             "overall_score": overall_score
         }
     
-    def _generate_validation_report(self, results: List[Dict[str, Any]]):
+    def _generate_validation_report(self, results: list[dict[str, Any]]):
         """生成验证报告"""
         print("\n📊 验证报告")
         print("=" * 60)
@@ -286,7 +280,7 @@ class LLMContextValidator:
         all_scores = [r["effectiveness"]["overall_score"] for r in results]
         avg_score = sum(all_scores) / len(all_scores)
         
-        print(f"\n📈 整体表现:")
+        print("\n📈 整体表现:")
         print(f"   平均优化效果: {avg_score:.3f}")
         print(f"   最佳效果: {max(all_scores):.3f}")
         print(f"   最差效果: {min(all_scores):.3f}")

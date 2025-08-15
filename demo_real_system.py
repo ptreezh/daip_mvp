@@ -1,11 +1,9 @@
-"""
-真实演示系统实际演示
+"""真实演示系统实际演示
 
 展示系统的真实LLM调用和完整功能。
 """
 
 import asyncio
-import json
 import logging
 from datetime import datetime
 
@@ -112,7 +110,7 @@ async def demo_ai_ethics_scenario():
             
             # 显示批判性审查结果
             if result['critical_review']['success']:
-                print(f"\n📊 批判性审查结果:")
+                print("\n📊 批判性审查结果:")
                 print(f"  ✅ 执行成功: {result['critical_review']['success']}")
                 print(f"  📄 原始内容: {len(result['critical_review']['original_content'])} 字符")
                 print(f"  📝 最终内容: {len(result['critical_review']['final_content'])} 字符")
@@ -125,7 +123,7 @@ async def demo_ai_ethics_scenario():
             
             # 显示多视角分析结果
             if result['multi_perspective']['success']:
-                print(f"\n🔍 多视角分析结果:")
+                print("\n🔍 多视角分析结果:")
                 print(f"  ✅ 执行成功: {result['multi_perspective']['success']}")
                 print(f"  🎯 分析主题: {result['multi_perspective']['topic'][:50]}...")
                 print(f"  👁️  分析视角: {', '.join(result['multi_perspective']['perspectives'])}")
@@ -141,7 +139,7 @@ async def demo_ai_ethics_scenario():
             
             # 显示综合分析结果
             if result['synthesis']['call_record']['success']:
-                print(f"\n🧩 综合分析结果:")
+                print("\n🧩 综合分析结果:")
                 synthesis_record = result['synthesis']['call_record']
                 print(f"  ✅ LLM调用成功: {synthesis_record['success']}")
                 print(f"  🆔 调用ID: {synthesis_record['call_id']}")
@@ -152,14 +150,14 @@ async def demo_ai_ethics_scenario():
                 print(f"  📝 分析报告长度: {len(result['synthesis']['response'])} 字符")
                 
                 # 显示分析报告的前几行
-                print(f"\n📋 伦理分析报告预览:")
+                print("\n📋 伦理分析报告预览:")
                 response_lines = result['synthesis']['response'].split('\n')[:10]
                 for line in response_lines:
                     if line.strip():
                         print(f"  {line[:100]}...")
             
             # 显示验证结果
-            print(f"\n🔐 真实性验证结果:")
+            print("\n🔐 真实性验证结果:")
             for i, verification in enumerate(result['verification_results'], 1):
                 print(f"  {i}. {verification['type']}:")
                 if verification['type'] == 'llm_call':
@@ -171,7 +169,7 @@ async def demo_ai_ethics_scenario():
                     print(f"     📊 透明度分数: {verification['verification']['transparency_score']:.1f}%")
             
             # 显示透明度证书
-            print(f"\n🏆 透明度证书:")
+            print("\n🏆 透明度证书:")
             cert = result['transparency_certificate']
             print(f"  📜 证书ID: {cert['certificate_id']}")
             print(f"  📅 颁发时间: {cert['issued_at']}")
@@ -179,19 +177,19 @@ async def demo_ai_ethics_scenario():
             print(f"  🏢 颁发机构: {cert['issuer']}")
             
             # 显示最终系统统计
-            print(f"\n📈 最终系统统计:")
+            print("\n📈 最终系统统计:")
             final_stats = demo_controller.get_demo_statistics()
             print(f"  📊 总会话数: {final_stats['total_sessions']}")
             print(f"  ✅ 完成会话数: {final_stats['completed_sessions']}")
             print(f"  📊 成功率: {final_stats['success_rate']:.1%}")
             print(f"  ⏱️  平均时长: {final_stats['average_duration_ms']/1000:.1f} 秒")
             
-            print(f"\n🎯 演示总结:")
-            print(f"  ✅ 所有LLM调用都是真实的，无任何模拟数据")
-            print(f"  ✅ 所有角色都从真实JSON文件加载")
-            print(f"  ✅ 工作流执行调用真实的后端服务")
-            print(f"  ✅ 完整的透明度监控和验证机制")
-            print(f"  ✅ 生成了可验证的透明度证书")
+            print("\n🎯 演示总结:")
+            print("  ✅ 所有LLM调用都是真实的，无任何模拟数据")
+            print("  ✅ 所有角色都从真实JSON文件加载")
+            print("  ✅ 工作流执行调用真实的后端服务")
+            print("  ✅ 完整的透明度监控和验证机制")
+            print("  ✅ 生成了可验证的透明度证书")
             
         else:
             print(f"\n❌ AI伦理分析失败: {result.get('error', 'Unknown error')}")

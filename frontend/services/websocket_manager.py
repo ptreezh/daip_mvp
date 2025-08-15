@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-WebSocket管理器
+"""WebSocket管理器
 
 基于Lona框架的WebSocket实时通信管理
 支持与后端服务的实时数据同步和事件处理
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, List, Optional, Any, Callable
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass
+from typing import Any, Optional
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -34,7 +32,7 @@ class MessageType(Enum):
 class WebSocketMessage:
     """WebSocket消息数据结构"""
     type: MessageType
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     timestamp: datetime = None
     session_id: Optional[str] = None
     
@@ -42,7 +40,7 @@ class WebSocketMessage:
         if self.timestamp is None:
             self.timestamp = datetime.now()
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         return {
             "type": self.type.value,
@@ -52,7 +50,7 @@ class WebSocketMessage:
         }
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'WebSocketMessage':
+    def from_dict(cls, data: dict[str, Any]) -> 'WebSocketMessage':
         """从字典创建消息对象"""
         return cls(
             type=MessageType(data["type"]),
@@ -66,7 +64,7 @@ class WebSocketEventHandler:
     """WebSocket事件处理器基类"""
     
     def __init__(self):
-        self.handlers: Dict[MessageType, List[Callable]] = {}
+        self.handlers: dict[MessageType, list[Callable]] = {}
     
     def register_handler(self, message_type: MessageType, handler: Callable):
         """注册消息处理器"""
@@ -104,7 +102,7 @@ class LonaWebSocketManager:
         self.incoming_queue = asyncio.Queue()
         
         # 会话管理
-        self.active_sessions: Dict[str, Dict[str, Any]] = {}
+        self.active_sessions: dict[str, dict[str, Any]] = {}
         
         logger.info(f"WebSocket管理器初始化: {backend_url}")
     
@@ -240,7 +238,7 @@ class LonaWebSocketManager:
         """注册任务更新处理器"""
         self.event_handler.register_handler(MessageType.TASK_UPDATE, handler)
     
-    async def simulate_incoming_message(self, message_type: MessageType, payload: Dict[str, Any]):
+    async def simulate_incoming_message(self, message_type: MessageType, payload: dict[str, Any]):
         """模拟接收消息（用于测试）"""
         message = WebSocketMessage(
             type=message_type,
@@ -248,7 +246,7 @@ class LonaWebSocketManager:
         )
         await self.incoming_queue.put(message)
     
-    def get_connection_status(self) -> Dict[str, Any]:
+    def get_connection_status(self) -> dict[str, Any]:
         """获取连接状态"""
         return {
             "connected": self.is_connected,
@@ -265,7 +263,7 @@ class RealtimeUpdateManager:
     
     def __init__(self, websocket_manager: LonaWebSocketManager):
         self.ws_manager = websocket_manager
-        self.component_callbacks: Dict[str, List[Callable]] = {}
+        self.component_callbacks: dict[str, list[Callable]] = {}
         
         # 注册各种消息处理器
         self._setup_handlers()
@@ -303,7 +301,7 @@ class RealtimeUpdateManager:
             self.component_callbacks[component_type] = []
         self.component_callbacks[component_type].append(callback)
     
-    async def _notify_components(self, component_type: str, data: Dict[str, Any]):
+    async def _notify_components(self, component_type: str, data: dict[str, Any]):
         """通知相关组件"""
         if component_type in self.component_callbacks:
             for callback in self.component_callbacks[component_type]:

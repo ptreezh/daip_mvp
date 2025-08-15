@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_entrance_use_cases.py
 @Description:
@@ -8,23 +6,35 @@
     Tests user stories and business scenarios defined in the specifications.
 """
 
-import pytest
-from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
-from unittest.mock import Mock, AsyncMock, patch
-import asyncio
+import os
 
 # Import domain models from previous test
 import sys
-import os
+from datetime import datetime
+from typing import Any, Optional
+from unittest.mock import Mock
+
+import pytest
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from test_dual_entrance_domain_model import (
-    UserId, SessionId, UserPreferences, TransparencyData, UserIntervention,
-    User, Session, EntranceType, SessionStatus, IntentType,
-    EntranceManager, DomainEventPublisher, SessionCreatedEvent,
-    EntranceSwitchedEvent, UserInterventionAddedEvent
+    DomainEventPublisher,
+    EntranceManager,
+    EntranceSwitchedEvent,
+    EntranceType,
+    IntentType,
+    Session,
+    SessionCreatedEvent,
+    SessionId,
+    TransparencyData,
+    User,
+    UserId,
+    UserIntervention,
+    UserInterventionAddedEvent,
+    UserPreferences,
 )
+
 
 # Use Case Interfaces
 class UserRepository:
@@ -35,7 +45,7 @@ class UserRepository:
     def find_by_id(self, user_id: UserId) -> Optional[User]:
         pass
     
-    def find_by_preferences(self, preferences: UserPreferences) -> List[User]:
+    def find_by_preferences(self, preferences: UserPreferences) -> list[User]:
         pass
 
 class SessionRepository:
@@ -46,10 +56,10 @@ class SessionRepository:
     def find_by_id(self, session_id: SessionId) -> Optional[Session]:
         pass
     
-    def find_by_user(self, user_id: UserId) -> List[Session]:
+    def find_by_user(self, user_id: UserId) -> list[Session]:
         pass
     
-    def find_active_sessions(self) -> List[Session]:
+    def find_active_sessions(self) -> list[Session]:
         pass
 
 class TransparencyService:
@@ -62,21 +72,21 @@ class TransparencyService:
 
 class WorkflowService:
     """Workflow service interface"""
-    async def execute_workflow(self, intent_type: IntentType, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute_workflow(self, intent_type: IntentType, context: dict[str, Any]) -> dict[str, Any]:
         pass
     
-    async def get_workflow_status(self, workflow_id: str) -> Dict[str, Any]:
+    async def get_workflow_status(self, workflow_id: str) -> dict[str, Any]:
         pass
 
 class MultiAgentService:
     """Multi-agent service interface"""
-    async def start_collaboration(self, topic: str, context: Dict[str, Any]) -> str:
+    async def start_collaboration(self, topic: str, context: dict[str, Any]) -> str:
         pass
     
     async def add_user_intervention(self, session_id: str, intervention: UserIntervention) -> bool:
         pass
     
-    async def get_consensus_metrics(self, session_id: str) -> Dict[str, float]:
+    async def get_consensus_metrics(self, session_id: str) -> dict[str, float]:
         pass
 
 # Use Cases
@@ -89,7 +99,7 @@ class CreateSessionUseCase:
         self.entrance_manager = EntranceManager()
         self.event_publisher = DomainEventPublisher()
     
-    async def execute(self, user_id: str, entrance_type: str) -> Dict[str, Any]:
+    async def execute(self, user_id: str, entrance_type: str) -> dict[str, Any]:
         """Execute create session use case"""
         try:
             # Validate input
@@ -142,7 +152,7 @@ class SwitchEntranceUseCase:
         self.entrance_manager = EntranceManager()
         self.event_publisher = DomainEventPublisher()
     
-    async def execute(self, session_id: str, new_entrance: str) -> Dict[str, Any]:
+    async def execute(self, session_id: str, new_entrance: str) -> dict[str, Any]:
         """Execute switch entrance use case"""
         try:
             # Validate input
@@ -197,7 +207,7 @@ class ProcessSecretariatRequestUseCase:
         self.workflow_service = workflow_service
         self.transparency_service = transparency_service
     
-    async def execute(self, session_id: str, content: str) -> Dict[str, Any]:
+    async def execute(self, session_id: str, content: str) -> dict[str, Any]:
         """Execute Secretariat request processing"""
         try:
             # Validate input
@@ -264,7 +274,7 @@ class ProcessForumRequestUseCase:
         self.session_repository = session_repository
         self.multi_agent_service = multi_agent_service
     
-    async def execute(self, session_id: str, topic: str) -> Dict[str, Any]:
+    async def execute(self, session_id: str, topic: str) -> dict[str, Any]:
         """Execute Forum request processing"""
         try:
             # Validate input
@@ -311,7 +321,7 @@ class HandleUserInterventionUseCase:
         self.multi_agent_service = multi_agent_service
         self.event_publisher = event_publisher
     
-    async def execute(self, session_id: str, content: str, intent_type: str) -> Dict[str, Any]:
+    async def execute(self, session_id: str, content: str, intent_type: str) -> dict[str, Any]:
         """Execute user intervention handling"""
         try:
             # Validate input
@@ -369,7 +379,7 @@ class GetTransparencyDataUseCase:
         self.session_repository = session_repository
         self.transparency_service = transparency_service
     
-    async def execute(self, session_id: str, detail_level: str = "summary") -> Dict[str, Any]:
+    async def execute(self, session_id: str, detail_level: str = "summary") -> dict[str, Any]:
         """Execute transparency data retrieval"""
         try:
             # Validate input
@@ -422,39 +432,39 @@ class GetTransparencyDataUseCase:
 class TestEntranceUseCases:
     """Test suite for entrance use cases"""
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_user_repository(self):
         return Mock(spec=UserRepository)
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_session_repository(self):
         return Mock(spec=SessionRepository)
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_workflow_service(self):
         return Mock(spec=WorkflowService)
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_transparency_service(self):
         return Mock(spec=TransparencyService)
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_multi_agent_service(self):
         return Mock(spec=MultiAgentService)
     
-    @pytest.fixture
+    @pytest.fixture()
     def sample_user(self):
         user_id = UserId("test_user")
         preferences = UserPreferences(preferred_entrance=EntranceType.SECRETARIAT)
         return User(user_id, preferences)
     
-    @pytest.fixture
+    @pytest.fixture()
     def sample_session(self):
         user_id = UserId("test_user")
         session_id = SessionId("test_session")
         return Session(session_id, user_id, EntranceType.SECRETARIAT)
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_create_session_use_case_success(self, mock_user_repository, mock_session_repository):
         """Test successful session creation"""
         # Setup mocks
@@ -479,7 +489,7 @@ class TestEntranceUseCases:
         # Verify session was saved
         mock_session_repository.save.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_create_session_use_case_existing_user(self, mock_user_repository, mock_session_repository, sample_user):
         """Test session creation with existing user"""
         # Setup mocks
@@ -500,7 +510,7 @@ class TestEntranceUseCases:
         # The user should have the new session added to their history
         assert len(sample_user.session_history) == 1
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_switch_entrance_use_case_success(self, mock_session_repository, sample_session):
         """Test successful entrance switching"""
         # Setup mocks
@@ -522,7 +532,7 @@ class TestEntranceUseCases:
         # Verify session was saved
         mock_session_repository.save.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_switch_entrance_use_case_session_not_found(self, mock_session_repository):
         """Test entrance switching with session not found"""
         # Setup mocks
@@ -538,7 +548,7 @@ class TestEntranceUseCases:
         assert result["success"] is False
         assert result["error"] == "Session not found"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_process_secretariat_request_use_case_success(self, mock_session_repository, 
                                                                 mock_workflow_service, mock_transparency_service, sample_session):
         """Test successful Secretariat request processing"""
@@ -586,7 +596,7 @@ class TestEntranceUseCases:
         # Verify session was saved
         mock_session_repository.save.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_process_forum_request_use_case_success(self, mock_session_repository, 
                                                           mock_multi_agent_service, sample_session):
         """Test successful Forum request processing"""
@@ -616,7 +626,7 @@ class TestEntranceUseCases:
         # Verify session was saved
         mock_session_repository.save.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_handle_user_intervention_use_case_success(self, mock_session_repository, 
                                                            mock_multi_agent_service, sample_session):
         """Test successful user intervention handling"""
@@ -652,7 +662,7 @@ class TestEntranceUseCases:
         # Verify session was saved
         mock_session_repository.save.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_get_transparency_data_use_case_success(self, mock_session_repository, 
                                                           mock_transparency_service, sample_session):
         """Test successful transparency data retrieval"""
@@ -690,7 +700,7 @@ class TestEntranceUseCases:
         # Verify summary was generated
         mock_transparency_service.generate_intelligent_summary.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_get_transparency_data_use_case_no_data(self, mock_session_repository, 
                                                           mock_transparency_service, sample_session):
         """Test transparency data retrieval when no data is available"""
@@ -727,7 +737,7 @@ class TestEntranceUseCases:
         intent = use_case._determine_intent("Let's chat about AI")
         assert intent == IntentType.CASUAL_DISCUSSION
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_use_case_error_handling(self, mock_session_repository):
         """Test use case error handling"""
         # Test with invalid session ID

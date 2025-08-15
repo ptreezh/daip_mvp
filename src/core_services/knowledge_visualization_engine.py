@@ -1,17 +1,16 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: DAIP-LIVE
 @File: knowledge_visualization_engine.py
 @Description: V0.3.4 知识可视化引擎 - 交互式知识图谱和可视化组件
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, List, Optional, Any, Tuple, Union
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any
+
 # 延迟加载的可视化库
 _matplotlib_plt = None
 _matplotlib_mdates = None
@@ -123,12 +122,10 @@ def _get_networkx():
         except ImportError:
             raise ImportError("networkx is required for graph analysis")
     return _networkx
-from collections import defaultdict, Counter
 
-from ..core_services.knowledge_retrieval_service import KnowledgeRetrievalService
 from ..core_services.enhanced_sskg_manager import EnhancedSSKGManager
-from ..core_services.memory_agent import MemAgent
-from ..virtual_role_chat.sskg.models import KnowledgeFact, KnowledgeRelation, RelationType
+from ..core_services.knowledge_retrieval_service import KnowledgeRetrievalService
+from ..virtual_role_chat.sskg.models import KnowledgeFact
 
 
 class VisualizationType(Enum):
@@ -167,7 +164,7 @@ class GraphNode:
     color: str = "#1f77b4"
     x: float = 0.0
     y: float = 0.0
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -178,7 +175,7 @@ class GraphEdge:
     relation_type: str
     weight: float = 1.0
     color: str = "#999999"
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -190,7 +187,7 @@ class TimelineEvent:
     timestamp: datetime
     category: str
     importance: float
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -200,9 +197,9 @@ class ClusterInfo:
     label: str
     size: int
     centrality: float
-    members: List[str]
+    members: list[str]
     domain: str
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 
 class KnowledgeVisualizationEngine:
@@ -234,7 +231,7 @@ class KnowledgeVisualizationEngine:
     async def generate_knowledge_graph(self, 
                                     query: str = "",
                                     max_nodes: int = 100,
-                                    config: VisualizationConfig = None) -> Dict[str, Any]:
+                                    config: VisualizationConfig = None) -> dict[str, Any]:
         """生成交互式知识图谱"""
         try:
             if config is None:
@@ -304,8 +301,8 @@ class KnowledgeVisualizationEngine:
     async def generate_timeline(self, 
                              start_date: datetime = None,
                              end_date: datetime = None,
-                             category_filter: List[str] = None,
-                             config: VisualizationConfig = None) -> Dict[str, Any]:
+                             category_filter: list[str] = None,
+                             config: VisualizationConfig = None) -> dict[str, Any]:
         """生成时间线可视化"""
         try:
             if config is None:
@@ -342,7 +339,7 @@ class KnowledgeVisualizationEngine:
     async def generate_cluster_view(self, 
                                   query: str = "",
                                   algorithm: str = "louvain",
-                                  config: VisualizationConfig = None) -> Dict[str, Any]:
+                                  config: VisualizationConfig = None) -> dict[str, Any]:
         """生成聚类视图"""
         try:
             if config is None:
@@ -380,7 +377,7 @@ class KnowledgeVisualizationEngine:
     async def generate_network_diagram(self, 
                                     focus_node: str = "",
                                     depth: int = 2,
-                                    config: VisualizationConfig = None) -> Dict[str, Any]:
+                                    config: VisualizationConfig = None) -> dict[str, Any]:
         """生成网络关系图"""
         try:
             if config is None:
@@ -412,7 +409,7 @@ class KnowledgeVisualizationEngine:
     async def generate_heatmap(self, 
                             dimension1: str = "domain",
                             dimension2: str = "confidence",
-                            config: VisualizationConfig = None) -> Dict[str, Any]:
+                            config: VisualizationConfig = None) -> dict[str, Any]:
         """生成热力图"""
         try:
             if config is None:
@@ -445,7 +442,7 @@ class KnowledgeVisualizationEngine:
             return {"error": str(e)}
     
     def export_visualization(self, 
-                           visualization_data: Dict[str, Any], 
+                           visualization_data: dict[str, Any], 
                            format: str = "html",
                            filename: str = None) -> str:
         """导出可视化结果"""
@@ -475,7 +472,7 @@ class KnowledgeVisualizationEngine:
             self.logger.error(f"导出可视化失败: {e}")
             return ""
     
-    async def _get_knowledge_facts(self, query: str, max_count: int) -> List[KnowledgeFact]:
+    async def _get_knowledge_facts(self, query: str, max_count: int) -> list[KnowledgeFact]:
         """获取知识事实"""
         try:
             if query:
@@ -491,7 +488,7 @@ class KnowledgeVisualizationEngine:
             self.logger.error(f"获取知识事实失败: {e}")
             return []
     
-    async def _build_knowledge_network(self, knowledge_facts: List[KnowledgeFact]) -> nx.Graph:
+    async def _build_knowledge_network(self, knowledge_facts: list[KnowledgeFact]) -> nx.Graph:
         """构建知识网络"""
         G = nx.Graph()
         
@@ -519,7 +516,7 @@ class KnowledgeVisualizationEngine:
         
         return G
     
-    def _create_interactive_graph(self, nodes: List[Dict], edges: List[Dict], config: VisualizationConfig) -> go.Figure:
+    def _create_interactive_graph(self, nodes: list[dict], edges: list[dict], config: VisualizationConfig) -> go.Figure:
         """创建交互式图谱"""
         # 准备节点轨迹
         node_trace = go.Scatter(
@@ -584,7 +581,7 @@ class KnowledgeVisualizationEngine:
         return fig
     
     async def _get_timeline_events(self, start_date: datetime, end_date: datetime, 
-                                 category_filter: List[str]) -> List[TimelineEvent]:
+                                 category_filter: list[str]) -> list[TimelineEvent]:
         """获取时间线事件"""
         try:
             # 从SSKG获取时间序列数据
@@ -634,7 +631,7 @@ class KnowledgeVisualizationEngine:
             self.logger.error(f"获取时间线事件失败: {e}")
             return []
     
-    def _create_timeline_chart(self, events: List[TimelineEvent], config: VisualizationConfig) -> go.Figure:
+    def _create_timeline_chart(self, events: list[TimelineEvent], config: VisualizationConfig) -> go.Figure:
         """创建时间线图表"""
         # 准备数据
         df = pd.DataFrame([{
@@ -667,7 +664,7 @@ class KnowledgeVisualizationEngine:
         
         return fig
     
-    def _apply_clustering_algorithm(self, G: nx.Graph, algorithm: str) -> List[ClusterInfo]:
+    def _apply_clustering_algorithm(self, G: nx.Graph, algorithm: str) -> list[ClusterInfo]:
         """应用聚类算法"""
         try:
             if algorithm == "louvain":
@@ -708,7 +705,7 @@ class KnowledgeVisualizationEngine:
             self.logger.error(f"应用聚类算法失败: {e}")
             return []
     
-    def _calculate_cluster_centrality(self, G: nx.Graph, nodes: List[str]) -> float:
+    def _calculate_cluster_centrality(self, G: nx.Graph, nodes: list[str]) -> float:
         """计算聚类中心性"""
         try:
             subgraph = G.subgraph(nodes)
@@ -717,7 +714,7 @@ class KnowledgeVisualizationEngine:
         except Exception:
             return 0.0
     
-    def _calculate_modularity(self, G: nx.Graph, clusters: List[ClusterInfo]) -> float:
+    def _calculate_modularity(self, G: nx.Graph, clusters: list[ClusterInfo]) -> float:
         """计算模块度"""
         try:
             import community as community_louvain
@@ -730,7 +727,7 @@ class KnowledgeVisualizationEngine:
         except Exception:
             return 0.0
     
-    def _create_cluster_visualization(self, G: nx.Graph, clusters: List[ClusterInfo], 
+    def _create_cluster_visualization(self, G: nx.Graph, clusters: list[ClusterInfo], 
                                     config: VisualizationConfig) -> go.Figure:
         """创建聚类可视化"""
         # 为每个聚类分配颜色
@@ -880,7 +877,7 @@ class KnowledgeVisualizationEngine:
         
         return fig
     
-    async def _get_knowledge_statistics(self) -> Dict[str, Any]:
+    async def _get_knowledge_statistics(self) -> dict[str, Any]:
         """获取知识统计数据"""
         try:
             # 这里应该从实际数据库获取统计数据
@@ -912,7 +909,7 @@ class KnowledgeVisualizationEngine:
             self.logger.error(f"获取知识统计数据失败: {e}")
             return {}
     
-    def _prepare_heatmap_data(self, stats: Dict[str, Any], dim1: str, dim2: str) -> List[List[float]]:
+    def _prepare_heatmap_data(self, stats: dict[str, Any], dim1: str, dim2: str) -> list[list[float]]:
         """准备热力图数据"""
         try:
             if dim1 == "domain" and dim2 == "confidence":
@@ -936,7 +933,7 @@ class KnowledgeVisualizationEngine:
             self.logger.error(f"准备热力图数据失败: {e}")
             return [[0 for _ in range(5)] for _ in range(5)]
     
-    def _create_heatmap(self, data: List[List[float]], config: VisualizationConfig) -> go.Figure:
+    def _create_heatmap(self, data: list[list[float]], config: VisualizationConfig) -> go.Figure:
         """创建热力图"""
         fig = go.Figure(data=go.Heatmap(
             z=data,

@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-工作流共识算法测试
+"""工作流共识算法测试
 
 测试WorkflowConsensusAlgorithm的各种功能，包括与工作流引擎的兼容性。
 """
 
 import asyncio
 import sys
-import os
-from datetime import datetime
 
 # 添加src路径
 sys.path.append('src')
@@ -21,8 +17,6 @@ async def test_workflow_consensus_algorithm():
     
     try:
         from workflow_consensus_algorithm import WorkflowConsensusAlgorithm
-        from consensus_algorithm_interface import ConsensusContext
-        from consensus_models import ConsensusInput
         
         # 创建算法实例
         algorithm = WorkflowConsensusAlgorithm()
@@ -60,8 +54,8 @@ async def test_simple_consensus(algorithm):
     """测试简单共识功能"""
     print("\n📊 测试简单共识...")
     
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 创建简单共识输入
     inputs = [
@@ -101,8 +95,8 @@ async def test_fact_evidence_format(algorithm):
     """测试事实-证据格式"""
     print("\n🔍 测试事实-证据格式...")
     
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 创建事实-证据格式输入
     inputs = [
@@ -168,9 +162,9 @@ async def test_different_consensus_methods():
     """测试不同的共识方法"""
     print("\n⚙️ 测试不同共识方法...")
     
-    from workflow_consensus_algorithm import WorkflowConsensusAlgorithm
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
+    from workflow_consensus_algorithm import WorkflowConsensusAlgorithm
     
     # 创建测试输入
     inputs = [
@@ -224,8 +218,8 @@ async def test_workflow_compatibility(algorithm):
     """测试工作流兼容性"""
     print("\n🔄 测试工作流兼容性...")
     
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 模拟聚合证据格式（工作流中的典型格式）
     aggregated_evidence_input = ConsensusInput(
@@ -263,9 +257,9 @@ async def test_edge_cases():
     """测试边界情况"""
     print("\n⚠️ 测试边界情况...")
     
-    from workflow_consensus_algorithm import WorkflowConsensusAlgorithm
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
+    from workflow_consensus_algorithm import WorkflowConsensusAlgorithm
     
     algorithm = WorkflowConsensusAlgorithm()
     
@@ -306,8 +300,8 @@ async def test_performance_and_health():
     """测试性能和健康状态"""
     print("\n🏥 测试性能和健康状态...")
     
+    from consensus_models import ConsensusInput, ConsensusRequest
     from workflow_consensus_algorithm import WorkflowConsensusAlgorithm
-    from consensus_models import ConsensusRequest, ConsensusInput
     
     algorithm = WorkflowConsensusAlgorithm()
     

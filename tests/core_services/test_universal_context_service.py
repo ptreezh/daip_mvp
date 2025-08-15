@@ -1,28 +1,26 @@
-# -*- coding: utf-8 -*-
-"""
-Tests for Universal Context Service
+"""Tests for Universal Context Service
 """
 
-import pytest
-from datetime import datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from src.config import TokenManagementConfig
-from src.core_services.token_management_service import TokenManagementService
-from src.core_services.universal_context_service import UniversalContextService, ImportantInformation
 from src.core_services.memory_service import MemoryService
+from src.core_services.token_management_service import TokenManagementService
+from src.core_services.universal_context_service import UniversalContextService
 
 
 class TestUniversalContextService:
     """Test cases for UniversalContextService."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def token_service(self):
         """Create a mock token management service."""
         config = TokenManagementConfig()
         return TokenManagementService(config)
     
-    @pytest.fixture
+    @pytest.fixture()
     def memory_service(self):
         """Create a mock memory service."""
         # Create a mock memory service to avoid database dependencies
@@ -31,7 +29,7 @@ class TestUniversalContextService:
         mock_memory.retrieve_memories.return_value = []
         return mock_memory
     
-    @pytest.fixture
+    @pytest.fixture()
     def context_service(self, token_service, memory_service):
         """Create a UniversalContextService instance."""
         service = UniversalContextService(token_service, memory_service)

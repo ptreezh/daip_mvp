@@ -1,40 +1,37 @@
-"""
-State management for workflow execution.
+"""State management for workflow execution.
 
 This module handles workflow state persistence, recovery, and monitoring.
 """
 
-from typing import Dict, Any, Optional, List
-from datetime import datetime
 import asyncio
 import logging
-from .models import WorkflowExecution, WorkflowStatus, ExecutionStep
+from datetime import datetime
+from typing import Any, Optional
+
+from .models import ExecutionStep, WorkflowExecution, WorkflowStatus
 
 logger = logging.getLogger(__name__)
 
 
 class StateManager:
-    """
-    Manages workflow execution state and persistence.
+    """Manages workflow execution state and persistence.
     
     Handles state management, persistence, and recovery for workflow executions,
     providing rollback capabilities and state monitoring.
     """
     
     def __init__(self, storage_backend: Optional[Any] = None):
-        """
-        Initialize the state manager.
+        """Initialize the state manager.
         
         Args:
             storage_backend: Optional storage backend for persistence
         """
         self.storage_backend = storage_backend
-        self._executions: Dict[str, WorkflowExecution] = {}
+        self._executions: dict[str, WorkflowExecution] = {}
         self._state_lock = asyncio.Lock()
     
     async def create_execution(self, execution: WorkflowExecution) -> bool:
-        """
-        Create a new workflow execution state.
+        """Create a new workflow execution state.
         
         Args:
             execution: WorkflowExecution to create
@@ -62,8 +59,7 @@ class StateManager:
                 return False
     
     async def get_execution(self, execution_id: str) -> Optional[WorkflowExecution]:
-        """
-        Get workflow execution state.
+        """Get workflow execution state.
         
         Args:
             execution_id: ID of the execution to retrieve
@@ -83,8 +79,7 @@ class StateManager:
             return execution
     
     async def update_execution(self, execution: WorkflowExecution) -> bool:
-        """
-        Update workflow execution state.
+        """Update workflow execution state.
         
         Args:
             execution: Updated WorkflowExecution
@@ -116,8 +111,7 @@ class StateManager:
         status: WorkflowStatus,
         current_step: Optional[str] = None
     ) -> bool:
-        """
-        Update execution status.
+        """Update execution status.
         
         Args:
             execution_id: ID of the execution
@@ -141,8 +135,7 @@ class StateManager:
         return await self.update_execution(execution)
     
     async def add_execution_step(self, execution_id: str, step: ExecutionStep) -> bool:
-        """
-        Add an execution step to the trace.
+        """Add an execution step to the trace.
         
         Args:
             execution_id: ID of the execution
@@ -161,10 +154,9 @@ class StateManager:
     async def update_workflow_state(
         self, 
         execution_id: str, 
-        state_updates: Dict[str, Any]
+        state_updates: dict[str, Any]
     ) -> bool:
-        """
-        Update workflow shared state.
+        """Update workflow shared state.
         
         Args:
             execution_id: ID of the execution
@@ -184,10 +176,9 @@ class StateManager:
         self, 
         execution_id: str, 
         node_id: str, 
-        outputs: Dict[str, Any]
+        outputs: dict[str, Any]
     ) -> bool:
-        """
-        Set outputs for a specific node.
+        """Set outputs for a specific node.
         
         Args:
             execution_id: ID of the execution
@@ -208,9 +199,8 @@ class StateManager:
         self, 
         execution_id: str, 
         node_id: str
-    ) -> Optional[Dict[str, Any]]:
-        """
-        Get outputs for a specific node.
+    ) -> Optional[dict[str, Any]]:
+        """Get outputs for a specific node.
         
         Args:
             execution_id: ID of the execution
@@ -226,8 +216,7 @@ class StateManager:
         return execution.node_outputs.get(node_id)
     
     async def add_execution_error(self, execution_id: str, error: str) -> bool:
-        """
-        Add an error to the execution.
+        """Add an error to the execution.
         
         Args:
             execution_id: ID of the execution
@@ -244,8 +233,7 @@ class StateManager:
         return await self.update_execution(execution)
     
     async def add_execution_warning(self, execution_id: str, warning: str) -> bool:
-        """
-        Add a warning to the execution.
+        """Add a warning to the execution.
         
         Args:
             execution_id: ID of the execution
@@ -262,8 +250,7 @@ class StateManager:
         return await self.update_execution(execution)
     
     async def create_checkpoint(self, execution_id: str) -> Optional[str]:
-        """
-        Create a checkpoint for rollback capability.
+        """Create a checkpoint for rollback capability.
         
         Args:
             execution_id: ID of the execution
@@ -297,8 +284,7 @@ class StateManager:
         execution_id: str, 
         checkpoint_id: str
     ) -> bool:
-        """
-        Rollback execution to a previous checkpoint.
+        """Rollback execution to a previous checkpoint.
         
         Args:
             execution_id: ID of the execution
@@ -332,9 +318,8 @@ class StateManager:
     async def list_executions(
         self, 
         status_filter: Optional[WorkflowStatus] = None
-    ) -> List[str]:
-        """
-        List execution IDs, optionally filtered by status.
+    ) -> list[str]:
+        """List execution IDs, optionally filtered by status.
         
         Args:
             status_filter: Optional status to filter by
@@ -352,8 +337,7 @@ class StateManager:
             ]
     
     async def cleanup_completed_executions(self, max_age_hours: int = 24) -> int:
-        """
-        Clean up old completed executions.
+        """Clean up old completed executions.
         
         Args:
             max_age_hours: Maximum age in hours for completed executions
@@ -389,12 +373,12 @@ class StateManager:
             return await self.storage_backend.load_execution(execution_id)
         return None
     
-    async def _store_checkpoint(self, checkpoint_id: str, checkpoint_data: Dict[str, Any]) -> None:
+    async def _store_checkpoint(self, checkpoint_id: str, checkpoint_data: dict[str, Any]) -> None:
         """Store checkpoint to storage backend."""
         if self.storage_backend and hasattr(self.storage_backend, 'store_checkpoint'):
             await self.storage_backend.store_checkpoint(checkpoint_id, checkpoint_data)
     
-    async def _load_checkpoint(self, checkpoint_id: str) -> Optional[Dict[str, Any]]:
+    async def _load_checkpoint(self, checkpoint_id: str) -> Optional[dict[str, Any]]:
         """Load checkpoint from storage backend."""
         if self.storage_backend and hasattr(self.storage_backend, 'load_checkpoint'):
             return await self.storage_backend.load_checkpoint(checkpoint_id)

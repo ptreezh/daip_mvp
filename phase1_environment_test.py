@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 10:00:00
+"""@Time    : 2025-08-05 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : phase1_environment_test.py
 @Description:
@@ -8,15 +6,12 @@
     包括Python环境检查、依赖服务验证等基础测试
 """
 
-import sys
-import subprocess
-import os
 import json
-import requests
+import logging
+import subprocess
+import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
-import logging
 
 # 配置日志
 logging.basicConfig(
@@ -145,7 +140,7 @@ class EnvironmentTester:
         
         try:
             import yaml
-            with open(self.config_file, 'r', encoding='utf-8') as f:
+            with open(self.config_file, encoding='utf-8') as f:
                 config = yaml.safe_load(f)
             
             # 检查关键配置项
@@ -327,7 +322,7 @@ class EnvironmentTester:
         logger.info(f"测试报告已生成: {report_path}")
         return str(report_path)
     
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """生成建议"""
         recommendations = []
         

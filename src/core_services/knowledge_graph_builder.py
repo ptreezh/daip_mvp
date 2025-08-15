@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-知识图谱构建器
+"""知识图谱构建器
 
 从文本中提取实体和关系，构建知识图谱
 """
 
 import logging
 import re
-from typing import Dict, List, Any, Tuple
 from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -24,15 +22,15 @@ class KnowledgeGraphBuilder:
         
         logger.info("知识图谱构建器初始化完成")
     
-    def extract_entities(self, text: str) -> List[Dict[str, Any]]:
+    def extract_entities(self, text: str) -> list[dict[str, Any]]:
         """提取实体"""
         return self.entity_extractor.extract(text)
     
-    def detect_relations(self, text: str, entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def detect_relations(self, text: str, entities: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """检测关系"""
         return self.relation_detector.detect(text, entities)
     
-    def build_graph_from_text(self, text: str) -> Dict[str, Any]:
+    def build_graph_from_text(self, text: str) -> dict[str, Any]:
         """从文本构建图谱"""
         try:
             # 提取实体
@@ -64,7 +62,7 @@ class KnowledgeGraphBuilder:
                 "error": str(e)
             }
     
-    def _build_graph_structure(self, entities: List[Dict[str, Any]], relations: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _build_graph_structure(self, entities: list[dict[str, Any]], relations: list[dict[str, Any]]) -> dict[str, Any]:
         """构建图谱结构"""
         try:
             # 创建节点
@@ -132,7 +130,7 @@ class EntityExtractor:
             ]
         }
     
-    def extract(self, text: str) -> List[Dict[str, Any]]:
+    def extract(self, text: str) -> list[dict[str, Any]]:
         """提取实体"""
         try:
             entities = []
@@ -181,7 +179,7 @@ class EntityExtractor:
         
         return min(base_importance + length_factor * 0.2, 1.0)
     
-    def _deduplicate_entities(self, entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _deduplicate_entities(self, entities: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """去重实体"""
         seen = set()
         unique_entities = []
@@ -229,7 +227,7 @@ class RelationDetector:
             }
         ]
     
-    def detect(self, text: str, entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def detect(self, text: str, entities: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """检测关系"""
         try:
             relations = []
@@ -282,7 +280,7 @@ class RelationDetector:
             logger.error(f"检测关系失败: {e}")
             return []
     
-    def _find_matching_entity(self, text: str, entity_map: Dict[str, str]) -> str:
+    def _find_matching_entity(self, text: str, entity_map: dict[str, str]) -> str:
         """查找匹配的实体"""
         # 精确匹配
         if text in entity_map:
@@ -295,7 +293,7 @@ class RelationDetector:
         
         return None
     
-    def _detect_cooccurrence_relations(self, text: str, entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _detect_cooccurrence_relations(self, text: str, entities: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """基于共现检测关系"""
         relations = []
         relation_id = len([r for r in relations]) + 1000  # 避免ID冲突

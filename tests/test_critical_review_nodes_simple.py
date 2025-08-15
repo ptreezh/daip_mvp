@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-23 14:00:00
+"""@Time    : 2025-07-23 14:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_critical_review_nodes_simple.py
 @Description:
     Simplified unit tests for Critical Review Workflow nodes.
 """
+from unittest.mock import Mock
+
 import pytest
-from datetime import datetime
-from unittest.mock import Mock, AsyncMock
+
 
 # Test the data models first
 def test_extracted_fact_model():
@@ -49,7 +48,7 @@ def test_evidence_model():
 
 def test_evidence_report_model():
     """Test EvidenceReport model creation."""
-    from src.institutional_primitives.critical_review_nodes import EvidenceReport, Evidence
+    from src.institutional_primitives.critical_review_nodes import Evidence, EvidenceReport
     
     supporting_evidence = Evidence(
         content="Support",
@@ -145,7 +144,7 @@ def test_evidence_aggregation_node_initialization():
 
 def test_evidence_aggregation_calculate_score():
     """Test evidence score calculation."""
-    from src.institutional_primitives.critical_review_nodes import EvidenceAggregationNode, Evidence
+    from src.institutional_primitives.critical_review_nodes import Evidence, EvidenceAggregationNode
     
     node = EvidenceAggregationNode("agg_1", {"weight_by_credibility": True})
     

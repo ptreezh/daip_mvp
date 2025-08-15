@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - 双入口Lona界面启动脚本
+"""Personal Intelligence Hub - 双入口Lona界面启动脚本
 
 基于DDD架构设计的统一入口界面
 支持Secretariat和Forum两种交互模式
@@ -10,16 +8,16 @@ Personal Intelligence Hub - 双入口Lona界面启动脚本
 import asyncio
 import logging
 import sys
-import os
 from pathlib import Path
 
 # 添加项目根目录到Python路径
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from lona import LonaApp, View
-from lona.html import HTML, Head, Title, Link, Meta, Body, Div, H1, P
-from frontend.lona_interface_design import MainView, create_lona_app
+from lona import View
+from lona.html import H1, HTML, Body, Div, Head, Link, Meta, P, Title
+
+from frontend.lona_interface_design import create_lona_app
 from frontend.websocket_integration import global_websocket_manager
 
 # 配置日志

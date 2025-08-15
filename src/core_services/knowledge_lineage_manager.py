@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-知识谱系管理器
+"""知识谱系管理器
 
 管理知识的谱系关系和影响网络
 """
 
 import logging
-from typing import Any, Dict, List, Optional
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +82,7 @@ class KnowledgeLineageManager:
             logger.error(f"建立关系失败: {e}")
             return False
     
-    def trace_knowledge_ancestry(self, node_id: str) -> List[Dict[str, Any]]:
+    def trace_knowledge_ancestry(self, node_id: str) -> list[dict[str, Any]]:
         """追踪知识祖先"""
         try:
             if node_id not in self.lineage_graph:

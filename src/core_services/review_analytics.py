@@ -1,21 +1,20 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: Claude Code
 @File: review_analytics.py
 @Description: Review analytics system for analyzing collaborative review processes with graceful degradation
 """
 
 import asyncio
-import json
 import logging
-import time
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Set, Tuple, Callable
-from dataclasses import dataclass, field
-from enum import Enum
 import threading
-from collections import defaultdict, deque
+import time
 import uuid
+from collections import defaultdict, deque
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -48,11 +47,11 @@ class ReviewMetric:
     value: float
     scope: AnalysisScope
     timestamp: datetime
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
     threshold: Optional[float] = None
     unit: str = ""
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert metric to dictionary"""
         return {
             'metric_id': self.metric_id,
@@ -77,11 +76,11 @@ class ReviewInsight:
     confidence: float
     impact_level: str
     actionable: bool
-    recommendations: List[str]
-    related_metrics: List[str]
+    recommendations: list[str]
+    related_metrics: list[str]
     timestamp: datetime
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert insight to dictionary"""
         return {
             'insight_id': self.insight_id,
@@ -103,13 +102,13 @@ class AnalyticsReport:
     report_id: str
     title: str
     scope: AnalysisScope
-    time_period: Tuple[datetime, datetime]
-    metrics: List[ReviewMetric]
-    insights: List[ReviewInsight]
+    time_period: tuple[datetime, datetime]
+    metrics: list[ReviewMetric]
+    insights: list[ReviewInsight]
     summary: str
     generated_at: datetime
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert report to dictionary"""
         return {
             'report_id': self.report_id,
@@ -124,8 +123,7 @@ class AnalyticsReport:
 
 
 class ReviewAnalytics:
-    """
-    Review analytics system with graceful degradation
+    """Review analytics system with graceful degradation
     Analyzes collaborative review processes and provides insights
     """
     
@@ -138,8 +136,8 @@ class ReviewAnalytics:
         self.reports_history: deque = deque(maxlen=1000)
         
         # Performance tracking
-        self.calculation_times: Dict[str, List[float]] = defaultdict(list)
-        self.last_calculation_time: Dict[str, float] = {}
+        self.calculation_times: dict[str, list[float]] = defaultdict(list)
+        self.last_calculation_time: dict[str, float] = {}
         
         # Graceful degradation settings
         self.max_calculation_time = 5.0  # seconds
@@ -147,19 +145,19 @@ class ReviewAnalytics:
         self.cache_ttl = 300  # seconds
         
         # Caching
-        self.metric_cache: Dict[str, Tuple[float, datetime]] = {}
-        self.insight_cache: Dict[str, Tuple[ReviewInsight, datetime]] = {}
+        self.metric_cache: dict[str, tuple[float, datetime]] = {}
+        self.insight_cache: dict[str, tuple[ReviewInsight, datetime]] = {}
         
         # Background processing
         self._running = False
         self._lock = threading.Lock()
         
         # Analytics processors
-        self.metric_processors: Dict[MetricType, Callable] = {}
-        self.insight_generators: List[Callable] = []
+        self.metric_processors: dict[MetricType, Callable] = {}
+        self.insight_generators: list[Callable] = []
         
         # Configuration
-        self.metric_thresholds: Dict[str, float] = {
+        self.metric_thresholds: dict[str, float] = {
             'participation_rate': 0.7,
             'quality_score': 0.8,
             'efficiency_ratio': 0.6,
@@ -200,7 +198,7 @@ class ReviewAnalytics:
             # Graceful degradation: continue without recording
             return metric.metric_id
             
-    async def calculate_session_metrics(self, session_id: str) -> List[ReviewMetric]:
+    async def calculate_session_metrics(self, session_id: str) -> list[ReviewMetric]:
         """Calculate metrics for a specific session"""
         try:
             start_time = time.time()
@@ -239,7 +237,7 @@ class ReviewAnalytics:
             # Graceful degradation: return basic metrics
             return await self._get_basic_metrics(session_id)
             
-    async def calculate_reviewer_metrics(self, reviewer_id: str) -> List[ReviewMetric]:
+    async def calculate_reviewer_metrics(self, reviewer_id: str) -> list[ReviewMetric]:
         """Calculate metrics for a specific reviewer"""
         try:
             start_time = time.time()
@@ -299,7 +297,7 @@ class ReviewAnalytics:
                 )
             ]
             
-    async def generate_insights(self, scope: AnalysisScope, scope_id: str) -> List[ReviewInsight]:
+    async def generate_insights(self, scope: AnalysisScope, scope_id: str) -> list[ReviewInsight]:
         """Generate insights based on analytics data"""
         try:
             start_time = time.time()
@@ -341,7 +339,7 @@ class ReviewAnalytics:
             return []
             
     async def generate_report(self, scope: AnalysisScope, scope_id: str, 
-                           time_period: Tuple[datetime, datetime]) -> AnalyticsReport:
+                           time_period: tuple[datetime, datetime]) -> AnalyticsReport:
         """Generate comprehensive analytics report"""
         try:
             start_time = time.time()
@@ -389,7 +387,7 @@ class ReviewAnalytics:
                 generated_at=datetime.now()
             )
             
-    async def get_system_stats(self) -> Dict[str, Any]:
+    async def get_system_stats(self) -> dict[str, Any]:
         """Get system statistics"""
         with self._lock:
             metrics_count = len(self.metrics_history)
@@ -415,7 +413,7 @@ class ReviewAnalytics:
         }
         
     # Private methods for metric calculation
-    async def _calculate_participation_metrics(self, session_data: Dict[str, Any]) -> List[ReviewMetric]:
+    async def _calculate_participation_metrics(self, session_data: dict[str, Any]) -> list[ReviewMetric]:
         """Calculate participation metrics"""
         metrics = []
         
@@ -456,7 +454,7 @@ class ReviewAnalytics:
         
         return metrics
         
-    async def _calculate_quality_metrics(self, session_data: Dict[str, Any]) -> List[ReviewMetric]:
+    async def _calculate_quality_metrics(self, session_data: dict[str, Any]) -> list[ReviewMetric]:
         """Calculate quality metrics"""
         metrics = []
         
@@ -484,7 +482,7 @@ class ReviewAnalytics:
         
         return metrics
         
-    async def _calculate_efficiency_metrics(self, session_data: Dict[str, Any]) -> List[ReviewMetric]:
+    async def _calculate_efficiency_metrics(self, session_data: dict[str, Any]) -> list[ReviewMetric]:
         """Calculate efficiency metrics"""
         metrics = []
         
@@ -523,7 +521,7 @@ class ReviewAnalytics:
         
         return metrics
         
-    async def _generate_participation_insights(self, metrics: List[ReviewMetric]) -> List[ReviewInsight]:
+    async def _generate_participation_insights(self, metrics: list[ReviewMetric]) -> list[ReviewInsight]:
         """Generate participation-related insights"""
         insights = []
         
@@ -551,7 +549,7 @@ class ReviewAnalytics:
                 
         return insights
         
-    async def _generate_quality_insights(self, metrics: List[ReviewMetric]) -> List[ReviewInsight]:
+    async def _generate_quality_insights(self, metrics: list[ReviewMetric]) -> list[ReviewInsight]:
         """Generate quality-related insights"""
         insights = []
         
@@ -579,7 +577,7 @@ class ReviewAnalytics:
                 
         return insights
         
-    async def _generate_efficiency_insights(self, metrics: List[ReviewMetric]) -> List[ReviewInsight]:
+    async def _generate_efficiency_insights(self, metrics: list[ReviewMetric]) -> list[ReviewInsight]:
         """Generate efficiency-related insights"""
         insights = []
         
@@ -608,7 +606,7 @@ class ReviewAnalytics:
         return insights
         
     # Helper methods
-    async def _get_session_data(self, session_id: str) -> Dict[str, Any]:
+    async def _get_session_data(self, session_id: str) -> dict[str, Any]:
         """Get session data (placeholder)"""
         # In real implementation, this would query a database
         return {
@@ -625,7 +623,7 @@ class ReviewAnalytics:
             'avg_resolution_time': 1800
         }
         
-    async def _get_reviewer_data(self, reviewer_id: str) -> Dict[str, Any]:
+    async def _get_reviewer_data(self, reviewer_id: str) -> dict[str, Any]:
         """Get reviewer data (placeholder)"""
         # In real implementation, this would query a database
         return {
@@ -637,21 +635,21 @@ class ReviewAnalytics:
             'issues_resolved': 12
         }
         
-    def _calculate_reviewer_participation(self, reviewer_data: Dict[str, Any]) -> float:
+    def _calculate_reviewer_participation(self, reviewer_data: dict[str, Any]) -> float:
         """Calculate reviewer participation rate"""
         sessions_participated = reviewer_data.get('sessions_participated', 0)
         total_sessions = 20  # This would be from system config
         
         return sessions_participated / total_sessions if total_sessions > 0 else 0.0
         
-    def _calculate_reviewer_quality(self, reviewer_data: Dict[str, Any]) -> float:
+    def _calculate_reviewer_quality(self, reviewer_data: dict[str, Any]) -> float:
         """Calculate reviewer quality score"""
         helpful_votes = reviewer_data.get('helpful_votes_received', 0)
         total_votes = reviewer_data.get('total_votes_received', 0)
         
         return helpful_votes / total_votes if total_votes > 0 else 0.5
         
-    async def _get_basic_metrics(self, session_id: str) -> List[ReviewMetric]:
+    async def _get_basic_metrics(self, session_id: str) -> list[ReviewMetric]:
         """Get basic metrics for graceful degradation"""
         return [
             ReviewMetric(
@@ -667,7 +665,7 @@ class ReviewAnalytics:
             )
         ]
         
-    async def _get_relevant_metrics(self, scope: AnalysisScope, scope_id: str) -> List[ReviewMetric]:
+    async def _get_relevant_metrics(self, scope: AnalysisScope, scope_id: str) -> list[ReviewMetric]:
         """Get relevant metrics for insight generation"""
         with self._lock:
             # Filter metrics by scope and recent time period
@@ -683,7 +681,7 @@ class ReviewAnalytics:
             return recent_metrics
             
     async def _calculate_report_metrics(self, scope: AnalysisScope, scope_id: str,
-                                      time_period: Tuple[datetime, datetime]) -> List[ReviewMetric]:
+                                      time_period: tuple[datetime, datetime]) -> list[ReviewMetric]:
         """Calculate metrics for report"""
         # Get metrics within time period
         relevant_metrics = []
@@ -695,7 +693,7 @@ class ReviewAnalytics:
                     
         return relevant_metrics
         
-    async def _generate_report_insights(self, metrics: List[ReviewMetric]) -> List[ReviewInsight]:
+    async def _generate_report_insights(self, metrics: list[ReviewMetric]) -> list[ReviewInsight]:
         """Generate insights for report"""
         all_insights = []
         
@@ -711,7 +709,7 @@ class ReviewAnalytics:
         
         return all_insights
         
-    async def _generate_report_summary(self, metrics: List[ReviewMetric], insights: List[ReviewInsight]) -> str:
+    async def _generate_report_summary(self, metrics: list[ReviewMetric], insights: list[ReviewInsight]) -> str:
         """Generate report summary"""
         if not metrics:
             return "No metrics available for this time period."
@@ -723,7 +721,7 @@ class ReviewAnalytics:
         # Count issues
         warning_insights = [i for i in insights if i.impact_level in ["medium", "high"]]
         
-        summary = f"Report Summary:\n"
+        summary = "Report Summary:\n"
         summary += f"- Total metrics analyzed: {len(metrics)}\n"
         summary += f"- Average quality score: {avg_quality:.2f}\n"
         summary += f"- Average efficiency ratio: {avg_efficiency:.2f}\n"

@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-贝叶斯共识算法测试
+"""贝叶斯共识算法测试
 
 测试BayesianAlgorithm的各种功能，包括数值和分类贝叶斯更新。
 """
 
 import asyncio
 import sys
-import os
-from datetime import datetime
 
 # 添加src路径
 sys.path.append('src')
@@ -21,8 +17,6 @@ async def test_bayesian_algorithm():
     
     try:
         from bayesian_algorithm import BayesianAlgorithm
-        from consensus_algorithm_interface import ConsensusContext
-        from consensus_models import ConsensusInput
         
         # 创建算法实例
         algorithm = BayesianAlgorithm()
@@ -60,8 +54,8 @@ async def test_numerical_bayesian_consensus(algorithm):
     """测试数值贝叶斯共识"""
     print("\n🔢 测试数值贝叶斯共识...")
     
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 创建数值输入（不同置信度作为精度权重）
     inputs = [
@@ -107,8 +101,8 @@ async def test_categorical_bayesian_consensus(algorithm):
     """测试分类贝叶斯共识"""
     print("\n📊 测试分类贝叶斯共识...")
     
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 创建分类输入（置信度作为证据强度）
     inputs = [
@@ -155,8 +149,8 @@ async def test_prior_strength_effect():
     print("\n🎯 测试先验强度影响...")
     
     from bayesian_algorithm import BayesianAlgorithm
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     # 创建测试输入
     inputs = [
@@ -215,8 +209,8 @@ async def test_edge_cases():
     print("\n⚠️ 测试边界情况...")
     
     from bayesian_algorithm import BayesianAlgorithm
-    from consensus_models import ConsensusInput
     from consensus_algorithm_interface import ConsensusContext
+    from consensus_models import ConsensusInput
     
     algorithm = BayesianAlgorithm()
     
@@ -261,7 +255,7 @@ async def test_health_and_performance():
     print("\n🏥 测试健康状态和性能...")
     
     from bayesian_algorithm import BayesianAlgorithm
-    from consensus_models import ConsensusRequest, ConsensusInput
+    from consensus_models import ConsensusInput, ConsensusRequest
     
     algorithm = BayesianAlgorithm()
     

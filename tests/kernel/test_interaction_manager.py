@@ -1,20 +1,19 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 10:00:00
+"""@Time    : 2025-07-25 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_interaction_manager.py
 @Description:
     Unit tests for the InteractionManager.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
 import ollama
+import pytest
 from ollama import ResponseError
 
 from src.kernel.interaction_manager import InteractionManager
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_ollama_client():
     """Fixture for a mocked Ollama async client."""
     client = MagicMock(spec=ollama.AsyncClient)
@@ -22,7 +21,7 @@ def mock_ollama_client():
     return client
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_response_success(mock_ollama_client):
     """Tests that get_response successfully returns content from the LLM."""
     # Arrange
@@ -44,7 +43,7 @@ async def test_get_response_success(mock_ollama_client):
     assert "Some debate context." in messages[1]['content']
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_response_handles_response_error(mock_ollama_client):
     """Tests that get_response handles Ollama ResponseError gracefully."""
     # Arrange
@@ -59,7 +58,7 @@ async def test_get_response_handles_response_error(mock_ollama_client):
     assert "Model not found" in response
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_response_handles_unexpected_error(mock_ollama_client):
     """Tests that get_response handles unexpected exceptions."""
     # Arrange

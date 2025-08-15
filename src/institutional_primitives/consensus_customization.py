@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 07:30:00
+"""@Time    : 2025-07-25 07:30:00
 @Author  : DAIP-LIVE Team
 @File    : consensus_customization.py
 @Description:
@@ -8,13 +6,10 @@
     Implements requirement 7.5 - custom consensus mechanism registration.
 """
 import logging
-import asyncio
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Callable, Union, Tuple
 from datetime import datetime
 from enum import Enum
-import statistics
-import math
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -68,10 +63,10 @@ class ConsensusInput(BaseModel):
     participant_id: str
     vote: Any  # Can be boolean, numeric, categorical, or complex object
     confidence: float = Field(ge=0.0, le=1.0)
-    evidence: List[Dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
     reasoning: str = ""
     weight: float = Field(ge=0.0, default=1.0)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ConsensusResult(BaseModel):
@@ -80,11 +75,11 @@ class ConsensusResult(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     agreement_level: float = Field(ge=0.0, le=1.0)
     participant_count: int
-    supporting_participants: List[str] = Field(default_factory=list)
-    dissenting_participants: List[str] = Field(default_factory=list)
-    evidence_summary: Dict[str, Any] = Field(default_factory=dict)
+    supporting_participants: list[str] = Field(default_factory=list)
+    dissenting_participants: list[str] = Field(default_factory=list)
+    evidence_summary: dict[str, Any] = Field(default_factory=dict)
     reasoning: str = ""
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
@@ -110,7 +105,7 @@ class ConsensusConfiguration(BaseModel):
     max_iterations: int = Field(ge=1, default=3)
     
     # Custom parameters
-    custom_parameters: Dict[str, Any] = Field(default_factory=dict)
+    custom_parameters: dict[str, Any] = Field(default_factory=dict)
     
     # Metadata
     created_at: datetime = Field(default_factory=datetime.now)
@@ -119,15 +114,13 @@ class ConsensusConfiguration(BaseModel):
 
 
 class ConsensusAlgorithm(ABC):
-    """
-    Abstract base class for consensus algorithms.
+    """Abstract base class for consensus algorithms.
     
     Custom consensus mechanisms must implement this interface.
     """
     
     def __init__(self, config: ConsensusConfiguration):
-        """
-        Initialize the consensus algorithm.
+        """Initialize the consensus algorithm.
         
         Args:
             config: Configuration for the consensus mechanism
@@ -135,9 +128,8 @@ class ConsensusAlgorithm(ABC):
         self.config = config
     
     @abstractmethod
-    async def calculate_consensus(self, inputs: List[ConsensusInput]) -> ConsensusResult:
-        """
-        Calculate consensus from participant inputs.
+    async def calculate_consensus(self, inputs: list[ConsensusInput]) -> ConsensusResult:
+        """Calculate consensus from participant inputs.
         
         Args:
             inputs: List of participant inputs
@@ -148,9 +140,8 @@ class ConsensusAlgorithm(ABC):
         pass
     
     @abstractmethod
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> List[str]:
-        """
-        Validate consensus inputs.
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> list[str]:
+        """Validate consensus inputs.
         
         Args:
             inputs: List of participant inputs
@@ -160,7 +151,7 @@ class ConsensusAlgorithm(ABC):
         """
         pass
     
-    def get_algorithm_info(self) -> Dict[str, Any]:
+    def get_algorithm_info(self) -> dict[str, Any]:
         """Get information about this algorithm."""
         return {
             "mechanism_id": self.config.mechanism_id,
@@ -174,7 +165,7 @@ class ConsensusAlgorithm(ABC):
 class MajorityVoteAlgorithm(ConsensusAlgorithm):
     """Simple majority voting algorithm."""
     
-    async def calculate_consensus(self, inputs: List[ConsensusInput]) -> ConsensusResult:
+    async def calculate_consensus(self, inputs: list[ConsensusInput]) -> ConsensusResult:
         """Calculate majority vote consensus."""
         if not inputs:
             return ConsensusResult(
@@ -229,7 +220,7 @@ class MajorityVoteAlgorithm(ConsensusAlgorithm):
             reasoning=f"Majority vote: {majority_count}/{total_votes} participants agreed on '{consensus_value}'"
         )
     
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> List[str]:
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> list[str]:
         """Validate inputs for majority voting."""
         errors = []
         
@@ -246,7 +237,7 @@ class MajorityVoteAlgorithm(ConsensusAlgorithm):
 class WeightedVoteAlgorithm(ConsensusAlgorithm):
     """Weighted voting algorithm based on participant weights."""
     
-    async def calculate_consensus(self, inputs: List[ConsensusInput]) -> ConsensusResult:
+    async def calculate_consensus(self, inputs: list[ConsensusInput]) -> ConsensusResult:
         """Calculate weighted vote consensus."""
         if not inputs:
             return ConsensusResult(
@@ -305,7 +296,7 @@ class WeightedVoteAlgorithm(ConsensusAlgorithm):
             reasoning=f"Weighted vote: {majority_weight:.2f}/{total_weight:.2f} weight for '{consensus_value}'"
         )
     
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> List[str]:
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> list[str]:
         """Validate inputs for weighted voting."""
         errors = []
         
@@ -328,7 +319,7 @@ class WeightedVoteAlgorithm(ConsensusAlgorithm):
 class EvidenceBasedAlgorithm(ConsensusAlgorithm):
     """Evidence-based consensus algorithm."""
     
-    async def calculate_consensus(self, inputs: List[ConsensusInput]) -> ConsensusResult:
+    async def calculate_consensus(self, inputs: list[ConsensusInput]) -> ConsensusResult:
         """Calculate evidence-based consensus."""
         if not inputs:
             return ConsensusResult(
@@ -424,7 +415,7 @@ class EvidenceBasedAlgorithm(ConsensusAlgorithm):
                      f"({best_score['evidence_count']} evidence items, {best_score['participant_count']} participants)"
         )
     
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> List[str]:
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> list[str]:
         """Validate inputs for evidence-based consensus."""
         errors = []
         
@@ -441,7 +432,7 @@ class EvidenceBasedAlgorithm(ConsensusAlgorithm):
 class BayesianConsensusAlgorithm(ConsensusAlgorithm):
     """Bayesian consensus algorithm using prior beliefs and evidence."""
     
-    async def calculate_consensus(self, inputs: List[ConsensusInput]) -> ConsensusResult:
+    async def calculate_consensus(self, inputs: list[ConsensusInput]) -> ConsensusResult:
         """Calculate Bayesian consensus."""
         if not inputs:
             return ConsensusResult(
@@ -525,7 +516,7 @@ class BayesianConsensusAlgorithm(ConsensusAlgorithm):
             }
         )
     
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> List[str]:
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> list[str]:
         """Validate inputs for Bayesian consensus."""
         errors = []
         
@@ -540,8 +531,7 @@ class BayesianConsensusAlgorithm(ConsensusAlgorithm):
 
 
 class ConsensusRegistry:
-    """
-    Registry for consensus algorithms and configurations.
+    """Registry for consensus algorithms and configurations.
     
     This class manages the registration and instantiation of
     custom consensus mechanisms.
@@ -549,8 +539,8 @@ class ConsensusRegistry:
     
     def __init__(self):
         """Initialize the consensus registry."""
-        self.algorithms: Dict[str, type] = {}
-        self.configurations: Dict[str, ConsensusConfiguration] = {}
+        self.algorithms: dict[str, type] = {}
+        self.configurations: dict[str, ConsensusConfiguration] = {}
         
         # Register built-in algorithms
         self._register_builtin_algorithms()
@@ -567,8 +557,7 @@ class ConsensusRegistry:
         logger.info("Registered built-in consensus algorithms")
     
     def register_algorithm(self, algorithm_id: str, algorithm_class: type) -> bool:
-        """
-        Register a custom consensus algorithm.
+        """Register a custom consensus algorithm.
         
         Args:
             algorithm_id: Unique identifier for the algorithm
@@ -578,7 +567,7 @@ class ConsensusRegistry:
             True if registration was successful
         """
         if not issubclass(algorithm_class, ConsensusAlgorithm):
-            logger.error(f"Algorithm class must inherit from ConsensusAlgorithm")
+            logger.error("Algorithm class must inherit from ConsensusAlgorithm")
             return False
         
         if algorithm_id in self.algorithms:
@@ -589,8 +578,7 @@ class ConsensusRegistry:
         return True
     
     def register_configuration(self, config: ConsensusConfiguration) -> bool:
-        """
-        Register a consensus configuration.
+        """Register a consensus configuration.
         
         Args:
             config: Consensus configuration to register
@@ -606,8 +594,7 @@ class ConsensusRegistry:
         return True
     
     def create_consensus_instance(self, mechanism_id: str) -> Optional[ConsensusAlgorithm]:
-        """
-        Create an instance of a consensus algorithm.
+        """Create an instance of a consensus algorithm.
         
         Args:
             mechanism_id: ID of the consensus mechanism configuration
@@ -634,11 +621,11 @@ class ConsensusRegistry:
             logger.error(f"Error creating consensus instance: {e}")
             return None
     
-    def list_algorithms(self) -> List[str]:
+    def list_algorithms(self) -> list[str]:
         """List all registered algorithm types."""
         return list(self.algorithms.keys())
     
-    def list_configurations(self) -> List[ConsensusConfiguration]:
+    def list_configurations(self) -> list[ConsensusConfiguration]:
         """List all registered configurations."""
         return list(self.configurations.values())
     
@@ -648,8 +635,7 @@ class ConsensusRegistry:
 
 
 class ConsensusManager:
-    """
-    High-level manager for consensus mechanisms.
+    """High-level manager for consensus mechanisms.
     
     This class provides a convenient interface for managing and executing
     consensus algorithms with custom configurations.
@@ -658,7 +644,7 @@ class ConsensusManager:
     def __init__(self):
         """Initialize the consensus manager."""
         self.registry = ConsensusRegistry()
-        self.active_sessions: Dict[str, ConsensusAlgorithm] = {}
+        self.active_sessions: dict[str, ConsensusAlgorithm] = {}
         
         # Create default configurations
         self._create_default_configurations()
@@ -730,8 +716,7 @@ class ConsensusManager:
         consensus_type: ConsensusType,
         **kwargs
     ) -> ConsensusConfiguration:
-        """
-        Create a custom consensus configuration.
+        """Create a custom consensus configuration.
         
         Args:
             mechanism_id: Unique ID for the mechanism
@@ -756,11 +741,10 @@ class ConsensusManager:
     async def calculate_consensus(
         self,
         mechanism_id: str,
-        inputs: List[ConsensusInput],
+        inputs: list[ConsensusInput],
         session_id: str = None
     ) -> Optional[ConsensusResult]:
-        """
-        Calculate consensus using a specific mechanism.
+        """Calculate consensus using a specific mechanism.
         
         Args:
             mechanism_id: ID of the consensus mechanism to use
@@ -814,7 +798,7 @@ class ConsensusManager:
             return True
         return False
     
-    def get_available_mechanisms(self) -> List[Dict[str, Any]]:
+    def get_available_mechanisms(self) -> list[dict[str, Any]]:
         """Get information about available consensus mechanisms."""
         mechanisms = []
         
@@ -831,7 +815,7 @@ class ConsensusManager:
         
         return mechanisms
     
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """Get system status information."""
         return {
             "registered_algorithms": len(self.registry.algorithms),

@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-真实多轮辩论系统端到端测试
+"""真实多轮辩论系统端到端测试
 
 完整测试用户从启动系统到完成辩论的整个流程，
 确保所有组件协同工作，用户体验流畅。
 """
 
 import asyncio
+import logging
 import sys
 import time
-import logging
-from pathlib import Path
-from typing import Dict, List, Any, Optional
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 # 添加项目路径
 project_root = Path(__file__).parent
@@ -44,7 +42,7 @@ class EndToEndTestResult:
         """开始测试"""
         self.start_time = datetime.now()
     
-    def finish(self, passed: bool, error_message: str = "", details: Dict = None, ux_score: float = 0.0):
+    def finish(self, passed: bool, error_message: str = "", details: dict = None, ux_score: float = 0.0):
         """结束测试"""
         self.end_time = datetime.now()
         self.passed = passed
@@ -59,11 +57,11 @@ class EndToEndTester:
     """端到端测试器"""
     
     def __init__(self):
-        self.test_results: List[EndToEndTestResult] = []
+        self.test_results: list[EndToEndTestResult] = []
         self.start_time = None
         self.end_time = None
     
-    async def run_complete_test_suite(self) -> Dict[str, Any]:
+    async def run_complete_test_suite(self) -> dict[str, Any]:
         """运行完整的端到端测试套件"""
         self.start_time = datetime.now()
         
@@ -108,9 +106,9 @@ class EndToEndTester:
             startup_start = time.time()
             
             # 导入核心组件
+            from src.core_services.role_manager import RoleManager
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-            from src.core_services.role_manager import RoleManager
             
             startup_time = time.time() - startup_start
             
@@ -248,9 +246,9 @@ class EndToEndTester:
         result.start()
         
         try:
+            from src.core_services.role_manager import RoleManager
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-            from src.core_services.role_manager import RoleManager
             
             # 创建系统组件
             llm_integrator = RealLLMIntegrator()
@@ -305,9 +303,9 @@ class EndToEndTester:
         result.start()
         
         try:
+            from src.core_services.role_manager import RoleManager
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-            from src.core_services.role_manager import RoleManager
             
             # 创建系统组件
             llm_integrator = RealLLMIntegrator()
@@ -363,8 +361,8 @@ class EndToEndTester:
         result.start()
         
         try:
-            from src.debate_system.debate_state_manager import DebateStateManager
             from src.debate_system.debate_flow_definition import DebateSession
+            from src.debate_system.debate_state_manager import DebateStateManager
             
             # 创建状态管理器
             state_manager = DebateStateManager()
@@ -421,10 +419,10 @@ class EndToEndTester:
         result.start()
         
         try:
-            from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
-            from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
             from src.core_services.role_manager import RoleManager
             from src.debate_system.debate_state_manager import DebateStateManager
+            from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
+            from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
             
             # 创建组件
             llm_integrator = RealLLMIntegrator()
@@ -477,9 +475,9 @@ class EndToEndTester:
             flow_start = time.time()
             
             # 1. 用户启动系统
+            from src.core_services.role_manager import RoleManager
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-            from src.core_services.role_manager import RoleManager
             
             startup_time = time.time()
             llm_integrator = RealLLMIntegrator()
@@ -555,8 +553,9 @@ class EndToEndTester:
         result.start()
         
         try:
-            import psutil
             import os
+
+            import psutil
             
             # 获取当前进程信息
             process = psutil.Process(os.getpid())
@@ -566,9 +565,9 @@ class EndToEndTester:
             perf_start = time.time()
             
             # 创建多个系统实例测试内存使用
+            from src.core_services.role_manager import RoleManager
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-            from src.core_services.role_manager import RoleManager
             
             instances = []
             for i in range(3):
@@ -625,8 +624,8 @@ class EndToEndTester:
         result.start()
         
         try:
-            from src.debate_system.debate_state_manager import DebateStateManager
             from src.debate_system.debate_flow_definition import DebateSession
+            from src.debate_system.debate_state_manager import DebateStateManager
             
             # 创建状态管理器
             state_manager = DebateStateManager()
@@ -677,7 +676,7 @@ class EndToEndTester:
         self.test_results.append(result)
         print(f"✓ 数据持久化测试: {'通过' if result.passed else '失败'} (UX: {result.user_experience_score}/10)")
     
-    def _generate_test_report(self) -> Dict[str, Any]:
+    def _generate_test_report(self) -> dict[str, Any]:
         """生成测试报告"""
         total_tests = len(self.test_results)
         passed_tests = sum(1 for r in self.test_results if r.passed)

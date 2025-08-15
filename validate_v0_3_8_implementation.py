@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 12:30:00
+"""@Time    : 2025-08-05 12:30:00
 @Author  : DAIP-LIVE Team
 @File    : validate_v0_3_8_implementation.py
 @Description:
@@ -11,23 +9,21 @@
 import asyncio
 import json
 import logging
+import os
+import sys
 import time
 from datetime import datetime
-from typing import Dict, Any, List
-import sys
-import os
+from typing import Any
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.core_services.enterprise_error_handling_system import (
     EnterpriseErrorHandler,
-    ErrorSeverity,
     ErrorCategory,
     ErrorContext,
-    RecoveryStrategy,
-    get_enterprise_error_handler,
-    handle_enterprise_error
+    ErrorSeverity,
+    handle_enterprise_error,
 )
 
 # Configure logging
@@ -51,7 +47,7 @@ class V0_3_8Validator:
         }
         self.error_handler = None
     
-    async def validate_implementation(self) -> Dict[str, Any]:
+    async def validate_implementation(self) -> dict[str, Any]:
         """Validate V0.3.8 implementation."""
         logger.info("Starting V0.3.8 Enterprise Error Handling System validation")
         
@@ -134,12 +130,12 @@ class V0_3_8Validator:
             try:
                 from src.core_services.enterprise_error_handling_system import (
                     EnterpriseErrorHandler,
-                    ErrorSeverity,
                     ErrorCategory,
                     ErrorContext,
+                    ErrorSeverity,
                     RecoveryStrategy,
                     get_enterprise_error_handler,
-                    handle_enterprise_error
+                    handle_enterprise_error,
                 )
                 test_result["details"]["imports_successful"] = True
             except ImportError as e:
@@ -492,7 +488,7 @@ class V0_3_8Validator:
             try:
                 result = test_function()
                 test_result["details"]["decorated_success_function_works"] = result == "success"
-            except Exception as e:
+            except Exception:
                 test_result["details"]["decorated_success_function_works"] = False
             
             # Test failing function

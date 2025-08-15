@@ -1,23 +1,21 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 04:00:00
+"""@Time    : 2025-07-25 04:00:00
 @Author  : DAIP-LIVE Team
 @File    : plugin_interface.py
 @Description:
     Plugin interface system for custom primitive creation.
     Implements requirement 7.1 - plugin interfaces for new workflow nodes.
 """
-import logging
 import importlib
 import inspect
+import logging
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, Callable
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
-from .base import InstitutionalPrimitive, ExecutionContext, PrimitiveInfo, ValidationResult
+from .base import InstitutionalPrimitive
 from .registry import PrimitiveRegistry
 
 logger = logging.getLogger(__name__)
@@ -29,32 +27,31 @@ class PluginMetadata(BaseModel):
     version: str
     author: str
     description: str
-    dependencies: List[str] = Field(default_factory=list)
-    primitive_types: List[str] = Field(default_factory=list)
-    service_adapters: List[str] = Field(default_factory=list)
+    dependencies: list[str] = Field(default_factory=list)
+    primitive_types: list[str] = Field(default_factory=list)
+    service_adapters: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=datetime.now)
 
 
 class PluginValidationResult(BaseModel):
     """Result of plugin validation."""
     is_valid: bool
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
     metadata: Optional[PluginMetadata] = None
 
 
 class CustomPrimitiveBase(InstitutionalPrimitive):
-    """
-    Enhanced base class for custom primitives with plugin support.
+    """Enhanced base class for custom primitives with plugin support.
     
     This class extends the basic InstitutionalPrimitive with additional
     features needed for plugin-based custom primitives.
     """
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.plugin_metadata: Optional[PluginMetadata] = None
-        self.service_adapters: Dict[str, Any] = {}
+        self.service_adapters: dict[str, Any] = {}
     
     def set_plugin_metadata(self, metadata: PluginMetadata) -> None:
         """Set plugin metadata for this primitive."""
@@ -73,7 +70,7 @@ class CustomPrimitiveBase(InstitutionalPrimitive):
         """Return the primitive type identifier."""
         pass
     
-    def get_plugin_info(self) -> Dict[str, Any]:
+    def get_plugin_info(self) -> dict[str, Any]:
         """Get plugin information for this primitive."""
         return {
             "primitive_type": self.get_primitive_type(),
@@ -84,8 +81,7 @@ class CustomPrimitiveBase(InstitutionalPrimitive):
 
 
 class PluginInterface(ABC):
-    """
-    Abstract interface for plugins that provide custom primitives.
+    """Abstract interface for plugins that provide custom primitives.
     
     Plugins must implement this interface to be loaded by the plugin system.
     """
@@ -96,18 +92,17 @@ class PluginInterface(ABC):
         pass
     
     @abstractmethod
-    def get_primitive_classes(self) -> Dict[str, Type[CustomPrimitiveBase]]:
+    def get_primitive_classes(self) -> dict[str, type[CustomPrimitiveBase]]:
         """Return a dictionary of primitive type -> primitive class mappings."""
         pass
     
     @abstractmethod
-    def get_service_adapters(self) -> Dict[str, Any]:
+    def get_service_adapters(self) -> dict[str, Any]:
         """Return a dictionary of service name -> adapter mappings."""
         pass
     
-    def initialize(self, context: Dict[str, Any]) -> bool:
-        """
-        Initialize the plugin with the given context.
+    def initialize(self, context: dict[str, Any]) -> bool:
+        """Initialize the plugin with the given context.
         
         Args:
             context: Initialization context containing system services
@@ -123,30 +118,27 @@ class PluginInterface(ABC):
 
 
 class PluginLoader:
-    """
-    Loader for plugin-based custom primitives.
+    """Loader for plugin-based custom primitives.
     
     This class handles loading, validating, and managing plugins that
     provide custom institutional primitives.
     """
     
     def __init__(self, registry: PrimitiveRegistry):
-        """
-        Initialize the plugin loader.
+        """Initialize the plugin loader.
         
         Args:
             registry: Primitive registry to register loaded primitives
         """
         self.registry = registry
-        self.loaded_plugins: Dict[str, PluginInterface] = {}
-        self.plugin_metadata: Dict[str, PluginMetadata] = {}
-        self.service_adapters: Dict[str, Any] = {}
+        self.loaded_plugins: dict[str, PluginInterface] = {}
+        self.plugin_metadata: dict[str, PluginMetadata] = {}
+        self.service_adapters: dict[str, Any] = {}
         
         logger.info("PluginLoader initialized")
     
     def load_plugin_from_module(self, module_path: str) -> PluginValidationResult:
-        """
-        Load a plugin from a Python module.
+        """Load a plugin from a Python module.
         
         Args:
             module_path: Path to the Python module containing the plugin
@@ -199,8 +191,7 @@ class PluginLoader:
             )
     
     def load_plugin_from_file(self, file_path: str) -> PluginValidationResult:
-        """
-        Load a plugin from a Python file.
+        """Load a plugin from a Python file.
         
         Args:
             file_path: Path to the Python file containing the plugin
@@ -323,8 +314,7 @@ class PluginLoader:
             logger.info(f"Registered service adapter '{service_name}' from plugin '{plugin_name}'")
     
     def unload_plugin(self, plugin_name: str) -> bool:
-        """
-        Unload a plugin and clean up its resources.
+        """Unload a plugin and clean up its resources.
         
         Args:
             plugin_name: Name of the plugin to unload
@@ -353,11 +343,11 @@ class PluginLoader:
             logger.error(f"Error unloading plugin {plugin_name}: {e}")
             return False
     
-    def list_loaded_plugins(self) -> List[PluginMetadata]:
+    def list_loaded_plugins(self) -> list[PluginMetadata]:
         """List all loaded plugins."""
         return list(self.plugin_metadata.values())
     
-    def get_plugin_info(self, plugin_name: str) -> Optional[Dict[str, Any]]:
+    def get_plugin_info(self, plugin_name: str) -> Optional[dict[str, Any]]:
         """Get detailed information about a loaded plugin."""
         if plugin_name not in self.loaded_plugins:
             return None
@@ -376,29 +366,27 @@ class PluginLoader:
         """Get a registered service adapter."""
         return self.service_adapters.get(service_name)
     
-    def list_service_adapters(self) -> List[str]:
+    def list_service_adapters(self) -> list[str]:
         """List all registered service adapters."""
         return list(self.service_adapters.keys())
 
 
 class PluginManager:
-    """
-    High-level manager for the plugin system.
+    """High-level manager for the plugin system.
     
     This class provides a convenient interface for managing plugins,
     including loading, validation, and lifecycle management.
     """
     
     def __init__(self, registry: PrimitiveRegistry):
-        """
-        Initialize the plugin manager.
+        """Initialize the plugin manager.
         
         Args:
             registry: Primitive registry for registering loaded primitives
         """
         self.registry = registry
         self.loader = PluginLoader(registry)
-        self.plugin_directories: List[str] = []
+        self.plugin_directories: list[str] = []
         
         logger.info("PluginManager initialized")
     
@@ -408,9 +396,8 @@ class PluginManager:
             self.plugin_directories.append(directory)
             logger.info(f"Added plugin directory: {directory}")
     
-    def discover_and_load_plugins(self) -> Dict[str, PluginValidationResult]:
-        """
-        Discover and load all plugins from registered directories.
+    def discover_and_load_plugins(self) -> dict[str, PluginValidationResult]:
+        """Discover and load all plugins from registered directories.
         
         Returns:
             Dictionary mapping plugin names to their loading results
@@ -437,8 +424,7 @@ class PluginManager:
         return results
     
     def load_plugin(self, plugin_path: str) -> PluginValidationResult:
-        """
-        Load a single plugin from a file or module path.
+        """Load a single plugin from a file or module path.
         
         Args:
             plugin_path: Path to the plugin file or module
@@ -455,11 +441,11 @@ class PluginManager:
         """Unload a plugin."""
         return self.loader.unload_plugin(plugin_name)
     
-    def list_plugins(self) -> List[PluginMetadata]:
+    def list_plugins(self) -> list[PluginMetadata]:
         """List all loaded plugins."""
         return self.loader.list_loaded_plugins()
     
-    def get_plugin_info(self, plugin_name: str) -> Optional[Dict[str, Any]]:
+    def get_plugin_info(self, plugin_name: str) -> Optional[dict[str, Any]]:
         """Get information about a specific plugin."""
         return self.loader.get_plugin_info(plugin_name)
     
@@ -467,9 +453,8 @@ class PluginManager:
         """Get a service adapter by name."""
         return self.loader.get_service_adapter(service_name)
     
-    def create_primitive_instance(self, primitive_type: str, primitive_id: str, config: Dict[str, Any] = None) -> Optional[InstitutionalPrimitive]:
-        """
-        Create an instance of a primitive type.
+    def create_primitive_instance(self, primitive_type: str, primitive_id: str, config: dict[str, Any] = None) -> Optional[InstitutionalPrimitive]:
+        """Create an instance of a primitive type.
         
         Args:
             primitive_type: Type of primitive to create
@@ -487,7 +472,7 @@ class PluginManager:
         
         return self.registry.instantiate_primitive(primitive_def)
     
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """Get overall status of the plugin system."""
         return {
             "loaded_plugins": len(self.loader.loaded_plugins),

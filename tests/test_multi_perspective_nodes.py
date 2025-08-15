@@ -1,24 +1,22 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 14:00:00
+"""@Time    : 2025-07-24 14:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_multi_perspective_nodes.py
 @Description:
     Unit tests for Multi-perspective Synthesis Workflow nodes.
 """
-import pytest
-from datetime import datetime
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock
 
-from src.institutional_primitives.multi_perspective_nodes import (
-    TaskDecompositionNode,
-    ParallelExplorationNode,
-    ViewpointSynthesisNode,
-    SubProblem,
-    ExpertViewpoint,
-    SynthesisResult
-)
+import pytest
+
 from src.institutional_primitives.base import ExecutionContext
+from src.institutional_primitives.multi_perspective_nodes import (
+    ExpertViewpoint,
+    ParallelExplorationNode,
+    SubProblem,
+    SynthesisResult,
+    TaskDecompositionNode,
+    ViewpointSynthesisNode,
+)
 
 
 class TestSubProblemModel:
@@ -98,7 +96,7 @@ class TestSynthesisResultModel:
 class TestTaskDecompositionNode:
     """Test cases for TaskDecompositionNode."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def decomposition_node(self):
         """Create a TaskDecompositionNode instance for testing."""
         return TaskDecompositionNode("decomp_1", {
@@ -107,7 +105,7 @@ class TestTaskDecompositionNode:
             "max_sub_problems": 4
         })
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_context(self):
         """Create a mock execution context."""
         context = Mock(spec=ExecutionContext)
@@ -120,7 +118,7 @@ class TestTaskDecompositionNode:
         context.mark_failed = Mock()
         return context
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_llm_interface(self):
         """Create a mock LLM interface."""
         llm = AsyncMock()
@@ -162,7 +160,7 @@ class TestTaskDecompositionNode:
         }
         return llm
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_role_manager(self):
         """Create a mock role manager."""
         role_manager = Mock()
@@ -171,7 +169,7 @@ class TestTaskDecompositionNode:
         role_manager.get_role_by_id.return_value = planner_role
         return role_manager
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_task_decomposition_success(self, decomposition_node, mock_context, mock_llm_interface, mock_role_manager):
         """Test successful task decomposition."""
         # Setup
@@ -211,7 +209,7 @@ class TestTaskDecompositionNode:
         assert "规划者" in call_args[0]["content"]
         assert "AI对就业的影响" in call_args[1]["content"]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_task_decomposition_missing_topic(self, decomposition_node, mock_context):
         """Test decomposition with missing topic."""
         # Setup
@@ -228,7 +226,7 @@ class TestTaskDecompositionNode:
         # Verify context was marked as failed
         mock_context.mark_failed.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_task_decomposition_missing_llm_interface(self, decomposition_node, mock_context):
         """Test decomposition with missing LLM interface."""
         # Setup
@@ -288,7 +286,7 @@ class TestTaskDecompositionNode:
 class TestParallelExplorationNode:
     """Test cases for ParallelExplorationNode."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def exploration_node(self):
         """Create a ParallelExplorationNode instance for testing."""
         return ParallelExplorationNode("explore_1", {
@@ -302,7 +300,7 @@ class TestParallelExplorationNode:
             "use_tools": True
         })
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_context(self):
         """Create a mock execution context."""
         context = Mock(spec=ExecutionContext)
@@ -335,7 +333,7 @@ class TestParallelExplorationNode:
         context.mark_failed = Mock()
         return context
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_llm_interface(self):
         """Create a mock LLM interface."""
         llm = AsyncMock()
@@ -372,7 +370,7 @@ class TestParallelExplorationNode:
         llm.generate.side_effect = generate_side_effect
         return llm
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_role_manager(self):
         """Create a mock role manager."""
         role_manager = Mock()
@@ -393,7 +391,7 @@ class TestParallelExplorationNode:
         role_manager.get_role_by_id.side_effect = get_role_by_id_side_effect
         return role_manager
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_tool_executor(self):
         """Create a mock tool executor."""
         tool_executor = Mock()
@@ -403,7 +401,7 @@ class TestParallelExplorationNode:
         }
         return tool_executor
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_parallel_exploration_success(self, exploration_node, mock_context, mock_llm_interface, mock_role_manager, mock_tool_executor):
         """Test successful parallel exploration."""
         # Setup
@@ -439,7 +437,7 @@ class TestParallelExplorationNode:
         # Verify tool executor was called
         assert mock_tool_executor.execute.call_count == 2
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_parallel_exploration_no_sub_problems(self, exploration_node, mock_context):
         """Test exploration with no sub-problems."""
         # Setup
@@ -456,7 +454,7 @@ class TestParallelExplorationNode:
         # Verify context was marked as failed
         mock_context.mark_failed.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_parallel_exploration_missing_llm_interface(self, exploration_node, mock_context):
         """Test exploration with missing LLM interface."""
         # Execute
@@ -488,7 +486,7 @@ class TestParallelExplorationNode:
 class TestViewpointSynthesisNode:
     """Test cases for ViewpointSynthesisNode."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def synthesis_node(self):
         """Create a ViewpointSynthesisNode instance for testing."""
         return ViewpointSynthesisNode("synth_1", {
@@ -497,7 +495,7 @@ class TestViewpointSynthesisNode:
             "include_expert_attribution": True
         })
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_context(self):
         """Create a mock execution context."""
         context = Mock(spec=ExecutionContext)
@@ -536,7 +534,7 @@ class TestViewpointSynthesisNode:
         context.mark_failed = Mock()
         return context
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_synthesis_engine(self):
         """Create a mock synthesis engine."""
         engine = AsyncMock()
@@ -551,7 +549,7 @@ class TestViewpointSynthesisNode:
 总的来说，AI对就业的影响既有挑战也有机遇，关键在于如何通过政策和教育体系的调整来最大化机遇并减少负面影响。"""
         return engine
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_viewpoint_synthesis_success(self, synthesis_node, mock_context, mock_synthesis_engine):
         """Test successful viewpoint synthesis."""
         # Setup
@@ -581,7 +579,7 @@ class TestViewpointSynthesisNode:
         call_args = mock_synthesis_engine.synthesize_opinions.call_args
         assert call_args[1]["topic"] == "AI对就业的影响"
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_viewpoint_synthesis_no_viewpoints(self, synthesis_node, mock_context):
         """Test synthesis with no viewpoints."""
         # Setup
@@ -598,7 +596,7 @@ class TestViewpointSynthesisNode:
         # Verify context was marked as failed
         mock_context.mark_failed.assert_called_once()
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_viewpoint_synthesis_missing_synthesis_engine(self, synthesis_node, mock_context):
         """Test synthesis with missing synthesis engine."""
         # Execute

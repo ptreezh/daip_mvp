@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 10:30:00
+"""@Time    : 2025-08-05 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : phase4_2_academic_research_test.py
 @Description:
@@ -12,18 +10,18 @@
 import asyncio
 import json
 import logging
-import time
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
-from datetime import datetime
 
 # Add project root to path
 import sys
+import time
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+from typing import Any, Optional
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from personal_intelligence_hub.services.backend_integration import BackendIntegrationService, get_backend_service
-from personal_intelligence_hub.services.websocket_manager import websocket_manager, WebSocketMessage, MessageType
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -36,14 +34,14 @@ class TestResult:
     status: str  # "PASSED", "FAILED", "ERROR"
     duration: float
     details: str
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[dict[str, Any]] = None
 
 class AcademicResearchTester:
     """Academic research scenario tester"""
     
     def __init__(self):
         self.backend_service: Optional[BackendIntegrationService] = None
-        self.test_results: List[TestResult] = []
+        self.test_results: list[TestResult] = []
         self.start_time: Optional[datetime] = None
         
     async def setup(self):
@@ -793,7 +791,7 @@ class AcademicResearchTester:
         except Exception:
             return 0.5  # Default moderate score
     
-    async def run_all_tests(self) -> List[TestResult]:
+    async def run_all_tests(self) -> list[TestResult]:
         """Run all academic research scenario tests"""
         logger.info("🚀 Starting Phase 4.2: Academic Research Scenario Testing")
         
@@ -824,7 +822,7 @@ class AcademicResearchTester:
         
         return self.test_results
     
-    async def generate_report(self) -> Dict[str, Any]:
+    async def generate_report(self) -> dict[str, Any]:
         """Generate comprehensive test report"""
         total_tests = len(self.test_results)
         passed_tests = sum(1 for result in self.test_results if result.status == "PASSED")

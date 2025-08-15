@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-双入口系统启动器
+"""双入口系统启动器
 
 集成所有组件并提供统一的启动接口
 支持Secretariat和Forum两种入口模式
@@ -9,24 +7,20 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any
-from datetime import datetime
 import uuid
 
-from lona import LonaApp, View
-from lona.html import HTML, Div, H1, Head, Title, Link, Button, P, Span
-from lona.html import TextInput, Select, Option, Form
-
-# 导入服务和组件
-from services.dual_entrance_websocket_manager import dual_entrance_websocket_manager, EntranceType
-from services.entrance_manager import entrance_manager
-from services.personal_assistant import PersonalAssistantService
-from services.backend_connector import BackendConnector
-
 from components.chat_interface import ChatInterface
+from components.task_panel import TaskPanel
 from components.transparency_monitor import TransparencyMonitor
 from components.wiki_panel import WikiPanel
-from components.task_panel import TaskPanel
+from lona import LonaApp, View
+from lona.html import H1, HTML, Button, Div, Form, Head, Link, Option, P, Select, TextInput, Title
+from services.backend_connector import BackendConnector
+
+# 导入服务和组件
+from services.dual_entrance_websocket_manager import EntranceType, dual_entrance_websocket_manager
+from services.entrance_manager import entrance_manager
+from services.personal_assistant import PersonalAssistantService
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)

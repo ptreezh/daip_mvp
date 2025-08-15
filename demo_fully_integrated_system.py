@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-完全集成系统演示
+"""完全集成系统演示
 
 展示所有虚拟角色LLM调用都使用智能上下文优化的完整DAIP-LIVE系统
 """
 
-import sys
 import asyncio
-import json
-from datetime import datetime
+import sys
+
 sys.path.append('src')
 
 async def demo_fully_integrated_system():
@@ -75,7 +72,7 @@ async def demo_fully_integrated_system():
             }
         )
         
-        print(f"🤖 个人助手回应:")
+        print("🤖 个人助手回应:")
         if assistant_response.get("optimization_applied"):
             metrics = assistant_response["optimization_metrics"]
             print(f"   ✨ 优化效果: 改进{metrics['improvement_score']:.3f}, 节省{metrics['tokens_saved']}Token")
@@ -117,7 +114,7 @@ async def demo_fully_integrated_system():
         )
         
         print(f"🎭 辩论参与者: {len(debate_roles)}个角色")
-        print(f"📊 辩论优化摘要:")
+        print("📊 辩论优化摘要:")
         
         optimization_summary = debate_results.get("optimization_summary", {})
         if optimization_summary:
@@ -127,7 +124,7 @@ async def demo_fully_integrated_system():
             print(f"   平均改进: {optimization_summary.get('average_improvement', 0):.3f}")
             print(f"   效果评估: {optimization_summary.get('debate_optimization_effectiveness', 'unknown')}")
         
-        print(f"\n🗣️  各角色观点:")
+        print("\n🗣️  各角色观点:")
         for role_id, response in debate_results.get("responses", {}).items():
             if "error" not in response:
                 print(f"   🤖 {response.get('role_name', role_id)}:")
@@ -220,7 +217,7 @@ async def demo_fully_integrated_system():
             }
         )
         
-        print(f"🤝 共识形成结果:")
+        print("🤝 共识形成结果:")
         if consensus_result.get("optimization_applied"):
             metrics = consensus_result["optimization_metrics"]
             print(f"   ✨ 优化效果: 改进{metrics['improvement_score']:.3f}, 节省{metrics['tokens_saved']}Token")
@@ -239,7 +236,7 @@ async def demo_fully_integrated_system():
         
         if "system_summary" in system_stats:
             summary = system_stats["system_summary"]
-            print(f"   📊 总体统计:")
+            print("   📊 总体统计:")
             print(f"      总调用次数: {summary.get('total_calls', 0)}")
             print(f"      活跃角色数: {summary.get('active_roles', 0)}")
             print(f"      总Token节省: {summary.get('total_tokens_saved', 0)}")
@@ -249,7 +246,7 @@ async def demo_fully_integrated_system():
             print(f"      系统效果: {system_stats.get('optimization_effectiveness', 'unknown')}")
             
             if "top_performing_roles" in system_stats:
-                print(f"\n   🏆 表现最佳角色:")
+                print("\n   🏆 表现最佳角色:")
                 for i, (role_id, score) in enumerate(system_stats["top_performing_roles"][:3], 1):
                     print(f"      {i}. {role_id}: 改进分数 {score:.3f}")
         

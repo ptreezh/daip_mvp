@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 15:35:00
+"""@Time    : 2025-08-05 15:35:00
 @Author  : DAIP-LIVE Team
 @File    : user_friendly_errors.py
 @Description:
@@ -8,10 +6,8 @@
 """
 
 import logging
-import sys
-import traceback
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +16,8 @@ logger = logging.getLogger(__name__)
 class ErrorSolution:
     """Solution for a specific error type"""
     description: str
-    steps: List[str]
-    common_causes: List[str]
+    steps: list[str]
+    common_causes: list[str]
     severity: str = "medium"  # low, medium, high, critical
 
 
@@ -31,7 +27,7 @@ class ErrorContext:
     component: str
     operation: str
     user_action: str
-    additional_info: Dict[str, Any]
+    additional_info: dict[str, Any]
 
 
 class UserFriendlyImportError(Exception):
@@ -100,7 +96,7 @@ class UserFriendlyImportError(Exception):
         else:
             return "System Initialization Error"
     
-    def _get_solutions(self) -> List[ErrorSolution]:
+    def _get_solutions(self) -> list[ErrorSolution]:
         """Get relevant solutions based on the error type"""
         error_type = type(self.original_error).__name__
         error_msg = str(self.original_error).lower()
@@ -321,7 +317,7 @@ def create_error_context(
     component: str,
     operation: str,
     user_action: str,
-    additional_info: Optional[Dict[str, Any]] = None
+    additional_info: Optional[dict[str, Any]] = None
 ) -> ErrorContext:
     """Create an error context for better error messages"""
     return ErrorContext(

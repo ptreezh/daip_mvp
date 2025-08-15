@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 18:00:00
+"""@Time    : 2025-07-24 18:00:00
 @Author  : DAIP-LIVE Team
 @File    : cli_interface.py
 @Description:
@@ -11,14 +9,13 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import click
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
-from rich.table import Table
 from rich.panel import Panel
-from rich.syntax import Syntax
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+from rich.table import Table
 
 from ..workflows.critical_review_workflow import CriticalReviewWorkflow
 from ..workflows.multi_perspective_workflow import MultiPerspectiveSynthesisWorkflow
@@ -40,15 +37,15 @@ class CLIInterface:
         self.transparency_controller = TransparencyController()
         self.console = Console()
     
-    async def setup_services(self) -> Dict[str, Any]:
+    async def setup_services(self) -> dict[str, Any]:
         """Set up required services for workflow execution."""
         try:
+            from ..core_services.fact_extraction_service import FactExtractionService
             from ..core_services.llm_interface import EnhancedLLMInterface
             from ..core_services.role_manager import RoleManager
-            from ..kernel.tool_executor import ToolExecutor
             from ..core_services.synthesis_engine import SynthesisEngine
-            from ..core_services.fact_extraction_service import FactExtractionService
             from ..core_services.wiki_service import WikiService
+            from ..kernel.tool_executor import ToolExecutor
             
             # Initialize services
             llm_interface = EnhancedLLMInterface()
@@ -82,12 +79,12 @@ class CLIInterface:
         collect_feedback: bool = False,
         include_traceability: bool = False,
         verbose: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Execute Critical Review Workflow."""
         try:
             # Get content
             if content_file:
-                with open(content_file, 'r', encoding='utf-8') as f:
+                with open(content_file, encoding='utf-8') as f:
                     content = f.read()
             elif not content:
                 content = click.prompt("Please enter the content to review")
@@ -95,7 +92,7 @@ class CLIInterface:
             # Load configuration
             config = {}
             if config_file and Path(config_file).exists():
-                with open(config_file, 'r', encoding='utf-8') as f:
+                with open(config_file, encoding='utf-8') as f:
                     config = json.load(f)
             
             # Set up services
@@ -168,7 +165,7 @@ class CLIInterface:
     async def execute_multi_perspective(
         self,
         topic: str = None,
-        perspectives: List[str] = None,
+        perspectives: list[str] = None,
         config_file: str = None,
         output_file: str = None,
         format_type: str = "rich",
@@ -176,7 +173,7 @@ class CLIInterface:
         collect_feedback: bool = False,
         include_traceability: bool = False,
         verbose: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Execute Multi-perspective Synthesis Workflow."""
         try:
             # Get topic
@@ -198,7 +195,7 @@ class CLIInterface:
             # Load configuration
             config = {}
             if config_file and Path(config_file).exists():
-                with open(config_file, 'r', encoding='utf-8') as f:
+                with open(config_file, encoding='utf-8') as f:
                     config = json.load(f)
             
             # Set up services
@@ -361,7 +358,7 @@ Create a JSON file with workflow configuration:
         
         console.print(Panel(help_text, title=f"Help: {workflow_name}", expand=False))
     
-    def _save_result_to_file(self, result: Dict[str, Any], output_file: str, format_type: str) -> None:
+    def _save_result_to_file(self, result: dict[str, Any], output_file: str, format_type: str) -> None:
         """Save result to file."""
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)

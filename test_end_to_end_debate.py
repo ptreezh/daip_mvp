@@ -1,27 +1,25 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-End-to-end debate functionality test script.
+"""End-to-end debate functionality test script.
 Tests that a complete debate can be initiated and run successfully.
 """
 
 import asyncio
 import logging
 import sys
-import pytest
 from pathlib import Path
+
+import pytest
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from src.cli.commands import run_debate_command
-from src.config import settings
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_basic_debate():
     """Test basic debate functionality with minimal configuration."""
     print("🧪 Testing basic debate functionality...")
@@ -63,7 +61,7 @@ async def test_basic_debate():
         logger.error(f"Basic debate test failed: {e}", exc_info=True)
         return False
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_role_assignment():
     """Test that roles are properly assigned and participate in the debate."""
     print("\n🧪 Testing role assignment and participation...")
@@ -98,7 +96,7 @@ async def test_role_assignment():
         logger.error(f"Role assignment test failed: {e}", exc_info=True)
         return False
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_consensus_mechanism():
     """Test that consensus mechanisms work correctly."""
     print("\n🧪 Testing consensus mechanism...")

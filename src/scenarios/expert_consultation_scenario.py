@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-02 16:30:00
+"""@Time    : 2025-08-02 16:30:00
 @Author  : DAIP-LIVE Team
 @File    : expert_consultation_scenario.py
 @Description:
@@ -17,19 +15,17 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
-from datetime import datetime
 import uuid
-import json
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from typing import Any, Optional
+
+from src.core_services.advanced_consensus_algorithms import WeightedVotingConsensus
+from src.core_services.integrated_llm_manager import IntegratedLLMManager
 
 # 导入项目核心组件
 from src.core_services.role_manager import RoleManager
-from src.core_services.integrated_llm_manager import IntegratedLLMManager
-from src.virtual_role_chat.cognitive_agent.agent import CognitiveAgent, CognitiveProfile
-from src.core_services.advanced_consensus_algorithms import WeightedVotingConsensus, ConsensusInput
 from src.core_services.wiki_service import WikiService
-from src.workflows.critical_review_workflow import CriticalReviewWorkflow
 
 logger = logging.getLogger(__name__)
 
@@ -40,11 +36,11 @@ class ExpertProfile:
     expert_id: str
     name: str
     domain: str
-    expertise_areas: List[str]
+    expertise_areas: list[str]
     authority_score: float
     background: str
     perspective: str
-    specialty_keywords: List[str]
+    specialty_keywords: list[str]
     collaboration_style: str = "analytical"
 
 
@@ -55,9 +51,9 @@ class ExpertOpinion:
     expert_name: str
     opinion_text: str
     confidence_level: float
-    supporting_evidence: List[str]
-    recommendations: List[str]
-    concerns: List[str]
+    supporting_evidence: list[str]
+    recommendations: list[str]
+    concerns: list[str]
     authority_weight: float
     timestamp: str
 
@@ -75,8 +71,7 @@ class ConsultationConfig:
 
 
 class ExpertConsultationScenario:
-    """
-    专家咨询场景 - V0.2.5核心功能实现
+    """专家咨询场景 - V0.2.5核心功能实现
     
     专注于为用户提供高质量的专家咨询服务：
     - 智能专家选择和邀请
@@ -99,13 +94,12 @@ class ExpertConsultationScenario:
         self.expert_profiles = self._initialize_expert_database()
         
         # 咨询历史
-        self.consultation_history: List[Dict[str, Any]] = []
+        self.consultation_history: list[dict[str, Any]] = []
         
         logger.info(f"专家咨询场景初始化完成: {self.scenario_id}")
     
-    def _initialize_expert_database(self) -> Dict[str, ExpertProfile]:
+    def _initialize_expert_database(self) -> dict[str, ExpertProfile]:
         """初始化专家数据库"""
-        
         # 基于现有RoleManager扩展跨领域专家
         expert_database = {
             # 技术领域专家
@@ -211,9 +205,8 @@ class ExpertConsultationScenario:
         question: str,
         context: str = "",
         config: ConsultationConfig = None
-    ) -> Dict[str, Any]:
-        """
-        进行专家咨询
+    ) -> dict[str, Any]:
+        """进行专家咨询
         
         Args:
             question: 咨询问题
@@ -308,9 +301,8 @@ class ExpertConsultationScenario:
         question: str, 
         context: str, 
         config: ConsultationConfig
-    ) -> List[ExpertProfile]:
+    ) -> list[ExpertProfile]:
         """智能选择专家组合"""
-        
         logger.info("开始智能专家选择...")
         
         # 分析问题关键词
@@ -364,7 +356,7 @@ class ExpertConsultationScenario:
         logger.info(f"选择了{len(selected_experts)}位专家: {[e.name for e in selected_experts]}")
         return selected_experts
     
-    def _extract_keywords(self, text: str) -> List[str]:
+    def _extract_keywords(self, text: str) -> list[str]:
         """提取关键词（简化实现）"""
         # 简化的关键词提取
         import re
@@ -379,7 +371,7 @@ class ExpertConsultationScenario:
         
         return list(set(keywords))  # 去重
     
-    def _calculate_keyword_relevance(self, question_keywords: List[str], expert_keywords: List[str]) -> float:
+    def _calculate_keyword_relevance(self, question_keywords: list[str], expert_keywords: list[str]) -> float:
         """计算关键词相关性"""
         if not question_keywords or not expert_keywords:
             return 0.0
@@ -393,11 +385,10 @@ class ExpertConsultationScenario:
     
     def _select_contrarian_expert(
         self, 
-        selected_experts: List[ExpertProfile], 
-        question_keywords: List[str]
+        selected_experts: list[ExpertProfile], 
+        question_keywords: list[str]
     ) -> Optional[ExpertProfile]:
         """选择可能提供对立观点的专家"""
-        
         selected_domains = {expert.domain for expert in selected_experts}
         
         # 寻找不同领域的专家
@@ -413,11 +404,10 @@ class ExpertConsultationScenario:
         self,
         question: str,
         context: str,
-        experts: List[ExpertProfile],
+        experts: list[ExpertProfile],
         config: ConsultationConfig
-    ) -> List[ExpertOpinion]:
+    ) -> list[ExpertOpinion]:
         """收集专家观点"""
-        
         logger.info("开始收集专家观点...")
         opinions = []
         
@@ -459,7 +449,6 @@ class ExpertConsultationScenario:
     
     def _build_expert_prompt(self, expert: ExpertProfile, question: str, context: str) -> str:
         """构建专家特定的提示"""
-        
         prompt = f"""
 你是{expert.name}，在{expert.domain}领域有着丰富的经验。
 
@@ -487,7 +476,6 @@ class ExpertConsultationScenario:
     
     async def _get_expert_opinion_from_llm(self, expert: ExpertProfile, prompt: str) -> str:
         """从LLM获取专家观点"""
-        
         try:
             # 使用集成LLM管理器
             response = await self.llm_manager.call_llm_for_role(
@@ -505,7 +493,6 @@ class ExpertConsultationScenario:
     
     def _generate_simulated_expert_opinion(self, expert: ExpertProfile, prompt: str) -> str:
         """生成模拟专家观点（用于测试和回退）"""
-        
         return f"""
 从{expert.perspective}来看，这个问题涉及{expert.domain}领域的多个重要方面。
 
@@ -534,7 +521,6 @@ class ExpertConsultationScenario:
         question: str
     ) -> ExpertOpinion:
         """解析和结构化专家观点"""
-        
         # 简化的解析逻辑 - 在实际应用中可以使用更复杂的NLP技术
         
         # 提取信心程度
@@ -584,7 +570,7 @@ class ExpertConsultationScenario:
         # 默认中等信心
         return 0.7
     
-    def _extract_recommendations(self, text: str) -> List[str]:
+    def _extract_recommendations(self, text: str) -> list[str]:
         """提取建议"""
         recommendations = []
         
@@ -600,7 +586,7 @@ class ExpertConsultationScenario:
         
         return recommendations[:5]  # 最多5个建议
     
-    def _extract_concerns(self, text: str) -> List[str]:
+    def _extract_concerns(self, text: str) -> list[str]:
         """提取担忧"""
         concerns = []
         
@@ -615,7 +601,7 @@ class ExpertConsultationScenario:
         
         return concerns[:3]  # 最多3个担忧
     
-    def _extract_evidence(self, text: str) -> List[str]:
+    def _extract_evidence(self, text: str) -> list[str]:
         """提取支持证据"""
         evidence = []
         
@@ -632,11 +618,10 @@ class ExpertConsultationScenario:
     
     async def _evaluate_expert_authority(
         self, 
-        opinions: List[ExpertOpinion], 
+        opinions: list[ExpertOpinion], 
         question: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """评估专家权威性"""
-        
         logger.info("开始权威性评估...")
         
         authority_scores = {}
@@ -714,11 +699,10 @@ class ExpertConsultationScenario:
     
     async def _analyze_opinion_differences(
         self, 
-        opinions: List[ExpertOpinion], 
-        authority_analysis: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        opinions: list[ExpertOpinion], 
+        authority_analysis: dict[str, Any]
+    ) -> dict[str, Any]:
         """分析观点差异"""
-        
         logger.info("开始分析观点差异...")
         
         if len(opinions) < 2:
@@ -769,7 +753,7 @@ class ExpertConsultationScenario:
             "main_concerns": self._find_common_themes(all_concerns)
         }
     
-    def _find_common_themes(self, items: List[str]) -> List[str]:
+    def _find_common_themes(self, items: list[str]) -> list[str]:
         """找出共同主题（简化版）"""
         if not items:
             return []
@@ -789,12 +773,11 @@ class ExpertConsultationScenario:
     async def _generate_comprehensive_advice(
         self,
         question: str,
-        opinions: List[ExpertOpinion],
-        opinion_analysis: Dict[str, Any],
-        authority_analysis: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        opinions: list[ExpertOpinion],
+        opinion_analysis: dict[str, Any],
+        authority_analysis: dict[str, Any]
+    ) -> dict[str, Any]:
         """生成综合建议"""
-        
         logger.info("开始生成综合建议...")
         
         # 权重加权的建议综合
@@ -829,11 +812,10 @@ class ExpertConsultationScenario:
     
     def _weight_recommendations(
         self, 
-        opinions: List[ExpertOpinion], 
-        authority_analysis: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        opinions: list[ExpertOpinion], 
+        authority_analysis: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """权重加权建议"""
-        
         recommendation_weights = {}
         
         for opinion in opinions:
@@ -873,11 +855,10 @@ class ExpertConsultationScenario:
     
     def _synthesize_risks(
         self, 
-        opinions: List[ExpertOpinion], 
-        authority_analysis: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        opinions: list[ExpertOpinion], 
+        authority_analysis: dict[str, Any]
+    ) -> dict[str, Any]:
         """综合风险评估"""
-        
         all_concerns = []
         for opinion in opinions:
             expert_authority = authority_analysis["authority_scores"][opinion.expert_id]["final_authority"]
@@ -933,7 +914,7 @@ class ExpertConsultationScenario:
             }
         }
     
-    def _find_consensus_risks(self, concerns: List[Dict[str, Any]]) -> List[str]:
+    def _find_consensus_risks(self, concerns: list[dict[str, Any]]) -> list[str]:
         """找出共识风险"""
         # 简化：查找被多个专家提到的相似风险
         concern_texts = [c["concern"] for c in concerns]
@@ -942,12 +923,11 @@ class ExpertConsultationScenario:
     def _generate_decision_recommendations(
         self,
         question: str,
-        weighted_recommendations: List[Dict[str, Any]],
-        risk_assessment: Dict[str, Any],
-        opinion_analysis: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        weighted_recommendations: list[dict[str, Any]],
+        risk_assessment: dict[str, Any],
+        opinion_analysis: dict[str, Any]
+    ) -> dict[str, Any]:
         """生成决策建议"""
-        
         # 基于专家建议的决策框架
         top_recommendations = weighted_recommendations[:5]
         high_priority_risks = risk_assessment["high_priority_risks"]
@@ -989,11 +969,10 @@ class ExpertConsultationScenario:
     
     def _generate_go_no_go_decision(
         self, 
-        opinion_analysis: Dict[str, Any], 
-        risk_assessment: Dict[str, Any]
-    ) -> Dict[str, str]:
+        opinion_analysis: dict[str, Any], 
+        risk_assessment: dict[str, Any]
+    ) -> dict[str, str]:
         """生成Go/No-Go决策建议"""
-        
         avg_confidence = opinion_analysis.get("opinion_summary", {}).get("average_confidence", 0)
         high_risks = len(risk_assessment.get("high_priority_risks", []))
         
@@ -1015,11 +994,10 @@ class ExpertConsultationScenario:
     
     def _suggest_implementation_path(
         self, 
-        decision_recommendations: Dict[str, Any], 
-        opinions: List[ExpertOpinion]
-    ) -> Dict[str, Any]:
+        decision_recommendations: dict[str, Any], 
+        opinions: list[ExpertOpinion]
+    ) -> dict[str, Any]:
         """建议实施路径"""
-        
         return {
             "phase_1": {
                 "name": "准备阶段",
@@ -1051,11 +1029,10 @@ class ExpertConsultationScenario:
     def _generate_executive_summary(
         self, 
         question: str, 
-        opinions: List[ExpertOpinion], 
-        decision_recommendations: Dict[str, Any]
+        opinions: list[ExpertOpinion], 
+        decision_recommendations: dict[str, Any]
     ) -> str:
         """生成执行摘要"""
-        
         expert_names = [op.expert_name for op in opinions]
         avg_confidence = sum(op.confidence_level for op in opinions) / len(opinions) if opinions else 0
         
@@ -1077,11 +1054,10 @@ class ExpertConsultationScenario:
     
     def _calculate_recommendation_confidence(
         self, 
-        opinions: List[ExpertOpinion], 
-        authority_analysis: Dict[str, Any]
+        opinions: list[ExpertOpinion], 
+        authority_analysis: dict[str, Any]
     ) -> float:
         """计算建议信心程度"""
-        
         if not opinions:
             return 0.0
         
@@ -1099,11 +1075,10 @@ class ExpertConsultationScenario:
     async def _generate_decision_support(
         self,
         question: str,
-        comprehensive_advice: Dict[str, Any],
-        expert_opinions: List[ExpertOpinion]
-    ) -> Dict[str, Any]:
+        comprehensive_advice: dict[str, Any],
+        expert_opinions: list[ExpertOpinion]
+    ) -> dict[str, Any]:
         """生成决策支持材料"""
-        
         return {
             "decision_matrix": self._create_decision_matrix(comprehensive_advice),
             "pros_and_cons": self._extract_pros_and_cons(expert_opinions),
@@ -1114,7 +1089,7 @@ class ExpertConsultationScenario:
             "next_steps": self._recommend_next_steps(comprehensive_advice)
         }
     
-    def _create_decision_matrix(self, advice: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_decision_matrix(self, advice: dict[str, Any]) -> dict[str, Any]:
         """创建决策矩阵"""
         return {
             "criteria": ["可行性", "成本效益", "风险水平", "时间投入", "资源需求"],
@@ -1128,7 +1103,7 @@ class ExpertConsultationScenario:
             "weight": {"可行性": 0.3, "成本效益": 0.25, "风险水平": 0.2, "时间投入": 0.15, "资源需求": 0.1}
         }
     
-    def _extract_pros_and_cons(self, opinions: List[ExpertOpinion]) -> Dict[str, List[str]]:
+    def _extract_pros_and_cons(self, opinions: list[ExpertOpinion]) -> dict[str, list[str]]:
         """提取利弊分析"""
         pros = []
         cons = []
@@ -1144,7 +1119,7 @@ class ExpertConsultationScenario:
             "cons": list(set(cons))[:5]
         }
     
-    def _analyze_stakeholder_impact(self, opinions: List[ExpertOpinion]) -> Dict[str, str]:
+    def _analyze_stakeholder_impact(self, opinions: list[ExpertOpinion]) -> dict[str, str]:
         """分析利益相关者影响"""
         return {
             "用户": "直接受益于改进的产品或服务",
@@ -1154,7 +1129,7 @@ class ExpertConsultationScenario:
             "竞争对手": "可能面临竞争压力"
         }
     
-    def _estimate_resource_requirements(self, opinions: List[ExpertOpinion]) -> Dict[str, str]:
+    def _estimate_resource_requirements(self, opinions: list[ExpertOpinion]) -> dict[str, str]:
         """估算资源需求"""
         return {
             "人力资源": "需要专业团队3-5人",
@@ -1164,7 +1139,7 @@ class ExpertConsultationScenario:
             "外部支持": "建议聘请相关专家顾问"
         }
     
-    def _identify_alternatives(self, opinions: List[ExpertOpinion]) -> List[str]:
+    def _identify_alternatives(self, opinions: list[ExpertOpinion]) -> list[str]:
         """识别替代方案"""
         alternatives = []
         
@@ -1185,7 +1160,7 @@ class ExpertConsultationScenario:
         
         return alternatives[:3]
     
-    def _recommend_next_steps(self, advice: Dict[str, Any]) -> List[str]:
+    def _recommend_next_steps(self, advice: dict[str, Any]) -> list[str]:
         """推荐下一步行动"""
         immediate_actions = advice.get("decision_recommendations", {}).get("action_plan", {}).get("immediate_actions", [])
         
@@ -1202,11 +1177,10 @@ class ExpertConsultationScenario:
         self,
         consultation_id: str,
         question: str,
-        expert_opinions: List[ExpertOpinion],
-        comprehensive_advice: Dict[str, Any]
+        expert_opinions: list[ExpertOpinion],
+        comprehensive_advice: dict[str, Any]
     ):
         """持久化咨询知识"""
-        
         try:
             # 构建知识条目
             knowledge_entry = {
@@ -1254,7 +1228,7 @@ async def main():
     )
     
     if result["success"]:
-        print(f"\n专家咨询完成！")
+        print("\n专家咨询完成！")
         print(f"咨询ID: {result['consultation_id']}")
         print(f"参与专家: {len(result['selected_experts'])}位")
         print(f"执行摘要: {result['comprehensive_advice']['executive_summary']}")

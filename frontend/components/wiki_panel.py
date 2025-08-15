@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Wiki面板组件 - 简化版本
+"""Wiki面板组件 - 简化版本
 
 显示和管理知识库内容，支持实时更新
 """
 
-from lona.html.widget import Widget
-from lona.html import HTML, Div, H3, P, TextInput, Button
 from datetime import datetime
+
+from lona.html import H3, HTML, Button, Div, P, TextInput
+from lona.html.widget import Widget
 
 
 class WikiPanel(Widget):

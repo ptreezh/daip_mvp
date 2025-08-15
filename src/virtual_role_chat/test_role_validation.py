@@ -1,13 +1,12 @@
-"""
-Test script for role validation functionality.
+"""Test script for role validation functionality.
 """
 
 import tempfile
 from pathlib import Path
 
 from src.virtual_role_chat.chat_room_manager import ChatRoomManager
-from src.virtual_role_chat.role_validator import RoleValidator, RoleValidationError
 from src.virtual_role_chat.models import ChatRoomConfig
+from src.virtual_role_chat.role_validator import RoleValidationError, RoleValidator
 
 
 def test_role_validation():

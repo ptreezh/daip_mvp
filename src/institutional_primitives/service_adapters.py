@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 05:00:00
+"""@Time    : 2025-07-25 05:00:00
 @Author  : DAIP-LIVE Team
 @File    : service_adapters.py
 @Description:
@@ -9,9 +7,9 @@
 """
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type, Callable
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -48,19 +46,19 @@ class ServiceAdapterMetadata(BaseModel):
     name: str
     version: str
     service_type: ServiceType
-    capabilities: List[AdapterCapability]
+    capabilities: list[AdapterCapability]
     description: str
     author: str
     created_at: datetime = Field(default_factory=datetime.now)
-    dependencies: List[str] = Field(default_factory=list)
-    configuration_schema: Dict[str, Any] = Field(default_factory=dict)
+    dependencies: list[str] = Field(default_factory=list)
+    configuration_schema: dict[str, Any] = Field(default_factory=dict)
 
 
 class AdapterConfiguration(BaseModel):
     """Configuration for a service adapter instance."""
     adapter_name: str
     instance_id: str
-    config: Dict[str, Any] = Field(default_factory=dict)
+    config: dict[str, Any] = Field(default_factory=dict)
     enabled: bool = True
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -70,8 +68,8 @@ class ServiceRequest(BaseModel):
     """Request to a service through an adapter."""
     request_id: str
     operation: str
-    parameters: Dict[str, Any] = Field(default_factory=dict)
-    context: Dict[str, Any] = Field(default_factory=dict)
+    parameters: dict[str, Any] = Field(default_factory=dict)
+    context: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
@@ -81,22 +79,20 @@ class ServiceResponse(BaseModel):
     success: bool
     data: Any = None
     error: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.now)
     duration_ms: Optional[float] = None
 
 
 class ServiceAdapter(ABC):
-    """
-    Abstract base class for service adapters.
+    """Abstract base class for service adapters.
     
     Service adapters provide standardized interfaces for integrating
     external services with the institutional primitives system.
     """
     
     def __init__(self, instance_id: str, config: AdapterConfiguration):
-        """
-        Initialize the service adapter.
+        """Initialize the service adapter.
         
         Args:
             instance_id: Unique identifier for this adapter instance
@@ -114,8 +110,7 @@ class ServiceAdapter(ABC):
     
     @abstractmethod
     async def initialize(self) -> bool:
-        """
-        Initialize the adapter and establish connections.
+        """Initialize the adapter and establish connections.
         
         Returns:
             True if initialization was successful
@@ -129,8 +124,7 @@ class ServiceAdapter(ABC):
     
     @abstractmethod
     async def health_check(self) -> bool:
-        """
-        Check if the adapter and underlying service are healthy.
+        """Check if the adapter and underlying service are healthy.
         
         Returns:
             True if healthy, False otherwise
@@ -139,8 +133,7 @@ class ServiceAdapter(ABC):
     
     @abstractmethod
     async def execute_request(self, request: ServiceRequest) -> ServiceResponse:
-        """
-        Execute a request through this adapter.
+        """Execute a request through this adapter.
         
         Args:
             request: Service request to execute
@@ -155,9 +148,8 @@ class ServiceAdapter(ABC):
         metadata = self.get_metadata()
         return capability in metadata.capabilities
     
-    def validate_configuration(self, config: Dict[str, Any]) -> List[str]:
-        """
-        Validate adapter configuration.
+    def validate_configuration(self, config: dict[str, Any]) -> list[str]:
+        """Validate adapter configuration.
         
         Args:
             config: Configuration to validate
@@ -180,7 +172,7 @@ class ServiceAdapter(ABC):
 class FactSourceAdapter(ServiceAdapter):
     """Adapter for fact source services."""
     
-    async def query_facts(self, query: str, filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+    async def query_facts(self, query: str, filters: dict[str, Any] = None) -> list[dict[str, Any]]:
         """Query facts from the source."""
         request = ServiceRequest(
             request_id=f"fact_query_{datetime.now().timestamp()}",
@@ -195,7 +187,7 @@ class FactSourceAdapter(ServiceAdapter):
             logger.error(f"Fact query failed: {response.error}")
             return []
     
-    async def validate_fact(self, fact: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def validate_fact(self, fact: str, context: dict[str, Any] = None) -> dict[str, Any]:
         """Validate a fact using the source."""
         request = ServiceRequest(
             request_id=f"fact_validation_{datetime.now().timestamp()}",
@@ -214,7 +206,7 @@ class FactSourceAdapter(ServiceAdapter):
 class ValidationServiceAdapter(ServiceAdapter):
     """Adapter for validation services."""
     
-    async def validate_content(self, content: str, validation_type: str, criteria: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def validate_content(self, content: str, validation_type: str, criteria: dict[str, Any] = None) -> dict[str, Any]:
         """Validate content using the service."""
         request = ServiceRequest(
             request_id=f"content_validation_{datetime.now().timestamp()}",
@@ -237,7 +229,7 @@ class ValidationServiceAdapter(ServiceAdapter):
 class SynthesisEngineAdapter(ServiceAdapter):
     """Adapter for synthesis engine services."""
     
-    async def synthesize_content(self, inputs: List[str], synthesis_strategy: str, parameters: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def synthesize_content(self, inputs: list[str], synthesis_strategy: str, parameters: dict[str, Any] = None) -> dict[str, Any]:
         """Synthesize content from multiple inputs."""
         request = ServiceRequest(
             request_id=f"synthesis_{datetime.now().timestamp()}",
@@ -258,8 +250,7 @@ class SynthesisEngineAdapter(ServiceAdapter):
 
 
 class ServiceAdapterRegistry:
-    """
-    Registry for service adapters.
+    """Registry for service adapters.
     
     This class manages the registration, configuration, and lifecycle
     of service adapters.
@@ -267,15 +258,14 @@ class ServiceAdapterRegistry:
     
     def __init__(self):
         """Initialize the service adapter registry."""
-        self.adapter_classes: Dict[str, Type[ServiceAdapter]] = {}
-        self.adapter_instances: Dict[str, ServiceAdapter] = {}
-        self.configurations: Dict[str, AdapterConfiguration] = {}
+        self.adapter_classes: dict[str, type[ServiceAdapter]] = {}
+        self.adapter_instances: dict[str, ServiceAdapter] = {}
+        self.configurations: dict[str, AdapterConfiguration] = {}
         
         logger.info("ServiceAdapterRegistry initialized")
     
-    def register_adapter_class(self, adapter_name: str, adapter_class: Type[ServiceAdapter]) -> bool:
-        """
-        Register a service adapter class.
+    def register_adapter_class(self, adapter_name: str, adapter_class: type[ServiceAdapter]) -> bool:
+        """Register a service adapter class.
         
         Args:
             adapter_name: Name of the adapter
@@ -291,9 +281,8 @@ class ServiceAdapterRegistry:
         logger.info(f"Registered adapter class: {adapter_name}")
         return True
     
-    def create_adapter_instance(self, adapter_name: str, instance_id: str, config: Dict[str, Any]) -> Optional[ServiceAdapter]:
-        """
-        Create an instance of a service adapter.
+    def create_adapter_instance(self, adapter_name: str, instance_id: str, config: dict[str, Any]) -> Optional[ServiceAdapter]:
+        """Create an instance of a service adapter.
         
         Args:
             adapter_name: Name of the adapter class
@@ -341,8 +330,7 @@ class ServiceAdapterRegistry:
             return None
     
     async def initialize_adapter(self, instance_id: str) -> bool:
-        """
-        Initialize a service adapter instance.
+        """Initialize a service adapter instance.
         
         Args:
             instance_id: ID of the adapter instance
@@ -371,8 +359,7 @@ class ServiceAdapterRegistry:
             return False
     
     async def cleanup_adapter(self, instance_id: str) -> bool:
-        """
-        Clean up a service adapter instance.
+        """Clean up a service adapter instance.
         
         Args:
             instance_id: ID of the adapter instance
@@ -403,15 +390,15 @@ class ServiceAdapterRegistry:
         """Get an adapter instance by ID."""
         return self.adapter_instances.get(instance_id)
     
-    def list_adapter_classes(self) -> List[str]:
+    def list_adapter_classes(self) -> list[str]:
         """List all registered adapter classes."""
         return list(self.adapter_classes.keys())
     
-    def list_adapter_instances(self) -> List[str]:
+    def list_adapter_instances(self) -> list[str]:
         """List all created adapter instances."""
         return list(self.adapter_instances.keys())
     
-    def get_adapters_by_type(self, service_type: ServiceType) -> List[ServiceAdapter]:
+    def get_adapters_by_type(self, service_type: ServiceType) -> list[ServiceAdapter]:
         """Get all adapter instances of a specific service type."""
         result = []
         for adapter in self.adapter_instances.values():
@@ -420,7 +407,7 @@ class ServiceAdapterRegistry:
                 result.append(adapter)
         return result
     
-    def get_adapters_by_capability(self, capability: AdapterCapability) -> List[ServiceAdapter]:
+    def get_adapters_by_capability(self, capability: AdapterCapability) -> list[ServiceAdapter]:
         """Get all adapter instances that support a specific capability."""
         result = []
         for adapter in self.adapter_instances.values():
@@ -428,7 +415,7 @@ class ServiceAdapterRegistry:
                 result.append(adapter)
         return result
     
-    async def health_check_all(self) -> Dict[str, bool]:
+    async def health_check_all(self) -> dict[str, bool]:
         """Perform health checks on all adapter instances."""
         results = {}
         
@@ -443,7 +430,7 @@ class ServiceAdapterRegistry:
         
         return results
     
-    def get_adapter_info(self, instance_id: str) -> Optional[Dict[str, Any]]:
+    def get_adapter_info(self, instance_id: str) -> Optional[dict[str, Any]]:
         """Get detailed information about an adapter instance."""
         if instance_id not in self.adapter_instances:
             return None
@@ -463,8 +450,7 @@ class ServiceAdapterRegistry:
 
 
 class ServiceAdapterManager:
-    """
-    High-level manager for service adapters.
+    """High-level manager for service adapters.
     
     This class provides a convenient interface for managing service adapters,
     including automatic discovery, configuration, and lifecycle management.
@@ -487,13 +473,12 @@ class ServiceAdapterManager:
         
         logger.info("Registered standard adapter classes")
     
-    def register_custom_adapter(self, adapter_name: str, adapter_class: Type[ServiceAdapter]) -> bool:
+    def register_custom_adapter(self, adapter_name: str, adapter_class: type[ServiceAdapter]) -> bool:
         """Register a custom adapter class."""
         return self.registry.register_adapter_class(adapter_name, adapter_class)
     
-    async def create_and_initialize_adapter(self, adapter_name: str, instance_id: str, config: Dict[str, Any]) -> Optional[ServiceAdapter]:
-        """
-        Create and initialize a service adapter in one step.
+    async def create_and_initialize_adapter(self, adapter_name: str, instance_id: str, config: dict[str, Any]) -> Optional[ServiceAdapter]:
+        """Create and initialize a service adapter in one step.
         
         Args:
             adapter_name: Name of the adapter class
@@ -522,9 +507,8 @@ class ServiceAdapterManager:
         """Get an adapter instance by ID."""
         return self.registry.get_adapter_instance(instance_id)
     
-    def find_adapters(self, service_type: ServiceType = None, capability: AdapterCapability = None) -> List[ServiceAdapter]:
-        """
-        Find adapters by type or capability.
+    def find_adapters(self, service_type: ServiceType = None, capability: AdapterCapability = None) -> list[ServiceAdapter]:
+        """Find adapters by type or capability.
         
         Args:
             service_type: Service type to filter by
@@ -540,9 +524,8 @@ class ServiceAdapterManager:
         else:
             return list(self.registry.adapter_instances.values())
     
-    async def execute_service_request(self, instance_id: str, operation: str, parameters: Dict[str, Any] = None, context: Dict[str, Any] = None) -> ServiceResponse:
-        """
-        Execute a service request through an adapter.
+    async def execute_service_request(self, instance_id: str, operation: str, parameters: dict[str, Any] = None, context: dict[str, Any] = None) -> ServiceResponse:
+        """Execute a service request through an adapter.
         
         Args:
             instance_id: ID of the adapter instance
@@ -570,7 +553,7 @@ class ServiceAdapterManager:
         
         return await adapter.execute_request(request)
     
-    async def health_check_all(self) -> Dict[str, Any]:
+    async def health_check_all(self) -> dict[str, Any]:
         """Perform comprehensive health check on all adapters."""
         health_results = await self.registry.health_check_all()
         
@@ -584,7 +567,7 @@ class ServiceAdapterManager:
         
         return summary
     
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """Get overall status of the service adapter system."""
         return {
             "registered_classes": len(self.registry.adapter_classes),

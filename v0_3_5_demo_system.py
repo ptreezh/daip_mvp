@@ -1,5 +1,4 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: Claude Code
 @File: v0_3_5_demo_system.py
 @Description: V0.3.5 Critical Review Workflow Demo System
@@ -7,9 +6,9 @@
 
 import asyncio
 import logging
-import time
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Any
+
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
@@ -18,20 +17,19 @@ from fastapi.templating import Jinja2Templates
 
 # Import V0.3.5 components
 from src.api.v0_3_5_critical_review_api import router as v0_3_5_router
-from src.core_services.smart_reviewer_allocator import SmartReviewerAllocator
-from src.core_services.multidimensional_assessment_engine import MultidimensionalAssessmentEngine
+from src.core_services.automated_report_generator import AutomatedReportGenerator
 from src.core_services.collaborative_review_environment import CollaborativeReviewEnvironment
 from src.core_services.conflict_resolution_system import ConflictResolutionSystem
+from src.core_services.multidimensional_assessment_engine import MultidimensionalAssessmentEngine
 from src.core_services.review_analytics import ReviewAnalytics
-from src.core_services.automated_report_generator import AutomatedReportGenerator
+from src.core_services.smart_reviewer_allocator import SmartReviewerAllocator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class V0_3_5_DemoSystem:
-    """
-    V0.3.5 Critical Review Workflow Demo System
+    """V0.3.5 Critical Review Workflow Demo System
     Complete demonstration of all components working together
     """
     
@@ -140,7 +138,6 @@ class V0_3_5_DemoSystem:
         
     def _setup_app(self):
         """Setup FastAPI application"""
-        
         # Mount static files
         self.app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
         
@@ -159,7 +156,7 @@ class V0_3_5_DemoSystem:
                 {"request": request}
             )
         
-        @self.app.get("/demo/status", response_model=Dict[str, Any])
+        @self.app.get("/demo/status", response_model=dict[str, Any])
         async def demo_status():
             """Get demo system status"""
             return {
@@ -219,7 +216,7 @@ class V0_3_5_DemoSystem:
                     "error": str(e)
                 }
         
-        @self.app.get("/demo/metrics", response_model=Dict[str, Any])
+        @self.app.get("/demo/metrics", response_model=dict[str, Any])
         async def get_demo_metrics():
             """Get demo metrics and analytics"""
             try:
@@ -272,7 +269,7 @@ class V0_3_5_DemoSystem:
             
             logger.info("V0.3.5 Demo System shutdown completed")
     
-    async def _simulate_complete_workflow(self) -> Dict[str, Any]:
+    async def _simulate_complete_workflow(self) -> dict[str, Any]:
         """Simulate a complete critical review workflow"""
         workflow_id = f"demo_workflow_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         
@@ -352,7 +349,7 @@ def validate_input(data):
             elif result.get('success'):
                 successful_assessments.append(result)
                 # Record metrics
-                from src.core_services.review_analytics import ReviewMetric, MetricType, AnalysisScope
+                from src.core_services.review_analytics import AnalysisScope, MetricType, ReviewMetric
                 
                 metric = ReviewMetric(
                     metric_id=f"assessment_{result['assessment_id']}",
@@ -397,7 +394,7 @@ def validate_input(data):
             
             if comment_result['success']:
                 # Record participation metric
-                from src.core_services.review_analytics import ReviewMetric, MetricType, AnalysisScope
+                from src.core_services.review_analytics import AnalysisScope, MetricType, ReviewMetric
                 
                 metric = ReviewMetric(
                     metric_id=f"comment_{comment_result['comment_id']}",
@@ -453,7 +450,7 @@ def validate_input(data):
         
         # Step 7: Generate final report
         logger.info("Step 7: Generating final report...")
-        from src.core_services.automated_report_generator import ReportRequest, ReportType, ReportFormat
+        from src.core_services.automated_report_generator import ReportFormat, ReportRequest, ReportType
         
         report_request = ReportRequest(
             request_id=f"report_{workflow_id}",

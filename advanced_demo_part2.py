@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-DAIP-LIVE 高级演示系统 - 第二部分
+"""DAIP-LIVE 高级演示系统 - 第二部分
 包含剩余的方法实现
 """
 
 import asyncio
-import json
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Any
+
 
 class AdvancedDemoPart2:
     """高级演示系统的剩余方法"""
     
-    async def generate_critical_review_results(self, topic: str, user_input: str, agent_responses: Dict) -> Dict[str, Any]:
+    async def generate_critical_review_results(self, topic: str, user_input: str, agent_responses: dict) -> dict[str, Any]:
         """生成批判性审查结果"""
         validated_facts = [
             f"用户对'{topic}'的观点已完整记录并分析",
@@ -65,9 +63,9 @@ class AdvancedDemoPart2:
             "review_timestamp": datetime.now().isoformat()
         }
     
-    async def run_synthesis_stage(self, topic: str, user_input: str, agent_responses: Dict) -> Dict[str, Any]:
+    async def run_synthesis_stage(self, topic: str, user_input: str, agent_responses: dict) -> dict[str, Any]:
         """运行多视角综合阶段"""
-        print(f"\n🔄 第三阶段：多视角综合工作流")
+        print("\n🔄 第三阶段：多视角综合工作流")
         print("="*60)
         print("正在整合多元化专家观点，识别共同点、分歧点和创新洞察...")
         
@@ -88,23 +86,23 @@ class AdvancedDemoPart2:
         # 生成综合结果
         synthesis_result = await self.generate_synthesis_result(topic, user_input, agent_responses)
         
-        print(f"\n🎯 多视角综合结果:")
+        print("\n🎯 多视角综合结果:")
         print("="*60)
         print(synthesis_result['comprehensive_synthesis'])
         
-        print(f"\n📊 综合分析统计:")
+        print("\n📊 综合分析统计:")
         print(f"   🌈 观点多样性: {synthesis_result['diversity_score']:.3f}")
         print(f"   🤝 共识程度: {synthesis_result['consensus_level']:.3f}")
         print(f"   💡 创新洞察: {len(synthesis_result['novel_insights'])} 项")
         print(f"   📈 综合质量: {synthesis_result['synthesis_quality']:.3f}")
         
-        print(f"\n✨ 识别的创新洞察:")
+        print("\n✨ 识别的创新洞察:")
         for i, insight in enumerate(synthesis_result['novel_insights'], 1):
             print(f"   {i}. {insight['content']}")
             print(f"      🎯 创新度: {insight['novelty_score']:.2f}")
             print(f"      🔗 来源融合: {', '.join(insight['source_perspectives'])}")
         
-        print(f"\n🔍 关键分歧点:")
+        print("\n🔍 关键分歧点:")
         for i, divergence in enumerate(synthesis_result['key_divergences'], 1):
             print(f"   {i}. {divergence['issue']}")
             print(f"      ⚖️ 对立观点: {divergence['opposing_views']}")
@@ -114,9 +112,8 @@ class AdvancedDemoPart2:
         
         return synthesis_result
     
-    async def generate_synthesis_result(self, topic: str, user_input: str, agent_responses: Dict) -> Dict[str, Any]:
+    async def generate_synthesis_result(self, topic: str, user_input: str, agent_responses: dict) -> dict[str, Any]:
         """生成综合分析结果"""
-        
         # 提取各角色的核心观点
         perspectives = {}
         for agent_id, response in agent_responses.items():
@@ -228,9 +225,9 @@ class AdvancedDemoPart2:
             "synthesis_timestamp": datetime.now().isoformat()
         }
     
-    async def run_intelligence_emergence_stage(self, agent_responses: Dict) -> Dict[str, Any]:
+    async def run_intelligence_emergence_stage(self, agent_responses: dict) -> dict[str, Any]:
         """运行集体智慧涌现阶段"""
-        print(f"\n🚀 第四阶段：集体智慧涌现")
+        print("\n🚀 第四阶段：集体智慧涌现")
         print("="*60)
         print("正在运行高级共识算法、检测涌现洞察、计算智慧涌现评分...")
         
@@ -251,7 +248,7 @@ class AdvancedDemoPart2:
         # 计算涌现结果
         emergence_result = await self.calculate_intelligence_emergence(agent_responses)
         
-        print(f"\n🎊 集体智慧涌现结果:")
+        print("\n🎊 集体智慧涌现结果:")
         print("="*60)
         print(f"   🌈 认知多样性评分: {emergence_result['cognitive_diversity']:.3f}")
         print(f"   🤝 共识信心度: {emergence_result['consensus_confidence']:.3f}")
@@ -259,7 +256,7 @@ class AdvancedDemoPart2:
         print(f"   💡 涌现洞察数量: {len(emergence_result['emergent_insights'])}")
         print(f"   🎯 涌现等级: {emergence_result['emergence_level']}")
         
-        print(f"\n✨ 检测到的涌现洞察:")
+        print("\n✨ 检测到的涌现洞察:")
         for i, insight in enumerate(emergence_result['emergent_insights'], 1):
             print(f"   {i}. {insight['content']}")
             print(f"      🎯 涌现评分: {insight['emergence_score']:.3f}")
@@ -267,12 +264,12 @@ class AdvancedDemoPart2:
             print(f"      🏷️  类型: {insight['insight_type']}")
             print(f"      🔗 涌现模式: {insight['emergence_pattern']}")
         
-        print(f"\n📊 涌现机制分析:")
+        print("\n📊 涌现机制分析:")
         mechanisms = emergence_result['emergence_mechanisms']
         for mechanism, score in mechanisms.items():
             print(f"   • {mechanism}: {score:.3f}")
         
-        print(f"\n🔍 认知多样性详细分析:")
+        print("\n🔍 认知多样性详细分析:")
         diversity_details = emergence_result['diversity_analysis']
         print(f"   🧠 推理风格多样性: {diversity_details['reasoning_diversity']:.3f}")
         print(f"   💎 价值体系多样性: {diversity_details['value_diversity']:.3f}")
@@ -283,9 +280,8 @@ class AdvancedDemoPart2:
         
         return emergence_result
     
-    async def calculate_intelligence_emergence(self, agent_responses: Dict) -> Dict[str, Any]:
+    async def calculate_intelligence_emergence(self, agent_responses: dict) -> dict[str, Any]:
         """计算集体智慧涌现"""
-        
         # 计算认知多样性
         reasoning_styles = set()
         value_systems = []
@@ -380,7 +376,7 @@ class AdvancedDemoPart2:
             }
         }
     
-    def _calculate_value_diversity(self, value_systems: List[Dict]) -> float:
+    def _calculate_value_diversity(self, value_systems: list[dict]) -> float:
         """计算价值体系多样性"""
         if len(value_systems) < 2:
             return 0.0

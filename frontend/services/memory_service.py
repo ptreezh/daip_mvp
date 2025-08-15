@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-记忆管理服务
+"""记忆管理服务
 
 连接前端记忆管理界面与后端MemAgent，提供记忆的CRUD操作和智能管理功能
 """
 
 import logging
-import asyncio
-from typing import Dict, List, Optional, Any
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Optional
 
-from src.core_services.memory_agent import MemAgent, Memory, MemoryType, MemoryQuery
 from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
+from src.core_services.memory_agent import MemAgent, Memory, MemoryQuery, MemoryType
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +49,7 @@ class MemoryService:
                           source_id: Optional[str] = None,
                           memory_type: Optional[str] = None,
                           search_query: Optional[str] = None,
-                          limit: int = 20) -> List[Dict[str, Any]]:
+                          limit: int = 20) -> list[dict[str, Any]]:
         """获取记忆列表"""
         if not self.is_initialized:
             await self.initialize()
@@ -100,7 +97,7 @@ class MemoryService:
                            memory_type: str,
                            source_id: str,
                            importance: float = 0.5,
-                           metadata: Optional[Dict[str, Any]] = None) -> Optional[str]:
+                           metadata: Optional[dict[str, Any]] = None) -> Optional[str]:
         """创建新记忆"""
         if not self.is_initialized:
             await self.initialize()
@@ -130,7 +127,7 @@ class MemoryService:
                            memory_id: str,
                            content: Optional[str] = None,
                            importance: Optional[float] = None,
-                           metadata: Optional[Dict[str, Any]] = None) -> bool:
+                           metadata: Optional[dict[str, Any]] = None) -> bool:
         """更新记忆"""
         if not self.is_initialized:
             await self.initialize()
@@ -198,7 +195,7 @@ class MemoryService:
             logger.error(f"删除记忆失败: {e}")
             return False
     
-    async def get_memory_statistics(self, source_id: Optional[str] = None) -> Dict[str, Any]:
+    async def get_memory_statistics(self, source_id: Optional[str] = None) -> dict[str, Any]:
         """获取记忆统计信息"""
         if not self.is_initialized:
             await self.initialize()
@@ -239,7 +236,7 @@ class MemoryService:
             logger.error(f"获取统计信息失败: {e}")
             return {}
     
-    async def organize_memories(self, source_id: str) -> Dict[str, List[Dict[str, Any]]]:
+    async def organize_memories(self, source_id: str) -> dict[str, list[dict[str, Any]]]:
         """组织记忆"""
         if not self.is_initialized:
             await self.initialize()
@@ -288,7 +285,7 @@ class MemoryService:
     async def share_memories(self, 
                             source_id: str, 
                             target_id: str, 
-                            memory_ids: List[str]) -> bool:
+                            memory_ids: list[str]) -> bool:
         """共享记忆"""
         if not self.is_initialized:
             await self.initialize()
@@ -306,7 +303,7 @@ class MemoryService:
             logger.error(f"共享记忆失败: {e}")
             return False
     
-    async def consolidate_memories(self, source_id: str, memory_type: Optional[str] = None) -> List[Dict[str, Any]]:
+    async def consolidate_memories(self, source_id: str, memory_type: Optional[str] = None) -> list[dict[str, Any]]:
         """整合记忆"""
         if not self.is_initialized:
             await self.initialize()

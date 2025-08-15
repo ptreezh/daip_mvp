@@ -1,29 +1,28 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.2.3 学术研究场景核心功能测试
+"""V0.2.3 学术研究场景核心功能测试
 
 测试文献检索、方法论指导、写作辅助和同行评议功能
 """
 
 import asyncio
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # 添加项目根目录到路径
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.scenarios.enhanced_academic_research_scenario_complete import EnhancedAcademicResearchScenario
-from src.memory_bank_tools import MemoryBankTools
 from src.core_services.virtual_team_service import VirtualTeamService
+from src.memory_bank_tools import MemoryBankTools
+from src.scenarios.enhanced_academic_research_scenario_complete import EnhancedAcademicResearchScenario
 
 
 class TestV023AcademicResearch:
     """V0.2.3 学术研究场景测试"""
     
-    @pytest.fixture
+    @pytest.fixture()
     async def scenario(self):
         """创建测试场景实例"""
         memory_tools = MemoryBankTools()
@@ -32,7 +31,7 @@ class TestV023AcademicResearch:
         await scenario.initialize_components()
         return scenario
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_start_research_project(self, scenario):
         """测试启动研究项目"""
         research_question = "How does artificial intelligence impact educational outcomes?"
@@ -53,7 +52,7 @@ class TestV023AcademicResearch:
         print(f"   Literature found: {result['literature_found']}")
         print(f"   Top methodology: {result['top_methodology']}")
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_design_study(self, scenario):
         """测试研究设计"""
         # 先启动项目
@@ -77,7 +76,7 @@ class TestV023AcademicResearch:
         print(f"   Study design: {result['study_design']}")
         print(f"   Data collection: {result['data_collection_methods']}")
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_write_manuscript_section(self, scenario):
         """测试稿件写作"""
         # 先启动项目
@@ -121,7 +120,7 @@ class TestV023AcademicResearch:
         print(f"   Strengths: {len(analysis_result['strengths'])}")
         print(f"   Suggestions: {len(analysis_result['suggestions'])}")
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_conduct_peer_review(self, scenario):
         """测试同行评议"""
         # 先启动项目并写作章节
@@ -153,13 +152,13 @@ class TestV023AcademicResearch:
         assert "weaknesses_identified" in review_result
         assert "suggestions_provided" in review_result
         
-        print(f"✅ Peer review completed")
+        print("✅ Peer review completed")
         print(f"   Average score: {review_result['average_score']}")
         print(f"   Decision: {review_result['final_decision']}")
         print(f"   Strengths identified: {review_result['strengths_identified']}")
         print(f"   Weaknesses identified: {review_result['weaknesses_identified']}")
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_project_status(self, scenario):
         """测试项目状态查询"""
         # 测试无项目状态
@@ -186,7 +185,7 @@ class TestV023AcademicResearch:
         print(f"   Domain: {status['domain']}")
         print(f"   Progress indicators: {status['progress_indicators']}")
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_export_project_report(self, scenario):
         """测试项目报告导出"""
         # 创建完整的研究项目
@@ -220,7 +219,7 @@ class TestV023AcademicResearch:
         print("   Report preview:")
         print(report[:300] + "...")
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_complete_research_workflow(self, scenario):
         """测试完整的研究工作流程"""
         print("\n🔬 Testing Complete Research Workflow")

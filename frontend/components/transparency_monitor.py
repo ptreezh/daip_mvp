@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-透明度监控组件 - 实时状态监控增强版本
+"""透明度监控组件 - 实时状态监控增强版本
 
 实时显示系统内部运作过程，提供完全透明度
 支持真实LLM调用监控、工作流状态跟踪和性能指标
@@ -10,10 +8,11 @@
 
 import asyncio
 import logging
-from typing import List, Dict, Any, Optional, Callable
-from datetime import datetime, timedelta
+from datetime import datetime
+from typing import Any
+
+from lona.html import HTML, Div, P, Span
 from lona.html.widget import Widget
-from lona.html import HTML, Div, H3, P, Span, Pre, Code, Button
 
 logger = logging.getLogger(__name__)
 
@@ -303,7 +302,7 @@ class TransparencyMonitor(Widget):
         except Exception as e:
             logger.error(f"更新系统状态失败: {e}")
     
-    async def log_llm_call(self, call_data: Dict[str, Any]):
+    async def log_llm_call(self, call_data: dict[str, Any]):
         """记录LLM调用"""
         try:
             call_record = {
@@ -339,7 +338,7 @@ class TransparencyMonitor(Widget):
         except Exception as e:
             logger.error(f"记录LLM调用失败: {e}")
     
-    async def log_workflow_start(self, workflows: List[str], roles: List[str]):
+    async def log_workflow_start(self, workflows: list[str], roles: list[str]):
         """记录工作流开始"""
         try:
             workflow_record = {
@@ -355,7 +354,7 @@ class TransparencyMonitor(Widget):
         except Exception as e:
             logger.error(f"记录工作流开始失败: {e}")
     
-    async def update_workflow_status(self, workflow_data: Dict[str, Any]):
+    async def update_workflow_status(self, workflow_data: dict[str, Any]):
         """更新工作流状态（WebSocket回调）"""
         try:
             workflow_id = workflow_data.get("workflow_id")

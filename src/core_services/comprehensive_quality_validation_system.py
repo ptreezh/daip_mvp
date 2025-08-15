@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 13:00:00
+"""@Time    : 2025-08-05 13:00:00
 @Author  : DAIP-LIVE Team
 @File    : comprehensive_quality_validation_system.py
 @Description:
@@ -8,26 +6,23 @@
     综合质量验证系统
 """
 
+import ast
 import asyncio
 import json
 import logging
-import time
-import threading
-from typing import Dict, List, Optional, Any, Callable, Union
-from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict, field
-from enum import Enum
-import inspect
-import ast
 import os
-import sys
 import re
-from concurrent.futures import ThreadPoolExecutor
-import hashlib
+import time
 import uuid
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Optional
 
+from .enterprise_error_handling_system import EnterpriseErrorHandler, ErrorSeverity
 from .performance_monitoring_system import PerformanceMonitoringSystem
-from .enterprise_error_handling_system import EnterpriseErrorHandler, ErrorSeverity, ErrorCategory
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +77,7 @@ class ValidationResult:
     passed: bool
     score: float
     message: str
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.now)
 
 
@@ -94,10 +89,10 @@ class QualityReport:
     validation_level: ValidationLevel
     overall_score: float
     quality_grade: QualityScore
-    metric_scores: Dict[QualityMetric, float]
-    validation_results: List[ValidationResult]
-    recommendations: List[str]
-    summary: Dict[str, Any]
+    metric_scores: dict[QualityMetric, float]
+    validation_results: list[ValidationResult]
+    recommendations: list[str]
+    summary: dict[str, Any]
 
 
 class CodeQualityAnalyzer:
@@ -106,7 +101,7 @@ class CodeQualityAnalyzer:
     def __init__(self):
         self.rules = self._initialize_rules()
     
-    def _initialize_rules(self) -> List[ValidationRule]:
+    def _initialize_rules(self) -> list[ValidationRule]:
         """Initialize validation rules."""
         return [
             ValidationRule(
@@ -177,12 +172,12 @@ class CodeQualityAnalyzer:
             )
         ]
     
-    def analyze_file(self, file_path: str) -> List[ValidationResult]:
+    def analyze_file(self, file_path: str) -> list[ValidationResult]:
         """Analyze a single file."""
         results = []
         
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
             
             for rule in self.rules:
@@ -356,7 +351,7 @@ class CodeQualityAnalyzer:
         local_imports = []
         
         for imp in import_lines:
-            if imp.startswith('import ') and not '.' in imp:
+            if imp.startswith('import ') and '.' not in imp:
                 standard_imports.append(imp)
             elif imp.startswith('from ') and any(imp.startswith(f'from {lib}') for lib in ['os', 'sys', 'json', 'time']):
                 standard_imports.append(imp)
@@ -376,7 +371,7 @@ class PerformanceValidator:
     def __init__(self, monitoring_system: PerformanceMonitoringSystem):
         self.monitoring_system = monitoring_system
     
-    async def validate_performance(self) -> List[ValidationResult]:
+    async def validate_performance(self) -> list[ValidationResult]:
         """Validate system performance."""
         results = []
         
@@ -478,7 +473,7 @@ class SecurityValidator:
     def __init__(self):
         self.security_rules = self._initialize_security_rules()
     
-    def _initialize_security_rules(self) -> List[ValidationRule]:
+    def _initialize_security_rules(self) -> list[ValidationRule]:
         """Initialize security rules."""
         return [
             ValidationRule(
@@ -516,7 +511,7 @@ class SecurityValidator:
             )
         ]
     
-    def validate_security(self, file_paths: List[str]) -> List[ValidationResult]:
+    def validate_security(self, file_paths: list[str]) -> list[ValidationResult]:
         """Validate security."""
         results = []
         
@@ -525,7 +520,7 @@ class SecurityValidator:
                 continue
             
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
                 
                 for rule in self.security_rules:
@@ -627,13 +622,13 @@ class SecurityValidator:
 class ComprehensiveQualityValidator:
     """Comprehensive quality validator."""
     
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.code_analyzer = CodeQualityAnalyzer()
         self.performance_validator = None
         self.security_validator = SecurityValidator()
         self.error_handler = None
-        self.validation_history: List[QualityReport] = []
+        self.validation_history: list[QualityReport] = []
         self.executor = ThreadPoolExecutor(max_workers=4)
     
     def initialize(self, monitoring_system: PerformanceMonitoringSystem, error_handler: EnterpriseErrorHandler):
@@ -704,7 +699,7 @@ class ComprehensiveQualityValidator:
         logger.info(f"Quality validation completed: {overall_score:.1f}% ({quality_grade.value})")
         return report
     
-    def _collect_python_files(self) -> List[str]:
+    def _collect_python_files(self) -> list[str]:
         """Collect Python files for validation."""
         python_files = []
         
@@ -715,7 +710,7 @@ class ComprehensiveQualityValidator:
         
         return python_files
     
-    async def _validate_code_quality(self, python_files: List[str], level: ValidationLevel) -> List[ValidationResult]:
+    async def _validate_code_quality(self, python_files: list[str], level: ValidationLevel) -> list[ValidationResult]:
         """Validate code quality."""
         results = []
         
@@ -748,7 +743,7 @@ class ComprehensiveQualityValidator:
         
         return results
     
-    def _validate_error_handling(self) -> List[ValidationResult]:
+    def _validate_error_handling(self) -> list[ValidationResult]:
         """Validate error handling."""
         results = []
         
@@ -797,7 +792,7 @@ class ComprehensiveQualityValidator:
         
         return results
     
-    def _calculate_metric_scores(self, validation_results: List[ValidationResult]) -> Dict[QualityMetric, float]:
+    def _calculate_metric_scores(self, validation_results: list[ValidationResult]) -> dict[QualityMetric, float]:
         """Calculate scores for each quality metric."""
         metric_scores = {}
         
@@ -828,7 +823,7 @@ class ComprehensiveQualityValidator:
         
         return metric_scores
     
-    def _calculate_overall_score(self, metric_scores: Dict[QualityMetric, float]) -> float:
+    def _calculate_overall_score(self, metric_scores: dict[QualityMetric, float]) -> float:
         """Calculate overall quality score."""
         if not metric_scores:
             return 0.0
@@ -868,7 +863,7 @@ class ComprehensiveQualityValidator:
         else:
             return QualityScore.POOR
     
-    def _generate_recommendations(self, validation_results: List[ValidationResult], metric_scores: Dict[QualityMetric, float]) -> List[str]:
+    def _generate_recommendations(self, validation_results: list[ValidationResult], metric_scores: dict[QualityMetric, float]) -> list[str]:
         """Generate improvement recommendations."""
         recommendations = []
         
@@ -898,7 +893,7 @@ class ComprehensiveQualityValidator:
         
         return recommendations
     
-    def get_validation_history(self, days: int = 30) -> List[Dict[str, Any]]:
+    def get_validation_history(self, days: int = 30) -> list[dict[str, Any]]:
         """Get validation history."""
         cutoff_time = datetime.now() - timedelta(days=days)
         return [
@@ -968,7 +963,7 @@ def get_comprehensive_quality_validator() -> ComprehensiveQualityValidator:
     return _comprehensive_quality_validator
 
 
-def initialize_comprehensive_quality_validator(config: Dict[str, Any]):
+def initialize_comprehensive_quality_validator(config: dict[str, Any]):
     """Initialize comprehensive quality validator."""
     global _comprehensive_quality_validator
     _comprehensive_quality_validator = ComprehensiveQualityValidator(config)

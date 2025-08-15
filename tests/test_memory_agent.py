@@ -1,38 +1,37 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-23 10:00:00
+"""@Time    : 2025-07-23 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_memory_agent.py
 @Description:
     Unit tests for MemAgent core functionality.
 """
-import pytest
 import tempfile
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
-from src.core_services.memory_agent import MemAgent, Memory, MemoryType, MemoryQuery, TrainingExample
+import pytest
+
 from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeNode, NodeType
+from src.core_services.memory_agent import MemAgent, Memory, MemoryQuery, MemoryType, TrainingExample
 
 
 class TestMemAgent:
     """Test cases for MemAgent core functionality."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def mock_sskg_manager(self):
         """Create a mock SSKG manager for testing."""
         mock_manager = Mock(spec=EnhancedSSKGManager)
         return mock_manager
     
-    @pytest.fixture
+    @pytest.fixture()
     def temp_model_path(self):
         """Create a temporary path for RL model storage."""
         with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as f:
             yield Path(f.name)
         # Cleanup is handled by tempfile
     
-    @pytest.fixture
+    @pytest.fixture()
     def mem_agent(self, mock_sskg_manager, temp_model_path):
         """Create a MemAgent instance for testing."""
         return MemAgent(
@@ -41,7 +40,7 @@ class TestMemAgent:
             enable_rl=True
         )
     
-    @pytest.fixture
+    @pytest.fixture()
     def sample_memory(self):
         """Create a sample memory for testing."""
         return Memory(

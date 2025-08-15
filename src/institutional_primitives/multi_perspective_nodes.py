@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 13:00:00
+"""@Time    : 2025-07-24 13:00:00
 @Author  : DAIP-LIVE Team
 @File    : multi_perspective_nodes.py
 @Description:
@@ -10,16 +8,16 @@
 
 # Import all components from the modularized package
 from .multi_perspective import (
-    SubProblem,
+    EnhancedSynthesisNode,
     ExpertViewpoint,
-    ViewpointCollection,
+    IterativeRefinementNode,
+    ParallelExplorationNode,
+    SubProblem,
     SynthesisQuality,
     SynthesisResult,
     TaskDecompositionNode,
-    ParallelExplorationNode,
+    ViewpointCollection,
     ViewpointCollectionNode,
-    EnhancedSynthesisNode,
-    IterativeRefinementNode
 )
 
 # For backward compatibility, also export the original ViewpointSynthesisNode name

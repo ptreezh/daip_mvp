@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-工作流共识算法适配器
+"""工作流共识算法适配器
 
 适配现有的ConsensusNode工作流算法到统一共识调度器接口。
 保持与工作流引擎的兼容性，支持加权平均和多数投票逻辑。
@@ -19,32 +17,25 @@
 - 需要与现有工作流兼容的场景
 """
 
-import asyncio
-from typing import Any, Dict, List, Optional, Set
 from datetime import datetime
+from typing import Any, Optional
 
-from consensus_algorithm_interface import (
-    ConsensusAlgorithm, ConsensusContext, AlgorithmCapabilities
-)
-from consensus_models import (
-    ConsensusInput, ConsensusResult, AlgorithmMetadata, 
-    ValidationResult, AlgorithmType
-)
+from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm, ConsensusContext
+from consensus_models import AlgorithmMetadata, AlgorithmType, ConsensusInput, ConsensusResult, ValidationResult
+from institutional_primitives.base import ExecutionContext
 
 # 导入现有的ConsensusNode实现
 from institutional_primitives.consensus_node import ConsensusNode
-from institutional_primitives.base import ExecutionContext
 
 
 class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
-    """
-    工作流共识算法适配器
+    """工作流共识算法适配器
     
     包装现有的ConsensusNode实现，提供统一接口。
     保持与工作流引擎的兼容性和现有的共识计算逻辑。
     """
     
-    def __init__(self, configuration: Optional[Dict[str, Any]] = None):
+    def __init__(self, configuration: Optional[dict[str, Any]] = None):
         super().__init__("workflow_consensus", configuration)
         
         # 从配置中获取参数
@@ -63,10 +54,9 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         )
         
     async def calculate(self, 
-                       inputs: List[ConsensusInput], 
+                       inputs: list[ConsensusInput], 
                        context: ConsensusContext) -> ConsensusResult:
-        """
-        执行工作流共识计算
+        """执行工作流共识计算
         
         Args:
             inputs: 统一格式的共识输入列表
@@ -109,9 +99,8 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             context.set_metric("algorithm_error", str(e))
             raise RuntimeError(f"工作流共识算法执行失败: {e}")
     
-    def _convert_inputs_to_workflow(self, inputs: List[ConsensusInput]) -> Dict[str, Any]:
+    def _convert_inputs_to_workflow(self, inputs: list[ConsensusInput]) -> dict[str, Any]:
         """将统一格式输入转换为工作流格式"""
-        
         # 检查输入是否已经是聚合证据格式
         if len(inputs) == 1 and isinstance(inputs[0].position, dict) and "aggregated_evidence" in inputs[0].position:
             # 直接使用聚合证据
@@ -130,7 +119,7 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         
         return {"aggregated_evidence": aggregated_evidence}
     
-    def _is_fact_evidence_format(self, inputs: List[ConsensusInput]) -> bool:
+    def _is_fact_evidence_format(self, inputs: list[ConsensusInput]) -> bool:
         """检查输入是否为事实-证据格式"""
         # 检查是否有fact_id和evidence_type等字段
         for inp in inputs:
@@ -139,7 +128,7 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
                     return True
         return False
     
-    def _aggregate_fact_evidence(self, inputs: List[ConsensusInput]) -> Dict[str, Any]:
+    def _aggregate_fact_evidence(self, inputs: list[ConsensusInput]) -> dict[str, Any]:
         """聚合事实-证据格式的输入"""
         facts = {}
         
@@ -180,7 +169,7 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         
         return facts
     
-    def _create_single_fact_evidence(self, inputs: List[ConsensusInput]) -> Dict[str, Any]:
+    def _create_single_fact_evidence(self, inputs: list[ConsensusInput]) -> dict[str, Any]:
         """为简单共识输入创建单一事实证据"""
         fact_id = "consensus_fact"
         
@@ -245,7 +234,7 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         
         return aggregated_evidence
     
-    def _create_workflow_context(self, context: ConsensusContext, aggregated_evidence: Dict[str, Any] = None) -> ExecutionContext:
+    def _create_workflow_context(self, context: ConsensusContext, aggregated_evidence: dict[str, Any] = None) -> ExecutionContext:
         """创建工作流执行上下文"""
         workflow_context = ExecutionContext(
             execution_id=f"consensus_{context.session_id}",
@@ -274,10 +263,9 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         return workflow_context
     
     def _convert_result_from_workflow(self, 
-                                     workflow_result: Dict[str, Any],
-                                     original_inputs: List[ConsensusInput]) -> ConsensusResult:
+                                     workflow_result: dict[str, Any],
+                                     original_inputs: list[ConsensusInput]) -> ConsensusResult:
         """将工作流格式结果转换为统一格式"""
-        
         if not workflow_result.get("success", False):
             raise RuntimeError(f"工作流执行失败: {workflow_result.get('error', 'Unknown error')}")
         
@@ -374,7 +362,7 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             max_participants=None
         )
     
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> ValidationResult:
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> ValidationResult:
         """验证输入数据"""
         errors = []
         warnings = []
@@ -426,7 +414,7 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             }
         )
     
-    def validate_configuration(self, config: Dict[str, Any]) -> ValidationResult:
+    def validate_configuration(self, config: dict[str, Any]) -> ValidationResult:
         """验证配置参数"""
         errors = []
         warnings = []
@@ -477,7 +465,7 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         
         return (base_time + aggregation_factor) * method_factor
     
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> dict[str, Any]:
         """获取算法健康状态"""
         base_status = super().get_health_status()
         

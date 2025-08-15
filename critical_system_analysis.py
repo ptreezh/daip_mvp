@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-关键系统分析工具
+"""关键系统分析工具
 
 基于第一性原理，从顶级测试工程师角度进行深度系统分析
 专注于发现可能影响工程可用性的关键问题
 """
 
 import asyncio
+import json
 import sys
 import time
 import traceback
-import psutil
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, List
-import json
+from pathlib import Path
+
+import psutil
 
 # 添加项目路径
 project_root = Path(__file__).parent
@@ -158,9 +156,9 @@ class CriticalSystemAnalysis:
         issues = []
         
         try:
+            from src.core_services.role_manager import RoleManager
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-            from src.core_services.role_manager import RoleManager
             
             # 创建系统实例
             llm_integrator = RealLLMIntegrator()
@@ -263,7 +261,7 @@ class CriticalSystemAnalysis:
                     else:
                         issues.append({
                             'severity': 'WARNING',
-                            'description': f'LLM调用返回空响应',
+                            'description': 'LLM调用返回空响应',
                             'impact': 'AI角色可能无法正常回应',
                             'recommendation': '检查LLM配置和提示词'
                         })
@@ -315,9 +313,9 @@ class CriticalSystemAnalysis:
         
         try:
             # 模拟用户完整使用流程
+            from src.core_services.role_manager import RoleManager
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-            from src.core_services.role_manager import RoleManager
             
             # 1. 系统启动时间
             start_time = time.time()
@@ -451,9 +449,9 @@ class CriticalSystemAnalysis:
         issues = []
         
         try:
+            from src.core_services.role_manager import RoleManager
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-            from src.core_services.role_manager import RoleManager
             
             # 创建系统实例
             llm_integrator = RealLLMIntegrator()
@@ -673,7 +671,7 @@ class CriticalSystemAnalysis:
         
         # 严重问题详情
         if self.critical_issues:
-            print(f"\n🚨 严重问题 (必须修复):")
+            print("\n🚨 严重问题 (必须修复):")
             print("-" * 30)
             for i, issue in enumerate(self.critical_issues, 1):
                 print(f"{i}. {issue['description']}")
@@ -683,7 +681,7 @@ class CriticalSystemAnalysis:
         
         # 关键警告
         if self.warnings:
-            print(f"\n⚠️ 重要警告 (建议修复):")
+            print("\n⚠️ 重要警告 (建议修复):")
             print("-" * 30)
             for i, warning in enumerate(self.warnings[:5], 1):  # 只显示前5个
                 print(f"{i}. {warning['description']}")
@@ -694,7 +692,7 @@ class CriticalSystemAnalysis:
         
         # 性能指标摘要
         if self.performance_data:
-            print(f"\n📊 关键性能指标:")
+            print("\n📊 关键性能指标:")
             print("-" * 30)
             
             if 'startup_time' in self.performance_data:
@@ -713,7 +711,7 @@ class CriticalSystemAnalysis:
                 print(f"可用角色数量: {self.performance_data['total_roles']}个")
         
         # 工程可用性评估
-        print(f"\n🎯 工程可用性评估:")
+        print("\n🎯 工程可用性评估:")
         print("-" * 30)
         
         if critical_count == 0:
@@ -738,7 +736,7 @@ class CriticalSystemAnalysis:
         print(f"建议: {recommendation}")
         
         # 关键发现总结
-        print(f"\n💡 关键发现:")
+        print("\n💡 关键发现:")
         print("-" * 30)
         
         key_findings = []
@@ -763,7 +761,7 @@ class CriticalSystemAnalysis:
             print(f"• {finding}")
         
         # 下一步行动建议
-        print(f"\n🚀 下一步行动建议:")
+        print("\n🚀 下一步行动建议:")
         print("-" * 30)
         
         if critical_count > 0:

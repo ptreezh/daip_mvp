@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2023-10-27 10:05:00
+"""@Time    : 2023-10-27 10:05:00
 @Author  : DAIP-LIVE Team
 @File    : consensus_strategies.py
 @Description:
@@ -10,7 +8,7 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Type
+from typing import Any
 
 from src.models import DebateTurn
 
@@ -19,9 +17,8 @@ class ConsensusStrategy(ABC):
     """Abstract base class for all consensus strategies."""
 
     @abstractmethod
-    def execute(self, history: List[DebateTurn]) -> Any:
-        """
-        Executes the consensus-finding logic.
+    def execute(self, history: list[DebateTurn]) -> Any:
+        """Executes the consensus-finding logic.
 
         Args:
             history (List[DebateTurn]): The full history of the debate.
@@ -33,19 +30,17 @@ class ConsensusStrategy(ABC):
 
 
 class SimpleMajorityVoteStrategy(ConsensusStrategy):
-    """
-    A simple consensus strategy based on majority vote.
+    """A simple consensus strategy based on majority vote.
 
     This strategy parses the last opinion of each role for keywords to determine
     their vote (e.g., 'agree' vs. 'disagree').
     """
 
     @staticmethod # Make it a static method
-    def execute(history: List[DebateTurn]) -> Dict[str, Any]:
+    def execute(history: list[DebateTurn]) -> dict[str, Any]:
+        """Counts votes based on keywords in the last turn of each role.
         """
-        Counts votes based on keywords in the last turn of each role.
-        """
-        votes: Dict[str, int] = {"agree": 0, "disagree": 0, "neutral": 0}
+        votes: dict[str, int] = {"agree": 0, "disagree": 0, "neutral": 0}
         roles_voted = set()
         # Iterate backwards to find the last opinion of each role
         for turn in reversed(history):
@@ -67,11 +62,11 @@ class ConsensusStrategyFactory:
     """Factory for creating and managing consensus strategy instances."""
 
     def __init__(self):
-        self._strategies: Dict[str, Type[ConsensusStrategy]] = {}
+        self._strategies: dict[str, type[ConsensusStrategy]] = {}
         # Public property for test compatibility
         self.strategies = self._strategies
 
-    def register(self, name: str, strategy_class: Type[ConsensusStrategy]):
+    def register(self, name: str, strategy_class: type[ConsensusStrategy]):
         """Registers a new consensus strategy."""
         self._strategies[name] = strategy_class
 
@@ -82,7 +77,7 @@ class ConsensusStrategyFactory:
             raise ValueError(f"Consensus strategy '{name}' not registered.")
         return strategy_class()
 
-    def get_all_strategies(self) -> Dict[str, Type[ConsensusStrategy]]:
+    def get_all_strategies(self) -> dict[str, type[ConsensusStrategy]]:
         """Returns all registered strategy classes."""
         return self._strategies
         
@@ -99,5 +94,5 @@ class ConsensusStrategyFactory:
             tool_manager.register_tool(
                 f"consensus.{name}",
                 strategy_class,
-                description=f"Custom consensus strategy" if name == "custom_strategy" else f"{name.replace('_', ' ').title()} consensus strategy"
+                description="Custom consensus strategy" if name == "custom_strategy" else f"{name.replace('_', ' ').title()} consensus strategy"
             )

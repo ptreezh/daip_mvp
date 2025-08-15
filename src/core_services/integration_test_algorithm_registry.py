@@ -1,23 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-算法注册表集成测试
+"""算法注册表集成测试
 
 验证AlgorithmRegistry与现有系统组件的集成和兼容性。
 """
 
 import asyncio
 import sys
-from typing import List, Dict, Any
 
-from consensus_models import (
-    ConsensusInput, ConsensusResult, AlgorithmMetadata, 
-    ValidationResult, AlgorithmType
-)
-from consensus_algorithm_interface import (
-    ConsensusAlgorithm, ConsensusContext, AlgorithmCapabilities
-)
 from algorithm_registry import AlgorithmRegistry
+from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm, ConsensusContext
+from consensus_models import AlgorithmMetadata, AlgorithmType, ConsensusInput, ConsensusResult, ValidationResult
 from consensus_validation import ConsensusDataSerializer
 
 
@@ -27,7 +19,7 @@ class LegacyCompatibleAlgorithm(ConsensusAlgorithm):
     def __init__(self, algorithm_id: str):
         super().__init__(algorithm_id, {})
         
-    async def calculate(self, inputs: List[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
+    async def calculate(self, inputs: list[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
         """模拟兼容旧格式的共识计算"""
         # 模拟处理旧格式数据
         serializer = ConsensusDataSerializer()
@@ -105,7 +97,7 @@ class LegacyCompatibleAlgorithm(ConsensusAlgorithm):
             max_participants=1000
         )
         
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> ValidationResult:
+    def validate_inputs(self, inputs: list[ConsensusInput]) -> ValidationResult:
         """验证输入"""
         if not inputs:
             return ValidationResult(is_valid=False, errors=["Empty inputs"])

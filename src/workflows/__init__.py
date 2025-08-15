@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-24 10:00:00
+"""@Time    : 2025-07-24 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : __init__.py
 @Description:

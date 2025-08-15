@@ -165,7 +165,7 @@ class TaskManager:
         """Gets a list of all tasks that are ready to be worked on (status 'to_do'
         and all dependencies are 'done').
 
-        Returns
+        Returns:
         -------
             List[Task]: A list of ready Task objects.
         """

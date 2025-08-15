@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""
-最小化的Lona测试 - 理解正确用法
+"""最小化的Lona测试 - 理解正确用法
 """
 
 from lona import LonaApp, View
-from lona.html import HTML, H1, P
+from lona.html import H1, HTML, P
 
 app = LonaApp(__file__)
 

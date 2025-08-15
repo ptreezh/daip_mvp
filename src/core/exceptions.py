@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : exceptions.py
 @Description:
@@ -8,11 +6,10 @@
     Defines all custom exception types and error handling utilities.
 """
 
-from typing import Optional, Dict, Any, List
-from enum import Enum
 import logging
 from datetime import datetime
-import traceback
+from enum import Enum
+from typing import Any, Optional
 
 
 class ErrorCode(Enum):
@@ -83,7 +80,7 @@ class DAIPException(Exception):
         self,
         message: str,
         error_code: ErrorCode = ErrorCode.INTERNAL_ERROR,
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
         cause: Optional[Exception] = None
     ):
         self.message = message
@@ -127,7 +124,7 @@ class DAIPException(Exception):
         # Default fallback
         return 500
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         result = {
             "error": {
@@ -391,7 +388,7 @@ class AuthorizationError(DAIPException):
 class ValidationError(DAIPException):
     """验证异常基类"""
     
-    def __init__(self, message: str, field: Optional[str] = None, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, field: Optional[str] = None, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code=ErrorCode.VALIDATION_ERROR,
@@ -412,7 +409,7 @@ class ParameterError(ValidationError):
 class NotFoundError(DAIPException):
     """资源未找到错误"""
     
-    def __init__(self, resource_type: str, resource_id: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, resource_type: str, resource_id: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=f"{resource_type} not found: {resource_id}",
             error_code=ErrorCode.NOT_FOUND,
@@ -423,7 +420,7 @@ class NotFoundError(DAIPException):
 class ConflictError(DAIPException):
     """冲突错误"""
     
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code=ErrorCode.CONFLICT,
@@ -434,7 +431,7 @@ class ConflictError(DAIPException):
 class AuthenticationError(DAIPException):
     """认证错误"""
     
-    def __init__(self, message: str = "Authentication failed", details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str = "Authentication failed", details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code=ErrorCode.AUTHENTICATION_ERROR,
@@ -445,7 +442,7 @@ class AuthenticationError(DAIPException):
 class AuthorizationError(DAIPException):
     """授权错误"""
     
-    def __init__(self, message: str = "Authorization failed", details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str = "Authorization failed", details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code=ErrorCode.AUTHORIZATION_ERROR,
@@ -456,7 +453,7 @@ class AuthorizationError(DAIPException):
 class ServiceUnavailableError(DAIPException):
     """服务不可用错误"""
     
-    def __init__(self, service_name: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, service_name: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=f"Service unavailable: {service_name}",
             error_code=ErrorCode.SERVICE_UNAVAILABLE,
@@ -467,7 +464,7 @@ class ServiceUnavailableError(DAIPException):
 class SessionError(DAIPException):
     """会话错误"""
     
-    def __init__(self, message: str, session_id: str = "", details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, session_id: str = "", details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code=ErrorCode.SESSION_ERROR,
@@ -478,7 +475,7 @@ class SessionError(DAIPException):
 class TaskError(DAIPException):
     """任务错误"""
     
-    def __init__(self, message: str, task_id: str = "", details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, task_id: str = "", details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code=ErrorCode.TASK_ERROR,
@@ -489,7 +486,7 @@ class TaskError(DAIPException):
 class WebSocketError(DAIPException):
     """WebSocket错误"""
     
-    def __init__(self, message: str, connection_id: str = "", details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, connection_id: str = "", details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code=ErrorCode.WEBSOCKET_ERROR,
@@ -500,7 +497,7 @@ class WebSocketError(DAIPException):
 class ForumServiceError(DAIPException):
     """Forum服务错误"""
     
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code=ErrorCode.SERVICE_UNAVAILABLE,
@@ -517,7 +514,7 @@ class DebateOrchestrationError(DebateError):
 # 异常处理工具函数
 # ============================================================================
 
-def handle_exception(exception: Exception) -> Dict[str, Any]:
+def handle_exception(exception: Exception) -> dict[str, Any]:
     """统一异常处理函数"""
     if isinstance(exception, DAIPException):
         return exception.to_dict()
@@ -542,7 +539,7 @@ class ErrorHandler:
             "recent_errors": []
         }
     
-    def handle_exception(self, exception: Exception, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def handle_exception(self, exception: Exception, context: Optional[dict[str, Any]] = None) -> dict[str, Any]:
         """处理异常"""
         self.error_stats["total_errors"] += 1
         
@@ -573,7 +570,7 @@ class ErrorHandler:
         
         return error_dict
     
-    def _update_error_stats(self, error_code: ErrorCode, context: Optional[Dict[str, Any]] = None):
+    def _update_error_stats(self, error_code: ErrorCode, context: Optional[dict[str, Any]] = None):
         """更新错误统计"""
         # 按错误代码统计
         if error_code.value not in self.error_stats["errors_by_code"]:
@@ -598,7 +595,7 @@ class ErrorHandler:
         if len(self.error_stats["recent_errors"]) > 100:
             self.error_stats["recent_errors"] = self.error_stats["recent_errors"][-100:]
     
-    def _log_error(self, exception: Exception, error_dict: Dict[str, Any], context: Optional[Dict[str, Any]] = None):
+    def _log_error(self, exception: Exception, error_dict: dict[str, Any], context: Optional[dict[str, Any]] = None):
         """记录错误日志"""
         error_info = error_dict["error"]
         
@@ -619,7 +616,7 @@ class ErrorHandler:
         else:
             self.logger.error(log_message, exc_info=exception)
     
-    def get_error_stats(self) -> Dict[str, Any]:
+    def get_error_stats(self) -> dict[str, Any]:
         """获取错误统计"""
         return self.error_stats.copy()
     
@@ -649,7 +646,7 @@ def get_error_handler(logger: logging.Logger = None) -> ErrorHandler:
     return _error_handler
 
 
-def handle_exception(exception: Exception, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def handle_exception(exception: Exception, context: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     """处理异常的便捷函数"""
     handler = get_error_handler()
     return handler.handle_exception(exception, context)
@@ -709,8 +706,8 @@ def create_error_response(
     error_type: str,
     message: str,
     error_code: Optional[str] = None,
-    details: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    details: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
     """创建标准错误响应"""
     return {
         "success": False,

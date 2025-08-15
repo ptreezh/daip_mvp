@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 13:05:00
+"""@Time    : 2025-08-03 13:05:00
 @Author  : DAIP-LIVE Team
 @File    : simplified_automation_test.py
 @Description:
@@ -12,14 +10,14 @@
 """
 
 import asyncio
+import json
 import logging
 import time
-import json
-import subprocess
-import requests
-from typing import Dict, List, Any, Optional
 from datetime import datetime
 from pathlib import Path
+from typing import Any
+
+import requests
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -32,7 +30,7 @@ class SimpleServiceManager:
     def __init__(self):
         self.services = {}
         
-    async def check_services_status(self) -> Dict[str, Any]:
+    async def check_services_status(self) -> dict[str, Any]:
         """检查服务状态"""
         logger.info("🔍 检查服务状态...")
         
@@ -57,7 +55,7 @@ class SimpleServiceManager:
             "check_time": datetime.now().isoformat()
         }
     
-    async def _check_backend_api(self) -> Dict[str, Any]:
+    async def _check_backend_api(self) -> dict[str, Any]:
         """检查后端API"""
         try:
             # 尝试连接后端API
@@ -80,7 +78,7 @@ class SimpleServiceManager:
                 "endpoint": "http://localhost:8000/health"
             }
     
-    async def _check_frontend_access(self) -> Dict[str, Any]:
+    async def _check_frontend_access(self) -> dict[str, Any]:
         """检查前端访问"""
         try:
             # 尝试访问前端
@@ -103,7 +101,7 @@ class SimpleServiceManager:
                 "endpoint": "http://localhost:3000"
             }
     
-    async def _check_system_health(self) -> Dict[str, Any]:
+    async def _check_system_health(self) -> dict[str, Any]:
         """检查系统健康状态"""
         try:
             import psutil
@@ -152,7 +150,7 @@ class APIBasedUserStoryTest:
         self.api_base = "http://localhost:8000"
         self.test_results = {}
         
-    async def run_api_user_story_tests(self) -> Dict[str, Any]:
+    async def run_api_user_story_tests(self) -> dict[str, Any]:
         """运行API用户故事测试"""
         logger.info("🧪 执行基于API的用户故事测试...")
         
@@ -202,7 +200,7 @@ class APIBasedUserStoryTest:
             "passed_tests": sum(1 for r in self.test_results.values() if r.get("success", False))
         }
     
-    async def _test_academic_research_api(self) -> Dict[str, Any]:
+    async def _test_academic_research_api(self) -> dict[str, Any]:
         """测试学术研究API"""
         try:
             # 模拟学术研究请求
@@ -243,7 +241,7 @@ class APIBasedUserStoryTest:
                 "error": str(e)
             }
     
-    async def _test_expert_consultation_api(self) -> Dict[str, Any]:
+    async def _test_expert_consultation_api(self) -> dict[str, Any]:
         """测试专家咨询API"""
         try:
             payload = {
@@ -270,7 +268,7 @@ class APIBasedUserStoryTest:
                 "error": str(e)
             }
     
-    async def _test_casual_discussion_api(self) -> Dict[str, Any]:
+    async def _test_casual_discussion_api(self) -> dict[str, Any]:
         """测试轻松讨论API"""
         try:
             payload = {
@@ -297,7 +295,7 @@ class APIBasedUserStoryTest:
                 "error": str(e)
             }
     
-    async def _test_scenario_manager_api(self) -> Dict[str, Any]:
+    async def _test_scenario_manager_api(self) -> dict[str, Any]:
         """测试场景管理器API"""
         try:
             # 测试场景推荐
@@ -324,7 +322,7 @@ class APIBasedUserStoryTest:
                 "error": str(e)
             }
     
-    async def _test_health_check_api(self) -> Dict[str, Any]:
+    async def _test_health_check_api(self) -> dict[str, Any]:
         """测试健康检查API"""
         try:
             response = requests.get(f"{self.api_base}/health", timeout=5)
@@ -348,7 +346,7 @@ class FunctionalUserStoryTest:
     def __init__(self):
         self.test_results = {}
         
-    async def run_functional_tests(self) -> Dict[str, Any]:
+    async def run_functional_tests(self) -> dict[str, Any]:
         """运行功能性测试"""
         logger.info("⚙️ 执行功能性用户故事测试...")
         
@@ -398,41 +396,36 @@ class FunctionalUserStoryTest:
             "passed_tests": sum(1 for r in self.test_results.values() if r.get("success", False))
         }
     
-    async def _test_core_module_imports(self) -> Dict[str, Any]:
+    async def _test_core_module_imports(self) -> dict[str, Any]:
         """测试核心模块导入"""
         try:
             import_results = {}
             
             # V0.2核心场景导入
             try:
-                from src.scenarios.academic_research_scenario import AcademicResearchScenario
                 import_results["academic_research"] = True
-            except Exception as e:
+            except Exception:
                 import_results["academic_research"] = False
                 
             try:
-                from src.scenarios.expert_consultation_scenario import ExpertConsultationScenario
                 import_results["expert_consultation"] = True
-            except Exception as e:
+            except Exception:
                 import_results["expert_consultation"] = False
                 
             try:
-                from src.scenarios.casual_discussion_scenario import CasualDiscussionScenario
                 import_results["casual_discussion"] = True
-            except Exception as e:
+            except Exception:
                 import_results["casual_discussion"] = False
                 
             try:
-                from src.scenarios.scenario_manager import ScenarioManager
                 import_results["scenario_manager"] = True
-            except Exception as e:
+            except Exception:
                 import_results["scenario_manager"] = False
             
             # 核心服务导入
             try:
-                from src.core_services.role_manager import RoleManager
                 import_results["role_manager"] = True
-            except Exception as e:
+            except Exception:
                 import_results["role_manager"] = False
             
             success_count = sum(import_results.values())
@@ -452,7 +445,7 @@ class FunctionalUserStoryTest:
                 "error": str(e)
             }
     
-    async def _test_v02_scenario_instantiation(self) -> Dict[str, Any]:
+    async def _test_v02_scenario_instantiation(self) -> dict[str, Any]:
         """测试V0.2场景实例化"""
         try:
             instantiation_results = {}
@@ -462,7 +455,7 @@ class FunctionalUserStoryTest:
                 from src.scenarios.academic_research_scenario import AcademicResearchScenario
                 academic_scenario = AcademicResearchScenario()
                 instantiation_results["academic_research"] = True
-            except Exception as e:
+            except Exception:
                 instantiation_results["academic_research"] = False
                 
             # 专家咨询场景
@@ -470,7 +463,7 @@ class FunctionalUserStoryTest:
                 from src.scenarios.expert_consultation_scenario import ExpertConsultationScenario
                 expert_scenario = ExpertConsultationScenario()
                 instantiation_results["expert_consultation"] = True
-            except Exception as e:
+            except Exception:
                 instantiation_results["expert_consultation"] = False
                 
             # 轻松讨论场景
@@ -478,7 +471,7 @@ class FunctionalUserStoryTest:
                 from src.scenarios.casual_discussion_scenario import CasualDiscussionScenario
                 casual_scenario = CasualDiscussionScenario()
                 instantiation_results["casual_discussion"] = True
-            except Exception as e:
+            except Exception:
                 instantiation_results["casual_discussion"] = False
                 
             # 场景管理器
@@ -486,7 +479,7 @@ class FunctionalUserStoryTest:
                 from src.scenarios.scenario_manager import ScenarioManager
                 scenario_manager = ScenarioManager()
                 instantiation_results["scenario_manager"] = True
-            except Exception as e:
+            except Exception:
                 instantiation_results["scenario_manager"] = False
             
             success_count = sum(instantiation_results.values())
@@ -506,7 +499,7 @@ class FunctionalUserStoryTest:
                 "error": str(e)
             }
     
-    async def _test_scenario_manager_functionality(self) -> Dict[str, Any]:
+    async def _test_scenario_manager_functionality(self) -> dict[str, Any]:
         """测试场景管理器功能"""
         try:
             from src.scenarios.scenario_manager import ScenarioManager, ScenarioType
@@ -543,7 +536,7 @@ class FunctionalUserStoryTest:
                 "error": str(e)
             }
     
-    async def _test_config_and_roles(self) -> Dict[str, Any]:
+    async def _test_config_and_roles(self) -> dict[str, Any]:
         """测试配置和角色文件"""
         try:
             config_checks = {
@@ -569,11 +562,12 @@ class FunctionalUserStoryTest:
                 "error": str(e)
             }
     
-    async def _test_memory_performance_baseline(self) -> Dict[str, Any]:
+    async def _test_memory_performance_baseline(self) -> dict[str, Any]:
         """测试内存和性能基准"""
         try:
-            import psutil
             import gc
+
+            import psutil
             
             # 获取初始内存使用
             process = psutil.Process()
@@ -630,7 +624,7 @@ class SimplifiedAutomationTester:
         self.api_tester = APIBasedUserStoryTest()
         self.functional_tester = FunctionalUserStoryTest()
         
-    async def run_simplified_automation_test(self) -> Dict[str, Any]:
+    async def run_simplified_automation_test(self) -> dict[str, Any]:
         """运行简化的自动化测试"""
         logger.info("=" * 80)
         logger.info("🚀 开始简化的全面用户故事自动化测试")
@@ -678,14 +672,13 @@ class SimplifiedAutomationTester:
     
     async def _generate_simplified_report(
         self,
-        service_status: Dict[str, Any],
-        functional_result: Dict[str, Any],
-        api_result: Dict[str, Any],
+        service_status: dict[str, Any],
+        functional_result: dict[str, Any],
+        api_result: dict[str, Any],
         start_time: datetime,
         end_time: datetime
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成简化的测试报告"""
-        
         test_duration = (end_time - start_time).total_seconds()
         
         # 计算总体成功状态
@@ -764,10 +757,10 @@ class SimplifiedAutomationTester:
     
     def _generate_simplified_recommendations(
         self,
-        functional_result: Dict[str, Any],
-        api_result: Dict[str, Any],
-        service_status: Dict[str, Any]
-    ) -> List[str]:
+        functional_result: dict[str, Any],
+        api_result: dict[str, Any],
+        service_status: dict[str, Any]
+    ) -> list[str]:
         """生成简化的改进建议"""
         recommendations = []
         
@@ -804,7 +797,7 @@ class SimplifiedAutomationTester:
         
         return recommendations
     
-    def _generate_simplified_next_steps(self, overall_success: bool, service_available: bool) -> List[str]:
+    def _generate_simplified_next_steps(self, overall_success: bool, service_available: bool) -> list[str]:
         """生成简化的下一步行动"""
         if overall_success:
             if service_available:
@@ -829,7 +822,7 @@ class SimplifiedAutomationTester:
                 "4. 启动服务并测试API集成"
             ]
     
-    async def _save_simplified_report(self, report: Dict[str, Any]):
+    async def _save_simplified_report(self, report: dict[str, Any]):
         """保存简化的测试报告"""
         try:
             report_path = Path("simplified_automation_test_report.json")
@@ -855,38 +848,38 @@ async def main():
         
         # 功能测试状态
         functional_assessment = result.get("functional_assessment", {})
-        print(f"\n⚙️ 功能测试:")
+        print("\n⚙️ 功能测试:")
         print(f"  核心功能: {'✅' if functional_assessment.get('success') else '❌'}")
         print(f"  通过测试: {functional_assessment.get('passed_tests', 0)}/{functional_assessment.get('total_tests', 0)}")
         print(f"  成功率: {functional_assessment.get('success_rate', 0):.1%}")
         
         # API测试状态
         api_assessment = result.get("api_assessment", {})
-        print(f"\n🔌 API测试:")
+        print("\n🔌 API测试:")
         if api_assessment.get("skipped"):
-            print(f"  API测试: ⏭️ 已跳过（服务不可用）")
+            print("  API测试: ⏭️ 已跳过（服务不可用）")
         else:
             print(f"  API测试: {'✅' if api_assessment.get('success') else '❌'}")
             print(f"  通过测试: {api_assessment.get('passed_tests', 0)}/{api_assessment.get('total_tests', 0)}")
         
         # 服务状态
         service_assessment = result.get("service_assessment", {})
-        print(f"\n🚀 服务状态:")
+        print("\n🚀 服务状态:")
         print(f"  服务可用: {'✅' if service_assessment.get('available') else '❌'}")
         print(f"  部署就绪: {'✅' if service_assessment.get('deployment_ready') else '❌'}")
         
         # 系统就绪状态
         system_readiness = result.get("system_readiness", {})
-        print(f"\n📋 系统就绪状态:")
+        print("\n📋 系统就绪状态:")
         for check, status in system_readiness.items():
             symbol = "✅" if status else "❌"
             print(f"  {check}: {symbol}")
         
-        print(f"\n💡 建议:")
+        print("\n💡 建议:")
         for rec in result.get("recommendations", []):
             print(f"  • {rec}")
         
-        print(f"\n🚀 下一步:")
+        print("\n🚀 下一步:")
         for step in result.get("next_steps", []):
             print(f"  {step}")
         

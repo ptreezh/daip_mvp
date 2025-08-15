@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多角色对话功能演示和验证
+"""多角色对话功能演示和验证
 
 验证V0.1.3任务的核心功能：
 1. 多角色对话管理器基本功能
@@ -19,11 +17,7 @@ from unittest.mock import AsyncMock, MagicMock
 project_root = Path(__file__).parent
 sys.path.append(str(project_root))
 
-from src.core_services.multi_role_dialogue_manager import (
-    MultiRoleDialogueManager,
-    DialogueParticipant,
-    DialogueSession
-)
+from src.core_services.multi_role_dialogue_manager import MultiRoleDialogueManager
 from src.core_services.role_manager import Role
 
 
@@ -95,7 +89,7 @@ async def test_basic_functionality():
             user_preferences={"expertise": ["教育", "技术"]}
         )
         
-        print(f"✅ 对话会话创建成功")
+        print("✅ 对话会话创建成功")
         print(f"   - 会话ID: {session.session_id}")
         print(f"   - 主题: {session.topic}")
         print(f"   - 参与者数量: {len(session.participants)}")
@@ -105,7 +99,7 @@ async def test_basic_functionality():
         print("\n🗣️ 开始第一轮对话...")
         dialogue_round = await manager.conduct_dialogue_round(session.session_id)
         
-        print(f"✅ 第一轮对话完成")
+        print("✅ 第一轮对话完成")
         print(f"   - 轮次编号: {dialogue_round.round_number}")
         print(f"   - 回应数量: {len(dialogue_round.responses)}")
         print(f"   - 收敛度: {session.convergence_score:.2f}")
@@ -125,7 +119,7 @@ async def test_basic_functionality():
             "comment"
         )
         
-        print(f"✅ 用户干预处理成功")
+        print("✅ 用户干预处理成功")
         print(f"   - 角色回应数量: {len(intervention_result['role_responses'])}")
         
         for response in intervention_result['role_responses']:
@@ -135,13 +129,13 @@ async def test_basic_functionality():
         print("\n🗣️ 开始第二轮对话...")
         dialogue_round2 = await manager.conduct_dialogue_round(session.session_id)
         
-        print(f"✅ 第二轮对话完成")
+        print("✅ 第二轮对话完成")
         print(f"   - 收敛度提升: {session.convergence_score:.2f}")
         print(f"   - 总轮次: {len(session.rounds)}")
         
         # 6. 测试会话状态
         status = manager.get_session_status(session.session_id)
-        print(f"\n📊 会话状态:")
+        print("\n📊 会话状态:")
         print(f"   - 状态: {status['status']}")
         print(f"   - 完成轮次: {status['rounds_completed']}")
         print(f"   - 用户干预: {status['user_interventions']}")
@@ -149,7 +143,7 @@ async def test_basic_functionality():
         
         # 7. 测试会话关闭
         summary = await manager.close_session(session.session_id)
-        print(f"\n✅ 会话关闭成功")
+        print("\n✅ 会话关闭成功")
         print(f"   - 总轮次: {summary['total_rounds']}")
         print(f"   - 最终收敛度: {summary['final_convergence_score']:.2f}")
         print(f"   - 总用户干预: {summary['total_user_interventions']}")
@@ -296,7 +290,7 @@ async def main():
     print("📋 测试结果汇总:")
     
     test_names = ["基本功能测试", "错误处理测试", "性能要求测试"]
-    for i, (name, result) in enumerate(zip(test_names, results)):
+    for i, (name, result) in enumerate(zip(test_names, results, strict=False)):
         status = "✅ 通过" if result else "❌ 失败"
         print(f"   {i+1}. {name}: {status}")
     

@@ -1,5 +1,4 @@
-"""
-Base classes for storage adapters.
+"""Base classes for storage adapters.
 
 This module defines the abstract base class for all storage adapters
 and the manager class that coordinates them.
@@ -7,7 +6,7 @@ and the manager class that coordinates them.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Optional
 
 try:
     from src.core_services.enhanced_sskg_manager import (
@@ -15,14 +14,14 @@ try:
         KnowledgeNode,
         KnowledgeRelation,
         NodeType,
-        RelationType
+        RelationType,
     )
 except ImportError:
     # For testing purposes
-    from enum import Enum
-    from typing import Literal
-    from pydantic import BaseModel, Field
     from datetime import datetime
+    from enum import Enum
+
+    from pydantic import BaseModel, Field
     
     class NodeType(str, Enum):
         """Types of nodes in the SSKG."""
@@ -61,7 +60,7 @@ except ImportError:
         created_at: datetime = Field(default_factory=datetime.now)
         updated_at: datetime = Field(default_factory=datetime.now)
         confidence: float = 1.0
-        metadata: Dict[str, Any] = {}
+        metadata: dict[str, Any] = {}
         version: int = 1
     
     class KnowledgeRelation(BaseModel):
@@ -70,21 +69,19 @@ except ImportError:
         target_id: str
         relation_type: RelationType
         confidence: float = 1.0
-        metadata: Dict[str, Any] = {}
+        metadata: dict[str, Any] = {}
         created_at: datetime = Field(default_factory=datetime.now)
 
 
 class StorageAdapter(ABC):
-    """
-    Abstract base class for all storage adapters.
+    """Abstract base class for all storage adapters.
     
     Storage adapters provide a consistent interface for mapping domain-specific
     data structures to SSKG representations while maintaining semantic integrity.
     """
     
     def __init__(self, sskg_manager: 'EnhancedSSKGManager'):
-        """
-        Initialize the storage adapter.
+        """Initialize the storage adapter.
         
         Args:
             sskg_manager: The SSKG manager to use for storage operations
@@ -94,8 +91,7 @@ class StorageAdapter(ABC):
     
     @abstractmethod
     def store(self, data: Any, **kwargs) -> str:
-        """
-        Store data in the SSKG.
+        """Store data in the SSKG.
         
         Args:
             data: The data to store
@@ -108,8 +104,7 @@ class StorageAdapter(ABC):
     
     @abstractmethod
     def retrieve(self, identifier: str, **kwargs) -> Optional[Any]:
-        """
-        Retrieve data from the SSKG.
+        """Retrieve data from the SSKG.
         
         Args:
             identifier: The identifier of the data to retrieve
@@ -122,8 +117,7 @@ class StorageAdapter(ABC):
     
     @abstractmethod
     def update(self, identifier: str, data: Any, **kwargs) -> bool:
-        """
-        Update data in the SSKG.
+        """Update data in the SSKG.
         
         Args:
             identifier: The identifier of the data to update
@@ -137,8 +131,7 @@ class StorageAdapter(ABC):
     
     @abstractmethod
     def delete(self, identifier: str, **kwargs) -> bool:
-        """
-        Delete data from the SSKG.
+        """Delete data from the SSKG.
         
         Args:
             identifier: The identifier of the data to delete
@@ -150,9 +143,8 @@ class StorageAdapter(ABC):
         pass
     
     @abstractmethod
-    def list_all(self, **kwargs) -> List[str]:
-        """
-        List all identifiers of data stored by this adapter.
+    def list_all(self, **kwargs) -> list[str]:
+        """List all identifiers of data stored by this adapter.
         
         Args:
             **kwargs: Additional parameters for listing
@@ -163,9 +155,8 @@ class StorageAdapter(ABC):
         pass
     
     def _create_node(self, node_type: NodeType, content: str, 
-                    confidence: float = 1.0, metadata: Dict[str, Any] = None) -> str:
-        """
-        Create a node in the SSKG.
+                    confidence: float = 1.0, metadata: dict[str, Any] = None) -> str:
+        """Create a node in the SSKG.
         
         Args:
             node_type: Type of the node
@@ -189,9 +180,8 @@ class StorageAdapter(ABC):
     def _create_relation(self, source_id: str, target_id: str, 
                         relation_type: RelationType, 
                         confidence: float = 1.0,
-                        metadata: Dict[str, Any] = None) -> bool:
-        """
-        Create a relation between two nodes in the SSKG.
+                        metadata: dict[str, Any] = None) -> bool:
+        """Create a relation between two nodes in the SSKG.
         
         Args:
             source_id: ID of the source node
@@ -215,16 +205,14 @@ class StorageAdapter(ABC):
 
 
 class StorageAdapterManager:
-    """
-    Manager for all storage adapters.
+    """Manager for all storage adapters.
     
     This class provides a unified interface for accessing different storage adapters
     and managing their lifecycle.
     """
     
     def __init__(self, sskg_manager: 'EnhancedSSKGManager'):
-        """
-        Initialize the storage adapter manager.
+        """Initialize the storage adapter manager.
         
         Args:
             sskg_manager: The SSKG manager to use for storage operations
@@ -234,11 +222,11 @@ class StorageAdapterManager:
         self.logger = logging.getLogger(__name__)
         
         # Register default adapters
-        from .role_adapter import RoleMemoryAdapter
-        from .wiki_adapter import WikiAdapter
-        from .session_adapter import SessionAdapter
-        from .project_adapter import ProjectAdapter
         from .memory_bank_adapter import MemoryBankAdapter
+        from .project_adapter import ProjectAdapter
+        from .role_adapter import RoleMemoryAdapter
+        from .session_adapter import SessionAdapter
+        from .wiki_adapter import WikiAdapter
         
         self.register_adapter("role_memory", RoleMemoryAdapter(sskg_manager))
         self.register_adapter("wiki", WikiAdapter(sskg_manager))
@@ -247,8 +235,7 @@ class StorageAdapterManager:
         self.register_adapter("memory_bank", MemoryBankAdapter(sskg_manager))
     
     def get_adapter(self, adapter_type: str) -> Optional[StorageAdapter]:
-        """
-        Get a storage adapter by type.
+        """Get a storage adapter by type.
         
         Args:
             adapter_type: Type of the adapter
@@ -259,8 +246,7 @@ class StorageAdapterManager:
         return self.adapters.get(adapter_type)
     
     def register_adapter(self, adapter_type: str, adapter: StorageAdapter):
-        """
-        Register a new storage adapter.
+        """Register a new storage adapter.
         
         Args:
             adapter_type: Type of the adapter
@@ -269,9 +255,8 @@ class StorageAdapterManager:
         self.adapters[adapter_type] = adapter
         self.logger.info(f"Registered storage adapter: {adapter_type}")
     
-    def list_adapters(self) -> List[str]:
-        """
-        List all registered adapter types.
+    def list_adapters(self) -> list[str]:
+        """List all registered adapter types.
         
         Returns:
             List of adapter types

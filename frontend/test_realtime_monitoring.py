@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-实时状态监控测试
+"""实时状态监控测试
 
 测试任务3.1.2的实时状态监控功能
 验证透明度监控组件的实时更新能力
@@ -11,7 +9,6 @@ import asyncio
 import logging
 import sys
 from datetime import datetime
-from typing import Dict, Any
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -25,7 +22,7 @@ async def test_transparency_monitor_realtime():
     
     try:
         from components.transparency_monitor import TransparencyMonitor
-        from services.websocket_manager import websocket_manager, realtime_manager
+        from services.websocket_manager import realtime_manager, websocket_manager
         
         # 创建透明度监控器
         monitor = TransparencyMonitor(
@@ -71,7 +68,7 @@ async def test_agent_status_updates():
     
     try:
         from components.transparency_monitor import TransparencyMonitor
-        from services.websocket_manager import websocket_manager, realtime_manager
+        from services.websocket_manager import realtime_manager, websocket_manager
         
         monitor = TransparencyMonitor(
             websocket_manager=websocket_manager,
@@ -145,7 +142,7 @@ async def test_system_status_updates():
     
     try:
         from components.transparency_monitor import TransparencyMonitor
-        from services.websocket_manager import websocket_manager, realtime_manager
+        from services.websocket_manager import realtime_manager, websocket_manager
         
         monitor = TransparencyMonitor(
             websocket_manager=websocket_manager,
@@ -204,7 +201,7 @@ async def test_workflow_status_updates():
     
     try:
         from components.transparency_monitor import TransparencyMonitor
-        from services.websocket_manager import websocket_manager, realtime_manager
+        from services.websocket_manager import realtime_manager, websocket_manager
         
         monitor = TransparencyMonitor(
             websocket_manager=websocket_manager,
@@ -298,7 +295,7 @@ async def test_performance_metrics():
     
     try:
         from components.transparency_monitor import TransparencyMonitor
-        from services.websocket_manager import websocket_manager, realtime_manager
+        from services.websocket_manager import realtime_manager, websocket_manager
         
         monitor = TransparencyMonitor(
             websocket_manager=websocket_manager,
@@ -383,7 +380,7 @@ async def test_websocket_integration():
     
     try:
         from components.transparency_monitor import TransparencyMonitor
-        from services.websocket_manager import websocket_manager, realtime_manager
+        from services.websocket_manager import realtime_manager, websocket_manager
         
         # 连接WebSocket
         connection_result = await websocket_manager.connect()

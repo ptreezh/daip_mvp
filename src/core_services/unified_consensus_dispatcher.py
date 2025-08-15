@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-统一共识调度器核心模块
+"""统一共识调度器核心模块
 
 提供统一的共识计算调度入口，集成算法注册表、选择器和降级管理器。
 实现异步共识计算的核心流程，支持请求路由和负载均衡。
@@ -12,18 +10,14 @@
 import asyncio
 import logging
 import time
-from datetime import datetime
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Optional
 
-from consensus_models import (
-    ConsensusRequest, ConsensusResponse, ConsensusResult, FailureContext,
-    AlgorithmSelection
-)
 from algorithm_registry import AlgorithmRegistry
 from algorithm_selector import AlgorithmSelector, SelectionStrategy
-from fallback_manager_core import FallbackManager, FallbackConfig
-
+from consensus_models import AlgorithmSelection, ConsensusRequest, ConsensusResponse, FailureContext
+from fallback_manager_core import FallbackConfig, FallbackManager
 
 logger = logging.getLogger(__name__)
 
@@ -49,8 +43,8 @@ class DispatcherMetrics:
     fallback_requests: int = 0
     average_response_time: float = 0.0
     active_requests: int = 0
-    algorithm_usage: Dict[str, int] = field(default_factory=dict)
-    error_counts: Dict[str, int] = field(default_factory=dict)
+    algorithm_usage: dict[str, int] = field(default_factory=dict)
+    error_counts: dict[str, int] = field(default_factory=dict)
 
 
 class RequestContext:
@@ -67,8 +61,7 @@ class RequestContext:
 
 
 class UnifiedConsensusDispatcher:
-    """
-    统一共识调度器
+    """统一共识调度器
     
     提供统一的共识计算入口，协调算法选择、执行和降级。
     """
@@ -90,7 +83,7 @@ class UnifiedConsensusDispatcher:
             
         # 指标和状态
         self.metrics = DispatcherMetrics()
-        self.active_requests: Dict[str, RequestContext] = {}
+        self.active_requests: dict[str, RequestContext] = {}
         self.request_counter = 0
         
         # 并发控制
@@ -99,8 +92,7 @@ class UnifiedConsensusDispatcher:
         logger.info("UnifiedConsensusDispatcher initialized")
         
     async def calculate_consensus(self, request: ConsensusRequest) -> ConsensusResponse:
-        """
-        计算共识 - 主要入口点
+        """计算共识 - 主要入口点
         
         Args:
             request: 共识请求
@@ -152,8 +144,7 @@ class UnifiedConsensusDispatcher:
                     del self.active_requests[request_id]
                     
     async def _execute_consensus(self, context: RequestContext) -> ConsensusResponse:
-        """
-        执行共识计算的核心逻辑
+        """执行共识计算的核心逻辑
         
         Args:
             context: 请求上下文
@@ -210,8 +201,7 @@ class UnifiedConsensusDispatcher:
                 )
                 
     async def _select_algorithm(self, request: ConsensusRequest) -> AlgorithmSelection:
-        """
-        选择算法
+        """选择算法
         
         Args:
             request: 共识请求
@@ -246,8 +236,7 @@ class UnifiedConsensusDispatcher:
                 raise RuntimeError("No available algorithms for selection")
                 
     async def _async_select_algorithm(self, request: ConsensusRequest) -> AlgorithmSelection:
-        """
-        异步算法选择
+        """异步算法选择
         
         Args:
             request: 共识请求
@@ -264,8 +253,7 @@ class UnifiedConsensusDispatcher:
         )
         
     async def _execute_algorithm(self, algorithm_id: str, request: ConsensusRequest) -> ConsensusResponse:
-        """
-        执行指定算法
+        """执行指定算法
         
         Args:
             algorithm_id: 算法ID
@@ -343,8 +331,7 @@ class UnifiedConsensusDispatcher:
                                        context: RequestContext, 
                                        failed_response: Optional[ConsensusResponse] = None,
                                        failure_context: Optional[FailureContext] = None) -> ConsensusResponse:
-        """
-        处理算法失败，尝试降级
+        """处理算法失败，尝试降级
         
         Args:
             context: 请求上下文
@@ -476,9 +463,8 @@ class UnifiedConsensusDispatcher:
             logger.info(f"Request {context.request_id} completed: {status} "
                        f"(algorithm: {algorithm_used}, time: {response.execution_time:.3f}s)")
                        
-    def get_health_status(self) -> Dict[str, Any]:
-        """
-        获取调度器健康状态
+    def get_health_status(self) -> dict[str, Any]:
+        """获取调度器健康状态
         
         Returns:
             健康状态信息

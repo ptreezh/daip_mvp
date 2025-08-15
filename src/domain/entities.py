@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : entities.py
 @Description:
@@ -9,14 +7,19 @@
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Optional
 from uuid import uuid4
 
 from .value_objects import (
-    EntranceType, IntentType, TaskStatus, SessionStatus, 
-    MessageIntent, ConsensusLevel, UserPreference, 
-    TaskPriority, ResourceUsage, TimeInterval
+    ConsensusLevel,
+    EntranceType,
+    IntentType,
+    MessageIntent,
+    SessionStatus,
+    TaskPriority,
+    TaskStatus,
+    UserPreference,
 )
 
 
@@ -68,7 +71,7 @@ class Session:
     status: SessionStatus = SessionStatus.ACTIVE
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     
     def __post_init__(self):
         if not self.session_id:
@@ -125,7 +128,7 @@ class Task:
     updated_at: datetime = field(default_factory=datetime.now)
     completed_at: Optional[datetime] = None
     result: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     
     def __post_init__(self):
         if not self.task_id:
@@ -180,7 +183,7 @@ class Message:
     content: str
     sender: str
     timestamp: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     
     def __post_init__(self):
         if not self.message_id:
@@ -275,8 +278,8 @@ class Debate:
     debate_id: str
     session_id: str
     topic: str
-    participants: List[str]
-    messages: List[Message] = field(default_factory=list)
+    participants: list[str]
+    messages: list[Message] = field(default_factory=list)
     consensus_level: ConsensusLevel = field(default_factory=lambda: ConsensusLevel(0.0))
     status: str = "active"
     created_at: datetime = field(default_factory=datetime.now)

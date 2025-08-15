@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - Workflow Compiler Tests
+"""Personal Intelligence Hub - Workflow Compiler Tests
 
 测试自然语言工作流编译器功能
 """
 
-import pytest
-from unittest.mock import Mock, patch
-from datetime import datetime
 
-from personal_intelligence_hub.services.workflow_compiler import WorkflowCompiler
+import pytest
+
 from personal_intelligence_hub.models.workflow_models import (
-    WorkflowDefinition, WorkflowStep, StepType, WorkflowValidationResult
+    StepType,
+    WorkflowDefinition,
+    WorkflowStep,
 )
+from personal_intelligence_hub.services.workflow_compiler import WorkflowCompiler
 
 
 class TestWorkflowCompiler:

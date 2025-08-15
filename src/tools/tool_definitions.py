@@ -1,9 +1,9 @@
-from typing import Any, Dict
+from typing import Any
 
 # This file centralizes the JSON Schema definitions for all tools.
 # This makes them easy to manage and import for registration.
 
-LIST_FILES_DEF: Dict[str, Any] = {
+LIST_FILES_DEF: dict[str, Any] = {
     "type": "function",
     "function": {
         "name": "list_files",
@@ -21,7 +21,7 @@ LIST_FILES_DEF: Dict[str, Any] = {
     },
 }
 
-READ_FILE_DEF: Dict[str, Any] = {
+READ_FILE_DEF: dict[str, Any] = {
     "type": "function",
     "function": {
         "name": "read_file",
@@ -39,7 +39,7 @@ READ_FILE_DEF: Dict[str, Any] = {
     },
 }
 
-WRITE_FILE_DEF: Dict[str, Any] = {
+WRITE_FILE_DEF: dict[str, Any] = {
     "type": "function",
     "function": {
         "name": "write_file",
@@ -61,7 +61,7 @@ WRITE_FILE_DEF: Dict[str, Any] = {
     },
 }
 
-CREATE_TASK_DEF: Dict[str, Any] = {
+CREATE_TASK_DEF: dict[str, Any] = {
     "type": "function",
     "function": {
         "name": "create_task",
@@ -88,7 +88,7 @@ CREATE_TASK_DEF: Dict[str, Any] = {
     },
 }
 
-LIST_TASKS_DEF: Dict[str, Any] = {
+LIST_TASKS_DEF: dict[str, Any] = {
     "type": "function",
     "function": {
         "name": "list_tasks",
@@ -107,7 +107,7 @@ LIST_TASKS_DEF: Dict[str, Any] = {
     },
 }
 
-UPDATE_TASK_DEF: Dict[str, Any] = {
+UPDATE_TASK_DEF: dict[str, Any] = {
     "type": "function",
     "function": {
         "name": "update_task",
@@ -134,7 +134,7 @@ UPDATE_TASK_DEF: Dict[str, Any] = {
     },
 }
 
-WRITE_WIKI_ENTRY_DEF: Dict[str, Any] = {
+WRITE_WIKI_ENTRY_DEF: dict[str, Any] = {
     "type": "function",
     "function": {
         "name": "write_wiki_entry",
@@ -156,7 +156,7 @@ WRITE_WIKI_ENTRY_DEF: Dict[str, Any] = {
     },
 }
 
-READ_WIKI_ENTRY_DEF: Dict[str, Any] = {
+READ_WIKI_ENTRY_DEF: dict[str, Any] = {
     "type": "function",
     "function": {
         "name": "read_wiki_entry",
@@ -174,7 +174,7 @@ READ_WIKI_ENTRY_DEF: Dict[str, Any] = {
     },
 }
 
-LIST_WIKI_ENTRIES_DEF: Dict[str, Any] = {
+LIST_WIKI_ENTRIES_DEF: dict[str, Any] = {
     "type": "function",
     "function": {
         "name": "list_wiki_entries",
@@ -187,7 +187,7 @@ LIST_WIKI_ENTRIES_DEF: Dict[str, Any] = {
     },
 }
 
-SEARCH_WIKI_DEF: Dict[str, Any] = {
+SEARCH_WIKI_DEF: dict[str, Any] = {
     "type": "function",
     "function": {
         "name": "search_wiki",

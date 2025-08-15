@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 09:15:00
+"""@Time    : 2025-08-06 09:15:00
 @Author  : DAIP-LIVE Team
 @File    : api_contract_generator.py
 @Description:
@@ -9,14 +7,13 @@
 """
 
 import json
-import inspect
-import yaml
-from typing import Dict, List, Any, Optional, Type, get_type_hints
-from dataclasses import dataclass, field, asdict
-from datetime import datetime
+import logging
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-import logging
+from typing import Any, Optional
+
+import yaml
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -61,7 +58,7 @@ class APIParameter:
     default: Any = None
     example: Any = None
     format: Optional[str] = None
-    enum: Optional[List[str]] = None
+    enum: Optional[list[str]] = None
     minimum: Optional[float] = None
     maximum: Optional[float] = None
     pattern: Optional[str] = None
@@ -73,9 +70,9 @@ class APIResponse:
     status_code: int
     description: str
     content_type: str = "application/json"
-    schema: Optional[Dict[str, Any]] = None
-    example: Optional[Dict[str, Any]] = None
-    headers: Optional[List[Dict[str, Any]]] = None
+    schema: Optional[dict[str, Any]] = None
+    example: Optional[dict[str, Any]] = None
+    headers: Optional[list[dict[str, Any]]] = None
 
 
 @dataclass
@@ -85,11 +82,11 @@ class APIEndpoint:
     method: HTTPMethod
     summary: str
     description: str
-    parameters: List[APIParameter] = field(default_factory=list)
-    responses: List[APIResponse] = field(default_factory=list)
-    request_body: Optional[Dict[str, Any]] = None
-    tags: List[str] = field(default_factory=list)
-    security: Optional[List[Dict[str, Any]]] = None
+    parameters: list[APIParameter] = field(default_factory=list)
+    responses: list[APIResponse] = field(default_factory=list)
+    request_body: Optional[dict[str, Any]] = None
+    tags: list[str] = field(default_factory=list)
+    security: Optional[list[dict[str, Any]]] = None
     deprecated: bool = False
 
 
@@ -100,18 +97,18 @@ class APIService:
     version: str
     description: str
     base_url: str
-    endpoints: List[APIEndpoint] = field(default_factory=list)
-    common_parameters: List[APIParameter] = field(default_factory=list)
-    security_schemes: Optional[Dict[str, Any]] = None
-    servers: List[Dict[str, Any]] = field(default_factory=list)
+    endpoints: list[APIEndpoint] = field(default_factory=list)
+    common_parameters: list[APIParameter] = field(default_factory=list)
+    security_schemes: Optional[dict[str, Any]] = None
+    servers: list[dict[str, Any]] = field(default_factory=list)
 
 
 class APIContractGenerator:
     """API contract generator and documentation system."""
     
     def __init__(self):
-        self.services: Dict[str, APIService] = {}
-        self.contracts: Dict[str, Dict[str, Any]] = {}
+        self.services: dict[str, APIService] = {}
+        self.contracts: dict[str, dict[str, Any]] = {}
         logger.info("API Contract Generator initialized")
     
     def register_service(self, service: APIService):
@@ -119,7 +116,7 @@ class APIContractGenerator:
         self.services[service.name] = service
         logger.info(f"API service registered: {service.name}")
     
-    def generate_openapi_spec(self, service_name: str) -> Dict[str, Any]:
+    def generate_openapi_spec(self, service_name: str) -> dict[str, Any]:
         """Generate OpenAPI specification for a service."""
         if service_name not in self.services:
             raise ValueError(f"Service not found: {service_name}")
@@ -168,7 +165,7 @@ class APIContractGenerator:
         
         return spec
     
-    def generate_postman_collection(self, service_name: str) -> Dict[str, Any]:
+    def generate_postman_collection(self, service_name: str) -> dict[str, Any]:
         """Generate Postman collection for a service."""
         if service_name not in self.services:
             raise ValueError(f"Service not found: {service_name}")
@@ -242,7 +239,7 @@ class APIContractGenerator:
         
         return collection
     
-    def _param_to_openapi(self, param: APIParameter) -> Dict[str, Any]:
+    def _param_to_openapi(self, param: APIParameter) -> dict[str, Any]:
         """Convert API parameter to OpenAPI format."""
         openapi_param = {
             "name": param.name,
@@ -275,7 +272,7 @@ class APIContractGenerator:
         
         return openapi_param
     
-    def _response_to_openapi(self, response: APIResponse) -> Dict[str, Any]:
+    def _response_to_openapi(self, response: APIResponse) -> dict[str, Any]:
         """Convert API response to OpenAPI format."""
         openapi_response = {
             "description": response.description

@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-依赖关系验证器
+"""依赖关系验证器
 用于检查系统中所有服务的依赖关系是否正确
 """
 
-import sys
 import logging
+import sys
 from pathlib import Path
 
 # 添加项目根目录到路径
@@ -38,8 +36,8 @@ class DependencyValidator:
     def validate_memory_agent(self):
         """验证MemAgent"""
         try:
-            from src.core_services.memory_agent import MemAgent
             from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
+            from src.core_services.memory_agent import MemAgent
             
             sskg_manager = EnhancedSSKGManager()
             agent = MemAgent(sskg_manager=sskg_manager, enable_rl=False)

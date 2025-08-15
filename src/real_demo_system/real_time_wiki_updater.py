@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-实时Wiki更新器
+"""实时Wiki更新器
 
 基于辩论结果自动更新知识库
 """
 
 import logging
-import asyncio
-from typing import Any, Dict, List, Optional
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +28,7 @@ class RealTimeWikiUpdater:
         self.update_history = []
         self.processing = False
     
-    def process_debate_result(self, debate_result: Dict[str, Any]) -> Dict[str, Any]:
+    def process_debate_result(self, debate_result: dict[str, Any]) -> dict[str, Any]:
         """处理辩论结果并更新Wiki"""
         try:
             update_result = {
@@ -129,8 +126,8 @@ class RealTimeWikiUpdater:
     def auto_update_knowledge(
         self,
         topic: str,
-        new_information: List[str]
-    ) -> Dict[str, Any]:
+        new_information: list[str]
+    ) -> dict[str, Any]:
         """自动更新知识"""
         try:
             update_result = {
@@ -196,7 +193,7 @@ class RealTimeWikiUpdater:
             logger.error(f"自动更新知识失败: {e}")
             return {"success": False, "error": str(e)}
     
-    def track_changes(self, change_data: Dict[str, Any]) -> str:
+    def track_changes(self, change_data: dict[str, Any]) -> str:
         """追踪变更"""
         try:
             change_id = str(uuid.uuid4())
@@ -221,7 +218,7 @@ class RealTimeWikiUpdater:
             logger.error(f"追踪变更失败: {e}")
             return None
     
-    def _evaluate_content_quality(self, content_data: Dict[str, Any]) -> Dict[str, float]:
+    def _evaluate_content_quality(self, content_data: dict[str, Any]) -> dict[str, float]:
         """评估内容质量"""
         try:
             quality_score = {
@@ -269,7 +266,7 @@ class RealTimeWikiUpdater:
             logger.error(f"评估内容质量失败: {e}")
             return {"accuracy": 0.0, "completeness": 0.0, "reliability": 0.0, "overall": 0.0}
     
-    def _find_related_entries(self, topic: str, information: str) -> List[Dict[str, Any]]:
+    def _find_related_entries(self, topic: str, information: str) -> list[dict[str, Any]]:
         """查找相关条目"""
         try:
             if self.wiki_service:
@@ -291,7 +288,7 @@ class RealTimeWikiUpdater:
             logger.error(f"查找相关条目失败: {e}")
             return []
     
-    def _merge_information(self, existing_entry: Dict[str, Any], new_info: str) -> Dict[str, Any]:
+    def _merge_information(self, existing_entry: dict[str, Any], new_info: str) -> dict[str, Any]:
         """合并信息"""
         try:
             merged_entry = existing_entry.copy()
@@ -310,7 +307,7 @@ class RealTimeWikiUpdater:
             logger.error(f"合并信息失败: {e}")
             return existing_entry
     
-    def get_update_statistics(self) -> Dict[str, Any]:
+    def get_update_statistics(self) -> dict[str, Any]:
         """获取更新统计"""
         try:
             stats = {

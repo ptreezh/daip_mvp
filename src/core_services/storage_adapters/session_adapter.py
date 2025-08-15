@@ -1,18 +1,14 @@
-"""
-Session Adapter for the SSKG.
+"""Session Adapter for the SSKG.
 
 This module implements the storage adapter for conversation states and session data.
 """
 
 import json
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 try:
-    from src.core_services.enhanced_sskg_manager import (
-        KnowledgeQuery,
-        NodeType
-    )
+    from src.core_services.enhanced_sskg_manager import KnowledgeQuery, NodeType
 except ImportError:
     # For testing purposes
     from enum import Enum
@@ -27,16 +23,14 @@ from .base import StorageAdapter
 
 
 class SessionAdapter(StorageAdapter):
-    """
-    Storage adapter for conversation states and session data.
+    """Storage adapter for conversation states and session data.
     
     This adapter manages the storage and retrieval of session states,
     conversation history, and context information.
     """
     
-    def store(self, session_data: Dict[str, Any], **kwargs) -> str:
-        """
-        Store session data in the SSKG.
+    def store(self, session_data: dict[str, Any], **kwargs) -> str:
+        """Store session data in the SSKG.
         
         Args:
             session_data: Dictionary containing session information
@@ -103,9 +97,8 @@ class SessionAdapter(StorageAdapter):
         
         return session_node_id
     
-    def retrieve(self, session_id: str, **kwargs) -> Optional[Dict[str, Any]]:
-        """
-        Retrieve session data from the SSKG.
+    def retrieve(self, session_id: str, **kwargs) -> Optional[dict[str, Any]]:
+        """Retrieve session data from the SSKG.
         
         Args:
             session_id: ID of the session to retrieve
@@ -145,9 +138,8 @@ class SessionAdapter(StorageAdapter):
             "metadata": metadata
         }
     
-    def update(self, session_id: str, session_data: Dict[str, Any], **kwargs) -> bool:
-        """
-        Update session data in the SSKG.
+    def update(self, session_id: str, session_data: dict[str, Any], **kwargs) -> bool:
+        """Update session data in the SSKG.
         
         Args:
             session_id: ID of the session to update
@@ -194,8 +186,7 @@ class SessionAdapter(StorageAdapter):
         return success
     
     def delete(self, session_id: str, **kwargs) -> bool:
-        """
-        Delete session data from the SSKG.
+        """Delete session data from the SSKG.
         
         Args:
             session_id: ID of the session to delete
@@ -224,9 +215,8 @@ class SessionAdapter(StorageAdapter):
         
         return success
     
-    def list_all(self, **kwargs) -> List[str]:
-        """
-        List all session IDs.
+    def list_all(self, **kwargs) -> list[str]:
+        """List all session IDs.
         
         Args:
             **kwargs: Additional parameters

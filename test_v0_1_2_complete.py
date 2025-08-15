@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-V0.1.2 完整集成测试
+"""V0.1.2 完整集成测试
 验证PersonalAssistant与后端服务的完整集成
 """
 
@@ -179,7 +177,7 @@ async def test_performance_benchmarks():
         max_time = max(times)
         min_time = min(times)
         
-        print(f"\n📊 性能统计:")
+        print("\n📊 性能统计:")
         print(f"   平均响应时间: {avg_time:.2f}秒")
         print(f"   最大响应时间: {max_time:.2f}秒")
         print(f"   最小响应时间: {min_time:.2f}秒")
@@ -226,7 +224,7 @@ async def test_error_handling():
                     print(f"   ✅ 正常处理: {len(response)}字符响应")
                     results.append(True)
                 else:
-                    print(f"   ❌ 无响应")
+                    print("   ❌ 无响应")
                     results.append(False)
                     
             except Exception as e:

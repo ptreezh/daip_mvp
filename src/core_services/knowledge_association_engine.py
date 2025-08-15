@@ -1,23 +1,22 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: DAIP-LIVE
 @File: knowledge_association_engine.py
 @Description: V0.3.4 知识关联发现引擎 - 知识点间的语义关联和相关性计算
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, List, Optional, Any, Tuple, Set
+import re
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-import numpy as np
-from collections import defaultdict, Counter
+from typing import Any, Optional
+
 import networkx as nx
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import re
 
 from ..core_services.enhanced_sskg_manager import EnhancedSSKGManager
 from ..core_services.knowledge_retrieval_service import KnowledgeRetrievalService
@@ -42,7 +41,7 @@ class Association:
     strength: float  # 关联强度 0-1
     confidence: float  # 置信度 0-1
     description: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     discovered_time: datetime
 
 
@@ -54,8 +53,8 @@ class KnowledgeNode:
     content: str
     type: str
     domain: str
-    tags: List[str]
-    properties: Dict[str, Any]
+    tags: list[str]
+    properties: dict[str, Any]
     embedding: Optional[np.ndarray] = None
 
 
@@ -64,8 +63,8 @@ class AssociationPattern:
     """关联模式"""
     pattern_id: str
     pattern_type: str
-    nodes: List[str]
-    relations: List[Tuple[str, str, str]]  # (source, relation, target)
+    nodes: list[str]
+    relations: list[tuple[str, str, str]]  # (source, relation, target)
     frequency: int
     significance: float
     description: str
@@ -83,7 +82,7 @@ class SemanticAnalyzer:
         self.similarity_threshold = 0.3
         
     async def analyze_semantic_relations(self, source_node: KnowledgeNode, 
-                                       target_node: KnowledgeNode) -> List[Association]:
+                                       target_node: KnowledgeNode) -> list[Association]:
         """分析语义关系"""
         try:
             associations = []
@@ -149,7 +148,7 @@ class SemanticAnalyzer:
         
         return len(intersection) / len(union)
     
-    def _find_shared_keywords(self, source: KnowledgeNode, target: KnowledgeNode) -> List[str]:
+    def _find_shared_keywords(self, source: KnowledgeNode, target: KnowledgeNode) -> list[str]:
         """查找共享关键词"""
         source_words = set(source.content.lower().split())
         target_words = set(target.content.lower().split())
@@ -162,7 +161,7 @@ class SemanticAnalyzer:
         return shared[:10]  # 返回前10个共享词
     
     async def _analyze_conceptual_relations(self, source: KnowledgeNode, 
-                                          target: KnowledgeNode) -> List[Association]:
+                                          target: KnowledgeNode) -> list[Association]:
         """分析概念关系"""
         relations = []
         
@@ -204,7 +203,7 @@ class GraphMiner:
         self.significance_threshold = 0.5
         
     async def discover_patterns(self, knowledge_id: str, 
-                              sskg_manager: EnhancedSSKGManager) -> List[AssociationPattern]:
+                              sskg_manager: EnhancedSSKGManager) -> list[AssociationPattern]:
         """发现关联模式"""
         try:
             # 获取知识子图
@@ -237,7 +236,7 @@ class GraphMiner:
             logging.error(f"模式发现失败: {e}")
             return []
     
-    def _convert_to_networkx(self, subgraph: Dict) -> nx.Graph:
+    def _convert_to_networkx(self, subgraph: dict) -> nx.Graph:
         """转换为NetworkX图"""
         G = nx.Graph()
         
@@ -256,7 +255,7 @@ class GraphMiner:
         
         return G
     
-    def _discover_path_patterns(self, G: nx.Graph) -> List[AssociationPattern]:
+    def _discover_path_patterns(self, G: nx.Graph) -> list[AssociationPattern]:
         """发现路径模式"""
         patterns = []
         
@@ -301,7 +300,7 @@ class GraphMiner:
         
         return patterns
     
-    def _discover_community_patterns(self, G: nx.Graph) -> List[AssociationPattern]:
+    def _discover_community_patterns(self, G: nx.Graph) -> list[AssociationPattern]:
         """发现社区模式"""
         patterns = []
         
@@ -336,7 +335,7 @@ class GraphMiner:
         
         return patterns
     
-    def _discover_centrality_patterns(self, G: nx.Graph) -> List[AssociationPattern]:
+    def _discover_centrality_patterns(self, G: nx.Graph) -> list[AssociationPattern]:
         """发现中心性模式"""
         patterns = []
         
@@ -408,7 +407,7 @@ class PatternDetector:
         ]
     
     async def detect_hidden_patterns(self, knowledge_id: str,
-                                   sskg_manager: EnhancedSSKGManager) -> List[AssociationPattern]:
+                                   sskg_manager: EnhancedSSKGManager) -> list[AssociationPattern]:
         """检测隐藏模式"""
         try:
             patterns = []
@@ -439,8 +438,8 @@ class PatternDetector:
             logging.error(f"隐藏模式检测失败: {e}")
             return []
     
-    async def _detect_template_patterns(self, template: Dict, 
-                                      related_knowledge: List[Dict]) -> List[AssociationPattern]:
+    async def _detect_template_patterns(self, template: dict, 
+                                      related_knowledge: list[dict]) -> list[AssociationPattern]:
         """基于模板检测模式"""
         patterns = []
         
@@ -482,7 +481,7 @@ class PatternDetector:
         
         return patterns
     
-    def _build_relation_graph(self, related_knowledge: List[Dict]) -> Dict[str, Dict[str, str]]:
+    def _build_relation_graph(self, related_knowledge: list[dict]) -> dict[str, dict[str, str]]:
         """构建关系图"""
         graph = defaultdict(dict)
         
@@ -499,9 +498,9 @@ class PatternDetector:
         
         return graph
     
-    def _extend_pattern(self, nodes: List[str], relations: List[Tuple[str, str, str]],
-                        graph: Dict[str, Dict[str, str]], 
-                        template_relations: List[str]) -> Dict[str, Any]:
+    def _extend_pattern(self, nodes: list[str], relations: list[tuple[str, str, str]],
+                        graph: dict[str, dict[str, str]], 
+                        template_relations: list[str]) -> dict[str, Any]:
         """扩展模式"""
         extended_nodes = nodes.copy()
         extended_relations = relations.copy()
@@ -520,7 +519,7 @@ class PatternDetector:
             'relations': extended_relations
         }
     
-    async def _detect_temporal_patterns(self, related_knowledge: List[Dict]) -> List[AssociationPattern]:
+    async def _detect_temporal_patterns(self, related_knowledge: list[dict]) -> list[AssociationPattern]:
         """检测时间模式"""
         patterns = []
         
@@ -549,7 +548,7 @@ class PatternDetector:
         
         return patterns
     
-    def _detect_evolution_pattern(self, time_sorted: List[Dict]) -> Optional[AssociationPattern]:
+    def _detect_evolution_pattern(self, time_sorted: list[dict]) -> Optional[AssociationPattern]:
         """检测进化模式"""
         try:
             # 检查是否有版本演进关系
@@ -584,12 +583,12 @@ class PatternDetector:
         
         return None
     
-    def _detect_periodic_pattern(self, time_sorted: List[Dict]) -> Optional[AssociationPattern]:
+    def _detect_periodic_pattern(self, time_sorted: list[dict]) -> Optional[AssociationPattern]:
         """检测周期性模式"""
         # 简化实现，实际应该分析时间间隔
         return None
     
-    async def _detect_cross_domain_patterns(self, related_knowledge: List[Dict]) -> List[AssociationPattern]:
+    async def _detect_cross_domain_patterns(self, related_knowledge: list[dict]) -> list[AssociationPattern]:
         """检测跨领域模式"""
         patterns = []
         
@@ -629,8 +628,8 @@ class PatternDetector:
         
         return patterns
     
-    def _find_cross_domain_connections(self, domain1_items: List[Dict], 
-                                      domain2_items: List[Dict]) -> List[Dict]:
+    def _find_cross_domain_connections(self, domain1_items: list[dict], 
+                                      domain2_items: list[dict]) -> list[dict]:
         """查找跨领域连接"""
         connections = []
         
@@ -688,7 +687,7 @@ class RelationExtractor:
             ]
         }
     
-    async def extract_relations(self, text: str) -> List[Tuple[str, str, str]]:
+    async def extract_relations(self, text: str) -> list[tuple[str, str, str]]:
         """从文本中提取关系"""
         relations = []
         
@@ -711,7 +710,7 @@ class RelationExtractor:
         
         return relations
     
-    def _extract_entities_from_sentence(self, sentence: str, match) -> List[str]:
+    def _extract_entities_from_sentence(self, sentence: str, match) -> list[str]:
         """从句子中提取实体"""
         # 简化实现：基于名词短语提取
         words = sentence.split()
@@ -745,7 +744,7 @@ class KnowledgeAssociationEngine:
         self.knowledge_retrieval = knowledge_retrieval
         self.logger = logging.getLogger(__name__)
     
-    async def discover_associations(self, knowledge_id: str) -> List[Association]:
+    async def discover_associations(self, knowledge_id: str) -> list[Association]:
         """发现知识点间的深层关联关系"""
         try:
             associations = []
@@ -793,7 +792,7 @@ class KnowledgeAssociationEngine:
             self.logger.error(f"关联发现失败: {e}")
             return []
     
-    async def discover_patterns(self, knowledge_id: str) -> List[AssociationPattern]:
+    async def discover_patterns(self, knowledge_id: str) -> list[AssociationPattern]:
         """发现关联模式"""
         try:
             patterns = []
@@ -842,7 +841,7 @@ class KnowledgeAssociationEngine:
         
         return None
     
-    async def _get_related_knowledge(self, knowledge_id: str) -> List[KnowledgeNode]:
+    async def _get_related_knowledge(self, knowledge_id: str) -> list[KnowledgeNode]:
         """获取相关知识"""
         try:
             # 从SSKG获取相关知识
@@ -870,7 +869,7 @@ class KnowledgeAssociationEngine:
             return []
     
     async def _analyze_temporal_relations(self, source: KnowledgeNode,
-                                       targets: List[KnowledgeNode]) -> List[Association]:
+                                       targets: list[KnowledgeNode]) -> list[Association]:
         """分析时间关系"""
         temporal_relations = []
         
@@ -904,7 +903,7 @@ class KnowledgeAssociationEngine:
         return temporal_relations
     
     async def _analyze_causal_relations(self, source: KnowledgeNode,
-                                      targets: List[KnowledgeNode]) -> List[Association]:
+                                      targets: list[KnowledgeNode]) -> list[Association]:
         """分析因果关系"""
         causal_relations = []
         
@@ -941,7 +940,7 @@ class KnowledgeAssociationEngine:
         return causal_relations
     
     async def _analyze_hierarchical_relations(self, source: KnowledgeNode,
-                                           targets: List[KnowledgeNode]) -> List[Association]:
+                                           targets: list[KnowledgeNode]) -> list[Association]:
         """分析层次关系"""
         hierarchical_relations = []
         
@@ -1037,7 +1036,7 @@ class KnowledgeAssociationEngine:
         
         return False
     
-    def _deduplicate_associations(self, associations: List[Association]) -> List[Association]:
+    def _deduplicate_associations(self, associations: list[Association]) -> list[Association]:
         """去重关联"""
         seen = set()
         unique_associations = []
@@ -1052,7 +1051,7 @@ class KnowledgeAssociationEngine:
         
         return unique_associations
     
-    def _rank_associations(self, associations: List[Association]) -> List[Association]:
+    def _rank_associations(self, associations: list[Association]) -> list[Association]:
         """排序关联"""
         # 基于强度和置信度排序
         def sort_key(association):
@@ -1060,7 +1059,7 @@ class KnowledgeAssociationEngine:
         
         return sorted(associations, key=sort_key, reverse=True)
     
-    def _rank_patterns(self, patterns: List[AssociationPattern]) -> List[AssociationPattern]:
+    def _rank_patterns(self, patterns: list[AssociationPattern]) -> list[AssociationPattern]:
         """排序模式"""
         # 基于显著性和频率排序
         def sort_key(pattern):

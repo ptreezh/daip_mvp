@@ -1,28 +1,25 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: DAIP-LIVE
 @File: collaborative_review_environment.py
 @Description: V0.3.5 协作评审环境 - Zen Mode Design 实时协作评审环境
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, List, Optional, Any, Set, Tuple, TYPE_CHECKING
-from dataclasses import dataclass, asdict, field
-from datetime import datetime, timedelta
-from enum import Enum
-import uuid
-from collections import defaultdict, deque
-import weakref
 import threading
 import time
+import uuid
+from collections import defaultdict, deque
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import TYPE_CHECKING, Any, Optional
 
 # Type checking imports to avoid circular dependencies
 if TYPE_CHECKING:
     from ..core_services.enhanced_sskg_manager import EnhancedSSKGManager
     from ..core_services.memory_agent import MemAgent
-    from ..core_services.smart_reviewer_allocator import SmartReviewerAllocator, ReviewerProfile
+    from ..core_services.smart_reviewer_allocator import SmartReviewerAllocator
 
 
 class ReviewActionType(Enum):
@@ -60,11 +57,11 @@ class ReviewComment:
     reviewer_id: str
     content: str
     timestamp: datetime
-    position: Dict[str, int]  # {line_start, line_end, char_start, char_end}
+    position: dict[str, int]  # {line_start, line_end, char_start, char_end}
     type: ReviewActionType
     parent_id: Optional[str] = None  # 父评论ID
     status: str = "active"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -74,10 +71,10 @@ class ReviewAnnotation:
     reviewer_id: str
     type: AnnotationType
     content: str
-    position: Dict[str, int]  # {line_start, line_end, char_start, char_end}
+    position: dict[str, int]  # {line_start, line_end, char_start, char_end}
     color: str
     timestamp: datetime
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -87,13 +84,13 @@ class DiscussionThread:
     title: str
     description: str
     initiator_id: str
-    participants: Set[str]
-    comments: List[ReviewComment]
+    participants: set[str]
+    comments: list[ReviewComment]
     status: DiscussionStatus
     created_at: datetime
     last_activity: datetime
-    related_sections: List[str]  # 相关章节ID
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    related_sections: list[str]  # 相关章节ID
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -101,15 +98,15 @@ class ReviewSession:
     """评审会话"""
     id: str
     review_request_id: str
-    participants: List[str]
+    participants: list[str]
     content: str
-    comments: List[ReviewComment]
-    annotations: List[ReviewAnnotation]
-    discussions: List[DiscussionThread]
+    comments: list[ReviewComment]
+    annotations: list[ReviewAnnotation]
+    discussions: list[DiscussionThread]
     created_at: datetime
     last_activity: datetime
     status: str = "active"
-    version_control: Dict[str, Any] = field(default_factory=dict)
+    version_control: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -118,10 +115,10 @@ class CollaborationEvent:
     id: str
     session_id: str
     event_type: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
     timestamp: datetime
     reviewer_id: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class CollaborativeReviewEnvironment:
@@ -136,16 +133,16 @@ class CollaborativeReviewEnvironment:
         self.logger = logging.getLogger(__name__)
         
         # 活跃会话
-        self.active_sessions: Dict[str, ReviewSession] = {}
+        self.active_sessions: dict[str, ReviewSession] = {}
         
         # 事件队列
-        self.event_queues: Dict[str, deque] = defaultdict(deque)
+        self.event_queues: dict[str, deque] = defaultdict(deque)
         
         # 用户在线状态
-        self.user_presence: Dict[str, Dict[str, Any]] = {}
+        self.user_presence: dict[str, dict[str, Any]] = {}
         
         # 版本控制
-        self.version_history: Dict[str, List[Dict]] = defaultdict(list)
+        self.version_history: dict[str, list[dict]] = defaultdict(list)
         
         # 通知系统
         self.notification_system = NotificationSystem()
@@ -158,7 +155,7 @@ class CollaborativeReviewEnvironment:
     
     async def create_review_session(self, 
                                   review_request_id: str,
-                                  participants: List[str],
+                                  participants: list[str],
                                   content: str) -> ReviewSession:
         """创建评审会话"""
         try:
@@ -221,7 +218,7 @@ class CollaborativeReviewEnvironment:
                          session_id: str,
                          reviewer_id: str,
                          content: str,
-                         position: Dict[str, int],
+                         position: dict[str, int],
                          comment_type: ReviewActionType = ReviewActionType.ADD_COMMENT,
                          parent_id: Optional[str] = None) -> ReviewComment:
         """添加评论"""
@@ -275,7 +272,7 @@ class CollaborativeReviewEnvironment:
                            reviewer_id: str,
                            annotation_type: AnnotationType,
                            content: str,
-                           position: Dict[str, int],
+                           position: dict[str, int],
                            color: str = "#FFD700") -> ReviewAnnotation:
         """添加标注"""
         try:
@@ -323,7 +320,7 @@ class CollaborativeReviewEnvironment:
                              initiator_id: str,
                              title: str,
                              description: str,
-                             related_sections: List[str] = None) -> DiscussionThread:
+                             related_sections: list[str] = None) -> DiscussionThread:
         """开始讨论"""
         try:
             if session_id not in self.active_sessions:
@@ -423,7 +420,7 @@ class CollaborativeReviewEnvironment:
             self.logger.error(f"添加讨论评论失败: {e}")
             raise
     
-    async def get_session_state(self, session_id: str) -> Dict[str, Any]:
+    async def get_session_state(self, session_id: str) -> dict[str, Any]:
         """获取会话状态"""
         try:
             if session_id not in self.active_sessions:
@@ -468,7 +465,7 @@ class CollaborativeReviewEnvironment:
     
     async def get_session_events(self, 
                                session_id: str,
-                               since_timestamp: Optional[datetime] = None) -> List[Dict]:
+                               since_timestamp: Optional[datetime] = None) -> list[dict]:
         """获取会话事件"""
         try:
             if session_id not in self.event_queues:
@@ -488,7 +485,7 @@ class CollaborativeReviewEnvironment:
     async def resolve_conflict(self,
                              session_id: str,
                              conflict_id: str,
-                             resolution: Dict[str, Any]) -> bool:
+                             resolution: dict[str, Any]) -> bool:
         """解决冲突"""
         try:
             return await self.conflict_resolver.resolve_conflict(
@@ -501,7 +498,7 @@ class CollaborativeReviewEnvironment:
     
     async def export_session_data(self, 
                                 session_id: str,
-                                format_type: str = "json") -> Dict[str, Any]:
+                                format_type: str = "json") -> dict[str, Any]:
         """导出会话数据"""
         try:
             if session_id not in self.active_sessions:
@@ -560,7 +557,7 @@ class CollaborativeReviewEnvironment:
     async def _record_event(self, 
                            session_id: str,
                            event_type: str,
-                           data: Dict[str, Any],
+                           data: dict[str, Any],
                            reviewer_id: str):
         """记录事件"""
         try:
@@ -581,7 +578,7 @@ class CollaborativeReviewEnvironment:
     async def _broadcast_event(self,
                              session_id: str,
                              event_type: str,
-                             data: Dict[str, Any],
+                             data: dict[str, Any],
                              exclude_reviewer: Optional[str] = None):
         """广播事件给参与者"""
         try:
@@ -714,7 +711,7 @@ class CollaborativeReviewEnvironment:
         except Exception as e:
             self.logger.error(f"更新用户在线状态失败: {e}")
     
-    async def get_environment_statistics(self) -> Dict[str, Any]:
+    async def get_environment_statistics(self) -> dict[str, Any]:
         """获取环境统计信息"""
         try:
             stats = {
@@ -745,7 +742,7 @@ class NotificationSystem:
         self.logger = logging.getLogger(__name__)
         self.notification_handlers = {}
     
-    async def notify_participants(self, participants: List[str], message: str):
+    async def notify_participants(self, participants: list[str], message: str):
         """通知参与者"""
         for participant_id in participants:
             await self.send_notification(participant_id, "system_message", {
@@ -753,7 +750,7 @@ class NotificationSystem:
                 "timestamp": datetime.now().isoformat()
             })
     
-    async def send_notification(self, user_id: str, event_type: str, data: Dict[str, Any]):
+    async def send_notification(self, user_id: str, event_type: str, data: dict[str, Any]):
         """发送通知"""
         try:
             # 这里可以实现不同的通知方式
@@ -775,7 +772,7 @@ class ConflictResolver:
     async def resolve_conflict(self, 
                              session_id: str,
                              conflict_id: str,
-                             resolution: Dict[str, Any]) -> bool:
+                             resolution: dict[str, Any]) -> bool:
         """解决冲突"""
         try:
             if conflict_id in self.active_conflicts:

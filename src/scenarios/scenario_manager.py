@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-03 12:30:00
+"""@Time    : 2025-08-03 12:30:00
 @Author  : DAIP-LIVE Team
 @File    : scenario_manager.py
 @Description:
@@ -16,21 +14,20 @@
 
 import asyncio
 import logging
-import json
 import uuid
-from typing import Dict, List, Any, Optional, Tuple
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from dataclasses import dataclass, asdict
 from enum import Enum
-
-# 导入三个场景
-from src.scenarios.academic_research_scenario import AcademicResearchScenario
-from src.scenarios.expert_consultation_scenario import ExpertConsultationScenario
-from src.scenarios.casual_discussion_scenario import CasualDiscussionScenario
+from typing import Any, Optional
 
 # 导入核心服务
 from src.core_services.memory_agent import MemAgent
 from src.core_services.wiki_service import WikiService
+
+# 导入三个场景
+from src.scenarios.academic_research_scenario import AcademicResearchScenario
+from src.scenarios.casual_discussion_scenario import CasualDiscussionScenario
+from src.scenarios.expert_consultation_scenario import ExpertConsultationScenario
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +45,8 @@ class ScenarioContext:
     scenario_id: str
     scenario_type: ScenarioType
     topic: str
-    user_preferences: Dict[str, Any]
-    session_data: Dict[str, Any]
+    user_preferences: dict[str, Any]
+    session_data: dict[str, Any]
     created_at: str
     last_accessed: str
     is_active: bool = True
@@ -71,18 +68,17 @@ class ScenarioTransition:
 class UserProfile:
     """用户档案"""
     user_id: str
-    preferences: Dict[str, Any]
-    scenario_usage_stats: Dict[str, int]
-    favorite_scenarios: List[ScenarioType]
-    last_scenarios: List[ScenarioType]
-    interaction_history: List[Dict[str, Any]]
+    preferences: dict[str, Any]
+    scenario_usage_stats: dict[str, int]
+    favorite_scenarios: list[ScenarioType]
+    last_scenarios: list[ScenarioType]
+    interaction_history: list[dict[str, Any]]
     created_at: str
     updated_at: str
 
 
 class ScenarioManager:
-    """
-    场景管理器 - V0.2.8核心功能实现
+    """场景管理器 - V0.2.8核心功能实现
     
     负责三个场景的统一管理、智能切换和上下文保持：
     - 场景生命周期管理
@@ -136,9 +132,9 @@ class ScenarioManager:
         scenario_type: ScenarioType,
         topic: str,
         user_id: str,
-        user_preferences: Optional[Dict[str, Any]] = None,
-        context_data: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        user_preferences: Optional[dict[str, Any]] = None,
+        context_data: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """启动指定场景"""
         logger.info(f"启动场景: {scenario_type.value} - {topic}")
         
@@ -189,7 +185,7 @@ class ScenarioManager:
         to_scenario_type: ScenarioType,
         transition_reason: str,
         preserve_context: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """场景切换"""
         logger.info(f"场景切换: {from_scenario_id} -> {to_scenario_type.value}")
         
@@ -249,8 +245,8 @@ class ScenarioManager:
         self,
         user_input: str,
         user_id: str,
-        current_context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        current_context: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """智能场景推荐"""
         logger.info(f"为用户 {user_id} 生成场景推荐")
         
@@ -303,7 +299,7 @@ class ScenarioManager:
                 "user_input": user_input
             }
     
-    async def get_unified_interface_data(self, user_id: str) -> Dict[str, Any]:
+    async def get_unified_interface_data(self, user_id: str) -> dict[str, Any]:
         """获取统一界面数据"""
         try:
             user_profile = self.user_profiles.get(user_id, await self._create_default_user_profile(user_id))
@@ -332,7 +328,7 @@ class ScenarioManager:
                     "total_sessions": total_usage,
                     "scenario_distribution": {
                         scenario.value: count for scenario, count in 
-                        zip(ScenarioType, [usage_stats.get(s.value, 0) for s in ScenarioType])
+                        zip(ScenarioType, [usage_stats.get(s.value, 0) for s in ScenarioType], strict=False)
                     },
                     "favorite_scenarios": [s.value for s in user_profile.favorite_scenarios]
                 },
@@ -349,8 +345,8 @@ class ScenarioManager:
         scenario_type: ScenarioType,
         topic: str,
         user_id: str,
-        user_preferences: Optional[Dict[str, Any]],
-        context_data: Optional[Dict[str, Any]]
+        user_preferences: Optional[dict[str, Any]],
+        context_data: Optional[dict[str, Any]]
     ) -> ScenarioContext:
         """创建场景上下文"""
         scenario_id = str(uuid.uuid4())
@@ -369,7 +365,7 @@ class ScenarioManager:
             last_accessed=datetime.now().isoformat()
         )
     
-    async def _execute_scenario(self, context: ScenarioContext) -> Dict[str, Any]:
+    async def _execute_scenario(self, context: ScenarioContext) -> dict[str, Any]:
         """执行具体场景"""
         scenario = self.scenarios[context.scenario_type]
         
@@ -398,7 +394,7 @@ class ScenarioManager:
         self,
         user_id: str,
         scenario_type: ScenarioType,
-        user_preferences: Optional[Dict[str, Any]]
+        user_preferences: Optional[dict[str, Any]]
     ):
         """更新用户档案"""
         if user_id not in self.user_profiles:
@@ -428,7 +424,7 @@ class ScenarioManager:
         # 更新收藏场景（基于使用频率）
         usage_items = list(profile.scenario_usage_stats.items())
         usage_items.sort(key=lambda x: x[1], reverse=True)
-        profile.favorite_scenarios = [ScenarioType(item[0]) for item, _ in zip(usage_items, range(3))]
+        profile.favorite_scenarios = [ScenarioType(item[0]) for item, _ in zip(usage_items, range(3), strict=False)]
         
         profile.updated_at = datetime.now().isoformat()
         
@@ -494,7 +490,7 @@ class ScenarioManager:
             except Exception as e:
                 logger.warning(f"转换记录存储失败: {e}")
     
-    async def _extract_transferable_context(self, from_context: ScenarioContext) -> Dict[str, Any]:
+    async def _extract_transferable_context(self, from_context: ScenarioContext) -> dict[str, Any]:
         """提取可传递的上下文"""
         transferable = {
             "original_topic": from_context.topic,
@@ -518,7 +514,7 @@ class ScenarioManager:
         
         return transferable
     
-    async def _analyze_user_input(self, user_input: str) -> Dict[str, Any]:
+    async def _analyze_user_input(self, user_input: str) -> dict[str, Any]:
         """分析用户输入"""
         analysis = {
             "input_text": user_input,
@@ -555,10 +551,10 @@ class ScenarioManager:
     async def _calculate_scenario_score(
         self,
         scenario_type: ScenarioType,
-        input_analysis: Dict[str, Any],
+        input_analysis: dict[str, Any],
         user_profile: UserProfile,
-        current_context: Optional[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        current_context: Optional[dict[str, Any]]
+    ) -> dict[str, Any]:
         """计算场景匹配分数"""
         scores = {}
         reasons = []
@@ -618,9 +614,9 @@ class ScenarioManager:
     async def _generate_scenario_config(
         self,
         scenario_type: ScenarioType,
-        input_analysis: Dict[str, Any],
+        input_analysis: dict[str, Any],
         user_profile: UserProfile
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成场景配置建议"""
         config = {}
         
@@ -653,8 +649,8 @@ class ScenarioManager:
     async def _generate_follow_up_recommendations(
         self,
         context: ScenarioContext,
-        result: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        result: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """生成后续推荐"""
         recommendations = []
         
@@ -686,7 +682,7 @@ class ScenarioManager:
         
         return recommendations
     
-    async def _get_scenario_capabilities(self) -> Dict[str, Any]:
+    async def _get_scenario_capabilities(self) -> dict[str, Any]:
         """获取场景能力描述"""
         return {
             ScenarioType.ACADEMIC_RESEARCH.value: {
@@ -709,7 +705,7 @@ class ScenarioManager:
             }
         }
     
-    async def _generate_interface_config(self, user_profile: UserProfile) -> Dict[str, Any]:
+    async def _generate_interface_config(self, user_profile: UserProfile) -> dict[str, Any]:
         """生成界面配置"""
         return {
             "default_scenario": user_profile.favorite_scenarios[0].value if user_profile.favorite_scenarios else ScenarioType.CASUAL_DISCUSSION.value,
@@ -731,7 +727,7 @@ async def recommend_and_start_scenario(
     user_input: str,
     user_id: str,
     auto_start: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """推荐并启动场景的便捷函数"""
     manager = ScenarioManager()
     
@@ -795,7 +791,7 @@ async def main():
             print(f"✅ 场景启动成功: {start_result['scenario_id']}")
             
             # 测试场景切换
-            print(f"\n🔄 测试场景切换...")
+            print("\n🔄 测试场景切换...")
             switch_result = await manager.switch_scenario(
                 from_scenario_id=start_result["scenario_id"],
                 to_scenario_type=ScenarioType.CASUAL_DISCUSSION,
@@ -810,7 +806,7 @@ async def main():
             print(f"❌ 场景启动失败: {start_result.get('error')}")
     
     # 测试统一界面数据
-    print(f"\n📊 获取统一界面数据...")
+    print("\n📊 获取统一界面数据...")
     interface_data = await manager.get_unified_interface_data(user_id)
     print(f"用户档案: {interface_data.get('user_profile', {}).get('scenario_usage_stats', {})}")
 

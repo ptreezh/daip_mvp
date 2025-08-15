@@ -1,49 +1,50 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-25 06:00:00
+"""@Time    : 2025-07-25 06:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_custom_primitive_creation.py
 @Description:
     Unit tests for custom primitive creation functionality.
     Tests requirements 7.1, 7.2, 7.3 for task 11.1.
 """
-import pytest
-import asyncio
 import tempfile
-import json
-import yaml
 from pathlib import Path
-from datetime import datetime
-from typing import Dict, Any
 
-from .plugin_interface import (
-    PluginLoader, PluginManager, CustomPrimitiveBase, PluginInterface, PluginMetadata
-)
-from .workflow_templates import (
-    TemplateEngine, TemplateLibrary, WorkflowTemplate, TemplateParameter, 
-    WorkflowNode, WorkflowEdge, TemplateParameterValues, ParameterType
-)
-from .service_adapters import (
-    ServiceAdapterManager, ServiceAdapter, ServiceAdapterMetadata, 
-    ServiceType, AdapterCapability, ServiceRequest, ServiceResponse
-)
-from .registry import PrimitiveRegistry
+import pytest
+
 from .base import ExecutionContext
 from .examples.custom_primitives import (
-    SentimentAnalysisPrimitive, DataTransformationPrimitive, 
-    MockExternalServiceAdapter, ExampleCustomPrimitivesPlugin
+    DataTransformationPrimitive,
+    ExampleCustomPrimitivesPlugin,
+    MockExternalServiceAdapter,
+    SentimentAnalysisPrimitive,
+)
+from .plugin_interface import CustomPrimitiveBase, PluginManager, PluginMetadata
+from .registry import PrimitiveRegistry
+from .service_adapters import (
+    AdapterCapability,
+    ServiceAdapterManager,
+    ServiceType,
+)
+from .workflow_templates import (
+    ParameterType,
+    TemplateEngine,
+    TemplateLibrary,
+    TemplateParameter,
+    TemplateParameterValues,
+    WorkflowEdge,
+    WorkflowNode,
+    WorkflowTemplate,
 )
 
 
 class TestPluginInterface:
     """Test plugin interface system (Requirement 7.1)."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def registry(self):
         """Create a primitive registry for testing."""
         return PrimitiveRegistry()
     
-    @pytest.fixture
+    @pytest.fixture()
     def plugin_manager(self, registry):
         """Create a plugin manager for testing."""
         return PluginManager(registry)
@@ -152,7 +153,7 @@ class TestPluginInterface:
         assert status["registered_primitives"] >= 2
         assert "example_custom_primitives" in [p["name"] for p in status["plugins"]]
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_custom_primitive_execution(self):
         """Test execution of custom primitives."""
         # Test sentiment analysis primitive
@@ -198,12 +199,12 @@ class TestPluginInterface:
 class TestWorkflowTemplates:
     """Test template-based workflow definition (Requirement 7.2)."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def template_engine(self):
         """Create a template engine for testing."""
         return TemplateEngine()
     
-    @pytest.fixture
+    @pytest.fixture()
     def sample_template(self):
         """Create a sample workflow template."""
         return WorkflowTemplate(
@@ -412,14 +413,14 @@ class TestWorkflowTemplates:
 class TestServiceAdapters:
     """Test service adapter registration (Requirement 7.3)."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def adapter_manager(self):
         """Create a service adapter manager for testing."""
         manager = ServiceAdapterManager()
         manager.register_standard_adapters()
         return manager
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_service_adapter_creation(self, adapter_manager):
         """Test service adapter creation and initialization."""
         # Register custom adapter
@@ -448,7 +449,7 @@ class TestServiceAdapters:
         assert metadata.service_type == ServiceType.CUSTOM
         assert AdapterCapability.READ in metadata.capabilities
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_service_adapter_execution(self, adapter_manager):
         """Test service adapter request execution."""
         # Register and create adapter
@@ -474,7 +475,7 @@ class TestServiceAdapters:
         assert response.data[0]["name"] == "Item 1"
         assert response.duration_ms is not None
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_adapter_discovery(self, adapter_manager):
         """Test adapter discovery by type and capability."""
         # Register and create multiple adapters
@@ -500,7 +501,7 @@ class TestServiceAdapters:
         read_adapters = adapter_manager.find_adapters(capability=AdapterCapability.READ)
         assert len(read_adapters) >= 2
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_health_check(self, adapter_manager):
         """Test adapter health checking."""
         # Register and create adapter
@@ -540,7 +541,7 @@ class TestServiceAdapters:
 class TestIntegration:
     """Test integration between all components."""
     
-    @pytest.fixture
+    @pytest.fixture()
     def integrated_system(self):
         """Create an integrated system with all components."""
         registry = PrimitiveRegistry()
@@ -556,7 +557,7 @@ class TestIntegration:
             "adapter_manager": adapter_manager
         }
     
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_end_to_end_workflow(self, integrated_system):
         """Test end-to-end workflow with custom primitives, templates, and adapters."""
         plugin_manager = integrated_system["plugin_manager"]

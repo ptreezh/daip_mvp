@@ -1,20 +1,19 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2024-07-19 11:15:00
+"""@Time    : 2024-07-19 11:15:00
 @Author  : DAIP-LIVE Team
 @File    : test_tui_unit.py
 @Description:
     Unit tests for the CLI components in src.cli.main.
     These tests focus on testing the actual CLI commands using typer's testing framework.
 """
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 from typer.testing import CliRunner
 
 from src.cli.main import app
 
 
-@pytest.fixture
+@pytest.fixture()
 def cli_runner():
     """Fixture that provides a CLI test runner."""
     return CliRunner()

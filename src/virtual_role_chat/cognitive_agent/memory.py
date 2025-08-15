@@ -1,5 +1,4 @@
-"""
-Implementation of the AgentMemory class.
+"""Implementation of the AgentMemory class.
 
 This module defines the AgentMemory class, which encapsulates the
 memory capabilities of a cognitive agent, including storage, retrieval,
@@ -8,14 +7,13 @@ and organization of memories.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
 
 class MemoryItem(BaseModel):
-    """
-    Individual memory item stored by an agent.
+    """Individual memory item stored by an agent.
     """
     id: str
     content: Any
@@ -25,25 +23,23 @@ class MemoryItem(BaseModel):
     access_count: int = 0
     importance: float = Field(ge=0.0, le=1.0)
     source: str
-    related_memories: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    related_memories: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class MemoryCategory(BaseModel):
-    """
-    Category for organizing related memories.
+    """Category for organizing related memories.
     """
     id: str
     name: str
     description: str
     parent_category: Optional[str] = None
-    subcategories: List[str] = Field(default_factory=list)
-    memory_ids: List[str] = Field(default_factory=list)
+    subcategories: list[str] = Field(default_factory=list)
+    memory_ids: list[str] = Field(default_factory=list)
 
 
 class AgentMemory:
-    """
-    System that encapsulates the memory capabilities of a cognitive agent.
+    """System that encapsulates the memory capabilities of a cognitive agent.
     
     The AgentMemory system enables the agent to store, retrieve, and organize
     memories of different types (episodic, semantic, procedural), supporting
@@ -51,8 +47,7 @@ class AgentMemory:
     """
     
     def __init__(self, agent_id: str):
-        """
-        Initialize an agent memory system.
+        """Initialize an agent memory system.
         
         Args:
             agent_id: ID of the agent this memory belongs to
@@ -61,15 +56,14 @@ class AgentMemory:
         self.logger = logging.getLogger(f"cognitive_agent.{agent_id}.memory")
         
         # Initialize memory components
-        self.memories: Dict[str, MemoryItem] = {}
-        self.categories: Dict[str, MemoryCategory] = self._initialize_categories()
-        self.memory_index: Dict[str, Set[str]] = {}  # Maps keywords to memory IDs
+        self.memories: dict[str, MemoryItem] = {}
+        self.categories: dict[str, MemoryCategory] = self._initialize_categories()
+        self.memory_index: dict[str, set[str]] = {}  # Maps keywords to memory IDs
         
         self.logger.info(f"Initialized memory system for agent {agent_id}")
     
-    def _initialize_categories(self) -> Dict[str, MemoryCategory]:
-        """
-        Initialize basic memory categories.
+    def _initialize_categories(self) -> dict[str, MemoryCategory]:
+        """Initialize basic memory categories.
         
         Returns:
             Dictionary mapping category IDs to MemoryCategory objects
@@ -129,10 +123,9 @@ class AgentMemory:
         memory_type: str = "semantic",
         importance: float = 0.5,
         source: str = "agent",
-        metadata: Dict[str, Any] = None
+        metadata: dict[str, Any] = None
     ) -> str:
-        """
-        Store a new memory item.
+        """Store a new memory item.
         
         Args:
             key: Key or identifier for the memory
@@ -173,8 +166,7 @@ class AgentMemory:
         return memory_id
     
     def _index_memory(self, memory: MemoryItem) -> None:
-        """
-        Index a memory for faster retrieval.
+        """Index a memory for faster retrieval.
         
         Args:
             memory: Memory to index
@@ -194,8 +186,7 @@ class AgentMemory:
                 self.memory_index[word].add(memory.id)
     
     async def retrieve(self, memory_id: str) -> Optional[MemoryItem]:
-        """
-        Retrieve a specific memory by ID.
+        """Retrieve a specific memory by ID.
         
         Args:
             memory_id: ID of the memory to retrieve
@@ -216,9 +207,8 @@ class AgentMemory:
         
         return memory
     
-    async def retrieve_by_key(self, key: str, memory_type: str = None) -> List[MemoryItem]:
-        """
-        Retrieve memories by key.
+    async def retrieve_by_key(self, key: str, memory_type: str = None) -> list[MemoryItem]:
+        """Retrieve memories by key.
         
         Args:
             key: Key to search for
@@ -249,9 +239,8 @@ class AgentMemory:
         query: str,
         memory_type: str = None,
         limit: int = 10
-    ) -> List[MemoryItem]:
-        """
-        Search for memories matching a query.
+    ) -> list[MemoryItem]:
+        """Search for memories matching a query.
         
         Args:
             query: Search query
@@ -291,9 +280,8 @@ class AgentMemory:
         
         return memories
     
-    async def retrieve_relevant(self, task: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Retrieve memories relevant to a specific task.
+    async def retrieve_relevant(self, task: dict[str, Any]) -> dict[str, Any]:
+        """Retrieve memories relevant to a specific task.
         
         Args:
             task: Task information
@@ -322,15 +310,14 @@ class AgentMemory:
         
         return organized_memories
     
-    async def update(self, task: Dict[str, Any], result: Dict[str, Any]) -> None:
-        """
-        Update memory based on task execution results.
+    async def update(self, task: dict[str, Any], result: dict[str, Any]) -> None:
+        """Update memory based on task execution results.
         
         Args:
             task: Task information
             result: Task execution results
         """
-        self.logger.info(f"Updating memory based on task execution")
+        self.logger.info("Updating memory based on task execution")
         
         # Store task execution as episodic memory
         task_memory_id = self.store(
@@ -378,8 +365,7 @@ class AgentMemory:
         description: str,
         parent_category: str = None
     ) -> bool:
-        """
-        Create a new memory category.
+        """Create a new memory category.
         
         Args:
             category_id: ID for the new category
@@ -411,8 +397,7 @@ class AgentMemory:
         return True
     
     def categorize_memory(self, memory_id: str, category_id: str) -> bool:
-        """
-        Add a memory to a category.
+        """Add a memory to a category.
         
         Args:
             memory_id: ID of the memory to categorize
@@ -437,8 +422,7 @@ class AgentMemory:
         return True
     
     def relate_memories(self, memory_id1: str, memory_id2: str) -> bool:
-        """
-        Create a relationship between two memories.
+        """Create a relationship between two memories.
         
         Args:
             memory_id1: ID of the first memory
@@ -466,9 +450,8 @@ class AgentMemory:
         
         return True
     
-    def get_stats(self) -> Dict[str, Any]:
-        """
-        Get statistics about the agent's memory.
+    def get_stats(self) -> dict[str, Any]:
+        """Get statistics about the agent's memory.
         
         Returns:
             Dictionary containing memory statistics

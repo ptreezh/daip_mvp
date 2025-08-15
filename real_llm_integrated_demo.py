@@ -1,26 +1,23 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-DAIP-LIVE 真实LLM集成演示系统
+"""DAIP-LIVE 真实LLM集成演示系统
 集成Ollama、OpenAI等真实LLM，提供完整透明度监控
 """
 
-import sys
-import os
-import time
-import json
 import asyncio
-import aiohttp
-import threading
-import webbrowser
-from datetime import datetime
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
 import http.server
+import json
+import os
 import socketserver
-from urllib.parse import parse_qs
-import hashlib
+import sys
+import threading
+import time
 import uuid
+import webbrowser
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from typing import Any, Optional
+
+import aiohttp
 
 # 添加项目路径
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -49,15 +46,15 @@ class TransparencyReport:
     total_tokens: int
     total_cost: float
     avg_response_time: float
-    models_used: List[str]
-    call_records: List[LLMCallRecord]
-    knowledge_generated: List[Dict[str, Any]]
+    models_used: list[str]
+    call_records: list[LLMCallRecord]
+    knowledge_generated: list[dict[str, Any]]
 
 class RealLLMIntegrator:
     """真实LLM集成器"""
     
     def __init__(self):
-        self.call_history: List[LLMCallRecord] = []
+        self.call_history: list[LLMCallRecord] = []
         self.session = None
         self.ollama_available = False
         self.openai_available = False
@@ -558,7 +555,7 @@ class WikiKnowledgeManager:
         self.knowledge_base = []
         self.wiki_entries = {}
     
-    def save_knowledge(self, item: Dict[str, Any]):
+    def save_knowledge(self, item: dict[str, Any]):
         """保存知识条目"""
         self.knowledge_base.append(item)
         
@@ -578,7 +575,7 @@ class WikiKnowledgeManager:
         print(f"💾 知识已保存到Wiki: {wiki_id}")
         return wiki_id
     
-    def _extract_tags(self, content: str) -> List[str]:
+    def _extract_tags(self, content: str) -> list[str]:
         """提取内容标签"""
         tags = []
         if "技术" in content or "技术" in content:
@@ -591,7 +588,7 @@ class WikiKnowledgeManager:
             tags.append("创作")
         return tags
     
-    def get_wiki_summary(self) -> Dict[str, Any]:
+    def get_wiki_summary(self) -> dict[str, Any]:
         """获取Wiki摘要"""
         return {
             "total_entries": len(self.wiki_entries),
@@ -1227,17 +1224,17 @@ def start_real_demo_server(port=8090):
     """启动真实LLM演示服务器"""
     try:
         with socketserver.TCPServer(("", port), RealDAIPDemoHandler) as httpd:
-            print(f"🚀 DAIP-LIVE 真实LLM集成演示服务器启动成功！")
+            print("🚀 DAIP-LIVE 真实LLM集成演示服务器启动成功！")
             print(f"📍 访问地址: http://localhost:{port}")
-            print(f"🔴 真实LLM调用模式已激活")
-            print(f"=" * 70)
-            print(f"✨ 真实特性:")
-            print(f"  • 🤖 真实Ollama/OpenAI调用")
-            print(f"  • 📊 完整透明度监控")
-            print(f"  • 💾 自动知识沉淀")
-            print(f"  • 📋 最终交付报告")
-            print(f"=" * 70)
-            print(f"按 Ctrl+C 停止服务器")
+            print("🔴 真实LLM调用模式已激活")
+            print("=" * 70)
+            print("✨ 真实特性:")
+            print("  • 🤖 真实Ollama/OpenAI调用")
+            print("  • 📊 完整透明度监控")
+            print("  • 💾 自动知识沉淀")
+            print("  • 📋 最终交付报告")
+            print("=" * 70)
+            print("按 Ctrl+C 停止服务器")
             
             # 自动打开浏览器
             threading.Timer(1.0, lambda: webbrowser.open(f'http://localhost:{port}')).start()

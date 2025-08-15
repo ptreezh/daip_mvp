@@ -1,6 +1,5 @@
 # @AI-Generated: 2024-07-23, Confidence: 0.99, Model: Gemini-Code-Assist
-"""
-API Endpoints for Multi-Role Chat and Role Management.
+"""API Endpoints for Multi-Role Chat and Role Management.
 """
 
 import asyncio
@@ -12,7 +11,7 @@ from datetime import datetime
 from typing import Any, Optional
 
 import numpy as np
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from src.app_state import AppState, get_app_state

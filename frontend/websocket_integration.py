@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Personal Intelligence Hub - WebSocket实时通信集成
+"""Personal Intelligence Hub - WebSocket实时通信集成
 
 为双入口界面提供实时通信能力
 支持多智能体辩论、状态监控、用户干预等功能
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, List, Optional, Any, Callable
+import uuid
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass, asdict
-import uuid
-from lona.html import Widget, Div, Span, Button, TextInput
+from typing import Any, Optional
+
+from lona.html import Button, Div, Span, Widget
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -76,7 +75,7 @@ class WebSocketMessage:
     """WebSocket消息数据结构"""
     message_id: str
     message_type: WebSocketMessageType
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     timestamp: datetime
     session_id: str
     user_id: Optional[str] = None
@@ -88,7 +87,7 @@ class WebSocketMessage:
         if self.message_id is None:
             self.message_id = f"msg_{uuid.uuid4().hex[:8]}"
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         return {
             "message_id": self.message_id,
@@ -101,7 +100,7 @@ class WebSocketMessage:
         }
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'WebSocketMessage':
+    def from_dict(cls, data: dict[str, Any]) -> 'WebSocketMessage':
         """从字典创建消息对象"""
         return cls(
             message_id=data["message_id"],
@@ -128,7 +127,7 @@ class LonaWebSocketManager:
         self.user_id = None
         
         # 消息处理器
-        self.message_handlers: Dict[WebSocketMessageType, List[Callable]] = {}
+        self.message_handlers: dict[WebSocketMessageType, list[Callable]] = {}
         
         # 消息队列
         self.outgoing_queue = asyncio.Queue()
@@ -323,7 +322,7 @@ class LonaWebSocketManager:
                 logger.error(f"心跳发送错误: {e}")
                 await asyncio.sleep(5)
     
-    def get_connection_status(self) -> Dict[str, Any]:
+    def get_connection_status(self) -> dict[str, Any]:
         """获取连接状态"""
         return {
             "connected": self.is_connected,
@@ -338,7 +337,7 @@ class LonaWebSocketManager:
             }
         }
     
-    async def simulate_incoming_message(self, message_type: WebSocketMessageType, payload: Dict[str, Any]):
+    async def simulate_incoming_message(self, message_type: WebSocketMessageType, payload: dict[str, Any]):
         """模拟接收消息（用于测试）"""
         message = WebSocketMessage(
             message_id=f"sim_{uuid.uuid4().hex[:8]}",
@@ -504,7 +503,7 @@ class ForumWebSocketIntegration(Widget):
         except Exception as e:
             logger.error(f"处理辩论结束失败: {e}")
     
-    async def start_debate(self, topic: str, agents: List[str]):
+    async def start_debate(self, topic: str, agents: list[str]):
         """开始辩论"""
         try:
             message = WebSocketMessage(
@@ -755,7 +754,7 @@ class SecretariatWebSocketIntegration(Widget):
         except Exception as e:
             logger.error(f"处理性能指标失败: {e}")
     
-    async def submit_task(self, task_data: Dict[str, Any]):
+    async def submit_task(self, task_data: dict[str, Any]):
         """提交任务"""
         try:
             task_id = f"task_{uuid.uuid4().hex[:8]}"
@@ -846,12 +845,12 @@ class SecretariatWebSocketIntegration(Widget):
         
         self.progress_indicator.append(progress_element)
     
-    def _update_system_status(self, status_data: Dict[str, Any]):
+    def _update_system_status(self, status_data: dict[str, Any]):
         """更新系统状态显示"""
         # 可以在这里添加更多状态显示逻辑
         pass
     
-    def _update_performance_display(self, metrics: Dict[str, Any]):
+    def _update_performance_display(self, metrics: dict[str, Any]):
         """更新性能显示"""
         # 可以在这里添加性能指标显示逻辑
         pass

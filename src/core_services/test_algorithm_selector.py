@@ -1,24 +1,21 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-算法选择器测试
+"""算法选择器测试
 
 验证AlgorithmSelector的所有功能，包括选择逻辑、评分机制和策略配置。
 """
 
-import asyncio
 import pytest
-from typing import List, Dict, Any
-
-from consensus_models import (
-    ConsensusInput, ConsensusRequest, AlgorithmSelection,
-    QualityRequirements, QualityPriority
-)
 from algorithm_registry import AlgorithmRegistry
 from algorithm_selector import (
-    AlgorithmSelector, SelectionStrategy, SelectionCriteria,
-    InputCompatibilityRule, PerformanceRule, AccuracyRule, AvailabilityRule
+    AccuracyRule,
+    AlgorithmSelector,
+    AvailabilityRule,
+    InputCompatibilityRule,
+    PerformanceRule,
+    SelectionCriteria,
+    SelectionStrategy,
 )
+from consensus_models import AlgorithmSelection, ConsensusInput, ConsensusRequest, QualityPriority, QualityRequirements
 from test_algorithm_registry import MockConsensusAlgorithm
 
 

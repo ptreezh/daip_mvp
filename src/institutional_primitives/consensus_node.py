@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-23 13:00:00
+"""@Time    : 2025-07-23 13:00:00
 @Author  : DAIP-LIVE Team
 @File    : consensus_node.py
 @Description:
@@ -8,31 +6,28 @@
     Calculates credibility scores using synthesis engine or voting algorithms.
 """
 import logging
-from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
-from .base import InstitutionalPrimitive, ExecutionContext
+from .base import ExecutionContext, InstitutionalPrimitive
 
 logger = logging.getLogger(__name__)
 
 
 class ConsensusNode(InstitutionalPrimitive):
-    """
-    共识计算节点 - Calculates credibility scores using synthesis engine or voting algorithms.
+    """共识计算节点 - Calculates credibility scores using synthesis engine or voting algorithms.
     
     Uses SynthesisEngine or voting algorithms to assign credibility scores
     to each factual assertion based on aggregated evidence.
     """
     
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.consensus_method = config.get("consensus_method", "weighted_average") if config else "weighted_average"
         self.credibility_threshold = config.get("credibility_threshold", 0.6) if config else 0.6
         self.use_synthesis_engine = config.get("use_synthesis_engine", True) if config else True
     
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-        """
-        Execute consensus calculation on aggregated evidence.
+    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        """Execute consensus calculation on aggregated evidence.
         
         Args:
             inputs: Should contain 'aggregated_evidence' from evidence aggregation
@@ -119,9 +114,8 @@ class ConsensusNode(InstitutionalPrimitive):
                 "error": str(e)
             }
     
-    def _calculate_weighted_average_consensus(self, evidence_data: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
-        """
-        Calculate consensus using weighted average of evidence scores.
+    def _calculate_weighted_average_consensus(self, evidence_data: dict[str, Any]) -> tuple[float, dict[str, Any]]:
+        """Calculate consensus using weighted average of evidence scores.
         
         Args:
             evidence_data: Aggregated evidence data
@@ -154,9 +148,8 @@ class ConsensusNode(InstitutionalPrimitive):
         
         return credibility, details
     
-    def _calculate_majority_vote_consensus(self, evidence_data: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
-        """
-        Calculate consensus using majority vote of evidence counts.
+    def _calculate_majority_vote_consensus(self, evidence_data: dict[str, Any]) -> tuple[float, dict[str, Any]]:
+        """Calculate consensus using majority vote of evidence counts.
         
         Args:
             evidence_data: Aggregated evidence data
@@ -212,9 +205,8 @@ class ConsensusNode(InstitutionalPrimitive):
         
         return credibility, details
     
-    def _calculate_majority_vote(self, evidence_data: Dict[str, Any]) -> float:
-        """
-        Calculate credibility score using majority vote method.
+    def _calculate_majority_vote(self, evidence_data: dict[str, Any]) -> float:
+        """Calculate credibility score using majority vote method.
         This is a simplified version for testing.
         
         Args:
@@ -234,9 +226,8 @@ class ConsensusNode(InstitutionalPrimitive):
         supporting_ratio = supporting / total
         return min(max(supporting_ratio, 0.0), 1.0)
     
-    def _calculate_weighted_consensus(self, evidence_data: Dict[str, Any]) -> float:
-        """
-        Calculate credibility score using weighted average method.
+    def _calculate_weighted_consensus(self, evidence_data: dict[str, Any]) -> float:
+        """Calculate credibility score using weighted average method.
         This is a simplified version for testing.
         
         Args:
@@ -258,9 +249,8 @@ class ConsensusNode(InstitutionalPrimitive):
         # Convert to 0-1 scale
         return min(max(0.5 + weighted_score * 0.5, 0.0), 1.0)
     
-    async def _calculate_synthesis_consensus(self, evidence_data: Dict[str, Any], context: ExecutionContext) -> Tuple[float, Dict[str, Any]]:
-        """
-        Calculate consensus using synthesis engine for complex evidence analysis.
+    async def _calculate_synthesis_consensus(self, evidence_data: dict[str, Any], context: ExecutionContext) -> tuple[float, dict[str, Any]]:
+        """Calculate consensus using synthesis engine for complex evidence analysis.
         
         Args:
             evidence_data: Aggregated evidence data
@@ -328,7 +318,7 @@ and 1.0 (completely reliable) for this fact. Provide your reasoning.
             # Fall back to weighted average
             return self._calculate_weighted_average_consensus(evidence_data)
     
-    def get_input_schema(self) -> Dict[str, Any]:
+    def get_input_schema(self) -> dict[str, Any]:
         """Return input schema for the consensus node."""
         return {
             "type": "object",
@@ -341,7 +331,7 @@ and 1.0 (completely reliable) for this fact. Provide your reasoning.
             "required": ["aggregated_evidence"]
         }
     
-    def get_output_schema(self) -> Dict[str, Any]:
+    def get_output_schema(self) -> dict[str, Any]:
         """Return output schema for the consensus node."""
         return {
             "type": "object",

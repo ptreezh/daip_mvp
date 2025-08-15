@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-多角色对话管理器
+"""多角色对话管理器
 
 负责管理多个认知代理之间的对话流程，包括：
 1. 角色选择和匹配
@@ -11,15 +9,15 @@
 5. LLM调用优化
 """
 
-import logging
 import asyncio
-from typing import Dict, List, Any, Optional
-from datetime import datetime
+import logging
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Optional
 
-from .role_manager import RoleManager
 from .integrated_llm_manager import IntegratedLLMManager
 from .memory_agent import MemAgent
+from .role_manager import RoleManager
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +29,8 @@ class DialogueParticipant:
     role_name: str
     role_description: str
     system_prompt: str
-    expertise_areas: List[str]
-    cognitive_style: Dict[str, Any]
+    expertise_areas: list[str]
+    cognitive_style: dict[str, Any]
 
 
 @dataclass
@@ -40,8 +38,8 @@ class DialogueRound:
     """对话轮次"""
     round_number: int
     topic: str
-    participants: List[DialogueParticipant]
-    responses: List[Dict[str, Any]]
+    participants: list[DialogueParticipant]
+    responses: list[dict[str, Any]]
     timestamp: datetime
     round_summary: Optional[str] = None
 
@@ -51,12 +49,12 @@ class DialogueSession:
     """对话会话"""
     session_id: str
     topic: str
-    participants: List[DialogueParticipant]
-    rounds: List[DialogueRound]
+    participants: list[DialogueParticipant]
+    rounds: list[DialogueRound]
     start_time: datetime
     status: str  # 'active', 'paused', 'completed'
     convergence_score: float = 0.0
-    user_interventions: List[Dict[str, Any]] = None
+    user_interventions: list[dict[str, Any]] = None
 
     def __post_init__(self):
         if self.user_interventions is None:
@@ -73,7 +71,7 @@ class MultiRoleDialogueManager:
         self.memory_agent = MemAgent()
         
         # 活跃的对话会话
-        self.active_sessions: Dict[str, DialogueSession] = {}
+        self.active_sessions: dict[str, DialogueSession] = {}
         
         # 角色选择策略配置
         self.role_selection_config = {
@@ -103,11 +101,10 @@ class MultiRoleDialogueManager:
     async def start_dialogue_session(
         self,
         topic: str,
-        user_preferences: Optional[Dict[str, Any]] = None,
-        specific_roles: Optional[List[str]] = None
+        user_preferences: Optional[dict[str, Any]] = None,
+        specific_roles: Optional[list[str]] = None
     ) -> DialogueSession:
-        """
-        启动多角色对话会话
+        """启动多角色对话会话
         
         Args:
             topic: 对话主题
@@ -153,10 +150,9 @@ class MultiRoleDialogueManager:
     async def conduct_dialogue_round(
         self,
         session_id: str,
-        round_context: Optional[Dict[str, Any]] = None
+        round_context: Optional[dict[str, Any]] = None
     ) -> DialogueRound:
-        """
-        进行一轮对话
+        """进行一轮对话
         
         Args:
             session_id: 会话ID
@@ -225,9 +221,8 @@ class MultiRoleDialogueManager:
         session_id: str,
         user_input: str,
         intervention_type: str = "comment"
-    ) -> Dict[str, Any]:
-        """
-        添加用户干预
+    ) -> dict[str, Any]:
+        """添加用户干预
         
         Args:
             session_id: 会话ID
@@ -301,10 +296,9 @@ class MultiRoleDialogueManager:
     async def _select_optimal_roles(
         self,
         topic: str,
-        user_preferences: Optional[Dict[str, Any]] = None
-    ) -> List[DialogueParticipant]:
-        """
-        基于主题和用户偏好选择最优角色组合
+        user_preferences: Optional[dict[str, Any]] = None
+    ) -> list[DialogueParticipant]:
+        """基于主题和用户偏好选择最优角色组合
         
         Args:
             topic: 对话主题
@@ -356,7 +350,7 @@ class MultiRoleDialogueManager:
             # 返回默认角色组合
             return await self._get_default_roles()
     
-    async def _filter_roles_by_topic(self, roles: List, topic: str) -> List:
+    async def _filter_roles_by_topic(self, roles: list, topic: str) -> list:
         """基于主题过滤角色"""
         # 定义主题关键词到角色的映射
         topic_role_mapping = {
@@ -400,7 +394,7 @@ class MultiRoleDialogueManager:
         
         return filtered_roles
     
-    async def _ensure_cognitive_diversity(self, roles: List) -> List:
+    async def _ensure_cognitive_diversity(self, roles: list) -> list:
         """确保认知多样性"""
         # 简化的认知多样性评估
         # 在实际实现中，这里应该基于角色的认知风格、专业背景等进行更复杂的评估
@@ -412,7 +406,7 @@ class MultiRoleDialogueManager:
         # 这里可以实现更复杂的多样性算法
         return roles[:self.role_selection_config["max_participants"]]
     
-    async def _apply_user_preferences(self, roles: List, preferences: Dict[str, Any]) -> List:
+    async def _apply_user_preferences(self, roles: list, preferences: dict[str, Any]) -> list:
         """应用用户偏好"""
         # 根据用户偏好调整角色选择
         # 例如：偏好某些专业领域、认知风格等
@@ -434,7 +428,7 @@ class MultiRoleDialogueManager:
         
         return roles
     
-    async def _get_specific_roles(self, role_ids: List[str]) -> List[DialogueParticipant]:
+    async def _get_specific_roles(self, role_ids: list[str]) -> list[DialogueParticipant]:
         """获取指定的角色"""
         participants = []
         
@@ -455,7 +449,7 @@ class MultiRoleDialogueManager:
         
         return participants
     
-    async def _get_default_roles(self) -> List[DialogueParticipant]:
+    async def _get_default_roles(self) -> list[DialogueParticipant]:
         """获取默认角色组合"""
         default_role_ids = ["system_synthesis_master", "socratic_dialogue_guide", "task_decomposition_master"]
         return await self._get_specific_roles(default_role_ids)
@@ -463,8 +457,8 @@ class MultiRoleDialogueManager:
     async def _build_round_context(
         self,
         session: DialogueSession,
-        additional_context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        additional_context: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """构建轮次上下文"""
         context = {
             "session_id": session.session_id,
@@ -496,14 +490,14 @@ class MultiRoleDialogueManager:
     
     async def _get_parallel_role_responses(
         self,
-        participants: List[DialogueParticipant],
+        participants: list[DialogueParticipant],
         topic: str,
         round_number: int,
-        context: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        context: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """并行获取所有角色的回应"""
         
-        async def get_role_response(participant: DialogueParticipant) -> Dict[str, Any]:
+        async def get_role_response(participant: DialogueParticipant) -> dict[str, Any]:
             try:
                 # 构建角色专用的提示
                 role_prompt = f"请就以下议题发表你的专业观点（第{round_number}轮讨论）: {topic}"
@@ -627,7 +621,7 @@ class MultiRoleDialogueManager:
         
         return False
     
-    def get_session_status(self, session_id: str) -> Dict[str, Any]:
+    def get_session_status(self, session_id: str) -> dict[str, Any]:
         """获取会话状态"""
         session = self.active_sessions.get(session_id)
         if not session:
@@ -645,7 +639,7 @@ class MultiRoleDialogueManager:
             "duration_seconds": (datetime.now() - session.start_time).total_seconds()
         }
     
-    def list_active_sessions(self) -> List[Dict[str, Any]]:
+    def list_active_sessions(self) -> list[dict[str, Any]]:
         """列出所有活跃会话"""
         return [
             {
@@ -659,7 +653,7 @@ class MultiRoleDialogueManager:
             for session_id, session in self.active_sessions.items()
         ]
     
-    async def close_session(self, session_id: str) -> Dict[str, Any]:
+    async def close_session(self, session_id: str) -> dict[str, Any]:
         """关闭会话"""
         session = self.active_sessions.get(session_id)
         if not session:

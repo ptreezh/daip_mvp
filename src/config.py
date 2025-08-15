@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-07-05 17:45:00
+"""@Time    : 2025-07-05 17:45:00
 @Author  : DAIP-LIVE Team
 @File    : config.py
 @Description: Unified configuration system for the DAIP-LIVE application.
              Handles loading, validation, and access to application configuration.
 """
 import logging
-import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Optional, Union
 
 import yaml
 from pydantic import BaseModel, Field
@@ -74,7 +71,7 @@ class AppConfig(BaseModel):
     
     # Additional settings needed by main.py
     log_level: str = "INFO"
-    allowed_origins: List[str] = ["*"]
+    allowed_origins: list[str] = ["*"]
 
 
 # --- Configuration Loading Logic ---
@@ -82,8 +79,7 @@ class AppConfig(BaseModel):
 _config: Optional[AppConfig] = None
 
 def load_config(config_path: Union[str, Path] = "config.yaml") -> AppConfig:
-    """
-    Loads configuration from a YAML file, validates it with Pydantic models, and returns it.
+    """Loads configuration from a YAML file, validates it with Pydantic models, and returns it.
     
     Args:
         config_path: Path to the configuration file (string or Path object)
@@ -110,7 +106,7 @@ def load_config(config_path: Union[str, Path] = "config.yaml") -> AppConfig:
 
     try:
         logger.info(f"Loading configuration from '{config_path.resolve()}'...")
-        with open(config_path, "r", encoding="utf-8") as f:
+        with open(config_path, encoding="utf-8") as f:
             config_data = yaml.safe_load(f)
             
         if not config_data:
@@ -133,8 +129,7 @@ def load_config(config_path: Union[str, Path] = "config.yaml") -> AppConfig:
         return _config
 
 def get_config() -> AppConfig:
-    """
-    Get the current configuration or load it if not already loaded.
+    """Get the current configuration or load it if not already loaded.
     
     Returns:
         AppConfig: The current configuration
@@ -145,8 +140,7 @@ def get_config() -> AppConfig:
     return _config
 
 def reload_config(config_path: Union[str, Path] = "config.yaml") -> AppConfig:
-    """
-    Force reload the configuration from disk.
+    """Force reload the configuration from disk.
     
     Args:
         config_path: Path to the configuration file

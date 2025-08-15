@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2024-07-19 11:15:00
+"""@Time    : 2024-07-19 11:15:00
 @Author  : DAIP-LIVE Team
 @File    : test_tui_integration.py
 @Description:
     Integration tests for the CLI in src.cli.main.
     These tests simulate the interaction between the CLI and the backend services.
 """
-import asyncio
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 from typer.testing import CliRunner
 
 from src.cli.main import app
@@ -18,7 +16,7 @@ from src.cli.main import app
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture
+@pytest.fixture()
 def cli_runner():
     """Fixture that provides a CLI test runner."""
     return CliRunner()

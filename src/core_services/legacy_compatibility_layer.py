@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-遗留系统兼容层
+"""遗留系统兼容层
 
 为现有系统提供向后兼容的接口，确保现有功能完全兼容。
 主要适配PersonalAssistantService、ToolManager和WorkflowEngine。
@@ -13,26 +11,20 @@
 - 确保性能和稳定性
 """
 
-import asyncio
 import logging
-from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
+from typing import Any, Optional
 
-from consensus_models import (
-    ConsensusInput, ConsensusRequest, ConsensusResponse,
-    QualityRequirements, QualityPriority
-)
-from unified_consensus_dispatcher import UnifiedConsensusDispatcher
-from algorithm_registry import AlgorithmRegistry
-from simple_majority_algorithm import SimpleMajorityAlgorithm
-from weighted_voting_algorithm import WeightedVotingAlgorithm
 from bayesian_algorithm import BayesianAlgorithm
+from consensus_models import ConsensusInput, ConsensusRequest, ConsensusResponse, QualityPriority, QualityRequirements
+from simple_majority_algorithm import SimpleMajorityAlgorithm
+from unified_consensus_dispatcher import UnifiedConsensusDispatcher
+from weighted_voting_algorithm import WeightedVotingAlgorithm
 from workflow_consensus_algorithm import WorkflowConsensusAlgorithm
 
 
 class LegacyCompatibilityLayer:
-    """
-    遗留系统兼容层基类
+    """遗留系统兼容层基类
     
     提供统一的兼容性接口，处理数据格式转换和错误处理。
     """
@@ -42,7 +34,7 @@ class LegacyCompatibilityLayer:
         self.dispatcher = dispatcher or get_global_dispatcher()
         
     async def _convert_legacy_to_unified(self, 
-                                        legacy_inputs: List[Dict[str, Any]],
+                                        legacy_inputs: list[dict[str, Any]],
                                         algorithm_preference: Optional[str] = None) -> ConsensusRequest:
         """将遗留格式转换为统一格式"""
         unified_inputs = []
@@ -71,7 +63,7 @@ class LegacyCompatibilityLayer:
         )
     
     async def _convert_unified_to_legacy(self, 
-                                        unified_response: ConsensusResponse) -> Dict[str, Any]:
+                                        unified_response: ConsensusResponse) -> dict[str, Any]:
         """将统一格式转换为遗留格式"""
         if not unified_response.success:
             return {
@@ -101,8 +93,7 @@ class LegacyCompatibilityLayer:
 
 
 class PersonalAssistantServiceCompatibility(LegacyCompatibilityLayer):
-    """
-    PersonalAssistantService兼容接口
+    """PersonalAssistantService兼容接口
     
     保持原有的字符串返回格式，内部使用统一共识调度器。
     """
@@ -112,10 +103,9 @@ class PersonalAssistantServiceCompatibility(LegacyCompatibilityLayer):
         self.logger = logging.getLogger("legacy.PersonalAssistant")
     
     async def execute_consensus(self, 
-                               inputs: List[Dict[str, Any]], 
-                               algorithm_type: str = "simple_majority_vote") -> Dict[str, Any]:
-        """
-        为PersonalAssistantService提供共识计算接口
+                               inputs: list[dict[str, Any]], 
+                               algorithm_type: str = "simple_majority_vote") -> dict[str, Any]:
+        """为PersonalAssistantService提供共识计算接口
         
         Args:
             inputs: 遗留格式的输入数据
@@ -158,9 +148,8 @@ class PersonalAssistantServiceCompatibility(LegacyCompatibilityLayer):
             }
     
     async def calculate_local_consensus(self, 
-                                      inputs: List[Dict[str, Any]]) -> str:
-        """
-        为PersonalAssistantService提供本地共识计算
+                                      inputs: list[dict[str, Any]]) -> str:
+        """为PersonalAssistantService提供本地共识计算
         
         保持原有的字符串返回格式，用于_local_consensus_calculation方法。
         """
@@ -189,7 +178,7 @@ class PersonalAssistantServiceCompatibility(LegacyCompatibilityLayer):
             self.logger.error(f"本地共识计算失败: {e}")
             return f"共识计算失败：{str(e)}"
     
-    def get_supported_algorithms(self) -> List[str]:
+    def get_supported_algorithms(self) -> list[str]:
         """获取支持的算法列表"""
         return [
             "simple_majority_vote",
@@ -200,8 +189,7 @@ class PersonalAssistantServiceCompatibility(LegacyCompatibilityLayer):
 
 
 class ToolManagerCompatibility(LegacyCompatibilityLayer):
-    """
-    ToolManager兼容接口
+    """ToolManager兼容接口
     
     适配工具管理器的调用接口，保持现有的工具注册机制。
     """
@@ -214,8 +202,7 @@ class ToolManagerCompatibility(LegacyCompatibilityLayer):
     async def register_consensus_tool(self, 
                                     tool_name: str,
                                     algorithm_type: str = "simple_majority") -> bool:
-        """
-        注册共识工具
+        """注册共识工具
         
         Args:
             tool_name: 工具名称
@@ -240,10 +227,9 @@ class ToolManagerCompatibility(LegacyCompatibilityLayer):
     
     async def execute_tool(self, 
                           tool_name: str,
-                          inputs: List[Dict[str, Any]],
-                          parameters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """
-        执行工具
+                          inputs: list[dict[str, Any]],
+                          parameters: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+        """执行工具
         
         Args:
             tool_name: 工具名称
@@ -292,14 +278,13 @@ class ToolManagerCompatibility(LegacyCompatibilityLayer):
                 "tool_name": tool_name
             }
     
-    def get_registered_tools(self) -> Dict[str, Dict[str, Any]]:
+    def get_registered_tools(self) -> dict[str, dict[str, Any]]:
         """获取已注册的工具列表"""
         return self.registered_tools.copy()
 
 
 class WorkflowEngineCompatibility(LegacyCompatibilityLayer):
-    """
-    WorkflowEngine兼容接口
+    """WorkflowEngine兼容接口
     
     适配工作流引擎的节点接口，保持ExecutionContext的兼容性。
     """
@@ -309,10 +294,9 @@ class WorkflowEngineCompatibility(LegacyCompatibilityLayer):
         self.logger = logging.getLogger("legacy.WorkflowEngine")
     
     async def execute_consensus_node(self,
-                                   inputs: Dict[str, Any],
-                                   execution_context: Any) -> Dict[str, Any]:
-        """
-        执行共识节点
+                                   inputs: dict[str, Any],
+                                   execution_context: Any) -> dict[str, Any]:
+        """执行共识节点
         
         Args:
             inputs: 节点输入数据
@@ -423,7 +407,7 @@ class WorkflowEngineCompatibility(LegacyCompatibilityLayer):
                 "facts_needing_revision": []
             }
     
-    def _calculate_evidence_confidence(self, evidence: Dict[str, Any]) -> float:
+    def _calculate_evidence_confidence(self, evidence: dict[str, Any]) -> float:
         """从证据数据计算置信度"""
         supporting = evidence.get("supporting_score", 0.0)
         challenging = evidence.get("challenging_score", 0.0)

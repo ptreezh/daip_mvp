@@ -1,18 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-自动化测试执行器 - 修复编码问题版本
+"""自动化测试执行器 - 修复编码问题版本
 """
 
 import asyncio
 import logging
-import time
-import json
-import subprocess
 import sys
-from typing import Dict, List, Any, Optional
-from datetime import datetime
-from pathlib import Path
 
 # 修复Windows控制台编码问题
 if sys.platform == "win32":

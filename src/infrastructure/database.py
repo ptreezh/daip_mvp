@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : database.py
 @Description:
@@ -8,26 +6,19 @@
     Handles database connections, sessions, and ORM operations.
 """
 
-import asyncio
-import json
-from typing import Dict, Any, List, Optional, Type, TypeVar, Generic
-from datetime import datetime
-from contextlib import asynccontextmanager
 import logging
-
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, Text, DateTime, Boolean, Integer, Float, JSON, ForeignKey, select, update, delete
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
 import uuid
+from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Any, Generic, Optional, TypeVar
 
-from ..domain.entities import User, Session, Task, Message
-from ..domain.value_objects import (
-    EntranceType, IntentType, TaskStatus, SessionStatus, 
-    MessageIntent, ConsensusLevel, UserPreference, 
-    TaskPriority, TimeInterval
-)
+from sqlalchemy import JSON, Boolean, DateTime, Float, String, Text, delete, select, update
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.sql import func
+
+from ..domain.value_objects import SessionStatus, TaskStatus
 
 # 类型变量
 T = TypeVar('T')
@@ -50,7 +41,7 @@ class UserModel(BaseModel):
     username: Mapped[str] = mapped_column(String(255), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     preferred_entrance: Mapped[str] = mapped_column(String(50), nullable=False)
-    preferences: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=False)
+    preferences: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
 class SessionModel(BaseModel):
@@ -61,7 +52,7 @@ class SessionModel(BaseModel):
     user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     entrance_type: Mapped[str] = mapped_column(String(50), nullable=False)
     status: Mapped[str] = mapped_column(String(50), nullable=False)
-    session_metadata: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=True)
+    session_metadata: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=True)
 
 class TaskModel(BaseModel):
     """任务表"""
@@ -75,7 +66,7 @@ class TaskModel(BaseModel):
     priority: Mapped[str] = mapped_column(String(50), nullable=False)
     result: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     completed_at: Mapped[Optional[DateTime]] = mapped_column(DateTime, nullable=True)
-    session_metadata: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=True)
+    session_metadata: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=True)
 
 class MessageModel(BaseModel):
     """消息表"""
@@ -89,7 +80,7 @@ class MessageModel(BaseModel):
     confidence: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     agent_role: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     message_type: Mapped[str] = mapped_column(String(50), nullable=False)
-    session_metadata: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=True)
+    session_metadata: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=True)
 
 class DebateModel(BaseModel):
     """辩论表"""
@@ -98,7 +89,7 @@ class DebateModel(BaseModel):
     debate_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     session_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     topic: Mapped[str] = mapped_column(Text, nullable=False)
-    participants: Mapped[List[str]] = mapped_column(JSON, nullable=False)
+    participants: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     consensus_level: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
     status: Mapped[str] = mapped_column(String(50), nullable=False)
 
@@ -111,7 +102,7 @@ class SystemEventModel(BaseModel):
     session_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
     user_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
     task_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
-    data: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=False)
+    data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
 
 # 全局数据库管理器实例
 _database_manager: Optional['DatabaseManager'] = None
@@ -182,20 +173,20 @@ class DatabaseManager:
             finally:
                 await session.close()
     
-    async def execute_query(self, query: str, params: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+    async def execute_query(self, query: str, params: dict[str, Any] = None) -> list[dict[str, Any]]:
         """执行查询"""
         async with self.get_session() as session:
             result = await session.execute(query, params or {})
             return [dict(row._mapping) for row in result.fetchall()]
     
-    async def execute_update(self, query: str, params: Dict[str, Any] = None) -> int:
+    async def execute_update(self, query: str, params: dict[str, Any] = None) -> int:
         """执行更新"""
         async with self.get_session() as session:
             result = await session.execute(query, params or {})
             await session.commit()
             return result.rowcount
     
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """数据库健康检查"""
         try:
             async with self.get_session() as session:
@@ -221,7 +212,7 @@ class DatabaseManager:
 class BaseRepository(Generic[T]):
     """基础仓储类"""
     
-    def __init__(self, session: AsyncSession, model_class: Type[BaseModel]):
+    def __init__(self, session: AsyncSession, model_class: type[BaseModel]):
         self.session = session
         self.model_class = model_class
     
@@ -240,7 +231,7 @@ class BaseRepository(Generic[T]):
         )
         return result.scalar_one_or_none()
     
-    async def get_all(self, limit: int = 100, offset: int = 0) -> List[T]:
+    async def get_all(self, limit: int = 100, offset: int = 0) -> list[T]:
         """获取所有记录"""
         result = await self.session.execute(
             select(self.model_class)
@@ -292,7 +283,7 @@ class UserRepository(BaseRepository[UserModel]):
         )
         return result.scalar_one_or_none()
     
-    async def get_active_users(self) -> List[UserModel]:
+    async def get_active_users(self) -> list[UserModel]:
         """获取活跃用户"""
         result = await self.session.execute(
             select(UserModel).where(UserModel.is_active == True)
@@ -300,7 +291,7 @@ class UserRepository(BaseRepository[UserModel]):
         return result.scalars().all()
     
     async def create_user(self, user_id: str, username: str, email: str, 
-                        preferred_entrance: str, preferences: Dict[str, Any]) -> UserModel:
+                        preferred_entrance: str, preferences: dict[str, Any]) -> UserModel:
         """创建用户"""
         return await self.create(
             user_id=user_id,
@@ -321,14 +312,14 @@ class SessionRepository(BaseRepository[SessionModel]):
         )
         return result.scalar_one_or_none()
     
-    async def get_user_sessions(self, user_id: str) -> List[SessionModel]:
+    async def get_user_sessions(self, user_id: str) -> list[SessionModel]:
         """获取用户的所有会话"""
         result = await self.session.execute(
             select(SessionModel).where(SessionModel.user_id == user_id)
         )
         return result.scalars().all()
     
-    async def get_active_sessions(self) -> List[SessionModel]:
+    async def get_active_sessions(self) -> list[SessionModel]:
         """获取活跃会话"""
         result = await self.session.execute(
             select(SessionModel).where(SessionModel.status == SessionStatus.ACTIVE.value)
@@ -336,7 +327,7 @@ class SessionRepository(BaseRepository[SessionModel]):
         return result.scalars().all()
     
     async def create_session(self, session_id: str, user_id: str, entrance_type: str, 
-                           status: str, metadata: Dict[str, Any] = None) -> SessionModel:
+                           status: str, metadata: dict[str, Any] = None) -> SessionModel:
         """创建会话"""
         return await self.create(
             session_id=session_id,
@@ -357,14 +348,14 @@ class TaskRepository(BaseRepository[TaskModel]):
         )
         return result.scalar_one_or_none()
     
-    async def get_session_tasks(self, session_id: str) -> List[TaskModel]:
+    async def get_session_tasks(self, session_id: str) -> list[TaskModel]:
         """获取会话的所有任务"""
         result = await self.session.execute(
             select(TaskModel).where(TaskModel.session_id == session_id)
         )
         return result.scalars().all()
     
-    async def get_tasks_by_status(self, status: str) -> List[TaskModel]:
+    async def get_tasks_by_status(self, status: str) -> list[TaskModel]:
         """根据状态获取任务"""
         result = await self.session.execute(
             select(TaskModel).where(TaskModel.status == status)
@@ -373,7 +364,7 @@ class TaskRepository(BaseRepository[TaskModel]):
     
     async def create_task(self, task_id: str, session_id: str, content: str, 
                          intent_type: str, status: str, priority: str = "normal",
-                         metadata: Dict[str, Any] = None) -> TaskModel:
+                         metadata: dict[str, Any] = None) -> TaskModel:
         """创建任务"""
         return await self.create(
             task_id=task_id,
@@ -406,7 +397,7 @@ class MessageRepository(BaseRepository[MessageModel]):
         )
         return result.scalar_one_or_none()
     
-    async def get_session_messages(self, session_id: str, limit: int = 50) -> List[MessageModel]:
+    async def get_session_messages(self, session_id: str, limit: int = 50) -> list[MessageModel]:
         """获取会话消息"""
         result = await self.session.execute(
             select(MessageModel)
@@ -416,7 +407,7 @@ class MessageRepository(BaseRepository[MessageModel]):
         )
         return result.scalars().all()
     
-    async def get_messages_by_sender(self, session_id: str, sender: str) -> List[MessageModel]:
+    async def get_messages_by_sender(self, session_id: str, sender: str) -> list[MessageModel]:
         """获取发送者的消息"""
         result = await self.session.execute(
             select(MessageModel)
@@ -430,7 +421,7 @@ class MessageRepository(BaseRepository[MessageModel]):
     async def create_message(self, message_id: str, session_id: str, content: str, 
                            sender: str, message_type: str, intent: str = None,
                            confidence: float = None, agent_role: str = None,
-                           metadata: Dict[str, Any] = None) -> MessageModel:
+                           metadata: dict[str, Any] = None) -> MessageModel:
         """创建消息"""
         return await self.create(
             message_id=message_id,
@@ -462,7 +453,7 @@ class DebateRepository(BaseRepository[DebateModel]):
         )
         return result.scalar_one_or_none()
     
-    async def get_active_debates(self) -> List[DebateModel]:
+    async def get_active_debates(self) -> list[DebateModel]:
         """获取活跃辩论"""
         result = await self.session.execute(
             select(DebateModel).where(DebateModel.status == "active")
@@ -470,7 +461,7 @@ class DebateRepository(BaseRepository[DebateModel]):
         return result.scalars().all()
     
     async def create_debate(self, debate_id: str, session_id: str, topic: str, 
-                          participants: List[str], status: str = "active") -> DebateModel:
+                          participants: list[str], status: str = "active") -> DebateModel:
         """创建辩论"""
         return await self.create(
             debate_id=debate_id,

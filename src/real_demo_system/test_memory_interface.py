@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-智能记忆管理界面测试脚本
+"""智能记忆管理界面测试脚本
 
 测试记忆管理界面的各项功能
 """
@@ -123,8 +121,8 @@ async def test_memory_interface_components():
     
     try:
         # 测试记忆面板组件创建
-        from frontend.services.memory_service import MemoryService
         from frontend.components.memory_panel_fixed import MemoryPanel
+        from frontend.services.memory_service import MemoryService
         
         # 初始化服务
         memory_service = MemoryService()

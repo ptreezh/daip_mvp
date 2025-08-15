@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-实时多角色辩论系统
+"""实时多角色辩论系统
 
 真正工程可用的辩论系统，支持：
 - 人类用户与AI角色实时对话
@@ -12,13 +10,11 @@
 """
 
 import asyncio
-import sys
-import time
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, Any, List, Optional
 import json
+import sys
 import uuid
+from datetime import datetime
+from pathlib import Path
 
 # 添加项目路径
 project_root = Path(__file__).parent
@@ -65,9 +61,9 @@ class RealTimeDebateSystem:
         print("🔧 正在初始化实时辩论系统...")
         
         try:
+            from src.core_services.role_manager import RoleManager
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             from src.real_demo_system.real_llm_integrator import RealLLMIntegrator
-            from src.core_services.role_manager import RoleManager
             
             # 创建系统组件
             llm_integrator = RealLLMIntegrator()
@@ -105,7 +101,7 @@ class RealTimeDebateSystem:
     
     async def setup_debate_session(self):
         """设置辩论会话"""
-        print(f"\n🎯 辩论话题设置")
+        print("\n🎯 辩论话题设置")
         print("-" * 30)
         
         # 获取辩论话题
@@ -121,7 +117,7 @@ class RealTimeDebateSystem:
         print(f"✅ 话题设定: {topic}")
         
         # 选择AI专家参与者
-        print(f"\n🎓 选择AI专家参与辩论")
+        print("\n🎓 选择AI专家参与辩论")
         print("建议选择2-4个不同领域的专家以获得多样化观点")
         
         # 推荐相关专家
@@ -132,7 +128,7 @@ class RealTimeDebateSystem:
             print(f"{i:2d}. {role.name[:50]}...")
         
         # 让用户选择专家
-        print(f"\n请选择参与的AI专家 (输入数字，用逗号分隔，如: 1,3,5):")
+        print("\n请选择参与的AI专家 (输入数字，用逗号分隔，如: 1,3,5):")
         role_choice = input("选择专家: ").strip()
         
         try:
@@ -161,7 +157,7 @@ class RealTimeDebateSystem:
             print(f"\n✅ 已选择 {len(selected_roles)} 位AI专家参与辩论")
             
             # 显示所有参与者
-            print(f"\n👥 辩论参与者:")
+            print("\n👥 辩论参与者:")
             print(f"   🙋 {self.user_name} (您)")
             for role_id in selected_roles:
                 role_name = self.participants[role_id]["name"]
@@ -175,7 +171,7 @@ class RealTimeDebateSystem:
     
     async def run_real_time_debate(self):
         """运行实时辩论"""
-        print(f"\n🚀 开始实时辩论")
+        print("\n🚀 开始实时辩论")
         print("=" * 60)
         print(f"话题: {self.debate_topic}")
         print("=" * 60)
@@ -463,7 +459,7 @@ class RealTimeDebateSystem:
         print(f"⏱️ 讨论时长: {len(self.conversation_history) * 0.5:.1f} 分钟")
         
         # 显示最近的关键观点
-        print(f"\n🔑 最近的关键观点:")
+        print("\n🔑 最近的关键观点:")
         recent_messages = self.conversation_history[-5:]
         for msg in recent_messages:
             if msg["type"] != "system":
@@ -519,7 +515,7 @@ class RealTimeDebateSystem:
                 speaker = msg["speaker"]
                 speaker_stats[speaker] = speaker_stats.get(speaker, 0) + 1
         
-        print(f"\n发言统计:")
+        print("\n发言统计:")
         for speaker, count in speaker_stats.items():
             print(f"  {speaker[:30]}: {count} 条")
     

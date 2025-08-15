@@ -1,23 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-聊天界面组件
+"""聊天界面组件
 
 提供用户与Personal Assistant交互的主要界面
 支持消息发送、接收、历史记录和特殊命令处理
 """
 
-import asyncio
 import logging
-from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
+from lona.html import HTML, Button, Div, Span, TextInput
 from lona.html.widget import Widget
-from lona.html import HTML, Div, TextInput, Button, P, Span, H3, Pre, Code
 
-from ..services.personal_assistant import PersonalAssistantService, ConversationContext
-from ..services.websocket_manager import websocket_manager, MessageType, WebSocketMessage
+from ..services.personal_assistant import PersonalAssistantService
+from ..services.websocket_manager import MessageType, WebSocketMessage, websocket_manager
 from .rich_text_renderer import rich_text_renderer
 
 # 配置日志
@@ -44,7 +41,7 @@ class ChatMessage:
     """聊天消息数据类"""
     
     def __init__(self, sender: str, content: str, message_type: MessageType = MessageType.TEXT, 
-                 metadata: Optional[Dict[str, Any]] = None):
+                 metadata: Optional[dict[str, Any]] = None):
         self.id = f"msg_{datetime.now().timestamp()}"
         self.sender = sender
         self.content = content
@@ -60,7 +57,7 @@ class ChatInterface(Widget):
         super().__init__()
         
         self.assistant_service = assistant_service
-        self.messages: List[ChatMessage] = []
+        self.messages: list[ChatMessage] = []
         self.session_id = session_id or f"session_{datetime.now().timestamp()}"
         self.is_processing = False
         
@@ -494,7 +491,7 @@ class ChatInterface(Widget):
         # Lona框架支持执行客户端JavaScript
         pass
     
-    async def add_agent_message(self, agent_name: str, content: str, metadata: Optional[Dict[str, Any]] = None):
+    async def add_agent_message(self, agent_name: str, content: str, metadata: Optional[dict[str, Any]] = None):
         """添加代理消息（供外部调用）"""
         agent_msg = ChatMessage(
             sender=agent_name,
@@ -515,7 +512,7 @@ class ChatInterface(Widget):
         self.messages.append(system_msg)
         await self.scroll_to_bottom()
     
-    def get_message_history(self) -> List[Dict[str, Any]]:
+    def get_message_history(self) -> list[dict[str, Any]]:
         """获取消息历史（供外部调用）"""
         return [
             {
@@ -535,7 +532,7 @@ class ChatInterface(Widget):
         self._add_welcome_message()
     
     # 集成演示相关方法
-    async def set_demo_scenario(self, scenario_key: str, scenario_data: Dict[str, Any]):
+    async def set_demo_scenario(self, scenario_key: str, scenario_data: dict[str, Any]):
         """设置演示场景"""
         self.current_scenario = scenario_key
         self.demo_active = True
@@ -552,7 +549,7 @@ class ChatInterface(Widget):
             message_type=MessageType.SYSTEM_INFO
         )
         self.messages.append(scenario_msg)
-    async def add_context(self, context_data: Dict[str, Any]):
+    async def add_context(self, context_data: dict[str, Any]):
         """添加上下文信息"""
         self.context_data.update(context_data)
         
@@ -572,7 +569,7 @@ class ChatInterface(Widget):
             except Exception as e:
                 logger.error(f"上下文更新回调失败: {e}")
     
-    async def set_current_task(self, task_data: Dict[str, Any]):
+    async def set_current_task(self, task_data: dict[str, Any]):
         """设置当前任务"""
         self.current_task = task_data
         
@@ -585,9 +582,9 @@ class ChatInterface(Widget):
             message_type=MessageType.SYSTEM_INFO
         )
         self.messages.append(task_msg)
-    async def display_workflow_result(self, workflow_result: Dict[str, Any]):
+    async def display_workflow_result(self, workflow_result: dict[str, Any]):
         """显示工作流执行结果"""
-        result_content = f"🎯 工作流执行完成\n\n"
+        result_content = "🎯 工作流执行完成\n\n"
         
         if workflow_result.get("consensus_result"):
             result_content += f"📊 共识结果: {workflow_result['consensus_result']}\n"
@@ -611,7 +608,7 @@ class ChatInterface(Widget):
             metadata=workflow_result
         )
         self.messages.append(result_msg)
-    async def handle_realtime_message(self, message_data: Dict[str, Any]):
+    async def handle_realtime_message(self, message_data: dict[str, Any]):
         """处理实时消息更新"""
         try:
             msg_type = MessageType(message_data.get("type", "text"))
@@ -629,7 +626,7 @@ class ChatInterface(Widget):
         except Exception as e:
             logger.error(f"处理实时消息失败: {e}")
     
-    def get_demo_context(self) -> Dict[str, Any]:
+    def get_demo_context(self) -> dict[str, Any]:
         """获取演示上下文"""
         return {
             "session_id": self.session_id,

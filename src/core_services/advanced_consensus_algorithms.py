@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Advanced Consensus Algorithms
+"""Advanced Consensus Algorithms
 
 This module implements sophisticated consensus algorithms for collective intelligence
 emergence, including dynamic algorithm selection, emergent insight detection,
@@ -13,10 +11,10 @@ Requirements: 11.4, 11.5, 11.8, 11.10
 import logging
 import math
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple, Union
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any, Optional, Union
 
 import numpy as np
 from pydantic import BaseModel, Field
@@ -37,24 +35,24 @@ class ConsensusAlgorithmType(str, Enum):
 class ConsensusInput:
     """Input data for consensus algorithms."""
     agent_id: str
-    position: Union[str, float, Dict[str, Any]]
+    position: Union[str, float, dict[str, Any]]
     confidence: float
     reasoning: Optional[str] = None
-    evidence: Optional[List[str]] = None
-    cognitive_profile: Optional[Dict[str, Any]] = None
+    evidence: Optional[list[str]] = None
+    cognitive_profile: Optional[dict[str, Any]] = None
     timestamp: Optional[datetime] = None
 
 
 @dataclass
 class ConsensusResult:
     """Result of consensus algorithm execution."""
-    consensus_value: Union[str, float, Dict[str, Any]]
+    consensus_value: Union[str, float, dict[str, Any]]
     confidence_level: float
     algorithm_used: ConsensusAlgorithmType
     participant_count: int
     diversity_score: float
-    emergent_insights: List[str]
-    reasoning_trace: Dict[str, Any]
+    emergent_insights: list[str]
+    reasoning_trace: dict[str, Any]
     timestamp: datetime
 
 
@@ -63,7 +61,7 @@ class EmergentInsight(BaseModel):
     insight_id: str
     content: str
     emergence_score: float = Field(ge=0.0, le=1.0)
-    contributing_agents: List[str]
+    contributing_agents: list[str]
     synthesis_pattern: str
     confidence: float = Field(ge=0.0, le=1.0)
     timestamp: datetime
@@ -79,22 +77,22 @@ class AdvancedConsensusAlgorithm(ABC):
     @abstractmethod
     def calculate_consensus(
         self,
-        inputs: List[ConsensusInput],
-        context: Optional[Dict[str, Any]] = None
+        inputs: list[ConsensusInput],
+        context: Optional[dict[str, Any]] = None
     ) -> ConsensusResult:
         """Calculate consensus from input positions."""
         pass
     
     @abstractmethod
-    def get_algorithm_parameters(self) -> Dict[str, Any]:
+    def get_algorithm_parameters(self) -> dict[str, Any]:
         """Get algorithm-specific parameters."""
         pass
     
     def detect_emergent_insights(
         self,
-        inputs: List[ConsensusInput],
+        inputs: list[ConsensusInput],
         consensus_result: ConsensusResult
-    ) -> List[EmergentInsight]:
+    ) -> list[EmergentInsight]:
         """Detect emergent insights from consensus process."""
         insights = []
         
@@ -119,7 +117,7 @@ class AdvancedConsensusAlgorithm(ABC):
         
         return insights
     
-    def _extract_unique_positions(self, inputs: List[ConsensusInput]) -> List[Any]:
+    def _extract_unique_positions(self, inputs: list[ConsensusInput]) -> list[Any]:
         """Extract unique positions from inputs."""
         positions = []
         for input_item in inputs:
@@ -127,7 +125,7 @@ class AdvancedConsensusAlgorithm(ABC):
                 positions.append(input_item.position)
         return positions
     
-    def _detect_contradictions(self, inputs: List[ConsensusInput]) -> List[Tuple[ConsensusInput, ConsensusInput]]:
+    def _detect_contradictions(self, inputs: list[ConsensusInput]) -> list[tuple[ConsensusInput, ConsensusInput]]:
         """Detect contradictory positions in inputs."""
         contradictions = []
         for i, input1 in enumerate(inputs):
@@ -161,7 +159,7 @@ class AdvancedConsensusAlgorithm(ABC):
     
     def _detect_synthesis_insight(
         self,
-        positions: List[Any],
+        positions: list[Any],
         consensus_result: ConsensusResult
     ) -> Optional[EmergentInsight]:
         """Detect synthesis insights."""
@@ -190,7 +188,7 @@ class AdvancedConsensusAlgorithm(ABC):
     
     def _detect_resolution_insight(
         self,
-        contradictions: List[Tuple[ConsensusInput, ConsensusInput]],
+        contradictions: list[tuple[ConsensusInput, ConsensusInput]],
         consensus_result: ConsensusResult
     ) -> Optional[EmergentInsight]:
         """Detect contradiction resolution insights."""
@@ -219,8 +217,8 @@ class WeightedVotingConsensus(AdvancedConsensusAlgorithm):
     
     def calculate_consensus(
         self,
-        inputs: List[ConsensusInput],
-        context: Optional[Dict[str, Any]] = None
+        inputs: list[ConsensusInput],
+        context: Optional[dict[str, Any]] = None
     ) -> ConsensusResult:
         """Calculate weighted voting consensus."""
         self.logger.info(f"Calculating weighted voting consensus with {len(inputs)} inputs")
@@ -267,9 +265,9 @@ class WeightedVotingConsensus(AdvancedConsensusAlgorithm):
     
     def _calculate_weights(
         self,
-        inputs: List[ConsensusInput],
-        context: Optional[Dict[str, Any]] = None
-    ) -> List[float]:
+        inputs: list[ConsensusInput],
+        context: Optional[dict[str, Any]] = None
+    ) -> list[float]:
         """Calculate weights for each input based on expertise, confidence, and diversity."""
         weights = []
         
@@ -308,7 +306,7 @@ class WeightedVotingConsensus(AdvancedConsensusAlgorithm):
     def _calculate_individual_diversity(
         self,
         target_input: ConsensusInput,
-        all_inputs: List[ConsensusInput]
+        all_inputs: list[ConsensusInput]
     ) -> float:
         """Calculate how diverse an individual input is compared to others."""
         if not target_input.cognitive_profile:
@@ -335,8 +333,8 @@ class WeightedVotingConsensus(AdvancedConsensusAlgorithm):
     
     def _calculate_cognitive_distance(
         self,
-        profile1: Dict[str, Any],
-        profile2: Dict[str, Any]
+        profile1: dict[str, Any],
+        profile2: dict[str, Any]
     ) -> float:
         """Calculate cognitive distance between two profiles."""
         # Simplified distance calculation
@@ -363,7 +361,7 @@ class WeightedVotingConsensus(AdvancedConsensusAlgorithm):
         
         return min(distance, 1.0)
     
-    def _calculate_value_distance(self, values1: Dict[str, float], values2: Dict[str, float]) -> float:
+    def _calculate_value_distance(self, values1: dict[str, float], values2: dict[str, float]) -> float:
         """Calculate distance between value systems."""
         all_values = set(values1.keys()) | set(values2.keys())
         if not all_values:
@@ -379,13 +377,13 @@ class WeightedVotingConsensus(AdvancedConsensusAlgorithm):
     
     def _calculate_categorical_consensus(
         self,
-        inputs: List[ConsensusInput],
-        weights: List[float]
+        inputs: list[ConsensusInput],
+        weights: list[float]
     ) -> str:
         """Calculate consensus for categorical positions."""
         position_weights = {}
         
-        for input_item, weight in zip(inputs, weights):
+        for input_item, weight in zip(inputs, weights, strict=False):
             position = input_item.position
             if position in position_weights:
                 position_weights[position] += weight
@@ -397,23 +395,23 @@ class WeightedVotingConsensus(AdvancedConsensusAlgorithm):
     
     def _calculate_numerical_consensus(
         self,
-        inputs: List[ConsensusInput],
-        weights: List[float]
+        inputs: list[ConsensusInput],
+        weights: list[float]
     ) -> float:
         """Calculate consensus for numerical positions."""
-        weighted_sum = sum(input_item.position * weight for input_item, weight in zip(inputs, weights))
+        weighted_sum = sum(input_item.position * weight for input_item, weight in zip(inputs, weights, strict=False))
         return weighted_sum
     
     def _calculate_complex_consensus(
         self,
-        inputs: List[ConsensusInput],
-        weights: List[float]
-    ) -> Dict[str, Any]:
+        inputs: list[ConsensusInput],
+        weights: list[float]
+    ) -> dict[str, Any]:
         """Calculate consensus for complex positions."""
         # For complex positions, we'll create a weighted combination
         consensus = {"type": "complex_consensus", "components": []}
         
-        for input_item, weight in zip(inputs, weights):
+        for input_item, weight in zip(inputs, weights, strict=False):
             consensus["components"].append({
                 "position": input_item.position,
                 "weight": weight,
@@ -424,19 +422,19 @@ class WeightedVotingConsensus(AdvancedConsensusAlgorithm):
     
     def _calculate_confidence(
         self,
-        inputs: List[ConsensusInput],
-        weights: List[float]
+        inputs: list[ConsensusInput],
+        weights: list[float]
     ) -> float:
         """Calculate overall confidence in consensus."""
         # Weighted average of individual confidences
-        weighted_confidence = sum(input_item.confidence * weight for input_item, weight in zip(inputs, weights))
+        weighted_confidence = sum(input_item.confidence * weight for input_item, weight in zip(inputs, weights, strict=False))
         
         # Adjust based on agreement level
         agreement_factor = self._calculate_agreement_factor(inputs)
         
         return min(weighted_confidence * agreement_factor, 1.0)
     
-    def _calculate_agreement_factor(self, inputs: List[ConsensusInput]) -> float:
+    def _calculate_agreement_factor(self, inputs: list[ConsensusInput]) -> float:
         """Calculate agreement factor based on position similarity."""
         if len(inputs) < 2:
             return 1.0
@@ -463,7 +461,7 @@ class WeightedVotingConsensus(AdvancedConsensusAlgorithm):
         
         return 0.7  # Default for complex positions
     
-    def _calculate_diversity_score(self, inputs: List[ConsensusInput]) -> float:
+    def _calculate_diversity_score(self, inputs: list[ConsensusInput]) -> float:
         """Calculate diversity score for the group."""
         if len(inputs) < 2:
             return 0.0
@@ -483,7 +481,7 @@ class WeightedVotingConsensus(AdvancedConsensusAlgorithm):
         
         return total_distance / pair_count if pair_count > 0 else 0.0
     
-    def get_algorithm_parameters(self) -> Dict[str, Any]:
+    def get_algorithm_parameters(self) -> dict[str, Any]:
         """Get algorithm parameters."""
         return {
             "expertise_weight": self.expertise_weight,
@@ -501,8 +499,8 @@ class BayesianConsensus(AdvancedConsensusAlgorithm):
     
     def calculate_consensus(
         self,
-        inputs: List[ConsensusInput],
-        context: Optional[Dict[str, Any]] = None
+        inputs: list[ConsensusInput],
+        context: Optional[dict[str, Any]] = None
     ) -> ConsensusResult:
         """Calculate Bayesian consensus."""
         self.logger.info(f"Calculating Bayesian consensus with {len(inputs)} inputs")
@@ -540,8 +538,8 @@ class BayesianConsensus(AdvancedConsensusAlgorithm):
     
     def _bayesian_numerical_consensus(
         self,
-        inputs: List[ConsensusInput]
-    ) -> Tuple[float, float]:
+        inputs: list[ConsensusInput]
+    ) -> tuple[float, float]:
         """Calculate Bayesian consensus for numerical values."""
         # Use precision-weighted average (inverse variance weighting)
         precisions = []
@@ -556,7 +554,7 @@ class BayesianConsensus(AdvancedConsensusAlgorithm):
         
         # Bayesian update
         total_precision = sum(precisions)
-        weighted_mean = sum(v * p for v, p in zip(values, precisions)) / total_precision
+        weighted_mean = sum(v * p for v, p in zip(values, precisions, strict=False)) / total_precision
         
         # Confidence based on total precision
         confidence = min(total_precision / (total_precision + self.prior_strength), 0.95)
@@ -565,8 +563,8 @@ class BayesianConsensus(AdvancedConsensusAlgorithm):
     
     def _bayesian_categorical_consensus(
         self,
-        inputs: List[ConsensusInput]
-    ) -> Tuple[str, float]:
+        inputs: list[ConsensusInput]
+    ) -> tuple[str, float]:
         """Calculate Bayesian consensus for categorical values."""
         # Count evidence for each category
         category_evidence = {}
@@ -592,7 +590,7 @@ class BayesianConsensus(AdvancedConsensusAlgorithm):
         
         return best_category, confidence
     
-    def _calculate_diversity_score(self, inputs: List[ConsensusInput]) -> float:
+    def _calculate_diversity_score(self, inputs: list[ConsensusInput]) -> float:
         """Calculate diversity score."""
         # Simple diversity measure based on position variance
         if isinstance(inputs[0].position, (int, float)):
@@ -603,7 +601,7 @@ class BayesianConsensus(AdvancedConsensusAlgorithm):
             unique_positions = len(set(input_item.position for input_item in inputs))
             return min(unique_positions / len(inputs), 1.0)
     
-    def get_algorithm_parameters(self) -> Dict[str, Any]:
+    def get_algorithm_parameters(self) -> dict[str, Any]:
         """Get algorithm parameters."""
         return {
             "prior_strength": self.prior_strength
@@ -620,8 +618,8 @@ class CognitiveDiversityPreservingConsensus(AdvancedConsensusAlgorithm):
     
     def calculate_consensus(
         self,
-        inputs: List[ConsensusInput],
-        context: Optional[Dict[str, Any]] = None
+        inputs: list[ConsensusInput],
+        context: Optional[dict[str, Any]] = None
     ) -> ConsensusResult:
         """Calculate consensus while preserving cognitive diversity."""
         self.logger.info(f"Calculating diversity-preserving consensus with {len(inputs)} inputs")
@@ -668,8 +666,8 @@ class CognitiveDiversityPreservingConsensus(AdvancedConsensusAlgorithm):
     
     def _cluster_by_cognitive_similarity(
         self,
-        inputs: List[ConsensusInput]
-    ) -> List[List[ConsensusInput]]:
+        inputs: list[ConsensusInput]
+    ) -> list[list[ConsensusInput]]:
         """Cluster inputs by cognitive similarity."""
         clusters = []
         
@@ -695,7 +693,7 @@ class CognitiveDiversityPreservingConsensus(AdvancedConsensusAlgorithm):
     def _calculate_cluster_similarity(
         self,
         input_item: ConsensusInput,
-        cluster: List[ConsensusInput]
+        cluster: list[ConsensusInput]
     ) -> float:
         """Calculate similarity between an input and a cluster."""
         if not input_item.cognitive_profile:
@@ -716,8 +714,8 @@ class CognitiveDiversityPreservingConsensus(AdvancedConsensusAlgorithm):
     
     def _calculate_cognitive_distance(
         self,
-        profile1: Dict[str, Any],
-        profile2: Dict[str, Any]
+        profile1: dict[str, Any],
+        profile2: dict[str, Any]
     ) -> float:
         """Calculate cognitive distance between profiles."""
         # Reuse implementation from WeightedVotingConsensus
@@ -744,7 +742,7 @@ class CognitiveDiversityPreservingConsensus(AdvancedConsensusAlgorithm):
         
         return min(distance, 1.0)
     
-    def _calculate_value_distance(self, values1: Dict[str, float], values2: Dict[str, float]) -> float:
+    def _calculate_value_distance(self, values1: dict[str, float], values2: dict[str, float]) -> float:
         """Calculate distance between value systems."""
         all_values = set(values1.keys()) | set(values2.keys())
         if not all_values:
@@ -760,8 +758,8 @@ class CognitiveDiversityPreservingConsensus(AdvancedConsensusAlgorithm):
     
     def _calculate_cluster_representatives(
         self,
-        clusters: List[List[ConsensusInput]]
-    ) -> List[ConsensusInput]:
+        clusters: list[list[ConsensusInput]]
+    ) -> list[ConsensusInput]:
         """Calculate representative for each cluster."""
         representatives = []
         
@@ -798,8 +796,8 @@ class CognitiveDiversityPreservingConsensus(AdvancedConsensusAlgorithm):
     
     def _diversity_preserving_aggregation(
         self,
-        representatives: List[ConsensusInput]
-    ) -> Union[str, float, Dict[str, Any]]:
+        representatives: list[ConsensusInput]
+    ) -> Union[str, float, dict[str, Any]]:
         """Aggregate representatives while preserving diversity."""
         if not representatives:
             return "No consensus"
@@ -852,11 +850,11 @@ class CognitiveDiversityPreservingConsensus(AdvancedConsensusAlgorithm):
                 ]
             }
     
-    def _calculate_base_confidence(self, inputs: List[ConsensusInput]) -> float:
+    def _calculate_base_confidence(self, inputs: list[ConsensusInput]) -> float:
         """Calculate base confidence from inputs."""
         return sum(input_item.confidence for input_item in inputs) / len(inputs)
     
-    def _calculate_diversity_score(self, inputs: List[ConsensusInput]) -> float:
+    def _calculate_diversity_score(self, inputs: list[ConsensusInput]) -> float:
         """Calculate diversity score for the group."""
         if len(inputs) < 2:
             return 0.0
@@ -876,7 +874,7 @@ class CognitiveDiversityPreservingConsensus(AdvancedConsensusAlgorithm):
         
         return total_distance / pair_count if pair_count > 0 else 0.0
     
-    def get_algorithm_parameters(self) -> Dict[str, Any]:
+    def get_algorithm_parameters(self) -> dict[str, Any]:
         """Get algorithm parameters."""
         return {
             "diversity_threshold": self.diversity_threshold,

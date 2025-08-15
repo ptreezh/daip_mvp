@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-05 10:00:00
+"""@Time    : 2025-08-05 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : quick_expert_consultation_test.py
 @Description:
@@ -11,17 +9,18 @@
 import asyncio
 import json
 import logging
-import time
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
-from datetime import datetime
 
 # Add project root to path
 import sys
+import time
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+from typing import Any, Optional
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from personal_intelligence_hub.services.backend_integration import BackendIntegrationService, get_backend_service
+from personal_intelligence_hub.services.backend_integration import get_backend_service
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,7 +33,7 @@ class TestResult:
     status: str  # "PASSED", "FAILED", "ERROR"
     duration: float
     details: str
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[dict[str, Any]] = None
 
 async def test_expert_consultation_scenario():
     """Test expert consultation scenario"""

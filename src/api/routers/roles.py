@@ -1,17 +1,15 @@
 import logging
-import os
-import json
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from src.api.dependencies import AppStateDep, get_expert_service
+from src.api.dependencies import get_expert_service
+from src.core_services.expert_service import ExpertService
 from src.models import (
     BatchRoleImportRequest,
     Role,
     SmartRoleCreateRequest,
 )
-from src.core_services.expert_service import ExpertService
 
 try:
     from src.role_utils import analyze_role_definition, standardize_role_dict

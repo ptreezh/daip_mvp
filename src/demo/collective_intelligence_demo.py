@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Collective Intelligence Demo
+"""Collective Intelligence Demo
 
 This demo showcases the collective intelligence capabilities of the DAIP-LIVE system.
 """
 
 import asyncio
 import logging
-from typing import Dict, List, Any
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-降级管理器核心模块
+"""降级管理器核心模块
 
 按照新的代码生成规则，将FallbackManager拆分为多个模块。
 这是核心模块，包含主要的FallbackManager类。
@@ -12,18 +10,16 @@
 import asyncio
 import logging
 import time
+from collections import defaultdict, deque
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, List, Optional, Any, Callable
-from collections import defaultdict, deque
+from typing import Any, Optional
 
-from consensus_models import (
-    ConsensusRequest, ConsensusResponse, ConsensusResult, FailureContext
-)
-from consensus_algorithm_interface import ConsensusAlgorithm, ConsensusContext
 from algorithm_registry import AlgorithmRegistry
 from algorithm_selector import AlgorithmSelector
-
+from consensus_algorithm_interface import ConsensusAlgorithm, ConsensusContext
+from consensus_models import ConsensusRequest, ConsensusResponse, ConsensusResult, FailureContext
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +93,7 @@ class FallbackEvent:
                  fallback_depth: int,
                  success: bool,
                  execution_time: float,
-                 metadata: Optional[Dict[str, Any]] = None):
+                 metadata: Optional[dict[str, Any]] = None):
         self.event_id = event_id
         self.timestamp = timestamp
         self.original_algorithm = original_algorithm
@@ -110,8 +106,7 @@ class FallbackEvent:
 
 
 class FallbackManager:
-    """
-    降级管理器核心类
+    """降级管理器核心类
     
     处理算法失败场景，提供多级降级策略和智能重试机制。
     """
@@ -125,11 +120,11 @@ class FallbackManager:
         self.config = config or FallbackConfig()
         
         # 熔断器状态
-        self.circuit_breakers: Dict[str, CircuitBreakerInfo] = defaultdict(CircuitBreakerInfo)
+        self.circuit_breakers: dict[str, CircuitBreakerInfo] = defaultdict(CircuitBreakerInfo)
         
         # 事件记录
         self.fallback_events: deque = deque(maxlen=1000)
-        self.event_listeners: List[Callable[[FallbackEvent], None]] = []
+        self.event_listeners: list[Callable[[FallbackEvent], None]] = []
         
         # 统计信息
         self.stats = {
@@ -144,9 +139,8 @@ class FallbackManager:
     def get_fallback_chain(self,
                           failed_algorithm: str,
                           request: ConsensusRequest,
-                          failure_context: Optional[FailureContext] = None) -> List[str]:
-        """
-        获取降级链
+                          failure_context: Optional[FailureContext] = None) -> list[str]:
+        """获取降级链
         
         Args:
             failed_algorithm: 失败的算法ID
@@ -185,7 +179,7 @@ class FallbackManager:
             logger.error(f"Failed to get fallback chain: {str(e)}")
             return []
             
-    def _filter_circuit_breaker_algorithms(self, algorithms: List[str]) -> List[str]:
+    def _filter_circuit_breaker_algorithms(self, algorithms: list[str]) -> list[str]:
         """过滤熔断器开启的算法"""
         filtered = []
         current_time = datetime.now()
@@ -207,7 +201,7 @@ class FallbackManager:
                     
         return filtered
         
-    def _get_selector_based_candidates(self, request: ConsensusRequest, available_algorithms: List[str]) -> List[str]:
+    def _get_selector_based_candidates(self, request: ConsensusRequest, available_algorithms: list[str]) -> list[str]:
         """基于选择器获取候选算法"""
         try:
             scores = self.selector.get_algorithm_scores(request, available_algorithms)
@@ -221,8 +215,7 @@ class FallbackManager:
                               request: ConsensusRequest,
                               failure_context: FailureContext,
                               fallback_depth: int = 1) -> ConsensusResponse:
-        """
-        执行降级算法
+        """执行降级算法
         
         Args:
             fallback_algorithm: 降级算法ID
@@ -408,7 +401,7 @@ class FallbackManager:
                               fallback_depth: int,
                               success: bool,
                               execution_time: float,
-                              metadata: Optional[Dict[str, Any]] = None):
+                              metadata: Optional[dict[str, Any]] = None):
         """记录降级事件"""
         event = FallbackEvent(
             event_id=event_id,

@@ -1,21 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-简化的MemAgent验证器
+"""简化的MemAgent验证器
 """
 
 import asyncio
 import logging
 import sys
-import os
 from pathlib import Path
 
 # 添加项目根目录到Python路径
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.core_services.memory_agent import MemAgent, Memory, MemoryType, MemoryQuery
 from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
+from src.core_services.memory_agent import MemAgent, Memory, MemoryQuery, MemoryType
 
 logger = logging.getLogger(__name__)
 

@@ -1,24 +1,22 @@
-"""
-@Time: 2025-08-03
+"""@Time: 2025-08-03
 @Author: DAIP-LIVE
 @File: smart_recommendation_engine.py
 @Description: V0.3.4 智能推荐引擎 - 基于用户兴趣和讨论上下文的知识推荐算法
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-import numpy as np
-from collections import defaultdict, Counter
+from typing import Any
 
-from ..core_services.knowledge_retrieval_service import KnowledgeRetrievalService
+import numpy as np
+
 from ..core_services.enhanced_sskg_manager import EnhancedSSKGManager
+from ..core_services.knowledge_retrieval_service import KnowledgeRetrievalService
 from ..core_services.memory_agent import MemAgent
-from ..core_services.knowledge_persistence_service import KnowledgePersistenceService
 
 
 class RecommendationType(Enum):
@@ -33,11 +31,11 @@ class RecommendationType(Enum):
 class UserInterest:
     """用户兴趣模型"""
     user_id: str
-    interests: Dict[str, float]  # 兴趣领域及权重
-    interaction_history: List[Dict]  # 交互历史
-    knowledge_preferences: Dict[str, float]  # 知识类型偏好
+    interests: dict[str, float]  # 兴趣领域及权重
+    interaction_history: list[dict]  # 交互历史
+    knowledge_preferences: dict[str, float]  # 知识类型偏好
     last_updated: datetime
-    expertise_level: Dict[str, float]  # 不同领域的专业程度
+    expertise_level: dict[str, float]  # 不同领域的专业程度
 
 
 @dataclass
@@ -47,8 +45,8 @@ class ContextFeatures:
     session_type: str
     time_of_day: str
     discussion_depth: int
-    participant_roles: List[str]
-    recent_keywords: List[str]
+    participant_roles: list[str]
+    recent_keywords: list[str]
     knowledge_domain: str
 
 
@@ -62,19 +60,19 @@ class KnowledgeItem:
     domain: str
     confidence: float
     created_time: datetime
-    tags: List[str]
-    metadata: Dict[str, Any]
+    tags: list[str]
+    metadata: dict[str, Any]
 
 
 @dataclass
 class RecommendationResult:
     """推荐结果"""
-    knowledge_items: List[KnowledgeItem]
-    recommendation_scores: List[float]
-    recommendation_types: List[RecommendationType]
+    knowledge_items: list[KnowledgeItem]
+    recommendation_scores: list[float]
+    recommendation_types: list[RecommendationType]
     explanation: str
     confidence: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class UserInterestModel:
@@ -105,7 +103,7 @@ class UserInterestModel:
             logging.error(f"获取用户兴趣模型失败: {e}")
             return await self._create_default_interest_model(user_id)
     
-    async def update_user_interests(self, user_id: str, interaction_data: Dict):
+    async def update_user_interests(self, user_id: str, interaction_data: dict):
         """更新用户兴趣模型"""
         try:
             user_interest = await self.get_user_interests(user_id)
@@ -143,7 +141,7 @@ class UserInterestModel:
         except Exception as e:
             logging.error(f"更新用户兴趣模型失败: {e}")
     
-    def _decay_interests(self, interests: Dict[str, float]) -> Dict[str, float]:
+    def _decay_interests(self, interests: dict[str, float]) -> dict[str, float]:
         """兴趣衰减处理"""
         decayed_interests = {}
         for topic, weight in interests.items():
@@ -176,7 +174,7 @@ class ContextAnalyzer:
         self.topic_extractor = TopicExtractor()
         self.keyword_extractor = KeywordExtractor()
         
-    async def extract_features(self, context: Dict) -> ContextFeatures:
+    async def extract_features(self, context: dict) -> ContextFeatures:
         """提取上下文特征"""
         try:
             # 分析当前话题
@@ -217,7 +215,7 @@ class ContextAnalyzer:
                 knowledge_domain="general"
             )
     
-    def _analyze_discussion_depth(self, context: Dict) -> int:
+    def _analyze_discussion_depth(self, context: dict) -> int:
         """分析讨论深度"""
         content_length = len(context.get('recent_content', ''))
         interaction_count = len(context.get('recent_interactions', []))
@@ -280,7 +278,7 @@ class KeywordExtractor:
             'the', 'is', 'at', 'which', 'on', 'a', 'an', 'and', 'or', 'but', 'in', 'with'
         }
     
-    def extract(self, text: str) -> List[str]:
+    def extract(self, text: str) -> list[str]:
         """提取关键词"""
         if not text:
             return []
@@ -306,7 +304,7 @@ class HybridRecommendationStrategy:
         self.knowledge_graph_weight = 0.3  # 知识图谱权重
         
     async def hybrid_recommend(self, user_interests: UserInterest, 
-                             context_features: ContextFeatures) -> List[KnowledgeItem]:
+                             context_features: ContextFeatures) -> list[KnowledgeItem]:
         """混合推荐算法"""
         try:
             # 并行执行不同推荐策略
@@ -334,7 +332,7 @@ class HybridRecommendationStrategy:
             return []
     
     async def _content_based_recommend(self, user_interests: UserInterest,
-                                     context_features: ContextFeatures) -> List[KnowledgeItem]:
+                                     context_features: ContextFeatures) -> list[KnowledgeItem]:
         """基于内容的推荐"""
         try:
             # 基于用户兴趣领域检索相关知识
@@ -364,7 +362,7 @@ class HybridRecommendationStrategy:
             return []
     
     async def _collaborative_recommend(self, user_interests: UserInterest,
-                                     context_features: ContextFeatures) -> List[KnowledgeItem]:
+                                     context_features: ContextFeatures) -> list[KnowledgeItem]:
         """协同过滤推荐"""
         try:
             # 基于用户历史行为和相似用户推荐
@@ -391,7 +389,7 @@ class HybridRecommendationStrategy:
             return []
     
     async def _knowledge_graph_recommend(self, user_interests: UserInterest,
-                                       context_features: ContextFeatures) -> List[KnowledgeItem]:
+                                       context_features: ContextFeatures) -> list[KnowledgeItem]:
         """知识图谱推荐"""
         try:
             # 基于知识图谱的关联推荐
@@ -456,9 +454,9 @@ class HybridRecommendationStrategy:
             logging.error(f"计算内容相关性失败: {e}")
             return 0.0
     
-    def _merge_and_rank_recommendations(self, content_results: List[KnowledgeItem],
-                                     collaborative_results: List[KnowledgeItem],
-                                     knowledge_graph_results: List[KnowledgeItem]) -> List[KnowledgeItem]:
+    def _merge_and_rank_recommendations(self, content_results: list[KnowledgeItem],
+                                     collaborative_results: list[KnowledgeItem],
+                                     knowledge_graph_results: list[KnowledgeItem]) -> list[KnowledgeItem]:
         """合并和排序推荐结果"""
         try:
             # 合并所有结果
@@ -488,7 +486,7 @@ class HybridRecommendationStrategy:
             logging.error(f"合并推荐结果失败: {e}")
             return []
     
-    def _deduplicate_knowledge(self, knowledge_items: List[KnowledgeItem]) -> List[KnowledgeItem]:
+    def _deduplicate_knowledge(self, knowledge_items: list[KnowledgeItem]) -> list[KnowledgeItem]:
         """去重知识项"""
         seen_ids = set()
         unique_items = []
@@ -500,7 +498,7 @@ class HybridRecommendationStrategy:
         
         return unique_items
     
-    def _deduplicate_weighted_results(self, weighted_results: List[Tuple[KnowledgeItem, float, RecommendationType]]) -> List[Tuple[KnowledgeItem, float, RecommendationType]]:
+    def _deduplicate_weighted_results(self, weighted_results: list[tuple[KnowledgeItem, float, RecommendationType]]) -> list[tuple[KnowledgeItem, float, RecommendationType]]:
         """去重加权结果"""
         item_scores = defaultdict(lambda: {'total_score': 0.0, 'types': []})
         
@@ -523,12 +521,12 @@ class HybridRecommendationStrategy:
         
         return deduplicated_results
     
-    async def _find_similar_users(self, user_interests: UserInterest) -> List[str]:
+    async def _find_similar_users(self, user_interests: UserInterest) -> list[str]:
         """查找相似用户"""
         # 简化实现，实际应该基于用户行为相似度计算
         return []
     
-    async def _get_user_knowledge(self, user_id: str) -> List[KnowledgeItem]:
+    async def _get_user_knowledge(self, user_id: str) -> list[KnowledgeItem]:
         """获取用户知识"""
         # 简化实现
         return []
@@ -547,7 +545,7 @@ class SmartRecommendationEngine:
         )
         self.logger = logging.getLogger(__name__)
     
-    async def recommend_knowledge(self, user_id: str, context: Dict) -> RecommendationResult:
+    async def recommend_knowledge(self, user_id: str, context: dict) -> RecommendationResult:
         """基于用户画像和上下文的智能推荐"""
         try:
             # 获取用户兴趣模型
@@ -600,16 +598,16 @@ class SmartRecommendationEngine:
                 metadata={'error': str(e)}
             )
     
-    async def update_user_interaction(self, user_id: str, interaction_data: Dict):
+    async def update_user_interaction(self, user_id: str, interaction_data: dict):
         """更新用户交互数据"""
         try:
             await self.user_interest_model.update_user_interests(user_id, interaction_data)
         except Exception as e:
             self.logger.error(f"更新用户交互数据失败: {e}")
     
-    def _calculate_recommendation_scores(self, items: List[KnowledgeItem],
+    def _calculate_recommendation_scores(self, items: list[KnowledgeItem],
                                        user_interests: UserInterest,
-                                       context_features: ContextFeatures) -> List[float]:
+                                       context_features: ContextFeatures) -> list[float]:
         """计算推荐分数"""
         scores = []
         for item in items:
@@ -636,7 +634,7 @@ class SmartRecommendationEngine:
         
         return scores
     
-    def _generate_explanation(self, items: List[KnowledgeItem],
+    def _generate_explanation(self, items: list[KnowledgeItem],
                             user_interests: UserInterest,
                             context_features: ContextFeatures) -> str:
         """生成推荐解释"""
@@ -660,7 +658,7 @@ class SmartRecommendationEngine:
         
         return "；".join(explanation_parts)
     
-    def _calculate_confidence(self, items: List[KnowledgeItem], scores: List[float]) -> float:
+    def _calculate_confidence(self, items: list[KnowledgeItem], scores: list[float]) -> float:
         """计算推荐置信度"""
         if not items:
             return 0.0

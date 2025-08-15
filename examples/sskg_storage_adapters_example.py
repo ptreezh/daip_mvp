@@ -1,5 +1,4 @@
-"""
-Example demonstrating the use of unified storage adapters.
+"""Example demonstrating the use of unified storage adapters.
 
 This script shows how to use different storage adapters to manage
 various types of data in the SSKG.
@@ -10,10 +9,7 @@ from pathlib import Path
 
 from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
 from src.core_services.sskg_storage_adapters import (
-    RoleMemoryAdapter,
-    WikiAdapter,
-    SessionAdapter,
-    StorageAdapterManager
+    StorageAdapterManager,
 )
 
 # Configure logging

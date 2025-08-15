@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2024-07-16 10:00:00
+"""@Time    : 2024-07-16 10:00:00
 @Author  : DAIP-LIVE Team
 @File    : tool_registry.py
 @Description:
@@ -10,8 +8,8 @@
 """
 
 from src.kernel.tool_executor import ToolExecutor
+from src.protocols.consensus_strategies import SimpleMajorityVoteStrategy  # Import the strategy
 from src.tools import kanban_tools
-from src.protocols.consensus_strategies import SimpleMajorityVoteStrategy # Import the strategy
 
 # --- Tool Definitions (JSON Schema for LLM Function Calling) ---
 

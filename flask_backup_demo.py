@@ -1,21 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-DAIP-LIVE Flask备用演示服务器
+"""DAIP-LIVE Flask备用演示服务器
 使用Flask提供更丰富的功能，集成真实后端服务
 """
 
-import sys
 import os
-import json
-import time
+import sys
 import threading
+import time
 import webbrowser
 from datetime import datetime
 
 # 尝试导入Flask
 try:
-    from flask import Flask, render_template_string, jsonify, request
+    from flask import Flask, jsonify, render_template_string, request
     from flask_cors import CORS
     FLASK_AVAILABLE = True
 except ImportError:
@@ -35,9 +32,8 @@ def create_flask_app():
     
     # 尝试导入真实的后端服务
     try:
-        from src.core_services.role_manager import RoleManager
         from src.core_services.intent_analysis_service import BasicIntentAnalysisService
-        from src.core_services.consensus_models import ConsensusInput
+        from src.core_services.role_manager import RoleManager
         
         # 初始化服务
         role_manager = RoleManager()
@@ -571,10 +567,10 @@ def start_flask_server(port=8081):
         return False
     
     try:
-        print(f"🚀 DAIP-LIVE Flask演示服务器启动中...")
+        print("🚀 DAIP-LIVE Flask演示服务器启动中...")
         print(f"📍 访问地址: http://localhost:{port}")
-        print(f"🔧 Flask版本，支持真实后端集成")
-        print(f"=" * 60)
+        print("🔧 Flask版本，支持真实后端集成")
+        print("=" * 60)
         
         # 自动打开浏览器
         threading.Timer(1.0, lambda: webbrowser.open(f'http://localhost:{port}')).start()

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 12:30:00
+"""@Time    : 2025-08-04 12:30:00
 @Author  : DAIP-LIVE Team
 @File    : test_v0_3_6_integration.py
 @Description:
@@ -8,14 +6,15 @@
 """
 
 import asyncio
-import logging
 import json
-from typing import Dict, Any, List
+import logging
 from datetime import datetime
+from typing import Any
 
-from src.subagents.intelligent_synthesis import IntelligentSynthesisAgent, EnhancedQualityEvaluator
 from src.subagents.dynamic_weight import DynamicWeightAdjuster, PerformanceMonitor
+from src.subagents.intelligent_synthesis import EnhancedQualityEvaluator, IntelligentSynthesisAgent
 from src.subagents.visualization import MultiPerspectiveVisualizer, VisualizationType
+
 
 # Mock LLM interface for testing
 class MockLLMInterface:
@@ -24,7 +23,7 @@ class MockLLMInterface:
     def __init__(self):
         self.config = {"model": "mock-model"}
     
-    async def generate(self, messages: List[Dict[str, Any]], participant_id: str = None) -> Dict[str, Any]:
+    async def generate(self, messages: list[dict[str, Any]], participant_id: str = None) -> dict[str, Any]:
         """Generate mock response."""
         return {
             "content": "这是一个综合分析的模拟响应。基于多位专家的观点，我们可以得出以下结论：\n\n1. 深度分析：该问题涉及多个层面的复杂因素，需要从根本机制进行分析。\n2. 多维度整合：经济、社会、技术三个维度相互影响，形成复杂系统。\n3. 冲突解决：通过平衡不同视角，可以找到建设性的解决方案。\n4. 洞察生成：关键在于系统性思维和长期视角的建立。\n\n综上所述，建议采取综合性策略，兼顾各方利益，实现可持续发展。",

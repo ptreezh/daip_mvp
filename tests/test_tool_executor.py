@@ -1,17 +1,18 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from src.kernel.tool_executor import ToolExecutor
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_tool_function() -> MagicMock:
     """Fixture for a mocked tool function."""
     # The tool executor wraps the result in a dictionary
     return MagicMock(return_value="Success")
 
 
-@pytest.fixture
+@pytest.fixture()
 def tool_executor() -> ToolExecutor:
     """Fixture for the ToolExecutor instance."""
     return ToolExecutor()

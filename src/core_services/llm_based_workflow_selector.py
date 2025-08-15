@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-基于LLM的智能工作流选择器
+"""基于LLM的智能工作流选择器
 
 使用真实的LLM调用进行语义理解，支持：
 1. 基于语义的智能工作流选择
@@ -9,15 +7,15 @@
 3. 动态学习和优化工作流匹配
 """
 
-import logging
 import json
-import asyncio
-import requests
-from typing import Dict, List, Tuple, Optional, Any
-from enum import Enum
-from dataclasses import dataclass, asdict
-from datetime import datetime
+import logging
 import os
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +40,9 @@ class WorkflowDefinition:
     name: str
     type: WorkflowType
     description: str
-    scenario_types: List[ScenarioType]
-    keywords: List[str]
-    examples: List[str]
+    scenario_types: list[ScenarioType]
+    keywords: list[str]
+    examples: list[str]
     created_at: datetime
     usage_count: int = 0
     success_rate: float = 1.0
@@ -58,8 +56,8 @@ class LLMIntentResult:
     confidence: float
     reasoning: str
     topic: str
-    semantic_analysis: Dict[str, Any]
-    suggested_improvements: List[str] = None
+    semantic_analysis: dict[str, Any]
+    suggested_improvements: list[str] = None
 
 
 class LLMBasedWorkflowSelector:
@@ -73,11 +71,11 @@ class LLMBasedWorkflowSelector:
         self.workflows = self._load_workflows()
         logger.info(f"LLM-based Workflow Selector initialized with model: {self.model_name}")
     
-    def _load_workflows(self) -> Dict[str, WorkflowDefinition]:
+    def _load_workflows(self) -> dict[str, WorkflowDefinition]:
         """加载工作流定义数据库"""
         if os.path.exists(self.workflows_db_path):
             try:
-                with open(self.workflows_db_path, 'r', encoding='utf-8') as f:
+                with open(self.workflows_db_path, encoding='utf-8') as f:
                     data = json.load(f)
                     workflows = {}
                     for key, value in data.items():
@@ -109,7 +107,7 @@ class LLMBasedWorkflowSelector:
         except Exception as e:
             logger.error(f"Failed to save workflows database: {e}")
     
-    def _create_default_workflows(self) -> Dict[str, WorkflowDefinition]:
+    def _create_default_workflows(self) -> dict[str, WorkflowDefinition]:
         """创建默认工作流定义"""
         now = datetime.now()
         
@@ -177,9 +175,8 @@ class LLMBasedWorkflowSelector:
             logger.error(f"LLM call failed: {e}")
             return ""
     
-    async def analyze_intent_with_llm(self, user_input: str, context: Optional[Dict] = None) -> LLMIntentResult:
+    async def analyze_intent_with_llm(self, user_input: str, context: Optional[dict] = None) -> LLMIntentResult:
         """使用LLM分析用户意图"""
-        
         # 构建工作流描述
         workflow_descriptions = []
         for key, workflow in self.workflows.items():
@@ -292,9 +289,8 @@ class LLMBasedWorkflowSelector:
             semantic_analysis={"fallback": True}
         )
     
-    async def add_workflow_from_description(self, description: str, examples: List[str] = None) -> bool:
+    async def add_workflow_from_description(self, description: str, examples: list[str] = None) -> bool:
         """基于自然语言描述添加新工作流"""
-        
         system_prompt = """你是一个工作流设计专家。用户会用自然语言描述一个新的工作流需求，你需要分析并创建工作流定义。
 
 返回格式必须是有效的JSON：
@@ -360,7 +356,6 @@ class LLMBasedWorkflowSelector:
     
     async def optimize_workflow_matching(self, user_input: str, selected_workflow: str, user_feedback: str) -> bool:
         """基于用户反馈优化工作流匹配"""
-        
         system_prompt = """你是一个工作流优化专家。基于用户反馈，分析如何改进工作流选择。
 
 返回格式必须是有效的JSON：
@@ -419,7 +414,7 @@ class LLMBasedWorkflowSelector:
             logger.error(f"Failed to optimize workflow matching: {e}")
             return False
     
-    def get_workflow_statistics(self) -> Dict[str, Any]:
+    def get_workflow_statistics(self) -> dict[str, Any]:
         """获取工作流使用统计"""
         stats = {
             "total_workflows": len(self.workflows),

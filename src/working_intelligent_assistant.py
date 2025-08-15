@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-工程可用的智能助手系统
+"""工程可用的智能助手系统
 
 基于现有核心服务构建的完整、可交付的智能助手
 支持真实的多角色辩论、共识计算、知识沉淀
@@ -10,20 +8,18 @@
 import asyncio
 import logging
 import sys
-from pathlib import Path
-from typing import Dict, Any, List, Optional
 from datetime import datetime
-import json
+from pathlib import Path
+from typing import Any
 
 # 添加项目根目录到路径
 sys.path.append(str(Path(__file__).parent.parent))
 
 # 导入核心服务 - 使用正确的类名
+from src.core_services.intent_analysis_service import BasicIntentAnalysisService
+from src.core_services.memory_agent import MemAgent
 from src.core_services.role_manager import RoleManager
 from src.core_services.wiki_service import WikiService
-from src.core_services.memory_agent import MemAgent
-from src.core_services.intent_analysis_service import BasicIntentAnalysisService
-from src.core_services.synthesis_engine import SynthesisEngine
 
 # 配置日志
 logging.basicConfig(
@@ -107,8 +103,8 @@ class WorkingIntelligentAssistant:
         except Exception as e:
             print(f"  ⚠️ 角色加载警告: {e}")
         
-        print(f"\n📚 知识库: 已准备就绪")
-        print(f"🧠 记忆系统: 已激活")
+        print("\n📚 知识库: 已准备就绪")
+        print("🧠 记忆系统: 已激活")
         print("="*60)
     
     async def start_conversation(self):
@@ -220,7 +216,7 @@ class WorkingIntelligentAssistant:
             logger.error(f"处理用户请求失败: {e}")
             print(f"❌ 处理过程中发生错误: {e}")
     
-    async def _analyze_intent(self, user_input: str) -> Dict[str, Any]:
+    async def _analyze_intent(self, user_input: str) -> dict[str, Any]:
         """分析用户意图"""
         try:
             # 使用意图分析服务
@@ -255,7 +251,7 @@ class WorkingIntelligentAssistant:
                 "domain": "通用"
             }
     
-    async def _select_roles_for_topic(self, topic: str) -> List[Any]:
+    async def _select_roles_for_topic(self, topic: str) -> list[Any]:
         """为话题选择合适的角色"""
         try:
             all_roles = {role.id: role for role in self.role_manager.list_roles()}
@@ -285,7 +281,7 @@ class WorkingIntelligentAssistant:
             # 返回空列表，后续会处理
             return []
     
-    async def _conduct_multi_role_discussion(self, topic: str, roles: List[Any]) -> Dict[str, Any]:
+    async def _conduct_multi_role_discussion(self, topic: str, roles: list[Any]) -> dict[str, Any]:
         """进行多角色讨论"""
         try:
             if not roles:
@@ -350,7 +346,7 @@ class WorkingIntelligentAssistant:
             logger.error(f"角色响应模拟失败: {e}")
             return f"作为{role.name}，我正在深入分析这个问题，需要更多时间思考。"
     
-    async def _form_consensus(self, discussion_result: Dict[str, Any]) -> Dict[str, Any]:
+    async def _form_consensus(self, discussion_result: dict[str, Any]) -> dict[str, Any]:
         """形成共识"""
         try:
             if "discussion_results" not in discussion_result:
@@ -373,7 +369,7 @@ class WorkingIntelligentAssistant:
             logger.error(f"共识形成失败: {e}")
             return {"error": str(e)}
     
-    def _simple_consensus_synthesis(self, results: List[Dict[str, Any]]) -> str:
+    def _simple_consensus_synthesis(self, results: list[dict[str, Any]]) -> str:
         """简单的共识综合"""
         synthesis = "## 综合分析结果\n\n"
         synthesis += "基于多角色深入讨论，我们得出以下综合结论：\n\n"
@@ -388,7 +384,7 @@ class WorkingIntelligentAssistant:
         
         return synthesis
     
-    async def _save_to_knowledge_base(self, topic: str, consensus_result: Dict[str, Any]):
+    async def _save_to_knowledge_base(self, topic: str, consensus_result: dict[str, Any]):
         """保存到知识库"""
         try:
             title = f"研究议题：{topic[:50]}"
@@ -409,7 +405,7 @@ class WorkingIntelligentAssistant:
         except Exception as e:
             logger.error(f"保存到知识库失败: {e}")
     
-    async def _update_memory(self, topic: str, result: Dict[str, Any]):
+    async def _update_memory(self, topic: str, result: dict[str, Any]):
         """更新记忆系统"""
         try:
             # 构建记忆条目
@@ -428,7 +424,7 @@ class WorkingIntelligentAssistant:
         except Exception as e:
             logger.error(f"更新记忆失败: {e}")
     
-    def _display_final_result(self, topic: str, result: Dict[str, Any]):
+    def _display_final_result(self, topic: str, result: dict[str, Any]):
         """显示最终结果"""
         print("\n" + "="*60)
         print("🎉 分析完成！结果如下：")
@@ -437,7 +433,7 @@ class WorkingIntelligentAssistant:
         print(f"📋 研究议题: {topic}")
         
         if result.get("consensus_text"):
-            print(f"\n🤝 共识结果:")
+            print("\n🤝 共识结果:")
             # 显示前300字符
             consensus_text = result["consensus_text"]
             if len(consensus_text) > 300:

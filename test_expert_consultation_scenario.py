@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-02 17:00:00
+"""@Time    : 2025-08-02 17:00:00
 @Author  : DAIP-LIVE Team
 @File    : test_expert_consultation_scenario.py
 @Description:
@@ -16,15 +14,15 @@
 """
 
 import asyncio
+import json
 import logging
 import time
-import json
-from typing import Dict, List, Any
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 # 导入待测试组件
-from src.scenarios.expert_consultation_scenario import ExpertConsultationScenario, ConsultationConfig
+from src.scenarios.expert_consultation_scenario import ConsultationConfig, ExpertConsultationScenario
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -38,7 +36,7 @@ class ExpertConsultationQualityAssurance:
         self.test_results = {}
         self.scenario = ExpertConsultationScenario()
         
-    async def run_all_tests(self) -> Dict[str, Any]:
+    async def run_all_tests(self) -> dict[str, Any]:
         """运行所有质量保证测试"""
         logger.info("=" * 60)
         logger.info("👨‍💼 开始专家咨询场景质量保证测试")
@@ -95,7 +93,7 @@ class ExpertConsultationQualityAssurance:
         
         return final_report
     
-    async def test_functional_completeness(self) -> Dict[str, Any]:
+    async def test_functional_completeness(self) -> dict[str, Any]:
         """功能完整性测试 - 完成创业公司技术选型咨询案例"""
         logger.info("执行创业公司技术选型咨询案例...")
         
@@ -162,7 +160,7 @@ class ExpertConsultationQualityAssurance:
                 "details": "功能完整性测试执行失败"
             }
     
-    async def test_expert_matching(self) -> Dict[str, Any]:
+    async def test_expert_matching(self) -> dict[str, Any]:
         """专家匹配机制测试 - 验证专家选择的相关性和多样性"""
         logger.info("执行专家匹配机制测试...")
         
@@ -258,7 +256,7 @@ class ExpertConsultationQualityAssurance:
                 "details": "专家匹配机制测试执行失败"
             }
     
-    def _check_expertise_relevance(self, question: str, experts: List[Dict]) -> bool:
+    def _check_expertise_relevance(self, question: str, experts: list[dict]) -> bool:
         """检查专家专长与问题的相关性"""
         question_lower = question.lower()
         
@@ -273,7 +271,7 @@ class ExpertConsultationQualityAssurance:
         
         return len(experts) > 0  # 如果有专家被选中，认为基本相关
     
-    def _calculate_diversity_metrics(self, matching_results: List[Dict]) -> Dict[str, float]:
+    def _calculate_diversity_metrics(self, matching_results: list[dict]) -> dict[str, float]:
         """计算专家多样性指标"""
         if not matching_results:
             return {"domain_diversity": 0, "expertise_coverage": 0}
@@ -297,7 +295,7 @@ class ExpertConsultationQualityAssurance:
             "total_unique_experts": unique_experts
         }
     
-    async def test_opinion_quality(self) -> Dict[str, Any]:
+    async def test_opinion_quality(self) -> dict[str, Any]:
         """观点质量评估测试 - 确认专家观点的专业性和实用性"""
         logger.info("执行观点质量评估测试...")
         
@@ -402,7 +400,7 @@ class ExpertConsultationQualityAssurance:
         indicator_count = sum(1 for indicator in structure_indicators if indicator in opinion_text)
         return indicator_count >= 3
     
-    async def test_decision_support(self) -> Dict[str, Any]:
+    async def test_decision_support(self) -> dict[str, Any]:
         """决策支持系统测试 - 验证综合建议的合理性和可操作性"""
         logger.info("执行决策支持系统测试...")
         
@@ -495,7 +493,7 @@ class ExpertConsultationQualityAssurance:
                 "details": "决策支持系统测试执行失败"
             }
     
-    async def test_user_experience(self) -> Dict[str, Any]:
+    async def test_user_experience(self) -> dict[str, Any]:
         """用户体验流程测试 - 验证咨询流程的直观性和有效性"""
         logger.info("执行用户体验流程测试...")
         
@@ -586,7 +584,7 @@ class ExpertConsultationQualityAssurance:
                 "details": "用户体验流程测试执行失败"
             }
     
-    def _assess_result_completeness(self, result: Dict[str, Any]) -> float:
+    def _assess_result_completeness(self, result: dict[str, Any]) -> float:
         """评估结果完整性"""
         if not result.get("success"):
             return 0.0
@@ -599,7 +597,7 @@ class ExpertConsultationQualityAssurance:
         present_components = sum(1 for comp in required_components if comp in result)
         return present_components / len(required_components)
     
-    def _assess_advice_clarity(self, result: Dict[str, Any]) -> float:
+    def _assess_advice_clarity(self, result: dict[str, Any]) -> float:
         """评估建议清晰度"""
         if not result.get("success"):
             return 0.0
@@ -615,7 +613,7 @@ class ExpertConsultationQualityAssurance:
         
         return sum(clarity_indicators) / len(clarity_indicators)
     
-    def _assess_actionability(self, result: Dict[str, Any]) -> float:
+    def _assess_actionability(self, result: dict[str, Any]) -> float:
         """评估建议可操作性"""
         if not result.get("success"):
             return 0.0
@@ -631,7 +629,7 @@ class ExpertConsultationQualityAssurance:
         
         return sum(actionability_indicators) / len(actionability_indicators)
     
-    def _estimate_user_satisfaction(self, ux_results: List[Dict]) -> float:
+    def _estimate_user_satisfaction(self, ux_results: list[dict]) -> float:
         """估算用户满意度"""
         if not ux_results:
             return 0.0
@@ -650,7 +648,7 @@ class ExpertConsultationQualityAssurance:
         
         return sum(satisfaction_factors) / len(satisfaction_factors)
     
-    async def test_authority_evaluation(self) -> Dict[str, Any]:
+    async def test_authority_evaluation(self) -> dict[str, Any]:
         """权威性评估测试 - 验证专家权威性评估的准确性"""
         logger.info("执行权威性评估测试...")
         
@@ -731,7 +729,7 @@ class ExpertConsultationQualityAssurance:
                 "details": "权威性评估测试执行失败"
             }
     
-    def _check_score_differentiation(self, authority_scores: Dict) -> bool:
+    def _check_score_differentiation(self, authority_scores: dict) -> bool:
         """检查权威性分数是否有合理的差异化"""
         if len(authority_scores) < 2:
             return True
@@ -742,7 +740,7 @@ class ExpertConsultationQualityAssurance:
         
         return (max_score - min_score) >= 0.1  # 至少0.1的差异
     
-    def _check_high_authority_influence(self, result: Dict[str, Any]) -> bool:
+    def _check_high_authority_influence(self, result: dict[str, Any]) -> bool:
         """检查高权威专家是否有更大影响力"""
         authority_analysis = result.get("authority_analysis", {})
         most_authoritative = authority_analysis.get("most_authoritative")
@@ -753,7 +751,7 @@ class ExpertConsultationQualityAssurance:
         # 简化检查：确保最权威专家存在
         return most_authoritative[1].get("final_authority", 0) > 0.7
     
-    def _check_authority_weighting(self, result: Dict[str, Any]) -> bool:
+    def _check_authority_weighting(self, result: dict[str, Any]) -> bool:
         """检查权威性是否影响建议权重"""
         weighted_recommendations = result.get("comprehensive_advice", {}).get("weighted_recommendations", [])
         
@@ -764,7 +762,7 @@ class ExpertConsultationQualityAssurance:
         weights = [rec.get("total_weight", 0) for rec in weighted_recommendations]
         return len(set(weights)) > 1  # 权重应该有差异
     
-    def _analyze_authority_scores(self, authority_scores: Dict) -> Dict[str, Any]:
+    def _analyze_authority_scores(self, authority_scores: dict) -> dict[str, Any]:
         """分析权威性分数分布"""
         if not authority_scores:
             return {"analysis": "无权威性分数数据"}
@@ -782,7 +780,7 @@ class ExpertConsultationQualityAssurance:
             "low_authority_count": len([s for s in scores if s < 0.6])
         }
     
-    async def test_integration_stability(self) -> Dict[str, Any]:
+    async def test_integration_stability(self) -> dict[str, Any]:
         """集成稳定性测试 - 验证组件协作稳定性"""
         logger.info("执行集成稳定性测试...")
         
@@ -864,9 +862,8 @@ class ExpertConsultationQualityAssurance:
                 "details": "集成稳定性测试执行失败"
             }
     
-    async def generate_final_report(self, overall_success: bool) -> Dict[str, Any]:
+    async def generate_final_report(self, overall_success: bool) -> dict[str, Any]:
         """生成最终质量保证报告"""
-        
         # 统计测试结果
         total_tests = len(self.test_results)
         passed_tests = sum(1 for result in self.test_results.values() if result.get("success", False))
@@ -909,7 +906,7 @@ class ExpertConsultationQualityAssurance:
         
         return report
     
-    async def save_report(self, report: Dict[str, Any]):
+    async def save_report(self, report: dict[str, Any]):
         """保存质量保证报告"""
         try:
             report_path = Path("v0_2_6_expert_consultation_quality_report.json")
@@ -940,7 +937,7 @@ async def main():
             status = "✅" if passed else "❌"
             print(f"  {check}: {status}")
         
-        print(f"\n💡 建议:")
+        print("\n💡 建议:")
         for rec in final_report['recommendations']:
             print(f"  • {rec}")
         

@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
@@ -83,8 +82,7 @@ async def search_memory(state: AppStateDep, req: MemoryEntryRequest):
 
 @router.post("/prompt_optimization", response_model=PromptOptimizationResponse)
 async def api_prompt_optimization(req: PromptOptimizationRequest):
-    """
-    Optimizes a user prompt in two steps:
+    """Optimizes a user prompt in two steps:
     1. Discern explicit and latent needs, sorted by confidence.
     2. Structure the primary need into a JSON format for an LLM.
     """

@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-DAIP-LIVE 零依赖Web演示服务器
+"""DAIP-LIVE 零依赖Web演示服务器
 使用Python内置模块，100%保证可运行
 """
 
 import http.server
+import json
 import socketserver
-import webbrowser
 import threading
 import time
-import json
-from urllib.parse import urlparse, parse_qs
-import os
+import webbrowser
+
 
 class DAIPDemoHandler(http.server.SimpleHTTPRequestHandler):
     """DAIP演示请求处理器"""
@@ -508,17 +505,17 @@ def start_server(port=8080):
     """启动服务器"""
     try:
         with socketserver.TCPServer(("", port), DAIPDemoHandler) as httpd:
-            print(f"🚀 DAIP-LIVE 零依赖演示服务器启动成功！")
+            print("🚀 DAIP-LIVE 零依赖演示服务器启动成功！")
             print(f"📍 访问地址: http://localhost:{port}")
-            print(f"🎭 功能完整的Web演示界面已就绪")
-            print(f"=" * 60)
-            print(f"✨ 特性:")
-            print(f"  • 💬 实时智能对话")
-            print(f"  • 🤖 多AI角色协作模拟") 
-            print(f"  • 📊 技术展示面板")
-            print(f"  • 🔧 零外部依赖")
-            print(f"=" * 60)
-            print(f"按 Ctrl+C 停止服务器")
+            print("🎭 功能完整的Web演示界面已就绪")
+            print("=" * 60)
+            print("✨ 特性:")
+            print("  • 💬 实时智能对话")
+            print("  • 🤖 多AI角色协作模拟") 
+            print("  • 📊 技术展示面板")
+            print("  • 🔧 零外部依赖")
+            print("=" * 60)
+            print("按 Ctrl+C 停止服务器")
             
             # 自动打开浏览器
             threading.Timer(1.0, lambda: webbrowser.open(f'http://localhost:{port}')).start()

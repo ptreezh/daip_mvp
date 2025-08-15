@@ -1,4 +1,5 @@
-from typing import Annotated, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated, Optional
+
 from fastapi import Depends, HTTPException
 
 if TYPE_CHECKING:

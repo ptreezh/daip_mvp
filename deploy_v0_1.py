@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-真实多轮辩论系统 V0.1.0 部署脚本
+"""真实多轮辩论系统 V0.1.0 部署脚本
 
 提供一键部署和验证功能，确保系统正确安装和配置。
 """
 
-import sys
-import os
-import subprocess
 import asyncio
-from pathlib import Path
-from typing import Dict, Any
 import json
+import subprocess
+import sys
+from pathlib import Path
+
 
 def print_banner():
     """打印部署横幅"""
@@ -113,7 +110,7 @@ async def run_quality_check():
             # 检查质量报告
             report_file = Path("src/debate_system/v0_1_5_quality_report.json")
             if report_file.exists():
-                with open(report_file, 'r', encoding='utf-8') as f:
+                with open(report_file, encoding='utf-8') as f:
                     report = json.load(f)
                 
                 summary = report.get("summary", {})

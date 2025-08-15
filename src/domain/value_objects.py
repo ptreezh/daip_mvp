@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : value_objects.py
 @Description:
@@ -9,9 +7,8 @@
 """
 
 from dataclasses import dataclass
-from enum import Enum
-from typing import Optional
 from datetime import datetime
+from enum import Enum
 
 
 class EntranceType(Enum):

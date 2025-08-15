@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-04 17:00:00
+"""@Time    : 2025-08-04 17:00:00
 @Author  : DAIP-LIVE Team
 @File    : scenario_api.py
 @Description:
@@ -8,19 +6,19 @@
     Provides RESTful interface for scenario integration service.
 """
 
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
+import logging
+from datetime import datetime
+from typing import Any, Optional
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from typing import Dict, List, Any, Optional
-from datetime import datetime
-import logging
 
 # Import scenario integration service
 from src.core_services.scenario_integration_service import (
     ScenarioIntegrationService,
-    UnifiedRequest,
     ScenarioType,
-    process_unified_request
+    UnifiedRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,24 +42,24 @@ async def get_scenario_service():
 class ExpertConsultationRequest(BaseModel):
     consultation_type: str = Field(..., description="Type of consultation")
     query: str = Field(..., description="Consultation query")
-    user_preferences: Dict[str, Any] = Field(default_factory=dict, description="User preferences")
+    user_preferences: dict[str, Any] = Field(default_factory=dict, description="User preferences")
     priority_level: str = Field(default="MEDIUM", description="Priority level")
-    expected_outcomes: List[str] = Field(default_factory=list, description="Expected outcomes")
+    expected_outcomes: list[str] = Field(default_factory=list, description="Expected outcomes")
 
 
 class AcademicResearchRequest(BaseModel):
     request_type: str = Field(..., description="Type of research request")
     topic: Optional[str] = Field(None, description="Research topic")
-    scope: Dict[str, Any] = Field(default_factory=dict, description="Research scope")
-    paper: Optional[Dict[str, Any]] = Field(None, description="Paper data for submission")
+    scope: dict[str, Any] = Field(default_factory=dict, description="Research scope")
+    paper: Optional[dict[str, Any]] = Field(None, description="Paper data for submission")
 
 
 class IndustryAnalysisRequest(BaseModel):
     industry_type: str = Field(..., description="Industry type")
     analysis_depth: str = Field(default="OVERVIEW", description="Analysis depth")
-    focus_areas: List[str] = Field(default_factory=list, description="Focus areas")
+    focus_areas: list[str] = Field(default_factory=list, description="Focus areas")
     time_horizon: str = Field(..., description="Time horizon")
-    specific_questions: List[str] = Field(default_factory=list, description="Specific questions")
+    specific_questions: list[str] = Field(default_factory=list, description="Specific questions")
     priority_level: str = Field(default="MEDIUM", description="Priority level")
 
 
@@ -69,19 +67,19 @@ class UnifiedScenarioRequest(BaseModel):
     scenario_type: str = Field(..., description="Scenario type")
     user_id: str = Field(..., description="User ID")
     session_id: str = Field(..., description="Session ID")
-    request_data: Dict[str, Any] = Field(..., description="Request data")
+    request_data: dict[str, Any] = Field(..., description="Request data")
     priority: str = Field(default="medium", description="Request priority")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Request metadata")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Request metadata")
 
 
 class ScenarioResponse(BaseModel):
     success: bool
     scenario_type: str
     request_id: str
-    response_data: Dict[str, Any]
+    response_data: dict[str, Any]
     execution_time: float
     error_message: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     completed_at: str
 
 
@@ -449,7 +447,7 @@ async def get_user_sessions(
 # Batch Processing Endpoints
 @router.post("/batch")
 async def process_batch_requests(
-    requests: List[UnifiedScenarioRequest],
+    requests: list[UnifiedScenarioRequest],
     background_tasks: BackgroundTasks,
     service: ScenarioIntegrationService = Depends(get_scenario_service)
 ):

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@Time    : 2025-08-06 10:30:00
+"""@Time    : 2025-08-06 10:30:00
 @Author  : DAIP-LIVE Team
 @File    : integration_services.py
 @Description:
@@ -8,15 +6,13 @@
     These services handle integration with external systems and services.
 """
 
-from typing import Dict, Any, List, Optional
-from datetime import datetime
 import asyncio
 import json
-from abc import ABC, abstractmethod
+from datetime import datetime
+from typing import Any, Optional
 
-from ..domain.entities import User, Session, Task, Message
-from ..domain.value_objects import EntranceType, IntentType, TaskStatus
-from ..use_cases.use_cases import SecretariatUseCase, ForumUseCase
+from ..domain.value_objects import EntranceType
+from ..use_cases.use_cases import ForumUseCase, SecretariatUseCase
 
 
 class DAIPServiceIntegrator:
@@ -33,7 +29,7 @@ class DAIPServiceIntegrator:
         self.synthesis_engine = MockSynthesisEngine()
         self.consensus_engine = MockConsensusEngine()
     
-    async def execute_workflow(self, workflow_request: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute_workflow(self, workflow_request: dict[str, Any]) -> dict[str, Any]:
         """执行工作流"""
         intent = workflow_request.get("intent", {})
         context = workflow_request.get("context", {})
@@ -50,7 +46,7 @@ class DAIPServiceIntegrator:
             "result": workflow_result["result"]
         }
     
-    async def start_collaboration(self, collaboration_request: Dict[str, Any]) -> Dict[str, Any]:
+    async def start_collaboration(self, collaboration_request: dict[str, Any]) -> dict[str, Any]:
         """启动多智能体协作"""
         session_id = collaboration_request.get("session_id")
         agents = collaboration_request.get("agents", [])
@@ -68,7 +64,7 @@ class DAIPServiceIntegrator:
             "estimated_duration": collaboration_result["estimated_duration"]
         }
     
-    async def synthesize_results(self, synthesis_request: Dict[str, Any]) -> Dict[str, Any]:
+    async def synthesize_results(self, synthesis_request: dict[str, Any]) -> dict[str, Any]:
         """合成结果"""
         workflow_results = synthesis_request.get("workflow_results", [])
         original_intent = synthesis_request.get("original_intent", "")
@@ -87,7 +83,7 @@ class DAIPServiceIntegrator:
             "format": format_type
         }
     
-    async def calculate_consensus(self, consensus_request: Dict[str, Any]) -> Dict[str, Any]:
+    async def calculate_consensus(self, consensus_request: dict[str, Any]) -> dict[str, Any]:
         """计算共识"""
         debate_id = consensus_request.get("debate_id")
         messages = consensus_request.get("messages", [])
@@ -109,7 +105,7 @@ class DAIPServiceIntegrator:
 class MockWorkflowEngine:
     """模拟工作流引擎"""
     
-    async def execute_workflow(self, intent: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute_workflow(self, intent: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
         """执行工作流"""
         # 模拟工作流执行
         await asyncio.sleep(1.0)
@@ -141,7 +137,7 @@ class MockWorkflowEngine:
 class MockMultiAgentSystem:
     """模拟多智能体系统"""
     
-    async def start_collaboration(self, session_id: str, agents: List[str], topic: str) -> Dict[str, Any]:
+    async def start_collaboration(self, session_id: str, agents: list[str], topic: str) -> dict[str, Any]:
         """启动协作"""
         # 模拟协作启动
         await asyncio.sleep(0.5)
@@ -171,8 +167,8 @@ class MockMultiAgentSystem:
 class MockSynthesisEngine:
     """模拟合成引擎"""
     
-    async def synthesize(self, workflow_results: List[Dict[str, Any]], 
-                        original_intent: str, format_type: str) -> Dict[str, Any]:
+    async def synthesize(self, workflow_results: list[dict[str, Any]], 
+                        original_intent: str, format_type: str) -> dict[str, Any]:
         """合成结果"""
         # 模拟合成过程
         await asyncio.sleep(1.0)
@@ -211,7 +207,7 @@ class MockSynthesisEngine:
 class MockConsensusEngine:
     """模拟共识引擎"""
     
-    async def calculate_consensus(self, debate_id: str, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def calculate_consensus(self, debate_id: str, messages: list[dict[str, Any]]) -> dict[str, Any]:
         """计算共识"""
         # 模拟共识计算
         await asyncio.sleep(0.5)
@@ -283,7 +279,7 @@ class WebSocketManager:
         except Exception as e:
             await self.send_error(session_id, f"Message processing error: {str(e)}")
     
-    async def send_message(self, session_id: str, message: Dict[str, Any]):
+    async def send_message(self, session_id: str, message: dict[str, Any]):
         """发送消息到客户端"""
         if session_id in self.connections:
             websocket = self.connections[session_id]
@@ -292,7 +288,7 @@ class WebSocketManager:
             except Exception as e:
                 print(f"Error sending message to session {session_id}: {e}")
     
-    async def broadcast_to_session(self, session_id: str, message: Dict[str, Any]):
+    async def broadcast_to_session(self, session_id: str, message: dict[str, Any]):
         """广播消息到会话"""
         await self.send_message(session_id, message)
     
@@ -334,7 +330,7 @@ class WebSocketMessageHandler:
         self.secretariat_use_case = SecretariatUseCase()
         self.forum_use_case = ForumUseCase()
     
-    async def handle_message(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    async def handle_message(self, data: dict[str, Any]) -> Optional[dict[str, Any]]:
         """处理消息"""
         message_type = data.get("type")
         
@@ -351,7 +347,7 @@ class WebSocketMessageHandler:
         else:
             return {"type": "error", "message": f"Unknown message type: {message_type}"}
     
-    async def handle_auth(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def handle_auth(self, data: dict[str, Any]) -> dict[str, Any]:
         """处理认证消息"""
         token = data.get("token")
         user_id = data.get("user_id")
@@ -378,7 +374,7 @@ class WebSocketMessageHandler:
                 "error": "Invalid authentication data"
             }
     
-    async def handle_secretariat_task(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def handle_secretariat_task(self, data: dict[str, Any]) -> dict[str, Any]:
         """处理Secretariat任务"""
         message = data.get("message", "")
         user_id = data.get("user_id", "default_user")
@@ -426,7 +422,7 @@ class WebSocketMessageHandler:
                 "message": f"Task submission failed: {str(e)}"
             }
     
-    async def handle_forum_intervention(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def handle_forum_intervention(self, data: dict[str, Any]) -> dict[str, Any]:
         """处理Forum用户干预"""
         message_data = data.get("message", {})
         user_id = data.get("user_id", "default_user")
@@ -478,7 +474,7 @@ class WebSocketMessageHandler:
                 "message": f"Intervention failed: {str(e)}"
             }
     
-    async def handle_get_status(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def handle_get_status(self, data: dict[str, Any]) -> dict[str, Any]:
         """处理状态查询"""
         task_id = data.get("task_id")
         
@@ -502,7 +498,7 @@ class WebSocketMessageHandler:
                 "timestamp": datetime.now().isoformat()
             }
     
-    async def handle_transparency_request(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def handle_transparency_request(self, data: dict[str, Any]) -> dict[str, Any]:
         """处理透明度数据请求"""
         task_id = data.get("task_id")
         
@@ -553,13 +549,13 @@ class SessionManager:
         """获取会话"""
         return self.active_sessions.get(session_id)
     
-    async def update_session_context(self, session_id: str, context_data: Dict[str, Any]):
+    async def update_session_context(self, session_id: str, context_data: dict[str, Any]):
         """更新会话上下文"""
         if session_id in self.session_store:
             self.session_store[session_id]["metadata"].update(context_data)
             self.session_store[session_id]["last_activity"] = datetime.now()
     
-    async def get_session_context(self, session_id: str) -> Dict[str, Any]:
+    async def get_session_context(self, session_id: str) -> dict[str, Any]:
         """获取会话上下文"""
         session_data = self.session_store.get(session_id, {})
         return session_data.get("metadata", {})

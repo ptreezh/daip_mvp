@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-集成LLM管理器
+"""集成LLM管理器
 
 为所有虚拟角色提供统一的、智能优化的LLM调用服务
 """
 
-import logging
-import asyncio
 import json
-from typing import Dict, List, Any, Optional
-from datetime import datetime
+import logging
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Optional
 
-from .real_llm_context_optimizer import IntelligentContextOptimizer, OptimizationResult
 from .memory_agent import MemAgent
+from .real_llm_context_optimizer import IntelligentContextOptimizer, OptimizationResult
 from .role_manager import RoleManager
 
 logger = logging.getLogger(__name__)
@@ -25,9 +22,9 @@ class RoleContext:
     """角色上下文"""
     role_id: str
     role_name: str
-    role_definition: Dict[str, Any]
-    conversation_history: List[Dict[str, Any]]
-    memory_context: Dict[str, Any]
+    role_definition: dict[str, Any]
+    conversation_history: list[dict[str, Any]]
+    memory_context: dict[str, Any]
     current_task: Optional[str] = None
     interaction_count: int = 0
     last_interaction: Optional[datetime] = None
@@ -40,7 +37,7 @@ class OptimizedLLMCall:
     original_prompt: str
     optimized_prompt: str
     llm_response: str
-    optimization_metrics: Dict[str, Any]
+    optimization_metrics: dict[str, Any]
     call_timestamp: datetime
     tokens_used: int
     response_time: float
@@ -62,10 +59,10 @@ class IntegratedLLMManager:
             self.memory_agent = None
         
         # 角色上下文缓存
-        self.role_contexts: Dict[str, RoleContext] = {}
+        self.role_contexts: dict[str, RoleContext] = {}
         
         # 调用历史记录
-        self.call_history: List[OptimizedLLMCall] = []
+        self.call_history: list[OptimizedLLMCall] = []
         
         # 性能统计
         self.performance_stats = {
@@ -93,10 +90,9 @@ class IntegratedLLMManager:
         role_id: str,
         user_input: str,
         task_context: Optional[str] = None,
-        additional_context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        additional_context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """为特定角色调用LLM（带智能上下文优化）"""
-        
         try:
             # 1. 获取或创建角色上下文
             role_context = await self._get_or_create_role_context(role_id)
@@ -164,13 +160,12 @@ class IntegratedLLMManager:
     
     async def call_llm_for_multi_role_debate(
         self,
-        participating_roles: List[str],
+        participating_roles: list[str],
         debate_topic: str,
-        debate_context: Dict[str, Any],
+        debate_context: dict[str, Any],
         round_number: int = 1
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """多角色辩论的LLM调用（每个角色都使用优化）"""
-        
         debate_results = {}
         
         for role_id in participating_roles:
@@ -214,9 +209,8 @@ class IntegratedLLMManager:
             "optimization_summary": await self._get_debate_optimization_summary(debate_results)
         }
     
-    async def get_role_performance_analytics(self, role_id: str) -> Dict[str, Any]:
+    async def get_role_performance_analytics(self, role_id: str) -> dict[str, Any]:
         """获取特定角色的性能分析"""
-        
         role_calls = [call for call in self.call_history if call.role_id == role_id]
         
         if not role_calls:
@@ -253,9 +247,8 @@ class IntegratedLLMManager:
             }
         }
     
-    async def get_system_wide_analytics(self) -> Dict[str, Any]:
+    async def get_system_wide_analytics(self) -> dict[str, Any]:
         """获取系统级性能分析"""
-        
         if not self.call_history:
             return {"error": "没有调用记录"}
         
@@ -314,7 +307,6 @@ class IntegratedLLMManager:
     
     async def _get_or_create_role_context(self, role_id: str) -> RoleContext:
         """获取或创建角色上下文"""
-        
         if role_id not in self.role_contexts:
             # 从角色管理器获取角色定义
             role_definition = await self.role_manager.get_role_definition(role_id)
@@ -341,7 +333,6 @@ class IntegratedLLMManager:
         task_context: Optional[str]
     ):
         """更新角色交互历史"""
-        
         interaction = {
             "type": "user_input",
             "content": user_input,
@@ -362,10 +353,9 @@ class IntegratedLLMManager:
         self,
         role_context: RoleContext,
         task_context: Optional[str],
-        additional_context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        additional_context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """构建角色专用的上下文信息"""
-        
         context = {
             "role_definition": role_context.role_definition,
             "role_expertise": role_context.role_definition.get("expertise", []),
@@ -392,7 +382,6 @@ class IntegratedLLMManager:
     
     async def _update_performance_stats(self, optimization_result: OptimizationResult):
         """更新性能统计"""
-        
         self.performance_stats["total_calls"] += 1
         self.performance_stats["total_tokens_saved"] += optimization_result.metrics["token_efficiency"]["token_savings"]
         self.performance_stats["total_time_saved"] += optimization_result.metrics["response_time"]["time_difference"]
@@ -411,7 +400,6 @@ class IntegratedLLMManager:
         llm_response: str
     ):
         """更新角色记忆"""
-        
         try:
             memory_entry = {
                 "role_id": role_context.role_id,
@@ -432,9 +420,8 @@ class IntegratedLLMManager:
         role_id: str, 
         user_input: str, 
         task_context: Optional[str]
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """降级LLM调用（不使用优化）"""
-        
         try:
             role_context = await self._get_or_create_role_context(role_id)
             
@@ -478,7 +465,6 @@ class IntegratedLLMManager:
     
     async def _load_all_role_contexts(self):
         """加载所有角色的上下文"""
-        
         try:
             all_roles = await self.role_manager.get_all_roles()
             
@@ -497,9 +483,8 @@ class IntegratedLLMManager:
         except Exception as e:
             logger.error(f"加载角色上下文失败: {e}")
     
-    async def _get_debate_optimization_summary(self, debate_results: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_debate_optimization_summary(self, debate_results: dict[str, Any]) -> dict[str, Any]:
         """获取辩论优化摘要"""
-        
         successful_optimizations = 0
         total_tokens_saved = 0
         total_time_saved = 0.0
