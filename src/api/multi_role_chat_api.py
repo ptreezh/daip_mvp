@@ -181,7 +181,7 @@ async def get_roles_details(app_state: AppState = Depends(get_app_state)):
             "id": name  # 使用name作为id
         }
         roles_list.append(role_info)
-    
+
     return {"roles": roles_list}
 
 

@@ -27,6 +27,7 @@ def register_all_tools(executor: ToolExecutor) -> None:
 
     Args:
         executor (ToolExecutor): The executor instance to register tools with.
+
     """
     executor.register_tool(list_files, LIST_FILES_DEF)
     executor.register_tool(read_file, READ_FILE_DEF)

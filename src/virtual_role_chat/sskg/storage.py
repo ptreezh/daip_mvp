@@ -9,7 +9,11 @@ import json
 import logging
 import sqlite3
 from datetime import datetime
+<<<<<<< HEAD
+from typing import List, Optional
+=======
 from typing import Optional
+>>>>>>> feature/core-services-refactor
 
 from .models import (
     KnowledgeFact,
@@ -31,22 +35,23 @@ class SSKGStorage:
     This class provides persistent storage for all SSKG entities including
     knowledge facts, memories, wiki pages, sessions, and projects.
     """
-    
+
     def __init__(self, db_path: str = "sskg.db"):
         """Initialize the SSKG storage system.
         
         Args:
             db_path: Path to the SQLite database file
+
         """
         self.db_path = db_path
         self.logger = logging.getLogger(__name__)
         self._init_database()
-    
+
     def _init_database(self) -> None:
         """Initialize the database schema."""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("PRAGMA foreign_keys = ON")
-            
+
             # Knowledge facts table
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS knowledge_facts (
@@ -68,7 +73,7 @@ class SSKGStorage:
                     tags TEXT  -- JSON array
                 )
             """)
-            
+
             # Knowledge relations table
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS knowledge_relations (
@@ -85,7 +90,7 @@ class SSKGStorage:
                     FOREIGN KEY (target_fact_id) REFERENCES knowledge_facts (id)
                 )
             """)
-            
+
             # Memories table
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS memories (
@@ -105,7 +110,7 @@ class SSKGStorage:
                     tags TEXT  -- JSON array
                 )
             """)
-            
+
             # Wiki pages table
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS wiki_pages (
@@ -126,7 +131,7 @@ class SSKGStorage:
                     metadata TEXT  -- JSON object
                 )
             """)
-            
+
             # Session states table
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS session_states (
@@ -142,7 +147,7 @@ class SSKGStorage:
                     metadata TEXT  -- JSON object
                 )
             """)
-            
+
             # Project states table
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS project_states (
@@ -161,12 +166,12 @@ class SSKGStorage:
                     tags TEXT  -- JSON array
                 )
             """)
-            
+
             # Create indexes for better performance
             self._create_indexes(conn)
-            
+
             conn.commit()
-    
+
     def _create_indexes(self, conn: sqlite3.Connection) -> None:
         """Create database indexes for better query performance."""
         indexes = [
@@ -184,9 +189,9 @@ class SSKGStorage:
             "CREATE INDEX IF NOT EXISTS idx_wiki_title ON wiki_pages(title)",
             "CREATE INDEX IF NOT EXISTS idx_wiki_category ON wiki_pages(category)"
         ]
-        
+
         for index_sql in indexes:
-            conn.execute(index_sql)    
+            conn.execute(index_sql)
 
     def store_fact(self, fact: KnowledgeFact) -> str:
         """Store a knowledge fact in the database.
@@ -196,11 +201,12 @@ class SSKGStorage:
             
         Returns:
             ID of the stored fact
+
         """
         if not fact.id:
             import uuid
             fact.id = str(uuid.uuid4())
-        
+
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
                 INSERT OR REPLACE INTO knowledge_facts (
@@ -213,17 +219,17 @@ class SSKGStorage:
                 fact.timestamp.isoformat(), fact.last_updated.isoformat(), fact.version,
                 fact.domain, fact.topic, json.dumps(fact.keywords),
                 fact.validation_status, json.dumps(fact.validation_history),
-                fact.access_count, 
+                fact.access_count,
                 fact.last_accessed.isoformat() if fact.last_accessed else None,
                 json.dumps(fact.metadata), json.dumps(fact.tags)
             ))
-            
+
             # Store relations
             for relation in fact.relations:
                 if not relation.id:
                     import uuid
                     relation.id = str(uuid.uuid4())
-                
+
                 conn.execute("""
                     INSERT OR REPLACE INTO knowledge_relations (
                         id, source_fact_id, target_fact_id, relation_type, confidence,
@@ -235,11 +241,11 @@ class SSKGStorage:
                     json.dumps(relation.metadata), relation.created_at.isoformat(),
                     relation.created_by
                 ))
-            
+
             conn.commit()
-        
+
         return fact.id
-    
+
     def retrieve_fact(self, fact_id: str) -> Optional[KnowledgeFact]:
         """Retrieve a knowledge fact by ID.
         
@@ -248,24 +254,25 @@ class SSKGStorage:
             
         Returns:
             Knowledge fact or None if not found
+
         """
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            
+
             # Get the fact
             cursor = conn.execute("""
                 SELECT * FROM knowledge_facts WHERE id = ?
             """, (fact_id,))
-            
+
             row = cursor.fetchone()
             if not row:
                 return None
-            
+
             # Get relations
             relations_cursor = conn.execute("""
                 SELECT * FROM knowledge_relations WHERE source_fact_id = ?
             """, (fact_id,))
-            
+
             relations = []
             for rel_row in relations_cursor.fetchall():
                 relations.append(KnowledgeRelation(
@@ -278,7 +285,7 @@ class SSKGStorage:
                     created_at=datetime.fromisoformat(rel_row['created_at']),
                     created_by=rel_row['created_by']
                 ))
-            
+
             # Create fact object
             fact = KnowledgeFact(
                 id=row['id'],
@@ -299,13 +306,13 @@ class SSKGStorage:
                 metadata=json.loads(row['metadata'] or '{}'),
                 tags=json.loads(row['tags'] or '[]')
             )
-            
+
             # Mark as accessed
             fact.mark_accessed()
             self._update_fact_access(fact_id, fact.access_count, fact.last_accessed)
-            
+
             return fact
-    
+
     def _update_fact_access(self, fact_id: str, access_count: int, last_accessed: datetime) -> None:
         """Update fact access statistics."""
         with sqlite3.connect(self.db_path) as conn:
@@ -315,8 +322,13 @@ class SSKGStorage:
                 WHERE id = ?
             """, (access_count, last_accessed.isoformat(), fact_id))
             conn.commit()
+<<<<<<< HEAD
+
+    def search_facts(self, query: KnowledgeQuery) -> List[KnowledgeFact]:
+=======
     
     def search_facts(self, query: KnowledgeQuery) -> list[KnowledgeFact]:
+>>>>>>> feature/core-services-refactor
         """Search for knowledge facts based on query criteria.
         
         Args:
@@ -324,57 +336,58 @@ class SSKGStorage:
             
         Returns:
             List of matching knowledge facts
+
         """
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            
+
             # Build WHERE clause
             where_conditions = []
             params = []
-            
+
             if query.content:
                 where_conditions.append("content LIKE ?")
                 params.append(f"%{query.content}%")
-            
+
             if query.source:
                 where_conditions.append("source = ?")
                 params.append(query.source)
-            
+
             if query.domain:
                 where_conditions.append("domain = ?")
                 params.append(query.domain)
-            
+
             if query.topic:
                 where_conditions.append("topic = ?")
                 params.append(query.topic)
-            
+
             if query.min_confidence > 0:
                 where_conditions.append("confidence >= ?")
                 params.append(query.min_confidence)
-            
+
             if query.max_confidence < 1:
                 where_conditions.append("confidence <= ?")
                 params.append(query.max_confidence)
-            
+
             if query.validation_status:
                 where_conditions.append("validation_status = ?")
                 params.append(query.validation_status)
-            
+
             if query.time_range:
                 where_conditions.append("timestamp BETWEEN ? AND ?")
                 params.extend([query.time_range[0].isoformat(), query.time_range[1].isoformat()])
-            
+
             if query.updated_since:
                 where_conditions.append("last_updated >= ?")
                 params.append(query.updated_since.isoformat())
-            
+
             # Build ORDER BY clause
             order_by = "timestamp DESC"  # Default ordering
             if query.sort_by == "confidence":
                 order_by = f"confidence {query.sort_order.upper()}"
             elif query.sort_by == "access_count":
                 order_by = f"access_count {query.sort_order.upper()}"
-            
+
             # Build final query
             where_clause = " AND ".join(where_conditions) if where_conditions else "1=1"
             sql = f"""
@@ -384,16 +397,16 @@ class SSKGStorage:
                 LIMIT ? OFFSET ?
             """
             params.extend([query.limit, query.offset])
-            
+
             cursor = conn.execute(sql, params)
             facts = []
-            
+
             for row in cursor.fetchall():
                 # Get relations for this fact
                 relations_cursor = conn.execute("""
                     SELECT * FROM knowledge_relations WHERE source_fact_id = ?
                 """, (row['id'],))
-                
+
                 relations = []
                 for rel_row in relations_cursor.fetchall():
                     relations.append(KnowledgeRelation(
@@ -406,7 +419,7 @@ class SSKGStorage:
                         created_at=datetime.fromisoformat(rel_row['created_at']),
                         created_by=rel_row['created_by']
                     ))
-                
+
                 fact = KnowledgeFact(
                     id=row['id'],
                     content=row['content'],
@@ -426,10 +439,10 @@ class SSKGStorage:
                     metadata=json.loads(row['metadata'] or '{}'),
                     tags=json.loads(row['tags'] or '[]')
                 )
-                
+
                 facts.append(fact)
-            
-            return facts    
+
+            return facts
 
     def delete_fact(self, fact_id: str) -> bool:
         """Delete a knowledge fact and its relations.
@@ -439,18 +452,19 @@ class SSKGStorage:
             
         Returns:
             True if deletion was successful
+
         """
         with sqlite3.connect(self.db_path) as conn:
             # Delete relations first (foreign key constraints)
-            conn.execute("DELETE FROM knowledge_relations WHERE source_fact_id = ? OR target_fact_id = ?", 
+            conn.execute("DELETE FROM knowledge_relations WHERE source_fact_id = ? OR target_fact_id = ?",
                         (fact_id, fact_id))
-            
+
             # Delete the fact
             cursor = conn.execute("DELETE FROM knowledge_facts WHERE id = ?", (fact_id,))
             conn.commit()
-            
+
             return cursor.rowcount > 0
-    
+
     def store_memory(self, memory: Memory) -> str:
         """Store a memory item.
         
@@ -459,11 +473,12 @@ class SSKGStorage:
             
         Returns:
             ID of the stored memory
+
         """
         if not memory.id:
             import uuid
             memory.id = str(uuid.uuid4())
-        
+
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
                 INSERT OR REPLACE INTO memories (
@@ -480,10 +495,15 @@ class SSKGStorage:
                 json.dumps(memory.metadata), json.dumps(memory.tags)
             ))
             conn.commit()
-        
+
         return memory.id
+<<<<<<< HEAD
+
+    def search_memories(self, query: MemoryQuery) -> List[Memory]:
+=======
     
     def search_memories(self, query: MemoryQuery) -> list[Memory]:
+>>>>>>> feature/core-services-refactor
         """Search for memories based on query criteria.
         
         Args:
@@ -491,41 +511,42 @@ class SSKGStorage:
             
         Returns:
             List of matching memories
+
         """
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            
+
             # Build WHERE clause
             where_conditions = []
             params = []
-            
+
             if query.content:
                 where_conditions.append("content LIKE ?")
                 params.append(f"%{query.content}%")
-            
+
             if query.memory_type:
                 where_conditions.append("memory_type = ?")
                 params.append(query.memory_type.value)
-            
+
             if query.owner_id:
                 where_conditions.append("owner_id = ?")
                 params.append(query.owner_id)
-            
+
             if query.min_importance > 0:
                 where_conditions.append("importance >= ?")
                 params.append(query.min_importance)
-            
+
             if query.time_range:
                 where_conditions.append("timestamp BETWEEN ? AND ?")
                 params.extend([query.time_range[0].isoformat(), query.time_range[1].isoformat()])
-            
+
             # Build ORDER BY clause
             order_by = "timestamp DESC"  # Default ordering
             if query.sort_by == "importance":
                 order_by = f"importance {query.sort_order.upper()}"
             elif query.sort_by == "access_count":
                 order_by = f"access_count {query.sort_order.upper()}"
-            
+
             # Build final query
             where_clause = " AND ".join(where_conditions) if where_conditions else "1=1"
             sql = f"""
@@ -535,10 +556,10 @@ class SSKGStorage:
                 LIMIT ? OFFSET ?
             """
             params.extend([query.limit, query.offset])
-            
+
             cursor = conn.execute(sql, params)
             memories = []
-            
+
             for row in cursor.fetchall():
                 memory = Memory(
                     id=row['id'],
@@ -557,9 +578,9 @@ class SSKGStorage:
                     tags=json.loads(row['tags'] or '[]')
                 )
                 memories.append(memory)
-            
+
             return memories
-    
+
     def store_wiki_page(self, page: WikiPage) -> bool:
         """Store a wiki page.
         
@@ -568,6 +589,7 @@ class SSKGStorage:
             
         Returns:
             True if storage was successful
+
         """
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
@@ -581,13 +603,13 @@ class SSKGStorage:
                 page.created_by, page.created_at.isoformat(), page.last_updated.isoformat(),
                 json.dumps(page.contributors), page.category, json.dumps(page.tags),
                 json.dumps(page.linked_pages), json.dumps(page.associated_facts),
-                page.view_count, 
+                page.view_count,
                 page.last_viewed.isoformat() if page.last_viewed else None,
                 json.dumps(page.metadata)
             ))
             conn.commit()
             return True
-    
+
     def retrieve_wiki_page(self, page_id: str) -> Optional[WikiPage]:
         """Retrieve a wiki page by ID.
         
@@ -596,16 +618,17 @@ class SSKGStorage:
             
         Returns:
             Wiki page or None if not found
+
         """
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            
+
             cursor = conn.execute("SELECT * FROM wiki_pages WHERE id = ?", (page_id,))
             row = cursor.fetchone()
-            
+
             if not row:
                 return None
-            
+
             page = WikiPage(
                 id=row['id'],
                 title=row['title'],
@@ -623,13 +646,13 @@ class SSKGStorage:
                 last_viewed=datetime.fromisoformat(row['last_viewed']) if row['last_viewed'] else None,
                 metadata=json.loads(row['metadata'] or '{}')
             )
-            
+
             # Mark as viewed
             page.mark_viewed()
             self._update_page_view(page_id, page.view_count, page.last_viewed)
-            
+
             return page
-    
+
     def _update_page_view(self, page_id: str, view_count: int, last_viewed: datetime) -> None:
         """Update page view statistics."""
         with sqlite3.connect(self.db_path) as conn:
@@ -639,7 +662,7 @@ class SSKGStorage:
                 WHERE id = ?
             """, (view_count, last_viewed.isoformat(), page_id))
             conn.commit()
-    
+
     def store_session_state(self, session: SessionState) -> bool:
         """Store session state.
         
@@ -648,6 +671,7 @@ class SSKGStorage:
             
         Returns:
             True if storage was successful
+
         """
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
@@ -665,7 +689,7 @@ class SSKGStorage:
             ))
             conn.commit()
             return True
-    
+
     def retrieve_session_state(self, session_id: str) -> Optional[SessionState]:
         """Retrieve session state by ID.
         
@@ -674,16 +698,17 @@ class SSKGStorage:
             
         Returns:
             Session state or None if not found
+
         """
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            
+
             cursor = conn.execute("SELECT * FROM session_states WHERE session_id = ?", (session_id,))
             row = cursor.fetchone()
-            
+
             if not row:
                 return None
-            
+
             return SessionState(
                 session_id=row['session_id'],
                 user_id=row['user_id'],
@@ -696,7 +721,7 @@ class SSKGStorage:
                 conversation_history=json.loads(row['conversation_history'] or '[]'),
                 metadata=json.loads(row['metadata'] or '{}')
             )
-    
+
     def store_project_state(self, project: ProjectState) -> bool:
         """Store project state.
         
@@ -705,6 +730,7 @@ class SSKGStorage:
             
         Returns:
             True if storage was successful
+
         """
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
@@ -722,7 +748,7 @@ class SSKGStorage:
             ))
             conn.commit()
             return True
-    
+
     def retrieve_project_state(self, project_id: str) -> Optional[ProjectState]:
         """Retrieve project state by ID.
         
@@ -731,16 +757,17 @@ class SSKGStorage:
             
         Returns:
             Project state or None if not found
+
         """
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            
+
             cursor = conn.execute("SELECT * FROM project_states WHERE project_id = ?", (project_id,))
             row = cursor.fetchone()
-            
+
             if not row:
                 return None
-            
+
             return ProjectState(
                 project_id=row['project_id'],
                 name=row['name'],

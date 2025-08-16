@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class BackendConfig:
     """后端服务配置"""
+
     base_url: str = "http://localhost:8000"
     websocket_url: str = "ws://localhost:8000/ws"
     timeout: int = 120
@@ -35,14 +36,14 @@ from src.core_services.workflow_knowledge_integrator import WorkflowKnowledgeInt
 
 class BackendConnector:
     """后端连接器主类"""
-    
+
     def __init__(self, config: Optional[BackendConfig] = None):
         self.config = config or BackendConfig()
-        
 
-        
 
-        
+
+
+
         # Initialize services using the actual implementations from src/core_services
         # Note: The real services use directory paths, not base_url.
         self.wiki_service = RealWikiService(wiki_directory="daip_mvp_project/memory_bank/wiki/")
@@ -58,24 +59,24 @@ class BackendConnector:
         # Initialize UserProfileService and IntentAnalysisService
         self.user_profile_service = UserProfileService()
         self.intent_analysis_service = BasicIntentAnalysisService(user_profile_service=self.user_profile_service)
-        
+
         # Initialize RoleManager
         self.role_manager = RoleManager()
-        
+
         # WebSocket connection status
         self.is_connected = False
-        
 
-        
+
+
         logger.info("BackendConnector initialized. Using actual services from src/core_services.")
-    
+
     async def health_check(self) -> bool:
         """Health check for backend services."""
         # This might need to be updated to check the health of the actual services
         logger.info("Performing health check (mocked for now).")
         # In a real implementation, this would check the health of the actual services
         return True
-    
+
     async def close(self):
         """Close connections."""
         logger.info("BackendConnector closed.")

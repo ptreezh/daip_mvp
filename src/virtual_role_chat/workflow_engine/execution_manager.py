@@ -7,7 +7,11 @@ including parallel execution, dependency management, and error handling.
 import asyncio
 import logging
 from datetime import datetime
+<<<<<<< HEAD
+from typing import Any, Dict, List, Optional
+=======
 from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from ..institutional_primitives import ExecutionContext, PrimitiveRegistry
 from .models import ExecutionStep, NodeStatus, WorkflowExecution, WorkflowNode
@@ -21,22 +25,28 @@ class ExecutionManager:
     Handles node execution, dependency resolution, parallel execution,
     and error handling for workflow orchestration.
     """
-    
+
     def __init__(self, primitive_registry: PrimitiveRegistry, max_concurrency: int = 5):
         """Initialize the execution manager.
         
         Args:
             primitive_registry: Registry for institutional primitives
             max_concurrency: Maximum number of concurrent node executions
+
         """
         self.primitive_registry = primitive_registry
         self.max_concurrency = max_concurrency
         self._execution_semaphore = asyncio.Semaphore(max_concurrency)
+<<<<<<< HEAD
+        self._active_executions: Dict[str, asyncio.Task] = {}
+
+=======
         self._active_executions: dict[str, asyncio.Task] = {}
     
+>>>>>>> feature/core-services-refactor
     async def execute_node(
-        self, 
-        node: WorkflowNode, 
+        self,
+        node: WorkflowNode,
         execution: WorkflowExecution,
         services: dict[str, Any]
     ) -> ExecutionStep:
@@ -49,6 +59,7 @@ class ExecutionManager:
             
         Returns:
             ExecutionStep containing execution results
+
         """
         step = ExecutionStep(
             node_id=node.id,
@@ -56,17 +67,17 @@ class ExecutionManager:
             status=NodeStatus.RUNNING,
             start_time=datetime.now()
         )
-        
+
         try:
             # Get primitive instance
             primitive = self.primitive_registry.create_primitive(node.type, node.config)
             if primitive is None:
                 raise ValueError(f"Failed to create primitive of type '{node.type}'")
-            
+
             # Prepare inputs from node dependencies
             inputs = await self._prepare_node_inputs(node, execution)
             step.inputs = inputs
-            
+
             # Create execution context
             context = ExecutionContext(
                 execution_id=execution.execution_id,
@@ -76,12 +87,12 @@ class ExecutionManager:
                 state=execution.context,
                 metadata=node.metadata
             )
-            
+
             # Execute primitive
             async with self._execution_semaphore:
                 logger.info(f"Executing node {node.id} (type: {node.type})")
                 result = await primitive.execute(inputs, context)
-            
+
             # Process results
             if result.success:
                 step.status = NodeStatus.COMPLETED
@@ -95,33 +106,38 @@ class ExecutionManager:
                 step.warnings = result.warnings
                 execution.failed_nodes.append(node.id)
                 logger.error(f"Node {node.id} failed: {result.errors}")
-            
+
             step.execution_time = result.execution_time
             step.metadata = result.metadata
-            
+
         except Exception as e:
             step.status = NodeStatus.FAILED
             step.errors = [str(e)]
             execution.failed_nodes.append(node.id)
             logger.error(f"Node {node.id} execution failed with exception: {e}")
-        
+
         finally:
             step.end_time = datetime.now()
             if step.start_time and step.end_time:
                 step.execution_time = (step.end_time - step.start_time).total_seconds()
-            
+
             # Remove from current nodes
             if node.id in execution.current_nodes:
                 execution.current_nodes.remove(node.id)
-        
+
         return step
-    
+
     async def execute_nodes_parallel(
         self,
         nodes: list[WorkflowNode],
         execution: WorkflowExecution,
+<<<<<<< HEAD
+        services: Dict[str, Any]
+    ) -> List[ExecutionStep]:
+=======
         services: dict[str, Any]
     ) -> list[ExecutionStep]:
+>>>>>>> feature/core-services-refactor
         """Execute multiple nodes in parallel.
         
         Args:
@@ -131,17 +147,18 @@ class ExecutionManager:
             
         Returns:
             List of ExecutionStep results
+
         """
         if not nodes:
             return []
-        
+
         logger.info(f"Executing {len(nodes)} nodes in parallel")
-        
+
         # Add nodes to current execution list
         for node in nodes:
             execution.current_nodes.append(node.id)
             execution.node_states[node.id] = NodeStatus.RUNNING
-        
+
         # Create execution tasks
         tasks = []
         for node in nodes:
@@ -151,16 +168,16 @@ class ExecutionManager:
             )
             tasks.append(task)
             self._active_executions[node.id] = task
-        
+
         try:
             # Wait for all tasks to complete
             results = await asyncio.gather(*tasks, return_exceptions=True)
-            
+
             # Process results
             steps = []
             for i, result in enumerate(results):
                 node = nodes[i]
-                
+
                 if isinstance(result, Exception):
                     # Handle task exception
                     step = ExecutionStep(
@@ -175,23 +192,27 @@ class ExecutionManager:
                     logger.error(f"Node {node.id} task failed: {result}")
                 else:
                     step = result
-                
+
                 steps.append(step)
                 execution.node_states[node.id] = step.status
-        
+
         finally:
             # Clean up active executions
             for node in nodes:
                 if node.id in self._active_executions:
                     del self._active_executions[node.id]
-        
+
         return steps
-    
+
     async def _prepare_node_inputs(
-        self, 
-        node: WorkflowNode, 
+        self,
+        node: WorkflowNode,
         execution: WorkflowExecution
+<<<<<<< HEAD
+    ) -> Dict[str, Any]:
+=======
     ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Prepare inputs for node execution from dependencies and parameters.
         
         Args:
@@ -200,17 +221,18 @@ class ExecutionManager:
             
         Returns:
             Dictionary of prepared inputs
+
         """
         inputs = {}
-        
+
         # Add workflow parameters
         inputs.update(execution.parameters)
-        
+
         # Add outputs from dependency nodes
         for dep_node_id in node.dependencies:
             if dep_node_id in execution.node_outputs:
                 dep_outputs = execution.node_outputs[dep_node_id]
-                
+
                 # Map outputs to inputs based on node configuration
                 if "input_mapping" in node.config:
                     mapping = node.config["input_mapping"]
@@ -220,13 +242,13 @@ class ExecutionManager:
                 else:
                     # Default: merge all outputs
                     inputs.update(dep_outputs)
-        
+
         # Add node-specific inputs from config
         if "inputs" in node.config:
             inputs.update(node.config["inputs"])
-        
+
         return inputs
-    
+
     async def cancel_node_execution(self, node_id: str) -> bool:
         """Cancel execution of a specific node.
         
@@ -235,6 +257,7 @@ class ExecutionManager:
             
         Returns:
             True if cancellation was successful, False otherwise
+
         """
         if node_id in self._active_executions:
             task = self._active_executions[node_id]
@@ -248,31 +271,38 @@ class ExecutionManager:
                 except Exception as e:
                     logger.error(f"Error cancelling node {node_id}: {e}")
                     return False
-        
+
         return False
-    
+
     async def cancel_all_executions(self) -> int:
         """Cancel all active node executions.
         
         Returns:
             Number of executions cancelled
+
         """
         cancelled_count = 0
-        
+
         for node_id in list(self._active_executions.keys()):
             if await self.cancel_node_execution(node_id):
                 cancelled_count += 1
-        
+
         return cancelled_count
+<<<<<<< HEAD
+
+    def get_active_executions(self) -> List[str]:
+=======
     
     def get_active_executions(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Get list of currently executing node IDs.
         
         Returns:
             List of node IDs currently executing
+
         """
         return list(self._active_executions.keys())
-    
+
     def is_node_executing(self, node_id: str) -> bool:
         """Check if a node is currently executing.
         
@@ -281,9 +311,10 @@ class ExecutionManager:
             
         Returns:
             True if node is executing, False otherwise
+
         """
         return node_id in self._active_executions
-    
+
     async def wait_for_node(self, node_id: str, timeout: Optional[float] = None) -> bool:
         """Wait for a specific node to complete execution.
         
@@ -293,12 +324,13 @@ class ExecutionManager:
             
         Returns:
             True if node completed, False if timeout or not found
+
         """
         if node_id not in self._active_executions:
             return False
-        
+
         task = self._active_executions[node_id]
-        
+
         try:
             if timeout:
                 await asyncio.wait_for(task, timeout=timeout)
@@ -311,12 +343,18 @@ class ExecutionManager:
         except Exception as e:
             logger.error(f"Error waiting for node {node_id}: {e}")
             return False
+<<<<<<< HEAD
+
+    def get_execution_statistics(self) -> Dict[str, Any]:
+=======
     
     def get_execution_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get execution statistics.
         
         Returns:
             Dictionary of execution statistics
+
         """
         return {
             "active_executions": len(self._active_executions),

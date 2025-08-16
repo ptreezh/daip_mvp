@@ -1,0 +1,49 @@
+基于SPEC实现下面的测试 需求 设计 和 任务清单 调用vibedev-spec-mcp工具
+  对齐需求 D:\DAIP\daip_mvp_project\AUTOMATED_TESTING_REQUIREMENTS.md
+  项目原来问题参考D:\DAIP\daip_mvp_project\WEB_INTERFACE_ANALYSIS_REPORT.md    
+  启动后端服务一定要用 127.0.0.1: 8000  如果端口被占用先关闭相关进程，再重启，再测试前端
+  自动化测试覆盖全部测试 D:\DAIP\daip_mvp_project\UserCase.txt  D:\DAIP\daip_mvp_project\testALLL.txt
+  要求下面场景完全无误
+
+  # 启动Personal Intelligence Hub
+  cd personal_intelligence_hub
+  python main_app.py
+  访问：http://localhost:8086/hub
+
+  方式2：启动FastAPI后端
+
+  # 启动FastAPI后端服务
+  python src/main.py
+  访问：http://localhost:8000
+  - API文档：http://localhost:8000/docs
+  - 健康检查：http://localhost:8000/status
+
+  方式3：启动辩论系统
+
+  # 启动多轮辩论系统
+  cd src/debate_system
+  python app.py
+  访问：http://localhost:8080
+
+  🎯 核心功能体验
+
+  1. 专家咨询场景
+
+  - 在Web界面输入你的问题
+  - 系统会智能匹配专家角色
+  - 观察多专家讨论和共识形成过程
+  -生成wiki页面
+
+  2. 学术研究场景
+
+  - 输入研究主题
+  - 系统生成多角度分析报告——并提供下载
+  - 查看知识图谱和引用关系
+
+  3. 行业分析场景
+
+  - 选择行业领域
+  - 获取市场分析和趋势预测
+  - 查看竞争格局分析---输出分析报告并提供下载
+
+  以上需要记忆，每次会话重启时重新阅读上述文档再继续  

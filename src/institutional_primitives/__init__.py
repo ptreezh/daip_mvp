@@ -33,10 +33,10 @@ __all__ = [
     "InstitutionalPrimitive",
     "PrimitiveInfo",
     "ValidationResult",
-    
+
     # Registry
     "PrimitiveRegistry",
-    
+
     # Workflow Engine
     "WorkflowDefinition",
     "WorkflowEdge",
@@ -44,7 +44,7 @@ __all__ = [
     "WorkflowNode",
     "WorkflowResult",
     "WorkflowStatus",
-    
+
     # Parallel Execution
     "ParallelExecutionGroup",
     "ParallelExecutionManager"

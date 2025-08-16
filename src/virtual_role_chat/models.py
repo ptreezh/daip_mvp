@@ -6,7 +6,11 @@ including ChatRoom, ChatSession, ChatMessage, and related types.
 
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any, Dict, List, Literal, Optional
+=======
 from typing import Any, Literal, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel
 
@@ -17,6 +21,7 @@ SessionID = str
 
 class ChatRoomConfig(BaseModel):
     """Configuration for a chat room."""
+
     name: str
     description: str = ""
     topic: str
@@ -27,6 +32,7 @@ class ChatRoomConfig(BaseModel):
 
 class ChatRoom(BaseModel):
     """Represents a chat room where multiple roles can interact."""
+
     id: ChatRoomID
     config: ChatRoomConfig
     created_at: datetime
@@ -36,6 +42,7 @@ class ChatRoom(BaseModel):
 
 class ChatRoomSummary(BaseModel):
     """Summary information about a chat room."""
+
     id: ChatRoomID
     name: str
     topic: str
@@ -47,6 +54,7 @@ class ChatRoomSummary(BaseModel):
 
 class ChatMessage(BaseModel):
     """Represents a message in a chat session."""
+
     id: str
     session_id: SessionID
     sender_id: str  # Role ID or user ID
@@ -58,6 +66,7 @@ class ChatMessage(BaseModel):
 
 class ChatSession(BaseModel):
     """Represents an active chat session within a chat room."""
+
     id: SessionID
     room_id: ChatRoomID
     start_time: datetime
@@ -69,6 +78,7 @@ class ChatSession(BaseModel):
 
 class SessionSummary(BaseModel):
     """Summary information about a chat session."""
+
     id: SessionID
     room_id: ChatRoomID
     start_time: datetime
@@ -81,6 +91,7 @@ class SessionSummary(BaseModel):
 
 class ValidationResult(BaseModel):
     """Result of validating a statement."""
+
     is_valid: bool
     confidence: float
     reasoning: str
@@ -89,6 +100,7 @@ class ValidationResult(BaseModel):
 
 class ResolutionResult(BaseModel):
     """Result of resolving conflicting statements."""
+
     resolved_statement: str
     confidence: float
     reasoning: str
@@ -97,6 +109,7 @@ class ResolutionResult(BaseModel):
 
 class SubTopic(BaseModel):
     """Represents a sub-topic of a complex topic."""
+
     id: str
     parent_topic_id: Optional[str]
     content: str
@@ -106,6 +119,7 @@ class SubTopic(BaseModel):
 
 class TransparencyLevel(str, Enum):
     """Levels of transparency for processing details."""
+
     MINIMAL = "minimal"
     MODERATE = "moderate"
     DETAILED = "detailed"
@@ -113,6 +127,7 @@ class TransparencyLevel(str, Enum):
 
 class SessionMetrics(BaseModel):
     """Metrics about a chat session."""
+
     message_count: int
     average_response_time: float
     topic_coherence: float
@@ -121,6 +136,7 @@ class SessionMetrics(BaseModel):
 
 class RolePerformance(BaseModel):
     """Performance metrics for a role in a chat session."""
+
     role_id: str
     message_count: int
     average_response_length: int
@@ -130,6 +146,7 @@ class RolePerformance(BaseModel):
 
 class QualityMetrics(BaseModel):
     """Metrics about conversation quality."""
+
     coherence_score: float
     diversity_score: float
     depth_score: float
@@ -138,6 +155,7 @@ class QualityMetrics(BaseModel):
 
 class QualityIssue(BaseModel):
     """Represents an issue with conversation quality."""
+
     issue_type: str
     severity: float
     description: str

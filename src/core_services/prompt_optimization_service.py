@@ -9,7 +9,11 @@ component of the Human User Intelligence Layer.
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
+<<<<<<< HEAD
+from typing import Any, Dict, List
+=======
 from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -21,6 +25,10 @@ logger = logging.getLogger(__name__)
 class ContextOptimization(BaseModel):
     """Represents the result of optimizing a prompt with context.
     """
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     original_prompt: str
     optimized_prompt: str
     added_context: list[str] = Field(default_factory=list)
@@ -35,13 +43,20 @@ class PromptOptimizationServiceInterface(ABC):
     It provides methods for optimizing prompts based on user profile and intent analysis,
     adding relevant context, and personalizing based on user's goals and preferences.
     """
-    
+
     @abstractmethod
     async def optimize_prompt(
+<<<<<<< HEAD
+        self,
+        original_prompt: str,
+        user_id: str,
+        context: Dict[str, Any]
+=======
         self, 
         original_prompt: str, 
         user_id: str, 
         context: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> ContextOptimization:
         """Optimize prompt based on user profile and intent.
         
@@ -52,14 +67,15 @@ class PromptOptimizationServiceInterface(ABC):
             
         Returns:
             ContextOptimization object with optimized prompt and metadata
+
         """
         pass
-    
+
     @abstractmethod
     def add_personal_context(
-        self, 
-        prompt: str, 
-        user_profile: UserProfile, 
+        self,
+        prompt: str,
+        user_profile: UserProfile,
         topic: str
     ) -> str:
         """Add relevant personal context to enhance understanding.
@@ -71,14 +87,15 @@ class PromptOptimizationServiceInterface(ABC):
             
         Returns:
             Enhanced prompt with personal context
+
         """
         pass
-    
+
     @abstractmethod
     def adapt_to_expertise_level(
-        self, 
-        prompt: str, 
-        expertise_level: str, 
+        self,
+        prompt: str,
+        expertise_level: str,
         topic: str
     ) -> str:
         """Adapt prompt to user's expertise level.
@@ -90,14 +107,21 @@ class PromptOptimizationServiceInterface(ABC):
             
         Returns:
             Adapted prompt for the user's expertise level
+
         """
         pass
-    
+
     @abstractmethod
     def optimize_for_communication_style(
+<<<<<<< HEAD
+        self,
+        prompt: str,
+        communication_preferences: Dict[str, Any]
+=======
         self, 
         prompt: str, 
         communication_preferences: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> str:
         """Optimize prompt for user's communication style.
         
@@ -107,6 +131,7 @@ class PromptOptimizationServiceInterface(ABC):
             
         Returns:
             Optimized prompt for the user's communication style
+
         """
         pass
 
@@ -118,7 +143,7 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
     using the user profile and intent analysis. It serves as a placeholder
     that can be replaced with more sophisticated implementations in the future.
     """
-    
+
     def __init__(self, intent_service, personal_context_service, llm_interface=None):
         """Initialize the BasicPromptOptimizationService.
         
@@ -126,17 +151,25 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
             intent_service: The IntentAnalysisService instance to use
             personal_context_service: The PersonalContextService instance to use
             llm_interface: Optional LLMInterface for more advanced optimization
+
         """
         self.intent_service = intent_service
         self.personal_context_service = personal_context_service
         self.llm_interface = llm_interface
         logger.info("BasicPromptOptimizationService initialized")
-    
+
     async def optimize_prompt(
+<<<<<<< HEAD
+        self,
+        original_prompt: str,
+        user_id: str,
+        context: Dict[str, Any]
+=======
         self, 
         original_prompt: str, 
         user_id: str, 
         context: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> ContextOptimization:
         """Optimize prompt based on user profile and intent.
         
@@ -147,6 +180,7 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
             
         Returns:
             ContextOptimization object with optimized prompt and metadata
+
         """
         try:
             # Get user profile
@@ -156,7 +190,7 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
                     original_prompt=original_prompt,
                     optimized_prompt=original_prompt
                 )
-            
+
             # Analyze intent if not provided in context
             intent_analysis = context.get("intent_analysis")
             if not intent_analysis:
@@ -165,24 +199,24 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
                     user_id,
                     context.get("conversation_history", [])
                 )
-            
+
             # Start with the original prompt
             optimized_prompt = original_prompt
             added_context = []
             personalization_factors = {}
-            
+
             # Add personal context based on topic
             topic = context.get("topic", "")
             if not topic and intent_analysis:
                 topic = intent_analysis.detected_intent
-            
+
             if topic:
                 with_context = self.add_personal_context(optimized_prompt, user_profile, topic)
                 if with_context != optimized_prompt:
                     optimized_prompt = with_context
                     added_context.append(f"Added personal context for topic: {topic}")
                     personalization_factors["personal_context"] = True
-            
+
             # Adapt to expertise level
             expertise_level = user_profile.preferences.get("expertise_level", "intermediate")
             with_expertise = self.adapt_to_expertise_level(optimized_prompt, expertise_level, topic)
@@ -190,7 +224,7 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
                 optimized_prompt = with_expertise
                 added_context.append(f"Adapted to expertise level: {expertise_level}")
                 personalization_factors["expertise_adaptation"] = expertise_level
-            
+
             # Optimize for communication style
             communication_preferences = user_profile.preferences.get("communication", {})
             if communication_preferences:
@@ -202,7 +236,7 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
                     optimized_prompt = with_style
                     added_context.append("Optimized for communication style")
                     personalization_factors["style_optimization"] = True
-            
+
             # Use LLM for more advanced optimization if available
             if self.llm_interface and len(original_prompt) > 20:
                 try:
@@ -211,7 +245,7 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
                     pass
                 except Exception as e:
                     logger.warning(f"Error using LLM for prompt optimization: {e}")
-            
+
             return ContextOptimization(
                 original_prompt=original_prompt,
                 optimized_prompt=optimized_prompt,
@@ -224,11 +258,11 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
                 original_prompt=original_prompt,
                 optimized_prompt=original_prompt
             )
-    
+
     def add_personal_context(
-        self, 
-        prompt: str, 
-        user_profile: UserProfile, 
+        self,
+        prompt: str,
+        user_profile: UserProfile,
         topic: str
     ) -> str:
         """Add relevant personal context to enhance understanding.
@@ -240,6 +274,7 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
             
         Returns:
             Enhanced prompt with personal context
+
         """
         try:
             # Get relevant background knowledge
@@ -247,28 +282,28 @@ class BasicPromptOptimizationService(PromptOptimizationServiceInterface):
                 user_profile.user_id,
                 topic
             )
-            
+
             if not relevant_background:
                 return prompt
-            
+
             # Add context to prompt
             context_items = [item.get("content", "") for item in relevant_background[:2]]
             context_str = "\n".join(context_items)
-            
+
             # Simple template for adding context
             enhanced_prompt = f"""Context: {context_str}
 
 Based on the above context, please respond to: {prompt}"""
-            
+
             return enhanced_prompt
         except Exception as e:
             logger.warning(f"Error adding personal context: {e}")
             return prompt
-    
+
     def adapt_to_expertise_level(
-        self, 
-        prompt: str, 
-        expertise_level: str, 
+        self,
+        prompt: str,
+        expertise_level: str,
         topic: str
     ) -> str:
         """Adapt prompt to user's expertise level.
@@ -280,6 +315,7 @@ Based on the above context, please respond to: {prompt}"""
             
         Returns:
             Adapted prompt for the user's expertise level
+
         """
         try:
             # Simple adaptation based on expertise level
@@ -292,11 +328,17 @@ Based on the above context, please respond to: {prompt}"""
         except Exception as e:
             logger.warning(f"Error adapting to expertise level: {e}")
             return prompt
-    
+
     def optimize_for_communication_style(
+<<<<<<< HEAD
+        self,
+        prompt: str,
+        communication_preferences: Dict[str, Any]
+=======
         self, 
         prompt: str, 
         communication_preferences: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> str:
         """Optimize prompt for user's communication style.
         
@@ -306,27 +348,28 @@ Based on the above context, please respond to: {prompt}"""
             
         Returns:
             Optimized prompt for the user's communication style
+
         """
         try:
             # Extract communication preferences
             verbosity = communication_preferences.get("verbosity", "normal")
             formality = communication_preferences.get("formality", "neutral")
-            
+
             # Apply style optimizations
             optimized = prompt
-            
+
             # Adjust for verbosity
             if verbosity == "concise":
                 optimized += "\n\nPlease provide a concise response."
             elif verbosity == "detailed":
                 optimized += "\n\nPlease provide a detailed response with thorough explanations."
-            
+
             # Adjust for formality
             if formality == "formal":
                 optimized += "\n\nPlease use formal language in your response."
             elif formality == "casual":
                 optimized += "\n\nPlease use casual, conversational language in your response."
-            
+
             return optimized
         except Exception as e:
             logger.warning(f"Error optimizing for communication style: {e}")

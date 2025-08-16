@@ -5,7 +5,11 @@ and instantiating institutional primitive nodes.
 """
 
 import logging
+<<<<<<< HEAD
+from typing import Any, Dict, List, Optional, Type
+=======
 from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .base import InstitutionalPrimitive, PrimitiveInfo, ValidationResult
 
@@ -19,9 +23,18 @@ class PrimitiveRegistry:
     institutional primitives, providing a centralized way to manage
     available workflow nodes.
     """
-    
+
     def __init__(self):
         """Initialize the primitive registry."""
+<<<<<<< HEAD
+        self._primitives: Dict[str, Type[InstitutionalPrimitive]] = {}
+        self._primitive_info: Dict[str, PrimitiveInfo] = {}
+
+    def register_primitive(
+        self,
+        primitive_type: str,
+        primitive_class: Type[InstitutionalPrimitive]
+=======
         self._primitives: dict[str, type[InstitutionalPrimitive]] = {}
         self._primitive_info: dict[str, PrimitiveInfo] = {}
     
@@ -29,6 +42,7 @@ class PrimitiveRegistry:
         self, 
         primitive_type: str, 
         primitive_class: type[InstitutionalPrimitive]
+>>>>>>> feature/core-services-refactor
     ) -> bool:
         """Register a primitive type with the registry.
         
@@ -38,17 +52,18 @@ class PrimitiveRegistry:
             
         Returns:
             True if registration was successful, False otherwise
+
         """
         try:
             # Validate that the class implements InstitutionalPrimitive
             if not issubclass(primitive_class, InstitutionalPrimitive):
                 logger.error(f"Class {primitive_class.__name__} does not implement InstitutionalPrimitive")
                 return False
-            
+
             # Check if primitive type is already registered
             if primitive_type in self._primitives:
                 logger.warning(f"Primitive type '{primitive_type}' is already registered. Overwriting.")
-            
+
             # Create an instance to get primitive info
             try:
                 instance = primitive_class()
@@ -57,19 +72,24 @@ class PrimitiveRegistry:
             except Exception as e:
                 logger.error(f"Failed to create instance of {primitive_class.__name__}: {e}")
                 return False
-            
+
             # Register the primitive
             self._primitives[primitive_type] = primitive_class
             self._primitive_info[primitive_type] = primitive_info
-            
+
             logger.info(f"Successfully registered primitive '{primitive_type}' ({primitive_class.__name__})")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to register primitive '{primitive_type}': {e}")
             return False
+<<<<<<< HEAD
+
+    def get_primitive(self, primitive_type: str) -> Optional[Type[InstitutionalPrimitive]]:
+=======
     
     def get_primitive(self, primitive_type: str) -> Optional[type[InstitutionalPrimitive]]:
+>>>>>>> feature/core-services-refactor
         """Get a primitive class by type.
         
         Args:
@@ -77,13 +97,20 @@ class PrimitiveRegistry:
             
         Returns:
             Primitive class if found, None otherwise
+
         """
         return self._primitives.get(primitive_type)
-    
+
     def create_primitive(
+<<<<<<< HEAD
+        self,
+        primitive_type: str,
+        config: Optional[Dict[str, Any]] = None
+=======
         self, 
         primitive_type: str, 
         config: Optional[dict[str, Any]] = None
+>>>>>>> feature/core-services-refactor
     ) -> Optional[InstitutionalPrimitive]:
         """Create an instance of a primitive by type.
         
@@ -93,26 +120,33 @@ class PrimitiveRegistry:
             
         Returns:
             Primitive instance if successful, None otherwise
+
         """
         primitive_class = self.get_primitive(primitive_type)
         if primitive_class is None:
             logger.error(f"Primitive type '{primitive_type}' not found in registry")
             return None
-        
+
         try:
             return primitive_class(config)
         except Exception as e:
             logger.error(f"Failed to create primitive '{primitive_type}': {e}")
             return None
+<<<<<<< HEAD
+
+    def list_primitives(self) -> List[PrimitiveInfo]:
+=======
     
     def list_primitives(self) -> list[PrimitiveInfo]:
+>>>>>>> feature/core-services-refactor
         """List all registered primitives.
         
         Returns:
             List of PrimitiveInfo objects for all registered primitives
+
         """
         return list(self._primitive_info.values())
-    
+
     def get_primitive_info(self, primitive_type: str) -> Optional[PrimitiveInfo]:
         """Get information about a specific primitive.
         
@@ -121,10 +155,16 @@ class PrimitiveRegistry:
             
         Returns:
             PrimitiveInfo if found, None otherwise
+
         """
         return self._primitive_info.get(primitive_type)
+<<<<<<< HEAD
+
+    def validate_primitive(self, primitive_def: Dict[str, Any]) -> ValidationResult:
+=======
     
     def validate_primitive(self, primitive_def: dict[str, Any]) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate a primitive definition.
         
         Args:
@@ -132,22 +172,23 @@ class PrimitiveRegistry:
             
         Returns:
             ValidationResult indicating whether the definition is valid
+
         """
         errors = []
         warnings = []
-        
+
         try:
             # Check required fields
             required_fields = ['type', 'config']
             for field in required_fields:
                 if field not in primitive_def:
                     errors.append(f"Required field '{field}' is missing from primitive definition")
-            
+
             # Check if primitive type exists
             primitive_type = primitive_def.get('type')
             if primitive_type and primitive_type not in self._primitives:
                 errors.append(f"Primitive type '{primitive_type}' is not registered")
-            
+
             # Validate configuration if primitive type exists
             if primitive_type and primitive_type in self._primitives:
                 try:
@@ -157,19 +198,19 @@ class PrimitiveRegistry:
                         errors.append("Failed to create primitive instance for validation")
                 except Exception as e:
                     errors.append(f"Configuration validation failed: {str(e)}")
-            
+
             return ValidationResult(
                 is_valid=len(errors) == 0,
                 errors=errors,
                 warnings=warnings
             )
-            
+
         except Exception as e:
             return ValidationResult(
                 is_valid=False,
                 errors=[f"Validation error: {str(e)}"]
             )
-    
+
     def unregister_primitive(self, primitive_type: str) -> bool:
         """Unregister a primitive type.
         
@@ -178,11 +219,12 @@ class PrimitiveRegistry:
             
         Returns:
             True if unregistration was successful, False otherwise
+
         """
         if primitive_type not in self._primitives:
             logger.warning(f"Primitive type '{primitive_type}' is not registered")
             return False
-        
+
         try:
             del self._primitives[primitive_type]
             del self._primitive_info[primitive_type]
@@ -191,7 +233,7 @@ class PrimitiveRegistry:
         except Exception as e:
             logger.error(f"Failed to unregister primitive '{primitive_type}': {e}")
             return False
-    
+
     def is_registered(self, primitive_type: str) -> bool:
         """Check if a primitive type is registered.
         
@@ -200,10 +242,16 @@ class PrimitiveRegistry:
             
         Returns:
             True if the primitive type is registered, False otherwise
+
         """
         return primitive_type in self._primitives
+<<<<<<< HEAD
+
+    def get_primitives_by_tag(self, tag: str) -> List[PrimitiveInfo]:
+=======
     
     def get_primitives_by_tag(self, tag: str) -> list[PrimitiveInfo]:
+>>>>>>> feature/core-services-refactor
         """Get all primitives that have a specific tag.
         
         Args:
@@ -211,12 +259,13 @@ class PrimitiveRegistry:
             
         Returns:
             List of PrimitiveInfo objects for primitives with the specified tag
+
         """
         return [
             info for info in self._primitive_info.values()
             if tag in info.tags
         ]
-    
+
     def clear(self) -> None:
         """Clear all registered primitives."""
         self._primitives.clear()
@@ -233,11 +282,16 @@ def get_global_registry() -> PrimitiveRegistry:
     
     Returns:
         Global PrimitiveRegistry instance
+
     """
     return _global_registry
 
 
+<<<<<<< HEAD
+def register_primitive(primitive_type: str, primitive_class: Type[InstitutionalPrimitive]) -> bool:
+=======
 def register_primitive(primitive_type: str, primitive_class: type[InstitutionalPrimitive]) -> bool:
+>>>>>>> feature/core-services-refactor
     """Register a primitive with the global registry.
     
     Args:
@@ -246,5 +300,6 @@ def register_primitive(primitive_type: str, primitive_class: type[InstitutionalP
         
     Returns:
         True if registration was successful, False otherwise
+
     """
     return _global_registry.register_primitive(primitive_type, primitive_class)

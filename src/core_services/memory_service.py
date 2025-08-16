@@ -20,6 +20,11 @@ from typing import Any, Optional
 
 from src.models import PendingFact  # Assuming PendingFact model exists
 
+<<<<<<< HEAD
+from src.models import PendingFact  # Assuming PendingFact model exists
+
+=======
+>>>>>>> feature/core-services-refactor
 from .sskg_manager import SSKGManager
 
 try:
@@ -451,18 +456,19 @@ class MemoryService:
             
         Returns:
             Memory ID of the stored token usage entry
+
         """
         content = f"Token usage: {token_usage_info.get('total_tokens', 0)} tokens " \
                  f"(input: {token_usage_info.get('input_tokens', 0)}, " \
                  f"output: {token_usage_info.get('output_tokens', 0)}) " \
                  f"for model {token_usage_info.get('model', 'unknown')}"
-        
+
         metadata = {
             "token_usage": token_usage_info,
             "cost_estimate": token_usage_info.get("estimated_cost", 0.0),
             "model": token_usage_info.get("model", "unknown")
         }
-        
+
         return self.add_memory(
             role_id=role_id,
             content=content,
@@ -536,7 +542,11 @@ class MemoryService:
 
         return memories
 
+<<<<<<< HEAD
+    def add_fact_to_sskg(self, subject: str, predicate: str, obj: str, metadata: Optional[Dict[str, Any]] = None):
+=======
     def add_fact_to_sskg(self, subject: str, predicate: str, obj: str, metadata: Optional[dict[str, Any]] = None):
+>>>>>>> feature/core-services-refactor
         """Adds a structured fact to the Semantic Structured Knowledge Graph.
 
         This is a direct interface to the underlying SSKGManager. It is thread-safe.
@@ -544,7 +554,11 @@ class MemoryService:
         with self.lock:
             self.sskg_manager.add_fact(subject, predicate, obj, metadata)
 
+<<<<<<< HEAD
+    def query_sskg(self, subject: str, predicate: Optional[str] = None) -> List[Dict[str, Any]]:
+=======
     def query_sskg(self, subject: str, predicate: Optional[str] = None) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Queries the SSKG for facts related to a subject. It is thread-safe.
         """
         with self.lock:

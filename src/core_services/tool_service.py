@@ -15,9 +15,10 @@ class FileToolsService:
 
 class MemoryToolsService:
     """A simple wrapper for memory tools for dependency injection."""
+
     def __init__(self, app_state: Any):
         self.app_state = app_state
-    
+
     def add_memory_entry(self, request: MemoryEntryRequest):
         # Placeholder for adding memory entry logic
         pass

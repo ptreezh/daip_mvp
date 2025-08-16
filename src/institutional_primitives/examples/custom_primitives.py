@@ -6,7 +6,11 @@
 """
 import asyncio
 from datetime import datetime
+<<<<<<< HEAD
+from typing import Any, Dict
+=======
 from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from ..base import ExecutionContext
 from ..plugin_interface import CustomPrimitiveBase, PluginInterface, PluginMetadata
@@ -22,11 +26,16 @@ from ..service_adapters import (
 
 class SentimentAnalysisPrimitive(CustomPrimitiveBase):
     """Example custom primitive for sentiment analysis."""
-    
+
     def get_primitive_type(self) -> str:
         return "sentiment_analysis"
+<<<<<<< HEAD
+
+    def get_input_schema(self) -> Dict[str, Any]:
+=======
     
     def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         return {
             "type": "object",
             "properties": {
@@ -42,8 +51,13 @@ class SentimentAnalysisPrimitive(CustomPrimitiveBase):
             },
             "required": ["text"]
         }
+<<<<<<< HEAD
+
+    def get_output_schema(self) -> Dict[str, Any]:
+=======
     
     def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         return {
             "type": "object",
             "properties": {
@@ -65,23 +79,28 @@ class SentimentAnalysisPrimitive(CustomPrimitiveBase):
             },
             "required": ["sentiment", "confidence"]
         }
+<<<<<<< HEAD
+
+    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+=======
     
     async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute sentiment analysis."""
         text = inputs.get("text", "")
         language = inputs.get("language", "en")
-        
+
         # Simulate sentiment analysis (in real implementation, would use ML model)
         await asyncio.sleep(0.1)  # Simulate processing time
-        
+
         # Simple keyword-based sentiment analysis for demo
         positive_words = ["good", "great", "excellent", "amazing", "wonderful", "fantastic"]
         negative_words = ["bad", "terrible", "awful", "horrible", "disappointing", "poor"]
-        
+
         text_lower = text.lower()
         positive_count = sum(1 for word in positive_words if word in text_lower)
         negative_count = sum(1 for word in negative_words if word in text_lower)
-        
+
         if positive_count > negative_count:
             sentiment = "positive"
             confidence = min(0.9, 0.5 + (positive_count - negative_count) * 0.1)
@@ -91,7 +110,7 @@ class SentimentAnalysisPrimitive(CustomPrimitiveBase):
         else:
             sentiment = "neutral"
             confidence = 0.5
-        
+
         return {
             "sentiment": sentiment,
             "confidence": confidence,
@@ -107,11 +126,16 @@ class SentimentAnalysisPrimitive(CustomPrimitiveBase):
 
 class DataTransformationPrimitive(CustomPrimitiveBase):
     """Example custom primitive for data transformation."""
-    
+
     def get_primitive_type(self) -> str:
         return "data_transformation"
+<<<<<<< HEAD
+
+    def get_input_schema(self) -> Dict[str, Any]:
+=======
     
     def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         return {
             "type": "object",
             "properties": {
@@ -131,8 +155,13 @@ class DataTransformationPrimitive(CustomPrimitiveBase):
             },
             "required": ["data", "transformation"]
         }
+<<<<<<< HEAD
+
+    def get_output_schema(self) -> Dict[str, Any]:
+=======
     
     def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         return {
             "type": "object",
             "properties": {
@@ -146,18 +175,23 @@ class DataTransformationPrimitive(CustomPrimitiveBase):
             },
             "required": ["transformed_data"]
         }
+<<<<<<< HEAD
+
+    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+=======
     
     async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute data transformation."""
         data = inputs.get("data", [])
         transformation = inputs.get("transformation", "filter")
         parameters = inputs.get("parameters", {})
-        
+
         # Simulate processing time
         await asyncio.sleep(0.05)
-        
+
         transformed_data = data.copy()
-        
+
         if transformation == "filter":
             # Filter data based on criteria
             criteria = parameters.get("criteria", {})
@@ -167,7 +201,7 @@ class DataTransformationPrimitive(CustomPrimitiveBase):
                 value = criteria.get("value")
                 if key and value is not None:
                     transformed_data = [item for item in data if isinstance(item, dict) and item.get(key) == value]
-        
+
         elif transformation == "map":
             # Transform each item
             field = parameters.get("field")
@@ -177,14 +211,14 @@ class DataTransformationPrimitive(CustomPrimitiveBase):
                     {**item, field: str(item.get(field, "")).upper()} if isinstance(item, dict) else item
                     for item in data
                 ]
-        
+
         elif transformation == "sort":
             # Sort data
             key = parameters.get("key")
             reverse = parameters.get("reverse", False)
             if key:
                 transformed_data = sorted(data, key=lambda x: x.get(key, 0) if isinstance(x, dict) else x, reverse=reverse)
-        
+
         elif transformation == "reduce":
             # Reduce data to a single value
             operation = parameters.get("operation", "sum")
@@ -192,7 +226,7 @@ class DataTransformationPrimitive(CustomPrimitiveBase):
                 transformed_data = sum(data)
             elif operation == "count":
                 transformed_data = len(data)
-        
+
         return {
             "transformed_data": transformed_data,
             "metadata": {
@@ -206,7 +240,7 @@ class DataTransformationPrimitive(CustomPrimitiveBase):
 
 class MockExternalServiceAdapter(ServiceAdapter):
     """Mock external service adapter for demonstration."""
-    
+
     def get_metadata(self) -> ServiceAdapterMetadata:
         return ServiceAdapterMetadata(
             name="mock_external_service",
@@ -224,31 +258,31 @@ class MockExternalServiceAdapter(ServiceAdapter):
                 "required": ["endpoint"]
             }
         )
-    
+
     async def initialize(self) -> bool:
         """Initialize the mock service."""
         # Simulate initialization
         await asyncio.sleep(0.1)
         return True
-    
+
     async def cleanup(self) -> None:
         """Clean up the mock service."""
         # Simulate cleanup
         await asyncio.sleep(0.05)
-    
+
     async def health_check(self) -> bool:
         """Check service health."""
         # Simulate health check
         await asyncio.sleep(0.02)
         return True
-    
+
     async def execute_request(self, request: ServiceRequest) -> ServiceResponse:
         """Execute a service request."""
         start_time = datetime.now()
-        
+
         # Simulate processing
         await asyncio.sleep(0.1)
-        
+
         if request.operation == "query_data":
             # Mock data query
             query = request.parameters.get("query", "")
@@ -257,16 +291,16 @@ class MockExternalServiceAdapter(ServiceAdapter):
                 {"id": 2, "name": "Item 2", "value": 200},
                 {"id": 3, "name": "Item 3", "value": 150}
             ]
-            
+
             # Simple filtering
             if query:
                 filtered_data = [item for item in mock_data if query.lower() in item["name"].lower()]
             else:
                 filtered_data = mock_data
-            
+
             end_time = datetime.now()
             duration = (end_time - start_time).total_seconds() * 1000
-            
+
             return ServiceResponse(
                 request_id=request.request_id,
                 success=True,
@@ -274,11 +308,11 @@ class MockExternalServiceAdapter(ServiceAdapter):
                 metadata={"query": query, "result_count": len(filtered_data)},
                 duration_ms=duration
             )
-        
+
         else:
             end_time = datetime.now()
             duration = (end_time - start_time).total_seconds() * 1000
-            
+
             return ServiceResponse(
                 request_id=request.request_id,
                 success=False,
@@ -289,7 +323,7 @@ class MockExternalServiceAdapter(ServiceAdapter):
 
 class ExampleCustomPrimitivesPlugin(PluginInterface):
     """Example plugin providing custom primitives."""
-    
+
     def get_metadata(self) -> PluginMetadata:
         return PluginMetadata(
             name="example_custom_primitives",
@@ -300,12 +334,26 @@ class ExampleCustomPrimitivesPlugin(PluginInterface):
             primitive_types=["sentiment_analysis", "data_transformation"],
             service_adapters=["mock_external_service"]
         )
+<<<<<<< HEAD
+
+    def get_primitive_classes(self) -> Dict[str, type]:
+=======
     
     def get_primitive_classes(self) -> dict[str, type]:
+>>>>>>> feature/core-services-refactor
         return {
             "sentiment_analysis": SentimentAnalysisPrimitive,
             "data_transformation": DataTransformationPrimitive
         }
+<<<<<<< HEAD
+
+    def get_service_adapters(self) -> Dict[str, Any]:
+        return {
+            "mock_external_service": MockExternalServiceAdapter
+        }
+
+    def initialize(self, context: Dict[str, Any]) -> bool:
+=======
     
     def get_service_adapters(self) -> dict[str, Any]:
         return {
@@ -313,10 +361,11 @@ class ExampleCustomPrimitivesPlugin(PluginInterface):
         }
     
     def initialize(self, context: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Initialize the plugin."""
         # Plugin-specific initialization
         return True
-    
+
     def cleanup(self) -> None:
         """Clean up plugin resources."""
         # Plugin-specific cleanup

@@ -33,6 +33,7 @@ class DebateProtocol:
         Args:
             kernel: An instance of the application kernel.
             event_queue: An asyncio queue to emit events to the UI or other listeners.
+
         """
         self.kernel = kernel
         self.event_queue = event_queue
@@ -90,7 +91,7 @@ class DebateProtocol:
                     opinion = opinion_response.get("content", "").strip()
                     if not opinion:
                         raise Exception(f"LLM failed to generate an opinion for role {role_id}")
-                    
+
                     # Log token usage if available
                     if "token_usage" in opinion_response:
                         token_info = opinion_response["token_usage"]
@@ -109,7 +110,7 @@ class DebateProtocol:
 
             # Consensus phase
             await self._emit_event(TechLogEvent(source="DebateProtocol", message="Debate rounds complete. Moving to consensus."))
-            
+
             # Execute consensus tool
             try:
                 # Try to use the tool if available

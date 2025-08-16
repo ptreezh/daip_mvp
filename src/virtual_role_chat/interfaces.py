@@ -4,7 +4,11 @@ This module defines the interfaces for the main components of the Virtual Role C
 including ChatRoomManager, ChatSessionService, RoleInteractionEngine, and ChatAnalyticsService.
 """
 
+<<<<<<< HEAD
+from typing import Any, Dict, List, Literal, Optional, Protocol, runtime_checkable
+=======
 from typing import Any, Literal, Optional, Protocol, runtime_checkable
+>>>>>>> feature/core-services-refactor
 
 from .models import (
     ChatMessage,
@@ -28,7 +32,7 @@ from .models import (
 @runtime_checkable
 class ChatRoomManagerInterface(Protocol):
     """Interface for managing chat rooms."""
-    
+
     def create_chat_room(self, config: ChatRoomConfig) -> ChatRoomID:
         """Create a new chat room with the given configuration.
         
@@ -37,9 +41,10 @@ class ChatRoomManagerInterface(Protocol):
             
         Returns:
             The ID of the created chat room.
+
         """
         ...
-    
+
     def get_chat_room(self, room_id: ChatRoomID) -> ChatRoom:
         """Get a chat room by its ID.
         
@@ -51,9 +56,10 @@ class ChatRoomManagerInterface(Protocol):
             
         Raises:
             ValueError: If the chat room does not exist.
+
         """
         ...
-    
+
     def update_chat_room(self, room_id: ChatRoomID, config: ChatRoomConfig) -> bool:
         """Update a chat room with the given configuration.
         
@@ -66,9 +72,10 @@ class ChatRoomManagerInterface(Protocol):
             
         Raises:
             ValueError: If the chat room does not exist.
+
         """
         ...
-    
+
     def delete_chat_room(self, room_id: ChatRoomID) -> bool:
         """Delete a chat room.
         
@@ -80,14 +87,21 @@ class ChatRoomManagerInterface(Protocol):
             
         Raises:
             ValueError: If the chat room does not exist.
+
         """
         ...
+<<<<<<< HEAD
+
+    def list_chat_rooms(self) -> List[ChatRoomSummary]:
+=======
     
     def list_chat_rooms(self) -> list[ChatRoomSummary]:
+>>>>>>> feature/core-services-refactor
         """List all chat rooms.
         
         Returns:
             A list of chat room summaries.
+
         """
         ...
 
@@ -95,7 +109,7 @@ class ChatRoomManagerInterface(Protocol):
 @runtime_checkable
 class ChatSessionServiceInterface(Protocol):
     """Interface for managing chat sessions."""
-    
+
     def start_session(self, room_id: ChatRoomID) -> SessionID:
         """Start a new chat session in the given chat room.
         
@@ -107,9 +121,10 @@ class ChatSessionServiceInterface(Protocol):
             
         Raises:
             ValueError: If the chat room does not exist.
+
         """
         ...
-    
+
     def end_session(self, session_id: SessionID) -> bool:
         """End a chat session.
         
@@ -121,9 +136,10 @@ class ChatSessionServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
-    
+
     def pause_session(self, session_id: SessionID) -> bool:
         """Pause a chat session.
         
@@ -135,9 +151,10 @@ class ChatSessionServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
-    
+
     def resume_session(self, session_id: SessionID) -> bool:
         """Resume a paused chat session.
         
@@ -149,9 +166,10 @@ class ChatSessionServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist or is not paused.
+
         """
         ...
-    
+
     def add_message(self, session_id: SessionID, message: ChatMessage) -> bool:
         """Add a message to a chat session.
         
@@ -164,10 +182,16 @@ class ChatSessionServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
+<<<<<<< HEAD
+
+    def get_messages(self, session_id: SessionID, limit: int = 50, offset: int = 0) -> List[ChatMessage]:
+=======
     
     def get_messages(self, session_id: SessionID, limit: int = 50, offset: int = 0) -> list[ChatMessage]:
+>>>>>>> feature/core-services-refactor
         """Get messages from a chat session.
         
         Args:
@@ -180,9 +204,10 @@ class ChatSessionServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
-    
+
     def get_session_summary(self, session_id: SessionID) -> SessionSummary:
         """Get a summary of a chat session.
         
@@ -194,9 +219,10 @@ class ChatSessionServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
-    
+
     def export_session(self, session_id: SessionID, format: Literal["json", "markdown", "pdf"]) -> bytes:
         """Export a chat session in the given format.
         
@@ -209,9 +235,10 @@ class ChatSessionServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
-    
+
     def set_transparency_level(self, session_id: SessionID, level: TransparencyLevel) -> bool:
         """Set the transparency level for a chat session.
         
@@ -224,6 +251,7 @@ class ChatSessionServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
 
@@ -231,7 +259,7 @@ class ChatSessionServiceInterface(Protocol):
 @runtime_checkable
 class RoleInteractionEngineInterface(Protocol):
     """Interface for orchestrating interactions between roles."""
-    
+
     def process_user_input(self, session_id: SessionID, user_input: str) -> None:
         """Process user input and trigger role responses.
         
@@ -241,9 +269,10 @@ class RoleInteractionEngineInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
-    
+
     def generate_role_response(self, session_id: SessionID, role_id: str) -> ChatMessage:
         """Generate a response from a role.
         
@@ -256,10 +285,16 @@ class RoleInteractionEngineInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist or the role is not in the session.
+
         """
         ...
+<<<<<<< HEAD
+
+    def get_next_role(self, session_id: SessionID, context: Optional[Dict[str, Any]] = None) -> str:
+=======
     
     def get_next_role(self, session_id: SessionID, context: Optional[dict[str, Any]] = None) -> str:
+>>>>>>> feature/core-services-refactor
         """Get the next role that should respond.
         
         Args:
@@ -271,9 +306,10 @@ class RoleInteractionEngineInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
-    
+
     def validate_statement(self, session_id: SessionID, statement: str) -> ValidationResult:
         """Validate a statement using cross-role validation.
         
@@ -286,10 +322,16 @@ class RoleInteractionEngineInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
+<<<<<<< HEAD
+
+    def resolve_conflict(self, session_id: SessionID, conflicting_statements: List[str]) -> ResolutionResult:
+=======
     
     def resolve_conflict(self, session_id: SessionID, conflicting_statements: list[str]) -> ResolutionResult:
+>>>>>>> feature/core-services-refactor
         """Resolve conflicting statements.
         
         Args:
@@ -301,9 +343,10 @@ class RoleInteractionEngineInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
-    
+
     def suggest_topic_refocus(self, session_id: SessionID) -> str:
         """Suggest a topic refocus to keep the conversation on track.
         
@@ -315,10 +358,16 @@ class RoleInteractionEngineInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
+<<<<<<< HEAD
+
+    def decompose_complex_topic(self, session_id: SessionID, topic: str) -> List[SubTopic]:
+=======
     
     def decompose_complex_topic(self, session_id: SessionID, topic: str) -> list[SubTopic]:
+>>>>>>> feature/core-services-refactor
         """Decompose a complex topic into simpler sub-topics.
         
         Args:
@@ -330,10 +379,16 @@ class RoleInteractionEngineInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
+<<<<<<< HEAD
+
+    def assign_subtopics_to_roles(self, session_id: SessionID, subtopics: List[SubTopic]) -> Dict[str, List[str]]:
+=======
     
     def assign_subtopics_to_roles(self, session_id: SessionID, subtopics: list[SubTopic]) -> dict[str, list[str]]:
+>>>>>>> feature/core-services-refactor
         """Assign sub-topics to roles based on expertise.
         
         Args:
@@ -345,9 +400,10 @@ class RoleInteractionEngineInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
-    
+
     def get_processing_transparency(self, session_id: SessionID) -> TransparencyLevel:
         """Get the current transparency level for a session.
         
@@ -359,6 +415,7 @@ class RoleInteractionEngineInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
 
@@ -366,7 +423,7 @@ class RoleInteractionEngineInterface(Protocol):
 @runtime_checkable
 class ChatAnalyticsServiceInterface(Protocol):
     """Interface for analyzing chat sessions."""
-    
+
     def get_session_metrics(self, session_id: SessionID) -> SessionMetrics:
         """Get metrics for a chat session.
         
@@ -378,9 +435,10 @@ class ChatAnalyticsServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
-    
+
     def get_role_performance(self, session_id: SessionID, role_id: str) -> RolePerformance:
         """Get performance metrics for a role in a chat session.
         
@@ -393,9 +451,10 @@ class ChatAnalyticsServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist or the role is not in the session.
+
         """
         ...
-    
+
     def get_conversation_quality(self, session_id: SessionID) -> QualityMetrics:
         """Get quality metrics for a conversation.
         
@@ -407,10 +466,16 @@ class ChatAnalyticsServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
+<<<<<<< HEAD
+
+    def detect_quality_issues(self, session_id: SessionID) -> List[QualityIssue]:
+=======
     
     def detect_quality_issues(self, session_id: SessionID) -> list[QualityIssue]:
+>>>>>>> feature/core-services-refactor
         """Detect quality issues in a conversation.
         
         Args:
@@ -421,10 +486,16 @@ class ChatAnalyticsServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
+<<<<<<< HEAD
+
+    def generate_analytics_report(self, session_id: SessionID) -> Dict[str, Any]:
+=======
     
     def generate_analytics_report(self, session_id: SessionID) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Generate a comprehensive analytics report for a chat session.
         
         Args:
@@ -435,6 +506,7 @@ class ChatAnalyticsServiceInterface(Protocol):
             
         Raises:
             ValueError: If the session does not exist.
+
         """
         ...
 

@@ -1,5 +1,9 @@
 import logging
+<<<<<<< HEAD
+from typing import List, Optional
+=======
 from typing import Optional
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -8,6 +12,7 @@ class MemoryBankTools:
     This class would contain methods for saving, loading, and managing documents
     within a memory bank structure.
     """
+
     def __init__(self):
         logger.info("MemoryBankTools initialized (placeholder).")
 
@@ -28,7 +33,11 @@ class MemoryBankTools:
         # In a real scenario, you'd read the content from the file system or a database
         return f"Content of {filename} from {path}" # Placeholder content
 
+<<<<<<< HEAD
+    def list_documents(self, path: str) -> List[str]:
+=======
     def list_documents(self, path: str) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Simulates listing documents in a given memory bank path.
         """
         logger.info(f"Simulating listing documents in: {path}")

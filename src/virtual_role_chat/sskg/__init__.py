@@ -11,7 +11,7 @@ from .storage import SSKGStorage
 
 __all__ = [
     'KnowledgeFact',
-    'KnowledgeRelation', 
+    'KnowledgeRelation',
     'KnowledgeQuery',
     'ConflictResolution',
     'Memory',

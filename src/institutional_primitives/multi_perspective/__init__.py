@@ -14,12 +14,12 @@ from .viewpoint_collection_node import ViewpointCollectionNode
 
 __all__ = [
     "SubProblem",
-    "ExpertViewpoint", 
+    "ExpertViewpoint",
     "ViewpointCollection",
     "SynthesisQuality",
     "SynthesisResult",
     "TaskDecompositionNode",
-    "ParallelExplorationNode", 
+    "ParallelExplorationNode",
     "ViewpointCollectionNode",
     "EnhancedSynthesisNode",
     "IterativeRefinementNode"

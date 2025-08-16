@@ -10,7 +10,7 @@ from .registry import PrimitiveRegistry, get_global_registry, register_primitive
 
 __all__ = [
     'InstitutionalPrimitive',
-    'ExecutionContext', 
+    'ExecutionContext',
     'PrimitiveInfo',
     'PrimitiveRegistry',
     'get_global_registry',

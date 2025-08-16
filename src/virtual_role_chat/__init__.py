@@ -73,7 +73,7 @@ except ImportError:
 __all__ = [
     # Core models
     "ChatRoom",
-    "ChatRoomConfig", 
+    "ChatRoomConfig",
     "ChatRoomID",
     "ChatRoomSummary",
     "ChatMessage",
@@ -88,13 +88,13 @@ __all__ = [
     "RolePerformance",
     "QualityMetrics",
     "QualityIssue",
-    
+
     # Interfaces
     "ChatRoomManagerInterface",
-    "ChatSessionServiceInterface", 
+    "ChatSessionServiceInterface",
     "RoleInteractionEngineInterface",
     "ChatAnalyticsServiceInterface",
-    
+
     # Workflow components
     "WorkflowState",
     "WorkflowEventType",
@@ -112,7 +112,7 @@ __all__ = [
     "FREE_FORM_WORKFLOW",
     "STRUCTURED_WORKFLOW",
     "DEBATE_WORKFLOW",
-    
+
     # PocketFlow integration
     "workflow_engine",
     "WorkflowEngineImpl",

@@ -4,7 +4,11 @@
 
 import logging
 from datetime import datetime
+<<<<<<< HEAD
+from typing import Any, Dict
+=======
 from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from .demo_types import DemoScenarioType
 
@@ -13,11 +17,19 @@ logger = logging.getLogger(__name__)
 
 class StepExecutor:
     """演示步骤执行器"""
+<<<<<<< HEAD
+
+    def __init__(self):
+        pass
+
+    async def execute_step(self, scenario_type: str, step_name: str, step_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
     
     def __init__(self):
         pass
     
     async def execute_step(self, scenario_type: str, step_name: str, step_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行演示步骤"""
         try:
             if scenario_type == DemoScenarioType.MULTI_ROLE_DEBATE.value:
@@ -31,13 +43,27 @@ class StepExecutor:
         except Exception as e:
             logger.error(f"执行步骤失败: {e}")
             return {"error": str(e)}
+<<<<<<< HEAD
+
+    async def _execute_debate_step(self, step_name: str, step_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
     
     async def _execute_debate_step(self, step_name: str, step_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行辩论场景步骤"""
         # 导入真实LLM执行器
         try:
             from .real_llm_executor import RealLLMExecutor
             real_executor = RealLLMExecutor()
+<<<<<<< HEAD
+
+            # 获取话题
+            topic = step_data.get("inputs", {}).get("topic", "AI在教育中的应用")
+
+            # 调用真实的LLM执行器
+            return await real_executor.execute_real_debate_step(step_name, step_data, topic)
+
+=======
             
             # 获取话题
             topic = step_data.get("inputs", {}).get("topic", "AI在教育中的应用")
@@ -45,6 +71,7 @@ class StepExecutor:
             # 调用真实的LLM执行器
             return await real_executor.execute_real_debate_step(step_name, step_data, topic)
             
+>>>>>>> feature/core-services-refactor
         except ImportError:
             # 如果无法导入，使用简化版本
             if step_name == "scenario_setup":
@@ -61,7 +88,11 @@ class StepExecutor:
                         "role_manager_ready": True
                     }
                 }
+<<<<<<< HEAD
+
+=======
             
+>>>>>>> feature/core-services-refactor
             elif step_name == "role_selection":
                 return {
                     "action": "角色选择",
@@ -73,34 +104,57 @@ class StepExecutor:
                     ],
                     "role_diversity_score": 0.85
                 }
+<<<<<<< HEAD
+
+=======
             
+>>>>>>> feature/core-services-refactor
             else:
                 return {
                     "action": step_name,
                     "description": f"执行辩论步骤: {step_name}",
                     "timestamp": datetime.now().isoformat()
                 }
+<<<<<<< HEAD
+
+    async def _execute_ethical_step(self, step_name: str, step_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
     
     async def _execute_ethical_step(self, step_name: str, step_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行伦理分析步骤"""
         return {
             "action": f"伦理分析: {step_name}",
             "description": f"执行伦理分析步骤: {step_name}",
             "timestamp": datetime.now().isoformat()
         }
+<<<<<<< HEAD
+
+    async def _execute_conflict_step(self, step_name: str, step_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
     
     async def _execute_conflict_step(self, step_name: str, step_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行冲突解决步骤"""
         return {
             "action": f"冲突解决: {step_name}",
             "description": f"执行冲突解决步骤: {step_name}",
             "timestamp": datetime.now().isoformat()
         }
+<<<<<<< HEAD
+
+    async def _execute_generic_step(self, step_name: str, step_data: Dict[str, Any]) -> Dict[str, Any]:
+=======
     
     async def _execute_generic_step(self, step_name: str, step_data: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行通用步骤"""
         return {
             "action": f"通用步骤: {step_name}",
             "description": f"执行通用步骤: {step_name}",
             "timestamp": datetime.now().isoformat()
+<<<<<<< HEAD
         }
+=======
+        }
+>>>>>>> feature/core-services-refactor

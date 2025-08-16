@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 class SubProblem(BaseModel):
     """Model for a decomposed sub-problem."""
+
     id: str
     perspective: str  # e.g., "经济", "社会", "技术", "伦理"
     description: str
@@ -23,6 +24,7 @@ class SubProblem(BaseModel):
 
 class ExpertViewpoint(BaseModel):
     """Model for an expert's viewpoint on a sub-problem."""
+
     expert_id: str
     expert_name: str
     expertise_areas: list[str] = Field(default_factory=list)
@@ -37,6 +39,7 @@ class ExpertViewpoint(BaseModel):
 
 class ViewpointCollection(BaseModel):
     """Model for collected viewpoints with analysis."""
+
     topic: str
     viewpoints: list[ExpertViewpoint] = Field(default_factory=list)
     conflicts: list[dict[str, Any]] = Field(default_factory=list)
@@ -49,6 +52,7 @@ class ViewpointCollection(BaseModel):
 
 class SynthesisQuality(BaseModel):
     """Model for assessing synthesis quality."""
+
     depth_score: float = Field(ge=0.0, le=1.0)
     breadth_score: float = Field(ge=0.0, le=1.0)
     insight_score: float = Field(ge=0.0, le=1.0)
@@ -60,6 +64,7 @@ class SynthesisQuality(BaseModel):
 
 class SynthesisResult(BaseModel):
     """Model for the final synthesis result."""
+
     topic: str
     perspectives: list[str] = Field(default_factory=list)
     synthesis: str
@@ -69,4 +74,8 @@ class SynthesisResult(BaseModel):
     quality_assessment: SynthesisQuality = None
     refinement_iterations: int = 0
     timestamp: datetime = Field(default_factory=datetime.now)
+<<<<<<< HEAD
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+=======
     metadata: dict[str, Any] = Field(default_factory=dict)
+>>>>>>> feature/core-services-refactor

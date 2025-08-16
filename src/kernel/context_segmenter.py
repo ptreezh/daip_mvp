@@ -25,6 +25,7 @@ class ContextSegmenter:
         ----
             max_tokens_per_chunk (int): The maximum number of tokens for each chunk.
                                         This depends on the model's context window.
+
         """
         self.max_tokens_per_chunk = max_tokens_per_chunk
         logging.info(
@@ -42,6 +43,7 @@ class ContextSegmenter:
         Returns:
         -------
             List[str]: A list of text chunks.
+
         """
         logging.info(f"Segmenting text of length {len(text)}...")
         # This is a very basic mock implementation. A real one would use a tokenizer.
@@ -75,6 +77,7 @@ class ContextSegmenter:
         Returns:
         -------
             str: The summarized text.
+
         """
         logging.info("Summarizing text...")
         # In a real implementation, this would call an LLM with a summarization prompt.
@@ -89,6 +92,7 @@ class ContextSegmenter:
         Returns:
         -------
             str: The final, condensed summary.
+
         """
         logging.info("Performing segment-and-summarize operation...")
         if len(text) < self.max_tokens_per_chunk:

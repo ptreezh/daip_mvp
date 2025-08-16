@@ -9,7 +9,11 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any, Dict, List, Optional, Type
+=======
 from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -18,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 class ServiceType(str, Enum):
     """Types of services that can be adapted."""
+
     FACT_SOURCE = "fact_source"
     VALIDATION_SERVICE = "validation_service"
     SYNTHESIS_ENGINE = "synthesis_engine"
@@ -31,6 +36,7 @@ class ServiceType(str, Enum):
 
 class AdapterCapability(str, Enum):
     """Capabilities that adapters can provide."""
+
     READ = "read"
     WRITE = "write"
     QUERY = "query"
@@ -43,6 +49,7 @@ class AdapterCapability(str, Enum):
 
 class ServiceAdapterMetadata(BaseModel):
     """Metadata for a service adapter."""
+
     name: str
     version: str
     service_type: ServiceType
@@ -56,6 +63,7 @@ class ServiceAdapterMetadata(BaseModel):
 
 class AdapterConfiguration(BaseModel):
     """Configuration for a service adapter instance."""
+
     adapter_name: str
     instance_id: str
     config: dict[str, Any] = Field(default_factory=dict)
@@ -66,6 +74,7 @@ class AdapterConfiguration(BaseModel):
 
 class ServiceRequest(BaseModel):
     """Request to a service through an adapter."""
+
     request_id: str
     operation: str
     parameters: dict[str, Any] = Field(default_factory=dict)
@@ -75,6 +84,7 @@ class ServiceRequest(BaseModel):
 
 class ServiceResponse(BaseModel):
     """Response from a service through an adapter."""
+
     request_id: str
     success: bool
     data: Any = None
@@ -90,47 +100,50 @@ class ServiceAdapter(ABC):
     Service adapters provide standardized interfaces for integrating
     external services with the institutional primitives system.
     """
-    
+
     def __init__(self, instance_id: str, config: AdapterConfiguration):
         """Initialize the service adapter.
         
         Args:
             instance_id: Unique identifier for this adapter instance
             config: Configuration for the adapter
+
         """
         self.instance_id = instance_id
         self.config = config
         self.is_initialized = False
         self.last_health_check = None
-        
+
     @abstractmethod
     def get_metadata(self) -> ServiceAdapterMetadata:
         """Return metadata about this adapter."""
         pass
-    
+
     @abstractmethod
     async def initialize(self) -> bool:
         """Initialize the adapter and establish connections.
         
         Returns:
             True if initialization was successful
+
         """
         pass
-    
+
     @abstractmethod
     async def cleanup(self) -> None:
         """Clean up resources and close connections."""
         pass
-    
+
     @abstractmethod
     async def health_check(self) -> bool:
         """Check if the adapter and underlying service are healthy.
         
         Returns:
             True if healthy, False otherwise
+
         """
         pass
-    
+
     @abstractmethod
     async def execute_request(self, request: ServiceRequest) -> ServiceResponse:
         """Execute a request through this adapter.
@@ -140,15 +153,21 @@ class ServiceAdapter(ABC):
             
         Returns:
             Service response
+
         """
         pass
-    
+
     def supports_capability(self, capability: AdapterCapability) -> bool:
         """Check if this adapter supports a specific capability."""
         metadata = self.get_metadata()
         return capability in metadata.capabilities
+<<<<<<< HEAD
+
+    def validate_configuration(self, config: Dict[str, Any]) -> List[str]:
+=======
     
     def validate_configuration(self, config: dict[str, Any]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Validate adapter configuration.
         
         Args:
@@ -156,45 +175,56 @@ class ServiceAdapter(ABC):
             
         Returns:
             List of validation errors
+
         """
         errors = []
         metadata = self.get_metadata()
         schema = metadata.configuration_schema
-        
+
         # Basic validation - in a real implementation, this would use JSON schema
         for required_field in schema.get("required", []):
             if required_field not in config:
                 errors.append(f"Required configuration field missing: {required_field}")
-        
+
         return errors
 
 
 class FactSourceAdapter(ServiceAdapter):
     """Adapter for fact source services."""
+<<<<<<< HEAD
+
+    async def query_facts(self, query: str, filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+=======
     
     async def query_facts(self, query: str, filters: dict[str, Any] = None) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Query facts from the source."""
         request = ServiceRequest(
             request_id=f"fact_query_{datetime.now().timestamp()}",
             operation="query_facts",
             parameters={"query": query, "filters": filters or {}}
         )
-        
+
         response = await self.execute_request(request)
         if response.success:
             return response.data or []
         else:
             logger.error(f"Fact query failed: {response.error}")
             return []
+<<<<<<< HEAD
+
+    async def validate_fact(self, fact: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+=======
     
     async def validate_fact(self, fact: str, context: dict[str, Any] = None) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Validate a fact using the source."""
         request = ServiceRequest(
             request_id=f"fact_validation_{datetime.now().timestamp()}",
             operation="validate_fact",
             parameters={"fact": fact, "context": context or {}}
         )
-        
+
         response = await self.execute_request(request)
         if response.success:
             return response.data or {}
@@ -205,8 +235,13 @@ class FactSourceAdapter(ServiceAdapter):
 
 class ValidationServiceAdapter(ServiceAdapter):
     """Adapter for validation services."""
+<<<<<<< HEAD
+
+    async def validate_content(self, content: str, validation_type: str, criteria: Dict[str, Any] = None) -> Dict[str, Any]:
+=======
     
     async def validate_content(self, content: str, validation_type: str, criteria: dict[str, Any] = None) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Validate content using the service."""
         request = ServiceRequest(
             request_id=f"content_validation_{datetime.now().timestamp()}",
@@ -217,7 +252,7 @@ class ValidationServiceAdapter(ServiceAdapter):
                 "criteria": criteria or {}
             }
         )
-        
+
         response = await self.execute_request(request)
         if response.success:
             return response.data or {}
@@ -228,8 +263,13 @@ class ValidationServiceAdapter(ServiceAdapter):
 
 class SynthesisEngineAdapter(ServiceAdapter):
     """Adapter for synthesis engine services."""
+<<<<<<< HEAD
+
+    async def synthesize_content(self, inputs: List[str], synthesis_strategy: str, parameters: Dict[str, Any] = None) -> Dict[str, Any]:
+=======
     
     async def synthesize_content(self, inputs: list[str], synthesis_strategy: str, parameters: dict[str, Any] = None) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Synthesize content from multiple inputs."""
         request = ServiceRequest(
             request_id=f"synthesis_{datetime.now().timestamp()}",
@@ -240,7 +280,7 @@ class SynthesisEngineAdapter(ServiceAdapter):
                 "parameters": parameters or {}
             }
         )
-        
+
         response = await self.execute_request(request)
         if response.success:
             return response.data or {}
@@ -255,9 +295,18 @@ class ServiceAdapterRegistry:
     This class manages the registration, configuration, and lifecycle
     of service adapters.
     """
-    
+
     def __init__(self):
         """Initialize the service adapter registry."""
+<<<<<<< HEAD
+        self.adapter_classes: Dict[str, Type[ServiceAdapter]] = {}
+        self.adapter_instances: Dict[str, ServiceAdapter] = {}
+        self.configurations: Dict[str, AdapterConfiguration] = {}
+
+        logger.info("ServiceAdapterRegistry initialized")
+
+    def register_adapter_class(self, adapter_name: str, adapter_class: Type[ServiceAdapter]) -> bool:
+=======
         self.adapter_classes: dict[str, type[ServiceAdapter]] = {}
         self.adapter_instances: dict[str, ServiceAdapter] = {}
         self.configurations: dict[str, AdapterConfiguration] = {}
@@ -265,6 +314,7 @@ class ServiceAdapterRegistry:
         logger.info("ServiceAdapterRegistry initialized")
     
     def register_adapter_class(self, adapter_name: str, adapter_class: type[ServiceAdapter]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Register a service adapter class.
         
         Args:
@@ -273,15 +323,21 @@ class ServiceAdapterRegistry:
             
         Returns:
             True if registration was successful
+
         """
         if adapter_name in self.adapter_classes:
             logger.warning(f"Adapter class '{adapter_name}' already registered. Overwriting.")
-        
+
         self.adapter_classes[adapter_name] = adapter_class
         logger.info(f"Registered adapter class: {adapter_name}")
         return True
+<<<<<<< HEAD
+
+    def create_adapter_instance(self, adapter_name: str, instance_id: str, config: Dict[str, Any]) -> Optional[ServiceAdapter]:
+=======
     
     def create_adapter_instance(self, adapter_name: str, instance_id: str, config: dict[str, Any]) -> Optional[ServiceAdapter]:
+>>>>>>> feature/core-services-refactor
         """Create an instance of a service adapter.
         
         Args:
@@ -291,15 +347,16 @@ class ServiceAdapterRegistry:
             
         Returns:
             Created adapter instance, or None if creation failed
+
         """
         if adapter_name not in self.adapter_classes:
             logger.error(f"Adapter class '{adapter_name}' not found")
             return None
-        
+
         if instance_id in self.adapter_instances:
             logger.error(f"Adapter instance '{instance_id}' already exists")
             return None
-        
+
         try:
             adapter_class = self.adapter_classes[adapter_name]
             adapter_config = AdapterConfiguration(
@@ -307,28 +364,28 @@ class ServiceAdapterRegistry:
                 instance_id=instance_id,
                 config=config
             )
-            
+
             # Validate configuration
             temp_instance = adapter_class(instance_id, adapter_config)
             validation_errors = temp_instance.validate_configuration(config)
             if validation_errors:
                 logger.error(f"Adapter configuration validation failed: {validation_errors}")
                 return None
-            
+
             # Create the actual instance
             instance = adapter_class(instance_id, adapter_config)
-            
+
             # Store configuration and instance
             self.configurations[instance_id] = adapter_config
             self.adapter_instances[instance_id] = instance
-            
+
             logger.info(f"Created adapter instance: {instance_id}")
             return instance
-            
+
         except Exception as e:
             logger.error(f"Error creating adapter instance '{instance_id}': {e}")
             return None
-    
+
     async def initialize_adapter(self, instance_id: str) -> bool:
         """Initialize a service adapter instance.
         
@@ -337,27 +394,28 @@ class ServiceAdapterRegistry:
             
         Returns:
             True if initialization was successful
+
         """
         if instance_id not in self.adapter_instances:
             logger.error(f"Adapter instance '{instance_id}' not found")
             return False
-        
+
         try:
             adapter = self.adapter_instances[instance_id]
             success = await adapter.initialize()
-            
+
             if success:
                 adapter.is_initialized = True
                 logger.info(f"Initialized adapter instance: {instance_id}")
             else:
                 logger.error(f"Failed to initialize adapter instance: {instance_id}")
-            
+
             return success
-            
+
         except Exception as e:
             logger.error(f"Error initializing adapter '{instance_id}': {e}")
             return False
-    
+
     async def cleanup_adapter(self, instance_id: str) -> bool:
         """Clean up a service adapter instance.
         
@@ -366,29 +424,42 @@ class ServiceAdapterRegistry:
             
         Returns:
             True if cleanup was successful
+
         """
         if instance_id not in self.adapter_instances:
             logger.error(f"Adapter instance '{instance_id}' not found")
             return False
-        
+
         try:
             adapter = self.adapter_instances[instance_id]
             await adapter.cleanup()
-            
+
             # Remove from registry
             del self.adapter_instances[instance_id]
             del self.configurations[instance_id]
-            
+
             logger.info(f"Cleaned up adapter instance: {instance_id}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Error cleaning up adapter '{instance_id}': {e}")
             return False
-    
+
     def get_adapter_instance(self, instance_id: str) -> Optional[ServiceAdapter]:
         """Get an adapter instance by ID."""
         return self.adapter_instances.get(instance_id)
+<<<<<<< HEAD
+
+    def list_adapter_classes(self) -> List[str]:
+        """List all registered adapter classes."""
+        return list(self.adapter_classes.keys())
+
+    def list_adapter_instances(self) -> List[str]:
+        """List all created adapter instances."""
+        return list(self.adapter_instances.keys())
+
+    def get_adapters_by_type(self, service_type: ServiceType) -> List[ServiceAdapter]:
+=======
     
     def list_adapter_classes(self) -> list[str]:
         """List all registered adapter classes."""
@@ -399,6 +470,7 @@ class ServiceAdapterRegistry:
         return list(self.adapter_instances.keys())
     
     def get_adapters_by_type(self, service_type: ServiceType) -> list[ServiceAdapter]:
+>>>>>>> feature/core-services-refactor
         """Get all adapter instances of a specific service type."""
         result = []
         for adapter in self.adapter_instances.values():
@@ -406,19 +478,29 @@ class ServiceAdapterRegistry:
             if metadata.service_type == service_type:
                 result.append(adapter)
         return result
+<<<<<<< HEAD
+
+    def get_adapters_by_capability(self, capability: AdapterCapability) -> List[ServiceAdapter]:
+=======
     
     def get_adapters_by_capability(self, capability: AdapterCapability) -> list[ServiceAdapter]:
+>>>>>>> feature/core-services-refactor
         """Get all adapter instances that support a specific capability."""
         result = []
         for adapter in self.adapter_instances.values():
             if adapter.supports_capability(capability):
                 result.append(adapter)
         return result
+<<<<<<< HEAD
+
+    async def health_check_all(self) -> Dict[str, bool]:
+=======
     
     async def health_check_all(self) -> dict[str, bool]:
+>>>>>>> feature/core-services-refactor
         """Perform health checks on all adapter instances."""
         results = {}
-        
+
         for instance_id, adapter in self.adapter_instances.items():
             try:
                 is_healthy = await adapter.health_check()
@@ -427,18 +509,23 @@ class ServiceAdapterRegistry:
             except Exception as e:
                 logger.error(f"Health check failed for adapter '{instance_id}': {e}")
                 results[instance_id] = False
-        
+
         return results
+<<<<<<< HEAD
+
+    def get_adapter_info(self, instance_id: str) -> Optional[Dict[str, Any]]:
+=======
     
     def get_adapter_info(self, instance_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Get detailed information about an adapter instance."""
         if instance_id not in self.adapter_instances:
             return None
-        
+
         adapter = self.adapter_instances[instance_id]
         config = self.configurations[instance_id]
         metadata = adapter.get_metadata()
-        
+
         return {
             "instance_id": instance_id,
             "adapter_name": config.adapter_name,
@@ -455,29 +542,38 @@ class ServiceAdapterManager:
     This class provides a convenient interface for managing service adapters,
     including automatic discovery, configuration, and lifecycle management.
     """
-    
+
     def __init__(self):
         """Initialize the service adapter manager."""
         self.registry = ServiceAdapterRegistry()
         self.auto_initialize = True
         self.health_check_interval = 300  # 5 minutes
-        
+
         logger.info("ServiceAdapterManager initialized")
-    
+
     def register_standard_adapters(self) -> None:
         """Register standard adapter classes."""
         # Register built-in adapter types
         self.registry.register_adapter_class("fact_source", FactSourceAdapter)
         self.registry.register_adapter_class("validation_service", ValidationServiceAdapter)
         self.registry.register_adapter_class("synthesis_engine", SynthesisEngineAdapter)
-        
+
         logger.info("Registered standard adapter classes")
+<<<<<<< HEAD
+
+    def register_custom_adapter(self, adapter_name: str, adapter_class: Type[ServiceAdapter]) -> bool:
+        """Register a custom adapter class."""
+        return self.registry.register_adapter_class(adapter_name, adapter_class)
+
+    async def create_and_initialize_adapter(self, adapter_name: str, instance_id: str, config: Dict[str, Any]) -> Optional[ServiceAdapter]:
+=======
     
     def register_custom_adapter(self, adapter_name: str, adapter_class: type[ServiceAdapter]) -> bool:
         """Register a custom adapter class."""
         return self.registry.register_adapter_class(adapter_name, adapter_class)
     
     async def create_and_initialize_adapter(self, adapter_name: str, instance_id: str, config: dict[str, Any]) -> Optional[ServiceAdapter]:
+>>>>>>> feature/core-services-refactor
         """Create and initialize a service adapter in one step.
         
         Args:
@@ -487,12 +583,13 @@ class ServiceAdapterManager:
             
         Returns:
             Created and initialized adapter instance
+
         """
         # Create the adapter
         adapter = self.registry.create_adapter_instance(adapter_name, instance_id, config)
         if not adapter:
             return None
-        
+
         # Initialize if auto-initialize is enabled
         if self.auto_initialize:
             success = await self.registry.initialize_adapter(instance_id)
@@ -500,14 +597,19 @@ class ServiceAdapterManager:
                 # Clean up on initialization failure
                 await self.registry.cleanup_adapter(instance_id)
                 return None
-        
+
         return adapter
-    
+
     def get_adapter(self, instance_id: str) -> Optional[ServiceAdapter]:
         """Get an adapter instance by ID."""
         return self.registry.get_adapter_instance(instance_id)
+<<<<<<< HEAD
+
+    def find_adapters(self, service_type: ServiceType = None, capability: AdapterCapability = None) -> List[ServiceAdapter]:
+=======
     
     def find_adapters(self, service_type: ServiceType = None, capability: AdapterCapability = None) -> list[ServiceAdapter]:
+>>>>>>> feature/core-services-refactor
         """Find adapters by type or capability.
         
         Args:
@@ -516,6 +618,7 @@ class ServiceAdapterManager:
             
         Returns:
             List of matching adapters
+
         """
         if service_type:
             return self.registry.get_adapters_by_type(service_type)
@@ -523,8 +626,13 @@ class ServiceAdapterManager:
             return self.registry.get_adapters_by_capability(capability)
         else:
             return list(self.registry.adapter_instances.values())
+<<<<<<< HEAD
+
+    async def execute_service_request(self, instance_id: str, operation: str, parameters: Dict[str, Any] = None, context: Dict[str, Any] = None) -> ServiceResponse:
+=======
     
     async def execute_service_request(self, instance_id: str, operation: str, parameters: dict[str, Any] = None, context: dict[str, Any] = None) -> ServiceResponse:
+>>>>>>> feature/core-services-refactor
         """Execute a service request through an adapter.
         
         Args:
@@ -535,6 +643,7 @@ class ServiceAdapterManager:
             
         Returns:
             Service response
+
         """
         adapter = self.registry.get_adapter_instance(instance_id)
         if not adapter:
@@ -543,20 +652,25 @@ class ServiceAdapterManager:
                 success=False,
                 error=f"Adapter instance '{instance_id}' not found"
             )
-        
+
         request = ServiceRequest(
             request_id=f"request_{datetime.now().timestamp()}",
             operation=operation,
             parameters=parameters or {},
             context=context or {}
         )
-        
+
         return await adapter.execute_request(request)
+<<<<<<< HEAD
+
+    async def health_check_all(self) -> Dict[str, Any]:
+=======
     
     async def health_check_all(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Perform comprehensive health check on all adapters."""
         health_results = await self.registry.health_check_all()
-        
+
         summary = {
             "total_adapters": len(health_results),
             "healthy_adapters": sum(1 for healthy in health_results.values() if healthy),
@@ -564,10 +678,15 @@ class ServiceAdapterManager:
             "health_check_timestamp": datetime.now().isoformat(),
             "adapter_status": health_results
         }
-        
+
         return summary
+<<<<<<< HEAD
+
+    def get_system_status(self) -> Dict[str, Any]:
+=======
     
     def get_system_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get overall status of the service adapter system."""
         return {
             "registered_classes": len(self.registry.adapter_classes),

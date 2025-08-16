@@ -6,7 +6,11 @@ workflow engine to orchestrate role interactions and conversation flows.
 
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
+=======
 from typing import Any, Optional, Protocol, runtime_checkable
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel
 
@@ -29,6 +33,7 @@ from .models import SessionID
 
 class WorkflowState(str, Enum):
     """States of a workflow execution."""
+
     PENDING = "pending"
     RUNNING = "running"
     PAUSED = "paused"
@@ -39,6 +44,7 @@ class WorkflowState(str, Enum):
 
 class WorkflowEventType(str, Enum):
     """Types of workflow events."""
+
     USER_INPUT = "user_input"
     ROLE_RESPONSE = "role_response"
     TOPIC_CHANGE = "topic_change"
@@ -52,6 +58,7 @@ class WorkflowEventType(str, Enum):
 
 class WorkflowEvent(BaseModel):
     """Represents an event in a workflow."""
+
     id: str
     type: WorkflowEventType
     session_id: SessionID
@@ -62,6 +69,7 @@ class WorkflowEvent(BaseModel):
 
 class WorkflowAction(BaseModel):
     """Represents an action to be executed in a workflow."""
+
     id: str
     name: str
     type: str  # e.g., "role_response", "validation", "synthesis"
@@ -72,6 +80,7 @@ class WorkflowAction(BaseModel):
 
 class WorkflowStep(BaseModel):
     """Represents a step in a workflow."""
+
     id: str
     name: str
     description: str = ""
@@ -82,6 +91,7 @@ class WorkflowStep(BaseModel):
 
 class ConversationWorkflow(BaseModel):
     """Defines a conversation workflow."""
+
     id: str
     name: str
     description: str = ""
@@ -94,6 +104,7 @@ class ConversationWorkflow(BaseModel):
 
 class WorkflowExecution(BaseModel):
     """Represents an active workflow execution."""
+
     id: str
     workflow_id: str
     session_id: SessionID
@@ -108,6 +119,7 @@ class WorkflowExecution(BaseModel):
 
 class TaskDecomposition(BaseModel):
     """Represents a task decomposition strategy."""
+
     id: str
     name: str
     description: str = ""
@@ -119,6 +131,7 @@ class TaskDecomposition(BaseModel):
 
 class ProcessingChain(BaseModel):
     """Represents a chain of processing tasks."""
+
     id: str
     name: str
     description: str = ""
@@ -133,7 +146,7 @@ class ProcessingChain(BaseModel):
 @runtime_checkable
 class WorkflowEngineInterface(Protocol):
     """Interface for the PocketFlow workflow engine."""
-    
+
     def create_workflow(self, workflow: ConversationWorkflow) -> str:
         """Create a new workflow definition.
         
@@ -142,10 +155,16 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             The ID of the created workflow.
+
         """
         ...
+<<<<<<< HEAD
+
+    def start_workflow(self, workflow_id: str, session_id: SessionID, context: Optional[Dict[str, Any]] = None) -> str:
+=======
     
     def start_workflow(self, workflow_id: str, session_id: SessionID, context: Optional[dict[str, Any]] = None) -> str:
+>>>>>>> feature/core-services-refactor
         """Start a workflow execution.
         
         Args:
@@ -155,9 +174,10 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             The ID of the workflow execution.
+
         """
         ...
-    
+
     def pause_workflow(self, execution_id: str) -> bool:
         """Pause a workflow execution.
         
@@ -166,9 +186,10 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             True if paused successfully, False otherwise.
+
         """
         ...
-    
+
     def resume_workflow(self, execution_id: str) -> bool:
         """Resume a paused workflow execution.
         
@@ -177,9 +198,10 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             True if resumed successfully, False otherwise.
+
         """
         ...
-    
+
     def cancel_workflow(self, execution_id: str) -> bool:
         """Cancel a workflow execution.
         
@@ -188,9 +210,10 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             True if cancelled successfully, False otherwise.
+
         """
         ...
-    
+
     def send_event(self, execution_id: str, event: WorkflowEvent) -> bool:
         """Send an event to a workflow execution.
         
@@ -200,9 +223,10 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             True if event was processed successfully, False otherwise.
+
         """
         ...
-    
+
     def get_execution_status(self, execution_id: str) -> WorkflowExecution:
         """Get the status of a workflow execution.
         
@@ -211,10 +235,16 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             The workflow execution status.
+
         """
         ...
+<<<<<<< HEAD
+
+    def get_execution_context(self, execution_id: str) -> Dict[str, Any]:
+=======
     
     def get_execution_context(self, execution_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get the context of a workflow execution.
         
         Args:
@@ -222,6 +252,7 @@ class WorkflowEngineInterface(Protocol):
             
         Returns:
             The workflow execution context.
+
         """
         ...
 
@@ -229,8 +260,13 @@ class WorkflowEngineInterface(Protocol):
 @runtime_checkable
 class WorkflowStateManagerInterface(Protocol):
     """Interface for managing workflow state."""
+<<<<<<< HEAD
+
+    def save_state(self, execution_id: str, state: Dict[str, Any]) -> bool:
+=======
     
     def save_state(self, execution_id: str, state: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Save workflow state.
         
         Args:
@@ -239,10 +275,16 @@ class WorkflowStateManagerInterface(Protocol):
             
         Returns:
             True if saved successfully, False otherwise.
+
         """
         ...
+<<<<<<< HEAD
+
+    def load_state(self, execution_id: str) -> Dict[str, Any]:
+=======
     
     def load_state(self, execution_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Load workflow state.
         
         Args:
@@ -250,9 +292,10 @@ class WorkflowStateManagerInterface(Protocol):
             
         Returns:
             The loaded state.
+
         """
         ...
-    
+
     def delete_state(self, execution_id: str) -> bool:
         """Delete workflow state.
         
@@ -261,6 +304,7 @@ class WorkflowStateManagerInterface(Protocol):
             
         Returns:
             True if deleted successfully, False otherwise.
+
         """
         ...
 
@@ -268,8 +312,13 @@ class WorkflowStateManagerInterface(Protocol):
 @runtime_checkable
 class TaskDecompositionServiceInterface(Protocol):
     """Interface for task decomposition services."""
+<<<<<<< HEAD
+
+    def analyze_complexity(self, task: str, context: Dict[str, Any]) -> float:
+=======
     
     def analyze_complexity(self, task: str, context: dict[str, Any]) -> float:
+>>>>>>> feature/core-services-refactor
         """Analyze the complexity of a task.
         
         Args:
@@ -278,10 +327,16 @@ class TaskDecompositionServiceInterface(Protocol):
             
         Returns:
             A complexity score between 0 and 1.
+
         """
         ...
+<<<<<<< HEAD
+
+    def decompose_task(self, task: str, strategy: TaskDecomposition, context: Dict[str, Any]) -> List[str]:
+=======
     
     def decompose_task(self, task: str, strategy: TaskDecomposition, context: dict[str, Any]) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """Decompose a task into subtasks.
         
         Args:
@@ -291,10 +346,16 @@ class TaskDecompositionServiceInterface(Protocol):
             
         Returns:
             A list of subtasks.
+
         """
         ...
+<<<<<<< HEAD
+
+    def create_processing_chain(self, tasks: List[str], execution_mode: str) -> ProcessingChain:
+=======
     
     def create_processing_chain(self, tasks: list[str], execution_mode: str) -> ProcessingChain:
+>>>>>>> feature/core-services-refactor
         """Create a processing chain from tasks.
         
         Args:
@@ -303,6 +364,7 @@ class TaskDecompositionServiceInterface(Protocol):
             
         Returns:
             A processing chain.
+
         """
         ...
 
@@ -310,8 +372,13 @@ class TaskDecompositionServiceInterface(Protocol):
 @runtime_checkable
 class WorkflowAdapterInterface(Protocol):
     """Interface for adapting DAIP-LIVE components to PocketFlow workflows."""
+<<<<<<< HEAD
+
+    def adapt_role_manager(self, role_manager: Any) -> Dict[str, Any]:
+=======
     
     def adapt_role_manager(self, role_manager: Any) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Adapt RoleManager for workflow use.
         
         Args:
@@ -319,10 +386,16 @@ class WorkflowAdapterInterface(Protocol):
             
         Returns:
             Adapted interface for workflow actions.
+
         """
         ...
+<<<<<<< HEAD
+
+    def adapt_memory_service(self, memory_service: Any) -> Dict[str, Any]:
+=======
     
     def adapt_memory_service(self, memory_service: Any) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Adapt MemoryService for workflow use.
         
         Args:
@@ -330,10 +403,16 @@ class WorkflowAdapterInterface(Protocol):
             
         Returns:
             Adapted interface for workflow actions.
+
         """
         ...
+<<<<<<< HEAD
+
+    def adapt_synthesis_engine(self, synthesis_engine: Any) -> Dict[str, Any]:
+=======
     
     def adapt_synthesis_engine(self, synthesis_engine: Any) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Adapt SynthesisEngine for workflow use.
         
         Args:
@@ -341,10 +420,16 @@ class WorkflowAdapterInterface(Protocol):
             
         Returns:
             Adapted interface for workflow actions.
+
         """
         ...
+<<<<<<< HEAD
+
+    def adapt_fact_services(self, fact_extraction: Any, fact_validation: Any) -> Dict[str, Any]:
+=======
     
     def adapt_fact_services(self, fact_extraction: Any, fact_validation: Any) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Adapt fact extraction and validation services for workflow use.
         
         Args:
@@ -353,6 +438,7 @@ class WorkflowAdapterInterface(Protocol):
             
         Returns:
             Adapted interface for workflow actions.
+
         """
         ...
 

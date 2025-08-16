@@ -5,7 +5,11 @@
 """
 import logging
 from collections.abc import AsyncGenerator
+<<<<<<< HEAD
+from typing import Any, Dict, List
+=======
 from typing import Any
+>>>>>>> feature/core-services-refactor
 
 import ollama
 

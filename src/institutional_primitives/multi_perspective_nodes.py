@@ -26,7 +26,7 @@ ViewpointSynthesisNode = EnhancedSynthesisNode
 __all__ = [
     "SubProblem",
     "ExpertViewpoint",
-    "ViewpointCollection", 
+    "ViewpointCollection",
     "SynthesisQuality",
     "SynthesisResult",
     "TaskDecompositionNode",

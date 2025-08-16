@@ -24,7 +24,11 @@ from consensus_validation import ConsensusDataSerializer, ConsensusDataValidator
 
 class TestConsensusModels:
     """测试核心数据模型"""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     def test_consensus_input_creation(self):
         """测试ConsensusInput创建"""
         input_data = ConsensusInput(
@@ -34,14 +38,22 @@ class TestConsensusModels:
             reasoning="基于历史数据分析",
             evidence=["数据点1", "数据点2"]
         )
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         assert input_data.agent_id == "agent_001"
         assert input_data.position == "支持提案A"
         assert input_data.confidence == 0.8
         assert input_data.reasoning == "基于历史数据分析"
         assert len(input_data.evidence) == 2
         assert isinstance(input_data.timestamp, datetime)
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
     def test_consensus_input_validation(self):
         """测试ConsensusInput验证"""
         # 测试置信度范围验证
@@ -51,6 +63,16 @@ class TestConsensusModels:
                 position="test",
                 confidence=1.5  # 超出范围
             )
+<<<<<<< HEAD
+
+        with pytest.raises(ValueError):
+            ConsensusInput(
+                agent_id="agent_001",
+                position="test",
+                confidence=-0.1  # 超出范围
+            )
+
+=======
             
         with pytest.raises(ValueError):
             ConsensusInput(
@@ -59,13 +81,18 @@ class TestConsensusModels:
                 confidence=-0.1  # 超出范围
             )
             
+>>>>>>> feature/core-services-refactor
     def test_consensus_request_creation(self):
         """测试ConsensusRequest创建"""
         inputs = [
             ConsensusInput(agent_id="agent_001", position="支持", confidence=0.8),
             ConsensusInput(agent_id="agent_002", position="反对", confidence=0.7)
         ]
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         request = ConsensusRequest(
             inputs=inputs,
             algorithm_preference="weighted_voting",
@@ -75,12 +102,20 @@ class TestConsensusModels:
                 min_confidence=0.7
             )
         )
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         assert len(request.inputs) == 2
         assert request.algorithm_preference == "weighted_voting"
         assert request.timeout == 60.0
         assert request.quality_requirements.priority == QualityPriority.ACCURACY
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
     def test_consensus_response_creation(self):
         """测试ConsensusResponse创建"""
         result = ConsensusResult(
@@ -90,7 +125,11 @@ class TestConsensusModels:
             reasoning_trace={"method": "weighted_voting"},
             metadata={"execution_details": "success"}
         )
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         response = ConsensusResponse(
             success=True,
             result=result,
@@ -98,13 +137,21 @@ class TestConsensusModels:
             execution_time=2.5,
             fallback_used=False
         )
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         assert response.success is True
         assert response.result.consensus_value == "支持"
         assert response.algorithm_used == "weighted_voting"
         assert response.execution_time == 2.5
         assert response.fallback_used is False
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
     def test_algorithm_metadata_creation(self):
         """测试AlgorithmMetadata创建"""
         metadata = AlgorithmMetadata(
@@ -120,7 +167,11 @@ class TestConsensusModels:
             requirements=["numpy"],
             configuration_schema={"weights": {"type": "dict"}}
         )
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         assert metadata.name == "加权投票算法"
         assert metadata.algorithm_type == AlgorithmType.WEIGHTED_VOTING
         assert metadata.accuracy == 0.85
@@ -129,7 +180,11 @@ class TestConsensusModels:
 
 class TestConsensusAlgorithmInterface:
     """测试共识算法接口"""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     def test_algorithm_capabilities(self):
         """测试算法能力描述"""
         capabilities = AlgorithmCapabilities(
@@ -141,12 +196,26 @@ class TestConsensusAlgorithmInterface:
             min_participants=2,
             max_participants=10
         )
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 测试能力检查
         inputs = [
             ConsensusInput(agent_id="agent_001", position="支持", confidence=0.8, reasoning="理由1"),
             ConsensusInput(agent_id="agent_002", position="反对", confidence=0.7, reasoning="理由2")
         ]
+<<<<<<< HEAD
+
+        request = ConsensusRequest(inputs=inputs)
+        assert capabilities.can_handle_request(request) is True
+
+        # 测试参与者数量限制
+        single_input_request = ConsensusRequest(inputs=[inputs[0]])
+        assert capabilities.can_handle_request(single_input_request) is False
+
+=======
         
         request = ConsensusRequest(inputs=inputs)
         assert capabilities.can_handle_request(request) is True
@@ -155,21 +224,34 @@ class TestConsensusAlgorithmInterface:
         single_input_request = ConsensusRequest(inputs=[inputs[0]])
         assert capabilities.can_handle_request(single_input_request) is False
         
+>>>>>>> feature/core-services-refactor
     def test_consensus_context(self):
         """测试共识上下文"""
         services = {"llm_service": "mock_llm", "memory_service": "mock_memory"}
         config = {"algorithm": "weighted_voting", "threshold": 0.6}
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         context = ConsensusContext(
             session_id="test_session",
             services=services,
             configuration=config
         )
+<<<<<<< HEAD
+
+        assert context.session_id == "test_session"
+        assert context.get_service("llm_service") == "mock_llm"
+        assert context.configuration["threshold"] == 0.6
+
+=======
         
         assert context.session_id == "test_session"
         assert context.get_service("llm_service") == "mock_llm"
         assert context.configuration["threshold"] == 0.6
         
+>>>>>>> feature/core-services-refactor
         # 测试指标设置
         context.set_metric("accuracy", 0.85)
         assert context.get_metric("accuracy") == 0.85
@@ -178,7 +260,11 @@ class TestConsensusAlgorithmInterface:
 
 class TestConsensusDataValidation:
     """测试数据验证功能"""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     def test_validate_consensus_input(self):
         """测试共识输入验证"""
         # 有效输入
@@ -189,6 +275,28 @@ class TestConsensusDataValidation:
             "reasoning": "基于分析结果",
             "evidence": ["证据1", "证据2"]
         }
+<<<<<<< HEAD
+
+        result = ConsensusDataValidator.validate_consensus_input(valid_data)
+        assert result.is_valid is True
+        assert len(result.errors) == 0
+
+        # 无效输入 - 置信度超出范围
+        invalid_data = valid_data.copy()
+        invalid_data["confidence"] = 1.5
+
+        result = ConsensusDataValidator.validate_consensus_input(invalid_data)
+        assert result.is_valid is False
+        assert len(result.errors) > 0
+
+        # 无效输入 - 缺少必需字段
+        incomplete_data = {"agent_id": "agent_001"}
+
+        result = ConsensusDataValidator.validate_consensus_input(incomplete_data)
+        assert result.is_valid is False
+        assert len(result.errors) > 0
+
+=======
         
         result = ConsensusDataValidator.validate_consensus_input(valid_data)
         assert result.is_valid is True
@@ -209,6 +317,7 @@ class TestConsensusDataValidation:
         assert result.is_valid is False
         assert len(result.errors) > 0
         
+>>>>>>> feature/core-services-refactor
     def test_validate_consensus_request(self):
         """测试共识请求验证"""
         inputs = [
@@ -218,31 +327,54 @@ class TestConsensusDataValidation:
                 "confidence": 0.8
             },
             {
+<<<<<<< HEAD
+                "agent_id": "agent_002",
+=======
                 "agent_id": "agent_002", 
+>>>>>>> feature/core-services-refactor
                 "position": "反对",
                 "confidence": 0.7
             }
         ]
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 有效请求
         valid_request = {
             "inputs": inputs,
             "timeout": 30.0
         }
+<<<<<<< HEAD
+
+        result = ConsensusDataValidator.validate_consensus_request(valid_request)
+        assert result.is_valid is True
+
+=======
         
         result = ConsensusDataValidator.validate_consensus_request(valid_request)
         assert result.is_valid is True
         
+>>>>>>> feature/core-services-refactor
         # 无效请求 - 空输入列表
         invalid_request = {
             "inputs": [],
             "timeout": 30.0
         }
+<<<<<<< HEAD
+
+        result = ConsensusDataValidator.validate_consensus_request(invalid_request)
+        assert result.is_valid is False
+        assert any("inputs不能为空" in error for error in result.errors)
+
+=======
         
         result = ConsensusDataValidator.validate_consensus_request(invalid_request)
         assert result.is_valid is False
         assert any("inputs不能为空" in error for error in result.errors)
         
+>>>>>>> feature/core-services-refactor
     def test_validate_algorithm_metadata(self):
         """测试算法元数据验证"""
         # 有效元数据
@@ -257,6 +389,16 @@ class TestConsensusDataValidation:
             "accuracy": 0.85,
             "performance": "fast"
         }
+<<<<<<< HEAD
+
+        result = ConsensusDataValidator.validate_algorithm_metadata(valid_metadata)
+        assert result.is_valid is True
+
+        # 无效元数据 - 错误的复杂度值
+        invalid_metadata = valid_metadata.copy()
+        invalid_metadata["complexity"] = "invalid_complexity"
+
+=======
         
         result = ConsensusDataValidator.validate_algorithm_metadata(valid_metadata)
         assert result.is_valid is True
@@ -265,13 +407,18 @@ class TestConsensusDataValidation:
         invalid_metadata = valid_metadata.copy()
         invalid_metadata["complexity"] = "invalid_complexity"
         
+>>>>>>> feature/core-services-refactor
         result = ConsensusDataValidator.validate_algorithm_metadata(invalid_metadata)
         assert result.is_valid is False
 
 
 class TestConsensusDataSerialization:
     """测试数据序列化功能"""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     def test_json_serialization(self):
         """测试JSON序列化"""
         input_data = ConsensusInput(
@@ -281,19 +428,31 @@ class TestConsensusDataSerialization:
             reasoning="基于分析",
             evidence=["证据1"]
         )
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 序列化
         json_str = ConsensusDataSerializer.serialize_to_json(input_data)
         assert isinstance(json_str, str)
         assert "agent_001" in json_str
         assert "支持提案" in json_str
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 反序列化
         deserialized = ConsensusDataSerializer.deserialize_from_json(json_str, ConsensusInput)
         assert deserialized.agent_id == "agent_001"
         assert deserialized.position == "支持提案"
         assert deserialized.confidence == 0.8
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
     def test_legacy_format_conversion(self):
         """测试旧格式转换"""
         # 测试DebateTurn格式转换
@@ -302,16 +461,28 @@ class TestConsensusDataSerialization:
             "opinion": "我认为这个提案很好",
             "round": 1
         }
+<<<<<<< HEAD
+
+        converted = ConsensusDataSerializer.convert_legacy_format(
+            debate_turn_data, "debate_turn"
+        )
+
+=======
         
         converted = ConsensusDataSerializer.convert_legacy_format(
             debate_turn_data, "debate_turn"
         )
         
+>>>>>>> feature/core-services-refactor
         assert converted["agent_id"] == "expert_001"
         assert converted["position"] == "我认为这个提案很好"
         assert converted["confidence"] == 0.8
         assert converted["metadata"]["round"] == 1
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 测试AdvancedConsensusInput格式转换
         advanced_input_data = {
             "agent_id": "agent_001",
@@ -321,11 +492,19 @@ class TestConsensusDataSerialization:
             "evidence": ["证据1", "证据2"],
             "cognitive_profile": {"expertise": "high"}
         }
+<<<<<<< HEAD
+
+        converted = ConsensusDataSerializer.convert_legacy_format(
+            advanced_input_data, "advanced_consensus_input"
+        )
+
+=======
         
         converted = ConsensusDataSerializer.convert_legacy_format(
             advanced_input_data, "advanced_consensus_input"
         )
         
+>>>>>>> feature/core-services-refactor
         assert converted["agent_id"] == "agent_001"
         assert converted["position"] == "支持"
         assert converted["confidence"] == 0.9
@@ -335,7 +514,11 @@ class TestConsensusDataSerialization:
 def run_basic_functionality_test():
     """运行基本功能测试"""
     print("🧪 开始基本功能测试...")
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     # 测试数据模型创建
     try:
         input_data = ConsensusInput(
@@ -347,7 +530,11 @@ def run_basic_functionality_test():
     except Exception as e:
         print(f"❌ ConsensusInput 创建失败: {e}")
         return False
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
     # 测试请求创建
     try:
         request = ConsensusRequest(inputs=[input_data])
@@ -355,7 +542,11 @@ def run_basic_functionality_test():
     except Exception as e:
         print(f"❌ ConsensusRequest 创建失败: {e}")
         return False
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
     # 测试验证功能
     try:
         validator = ConsensusDataValidator()
@@ -368,7 +559,11 @@ def run_basic_functionality_test():
     except Exception as e:
         print(f"❌ 数据验证功能异常: {e}")
         return False
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
     # 测试序列化功能
     try:
         serializer = ConsensusDataSerializer()
@@ -382,7 +577,11 @@ def run_basic_functionality_test():
     except Exception as e:
         print(f"❌ 序列化功能异常: {e}")
         return False
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
     print("🎉 所有基本功能测试通过!")
     return True
 
@@ -390,7 +589,11 @@ def run_basic_functionality_test():
 if __name__ == "__main__":
     # 运行基本功能测试
     success = run_basic_functionality_test()
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     if success:
         print("\n📋 测试总结:")
         print("- ✅ 核心数据模型正常工作")
@@ -399,4 +602,8 @@ if __name__ == "__main__":
         print("- ✅ 接口定义完整")
         print("\n🚀 任务1实现完成，可以进行下一步开发!")
     else:
+<<<<<<< HEAD
         print("\n❌ 测试失败，需要修复问题后再继续")
+=======
+        print("\n❌ 测试失败，需要修复问题后再继续")
+>>>>>>> feature/core-services-refactor

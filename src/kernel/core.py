@@ -29,10 +29,11 @@ class Kernel:
 
         Args:
             llm_interface: An instance of a class that adheres to the LLMInterface.
+
         """
         # Store the LLM interface
         self.llm_interface = llm_interface
-        
+
         # Instantiate other core components
         self.synthesis_engine: SynthesisEngine = SynthesisEngine(llm_interface=self.llm_interface)
         self.tool_executor: ToolExecutor = tool_executor_instance

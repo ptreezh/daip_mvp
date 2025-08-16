@@ -8,7 +8,11 @@
 import logging
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any, Dict, List, Optional
+=======
 from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -17,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class InteractionMode(str, Enum):
     """Modes of role interaction."""
+
     COLLABORATIVE = "collaborative"
     COMPETITIVE = "competitive"
     ANALYTICAL = "analytical"
@@ -28,6 +33,7 @@ class InteractionMode(str, Enum):
 
 class ExpertiseLevel(str, Enum):
     """Levels of expertise."""
+
     NOVICE = "novice"
     INTERMEDIATE = "intermediate"
     ADVANCED = "advanced"
@@ -37,6 +43,7 @@ class ExpertiseLevel(str, Enum):
 
 class CognitiveStyle(str, Enum):
     """Cognitive styles for reasoning."""
+
     LOGICAL = "logical"
     INTUITIVE = "intuitive"
     SYSTEMATIC = "systematic"
@@ -47,74 +54,88 @@ class CognitiveStyle(str, Enum):
 
 class RolePersonality(BaseModel):
     """Personality traits for a role."""
+
     openness: float = Field(ge=0.0, le=1.0, default=0.5)
     conscientiousness: float = Field(ge=0.0, le=1.0, default=0.5)
     extraversion: float = Field(ge=0.0, le=1.0, default=0.5)
     agreeableness: float = Field(ge=0.0, le=1.0, default=0.5)
     neuroticism: float = Field(ge=0.0, le=1.0, default=0.5)
-    
+
     def get_personality_description(self) -> str:
         """Generate a personality description."""
         traits = []
-        
+
         if self.openness > 0.7:
             traits.append("highly creative and open to new ideas")
         elif self.openness < 0.3:
             traits.append("practical and conventional")
-        
+
         if self.conscientiousness > 0.7:
             traits.append("highly organized and detail-oriented")
         elif self.conscientiousness < 0.3:
             traits.append("flexible and spontaneous")
-        
+
         if self.extraversion > 0.7:
             traits.append("outgoing and assertive")
         elif self.extraversion < 0.3:
             traits.append("reserved and thoughtful")
-        
+
         if self.agreeableness > 0.7:
             traits.append("cooperative and trusting")
         elif self.agreeableness < 0.3:
             traits.append("competitive and skeptical")
-        
+
         if self.neuroticism > 0.7:
             traits.append("emotionally sensitive")
         elif self.neuroticism < 0.3:
             traits.append("emotionally stable")
-        
+
         return ", ".join(traits) if traits else "balanced personality"
 
 
 class ExpertiseProfile(BaseModel):
     """Expertise profile for a role."""
+
     domain: str
     level: ExpertiseLevel
     specializations: list[str] = Field(default_factory=list)
     years_experience: Optional[int] = None
+<<<<<<< HEAD
+    key_skills: List[str] = Field(default_factory=list)
+    knowledge_areas: List[str] = Field(default_factory=list)
+
+=======
     key_skills: list[str] = Field(default_factory=list)
     knowledge_areas: list[str] = Field(default_factory=list)
     
+>>>>>>> feature/core-services-refactor
     def get_expertise_description(self) -> str:
         """Generate an expertise description."""
         desc = f"{self.level.value} level expertise in {self.domain}"
-        
+
         if self.specializations:
             desc += f", specializing in {', '.join(self.specializations)}"
-        
+
         if self.years_experience:
             desc += f" with {self.years_experience} years of experience"
-        
+
         return desc
 
 
 class RolePromptTemplate(BaseModel):
     """Template for role prompts."""
+
     system_prompt: str
     task_prompt_template: str
     interaction_prompt_template: str
     context_prompt_template: str
+<<<<<<< HEAD
+    variables: Dict[str, Any] = Field(default_factory=dict)
+
+=======
     variables: dict[str, Any] = Field(default_factory=dict)
     
+>>>>>>> feature/core-services-refactor
     def render_prompt(self, prompt_type: str, **kwargs) -> str:
         """Render a prompt with variables."""
         template_map = {
@@ -123,14 +144,14 @@ class RolePromptTemplate(BaseModel):
             "interaction": self.interaction_prompt_template,
             "context": self.context_prompt_template
         }
-        
+
         template = template_map.get(prompt_type, "")
         if not template:
             return ""
-        
+
         # Merge variables with kwargs
         render_vars = {**self.variables, **kwargs}
-        
+
         # Simple template rendering
         try:
             return template.format(**render_vars)
@@ -141,43 +162,55 @@ class RolePromptTemplate(BaseModel):
 
 class RoleConfiguration(BaseModel):
     """Complete configuration for a role."""
+
     role_id: str
     name: str
     description: str
-    
+
     # Core characteristics
     expertise_profile: ExpertiseProfile
     personality: RolePersonality
     cognitive_style: CognitiveStyle
     interaction_mode: InteractionMode
-    
+
     # Prompts and behavior
     prompt_template: RolePromptTemplate
-    
+
     # Behavioral parameters
     confidence_threshold: float = Field(ge=0.0, le=1.0, default=0.7)
     risk_tolerance: float = Field(ge=0.0, le=1.0, default=0.5)
     collaboration_preference: float = Field(ge=0.0, le=1.0, default=0.7)
-    
+
     # Constraints and preferences
     max_response_length: int = Field(gt=0, default=1000)
     preferred_evidence_types: list[str] = Field(default_factory=list)
     communication_style: str = "professional"
-    
+
     # Metadata
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
     version: str = "1.0.0"
+<<<<<<< HEAD
+    tags: List[str] = Field(default_factory=list)
+
+    def update_configuration(self, updates: Dict[str, Any]) -> None:
+=======
     tags: list[str] = Field(default_factory=list)
     
     def update_configuration(self, updates: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Update role configuration."""
         for key, value in updates.items():
             if hasattr(self, key):
                 setattr(self, key, value)
         self.updated_at = datetime.now()
+<<<<<<< HEAD
+
+    def get_role_context(self) -> Dict[str, Any]:
+=======
     
     def get_role_context(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get role context for LLM interactions."""
         return {
             "role_id": self.role_id,
@@ -193,22 +226,34 @@ class RoleConfiguration(BaseModel):
 
 class RoleTemplate(BaseModel):
     """Template for creating role configurations."""
+
     template_id: str
     name: str
     description: str
     category: str
-    
+
     # Template parameters
     default_config: RoleConfiguration
+<<<<<<< HEAD
+    customizable_fields: List[str] = Field(default_factory=list)
+    required_fields: List[str] = Field(default_factory=list)
+
+=======
     customizable_fields: list[str] = Field(default_factory=list)
     required_fields: list[str] = Field(default_factory=list)
     
+>>>>>>> feature/core-services-refactor
     # Metadata
     author: str
     version: str = "1.0.0"
     created_at: datetime = Field(default_factory=datetime.now)
+<<<<<<< HEAD
+    tags: List[str] = Field(default_factory=list)
+
+=======
     tags: list[str] = Field(default_factory=list)
     
+>>>>>>> feature/core-services-refactor
     def create_role_from_template(
         self,
         role_id: str,
@@ -218,7 +263,7 @@ class RoleTemplate(BaseModel):
         # Start with default configuration
         config_dict = self.default_config.dict()
         config_dict["role_id"] = role_id
-        
+
         # Apply customizations
         if customizations:
             for field, value in customizations.items():
@@ -226,12 +271,12 @@ class RoleTemplate(BaseModel):
                     config_dict[field] = value
                 else:
                     logger.warning(f"Field '{field}' is not customizable in template '{self.template_id}'")
-        
+
         # Validate required fields
         for field in self.required_fields:
             if field not in config_dict or config_dict[field] is None:
                 raise ValueError(f"Required field '{field}' is missing")
-        
+
         return RoleConfiguration(**config_dict)
 
 
@@ -241,18 +286,25 @@ class RoleConfigurationManager:
     This class provides dynamic role configuration capabilities,
     allowing for custom prompts, expertise profiles, and interaction patterns.
     """
-    
+
     def __init__(self):
         """Initialize the role configuration manager."""
+<<<<<<< HEAD
+        self.configurations: Dict[str, RoleConfiguration] = {}
+        self.templates: Dict[str, RoleTemplate] = {}
+        self.active_roles: Dict[str, str] = {}  # role_instance_id -> config_id
+
+=======
         self.configurations: dict[str, RoleConfiguration] = {}
         self.templates: dict[str, RoleTemplate] = {}
         self.active_roles: dict[str, str] = {}  # role_instance_id -> config_id
         
+>>>>>>> feature/core-services-refactor
         # Initialize with standard templates
         self._initialize_standard_templates()
-        
+
         logger.info("RoleConfigurationManager initialized")
-    
+
     def _initialize_standard_templates(self) -> None:
         """Initialize standard role templates."""
         # Critical Reviewer Template
@@ -296,7 +348,7 @@ class RoleConfigurationManager:
             required_fields=["role_id", "name"],
             tags=["critical", "analysis", "fact-checking"]
         )
-        
+
         # Synthesis Expert Template
         synthesis_expert = RoleTemplate(
             template_id="synthesis_expert",
@@ -338,7 +390,7 @@ class RoleConfigurationManager:
             required_fields=["role_id", "name"],
             tags=["synthesis", "integration", "collaboration"]
         )
-        
+
         # Domain Expert Template
         domain_expert = RoleTemplate(
             template_id="domain_expert",
@@ -380,14 +432,14 @@ class RoleConfigurationManager:
             required_fields=["role_id", "name", "expertise_profile"],
             tags=["expert", "domain", "customizable"]
         )
-        
+
         # Register templates
         self.templates[critical_reviewer.template_id] = critical_reviewer
         self.templates[synthesis_expert.template_id] = synthesis_expert
         self.templates[domain_expert.template_id] = domain_expert
-        
+
         logger.info("Initialized standard role templates")
-    
+
     def register_role_template(self, template: RoleTemplate) -> bool:
         """Register a role template.
         
@@ -396,14 +448,15 @@ class RoleConfigurationManager:
             
         Returns:
             True if registration was successful
+
         """
         if template.template_id in self.templates:
             logger.warning(f"Template '{template.template_id}' already exists. Overwriting.")
-        
+
         self.templates[template.template_id] = template
         logger.info(f"Registered role template: {template.template_id}")
         return True
-    
+
     def create_role_from_template(
         self,
         template_id: str,
@@ -419,25 +472,26 @@ class RoleConfigurationManager:
             
         Returns:
             Created role configuration, or None if creation failed
+
         """
         if template_id not in self.templates:
             logger.error(f"Template '{template_id}' not found")
             return None
-        
+
         try:
             template = self.templates[template_id]
             config = template.create_role_from_template(role_id, customizations)
-            
+
             # Register the configuration
             self.configurations[role_id] = config
-            
+
             logger.info(f"Created role '{role_id}' from template '{template_id}'")
             return config
-            
+
         except Exception as e:
             logger.error(f"Error creating role from template: {e}")
             return None
-    
+
     def register_role_configuration(self, config: RoleConfiguration) -> bool:
         """Register a role configuration.
         
@@ -446,18 +500,19 @@ class RoleConfigurationManager:
             
         Returns:
             True if registration was successful
+
         """
         if config.role_id in self.configurations:
             logger.warning(f"Role configuration '{config.role_id}' already exists. Overwriting.")
-        
+
         self.configurations[config.role_id] = config
         logger.info(f"Registered role configuration: {config.role_id}")
         return True
-    
+
     def get_role_configuration(self, role_id: str) -> Optional[RoleConfiguration]:
         """Get a role configuration by ID."""
         return self.configurations.get(role_id)
-    
+
     def update_role_configuration(
         self,
         role_id: str,
@@ -471,36 +526,50 @@ class RoleConfigurationManager:
             
         Returns:
             True if update was successful
+
         """
         if role_id not in self.configurations:
             logger.error(f"Role configuration '{role_id}' not found")
             return False
-        
+
         try:
             config = self.configurations[role_id]
             config.update_configuration(updates)
-            
+
             logger.info(f"Updated role configuration: {role_id}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Error updating role configuration: {e}")
             return False
+<<<<<<< HEAD
+
+    def list_role_configurations(self) -> List[RoleConfiguration]:
+        """List all role configurations."""
+        return list(self.configurations.values())
+
+    def list_role_templates(self) -> List[RoleTemplate]:
+=======
     
     def list_role_configurations(self) -> list[RoleConfiguration]:
         """List all role configurations."""
         return list(self.configurations.values())
     
     def list_role_templates(self) -> list[RoleTemplate]:
+>>>>>>> feature/core-services-refactor
         """List all role templates."""
         return list(self.templates.values())
-    
+
     def search_templates(
         self,
         category: str = None,
         tags: list[str] = None,
         query: str = None
+<<<<<<< HEAD
+    ) -> List[RoleTemplate]:
+=======
     ) -> list[RoleTemplate]:
+>>>>>>> feature/core-services-refactor
         """Search role templates by criteria.
         
         Args:
@@ -510,30 +579,31 @@ class RoleConfigurationManager:
             
         Returns:
             List of matching templates
+
         """
         templates = list(self.templates.values())
         results = []
-        
+
         for template in templates:
             # Category filter
             if category and template.category != category:
                 continue
-            
+
             # Tags filter
             if tags and not any(tag in template.tags for tag in tags):
                 continue
-            
+
             # Text query filter
             if query:
                 query_lower = query.lower()
-                if (query_lower not in template.name.lower() and 
+                if (query_lower not in template.name.lower() and
                     query_lower not in template.description.lower()):
                     continue
-            
+
             results.append(template)
-        
+
         return results
-    
+
     def activate_role(self, role_instance_id: str, config_id: str) -> bool:
         """Activate a role with a specific configuration.
         
@@ -543,22 +613,23 @@ class RoleConfigurationManager:
             
         Returns:
             True if activation was successful
+
         """
         if config_id not in self.configurations:
             logger.error(f"Configuration '{config_id}' not found")
             return False
-        
+
         self.active_roles[role_instance_id] = config_id
         logger.info(f"Activated role instance '{role_instance_id}' with config '{config_id}'")
         return True
-    
+
     def get_active_role_config(self, role_instance_id: str) -> Optional[RoleConfiguration]:
         """Get the configuration for an active role instance."""
         config_id = self.active_roles.get(role_instance_id)
         if config_id:
             return self.configurations.get(config_id)
         return None
-    
+
     def deactivate_role(self, role_instance_id: str) -> bool:
         """Deactivate a role instance."""
         if role_instance_id in self.active_roles:
@@ -566,7 +637,7 @@ class RoleConfigurationManager:
             logger.info(f"Deactivated role instance: {role_instance_id}")
             return True
         return False
-    
+
     def get_role_prompt(
         self,
         role_id: str,
@@ -582,26 +653,37 @@ class RoleConfigurationManager:
             
         Returns:
             Rendered prompt string
+
         """
         config = self.configurations.get(role_id)
         if not config:
             logger.error(f"Role configuration '{role_id}' not found")
             return ""
-        
+
         # Add role context to kwargs
         role_context = config.get_role_context()
         render_kwargs = {**role_context, **kwargs}
-        
+
         return config.prompt_template.render_prompt(prompt_type, **render_kwargs)
+<<<<<<< HEAD
+
+    def export_configuration(self, role_id: str) -> Optional[Dict[str, Any]]:
+=======
     
     def export_configuration(self, role_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Export a role configuration to dictionary."""
         config = self.configurations.get(role_id)
         if config:
             return config.dict()
         return None
+<<<<<<< HEAD
+
+    def import_configuration(self, config_data: Dict[str, Any]) -> bool:
+=======
     
     def import_configuration(self, config_data: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Import a role configuration from dictionary."""
         try:
             config = RoleConfiguration(**config_data)
@@ -609,8 +691,13 @@ class RoleConfigurationManager:
         except Exception as e:
             logger.error(f"Error importing configuration: {e}")
             return False
+<<<<<<< HEAD
+
+    def get_system_status(self) -> Dict[str, Any]:
+=======
     
     def get_system_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get system status information."""
         return {
             "total_configurations": len(self.configurations),

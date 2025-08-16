@@ -9,7 +9,11 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any, Dict, List, Optional, Union
+=======
 from typing import Any, Optional, Union
+>>>>>>> feature/core-services-refactor
 
 from rich.console import Console
 from rich.panel import Panel
@@ -23,6 +27,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ConfigurationOption:
     """Represents a configuration option."""
+
     key: str
     name: str
     description: str
@@ -38,21 +43,29 @@ class ConfigurationOption:
 
 class ConfigurationManager:
     """Manages workflow configuration options and user preferences."""
-    
+
     def __init__(self, config_dir: str = ".kiro/config", console: Console = None):
         """Initialize the configuration manager."""
         self.console = console or Console()
         self.config_dir = Path(config_dir)
         self.config_dir.mkdir(parents=True, exist_ok=True)
+<<<<<<< HEAD
+
+        self.configurations: Dict[str, Dict[str, Any]] = {}
+        self.configuration_options: Dict[str, List[ConfigurationOption]] = {}
+        self.user_preferences: Dict[str, Any] = {}
+
+=======
         
         self.configurations: dict[str, dict[str, Any]] = {}
         self.configuration_options: dict[str, list[ConfigurationOption]] = {}
         self.user_preferences: dict[str, Any] = {}
         
+>>>>>>> feature/core-services-refactor
         # Load existing configurations
         self._load_configurations()
         self._initialize_default_options()
-    
+
     def _load_configurations(self) -> None:
         """Load existing configurations from disk."""
         try:
@@ -62,22 +75,22 @@ class ConfigurationManager:
                 try:
                     with open(config_file, encoding='utf-8') as f:
                         config_data = json.load(f)
-                    
+
                     config_name = config_file.stem
                     self.configurations[config_name] = config_data
-                    
+
                 except Exception as e:
                     logger.error(f"Error loading configuration {config_file}: {e}")
-            
+
             # Load user preferences
             prefs_file = self.config_dir / "user_preferences.json"
             if prefs_file.exists():
                 with open(prefs_file, encoding='utf-8') as f:
                     self.user_preferences = json.load(f)
-        
+
         except Exception as e:
             logger.error(f"Error loading configurations: {e}")
-    
+
     def _initialize_default_options(self) -> None:
         """Initialize default configuration options for workflows."""
         # Critical Review Workflow Options
@@ -166,7 +179,7 @@ class ConfigurationManager:
                 category="revision"
             )
         ]
-        
+
         # Multi-Perspective Synthesis Workflow Options
         self.configuration_options["multi_perspective"] = [
             ConfigurationOption(
@@ -251,7 +264,7 @@ class ConfigurationManager:
                 category="refinement"
             )
         ]
-        
+
         # User Interface Options
         self.configuration_options["user_interface"] = [
             ConfigurationOption(
@@ -299,7 +312,7 @@ class ConfigurationManager:
                 category="output"
             )
         ]
-    
+
     async def create_configuration(
         self,
         workflow_name: str,
@@ -308,22 +321,22 @@ class ConfigurationManager:
     ) -> dict[str, Any]:
         """Create a new configuration interactively."""
         self.console.print(f"\n[blue]🎨 Creating Configuration for {workflow_name}[/blue]")
-        
+
         if workflow_name not in self.configuration_options:
             self.console.print(f"[red]Unknown workflow: {workflow_name}[/red]")
             return {}
-        
+
         options = self.configuration_options[workflow_name]
         config = base_config.copy() if base_config else {}
-        
+
         # Initialize with defaults
         for option in options:
             if option.key not in config:
                 self._set_nested_value(config, option.key, option.default_value)
-        
+
         # Interactive configuration
         return await self._interactive_configuration(workflow_name, config, options)
-    
+
     async def _interactive_configuration(
         self,
         workflow_name: str,
@@ -337,26 +350,26 @@ class ConfigurationManager:
             if option.category not in categories:
                 categories[option.category] = []
             categories[option.category].append(option)
-        
+
         while True:
             self.console.print(f"\n[cyan]Configuration categories for {workflow_name}:[/cyan]")
             category_names = list(categories.keys())
-            
+
             for i, category in enumerate(category_names, 1):
                 option_count = len(categories[category])
                 self.console.print(f"  {i}. {category.title()} ({option_count} options)")
-            
+
             self.console.print(f"  {len(category_names) + 1}. Review and save")
             self.console.print(f"  {len(category_names) + 2}. Cancel")
-            
+
             choice = Prompt.ask(
                 "Select a category to configure",
                 choices=[str(i) for i in range(1, len(category_names) + 3)],
                 default=str(len(category_names) + 1)
             )
-            
+
             choice_num = int(choice)
-            
+
             if choice_num == len(category_names) + 1:
                 # Review and save
                 self._display_configuration_summary(config)
@@ -375,9 +388,9 @@ class ConfigurationManager:
                 category_name = category_names[choice_num - 1]
                 category_options = categories[category_name]
                 config = await self._configure_category(category_name, category_options, config)
-        
+
         return config
-    
+
     async def _configure_category(
         self,
         category_name: str,
@@ -386,45 +399,45 @@ class ConfigurationManager:
     ) -> dict[str, Any]:
         """Configure options within a specific category."""
         self.console.print(f"\n[cyan]🔧 Configuring {category_name.title()}[/cyan]")
-        
+
         while True:
             # Display current category configuration
             table = Table(title=f"{category_name.title()} Configuration")
             table.add_column("Option", style="cyan")
             table.add_column("Current Value", style="magenta")
             table.add_column("Description", style="dim")
-            
+
             for option in options:
                 current_value = self._get_nested_value(config, option.key, option.default_value)
                 table.add_row(option.name, str(current_value), option.description)
-            
+
             self.console.print(table)
-            
+
             # Show options to modify
             option_names = [opt.name for opt in options]
             option_names.append("Done with this category")
-            
+
             self.console.print("\nSelect option to modify:")
             for i, name in enumerate(option_names, 1):
                 self.console.print(f"  {i}. {name}")
-            
+
             choice = Prompt.ask(
                 "Select option",
                 choices=[str(i) for i in range(1, len(option_names) + 1)],
                 default=str(len(option_names))
             )
-            
+
             if int(choice) == len(option_names):
                 break
-            
+
             selected_option = options[int(choice) - 1]
             new_value = await self._get_option_value(selected_option, config)
-            
+
             if new_value is not None:
                 self._set_nested_value(config, selected_option.key, new_value)
-        
+
         return config
-    
+
     async def _get_option_value(
         self,
         option: ConfigurationOption,
@@ -432,17 +445,17 @@ class ConfigurationManager:
     ) -> Any:
         """Get a configuration option value from user input."""
         current_value = self._get_nested_value(config, option.key, option.default_value)
-        
+
         self.console.print(f"\n[yellow]Setting {option.name}[/yellow]")
         self.console.print(f"Description: {option.description}")
         self.console.print(f"Current value: {current_value}")
-        
+
         if option.option_type == "string":
             return Prompt.ask(
                 f"Enter value for {option.name}",
                 default=str(current_value)
             )
-        
+
         elif option.option_type == "integer":
             from rich.prompt import IntPrompt
             while True:
@@ -450,16 +463,16 @@ class ConfigurationManager:
                     f"Enter integer value for {option.name}",
                     default=current_value
                 )
-                
+
                 if option.min_value is not None and value < option.min_value:
                     self.console.print(f"[red]Value must be at least {option.min_value}[/red]")
                     continue
                 if option.max_value is not None and value > option.max_value:
                     self.console.print(f"[red]Value must be at most {option.max_value}[/red]")
                     continue
-                
+
                 return value
-        
+
         elif option.option_type == "float":
             from rich.prompt import FloatPrompt
             while True:
@@ -467,32 +480,32 @@ class ConfigurationManager:
                     f"Enter float value for {option.name}",
                     default=current_value
                 )
-                
+
                 if option.min_value is not None and value < option.min_value:
                     self.console.print(f"[red]Value must be at least {option.min_value}[/red]")
                     continue
                 if option.max_value is not None and value > option.max_value:
                     self.console.print(f"[red]Value must be at most {option.max_value}[/red]")
                     continue
-                
+
                 return value
-        
+
         elif option.option_type == "boolean":
             return Confirm.ask(
                 f"Enable {option.name}?",
                 default=current_value
             )
-        
+
         elif option.option_type == "choice":
             if not option.choices:
                 return self._get_string_value(option, current_value)
-            
+
             return Prompt.ask(
                 f"Select value for {option.name}",
                 choices=option.choices,
                 default=str(current_value)
             )
-        
+
         elif option.option_type == "list":
             current_str = ",".join(str(v) for v in current_value) if isinstance(current_value, list) else str(current_value)
             value_str = Prompt.ask(
@@ -500,43 +513,58 @@ class ConfigurationManager:
                 default=current_str
             )
             return [item.strip() for item in value_str.split(",") if item.strip()]
-        
+
         else:
             return Prompt.ask(
                 f"Enter value for {option.name}",
                 default=str(current_value)
             )
+<<<<<<< HEAD
+
+    def _get_nested_value(self, config: Dict[str, Any], key: str, default: Any = None) -> Any:
+=======
     
     def _get_nested_value(self, config: dict[str, Any], key: str, default: Any = None) -> Any:
+>>>>>>> feature/core-services-refactor
         """Get a nested configuration value using dot notation."""
         keys = key.split('.')
         value = config
-        
+
         try:
             for k in keys:
                 value = value[k]
             return value
         except (KeyError, TypeError):
             return default
+<<<<<<< HEAD
+
+    def _set_nested_value(self, config: Dict[str, Any], key: str, value: Any) -> None:
+=======
     
     def _set_nested_value(self, config: dict[str, Any], key: str, value: Any) -> None:
+>>>>>>> feature/core-services-refactor
         """Set a nested configuration value using dot notation."""
         keys = key.split('.')
         current = config
-        
+
         # Navigate to the parent of the target key
         for k in keys[:-1]:
             if k not in current:
                 current[k] = {}
             current = current[k]
-        
+
         # Set the final value
         current[keys[-1]] = value
+<<<<<<< HEAD
+
+    def _display_configuration_summary(self, config: Dict[str, Any]) -> None:
+=======
     
     def _display_configuration_summary(self, config: dict[str, Any]) -> None:
+>>>>>>> feature/core-services-refactor
         """Display a summary of the configuration."""
         self.console.print("\n[blue]📋 Configuration Summary[/blue]")
-        
+
         syntax = Syntax(
             json.dumps(config, indent=2, ensure_ascii=False),
             "json",
@@ -544,58 +572,73 @@ class ConfigurationManager:
             line_numbers=True
         )
         self.console.print(Panel(syntax, title="Configuration"))
+<<<<<<< HEAD
+
+    def _save_configuration(self, config_name: str, config: Dict[str, Any]) -> bool:
+=======
     
     def _save_configuration(self, config_name: str, config: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Save configuration to disk."""
         try:
             config_file = self.config_dir / f"{config_name}.json"
-            
+
             with open(config_file, 'w', encoding='utf-8') as f:
                 json.dump(config, f, indent=2, ensure_ascii=False)
-            
+
             self.console.print(f"[green]✅ Configuration saved: {config_name}[/green]")
             return True
-        
+
         except Exception as e:
             self.console.print(f"[red]❌ Failed to save configuration: {e}[/red]")
             logger.error(f"Error saving configuration {config_name}: {e}")
             return False
+<<<<<<< HEAD
+
+    def load_configuration(self, config_name: str) -> Dict[str, Any]:
+=======
     
     def load_configuration(self, config_name: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Load a configuration by name."""
         if config_name in self.configurations:
             return copy.deepcopy(self.configurations[config_name])
-        
+
         # Try to load from file
         config_file = self.config_dir / f"{config_name}.json"
         if config_file.exists():
             try:
                 with open(config_file, encoding='utf-8') as f:
                     config = json.load(f)
-                
+
                 self.configurations[config_name] = config
                 return copy.deepcopy(config)
-            
+
             except Exception as e:
                 logger.error(f"Error loading configuration {config_name}: {e}")
-        
+
         return {}
+<<<<<<< HEAD
+
+    def list_configurations(self, workflow_name: str = None) -> List[str]:
+=======
     
     def list_configurations(self, workflow_name: str = None) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List available configurations."""
         configs = list(self.configurations.keys())
-        
+
         if workflow_name:
             configs = [name for name in configs if name.startswith(workflow_name)]
-        
+
         return configs
-    
+
     def delete_configuration(self, config_name: str) -> bool:
         """Delete a configuration."""
         # Remove from memory
         if config_name in self.configurations:
             del self.configurations[config_name]
-        
+
         # Remove from disk
         config_file = self.config_dir / f"{config_name}.json"
         if config_file.exists():
@@ -606,29 +649,29 @@ class ConfigurationManager:
             except Exception as e:
                 self.console.print(f"[red]❌ Failed to delete configuration: {e}[/red]")
                 return False
-        
+
         return True
-    
+
     def export_configuration(self, config_name: str, export_path: str) -> bool:
         """Export a configuration to a specific path."""
         if config_name not in self.configurations:
             self.console.print(f"[red]Configuration not found: {config_name}[/red]")
             return False
-        
+
         try:
             export_file = Path(export_path)
             export_file.parent.mkdir(parents=True, exist_ok=True)
-            
+
             with open(export_file, 'w', encoding='utf-8') as f:
                 json.dump(self.configurations[config_name], f, indent=2, ensure_ascii=False)
-            
+
             self.console.print(f"[green]✅ Configuration exported to: {export_path}[/green]")
             return True
-        
+
         except Exception as e:
             self.console.print(f"[red]❌ Failed to export configuration: {e}[/red]")
             return False
-    
+
     def import_configuration(self, import_path: str, config_name: str = None) -> bool:
         """Import a configuration from a file."""
         try:
@@ -636,19 +679,23 @@ class ConfigurationManager:
             if not import_file.exists():
                 self.console.print(f"[red]Import file not found: {import_path}[/red]")
                 return False
+<<<<<<< HEAD
+
+=======
             
+>>>>>>> feature/core-services-refactor
             with open(import_file, encoding='utf-8') as f:
                 config = json.load(f)
-            
+
             if config_name is None:
                 config_name = import_file.stem
-            
+
             self.configurations[config_name] = config
             self._save_configuration(config_name, config)
-            
+
             self.console.print(f"[green]✅ Configuration imported as: {config_name}[/green]")
             return True
-        
+
         except Exception as e:
             self.console.print(f"[red]❌ Failed to import configuration: {e}[/red]")
             return False

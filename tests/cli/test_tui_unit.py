@@ -45,7 +45,7 @@ def test_roles_command_success(mock_list_roles, cli_runner):
         {"name": "Expert", "description": "An expert role", "tags": ["professional"]},
         {"name": "Critic", "description": "A critical thinker", "tags": ["analytical"]}
     ]
-    
+
     result = cli_runner.invoke(app, ["roles"])
     assert result.exit_code == 0
     assert "Available Roles" in result.stdout
@@ -57,7 +57,7 @@ def test_roles_command_success(mock_list_roles, cli_runner):
 def test_roles_command_no_roles(mock_list_roles, cli_runner):
     """Test that the roles command handles empty role list."""
     mock_list_roles.return_value = []
-    
+
     result = cli_runner.invoke(app, ["roles"])
     assert result.exit_code == 0
     assert "No roles available" in result.stdout
@@ -69,7 +69,7 @@ def test_start_command_success(mock_run_debate, mock_asyncio_run, cli_runner):
     """Test that the start command works with valid arguments."""
     mock_run_debate.return_value = True
     mock_asyncio_run.return_value = True  # asyncio.run should return the result of run_debate_command
-    
+
     result = cli_runner.invoke(app, ["start", "Test topic", "--role", "Expert", "--rounds", "2"])
     assert result.exit_code == 0
     assert "Initializing debate" in result.stdout
@@ -81,7 +81,7 @@ def test_start_command_validation_errors(cli_runner):
     result = cli_runner.invoke(app, ["start", "Test topic", "--rounds", "0"])
     assert result.exit_code == 1
     assert "Number of rounds must be at least 1" in result.stdout
-    
+
     # Test with too short topic
     result = cli_runner.invoke(app, ["start", "ab"])
     assert result.exit_code == 1
@@ -94,10 +94,10 @@ def test_start_command_with_save(mock_run_debate, mock_asyncio_run, cli_runner):
     """Test that the start command works with save option."""
     mock_run_debate.return_value = True
     mock_asyncio_run.return_value = True  # asyncio.run should return the result of run_debate_command
-    
+
     result = cli_runner.invoke(app, [
-        "start", "Test topic", 
-        "--save", 
+        "start", "Test topic",
+        "--save",
         "--output", "test_output.txt"
     ])
     assert result.exit_code == 0
@@ -114,7 +114,7 @@ def test_start_command_failure(mock_run_debate, mock_asyncio_run, cli_runner):
     """Test that the start command handles failure correctly."""
     mock_asyncio_run.return_value = None
     mock_run_debate.return_value = False
-    
+
     result = cli_runner.invoke(app, ["start", "Test topic"])
     assert result.exit_code == 1
     assert "Debate failed to complete successfully" in result.stdout
@@ -124,7 +124,7 @@ def test_start_command_failure(mock_run_debate, mock_asyncio_run, cli_runner):
 def test_start_command_keyboard_interrupt(mock_asyncio_run, cli_runner):
     """Test that the start command handles keyboard interrupt."""
     mock_asyncio_run.side_effect = KeyboardInterrupt()
-    
+
     result = cli_runner.invoke(app, ["start", "Test topic"])
     assert result.exit_code == 0  # KeyboardInterrupt should exit gracefully
     assert "interrupted by user" in result.stdout
@@ -135,7 +135,7 @@ def test_start_command_timeout_error(mock_asyncio_run, cli_runner):
     """Test that the start command handles timeout errors."""
     import asyncio
     mock_asyncio_run.side_effect = asyncio.TimeoutError()
-    
+
     result = cli_runner.invoke(app, ["start", "Test topic"])
     assert result.exit_code == 1
     assert "timed out" in result.stdout
@@ -145,7 +145,7 @@ def test_start_command_timeout_error(mock_asyncio_run, cli_runner):
 def test_start_command_memory_error(mock_asyncio_run, cli_runner):
     """Test that the start command handles memory errors."""
     mock_asyncio_run.side_effect = MemoryError()
-    
+
     result = cli_runner.invoke(app, ["start", "Test topic"])
     assert result.exit_code == 1
     assert "ran out of memory" in result.stdout
@@ -154,7 +154,7 @@ def test_start_command_memory_error(mock_asyncio_run, cli_runner):
 def test_start_command_invalid_consensus_strategy(cli_runner):
     """Test that the start command validates consensus strategy."""
     result = cli_runner.invoke(app, [
-        "start", "Test topic", 
+        "start", "Test topic",
         "--consensus", "invalid_strategy"
     ])
     assert result.exit_code == 1

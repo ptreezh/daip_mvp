@@ -48,10 +48,10 @@ class TestRoleManager(TestCase):
         # Create individual JSON role files
         researcher_file = self.roles_directory / "test_researcher.json"
         writer_file = self.roles_directory / "test_writer.json"
-        
+
         with open(researcher_file, "w", encoding="utf-8") as f:
             json.dump(TEST_RESEARCHER_JSON, f)
-        
+
         with open(writer_file, "w", encoding="utf-8") as f:
             json.dump(TEST_WRITER_JSON, f)
 

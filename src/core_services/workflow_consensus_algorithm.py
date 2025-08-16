@@ -18,10 +18,18 @@
 """
 
 from datetime import datetime
+<<<<<<< HEAD
+from typing import Any, Dict, List, Optional
+
+from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm, ConsensusContext
+from consensus_models import AlgorithmMetadata, AlgorithmType, ConsensusInput, ConsensusResult, ValidationResult
+
+=======
 from typing import Any, Optional
 
 from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm, ConsensusContext
 from consensus_models import AlgorithmMetadata, AlgorithmType, ConsensusInput, ConsensusResult, ValidationResult
+>>>>>>> feature/core-services-refactor
 from institutional_primitives.base import ExecutionContext
 
 # 导入现有的ConsensusNode实现
@@ -34,15 +42,26 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
     包装现有的ConsensusNode实现，提供统一接口。
     保持与工作流引擎的兼容性和现有的共识计算逻辑。
     """
+<<<<<<< HEAD
+
+    def __init__(self, configuration: Optional[Dict[str, Any]] = None):
+        super().__init__("workflow_consensus", configuration)
+
+=======
     
     def __init__(self, configuration: Optional[dict[str, Any]] = None):
         super().__init__("workflow_consensus", configuration)
         
+>>>>>>> feature/core-services-refactor
         # 从配置中获取参数
         self.consensus_method = self.configuration.get("consensus_method", "weighted_average")
         self.credibility_threshold = self.configuration.get("credibility_threshold", 0.6)
         self.use_synthesis_engine = self.configuration.get("use_synthesis_engine", False)
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 创建底层ConsensusNode实例
         self._consensus_node = ConsensusNode(
             primitive_id="unified_consensus_adapter",
@@ -52,9 +71,15 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
                 "use_synthesis_engine": self.use_synthesis_engine
             }
         )
+<<<<<<< HEAD
+
+    async def calculate(self,
+                       inputs: List[ConsensusInput],
+=======
         
     async def calculate(self, 
                        inputs: list[ConsensusInput], 
+>>>>>>> feature/core-services-refactor
                        context: ConsensusContext) -> ConsensusResult:
         """执行工作流共识计算
         
@@ -64,13 +89,30 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             
         Returns:
             统一格式的共识计算结果
+<<<<<<< HEAD
+
+        """
+        context.set_metric("algorithm_start", datetime.now())
+
+=======
         """
         context.set_metric("algorithm_start", datetime.now())
         
+>>>>>>> feature/core-services-refactor
         # 验证输入
         validation = self.validate_inputs(inputs)
         if not validation.is_valid:
             raise ValueError(f"输入验证失败: {validation.errors}")
+<<<<<<< HEAD
+
+        # 转换输入格式到工作流格式
+        workflow_inputs = self._convert_inputs_to_workflow(inputs)
+
+        # 创建工作流执行上下文
+        aggregated_evidence = workflow_inputs.get("aggregated_evidence", {})
+        workflow_context = self._create_workflow_context(context, aggregated_evidence)
+
+=======
         
         # 转换输入格式到工作流格式
         workflow_inputs = self._convert_inputs_to_workflow(inputs)
@@ -79,19 +121,37 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         aggregated_evidence = workflow_inputs.get("aggregated_evidence", {})
         workflow_context = self._create_workflow_context(context, aggregated_evidence)
         
+>>>>>>> feature/core-services-refactor
         try:
             # 调用工作流共识节点
             workflow_result = await self._consensus_node.execute(
                 workflow_inputs, workflow_context
             )
+<<<<<<< HEAD
+
+            # 转换结果格式
+            result = self._convert_result_from_workflow(workflow_result, inputs)
+
+=======
             
             # 转换结果格式
             result = self._convert_result_from_workflow(workflow_result, inputs)
             
+>>>>>>> feature/core-services-refactor
             # 更新执行指标
             context.set_metric("algorithm_end", datetime.now())
             context.set_metric("workflow_algorithm_used", "ConsensusNode")
             context.set_metric("consensus_method", self.consensus_method)
+<<<<<<< HEAD
+
+            return result
+
+        except Exception as e:
+            context.set_metric("algorithm_error", str(e))
+            raise RuntimeError(f"工作流共识算法执行失败: {e}")
+
+    def _convert_inputs_to_workflow(self, inputs: List[ConsensusInput]) -> Dict[str, Any]:
+=======
             
             return result
             
@@ -100,15 +160,23 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             raise RuntimeError(f"工作流共识算法执行失败: {e}")
     
     def _convert_inputs_to_workflow(self, inputs: list[ConsensusInput]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """将统一格式输入转换为工作流格式"""
         # 检查输入是否已经是聚合证据格式
         if len(inputs) == 1 and isinstance(inputs[0].position, dict) and "aggregated_evidence" in inputs[0].position:
             # 直接使用聚合证据
             return inputs[0].position
+<<<<<<< HEAD
+
+        # 否则，将输入转换为聚合证据格式
+        aggregated_evidence = {}
+
+=======
         
         # 否则，将输入转换为聚合证据格式
         aggregated_evidence = {}
         
+>>>>>>> feature/core-services-refactor
         # 根据输入类型处理
         if self._is_fact_evidence_format(inputs):
             # 输入是事实-证据格式
@@ -116,10 +184,17 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         else:
             # 输入是简单共识格式，创建单一事实
             aggregated_evidence = self._create_single_fact_evidence(inputs)
+<<<<<<< HEAD
+
+        return {"aggregated_evidence": aggregated_evidence}
+
+    def _is_fact_evidence_format(self, inputs: List[ConsensusInput]) -> bool:
+=======
         
         return {"aggregated_evidence": aggregated_evidence}
     
     def _is_fact_evidence_format(self, inputs: list[ConsensusInput]) -> bool:
+>>>>>>> feature/core-services-refactor
         """检查输入是否为事实-证据格式"""
         # 检查是否有fact_id和evidence_type等字段
         for inp in inputs:
@@ -127,6 +202,17 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
                 if "fact_id" in inp.metadata and "evidence_type" in inp.metadata:
                     return True
         return False
+<<<<<<< HEAD
+
+    def _aggregate_fact_evidence(self, inputs: List[ConsensusInput]) -> Dict[str, Any]:
+        """聚合事实-证据格式的输入"""
+        facts = {}
+
+        for inp in inputs:
+            fact_id = inp.metadata.get("fact_id", "default_fact")
+            evidence_type = inp.metadata.get("evidence_type", "neutral")
+
+=======
     
     def _aggregate_fact_evidence(self, inputs: list[ConsensusInput]) -> dict[str, Any]:
         """聚合事实-证据格式的输入"""
@@ -136,6 +222,7 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             fact_id = inp.metadata.get("fact_id", "default_fact")
             evidence_type = inp.metadata.get("evidence_type", "neutral")
             
+>>>>>>> feature/core-services-refactor
             if fact_id not in facts:
                 facts[fact_id] = {
                     "fact_content": inp.metadata.get("fact_content", str(inp.position)),
@@ -147,7 +234,11 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
                     "neutral_score": 0.0,
                     "evidence_summary": []
                 }
+<<<<<<< HEAD
+
+=======
             
+>>>>>>> feature/core-services-refactor
             # 累积证据
             if evidence_type == "supporting":
                 facts[fact_id]["supporting_count"] += 1
@@ -158,6 +249,27 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             else:
                 facts[fact_id]["neutral_count"] += 1
                 facts[fact_id]["neutral_score"] += inp.confidence
+<<<<<<< HEAD
+
+            # 添加证据摘要
+            if inp.reasoning:
+                facts[fact_id]["evidence_summary"].append(f"{evidence_type}: {inp.reasoning}")
+
+        # 转换证据摘要为字符串
+        for fact_id in facts:
+            facts[fact_id]["evidence_summary"] = "; ".join(facts[fact_id]["evidence_summary"])
+
+        return facts
+
+    def _create_single_fact_evidence(self, inputs: List[ConsensusInput]) -> Dict[str, Any]:
+        """为简单共识输入创建单一事实证据"""
+        fact_id = "consensus_fact"
+
+        # 分析输入的立场分布
+        position_counts = {}
+        position_scores = {}
+
+=======
             
             # 添加证据摘要
             if inp.reasoning:
@@ -177,11 +289,21 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         position_counts = {}
         position_scores = {}
         
+>>>>>>> feature/core-services-refactor
         for inp in inputs:
             position = str(inp.position)
             if position not in position_counts:
                 position_counts[position] = 0
                 position_scores[position] = 0.0
+<<<<<<< HEAD
+
+            position_counts[position] += 1
+            position_scores[position] += inp.confidence
+
+        # 确定主要立场和对立立场
+        sorted_positions = sorted(position_counts.items(), key=lambda x: x[1], reverse=True)
+
+=======
             
             position_counts[position] += 1
             position_scores[position] += inp.confidence
@@ -189,15 +311,24 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         # 确定主要立场和对立立场
         sorted_positions = sorted(position_counts.items(), key=lambda x: x[1], reverse=True)
         
+>>>>>>> feature/core-services-refactor
         if len(sorted_positions) >= 2:
             # 有对立观点
             main_position = sorted_positions[0][0]
             opposing_position = sorted_positions[1][0]
+<<<<<<< HEAD
+
+            supporting_count = position_counts[main_position]
+            challenging_count = position_counts[opposing_position]
+            neutral_count = sum(count for pos, count in sorted_positions[2:])
+
+=======
             
             supporting_count = position_counts[main_position]
             challenging_count = position_counts[opposing_position]
             neutral_count = sum(count for pos, count in sorted_positions[2:])
             
+>>>>>>> feature/core-services-refactor
             supporting_score = position_scores[main_position]
             challenging_score = position_scores[opposing_position]
             neutral_score = sum(position_scores[pos] for pos, _ in sorted_positions[2:])
@@ -207,17 +338,29 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             supporting_count = len(inputs)
             challenging_count = 0
             neutral_count = 0
+<<<<<<< HEAD
+
+            supporting_score = sum(inp.confidence for inp in inputs)
+            challenging_score = 0.0
+            neutral_score = 0.0
+
+=======
             
             supporting_score = sum(inp.confidence for inp in inputs)
             challenging_score = 0.0
             neutral_score = 0.0
         
+>>>>>>> feature/core-services-refactor
         # 创建证据摘要
         evidence_summary = []
         for inp in inputs:
             if inp.reasoning:
                 evidence_summary.append(f"{inp.agent_id}: {inp.reasoning}")
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 创建聚合证据和提取事实
         aggregated_evidence = {
             fact_id: {
@@ -231,16 +374,34 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
                 "evidence_summary": "; ".join(evidence_summary)
             }
         }
+<<<<<<< HEAD
+
+        return aggregated_evidence
+
+    def _create_workflow_context(self, context: ConsensusContext, aggregated_evidence: Dict[str, Any] = None) -> ExecutionContext:
+=======
         
         return aggregated_evidence
     
     def _create_workflow_context(self, context: ConsensusContext, aggregated_evidence: dict[str, Any] = None) -> ExecutionContext:
+>>>>>>> feature/core-services-refactor
         """创建工作流执行上下文"""
         workflow_context = ExecutionContext(
             execution_id=f"consensus_{context.session_id}",
             workflow_id="unified_consensus_workflow",
             node_id="consensus_adapter"
         )
+<<<<<<< HEAD
+
+        # 传递服务
+        if context.services:
+            workflow_context.services = context.services
+
+        # 传递配置
+        if context.configuration:
+            workflow_context.config = context.configuration
+
+=======
         
         # 传递服务
         if context.services:
@@ -250,6 +411,7 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         if context.configuration:
             workflow_context.config = context.configuration
         
+>>>>>>> feature/core-services-refactor
         # 创建提取事实信息，以便ConsensusNode能正确获取fact_content
         if aggregated_evidence:
             extracted_facts = []
@@ -259,6 +421,21 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
                     "content": evidence_data.get("fact_content", fact_id)
                 })
             workflow_context.state["extracted_facts"] = extracted_facts
+<<<<<<< HEAD
+
+        return workflow_context
+
+    def _convert_result_from_workflow(self,
+                                     workflow_result: Dict[str, Any],
+                                     original_inputs: List[ConsensusInput]) -> ConsensusResult:
+        """将工作流格式结果转换为统一格式"""
+        if not workflow_result.get("success", False):
+            raise RuntimeError(f"工作流执行失败: {workflow_result.get('error', 'Unknown error')}")
+
+        credibility_scores = workflow_result.get("credibility_scores", {})
+        consensus_results = workflow_result.get("consensus_results", {})
+
+=======
         
         return workflow_context
     
@@ -272,6 +449,7 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         credibility_scores = workflow_result.get("credibility_scores", {})
         consensus_results = workflow_result.get("consensus_results", {})
         
+>>>>>>> feature/core-services-refactor
         # 确定最终共识值
         if len(credibility_scores) == 1:
             # 单一事实，返回事实内容而不是可信度分数
@@ -285,7 +463,11 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             best_fact_result = consensus_results.get(best_fact_id, {})
             consensus_value = best_fact_result.get("fact_content", best_fact_id)
             confidence = credibility_scores[best_fact_id]
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 构建推理轨迹
         reasoning_trace = {
             "algorithm": "workflow_consensus",
@@ -295,7 +477,11 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             "facts_processed": len(credibility_scores),
             "facts_needing_revision": len(workflow_result.get("facts_needing_revision", []))
         }
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 构建元数据
         metadata = {
             "credibility_scores": credibility_scores,
@@ -306,7 +492,11 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             "workflow_compatible": True,
             "evidence_aggregated": True
         }
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         return ConsensusResult(
             consensus_value=consensus_value,
             confidence=confidence,
@@ -314,7 +504,11 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             reasoning_trace=reasoning_trace,
             metadata=metadata
         )
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     def get_metadata(self) -> AlgorithmMetadata:
         """获取算法元数据"""
         return AlgorithmMetadata(
@@ -349,7 +543,11 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
                 }
             }
         )
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     def get_capabilities(self) -> AlgorithmCapabilities:
         """获取算法能力描述"""
         return AlgorithmCapabilities(
@@ -361,6 +559,18 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             min_participants=1,
             max_participants=None
         )
+<<<<<<< HEAD
+
+    def validate_inputs(self, inputs: List[ConsensusInput]) -> ValidationResult:
+        """验证输入数据"""
+        errors = []
+        warnings = []
+
+        if not inputs:
+            errors.append("输入列表不能为空")
+            return ValidationResult(is_valid=False, errors=errors)
+
+=======
     
     def validate_inputs(self, inputs: list[ConsensusInput]) -> ValidationResult:
         """验证输入数据"""
@@ -371,11 +581,16 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             errors.append("输入列表不能为空")
             return ValidationResult(is_valid=False, errors=errors)
         
+>>>>>>> feature/core-services-refactor
         # 检查置信度
         for i, inp in enumerate(inputs):
             if not (0.0 <= inp.confidence <= 1.0):
                 errors.append(f"输入{i}的置信度必须在0.0-1.0之间")
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 检查是否为事实-证据格式
         fact_evidence_format = self._is_fact_evidence_format(inputs)
         if fact_evidence_format:
@@ -385,11 +600,28 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
                 if isinstance(inp.metadata, dict):
                     fact_id = inp.metadata.get("fact_id")
                     evidence_type = inp.metadata.get("evidence_type")
+<<<<<<< HEAD
+
+=======
                     
+>>>>>>> feature/core-services-refactor
                     if not fact_id:
                         warnings.append("某些输入缺少fact_id，将使用默认值")
                     else:
                         fact_ids.add(fact_id)
+<<<<<<< HEAD
+
+                    if evidence_type not in ["supporting", "challenging", "neutral"]:
+                        warnings.append(f"未知的证据类型: {evidence_type}")
+
+            if len(fact_ids) > 10:
+                warnings.append(f"事实数量较多({len(fact_ids)})，可能影响性能")
+
+        # 检查综合分析引擎要求
+        if self.use_synthesis_engine:
+            warnings.append("启用了综合分析引擎，需要确保synthesis_engine服务可用")
+
+=======
                     
                     if evidence_type not in ["supporting", "challenging", "neutral"]:
                         warnings.append(f"未知的证据类型: {evidence_type}")
@@ -401,6 +633,7 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         if self.use_synthesis_engine:
             warnings.append("启用了综合分析引擎，需要确保synthesis_engine服务可用")
         
+>>>>>>> feature/core-services-refactor
         return ValidationResult(
             is_valid=len(errors) == 0,
             errors=errors,
@@ -408,30 +641,51 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             metadata={
                 "total_inputs": len(inputs),
                 "fact_evidence_format": fact_evidence_format,
+<<<<<<< HEAD
+                "unique_facts": len(set(inp.metadata.get("fact_id", "default")
+=======
                 "unique_facts": len(set(inp.metadata.get("fact_id", "default") 
+>>>>>>> feature/core-services-refactor
                                       for inp in inputs if isinstance(inp.metadata, dict))),
                 "consensus_method": self.consensus_method
             }
         )
+<<<<<<< HEAD
+
+    def validate_configuration(self, config: Dict[str, Any]) -> ValidationResult:
+        """验证配置参数"""
+        errors = []
+        warnings = []
+
+=======
     
     def validate_configuration(self, config: dict[str, Any]) -> ValidationResult:
         """验证配置参数"""
         errors = []
         warnings = []
         
+>>>>>>> feature/core-services-refactor
         # 验证共识方法
         if "consensus_method" in config:
             method = config["consensus_method"]
             valid_methods = ["weighted_average", "majority_vote", "synthesis"]
             if method not in valid_methods:
                 errors.append(f"consensus_method必须是{valid_methods}之一")
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 验证可信度阈值
         if "credibility_threshold" in config:
             threshold = config["credibility_threshold"]
             if not isinstance(threshold, (int, float)) or not (0.0 <= threshold <= 1.0):
                 errors.append("credibility_threshold必须是0.0-1.0之间的数值")
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 验证综合分析引擎设置
         if "use_synthesis_engine" in config:
             use_synthesis = config["use_synthesis_engine"]
@@ -439,22 +693,37 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
                 errors.append("use_synthesis_engine必须是布尔值")
             elif use_synthesis:
                 warnings.append("启用综合分析引擎需要额外的服务依赖")
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         return ValidationResult(
             is_valid=len(errors) == 0,
             errors=errors,
             warnings=warnings
         )
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     def estimate_execution_time(self, request) -> float:
         """估算执行时间"""
         # 工作流算法需要更多时间进行证据聚合和分析
         base_time = 0.8  # 基础时间800ms
         input_count = len(request.inputs)
+<<<<<<< HEAD
+
+        # 证据聚合因子
+        aggregation_factor = input_count * 0.03
+
+=======
         
         # 证据聚合因子
         aggregation_factor = input_count * 0.03
         
+>>>>>>> feature/core-services-refactor
         # 方法复杂度因子
         method_factors = {
             "weighted_average": 1.0,
@@ -462,6 +731,15 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             "synthesis": 2.0  # 综合分析需要更多时间
         }
         method_factor = method_factors.get(self.consensus_method, 1.0)
+<<<<<<< HEAD
+
+        return (base_time + aggregation_factor) * method_factor
+
+    def get_health_status(self) -> Dict[str, Any]:
+        """获取算法健康状态"""
+        base_status = super().get_health_status()
+
+=======
         
         return (base_time + aggregation_factor) * method_factor
     
@@ -469,6 +747,7 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
         """获取算法健康状态"""
         base_status = super().get_health_status()
         
+>>>>>>> feature/core-services-refactor
         # 添加特定的健康检查
         base_status.update({
             "consensus_node_available": self._consensus_node is not None,
@@ -479,5 +758,10 @@ class WorkflowConsensusAlgorithm(ConsensusAlgorithm):
             },
             "workflow_compatible": True
         })
+<<<<<<< HEAD
+
+        return base_status
+=======
         
         return base_status
+>>>>>>> feature/core-services-refactor

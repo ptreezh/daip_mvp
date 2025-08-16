@@ -25,7 +25,7 @@ from .strategies import (
 __all__ = [
     'TaskContextOptimizer',
     'TaskRequirement',
-    'ContextElement', 
+    'ContextElement',
     'OptimizedContext',
     'TaskDetectionResult',
     'TaskDetectionStrategy',

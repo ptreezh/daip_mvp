@@ -20,30 +20,30 @@ from personal_intelligence_hub.models.wiki_models import (
 
 class WikiPanel:
     """Wiki面板组件"""
-    
+
     def __init__(self):
         self.current_page = None
         self.search_results = []
         self.facts = []
         self.wiki_pages = []
-        
+
         # 创建UI元素
         self.search_input = TextInput(
             placeholder="搜索知识库...",
             _class="wiki-search-input"
         )
         self.search_button = Button("搜索", _class="wiki-search-button")
-        
+
         # 绑定事件
         self.search_button.onclick = self.handle_search
         self.search_input.onkeydown = self.handle_search_keydown
-    
+
     async def handle_search(self, event):
         """处理搜索事件"""
         query = self.search_input.value.strip()
         if not query:
             return
-        
+
         # 模拟搜索结果
         self.search_results = [
             WikiSearchResult(
@@ -63,14 +63,14 @@ class WikiPanel:
                 last_updated=datetime.now()
             )
         ]
-        
+
         await self.refresh()
-    
+
     async def handle_search_keydown(self, event):
         """处理搜索输入框按键事件"""
         if event.key == 'Enter':
             await self.handle_search(event)
-    
+
     async def handle_wiki_update(self, update: WikiUpdate):
         """处理Wiki实时更新"""
         if update.source == WikiUpdateSource.CONSENSUS_NODE:
@@ -79,9 +79,9 @@ class WikiPanel:
         elif update.source == WikiUpdateSource.FACT_EXTRACTION:
             # 处理事实提取更新
             await self.add_extracted_fact(update.content, update.quality_score)
-        
+
         await self.refresh()
-    
+
     async def add_consensus_fact(self, content: str, quality_score: float):
         """添加共识节点事实"""
         fact = ConsensusNodeFact(
@@ -93,7 +93,7 @@ class WikiPanel:
             metadata={"type": "consensus", "source": "ConsensusNode"}
         )
         self.facts.append(fact)
-    
+
     async def add_extracted_fact(self, content: str, quality_score: float):
         """添加提取的事实"""
         fact = ConsensusNodeFact(
@@ -105,7 +105,7 @@ class WikiPanel:
             metadata={"type": "extracted", "source": "FactExtractionService"}
         )
         self.facts.append(fact)
-    
+
     async def display_page(self, page_id: str):
         """显示Wiki页面"""
         # 模拟页面数据
@@ -122,7 +122,7 @@ class WikiPanel:
             metadata={"author": "AI系统", "views": 42}
         )
         await self.refresh()
-    
+
     def render_search_result(self, result: WikiSearchResult):
         """渲染搜索结果"""
         return Div(
@@ -145,7 +145,7 @@ class WikiPanel:
             _class="wiki-search-result",
             onclick=f"displayPage('{result.page_id}')"
         )
-    
+
     def render_current_page(self):
         """渲染当前页面"""
         if not self.current_page:
@@ -153,7 +153,7 @@ class WikiPanel:
                 P("选择一个页面查看详情"),
                 _class="wiki-no-page"
             )
-        
+
         return Div(
             H3(self.current_page.title, _class="wiki-page-title"),
             Div(
@@ -176,7 +176,7 @@ class WikiPanel:
             ),
             _class="wiki-current-page"
         )
-    
+
     def render_consensus_facts(self):
         """渲染共识节点事实"""
         if not self.facts:
@@ -184,7 +184,7 @@ class WikiPanel:
                 P("暂无共识节点事实"),
                 _class="wiki-no-facts"
             )
-        
+
         return Div(
             H4("🎯 共识节点事实", _class="wiki-facts-title"),
             *[Div(
@@ -204,7 +204,7 @@ class WikiPanel:
             ) for fact in self.facts[-5:]],  # 显示最近5个事实
             _class="wiki-consensus-facts"
         )
-    
+
     def render_recent_updates(self):
         """渲染最近更新"""
         # 模拟最近更新
@@ -228,7 +228,7 @@ class WikiPanel:
                 metadata={"type": "extraction"}
             )
         ]
-        
+
         return Div(
             H4("🔄 最近更新", _class="wiki-updates-title"),
             *[Div(
@@ -248,34 +248,34 @@ class WikiPanel:
             ) for update in recent_updates],
             _class="wiki-recent-updates"
         )
-    
+
     def render(self) -> HTML:
         """渲染Wiki面板"""
         return Div(
             H3("📚 知识库", _class="wiki-title"),
-            
+
             # 搜索区域
             Div(
                 self.search_input,
                 self.search_button,
                 _class="wiki-search-area"
             ),
-            
+
             # 当前页面显示
             self.render_current_page(),
-            
+
             # 共识节点事实
             self.render_consensus_facts(),
-            
+
             # 最近更新
             self.render_recent_updates(),
-            
+
             # 搜索结果
             Div(
                 H4("🔍 搜索结果") if self.search_results else Div(),
                 *[self.render_search_result(result) for result in self.search_results],
                 _class="wiki-search-results"
             ) if self.search_results else Div(),
-            
+
             _class="wiki-panel"
         )

@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
+<<<<<<< HEAD
+from typing import Any, List, Literal, Optional, Union
+=======
 from typing import Any, Literal, Optional, Union
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -126,6 +130,7 @@ class PendingFact(BaseModel):
     """Represents a fact that has been extracted but is pending verification and processing.
     This model is used by services like FactExtractionService and MemoryService.
     """
+
     content: str = Field(..., description="The textual content of the extracted fact.")
     source: str = Field(
         ..., description="The origin of the fact (e.g., document name, agent message ID)."
@@ -351,6 +356,7 @@ class DebateConfig(BaseModel):
     This model defines all the parameters required to initialize and run a debate,
     including the topic, participants, and rules of engagement.
     """
+
     topic: str = Field(..., description="The central topic of the debate.")
     roles: list[str] = Field(..., description="A list of role IDs participating in the debate.")
     rounds: int = Field(default=2, description="The number of full rounds in the debate.")
@@ -369,6 +375,7 @@ class DebateTurn(BaseModel):
     This model captures the output of a role's contribution at a specific point
     in the debate.
     """
+
     role_id: str = Field(..., description="The ID of the role that took the turn.")
     opinion: str = Field(..., description="The content of the role's opinion or argument.")
     round: int = Field(..., description="The debate round number in which this turn occurred.")
@@ -380,6 +387,7 @@ class DebateResult(BaseModel):
     This model aggregates the entire debate history, the outcome of the consensus
     process, and the final synthesized summary.
     """
+
     topic: str = Field(..., description="The original topic of the debate.")
     history: list[DebateTurn] = Field(
         ..., description="A complete history of all turns taken during the debate."
@@ -459,6 +467,7 @@ class ErrorEvent(Event):
 
 class ClearScreenEvent(Event):
     """Event that signals the UI to clear the main output area."""
+
     event_type: Literal["clear_screen"] = "clear_screen"
 
 

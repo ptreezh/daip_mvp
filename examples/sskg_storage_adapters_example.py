@@ -25,23 +25,23 @@ def main():
     # Create data directory if it doesn't exist
     data_dir = Path("./data")
     data_dir.mkdir(exist_ok=True)
-    
+
     # Initialize SSKG manager
     sskg_manager = EnhancedSSKGManager(
         graph_path=data_dir / "sskg.graphml",
         vector_store_path=data_dir / "vector_store",
         enable_vector_search=True
     )
-    
+
     # Initialize storage adapter manager
     adapter_manager = StorageAdapterManager(sskg_manager)
-    
+
     print("\n=== Storage Adapters Example ===\n")
-    
+
     # Example 1: Role Memory Adapter
     print("1. Role Memory Adapter Example")
     print("-" * 40)
-    
+
     role_data = {
         "role_id": "expert_scientist",
         "name": "Dr. Sarah Chen",
@@ -70,20 +70,20 @@ def main():
             }
         ]
     }
-    
+
     # Store role data
     role_id = adapter_manager.store_data("role_memory", role_data)
     print(f"Stored role with ID: {role_id}")
-    
+
     # Retrieve role data
     retrieved_role = adapter_manager.retrieve_data("role_memory", "expert_scientist")
     print(f"Retrieved role: {retrieved_role['name']}")
     print(f"Number of memories: {len(retrieved_role['memories'])}")
-    
+
     # Example 2: Wiki Adapter
     print("\n2. Wiki Adapter Example")
     print("-" * 40)
-    
+
     wiki_data = {
         "page_id": "quantum_computing_basics",
         "title": "Quantum Computing Fundamentals",
@@ -97,20 +97,20 @@ def main():
         "category": "science",
         "author": "Dr. Sarah Chen"
     }
-    
+
     # Store wiki page
     wiki_id = adapter_manager.store_data("wiki", wiki_data)
     print(f"Stored wiki page with ID: {wiki_id}")
-    
+
     # Retrieve wiki page
     retrieved_wiki = adapter_manager.retrieve_data("wiki", "quantum_computing_basics")
     print(f"Retrieved wiki page: {retrieved_wiki['title']}")
     print(f"Tags: {', '.join(retrieved_wiki['tags'])}")
-    
+
     # Example 3: Session Adapter
     print("\n3. Session Adapter Example")
     print("-" * 40)
-    
+
     session_data = {
         "session_id": "user_session_001",
         "user_id": "user_123",
@@ -137,21 +137,21 @@ def main():
             "current_workflow": "educational_explanation"
         }
     }
-    
+
     # Store session data
     session_id = adapter_manager.store_data("session", session_data)
     print(f"Stored session with ID: {session_id}")
-    
+
     # Retrieve session data
     retrieved_session = adapter_manager.retrieve_data("session", "user_session_001")
     print(f"Retrieved session for user: {retrieved_session['user_id']}")
     print(f"Current topic: {retrieved_session['state']['current_topic']}")
     print(f"Conversation messages: {len(retrieved_session['conversation_history'])}")
-    
+
     # Example 4: Hierarchical Organization
     print("\n4. Hierarchical Organization Example")
     print("-" * 40)
-    
+
     # Create related wiki pages to demonstrate hierarchical organization
     related_pages = [
         {
@@ -169,15 +169,15 @@ def main():
             "category": "science"
         }
     ]
-    
+
     for page_data in related_pages:
         page_id = adapter_manager.store_data("wiki", page_data)
         print(f"Stored related page: {page_data['title']} (ID: {page_id})")
-    
+
     # Example 5: Cross-Adapter Integration
     print("\n5. Cross-Adapter Integration Example")
     print("-" * 40)
-    
+
     # Update role with new memory based on wiki interaction
     new_memory = {
         "content": "Explained quantum computing fundamentals to a beginner user",
@@ -189,16 +189,16 @@ def main():
             "wiki_page": "quantum_computing_basics"
         }
     }
-    
+
     # Get current role data and add new memory
     current_role = adapter_manager.retrieve_data("role_memory", "expert_scientist")
     current_role["memories"].append(new_memory)
-    
+
     # Update role with new memory
     role_adapter = adapter_manager.get_adapter("role_memory")
     role_adapter.update("expert_scientist", current_role)
     print("Updated role with new memory from wiki interaction")
-    
+
     # Update session with new conversation turn
     current_session = adapter_manager.retrieve_data("session", "user_session_001")
     current_session["conversation_history"].append({
@@ -206,16 +206,16 @@ def main():
         "speaker": "assistant",
         "message": "I've also created a wiki page about quantum computing fundamentals for future reference."
     })
-    
+
     # Update session
     session_adapter = adapter_manager.get_adapter("session")
     session_adapter.update("user_session_001", current_session)
     print("Updated session with new conversation turn")
-    
+
     # Save the graph
     sskg_manager.save_graph()
     print("\nGraph saved successfully.")
-    
+
     # Display summary
     print("\n=== Summary ===")
     print(f"Available adapters: {', '.join(adapter_manager.list_adapters())}")

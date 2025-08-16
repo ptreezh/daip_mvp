@@ -11,12 +11,12 @@ from lona.html.widget import Widget
 
 class TaskPanel(Widget):
     """任务面板组件"""
-    
+
     def __init__(self, task_service):
         super().__init__()
-        
+
         self.task_service = task_service
-        
+
         # 模拟任务数据
         self.tasks = [
             {
@@ -32,7 +32,7 @@ class TaskPanel(Widget):
                 ]
             },
             {
-                "id": "2", 
+                "id": "2",
                 "title": "生成共识报告",
                 "status": "not_started",
                 "assigned_agent": "创意直觉师",
@@ -40,17 +40,17 @@ class TaskPanel(Widget):
                 "subtasks": []
             }
         ]
-    
+
     async def handle_realtime_update(self, data):
         """处理实时任务更新（WebSocket回调）"""
         try:
             update_type = data.get("type")
             task_data = data.get("task")
-            
+
             if update_type == "task_created" and task_data:
                 # 添加新任务
                 self.tasks.append(task_data)
-            
+
             elif update_type == "task_updated" and task_data:
                 # 更新现有任务
                 task_id = task_data.get("id")
@@ -58,7 +58,7 @@ class TaskPanel(Widget):
                     if task["id"] == task_id:
                         self.tasks[i].update(task_data)
                         break
-            
+
             elif update_type == "status_changed":
                 # 更新任务状态
                 task_id = data.get("task_id")
@@ -72,35 +72,35 @@ class TaskPanel(Widget):
                         elif new_status == "in_progress" and task["progress"] == 0:
                             task["progress"] = 10
                         break
-            
+
             # 刷新组件显示
         except Exception as e:
             print(f"处理任务更新失败: {e}")
-    
+
     def get_status_color(self, status):
         """获取状态对应的颜色"""
         colors = {
             "not_started": "secondary",
-            "in_progress": "warning", 
+            "in_progress": "warning",
             "completed": "success",
             "blocked": "danger"
         }
         return colors.get(status, "secondary")
-    
+
     def get_status_text(self, status):
         """获取状态对应的中文文本"""
         texts = {
             "not_started": "未开始",
             "in_progress": "进行中",
-            "completed": "已完成", 
+            "completed": "已完成",
             "blocked": "阻塞"
         }
         return texts.get(status, status)
-    
+
     def render(self) -> HTML:
         return Div(
             H3("📋 任务管理", _class="panel-title"),
-            
+
             # 任务列表
             Div(
                 *[
@@ -119,7 +119,7 @@ class TaskPanel(Widget):
                             ),
                             style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;"
                         ),
-                        
+
                         # 进度条
                         Div(
                             Div(
@@ -127,7 +127,7 @@ class TaskPanel(Widget):
                             ),
                             style="width: 100%; height: 8px; background: #e9ecef; border-radius: 4px; margin-bottom: 10px;"
                         ),
-                        
+
                         # 子任务（如果有）
                         Div(
                             *[
@@ -145,20 +145,20 @@ class TaskPanel(Widget):
                             ],
                             style="padding-left: 10px; border-left: 2px solid #e9ecef;" if task["subtasks"] else "display: none;"
                         ),
-                        
+
                         style="border: 1px solid #e9ecef; border-left: 4px solid #f39c12; border-radius: 6px; padding: 12px; margin-bottom: 12px; background: white;"
                     )
                     for task in self.tasks
                 ],
                 style="max-height: 400px; overflow-y: auto;"
             ),
-            
+
             # 任务统计
             Div(
                 P("任务统计", style="font-weight: 600; color: white; margin: 0;"),
                 P(f"总计: {len(self.tasks)} | 进行中: 1 | 已完成: 0", style="color: white; margin: 5px 0 0 0; font-size: 0.9rem;"),
                 style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); padding: 12px; border-radius: 6px; margin-top: 10px;"
             ),
-            
+
             _class="task-panel"
         )

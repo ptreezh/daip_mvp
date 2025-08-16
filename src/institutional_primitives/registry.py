@@ -5,7 +5,11 @@ for their registration, discovery, and instantiation.
 """
 
 import logging
+<<<<<<< HEAD
+from typing import Any, Dict, List, Optional, Type
+=======
 from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .base import InstitutionalPrimitive, PrimitiveInfo, ValidationResult
 
@@ -16,13 +20,18 @@ class PrimitiveRegistry:
     This class manages the registration, discovery, and instantiation of
     institutional primitive nodes.
     """
-    
+
     def __init__(self):
         """Initialize the primitive registry."""
         self._primitives: dict[str, type[InstitutionalPrimitive]] = {}
         self._logger = logging.getLogger(__name__)
+<<<<<<< HEAD
+
+    def register_primitive(self, primitive_type: str, primitive_class: Type[InstitutionalPrimitive]) -> bool:
+=======
     
     def register_primitive(self, primitive_type: str, primitive_class: type[InstitutionalPrimitive]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Register a primitive type with the registry.
         
         Args:
@@ -31,15 +40,21 @@ class PrimitiveRegistry:
             
         Returns:
             True if registration was successful, False otherwise
+
         """
         if primitive_type in self._primitives:
             self._logger.warning(f"Primitive type '{primitive_type}' already registered. Overwriting.")
-        
+
         self._primitives[primitive_type] = primitive_class
         self._logger.info(f"Registered primitive type '{primitive_type}'")
         return True
+<<<<<<< HEAD
+
+    def get_primitive(self, primitive_type: str) -> Optional[Type[InstitutionalPrimitive]]:
+=======
     
     def get_primitive(self, primitive_type: str) -> Optional[type[InstitutionalPrimitive]]:
+>>>>>>> feature/core-services-refactor
         """Get a primitive class by type.
         
         Args:
@@ -47,25 +62,32 @@ class PrimitiveRegistry:
             
         Returns:
             The primitive class, or None if not found
+
         """
         if primitive_type not in self._primitives:
             self._logger.warning(f"Primitive type '{primitive_type}' not found in registry")
             return None
-        
+
         return self._primitives[primitive_type]
+<<<<<<< HEAD
+
+    def list_primitives(self) -> List[PrimitiveInfo]:
+=======
     
     def list_primitives(self) -> list[PrimitiveInfo]:
+>>>>>>> feature/core-services-refactor
         """List all registered primitives.
         
         Returns:
             List of information about registered primitives
+
         """
         result = []
         for primitive_type, primitive_class in self._primitives.items():
             # Create a temporary instance to get schemas
             # In a real implementation, this might be handled differently
             temp_instance = primitive_class(primitive_id="temp")
-            
+
             info = PrimitiveInfo(
                 type=primitive_type,
                 name=primitive_class.__name__,
@@ -75,10 +97,15 @@ class PrimitiveRegistry:
                 version="1.0.0"  # In a real implementation, this would be dynamic
             )
             result.append(info)
-        
+
         return result
+<<<<<<< HEAD
+
+    def validate_primitive(self, primitive_def: Dict[str, Any]) -> ValidationResult:
+=======
     
     def validate_primitive(self, primitive_def: dict[str, Any]) -> ValidationResult:
+>>>>>>> feature/core-services-refactor
         """Validate a primitive definition.
         
         Args:
@@ -86,32 +113,38 @@ class PrimitiveRegistry:
             
         Returns:
             Validation result indicating whether the definition is valid
+
         """
         result = ValidationResult(is_valid=True)
-        
+
         # Check required fields
         required_fields = ["type", "id", "config"]
         for field in required_fields:
             if field not in primitive_def:
                 result.is_valid = False
                 result.errors.append(f"Missing required field '{field}'")
-        
+
         if not result.is_valid:
             return result
-        
+
         # Check if primitive type exists
         primitive_type = primitive_def["type"]
         if primitive_type not in self._primitives:
             result.is_valid = False
             result.errors.append(f"Unknown primitive type '{primitive_type}'")
             return result
-        
+
         # In a real implementation, we would also validate the config against
         # the primitive's expected configuration schema
-        
+
         return result
+<<<<<<< HEAD
+
+    def instantiate_primitive(self, primitive_def: Dict[str, Any]) -> Optional[InstitutionalPrimitive]:
+=======
     
     def instantiate_primitive(self, primitive_def: dict[str, Any]) -> Optional[InstitutionalPrimitive]:
+>>>>>>> feature/core-services-refactor
         """Instantiate a primitive from a definition.
         
         Args:
@@ -119,16 +152,17 @@ class PrimitiveRegistry:
             
         Returns:
             Instantiated primitive, or None if instantiation failed
+
         """
         validation = self.validate_primitive(primitive_def)
         if not validation.is_valid:
             self._logger.error(f"Cannot instantiate invalid primitive: {validation.errors}")
             return None
-        
+
         primitive_type = primitive_def["type"]
         primitive_id = primitive_def["id"]
         config = primitive_def.get("config", {})
-        
+
         primitive_class = self._primitives[primitive_type]
         try:
             instance = primitive_class(primitive_id=primitive_id, config=config)

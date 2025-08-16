@@ -51,19 +51,37 @@ logger = logging.getLogger(__name__)
 
 class DebateSystemView(LonaView):
     """多轮辩论系统主视图"""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     def __init__(self):
         super().__init__()
         self.debate_interface = None
         self.dialogue_engine = None
         self.state_manager = None
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     async def handle_request(self, request):
         """处理HTTP请求"""
         try:
             # 初始化组件（如果尚未初始化）
             if not self.debate_interface:
                 await self._initialize_components()
+<<<<<<< HEAD
+
+            # 返回主界面
+            return self.debate_interface.render()
+
+        except Exception as e:
+            logger.error(f"处理请求失败: {e}")
+            return self._render_error_page(str(e))
+
+=======
             
             # 返回主界面
             return self.debate_interface.render()
@@ -72,18 +90,27 @@ class DebateSystemView(LonaView):
             logger.error(f"处理请求失败: {e}")
             return self._render_error_page(str(e))
     
+>>>>>>> feature/core-services-refactor
     async def _initialize_components(self):
         """初始化系统组件"""
         try:
             logger.info("正在初始化辩论系统组件...")
+<<<<<<< HEAD
+
+=======
             
+>>>>>>> feature/core-services-refactor
             # 创建模拟的依赖组件
             mock_cognitive_agent = MockCognitiveAgent()
             mock_role_manager = MockRoleManager()
             mock_llm_manager = MockLLMManager()
             mock_memory_agent = MockMemoryAgent()
             mock_participant_manager = MockParticipantManager()
+<<<<<<< HEAD
+
+=======
             
+>>>>>>> feature/core-services-refactor
             # 创建多角色对话引擎
             self.dialogue_engine = MultiRoleDialogueEngine(
                 cognitive_agent=mock_cognitive_agent,
@@ -92,15 +119,31 @@ class DebateSystemView(LonaView):
                 memory_agent=mock_memory_agent,
                 participant_manager=mock_participant_manager
             )
+<<<<<<< HEAD
+
+            # 创建状态管理器
+            self.state_manager = DebateStateManager()
+
+=======
             
             # 创建状态管理器
             self.state_manager = DebateStateManager()
             
+>>>>>>> feature/core-services-refactor
             # 创建Web界面
             self.debate_interface = DebateWebInterface(
                 dialogue_engine=self.dialogue_engine,
                 state_manager=self.state_manager
             )
+<<<<<<< HEAD
+
+            logger.info("✅ 辩论系统组件初始化完成")
+
+        except Exception as e:
+            logger.error(f"初始化组件失败: {e}")
+            raise
+
+=======
             
             logger.info("✅ 辩论系统组件初始化完成")
         
@@ -108,6 +151,7 @@ class DebateSystemView(LonaView):
             logger.error(f"初始化组件失败: {e}")
             raise
     
+>>>>>>> feature/core-services-refactor
     def _render_error_page(self, error_message: str) -> HTML:
         """渲染错误页面"""
         return HTML(
@@ -122,7 +166,11 @@ class DebateSystemView(LonaView):
 
 class HealthCheckView(LonaView):
     """健康检查视图"""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     async def handle_request(self, request):
         """处理健康检查请求"""
         try:
@@ -133,7 +181,11 @@ class HealthCheckView(LonaView):
                 "websocket_connections": len(debate_websocket_manager.connections),
                 "total_messages": debate_websocket_manager.total_messages_sent + debate_websocket_manager.total_messages_received
             }
+<<<<<<< HEAD
+
+=======
             
+>>>>>>> feature/core-services-refactor
             return HTML(
                 Div(
                     H1("🟢 系统健康状态", style="color: #28a745; text-align: center;"),
@@ -144,7 +196,11 @@ class HealthCheckView(LonaView):
                     style="max-width: 400px; margin: 50px auto; padding: 20px; border: 1px solid #28a745; border-radius: 8px;"
                 )
             )
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         except Exception as e:
             logger.error(f"健康检查失败: {e}")
             return HTML(
@@ -159,11 +215,19 @@ class HealthCheckView(LonaView):
 # 模拟组件类（用于演示）
 class MockCognitiveAgent:
     """模拟认知代理"""
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     pass
 
 class MockRoleManager:
     """模拟角色管理器"""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     async def get_available_roles(self):
         """获取可用角色"""
         return {
@@ -195,12 +259,20 @@ class MockRoleManager:
 
 class MockLLMManager:
     """模拟LLM管理器"""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     async def generate_response(self, prompt: str, model_preference: str = "gpt-4", timeout: int = 30):
         """生成响应"""
         # 模拟LLM响应
         await asyncio.sleep(1)  # 模拟处理时间
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         responses = [
             "这是一个非常有趣的观点。从我的专业角度来看，我认为这个问题需要从多个维度来分析。",
             "我同意前面专家的部分观点，但我想补充一些不同的视角。",
@@ -208,12 +280,30 @@ class MockLLMManager:
             "让我从另一个角度来看这个问题。我们需要考虑长期和短期的影响。",
             "这确实是一个复杂的问题。我建议我们可以从以下几个方面来深入讨论。"
         ]
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         import random
         return random.choice(responses)
 
 class MockMemoryAgent:
     """模拟记忆代理"""
+<<<<<<< HEAD
+
+    async def store_memory(self, key: str, content: Any, memory_type: str = "general"):
+        """存储记忆"""
+        pass
+
+    async def retrieve_memory(self, key: str):
+        """检索记忆"""
+        return None
+
+class MockParticipantManager:
+    """模拟参与者管理器"""
+
+=======
     
     async def store_memory(self, key: str, content: Any, memory_type: str = "general"):
         """存储记忆"""
@@ -225,22 +315,35 @@ class MockMemoryAgent:
 
 class MockParticipantManager:
     """模拟参与者管理器"""
+>>>>>>> feature/core-services-refactor
     pass
 
 
 def create_app() -> App:
     """创建Lona应用程序"""
     app = App(__name__)
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     # 配置静态文件
     static_dir = current_dir / "static"
     if static_dir.exists():
         app.add_static_file_handler("/static/", static_dir)
+<<<<<<< HEAD
+
+    # 添加路由
+    app.add_route(Route("/", DebateSystemView))
+    app.add_route(Route("/health", HealthCheckView))
+
+=======
     
     # 添加路由
     app.add_route(Route("/", DebateSystemView))
     app.add_route(Route("/health", HealthCheckView))
     
+>>>>>>> feature/core-services-refactor
     return app
 
 
@@ -258,6 +361,15 @@ async def main():
     """主函数"""
     try:
         logger.info("🚀 启动多轮辩论系统...")
+<<<<<<< HEAD
+
+        # 设置WebSocket服务器
+        await setup_websocket_server()
+
+        # 创建Lona应用
+        app = create_app()
+
+=======
         
         # 设置WebSocket服务器
         await setup_websocket_server()
@@ -265,18 +377,27 @@ async def main():
         # 创建Lona应用
         app = create_app()
         
+>>>>>>> feature/core-services-refactor
         # 启动应用
         logger.info("🌐 Web服务器启动中...")
         logger.info("📱 访问地址: http://localhost:8080")
         logger.info("🏥 健康检查: http://localhost:8080/health")
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 运行应用
         app.run(
             host="0.0.0.0",
             port=8080,
             debug=True
         )
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     except KeyboardInterrupt:
         logger.info("👋 用户中断，正在关闭系统...")
     except Exception as e:
@@ -297,7 +418,11 @@ if __name__ == "__main__":
         if sys.version_info < (3, 8):
             print("❌ 需要Python 3.8或更高版本")
             sys.exit(1)
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         # 检查依赖
         try:
             import lona
@@ -305,6 +430,15 @@ if __name__ == "__main__":
         except ImportError:
             print("❌ 未安装Lona框架，请运行: pip install lona")
             sys.exit(1)
+<<<<<<< HEAD
+
+        # 运行应用
+        asyncio.run(main())
+
+    except Exception as e:
+        logger.error(f"应用程序启动失败: {e}")
+        sys.exit(1)
+=======
         
         # 运行应用
         asyncio.run(main())
@@ -312,3 +446,4 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"应用程序启动失败: {e}")
         sys.exit(1)
+>>>>>>> feature/core-services-refactor

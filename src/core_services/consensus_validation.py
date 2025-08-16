@@ -21,7 +21,11 @@
 import json
 import re
 from datetime import datetime
+<<<<<<< HEAD
+from typing import Any, Dict, List, Type
+=======
 from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from consensus_models import (
     AlgorithmMetadata,
@@ -34,6 +38,15 @@ from pydantic import ValidationError
 
 class ConsensusDataValidator:
     """共识数据验证器"""
+<<<<<<< HEAD
+
+    @staticmethod
+    def validate_consensus_input(data: Dict[str, Any]) -> ValidationResult:
+        """验证共识输入数据"""
+        errors = []
+        warnings = []
+
+=======
     
     @staticmethod
     def validate_consensus_input(data: dict[str, Any]) -> ValidationResult:
@@ -41,6 +54,7 @@ class ConsensusDataValidator:
         errors = []
         warnings = []
         
+>>>>>>> feature/core-services-refactor
         try:
             # 使用Pydantic验证
             ConsensusInput(**data)
@@ -51,7 +65,11 @@ class ConsensusDataValidator:
                 errors.append(f"字段 '{field}': {message}")
         except Exception as e:
             errors.append(f"验证失败: {str(e)}")
+<<<<<<< HEAD
+
+=======
             
+>>>>>>> feature/core-services-refactor
         # 额外的业务逻辑验证
         if "confidence" in data:
             confidence = data["confidence"]
@@ -59,12 +77,20 @@ class ConsensusDataValidator:
                 errors.append("置信度必须是数字")
             elif confidence < 0 or confidence > 1:
                 errors.append("置信度必须在0-1之间")
+<<<<<<< HEAD
+
+=======
                 
+>>>>>>> feature/core-services-refactor
         if "agent_id" in data:
             agent_id = data["agent_id"]
             if not isinstance(agent_id, str) or not agent_id.strip():
                 errors.append("agent_id必须是非空字符串")
+<<<<<<< HEAD
+
+=======
                 
+>>>>>>> feature/core-services-refactor
         # 检查position类型
         if "position" in data:
             position = data["position"]
@@ -72,12 +98,25 @@ class ConsensusDataValidator:
                 errors.append("position不能为空")
             elif isinstance(position, str) and not position.strip():
                 warnings.append("position为空字符串")
+<<<<<<< HEAD
+
+=======
                 
+>>>>>>> feature/core-services-refactor
         return ValidationResult(
             is_valid=len(errors) == 0,
             errors=errors,
             warnings=warnings
         )
+<<<<<<< HEAD
+
+    @staticmethod
+    def validate_consensus_request(data: Dict[str, Any]) -> ValidationResult:
+        """验证共识请求数据"""
+        errors = []
+        warnings = []
+
+=======
         
     @staticmethod
     def validate_consensus_request(data: dict[str, Any]) -> ValidationResult:
@@ -85,6 +124,7 @@ class ConsensusDataValidator:
         errors = []
         warnings = []
         
+>>>>>>> feature/core-services-refactor
         try:
             # 使用Pydantic验证
             ConsensusRequest(**data)
@@ -95,7 +135,11 @@ class ConsensusDataValidator:
                 errors.append(f"字段 '{field}': {message}")
         except Exception as e:
             errors.append(f"验证失败: {str(e)}")
+<<<<<<< HEAD
+
+=======
             
+>>>>>>> feature/core-services-refactor
         # 验证输入列表
         if "inputs" in data:
             inputs = data["inputs"]
@@ -109,12 +153,20 @@ class ConsensusDataValidator:
                     if not isinstance(input_data, dict):
                         errors.append(f"inputs[{i}]必须是字典")
                         continue
+<<<<<<< HEAD
+
+=======
                         
+>>>>>>> feature/core-services-refactor
                     input_validation = ConsensusDataValidator.validate_consensus_input(input_data)
                     if not input_validation.is_valid:
                         for error in input_validation.errors:
                             errors.append(f"inputs[{i}].{error}")
+<<<<<<< HEAD
+
+=======
                             
+>>>>>>> feature/core-services-refactor
         # 验证超时时间
         if "timeout" in data:
             timeout = data["timeout"]
@@ -124,12 +176,25 @@ class ConsensusDataValidator:
                 errors.append("timeout必须大于0")
             elif timeout > 300:  # 5分钟
                 warnings.append("timeout过长，可能影响用户体验")
+<<<<<<< HEAD
+
+=======
                 
+>>>>>>> feature/core-services-refactor
         return ValidationResult(
             is_valid=len(errors) == 0,
             errors=errors,
             warnings=warnings
         )
+<<<<<<< HEAD
+
+    @staticmethod
+    def validate_algorithm_metadata(data: Dict[str, Any]) -> ValidationResult:
+        """验证算法元数据"""
+        errors = []
+        warnings = []
+
+=======
         
     @staticmethod
     def validate_algorithm_metadata(data: dict[str, Any]) -> ValidationResult:
@@ -137,6 +202,7 @@ class ConsensusDataValidator:
         errors = []
         warnings = []
         
+>>>>>>> feature/core-services-refactor
         try:
             AlgorithmMetadata(**data)
         except ValidationError as e:
@@ -146,25 +212,41 @@ class ConsensusDataValidator:
                 errors.append(f"字段 '{field}': {message}")
         except Exception as e:
             errors.append(f"验证失败: {str(e)}")
+<<<<<<< HEAD
+
+=======
             
+>>>>>>> feature/core-services-refactor
         # 验证版本格式
         if "version" in data:
             version = data["version"]
             if not re.match(r'^\d+\.\d+(\.\d+)?$', version):
                 warnings.append("版本号建议使用语义化版本格式 (如: 1.0.0)")
+<<<<<<< HEAD
+
+=======
                 
+>>>>>>> feature/core-services-refactor
         # 验证复杂度等级
         if "complexity" in data:
             complexity = data["complexity"]
             if complexity not in ["low", "medium", "high"]:
                 errors.append("complexity必须是 'low', 'medium', 或 'high'")
+<<<<<<< HEAD
+
+=======
                 
+>>>>>>> feature/core-services-refactor
         # 验证性能等级
         if "performance" in data:
             performance = data["performance"]
             if performance not in ["fast", "medium", "slow"]:
                 errors.append("performance必须是 'fast', 'medium', 或 'slow'")
+<<<<<<< HEAD
+
+=======
                 
+>>>>>>> feature/core-services-refactor
         return ValidationResult(
             is_valid=len(errors) == 0,
             errors=errors,
@@ -174,7 +256,11 @@ class ConsensusDataValidator:
 
 class ConsensusDataSerializer:
     """共识数据序列化器"""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     @staticmethod
     def serialize_to_json(obj: Any) -> str:
         """序列化对象为JSON字符串"""
@@ -187,6 +273,21 @@ class ConsensusDataSerializer:
                 return obj.__dict__
             else:
                 return str(obj)
+<<<<<<< HEAD
+
+        return json.dumps(obj, default=json_encoder, ensure_ascii=False, indent=2)
+
+    @staticmethod
+    def deserialize_from_json(json_str: str, target_type: Type) -> Any:
+        """从JSON字符串反序列化对象"""
+        try:
+            data = json.loads(json_str)
+
+            # 处理datetime字段
+            if isinstance(data, dict):
+                data = ConsensusDataSerializer._convert_datetime_fields(data)
+
+=======
                 
         return json.dumps(obj, default=json_encoder, ensure_ascii=False, indent=2)
         
@@ -200,34 +301,57 @@ class ConsensusDataSerializer:
             if isinstance(data, dict):
                 data = ConsensusDataSerializer._convert_datetime_fields(data)
                 
+>>>>>>> feature/core-services-refactor
             # 使用目标类型创建对象
             if hasattr(target_type, 'parse_obj'):  # Pydantic模型
                 return target_type.parse_obj(data)
             else:
                 return target_type(**data)
+<<<<<<< HEAD
+
+=======
                 
+>>>>>>> feature/core-services-refactor
         except json.JSONDecodeError as e:
             raise ValueError(f"JSON格式错误: {str(e)}")
         except Exception as e:
             raise ValueError(f"反序列化失败: {str(e)}")
+<<<<<<< HEAD
+
+    @staticmethod
+    def _convert_datetime_fields(data: Dict[str, Any]) -> Dict[str, Any]:
+        """转换datetime字段"""
+        datetime_fields = ["timestamp", "created_at", "updated_at"]
+
+=======
             
     @staticmethod
     def _convert_datetime_fields(data: dict[str, Any]) -> dict[str, Any]:
         """转换datetime字段"""
         datetime_fields = ["timestamp", "created_at", "updated_at"]
         
+>>>>>>> feature/core-services-refactor
         for field in datetime_fields:
             if field in data and isinstance(data[field], str):
                 try:
                     data[field] = datetime.fromisoformat(data[field].replace('Z', '+00:00'))
                 except ValueError:
                     pass  # 保持原值
+<<<<<<< HEAD
+
+        return data
+
+    @staticmethod
+    def convert_legacy_format(legacy_data: Dict[str, Any],
+                            source_format: str) -> Dict[str, Any]:
+=======
                     
         return data
         
     @staticmethod
     def convert_legacy_format(legacy_data: dict[str, Any], 
                             source_format: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """转换旧版本数据格式"""
         if source_format == "debate_turn":
             # 转换DebateTurn格式到ConsensusInput
@@ -263,6 +387,15 @@ class ConsensusDataSerializer:
 
 class ConsensusDataConverter:
     """共识数据格式转换器"""
+<<<<<<< HEAD
+
+    @staticmethod
+    def to_standard_format(data: Any, source_type: str = "auto") -> Dict[str, Any]:
+        """转换为标准格式"""
+        if source_type == "auto":
+            source_type = ConsensusDataConverter._detect_format(data)
+
+=======
     
     @staticmethod
     def to_standard_format(data: Any, source_type: str = "auto") -> dict[str, Any]:
@@ -270,6 +403,7 @@ class ConsensusDataConverter:
         if source_type == "auto":
             source_type = ConsensusDataConverter._detect_format(data)
             
+>>>>>>> feature/core-services-refactor
         if source_type == "pydantic":
             return data.dict() if hasattr(data, 'dict') else data
         elif source_type == "dataclass":
@@ -278,7 +412,11 @@ class ConsensusDataConverter:
             return data
         else:
             raise ValueError(f"不支持的源类型: {source_type}")
+<<<<<<< HEAD
+
+=======
             
+>>>>>>> feature/core-services-refactor
     @staticmethod
     def _detect_format(data: Any) -> str:
         """自动检测数据格式"""
@@ -290,6 +428,17 @@ class ConsensusDataConverter:
             return "dict"
         else:
             return "unknown"
+<<<<<<< HEAD
+
+    @staticmethod
+    def batch_convert(data_list: List[Any],
+                     target_type: Type,
+                     source_format: str = "auto") -> List[Any]:
+        """批量转换数据"""
+        results = []
+        errors = []
+
+=======
             
     @staticmethod
     def batch_convert(data_list: list[Any], 
@@ -299,6 +448,7 @@ class ConsensusDataConverter:
         results = []
         errors = []
         
+>>>>>>> feature/core-services-refactor
         for i, item in enumerate(data_list):
             try:
                 if source_format != "auto":
@@ -310,8 +460,16 @@ class ConsensusDataConverter:
                 results.append(result)
             except Exception as e:
                 errors.append(f"项目 {i}: {str(e)}")
+<<<<<<< HEAD
+
+        if errors:
+            raise ValueError(f"批量转换失败: {'; '.join(errors)}")
+
+        return results
+=======
                 
         if errors:
             raise ValueError(f"批量转换失败: {'; '.join(errors)}")
             
         return results
+>>>>>>> feature/core-services-refactor

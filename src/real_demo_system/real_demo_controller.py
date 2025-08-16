@@ -8,11 +8,18 @@ import json
 import logging
 import time
 import uuid
+<<<<<<< HEAD
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
+=======
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .call_verification import CallVerificationSystem
 
@@ -27,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 class DemoSessionStatus(Enum):
     """演示会话状态"""
+
     INITIALIZING = "initializing"
     READY = "ready"
     RUNNING = "running"
@@ -39,18 +47,28 @@ class DemoSessionStatus(Enum):
 @dataclass
 class DemoSession:
     """演示会话"""
+
     session_id: str
     session_name: str
     status: DemoSessionStatus
     start_time: datetime
     end_time: Optional[datetime]
     scenario_type: str
+<<<<<<< HEAD
+    participants: List[str]
+    execution_log: List[Dict[str, Any]]
+    results: Optional[Dict[str, Any]]
+    metadata: Dict[str, Any]
+
+    def to_dict(self) -> Dict[str, Any]:
+=======
     participants: list[str]
     execution_log: list[dict[str, Any]]
     results: Optional[dict[str, Any]]
     metadata: dict[str, Any]
     
     def to_dict(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         data = asdict(self)
         data['status'] = self.status.value
         data['start_time'] = self.start_time.isoformat()
@@ -64,34 +82,49 @@ class RealDemoController:
     统一管理演示流程，协调各个组件的真实调用，
     实现演示会话管理和完整的透明度监控。
     """
+<<<<<<< HEAD
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+=======
     
     def __init__(self, config: Optional[dict[str, Any]] = None):
+>>>>>>> feature/core-services-refactor
         """初始化演示控制器
         
         Args:
             config: 配置参数
+
         """
         self.config = config or {}
-        
+
         # 初始化核心组件
         self.llm_integrator = RealLLMIntegrator(self.config.get("llm", {}))
         self.role_manager = RealRoleManager(self.config.get("roles_directory", "roles"))
         self.workflow_executor = RealWorkflowExecutor(self.llm_integrator, self.role_manager)
         self.transparency_monitor = TransparencyMonitor(self.llm_integrator)
         self.verification_system = CallVerificationSystem()
-        
+
         # 演示会话管理
+<<<<<<< HEAD
+        self.active_sessions: Dict[str, DemoSession] = {}
+        self.session_history: List[DemoSession] = []
+
+        # 事件订阅者
+        self.subscribers: List[Callable] = []
+
+=======
         self.active_sessions: dict[str, DemoSession] = {}
         self.session_history: list[DemoSession] = []
         
         # 事件订阅者
         self.subscribers: list[Callable] = []
         
+>>>>>>> feature/core-services-refactor
         # 订阅工作流事件
         self.workflow_executor.subscribe(self._handle_workflow_event)
-        
+
         logger.info("RealDemoController initialized")
-    
+
     async def create_demo_session(
         self,
         session_name: str,
@@ -109,9 +142,10 @@ class RealDemoController:
             
         Returns:
             会话ID
+
         """
         session_id = str(uuid.uuid4())
-        
+
         session = DemoSession(
             session_id=session_id,
             session_name=session_name,
@@ -124,26 +158,26 @@ class RealDemoController:
             results=None,
             metadata=metadata or {}
         )
-        
+
         self.active_sessions[session_id] = session
-        
+
         # 记录会话创建
         await self._log_session_event(session_id, "session_created", {
             "session_name": session_name,
             "scenario_type": scenario_type,
             "participants": participants
         })
-        
+
         # 初始化会话
         await self._initialize_session(session_id)
-        
+
         logger.info(f"Demo session created: {session_id}")
         return session_id
-    
+
     async def _initialize_session(self, session_id: str):
         """初始化会话"""
         session = self.active_sessions[session_id]
-        
+
         try:
             # 验证参与者角色
             valid_participants = []
@@ -160,34 +194,39 @@ class RealDemoController:
                         "participant": participant,
                         "error": "Role not found"
                     })
-            
+
             session.participants = valid_participants
-            
+
             # 检查系统健康状态
             health_status = await self.llm_integrator.health_check()
             await self._log_session_event(session_id, "system_health_check", health_status)
-            
+
             # 更新会话状态
             session.status = DemoSessionStatus.READY
-            
+
             await self._log_session_event(session_id, "session_initialized", {
                 "valid_participants": len(valid_participants),
                 "system_status": health_status["overall_status"]
             })
-            
+
         except Exception as e:
             session.status = DemoSessionStatus.FAILED
             await self._log_session_event(session_id, "initialization_failed", {
                 "error": str(e)
             })
             logger.error(f"Session initialization failed: {e}")
-    
+
     async def execute_ai_ethics_scenario(
         self,
         session_id: str,
         ethical_dilemma: str,
+<<<<<<< HEAD
+        context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+=======
         context: Optional[dict[str, Any]] = None
     ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行AI伦理决策分析场景
         
         Args:
@@ -197,36 +236,37 @@ class RealDemoController:
             
         Returns:
             场景执行结果
+
         """
         if session_id not in self.active_sessions:
             return {"success": False, "error": "Session not found"}
-        
+
         session = self.active_sessions[session_id]
-        
+
         if session.status != DemoSessionStatus.READY:
             return {"success": False, "error": f"Session not ready, current status: {session.status.value}"}
-        
+
         try:
             session.status = DemoSessionStatus.RUNNING
-            
+
             await self._log_session_event(session_id, "scenario_started", {
                 "scenario_type": "ai_ethics",
                 "ethical_dilemma": ethical_dilemma,
                 "context": context
             })
-            
+
             # 第一步：使用批判性审查工作流分析伦理困境
             critical_review_result = await self.workflow_executor.execute_critical_review(
                 prompt=f"请分析以下AI伦理困境：{ethical_dilemma}",
                 role_context="作为AI伦理专家，请提供深入的伦理分析",
                 execution_id=f"{session_id}_critical_review"
             )
-            
+
             await self._log_session_event(session_id, "critical_review_completed", {
                 "success": critical_review_result.get("success", False),
                 "execution_id": critical_review_result.get("execution_id")
             })
-            
+
             # 第二步：使用多视角工作流获取不同角色的观点
             perspectives = ["伦理学", "技术", "法律", "社会影响", "商业"]
             multi_perspective_result = await self.workflow_executor.execute_multi_perspective(
@@ -234,13 +274,13 @@ class RealDemoController:
                 perspectives=perspectives,
                 execution_id=f"{session_id}_multi_perspective"
             )
-            
+
             await self._log_session_event(session_id, "multi_perspective_completed", {
                 "success": multi_perspective_result.get("success", False),
                 "execution_id": multi_perspective_result.get("execution_id"),
                 "perspectives": perspectives
             })
-            
+
             # 第三步：生成综合分析报告
             synthesis_prompt = f"""
             基于以下分析结果，生成AI伦理决策分析报告：
@@ -257,20 +297,20 @@ class RealDemoController:
             3. 决策建议
             4. 实施指导
             """
-            
+
             synthesis_result = await self.llm_integrator.call_llm(
                 prompt=synthesis_prompt,
                 metadata={"session_id": session_id, "step": "synthesis"}
             )
-            
+
             await self._log_session_event(session_id, "synthesis_completed", {
                 "call_id": synthesis_result.call_id,
                 "success": synthesis_result.success
             })
-            
+
             # 验证所有调用的真实性
             verification_results = []
-            
+
             # 验证LLM调用
             if synthesis_result.success:
                 verification = self.verification_system.verify_call_integrity(synthesis_result)
@@ -279,7 +319,7 @@ class RealDemoController:
                     "call_id": synthesis_result.call_id,
                     "verification": verification.to_dict()
                 })
-            
+
             # 验证工作流执行
             if critical_review_result.get("success"):
                 workflow_verification = self.workflow_executor.get_execution_transparency_report(
@@ -290,11 +330,11 @@ class RealDemoController:
                     "execution_id": critical_review_result["execution_id"],
                     "verification": workflow_verification
                 })
-            
+
             # 完成会话
             session.status = DemoSessionStatus.COMPLETED
             session.end_time = datetime.now()
-            
+
             # 准备最终结果
             final_results = {
                 "success": True,
@@ -310,42 +350,47 @@ class RealDemoController:
                 "session_duration_ms": int((session.end_time - session.start_time).total_seconds() * 1000),
                 "transparency_certificate": await self._generate_session_certificate(session_id)
             }
-            
+
             session.results = final_results
-            
+
             await self._log_session_event(session_id, "scenario_completed", {
                 "success": True,
                 "duration_ms": final_results["session_duration_ms"]
             })
-            
+
             # 移动到历史记录
             self.session_history.append(session)
             del self.active_sessions[session_id]
-            
+
             return final_results
-            
+
         except Exception as e:
             session.status = DemoSessionStatus.FAILED
             session.end_time = datetime.now()
-            
+
             await self._log_session_event(session_id, "scenario_failed", {
                 "error": str(e)
             })
-            
+
             logger.error(f"AI ethics scenario failed: {e}")
-            
+
             return {
                 "success": False,
                 "error": str(e),
                 "session_id": session_id
             }
-    
+
     async def execute_product_strategy_scenario(
         self,
         session_id: str,
         product_description: str,
+<<<<<<< HEAD
+        market_context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+=======
         market_context: Optional[dict[str, Any]] = None
     ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """执行产品策略评估场景
         
         Args:
@@ -355,24 +400,25 @@ class RealDemoController:
             
         Returns:
             场景执行结果
+
         """
         if session_id not in self.active_sessions:
             return {"success": False, "error": "Session not found"}
-        
+
         session = self.active_sessions[session_id]
-        
+
         if session.status != DemoSessionStatus.READY:
             return {"success": False, "error": f"Session not ready, current status: {session.status.value}"}
-        
+
         try:
             session.status = DemoSessionStatus.RUNNING
-            
+
             await self._log_session_event(session_id, "scenario_started", {
                 "scenario_type": "product_strategy",
                 "product_description": product_description,
                 "market_context": market_context
             })
-            
+
             # 使用多视角工作流进行产品策略分析
             perspectives = ["市场分析", "竞争分析", "技术可行性", "财务分析", "风险评估"]
             strategy_analysis_result = await self.workflow_executor.execute_multi_perspective(
@@ -380,12 +426,12 @@ class RealDemoController:
                 perspectives=perspectives,
                 execution_id=f"{session_id}_strategy_analysis"
             )
-            
+
             await self._log_session_event(session_id, "strategy_analysis_completed", {
                 "success": strategy_analysis_result.get("success", False),
                 "execution_id": strategy_analysis_result.get("execution_id")
             })
-            
+
             # 生成策略建议报告
             strategy_prompt = f"""
             基于多视角分析结果，为以下产品生成策略建议：
@@ -403,16 +449,16 @@ class RealDemoController:
             4. 实施路线图
             5. 成功指标定义
             """
-            
+
             strategy_result = await self.llm_integrator.call_llm(
                 prompt=strategy_prompt,
                 metadata={"session_id": session_id, "step": "strategy_generation"}
             )
-            
+
             # 完成会话并生成结果
             session.status = DemoSessionStatus.COMPLETED
             session.end_time = datetime.now()
-            
+
             final_results = {
                 "success": True,
                 "scenario_type": "product_strategy",
@@ -426,61 +472,71 @@ class RealDemoController:
                 "session_duration_ms": int((session.end_time - session.start_time).total_seconds() * 1000),
                 "transparency_certificate": await self._generate_session_certificate(session_id)
             }
-            
+
             session.results = final_results
-            
+
             # 移动到历史记录
             self.session_history.append(session)
             del self.active_sessions[session_id]
-            
+
             return final_results
-            
+
         except Exception as e:
             session.status = DemoSessionStatus.FAILED
             session.end_time = datetime.now()
-            
+
             await self._log_session_event(session_id, "scenario_failed", {
                 "error": str(e)
             })
-            
+
             return {
                 "success": False,
                 "error": str(e),
                 "session_id": session_id
             }
+<<<<<<< HEAD
+
+    async def get_session_status(self, session_id: str) -> Optional[Dict[str, Any]]:
+=======
     
     async def get_session_status(self, session_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """获取会话状态"""
         # 检查活跃会话
         if session_id in self.active_sessions:
             session = self.active_sessions[session_id]
             return session.to_dict()
-        
+
         # 检查历史会话
         for session in self.session_history:
             if session.session_id == session_id:
                 return session.to_dict()
-        
+
         return None
-    
+
     async def cancel_session(self, session_id: str) -> bool:
         """取消会话"""
         if session_id not in self.active_sessions:
             return False
-        
+
         session = self.active_sessions[session_id]
         session.status = DemoSessionStatus.CANCELLED
         session.end_time = datetime.now()
-        
+
         await self._log_session_event(session_id, "session_cancelled", {})
-        
+
         # 移动到历史记录
         self.session_history.append(session)
         del self.active_sessions[session_id]
-        
+
         return True
+<<<<<<< HEAD
+
+    async def _log_session_event(self, session_id: str, event_type: str, data: Dict[str, Any]):
+=======
     
     async def _log_session_event(self, session_id: str, event_type: str, data: dict[str, Any]):
+>>>>>>> feature/core-services-refactor
         """记录会话事件"""
         if session_id in self.active_sessions:
             session = self.active_sessions[session_id]
@@ -490,19 +546,24 @@ class RealDemoController:
                 "data": data
             }
             session.execution_log.append(event)
-            
+
             # 通知订阅者
             await self._emit_event("session_event", {
                 "session_id": session_id,
                 "event": event
             })
+<<<<<<< HEAD
+
+    async def _generate_session_certificate(self, session_id: str) -> Dict[str, Any]:
+=======
     
     async def _generate_session_certificate(self, session_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """生成会话透明度证书"""
         session_data = await self.get_session_status(session_id)
         if not session_data:
             return {"error": "Session not found"}
-        
+
         certificate = {
             "certificate_id": f"SESSION_{session_id}_{int(time.time())}",
             "session_id": session_id,
@@ -522,13 +583,22 @@ class RealDemoController:
             "issuer": "DAIP-LIVE Real Demo System",
             "validity": "This certificate verifies the transparency and authenticity of the demo session"
         }
-        
+
         # 计算证书哈希
         cert_content = json.dumps(certificate, sort_keys=True)
         import hashlib
         certificate["certificate_hash"] = hashlib.sha256(cert_content.encode()).hexdigest()
-        
+
         return certificate
+<<<<<<< HEAD
+
+    async def _handle_workflow_event(self, event: Dict[str, Any]):
+        """处理工作流事件"""
+        # 转发工作流事件给订阅者
+        await self._emit_event("workflow_event", event)
+
+    async def _emit_event(self, event_type: str, data: Dict[str, Any]):
+=======
     
     async def _handle_workflow_event(self, event: dict[str, Any]):
         """处理工作流事件"""
@@ -536,13 +606,14 @@ class RealDemoController:
         await self._emit_event("workflow_event", event)
     
     async def _emit_event(self, event_type: str, data: dict[str, Any]):
+>>>>>>> feature/core-services-refactor
         """发送事件"""
         event = {
             "event_type": event_type,
             "timestamp": datetime.now().isoformat(),
             "data": data
         }
-        
+
         # 通知订阅者
         for subscriber in self.subscribers:
             try:
@@ -552,19 +623,24 @@ class RealDemoController:
                     subscriber(event)
             except Exception as e:
                 logger.error(f"Error notifying subscriber: {e}")
-    
+
     def subscribe(self, callback: Callable):
         """订阅演示事件"""
         self.subscribers.append(callback)
         logger.info(f"New demo subscriber added, total: {len(self.subscribers)}")
-    
+
     def unsubscribe(self, callback: Callable):
         """取消订阅"""
         if callback in self.subscribers:
             self.subscribers.remove(callback)
             logger.info(f"Demo subscriber removed, total: {len(self.subscribers)}")
+<<<<<<< HEAD
+
+    def get_system_status(self) -> Dict[str, Any]:
+=======
     
     def get_system_status(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取系统状态"""
         return {
             "timestamp": datetime.now().isoformat(),
@@ -583,29 +659,34 @@ class RealDemoController:
                 "role_validation": self.role_manager.get_validation_summary()
             }
         }
+<<<<<<< HEAD
+
+    def get_demo_statistics(self) -> Dict[str, Any]:
+=======
     
     def get_demo_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """获取演示统计信息"""
         all_sessions = list(self.active_sessions.values()) + self.session_history
-        
+
         scenario_types = {}
         success_count = 0
         total_duration = 0
-        
+
         for session in all_sessions:
             # 统计场景类型
             scenario_type = session.scenario_type
             scenario_types[scenario_type] = scenario_types.get(scenario_type, 0) + 1
-            
+
             # 统计成功率
             if session.status == DemoSessionStatus.COMPLETED:
                 success_count += 1
-            
+
             # 统计总时长
             if session.end_time:
                 duration = (session.end_time - session.start_time).total_seconds() * 1000
                 total_duration += duration
-        
+
         return {
             "total_sessions": len(all_sessions),
             "active_sessions": len(self.active_sessions),

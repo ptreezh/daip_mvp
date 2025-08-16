@@ -66,7 +66,7 @@ async def test_basic_debate_flow(mock_kernel, event_queue, simple_debate_config)
         {"content": "Gradual transition is more economically viable"}
     ]
     mock_kernel.tool_executor.execute_tool.return_value = {
-        "status": "success", 
+        "status": "success",
         "result": "Both perspectives agree on gradual transition"
     }
     mock_kernel.synthesis_engine.synthesize_opinions.return_value = (
@@ -102,7 +102,7 @@ async def test_single_round_debate_flow(mock_kernel, event_queue):
         rounds=1,
         consensus_strategy="simple_majority_vote"
     )
-    
+
     mock_kernel.synthesis_engine.summarize_context.return_value = "Initial context"
     mock_kernel.llm_interface.generate.return_value = {"content": "Expert opinion"}
     mock_kernel.tool_executor.execute_tool.return_value = {"status": "success", "result": "Decision made"}
@@ -130,10 +130,10 @@ async def test_multi_participant_debate_flow(mock_kernel, event_queue):
         rounds=1,
         consensus_strategy="simple_majority_vote"
     )
-    
+
     mock_kernel.synthesis_engine.summarize_context.side_effect = [
         "Context for Scientist",
-        "Context for Economist", 
+        "Context for Economist",
         "Context for Ethicist",
         "Context for Politician"
     ]
@@ -158,6 +158,6 @@ async def test_multi_participant_debate_flow(mock_kernel, event_queue):
     assert "Economist" in role_ids
     assert "Ethicist" in role_ids
     assert "Politician" in role_ids
-    
+
     # All should be round 1
     assert all(turn.round == 1 for turn in protocol.history)

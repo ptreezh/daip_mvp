@@ -12,6 +12,7 @@ BOARD_FILE = DATA_DIR / "kanban_board.json"
 
 class KanbanToolError(Exception):
     """Custom exception for Kanban tool errors."""
+
     pass
 
 
@@ -47,6 +48,7 @@ def create_task(title: str, description: str, status: str = "TODO") -> str:
 
     Returns:
         A confirmation message with the new task's ID.
+
     """
     try:
         board = _load_board()
@@ -75,6 +77,7 @@ def list_tasks(status: Optional[str] = None) -> str:
 
     Returns:
         A formatted string of tasks or a message if no tasks are found.
+
     """
     try:
         board = _load_board()
@@ -118,6 +121,7 @@ def update_task(
 
     Returns:
         A confirmation or error message.
+
     """
     if not new_status and not new_description:
         return "Error: You must provide either a new status or a new description to update the task."

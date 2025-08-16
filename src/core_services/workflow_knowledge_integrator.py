@@ -6,9 +6,14 @@
     into Critical Review and Multi-perspective Synthesis workflows.
 """
 import logging
+<<<<<<< HEAD
+from datetime import datetime
+from typing import Any, Callable, Dict, List
+=======
 from collections.abc import Callable
 from datetime import datetime
 from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel
 
@@ -22,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 class WorkflowIntegrationConfig(BaseModel):
     """Configuration for workflow knowledge integration."""
+
     auto_persist_facts: bool = True
     auto_persist_synthesis: bool = True
     min_confidence_threshold: float = 0.5
@@ -37,7 +43,7 @@ class WorkflowKnowledgeIntegrator:
     This service implements requirement 6.1 and 6.2 by automatically
     persisting validated facts and synthesis results from workflows.
     """
-    
+
     def __init__(
         self,
         sskg_manager: EnhancedSSKGManager,
@@ -50,11 +56,12 @@ class WorkflowKnowledgeIntegrator:
             sskg_manager: Enhanced SSKG manager for knowledge storage
             wiki_service: Wiki service for structured documentation
             config: Configuration for integration behavior
+
         """
         self.sskg_manager = sskg_manager
         self.wiki_service = wiki_service
         self.config = config or WorkflowIntegrationConfig()
-        
+
         # Initialize knowledge persistence service
         conflict_resolver = KnowledgeConflictResolver()
         self.persistence_service = KnowledgePersistenceService(
@@ -62,26 +69,36 @@ class WorkflowKnowledgeIntegrator:
             wiki_service=wiki_service,
             conflict_resolver=conflict_resolver
         )
-        
+
         # Configure persistence service
         self.persistence_service.configure_persistence(
             min_confidence_threshold=self.config.min_confidence_threshold,
             auto_resolve_conflicts=self.config.auto_resolve_conflicts,
             create_wiki_pages=self.config.create_wiki_pages
         )
-        
+
         # Callback registry for notifications
+<<<<<<< HEAD
+        self.persistence_callbacks: List[Callable[[str, KnowledgePersistenceResult], None]] = []
+        self.conflict_callbacks: List[Callable[[str, List[str]], None]] = []
+
+=======
         self.persistence_callbacks: list[Callable[[str, KnowledgePersistenceResult], None]] = []
         self.conflict_callbacks: list[Callable[[str, list[str]], None]] = []
         
+>>>>>>> feature/core-services-refactor
         logger.info("WorkflowKnowledgeIntegrator initialized")
-    
+
     async def integrate_critical_review_workflow(
         self,
         workflow_result: dict[str, Any],
         execution_id: str,
         workflow_instance: Any = None
+<<<<<<< HEAD
+    ) -> Dict[str, Any]:
+=======
     ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Integrate knowledge persistence into Critical Review workflow results.
         
         Args:
@@ -91,18 +108,19 @@ class WorkflowKnowledgeIntegrator:
             
         Returns:
             Enhanced workflow result with persistence information
+
         """
         logger.info(f"Integrating Critical Review workflow knowledge for execution {execution_id}")
-        
+
         enhanced_result = workflow_result.copy()
-        
+
         try:
             if self.config.auto_persist_facts and workflow_result.get("success", False):
                 # Persist validated facts
                 persistence_results = await self.persistence_service.persist_critical_review_results(
                     workflow_result, execution_id
                 )
-                
+
                 # Add persistence information to result
                 enhanced_result["knowledge_persistence"] = {
                     "facts_persisted": len([r for r in persistence_results if r.success]),
@@ -113,7 +131,7 @@ class WorkflowKnowledgeIntegrator:
                     "persistence_timestamp": datetime.now().isoformat(),
                     "persistence_results": [r.model_dump() for r in persistence_results]
                 }
-                
+
                 # Notify callbacks
                 for result in persistence_results:
                     for callback in self.persistence_callbacks:
@@ -121,39 +139,43 @@ class WorkflowKnowledgeIntegrator:
                             callback(execution_id, result)
                         except Exception as e:
                             logger.error(f"Persistence callback failed: {e}")
-                
+
                 # Handle conflicts if any
                 all_conflicts = []
                 for result in persistence_results:
                     all_conflicts.extend(result.conflicts_detected)
-                
+
                 if all_conflicts and self.config.notify_on_conflicts:
                     for callback in self.conflict_callbacks:
                         try:
                             callback(execution_id, all_conflicts)
                         except Exception as e:
                             logger.error(f"Conflict callback failed: {e}")
-                
+
                 logger.info(f"Successfully integrated {len(persistence_results)} facts from Critical Review")
-            
+
             # Enable cross-session knowledge sharing if configured
             if self.config.enable_cross_session_sharing:
                 enhanced_result["cross_session_knowledge"] = await self._get_related_knowledge(
                     workflow_result, "critical_review"
                 )
-            
+
         except Exception as e:
             logger.error(f"Error integrating Critical Review workflow knowledge: {e}")
             enhanced_result["knowledge_persistence_error"] = str(e)
-        
+
         return enhanced_result
-    
+
     async def integrate_multi_perspective_workflow(
         self,
         workflow_result: dict[str, Any],
         execution_id: str,
         workflow_instance: Any = None
+<<<<<<< HEAD
+    ) -> Dict[str, Any]:
+=======
     ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Integrate knowledge persistence into Multi-perspective Synthesis workflow results.
         
         Args:
@@ -163,18 +185,19 @@ class WorkflowKnowledgeIntegrator:
             
         Returns:
             Enhanced workflow result with persistence information
+
         """
         logger.info(f"Integrating Multi-perspective Synthesis workflow knowledge for execution {execution_id}")
-        
+
         enhanced_result = workflow_result.copy()
-        
+
         try:
             if self.config.auto_persist_synthesis and workflow_result.get("success", False):
                 # Persist synthesis result
                 persistence_result = await self.persistence_service.persist_synthesis_results(
                     workflow_result, execution_id
                 )
-                
+
                 # Add persistence information to result
                 enhanced_result["knowledge_persistence"] = {
                     "synthesis_persisted": persistence_result.success,
@@ -184,14 +207,14 @@ class WorkflowKnowledgeIntegrator:
                     "persistence_timestamp": persistence_result.persistence_timestamp.isoformat(),
                     "persistence_result": persistence_result.model_dump()
                 }
-                
+
                 # Notify callbacks
                 for callback in self.persistence_callbacks:
                     try:
                         callback(execution_id, persistence_result)
                     except Exception as e:
                         logger.error(f"Persistence callback failed: {e}")
-                
+
                 # Handle conflicts if any
                 if persistence_result.conflicts_detected and self.config.notify_on_conflicts:
                     for callback in self.conflict_callbacks:
@@ -199,26 +222,36 @@ class WorkflowKnowledgeIntegrator:
                             callback(execution_id, persistence_result.conflicts_detected)
                         except Exception as e:
                             logger.error(f"Conflict callback failed: {e}")
+<<<<<<< HEAD
+
+                logger.info("Successfully integrated synthesis result from Multi-perspective workflow")
+
+=======
                 
                 logger.info("Successfully integrated synthesis result from Multi-perspective workflow")
             
+>>>>>>> feature/core-services-refactor
             # Enable cross-session knowledge sharing if configured
             if self.config.enable_cross_session_sharing:
                 enhanced_result["cross_session_knowledge"] = await self._get_related_knowledge(
                     workflow_result, "multi_perspective"
                 )
-            
+
         except Exception as e:
             logger.error(f"Error integrating Multi-perspective workflow knowledge: {e}")
             enhanced_result["knowledge_persistence_error"] = str(e)
-        
+
         return enhanced_result
-    
+
     async def _get_related_knowledge(
         self,
         workflow_result: dict[str, Any],
         workflow_type: str
+<<<<<<< HEAD
+    ) -> Dict[str, Any]:
+=======
     ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get related knowledge from previous sessions for cross-session sharing.
         
         Args:
@@ -227,6 +260,7 @@ class WorkflowKnowledgeIntegrator:
             
         Returns:
             Dictionary containing related knowledge information
+
         """
         related_knowledge = {
             "related_facts": [],
@@ -234,7 +268,7 @@ class WorkflowKnowledgeIntegrator:
             "knowledge_connections": [],
             "retrieval_timestamp": datetime.now().isoformat()
         }
-        
+
         try:
             if workflow_type == "critical_review":
                 # Look for related facts based on content similarity
@@ -242,14 +276,14 @@ class WorkflowKnowledgeIntegrator:
                 if original_content:
                     # Query for similar facts
                     from .enhanced_sskg_manager import KnowledgeQuery, NodeType
-                    
+
                     related_facts_query = KnowledgeQuery(
                         node_types=[NodeType.FACT],
                         content_query=original_content[:200],  # Use first 200 chars for similarity
                         min_confidence=0.6,
                         limit=5
                     )
-                    
+
                     related_facts = self.sskg_manager.query(related_facts_query)
                     related_knowledge["related_facts"] = [
                         {
@@ -261,20 +295,20 @@ class WorkflowKnowledgeIntegrator:
                         }
                         for fact in related_facts
                     ]
-            
+
             elif workflow_type == "multi_perspective":
                 # Look for related synthesis results based on topic similarity
                 topic = workflow_result.get("topic", "")
                 if topic:
                     from .enhanced_sskg_manager import KnowledgeQuery, NodeType
-                    
+
                     related_synthesis_query = KnowledgeQuery(
                         node_types=[NodeType.CONCEPT],
                         content_query=topic,
                         min_confidence=0.6,
                         limit=5
                     )
-                    
+
                     related_synthesis = self.sskg_manager.query(related_synthesis_query)
                     related_knowledge["related_synthesis"] = [
                         {
@@ -287,13 +321,13 @@ class WorkflowKnowledgeIntegrator:
                         }
                         for synthesis in related_synthesis
                     ]
-            
+
         except Exception as e:
             logger.error(f"Error retrieving related knowledge: {e}")
             related_knowledge["retrieval_error"] = str(e)
-        
+
         return related_knowledge
-    
+
     def add_persistence_callback(
         self,
         callback: Callable[[str, KnowledgePersistenceResult], None]
@@ -302,9 +336,10 @@ class WorkflowKnowledgeIntegrator:
         
         Args:
             callback: Function to call when knowledge is persisted
+
         """
         self.persistence_callbacks.append(callback)
-    
+
     def add_conflict_callback(
         self,
         callback: Callable[[str, list[str]], None]
@@ -313,9 +348,10 @@ class WorkflowKnowledgeIntegrator:
         
         Args:
             callback: Function to call when conflicts are detected
+
         """
         self.conflict_callbacks.append(callback)
-    
+
     def remove_persistence_callback(
         self,
         callback: Callable[[str, KnowledgePersistenceResult], None]
@@ -325,7 +361,7 @@ class WorkflowKnowledgeIntegrator:
             self.persistence_callbacks.remove(callback)
         except ValueError:
             pass
-    
+
     def remove_conflict_callback(
         self,
         callback: Callable[[str, list[str]], None]
@@ -335,7 +371,7 @@ class WorkflowKnowledgeIntegrator:
             self.conflict_callbacks.remove(callback)
         except ValueError:
             pass
-    
+
     def configure_integration(
         self,
         auto_persist_facts: bool = None,
@@ -356,6 +392,7 @@ class WorkflowKnowledgeIntegrator:
             auto_resolve_conflicts: Whether to automatically resolve conflicts
             notify_on_conflicts: Whether to notify on conflicts
             enable_cross_session_sharing: Whether to enable cross-session sharing
+
         """
         if auto_persist_facts is not None:
             self.config.auto_persist_facts = auto_persist_facts
@@ -380,19 +417,25 @@ class WorkflowKnowledgeIntegrator:
             self.config.notify_on_conflicts = notify_on_conflicts
         if enable_cross_session_sharing is not None:
             self.config.enable_cross_session_sharing = enable_cross_session_sharing
-        
+
         logger.info("Workflow knowledge integration configuration updated")
+<<<<<<< HEAD
+
+    def get_integration_statistics(self) -> Dict[str, Any]:
+=======
     
     def get_integration_statistics(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Get statistics about knowledge integration.
         
         Returns:
             Dictionary containing integration statistics
+
         """
         try:
             # Get persistence statistics
             persistence_stats = self.persistence_service.get_persistence_statistics()
-            
+
             # Add integration-specific statistics
             integration_stats = {
                 **persistence_stats,
@@ -409,20 +452,24 @@ class WorkflowKnowledgeIntegrator:
                     "conflict_callbacks": len(self.conflict_callbacks)
                 }
             }
-            
+
             return integration_stats
-            
+
         except Exception as e:
             logger.error(f"Error getting integration statistics: {e}")
             return {"error": str(e)}
-    
+
     async def search_knowledge(
         self,
         query: str,
         knowledge_types: list[str] = None,
         min_confidence: float = 0.5,
         limit: int = 10
+<<<<<<< HEAD
+    ) -> Dict[str, Any]:
+=======
     ) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Search for knowledge across all persisted content.
         
         Args:
@@ -433,10 +480,11 @@ class WorkflowKnowledgeIntegrator:
             
         Returns:
             Search results with knowledge items
+
         """
         try:
             from .enhanced_sskg_manager import KnowledgeQuery, NodeType
-            
+
             # Map knowledge types to node types
             type_mapping = {
                 "facts": NodeType.FACT,
@@ -444,7 +492,7 @@ class WorkflowKnowledgeIntegrator:
                 "wiki": NodeType.WIKI,
                 "memories": NodeType.MEMORY
             }
-            
+
             # Determine node types to search
             node_types = []
             if knowledge_types:
@@ -454,7 +502,7 @@ class WorkflowKnowledgeIntegrator:
             else:
                 # Search all knowledge types by default
                 node_types = [NodeType.FACT, NodeType.CONCEPT, NodeType.WIKI]
-            
+
             # Execute search
             search_query = KnowledgeQuery(
                 node_types=node_types,
@@ -462,9 +510,9 @@ class WorkflowKnowledgeIntegrator:
                 min_confidence=min_confidence,
                 limit=limit
             )
-            
+
             results = self.sskg_manager.query(search_query)
-            
+
             # Format results
             formatted_results = []
             for result in results:
@@ -476,7 +524,7 @@ class WorkflowKnowledgeIntegrator:
                     "created_at": result.created_at.isoformat(),
                     "metadata": result.metadata
                 }
-                
+
                 # Add type-specific information
                 if result.node_type == NodeType.FACT:
                     formatted_result["source"] = result.metadata.get("source", "unknown")
@@ -484,16 +532,16 @@ class WorkflowKnowledgeIntegrator:
                 elif result.node_type == NodeType.CONCEPT:
                     formatted_result["topic"] = result.metadata.get("topic", "Unknown")
                     formatted_result["perspectives"] = result.metadata.get("perspectives", [])
-                
+
                 formatted_results.append(formatted_result)
-            
+
             return {
                 "query": query,
                 "results": formatted_results,
                 "total_results": len(formatted_results),
                 "search_timestamp": datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             logger.error(f"Error searching knowledge: {e}")
             return {

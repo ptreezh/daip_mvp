@@ -5,7 +5,11 @@
     Service layer for managing the validation of extracted facts.
 """
 import logging
+<<<<<<< HEAD
+from typing import Any, List
+=======
 from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from src.models import PendingFact
 

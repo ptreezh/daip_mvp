@@ -9,11 +9,19 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any, Dict, List, Optional
+=======
 from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 
 class DebatePhase(Enum):
     """辩论阶段枚举"""
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     PREPARATION = "preparation"
     OPENING_STATEMENTS = "opening_statements"
     MAIN_ARGUMENTS = "main_arguments"
@@ -27,6 +35,10 @@ class DebatePhase(Enum):
 
 class ParticipantRole(Enum):
     """参与者角色枚举"""
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     PROPONENT = "proponent"
     OPPONENT = "opponent"
     MODERATOR = "moderator"
@@ -37,6 +49,10 @@ class ParticipantRole(Enum):
 
 class DebateStatus(Enum):
     """辩论状态枚举"""
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     CREATED = "created"
     PREPARING = "preparing"
     ACTIVE = "active"
@@ -48,6 +64,10 @@ class DebateStatus(Enum):
 
 class DebateFormat(Enum):
     """辩论格式枚举"""
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     TRADITIONAL = "traditional"
     OXFORD = "oxford"
     PARLIAMENTARY = "parliamentary"
@@ -60,6 +80,10 @@ class DebateFormat(Enum):
 @dataclass
 class DebateRules:
     """辩论规则配置"""
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     format: DebateFormat = DebateFormat.TRADITIONAL
     max_rounds: int = 3
     round_duration_minutes: Optional[int] = 60
@@ -77,21 +101,38 @@ class DebateRules:
 @dataclass
 class DebateParticipant:
     """辩论参与者"""
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     participant_id: str
     name: str
     role: ParticipantRole
     side: Optional[str] = None
+<<<<<<< HEAD
+    expertise_areas: List[str] = field(default_factory=list)
+    credibility_score: float = 0.5
+    participation_history: List[str] = field(default_factory=list)
+    is_active: bool = True
+    joined_at: datetime = field(default_factory=datetime.now)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+=======
     expertise_areas: list[str] = field(default_factory=list)
     credibility_score: float = 0.5
     participation_history: list[str] = field(default_factory=list)
     is_active: bool = True
     joined_at: datetime = field(default_factory=datetime.now)
     metadata: dict[str, Any] = field(default_factory=dict)
+>>>>>>> feature/core-services-refactor
 
 
 @dataclass
 class DebateContribution:
     """辩论贡献（发言、论证等）"""
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     contribution_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     participant_id: str = ""
     round_number: int = 1
@@ -99,6 +140,15 @@ class DebateContribution:
     content: str = ""
     contribution_type: str = "statement"
     timestamp: datetime = field(default_factory=datetime.now)
+<<<<<<< HEAD
+    references: List[str] = field(default_factory=list)
+    evidence: List[Dict[str, Any]] = field(default_factory=list)
+    tags: List[str] = field(default_factory=list)
+    quality_score: Optional[float] = None
+    relevance_score: Optional[float] = None
+    impact_score: Optional[float] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+=======
     references: list[str] = field(default_factory=list)
     evidence: list[dict[str, Any]] = field(default_factory=list)
     tags: list[str] = field(default_factory=list)
@@ -106,15 +156,29 @@ class DebateContribution:
     relevance_score: Optional[float] = None
     impact_score: Optional[float] = None
     metadata: dict[str, Any] = field(default_factory=dict)
+>>>>>>> feature/core-services-refactor
 
 
 @dataclass
 class DebateRound:
     """辩论轮次"""
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     round_number: int
     current_phase: DebatePhase = DebatePhase.PREPARATION
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
+<<<<<<< HEAD
+    contributions: List[DebateContribution] = field(default_factory=list)
+    phase_history: List[Dict[str, Any]] = field(default_factory=list)
+    consensus_attempts: List[Dict[str, Any]] = field(default_factory=list)
+    round_summary: Optional[str] = None
+    key_points: List[str] = field(default_factory=list)
+    unresolved_issues: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+=======
     contributions: list[DebateContribution] = field(default_factory=list)
     phase_history: list[dict[str, Any]] = field(default_factory=list)
     consensus_attempts: list[dict[str, Any]] = field(default_factory=list)
@@ -122,25 +186,42 @@ class DebateRound:
     key_points: list[str] = field(default_factory=list)
     unresolved_issues: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
+>>>>>>> feature/core-services-refactor
 
 
 @dataclass
 class DebateSession:
     """辩论会话"""
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     session_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     title: str = ""
     topic: str = ""
     description: str = ""
     rules: DebateRules = field(default_factory=DebateRules)
     status: DebateStatus = DebateStatus.CREATED
+<<<<<<< HEAD
+    participants: List[DebateParticipant] = field(default_factory=list)
+    rounds: List[DebateRound] = field(default_factory=list)
+=======
     participants: list[DebateParticipant] = field(default_factory=list)
     rounds: list[DebateRound] = field(default_factory=list)
+>>>>>>> feature/core-services-refactor
     current_round: int = 0
     created_at: datetime = field(default_factory=datetime.now)
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     moderator_id: Optional[str] = None
+<<<<<<< HEAD
+    final_consensus: Optional[Dict[str, Any]] = None
+    debate_metrics: Dict[str, Any] = field(default_factory=dict)
+    tags: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+=======
     final_consensus: Optional[dict[str, Any]] = None
     debate_metrics: dict[str, Any] = field(default_factory=dict)
     tags: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
+>>>>>>> feature/core-services-refactor

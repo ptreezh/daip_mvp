@@ -22,14 +22,24 @@ class TaskDecompositionNode(InstitutionalPrimitive):
     Uses a "规划者" role to break down complex topics into sub-problems that can be
     analyzed from different perspectives (e.g., economic, social, technical, ethical).
     """
+<<<<<<< HEAD
+
+    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
+=======
     
     def __init__(self, primitive_id: str, config: dict[str, Any] = None):
+>>>>>>> feature/core-services-refactor
         super().__init__(primitive_id, config)
         self.planner_role = config.get("planner_role", "规划者") if config else "规划者"
         self.default_perspectives = config.get("default_perspectives", ["经济", "社会", "技术", "伦理"]) if config else ["经济", "社会", "技术", "伦理"]
         self.max_sub_problems = config.get("max_sub_problems", 5) if config else 5
+<<<<<<< HEAD
+
+    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+=======
     
     async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Execute task decomposition for a complex topic.
         
         Args:
@@ -38,35 +48,36 @@ class TaskDecompositionNode(InstitutionalPrimitive):
             
         Returns:
             List of decomposed sub-problems
+
         """
         context.mark_started()
-        
+
         try:
             # Extract inputs
             topic = inputs.get("topic", "")
             custom_perspectives = inputs.get("perspectives", [])
-            
+
             if not topic:
                 raise ValueError("Topic is required for task decomposition")
-            
+
             # Get LLM interface from services
             llm_interface = context.services.get("llm_interface")
             if not llm_interface:
                 raise ValueError("LLM interface not available in execution context")
-            
+
             # Get role manager from services
             role_manager = context.services.get("role_manager")
-            
+
             # Prepare perspectives to use
             perspectives = custom_perspectives if custom_perspectives else self.default_perspectives
-            
+
             # Prepare decomposition prompt
             planner_role_prompt = ""
             if role_manager:
                 planner_role = role_manager.get_role_by_id(self.planner_role)
                 if planner_role:
                     planner_role_prompt = planner_role.system_prompt
-            
+
             if not planner_role_prompt:
                 planner_role_prompt = """你是一位专业的任务分解专家，擅长将复杂问题分解为多个子问题，以便从不同角度进行分析。
 你的任务是将给定的主题分解为多个子问题，每个子问题代表一个不同的视角。
@@ -76,7 +87,7 @@ class TaskDecompositionNode(InstitutionalPrimitive):
 3. 关键问题列表
 4. 所需专业知识领域
 5. 优先级（1-5，1为最高）"""
-            
+
             decomposition_prompt = f"""请将以下复杂主题分解为多个子问题，以便从不同角度进行分析：
 
 主题：{topic}
@@ -103,19 +114,19 @@ class TaskDecompositionNode(InstitutionalPrimitive):
   ...
 ]
 ```"""
-            
+
             # Generate decomposition
             messages = [
                 {"role": "system", "content": planner_role_prompt},
                 {"role": "user", "content": decomposition_prompt}
             ]
-            
+
             response = await llm_interface.generate(messages)
             decomposition_text = response.get("content", "")
-            
+
             # Extract JSON from response
             sub_problems_data = self._extract_json_from_text(decomposition_text)
-            
+
             # Convert to SubProblem objects
             sub_problems = []
             for i, data in enumerate(sub_problems_data[:self.max_sub_problems]):
@@ -132,20 +143,20 @@ class TaskDecompositionNode(InstitutionalPrimitive):
                     }
                 )
                 sub_problems.append(sub_problem)
-            
+
             # Store in workflow state
             context.state["topic"] = topic
             context.state["sub_problems"] = [problem.model_dump() for problem in sub_problems]
-            
+
             context.mark_completed()
-            
+
             return {
                 "topic": topic,
                 "sub_problems": [problem.model_dump() for problem in sub_problems],
                 "sub_problem_count": len(sub_problems),
                 "success": True
             }
-            
+
         except Exception as e:
             context.mark_failed()
             logger.error(f"TaskDecompositionNode execution failed: {e}")
@@ -156,8 +167,13 @@ class TaskDecompositionNode(InstitutionalPrimitive):
                 "success": False,
                 "error": str(e)
             }
+<<<<<<< HEAD
+
+    def _extract_json_from_text(self, text: str) -> List[Dict[str, Any]]:
+=======
     
     def _extract_json_from_text(self, text: str) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Extract JSON data from text response."""
         # Find JSON content between triple backticks
         json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', text)
@@ -171,14 +187,19 @@ class TaskDecompositionNode(InstitutionalPrimitive):
             else:
                 logger.warning("Could not extract JSON from response")
                 return []
-        
+
         try:
             return json.loads(json_str)
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON: {e}")
             return []
+<<<<<<< HEAD
+
+    def get_input_schema(self) -> Dict[str, Any]:
+=======
     
     def get_input_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return input schema for the task decomposition node."""
         return {
             "type": "object",
@@ -195,8 +216,13 @@ class TaskDecompositionNode(InstitutionalPrimitive):
             },
             "required": ["topic"]
         }
+<<<<<<< HEAD
+
+    def get_output_schema(self) -> Dict[str, Any]:
+=======
     
     def get_output_schema(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Return output schema for the task decomposition node."""
         return {
             "type": "object",

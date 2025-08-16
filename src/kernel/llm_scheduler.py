@@ -13,7 +13,11 @@ import json
 import logging
 from collections.abc import Coroutine
 from dataclasses import dataclass
+<<<<<<< HEAD
+from typing import Any, Dict, List
+=======
 from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from .interaction_manager import InteractionManager
 from .llm_interface import LLMInterface
@@ -48,6 +52,7 @@ class LLMScheduler:
             llm_interface: The interface to the language model.
             tool_executor: The executor for running tools.
             interaction_manager: The engine for preparing conversational context.
+
         """
         self.llm_interface = llm_interface
         self.tool_executor = tool_executor
@@ -70,7 +75,11 @@ class LLMScheduler:
             self._worker_task = None
             logging.info("LLMScheduler worker stopped.")
 
+<<<<<<< HEAD
+    async def submit_request(self, history: List[Dict[str, Any]]) -> str:
+=======
     async def submit_request(self, history: list[dict[str, Any]]) -> str:
+>>>>>>> feature/core-services-refactor
         """Submits a request to the LLM and waits for the final response.
 
         This method handles the entire lifecycle of a request, including
@@ -81,6 +90,7 @@ class LLMScheduler:
 
         Returns:
             The final text response from the assistant.
+
         """
         future = asyncio.get_running_loop().create_future()
         request = LLMRequest(history=history, future=future)

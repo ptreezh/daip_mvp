@@ -6,7 +6,11 @@ and the manager class that coordinates them.
 
 import logging
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
+from typing import Any, Dict, List, Optional
+=======
 from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 try:
     from src.core_services.enhanced_sskg_manager import (
@@ -22,9 +26,14 @@ except ImportError:
     from enum import Enum
 
     from pydantic import BaseModel, Field
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/core-services-refactor
     class NodeType(str, Enum):
         """Types of nodes in the SSKG."""
+
         FACT = "fact"
         MEMORY = "memory"
         WIKI = "wiki"
@@ -34,9 +43,10 @@ except ImportError:
         USER = "user"
         CONCEPT = "concept"
         EVENT = "event"
-    
+
     class RelationType(str, Enum):
         """Types of relationships in the SSKG."""
+
         IS_A = "is_a"
         PART_OF = "part_of"
         RELATED_TO = "related_to"
@@ -51,9 +61,10 @@ except ImportError:
         REFERENCES = "references"
         INSTANCE_OF = "instance_of"
         DERIVED_FROM = "derived_from"
-    
+
     class KnowledgeNode(BaseModel):
         """Base model for all knowledge nodes in the SSKG."""
+
         id: str
         node_type: NodeType
         content: str
@@ -62,9 +73,10 @@ except ImportError:
         confidence: float = 1.0
         metadata: dict[str, Any] = {}
         version: int = 1
-    
+
     class KnowledgeRelation(BaseModel):
         """Model for relationships between knowledge nodes."""
+
         source_id: str
         target_id: str
         relation_type: RelationType
@@ -79,16 +91,17 @@ class StorageAdapter(ABC):
     Storage adapters provide a consistent interface for mapping domain-specific
     data structures to SSKG representations while maintaining semantic integrity.
     """
-    
+
     def __init__(self, sskg_manager: 'EnhancedSSKGManager'):
         """Initialize the storage adapter.
         
         Args:
             sskg_manager: The SSKG manager to use for storage operations
+
         """
         self.sskg_manager = sskg_manager
         self.logger = logging.getLogger(self.__class__.__name__)
-    
+
     @abstractmethod
     def store(self, data: Any, **kwargs) -> str:
         """Store data in the SSKG.
@@ -99,9 +112,10 @@ class StorageAdapter(ABC):
             
         Returns:
             ID of the stored node
+
         """
         pass
-    
+
     @abstractmethod
     def retrieve(self, identifier: str, **kwargs) -> Optional[Any]:
         """Retrieve data from the SSKG.
@@ -112,9 +126,10 @@ class StorageAdapter(ABC):
             
         Returns:
             Retrieved data or None if not found
+
         """
         pass
-    
+
     @abstractmethod
     def update(self, identifier: str, data: Any, **kwargs) -> bool:
         """Update data in the SSKG.
@@ -126,9 +141,10 @@ class StorageAdapter(ABC):
             
         Returns:
             True if update was successful, False otherwise
+
         """
         pass
-    
+
     @abstractmethod
     def delete(self, identifier: str, **kwargs) -> bool:
         """Delete data from the SSKG.
@@ -139,11 +155,16 @@ class StorageAdapter(ABC):
             
         Returns:
             True if deletion was successful, False otherwise
+
         """
         pass
-    
+
     @abstractmethod
+<<<<<<< HEAD
+    def list_all(self, **kwargs) -> List[str]:
+=======
     def list_all(self, **kwargs) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all identifiers of data stored by this adapter.
         
         Args:
@@ -151,11 +172,18 @@ class StorageAdapter(ABC):
             
         Returns:
             List of identifiers
+
         """
         pass
+<<<<<<< HEAD
+
+    def _create_node(self, node_type: NodeType, content: str,
+                    confidence: float = 1.0, metadata: Dict[str, Any] = None) -> str:
+=======
     
     def _create_node(self, node_type: NodeType, content: str, 
                     confidence: float = 1.0, metadata: dict[str, Any] = None) -> str:
+>>>>>>> feature/core-services-refactor
         """Create a node in the SSKG.
         
         Args:
@@ -166,6 +194,7 @@ class StorageAdapter(ABC):
             
         Returns:
             ID of the created node
+
         """
         node = KnowledgeNode(
             id="",  # Will be assigned by SSKG manager
@@ -174,13 +203,17 @@ class StorageAdapter(ABC):
             confidence=confidence,
             metadata=metadata or {}
         )
-        
+
         return self.sskg_manager.add_node(node)
-    
-    def _create_relation(self, source_id: str, target_id: str, 
-                        relation_type: RelationType, 
+
+    def _create_relation(self, source_id: str, target_id: str,
+                        relation_type: RelationType,
                         confidence: float = 1.0,
+<<<<<<< HEAD
+                        metadata: Dict[str, Any] = None) -> bool:
+=======
                         metadata: dict[str, Any] = None) -> bool:
+>>>>>>> feature/core-services-refactor
         """Create a relation between two nodes in the SSKG.
         
         Args:
@@ -192,6 +225,7 @@ class StorageAdapter(ABC):
             
         Returns:
             True if the relation was created successfully, False otherwise
+
         """
         relation = KnowledgeRelation(
             source_id=source_id,
@@ -200,7 +234,7 @@ class StorageAdapter(ABC):
             confidence=confidence,
             metadata=metadata or {}
         )
-        
+
         return self.sskg_manager.add_relation(relation)
 
 
@@ -210,30 +244,35 @@ class StorageAdapterManager:
     This class provides a unified interface for accessing different storage adapters
     and managing their lifecycle.
     """
-    
+
     def __init__(self, sskg_manager: 'EnhancedSSKGManager'):
         """Initialize the storage adapter manager.
         
         Args:
             sskg_manager: The SSKG manager to use for storage operations
+
         """
         self.sskg_manager = sskg_manager
         self.adapters = {}
         self.logger = logging.getLogger(__name__)
-        
+
         # Register default adapters
         from .memory_bank_adapter import MemoryBankAdapter
         from .project_adapter import ProjectAdapter
         from .role_adapter import RoleMemoryAdapter
         from .session_adapter import SessionAdapter
         from .wiki_adapter import WikiAdapter
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         self.register_adapter("role_memory", RoleMemoryAdapter(sskg_manager))
         self.register_adapter("wiki", WikiAdapter(sskg_manager))
         self.register_adapter("session", SessionAdapter(sskg_manager))
         self.register_adapter("project", ProjectAdapter(sskg_manager))
         self.register_adapter("memory_bank", MemoryBankAdapter(sskg_manager))
-    
+
     def get_adapter(self, adapter_type: str) -> Optional[StorageAdapter]:
         """Get a storage adapter by type.
         
@@ -242,23 +281,31 @@ class StorageAdapterManager:
             
         Returns:
             Storage adapter or None if not found
+
         """
         return self.adapters.get(adapter_type)
-    
+
     def register_adapter(self, adapter_type: str, adapter: StorageAdapter):
         """Register a new storage adapter.
         
         Args:
             adapter_type: Type of the adapter
             adapter: Storage adapter instance
+
         """
         self.adapters[adapter_type] = adapter
         self.logger.info(f"Registered storage adapter: {adapter_type}")
+<<<<<<< HEAD
+
+    def list_adapters(self) -> List[str]:
+=======
     
     def list_adapters(self) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all registered adapter types.
         
         Returns:
             List of adapter types
+
         """
         return list(self.adapters.keys())

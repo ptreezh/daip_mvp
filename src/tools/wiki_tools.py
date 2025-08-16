@@ -45,6 +45,7 @@ def write_wiki_entry(title: str, content: str) -> str:
 
     Returns:
         A confirmation message.
+
     """
     try:
         WIKI_DIR.mkdir(exist_ok=True)
@@ -71,6 +72,7 @@ def read_wiki_entry(title: str) -> str:
 
     Returns:
         The content of the entry or an error message.
+
     """
     try:
         file_path = WIKI_DIR / _sanitize_filename(title)
@@ -87,6 +89,7 @@ def list_wiki_entries() -> str:
 
     Returns:
         A formatted string of all entry titles.
+
     """
     if not WIKI_DIR.is_dir():
         return "The Wiki is empty. No entries found."
@@ -106,6 +109,7 @@ def search_wiki(query: str) -> str:
 
     Returns:
         A formatted string of the most relevant entries found.
+
     """
     try:
         vector_store = _get_vector_store()

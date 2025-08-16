@@ -8,7 +8,11 @@ import asyncio
 import logging
 import time
 from dataclasses import dataclass
+<<<<<<< HEAD
+from typing import Any, Dict, List, Optional, Tuple
+=======
 from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 import aiohttp
 
@@ -18,6 +22,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class LLMResponse:
     """LLM响应"""
+
     content: str
     tokens_used: int
     response_time: float
@@ -29,6 +34,7 @@ class LLMResponse:
 @dataclass
 class OptimizationResult:
     """优化结果"""
+
     original_context: str
     optimized_context: str
     original_response: LLMResponse
@@ -40,17 +46,17 @@ class OptimizationResult:
 
 class RealLLMClient:
     """真实LLM客户端"""
-    
+
     def __init__(self):
         """初始化LLM客户端"""
         self.ollama_base_url = "http://localhost:11434"
         self.available_models = []
         self.session = None
-        
+
     async def initialize(self):
         """初始化连接"""
         self.session = aiohttp.ClientSession()
-        
+
         # 检查可用模型
         try:
             async with self.session.get(f"{self.ollama_base_url}/api/tags") as response:
@@ -62,17 +68,17 @@ class RealLLMClient:
                     logger.warning("无法连接到Ollama服务")
         except Exception as e:
             logger.error(f"初始化LLM客户端失败: {e}")
-    
+
     async def call_llm(
-        self, 
-        prompt: str, 
+        self,
+        prompt: str,
         model: str = "llama3:instruct",
         max_tokens: int = 1000
     ) -> LLMResponse:
         """调用真实LLM"""
         if not self.session:
             await self.initialize()
-        
+
         if model not in self.available_models:
             # 如果指定模型不可用，使用第一个可用模型
             if self.available_models:
@@ -87,9 +93,9 @@ class RealLLMClient:
                     success=False,
                     error="没有可用的LLM模型"
                 )
-        
+
         start_time = time.time()
-        
+
         try:
             payload = {
                 "model": model,
@@ -100,18 +106,18 @@ class RealLLMClient:
                     "temperature": 0.7
                 }
             }
-            
+
             async with self.session.post(
                 f"{self.ollama_base_url}/api/generate",
                 json=payload,
                 timeout=aiohttp.ClientTimeout(total=60)
             ) as response:
-                
+
                 response_time = time.time() - start_time
-                
+
                 if response.status == 200:
                     data = await response.json()
-                    
+
                     return LLMResponse(
                         content=data.get("response", ""),
                         tokens_used=data.get("eval_count", 0) + data.get("prompt_eval_count", 0),
@@ -129,7 +135,7 @@ class RealLLMClient:
                         success=False,
                         error=f"HTTP {response.status}: {error_text}"
                     )
-                    
+
         except Exception as e:
             response_time = time.time() - start_time
             return LLMResponse(
@@ -140,7 +146,7 @@ class RealLLMClient:
                 success=False,
                 error=str(e)
             )
-    
+
     async def close(self):
         """关闭连接"""
         if self.session:
@@ -149,18 +155,18 @@ class RealLLMClient:
 
 class IntelligentContextOptimizer:
     """智能上下文优化器"""
-    
+
     def __init__(self):
         """初始化优化器"""
         self.llm_client = RealLLMClient()
         self.optimization_model = "llama3:instruct"  # 用于优化的模型
         self.evaluation_model = "llama3:instruct"    # 用于评估的模型
-        
+
     async def initialize(self):
         """初始化优化器"""
         await self.llm_client.initialize()
         logger.info("智能上下文优化器初始化完成")
-    
+
     async def optimize_context_with_llm(
         self,
         user_query: str,
@@ -173,34 +179,34 @@ class IntelligentContextOptimizer:
         original_context = self._build_original_context(
             user_query, conversation_history, available_context
         )
-        
+
         # 2. 使用LLM分析和优化上下文
         optimized_context = await self._llm_optimize_context(
             user_query, original_context
         )
-        
+
         # 3. 使用两种上下文调用目标LLM
         original_response = await self.llm_client.call_llm(
             f"{original_context}\n\n用户问题: {user_query}",
             model=target_model
         )
-        
+
         optimized_response = await self.llm_client.call_llm(
             f"{optimized_context}\n\n用户问题: {user_query}",
             model=target_model
         )
-        
+
         # 4. 使用LLM评估优化效果
         improvement_score, reasoning = await self._llm_evaluate_improvement(
             user_query, original_response, optimized_response
         )
-        
+
         # 5. 计算详细指标
         metrics = self._calculate_detailed_metrics(
             original_context, optimized_context,
             original_response, optimized_response
         )
-        
+
         return OptimizationResult(
             original_context=original_context,
             optimized_context=optimized_context,
@@ -210,7 +216,7 @@ class IntelligentContextOptimizer:
             optimization_reasoning=reasoning,
             metrics=metrics
         )
-    
+
     def _build_original_context(
         self,
         user_query: str,
@@ -219,33 +225,33 @@ class IntelligentContextOptimizer:
     ) -> str:
         """构建原始上下文"""
         context_parts = []
-        
+
         # 添加对话历史
         if conversation_history:
             context_parts.append("对话历史:")
             for turn in conversation_history[-5:]:  # 最近5轮对话
                 role = "用户" if turn.get("type") == "user_query" else "助手"
                 context_parts.append(f"{role}: {turn.get('content', '')}")
-        
+
         # 添加相关知识
         if "relevant_knowledge" in available_context:
             context_parts.append("\n相关知识:")
             for knowledge in available_context["relevant_knowledge"]:
                 context_parts.append(f"- {knowledge}")
-        
+
         # 添加领域知识
         if "domain_knowledge" in available_context:
             context_parts.append("\n领域知识:")
             for domain, info in available_context["domain_knowledge"].items():
                 context_parts.append(f"- {domain}: {info}")
-        
+
         # 添加用户环境
         if "user_environment" in available_context:
             env = available_context["user_environment"]
             context_parts.append(f"\n用户背景: 专业水平={env.get('expertise_level', '未知')}")
-        
+
         return "\n".join(context_parts)
-    
+
     async def _llm_optimize_context(self, user_query: str, original_context: str) -> str:
         """使用LLM优化上下文"""
         optimization_prompt = f"""你是一个专业的上下文优化专家。请分析以下用户问题和原始上下文，然后生成一个优化后的上下文，使其更加相关、简洁和有效。
@@ -269,13 +275,13 @@ class IntelligentContextOptimizer:
             model=self.optimization_model,
             max_tokens=800
         )
-        
+
         if response.success:
             return response.content.strip()
         else:
             logger.error(f"上下文优化失败: {response.error}")
             return original_context  # 失败时返回原始上下文
-    
+
     async def _llm_evaluate_improvement(
         self,
         user_query: str,
@@ -309,14 +315,14 @@ class IntelligentContextOptimizer:
             model=self.evaluation_model,
             max_tokens=500
         )
-        
+
         if response.success:
             content = response.content.strip()
-            
+
             # 解析评分
             score = 5.0  # 默认分数
             reasoning = content
-            
+
             lines = content.split('\n')
             for line in lines:
                 if line.startswith('评分:'):
@@ -332,15 +338,15 @@ class IntelligentContextOptimizer:
                         pass
                 elif line.startswith('理由:'):
                     reasoning = line.split(':', 1)[1].strip()
-            
+
             # 转换为0-1范围
             improvement_score = (score - 5) / 5  # -1到1的范围
-            
+
             return improvement_score, reasoning
         else:
             logger.error(f"效果评估失败: {response.error}")
             return 0.0, "评估失败"
-    
+
     def _calculate_detailed_metrics(
         self,
         original_context: str,
@@ -374,7 +380,7 @@ class IntelligentContextOptimizer:
                 "optimized_lines": len(optimized_context.split('\n'))
             }
         }
-    
+
     async def close(self):
         """关闭优化器"""
         await self.llm_client.close()
@@ -382,18 +388,18 @@ class IntelligentContextOptimizer:
 
 class RealLLMContextValidator:
     """真实LLM上下文验证器"""
-    
+
     def __init__(self):
         """初始化验证器"""
         self.optimizer = IntelligentContextOptimizer()
-        
+
     async def run_comprehensive_validation(self):
         """运行综合验证"""
         print("🚀 真实LLM上下文优化验证")
         print("=" * 60)
-        
+
         await self.optimizer.initialize()
-        
+
         # 测试用例
         test_cases = [
             {
@@ -440,28 +446,37 @@ class RealLLMContextValidator:
                 }
             }
         ]
-        
+
         results = []
-        
+
         for i, test_case in enumerate(test_cases, 1):
             print(f"\n📋 测试用例 {i}: {test_case['query'][:50]}...")
             print("-" * 50)
-            
+
             try:
                 result = await self.optimizer.optimize_context_with_llm(
                     user_query=test_case["query"],
                     conversation_history=test_case["history"],
                     available_context=test_case["context"]
                 )
-                
+
                 results.append(result)
-                
+
                 # 显示结果
                 print("✅ 优化成功")
                 print(f"📊 改进评分: {result.improvement_score:.3f}")
                 print(f"🗜️  上下文压缩: {result.metrics['context_compression_ratio']*100:.1f}%")
                 print(f"⚡ Token节省: {result.metrics['token_efficiency']['token_savings']}")
                 print(f"⏱️  时间差异: {result.metrics['response_time']['time_difference']:.3f}s")
+<<<<<<< HEAD
+
+                print("\n🧠 优化理由:")
+                print(f"   {result.optimization_reasoning}")
+
+                print("\n📝 原始回答 (前200字符):")
+                print(f"   {result.original_response.content[:200]}...")
+
+=======
                 
                 print("\n🧠 优化理由:")
                 print(f"   {result.optimization_reasoning}")
@@ -469,36 +484,46 @@ class RealLLMContextValidator:
                 print("\n📝 原始回答 (前200字符):")
                 print(f"   {result.original_response.content[:200]}...")
                 
+>>>>>>> feature/core-services-refactor
                 print("\n✨ 优化后回答 (前200字符):")
                 print(f"   {result.optimized_response.content[:200]}...")
-                
+
             except Exception as e:
                 print(f"❌ 测试失败: {e}")
                 logger.error(f"测试用例 {i} 失败: {e}")
-        
+
         # 生成综合报告
         await self._generate_comprehensive_report(results)
-        
+
         await self.optimizer.close()
-        
+
         return results
+<<<<<<< HEAD
+
+    async def _generate_comprehensive_report(self, results: List[OptimizationResult]):
+=======
     
     async def _generate_comprehensive_report(self, results: list[OptimizationResult]):
+>>>>>>> feature/core-services-refactor
         """生成综合报告"""
         print("\n📊 综合验证报告")
         print("=" * 60)
-        
+
         if not results:
             print("❌ 没有成功的测试结果")
             return
-        
+
         # 计算平均指标
         avg_improvement = sum(r.improvement_score for r in results) / len(results)
         avg_compression = sum(r.metrics['context_compression_ratio'] for r in results) / len(results)
         avg_token_savings = sum(r.metrics['token_efficiency']['token_savings'] for r in results) / len(results)
-        
+
         successful_optimizations = sum(1 for r in results if r.improvement_score > 0)
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         print("📈 整体表现:")
         print(f"   测试用例数: {len(results)}")
         print(f"   成功优化数: {successful_optimizations}")
@@ -506,7 +531,7 @@ class RealLLMContextValidator:
         print(f"   平均改进评分: {avg_improvement:.3f}")
         print(f"   平均上下文压缩: {avg_compression*100:.1f}%")
         print(f"   平均Token节省: {avg_token_savings:.0f}")
-        
+
         # 可靠性评估
         if avg_improvement > 0.2:
             reliability = "高度可靠"
@@ -516,9 +541,13 @@ class RealLLMContextValidator:
             reliability = "基本可靠"
         else:
             reliability = "不可靠"
-        
+
         print(f"   可靠性评估: {reliability}")
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         print("\n🎯 关键发现:")
         if avg_compression > 0.2:
             print(f"   ✅ 显著的上下文压缩效果 ({avg_compression*100:.1f}%)")
@@ -526,7 +555,11 @@ class RealLLMContextValidator:
             print(f"   ✅ 明显的Token使用优化 (节省{avg_token_savings:.0f}个)")
         if successful_optimizations == len(results):
             print("   ✅ 所有测试用例都获得改进")
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         print("\n💡 验证结论:")
         if avg_improvement > 0.1:
             print("   🎉 真实LLM验证显示优化系统有效！")
@@ -538,10 +571,14 @@ class RealLLMContextValidator:
 async def main():
     """主函数"""
     validator = RealLLMContextValidator()
-    
+
     try:
         results = await validator.run_comprehensive_validation()
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> feature/core-services-refactor
         print("\n🔍 真实性验证:")
         print("=" * 60)
         print("✅ 使用了真实的LLM模型进行优化和验证")
@@ -549,7 +586,7 @@ async def main():
         print("✅ 使用LLM评估优化效果")
         print("✅ 提供了客观的性能指标")
         print("✅ 展示了真实的改进效果")
-        
+
     except Exception as e:
         print(f"❌ 验证过程出错: {e}")
         logger.error(f"主验证流程失败: {e}")

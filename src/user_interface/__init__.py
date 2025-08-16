@@ -17,17 +17,17 @@ from .workflow_steering import SteeringAction, SteeringCommand, SteeringPoint, W
 
 __all__ = [
     "WorkflowCLI",
-    "WorkflowAPI", 
+    "WorkflowAPI",
     "ProgressMonitor",
     "ResultFormatter",
     "InteractiveController",
     "WorkflowCustomizer",
     "ParameterManager",
-    "ParameterDefinition", 
+    "ParameterDefinition",
     "ParameterType",
     "WorkflowSteering",
     "SteeringAction",
-    "SteeringPoint", 
+    "SteeringPoint",
     "SteeringCommand",
     "ConfigurationManager",
     "ConfigurationOption"

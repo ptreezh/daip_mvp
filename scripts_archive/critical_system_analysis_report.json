@@ -1,0 +1,37 @@
+{
+  "timestamp": "2025-08-01T11:46:13.799499",
+  "assessment": "优秀",
+  "critical_issues": [],
+  "warnings": [
+    {
+      "severity": "WARNING",
+      "description": "5个角色名称过长",
+      "impact": "界面显示困难，用户难以选择",
+      "recommendation": "简化角色名称或提供简短别名"
+    },
+    {
+      "severity": "WARNING",
+      "description": "19个重复的角色名称",
+      "impact": "用户可能混淆不同角色",
+      "recommendation": "确保角色名称唯一性"
+    }
+  ],
+  "performance_data": {
+    "llm_success_rate": 1.0,
+    "llm_avg_response_time": 1.593522548675537,
+    "startup_time": 0.5782592296600342,
+    "available_roles": 131,
+    "concurrent_success_rate": 1.0,
+    "concurrent_time": 0.009392261505126953,
+    "memory_mb": 125.41015625,
+    "cpu_percent": 0.0,
+    "role_load_time": 0.01814413070678711,
+    "role_query_time": 0.02920079231262207,
+    "total_roles": 131,
+    "format_issues": 0
+  },
+  "key_findings": [
+    "角色管理系统需要改进"
+  ],
+  "total_issues": 2
+}

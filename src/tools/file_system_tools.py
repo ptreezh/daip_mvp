@@ -23,6 +23,7 @@ def list_files(directory: str = ".") -> str:
         str: A string containing the list of files and directories,
              or an error message if the directory is not found, not accessible,
              or outside the allowed project scope.
+
     """
     try:
         target_path = BASE_DIR.joinpath(directory).resolve()
@@ -58,6 +59,7 @@ def read_file(file_path: str) -> str:
     Returns:
         str: The content of the file, or an error message if the file
              is not found, not accessible, or outside the allowed scope.
+
     """
     try:
         target_path = BASE_DIR.joinpath(file_path).resolve()
@@ -86,6 +88,7 @@ def write_file(file_path: str, content: str) -> str:
 
     Returns:
         str: A success message or an error message.
+
     """
     try:
         target_path = BASE_DIR.joinpath(file_path).resolve()

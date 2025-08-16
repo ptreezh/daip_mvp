@@ -21,6 +21,7 @@ class InteractionManager:
         Args:
             client (ollama.AsyncClient): An instance of the Ollama async client.
             model (str): The name of the Ollama model to use.
+
         """
         self.model = model
         self.client = client

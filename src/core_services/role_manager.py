@@ -9,6 +9,7 @@ from typing import Any, Optional
 # Define the base directory for roles
 ROLES_DIR = Path("roles")
 
+
 @dataclass
 class Role:
     """Represents a role definition."""
@@ -40,17 +41,17 @@ class Role:
             else:
                 # 如果列表为空或格式不对，创建默认角色
                 data = {"name": "Unknown Role", "description": "Default role"}
-        
+
         # 确保数据是字典格式
         if not isinstance(data, dict):
             data = {"name": "Unknown Role", "description": "Default role"}
-        
+
         # 容错处理各个字段
         role_id = data.get("id") or data.get("name") or "unknown_id"
         name = data.get("name") or data.get("id") or "Unknown Role"
         description = data.get("description") or data.get("system_prompt") or f"Role: {name}"
         system_prompt = data.get("system_prompt") or data.get("description") or f"You are {name}."
-        
+
         # 处理capabilities字段的多种格式
         capabilities = data.get("capabilities", [])
         if not isinstance(capabilities, list):
@@ -58,7 +59,7 @@ class Role:
                 capabilities = [capabilities]
             else:
                 capabilities = []
-        
+
         # 添加其他可能的能力字段
         if "expertise" in data:
             expertise = data["expertise"]
@@ -66,7 +67,7 @@ class Role:
                 capabilities.extend(expertise)
             elif isinstance(expertise, str):
                 capabilities.append(expertise)
-        
+
         return cls(
             id=str(role_id),
             name=str(name),
@@ -79,11 +80,12 @@ class Role:
 class RoleManager:
     """Loads, manages, and persists role definitions from individual JSON files."""
 
-    def __init__(self, roles_directory: Path = ROLES_DIR):
+    def __init__(self, roles_directory: Path = ROLES_DIR) -> None:
         """Initializes the RoleManager by loading roles from JSON files in the specified directory.
 
         Args:
             roles_directory (Path): The path to the directory containing role JSON files.
+
         """
         self.roles_directory = roles_directory
         self._roles: dict[str, Role] = {}
@@ -92,15 +94,15 @@ class RoleManager:
 
     def _load_roles(self) -> None:
         """Loads all role definitions from the roles directory."""
-        self._roles = {} # Clear existing roles
-        self.roles_directory.mkdir(parents=True, exist_ok=True) # Ensure directory exists
-        
+        self._roles = {}  # Clear existing roles
+        self.roles_directory.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+
         loaded_count = 0
         for role_file in self.roles_directory.glob("*.json"):
             try:
                 with open(role_file, encoding="utf-8") as f:
                     role_data = json.load(f)
-                    
+
                     # 检查数据格式
                     if isinstance(role_data, list):
                         logging.warning(f"Skipping {role_file}: contains list instead of role object")
@@ -108,12 +110,12 @@ class RoleManager:
                     elif not isinstance(role_data, dict):
                         logging.warning(f"Skipping {role_file}: invalid data format")
                         continue
-                    
+
                     # 验证必需字段
                     if "name" not in role_data or "description" not in role_data:
                         logging.warning(f"Skipping {role_file}: missing required fields (name, description)")
                         continue
-                    
+
                     role = Role.from_dict(role_data)
                     self._roles[role.id] = role
                     loaded_count += 1
@@ -134,7 +136,7 @@ class RoleManager:
                     with open(role_file, encoding="utf-8") as f:
                         role_data = json.load(f)
                         role = Role.from_dict(role_data)
-                        self._roles[role.id] = role # Add to in-memory cache
+                        self._roles[role.id] = role  # Add to in-memory cache
                         logging.info(f"Dynamically loaded role '{role_id}' from file.")
                         return role
                 except (json.JSONDecodeError, KeyError, Exception) as e:
@@ -142,14 +144,14 @@ class RoleManager:
             else:
                 logging.warning(f"Role file for '{role_id}' not found at {role_file}.")
         return self._roles.get(role_id)
-    
+
     def get_role(self, role_id: str) -> Optional[Role]:
         """Alias for get_role_by_id for compatibility."""
         return self.get_role_by_id(role_id)
 
     def list_roles(self) -> list[Role]:
         """Returns a list of all available roles (reloads from disk to ensure freshness)."""
-        self._load_roles() # Ensure the in-memory cache is fresh
+        self._load_roles()  # Ensure the in-memory cache is fresh
         return list(self._roles.values())
 
     def save_role(self, role: Role) -> bool:
@@ -160,12 +162,13 @@ class RoleManager:
 
         Returns:
             bool: True if the role was saved successfully, False otherwise.
+
         """
         role_file = self.roles_directory / f"{role.id}.json"
         try:
             with open(role_file, "w", encoding="utf-8") as f:
                 json.dump(role.to_dict(), f, indent=4, ensure_ascii=False)
-            self._roles[role.id] = role # Update in-memory cache
+            self._roles[role.id] = role  # Update in-memory cache
             logging.info(f"Successfully saved role '{role.id}' to {role_file}")
             return True
         except Exception as e:
@@ -180,6 +183,7 @@ class RoleManager:
 
         Returns:
             bool: True if the role was deleted successfully, False otherwise.
+
         """
         role_file = self.roles_directory / f"{role_id}.json"
         if role_file.exists():

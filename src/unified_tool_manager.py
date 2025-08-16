@@ -1,5 +1,9 @@
 import logging
+<<<<<<< HEAD
+from typing import Any, Dict
+=======
 from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
@@ -8,7 +12,12 @@ class UnifiedToolManager:
     This class is responsible for registering, managing, and executing various tools
     based on a provided configuration.
     """
+<<<<<<< HEAD
+
+    def __init__(self, config: Dict[str, Any]):
+=======
     def __init__(self, config: dict[str, Any]):
+>>>>>>> feature/core-services-refactor
         self.config = config
         self.available_tools = {}
         self._register_tools()
@@ -33,6 +42,7 @@ class UnifiedToolManager:
             tool_name: The name of the tool
             tool_class: The class or function implementing the tool
             description: Optional description of the tool
+
         """
         self.available_tools[tool_name] = {
             "type": "custom_tool",
@@ -51,25 +61,26 @@ class UnifiedToolManager:
             
         Returns:
             The result of the tool execution
+
         """
         if tool_name not in self.available_tools:
             logger.warning(f"Tool '{tool_name}' not found.")
             return None
-            
+
         logger.info(f"Executing tool: {tool_name} with args: {kwargs}")
-        
+
         tool_info = self.available_tools[tool_name]
         tool_class = tool_info.get("class")
-        
+
         if not tool_class:
             logger.error(f"Tool '{tool_name}' has no implementation class.")
             return None
-            
+
         try:
             # If it's a class, instantiate it with kwargs and call execute
             if isinstance(tool_class, type):
                 tool_instance = tool_class(**kwargs)
-                
+
                 # Check if execute method is async
                 import inspect
                 if hasattr(tool_instance, 'execute'):
@@ -95,6 +106,7 @@ class UnifiedToolManager:
         
         Args:
             consensus_factory: A ConsensusStrategyFactory instance containing registered strategies
+
         """
         try:
             strategies = consensus_factory.get_all_strategies()

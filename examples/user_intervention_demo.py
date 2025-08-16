@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
+
 from user_interface.interactive_controller import InteractiveController
 from user_interface.parameter_manager import ParameterDefinition, ParameterType
 
@@ -23,9 +24,9 @@ async def demo_parameter_collection():
     """Demonstrate parameter collection functionality."""
     console = Console()
     controller = InteractiveController(console=console)
-    
+
     console.print(Panel.fit("Parameter Collection Demo", style="blue"))
-    
+
     # Define example parameters for a critical review workflow
     parameter_definitions = [
         ParameterDefinition(
@@ -70,21 +71,21 @@ async def demo_parameter_collection():
             default=["批判者", "验证者", "专家"]
         )
     ]
-    
+
     console.print("\n[yellow]This demo will collect parameters for a Critical Review Workflow.[/yellow]")
     console.print("[dim]You can press Ctrl+C at any time to skip parameter collection.[/dim]")
-    
+
     try:
         parameters = await controller.collect_workflow_parameters(
             workflow_name="critical_review",
             parameter_definitions=parameter_definitions,
             context={"demo": True, "description": "Critical Review Workflow Demo"}
         )
-        
+
         if parameters:
             console.print("\n[green]✅ Parameters collected successfully![/green]")
             controller.parameter_manager.display_parameter_summary(parameters)
-            
+
             # Offer to save as preset
             from rich.prompt import Confirm
             if Confirm.ask("Save these parameters as a preset?"):
@@ -97,7 +98,7 @@ async def demo_parameter_collection():
                 )
         else:
             console.print("[yellow]No parameters collected.[/yellow]")
-    
+
     except KeyboardInterrupt:
         console.print("\n[yellow]Parameter collection cancelled by user.[/yellow]")
 
@@ -106,9 +107,9 @@ async def demo_workflow_steering():
     """Demonstrate workflow steering functionality."""
     console = Console()
     controller = InteractiveController(console=console)
-    
+
     console.print(Panel.fit("Workflow Steering Demo", style="green"))
-    
+
     # Setup steering points for a multi-perspective synthesis workflow
     steering_points = [
         {
@@ -136,16 +137,16 @@ async def demo_workflow_steering():
             "priority": 3
         }
     ]
-    
+
     await controller.setup_workflow_steering("multi_perspective_synthesis", steering_points)
-    
+
     console.print("\n[yellow]This demo will simulate workflow steering points.[/yellow]")
     console.print("[dim]You'll be prompted to make decisions at key workflow points.[/dim]")
-    
+
     # Simulate workflow execution with steering points
     for i, point_config in enumerate(steering_points, 1):
         console.print(f"\n[blue]--- Simulating Workflow Step {i} ---[/blue]")
-        
+
         # Simulate some context for the steering point
         context = {
             "current_step": point_config["workflow_step"],
@@ -157,25 +158,25 @@ async def demo_workflow_steering():
                 "quality_threshold": 0.8
             }
         }
-        
+
         try:
             result = await controller.trigger_workflow_steering(
                 point_id=point_config["id"],
                 context=context
             )
-            
+
             console.print(f"[green]Steering result: {result['action']}[/green]")
-            
+
             if result["action"] == "emergency_stop":
                 console.print("[red]Emergency stop triggered. Ending demo.[/red]")
                 break
             elif result["action"] == "pause":
                 console.print("[yellow]Workflow paused. Continuing demo...[/yellow]")
-        
+
         except KeyboardInterrupt:
             console.print("\n[yellow]Steering cancelled by user.[/yellow]")
             break
-    
+
     # Show steering history
     history = controller.get_steering_history()
     if history:
@@ -187,11 +188,11 @@ async def demo_configuration_management():
     """Demonstrate configuration management functionality."""
     console = Console()
     controller = InteractiveController(console=console)
-    
+
     console.print(Panel.fit("Configuration Management Demo", style="purple"))
-    
+
     console.print("\n[yellow]This demo will show configuration management capabilities.[/yellow]")
-    
+
     # Create a sample configuration
     sample_config = {
         "generation": {
@@ -215,23 +216,23 @@ async def demo_configuration_management():
             "require_unanimous": False
         }
     }
-    
+
     # Save the configuration
     config_name = "demo_critical_review_config"
     controller.save_workflow_configuration(config_name, sample_config)
     console.print(f"[green]✅ Saved sample configuration: {config_name}[/green]")
-    
+
     # Show configuration management menu
     try:
         result_config = await controller.handle_workflow_customization_menu(
             workflow_name="critical_review",
             current_config=sample_config
         )
-        
+
         if result_config:
             console.print("\n[green]Final configuration:[/green]")
             controller.configuration_manager._display_configuration_summary(result_config)
-    
+
     except KeyboardInterrupt:
         console.print("\n[yellow]Configuration management cancelled by user.[/yellow]")
 
@@ -240,21 +241,21 @@ async def demo_integration_scenario():
     """Demonstrate integration of all user intervention capabilities."""
     console = Console()
     controller = InteractiveController(console=console)
-    
+
     console.print(Panel.fit("Integration Scenario Demo", style="red"))
-    
+
     console.print("\n[yellow]This demo simulates a complete workflow with user intervention.[/yellow]")
     console.print("[dim]You'll experience parameter collection, steering, and configuration management.[/dim]")
-    
+
     # Step 1: Load or create configuration
     console.print("\n[blue]Step 1: Configuration Setup[/blue]")
-    
+
     configs = controller.list_workflow_configurations("critical_review")
     if configs:
         console.print("Available configurations:")
         for i, config in enumerate(configs, 1):
             console.print(f"  {i}. {config}")
-        
+
         from rich.prompt import Confirm, Prompt
         if Confirm.ask("Use existing configuration?"):
             choice = Prompt.ask(
@@ -268,10 +269,10 @@ async def demo_integration_scenario():
             workflow_config = await controller.create_workflow_configuration("critical_review", "integration_demo")
     else:
         workflow_config = await controller.create_workflow_configuration("critical_review", "integration_demo")
-    
+
     # Step 2: Setup workflow parameters
     console.print("\n[blue]Step 2: Workflow Parameters[/blue]")
-    
+
     parameter_definitions = [
         ParameterDefinition(
             name="content_topic",
@@ -287,7 +288,7 @@ async def demo_integration_scenario():
             choices=["basic", "detailed", "comprehensive"]
         )
     ]
-    
+
     try:
         workflow_params = await controller.collect_workflow_parameters(
             workflow_name="critical_review",
@@ -296,10 +297,10 @@ async def demo_integration_scenario():
     except KeyboardInterrupt:
         console.print("[yellow]Using default parameters.[/yellow]")
         workflow_params = {"content_topic": "Climate Change Policy", "analysis_depth": "comprehensive"}
-    
+
     # Step 3: Setup steering points
     console.print("\n[blue]Step 3: Workflow Execution with Steering[/blue]")
-    
+
     steering_points = [
         {
             "id": "content_generated",
@@ -316,69 +317,69 @@ async def demo_integration_scenario():
             "actions": ["continue", "pause", "inject_data"]
         }
     ]
-    
+
     await controller.setup_workflow_steering("critical_review", steering_points)
-    
+
     # Simulate workflow execution
     for point_config in steering_points:
         console.print(f"\n[cyan]Executing: {point_config['name']}[/cyan]")
-        
+
         context = {
             "workflow_config": workflow_config,
             "workflow_params": workflow_params,
             "current_step": point_config["workflow_step"]
         }
-        
+
         try:
             result = await controller.trigger_workflow_steering(
                 point_id=point_config["id"],
                 context=context
             )
-            
+
             console.print(f"[green]Action taken: {result['action']}[/green]")
-            
+
             if result["action"] == "emergency_stop":
                 break
-        
+
         except KeyboardInterrupt:
             console.print("[yellow]Workflow interrupted.[/yellow]")
             break
-    
+
     # Step 4: Show summary
     console.print("\n[blue]Step 4: Summary[/blue]")
-    
+
     history = controller.get_steering_history()
     if history:
         console.print("Intervention history:")
         controller.display_intervention_summary(history)
-    
+
     console.print("\n[green]✅ Integration demo completed![/green]")
 
 
 async def main():
     """Main demo function."""
     console = Console()
-    
+
     console.print(Panel.fit(
         Text("User Intervention and Customization Demo", style="bold blue"),
         style="blue"
     ))
-    
+
     demos = [
         ("Parameter Collection", demo_parameter_collection),
         ("Workflow Steering", demo_workflow_steering),
         ("Configuration Management", demo_configuration_management),
         ("Integration Scenario", demo_integration_scenario)
     ]
-    
+
     console.print("\nAvailable demos:")
     for i, (name, _) in enumerate(demos, 1):
         console.print(f"  {i}. {name}")
     console.print(f"  {len(demos) + 1}. Run all demos")
     console.print(f"  {len(demos) + 2}. Exit")
-    
+
     from rich.prompt import Prompt
-    
+
     while True:
         try:
             choice = Prompt.ask(
@@ -386,16 +387,16 @@ async def main():
                 choices=[str(i) for i in range(1, len(demos) + 3)],
                 default=str(len(demos) + 2)
             )
-            
+
             choice_num = int(choice)
-            
+
             if choice_num <= len(demos):
                 # Run specific demo
                 name, demo_func = demos[choice_num - 1]
                 console.print(f"\n[blue]Running {name} Demo...[/blue]")
                 await demo_func()
                 console.print(f"\n[green]{name} Demo completed![/green]")
-            
+
             elif choice_num == len(demos) + 1:
                 # Run all demos
                 console.print("\n[blue]Running all demos...[/blue]")
@@ -408,12 +409,12 @@ async def main():
                         continue
                 console.print("\n[green]All demos completed![/green]")
                 break
-            
+
             else:
                 # Exit
                 console.print("[blue]Goodbye![/blue]")
                 break
-        
+
         except KeyboardInterrupt:
             console.print("\n[yellow]Demo interrupted. Returning to menu.[/yellow]")
             continue

@@ -1,0 +1,14 @@
+{
+  "topic": "Should artificial intelligence be regulated?",
+  "roles": [
+    "Expert",
+    "Critic"
+  ],
+  "rounds": 2,
+  "consensus_strategy": "simple_majority_vote",
+  "history": [],
+  "consensus": null,
+  "synthesis": null,
+  "success": true,
+  "timestamp": "2025-07-21T13:49:52.191297"
+}

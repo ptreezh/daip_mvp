@@ -12,7 +12,11 @@ import logging
 import secrets
 from datetime import datetime, timedelta
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any, Dict, Optional, Tuple
+=======
 from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel
 
@@ -24,6 +28,10 @@ logger = logging.getLogger(__name__)
 class AuthenticationRequest(BaseModel):
     """Model for authentication requests.
     """
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     username: str
     password: str
 
@@ -31,6 +39,10 @@ class AuthenticationRequest(BaseModel):
 class AuthenticationResponse(BaseModel):
     """Model for authentication responses.
     """
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/core-services-refactor
     success: bool
     user_id: Optional[str] = None
     session_id: Optional[str] = None
@@ -45,9 +57,9 @@ class SessionManagementService:
     and handling session-related security concerns. It works closely with the UserProfileService
     to provide a complete user management solution.
     """
-    
+
     def __init__(
-        self, 
+        self,
         user_profile_service: UserProfileService,
         auth_data_dir: str = "data/auth",
         session_expiry_minutes: int = 60,
@@ -60,26 +72,32 @@ class SessionManagementService:
             auth_data_dir: Directory where authentication data is stored
             session_expiry_minutes: Default session expiry time in minutes
             token_secret: Secret key for token signing (generated if not provided)
+
         """
         self.user_profile_service = user_profile_service
         self.auth_data_dir = Path(auth_data_dir)
         self.credentials_file = self.auth_data_dir / "credentials.json"
         self.session_expiry_minutes = session_expiry_minutes
-        
+
         # Create auth data directory if it doesn't exist
         self.auth_data_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Initialize credentials storage if it doesn't exist
         if not self.credentials_file.exists():
             with open(self.credentials_file, "w", encoding="utf-8") as f:
                 json.dump({}, f)
-        
+
         # Generate or use provided token secret
         self.token_secret = token_secret or secrets.token_hex(32)
-        
+
         logger.info(f"SessionManagementService initialized with auth directory: {self.auth_data_dir}")
+<<<<<<< HEAD
+
+    def _hash_password(self, password: str, salt: Optional[str] = None) -> Tuple[str, str]:
+=======
     
     def _hash_password(self, password: str, salt: Optional[str] = None) -> tuple[str, str]:
+>>>>>>> feature/core-services-refactor
         """Hash a password using PBKDF2 with SHA-256.
         
         Args:
@@ -88,19 +106,20 @@ class SessionManagementService:
             
         Returns:
             Tuple of (hashed_password, salt)
+
         """
         if not salt:
             salt = secrets.token_hex(16)
-            
+
         key = hashlib.pbkdf2_hmac(
             'sha256',
             password.encode('utf-8'),
             salt.encode('utf-8'),
             100000  # Number of iterations
         ).hex()
-        
+
         return key, salt
-    
+
     def _verify_password(self, stored_hash: str, stored_salt: str, provided_password: str) -> bool:
         """Verify a password against a stored hash.
         
@@ -111,15 +130,22 @@ class SessionManagementService:
             
         Returns:
             True if the password matches, False otherwise
+
         """
         key, _ = self._hash_password(provided_password, stored_salt)
         return hmac.compare_digest(key, stored_hash)
+<<<<<<< HEAD
+
+    def _load_credentials(self) -> Dict[str, Dict[str, Any]]:
+=======
     
     def _load_credentials(self) -> dict[str, dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Load user credentials from storage.
         
         Returns:
             Dictionary of user credentials indexed by user_id
+
         """
         try:
             with open(self.credentials_file, encoding="utf-8") as f:
@@ -127,20 +153,31 @@ class SessionManagementService:
         except Exception as e:
             logger.error(f"Error loading credentials: {e}")
             return {}
+<<<<<<< HEAD
+
+    def _save_credentials(self, credentials: Dict[str, Dict[str, Any]]) -> None:
+=======
     
     def _save_credentials(self, credentials: dict[str, dict[str, Any]]) -> None:
+>>>>>>> feature/core-services-refactor
         """Save user credentials to storage.
         
         Args:
             credentials: Dictionary of user credentials indexed by user_id
+
         """
         try:
             with open(self.credentials_file, "w", encoding="utf-8") as f:
                 json.dump(credentials, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving credentials: {e}")
+<<<<<<< HEAD
+
+    def register_user(self, username: str, password: str, **profile_data) -> Tuple[bool, str, Optional[UserProfile]]:
+=======
     
     def register_user(self, username: str, password: str, **profile_data) -> tuple[bool, str, Optional[UserProfile]]:
+>>>>>>> feature/core-services-refactor
         """Register a new user.
         
         Args:
@@ -150,18 +187,19 @@ class SessionManagementService:
             
         Returns:
             Tuple of (success, message, user_profile)
+
         """
         # Check if username already exists
         existing_profile = self.user_profile_service.get_profile_by_username(username)
         if existing_profile:
             return False, "Username already exists", None
-        
+
         # Create user profile
         profile = self.user_profile_service.create_profile(username=username, **profile_data)
-        
+
         # Hash password and store credentials
         password_hash, salt = self._hash_password(password)
-        
+
         credentials = self._load_credentials()
         credentials[profile.user_id] = {
             "username": username,
@@ -170,10 +208,10 @@ class SessionManagementService:
             "created_at": datetime.now().isoformat()
         }
         self._save_credentials(credentials)
-        
+
         logger.info(f"Registered new user: {username} with ID {profile.user_id}")
         return True, "User registered successfully", profile
-    
+
     def authenticate(self, username: str, password: str) -> AuthenticationResponse:
         """Authenticate a user and create a session.
         
@@ -183,6 +221,7 @@ class SessionManagementService:
             
         Returns:
             AuthenticationResponse with authentication result
+
         """
         # Find user profile by username
         profile = self.user_profile_service.get_profile_by_username(username)
@@ -191,7 +230,7 @@ class SessionManagementService:
                 success=False,
                 message="Invalid username or password"
             )
-        
+
         # Get credentials for the user
         credentials = self._load_credentials()
         user_creds = credentials.get(profile.user_id)
@@ -200,7 +239,7 @@ class SessionManagementService:
                 success=False,
                 message="Invalid username or password"
             )
-        
+
         # Verify password
         if not self._verify_password(
             user_creds["password_hash"],
@@ -211,19 +250,19 @@ class SessionManagementService:
                 success=False,
                 message="Invalid username or password"
             )
-        
+
         # Create new session
         session = self.user_profile_service.create_session(
             profile.user_id,
             expiry_minutes=self.session_expiry_minutes
         )
-        
+
         if not session:
             return AuthenticationResponse(
                 success=False,
                 message="Failed to create session"
             )
-        
+
         logger.info(f"User {username} authenticated successfully")
         return AuthenticationResponse(
             success=True,
@@ -232,8 +271,13 @@ class SessionManagementService:
             message="Authentication successful",
             expires_at=session.expires_at
         )
+<<<<<<< HEAD
+
+    def validate_session(self, session_id: str) -> Tuple[bool, Optional[str], Optional[UserSession]]:
+=======
     
     def validate_session(self, session_id: str) -> tuple[bool, Optional[str], Optional[UserSession]]:
+>>>>>>> feature/core-services-refactor
         """Validate a session.
         
         Args:
@@ -241,19 +285,20 @@ class SessionManagementService:
             
         Returns:
             Tuple of (is_valid, user_id, session)
+
         """
         session = self.user_profile_service.get_session(session_id)
         if not session:
             return False, None, None
-        
+
         # Update session last_active time
         session = self.user_profile_service.update_session(
             session_id,
             last_active=datetime.now()
         )
-        
+
         return True, session.user_id, session
-    
+
     def end_session(self, session_id: str) -> bool:
         """End a session.
         
@@ -262,9 +307,10 @@ class SessionManagementService:
             
         Returns:
             True if the session was ended successfully, False otherwise
+
         """
         return self.user_profile_service.end_session(session_id)
-    
+
     def end_all_user_sessions(self, user_id: str) -> int:
         """End all sessions for a user.
         
@@ -273,17 +319,23 @@ class SessionManagementService:
             
         Returns:
             Number of sessions ended
+
         """
         sessions = self.user_profile_service.get_active_sessions_for_user(user_id)
         count = 0
-        
+
         for session in sessions:
             if self.user_profile_service.end_session(session.session_id):
                 count += 1
-                
+
         return count
+<<<<<<< HEAD
+
+    def change_password(self, user_id: str, current_password: str, new_password: str) -> Tuple[bool, str]:
+=======
     
     def change_password(self, user_id: str, current_password: str, new_password: str) -> tuple[bool, str]:
+>>>>>>> feature/core-services-refactor
         """Change a user's password.
         
         Args:
@@ -293,13 +345,14 @@ class SessionManagementService:
             
         Returns:
             Tuple of (success, message)
+
         """
         # Get credentials for the user
         credentials = self._load_credentials()
         user_creds = credentials.get(user_id)
         if not user_creds:
             return False, "User not found"
-        
+
         # Verify current password
         if not self._verify_password(
             user_creds["password_hash"],
@@ -307,22 +360,27 @@ class SessionManagementService:
             current_password
         ):
             return False, "Current password is incorrect"
-        
+
         # Hash new password and update credentials
         password_hash, salt = self._hash_password(new_password)
         user_creds["password_hash"] = password_hash
         user_creds["salt"] = salt
         user_creds["updated_at"] = datetime.now().isoformat()
-        
+
         self._save_credentials(credentials)
-        
+
         # End all existing sessions for security
         self.end_all_user_sessions(user_id)
-        
+
         logger.info(f"Password changed for user {user_id}")
         return True, "Password changed successfully"
+<<<<<<< HEAD
+
+    def reset_password(self, username: str, new_password: str) -> Tuple[bool, str]:
+=======
     
     def reset_password(self, username: str, new_password: str) -> tuple[bool, str]:
+>>>>>>> feature/core-services-refactor
         """Reset a user's password (admin function).
         
         Args:
@@ -331,33 +389,34 @@ class SessionManagementService:
             
         Returns:
             Tuple of (success, message)
+
         """
         # Find user profile by username
         profile = self.user_profile_service.get_profile_by_username(username)
         if not profile:
             return False, "User not found"
-        
+
         # Get credentials for the user
         credentials = self._load_credentials()
         user_creds = credentials.get(profile.user_id)
         if not user_creds:
             return False, "User credentials not found"
-        
+
         # Hash new password and update credentials
         password_hash, salt = self._hash_password(new_password)
         user_creds["password_hash"] = password_hash
         user_creds["salt"] = salt
         user_creds["updated_at"] = datetime.now().isoformat()
         user_creds["password_reset"] = True
-        
+
         self._save_credentials(credentials)
-        
+
         # End all existing sessions for security
         self.end_all_user_sessions(profile.user_id)
-        
+
         logger.info(f"Password reset for user {username}")
         return True, "Password reset successfully"
-    
+
     def generate_token(self, user_id: str, expiry_minutes: int = 60) -> str:
         """Generate an authentication token for a user.
         
@@ -367,6 +426,7 @@ class SessionManagementService:
             
         Returns:
             Authentication token
+
         """
         # Create a simple JWT-like token
         payload = {
@@ -375,23 +435,28 @@ class SessionManagementService:
             "iat": int(datetime.now().timestamp()),
             "jti": secrets.token_hex(8)
         }
-        
+
         # Convert payload to JSON and encode
         payload_bytes = json.dumps(payload).encode('utf-8')
         payload_b64 = payload_bytes.hex()
-        
+
         # Create signature
         signature = hmac.new(
             self.token_secret.encode('utf-8'),
             payload_bytes,
             hashlib.sha256
         ).hexdigest()
-        
+
         # Combine payload and signature
         token = f"{payload_b64}.{signature}"
         return token
+<<<<<<< HEAD
+
+    def validate_token(self, token: str) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
+=======
     
     def validate_token(self, token: str) -> tuple[bool, Optional[str], Optional[dict[str, Any]]]:
+>>>>>>> feature/core-services-refactor
         """Validate an authentication token.
         
         Args:
@@ -399,29 +464,30 @@ class SessionManagementService:
             
         Returns:
             Tuple of (is_valid, user_id, payload)
+
         """
         try:
             # Split token into payload and signature
             payload_b64, signature = token.split('.')
-            
+
             # Decode payload
             payload_bytes = bytes.fromhex(payload_b64)
             payload = json.loads(payload_bytes.decode('utf-8'))
-            
+
             # Verify signature
             expected_signature = hmac.new(
                 self.token_secret.encode('utf-8'),
                 payload_bytes,
                 hashlib.sha256
             ).hexdigest()
-            
+
             if not hmac.compare_digest(signature, expected_signature):
                 return False, None, None
-            
+
             # Check expiration
             if payload.get("exp", 0) < int(datetime.now().timestamp()):
                 return False, None, None
-            
+
             return True, payload.get("user_id"), payload
         except Exception as e:
             logger.warning(f"Token validation error: {e}")

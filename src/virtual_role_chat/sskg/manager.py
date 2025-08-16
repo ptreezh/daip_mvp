@@ -6,7 +6,11 @@ including knowledge storage, retrieval, conflict resolution, and semantic search
 
 import logging
 from datetime import datetime
+<<<<<<< HEAD
+from typing import Any, Dict, List, Optional
+=======
 from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from .models import (
     ConflictResolution,
@@ -28,25 +32,26 @@ class SSKGManager:
     This class provides a unified interface for all SSKG operations including
     knowledge storage, retrieval, conflict resolution, and semantic search.
     """
-    
+
     def __init__(self, storage: Optional[SSKGStorage] = None):
         """Initialize the SSKG manager.
         
         Args:
             storage: Storage backend (defaults to SQLite storage)
+
         """
         self.storage = storage or SSKGStorage()
         self.logger = logging.getLogger(__name__)
-        
+
         # Conflict resolution strategies
         self.conflict_resolvers = {
             ConflictResolutionStrategy.TEMPORAL: self._resolve_temporal_conflict,
             ConflictResolutionStrategy.CONFIDENCE_BASED: self._resolve_confidence_conflict,
             ConflictResolutionStrategy.SOURCE_BASED: self._resolve_source_conflict,
         }
-    
+
     # Knowledge Fact Operations
-    
+
     def store_fact(self, fact: KnowledgeFact) -> str:
         """Store a knowledge fact with automatic conflict detection.
         
@@ -55,20 +60,26 @@ class SSKGManager:
             
         Returns:
             ID of the stored fact
+
         """
         # Check for potential conflicts
         conflicts = self._detect_conflicts(fact)
-        
+
         if conflicts:
             self.logger.info(f"Detected {len(conflicts)} potential conflicts for fact")
             # For now, just log conflicts. In a full implementation,
             # this would trigger conflict resolution
             for conflict in conflicts:
                 self.logger.debug(f"Conflict with fact {conflict.id}: {conflict.content}")
-        
+
         return self.storage.store_fact(fact)
+<<<<<<< HEAD
+
+    def retrieve_facts(self, query: KnowledgeQuery) -> List[KnowledgeFact]:
+=======
     
     def retrieve_facts(self, query: KnowledgeQuery) -> list[KnowledgeFact]:
+>>>>>>> feature/core-services-refactor
         """Retrieve knowledge facts based on query criteria.
         
         Args:
@@ -76,10 +87,16 @@ class SSKGManager:
             
         Returns:
             List of matching knowledge facts
+
         """
         return self.storage.search_facts(query)
+<<<<<<< HEAD
+
+    def update_fact(self, fact_id: str, updates: Dict[str, Any]) -> bool:
+=======
     
     def update_fact(self, fact_id: str, updates: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Update a knowledge fact.
         
         Args:
@@ -88,22 +105,23 @@ class SSKGManager:
             
         Returns:
             True if update was successful
+
         """
         fact = self.storage.retrieve_fact(fact_id)
         if not fact:
             return False
-        
+
         # Apply updates
         for field, value in updates.items():
             if hasattr(fact, field):
                 setattr(fact, field, value)
-        
+
         fact.last_updated = datetime.now()
         fact.version += 1
-        
+
         self.storage.store_fact(fact)
         return True
-    
+
     def delete_fact(self, fact_id: str) -> bool:
         """Delete a knowledge fact.
         
@@ -112,17 +130,26 @@ class SSKGManager:
             
         Returns:
             True if deletion was successful
+
         """
         # In a full implementation, this would handle cascading deletes
         # and relationship cleanup
         return self.storage.delete_fact(fact_id)
-    
+
     def search_knowledge(
+<<<<<<< HEAD
+        self,
+        query: str,
+        filters: Dict[str, Any] = None,
+        limit: int = 10
+    ) -> List[KnowledgeFact]:
+=======
         self, 
         query: str, 
         filters: dict[str, Any] = None, 
         limit: int = 10
     ) -> list[KnowledgeFact]:
+>>>>>>> feature/core-services-refactor
         """Perform semantic search for knowledge.
         
         Args:
@@ -132,13 +159,14 @@ class SSKGManager:
             
         Returns:
             List of matching knowledge facts
+
         """
         # Build knowledge query
         knowledge_query = KnowledgeQuery(
             content=query,
             limit=limit
         )
-        
+
         # Apply filters
         if filters:
             if 'domain' in filters:
@@ -147,14 +175,21 @@ class SSKGManager:
                 knowledge_query.min_confidence = filters['min_confidence']
             if 'source' in filters:
                 knowledge_query.source = filters['source']
-        
+
         return self.retrieve_facts(knowledge_query)
-    
+
     def get_related_facts(
+<<<<<<< HEAD
+        self,
+        fact_id: str,
+        relation_types: List[str] = None
+    ) -> List[KnowledgeFact]:
+=======
         self, 
         fact_id: str, 
         relation_types: list[str] = None
     ) -> list[KnowledgeFact]:
+>>>>>>> feature/core-services-refactor
         """Get facts related to a specific fact.
         
         Args:
@@ -163,21 +198,27 @@ class SSKGManager:
             
         Returns:
             List of related facts
+
         """
         fact = self.storage.retrieve_fact(fact_id)
         if not fact:
             return []
-        
+
         related_facts = []
         for relation in fact.relations:
             if not relation_types or relation.relation_type.value in relation_types:
                 related_fact = self.storage.retrieve_fact(relation.target_fact_id)
                 if related_fact:
                     related_facts.append(related_fact)
-        
+
         return related_facts
+<<<<<<< HEAD
+
+    def resolve_conflicts(self, conflicting_facts: List[str]) -> ConflictResolution:
+=======
     
     def resolve_conflicts(self, conflicting_facts: list[str]) -> ConflictResolution:
+>>>>>>> feature/core-services-refactor
         """Resolve conflicts between knowledge facts.
         
         Args:
@@ -185,21 +226,22 @@ class SSKGManager:
             
         Returns:
             Conflict resolution result
+
         """
         facts = []
         for fact_id in conflicting_facts:
             fact = self.storage.retrieve_fact(fact_id)
             if fact:
                 facts.append(fact)
-        
+
         if len(facts) < 2:
             raise ValueError("Need at least 2 facts to resolve conflicts")
-        
+
         # Use confidence-based resolution as default
         return self._resolve_confidence_conflict(facts)
-    
+
     # Memory Operations
-    
+
     def store_memory(self, memory: Memory, memory_type: str) -> str:
         """Store a memory item.
         
@@ -209,10 +251,16 @@ class SSKGManager:
             
         Returns:
             ID of the stored memory
+
         """
         return self.storage.store_memory(memory)
+<<<<<<< HEAD
+
+    def retrieve_memories(self, query: MemoryQuery) -> List[Memory]:
+=======
     
     def retrieve_memories(self, query: MemoryQuery) -> list[Memory]:
+>>>>>>> feature/core-services-refactor
         """Retrieve memories based on query criteria.
         
         Args:
@@ -220,12 +268,18 @@ class SSKGManager:
             
         Returns:
             List of matching memories
+
         """
         return self.storage.search_memories(query)
-    
+
     # Session and Project State Operations
+<<<<<<< HEAD
+
+    def store_session_state(self, session_id: str, state: Dict[str, Any]) -> bool:
+=======
     
     def store_session_state(self, session_id: str, state: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Store session state.
         
         Args:
@@ -234,14 +288,20 @@ class SSKGManager:
             
         Returns:
             True if storage was successful
+
         """
         session_state = SessionState(
             session_id=session_id,
             state_data=state
         )
         return self.storage.store_session_state(session_state)
+<<<<<<< HEAD
+
+    def retrieve_session_state(self, session_id: str) -> Dict[str, Any]:
+=======
     
     def retrieve_session_state(self, session_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Retrieve session state.
         
         Args:
@@ -249,11 +309,17 @@ class SSKGManager:
             
         Returns:
             Session state data
+
         """
         session_state = self.storage.retrieve_session_state(session_id)
         return session_state.state_data if session_state else {}
+<<<<<<< HEAD
+
+    def store_project_state(self, project_id: str, state: Dict[str, Any]) -> bool:
+=======
     
     def store_project_state(self, project_id: str, state: dict[str, Any]) -> bool:
+>>>>>>> feature/core-services-refactor
         """Store project state.
         
         Args:
@@ -262,6 +328,7 @@ class SSKGManager:
             
         Returns:
             True if storage was successful
+
         """
         project_state = ProjectState(
             project_id=project_id,
@@ -269,8 +336,13 @@ class SSKGManager:
             config=state
         )
         return self.storage.store_project_state(project_state)
+<<<<<<< HEAD
+
+    def retrieve_project_state(self, project_id: str) -> Dict[str, Any]:
+=======
     
     def retrieve_project_state(self, project_id: str) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Retrieve project state.
         
         Args:
@@ -278,17 +350,25 @@ class SSKGManager:
             
         Returns:
             Project state data
+
         """
         project_state = self.storage.retrieve_project_state(project_id)
         return project_state.config if project_state else {}
-    
+
     # Wiki Operations
-    
+
     def store_wiki_content(
+<<<<<<< HEAD
+        self,
+        page_id: str,
+        content: str,
+        metadata: Dict[str, Any]
+=======
         self, 
         page_id: str, 
         content: str, 
         metadata: dict[str, Any]
+>>>>>>> feature/core-services-refactor
     ) -> bool:
         """Store wiki page content.
         
@@ -299,6 +379,7 @@ class SSKGManager:
             
         Returns:
             True if storage was successful
+
         """
         wiki_page = WikiPage(
             id=page_id,
@@ -308,7 +389,7 @@ class SSKGManager:
             metadata=metadata
         )
         return self.storage.store_wiki_page(wiki_page)
-    
+
     def retrieve_wiki_content(self, page_id: str) -> WikiPage:
         """Retrieve wiki page content.
         
@@ -317,12 +398,18 @@ class SSKGManager:
             
         Returns:
             Wiki page object
+
         """
         return self.storage.retrieve_wiki_page(page_id)
-    
+
     # Private helper methods
+<<<<<<< HEAD
+
+    def _detect_conflicts(self, fact: KnowledgeFact) -> List[KnowledgeFact]:
+=======
     
     def _detect_conflicts(self, fact: KnowledgeFact) -> list[KnowledgeFact]:
+>>>>>>> feature/core-services-refactor
         """Detect potential conflicts with existing facts.
         
         Args:
@@ -330,6 +417,7 @@ class SSKGManager:
             
         Returns:
             List of potentially conflicting facts
+
         """
         # Simple conflict detection based on content similarity
         query = KnowledgeQuery(
@@ -337,19 +425,19 @@ class SSKGManager:
             domain=fact.domain,
             limit=5
         )
-        
+
         similar_facts = self.storage.search_facts(query)
-        
+
         # Filter out exact matches and low-confidence facts
         conflicts = []
         for similar_fact in similar_facts:
-            if (similar_fact.id != fact.id and 
+            if (similar_fact.id != fact.id and
                 similar_fact.confidence > 0.5 and
                 self._are_conflicting(fact, similar_fact)):
                 conflicts.append(similar_fact)
-        
+
         return conflicts
-    
+
     def _are_conflicting(self, fact1: KnowledgeFact, fact2: KnowledgeFact) -> bool:
         """Determine if two facts are conflicting.
         
@@ -359,16 +447,17 @@ class SSKGManager:
             
         Returns:
             True if facts are conflicting
+
         """
         # Simple heuristic: facts are conflicting if they have similar content
         # but different confidence levels or sources
         # In a real implementation, this would use more sophisticated NLP
-        
+
         content_similarity = self._calculate_content_similarity(fact1.content, fact2.content)
-        
-        return (content_similarity > 0.7 and 
+
+        return (content_similarity > 0.7 and
                 abs(fact1.confidence - fact2.confidence) > 0.3)
-    
+
     def _calculate_content_similarity(self, content1: str, content2: str) -> float:
         """Calculate similarity between two content strings.
         
@@ -378,20 +467,26 @@ class SSKGManager:
             
         Returns:
             Similarity score (0.0-1.0)
+
         """
         # Simple word-based similarity
         words1 = set(content1.lower().split())
         words2 = set(content2.lower().split())
-        
+
         if not words1 or not words2:
             return 0.0
-        
+
         intersection = len(words1.intersection(words2))
         union = len(words1.union(words2))
-        
+
         return intersection / union if union > 0 else 0.0
+<<<<<<< HEAD
+
+    def _resolve_confidence_conflict(self, facts: List[KnowledgeFact]) -> ConflictResolution:
+=======
     
     def _resolve_confidence_conflict(self, facts: list[KnowledgeFact]) -> ConflictResolution:
+>>>>>>> feature/core-services-refactor
         """Resolve conflict by choosing the fact with highest confidence.
         
         Args:
@@ -399,9 +494,10 @@ class SSKGManager:
             
         Returns:
             Conflict resolution result
+
         """
         resolved_fact = max(facts, key=lambda f: f.confidence)
-        
+
         return ConflictResolution(
             resolved_fact=resolved_fact,
             conflicting_facts=[f for f in facts if f.id != resolved_fact.id],
@@ -409,8 +505,13 @@ class SSKGManager:
             confidence=resolved_fact.confidence,
             reasoning=f"Selected fact with highest confidence ({resolved_fact.confidence})"
         )
+<<<<<<< HEAD
+
+    def _resolve_temporal_conflict(self, facts: List[KnowledgeFact]) -> ConflictResolution:
+=======
     
     def _resolve_temporal_conflict(self, facts: list[KnowledgeFact]) -> ConflictResolution:
+>>>>>>> feature/core-services-refactor
         """Resolve conflict by choosing the most recent fact.
         
         Args:
@@ -418,9 +519,10 @@ class SSKGManager:
             
         Returns:
             Conflict resolution result
+
         """
         resolved_fact = max(facts, key=lambda f: f.timestamp)
-        
+
         return ConflictResolution(
             resolved_fact=resolved_fact,
             conflicting_facts=[f for f in facts if f.id != resolved_fact.id],
@@ -428,8 +530,13 @@ class SSKGManager:
             confidence=resolved_fact.confidence,
             reasoning=f"Selected most recent fact (timestamp: {resolved_fact.timestamp})"
         )
+<<<<<<< HEAD
+
+    def _resolve_source_conflict(self, facts: List[KnowledgeFact]) -> ConflictResolution:
+=======
     
     def _resolve_source_conflict(self, facts: list[KnowledgeFact]) -> ConflictResolution:
+>>>>>>> feature/core-services-refactor
         """Resolve conflict by choosing the fact from the most reliable source.
         
         Args:
@@ -437,6 +544,7 @@ class SSKGManager:
             
         Returns:
             Conflict resolution result
+
         """
         # Simple source reliability ranking
         source_reliability = {
@@ -445,12 +553,12 @@ class SSKGManager:
             'user': 0.6,
             'unknown': 0.3
         }
-        
+
         def get_source_score(fact):
             return source_reliability.get(fact.source, 0.5)
-        
+
         resolved_fact = max(facts, key=get_source_score)
-        
+
         return ConflictResolution(
             resolved_fact=resolved_fact,
             conflicting_facts=[f for f in facts if f.id != resolved_fact.id],

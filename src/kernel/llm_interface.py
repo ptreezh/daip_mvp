@@ -10,7 +10,11 @@ The interface now includes token management capabilities for cost tracking and c
 import logging
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
+<<<<<<< HEAD
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+=======
 from typing import TYPE_CHECKING, Any, Optional
+>>>>>>> feature/core-services-refactor
 
 import ollama
 from openai import AsyncOpenAI
@@ -30,7 +34,9 @@ class LLMConfig(BaseModel):
         base_url (Optional[str]): The base URL for the API endpoint.
         temperature (float): The sampling temperature.
         max_tokens (int): The maximum number of tokens to generate.
+
     """
+
     provider: str
     model: str
     api_key: Optional[str] = None
@@ -49,7 +55,11 @@ class LLMInterface(ABC):
         self.token_service = token_service
 
     @abstractmethod
+<<<<<<< HEAD
+    async def generate(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> Dict[str, Any]:
+=======
     async def generate(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """Generates a single, non-streaming response from the LLM.
         
         Args:
@@ -59,11 +69,16 @@ class LLMInterface(ABC):
             
         Returns:
             Dictionary containing the response and token usage information
+
         """
         pass
 
     @abstractmethod
+<<<<<<< HEAD
+    async def generate_stream(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
+=======
     async def generate_stream(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
+>>>>>>> feature/core-services-refactor
         """Generates a response as a stream of text chunks.
         
         Args:
@@ -73,6 +88,7 @@ class LLMInterface(ABC):
             
         Yields:
             String chunks of the response
+
         """
         pass
 
@@ -101,7 +117,7 @@ class OpenAIInterface(LLMInterface):
             optimized_messages = context_window.messages
         else:
             optimized_messages = messages
-        
+
         completion = await self.client.chat.completions.create(
             model=self.config.model,
             messages=optimized_messages,
@@ -110,11 +126,11 @@ class OpenAIInterface(LLMInterface):
             stream=False,
             **kwargs,
         )
-        
+
         # Extract response and token usage
         response_message = completion.choices[0].message
         usage = completion.usage
-        
+
         # Record token usage if service is available
         if self.token_service and usage:
             self.token_service.record_usage(
@@ -123,7 +139,7 @@ class OpenAIInterface(LLMInterface):
                 model=self.config.model,
                 participant_id=participant_id
             )
-        
+
         # Return response with token information
         result = response_message.model_dump(exclude_unset=True)
         if usage:
@@ -132,7 +148,7 @@ class OpenAIInterface(LLMInterface):
                 "output_tokens": usage.completion_tokens,
                 "total_tokens": usage.total_tokens
             }
-        
+
         return result
 
     async def generate_stream(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
@@ -142,7 +158,7 @@ class OpenAIInterface(LLMInterface):
             optimized_messages = context_window.messages
         else:
             optimized_messages = messages
-        
+
         stream = await self.client.chat.completions.create(
             model=self.config.model,
             messages=optimized_messages,
@@ -151,7 +167,7 @@ class OpenAIInterface(LLMInterface):
             stream=True,
             **kwargs,
         )
-        
+
         # Track tokens for streaming (approximate)
         output_tokens = 0
         async for chunk in stream:
@@ -160,7 +176,7 @@ class OpenAIInterface(LLMInterface):
                 if self.token_service:
                     output_tokens += self.token_service.count_tokens(content, self.config.model)
                 yield content
-        
+
         # Record approximate usage for streaming
         if self.token_service:
             input_tokens = self.token_service.count_messages_tokens(optimized_messages, self.config.model)
@@ -200,7 +216,7 @@ class OllamaInterface(LLMInterface):
             optimized_messages = context_window.messages
         else:
             optimized_messages = messages
-        
+
         response = await self.client.chat(
             model=self.config.model,
             messages=optimized_messages,
@@ -208,26 +224,26 @@ class OllamaInterface(LLMInterface):
             options={"temperature": self.config.temperature, "num_predict": self.config.max_tokens},
             **kwargs,
         )
-        
+
         # Calculate token usage if service is available
         if self.token_service:
             input_tokens = self.token_service.count_messages_tokens(optimized_messages, self.config.model)
             output_tokens = self.token_service.count_tokens(response["message"]["content"], self.config.model)
-            
+
             self.token_service.record_usage(
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
                 model=self.config.model,
                 participant_id=participant_id
             )
-            
+
             # Add token usage to response
             response["token_usage"] = {
                 "input_tokens": input_tokens,
                 "output_tokens": output_tokens,
                 "total_tokens": input_tokens + output_tokens
             }
-        
+
         return response["message"]
 
     async def generate_stream(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
@@ -237,7 +253,7 @@ class OllamaInterface(LLMInterface):
             optimized_messages = context_window.messages
         else:
             optimized_messages = messages
-        
+
         stream = await self.client.chat(
             model=self.config.model,
             messages=optimized_messages,
@@ -245,7 +261,7 @@ class OllamaInterface(LLMInterface):
             options={"temperature": self.config.temperature, "num_predict": self.config.max_tokens},
             **kwargs,
         )
-        
+
         # Track tokens for streaming
         output_tokens = 0
         async for chunk in stream:
@@ -253,7 +269,7 @@ class OllamaInterface(LLMInterface):
             if self.token_service:
                 output_tokens += self.token_service.count_tokens(content, self.config.model)
             yield content
-        
+
         # Record usage for streaming
         if self.token_service:
             input_tokens = self.token_service.count_messages_tokens(optimized_messages, self.config.model)
@@ -299,6 +315,7 @@ class LLMFactory:
 
         Raises:
             ValueError: If the provider in the config is not supported.
+
         """
         provider = config.provider.lower()
         if provider == "openai":

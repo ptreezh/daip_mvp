@@ -44,7 +44,7 @@ def create_sample_critical_review_result():
                 }
             },
             {
-                "id": "fact_002", 
+                "id": "fact_002",
                 "content": "这一预测基于麦肯锡的研究报告",
                 "confidence": 0.8,
                 "source_location": "sentence 2",
@@ -58,7 +58,7 @@ def create_sample_critical_review_result():
                 "id": "fact_003",
                 "content": "AI技术的发展速度正在加快",
                 "confidence": 0.7,
-                "source_location": "sentence 3", 
+                "source_location": "sentence 3",
                 "fact_type": "general",
                 "metadata": {
                     "extraction_method": "llm",
@@ -225,7 +225,7 @@ async def test_knowledge_persistence_service():
         title="Test: Knowledge Persistence",
         border_style="blue"
     ))
-    
+
     # Initialize services
     sskg_manager = EnhancedSSKGManager()
     wiki_service = WikiService()
@@ -233,22 +233,22 @@ async def test_knowledge_persistence_service():
         sskg_manager=sskg_manager,
         wiki_service=wiki_service
     )
-    
+
     # Test Critical Review persistence
     console.print("\n[cyan]Testing Critical Review Persistence:[/cyan]")
     critical_result = create_sample_critical_review_result()
-    
+
     persistence_results = await persistence_service.persist_critical_review_results(
         critical_result, "test_critical_001"
     )
-    
+
     # Display results
     table = Table(title="Critical Review Persistence Results")
     table.add_column("Fact ID", style="cyan")
     table.add_column("Success", style="green")
     table.add_column("Confidence", style="magenta")
     table.add_column("Conflicts", style="yellow")
-    
+
     for result in persistence_results:
         success_icon = "✅" if result.success else "❌"
         table.add_row(
@@ -257,37 +257,37 @@ async def test_knowledge_persistence_service():
             f"{result.metadata.get('confidence_score', 0):.2f}",
             str(len(result.conflicts_detected))
         )
-    
+
     console.print(table)
-    
+
     # Test Multi-perspective Synthesis persistence
     console.print("\n[cyan]Testing Multi-perspective Synthesis Persistence:[/cyan]")
     synthesis_result = create_sample_multi_perspective_result()
-    
+
     synthesis_persistence = await persistence_service.persist_synthesis_results(
         synthesis_result, "test_synthesis_001"
     )
-    
+
     console.print(f"Synthesis Persistence: {'✅ Success' if synthesis_persistence.success else '❌ Failed'}")
     console.print(f"Node ID: {synthesis_persistence.persisted_node_id}")
     console.print(f"Conflicts Detected: {len(synthesis_persistence.conflicts_detected)}")
     console.print(f"Wiki Page: {'Created' if synthesis_persistence.wiki_page_id else 'Not created'}")
-    
+
     # Get persistence statistics
     console.print("\n[cyan]Persistence Statistics:[/cyan]")
     stats = persistence_service.get_persistence_statistics()
-    
+
     stats_table = Table(title="Persistence Statistics")
     stats_table.add_column("Metric", style="cyan")
     stats_table.add_column("Value", style="magenta")
-    
+
     for key, value in stats.items():
         if isinstance(value, dict):
             for sub_key, sub_value in value.items():
                 stats_table.add_row(f"{key}.{sub_key}", str(sub_value))
         else:
             stats_table.add_row(key, str(value))
-    
+
     console.print(stats_table)
 
 
@@ -298,7 +298,7 @@ async def test_knowledge_retrieval_service():
         title="Test: Knowledge Retrieval",
         border_style="blue"
     ))
-    
+
     # Initialize services (reuse from persistence test)
     sskg_manager = EnhancedSSKGManager()
     wiki_service = WikiService()
@@ -306,85 +306,85 @@ async def test_knowledge_retrieval_service():
         sskg_manager=sskg_manager,
         wiki_service=wiki_service
     )
-    
+
     # First, add some test data
     persistence_service = KnowledgePersistenceService(
         sskg_manager=sskg_manager,
         wiki_service=wiki_service
     )
-    
+
     # Add test data
     critical_result = create_sample_critical_review_result()
     synthesis_result = create_sample_multi_perspective_result()
-    
+
     await persistence_service.persist_critical_review_results(critical_result, "test_001")
     await persistence_service.persist_synthesis_results(synthesis_result, "test_002")
-    
+
     # Test semantic search
     console.print("\n[cyan]Testing Semantic Search:[/cyan]")
-    
+
     search_queries = [
         "人工智能就业影响",
         "AI technology development",
         "麦肯锡研究报告",
         "工作岗位替代"
     ]
-    
+
     for query in search_queries:
         console.print(f"\n[yellow]Search Query:[/yellow] {query}")
-        
+
         search_results = await retrieval_service.semantic_search(
             query=query,
             scope=SearchScope.ALL,
             limit=3
         )
-        
+
         if search_results:
             for i, result in enumerate(search_results, 1):
                 console.print(f"  {i}. [{result.node_type}] {result.content[:100]}...")
                 console.print(f"     Confidence: {result.confidence:.2f}, Relevance: {result.relevance_score:.2f}")
         else:
             console.print("  No results found")
-    
+
     # Test cross-session knowledge sharing
     console.print("\n[cyan]Testing Cross-session Knowledge Sharing:[/cyan]")
-    
+
     session_context = {
         "topic": "AI就业影响",
         "keywords": ["人工智能", "工作", "就业"],
         "user_id": "test_user"
     }
-    
+
     cross_session_knowledge = await retrieval_service.get_cross_session_knowledge(
         session_context=session_context,
         time_window_days=30
     )
-    
+
     console.print(f"Facts found: {len(cross_session_knowledge['facts'])}")
     console.print(f"Synthesis found: {len(cross_session_knowledge['synthesis'])}")
     console.print(f"Wiki pages found: {len(cross_session_knowledge['wiki_pages'])}")
     console.print(f"Knowledge connections: {len(cross_session_knowledge['knowledge_connections'])}")
-    
+
     # Test knowledge quality assessment
     console.print("\n[cyan]Testing Knowledge Quality Assessment:[/cyan]")
-    
+
     # Get some nodes to assess
     all_nodes = sskg_manager.query(sskg_manager.KnowledgeQuery(limit=3))
-    
+
     for node in all_nodes:
         assessment = await retrieval_service.assess_knowledge_quality(node.id)
-        
+
         console.print(f"\n[yellow]Node:[/yellow] {node.content[:50]}...")
         console.print(f"Overall Quality: {assessment.overall_quality:.2f}")
         console.print(f"Recommendations: {len(assessment.recommendations)}")
-        
+
         for rec in assessment.recommendations[:2]:  # Show first 2 recommendations
             console.print(f"  - {rec}")
-    
+
     # Test knowledge statistics
     console.print("\n[cyan]Knowledge Statistics:[/cyan]")
     stats = retrieval_service.get_knowledge_statistics()
-    
+
     for key, value in stats.items():
         if isinstance(value, dict):
             console.print(f"{key}:")
@@ -401,11 +401,11 @@ async def test_workflow_integration():
         title="Test: Workflow Integration",
         border_style="blue"
     ))
-    
+
     # Initialize services
     sskg_manager = EnhancedSSKGManager()
     wiki_service = WikiService()
-    
+
     config = WorkflowIntegrationConfig(
         auto_persist_facts=True,
         auto_persist_synthesis=True,
@@ -413,22 +413,22 @@ async def test_workflow_integration():
         create_wiki_pages=True,
         enable_cross_session_sharing=True
     )
-    
+
     integrator = WorkflowKnowledgeIntegrator(
         sskg_manager=sskg_manager,
         wiki_service=wiki_service,
         config=config
     )
-    
+
     # Test Critical Review integration
     console.print("\n[cyan]Testing Critical Review Integration:[/cyan]")
-    
+
     critical_result = create_sample_critical_review_result()
     enhanced_critical = await integrator.integrate_critical_review_workflow(
         workflow_result=critical_result,
         execution_id="integration_test_001"
     )
-    
+
     # Display integration results
     if "knowledge_persistence" in enhanced_critical:
         persistence_info = enhanced_critical["knowledge_persistence"]
@@ -436,34 +436,34 @@ async def test_workflow_integration():
         console.print(f"Persistence Failures: {persistence_info['persistence_failures']}")
         console.print(f"Conflicts Detected: {persistence_info['conflicts_detected']}")
         console.print(f"Wiki Pages Created: {persistence_info['wiki_pages_created']}")
-    
+
     # Test Multi-perspective integration
     console.print("\n[cyan]Testing Multi-perspective Integration:[/cyan]")
-    
+
     synthesis_result = create_sample_multi_perspective_result()
     enhanced_synthesis = await integrator.integrate_multi_perspective_workflow(
         workflow_result=synthesis_result,
         execution_id="integration_test_002"
     )
-    
+
     # Display integration results
     if "knowledge_persistence" in enhanced_synthesis:
         persistence_info = enhanced_synthesis["knowledge_persistence"]
         console.print(f"Synthesis Persisted: {persistence_info['synthesis_persisted']}")
         console.print(f"Conflicts Detected: {persistence_info['conflicts_detected']}")
         console.print(f"Wiki Page Created: {persistence_info['wiki_page_created']}")
-    
+
     # Test cross-session knowledge sharing
     if "cross_session_knowledge" in enhanced_synthesis:
         cross_session = enhanced_synthesis["cross_session_knowledge"]
         console.print(f"Related Facts: {len(cross_session['facts'])}")
         console.print(f"Related Synthesis: {len(cross_session['related_synthesis'])}")
         console.print(f"Knowledge Connections: {len(cross_session['knowledge_connections'])}")
-    
+
     # Get integration statistics
     console.print("\n[cyan]Integration Statistics:[/cyan]")
     integration_stats = integrator.get_integration_statistics()
-    
+
     for key, value in integration_stats.items():
         if isinstance(value, dict):
             console.print(f"{key}:")
@@ -480,7 +480,7 @@ async def test_knowledge_search():
         title="Test: Knowledge Search",
         border_style="blue"
     ))
-    
+
     # Initialize services and add test data
     sskg_manager = EnhancedSSKGManager()
     wiki_service = WikiService()
@@ -488,31 +488,31 @@ async def test_knowledge_search():
         sskg_manager=sskg_manager,
         wiki_service=wiki_service
     )
-    
+
     # Add test data
     critical_result = create_sample_critical_review_result()
     synthesis_result = create_sample_multi_perspective_result()
-    
+
     await integrator.integrate_critical_review_workflow(critical_result, "search_test_001")
     await integrator.integrate_multi_perspective_workflow(synthesis_result, "search_test_002")
-    
+
     # Test search functionality
     console.print("\n[cyan]Testing Knowledge Search:[/cyan]")
-    
+
     search_results = await integrator.search_knowledge(
         query="人工智能对就业的影响",
         knowledge_types=["facts", "synthesis"],
         min_confidence=0.5,
         limit=5
     )
-    
+
     console.print(f"Search Results: {search_results['total_results']} items found")
-    
+
     for i, result in enumerate(search_results['results'], 1):
         console.print(f"\n{i}. [{result['type']}] {result['content'][:100]}...")
         console.print(f"   Confidence: {result['confidence']:.2f}")
         console.print(f"   Created: {result['created_at']}")
-        
+
         if result['type'] == 'fact':
             console.print(f"   Source: {result.get('source', 'Unknown')}")
         elif result['type'] == 'concept':
@@ -533,13 +533,13 @@ async def main():
         title="Task 10.1 Implementation Test",
         border_style="green"
     ))
-    
+
     try:
         await test_knowledge_persistence_service()
         await test_knowledge_retrieval_service()
         await test_workflow_integration()
         await test_knowledge_search()
-        
+
         console.print(Panel(
             "[bold green]All tests completed successfully![/bold green]\n\n"
             "Task 10.1 implementation includes:\n"
@@ -555,7 +555,7 @@ async def main():
             title="Test Results",
             border_style="green"
         ))
-        
+
     except Exception as e:
         console.print(f"[red]Test failed: {e}[/red]")
         console.print_exception()

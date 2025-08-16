@@ -7,25 +7,29 @@
 import logging
 import uuid
 from datetime import datetime
+<<<<<<< HEAD
+from typing import Any, Dict, List
+=======
 from typing import Any
+>>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
 
 class RealTimeConflictMonitor:
     """实时冲突监控器"""
-    
+
     def __init__(self):
         """初始化实时冲突监控器"""
         self.active_monitors = {}
         self.conflict_alerts = []
         self.monitoring_rules = self._initialize_monitoring_rules()
-    
+
     def start_monitoring(self, knowledge_domain: str, sensitivity_level: str = "medium") -> str:
         """启动监控"""
         try:
             monitor_id = str(uuid.uuid4())
-            
+
             monitor_config = {
                 "monitor_id": monitor_id,
                 "knowledge_domain": knowledge_domain,
@@ -34,26 +38,31 @@ class RealTimeConflictMonitor:
                 "status": "active",
                 "detected_conflicts": []
             }
-            
+
             self.active_monitors[monitor_id] = monitor_config
             return monitor_id
-            
+
         except Exception as e:
             logger.error(f"启动监控失败: {e}")
             return None
+<<<<<<< HEAD
+
+    def detect_emerging_conflicts(self, new_knowledge: Dict[str, Any]) -> List[Dict[str, Any]]:
+=======
     
     def detect_emerging_conflicts(self, new_knowledge: dict[str, Any]) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """检测新兴冲突"""
         try:
             emerging_conflicts = []
-            
+
             # 简化的冲突检测逻辑
             content = new_knowledge.get("content", "").lower()
             domain = new_knowledge.get("domain", "")
-            
+
             # 检查是否与现有知识存在潜在冲突
             conflict_indicators = ["不同意", "反对", "错误", "不准确", "质疑"]
-            
+
             for indicator in conflict_indicators:
                 if indicator in content:
                     conflict = {
@@ -65,18 +74,23 @@ class RealTimeConflictMonitor:
                         "detection_time": datetime.now().isoformat()
                     }
                     emerging_conflicts.append(conflict)
-            
+
             return emerging_conflicts
-            
+
         except Exception as e:
             logger.error(f"检测新兴冲突失败: {e}")
             return []
+<<<<<<< HEAD
+
+    def send_conflict_alert(self, conflict: Dict[str, Any]) -> Dict[str, Any]:
+=======
     
     def send_conflict_alert(self, conflict: dict[str, Any]) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """发送冲突警报"""
         try:
             alert_id = str(uuid.uuid4())
-            
+
             alert = {
                 "alert_id": alert_id,
                 "conflict_id": conflict.get("conflict_id"),
@@ -86,15 +100,20 @@ class RealTimeConflictMonitor:
                 "recommended_action": "需要人工审查",
                 "success": True
             }
-            
+
             self.conflict_alerts.append(alert)
             return alert
-            
+
         except Exception as e:
             logger.error(f"发送冲突警报失败: {e}")
             return {"success": False, "error": str(e)}
+<<<<<<< HEAD
+
+    def _initialize_monitoring_rules(self) -> Dict[str, Any]:
+=======
     
     def _initialize_monitoring_rules(self) -> dict[str, Any]:
+>>>>>>> feature/core-services-refactor
         """初始化监控规则"""
         return {
             "contradiction_detection": {

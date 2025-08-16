@@ -8,7 +8,11 @@
 import asyncio
 import json
 import logging
+<<<<<<< HEAD
+from typing import Any, Dict
+=======
 from typing import Any
+>>>>>>> feature/core-services-refactor
 
 from src.core_services.memory_service import MemoryService
 from src.kernel.llm_interface import LLMInterface
@@ -16,6 +20,7 @@ from src.kernel.llm_interface import LLMInterface
 
 class InvalidResponseTypeError(Exception):
     """Custom exception for when LLM response has an unexpected type."""
+
     pass
 
 logger = logging.getLogger(__name__)
@@ -56,6 +61,7 @@ class FactExtractionService:
             llm_interface: The interface to interact with the language model.
             memory_service: The service to store the extracted facts.
             confidence_threshold: The minimum confidence score to stage a fact for review.
+
         """
         self.llm_interface = llm_interface
         self.memory_service = memory_service
@@ -64,7 +70,7 @@ class FactExtractionService:
     async def extract_and_save_facts(self, text: str, source_metadata: dict[str, Any], max_retries: int = 3):
         """Analyzes text, extracts facts, and saves them to the SSKG."""
         prompt = FACT_EXTRACTION_PROMPT_TEMPLATE.format(text_to_analyze=text)
-        
+
         # Define exceptions that should trigger a retry.
         # This should be expanded with transient network/API errors from the LLM client library
         # (e.g., httpx.ReadTimeout, httpx.ConnectError, specific 5xx/429 status exceptions).
@@ -75,7 +81,7 @@ class FactExtractionService:
                 # Assume llm_interface has a method to generate structured output
                 response = await self.llm_interface.generate(messages=[{"role": "user", "content": prompt}])
                 response_text = response.get("content", "[]")
-                
+
                 extracted_data = json.loads(response_text)
 
                 if not isinstance(extracted_data, list):
@@ -100,7 +106,7 @@ class FactExtractionService:
                 return
         else: # This 'else' belongs to the 'for' loop, and runs if the loop completes without 'break'
             return # All retries failed, so we exit.
-        
+
         if isinstance(extracted_facts, list):
             pending_count = 0
             rejected_count = 0

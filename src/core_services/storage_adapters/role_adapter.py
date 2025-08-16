@@ -11,14 +11,14 @@ try:
 except ImportError:
     # For testing purposes
     from enum import Enum
-    
+
     class NodeType(str, Enum):
         ROLE = "role"
         MEMORY = "memory"
-    
+
     class RelationType(str, Enum):
         OWNED_BY = "owned_by"
-    
+
     class KnowledgeQuery:
         pass
 
@@ -31,8 +31,13 @@ class RoleMemoryAdapter(StorageAdapter):
     This adapter manages the storage and retrieval of role-specific memories,
     personality traits, and cognitive frameworks.
     """
+<<<<<<< HEAD
+
+    def store(self, role_data: Dict[str, Any], **kwargs) -> str:
+=======
     
     def store(self, role_data: dict[str, Any], **kwargs) -> str:
+>>>>>>> feature/core-services-refactor
         """Store role memory data in the SSKG.
         
         Args:
@@ -46,11 +51,12 @@ class RoleMemoryAdapter(StorageAdapter):
             
         Returns:
             ID of the stored role node
+
         """
         role_id = role_data.get("role_id")
         if not role_id:
             raise ValueError("role_id is required for role storage")
-        
+
         # Create main role node
         role_content = f"Role: {role_data.get('name', role_id)}"
         role_metadata = {
@@ -61,14 +67,14 @@ class RoleMemoryAdapter(StorageAdapter):
             "created_at": datetime.now().isoformat(),
             "adapter_type": "role_memory"
         }
-        
+
         role_node_id = self._create_node(
             node_type=NodeType.ROLE,
             content=role_content,
             confidence=1.0,
             metadata=role_metadata
         )
-        
+
         # Store individual memories
         memories = role_data.get("memories", [])
         for memory in memories:
@@ -80,11 +86,16 @@ class RoleMemoryAdapter(StorageAdapter):
                     target_id=role_node_id,
                     relation_type=RelationType.OWNED_BY
                 )
-        
+
         self.logger.info(f"Stored role {role_id} with {len(memories)} memories")
         return role_node_id
+<<<<<<< HEAD
+
+    def _store_role_memory(self, memory_data: Dict[str, Any], role_id: str) -> Optional[str]:
+=======
     
     def _store_role_memory(self, memory_data: dict[str, Any], role_id: str) -> Optional[str]:
+>>>>>>> feature/core-services-refactor
         """Store a single role memory.
         
         Args:
@@ -93,10 +104,11 @@ class RoleMemoryAdapter(StorageAdapter):
             
         Returns:
             ID of the stored memory node or None if failed
+
         """
         if not memory_data.get("content"):
             return None
-        
+
         memory_metadata = {
             "role_id": role_id,
             "memory_type": memory_data.get("type", "episodic"),
@@ -105,15 +117,20 @@ class RoleMemoryAdapter(StorageAdapter):
             "timestamp": memory_data.get("timestamp", datetime.now().isoformat()),
             "adapter_type": "role_memory"
         }
-        
+
         return self._create_node(
             node_type=NodeType.MEMORY,
             content=memory_data["content"],
             confidence=memory_data.get("confidence", 0.8),
             metadata=memory_metadata
         )
+<<<<<<< HEAD
+
+    def retrieve(self, role_id: str, **kwargs) -> Optional[Dict[str, Any]]:
+=======
     
     def retrieve(self, role_id: str, **kwargs) -> Optional[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve role data from the SSKG.
         
         Args:
@@ -123,6 +140,7 @@ class RoleMemoryAdapter(StorageAdapter):
             
         Returns:
             Role data dictionary or None if not found
+
         """
         # Find role node
         role_nodes = self.sskg_manager.query(KnowledgeQuery(
@@ -130,10 +148,10 @@ class RoleMemoryAdapter(StorageAdapter):
             metadata_filters={"role_id": role_id, "adapter_type": "role_memory"},
             limit=1
         ))
-        
+
         if not role_nodes:
             return None
-        
+
         role_node = role_nodes[0]
         role_data = {
             "role_id": role_id,
@@ -141,15 +159,20 @@ class RoleMemoryAdapter(StorageAdapter):
             "personality": role_node.metadata.get("personality", {}),
             "cognitive_framework": role_node.metadata.get("cognitive_framework", {})
         }
-        
+
         # Include memories if requested
         include_memories = kwargs.get("include_memories", True)
         if include_memories:
             role_data["memories"] = self._retrieve_role_memories(role_id)
-        
+
         return role_data
+<<<<<<< HEAD
+
+    def _retrieve_role_memories(self, role_id: str) -> List[Dict[str, Any]]:
+=======
     
     def _retrieve_role_memories(self, role_id: str) -> list[dict[str, Any]]:
+>>>>>>> feature/core-services-refactor
         """Retrieve memories for a role.
         
         Args:
@@ -157,13 +180,14 @@ class RoleMemoryAdapter(StorageAdapter):
             
         Returns:
             List of memory dictionaries
+
         """
         memory_nodes = self.sskg_manager.query(KnowledgeQuery(
             node_types=[NodeType.MEMORY],
             metadata_filters={"role_id": role_id, "adapter_type": "role_memory"},
             limit=1000
         ))
-        
+
         memories = []
         for node in memory_nodes:
             memories.append({
@@ -174,10 +198,15 @@ class RoleMemoryAdapter(StorageAdapter):
                 "timestamp": node.metadata.get("timestamp", ""),
                 "confidence": node.confidence
             })
-        
+
         return memories
+<<<<<<< HEAD
+
+    def update(self, role_id: str, role_data: Dict[str, Any], **kwargs) -> bool:
+=======
     
     def update(self, role_id: str, role_data: dict[str, Any], **kwargs) -> bool:
+>>>>>>> feature/core-services-refactor
         """Update role data in the SSKG.
         
         Args:
@@ -188,6 +217,7 @@ class RoleMemoryAdapter(StorageAdapter):
             
         Returns:
             True if update was successful, False otherwise
+
         """
         # Find role node
         role_nodes = self.sskg_manager.query(KnowledgeQuery(
@@ -195,12 +225,12 @@ class RoleMemoryAdapter(StorageAdapter):
             metadata_filters={"role_id": role_id, "adapter_type": "role_memory"},
             limit=1
         ))
-        
+
         if not role_nodes:
             return False
-        
+
         role_node = role_nodes[0]
-        
+
         # Update role metadata
         updated_metadata = dict(role_node.metadata)
         if "name" in role_data:
@@ -209,23 +239,23 @@ class RoleMemoryAdapter(StorageAdapter):
             updated_metadata["personality"] = role_data["personality"]
         if "cognitive_framework" in role_data:
             updated_metadata["cognitive_framework"] = role_data["cognitive_framework"]
-        
+
         # Update role content if name changed
         updated_content = role_node.content
         if "name" in role_data:
             updated_content = f"Role: {role_data['name']}"
-        
+
         # Update role node
         success = self.sskg_manager.update_node(role_node.id, {
             "content": updated_content,
             "metadata": updated_metadata
         })
-        
+
         if success:
             self.logger.info(f"Updated role {role_id}")
-        
+
         return success
-    
+
     def delete(self, role_id: str, **kwargs) -> bool:
         """Delete role data from the SSKG.
         
@@ -236,6 +266,7 @@ class RoleMemoryAdapter(StorageAdapter):
             
         Returns:
             True if deletion was successful, False otherwise
+
         """
         # Find role node
         role_nodes = self.sskg_manager.query(KnowledgeQuery(
@@ -243,12 +274,12 @@ class RoleMemoryAdapter(StorageAdapter):
             metadata_filters={"role_id": role_id, "adapter_type": "role_memory"},
             limit=1
         ))
-        
+
         if not role_nodes:
             return False
-        
+
         role_node = role_nodes[0]
-        
+
         # Delete associated memories if requested
         delete_memories = kwargs.get("delete_memories", True)
         if delete_memories:
@@ -257,19 +288,24 @@ class RoleMemoryAdapter(StorageAdapter):
                 metadata_filters={"role_id": role_id, "adapter_type": "role_memory"},
                 limit=1000
             ))
-            
+
             for memory_node in memory_nodes:
                 self.sskg_manager.delete_node(memory_node.id)
-        
+
         # Delete role node
         success = self.sskg_manager.delete_node(role_node.id)
-        
+
         if success:
             self.logger.info(f"Deleted role {role_id}")
-        
+
         return success
+<<<<<<< HEAD
+
+    def list_all(self, **kwargs) -> List[str]:
+=======
     
     def list_all(self, **kwargs) -> list[str]:
+>>>>>>> feature/core-services-refactor
         """List all role IDs.
         
         Args:
@@ -277,11 +313,12 @@ class RoleMemoryAdapter(StorageAdapter):
             
         Returns:
             List of role IDs
+
         """
         role_nodes = self.sskg_manager.query(KnowledgeQuery(
             node_types=[NodeType.ROLE],
             metadata_filters={"adapter_type": "role_memory"},
             limit=1000
         ))
-        
+
         return [node.metadata.get("role_id", "") for node in role_nodes if node.metadata.get("role_id")]

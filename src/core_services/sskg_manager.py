@@ -24,6 +24,7 @@ class SSKGManager:
         Args:
             graph_path (Optional[Path]): Path to the graph file for persistence.
                                          If the file exists, it will be loaded.
+
         """
         self.graph_path = graph_path
         self.graph = self._load_graph()

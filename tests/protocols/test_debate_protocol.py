@@ -99,7 +99,7 @@ async def test_run_successful_debate(mock_kernel, event_queue, debate_config):
         assert len(messages) == 2
         assert messages[0]["role"] == "system"
         assert messages[1]["role"] == "user"
-    
+
     mock_kernel.tool_executor.execute_tool.assert_called_once_with(
         tool_name="test_consensus",
         history=protocol.history
@@ -124,7 +124,7 @@ async def test_run_successful_debate(mock_kernel, event_queue, debate_config):
     assert isinstance(events[6], TechLogEvent) # "Moving to consensus."
     assert isinstance(events[7], TechLogEvent) # "Synthesizing final result."
     assert isinstance(events[8], DebateEndEvent)
-    
+
     final_result = events[8].result
     assert isinstance(final_result, DebateResult)
     assert final_result.consensus_outcome == "Consensus reached"

@@ -20,6 +20,7 @@ class TurnManager:
         Args:
             config (DebateConfig): The configuration object for the debate,
                                    containing roles and number of rounds.
+
         """
         self._roles: list[str] = config.roles
         self._total_rounds: int = config.rounds
@@ -31,14 +32,20 @@ class TurnManager:
 
         Returns:
             bool: True if the current round exceeds the total rounds, False otherwise.
+
         """
         return self._current_round > self._total_rounds
 
+<<<<<<< HEAD
+    def get_current_turn(self) -> Tuple[int, str]:
+=======
     def get_current_turn(self) -> tuple[int, str]:
+>>>>>>> feature/core-services-refactor
         """Gets the current turn's round number and the ID of the role that should speak.
 
         Returns:
             Tuple[int, str]: A tuple containing the current round number and the current role ID.
+
         """
         return self._current_round, self._roles[self._current_role_index]
 

@@ -17,7 +17,11 @@ class ConsensusStrategy(ABC):
     """Abstract base class for all consensus strategies."""
 
     @abstractmethod
+<<<<<<< HEAD
+    def execute(self, history: List[DebateTurn]) -> Any:
+=======
     def execute(self, history: list[DebateTurn]) -> Any:
+>>>>>>> feature/core-services-refactor
         """Executes the consensus-finding logic.
 
         Args:
@@ -25,6 +29,7 @@ class ConsensusStrategy(ABC):
 
         Returns:
             Any: The outcome of the consensus process.
+
         """
         pass
 
@@ -37,10 +42,17 @@ class SimpleMajorityVoteStrategy(ConsensusStrategy):
     """
 
     @staticmethod # Make it a static method
+<<<<<<< HEAD
+    def execute(history: List[DebateTurn]) -> Dict[str, Any]:
+        """Counts votes based on keywords in the last turn of each role.
+        """
+        votes: Dict[str, int] = {"agree": 0, "disagree": 0, "neutral": 0}
+=======
     def execute(history: list[DebateTurn]) -> dict[str, Any]:
         """Counts votes based on keywords in the last turn of each role.
         """
         votes: dict[str, int] = {"agree": 0, "disagree": 0, "neutral": 0}
+>>>>>>> feature/core-services-refactor
         roles_voted = set()
         # Iterate backwards to find the last opinion of each role
         for turn in reversed(history):
@@ -80,14 +92,14 @@ class ConsensusStrategyFactory:
     def get_all_strategies(self) -> dict[str, type[ConsensusStrategy]]:
         """Returns all registered strategy classes."""
         return self._strategies
-        
+
     def create(self, name: str, **kwargs) -> ConsensusStrategy:
         """Creates an instance of a registered consensus strategy with parameters."""
         strategy_class = self._strategies.get(name)
         if not strategy_class:
             raise ValueError(f"Consensus strategy '{name}' not registered.")
         return strategy_class(**kwargs)
-        
+
     def register_strategies_with_tool_manager(self, tool_manager):
         """Registers all strategies with the tool manager."""
         for name, strategy_class in self._strategies.items():

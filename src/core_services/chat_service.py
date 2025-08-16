@@ -2,7 +2,11 @@ import asyncio
 import json
 import logging
 import random
+<<<<<<< HEAD
+from typing import Any, List, Optional
+=======
 from typing import Any, Optional
+>>>>>>> feature/core-services-refactor
 
 from fastapi import HTTPException
 
@@ -98,7 +102,11 @@ class ChatService:
 
         return await chat_engine.send_user_message(room_id, content, sender_name)
 
+<<<<<<< HEAD
+    async def generate_responses_for_room(self, engine_id: str, room_id: str, target_roles: Optional[List[str]]) -> List["RoleResponse"]:
+=======
     async def generate_responses_for_room(self, engine_id: str, room_id: str, target_roles: Optional[list[str]]) -> list["RoleResponse"]:
+>>>>>>> feature/core-services-refactor
         """Generates responses from AI roles in a chat room.
         """
         chat_engine = self._get_engine(engine_id)
@@ -113,7 +121,11 @@ class ChatService:
             raise HTTPException(status_code=404, detail="Chat room not found.")
         return room
 
+<<<<<<< HEAD
+    def list_all_rooms(self, engine_id: str) -> List["ChatRoom"]:
+=======
     def list_all_rooms(self, engine_id: str) -> list["ChatRoom"]:
+>>>>>>> feature/core-services-refactor
         """Lists all available chat rooms in a given engine.
         """
         chat_engine = self._get_engine(engine_id)

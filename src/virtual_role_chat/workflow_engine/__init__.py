@@ -20,7 +20,7 @@ from .state_manager import StateManager
 
 __all__ = [
     'WorkflowDefinition',
-    'WorkflowNode', 
+    'WorkflowNode',
     'WorkflowEdge',
     'WorkflowResult',
     'WorkflowStatus',
