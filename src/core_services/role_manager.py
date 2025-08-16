@@ -4,14 +4,11 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-<<<<<<< HEAD
-from typing import Any, Dict, List, Optional
-=======
 from typing import Any, Optional
->>>>>>> feature/core-services-refactor
 
 # Define the base directory for roles
 ROLES_DIR = Path("roles")
+
 
 @dataclass
 class Role:
@@ -34,11 +31,7 @@ class Role:
         }
 
     @classmethod
-<<<<<<< HEAD
-    def from_dict(cls, data: Dict[str, Any]) -> "Role":
-=======
     def from_dict(cls, data: dict[str, Any]) -> "Role":
->>>>>>> feature/core-services-refactor
         """Creates a Role object from a dictionary with enhanced error tolerance."""
         # 处理不同的数据格式
         if isinstance(data, list):
@@ -48,29 +41,17 @@ class Role:
             else:
                 # 如果列表为空或格式不对，创建默认角色
                 data = {"name": "Unknown Role", "description": "Default role"}
-<<<<<<< HEAD
 
         # 确保数据是字典格式
         if not isinstance(data, dict):
             data = {"name": "Unknown Role", "description": "Default role"}
 
-=======
-        
-        # 确保数据是字典格式
-        if not isinstance(data, dict):
-            data = {"name": "Unknown Role", "description": "Default role"}
-        
->>>>>>> feature/core-services-refactor
         # 容错处理各个字段
         role_id = data.get("id") or data.get("name") or "unknown_id"
         name = data.get("name") or data.get("id") or "Unknown Role"
         description = data.get("description") or data.get("system_prompt") or f"Role: {name}"
         system_prompt = data.get("system_prompt") or data.get("description") or f"You are {name}."
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> feature/core-services-refactor
         # 处理capabilities字段的多种格式
         capabilities = data.get("capabilities", [])
         if not isinstance(capabilities, list):
@@ -78,11 +59,7 @@ class Role:
                 capabilities = [capabilities]
             else:
                 capabilities = []
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> feature/core-services-refactor
         # 添加其他可能的能力字段
         if "expertise" in data:
             expertise = data["expertise"]
@@ -90,11 +67,7 @@ class Role:
                 capabilities.extend(expertise)
             elif isinstance(expertise, str):
                 capabilities.append(expertise)
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> feature/core-services-refactor
         return cls(
             id=str(role_id),
             name=str(name),
@@ -107,7 +80,7 @@ class Role:
 class RoleManager:
     """Loads, manages, and persists role definitions from individual JSON files."""
 
-    def __init__(self, roles_directory: Path = ROLES_DIR):
+    def __init__(self, roles_directory: Path = ROLES_DIR) -> None:
         """Initializes the RoleManager by loading roles from JSON files in the specified directory.
 
         Args:
@@ -121,19 +94,15 @@ class RoleManager:
 
     def _load_roles(self) -> None:
         """Loads all role definitions from the roles directory."""
-        self._roles = {} # Clear existing roles
-        self.roles_directory.mkdir(parents=True, exist_ok=True) # Ensure directory exists
+        self._roles = {}  # Clear existing roles
+        self.roles_directory.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
 
         loaded_count = 0
         for role_file in self.roles_directory.glob("*.json"):
             try:
                 with open(role_file, encoding="utf-8") as f:
                     role_data = json.load(f)
-<<<<<<< HEAD
 
-=======
-                    
->>>>>>> feature/core-services-refactor
                     # 检查数据格式
                     if isinstance(role_data, list):
                         logging.warning(f"Skipping {role_file}: contains list instead of role object")
@@ -141,20 +110,12 @@ class RoleManager:
                     elif not isinstance(role_data, dict):
                         logging.warning(f"Skipping {role_file}: invalid data format")
                         continue
-<<<<<<< HEAD
 
-=======
-                    
->>>>>>> feature/core-services-refactor
                     # 验证必需字段
                     if "name" not in role_data or "description" not in role_data:
                         logging.warning(f"Skipping {role_file}: missing required fields (name, description)")
                         continue
-<<<<<<< HEAD
 
-=======
-                    
->>>>>>> feature/core-services-refactor
                     role = Role.from_dict(role_data)
                     self._roles[role.id] = role
                     loaded_count += 1
@@ -175,7 +136,7 @@ class RoleManager:
                     with open(role_file, encoding="utf-8") as f:
                         role_data = json.load(f)
                         role = Role.from_dict(role_data)
-                        self._roles[role.id] = role # Add to in-memory cache
+                        self._roles[role.id] = role  # Add to in-memory cache
                         logging.info(f"Dynamically loaded role '{role_id}' from file.")
                         return role
                 except (json.JSONDecodeError, KeyError, Exception) as e:
@@ -190,7 +151,7 @@ class RoleManager:
 
     def list_roles(self) -> list[Role]:
         """Returns a list of all available roles (reloads from disk to ensure freshness)."""
-        self._load_roles() # Ensure the in-memory cache is fresh
+        self._load_roles()  # Ensure the in-memory cache is fresh
         return list(self._roles.values())
 
     def save_role(self, role: Role) -> bool:
@@ -207,7 +168,7 @@ class RoleManager:
         try:
             with open(role_file, "w", encoding="utf-8") as f:
                 json.dump(role.to_dict(), f, indent=4, ensure_ascii=False)
-            self._roles[role.id] = role # Update in-memory cache
+            self._roles[role.id] = role  # Update in-memory cache
             logging.info(f"Successfully saved role '{role.id}' to {role_file}")
             return True
         except Exception as e:

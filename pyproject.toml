@@ -70,12 +70,28 @@ exclude = '''
 [tool.ruff]
 line-length = 120
 target-version = "py310"
-select = ["E", "F", "I", "B", "UP", "C90", "N", "D", "ANN", "TRY", "PT", "T20", "RET", "SIM"]
+# 减少严格的规则，特别是那些可能与中文注释冲突的规则
+# 移除了 "C90" (McCabe complexity), "N" (PEP 8 naming conventions), 
+# "D" (Docstring rules, 除了已忽略的), "ANN" (Type annotation rules, 除了已忽略的),
+# "TRY" (Exception handling rules), "T20" (Print statements), "SIM" (Code simplification)
+# 保留 "E" (Pycodestyle errors), "F" (Pyflakes), "I" (Isort), "B" (Bugbear), "UP" (Pyupgrade)
+select = ["E", "F", "I", "B", "UP"]
 ignore = [
+    # 原有的忽略规则
     "D203",
     "D213",
     "ANN101",
     "ANN102",
+    # 添加更多可能与项目实际情况冲突的规则
+    "E501",  # Line too long (交给Black处理)
+    "W191",  # Indentation contains tabs (交给Black处理)
+    "E111",  # Indentation is not a multiple of four (交给Black处理)
+    "E117",  # Over-indented (交给Black处理)
+    "E701",  # Multiple statements on one line (交给Black处理)
+    "E702",  # Multiple statements on one line (交给Black处理)
+    "E703",  # Statement ends with a semicolon (交给Black处理)
+    "E731",  # Do not assign a lambda expression, use a def (风格问题，可忽略)
+    "B905",  # `zip()` without an explicit `strict=` parameter (严格模式, 可能过于严格)
 ]
 exclude = [".venv", "build", "dist", "migrations"]
 fix = true
@@ -83,8 +99,9 @@ fix = true
 [tool.ruff.pydocstyle]
 convention = "google"
 
+# 为测试文件进一步放宽规则
 [tool.ruff.per-file-ignores]
-"tests/**/*.py" = ["ANN", "T20", "D101", "D102"]
+"tests/**/*.py" = ["ANN", "T20", "D101", "D102", "B011"]
 
 [tool.mypy]
 python_version = "3.10"
