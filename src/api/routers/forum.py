@@ -20,7 +20,7 @@ from ...core_services.forum_service import forum_service
 logger = logging.getLogger(__name__)
 
 # 创建路由器
-forum_router = APIRouter(prefix="/api/forum", tags=["forum"])
+router = APIRouter(prefix="/api/forum", tags=["forum"])
 
 
 # Pydantic模型
@@ -88,258 +88,147 @@ class ForumStatisticsResponse(BaseModel):
     average_consensus: float
 
 
-@forum_router.post("/session", response_model=ForumSessionResponse)
+@router.post("/session", response_model=ForumSessionResponse)
 async def create_forum_session(request: ForumSessionRequest):
     """创建Forum会话"""
     try:
-        logger.info(f"创建Forum会话: {request.topic}")
-        
-        # 启动Forum会话
-        session = await forum_service.start_forum_session(
+        session_id = await forum_service.start_session(request.topic, request.user_id, request.settings or {})
+        return ForumSessionResponse(
+            session_id=session_id,
             topic=request.topic,
-            user_id=request.user_id
+            user_id=request.user_id,
+            start_time=datetime.now().isoformat()
         )
-        
-        response = ForumSessionResponse(
-            session_id=session.session_id,
-            topic=session.topic,
-            status=session.status,
-            start_time=session.start_time.isoformat(),
-            active_agents=session.active_agents,
-            message_count=len(session.messages),
-            user_intervention_count=len(session.user_interventions),
-            consensus_level=session.consensus_level,
-            duration=(datetime.now() - session.start_time).total_seconds()
-        )
-        
-        logger.info(f"Forum会话创建成功: {session.session_id}")
-        return response
-        
     except ForumServiceError as e:
-        logger.error(f"Forum服务错误: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         logger.error(f"创建Forum会话失败: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@forum_router.get("/session/{session_id}", response_model=SessionContextResponse)
+@router.get("/session/{session_id}", response_model=SessionContextResponse)
 async def get_session_context(session_id: str):
     """获取会话上下文"""
     try:
         context = await forum_service.get_session_context(session_id)
-        
-        if not context:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        response = SessionContextResponse(**context)
-        return response
-        
-    except HTTPException:
-        raise
+        return SessionContextResponse(**context)
+    except ForumServiceError as e:
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         logger.error(f"获取会话上下文失败: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@forum_router.post("/intervention", response_model=UserInterventionResponse)
+@router.post("/intervention", response_model=UserInterventionResponse)
 async def handle_user_intervention(request: UserInterventionRequest):
     """处理用户干预"""
     try:
-        logger.info(f"处理用户干预: {request.session_id}")
-        
         result = await forum_service.handle_user_intervention(
-            session_id=request.session_id,
-            user_message=request.message
+            request.session_id, 
+            request.message, 
+            request.intent
         )
-        
-        response = UserInterventionResponse(
-            status=result["status"],
-            optimized_input=result["optimized_input"],
-            session_id=result["session_id"],
-            timestamp=datetime.now().isoformat()
-        )
-        
-        logger.info(f"用户干预处理成功: {request.session_id}")
-        return response
-        
+        return UserInterventionResponse(**result)
     except ForumServiceError as e:
-        logger.error(f"Forum服务错误: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         logger.error(f"处理用户干预失败: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@forum_router.post("/control")
+@router.post("/control")
 async def control_session(request: SessionControlRequest):
     """控制会话"""
     try:
-        logger.info(f"控制会话: {request.session_id} - {request.action}")
-        
-        success = False
-        
         if request.action == "pause":
-            success = await forum_service.pause_session(request.session_id)
+            await forum_service.pause_session(request.session_id)
         elif request.action == "resume":
-            success = await forum_service.resume_session(request.session_id)
+            await forum_service.resume_session(request.session_id)
         elif request.action == "end":
-            result = await forum_service.end_session(request.session_id)
-            if result:
-                success = True
-            else:
-                raise HTTPException(status_code=404, detail="Session not found")
+            await forum_service.end_session(request.session_id)
         else:
             raise HTTPException(status_code=400, detail="Invalid action")
         
-        if not success:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        return {
-            "status": "success",
-            "action": request.action,
-            "session_id": request.session_id,
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except HTTPException:
-        raise
+        return {"message": f"Session {request.session_id} {request.action}d successfully"}
+    except ForumServiceError as e:
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         logger.error(f"控制会话失败: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@forum_router.get("/sessions")
-async def get_active_sessions():
-    """获取所有活跃会话"""
+@router.get("/sessions")
+async def list_sessions():
+    """列出所有会话"""
     try:
-        sessions = forum_service.get_active_sessions()
-        return {
-            "sessions": sessions,
-            "count": len(sessions),
-            "timestamp": datetime.now().isoformat()
-        }
-        
+        sessions = await forum_service.list_sessions()
+        return sessions
+    except ForumServiceError as e:
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
-        logger.error(f"获取活跃会话失败: {e}")
+        logger.error(f"列出会话失败: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@forum_router.get("/statistics", response_model=ForumStatisticsResponse)
+@router.get("/statistics", response_model=ForumStatisticsResponse)
 async def get_forum_statistics():
     """获取Forum统计信息"""
     try:
-        stats = forum_service.get_session_statistics()
+        stats = await forum_service.get_statistics()
         return ForumStatisticsResponse(**stats)
-        
+    except ForumServiceError as e:
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
-        logger.error(f"获取Forum统计失败: {e}")
+        logger.error(f"获取统计信息失败: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@forum_router.delete("/session/{session_id}")
+@router.delete("/session/{session_id}")
 async def delete_session(session_id: str):
     """删除会话"""
     try:
-        result = await forum_service.end_session(session_id)
-        
-        if not result:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        return {
-            "status": "deleted",
-            "session_id": session_id,
-            "result": result,
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except HTTPException:
-        raise
+        await forum_service.delete_session(session_id)
+        return {"message": f"Session {session_id} deleted successfully"}
+    except ForumServiceError as e:
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         logger.error(f"删除会话失败: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@forum_router.get("/health")
+@router.get("/health")
 async def forum_health_check():
-    """Forum健康检查"""
+    """Forum服务健康检查"""
     try:
-        active_sessions = forum_service.get_active_sessions()
-        stats = forum_service.get_session_statistics()
-        
-        return {
-            "status": "healthy",
-            "service": "forum",
-            "active_sessions": len(active_sessions),
-            "statistics": stats,
-            "timestamp": datetime.now().isoformat()
-        }
-        
+        health_status = await forum_service.health_check()
+        return health_status
+    except ForumServiceError as e:
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
-        logger.error(f"Forum健康检查失败: {e}")
-        return {
-            "status": "unhealthy",
-            "service": "forum",
-            "error": str(e),
-            "timestamp": datetime.now().isoformat()
-        }
+        logger.error(f"健康检查失败: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@forum_router.get("/session/{session_id}/messages")
-async def get_session_messages(session_id: str):
-    """获取会话消息历史"""
+@router.get("/session/{session_id}/messages")
+async def get_session_messages(session_id: str, limit: int = 50):
+    """获取会话消息"""
     try:
-        # 从Forum服务获取会话消息
-        context = await forum_service.get_session_context(session_id)
-        
-        if not context:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        # 这里应该从消息存储中获取实际的消息历史
-        # 简化实现，返回基本结构
-        return {
-            "session_id": session_id,
-            "messages": [],  # 实际实现中应该从消息存储中获取
-            "message_count": context["message_count"],
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except HTTPException:
-        raise
+        messages = await forum_service.get_session_messages(session_id, limit)
+        return messages
+    except ForumServiceError as e:
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         logger.error(f"获取会话消息失败: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@forum_router.post("/session/{session_id}/optimize")
-async def optimize_user_input(session_id: str, input_data: dict[str, Any]):
+@router.post("/session/{session_id}/optimize")
+async def optimize_user_input(session_id: str, user_input: str):
     """优化用户输入"""
     try:
-        user_input = input_data.get("input", "")
-        intent = input_data.get("intent", "comment")
-        
-        if not user_input:
-            raise HTTPException(status_code=400, detail="Input is required")
-        
-        # 获取会话上下文以获取话题
-        context = await forum_service.get_session_context(session_id)
-        
-        if not context:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        # 使用Forum服务的用户干预管理器优化输入
-        optimized_input = await forum_service.user_intervention_manager.optimize_input(
-            user_input, intent, context["topic"]
-        )
-        
-        return {
-            "original_input": user_input,
-            "optimized_input": optimized_input,
-            "intent": intent,
-            "session_id": session_id,
-            "timestamp": datetime.now().isoformat()
-        }
-        
+        # 这里应该调用一个实际的优化服务
+        optimized_input = user_input  # 占位符实现
+        return {"optimized_input": optimized_input}
     except HTTPException:
         raise
     except Exception as e:
@@ -347,29 +236,6 @@ async def optimize_user_input(session_id: str, input_data: dict[str, Any]):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-# 错误处理
-@forum_router.exception_handler(ForumServiceError)
-async def forum_service_error_handler(request, exc: ForumServiceError):
-    """Forum服务错误处理器"""
-    return {
-        "error": "Forum service error",
-        "message": str(exc),
-        "timestamp": datetime.now().isoformat()
-    }
 
 
-@forum_router.exception_handler(ValueError)
-async def value_error_handler(request, exc: ValueError):
-    """数值错误处理器"""
-    return {
-        "error": "Validation error",
-        "message": str(exc),
-        "timestamp": datetime.now().isoformat()
-    }
 
-
-# 包含路由器的函数
-def include_forum_router(app):
-    """包含Forum路由器"""
-    app.include_router(forum_router)
-    logger.info("Forum API路由器已注册")

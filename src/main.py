@@ -77,14 +77,43 @@ async def value_error_exception_handler(request: Request, exc: ValueError):
 
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
-    """
-    Handles any other unhandled exceptions.
+    """Handles any other unhandled exceptions.
     Returns a 500 Internal Server Error to prevent leaking details.
     """
     logger.error(f"Unhandled exception for request {request.url.path}: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content={"detail": "An internal server error occurred."},
+    )
+
+
+# Import ForumServiceError for exception handler
+from src.core.exceptions import ForumServiceError
+from datetime import datetime
+
+@app.exception_handler(ForumServiceError)
+async def forum_service_error_handler(request, exc: ForumServiceError):
+    """Forum服务错误处理器"""
+    return JSONResponse(
+        status_code=500,  # You might want to use a more specific status code
+        content={
+            "error": "Forum service error",
+            "message": str(exc),
+            "timestamp": datetime.now().isoformat()
+        }
+    )
+
+
+@app.exception_handler(ValueError)
+async def value_error_handler(request, exc: ValueError):
+    """数值错误处理器"""
+    return JSONResponse(
+        status_code=400,  # Bad Request for ValueError
+        content={
+            "error": "Validation error",
+            "message": str(exc),
+            "timestamp": datetime.now().isoformat()
+        }
     )
 @app.on_event("startup")
 async def startup_event():
