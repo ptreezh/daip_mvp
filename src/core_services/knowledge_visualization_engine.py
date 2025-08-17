@@ -498,7 +498,7 @@ class KnowledgeVisualizationEngine:
             self.logger.error(f"获取知识事实失败: {e}")
             return []
     
-    async def _build_knowledge_network(self, knowledge_facts: list[KnowledgeFact]) -> "_get_networkx()".Graph:
+    async def _build_knowledge_network(self, knowledge_facts: list[KnowledgeFact]) -> "nx.Graph":
         """构建知识网络"""
         nx = _get_networkx()
         G = nx.Graph()
