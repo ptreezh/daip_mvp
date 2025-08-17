@@ -8,7 +8,7 @@ import json
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Optional, Dict, List
 
 import uvicorn
 from fastapi import BackgroundTasks, FastAPI, HTTPException
@@ -80,21 +80,12 @@ class APIInterface:
         self.progress_monitor = ProgressMonitor()
         self.result_formatter = ResultFormatter()
         self.transparency_controller = TransparencyController()
-<<<<<<< HEAD
-        self.execution_status: Dict[str, WorkflowStatus] = {}
-
-        # Set up routes
-        self._setup_routes()
-
-    async def setup_services(self) -> Dict[str, Any]:
-=======
         self.execution_status: dict[str, WorkflowStatus] = {}
         
         # Set up routes
         self._setup_routes()
     
     async def setup_services(self) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """Set up required services for workflow execution."""
         try:
             from ..core_services.fact_extraction_service import FactExtractionService
@@ -103,11 +94,7 @@ class APIInterface:
             from ..core_services.synthesis_engine import SynthesisEngine
             from ..core_services.wiki_service import WikiService
             from ..kernel.tool_executor import ToolExecutor
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # Initialize services
             llm_interface = EnhancedLLMInterface()
             role_manager = RoleManager()
@@ -277,8 +264,7 @@ class APIInterface:
                 return StreamingResponse(
                     iter([formatted_content]),
                     media_type=media_type_map.get(format, "text/plain"),
-                    headers={"Content-Disposition": f"attachment; filename=result_{execution_id}.{format}"}
-                )
+                    headers={{"Content-Disposition": f"attachment; filename=result_{execution_id}.{format}"}})
             else:
                 return JSONResponse(content=status.result)
 
@@ -293,9 +279,9 @@ class APIInterface:
             if status.status == "running":
                 status.status = "cancelled"
                 status.completed_at = datetime.now()
-                return {"message": "Workflow cancelled"}
+                return {{"message": "Workflow cancelled"}}
             else:
-                return {"message": f"Workflow already {status.status}"}
+                return {{"message": f"Workflow already {status.status}"}}
 
         @self.app.get("/workflows/{execution_id}/progress")
         async def get_workflow_progress(execution_id: str):
@@ -349,8 +335,7 @@ class APIInterface:
                 return StreamingResponse(
                     iter([traceable_result]),
                     media_type="text/plain",
-                    headers={"Content-Disposition": f"attachment; filename=traceability_{execution_id}.{format}"}
-                )
+                    headers={{"Content-Disposition": f"attachment; filename=traceability_{execution_id}.{format}"}})
 
         @self.app.post("/workflows/{execution_id}/feedback")
         async def submit_workflow_feedback(execution_id: str, feedback_data: dict[str, Any]):
@@ -381,7 +366,7 @@ class APIInterface:
                 if "general_comments" in feedback_data:
                     feedback.general_comments = feedback_data["general_comments"]
 
-                return {"message": "Feedback submitted successfully", "feedback_id": execution_id}
+                return {{"message": "Feedback submitted successfully", "feedback_id": execution_id}}
 
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Error submitting feedback: {str(e)}")
@@ -531,11 +516,7 @@ class APIInterface:
             self.execution_status[execution_id].status = "failed"
             self.execution_status[execution_id].error = str(e)
             self.execution_status[execution_id].completed_at = datetime.now()
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     def run(self, host: str = "127.0.0.1", port: int = 8000, reload: bool = False):
         """Run the API server."""
         uvicorn.run(self.app, host=host, port=port, reload=reload)

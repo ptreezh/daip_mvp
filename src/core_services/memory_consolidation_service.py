@@ -9,11 +9,7 @@
 import logging
 from datetime import datetime
 from enum import Enum
-<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
-=======
-from typing import Any, Optional
->>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -33,12 +29,8 @@ class ConflictResolutionStrategy(str, Enum):
 
 class MemoryConflict(BaseModel):
     """Model for memory conflicts."""
-<<<<<<< HEAD
 
-    conflicting_memories: List[Memory]
-=======
     conflicting_memories: list[Memory]
->>>>>>> feature/core-services-refactor
     conflict_type: str
     severity: float = Field(ge=0.0, le=1.0)
     description: str
@@ -69,13 +61,8 @@ class MemoryConsolidationService:
             "memories_shared": 0
         }
         logger.info("MemoryConsolidationService initialized")
-<<<<<<< HEAD
 
-    def consolidate_memories_advanced(self, source_id: str) -> List[Memory]:
-=======
-    
     def consolidate_memories_advanced(self, source_id: str) -> list[Memory]:
->>>>>>> feature/core-services-refactor
         """Advanced memory consolidation."""
         consolidated_memories = []
 
@@ -130,13 +117,8 @@ class MemoryConsolidationService:
                 "consolidation_time": datetime.now().isoformat()
             }
         )
-<<<<<<< HEAD
 
-    def detect_memory_conflicts(self, source_id: str) -> List[MemoryConflict]:
-=======
-    
     def detect_memory_conflicts(self, source_id: str) -> list[MemoryConflict]:
->>>>>>> feature/core-services-refactor
         """Detect conflicts between memories."""
         conflicts = []
 
@@ -230,12 +212,7 @@ class MemoryConsolidationService:
 
         self.consolidation_stats["memories_shared"] += memories_shared
         return memories_shared
-<<<<<<< HEAD
 
-    def get_consolidation_stats(self) -> Dict[str, Any]:
-=======
-    
     def get_consolidation_stats(self) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """Get consolidation statistics."""
         return self.consolidation_stats.copy()

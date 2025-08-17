@@ -6,11 +6,7 @@
     all institutional primitive nodes for systematic fact validation.
 """
 import logging
-<<<<<<< HEAD
 from typing import Any, Dict
-=======
-from typing import Any
->>>>>>> feature/core-services-refactor
 
 from src.institutional_primitives.base import ExecutionContext
 from src.institutional_primitives.consensus_node import ConsensusNode
@@ -32,13 +28,8 @@ class CriticalReviewWorkflow:
     multi-role fact validation, epistemological verification, and
     evidence-based revision processes.
     """
-<<<<<<< HEAD
-
-    def __init__(self, workflow_id: str, config: Dict[str, Any] = None):
-=======
     
     def __init__(self, workflow_id: str, config: dict[str, Any] = None):
->>>>>>> feature/core-services-refactor
         """Initialize the Critical Review Workflow.
         
         Args:
@@ -124,11 +115,7 @@ class CriticalReviewWorkflow:
         role_context: str = "",
         services: dict[str, Any] = None,
         execution_id: str = None
-<<<<<<< HEAD
-    ) -> Dict[str, Any]:
-=======
     ) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """Execute the complete Critical Review Workflow.
         
         Args:
@@ -233,13 +220,8 @@ class CriticalReviewWorkflow:
                 "error": f"Workflow execution failed: {str(e)}",
                 "execution_id": context.execution_id
             }
-<<<<<<< HEAD
-
-    def _create_error_result(self, error_message: str, step_result: Dict[str, Any]) -> Dict[str, Any]:
-=======
     
     def _create_error_result(self, error_message: str, step_result: dict[str, Any]) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """Create a standardized error result."""
         return {
             "success": False,
@@ -256,11 +238,7 @@ class CriticalReviewWorkflow:
         services: dict[str, Any] = None,
         workflow_config: dict[str, Any] = None,
         workflow_id: str = "critical_review"
-<<<<<<< HEAD
-    ) -> Dict[str, Any]:
-=======
     ) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """Convenience method to execute a Critical Review Workflow.
         
         Args:

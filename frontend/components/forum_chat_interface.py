@@ -306,11 +306,6 @@ class ForumChatInterface(Widget):
             )
             self.messages.append(error_msg)
     
-    async def handle_user_intervention(self, intervention_data: Dict[str, Any]):
-        """处理用户干预回调"""
-        # 这里可以添加用户干预后的处理逻辑
-        logger.info(f"用户干预已发送: {intervention_data}")
-    
     def handle_intent_change(self, event):
         """处理意图选择变化"""
         self.selected_intent = event.data

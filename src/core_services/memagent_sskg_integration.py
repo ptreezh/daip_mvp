@@ -8,11 +8,7 @@
 """
 import logging
 from datetime import datetime
-<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
-=======
-from typing import Any, Optional
->>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel
 
@@ -59,13 +55,8 @@ class UnifiedMemoryInterface:
         self.sskg_manager = sskg_manager
 
         # Mapping between memories and knowledge nodes
-<<<<<<< HEAD
-        self.memory_knowledge_mappings: Dict[str, MemoryKnowledgeMapping] = {}
-
-=======
         self.memory_knowledge_mappings: dict[str, MemoryKnowledgeMapping] = {}
         
->>>>>>> feature/core-services-refactor
         # Statistics
         self.integration_stats = {
             "memories_transformed": 0,
@@ -84,11 +75,7 @@ class UnifiedMemoryInterface:
         min_importance: float = 0.0,
         include_knowledge: bool = True,
         limit: int = 10
-<<<<<<< HEAD
-    ) -> List[Memory]:
-=======
     ) -> list[Memory]:
->>>>>>> feature/core-services-refactor
         """Unified memory retrieval that searches both MemAgent and SSKG.
         
         Args:
@@ -238,13 +225,8 @@ class UnifiedMemoryInterface:
             return 0.4
         else:
             return 0.2
-<<<<<<< HEAD
 
-    def _deduplicate_memories(self, memories: List[Memory]) -> List[Memory]:
-=======
-    
     def _deduplicate_memories(self, memories: list[Memory]) -> list[Memory]:
->>>>>>> feature/core-services-refactor
         """Remove duplicate memories based on content similarity."""
         unique_memories = []
         seen_contents = set()
@@ -397,13 +379,8 @@ class UnifiedMemoryInterface:
 
         # Default to related_to for similar content
         return RelationType.RELATED_TO
-<<<<<<< HEAD
 
-    def create_cross_references(self, memory_id: str, knowledge_node_ids: List[str]):
-=======
-    
     def create_cross_references(self, memory_id: str, knowledge_node_ids: list[str]):
->>>>>>> feature/core-services-refactor
         """Create explicit cross-references between memory and knowledge nodes."""
         try:
             # Get the memory
@@ -447,13 +424,8 @@ class UnifiedMemoryInterface:
     def get_memory_knowledge_mapping(self, memory_id: str) -> Optional[MemoryKnowledgeMapping]:
         """Get the knowledge mapping for a memory."""
         return self.memory_knowledge_mappings.get(memory_id)
-<<<<<<< HEAD
 
-    def get_related_knowledge_for_memory(self, memory_id: str) -> List[KnowledgeNode]:
-=======
-    
     def get_related_knowledge_for_memory(self, memory_id: str) -> list[KnowledgeNode]:
->>>>>>> feature/core-services-refactor
         """Get knowledge nodes related to a specific memory."""
         try:
             # Get the mapping
@@ -540,13 +512,8 @@ class UnifiedMemoryInterface:
         except Exception as e:
             logger.error(f"Error synchronizing memory to knowledge: {e}")
             return False
-<<<<<<< HEAD
 
-    def get_integration_stats(self) -> Dict[str, Any]:
-=======
-    
     def get_integration_stats(self) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """Get integration statistics."""
         return {
             **self.integration_stats,

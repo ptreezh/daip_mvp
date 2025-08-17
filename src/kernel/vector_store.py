@@ -1,9 +1,5 @@
 import logging
-<<<<<<< HEAD
 from typing import Any, Dict, List
-=======
-from typing import Any
->>>>>>> feature/core-services-refactor
 
 import chromadb
 import ollama
@@ -34,11 +30,7 @@ class VectorStore:
             logging.error(f"Failed to initialize ChromaDB client: {e}")
             raise
 
-<<<<<<< HEAD
-    async def add_entry(self, doc_id: str, content: str, metadata: Dict[str, Any]):
-=======
     async def add_entry(self, doc_id: str, content: str, metadata: dict[str, Any]):
->>>>>>> feature/core-services-refactor
         """Generates an embedding for a document and upserts it into the collection.
         'Upsert' will add the document if it's new or update it if it exists.
         """
@@ -55,11 +47,7 @@ class VectorStore:
         except Exception as e:
             logging.error(f"Failed to add entry '{doc_id}' to vector store: {e}")
 
-<<<<<<< HEAD
-    async def search(self, query: str, n_results: int = 3) -> List[Dict[str, Any]]:
-=======
     async def search(self, query: str, n_results: int = 3) -> list[dict[str, Any]]:
->>>>>>> feature/core-services-refactor
         """Performs a semantic search for a given query.
         """
         try:

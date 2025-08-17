@@ -93,24 +93,24 @@ class VersionInfo:
                 major=self.major + 1,
                 minor=0,
                 patch=0,
-                self.prerelease,
-                self.build
+                prerelease=self.prerelease,
+                build=self.build
             )
         elif release_type == ReleaseType.MINOR:
             return VersionInfo(
                 major=self.major,
                 minor=self.minor + 1,
                 patch=0,
-                self.prerelease,
-                self.build
+                prerelease=self.prerelease,
+                build=self.build
             )
         elif release_type == ReleaseType.PATCH:
             return VersionInfo(
                 major=self.major,
                 minor=self.minor,
                 patch=self.patch + 1,
-                self.prerelease,
-                self.build
+                prerelease=self.prerelease,
+                build=self.build
             )
         elif release_type == ReleaseType.HOTFIX:
             # Hotfix patches the current version

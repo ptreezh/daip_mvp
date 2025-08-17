@@ -8,11 +8,7 @@ atomic capabilities for AI collaboration workflows.
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
-<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
-=======
-from typing import Any, Optional
->>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -73,13 +69,8 @@ class InstitutionalPrimitive(ABC):
     They serve as the fundamental building blocks for complex social institutions
     within AI collaboration systems.
     """
-<<<<<<< HEAD
-
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-=======
     
     def __init__(self, config: Optional[dict[str, Any]] = None):
->>>>>>> feature/core-services-refactor
         """Initialize the primitive with configuration.
         
         Args:
@@ -90,11 +81,7 @@ class InstitutionalPrimitive(ABC):
         self._validate_config()
 
     @abstractmethod
-<<<<<<< HEAD
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> ExecutionResult:
-=======
     async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> ExecutionResult:
->>>>>>> feature/core-services-refactor
         """Execute the primitive with given inputs and context.
         
         Args:
@@ -108,11 +95,7 @@ class InstitutionalPrimitive(ABC):
         pass
 
     @abstractmethod
-<<<<<<< HEAD
-    def get_input_schema(self) -> Dict[str, Any]:
-=======
     def get_input_schema(self) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """Return JSON schema for expected inputs.
         
         Returns:
@@ -122,11 +105,7 @@ class InstitutionalPrimitive(ABC):
         pass
 
     @abstractmethod
-<<<<<<< HEAD
-    def get_output_schema(self) -> Dict[str, Any]:
-=======
     def get_output_schema(self) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """Return JSON schema for produced outputs.
         
         Returns:
@@ -152,13 +131,8 @@ class InstitutionalPrimitive(ABC):
             tags=self.get_tags(),
             author=self.get_author()
         )
-<<<<<<< HEAD
-
-    def validate_inputs(self, inputs: Dict[str, Any]) -> ValidationResult:
-=======
     
     def validate_inputs(self, inputs: dict[str, Any]) -> ValidationResult:
->>>>>>> feature/core-services-refactor
         """Validate inputs against the input schema.
         
         Args:
@@ -198,13 +172,8 @@ class InstitutionalPrimitive(ABC):
                 is_valid=False,
                 errors=[f"Validation error: {str(e)}"]
             )
-<<<<<<< HEAD
-
-    def validate_outputs(self, outputs: Dict[str, Any]) -> ValidationResult:
-=======
     
     def validate_outputs(self, outputs: dict[str, Any]) -> ValidationResult:
->>>>>>> feature/core-services-refactor
         """Validate outputs against the output schema.
         
         Args:
@@ -274,13 +243,8 @@ class InstitutionalPrimitive(ABC):
 
         """
         return "1.0.0"
-<<<<<<< HEAD
-
-    def get_tags(self) -> List[str]:
-=======
     
     def get_tags(self) -> list[str]:
->>>>>>> feature/core-services-refactor
         """Get tags associated with this primitive.
         
         Returns:
@@ -307,13 +271,8 @@ class InstitutionalPrimitive(ABC):
         """
         # Override in subclasses to add specific validation
         pass
-<<<<<<< HEAD
-
-    async def _pre_execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> None:
-=======
     
     async def _pre_execute(self, inputs: dict[str, Any], context: ExecutionContext) -> None:
->>>>>>> feature/core-services-refactor
         """Pre-execution hook for setup operations.
         
         Args:
