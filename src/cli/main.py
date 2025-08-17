@@ -26,6 +26,14 @@ app = typer.Typer(
 )
 console = Console()
 
+# Create a Typer application for the 'assistant' command group
+assistant_app = typer.Typer(
+    name="assistant",
+    help="Commands for interacting with the Personal Assistant.",
+    add_completion=False,
+)
+app.add_typer(assistant_app, name="assistant")
+
 # Configure logging
 logging.basicConfig(level=getattr(logging, settings.log_level.upper()))
 logger = logging.getLogger(__name__)
@@ -416,6 +424,7 @@ def help():
     console.print("  [cyan]start[/cyan]   - Start a new debate")
     console.print("  [cyan]roles[/cyan]   - List available roles for debates")
     console.print("  [cyan]status[/cyan]  - Check system status")
+    console.print("  [cyan]assistant[/cyan] - Commands for the Personal Assistant")
     console.print("  [cyan]help[/cyan]    - Show this help message")
     console.print()
     
@@ -428,6 +437,9 @@ def help():
     console.print()
     console.print("  # List available roles")
     console.print("  [dim]daip-cli roles[/dim]")
+    console.print()
+    console.print("  # Send a query to the personal assistant")
+    console.print("  [dim]daip-cli assistant chat 'Summarize the latest AI research.'[/dim]")
     console.print()
     console.print("  # Start a longer debate with verbose output")
     console.print("  [dim]daip-cli start 'Future of work' --role 'Futurist' --role 'Labor Expert' --rounds 5 --verbose[/dim]")

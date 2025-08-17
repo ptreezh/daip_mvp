@@ -10,11 +10,7 @@ The interface now includes token management capabilities for cost tracking and c
 import logging
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
-<<<<<<< HEAD
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
-=======
-from typing import TYPE_CHECKING, Any, Optional
->>>>>>> feature/core-services-refactor
 
 import ollama
 from openai import AsyncOpenAI
@@ -55,11 +51,7 @@ class LLMInterface(ABC):
         self.token_service = token_service
 
     @abstractmethod
-<<<<<<< HEAD
-    async def generate(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> Dict[str, Any]:
-=======
     async def generate(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """Generates a single, non-streaming response from the LLM.
         
         Args:
@@ -74,11 +66,7 @@ class LLMInterface(ABC):
         pass
 
     @abstractmethod
-<<<<<<< HEAD
-    async def generate_stream(self, messages: List[Dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
-=======
     async def generate_stream(self, messages: list[dict[str, Any]], participant_id: Optional[str] = None, **kwargs: Any) -> AsyncIterator[str]:
->>>>>>> feature/core-services-refactor
         """Generates a response as a stream of text chunks.
         
         Args:

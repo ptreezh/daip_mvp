@@ -36,12 +36,8 @@ class TokenUsage(BaseModel):
 
 class ContextWindow(BaseModel):
     """Model for managing context window state."""
-<<<<<<< HEAD
 
-    messages: List[Dict[str, Any]]
-=======
     messages: list[dict[str, Any]]
->>>>>>> feature/core-services-refactor
     total_tokens: int
     max_tokens: int
     compression_applied: bool = False
@@ -60,13 +56,8 @@ class TokenManagementService:
         """Initialize the token management service."""
         self.config = config
         self.tokenizer = tiktoken.get_encoding("cl100k_base")  # GPT-3.5/4 encoding
-<<<<<<< HEAD
-        self.usage_history: List[TokenUsage] = []
-
-=======
         self.usage_history: list[TokenUsage] = []
         
->>>>>>> feature/core-services-refactor
         # Model-specific token limits (can be extended)
         self.model_limits = {
             "gpt-3.5-turbo": 4096,
@@ -109,13 +100,8 @@ class TokenManagementService:
             logger.error(f"Error counting tokens: {e}")
             # Fallback: rough estimation (4 chars per token)
             return len(text) // 4
-<<<<<<< HEAD
-
-    def count_messages_tokens(self, messages: List[Dict[str, Any]], model: Optional[str] = None) -> int:
-=======
     
     def count_messages_tokens(self, messages: list[dict[str, Any]], model: Optional[str] = None) -> int:
->>>>>>> feature/core-services-refactor
         """Count total tokens in a list of messages.
         
         Args:
@@ -176,13 +162,8 @@ class TokenManagementService:
 
         """
         return self.model_limits.get(model, self.config.max_context_tokens)
-<<<<<<< HEAD
-
-    def check_context_limit(self, messages: List[Dict[str, Any]], model: str) -> Tuple[bool, int, int]:
-=======
     
     def check_context_limit(self, messages: list[dict[str, Any]], model: str) -> tuple[bool, int, int]:
->>>>>>> feature/core-services-refactor
         """Check if messages fit within model's context window.
         
         Args:
@@ -197,13 +178,8 @@ class TokenManagementService:
         max_tokens = self.get_context_limit(model)
 
         return current_tokens <= max_tokens, current_tokens, max_tokens
-<<<<<<< HEAD
-
-    def optimize_context_window(self, messages: List[Dict[str, Any]], model: str,
-=======
     
     def optimize_context_window(self, messages: list[dict[str, Any]], model: str, 
->>>>>>> feature/core-services-refactor
                               target_tokens: Optional[int] = None) -> ContextWindow:
         """Smart truncation while preserving important context.
         
@@ -311,15 +287,9 @@ class TokenManagementService:
         logger.debug(f"Recorded token usage: {usage.total_tokens} tokens, ${usage.estimated_cost:.4f}")
 
         return usage
-<<<<<<< HEAD
-
-    def get_usage_stats(self, participant_id: Optional[str] = None,
-                       hours: Optional[int] = None) -> Dict[str, Any]:
-=======
     
     def get_usage_stats(self, participant_id: Optional[str] = None, 
                        hours: Optional[int] = None) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """Get token usage statistics.
         
         Args:
@@ -363,13 +333,8 @@ class TokenManagementService:
             "input_tokens": sum(u.input_tokens for u in filtered_usage),
             "output_tokens": sum(u.output_tokens for u in filtered_usage)
         }
-<<<<<<< HEAD
-
-    def prepare_context_for_llm(self, messages: List[Dict[str, Any]], model: str,
-=======
     
     def prepare_context_for_llm(self, messages: list[dict[str, Any]], model: str, 
->>>>>>> feature/core-services-refactor
                                participant_id: Optional[str] = None) -> ContextWindow:
         """Prepare optimized context for LLM call.
         

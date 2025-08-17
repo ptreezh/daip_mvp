@@ -8,11 +8,7 @@ opportunities. It serves as a key component of the Human User Intelligence Layer
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-<<<<<<< HEAD
 from typing import Any, Dict, List, Tuple
-=======
-from typing import Any
->>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
@@ -22,10 +18,7 @@ logger = logging.getLogger(__name__)
 class IntentAnalysis(BaseModel):
     """Represents the result of analyzing user intent.
     """
-<<<<<<< HEAD
 
-=======
->>>>>>> feature/core-services-refactor
     user_input: str
     detected_intent: str
     confidence: float = Field(ge=0.0, le=1.0)
@@ -45,17 +38,10 @@ class IntentAnalysisServiceInterface(ABC):
 
     @abstractmethod
     async def analyze_intent(
-<<<<<<< HEAD
         self,
         user_input: str,
         user_id: str,
-        conversation_context: List[Dict[str, Any]]
-=======
-        self, 
-        user_input: str, 
-        user_id: str, 
         conversation_context: list[dict[str, Any]]
->>>>>>> feature/core-services-refactor
     ) -> IntentAnalysis:
         """Analyze user intent and provide enhancement suggestions.
         
@@ -75,11 +61,7 @@ class IntentAnalysisServiceInterface(ABC):
         self,
         user_id: str,
         current_context: str
-<<<<<<< HEAD
-    ) -> List[str]:
-=======
     ) -> list[str]:
->>>>>>> feature/core-services-refactor
         """Predict what the user might need based on their profile and context.
         
         Args:
@@ -117,11 +99,7 @@ class IntentAnalysisServiceInterface(ABC):
         self,
         user_id: str,
         limit: int = 5
-<<<<<<< HEAD
-    ) -> List[Tuple[str, float]]:
-=======
     ) -> list[tuple[str, float]]:
->>>>>>> feature/core-services-refactor
         """Get the most common intents for a user.
         
         Args:
@@ -156,17 +134,10 @@ class BasicIntentAnalysisService(IntentAnalysisServiceInterface):
         logger.info("BasicIntentAnalysisService initialized")
 
     async def analyze_intent(
-<<<<<<< HEAD
-        self,
-        user_input: str,
-        user_id: str,
-        conversation_context: List[Dict[str, Any]]
-=======
         self, 
         user_input: str, 
         user_id: str, 
         conversation_context: list[dict[str, Any]]
->>>>>>> feature/core-services-refactor
     ) -> IntentAnalysis:
         """Analyze user intent using simple keyword matching.
         
@@ -242,11 +213,7 @@ class BasicIntentAnalysisService(IntentAnalysisServiceInterface):
         self,
         user_id: str,
         current_context: str
-<<<<<<< HEAD
-    ) -> List[str]:
-=======
     ) -> list[str]:
->>>>>>> feature/core-services-refactor
         """Predict user needs based on profile and context.
         
         Args:
@@ -304,11 +271,7 @@ class BasicIntentAnalysisService(IntentAnalysisServiceInterface):
         self,
         user_id: str,
         limit: int = 5
-<<<<<<< HEAD
-    ) -> List[Tuple[str, float]]:
-=======
     ) -> list[tuple[str, float]]:
->>>>>>> feature/core-services-refactor
         """Get common intents from the user profile.
         
         Args:

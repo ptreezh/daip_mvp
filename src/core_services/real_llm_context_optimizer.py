@@ -8,11 +8,7 @@ import asyncio
 import logging
 import time
 from dataclasses import dataclass
-<<<<<<< HEAD
-from typing import Any, Dict, List, Optional, Tuple
-=======
 from typing import Any, Optional
->>>>>>> feature/core-services-refactor
 
 import aiohttp
 
@@ -468,15 +464,6 @@ class RealLLMContextValidator:
                 print(f"🗜️  上下文压缩: {result.metrics['context_compression_ratio']*100:.1f}%")
                 print(f"⚡ Token节省: {result.metrics['token_efficiency']['token_savings']}")
                 print(f"⏱️  时间差异: {result.metrics['response_time']['time_difference']:.3f}s")
-<<<<<<< HEAD
-
-                print("\n🧠 优化理由:")
-                print(f"   {result.optimization_reasoning}")
-
-                print("\n📝 原始回答 (前200字符):")
-                print(f"   {result.original_response.content[:200]}...")
-
-=======
                 
                 print("\n🧠 优化理由:")
                 print(f"   {result.optimization_reasoning}")
@@ -484,7 +471,6 @@ class RealLLMContextValidator:
                 print("\n📝 原始回答 (前200字符):")
                 print(f"   {result.original_response.content[:200]}...")
                 
->>>>>>> feature/core-services-refactor
                 print("\n✨ 优化后回答 (前200字符):")
                 print(f"   {result.optimized_response.content[:200]}...")
 
@@ -498,13 +484,8 @@ class RealLLMContextValidator:
         await self.optimizer.close()
 
         return results
-<<<<<<< HEAD
-
-    async def _generate_comprehensive_report(self, results: List[OptimizationResult]):
-=======
     
     async def _generate_comprehensive_report(self, results: list[OptimizationResult]):
->>>>>>> feature/core-services-refactor
         """生成综合报告"""
         print("\n📊 综合验证报告")
         print("=" * 60)
@@ -519,11 +500,7 @@ class RealLLMContextValidator:
         avg_token_savings = sum(r.metrics['token_efficiency']['token_savings'] for r in results) / len(results)
 
         successful_optimizations = sum(1 for r in results if r.improvement_score > 0)
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         print("📈 整体表现:")
         print(f"   测试用例数: {len(results)}")
         print(f"   成功优化数: {successful_optimizations}")
@@ -543,11 +520,7 @@ class RealLLMContextValidator:
             reliability = "不可靠"
 
         print(f"   可靠性评估: {reliability}")
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         print("\n🎯 关键发现:")
         if avg_compression > 0.2:
             print(f"   ✅ 显著的上下文压缩效果 ({avg_compression*100:.1f}%)")
@@ -555,11 +528,7 @@ class RealLLMContextValidator:
             print(f"   ✅ 明显的Token使用优化 (节省{avg_token_savings:.0f}个)")
         if successful_optimizations == len(results):
             print("   ✅ 所有测试用例都获得改进")
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         print("\n💡 验证结论:")
         if avg_improvement > 0.1:
             print("   🎉 真实LLM验证显示优化系统有效！")
@@ -574,11 +543,7 @@ async def main():
 
     try:
         results = await validator.run_comprehensive_validation()
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         print("\n🔍 真实性验证:")
         print("=" * 60)
         print("✅ 使用了真实的LLM模型进行优化和验证")

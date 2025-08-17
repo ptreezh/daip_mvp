@@ -13,11 +13,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-<<<<<<< HEAD
 from typing import List, Optional
-=======
-from typing import Optional
->>>>>>> feature/core-services-refactor
 
 import chromadb
 import ollama
@@ -414,11 +410,7 @@ class WikiService:
             logging.error(f"Failed to apply proposal '{proposal_id}': {e}")
             return False
 
-<<<<<<< HEAD
     def search(self, query: str, top_k: int = 3) -> List[str]:
-=======
-    def search(self, query: str, top_k: int = 3) -> list[str]:
->>>>>>> feature/core-services-refactor
         """Performs a semantic search using a vector index.
 
         Args:

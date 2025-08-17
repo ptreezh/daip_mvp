@@ -35,6 +35,10 @@ if not MISSING_DEPENDENCIES:
         from src.app_state import AppState
         from src.models import DebateConfig
         from src.protocols.debate_protocol import DebateProtocol
+        from src.application.personal_assistant_service import PersonalAssistantService
+        from src.domain.entities import UserMessage
+        from src.application.personal_assistant_service import PersonalAssistantService
+        from src.domain.entities import UserMessage
     except ImportError as e:
         logger.error(f"Failed to import required modules: {e}")
         MISSING_DEPENDENCIES.append(str(e))
@@ -511,3 +515,53 @@ def list_available_roles():
         console.print(f"[red]❌ Failed to list roles: {e}[/red]")
         logger.error(f"Role listing failed: {e}", exc_info=True)
         return []
+
+
+async def run_assistant_chat_command(query: str):
+    """Send a query to the personal assistant and display the response."""
+    if not query.strip():
+        console.print("[red]❌ Error: Query cannot be empty.[/red]")
+        return
+
+    try:
+        with console.status("[bold blue]Thinking...[/bold blue]", spinner="dots"):
+            # Initialize AppState and PersonalAssistantService
+            app_state = AppState()
+            personal_assistant_service = PersonalAssistantService()
+            await personal_assistant_service.initialize()
+
+            # For simplicity, use a fixed user ID and create a session if it doesn't exist
+            user_id = "cli_user"
+            session_id = f"cli_session_{user_id}" # A simple session ID for CLI interaction
+
+            # Check if session exists, otherwise create one
+            try:
+                await personal_assistant_service.get_session(session_id)
+            except ValueError: # Session not found
+                session_info = await personal_assistant_service.create_session(user_id)
+                session_id = session_info["session_id"]
+
+            # Process the user's input
+            user_input_data = {
+                "content": query,
+                "scenario_type": "personal_assistant", # Indicate the scenario
+                "user_preferences": {"detail_level": "comprehensive"}
+            }
+            response = await personal_assistant_service.process_user_input(session_id, user_input_data)
+
+            # Display the assistant's response
+            if response and response.get("type") == "task_created":
+                console.print(f"\n[bold green]✅ Assistant Response:[/bold green]")
+                console.print(f"[white]{response.get('message', 'Task created successfully.')}[/white]")
+                console.print(f"[dim]Task ID: {response.get('task_id')}[/dim]")
+                console.print(f"[dim]Estimated Duration: {response.get('estimated_duration'):.1f} seconds[/dim]")
+            elif response and response.get("type") == "intervention_processed":
+                 console.print(f"\n[bold green]✅ Assistant Response:[/bold green]")
+                 console.print(f"[white]{response.get('message', 'Intervention processed.')}[/white]")
+            else:
+                console.print(f"\n[bold green]✅ Assistant Response:[/bold green]")
+                console.print(f"[white]{response.get('response', 'No specific response content.')}[/white]") # Fallback for other response types
+
+    except Exception as e:
+        console.print(f"\n[red]❌ An error occurred while interacting with the assistant: {e}[/red]")
+        logger.error(f"Personal assistant CLI command failed: {e}", exc_info=True)

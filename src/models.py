@@ -2,11 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-<<<<<<< HEAD
-from typing import Any, List, Literal, Optional, Union
-=======
 from typing import Any, Literal, Optional, Union
->>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel, Field
 
