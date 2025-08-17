@@ -1,31 +1,20 @@
 #!/usr/bin/env python3
-"""演示场景管理器
+# -*- coding: utf-8 -*-
+"""
+演示场景管理器
 """
 
-<<<<<<< HEAD
-from typing import Any, Dict
-=======
-from typing import Any
->>>>>>> feature/core-services-refactor
-
+from typing import Dict, Any, List
 from .demo_types import DemoScenarioType
 
 
 class ScenarioManager:
     """演示场景管理器"""
-<<<<<<< HEAD
-
+    
     def __init__(self):
         self.scenarios = self._initialize_scenarios()
-
+    
     def _initialize_scenarios(self) -> Dict[str, Dict[str, Any]]:
-=======
-    
-    def __init__(self):
-        self.scenarios = self._initialize_scenarios()
-    
-    def _initialize_scenarios(self) -> dict[str, dict[str, Any]]:
->>>>>>> feature/core-services-refactor
         """初始化演示场景"""
         return {
             DemoScenarioType.MULTI_ROLE_DEBATE.value: {
@@ -37,22 +26,14 @@ class ScenarioManager:
                 "customizable_params": ["topic", "roles", "debate_rounds"],
                 "steps": [
                     "scenario_setup",
-<<<<<<< HEAD
-                    "role_selection",
-=======
                     "role_selection", 
->>>>>>> feature/core-services-refactor
                     "debate_initialization",
                     "debate_rounds",
                     "consensus_formation",
                     "result_analysis"
                 ]
             },
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             DemoScenarioType.ETHICAL_ANALYSIS.value: {
                 "name": "AI伦理决策分析",
                 "description": "展示AI系统如何进行伦理决策分析",
@@ -68,11 +49,7 @@ class ScenarioManager:
                     "recommendation_generation"
                 ]
             },
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             DemoScenarioType.CONFLICT_RESOLUTION.value: {
                 "name": "知识冲突解决",
                 "description": "展示如何识别和解决知识冲突",
@@ -89,54 +66,28 @@ class ScenarioManager:
                 ]
             }
         }
-<<<<<<< HEAD
-
+    
     def get_available_scenarios(self) -> Dict[str, Dict[str, Any]]:
         """获取可用场景"""
         return self.scenarios.copy()
-
+    
     def get_scenario(self, scenario_type: str) -> Dict[str, Any]:
-=======
-    
-    def get_available_scenarios(self) -> dict[str, dict[str, Any]]:
-        """获取可用场景"""
-        return self.scenarios.copy()
-    
-    def get_scenario(self, scenario_type: str) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """获取特定场景"""
         if scenario_type not in self.scenarios:
             raise ValueError(f"未知场景类型: {scenario_type}")
         return self.scenarios[scenario_type].copy()
-<<<<<<< HEAD
-
+    
     def validate_scenario_params(self, scenario_type: str, params: Dict[str, Any]) -> bool:
         """验证场景参数"""
         if scenario_type not in self.scenarios:
             return False
-
-        scenario = self.scenarios[scenario_type]
-        customizable_params = scenario.get("customizable_params", [])
-
-=======
-    
-    def validate_scenario_params(self, scenario_type: str, params: dict[str, Any]) -> bool:
-        """验证场景参数"""
-        if scenario_type not in self.scenarios:
-            return False
         
         scenario = self.scenarios[scenario_type]
         customizable_params = scenario.get("customizable_params", [])
         
->>>>>>> feature/core-services-refactor
         # 检查是否有不支持的参数
         for param in params:
             if param not in customizable_params:
                 return False
-<<<<<<< HEAD
-
-        return True
-=======
         
         return True
->>>>>>> feature/core-services-refactor

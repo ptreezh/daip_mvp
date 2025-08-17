@@ -1,4 +1,5 @@
-"""Optimization strategies for the Task Context Optimizer.
+"""
+Optimization strategies for the Task Context Optimizer.
 
 This module implements various strategies for task detection, context prioritization,
 compression, and blending to optimize context preparation for LLM interactions.
@@ -7,35 +8,24 @@ compression, and blending to optimize context preparation for LLM interactions.
 import logging
 import re
 from abc import ABC, abstractmethod
-<<<<<<< HEAD
-from typing import Any, Dict, List
-=======
-from typing import Any
->>>>>>> feature/core-services-refactor
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from .models import (
-    ContextElement,
-    ContextOptimizationConfig,
-    ElementType,
-    OptimizedContext,
-    TaskDetectionResult,
-    TaskType,
+    TaskType, TaskRequirement, ContextElement, TaskDetectionResult,
+    OptimizedContext, ContextOptimizationConfig, ElementType, RequirementType
 )
 
 
 class TaskDetectionStrategy(ABC):
-    """Abstract base class for task detection strategies.
     """
-<<<<<<< HEAD
-
-    @abstractmethod
-    def detect_task(self, messages: List[Dict[str, Any]], context: Dict[str, Any]) -> TaskDetectionResult:
-=======
+    Abstract base class for task detection strategies.
+    """
     
     @abstractmethod
-    def detect_task(self, messages: list[dict[str, Any]], context: dict[str, Any]) -> TaskDetectionResult:
->>>>>>> feature/core-services-refactor
-        """Detect the task type and requirements from messages and context.
+    def detect_task(self, messages: List[Dict[str, Any]], context: Dict[str, Any]) -> TaskDetectionResult:
+        """
+        Detect the task type and requirements from messages and context.
         
         Args:
             messages: List of conversation messages
@@ -43,35 +33,26 @@ class TaskDetectionStrategy(ABC):
             
         Returns:
             Task detection result
-
         """
         pass
 
 
 class PatternBasedTaskDetection(TaskDetectionStrategy):
-    """Task detection strategy based on pattern matching.
     """
-<<<<<<< HEAD
-
-=======
+    Task detection strategy based on pattern matching.
+    """
     
->>>>>>> feature/core-services-refactor
     def __init__(self):
         """Initialize the pattern-based task detection strategy."""
         self.logger = logging.getLogger(__name__)
         self.task_patterns = self._initialize_task_patterns()
-<<<<<<< HEAD
-
-    def _initialize_task_patterns(self) -> Dict[TaskType, List[str]]:
-=======
     
-    def _initialize_task_patterns(self) -> dict[TaskType, list[str]]:
->>>>>>> feature/core-services-refactor
-        """Initialize task detection patterns.
+    def _initialize_task_patterns(self) -> Dict[TaskType, List[str]]:
+        """
+        Initialize task detection patterns.
         
         Returns:
             Dictionary mapping task types to detection patterns
-
         """
         return {
             TaskType.INFORMATION_RETRIEVAL: [
@@ -101,14 +82,10 @@ class PatternBasedTaskDetection(TaskDetectionStrategy):
                 r'\b(alternatives|possibilities|options|variations)\b'
             ]
         }
-<<<<<<< HEAD
-
-    def detect_task(self, messages: List[Dict[str, Any]], context: Dict[str, Any]) -> TaskDetectionResult:
-=======
     
-    def detect_task(self, messages: list[dict[str, Any]], context: dict[str, Any]) -> TaskDetectionResult:
->>>>>>> feature/core-services-refactor
-        """Detect task type using pattern matching.
+    def detect_task(self, messages: List[Dict[str, Any]], context: Dict[str, Any]) -> TaskDetectionResult:
+        """
+        Detect task type using pattern matching.
         
         Args:
             messages: List of conversation messages
@@ -116,18 +93,17 @@ class PatternBasedTaskDetection(TaskDetectionStrategy):
             
         Returns:
             Task detection result
-
         """
         # Extract text from messages
         text_content = self._extract_text_content(messages)
-
+        
         # Score each task type
         task_scores = {}
         for task_type, patterns in self.task_patterns.items():
             score = self._calculate_pattern_score(text_content, patterns)
             if score > 0:
                 task_scores[task_type] = score
-
+        
         # Determine best match
         if not task_scores:
             return TaskDetectionResult(
@@ -135,22 +111,17 @@ class PatternBasedTaskDetection(TaskDetectionStrategy):
                 confidence=0.0,
                 task_description="Unable to determine task type"
             )
-
+        
         best_task_type = max(task_scores.items(), key=lambda x: x[1])
         task_type, confidence = best_task_type
-
+        
         return TaskDetectionResult(
             task_type=task_type,
             confidence=min(confidence, 1.0),
             task_description=text_content[:100] if text_content else f"{task_type.value} task detected"
         )
-<<<<<<< HEAD
-
-    def _extract_text_content(self, messages: List[Dict[str, Any]]) -> str:
-=======
     
-    def _extract_text_content(self, messages: list[dict[str, Any]]) -> str:
->>>>>>> feature/core-services-refactor
+    def _extract_text_content(self, messages: List[Dict[str, Any]]) -> str:
         """Extract text content from messages."""
         text_parts = []
         for message in messages:
@@ -161,49 +132,38 @@ class PatternBasedTaskDetection(TaskDetectionStrategy):
                     text_parts.append(str(message['message']))
             elif isinstance(message, str):
                 text_parts.append(message)
-
+        
         return ' '.join(text_parts).lower()
-<<<<<<< HEAD
-
-    def _calculate_pattern_score(self, text: str, patterns: List[str]) -> float:
-=======
     
-    def _calculate_pattern_score(self, text: str, patterns: list[str]) -> float:
->>>>>>> feature/core-services-refactor
+    def _calculate_pattern_score(self, text: str, patterns: List[str]) -> float:
         """Calculate pattern matching score for a task type."""
         total_matches = 0
         for pattern in patterns:
             matches = len(re.findall(pattern, text, re.IGNORECASE))
             total_matches += matches
-
+        
         text_length = len(text.split())
         if text_length == 0:
             return 0.0
-
+        
         score = min(total_matches / max(text_length * 0.1, 1), 1.0)
         return score
 
 
 class ContextPrioritizationStrategy(ABC):
-    """Abstract base class for context prioritization strategies.
     """
-<<<<<<< HEAD
-
-=======
+    Abstract base class for context prioritization strategies.
+    """
     
->>>>>>> feature/core-services-refactor
     @abstractmethod
     def prioritize_elements(
         self,
-        elements: list[ContextElement],
+        elements: List[ContextElement],
         task_result: TaskDetectionResult,
         config: ContextOptimizationConfig
-<<<<<<< HEAD
     ) -> List[ContextElement]:
-=======
-    ) -> list[ContextElement]:
->>>>>>> feature/core-services-refactor
-        """Prioritize context elements based on task requirements.
+        """
+        Prioritize context elements based on task requirements.
         
         Args:
             elements: List of context elements to prioritize
@@ -212,34 +172,27 @@ class ContextPrioritizationStrategy(ABC):
             
         Returns:
             Prioritized list of context elements
-
         """
         pass
 
 
 class RelevanceBasedPrioritization(ContextPrioritizationStrategy):
-    """Context prioritization strategy based on relevance scoring.
     """
-<<<<<<< HEAD
-
-=======
+    Context prioritization strategy based on relevance scoring.
+    """
     
->>>>>>> feature/core-services-refactor
     def __init__(self):
         """Initialize the relevance-based prioritization strategy."""
         self.logger = logging.getLogger(__name__)
-
+    
     def prioritize_elements(
         self,
-        elements: list[ContextElement],
+        elements: List[ContextElement],
         task_result: TaskDetectionResult,
         config: ContextOptimizationConfig
-<<<<<<< HEAD
     ) -> List[ContextElement]:
-=======
-    ) -> list[ContextElement]:
->>>>>>> feature/core-services-refactor
-        """Prioritize elements based on relevance to the task.
+        """
+        Prioritize elements based on relevance to the task.
         
         Args:
             elements: List of context elements to prioritize
@@ -248,26 +201,26 @@ class RelevanceBasedPrioritization(ContextPrioritizationStrategy):
             
         Returns:
             Prioritized list of context elements
-
         """
         # Calculate enhanced relevance scores
         for element in elements:
             element.relevance_score = self._calculate_enhanced_relevance(
                 element, task_result, config
             )
-
+        
         # Sort by priority score
         prioritized = sorted(elements, key=lambda e: e.get_priority_score(), reverse=True)
-
+        
         return prioritized
-
+    
     def _calculate_enhanced_relevance(
         self,
         element: ContextElement,
         task_result: TaskDetectionResult,
         config: ContextOptimizationConfig
     ) -> float:
-        """Calculate enhanced relevance score considering task context.
+        """
+        Calculate enhanced relevance score considering task context.
         
         Args:
             element: Context element to score
@@ -276,46 +229,39 @@ class RelevanceBasedPrioritization(ContextPrioritizationStrategy):
             
         Returns:
             Enhanced relevance score (0.0-1.0)
-
         """
         base_relevance = element.relevance_score
-
+        
         # Task type specific adjustments
         task_weights = config.task_specific_weights.get(task_result.task_type, {})
         type_adjustment = task_weights.get(element.element_type.value, 1.0)
-
+        
         # Domain relevance adjustment
         domain_adjustment = 1.0
         if task_result.domain and element.metadata.get('domain'):
             if task_result.domain == element.metadata['domain']:
                 domain_adjustment = 1.2
-
+        
         # Combine adjustments
         enhanced_relevance = base_relevance * type_adjustment * domain_adjustment
-
+        
         return min(enhanced_relevance, 1.0)
 
 
 class ContextCompressionStrategy(ABC):
-    """Abstract base class for context compression strategies.
     """
-<<<<<<< HEAD
-
-=======
+    Abstract base class for context compression strategies.
+    """
     
->>>>>>> feature/core-services-refactor
     @abstractmethod
     def compress_context(
         self,
-        elements: list[ContextElement],
+        elements: List[ContextElement],
         target_tokens: int,
         config: ContextOptimizationConfig
-<<<<<<< HEAD
     ) -> List[ContextElement]:
-=======
-    ) -> list[ContextElement]:
->>>>>>> feature/core-services-refactor
-        """Compress context to fit within token limits.
+        """
+        Compress context to fit within token limits.
         
         Args:
             elements: List of context elements to compress
@@ -324,34 +270,27 @@ class ContextCompressionStrategy(ABC):
             
         Returns:
             Compressed list of context elements
-
         """
         pass
 
 
 class SmartTruncationCompression(ContextCompressionStrategy):
-    """Context compression strategy using smart truncation.
     """
-<<<<<<< HEAD
-
-=======
+    Context compression strategy using smart truncation.
+    """
     
->>>>>>> feature/core-services-refactor
     def __init__(self):
         """Initialize the smart truncation compression strategy."""
         self.logger = logging.getLogger(__name__)
-
+    
     def compress_context(
         self,
-        elements: list[ContextElement],
+        elements: List[ContextElement],
         target_tokens: int,
         config: ContextOptimizationConfig
-<<<<<<< HEAD
     ) -> List[ContextElement]:
-=======
-    ) -> list[ContextElement]:
->>>>>>> feature/core-services-refactor
-        """Compress context using smart truncation strategies.
+        """
+        Compress context using smart truncation strategies.
         
         Args:
             elements: List of context elements to compress
@@ -360,35 +299,31 @@ class SmartTruncationCompression(ContextCompressionStrategy):
             
         Returns:
             Compressed list of context elements
-
         """
         if not elements:
             return elements
-
+        
         # Calculate current token count
         current_tokens = sum(element.token_count for element in elements)
-
+        
         if current_tokens <= target_tokens:
             return elements
-
+        
         # Remove low-relevance elements
         compressed_elements = self._remove_low_relevance_elements(
             elements, target_tokens, config
         )
-
+        
         return compressed_elements
-
+    
     def _remove_low_relevance_elements(
         self,
-        elements: list[ContextElement],
+        elements: List[ContextElement],
         target_tokens: int,
         config: ContextOptimizationConfig
-<<<<<<< HEAD
     ) -> List[ContextElement]:
-=======
-    ) -> list[ContextElement]:
->>>>>>> feature/core-services-refactor
-        """Remove elements with low relevance scores.
+        """
+        Remove elements with low relevance scores.
         
         Args:
             elements: List of elements
@@ -397,15 +332,14 @@ class SmartTruncationCompression(ContextCompressionStrategy):
             
         Returns:
             Filtered list of elements
-
         """
         # Sort by priority score
         sorted_elements = sorted(elements, key=lambda e: e.get_priority_score(), reverse=True)
-
+        
         # Keep elements until we reach the target
         kept_elements = []
         current_tokens = 0
-
+        
         for element in sorted_elements:
             if current_tokens + element.token_count <= target_tokens:
                 kept_elements.append(element)
@@ -414,28 +348,26 @@ class SmartTruncationCompression(ContextCompressionStrategy):
                 # Keep high-relevance elements even if they exceed the limit slightly
                 kept_elements.append(element)
                 break
-
+        
         return kept_elements
 
 
 class ContextBlendingStrategy(ABC):
-    """Abstract base class for context blending strategies.
     """
-<<<<<<< HEAD
-
-=======
+    Abstract base class for context blending strategies.
+    """
     
->>>>>>> feature/core-services-refactor
     @abstractmethod
     def blend_context_sources(
         self,
         task_instructions: str,
-        background_knowledge: list[str],
-        conversation_history: list[dict[str, Any]],
+        background_knowledge: List[str],
+        conversation_history: List[Dict[str, Any]],
         max_tokens: int,
         config: ContextOptimizationConfig
     ) -> OptimizedContext:
-        """Blend multiple context sources into an optimized context.
+        """
+        Blend multiple context sources into an optimized context.
         
         Args:
             task_instructions: Task-specific instructions
@@ -446,32 +378,29 @@ class ContextBlendingStrategy(ABC):
             
         Returns:
             Optimized context
-
         """
         pass
 
 
 class ProportionalBlending(ContextBlendingStrategy):
-    """Context blending strategy that allocates tokens proportionally.
     """
-<<<<<<< HEAD
-
-=======
+    Context blending strategy that allocates tokens proportionally.
+    """
     
->>>>>>> feature/core-services-refactor
     def __init__(self):
         """Initialize the proportional blending strategy."""
         self.logger = logging.getLogger(__name__)
-
+    
     def blend_context_sources(
         self,
         task_instructions: str,
-        background_knowledge: list[str],
-        conversation_history: list[dict[str, Any]],
+        background_knowledge: List[str],
+        conversation_history: List[Dict[str, Any]],
         max_tokens: int,
         config: ContextOptimizationConfig
     ) -> OptimizedContext:
-        """Blend context sources using proportional allocation.
+        """
+        Blend context sources using proportional allocation.
         
         Args:
             task_instructions: Task-specific instructions
@@ -482,7 +411,6 @@ class ProportionalBlending(ContextBlendingStrategy):
             
         Returns:
             Optimized context
-
         """
         # Define proportional allocation
         allocation = {
@@ -490,15 +418,15 @@ class ProportionalBlending(ContextBlendingStrategy):
             'knowledge': 0.4,     # 40% for background knowledge
             'conversation': 0.3   # 30% for conversation history
         }
-
+        
         # Calculate token allocations
         instruction_tokens = int(max_tokens * allocation['instructions'])
         knowledge_tokens = int(max_tokens * allocation['knowledge'])
         conversation_tokens = int(max_tokens * allocation['conversation'])
-
+        
         # Create context elements
         elements = []
-
+        
         # Add task instructions
         if task_instructions:
             elements.append(ContextElement(
@@ -510,13 +438,13 @@ class ProportionalBlending(ContextBlendingStrategy):
                 token_count=min(self._estimate_tokens(task_instructions), instruction_tokens),
                 source="task_detection"
             ))
-
+        
         # Add background knowledge
         for i, knowledge in enumerate(background_knowledge):
             if sum(e.token_count for e in elements if e.element_type == ElementType.KNOWLEDGE) < knowledge_tokens:
                 remaining_tokens = knowledge_tokens - sum(e.token_count for e in elements if e.element_type == ElementType.KNOWLEDGE)
                 token_count = min(self._estimate_tokens(knowledge), remaining_tokens)
-
+                
                 if token_count > 0:
                     elements.append(ContextElement(
                         id=f"knowledge_{i}",
@@ -527,11 +455,11 @@ class ProportionalBlending(ContextBlendingStrategy):
                         token_count=token_count,
                         source="background_knowledge"
                     ))
-
+        
         # Calculate metrics
         total_tokens = sum(element.token_count for element in elements)
         compression_ratio = total_tokens / max_tokens if max_tokens > 0 else 1.0
-
+        
         return OptimizedContext(
             elements=elements,
             total_tokens=total_tokens,
@@ -543,16 +471,16 @@ class ProportionalBlending(ContextBlendingStrategy):
             compression_ratio=compression_ratio,
             optimization_strategy="proportional_blending"
         )
-
+    
     def _estimate_tokens(self, text: str) -> int:
-        """Estimate token count for text.
+        """
+        Estimate token count for text.
         
         Args:
             text: Text to estimate
             
         Returns:
             Estimated token count
-
         """
         # Simple approximation: 1 token ≈ 4 characters
         return len(text) // 4

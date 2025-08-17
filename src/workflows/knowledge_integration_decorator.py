@@ -1,144 +1,145 @@
-"""@Time    : 2025-07-24 23:00:00
+# -*- coding: utf-8 -*-
+"""
+@Time    : 2025-07-24 23:00:00
 @Author  : DAIP-LIVE Team
 @File    : knowledge_integration_decorator.py
 @Description:
     Decorator for automatically integrating knowledge persistence into workflows.
 """
-import functools
 import logging
-<<<<<<< HEAD
-from collections.abc import Awaitable
-from typing import Any, Callable, Dict, Optional
-=======
-from collections.abc import Awaitable, Callable
-from typing import Any, Optional
->>>>>>> feature/core-services-refactor
+import asyncio
+import functools
+from typing import Any, Dict, Optional, Callable, Awaitable
 
+from ..core_services.workflow_knowledge_integrator import (
+    WorkflowKnowledgeIntegrator,
+    WorkflowIntegrationConfig
+)
 from ..core_services.enhanced_sskg_manager import EnhancedSSKGManager
 from ..core_services.wiki_service import WikiService
-from ..core_services.workflow_knowledge_integrator import WorkflowIntegrationConfig, WorkflowKnowledgeIntegrator
 
 logger = logging.getLogger(__name__)
 
 
 class KnowledgeIntegrationDecorator:
-    """Decorator class for integrating knowledge persistence into workflows.
+    """
+    Decorator class for integrating knowledge persistence into workflows.
     
     This decorator automatically enhances workflow execution results with
     knowledge persistence capabilities, implementing requirements 6.1 and 6.2.
     """
-
+    
     def __init__(
         self,
         sskg_manager: EnhancedSSKGManager,
         wiki_service: WikiService,
         config: WorkflowIntegrationConfig = None
     ):
-        """Initialize the knowledge integration decorator.
+        """
+        Initialize the knowledge integration decorator.
         
         Args:
             sskg_manager: Enhanced SSKG manager for knowledge storage
             wiki_service: Wiki service for structured documentation
             config: Configuration for integration behavior
-
         """
         self.integrator = WorkflowKnowledgeIntegrator(
             sskg_manager=sskg_manager,
             wiki_service=wiki_service,
             config=config
         )
-
+    
     def integrate_critical_review(
         self,
         auto_persist: bool = True,
         create_wiki: bool = True,
         min_confidence: float = 0.5
     ):
-        """Decorator for Critical Review workflows.
+        """
+        Decorator for Critical Review workflows.
         
         Args:
             auto_persist: Whether to automatically persist validated facts
             create_wiki: Whether to create wiki pages for results
             min_confidence: Minimum confidence threshold for persistence
-
         """
-        def decorator(func: Callable[..., Awaitable[dict[str, Any]]]):
+        def decorator(func: Callable[..., Awaitable[Dict[str, Any]]]):
             @functools.wraps(func)
             async def wrapper(*args, **kwargs):
                 # Execute original workflow
                 result = await func(*args, **kwargs)
-
+                
                 # Extract execution ID from result or generate one
                 execution_id = result.get("execution_id", f"critical_review_{id(result)}")
-
+                
                 # Configure integrator for this execution
                 self.integrator.configure_integration(
                     auto_persist_facts=auto_persist,
                     create_wiki_pages=create_wiki,
                     min_confidence_threshold=min_confidence
                 )
-
+                
                 # Integrate knowledge persistence
                 enhanced_result = await self.integrator.integrate_critical_review_workflow(
                     workflow_result=result,
                     execution_id=execution_id,
                     workflow_instance=args[0] if args else None
                 )
-
+                
                 return enhanced_result
-
+            
             return wrapper
         return decorator
-
+    
     def integrate_multi_perspective(
         self,
         auto_persist: bool = True,
         create_wiki: bool = True,
         min_confidence: float = 0.6
     ):
-        """Decorator for Multi-perspective Synthesis workflows.
+        """
+        Decorator for Multi-perspective Synthesis workflows.
         
         Args:
             auto_persist: Whether to automatically persist synthesis results
             create_wiki: Whether to create wiki pages for results
             min_confidence: Minimum confidence threshold for persistence
-
         """
-        def decorator(func: Callable[..., Awaitable[dict[str, Any]]]):
+        def decorator(func: Callable[..., Awaitable[Dict[str, Any]]]):
             @functools.wraps(func)
             async def wrapper(*args, **kwargs):
                 # Execute original workflow
                 result = await func(*args, **kwargs)
-
+                
                 # Extract execution ID from result or generate one
                 execution_id = result.get("execution_id", f"multi_perspective_{id(result)}")
-
+                
                 # Configure integrator for this execution
                 self.integrator.configure_integration(
                     auto_persist_synthesis=auto_persist,
                     create_wiki_pages=create_wiki,
                     min_confidence_threshold=min_confidence
                 )
-
+                
                 # Integrate knowledge persistence
                 enhanced_result = await self.integrator.integrate_multi_perspective_workflow(
                     workflow_result=result,
                     execution_id=execution_id,
                     workflow_instance=args[0] if args else None
                 )
-
+                
                 return enhanced_result
-
+            
             return wrapper
         return decorator
-
+    
     def add_persistence_callback(
         self,
         callback: Callable[[str, Any], None]
     ) -> None:
         """Add a callback for persistence events."""
         self.integrator.add_persistence_callback(callback)
-
+    
     def add_conflict_callback(
         self,
         callback: Callable[[str, list], None]
@@ -156,7 +157,8 @@ def initialize_knowledge_integration(
     wiki_service: WikiService,
     config: WorkflowIntegrationConfig = None
 ) -> KnowledgeIntegrationDecorator:
-    """Initialize the global knowledge integration decorator.
+    """
+    Initialize the global knowledge integration decorator.
     
     Args:
         sskg_manager: Enhanced SSKG manager for knowledge storage
@@ -165,7 +167,6 @@ def initialize_knowledge_integration(
         
     Returns:
         The initialized decorator instance
-
     """
     global _global_decorator
     _global_decorator = KnowledgeIntegrationDecorator(
@@ -187,25 +188,25 @@ def with_critical_review_persistence(
     create_wiki: bool = True,
     min_confidence: float = 0.5
 ):
-    """Convenience decorator for Critical Review workflows using global instance.
+    """
+    Convenience decorator for Critical Review workflows using global instance.
     
     Args:
         auto_persist: Whether to automatically persist validated facts
         create_wiki: Whether to create wiki pages for results
         min_confidence: Minimum confidence threshold for persistence
-
     """
-    def decorator(func: Callable[..., Awaitable[dict[str, Any]]]):
+    def decorator(func: Callable[..., Awaitable[Dict[str, Any]]]):
         if _global_decorator is None:
             logger.warning("Knowledge integration decorator not initialized. Skipping integration.")
             return func
-
+        
         return _global_decorator.integrate_critical_review(
             auto_persist=auto_persist,
             create_wiki=create_wiki,
             min_confidence=min_confidence
         )(func)
-
+    
     return decorator
 
 
@@ -214,48 +215,49 @@ def with_multi_perspective_persistence(
     create_wiki: bool = True,
     min_confidence: float = 0.6
 ):
-    """Convenience decorator for Multi-perspective Synthesis workflows using global instance.
+    """
+    Convenience decorator for Multi-perspective Synthesis workflows using global instance.
     
     Args:
         auto_persist: Whether to automatically persist synthesis results
         create_wiki: Whether to create wiki pages for results
         min_confidence: Minimum confidence threshold for persistence
-
     """
-    def decorator(func: Callable[..., Awaitable[dict[str, Any]]]):
+    def decorator(func: Callable[..., Awaitable[Dict[str, Any]]]):
         if _global_decorator is None:
             logger.warning("Knowledge integration decorator not initialized. Skipping integration.")
             return func
-
+        
         return _global_decorator.integrate_multi_perspective(
             auto_persist=auto_persist,
             create_wiki=create_wiki,
             min_confidence=min_confidence
         )(func)
-
+    
     return decorator
 
 
 # Example usage functions for demonstration
 async def example_critical_review_integration():
     """Example of how to use the Critical Review integration."""
+    
     # This would typically be done in your application initialization
     from ..core_services.enhanced_sskg_manager import EnhancedSSKGManager
     from ..core_services.wiki_service import WikiService
-
+    
     sskg_manager = EnhancedSSKGManager()
     wiki_service = WikiService()
-
+    
     # Initialize global decorator
     decorator = initialize_knowledge_integration(sskg_manager, wiki_service)
-
+    
     # Example workflow function with integration
     @decorator.integrate_critical_review(
         auto_persist=True,
         create_wiki=True,
         min_confidence=0.7
     )
-    async def critical_review_workflow(content: str) -> dict[str, Any]:
+    async def critical_review_workflow(content: str) -> Dict[str, Any]:
         # Simulate workflow execution
         return {
             "success": True,
@@ -272,26 +274,26 @@ async def example_critical_review_integration():
             "credibility_scores": {"fact_001": 0.8},
             "revised_content": "Revised content with corrections"
         }
-
+    
     # Execute workflow with automatic knowledge integration
     result = await critical_review_workflow("Example content to review")
-
+    
     # Result will now include knowledge persistence information
     print("Knowledge persistence info:", result.get("knowledge_persistence"))
-
+    
     return result
 
 
 async def example_multi_perspective_integration():
     """Example of how to use the Multi-perspective Synthesis integration."""
-
+    
     # Example workflow function with integration
     @with_multi_perspective_persistence(
         auto_persist=True,
         create_wiki=True,
         min_confidence=0.6
     )
-    async def multi_perspective_workflow(topic: str, perspectives: list) -> dict[str, Any]:
+    async def multi_perspective_workflow(topic: str, perspectives: list) -> Dict[str, Any]:
         # Simulate workflow execution
         return {
             "success": True,
@@ -307,13 +309,13 @@ async def example_multi_perspective_integration():
             },
             "key_insights": ["Insight 1", "Insight 2", "Insight 3"]
         }
-
+    
     # Execute workflow with automatic knowledge integration
     result = await multi_perspective_workflow("AI impact on jobs", ["经济", "社会", "技术"])
-
+    
     # Result will now include knowledge persistence information
     print("Knowledge persistence info:", result.get("knowledge_persistence"))
-
+    
     return result
 
 

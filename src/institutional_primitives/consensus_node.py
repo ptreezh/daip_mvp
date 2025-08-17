@@ -1,4 +1,6 @@
-"""@Time    : 2025-07-23 13:00:00
+# -*- coding: utf-8 -*-
+"""
+@Time    : 2025-07-23 13:00:00
 @Author  : DAIP-LIVE Team
 @File    : consensus_node.py
 @Description:
@@ -6,42 +8,31 @@
     Calculates credibility scores using synthesis engine or voting algorithms.
 """
 import logging
-<<<<<<< HEAD
-from typing import Any, Dict, Tuple
-=======
-from typing import Any
->>>>>>> feature/core-services-refactor
+from datetime import datetime
+from typing import Any, Dict, List, Tuple
 
-from .base import ExecutionContext, InstitutionalPrimitive
+from .base import InstitutionalPrimitive, ExecutionContext
 
 logger = logging.getLogger(__name__)
 
 
 class ConsensusNode(InstitutionalPrimitive):
-    """共识计算节点 - Calculates credibility scores using synthesis engine or voting algorithms.
+    """
+    共识计算节点 - Calculates credibility scores using synthesis engine or voting algorithms.
     
     Uses SynthesisEngine or voting algorithms to assign credibility scores
     to each factual assertion based on aggregated evidence.
     """
-<<<<<<< HEAD
-
-    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
-=======
     
-    def __init__(self, primitive_id: str, config: dict[str, Any] = None):
->>>>>>> feature/core-services-refactor
+    def __init__(self, primitive_id: str, config: Dict[str, Any] = None):
         super().__init__(primitive_id, config)
         self.consensus_method = config.get("consensus_method", "weighted_average") if config else "weighted_average"
         self.credibility_threshold = config.get("credibility_threshold", 0.6) if config else 0.6
         self.use_synthesis_engine = config.get("use_synthesis_engine", True) if config else True
-<<<<<<< HEAD
-
-    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
-=======
     
-    async def execute(self, inputs: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
-        """Execute consensus calculation on aggregated evidence.
+    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]:
+        """
+        Execute consensus calculation on aggregated evidence.
         
         Args:
             inputs: Should contain 'aggregated_evidence' from evidence aggregation
@@ -49,27 +40,26 @@ class ConsensusNode(InstitutionalPrimitive):
             
         Returns:
             Final credibility scores and consensus results
-
         """
         context.mark_started()
-
+        
         try:
             # Get aggregated evidence from inputs or workflow state
             aggregated_evidence = inputs.get("aggregated_evidence") or context.state.get("aggregated_evidence", {})
-
+            
             if not aggregated_evidence:
                 raise ValueError("Aggregated evidence is required for consensus calculation")
-
+            
             # Calculate consensus for each fact
             consensus_results = {}
             final_credibility_scores = {}
             facts_needing_revision = []
             consensus_details = {}
-
+            
             # Get extracted facts for reference
             extracted_facts_data = context.state.get("extracted_facts", [])
             extracted_facts = {fact.get("id"): fact for fact in extracted_facts_data}
-
+            
             # Process each fact
             for fact_id, evidence_data in aggregated_evidence.items():
                 # Choose consensus method
@@ -82,15 +72,15 @@ class ConsensusNode(InstitutionalPrimitive):
                 else:
                     # Default to weighted average
                     credibility, details = self._calculate_weighted_average_consensus(evidence_data)
-
+                
                 # Store results
                 final_credibility_scores[fact_id] = credibility
                 consensus_details[fact_id] = details
-
+                
                 # Check if fact needs revision
                 if credibility < self.credibility_threshold:
                     facts_needing_revision.append(fact_id)
-
+                
                 # Create consensus result
                 consensus_results[fact_id] = {
                     "fact_id": fact_id,
@@ -101,26 +91,26 @@ class ConsensusNode(InstitutionalPrimitive):
                     "evidence_summary": evidence_data.get("evidence_summary", ""),
                     "consensus_details": details
                 }
-
+            
             # Store in workflow state
             context.state["credibility_scores"] = final_credibility_scores
             context.state["facts_needing_revision"] = facts_needing_revision
             context.state["consensus_details"] = consensus_details
             context.state["consensus_results"] = consensus_results
-
+            
             context.mark_completed()
-
+            
             return {
                 "credibility_scores": final_credibility_scores,
                 "facts_needing_revision": facts_needing_revision,
                 "consensus_results": consensus_results,
                 "success": True
             }
-
+            
         except Exception as e:
             context.mark_failed()
             logger.error(f"ConsensusNode execution failed: {e}")
-
+            
             return {
                 "consensus_results": {},
                 "credibility_scores": {},
@@ -128,26 +118,21 @@ class ConsensusNode(InstitutionalPrimitive):
                 "success": False,
                 "error": str(e)
             }
-<<<<<<< HEAD
-
-    def _calculate_weighted_average_consensus(self, evidence_data: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
-=======
     
-    def _calculate_weighted_average_consensus(self, evidence_data: dict[str, Any]) -> tuple[float, dict[str, Any]]:
->>>>>>> feature/core-services-refactor
-        """Calculate consensus using weighted average of evidence scores.
+    def _calculate_weighted_average_consensus(self, evidence_data: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
+        """
+        Calculate consensus using weighted average of evidence scores.
         
         Args:
             evidence_data: Aggregated evidence data
             
         Returns:
             Tuple of (credibility_score, consensus_details)
-
         """
         supporting_score = evidence_data.get("supporting_score", 0.0)
         challenging_score = evidence_data.get("challenging_score", 0.0)
         neutral_score = evidence_data.get("neutral_score", 0.0)
-
+        
         # Calculate weighted credibility
         total_weight = supporting_score + challenging_score + neutral_score
         if total_weight > 0:
@@ -157,7 +142,7 @@ class ConsensusNode(InstitutionalPrimitive):
             credibility = min(max(0.5 + weighted_score * 0.5, 0.0), 1.0)
         else:
             credibility = 0.5  # Neutral when no evidence
-
+        
         details = {
             "method": "weighted_average",
             "supporting_score": supporting_score,
@@ -166,30 +151,25 @@ class ConsensusNode(InstitutionalPrimitive):
             "total_weight": total_weight,
             "weighted_score": weighted_score if total_weight > 0 else 0.0
         }
-
+        
         return credibility, details
-<<<<<<< HEAD
-
-    def _calculate_majority_vote_consensus(self, evidence_data: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
-=======
     
-    def _calculate_majority_vote_consensus(self, evidence_data: dict[str, Any]) -> tuple[float, dict[str, Any]]:
->>>>>>> feature/core-services-refactor
-        """Calculate consensus using majority vote of evidence counts.
+    def _calculate_majority_vote_consensus(self, evidence_data: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
+        """
+        Calculate consensus using majority vote of evidence counts.
         
         Args:
             evidence_data: Aggregated evidence data
             
         Returns:
             Tuple of (credibility_score, consensus_details)
-
         """
         supporting_count = evidence_data.get("supporting_count", 0)
         challenging_count = evidence_data.get("challenging_count", 0)
         neutral_count = evidence_data.get("neutral_count", 0)
-
+        
         total_votes = supporting_count + challenging_count + neutral_count
-
+        
         if total_votes == 0:
             return 0.5, {
                 "method": "majority_vote",
@@ -199,11 +179,11 @@ class ConsensusNode(InstitutionalPrimitive):
                 "total_votes": 0,
                 "outcome": "no_evidence"
             }
-
+        
         # Calculate vote percentages
         supporting_percentage = supporting_count / total_votes
         challenging_percentage = challenging_count / total_votes
-
+        
         # Determine outcome
         if supporting_percentage > challenging_percentage:
             outcome = "supporting"
@@ -218,7 +198,7 @@ class ConsensusNode(InstitutionalPrimitive):
         else:
             outcome = "tie"
             credibility = 0.5
-
+        
         details = {
             "method": "majority_vote",
             "supporting_votes": supporting_count,
@@ -229,16 +209,12 @@ class ConsensusNode(InstitutionalPrimitive):
             "challenging_percentage": challenging_percentage,
             "outcome": outcome
         }
-
+        
         return credibility, details
-<<<<<<< HEAD
-
-    def _calculate_majority_vote(self, evidence_data: Dict[str, Any]) -> float:
-=======
     
-    def _calculate_majority_vote(self, evidence_data: dict[str, Any]) -> float:
->>>>>>> feature/core-services-refactor
-        """Calculate credibility score using majority vote method.
+    def _calculate_majority_vote(self, evidence_data: Dict[str, Any]) -> float:
+        """
+        Calculate credibility score using majority vote method.
         This is a simplified version for testing.
         
         Args:
@@ -246,26 +222,21 @@ class ConsensusNode(InstitutionalPrimitive):
             
         Returns:
             Credibility score
-
         """
         supporting = evidence_data.get("supporting_count", 0)
         challenging = evidence_data.get("challenging_count", 0)
         total = supporting + challenging
-
+        
         if total == 0:
             return 0.5
-
+        
         # Calculate credibility based on vote ratio
         supporting_ratio = supporting / total
         return min(max(supporting_ratio, 0.0), 1.0)
-<<<<<<< HEAD
-
-    def _calculate_weighted_consensus(self, evidence_data: Dict[str, Any]) -> float:
-=======
     
-    def _calculate_weighted_consensus(self, evidence_data: dict[str, Any]) -> float:
->>>>>>> feature/core-services-refactor
-        """Calculate credibility score using weighted average method.
+    def _calculate_weighted_consensus(self, evidence_data: Dict[str, Any]) -> float:
+        """
+        Calculate credibility score using weighted average method.
         This is a simplified version for testing.
         
         Args:
@@ -273,28 +244,23 @@ class ConsensusNode(InstitutionalPrimitive):
             
         Returns:
             Credibility score
-
         """
         supporting = evidence_data.get("supporting_score", 0.0)
         challenging = evidence_data.get("challenging_score", 0.0)
         neutral = evidence_data.get("neutral_score", 0.0)
-
+        
         total_weight = supporting + challenging + neutral
         if total_weight == 0:
             return 0.5
-
+        
         # Supporting increases credibility, challenging decreases it
         weighted_score = (supporting - challenging) / total_weight
         # Convert to 0-1 scale
         return min(max(0.5 + weighted_score * 0.5, 0.0), 1.0)
-<<<<<<< HEAD
-
-    async def _calculate_synthesis_consensus(self, evidence_data: Dict[str, Any], context: ExecutionContext) -> Tuple[float, Dict[str, Any]]:
-=======
     
-    async def _calculate_synthesis_consensus(self, evidence_data: dict[str, Any], context: ExecutionContext) -> tuple[float, dict[str, Any]]:
->>>>>>> feature/core-services-refactor
-        """Calculate consensus using synthesis engine for complex evidence analysis.
+    async def _calculate_synthesis_consensus(self, evidence_data: Dict[str, Any], context: ExecutionContext) -> Tuple[float, Dict[str, Any]]:
+        """
+        Calculate consensus using synthesis engine for complex evidence analysis.
         
         Args:
             evidence_data: Aggregated evidence data
@@ -302,18 +268,17 @@ class ConsensusNode(InstitutionalPrimitive):
             
         Returns:
             Tuple of (credibility_score, consensus_details)
-
         """
         # Get synthesis engine
         synthesis_engine = context.services.get("synthesis_engine")
         if not synthesis_engine:
             # Fall back to weighted average if synthesis engine not available
             return self._calculate_weighted_average_consensus(evidence_data)
-
+        
         # Prepare evidence summary for synthesis
         supporting_evidence = evidence_data.get("supporting_count", 0)
         challenging_evidence = evidence_data.get("challenging_count", 0)
-
+        
         evidence_summary = f"""
 Fact: {evidence_data.get('fact_content', 'Unknown fact')}
 
@@ -325,19 +290,19 @@ Evidence Summary:
 Please analyze this evidence and determine a credibility score between 0.0 (completely unreliable) 
 and 1.0 (completely reliable) for this fact. Provide your reasoning.
 """
-
+        
         # Use synthesis engine to analyze evidence
         try:
             synthesis_result = await synthesis_engine.synthesize_opinions(
                 topic="Fact Credibility Analysis",
                 history=[{"round": 1, "role_id": "evidence_analyzer", "opinion": evidence_summary}]
             )
-
+            
             # Extract credibility score from synthesis result
             # This is a simplified implementation - in practice would use more sophisticated parsing
             credibility = 0.5  # Default
             reasoning = synthesis_result
-
+            
             # Simple regex-free parsing
             if "credibility score:" in synthesis_result.lower():
                 parts = synthesis_result.lower().split("credibility score:")
@@ -348,27 +313,22 @@ and 1.0 (completely reliable) for this fact. Provide your reasoning.
                         credibility = min(max(credibility, 0.0), 1.0)  # Ensure in range 0-1
                     except ValueError:
                         pass
-
+            
             details = {
                 "method": "synthesis",
                 "reasoning": reasoning[:500] + "..." if len(reasoning) > 500 else reasoning,
                 "supporting_count": supporting_evidence,
                 "challenging_count": challenging_evidence
             }
-
+            
             return credibility, details
-
+            
         except Exception as e:
             logger.error(f"Synthesis consensus calculation failed: {e}")
             # Fall back to weighted average
             return self._calculate_weighted_average_consensus(evidence_data)
-<<<<<<< HEAD
-
-    def get_input_schema(self) -> Dict[str, Any]:
-=======
     
-    def get_input_schema(self) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
+    def get_input_schema(self) -> Dict[str, Any]:
         """Return input schema for the consensus node."""
         return {
             "type": "object",
@@ -380,13 +340,8 @@ and 1.0 (completely reliable) for this fact. Provide your reasoning.
             },
             "required": ["aggregated_evidence"]
         }
-<<<<<<< HEAD
-
-    def get_output_schema(self) -> Dict[str, Any]:
-=======
     
-    def get_output_schema(self) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
+    def get_output_schema(self) -> Dict[str, Any]:
         """Return output schema for the consensus node."""
         return {
             "type": "object",

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""V0.1.5 全面质量检查和端到端测试
+# -*- coding: utf-8 -*-
+"""
+V0.1.5 全面质量检查和端到端测试
 
 执行多轮辩论系统的全面质量验证，包括：
 - 代码质量审查
@@ -10,19 +12,16 @@
 """
 
 import asyncio
-import json
-import logging
-import sys
 import time
-from datetime import datetime
-from pathlib import Path
-<<<<<<< HEAD
-from typing import Any, Dict, List
-=======
-from typing import Any
->>>>>>> feature/core-services-refactor
-
+import sys
+import os
+import logging
+import subprocess
 import psutil
+from pathlib import Path
+from typing import Dict, List, Any, Optional
+from datetime import datetime
+import json
 
 # 添加项目根目录到路径
 current_dir = Path(__file__).parent
@@ -39,11 +38,7 @@ logger = logging.getLogger(__name__)
 
 class QualityCheckResult:
     """质量检查结果"""
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     def __init__(self, check_name: str):
         self.check_name = check_name
         self.passed = False
@@ -52,21 +47,12 @@ class QualityCheckResult:
         self.details = {}
         self.start_time = None
         self.end_time = None
-<<<<<<< HEAD
-
+    
     def start(self):
         """开始检查"""
         self.start_time = datetime.now()
-
+    
     def finish(self, passed: bool, error_message: str = "", details: Dict = None):
-=======
-    
-    def start(self):
-        """开始检查"""
-        self.start_time = datetime.now()
-    
-    def finish(self, passed: bool, error_message: str = "", details: dict = None):
->>>>>>> feature/core-services-refactor
         """结束检查"""
         self.end_time = datetime.now()
         self.passed = passed
@@ -78,25 +64,14 @@ class QualityCheckResult:
 
 class V015QualityChecker:
     """V0.1.5质量检查器"""
-<<<<<<< HEAD
-
+    
     def __init__(self):
         self.check_results: List[QualityCheckResult] = []
         self.start_time = None
         self.end_time = None
         self.system_info = self._collect_system_info()
-
+    
     def _collect_system_info(self) -> Dict[str, Any]:
-=======
-    
-    def __init__(self):
-        self.check_results: list[QualityCheckResult] = []
-        self.start_time = None
-        self.end_time = None
-        self.system_info = self._collect_system_info()
-    
-    def _collect_system_info(self) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """收集系统信息"""
         return {
             "python_version": sys.version,
@@ -105,21 +80,12 @@ class V015QualityChecker:
             "memory_total": psutil.virtual_memory().total,
             "timestamp": datetime.now().isoformat()
         }
-<<<<<<< HEAD
-
+    
     async def run_all_checks(self) -> Dict[str, Any]:
         """运行所有质量检查"""
         self.start_time = datetime.now()
         logger.info("🚀 开始V0.1.5全面质量检查...")
-
-=======
-    
-    async def run_all_checks(self) -> dict[str, Any]:
-        """运行所有质量检查"""
-        self.start_time = datetime.now()
-        logger.info("🚀 开始V0.1.5全面质量检查...")
         
->>>>>>> feature/core-services-refactor
         # 检查列表
         check_methods = [
             self.check_code_quality,
@@ -131,97 +97,55 @@ class V015QualityChecker:
             self.check_error_handling,
             self.check_end_to_end_workflow
         ]
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         # 执行检查
         for check_method in check_methods:
             try:
                 await check_method()
             except Exception as e:
                 logger.error(f"检查执行失败 {check_method.__name__}: {e}")
-<<<<<<< HEAD
-
-        self.end_time = datetime.now()
-
-        # 生成检查报告
-        return self._generate_quality_report()
-
-=======
         
         self.end_time = datetime.now()
         
         # 生成检查报告
         return self._generate_quality_report()
     
->>>>>>> feature/core-services-refactor
     async def check_code_quality(self):
         """代码质量审查"""
         result = QualityCheckResult("代码质量审查")
         result.start()
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         try:
             # 检查Python语法
             python_files = list(current_dir.glob("*.py"))
             syntax_errors = []
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             for py_file in python_files:
                 try:
-                    with open(py_file, encoding='utf-8') as f:
+                    with open(py_file, 'r', encoding='utf-8') as f:
                         compile(f.read(), py_file, 'exec')
                 except SyntaxError as e:
                     syntax_errors.append(f"{py_file}: {e}")
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 检查代码结构
             code_metrics = {
                 "total_files": len(python_files),
                 "total_lines": 0,
                 "syntax_errors": len(syntax_errors)
             }
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             for py_file in python_files:
                 try:
-                    with open(py_file, encoding='utf-8') as f:
+                    with open(py_file, 'r', encoding='utf-8') as f:
                         code_metrics["total_lines"] += len(f.readlines())
                 except:
                     pass
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             result.finish(
                 passed=len(syntax_errors) == 0,
                 error_message="; ".join(syntax_errors) if syntax_errors else "",
                 details=code_metrics
             )
-<<<<<<< HEAD
-
-        except Exception as e:
-            result.finish(False, str(e))
-
-        self.check_results.append(result)
-        logger.info(f"✅ 代码质量审查: {'通过' if result.passed else '失败'}")
-
-=======
             
         except Exception as e:
             result.finish(False, str(e))
@@ -229,21 +153,10 @@ class V015QualityChecker:
         self.check_results.append(result)
         logger.info(f"✅ 代码质量审查: {'通过' if result.passed else '失败'}")
     
->>>>>>> feature/core-services-refactor
     async def check_module_imports(self):
         """模块导入测试"""
         result = QualityCheckResult("模块导入测试")
         result.start()
-<<<<<<< HEAD
-
-        try:
-            modules_to_test = [
-                "debate_flow_definition",
-                "participant_management",
-                "debate_state_manager"
-            ]
-
-=======
         
         try:
             modules_to_test = [
@@ -252,7 +165,6 @@ class V015QualityChecker:
                 "debate_state_manager"
             ]
             
->>>>>>> feature/core-services-refactor
             import_results = {}
             for module_name in modules_to_test:
                 try:
@@ -261,29 +173,14 @@ class V015QualityChecker:
                     import_results[module_name] = "success"
                 except ImportError as e:
                     import_results[module_name] = f"failed: {e}"
-<<<<<<< HEAD
-
-            failed_imports = [k for k, v in import_results.items() if v != "success"]
-
-=======
             
             failed_imports = [k for k, v in import_results.items() if v != "success"]
             
->>>>>>> feature/core-services-refactor
             result.finish(
                 passed=len(failed_imports) == 0,
                 error_message=f"Failed imports: {failed_imports}" if failed_imports else "",
                 details=import_results
             )
-<<<<<<< HEAD
-
-        except Exception as e:
-            result.finish(False, str(e))
-
-        self.check_results.append(result)
-        logger.info(f"✅ 模块导入测试: {'通过' if result.passed else '失败'}")
-
-=======
             
         except Exception as e:
             result.finish(False, str(e))
@@ -291,43 +188,26 @@ class V015QualityChecker:
         self.check_results.append(result)
         logger.info(f"✅ 模块导入测试: {'通过' if result.passed else '失败'}")
     
->>>>>>> feature/core-services-refactor
     async def check_debate_system_components(self):
         """辩论系统组件测试"""
         result = QualityCheckResult("辩论系统组件测试")
         result.start()
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         try:
-            from src.debate_system.debate_flow_definition import DebateSession
+            from src.debate_system.debate_flow_definition import DebateSession, DebatePhase, DebateStatus
+            from src.debate_system.participant_management import ParticipantManager, Permission
             from src.debate_system.debate_state_manager import DebateStateManager
-            from src.debate_system.participant_management import ParticipantManager
-<<<<<<< HEAD
-
-            # 测试组件创建
-            state_manager = DebateStateManager()
-            participant_manager = ParticipantManager()
-
-=======
             
             # 测试组件创建
             state_manager = DebateStateManager()
             participant_manager = ParticipantManager()
             
->>>>>>> feature/core-services-refactor
             # 创建测试会话
             test_session = DebateSession(
                 title="测试辩论",
                 topic="测试话题"
             )
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             component_tests = {
                 "state_manager_created": state_manager is not None,
                 "participant_manager_created": participant_manager is not None,
@@ -335,28 +215,13 @@ class V015QualityChecker:
                 "session_has_id": hasattr(test_session, 'session_id'),
                 "session_has_status": hasattr(test_session, 'status')
             }
-<<<<<<< HEAD
-
-            all_passed = all(component_tests.values())
-
-=======
             
             all_passed = all(component_tests.values())
             
->>>>>>> feature/core-services-refactor
             result.finish(
                 passed=all_passed,
                 details=component_tests
             )
-<<<<<<< HEAD
-
-        except Exception as e:
-            result.finish(False, str(e))
-
-        self.check_results.append(result)
-        logger.info(f"✅ 辩论系统组件测试: {'通过' if result.passed else '失败'}")
-
-=======
             
         except Exception as e:
             result.finish(False, str(e))
@@ -364,31 +229,19 @@ class V015QualityChecker:
         self.check_results.append(result)
         logger.info(f"✅ 辩论系统组件测试: {'通过' if result.passed else '失败'}")
     
->>>>>>> feature/core-services-refactor
     async def check_multi_role_debate_system(self):
         """多角色辩论系统测试"""
         result = QualityCheckResult("多角色辩论系统测试")
         result.start()
-<<<<<<< HEAD
-
-        try:
-            from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
-
-=======
         
         try:
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             
->>>>>>> feature/core-services-refactor
             # 创建模拟组件
             class MockLLMIntegrator:
                 async def generate_response(self, *args, **kwargs):
                     return "Test response"
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             class MockRoleManager:
                 async def get_role(self, role_id):
                     return {
@@ -396,20 +249,12 @@ class V015QualityChecker:
                         "name": f"Test Role {role_id}",
                         "expertise": ["testing"]
                     }
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 创建辩论系统
             llm_integrator = MockLLMIntegrator()
             role_manager = MockRoleManager()
             debate_system = MultiRoleDebateSystem(llm_integrator, role_manager)
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 测试基本功能
             multi_role_tests = {
                 "system_created": debate_system is not None,
@@ -418,28 +263,13 @@ class V015QualityChecker:
                 "has_active_debates": hasattr(debate_system, 'active_debates'),
                 "has_start_debate_method": hasattr(debate_system, 'start_debate')
             }
-<<<<<<< HEAD
-
-            all_passed = all(multi_role_tests.values())
-
-=======
             
             all_passed = all(multi_role_tests.values())
             
->>>>>>> feature/core-services-refactor
             result.finish(
                 passed=all_passed,
                 details=multi_role_tests
             )
-<<<<<<< HEAD
-
-        except Exception as e:
-            result.finish(False, str(e))
-
-        self.check_results.append(result)
-        logger.info(f"✅ 多角色辩论系统测试: {'通过' if result.passed else '失败'}")
-
-=======
             
         except Exception as e:
             result.finish(False, str(e))
@@ -447,30 +277,17 @@ class V015QualityChecker:
         self.check_results.append(result)
         logger.info(f"✅ 多角色辩论系统测试: {'通过' if result.passed else '失败'}")
     
->>>>>>> feature/core-services-refactor
     async def check_performance_metrics(self):
         """性能指标测试"""
         result = QualityCheckResult("性能指标测试")
         result.start()
-<<<<<<< HEAD
-
-        try:
-            # 测试系统启动时间
-            startup_start = time.time()
-
-
-            startup_time = time.time() - startup_start
-
-            # 测试内存使用
-            process = psutil.Process()
-            memory_usage = process.memory_info().rss / 1024 / 1024  # MB
-
-=======
         
         try:
             # 测试系统启动时间
             startup_start = time.time()
             
+            from src.debate_system.debate_state_manager import DebateStateManager
+            from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             
             startup_time = time.time() - startup_start
             
@@ -478,40 +295,22 @@ class V015QualityChecker:
             process = psutil.Process()
             memory_usage = process.memory_info().rss / 1024 / 1024  # MB
             
->>>>>>> feature/core-services-refactor
             performance_metrics = {
                 "startup_time_seconds": startup_time,
                 "memory_usage_mb": memory_usage,
                 "startup_time_ok": startup_time < 30,  # 启动时间 < 30秒
                 "memory_usage_ok": memory_usage < 2048  # 内存使用 < 2GB
             }
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             performance_ok = all([
                 performance_metrics["startup_time_ok"],
                 performance_metrics["memory_usage_ok"]
             ])
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             result.finish(
                 passed=performance_ok,
                 details=performance_metrics
             )
-<<<<<<< HEAD
-
-        except Exception as e:
-            result.finish(False, str(e))
-
-        self.check_results.append(result)
-        logger.info(f"✅ 性能指标测试: {'通过' if result.passed else '失败'}")
-
-=======
             
         except Exception as e:
             result.finish(False, str(e))
@@ -519,42 +318,21 @@ class V015QualityChecker:
         self.check_results.append(result)
         logger.info(f"✅ 性能指标测试: {'通过' if result.passed else '失败'}")
     
->>>>>>> feature/core-services-refactor
     async def check_memory_usage(self):
         """内存使用测试"""
         result = QualityCheckResult("内存使用测试")
         result.start()
-<<<<<<< HEAD
-
-        try:
-            process = psutil.Process()
-            initial_memory = process.memory_info().rss
-
-=======
         
         try:
             process = psutil.Process()
             initial_memory = process.memory_info().rss
             
->>>>>>> feature/core-services-refactor
             # 创建多个组件实例来测试内存使用
             components = []
             for i in range(5):
                 from src.debate_system.debate_state_manager import DebateStateManager
                 state_manager = DebateStateManager()
                 components.append(state_manager)
-<<<<<<< HEAD
-
-            # 等待一段时间
-            await asyncio.sleep(1)
-
-            peak_memory = process.memory_info().rss
-            memory_increase = (peak_memory - initial_memory) / 1024 / 1024  # MB
-
-            # 清理组件
-            components.clear()
-
-=======
             
             # 等待一段时间
             await asyncio.sleep(1)
@@ -565,22 +343,14 @@ class V015QualityChecker:
             # 清理组件
             components.clear()
             
->>>>>>> feature/core-services-refactor
             # 等待垃圾回收
             import gc
             gc.collect()
             await asyncio.sleep(1)
-<<<<<<< HEAD
-
-            final_memory = process.memory_info().rss
-            memory_after_cleanup = (final_memory - initial_memory) / 1024 / 1024  # MB
-
-=======
             
             final_memory = process.memory_info().rss
             memory_after_cleanup = (final_memory - initial_memory) / 1024 / 1024  # MB
             
->>>>>>> feature/core-services-refactor
             memory_tests = {
                 "initial_memory_mb": initial_memory / 1024 / 1024,
                 "peak_memory_mb": peak_memory / 1024 / 1024,
@@ -589,28 +359,13 @@ class V015QualityChecker:
                 "memory_after_cleanup_mb": memory_after_cleanup,
                 "memory_leak_detected": memory_after_cleanup > memory_increase * 0.5
             }
-<<<<<<< HEAD
-
-            memory_ok = not memory_tests["memory_leak_detected"]
-
-=======
             
             memory_ok = not memory_tests["memory_leak_detected"]
             
->>>>>>> feature/core-services-refactor
             result.finish(
                 passed=memory_ok,
                 details=memory_tests
             )
-<<<<<<< HEAD
-
-        except Exception as e:
-            result.finish(False, str(e))
-
-        self.check_results.append(result)
-        logger.info(f"✅ 内存使用测试: {'通过' if result.passed else '失败'}")
-
-=======
             
         except Exception as e:
             result.finish(False, str(e))
@@ -618,26 +373,10 @@ class V015QualityChecker:
         self.check_results.append(result)
         logger.info(f"✅ 内存使用测试: {'通过' if result.passed else '失败'}")
     
->>>>>>> feature/core-services-refactor
     async def check_error_handling(self):
         """错误处理测试"""
         result = QualityCheckResult("错误处理测试")
         result.start()
-<<<<<<< HEAD
-
-        try:
-            from src.debate_system.debate_state_manager import DebateStateManager
-
-            # 测试无效输入处理
-            state_manager = DebateStateManager()
-
-            # 测试获取不存在的会话
-            non_existent_session = await state_manager.get_session("non_existent_id")
-
-            # 测试删除不存在的会话
-            delete_result = await state_manager.delete_session("non_existent_id")
-
-=======
         
         try:
             from src.debate_system.debate_state_manager import DebateStateManager
@@ -651,33 +390,17 @@ class V015QualityChecker:
             # 测试删除不存在的会话
             delete_result = await state_manager.delete_session("non_existent_id")
             
->>>>>>> feature/core-services-refactor
             error_tests = {
                 "non_existent_session_handled": non_existent_session is None,
                 "non_existent_delete_handled": delete_result is False
             }
-<<<<<<< HEAD
-
-            all_handled = all(error_tests.values())
-
-=======
             
             all_handled = all(error_tests.values())
             
->>>>>>> feature/core-services-refactor
             result.finish(
                 passed=all_handled,
                 details=error_tests
             )
-<<<<<<< HEAD
-
-        except Exception as e:
-            result.finish(False, str(e))
-
-        self.check_results.append(result)
-        logger.info(f"✅ 错误处理测试: {'通过' if result.passed else '失败'}")
-
-=======
             
         except Exception as e:
             result.finish(False, str(e))
@@ -685,35 +408,22 @@ class V015QualityChecker:
         self.check_results.append(result)
         logger.info(f"✅ 错误处理测试: {'通过' if result.passed else '失败'}")
     
->>>>>>> feature/core-services-refactor
     async def check_end_to_end_workflow(self):
         """端到端工作流测试"""
         result = QualityCheckResult("端到端工作流测试")
         result.start()
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         try:
-            from src.debate_system.debate_flow_definition import DebateSession
             from src.debate_system.debate_state_manager import DebateStateManager
+            from src.debate_system.debate_flow_definition import DebateSession
             from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 创建模拟组件
             class MockLLMIntegrator:
                 async def generate_response(self, *args, **kwargs):
                     await asyncio.sleep(0.1)  # 模拟处理时间
                     return "这是一个端到端测试响应"
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             class MockRoleManager:
                 async def get_role(self, role_id):
                     return {
@@ -721,35 +431,18 @@ class V015QualityChecker:
                         "name": f"专家{role_id}",
                         "expertise": ["测试", "验证"]
                     }
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 创建组件
             state_manager = DebateStateManager()
             llm_integrator = MockLLMIntegrator()
             role_manager = MockRoleManager()
             debate_system = MultiRoleDebateSystem(llm_integrator, role_manager)
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 创建测试会话
             test_session = DebateSession(
                 title="端到端测试辩论",
                 topic="人工智能的未来发展"
             )
-<<<<<<< HEAD
-
-            # 执行完整工作流
-            workflow_steps = {}
-
-            # 1. 创建会话
-            workflow_steps["session_created"] = await state_manager.create_session(test_session)
-
-=======
             
             # 执行完整工作流
             workflow_steps = {}
@@ -757,7 +450,6 @@ class V015QualityChecker:
             # 1. 创建会话
             workflow_steps["session_created"] = await state_manager.create_session(test_session)
             
->>>>>>> feature/core-services-refactor
             # 2. 启动辩论
             if workflow_steps["session_created"]:
                 debate_result = await debate_system.start_debate(
@@ -767,11 +459,7 @@ class V015QualityChecker:
                 workflow_steps["debate_started"] = debate_result is not None
             else:
                 workflow_steps["debate_started"] = False
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 3. 获取辩论状态
             if workflow_steps["debate_started"]:
                 debate_id = debate_result.get("debate_id")
@@ -779,31 +467,14 @@ class V015QualityChecker:
                 workflow_steps["status_retrieved"] = status is not None
             else:
                 workflow_steps["status_retrieved"] = False
-<<<<<<< HEAD
-
-            # 检查工作流完整性
-            workflow_complete = all(workflow_steps.values())
-
-=======
             
             # 检查工作流完整性
             workflow_complete = all(workflow_steps.values())
             
->>>>>>> feature/core-services-refactor
             result.finish(
                 passed=workflow_complete,
                 details=workflow_steps
             )
-<<<<<<< HEAD
-
-        except Exception as e:
-            result.finish(False, str(e))
-
-        self.check_results.append(result)
-        logger.info(f"✅ 端到端工作流测试: {'通过' if result.passed else '失败'}")
-
-    def _generate_quality_report(self) -> Dict[str, Any]:
-=======
             
         except Exception as e:
             result.finish(False, str(e))
@@ -811,22 +482,15 @@ class V015QualityChecker:
         self.check_results.append(result)
         logger.info(f"✅ 端到端工作流测试: {'通过' if result.passed else '失败'}")
     
-    def _generate_quality_report(self) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
+    def _generate_quality_report(self) -> Dict[str, Any]:
         """生成质量报告"""
         total_checks = len(self.check_results)
         passed_checks = sum(1 for r in self.check_results if r.passed)
         failed_checks = total_checks - passed_checks
         success_rate = (passed_checks / total_checks * 100) if total_checks > 0 else 0
-<<<<<<< HEAD
-
-        total_duration = (self.end_time - self.start_time).total_seconds() if self.start_time and self.end_time else 0
-
-=======
         
         total_duration = (self.end_time - self.start_time).total_seconds() if self.start_time and self.end_time else 0
         
->>>>>>> feature/core-services-refactor
         # 质量门禁检查
         quality_gates = {
             "code_quality_passed": all(r.passed for r in self.check_results if "代码质量" in r.check_name),
@@ -836,15 +500,9 @@ class V015QualityChecker:
             "end_to_end_tests_passed": all(r.passed for r in self.check_results if "端到端" in r.check_name),
             "overall_success_rate_ok": success_rate >= 80
         }
-<<<<<<< HEAD
-
-        quality_gates["overall_quality_gate_passed"] = all(quality_gates.values())
-
-=======
         
         quality_gates["overall_quality_gate_passed"] = all(quality_gates.values())
         
->>>>>>> feature/core-services-refactor
         return {
             "summary": {
                 "total_checks": total_checks,
@@ -873,15 +531,6 @@ async def main():
     """主函数"""
     print("🚀 启动V0.1.5全面质量检查和端到端测试...")
     print("=" * 80)
-<<<<<<< HEAD
-
-    # 创建质量检查器
-    quality_checker = V015QualityChecker()
-
-    # 运行所有检查
-    quality_report = await quality_checker.run_all_checks()
-
-=======
     
     # 创建质量检查器
     quality_checker = V015QualityChecker()
@@ -889,44 +538,27 @@ async def main():
     # 运行所有检查
     quality_report = await quality_checker.run_all_checks()
     
->>>>>>> feature/core-services-refactor
     # 显示检查结果
     print("\n" + "=" * 80)
     print("📊 质量检查结果摘要")
     print("=" * 80)
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     summary = quality_report["summary"]
     print(f"总检查数: {summary['total_checks']}")
     print(f"通过检查: {summary['passed_checks']}")
     print(f"失败检查: {summary['failed_checks']}")
     print(f"成功率: {summary['success_rate']:.1f}%")
     print(f"总耗时: {summary['total_duration']:.2f}秒")
-<<<<<<< HEAD
-
-    # 显示质量门禁结果
-    print("\n🚪 V0.1.5质量门禁检查")
-    print("-" * 40)
-
-=======
     
     # 显示质量门禁结果
     print("\n🚪 V0.1.5质量门禁检查")
     print("-" * 40)
     
->>>>>>> feature/core-services-refactor
     quality_gates = quality_report["quality_gates"]
     for gate_name, gate_result in quality_gates.items():
         status = "✅ 通过" if gate_result else "❌ 失败"
         print(f"{gate_name}: {status}")
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     # 显示失败的检查详情
     failed_checks = [r for r in quality_checker.check_results if not r.passed]
     if failed_checks:
@@ -937,24 +569,14 @@ async def main():
             print(f"错误: {check.error_message}")
             print(f"耗时: {check.duration:.2f}秒")
             print()
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     # 保存质量报告
     report_file = current_dir / "v0_1_5_quality_report.json"
     with open(report_file, 'w', encoding='utf-8') as f:
         json.dump(quality_report, f, indent=2, ensure_ascii=False)
-<<<<<<< HEAD
-
-    print(f"📄 详细质量报告已保存到: {report_file}")
-
-=======
     
     print(f"📄 详细质量报告已保存到: {report_file}")
     
->>>>>>> feature/core-services-refactor
     # 最终结果
     overall_passed = quality_gates["overall_quality_gate_passed"]
     if overall_passed:
@@ -981,8 +603,4 @@ if __name__ == "__main__":
         sys.exit(1)
     except Exception as e:
         print(f"\n❌ 质量检查执行失败: {e}")
-<<<<<<< HEAD
         sys.exit(1)
-=======
-        sys.exit(1)
->>>>>>> feature/core-services-refactor

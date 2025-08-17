@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
-"""实时Wiki更新器
+# -*- coding: utf-8 -*-
+"""
+实时Wiki更新器
 
 基于辩论结果自动更新知识库
 """
 
 import logging
-import uuid
+import asyncio
+from typing import Any, Dict, List, Optional
 from datetime import datetime
-<<<<<<< HEAD
-from typing import Any, Dict, List
-=======
-from typing import Any
->>>>>>> feature/core-services-refactor
+import uuid
 
 logger = logging.getLogger(__name__)
 
 
 class RealTimeWikiUpdater:
     """实时Wiki更新器"""
-
+    
     def __init__(self):
         """初始化实时Wiki更新器"""
         try:
@@ -27,17 +26,12 @@ class RealTimeWikiUpdater:
         except ImportError:
             logger.warning("WikiService不可用，使用模拟实现")
             self.wiki_service = None
-
+        
         self.update_queue = []
         self.update_history = []
         self.processing = False
-<<<<<<< HEAD
-
-    def process_debate_result(self, debate_result: Dict[str, Any]) -> Dict[str, Any]:
-=======
     
-    def process_debate_result(self, debate_result: dict[str, Any]) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
+    def process_debate_result(self, debate_result: Dict[str, Any]) -> Dict[str, Any]:
         """处理辩论结果并更新Wiki"""
         try:
             update_result = {
@@ -48,12 +42,12 @@ class RealTimeWikiUpdater:
                 "new_entries": [],
                 "quality_scores": {}
             }
-
+            
             # 提取关键信息
             consensus = debate_result.get("consensus", {})
             new_insights = debate_result.get("new_insights", [])
             evidence = debate_result.get("evidence", [])
-
+            
             # 处理共识内容
             if consensus and consensus.get("key_points"):
                 for point in consensus["key_points"]:
@@ -65,7 +59,7 @@ class RealTimeWikiUpdater:
                         "contributors": debate_result.get("participants", []),
                         "evidence": evidence
                     }
-
+                    
                     # 创建或更新知识条目
                     if self.wiki_service:
                         # 使用WikiService的create_entry方法
@@ -79,17 +73,17 @@ class RealTimeWikiUpdater:
                         entry_id = wiki_version.entry_name if wiki_version else f"entry_{len(update_result['new_entries']) + 1}"
                     else:
                         entry_id = f"entry_{len(update_result['new_entries']) + 1}"
-
+                    
                     update_result["new_entries"].append({
                         "entry_id": entry_id,
                         "title": entry_data["title"],
                         "content": entry_data["content"]
                     })
-
+                    
                     # 评估质量
                     quality_score = self._evaluate_content_quality(entry_data)
                     update_result["quality_scores"][entry_id] = quality_score
-
+            
             # 处理新洞察
             for insight in new_insights:
                 insight_entry = {
@@ -100,7 +94,7 @@ class RealTimeWikiUpdater:
                     "contributors": debate_result.get("participants", []),
                     "evidence": evidence
                 }
-
+                
                 if self.wiki_service:
                     # 使用WikiService的create_entry方法
                     wiki_version = self.wiki_service.create_entry(
@@ -113,30 +107,30 @@ class RealTimeWikiUpdater:
                     entry_id = wiki_version.entry_name if wiki_version else f"insight_{len(update_result['new_entries']) + 1}"
                 else:
                     entry_id = f"insight_{len(update_result['new_entries']) + 1}"
-
+                
                 update_result["new_entries"].append({
                     "entry_id": entry_id,
                     "title": insight_entry["title"],
                     "content": insight_entry["content"]
                 })
-
+                
                 quality_score = self._evaluate_content_quality(insight_entry)
                 update_result["quality_scores"][entry_id] = quality_score
-
+            
             # 记录更新历史
             self.update_history.append(update_result)
-
+            
             return update_result
-
+            
         except Exception as e:
             logger.error(f"处理辩论结果失败: {e}")
             return {"error": str(e)}
-
+    
     def auto_update_knowledge(
         self,
         topic: str,
-        new_information: list[str]
-    ) -> dict[str, Any]:
+        new_information: List[str]
+    ) -> Dict[str, Any]:
         """自动更新知识"""
         try:
             update_result = {
@@ -145,21 +139,21 @@ class RealTimeWikiUpdater:
                 "updated_entries": [],
                 "timestamp": datetime.now().isoformat()
             }
-
+            
             for info in new_information:
                 # 检查是否存在相关条目
                 existing_entries = self._find_related_entries(topic, info)
-
+                
                 if existing_entries:
                     # 更新现有条目
                     for entry in existing_entries:
                         updated_entry = self._merge_information(entry, info)
-
+                        
                         if self.wiki_service:
                             # WikiService没有直接的update方法，需要创建新版本
                             # 这里简化处理，记录更新意图
                             pass
-
+                        
                         update_result["updated_entries"].append({
                             "entry_id": entry["id"],
                             "old_content": entry.get("content", ""),
@@ -175,7 +169,7 @@ class RealTimeWikiUpdater:
                         "confidence": 0.6,
                         "timestamp": datetime.now().isoformat()
                     }
-
+                    
                     if self.wiki_service:
                         # 使用WikiService的create_entry方法
                         wiki_version = self.wiki_service.create_entry(
@@ -188,30 +182,25 @@ class RealTimeWikiUpdater:
                         entry_id = wiki_version.entry_name if wiki_version else f"auto_{len(update_result['updated_entries']) + 1}"
                     else:
                         entry_id = f"auto_{len(update_result['updated_entries']) + 1}"
-
+                    
                     update_result["updated_entries"].append({
                         "entry_id": entry_id,
                         "title": new_entry["title"],
                         "content": new_entry["content"],
                         "update_type": "new_entry"
                     })
-
+            
             return update_result
-
+            
         except Exception as e:
             logger.error(f"自动更新知识失败: {e}")
             return {"success": False, "error": str(e)}
-<<<<<<< HEAD
-
-    def track_changes(self, change_data: Dict[str, Any]) -> str:
-=======
     
-    def track_changes(self, change_data: dict[str, Any]) -> str:
->>>>>>> feature/core-services-refactor
+    def track_changes(self, change_data: Dict[str, Any]) -> str:
         """追踪变更"""
         try:
             change_id = str(uuid.uuid4())
-
+            
             change_record = {
                 "change_id": change_id,
                 "timestamp": datetime.now().isoformat(),
@@ -222,22 +211,17 @@ class RealTimeWikiUpdater:
                 "reason": change_data.get("reason", ""),
                 "contributor": change_data.get("contributor", "system")
             }
-
+            
             # 添加到更新历史
             self.update_history.append(change_record)
-
+            
             return change_id
-
+            
         except Exception as e:
             logger.error(f"追踪变更失败: {e}")
             return None
-<<<<<<< HEAD
-
-    def _evaluate_content_quality(self, content_data: Dict[str, Any]) -> Dict[str, float]:
-=======
     
-    def _evaluate_content_quality(self, content_data: dict[str, Any]) -> dict[str, float]:
->>>>>>> feature/core-services-refactor
+    def _evaluate_content_quality(self, content_data: Dict[str, Any]) -> Dict[str, float]:
         """评估内容质量"""
         try:
             quality_score = {
@@ -246,11 +230,11 @@ class RealTimeWikiUpdater:
                 "reliability": 0.0,
                 "overall": 0.0
             }
-
+            
             # 基于置信度评估准确性
             confidence = content_data.get("confidence", 0.5)
             quality_score["accuracy"] = confidence
-
+            
             # 基于内容长度和结构评估完整性
             content = content_data.get("content", "")
             if len(content) > 100:
@@ -259,38 +243,33 @@ class RealTimeWikiUpdater:
                 quality_score["completeness"] = 0.6
             else:
                 quality_score["completeness"] = 0.4
-
+            
             # 基于证据和来源评估可靠性
             evidence = content_data.get("evidence", [])
             contributors = content_data.get("contributors", [])
-
+            
             reliability_factors = 0
             if evidence:
                 reliability_factors += len(evidence) * 0.2
             if contributors:
                 reliability_factors += len(contributors) * 0.1
-
+            
             quality_score["reliability"] = min(reliability_factors, 1.0)
-
+            
             # 计算总体质量
             quality_score["overall"] = (
                 quality_score["accuracy"] * 0.4 +
                 quality_score["completeness"] * 0.3 +
                 quality_score["reliability"] * 0.3
             )
-
+            
             return quality_score
-
+            
         except Exception as e:
             logger.error(f"评估内容质量失败: {e}")
             return {"accuracy": 0.0, "completeness": 0.0, "reliability": 0.0, "overall": 0.0}
-<<<<<<< HEAD
-
-    def _find_related_entries(self, topic: str, information: str) -> List[Dict[str, Any]]:
-=======
     
-    def _find_related_entries(self, topic: str, information: str) -> list[dict[str, Any]]:
->>>>>>> feature/core-services-refactor
+    def _find_related_entries(self, topic: str, information: str) -> List[Dict[str, Any]]:
         """查找相关条目"""
         try:
             if self.wiki_service:
@@ -307,41 +286,31 @@ class RealTimeWikiUpdater:
                         "relevance": 0.8
                     }
                 ]
-
+                
         except Exception as e:
             logger.error(f"查找相关条目失败: {e}")
             return []
-<<<<<<< HEAD
-
-    def _merge_information(self, existing_entry: Dict[str, Any], new_info: str) -> Dict[str, Any]:
-=======
     
-    def _merge_information(self, existing_entry: dict[str, Any], new_info: str) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
+    def _merge_information(self, existing_entry: Dict[str, Any], new_info: str) -> Dict[str, Any]:
         """合并信息"""
         try:
             merged_entry = existing_entry.copy()
-
+            
             # 简单的信息合并策略
             existing_content = existing_entry.get("content", "")
-
+            
             if new_info not in existing_content:
                 merged_entry["content"] = f"{existing_content}\n\n补充信息: {new_info}"
                 merged_entry["last_updated"] = datetime.now().isoformat()
                 merged_entry["update_reason"] = "信息补充"
-
+            
             return merged_entry
-
+            
         except Exception as e:
             logger.error(f"合并信息失败: {e}")
             return existing_entry
-<<<<<<< HEAD
-
-    def get_update_statistics(self) -> Dict[str, Any]:
-=======
     
-    def get_update_statistics(self) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
+    def get_update_statistics(self) -> Dict[str, Any]:
         """获取更新统计"""
         try:
             stats = {
@@ -351,35 +320,35 @@ class RealTimeWikiUpdater:
                 "recent_updates": [],
                 "update_frequency": {}
             }
-
+            
             # 统计成功和失败的更新
             for update in self.update_history:
                 if "error" in update:
                     stats["failed_updates"] += 1
                 else:
                     stats["successful_updates"] += 1
-
+            
             # 获取最近的更新
             stats["recent_updates"] = self.update_history[-5:] if len(self.update_history) >= 5 else self.update_history
-
+            
             # 计算更新频率（按日期）
             from collections import defaultdict
             frequency = defaultdict(int)
-
+            
             for update in self.update_history:
                 timestamp = update.get("timestamp", "")
                 if timestamp:
                     date = timestamp.split("T")[0]  # 提取日期部分
                     frequency[date] += 1
-
+            
             stats["update_frequency"] = dict(frequency)
-
+            
             return stats
-
+            
         except Exception as e:
             logger.error(f"获取更新统计失败: {e}")
             return {"error": str(e)}
-
+    
     def clear_update_history(self) -> bool:
         """清除更新历史"""
         try:

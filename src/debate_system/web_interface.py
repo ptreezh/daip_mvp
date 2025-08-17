@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""多轮辩论系统Web界面
+# -*- coding: utf-8 -*-
+"""
+多轮辩论系统Web界面
 
 基于现有ChatInterface和TransparencyMonitor组件，
 为多轮辩论系统提供专门的Web界面。
@@ -14,35 +16,20 @@
 
 import asyncio
 import logging
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 from enum import Enum
-<<<<<<< HEAD
-from typing import Any, Dict, List, Optional
-=======
-from typing import Any, Optional
->>>>>>> feature/core-services-refactor
 
-from lona.html import (
-    H2,
-    H3,
-    HTML,
-    A,
-    Button,
-    Div,
-    Nav,
-    Option,
-    P,
-    Select,
-    Span,
-    TextInput,
-)
 from lona.html.widget import Widget
+from lona.html import HTML, Div, H1, H2, H3, P, Span, Button, TextInput, Select, Option
+from lona.html import Table, Tr, Td, Th, THead, TBody
+from lona.html import Nav, Ul, Li, A
 
 # 导入现有组件
 try:
     from frontend.components.chat_interface import ChatInterface, ChatMessage, MessageType
     from frontend.components.transparency_monitor import TransparencyMonitor
-    from frontend.services.websocket_manager import WebSocketMessage, websocket_manager
+    from frontend.services.websocket_manager import websocket_manager, WebSocketMessage
 except ImportError:
     # 如果无法导入，创建占位符类
     class ChatInterface:
@@ -57,20 +44,15 @@ except ImportError:
             pass
 
 # 导入辩论系统组件
+from multi_role_dialogue_engine import MultiRoleDialogueEngine, DialogueState, ConversationTurn
+from .debate_flow_definition import DebateSession, DebateStatus, DebatePhase, ParticipantRole
 from debate_state_manager import DebateStateManager
-from multi_role_dialogue_engine import MultiRoleDialogueEngine
-
-from .debate_flow_definition import DebateSession, DebateStatus
 
 logger = logging.getLogger(__name__)
 
 
 class DebateInterfaceMode(Enum):
     """辩论界面模式"""
-<<<<<<< HEAD
-
-=======
->>>>>>> feature/core-services-refactor
     SETUP = "setup"          # 设置模式
     ACTIVE = "active"        # 活跃辩论
     MONITORING = "monitoring" # 监控模式
@@ -79,26 +61,6 @@ class DebateInterfaceMode(Enum):
 
 class DebateWebInterface(Widget):
     """多轮辩论系统Web界面"""
-<<<<<<< HEAD
-
-    def __init__(self,
-                 dialogue_engine: MultiRoleDialogueEngine,
-                 state_manager: DebateStateManager):
-        super().__init__()
-
-        self.dialogue_engine = dialogue_engine
-        self.state_manager = state_manager
-
-        # 界面状态
-        self.current_mode = DebateInterfaceMode.SETUP
-        self.active_session: Optional[DebateSession] = None
-        self.session_history: List[Dict[str, Any]] = []
-
-        # 子组件
-        self.chat_interface = None
-        self.transparency_monitor = None
-
-=======
     
     def __init__(self, 
                  dialogue_engine: MultiRoleDialogueEngine,
@@ -111,13 +73,12 @@ class DebateWebInterface(Widget):
         # 界面状态
         self.current_mode = DebateInterfaceMode.SETUP
         self.active_session: Optional[DebateSession] = None
-        self.session_history: list[dict[str, Any]] = []
+        self.session_history: List[Dict[str, Any]] = []
         
         # 子组件
         self.chat_interface = None
         self.transparency_monitor = None
         
->>>>>>> feature/core-services-refactor
         # UI元素
         self.topic_input = TextInput(
             placeholder="请输入辩论话题...",
@@ -154,21 +115,6 @@ class DebateWebInterface(Widget):
             DebateInterfaceMode.MONITORING: Button("监控", _class="btn btn-outline-info"),
             DebateInterfaceMode.RESULTS: Button("结果", _class="btn btn-outline-warning")
         }
-<<<<<<< HEAD
-
-        # 绑定事件
-        self.start_debate_button.handle_click = self.handle_start_debate
-        self.stop_debate_button.handle_click = self.handle_stop_debate
-
-        for mode, button in self.mode_switch_buttons.items():
-            button.handle_click = lambda event, m=mode: asyncio.create_task(self.switch_mode(m))
-
-        # 初始化子组件
-        self._initialize_components()
-
-        logger.info("多轮辩论Web界面初始化完成")
-
-=======
         
         # 绑定事件
         self.start_debate_button.handle_click = self.handle_start_debate
@@ -182,7 +128,6 @@ class DebateWebInterface(Widget):
         
         logger.info("多轮辩论Web界面初始化完成")
     
->>>>>>> feature/core-services-refactor
     def _initialize_components(self):
         """初始化子组件"""
         try:
@@ -190,17 +135,6 @@ class DebateWebInterface(Widget):
             self.transparency_monitor = TransparencyMonitor(
                 websocket_manager=websocket_manager
             )
-<<<<<<< HEAD
-
-            # 设置监控回调
-            self.transparency_monitor.on_agent_update = self.handle_agent_update
-            self.transparency_monitor.on_workflow_update = self.handle_workflow_update
-
-            logger.info("子组件初始化完成")
-        except Exception as e:
-            logger.error(f"子组件初始化失败: {e}")
-
-=======
             
             # 设置监控回调
             self.transparency_monitor.on_agent_update = self.handle_agent_update
@@ -210,7 +144,6 @@ class DebateWebInterface(Widget):
         except Exception as e:
             logger.error(f"子组件初始化失败: {e}")
     
->>>>>>> feature/core-services-refactor
     async def handle_start_debate(self, event):
         """处理开始辩论"""
         try:
@@ -218,69 +151,36 @@ class DebateWebInterface(Widget):
             if not topic:
                 await self.show_error("请输入辩论话题")
                 return
-<<<<<<< HEAD
-
-            participant_count = int(self.participant_count_select.value)
-            debate_format = self.debate_format_select.value
-
-=======
             
             participant_count = int(self.participant_count_select.value)
             debate_format = self.debate_format_select.value
             
->>>>>>> feature/core-services-refactor
             # 创建辩论会话
             session = DebateSession(
                 title=f"辩论：{topic}",
                 topic=topic,
                 description=f"关于'{topic}'的多角色辩论"
             )
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 保存会话到状态管理器
             success = await self.state_manager.create_session(session)
             if not success:
                 await self.show_error("创建辩论会话失败")
                 return
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 启动多角色对话
             dialogue_success = await self.dialogue_engine.start_dialogue(
                 session, topic, max_roles=participant_count
             )
-<<<<<<< HEAD
-
-            if not dialogue_success:
-                await self.show_error("启动多角色对话失败")
-                return
-
-=======
             
             if not dialogue_success:
                 await self.show_error("启动多角色对话失败")
                 return
             
->>>>>>> feature/core-services-refactor
             # 更新界面状态
             self.active_session = session
             self.start_debate_button.disabled = True
             self.stop_debate_button.disabled = False
-<<<<<<< HEAD
-
-            # 切换到活跃模式
-            await self.switch_mode(DebateInterfaceMode.ACTIVE)
-
-            # 创建聊天界面（模拟PersonalAssistantService）
-            mock_assistant = MockPersonalAssistantService(self.dialogue_engine, session.session_id)
-            self.chat_interface = ChatInterface(mock_assistant, session.session_id)
-
-=======
             
             # 切换到活跃模式
             await self.switch_mode(DebateInterfaceMode.ACTIVE)
@@ -289,7 +189,6 @@ class DebateWebInterface(Widget):
             mock_assistant = MockPersonalAssistantService(self.dialogue_engine, session.session_id)
             self.chat_interface = ChatInterface(mock_assistant, session.session_id)
             
->>>>>>> feature/core-services-refactor
             # 添加辩论开始消息
             await self.chat_interface.add_system_message(
                 f"🎭 多角色辩论已开始！\n\n"
@@ -299,18 +198,6 @@ class DebateWebInterface(Widget):
                 f"各位专家正在准备发言，请稍候...",
                 MessageType.SYSTEM_INFO
             )
-<<<<<<< HEAD
-
-            # 启动透明度监控
-            await self.transparency_monitor.start_monitoring()
-
-            logger.info(f"辩论已开始: {topic}")
-
-        except Exception as e:
-            logger.error(f"开始辩论失败: {e}")
-            await self.show_error(f"开始辩论失败: {str(e)}")
-
-=======
             
             # 启动透明度监控
             await self.transparency_monitor.start_monitoring()
@@ -321,36 +208,22 @@ class DebateWebInterface(Widget):
             logger.error(f"开始辩论失败: {e}")
             await self.show_error(f"开始辩论失败: {str(e)}")
     
->>>>>>> feature/core-services-refactor
     async def handle_stop_debate(self, event):
         """处理结束辩论"""
         try:
             if not self.active_session:
                 return
-<<<<<<< HEAD
-
-            # 结束对话
-            success = await self.dialogue_engine.end_dialogue(self.active_session.session_id)
-
-=======
             
             # 结束对话
             success = await self.dialogue_engine.end_dialogue(self.active_session.session_id)
             
->>>>>>> feature/core-services-refactor
             if success:
                 # 更新会话状态
                 self.active_session.status = DebateStatus.COMPLETED
                 self.active_session.completed_at = datetime.now()
-<<<<<<< HEAD
-
-                await self.state_manager.update_session(self.active_session)
-
-=======
                 
                 await self.state_manager.update_session(self.active_session)
                 
->>>>>>> feature/core-services-refactor
                 # 添加到历史记录
                 summary = await self.dialogue_engine.get_dialogue_summary(self.active_session.session_id)
                 self.session_history.append({
@@ -358,16 +231,6 @@ class DebateWebInterface(Widget):
                     "summary": summary,
                     "completed_at": datetime.now()
                 })
-<<<<<<< HEAD
-
-                # 更新界面状态
-                self.start_debate_button.disabled = False
-                self.stop_debate_button.disabled = True
-
-                # 切换到结果模式
-                await self.switch_mode(DebateInterfaceMode.RESULTS)
-
-=======
                 
                 # 更新界面状态
                 self.start_debate_button.disabled = False
@@ -376,27 +239,12 @@ class DebateWebInterface(Widget):
                 # 切换到结果模式
                 await self.switch_mode(DebateInterfaceMode.RESULTS)
                 
->>>>>>> feature/core-services-refactor
                 # 添加结束消息
                 if self.chat_interface:
                     await self.chat_interface.add_system_message(
                         "🏁 辩论已结束！正在生成总结报告...",
                         MessageType.SYSTEM_INFO
                     )
-<<<<<<< HEAD
-
-                # 停止监控
-                await self.transparency_monitor.stop_monitoring()
-
-                logger.info(f"辩论已结束: {self.active_session.session_id}")
-            else:
-                await self.show_error("结束辩论失败")
-
-        except Exception as e:
-            logger.error(f"结束辩论失败: {e}")
-            await self.show_error(f"结束辩论失败: {str(e)}")
-
-=======
                 
                 # 停止监控
                 await self.transparency_monitor.stop_monitoring()
@@ -409,50 +257,31 @@ class DebateWebInterface(Widget):
             logger.error(f"结束辩论失败: {e}")
             await self.show_error(f"结束辩论失败: {str(e)}")
     
->>>>>>> feature/core-services-refactor
     async def switch_mode(self, mode: DebateInterfaceMode):
         """切换界面模式"""
         try:
             self.current_mode = mode
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 更新按钮状态
             for m, button in self.mode_switch_buttons.items():
                 if m == mode:
                     button._class = "btn btn-primary"
                 else:
                     button._class = "btn btn-outline-secondary"
-<<<<<<< HEAD
-
-            logger.info(f"界面模式已切换到: {mode.value}")
-
-        except Exception as e:
-            logger.error(f"切换模式失败: {e}")
-
-    async def handle_agent_update(self, agent_data: Dict[str, Any]):
-=======
             
             logger.info(f"界面模式已切换到: {mode.value}")
             
         except Exception as e:
             logger.error(f"切换模式失败: {e}")
     
-    async def handle_agent_update(self, agent_data: dict[str, Any]):
->>>>>>> feature/core-services-refactor
+    async def handle_agent_update(self, agent_data: Dict[str, Any]):
         """处理代理状态更新"""
         try:
             if self.chat_interface:
                 agent_name = agent_data.get("name", "Unknown Agent")
                 status = agent_data.get("status", "unknown")
                 current_task = agent_data.get("current_task", "")
-<<<<<<< HEAD
-
-=======
                 
->>>>>>> feature/core-services-refactor
                 if status == "thinking":
                     await self.chat_interface.add_system_message(
                         f"🤖 {agent_name} 正在思考: {current_task}",
@@ -466,35 +295,22 @@ class DebateWebInterface(Widget):
                     )
         except Exception as e:
             logger.error(f"处理代理更新失败: {e}")
-<<<<<<< HEAD
-
-    async def handle_workflow_update(self, workflow_data: Dict[str, Any]):
-=======
     
-    async def handle_workflow_update(self, workflow_data: dict[str, Any]):
->>>>>>> feature/core-services-refactor
+    async def handle_workflow_update(self, workflow_data: Dict[str, Any]):
         """处理工作流更新"""
         try:
             if self.chat_interface:
                 workflow_type = workflow_data.get("type", "unknown")
                 status = workflow_data.get("status", "unknown")
                 progress = workflow_data.get("progress", 0)
-<<<<<<< HEAD
-
-=======
                 
->>>>>>> feature/core-services-refactor
                 await self.chat_interface.add_system_message(
                     f"🔄 工作流 {workflow_type}: {status} ({progress}%)",
                     MessageType.WORKFLOW_STATUS
                 )
         except Exception as e:
             logger.error(f"处理工作流更新失败: {e}")
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     async def show_error(self, message: str):
         """显示错误消息"""
         if self.chat_interface:
@@ -503,20 +319,12 @@ class DebateWebInterface(Widget):
                 MessageType.ERROR
             )
         logger.error(message)
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     def _render_setup_mode(self) -> HTML:
         """渲染设置模式"""
         return Div(
             H2("🎭 创建新辩论", _class="mb-4"),
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 辩论设置表单
             Div(
                 Div(
@@ -541,11 +349,7 @@ class DebateWebInterface(Widget):
                     ),
                     _class="col-md-6"
                 ),
-<<<<<<< HEAD
-
-=======
                 
->>>>>>> feature/core-services-refactor
                 # 历史记录
                 Div(
                     H3("📚 历史辩论", _class="mb-3"),
@@ -553,15 +357,9 @@ class DebateWebInterface(Widget):
                         Div(
                             H5(record["session"].title, _class="mb-2"),
                             P(f"话题: {record['session'].topic}", _class="text-muted mb-1"),
-<<<<<<< HEAD
-                            P(f"完成时间: {record['completed_at'].strftime('%Y-%m-%d %H:%M')}",
-                              _class="text-muted mb-2"),
-                            P(f"参与角色: {record['summary']['active_roles'] if record['summary'] else 'N/A'}",
-=======
                             P(f"完成时间: {record['completed_at'].strftime('%Y-%m-%d %H:%M')}", 
                               _class="text-muted mb-2"),
                             P(f"参与角色: {record['summary']['active_roles'] if record['summary'] else 'N/A'}", 
->>>>>>> feature/core-services-refactor
                               _class="text-muted"),
                             _class="card card-body mb-3"
                         )
@@ -575,11 +373,7 @@ class DebateWebInterface(Widget):
             ),
             _class="container-fluid"
         )
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     def _render_active_mode(self) -> HTML:
         """渲染活跃辩论模式"""
         if not self.chat_interface:
@@ -587,24 +381,14 @@ class DebateWebInterface(Widget):
                 P("正在初始化辩论界面...", _class="text-center py-5"),
                 _class="container-fluid"
             )
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         return Div(
             # 辩论控制栏
             Div(
                 Div(
-<<<<<<< HEAD
-                    H3(f"🎭 {self.active_session.title}" if self.active_session else "辩论进行中",
-                       _class="mb-0"),
-                    P(f"话题: {self.active_session.topic}" if self.active_session else "",
-=======
                     H3(f"🎭 {self.active_session.title}" if self.active_session else "辩论进行中", 
                        _class="mb-0"),
                     P(f"话题: {self.active_session.topic}" if self.active_session else "", 
->>>>>>> feature/core-services-refactor
                       _class="text-muted mb-0"),
                     _class="col"
                 ),
@@ -614,11 +398,7 @@ class DebateWebInterface(Widget):
                 ),
                 _class="row align-items-center mb-3 p-3 bg-light rounded"
             ),
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 主要内容区域
             Div(
                 # 聊天界面
@@ -626,11 +406,7 @@ class DebateWebInterface(Widget):
                     self.chat_interface.render(),
                     _class="col-lg-8"
                 ),
-<<<<<<< HEAD
-
-=======
                 
->>>>>>> feature/core-services-refactor
                 # 侧边栏 - 辩论状态
                 Div(
                     self._render_debate_status_panel(),
@@ -640,11 +416,7 @@ class DebateWebInterface(Widget):
             ),
             _class="container-fluid"
         )
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     def _render_monitoring_mode(self) -> HTML:
         """渲染监控模式"""
         if not self.transparency_monitor:
@@ -652,17 +424,10 @@ class DebateWebInterface(Widget):
                 P("监控组件未初始化", _class="text-center py-5"),
                 _class="container-fluid"
             )
-<<<<<<< HEAD
-
-        return Div(
-            H2("📊 系统监控", _class="mb-4"),
-
-=======
         
         return Div(
             H2("📊 系统监控", _class="mb-4"),
             
->>>>>>> feature/core-services-refactor
             # 监控面板
             Div(
                 self.transparency_monitor.render(),
@@ -670,11 +435,7 @@ class DebateWebInterface(Widget):
             ),
             _class="container-fluid"
         )
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     def _render_results_mode(self) -> HTML:
         """渲染结果模式"""
         if not self.active_session:
@@ -682,42 +443,25 @@ class DebateWebInterface(Widget):
                 P("暂无辩论结果", _class="text-center py-5"),
                 _class="container-fluid"
             )
-<<<<<<< HEAD
-
-        return Div(
-            H2("📊 辩论结果", _class="mb-4"),
-
-=======
         
         return Div(
             H2("📊 辩论结果", _class="mb-4"),
             
->>>>>>> feature/core-services-refactor
             # 结果摘要
             Div(
                 H3("📋 辩论摘要", _class="mb-3"),
                 Div(
                     P(f"话题: {self.active_session.topic}", _class="mb-2"),
-<<<<<<< HEAD
-                    P(f"开始时间: {self.active_session.started_at.strftime('%Y-%m-%d %H:%M') if self.active_session.started_at else 'N/A'}",
-                      _class="mb-2"),
-                    P(f"结束时间: {self.active_session.completed_at.strftime('%Y-%m-%d %H:%M') if self.active_session.completed_at else 'N/A'}",
-=======
                     P(f"开始时间: {self.active_session.started_at.strftime('%Y-%m-%d %H:%M') if self.active_session.started_at else 'N/A'}", 
                       _class="mb-2"),
                     P(f"结束时间: {self.active_session.completed_at.strftime('%Y-%m-%d %H:%M') if self.active_session.completed_at else 'N/A'}", 
->>>>>>> feature/core-services-refactor
                       _class="mb-2"),
                     P(f"参与者: {len(self.active_session.participants)}", _class="mb-2"),
                     _class="card card-body"
                 ),
                 _class="mb-4"
             ),
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 详细结果（如果有的话）
             Div(
                 H3("💡 关键洞察", _class="mb-3"),
@@ -726,20 +470,12 @@ class DebateWebInterface(Widget):
             ),
             _class="container-fluid"
         )
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     def _render_debate_status_panel(self) -> HTML:
         """渲染辩论状态面板"""
         if not self.active_session:
             return Div()
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         # 获取对话摘要
         try:
             summary = asyncio.create_task(
@@ -747,17 +483,10 @@ class DebateWebInterface(Widget):
             )
         except:
             summary = None
-<<<<<<< HEAD
-
-        return Div(
-            H4("📊 辩论状态", _class="mb-3"),
-
-=======
         
         return Div(
             H4("📊 辩论状态", _class="mb-3"),
             
->>>>>>> feature/core-services-refactor
             # 基本信息
             Div(
                 P(f"会话ID: {self.active_session.session_id[:8]}...", _class="mb-1 small text-muted"),
@@ -766,11 +495,7 @@ class DebateWebInterface(Widget):
                 P(f"参与者: {len(self.active_session.participants)}", _class="mb-1"),
                 _class="card card-body mb-3"
             ),
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 参与者列表
             Div(
                 H5("👥 参与角色", _class="mb-2"),
@@ -786,11 +511,7 @@ class DebateWebInterface(Widget):
                 ],
                 _class="card card-body mb-3"
             ),
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             # 快速操作
             Div(
                 H5("⚡ 快速操作", _class="mb-2"),
@@ -800,22 +521,14 @@ class DebateWebInterface(Widget):
                 _class="card card-body"
             )
         )
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     def _render_navigation(self) -> HTML:
         """渲染导航栏"""
         return Nav(
             Div(
                 # 品牌
                 A("🎭 多轮辩论系统", href="#", _class="navbar-brand"),
-<<<<<<< HEAD
-
-=======
                 
->>>>>>> feature/core-services-refactor
                 # 模式切换按钮
                 Div(
                     *[button for button in self.mode_switch_buttons.values()],
@@ -825,11 +538,7 @@ class DebateWebInterface(Widget):
             ),
             _class="navbar navbar-expand-lg navbar-light bg-light mb-4"
         )
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     def render(self) -> HTML:
         """渲染主界面"""
         # 根据当前模式渲染不同内容
@@ -839,18 +548,6 @@ class DebateWebInterface(Widget):
             DebateInterfaceMode.MONITORING: self._render_monitoring_mode,
             DebateInterfaceMode.RESULTS: self._render_results_mode
         }
-<<<<<<< HEAD
-
-        content_renderer = content_map.get(self.current_mode, self._render_setup_mode)
-
-        return Div(
-            # 导航栏
-            self._render_navigation(),
-
-            # 主要内容
-            content_renderer(),
-
-=======
         
         content_renderer = content_map.get(self.current_mode, self._render_setup_mode)
         
@@ -861,7 +558,6 @@ class DebateWebInterface(Widget):
             # 主要内容
             content_renderer(),
             
->>>>>>> feature/core-services-refactor
             # 样式
             HTML("""
             <style>
@@ -880,60 +576,35 @@ class DebateWebInterface(Widget):
                 .btn-group .btn { margin-right: 5px; }
             </style>
             """),
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             _class="debate-web-interface"
         )
 
 
 class MockPersonalAssistantService:
     """模拟PersonalAssistantService用于集成"""
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     def __init__(self, dialogue_engine: MultiRoleDialogueEngine, session_id: str):
         self.dialogue_engine = dialogue_engine
         self.session_id = session_id
         self.conversation_contexts = {}
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     async def process_message(self, message: str, session_id: str) -> str:
         """处理消息"""
         try:
             # 继续对话
             success = await self.dialogue_engine.continue_dialogue(session_id)
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             if success:
                 return "✅ 消息已发送给各位专家，他们正在准备回应..."
             else:
                 return "❌ 处理消息时出现问题，请稍后重试。"
-<<<<<<< HEAD
-
-        except Exception as e:
-            logger.error(f"处理消息失败: {e}")
-            return f"❌ 处理消息时出现错误: {str(e)}"
-
-    def update_conversation_context(self, session_id: str, context: Dict[str, Any]):
-=======
         
         except Exception as e:
             logger.error(f"处理消息失败: {e}")
             return f"❌ 处理消息时出现错误: {str(e)}"
     
-    def update_conversation_context(self, session_id: str, context: dict[str, Any]):
->>>>>>> feature/core-services-refactor
+    def update_conversation_context(self, session_id: str, context: Dict[str, Any]):
         """更新对话上下文"""
         if session_id not in self.conversation_contexts:
             self.conversation_contexts[session_id] = []
@@ -943,19 +614,6 @@ class MockPersonalAssistantService:
 # 使用示例和测试代码
 if __name__ == "__main__":
     import asyncio
-<<<<<<< HEAD
-
-    async def test_debate_web_interface():
-        """测试多轮辩论Web界面"""
-        print("🧪 测试多轮辩论Web界面...")
-
-        # 这里需要实际的组件实例
-        print("⚠️ 需要实际的组件实例才能运行完整测试")
-        print("✅ 多轮辩论Web界面代码结构验证完成")
-
-    # 运行测试
-    asyncio.run(test_debate_web_interface())
-=======
     
     async def test_debate_web_interface():
         """测试多轮辩论Web界面"""
@@ -967,4 +625,3 @@ if __name__ == "__main__":
     
     # 运行测试
     asyncio.run(test_debate_web_interface())
->>>>>>> feature/core-services-refactor

@@ -1,26 +1,21 @@
 #!/usr/bin/env python3
-"""真实LLM执行器
+# -*- coding: utf-8 -*-
+"""
+真实LLM执行器
 调用真实的大模型进行角色辩论
 """
 
-import asyncio
 import logging
-<<<<<<< HEAD
-from typing import Any, Dict
-=======
-from typing import Any
->>>>>>> feature/core-services-refactor
+import asyncio
+from typing import Dict, Any, List
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
 
 class RealLLMExecutor:
     """真实LLM执行器"""
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     def __init__(self):
         # 定义角色系统提示
         self.role_prompts = {
@@ -36,11 +31,7 @@ class RealLLMExecutor:
                 "perspective": "教育价值",
                 "stance": "支持但谨慎"
             },
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             "技术伦理学家": {
                 "system_prompt": """你是一位技术伦理学家，专门研究AI技术的伦理影响。
 你的观点特点：
@@ -53,11 +44,7 @@ class RealLLMExecutor:
                 "perspective": "伦理风险",
                 "stance": "谨慎质疑"
             },
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             "学生代表": {
                 "system_prompt": """你是一位大学生代表，代表学生群体的声音和需求。
 你的观点特点：
@@ -71,13 +58,8 @@ class RealLLMExecutor:
                 "stance": "实用主义"
             }
         }
-<<<<<<< HEAD
-
-    async def execute_real_debate_step(self, step_name: str, step_data: Dict[str, Any], topic: str) -> Dict[str, Any]:
-=======
     
-    async def execute_real_debate_step(self, step_name: str, step_data: dict[str, Any], topic: str) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
+    async def execute_real_debate_step(self, step_name: str, step_data: Dict[str, Any], topic: str) -> Dict[str, Any]:
         """执行真实的辩论步骤"""
         try:
             if step_name == "scenario_setup":
@@ -94,21 +76,12 @@ class RealLLMExecutor:
                 return await self._analyze_debate_results()
             else:
                 return {"action": step_name, "description": f"执行步骤: {step_name}"}
-<<<<<<< HEAD
-
-        except Exception as e:
-            logger.error(f"执行真实辩论步骤失败: {e}")
-            return {"error": str(e)}
-
-    async def _setup_debate_scenario(self, topic: str) -> Dict[str, Any]:
-=======
         
         except Exception as e:
             logger.error(f"执行真实辩论步骤失败: {e}")
             return {"error": str(e)}
     
-    async def _setup_debate_scenario(self, topic: str) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
+    async def _setup_debate_scenario(self, topic: str) -> Dict[str, Any]:
         """设置辩论场景"""
         return {
             "action": "真实场景设置",
@@ -126,19 +99,8 @@ class RealLLMExecutor:
                 "debate_protocol_ready": True
             }
         }
-<<<<<<< HEAD
-
-    async def _select_and_initialize_roles(self) -> Dict[str, Any]:
-        """选择和初始化角色"""
-        selected_roles = []
-
-        for role_name, role_config in self.role_prompts.items():
-            # 模拟LLM初始化过程
-            await asyncio.sleep(0.5)  # 模拟网络延迟
-
-=======
     
-    async def _select_and_initialize_roles(self) -> dict[str, Any]:
+    async def _select_and_initialize_roles(self) -> Dict[str, Any]:
         """选择和初始化角色"""
         selected_roles = []
         
@@ -146,7 +108,6 @@ class RealLLMExecutor:
             # 模拟LLM初始化过程
             await asyncio.sleep(0.5)  # 模拟网络延迟
             
->>>>>>> feature/core-services-refactor
             selected_roles.append({
                 "name": role_name,
                 "perspective": role_config["perspective"],
@@ -154,11 +115,7 @@ class RealLLMExecutor:
                 "system_prompt_length": len(role_config["system_prompt"]),
                 "initialization_status": "ready"
             })
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         return {
             "action": "真实角色初始化",
             "description": "成功初始化3个AI角色，每个角色都有独特的认知框架",
@@ -170,20 +127,8 @@ class RealLLMExecutor:
                 "roles_ready": True
             }
         }
-<<<<<<< HEAD
-
-    async def _initialize_debate_positions(self, topic: str) -> Dict[str, Any]:
-        """初始化辩论立场"""
-        # 模拟每个角色生成初始立场
-        positions = []
-
-        for role_name, role_config in self.role_prompts.items():
-            # 模拟LLM调用生成立场
-            await asyncio.sleep(1.0)  # 模拟LLM响应时间
-
-=======
     
-    async def _initialize_debate_positions(self, topic: str) -> dict[str, Any]:
+    async def _initialize_debate_positions(self, topic: str) -> Dict[str, Any]:
         """初始化辩论立场"""
         # 模拟每个角色生成初始立场
         positions = []
@@ -192,29 +137,20 @@ class RealLLMExecutor:
             # 模拟LLM调用生成立场
             await asyncio.sleep(1.0)  # 模拟LLM响应时间
             
->>>>>>> feature/core-services-refactor
             if "教育专家" in role_name:
                 position = f"从教育专业角度看，{topic}确实存在用户体验问题。我们需要在技术创新和教育本质之间找到平衡。"
             elif "技术伦理学家" in role_name:
                 position = f"我同意这个观点。{topic}反映了AI产品开发中的伦理责任缺失，我们不应该让用户承担技术不成熟的后果。"
             else:  # 学生代表
                 position = f"作为用户，我深有感触。{topic}说出了我们的心声 - 我们需要的是好用的产品，而不是复杂的技术展示。"
-<<<<<<< HEAD
-
-=======
             
->>>>>>> feature/core-services-refactor
             positions.append({
                 "role": role_name,
                 "initial_position": position,
                 "confidence": 0.8,
                 "reasoning_depth": "detailed"
             })
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         return {
             "action": "立场初始化",
             "description": "各AI角色基于其认知框架生成了初始辩论立场",
@@ -225,27 +161,15 @@ class RealLLMExecutor:
                 "total_tokens_generated": 450
             }
         }
-<<<<<<< HEAD
-
+    
     async def _conduct_debate_rounds(self, topic: str) -> Dict[str, Any]:
         """进行辩论轮次"""
         rounds_data = []
-
-        # 第一轮：问题分析
-        print("\n🎯 第一轮辩论：问题本质分析")
-        await asyncio.sleep(1.5)
-
-=======
-    
-    async def _conduct_debate_rounds(self, topic: str) -> dict[str, Any]:
-        """进行辩论轮次"""
-        rounds_data = []
         
         # 第一轮：问题分析
         print("\n🎯 第一轮辩论：问题本质分析")
         await asyncio.sleep(1.5)
         
->>>>>>> feature/core-services-refactor
         round1_statements = [
             {
                 "role": "教育专家",
@@ -253,11 +177,7 @@ class RealLLMExecutor:
                 "key_points": ["产品设计责任", "用户体验", "教育应用"]
             },
             {
-<<<<<<< HEAD
-                "role": "技术伦理学家",
-=======
                 "role": "技术伦理学家", 
->>>>>>> feature/core-services-refactor
                 "statement": "这个问题的核心是技术公司将产品风险转嫁给用户。未经充分训练的AI模型被包装成产品推向市场，用户被迫成为'驯化师'。",
                 "key_points": ["风险转嫁", "产品责任", "用户权益"]
             },
@@ -267,11 +187,7 @@ class RealLLMExecutor:
                 "key_points": ["用户体验", "工具易用性", "需求理解"]
             }
         ]
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         rounds_data.append({
             "round_number": 1,
             "theme": "问题本质分析",
@@ -279,19 +195,11 @@ class RealLLMExecutor:
             "consensus_level": 0.85,
             "key_insights": ["AI产品用户体验问题", "技术责任转嫁", "产品设计缺陷"]
         })
-<<<<<<< HEAD
-
-        # 第二轮：解决方案探讨
-        print("🎯 第二轮辩论：解决方案探讨")
-        await asyncio.sleep(1.5)
-
-=======
         
         # 第二轮：解决方案探讨
         print("🎯 第二轮辩论：解决方案探讨")
         await asyncio.sleep(1.5)
         
->>>>>>> feature/core-services-refactor
         round2_statements = [
             {
                 "role": "教育专家",
@@ -304,35 +212,20 @@ class RealLLMExecutor:
                 "key_points": ["责任标准", "行业监管", "企业责任"]
             },
             {
-<<<<<<< HEAD
-                "role": "学生代表",
-=======
                 "role": "学生代表", 
->>>>>>> feature/core-services-refactor
                 "statement": "最实际的是，AI产品应该有'学习模式' - 通过观察我的使用习惯，自动优化响应。就像好的老师会了解学生一样。",
                 "key_points": ["个性化学习", "使用习惯", "自动优化"]
             }
         ]
-<<<<<<< HEAD
-
-        rounds_data.append({
-            "round_number": 2,
-            "theme": "解决方案探讨",
-=======
         
         rounds_data.append({
             "round_number": 2,
             "theme": "解决方案探讨", 
->>>>>>> feature/core-services-refactor
             "statements": round2_statements,
             "consensus_level": 0.75,
             "key_insights": ["产品责任回归", "智能化改进", "个性化适应"]
         })
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         return {
             "action": "真实多轮辩论",
             "description": "AI角色进行了深度的多轮辩论，展现了不同认知框架的碰撞",
@@ -345,32 +238,19 @@ class RealLLMExecutor:
                 "debate_quality": "high"
             }
         }
-<<<<<<< HEAD
-
+    
     async def _form_consensus(self, topic: str) -> Dict[str, Any]:
         """形成共识"""
         print("\n🤝 共识形成阶段")
         await asyncio.sleep(2.0)
-
-=======
-    
-    async def _form_consensus(self, topic: str) -> dict[str, Any]:
-        """形成共识"""
-        print("\n🤝 共识形成阶段")
-        await asyncio.sleep(2.0)
         
->>>>>>> feature/core-services-refactor
         # 模拟共识算法处理
         consensus_process = {
             "method": "加权德尔菲法 + 语义相似度分析",
             "iterations": 3,
             "convergence_threshold": 0.8
         }
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         final_consensus = """
 经过深入辩论，三位AI专家达成以下共识：
 
@@ -385,11 +265,7 @@ class RealLLMExecutor:
 
 4. **最终目标**：让AI真正成为用户的智能助手，而不是需要用户伺候的复杂工具。
 """
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         return {
             "action": "智能共识形成",
             "description": "通过高级共识算法，AI角色达成了深度共识",
@@ -407,19 +283,11 @@ class RealLLMExecutor:
                 "semantic_similarity_score": 0.92
             }
         }
-<<<<<<< HEAD
-
+    
     async def _analyze_debate_results(self) -> Dict[str, Any]:
         """分析辩论结果"""
         await asyncio.sleep(1.0)
-
-=======
-    
-    async def _analyze_debate_results(self) -> dict[str, Any]:
-        """分析辩论结果"""
-        await asyncio.sleep(1.0)
         
->>>>>>> feature/core-services-refactor
         return {
             "action": "深度结果分析",
             "description": "对整个AI辩论过程进行综合分析和质量评估",
@@ -447,8 +315,4 @@ class RealLLMExecutor:
                 "quality_metrics_computed": 5,
                 "insight_generation_method": "multi_perspective_synthesis"
             }
-<<<<<<< HEAD
         }
-=======
-        }
->>>>>>> feature/core-services-refactor

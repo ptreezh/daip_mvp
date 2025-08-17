@@ -1,48 +1,40 @@
-"""Implementation of specific institutional primitives.
+"""
+Implementation of specific institutional primitives.
 
 This module provides concrete implementations of various institutional primitives
 used in the DAIP-LIVE system for collective intelligence and decision-making.
 """
 
 import logging
+from typing import Dict, List, Any, Optional
 from abc import ABC, abstractmethod
-<<<<<<< HEAD
-from typing import Any, Dict
-=======
-from typing import Any
->>>>>>> feature/core-services-refactor
 
 logger = logging.getLogger(__name__)
 
 
 class InstitutionalPrimitive(ABC):
     """基础制度原语抽象类"""
-
+    
     def __init__(self, name: str):
         """初始化制度原语"""
         self.name = name
-
+        
     @abstractmethod
-    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
+    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """执行制度原语"""
         pass
 
 
 class ConsensusBuilding(InstitutionalPrimitive):
     """共识构建原语"""
-
+    
     def __init__(self):
         super().__init__("consensus_building")
-<<<<<<< HEAD
-
-    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
-=======
         
-    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
+    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """执行共识构建"""
         logger.info("执行共识构建原语")
-
+        
         # 这里实现具体的共识构建逻辑
         result = {
             "primitive": self.name,
@@ -51,25 +43,20 @@ class ConsensusBuilding(InstitutionalPrimitive):
             "participants": context.get("participants", []),
             "result": "共识已达成"
         }
-
+        
         return result
 
 
 class CriticalReview(InstitutionalPrimitive):
     """批判性审查原语"""
-
+    
     def __init__(self):
         super().__init__("critical_review")
-<<<<<<< HEAD
-
-    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
-=======
         
-    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
+    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """执行批判性审查"""
         logger.info("执行批判性审查原语")
-
+        
         # 这里实现具体的批判性审查逻辑
         result = {
             "primitive": self.name,
@@ -78,25 +65,20 @@ class CriticalReview(InstitutionalPrimitive):
             "issues_found": context.get("issues", []),
             "recommendations": ["建议1", "建议2"]
         }
-
+        
         return result
 
 
 class MultiPerspectiveAnalysis(InstitutionalPrimitive):
     """多视角分析原语"""
-
+    
     def __init__(self):
         super().__init__("multi_perspective_analysis")
-<<<<<<< HEAD
-
-    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
-=======
         
-    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
+    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """执行多视角分析"""
         logger.info("执行多视角分析原语")
-
+        
         # 这里实现具体的多视角分析逻辑
         result = {
             "primitive": self.name,
@@ -105,5 +87,5 @@ class MultiPerspectiveAnalysis(InstitutionalPrimitive):
             "synthesis": "综合分析结果",
             "insights": ["洞察1", "洞察2"]
         }
-
+        
         return result
