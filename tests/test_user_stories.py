@@ -20,9 +20,9 @@ from src.core_services.academic_research_scenario import (
 # Import the scenarios
 from src.core_services.expert_consultation_scenario import (
     ConsultationType,
+    ConsultationPriority,
     ExpertConsultationRequest,
     ExpertConsultationScenario,
-    PriorityLevel,
 )
 from src.core_services.industry_analysis_scenario import (
     AnalysisDepth,

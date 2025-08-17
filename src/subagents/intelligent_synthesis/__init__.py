@@ -7,10 +7,8 @@
 
 from .quality_evaluator import EnhancedQualityEvaluator
 from .synthesis_agent import IntelligentSynthesisAgent
-from .weight_optimizer import SynthesisWeightOptimizer
 
 __all__ = [
     "IntelligentSynthesisAgent",
-    "EnhancedQualityEvaluator",
-    "SynthesisWeightOptimizer"
+    "EnhancedQualityEvaluator"
 ]

@@ -5,8 +5,6 @@ to SSKG representations while maintaining semantic integrity and consistent acce
 """
 
 from .base import StorageAdapter, StorageAdapterManager
-from .memory_bank_adapter import MemoryBankAdapter
-from .project_adapter import ProjectAdapter
 from .role_adapter import RoleMemoryAdapter
 from .session_adapter import SessionAdapter
 from .wiki_adapter import WikiAdapter
@@ -17,6 +15,4 @@ __all__ = [
     'RoleMemoryAdapter',
     'WikiAdapter',
     'SessionAdapter',
-    'ProjectAdapter',
-    'MemoryBankAdapter',
 ]

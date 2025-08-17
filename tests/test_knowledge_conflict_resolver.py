@@ -9,10 +9,10 @@ import pytest
 
 from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeNode, NodeType
 from src.core_services.knowledge_conflict_resolver import (
-    ConflictDetectionResult,
     ConflictType,
     KnowledgeConflictResolver,
     ResolutionStrategy,
+from src.core_services.perspective_conflict_detector import ConflictDetectionResult
 )
 
 

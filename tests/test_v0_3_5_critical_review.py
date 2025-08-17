@@ -22,7 +22,7 @@ from src.core_services.automated_report_generator import (
 )
 from src.core_services.collaborative_review_environment import CollaborativeReviewEnvironment
 from src.core_services.conflict_resolution_system import Conflict, ConflictResolutionSystem, ConflictType
-from src.core_services.multidimensional_assessment_engine import MultidimensionalAssessmentEngine
+from src.core_services.multidimensional_assessment_engine import MultiDimensionalAssessmentEngine
 from src.core_services.review_analytics import MetricType, ReviewAnalytics, ReviewMetric
 from src.core_services.smart_reviewer_allocator import SmartReviewerAllocator
 
