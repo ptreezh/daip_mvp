@@ -33,6 +33,20 @@ def _get_networkx():
             raise ImportError("networkx is required for knowledge visualization. Please install it with 'pip install networkx'")
     return _networkx
 
+def _get_plotly_go():
+    global _plotly_go
+    if _plotly_go is None:
+        try:
+            import plotly.graph_objects as go
+            _plotly_go = go
+        except ImportError:
+            raise ImportError("plotly is required for interactive visualizations. Please install it with 'pip install plotly'")
+    return _plotly_go
+            _networkx = nx
+        except ImportError:
+            raise ImportError("networkx is required for knowledge visualization. Please install it with 'pip install networkx'")
+    return _networkx
+
 def _get_matplotlib_plt():
     global _matplotlib_plt
     if _matplotlib_plt is None:
@@ -527,8 +541,9 @@ class KnowledgeVisualizationEngine:
         
         return G
     
-    def _create_interactive_graph(self, nodes: list[dict], edges: list[dict], config: VisualizationConfig) -> go.Figure:
+    def _create_interactive_graph(self, nodes: list[dict], edges: list[dict], config: VisualizationConfig) -> "_get_plotly_go()".Figure:
         """创建交互式图谱"""
+        go = _get_plotly_go()
         # 准备节点轨迹
         node_trace = go.Scatter(
             x=[node['x'] for node in nodes],
