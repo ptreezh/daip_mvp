@@ -331,6 +331,7 @@ class ForumChatInterface(Widget):
                 ),
                 _class="forum-agent-message"
             )
+        )
     
     def _render_user_message(self, message: ForumMessage) -> HTML:
         """渲染用户消息"""

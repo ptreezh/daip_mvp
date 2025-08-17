@@ -576,8 +576,7 @@ class TestEvidenceAggregationNode:
 
 if __name__ == "__main__":
     pytest.main([__file__])
-c
-lass TestConsensusNode:
+class TestConsensusNode:
     """Test cases for ConsensusNode."""
     
     @pytest.fixture

@@ -118,8 +118,8 @@ class VersionInfo:
                 major=self.major,
                 minor=self.minor,
                 patch=self.patch,
-                self.prerelease=f"hotfix.{datetime.now().strftime('%Y%m%d')}",
-                self.build
+                prerelease=f"hotfix.{datetime.now().strftime('%Y%m%d')}",
+                build=self.build
             )
         elif release_type == ReleaseType.RC:
             # Release candidate

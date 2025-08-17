@@ -177,8 +177,7 @@ class TestRoleMemoryAdapter(unittest.TestCase):
         retrieved_data = self.adapter.retrieve("test_role")
         self.assertIsNone(retrieved_data)
 
-class
- TestWikiAdapter(unittest.TestCase):
+class TestWikiAdapter(unittest.TestCase):
     """Test cases for the Wiki Adapter."""
     
     def setUp(self):
