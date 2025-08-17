@@ -27,6 +27,10 @@ class ConflictType(Enum):
     ANNOTATION_CONFLICT = "annotation_conflict"
     STATUS_CONFLICT = "status_conflict"
     VERSION_CONFLICT = "version_conflict"
+    DIRECT_CONTRADICTION = "direct_contradiction"
+    PARTIAL_OVERLAP = "partial_overlap"
+    TEMPORAL_INCONSISTENCY = "temporal_inconsistency"
+    SOURCE_DISAGREEMENT = "source_disagreement"
 
 
 class ConflictPriority(Enum):

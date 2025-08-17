@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager, KnowledgeNode, NodeType
-from src.core_services.knowledge_conflict_resolver import (
+from src.core_services.conflict_resolution_system import (
     ConflictType,
     KnowledgeConflictResolver,
     ResolutionStrategy,
