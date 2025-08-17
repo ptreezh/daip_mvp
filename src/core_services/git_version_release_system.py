@@ -175,9 +175,9 @@ class ReleaseInfo:
     release_type: ReleaseType
     status: ReleaseStatus
     created_at: datetime
-    published_at: Optional[datetime] = None
     tag_name: str
     target_commitish: str
+    published_at: Optional[datetime] = None
     assets: List[ReleaseAsset] = field(default_factory=list)
     download_count: int = 0
     body: str = ""
