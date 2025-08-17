@@ -13,8 +13,8 @@ from typing import Any, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from ..core.exceptions import ForumServiceError
-from ..core_services.forum_service import forum_service
+from ...core.exceptions import ForumServiceError
+from ...core_services.forum_service import forum_service
 
 # 配置日志
 logger = logging.getLogger(__name__)
