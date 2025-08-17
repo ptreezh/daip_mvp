@@ -42,6 +42,16 @@ def _get_plotly_go():
         except ImportError:
             raise ImportError("plotly is required for interactive visualizations. Please install it with 'pip install plotly'")
     return _plotly_go
+
+def _get_plotly_px():
+    global _plotly_px
+    if _plotly_px is None:
+        try:
+            import plotly.express as px
+            _plotly_px = px
+        except ImportError:
+            raise ImportError("plotly is required for interactive visualizations. Please install it with 'pip install plotly'")
+    return _plotly_px
             _networkx = nx
         except ImportError:
             raise ImportError("networkx is required for knowledge visualization. Please install it with 'pip install networkx'")
@@ -244,6 +254,7 @@ class KnowledgeVisualizationEngine:
         }
         
         # 颜色方案
+        px = _get_plotly_px()
         self.color_schemes = {
             "viridis": px.colors.sequential.Viridis,
             "plasma": px.colors.sequential.Plasma,
@@ -657,8 +668,9 @@ class KnowledgeVisualizationEngine:
             self.logger.error(f"获取时间线事件失败: {e}")
             return []
     
-    def _create_timeline_chart(self, events: list[TimelineEvent], config: VisualizationConfig) -> go.Figure:
+    def _create_timeline_chart(self, events: list[TimelineEvent], config: VisualizationConfig) -> "_get_plotly_go()".Figure:
         """创建时间线图表"""
+        px = _get_plotly_px()
         # 准备数据
         df = pd.DataFrame([{
             'id': event.id,
@@ -754,8 +766,9 @@ class KnowledgeVisualizationEngine:
             return 0.0
     
     def _create_cluster_visualization(self, G: nx.Graph, clusters: list[ClusterInfo], 
-                                    config: VisualizationConfig) -> go.Figure:
+                                    config: VisualizationConfig) -> "_get_plotly_go()".Figure:
         """创建聚类可视化"""
+        px = _get_plotly_px()
         # 为每个聚类分配颜色
         colors = px.colors.qualitative.Set3
         
@@ -851,7 +864,7 @@ class KnowledgeVisualizationEngine:
             self.logger.error(f"获取子网络失败: {e}")
             return nx.Graph()
     
-    def _create_network_diagram(self, G: nx.Graph, config: VisualizationConfig) -> go.Figure:
+    def _create_network_diagram(self, G: nx.Graph, config: VisualizationConfig) -> "_get_plotly_go()".Figure:
         """创建网络关系图"""
         pos = nx.spring_layout(G, k=2, iterations=50)
         
@@ -959,7 +972,7 @@ class KnowledgeVisualizationEngine:
             self.logger.error(f"准备热力图数据失败: {e}")
             return [[0 for _ in range(5)] for _ in range(5)]
     
-    def _create_heatmap(self, data: list[list[float]], config: VisualizationConfig) -> go.Figure:
+    def _create_heatmap(self, data: list[list[float]], config: VisualizationConfig) -> "_get_plotly_go()".Figure:
         """创建热力图"""
         fig = go.Figure(data=go.Heatmap(
             z=data,
