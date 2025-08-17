@@ -1320,7 +1320,7 @@ class PerspectiveConflictDetector:
             logger.info(f"Initialized {len(self.detection_strategies)} detection strategies")
             
         except Exception as e:
-            logger.error(f"Error initializing detection strategies: {e}"
+            logger.error(f"Error initializing detection strategies: {e}")
 
 
 # Singleton instance for global use
