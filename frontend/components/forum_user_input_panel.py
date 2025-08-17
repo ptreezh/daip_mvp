@@ -11,7 +11,7 @@ import logging
 from datetime import datetime
 from typing import Any
 
-from lona.html import HTML, Button, Div, Select, Span, Textarea
+from lona.html import HTML, Button, Div, Select, Span, TextArea
 from lona.html.widget import Widget
 
 from ..services.dual_entrance_websocket_manager import dual_entrance_websocket_manager
@@ -47,7 +47,7 @@ class ForumUserInputPanel(Widget):
             values=[(intent["value"], intent["label"]) for intent in self.intent_types]
         )
         
-        self.input_field = Textarea(
+        self.input_field = TextArea(
             placeholder="输入您的观点、问题或建议...",
             _class="forum-input-textarea",
             rows=3
