@@ -52,6 +52,9 @@ def _get_plotly_px():
         except ImportError:
             raise ImportError("plotly is required for interactive visualizations. Please install it with 'pip install plotly'")
     return _plotly_px
+
+
+def _get_matplotlib_plt():
             _networkx = nx
         except ImportError:
             raise ImportError("networkx is required for knowledge visualization. Please install it with 'pip install networkx'")
