@@ -9,13 +9,11 @@ from .dynamic_weight.performance_monitor import PerformanceMonitor
 from .dynamic_weight.weight_adjuster import DynamicWeightAdjuster
 from .intelligent_synthesis.quality_evaluator import EnhancedQualityEvaluator
 from .intelligent_synthesis.synthesis_agent import IntelligentSynthesisAgent
-from .intelligent_synthesis.weight_optimizer import SynthesisWeightOptimizer
 from .visualization.perspective_visualizer import MultiPerspectiveVisualizer
 
 __all__ = [
     "IntelligentSynthesisAgent",
     "EnhancedQualityEvaluator", 
-    "SynthesisWeightOptimizer",
     "DynamicWeightAdjuster",
     "PerformanceMonitor",
     "MultiPerspectiveVisualizer"

@@ -12,8 +12,8 @@ from src.core_services.knowledge_conflict_resolver import (
     ConflictType,
     KnowledgeConflictResolver,
     ResolutionStrategy,
-from src.core_services.perspective_conflict_detector import ConflictDetectionResult
 )
+from src.core_services.perspective_conflict_detector import ConflictDetectionResult
 
 
 class TestKnowledgeConflictResolver(unittest.TestCase):

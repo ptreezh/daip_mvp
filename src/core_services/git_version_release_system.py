@@ -134,7 +134,7 @@ class VersionInfo:
                 minor=self.minor,
                 patch=self.patch,
                 prerelease=f"rc.{rc_count}",
-                self.build
+                build=self.build
             )
         else:
             raise ValueError(f"Unknown release type: {release_type}")
