@@ -1,45 +1,35 @@
 #!/usr/bin/env python3
-"""统一共识调度器核心数据模型集成测试
+# -*- coding: utf-8 -*-
+"""
+统一共识调度器核心数据模型集成测试
 
 验证所有组件的集成工作情况，确保满足任务要求。
 """
 
 import sys
 import traceback
-<<<<<<< HEAD
-from typing import List
-=======
->>>>>>> feature/core-services-refactor
+from datetime import datetime
+from typing import Dict, Any, List
 
-from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm, ConsensusContext
 from consensus_models import (
-    AlgorithmMetadata,
-    AlgorithmType,
-    ConsensusInput,
-    ConsensusRequest,
-    ConsensusResponse,
-    ConsensusResult,
-    QualityRequirements,
-    ValidationResult,
+    ConsensusInput, ConsensusRequest, ConsensusResponse, ConsensusResult,
+    AlgorithmMetadata, ValidationResult, AlgorithmType, QualityRequirements
 )
-from consensus_validation import ConsensusDataSerializer, ConsensusDataValidator
+from consensus_algorithm_interface import (
+    ConsensusAlgorithm, ConsensusContext, AlgorithmCapabilities
+)
+from consensus_validation import (
+    ConsensusDataValidator, ConsensusDataSerializer, ConsensusDataConverter
+)
 
 
 class MockConsensusAlgorithm(ConsensusAlgorithm):
     """模拟共识算法用于测试"""
-<<<<<<< HEAD
-
-    def __init__(self):
-        super().__init__("mock_algorithm", {"test_param": "test_value"})
-
-    async def calculate(self, inputs: List[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
-=======
     
     def __init__(self):
         super().__init__("mock_algorithm", {"test_param": "test_value"})
         
-    async def calculate(self, inputs: list[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
->>>>>>> feature/core-services-refactor
+    async def calculate(self, inputs: List[ConsensusInput], context: ConsensusContext) -> ConsensusResult:
         """模拟共识计算"""
         # 简单的多数投票逻辑
         positions = [inp.position for inp in inputs]
@@ -51,17 +41,10 @@ class MockConsensusAlgorithm(ConsensusAlgorithm):
         else:
             # 数值类型，计算平均值
             consensus_value = sum(positions) / len(positions)
-<<<<<<< HEAD
-
-        # 计算平均置信度
-        avg_confidence = sum(inp.confidence for inp in inputs) / len(inputs)
-
-=======
             
         # 计算平均置信度
         avg_confidence = sum(inp.confidence for inp in inputs) / len(inputs)
         
->>>>>>> feature/core-services-refactor
         return ConsensusResult(
             consensus_value=consensus_value,
             confidence=avg_confidence,
@@ -69,11 +52,7 @@ class MockConsensusAlgorithm(ConsensusAlgorithm):
             reasoning_trace={"method": "mock_majority_vote"},
             metadata={"algorithm": "mock", "input_count": len(inputs)}
         )
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
     def get_metadata(self) -> AlgorithmMetadata:
         """获取算法元数据"""
         return AlgorithmMetadata(
@@ -89,11 +68,7 @@ class MockConsensusAlgorithm(ConsensusAlgorithm):
             requirements=[],
             configuration_schema={"test_param": {"type": "string"}}
         )
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
     def get_capabilities(self) -> AlgorithmCapabilities:
         """获取算法能力"""
         return AlgorithmCapabilities(
@@ -105,13 +80,8 @@ class MockConsensusAlgorithm(ConsensusAlgorithm):
             min_participants=1,
             max_participants=100
         )
-<<<<<<< HEAD
-
-    def validate_inputs(self, inputs: List[ConsensusInput]) -> ValidationResult:
-=======
         
-    def validate_inputs(self, inputs: list[ConsensusInput]) -> ValidationResult:
->>>>>>> feature/core-services-refactor
+    def validate_inputs(self, inputs: List[ConsensusInput]) -> ValidationResult:
         """验证输入"""
         if not inputs:
             return ValidationResult(is_valid=False, errors=["输入列表为空"])
@@ -121,11 +91,7 @@ class MockConsensusAlgorithm(ConsensusAlgorithm):
 def test_complete_workflow():
     """测试完整的工作流程"""
     print("🔄 测试完整工作流程...")
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     try:
         # 1. 创建测试数据
         inputs = [
@@ -137,11 +103,7 @@ def test_complete_workflow():
                 evidence=["数据点1", "数据点2"]
             ),
             ConsensusInput(
-<<<<<<< HEAD
-                agent_id="agent_002",
-=======
                 agent_id="agent_002", 
->>>>>>> feature/core-services-refactor
                 position="支持提案A",
                 confidence=0.7,
                 reasoning="符合业务需求",
@@ -149,21 +111,13 @@ def test_complete_workflow():
             ),
             ConsensusInput(
                 agent_id="agent_003",
-<<<<<<< HEAD
-                position="反对提案A",
-=======
                 position="反对提案A", 
->>>>>>> feature/core-services-refactor
                 confidence=0.6,
                 reasoning="成本过高",
                 evidence=["成本分析"]
             )
         ]
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         # 2. 创建共识请求
         request = ConsensusRequest(
             inputs=inputs,
@@ -171,21 +125,6 @@ def test_complete_workflow():
             timeout=30.0,
             quality_requirements=QualityRequirements(min_confidence=0.6)
         )
-<<<<<<< HEAD
-
-        print("✅ 测试数据创建成功")
-
-        # 3. 验证请求数据
-        validator = ConsensusDataValidator()
-        validation_result = validator.validate_consensus_request(request.dict())
-
-        if not validation_result.is_valid:
-            print(f"❌ 请求验证失败: {validation_result.errors}")
-            return False
-
-        print("✅ 请求数据验证通过")
-
-=======
         
         print("✅ 测试数据创建成功")
         
@@ -199,7 +138,6 @@ def test_complete_workflow():
             
         print("✅ 请求数据验证通过")
         
->>>>>>> feature/core-services-refactor
         # 4. 测试算法接口
         algorithm = MockConsensusAlgorithm()
         context = ConsensusContext(
@@ -207,31 +145,12 @@ def test_complete_workflow():
             services={},
             configuration={}
         )
-<<<<<<< HEAD
-
-=======
         
->>>>>>> feature/core-services-refactor
         # 检查算法能力
         capabilities = algorithm.get_capabilities()
         if not capabilities.can_handle_request(request):
             print("❌ 算法无法处理请求")
             return False
-<<<<<<< HEAD
-
-        print("✅ 算法能力检查通过")
-
-        # 5. 执行共识计算
-        import asyncio
-        result = asyncio.run(algorithm.calculate(inputs, context))
-
-        if not result:
-            print("❌ 共识计算失败")
-            return False
-
-        print(f"✅ 共识计算成功: {result.consensus_value} (置信度: {result.confidence:.2f})")
-
-=======
             
         print("✅ 算法能力检查通过")
         
@@ -245,7 +164,6 @@ def test_complete_workflow():
             
         print(f"✅ 共识计算成功: {result.consensus_value} (置信度: {result.confidence:.2f})")
         
->>>>>>> feature/core-services-refactor
         # 6. 创建响应
         response = ConsensusResponse(
             success=True,
@@ -254,30 +172,13 @@ def test_complete_workflow():
             execution_time=1.5,
             fallback_used=False
         )
-<<<<<<< HEAD
-
-        print("✅ 响应创建成功")
-
-=======
         
         print("✅ 响应创建成功")
         
->>>>>>> feature/core-services-refactor
         # 7. 测试序列化
         serializer = ConsensusDataSerializer()
         json_str = serializer.serialize_to_json(response)
         deserialized_response = serializer.deserialize_from_json(json_str, ConsensusResponse)
-<<<<<<< HEAD
-
-        if deserialized_response.success != response.success:
-            print("❌ 序列化测试失败")
-            return False
-
-        print("✅ 序列化测试通过")
-
-        return True
-
-=======
         
         if deserialized_response.success != response.success:
             print("❌ 序列化测试失败")
@@ -287,7 +188,6 @@ def test_complete_workflow():
         
         return True
         
->>>>>>> feature/core-services-refactor
     except Exception as e:
         print(f"❌ 工作流程测试失败: {str(e)}")
         traceback.print_exc()
@@ -297,15 +197,9 @@ def test_complete_workflow():
 def test_data_validation_edge_cases():
     """测试数据验证边界情况"""
     print("🧪 测试数据验证边界情况...")
-<<<<<<< HEAD
-
-    validator = ConsensusDataValidator()
-
-=======
     
     validator = ConsensusDataValidator()
     
->>>>>>> feature/core-services-refactor
     # 测试空输入
     empty_request = {"inputs": []}
     result = validator.validate_consensus_request(empty_request)
@@ -313,11 +207,7 @@ def test_data_validation_edge_cases():
         print("❌ 空输入验证应该失败")
         return False
     print("✅ 空输入验证正确失败")
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     # 测试置信度边界
     invalid_confidence_input = {
         "agent_id": "test",
@@ -329,11 +219,7 @@ def test_data_validation_edge_cases():
         print("❌ 无效置信度验证应该失败")
         return False
     print("✅ 无效置信度验证正确失败")
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     # 测试超时时间
     invalid_timeout_request = {
         "inputs": [{"agent_id": "test", "position": "test", "confidence": 0.5}],
@@ -344,52 +230,22 @@ def test_data_validation_edge_cases():
         print("❌ 无效超时时间验证应该失败")
         return False
     print("✅ 无效超时时间验证正确失败")
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     return True
 
 
 def test_legacy_format_conversion():
     """测试旧格式转换"""
     print("🔄 测试旧格式转换...")
-<<<<<<< HEAD
-
-    serializer = ConsensusDataSerializer()
-
-=======
     
     serializer = ConsensusDataSerializer()
     
->>>>>>> feature/core-services-refactor
     # 测试DebateTurn格式转换
     debate_turn = {
         "role_id": "expert_001",
         "opinion": "我支持这个提案",
         "round": 1
     }
-<<<<<<< HEAD
-
-    try:
-        converted = serializer.convert_legacy_format(debate_turn, "debate_turn")
-
-        if converted["agent_id"] != "expert_001":
-            print("❌ DebateTurn转换失败: agent_id不正确")
-            return False
-
-        if converted["position"] != "我支持这个提案":
-            print("❌ DebateTurn转换失败: position不正确")
-            return False
-
-        print("✅ DebateTurn格式转换成功")
-
-    except Exception as e:
-        print(f"❌ DebateTurn转换失败: {str(e)}")
-        return False
-
-=======
     
     try:
         converted = serializer.convert_legacy_format(debate_turn, "debate_turn")
@@ -408,7 +264,6 @@ def test_legacy_format_conversion():
         print(f"❌ DebateTurn转换失败: {str(e)}")
         return False
     
->>>>>>> feature/core-services-refactor
     # 测试AdvancedConsensusInput格式转换
     advanced_input = {
         "agent_id": "agent_001",
@@ -418,26 +273,6 @@ def test_legacy_format_conversion():
         "evidence": ["证据1"],
         "cognitive_profile": {"expertise": "high"}
     }
-<<<<<<< HEAD
-
-    try:
-        converted = serializer.convert_legacy_format(advanced_input, "advanced_consensus_input")
-
-        if converted["agent_id"] != "agent_001":
-            print("❌ AdvancedConsensusInput转换失败: agent_id不正确")
-            return False
-
-        if converted["confidence"] != 0.9:
-            print("❌ AdvancedConsensusInput转换失败: confidence不正确")
-            return False
-
-        print("✅ AdvancedConsensusInput格式转换成功")
-
-    except Exception as e:
-        print(f"❌ AdvancedConsensusInput转换失败: {str(e)}")
-        return False
-
-=======
     
     try:
         converted = serializer.convert_legacy_format(advanced_input, "advanced_consensus_input")
@@ -456,34 +291,22 @@ def test_legacy_format_conversion():
         print(f"❌ AdvancedConsensusInput转换失败: {str(e)}")
         return False
     
->>>>>>> feature/core-services-refactor
     return True
 
 
 def run_comprehensive_test():
     """运行综合测试"""
     print("🚀 开始综合集成测试...\n")
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/core-services-refactor
     tests = [
         ("完整工作流程", test_complete_workflow),
         ("数据验证边界情况", test_data_validation_edge_cases),
         ("旧格式转换", test_legacy_format_conversion)
     ]
-<<<<<<< HEAD
-
-    passed = 0
-    failed = 0
-
-=======
     
     passed = 0
     failed = 0
     
->>>>>>> feature/core-services-refactor
     for test_name, test_func in tests:
         print(f"📋 运行测试: {test_name}")
         try:
@@ -496,17 +319,10 @@ def run_comprehensive_test():
         except Exception as e:
             print(f"❌ {test_name} 异常: {str(e)}\n")
             failed += 1
-<<<<<<< HEAD
-
-    print("=" * 50)
-    print(f"📊 测试结果: {passed} 通过, {failed} 失败")
-
-=======
     
     print("=" * 50)
     print(f"📊 测试结果: {passed} 通过, {failed} 失败")
     
->>>>>>> feature/core-services-refactor
     if failed == 0:
         print("🎉 所有集成测试通过!")
         print("\n📋 任务1完成情况:")
@@ -524,8 +340,4 @@ def run_comprehensive_test():
 
 if __name__ == "__main__":
     success = run_comprehensive_test()
-<<<<<<< HEAD
     sys.exit(0 if success else 1)
-=======
-    sys.exit(0 if success else 1)
->>>>>>> feature/core-services-refactor
