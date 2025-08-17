@@ -358,10 +358,7 @@ class MultiPerspectiveVisualizer:
                         "key": "value",
                         "groups": ["name"],
                         "spacing": 2,
-                        "backgroundColor": (ctx) => {
-                            const item = ctx.raw;
-                            return item.color;
-                        }
+                        "backgroundColor": "(ctx) => { const item = ctx.raw; return item.color; }"
                     }]
                 },
                 "options": {
@@ -377,14 +374,9 @@ class MultiPerspectiveVisualizer:
                         },
                         "tooltip": {
                             "callbacks": {
-                                "title": (context) => context[0].raw.name,
-                                "label": (context) => {
-                                    const item = context.raw;
-                                    return [
-                                        `类型: ${item.type}`,
-                                        `内容: ${item.content || item.description || ''}`
-                                    ];
-                                }
+                                "title": "(context) => context[0].raw.name",
+                                "beforeLabel": "(context) => `权重: ${(context.raw.weight * 100).toFixed(1)}%`",
+                                "label": "(context) => `值: ${context.raw.value}`"
                             }
                         }
                     }
