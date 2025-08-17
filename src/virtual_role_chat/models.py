@@ -6,11 +6,7 @@ including ChatRoom, ChatSession, ChatMessage, and related types.
 
 from datetime import datetime
 from enum import Enum
-<<<<<<< HEAD
 from typing import Any, Dict, List, Literal, Optional
-=======
-from typing import Any, Literal, Optional
->>>>>>> feature/core-services-refactor
 
 from pydantic import BaseModel
 
@@ -25,9 +21,9 @@ class ChatRoomConfig(BaseModel):
     name: str
     description: str = ""
     topic: str
-    roles: list[str]  # Role IDs
+    roles: List[str]  # Role IDs
     mode: Literal["free_form", "structured", "debate"] = "free_form"
-    interaction_rules: dict[str, Any] = {}  # Mode-specific configuration
+    interaction_rules: Dict[str, Any] = {}  # Mode-specific configuration
 
 
 class ChatRoom(BaseModel):
@@ -61,7 +57,7 @@ class ChatMessage(BaseModel):
     sender_type: Literal["role", "user", "system"]
     content: str
     timestamp: datetime
-    metadata: dict[str, Any] = {}
+    metadata: Dict[str, Any] = {}
 
 
 class ChatSession(BaseModel):
@@ -72,8 +68,8 @@ class ChatSession(BaseModel):
     start_time: datetime
     end_time: Optional[datetime] = None
     status: Literal["active", "paused", "completed"] = "active"
-    messages: list[ChatMessage] = []
-    metadata: dict[str, Any] = {}
+    messages: List[ChatMessage] = []
+    metadata: Dict[str, Any] = {}
 
 
 class SessionSummary(BaseModel):
@@ -84,9 +80,9 @@ class SessionSummary(BaseModel):
     start_time: datetime
     end_time: Optional[datetime]
     message_count: int
-    participant_roles: list[str]
+    participant_roles: List[str]
     topic: str
-    key_points: list[str] = []
+    key_points: List[str] = []
 
 
 class ValidationResult(BaseModel):
@@ -104,7 +100,7 @@ class ResolutionResult(BaseModel):
     resolved_statement: str
     confidence: float
     reasoning: str
-    supporting_facts: list[str] = []
+    supporting_facts: List[str] = []
 
 
 class SubTopic(BaseModel):
@@ -114,7 +110,7 @@ class SubTopic(BaseModel):
     parent_topic_id: Optional[str]
     content: str
     complexity: float
-    required_expertise: list[str]
+    required_expertise: List[str]
 
 
 class TransparencyLevel(str, Enum):
@@ -131,7 +127,7 @@ class SessionMetrics(BaseModel):
     message_count: int
     average_response_time: float
     topic_coherence: float
-    engagement_distribution: dict[str, float]  # Role ID to engagement percentage
+    engagement_distribution: Dict[str, float]  # Role ID to engagement percentage
 
 
 class RolePerformance(BaseModel):
@@ -159,6 +155,5 @@ class QualityIssue(BaseModel):
     issue_type: str
     severity: float
     description: str
-    affected_messages: list[str]
+    affected_messages: List[str]
     suggested_action: str
-

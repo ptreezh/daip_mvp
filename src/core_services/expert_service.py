@@ -1,11 +1,7 @@
 import json
 import logging
 import os
-<<<<<<< HEAD
 from typing import Any, Dict, List
-=======
-from typing import Any
->>>>>>> feature/core-services-refactor
 
 try:
     from src.role_utils import standardize_role_dict
@@ -41,11 +37,7 @@ class ExpertService:
             experts.append(expert)
         return experts
 
-<<<<<<< HEAD
     def create_expert(self, expert_data: Dict[str, Any]) -> Any:
-=======
-    def create_expert(self, expert_data: dict[str, Any]) -> Any:
->>>>>>> feature/core-services-refactor
         """Creates a single expert, handles validation and saving.
         Raises ValueError if the expert already exists.
         """
@@ -80,13 +72,8 @@ class ExpertService:
         return expert
 
     def batch_import_experts(
-<<<<<<< HEAD
         self, roles_data: List[Dict[str, Any]], overwrite: bool, validate_only: bool
     ) -> Dict[str, Any]:
-=======
-        self, roles_data: list[dict[str, Any]], overwrite: bool, validate_only: bool
-    ) -> dict[str, Any]:
->>>>>>> feature/core-services-refactor
         """Batch imports experts from a list of dictionaries.
         Handles standardization, file writing, validation, and state reloading.
         """

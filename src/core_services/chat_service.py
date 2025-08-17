@@ -2,23 +2,12 @@ import asyncio
 import json
 import logging
 import random
-<<<<<<< HEAD
 from typing import Any, List, Optional
-=======
-from typing import Any, Optional
->>>>>>> feature/core-services-refactor
 
 from fastapi import HTTPException
 
 from src.models import ChatMessage, MultiRoleChatRequest, MultiRoleChatResponse
-
-# Assuming MultiRoleChatEngine is available
-try:
-    from src.multi_role_chat import ChatRoom, MultiRoleChatEngine, RoleResponse
-
-    CHAT_ENGINE_AVAILABLE = True
-except ImportError:
-    CHAT_ENGINE_AVAILABLE = False
+from src.multi_role_chat import MultiRoleChatEngine, RoleResponse
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +19,6 @@ class ChatService:
 
     def __init__(self, app_state: Any): # Use Any to avoid circular import type hint
         self.app_state = app_state
-        if not CHAT_ENGINE_AVAILABLE:
-            logger.warning("MultiRoleChatEngine not available. Chat functionalities will be limited.")
 
     async def handle_simple_multi_role_chat(self, request: MultiRoleChatRequest) -> MultiRoleChatResponse:
         """Handles the logic for a simplified multi-role chat simulation.
@@ -66,17 +53,15 @@ class ChatService:
     def create_chat_engine(self, engine_id: str, model_type: str) -> None:
         """Creates and registers a new multi-role chat engine.
         """
-        if not CHAT_ENGINE_AVAILABLE:
-            raise HTTPException(status_code=503, detail="Chat Engine feature is not available.")
-
         if engine_id in self.app_state.chat_engines:
             raise HTTPException(status_code=400, detail="Chat engine with this ID already exists.")
 
-        # Ensure expert library is loaded
-        if not self.app_state.expert_library.experts:
-            self.app_state.expert_library.load_experts_from_directory()
+        # Ensure expert service is available
+        expert_service = self.app_state.expert_service
+        if not expert_service:
+            raise HTTPException(status_code=503, detail="Expert service is not available.")
 
-        self.app_state.chat_engines[engine_id] = MultiRoleChatEngine(self.app_state.expert_library, model_type)
+        self.app_state.chat_engines[engine_id] = MultiRoleChatEngine(expert_service, model_type)
         logger.info(f"Chat engine '{engine_id}' created with model '{model_type}'.")
 
     def _get_engine(self, engine_id: str) -> "MultiRoleChatEngine":
@@ -102,11 +87,7 @@ class ChatService:
 
         return await chat_engine.send_user_message(room_id, content, sender_name)
 
-<<<<<<< HEAD
     async def generate_responses_for_room(self, engine_id: str, room_id: str, target_roles: Optional[List[str]]) -> List["RoleResponse"]:
-=======
-    async def generate_responses_for_room(self, engine_id: str, room_id: str, target_roles: Optional[list[str]]) -> list["RoleResponse"]:
->>>>>>> feature/core-services-refactor
         """Generates responses from AI roles in a chat room.
         """
         chat_engine = self._get_engine(engine_id)
@@ -121,11 +102,7 @@ class ChatService:
             raise HTTPException(status_code=404, detail="Chat room not found.")
         return room
 
-<<<<<<< HEAD
     def list_all_rooms(self, engine_id: str) -> List["ChatRoom"]:
-=======
-    def list_all_rooms(self, engine_id: str) -> list["ChatRoom"]:
->>>>>>> feature/core-services-refactor
         """Lists all available chat rooms in a given engine.
         """
         chat_engine = self._get_engine(engine_id)
