@@ -113,7 +113,7 @@
 ## 模块 7: 工作流与制度原语 (Workflows & Primitives)
 
 ### 服务: `src.institutional_primitives.registry.PrimitiveRegistry`
-- **描述**: 一个内存中的注册表，用于管理、发现和实例化“制度原语”（即可复用的工作流节点）。
+- **描述**: 一个内存中的注册表，用于管理、发现和实例化"制度原语"（即可复用的工作流节点）。
 - **审查备注**: 这是一个基础性的、完全实现的模块。它本身是完整的，但它的价值取决于是否有实际的`InstitutionalPrimitive`类被注册进来。
 - **依赖**: None
 
@@ -138,5 +138,31 @@
 | `pause_workflow(self, execution_id: str)` | 暂停一个正在运行的工作流。 | **桩** |
 | `resume_workflow(self, execution_id: str)` | 恢复一个已暂停的工作流。 | **桩** |
 | `cancel_workflow(self, execution_id: str)` | 取消一个正在运行或已暂停的工作流。 | **桩** |
+
+---
+
+## 模块 8: 个人助手服务 (Personal Assistant Service) - 重构中
+
+### 服务: `src.application.personal_assistant_service.PersonalAssistantService`
+- **描述**: 统一AI助手服务，协调不同入口类型并提供智能用户支持。
+- **审查备注**: **重构中**: 此服务已完整实现(90%+)，但正在进行重构以提高灵活性和可维护性。CLI将直接调用底层服务而非通过此服务，但Web界面和其他客户端仍依赖此服务。短期内保持兼容，长期可能变更。
+
+| 方法签名 | 功能描述 | 实现状态 |
+| --- | --- | --- |
+| `__init__(self)` | 初始化服务并创建核心组件实例。 | **完整** |
+| `initialize(self)` | 初始化服务配置和默认用户。 | **完整** |
+| `create_session(self, user_id: str, context: dict[str, Any] = None)` | 创建新会话并选择合适的入口类型。 | **完整** |
+| `process_user_input(self, session_id: str, user_input: dict[str, Any])` | 处理用户输入并路由到相应处理方法。 | **完整** |
+| `_process_secretariat_input(self, session_aggregate: SessionAggregate, user_input: dict[str, Any])` | 处理Secretariat入口的用户输入。 | **完整** |
+| `_process_forum_input(self, session_aggregate: SessionAggregate, user_input: dict[str, Any])` | 处理Forum入口的用户输入。 | **完整** |
+| `_analyze_input_intent(self, content: str)` | 分析用户输入意图。 | **完整** |
+| `get_session_status(self, session_id: str)` | 获取会话状态信息。 | **完整** |
+| `get_task_status(self, task_id: str)` | 获取任务状态信息。 | **完整** |
+| `get_transparency_data(self, session_id: str)` | 获取透明度数据。 | **完整** |
+| `switch_entrance(self, session_id: str, target_entrance: str)` | 切换会话入口类型。 | **完整** |
+| `get_entrance_suggestions(self, session_id: str)` | 获取入口切换建议。 | **完整** |
+| `get_system_health(self)` | 获取系统健康状态。 | **完整** |
+| `cleanup_expired_sessions(self, timeout_hours: int = 24)` | 清理过期会话。 | **完整** |
+| `get_user_statistics(self, user_id: str)` | 获取用户统计数据。 | **完整** |
 
 ---
