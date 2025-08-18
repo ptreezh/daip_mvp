@@ -1,3 +1,7 @@
+
+
+进入下面一个阶段前，请务必遵循 研究 创想 计划 执行 回顾的原则，基于TDD测试驱动开放的规范，对每个阶段的specs规范文档进行进一步的细化分解和补充。specs规范是kiro的开发规范，生成更具体的需求文档、设计文档和tasks清单。需要对原规范文档进行再详细的研究，结合项目实际和全局API参考，进一步细化需求，细化设计和细化任务清单。
+全局API参考  D:\DAIP\daipMVPbackup\daip_mvp_project\.kiro\specs\unified-command-line-interface\GLOBAL_API_DICTIONARY.md    务必不要轻易增加和修改后端API，除非非常有必要时，也需要得到我的同意再增加后端服务。   
 # 阶段 4 & 5: 高级角色管理、工作流、Wiki 导出、完善与文档 - 设计
 
 ## 阶段 4: 高级角色管理、工作流与 Wiki 导出 - 设计

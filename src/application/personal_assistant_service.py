@@ -10,6 +10,7 @@ import asyncio
 import json
 from datetime import datetime
 from typing import Any
+from uuid import uuid4
 
 from ..domain.aggregates import DebateAggregate, SessionAggregate, TaskAggregate
 from ..domain.domain_services import (
@@ -242,6 +243,7 @@ class PersonalAssistantService:
         
         # 添加用户消息到会话
         user_message = UserMessage(
+            message_id=str(uuid4()),
             session_id=session_aggregate.session_id,
             content=content,
             sender=f"user_{session_aggregate.user_id}",
