@@ -12,15 +12,15 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any
 
-from .aggregates import SessionAggregate, TaskAggregate
-from .domain_services import (
+from ..domain.aggregates import SessionAggregate, TaskAggregate
+from ..domain.domain_services import (
     ConsensusTrackingService,
     EntranceSelectorService,
     UserInterventionService,
     WorkflowOrchestratorService,
 )
-from .entities import AgentMessage, Session, Task, User, UserMessage
-from .value_objects import EntranceType, IntentType, MessageIntent, TaskPriority
+from ..domain.entities import AgentMessage, Session, Task, User, UserMessage, Debate # Added Debate
+from ..domain.value_objects import EntranceType, IntentType, MessageIntent, TaskPriority
 
 
 class BaseUseCase(ABC):

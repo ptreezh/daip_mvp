@@ -61,6 +61,7 @@ class SessionConfig(BaseModel):
 
 class AppConfig(BaseModel):
     """Root model for the entire application configuration."""
+    version: str = "0.1.0" # Application version
     llm: LLMConfig = Field(default_factory=LLMConfig)
     vector_store: VectorStoreConfig = Field(default_factory=VectorStoreConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)

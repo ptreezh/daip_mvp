@@ -75,7 +75,7 @@ class FactExtractionService:
         for attempt in range(max_retries):
             try:
                 # Assume llm_interface has a method to generate structured output
-                response = await self.llm_interface.generate(messages=[{{"role": "user", "content": prompt}}])
+                response = await self.llm_interface.generate(messages=[{"role": "user", "content": prompt}])
                 response_text = response.get("content", "[]")
 
                 extracted_data = json.loads(response_text)

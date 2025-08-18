@@ -134,6 +134,7 @@ class Session:
         self.entrance_type = entrance_type
         self.status = SessionStatus.ACTIVE
         self.created_at = datetime.now()
+        self.last_modified = datetime.now()
         self.expires_at = datetime.now() + timedelta(hours=24)
         self.context: dict[str, Any] = {}
         self.transparency_data: Optional[TransparencyData] = None

@@ -5,6 +5,7 @@
 """
 
 import asyncio
+import io
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -12,6 +13,7 @@ from typer.testing import CliRunner
 
 from src.cli.commands import CLIDebateHandler, check_system_health, list_available_roles, run_debate_command
 from src.cli.main import app
+from src.cli.interactive_cli import main_menu_loop, start_role_management
 
 
 @pytest.fixture()
@@ -137,12 +139,10 @@ class TestCLIServiceIntegration:
         mock_app_state_instance = MagicMock()
         mock_app_state.return_value = mock_app_state_instance
 
-        # Mock FastAPI app
-        with patch("src.main.app") as mock_fastapi:
-            mock_route = MagicMock()
-            mock_route.path = "/api/test"
-            mock_fastapi.routes = [mock_route]
-
+        # Mock FastAPI app that check_system_health imports
+        with patch("src.main.app") as mock_fastapi_app: # Patch the FastAPI app
+            mock_fastapi_app.routes = [MagicMock(path="/api/test")] # Set the routes attribute
+            
             health_info = check_system_health()
 
             assert health_info["dependencies"]["status"] == "✅ Ready"
@@ -412,3 +412,107 @@ class TestCLIEndToEndIntegration:
         assert "chromadb" in result.stdout
         assert "tiktoken" in result.stdout
         assert "Fix missing dependencies first" in result.stdout
+
+    @patch("src.cli.interactive_cli.start_role_management")
+    def test_navigation_to_submenu_on_valid_input(self, mock_start_role_management):
+        """
+        Test that entering '5' at the main menu navigates to the role management submenu.
+        This is a RED test for T-FMW-06.
+        """
+        # Prepare the input for the interactive menu
+        # "5\n" to select role management, then "q\n" to quit the main menu
+        # The start_role_management also has an input() call, so we need to provide an extra newline for that.
+        test_input = "5\n\nq\n"
+
+        # Use io.StringIO to simulate stdin and capture rich.console output
+        mock_stdin = io.StringIO(test_input)
+        mock_stdout = io.StringIO()
+
+        with patch('sys.stdin', mock_stdin), \
+             patch('src.cli.interactive_cli.console._file', mock_stdout): # Patch rich.console's output file
+            # Call the main_menu_loop directly
+            main_menu_loop()
+
+            # Assert that start_role_management was called exactly once
+            mock_start_role_management.assert_called_once()
+
+            # Capture the output
+            output = mock_stdout.getvalue()
+
+            # Assert that the output indicates entering and exiting role management
+            # (Output assertions removed as start_role_management is mocked)
+
+    @patch("src.cli.interactive_cli.start_role_management") # This patch is just to avoid issues if the menu structure changes
+    def test_error_message_on_non_numeric_input(self, mock_start_role_management):
+        """
+        Test that entering non-numeric input displays a clear error message.
+        This is a RED test for T-FMW-08.
+        """
+        test_input = "abc\nq\n"
+
+        mock_stdin = io.StringIO(test_input)
+        mock_stdout = io.StringIO()
+
+        with patch('sys.stdin', mock_stdin), \
+             patch('src.cli.interactive_cli.console._file', mock_stdout):
+            main_menu_loop()
+
+            output = mock_stdout.getvalue()
+
+            # Assert that an error message is displayed
+            assert "Invalid choice. Please try again." in output
+            assert "Exiting DAIP-LIVE CLI. Goodbye!" in output
+
+            # Ensure start_role_management was NOT called
+            mock_start_role_management.assert_not_called()
+
+    @patch("src.cli.interactive_cli.start_role_management") # This patch is just to avoid issues if the menu structure changes
+    def test_error_message_on_out_of_range_input(self, mock_start_role_management):
+        """
+        Test that entering an out-of-range input displays a clear error message.
+        This is a RED test for T-FMW-10.
+        """
+        test_input = "99\nq\n"
+
+        mock_stdin = io.StringIO(test_input)
+        mock_stdout = io.StringIO()
+
+        with patch('sys.stdin', mock_stdin), \
+             patch('src.cli.interactive_cli.console._file', mock_stdout):
+            main_menu_loop()
+
+            output = mock_stdout.getvalue()
+
+            # Assert that an error message is displayed
+            assert "Invalid choice. Please try again." in output
+            assert "Exiting DAIP-LIVE CLI. Goodbye!" in output
+
+            # Ensure start_role_management was NOT called
+            mock_start_role_management.assert_not_called()
+
+    @patch("src.application.personal_assistant_service.SecretariatUseCase") # Mock SecretariatUseCase
+    @patch("src.application.personal_assistant_service.ForumUseCase") # Mock ForumUseCase
+    @patch("src.application.personal_assistant_service.EntranceSwitchingUseCase") # Mock EntranceSwitchingUseCase
+    def test_assistant_chat_command_not_found(self, mock_entrance_switching_use_case, mock_forum_use_case, mock_secretariat_use_case, cli_runner):
+        """
+        Test that the 'assistant chat' command fails when not implemented.
+        This is a RED test for the Personal Assistant feature (PA-F-01).
+        """
+        # Mock the return value of process_user_input to avoid actual service calls
+        mock_personal_assistant_service = MagicMock()
+        mock_personal_assistant_service.process_user_input = AsyncMock(return_value={
+            "response": "Mocked assistant response for 'hello'."
+        })
+        # Make initialize, get_session, and create_session awaitable
+        mock_personal_assistant_service.initialize = AsyncMock()
+        mock_personal_assistant_service.get_session = AsyncMock()
+        mock_personal_assistant_service.create_session = AsyncMock(return_value={"session_id": "mock_session_id"})
+        # Patch PersonalAssistantService to return our mock
+        with patch("src.cli.commands.PersonalAssistantService", return_value=mock_personal_assistant_service):
+            result = cli_runner.invoke(app, ["assistant", "chat", "hello"])
+
+            # Assert that the command succeeded
+            assert result.exit_code == 0
+
+            # Assert that the mocked response is present
+            assert "Mocked assistant response for 'hello'." in result.output

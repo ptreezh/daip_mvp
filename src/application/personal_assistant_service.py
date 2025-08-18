@@ -26,6 +26,7 @@ from ..domain.value_objects import (
     TaskStatus,
     UserPreference,
 )
+from ..use_cases.use_cases import SecretariatUseCase, ForumUseCase, EntranceSwitchingUseCase
 
 
 class PersonalAssistantService:

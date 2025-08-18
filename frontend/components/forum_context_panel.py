@@ -98,7 +98,8 @@ class ForumContextPanel(Widget):
                 status_text=self.get_status_text()
             ))
         
-        self.topic_header.set_html(topic_content)
+        # 使用正确的Lona API - 设置nodes属性而不是调用set_html
+        self.topic_header.nodes = [topic_content]
     
     def update_consensus_meter(self):
         """更新共识度计"""
@@ -117,7 +118,8 @@ class ForumContextPanel(Widget):
             <div class="consensus-description">{consensus_description}</div>
         """)
         
-        self.consensus_meter.set_html(meter_content)
+        # 使用正确的Lona API - 设置nodes属性而不是调用set_html
+        self.consensus_meter.nodes = [meter_content]
     
     def update_agents_list(self):
         """更新活跃Agent列表"""
@@ -160,7 +162,8 @@ class ForumContextPanel(Widget):
                 agents_items="".join(agents_items)
             ))
         
-        self.agents_list.set_html(agents_content)
+        # 使用正确的Lona API - 设置nodes属性而不是调用set_html
+        self.agents_list.nodes = [agents_content]
     
     def update_arguments_list(self):
         """更新关键论点列表"""
@@ -203,7 +206,8 @@ class ForumContextPanel(Widget):
                 arguments_items="".join(arguments_items)
             ))
         
-        self.arguments_list.set_html(arguments_content)
+    # 使用正确的Lona API - 设置nodes属性而不是调用set_html
+        self.arguments_list.nodes = [arguments_content]
     
     def update_status_info(self):
         """更新状态信息"""
@@ -234,7 +238,8 @@ class ForumContextPanel(Widget):
             ])
         ))
         
-        self.status_info.set_html(status_content)
+  # 使用正确的Lona API - 设置nodes属性而不是调用set_html
+        self.status_info.nodes = [status_content]
     
     def update_session_stats(self):
         """更新会话统计"""
@@ -268,7 +273,8 @@ class ForumContextPanel(Widget):
             ])
         ))
         
-        self.session_stats.set_html(stats_content)
+  # 使用正确的Lona API - 设置nodes属性而不是调用set_html
+        self.session_stats.nodes = [stats_content]
     
     def get_status_text(self) -> str:
         """获取状态文本"""

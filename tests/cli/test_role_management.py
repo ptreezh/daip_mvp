@@ -21,7 +21,7 @@ runner = CliRunner()
 
 @pytest.fixture
 def mock_autonomous_role_creation_system():
-    with patch('src.cli.commands.AutonomousRoleCreationSystem', autospec=True) as MockClass:
+    with patch('src.core_services.autonomous_role_creation_system.AutonomousRoleCreationSystem', autospec=True) as MockClass:
         instance = MockClass.return_value
         instance.create_role = AsyncMock()
         yield instance
@@ -50,6 +50,8 @@ def test_create_role_success(mock_autonomous_role_creation_system):
         generated_role=GeneratedRole(
             role_id="new_role_id",
             name="New Role",
+            role_type=RoleType.EXPERT,
+            domain="general",
             description="A test role.",
             system_prompt="You are a new role.",
             capabilities=[],
@@ -84,6 +86,8 @@ def test_create_role_with_tags(mock_autonomous_role_creation_system):
         generated_role=GeneratedRole(
             role_id="tagged_role_id",
             name="Tagged Role",
+            role_type=RoleType.EXPERT,
+            domain="general",
             description="A role with tags.",
             system_prompt="You are a tagged role.",
             capabilities=[],

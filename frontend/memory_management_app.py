@@ -5,12 +5,18 @@
 """
 
 import logging
+import sys
+from pathlib import Path
 
-from components.memory_panel import MemoryPanel
+# 添加项目根目录到Python路径
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from frontend.components.memory_panel import MemoryPanel
 from lona import App
 from lona.html import H1, H2, HTML, Button, Div, P
 from lona.view import TemplateView
-from services.memory_service import MemoryService
+from frontend.services.memory_service import MemoryService
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)

@@ -113,15 +113,127 @@ def _get_numpy():
             raise ImportError("numpy is required for numerical computations. Please install it with 'pip install numpy'")
     return _numpy
 
-# 读取原始文件的其余部分﻿            # 鑾峰彇鐭ヨ瘑鏁版嵁
+
+class VisualizationType(Enum):
+    """可视化类型枚举"""
+    KNOWLEDGE_GRAPH = "knowledge_graph"  # 知识图谱
+    TIMELINE = "timeline"  # 时间线
+    CLUSTER_VIEW = "cluster_view"  # 聚类视图
+    NETWORK_DIAGRAM = "network_diagram"  # 网络关系图
+    HEATMAP = "heatmap"  # 热力图
+    TREE_MAP = "tree_map"  # 树状图
+    SANKEY_DIAGRAM = "sankey_diagram"  # 桑基图
+
+
+@dataclass
+class VisualizationConfig:
+    """可视化配置"""
+    width: int = 800
+    height: int = 600
+    theme: str = "plotly_white"
+    color_scheme: str = "viridis"
+    font_size: int = 12
+    show_labels: bool = True
+    interactive: bool = True
+    export_format: str = "html"
+
+
+@dataclass
+class GraphNode:
+    """图谱节点"""
+    id: str
+    label: str
+    type: str
+    confidence: float
+    domain: str
+    size: float = 1.0
+    color: str = "#1f77b4"
+    x: float = 0.0
+    y: float = 0.0
+    metadata: dict[str, Any] = None
+
+
+@dataclass
+class GraphEdge:
+    """图谱边"""
+    source: str
+    target: str
+    relation_type: str
+    weight: float = 1.0
+    color: str = "#999999"
+    metadata: dict[str, Any] = None
+
+
+@dataclass
+class TimelineEvent:
+    """时间线事件"""
+    id: str
+    title: str
+    description: str
+    timestamp: datetime
+    category: str
+    importance: float
+    metadata: dict[str, Any] = None
+
+
+@dataclass
+class ClusterInfo:
+    """聚类信息"""
+    id: str
+    label: str
+    size: int
+    centrality: float
+    members: list[str]
+    domain: str
+    metadata: dict[str, Any] = None
+
+
+class KnowledgeVisualizationEngine:
+    """知识可视化引擎"""
+    
+    def __init__(self, sskg_manager, knowledge_retrieval):
+        self.sskg_manager = sskg_manager
+        self.knowledge_retrieval = knowledge_retrieval
+        self.logger = logging.getLogger(__name__)
+        
+        # 布局算法
+        self.layout_algorithms = {
+            "spring": _get_networkx().spring_layout,
+            "circular": _get_networkx().circular_layout,
+            "random": _get_networkx().random_layout,
+            "shell": _get_networkx().shell_layout
+        }
+        
+        # 颜色方案
+        px = _get_plotly_px()
+        self.color_schemes = {
+            "viridis": px.colors.sequential.Viridis,
+            "plasma": px.colors.sequential.Plasma,
+            "blues": px.colors.sequential.Blues,
+            "reds": px.colors.sequential.Reds,
+            "category10": px.colors.qualitative.Set3
+        }
+    
+    async def generate_knowledge_graph(self,
+                                     query: str = "",
+                                     max_nodes: int = 100,
+                                     config: VisualizationConfig = None) -> dict[str, Any]:
+        """生成知识图谱"""
+        try:
+            if config is None:
+                config = VisualizationConfig()
+
+            # 获取知识数据
             knowledge_facts = await self._get_knowledge_facts(query, max_nodes)
             
-            # 鏋勫缓缃戠粶鍥?            G = await self._build_knowledge_network(knowledge_facts)
+            # 构建网络图
+            G = await self._build_knowledge_network(knowledge_facts)
             
-            # 搴旂敤甯冨眬绠楁硶
-            pos = nx.spring_layout(G, k=2, iterations=50)
+            # 应用布局算法
+            pos = _get_networkx().spring_layout(G, k=2, iterations=50)
             
-            # 鍑嗗鍙鍖栨暟鎹?            nodes = []
+            # 准备可视化数据
+            nodes = []
             edges = []
             
             for node_id, node_data in G.nodes(data=True):
@@ -151,7 +263,7 @@ def _get_numpy():
                 )
                 edges.append(asdict(edge))
             
-            # 鐢熸垚Plotly鍥捐〃
+            # 生成Plotly图表
             fig = self._create_interactive_graph(nodes, edges, config)
             
             return {
@@ -163,13 +275,13 @@ def _get_numpy():
                     "total_nodes": len(nodes),
                     "total_edges": len(edges),
                     "average_degree": sum(dict(G.degree()).values()) / len(G.nodes()),
-                    "network_density": nx.density(G)
+                    "network_density": _get_networkx().density(G)
                 },
                 "config": asdict(config)
             }
             
         except Exception as e:
-            self.logger.error(f"鐢熸垚鐭ヨ瘑鍥捐氨澶辫触: {e}")
+            self.logger.error(f"生成知识图谱失败: {e}")
             return {"error": str(e)}
     
     async def generate_timeline(self, 
@@ -177,18 +289,19 @@ def _get_numpy():
                              end_date: datetime = None,
                              category_filter: list[str] = None,
                              config: VisualizationConfig = None) -> dict[str, Any]:
-        """鐢熸垚鏃堕棿绾垮彲瑙嗗寲"""
+        """生成时间线可视化"""
         try:
             if config is None:
                 config = VisualizationConfig()
             
-            # 鑾峰彇鏃堕棿搴忓垪鏁版嵁
+            # 获取时间序列数据
             events = await self._get_timeline_events(start_date, end_date, category_filter)
             
             if not events:
-                return {"error": "娌℃湁鎵惧埌鏃堕棿搴忓垪鏁版嵁"}
+                return {"error": "没有找到时间序列数据"}
             
-            # 鍒涘缓鏃堕棿绾垮浘琛?            fig = self._create_timeline_chart(events, config)
+            # 创建时间线图表
+            fig = self._create_timeline_chart(events, config)
             
             return {
                 "visualization_type": "timeline",
@@ -206,27 +319,29 @@ def _get_numpy():
             }
             
         except Exception as e:
-            self.logger.error(f"鐢熸垚鏃堕棿绾垮け璐? {e}")
+            self.logger.error(f"生成时间线失败: {e}")
             return {"error": str(e)}
     
     async def generate_cluster_view(self, 
                                   query: str = "",
                                   algorithm: str = "louvain",
                                   config: VisualizationConfig = None) -> dict[str, Any]:
-        """鐢熸垚鑱氱被瑙嗗浘"""
+        """生成聚类视图"""
         try:
             if config is None:
                 config = VisualizationConfig()
             
-            # 鑾峰彇鐭ヨ瘑鏁版嵁
+            # 获取知识数据
             knowledge_facts = await self._get_knowledge_facts(query, 200)
             
-            # 鏋勫缓缃戠粶鍥?            G = await self._build_knowledge_network(knowledge_facts)
+            # 构建网络图
+            G = await self._build_knowledge_network(knowledge_facts)
             
-            # 搴旂敤鑱氱被绠楁硶
+            # 应用聚类算法
             clusters = self._apply_clustering_algorithm(G, algorithm)
             
-            # 鍒涘缓鑱氱被鍙鍖?            fig = self._create_cluster_visualization(G, clusters, config)
+            # 创建聚类可视化
+            fig = self._create_cluster_visualization(G, clusters, config)
             
             return {
                 "visualization_type": "cluster_view",
@@ -242,22 +357,23 @@ def _get_numpy():
             }
             
         except Exception as e:
-            self.logger.error(f"鐢熸垚鑱氱被瑙嗗浘澶辫触: {e}")
+            self.logger.error(f"生成聚类视图失败: {e}")
             return {"error": str(e)}
     
     async def generate_network_diagram(self, 
                                     focus_node: str = "",
                                     depth: int = 2,
                                     config: VisualizationConfig = None) -> dict[str, Any]:
-        """鐢熸垚缃戠粶鍏崇郴鍥?""
+        """生成网络关系图"""
         try:
             if config is None:
                 config = VisualizationConfig()
             
-            # 鑾峰彇浠ョ劍鐐硅妭鐐逛负涓績鐨勫瓙缃戠粶
+            # 获取以焦点节点为中心的子网络
             subgraph = await self._get_subgraph_around_node(focus_node, depth)
             
-            # 鍒涘缓缃戠粶鍥?            fig = self._create_network_diagram(subgraph, config)
+            # 创建网络图
+            fig = self._create_network_diagram(subgraph, config)
             
             return {
                 "visualization_type": "network_diagram",
@@ -267,30 +383,32 @@ def _get_numpy():
                 "stats": {
                     "nodes_in_view": len(subgraph.nodes()),
                     "edges_in_view": len(subgraph.edges()),
-                    "average_path_length": nx.average_shortest_path_length(subgraph) if nx.is_connected(subgraph) else 0
+                    "average_path_length": _get_networkx().average_shortest_path_length(subgraph) if _get_networkx().is_connected(subgraph) else 0
                 },
                 "config": asdict(config)
             }
             
         except Exception as e:
-            self.logger.error(f"鐢熸垚缃戠粶鍏崇郴鍥惧け璐? {e}")
+            self.logger.error(f"生成网络关系图失败: {e}")
             return {"error": str(e)}
     
     async def generate_heatmap(self, 
                             dimension1: str = "domain",
                             dimension2: str = "confidence",
                             config: VisualizationConfig = None) -> dict[str, Any]:
-        """鐢熸垚鐑姏鍥?""
+        """生成热力图"""
         try:
             if config is None:
                 config = VisualizationConfig()
             
-            # 鑾峰彇鐭ヨ瘑缁熻鏁版嵁
+            # 获取知识统计数据
             stats = await self._get_knowledge_statistics()
             
-            # 鍒涘缓鐑姏鍥炬暟鎹?            heatmap_data = self._prepare_heatmap_data(stats, dimension1, dimension2)
+            # 创建热力图数据
+            heatmap_data = self._prepare_heatmap_data(stats, dimension1, dimension2)
             
-            # 鐢熸垚鐑姏鍥?            fig = self._create_heatmap(heatmap_data, config)
+            # 生成热力图
+            fig = self._create_heatmap(heatmap_data, config)
             
             return {
                 "visualization_type": "heatmap",
@@ -306,19 +424,20 @@ def _get_numpy():
             }
             
         except Exception as e:
-            self.logger.error(f"鐢熸垚鐑姏鍥惧け璐? {e}")
+            self.logger.error(f"生成热力图失败: {e}")
             return {"error": str(e)}
     
     def export_visualization(self, 
                            visualization_data: dict[str, Any], 
                            format: str = "html",
                            filename: str = None) -> str:
-        """瀵煎嚭鍙鍖栫粨鏋?""
+        """导出可视化结果"""
         try:
             if filename is None:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 filename = f"knowledge_visualization_{timestamp}"
             
+            go = _get_plotly_go() # Ensure go is imported
             fig_dict = visualization_data.get("figure", {})
             fig = go.Figure(fig_dict)
             
@@ -332,36 +451,37 @@ def _get_numpy():
                 output_file = f"{filename}.pdf"
                 fig.write_image(output_file)
             else:
-                raise ValueError(f"涓嶆敮鎸佺殑瀵煎嚭鏍煎紡: {format}")
+                raise ValueError(f"不支持的导出格式: {format}")
             
             return output_file
             
         except Exception as e:
-            self.logger.error(f"瀵煎嚭鍙鍖栧け璐? {e}")
+            self.logger.error(f"导出可视化失败: {e}")
             return ""
     
-    async def _get_knowledge_facts(self, query: str, max_count: int) -> list[KnowledgeFact]:
-        """鑾峰彇鐭ヨ瘑浜嬪疄"""
+    async def _get_knowledge_facts(self, query: str, max_count: int) -> list:
+        """获取知识事实"""
         try:
             if query:
-                # 鍩轰簬鏌ヨ鎼滅储
+                # 基于查询搜索
                 search_results = await self.knowledge_retrieval.semantic_search(
                     query=query, limit=max_count
                 )
                 return search_results
             else:
-                # 鑾峰彇鏈€鏂扮煡璇?                return await self.knowledge_retrieval.get_recent_knowledge(max_count)
+                # 获取最新知识
+                return await self.knowledge_retrieval.get_recent_knowledge(max_count)
         except Exception as e:
-            self.logger.error(f"鑾峰彇鐭ヨ瘑浜嬪疄澶辫触: {e}")
+            self.logger.error(f"获取知识事实失败: {e}")
             return []
     
-    async def _build_knowledge_network(self, knowledge_facts: list[KnowledgeFact]) -> "nx.Graph":
-        """鏋勫缓鐭ヨ瘑缃戠粶"""
+    async def _build_knowledge_network(self, knowledge_facts: list) -> "nx.Graph":
+        """构建知识网络"""
         nx = _get_networkx()
         G = nx.Graph()
         
         for fact in knowledge_facts:
-            # 娣诲姞鑺傜偣
+            # 添加节点
             G.add_node(
                 fact.id,
                 label=fact.content[:50] + "..." if len(fact.content) > 50 else fact.content,
@@ -372,7 +492,8 @@ def _get_numpy():
                 timestamp=fact.timestamp.isoformat()
             )
             
-            # 娣诲姞鍏崇郴杈?            for relation in fact.relations:
+            # 添加关系边
+            for relation in fact.relations:
                 G.add_edge(
                     fact.id,
                     relation.target_fact_id,
@@ -383,10 +504,10 @@ def _get_numpy():
         
         return G
     
-    def _create_interactive_graph(self, nodes: list[dict], edges: list[dict], config: VisualizationConfig) -> "_get_plotly_go()".Figure:
-        """鍒涘缓浜や簰寮忓浘璋?""
+    def _create_interactive_graph(self, nodes: list[dict], edges: list[dict], config: VisualizationConfig) -> "go.Figure":
+        """创建交互式图表"""
         go = _get_plotly_go()
-        # 鍑嗗鑺傜偣杞ㄨ抗
+        # 准备节点轨迹
         node_trace = go.Scatter(
             x=[node['x'] for node in nodes],
             y=[node['y'] for node in nodes],
@@ -403,7 +524,8 @@ def _get_numpy():
             name='Knowledge Nodes'
         )
         
-        # 鍑嗗杈硅建杩?        edge_trace = go.Scatter(
+        # 准备边轨迹
+        edge_trace = go.Scatter(
             x=[], y=[],
             mode='lines',
             line=dict(width=1, color='gray'),
@@ -420,7 +542,7 @@ def _get_numpy():
             edge_trace['x'] += [x0, x1, None]
             edge_trace['y'] += [y0, y1, None]
         
-        # 鍒涘缓鍥捐〃
+        # 创建图表
         fig = go.Figure(data=[edge_trace, node_trace])
         
         fig.update_layout(
@@ -448,41 +570,43 @@ def _get_numpy():
         return fig
     
     async def _get_timeline_events(self, start_date: datetime, end_date: datetime, 
-                                 category_filter: list[str]) -> list[TimelineEvent]:
-        """鑾峰彇鏃堕棿绾夸簨浠?""
+                                 category_filter: list[str]) -> list:
+        """获取时间线事件"""
         try:
-            # 浠嶴SKG鑾峰彇鏃堕棿搴忓垪鏁版嵁
+            # 从SSKG获取时间序列数据
             events = []
             
-            # 杩欓噷绠€鍖栧疄鐜帮紝瀹為檯搴旇浠庢暟鎹簱鏌ヨ
-            # 妯℃嫙涓€浜涗簨浠舵暟鎹?            sample_events = [
+            # 这里简化实现，实际应该从数据库查询
+            # 模拟一些事件数据
+            sample_events = [
                 TimelineEvent(
                     id="event_1",
-                    title="绯荤粺鍚姩",
-                    description="DAIP-LIVE绯荤粺姝ｅ紡鍚姩",
+                    title="系统启动",
+                    description="DAIP-LIVE系统正式启动",
                     timestamp=datetime.now() - timedelta(days=30),
                     category="system",
                     importance=0.9
                 ),
                 TimelineEvent(
                     id="event_2",
-                    title="鐭ヨ瘑鍥捐氨鏋勫缓",
-                    description="瀹屾垚鍒濆鐭ヨ瘑鍥捐氨鏋勫缓",
+                    title="知识图谱构建",
+                    description="完成初始知识图谱构建",
                     timestamp=datetime.now() - timedelta(days=25),
                     category="knowledge",
                     importance=0.8
                 ),
                 TimelineEvent(
                     id="event_3",
-                    title="V0.3.4寮€鍙?,
-                    description="寮€濮媀0.3.4鐗堟湰寮€鍙?,
+                    title="V0.3.4开发",
+                    description="开始V0.3.4版本开发",
                     timestamp=datetime.now() - timedelta(days=10),
                     category="development",
                     importance=0.7
                 )
             ]
             
-            # 搴旂敤杩囨护鍣?            filtered_events = sample_events
+            # 应用过滤器
+            filtered_events = sample_events
             if start_date:
                 filtered_events = [e for e in filtered_events if e.timestamp >= start_date]
             if end_date:
@@ -493,14 +617,15 @@ def _get_numpy():
             return filtered_events
             
         except Exception as e:
-            self.logger.error(f"鑾峰彇鏃堕棿绾夸簨浠跺け璐? {e}")
+            self.logger.error(f"获取时间线事件失败: {e}")
             return []
     
-    def _create_timeline_chart(self, events: list[TimelineEvent], config: VisualizationConfig) -> "_get_plotly_go()".Figure:
-        """鍒涘缓鏃堕棿绾垮浘琛?""
+    def _create_timeline_chart(self, events: list, config: VisualizationConfig) -> "go.Figure":
+        """创建时间线图表"""
         px = _get_plotly_px()
-        # 鍑嗗鏁版嵁
-        df = pd.DataFrame([{
+        go = _get_plotly_go()
+        # 准备数据
+        df = _get_pandas().DataFrame([{
             'id': event.id,
             'title': event.title,
             'description': event.description,
@@ -509,7 +634,7 @@ def _get_numpy():
             'importance': event.importance
         } for event in events])
         
-        # 鍒涘缓鏃堕棿绾垮浘
+        # 创建时间线图
         fig = px.timeline(
             df,
             x_start="timestamp",
@@ -530,19 +655,21 @@ def _get_numpy():
         
         return fig
     
-    def _apply_clustering_algorithm(self, G: nx.Graph, algorithm: str) -> list[ClusterInfo]:
-        """搴旂敤鑱氱被绠楁硶"""
+    def _apply_clustering_algorithm(self, G: "nx.Graph", algorithm: str) -> list:
+        """应用聚类算法"""
         try:
+            nx = _get_networkx()
             if algorithm == "louvain":
                 import community as community_louvain
                 partition = community_louvain.best_partition(G)
             else:
-                # 榛樿浣跨敤杩為€氬垎閲?                partition = {}
+                # 默认使用连通分量
+                partition = {}
                 for i, component in enumerate(nx.connected_components(G)):
                     for node in component:
                         partition[node] = i
             
-            # 鏋勫缓鑱氱被淇℃伅
+            # 构建聚类信息
             clusters = {}
             for node, cluster_id in partition.items():
                 if cluster_id not in clusters:
@@ -567,20 +694,21 @@ def _get_numpy():
             return cluster_infos
             
         except Exception as e:
-            self.logger.error(f"搴旂敤鑱氱被绠楁硶澶辫触: {e}")
+            self.logger.error(f"应用聚类算法失败: {e}")
             return []
     
-    def _calculate_cluster_centrality(self, G: nx.Graph, nodes: list[str]) -> float:
-        """璁＄畻鑱氱被涓績鎬?""
+    def _calculate_cluster_centrality(self, G: "nx.Graph", nodes: list[str]) -> float:
+        """计算聚类中心性"""
         try:
+            nx = _get_networkx()
             subgraph = G.subgraph(nodes)
             centrality_scores = nx.degree_centrality(subgraph)
             return sum(centrality_scores.values()) / len(centrality_scores)
         except Exception:
             return 0.0
     
-    def _calculate_modularity(self, G: nx.Graph, clusters: list[ClusterInfo]) -> float:
-        """璁＄畻妯″潡搴?""
+    def _calculate_modularity(self, G: "nx.Graph", clusters: list) -> float:
+        """计算模块度"""
         try:
             import community as community_louvain
             partition = {}
@@ -592,13 +720,15 @@ def _get_numpy():
         except Exception:
             return 0.0
     
-    def _create_cluster_visualization(self, G: nx.Graph, clusters: list[ClusterInfo], 
-                                    config: VisualizationConfig) -> "_get_plotly_go()".Figure:
-        """鍒涘缓鑱氱被鍙鍖?""
+    def _create_cluster_visualization(self, G: "nx.Graph", clusters: list, 
+                                    config: VisualizationConfig) -> "go.Figure":
+        """创建聚类可视化"""
         px = _get_plotly_px()
-        # 涓烘瘡涓仛绫诲垎閰嶉鑹?        colors = px.colors.qualitative.Set3
+        go = _get_plotly_go()
+        # 为每个聚类分配颜色
+        colors = px.colors.qualitative.Set3
         
-        # 鍑嗗鑺傜偣鏁版嵁
+        # 准备节点数据
         node_colors = []
         node_sizes = []
         cluster_labels = []
@@ -620,13 +750,14 @@ def _get_numpy():
                 node_sizes.append(10)
                 cluster_labels.append('unclustered')
         
-        # 鑾峰彇鑺傜偣浣嶇疆
-        pos = nx.spring_layout(G, k=2, iterations=50)
+        # 获取节点位置
+        pos = _get_networkx().spring_layout(G, k=2, iterations=50)
         
-        # 鍒涘缓鍥捐〃
+        # 创建图表
         fig = go.Figure()
         
-        # 娣诲姞杈?        for edge in G.edges():
+        # 添加边
+        for edge in G.edges():
             x0, y0 = pos[edge[0]]
             x1, y1 = pos[edge[1]]
             fig.add_trace(go.Scatter(
@@ -637,7 +768,7 @@ def _get_numpy():
                 showlegend=False
             ))
         
-        # 娣诲姞鑺傜偣
+        # 添加节点
         fig.add_trace(go.Scatter(
             x=[pos[node][0] for node in G.nodes()],
             y=[pos[node][1] for node in G.nodes()],
@@ -663,14 +794,17 @@ def _get_numpy():
         
         return fig
     
-    async def _get_subgraph_around_node(self, focus_node: str, depth: int) -> nx.Graph:
-        """鑾峰彇浠ョ劍鐐硅妭鐐逛负涓績鐨勫瓙缃戠粶"""
+    async def _get_subgraph_around_node(self, focus_node: str, depth: int) -> "nx.Graph":
+        """获取以焦点节点为中心的子网络"""
         try:
-            # 鑾峰彇鐒︾偣鑺傜偣鐨勯偦灞?            neighbors = await self.sskg_manager.find_related_nodes(
+            nx = _get_networkx()
+            # 获取焦点节点的邻居
+            neighbors = await self.sskg_manager.find_related_nodes(
                 focus_node, max_depth=depth
             )
             
-            # 鏋勫缓瀛愮綉缁?            G = nx.Graph()
+            # 构建子网络
+            G = nx.Graph()
             G.add_node(focus_node, label=focus_node, type='focus')
             
             for neighbor in neighbors:
@@ -684,14 +818,16 @@ def _get_numpy():
             return G
             
         except Exception as e:
-            self.logger.error(f"鑾峰彇瀛愮綉缁滃け璐? {e}")
-            return nx.Graph()
+            self.logger.error(f"获取子网络失败: {e}")
+            return _get_networkx().Graph()
     
-    def _create_network_diagram(self, G: nx.Graph, config: VisualizationConfig) -> "_get_plotly_go()".Figure:
-        """鍒涘缓缃戠粶鍏崇郴鍥?""
+    def _create_network_diagram(self, G: "nx.Graph", config: VisualizationConfig) -> "go.Figure":
+        """创建网络关系图"""
+        go = _get_plotly_go()
+        nx = _get_networkx()
         pos = nx.spring_layout(G, k=2, iterations=50)
         
-        # 鍒涘缓杈圭殑杞ㄨ抗
+        # 创建边的轨迹
         edge_trace = go.Scatter(
             x=[], y=[],
             mode='lines',
@@ -706,7 +842,8 @@ def _get_numpy():
             edge_trace['x'] += [x0, x1, None]
             edge_trace['y'] += [y0, y1, None]
         
-        # 鍒涘缓鑺傜偣鐨勮建杩?        node_trace = go.Scatter(
+        # 创建节点的轨迹
+        node_trace = go.Scatter(
             x=[pos[node][0] for node in G.nodes()],
             y=[pos[node][1] for node in G.nodes()],
             mode='markers+text',
@@ -739,10 +876,10 @@ def _get_numpy():
         return fig
     
     async def _get_knowledge_statistics(self) -> dict[str, Any]:
-        """鑾峰彇鐭ヨ瘑缁熻鏁版嵁"""
+        """获取知识统计数据"""
         try:
-            # 杩欓噷搴旇浠庡疄闄呮暟鎹簱鑾峰彇缁熻鏁版嵁
-            # 绠€鍖栧疄鐜帮紝杩斿洖妯℃嫙鏁版嵁
+            # 这里应该从实际数据库获取统计数据
+            # 简化实现，返回模拟数据
             return {
                 "domain_distribution": {
                     "technology": 45,
@@ -767,34 +904,37 @@ def _get_numpy():
                 }
             }
         except Exception as e:
-            self.logger.error(f"鑾峰彇鐭ヨ瘑缁熻鏁版嵁澶辫触: {e}")
+            self.logger.error(f"获取知识统计数据失败: {e}")
             return {}
     
     def _prepare_heatmap_data(self, stats: dict[str, Any], dim1: str, dim2: str) -> list[list[float]]:
-        """鍑嗗鐑姏鍥炬暟鎹?""
+        """准备热力图数据"""
         try:
+            np = _get_numpy()
             if dim1 == "domain" and dim2 == "confidence":
-                # 鍒涘缓棰嗗煙vs缃俊搴︾殑鐑姏鍥?                domains = list(stats["domain_distribution"].keys())
+                # 创建领域vs置信度的热力图
+                domains = list(stats["domain_distribution"].keys())
                 confidence_ranges = list(stats["confidence_distribution"].keys())
                 
                 data = []
                 for domain in domains:
                     row = []
                     for conf_range in confidence_ranges:
-                        # 绠€鍖栵細闅忔満鐢熸垚鏁版嵁
+                        # 简化：随机生成数据
                         row.append(np.random.random() * 100)
                     data.append(row)
                 
                 return data
             else:
-                # 榛樿杩斿洖闅忔満鏁版嵁
+                # 默认返回随机数据
                 return [[np.random.random() * 100 for _ in range(5)] for _ in range(5)]
         except Exception as e:
-            self.logger.error(f"鍑嗗鐑姏鍥炬暟鎹け璐? {e}")
+            self.logger.error(f"准备热力图数据失败: {e}")
             return [[0 for _ in range(5)] for _ in range(5)]
     
-    def _create_heatmap(self, data: list[list[float]], config: VisualizationConfig) -> "_get_plotly_go()".Figure:
-        """鍒涘缓鐑姏鍥?""
+    def _create_heatmap(self, data: list[list[float]], config: VisualizationConfig) -> "go.Figure":
+        """创建热力图"""
+        go = _get_plotly_go()
         fig = go.Figure(data=go.Heatmap(
             z=data,
             colorscale='Viridis',
@@ -813,7 +953,7 @@ def _get_numpy():
         return fig
     
     def _get_node_color(self, node_type: str) -> str:
-        """鑾峰彇鑺傜偣棰滆壊"""
+        """获取节点颜色"""
         color_map = {
             'fact': '#1f77b4',
             'concept': '#ff7f0e',
@@ -825,7 +965,7 @@ def _get_numpy():
         return color_map.get(node_type, '#7f7f7f')
     
     def _get_edge_color(self, relation_type: str) -> str:
-        """鑾峰彇杈归鑹?""
+        """获取边颜色"""
         color_map = {
             'supports': '#2ca02c',
             'contradicts': '#d62728',
@@ -836,41 +976,45 @@ def _get_numpy():
         return color_map.get(relation_type, '#7f7f7f')
 
 
-# 浣跨敤绀轰緥
+# 使用示例
 async def example_usage():
-    """浣跨敤绀轰緥"""
-    # 鍒濆鍖栫粍浠?    sskg_manager = EnhancedSSKGManager()
+    """使用示例"""
+    # 初始化组件
+    sskg_manager = EnhancedSSKGManager()
     knowledge_retrieval = KnowledgeRetrievalService()
     
-    # 鍒涘缓鍙鍖栧紩鎿?    viz_engine = KnowledgeVisualizationEngine(sskg_manager, knowledge_retrieval)
+    # 创建可视化引擎
+    viz_engine = KnowledgeVisualizationEngine(sskg_manager, knowledge_retrieval)
     
-    # 鐢熸垚鐭ヨ瘑鍥捐氨
+    # 生成知识图谱
     graph_result = await viz_engine.generate_knowledge_graph(
-        query="鏈哄櫒瀛︿範",
+        query="机器学习",
         max_nodes=50
     )
     
-    print(f"鐭ヨ瘑鍥捐氨鑺傜偣鏁? {graph_result.get('stats', {}).get('total_nodes', 0)}")
+    print(f"知识图谱节点数: {graph_result.get('stats', {}).get('total_nodes', 0)}")
     
-    # 鐢熸垚鏃堕棿绾?    timeline_result = await viz_engine.generate_timeline()
+    # 生成时间线
+    timeline_result = await viz_engine.generate_timeline()
     
-    print(f"鏃堕棿绾夸簨浠舵暟: {timeline_result.get('stats', {}).get('total_events', 0)}")
+    print(f"时间线事件数: {timeline_result.get('stats', {}).get('total_events', 0)}")
     
-    # 鐢熸垚鑱氱被瑙嗗浘
+    # 生成聚类视图
     cluster_result = await viz_engine.generate_cluster_view(
-        query="AI鎶€鏈?,
+        query="AI技术",
         algorithm="louvain"
     )
     
-    print(f"鑱氱被鏁伴噺: {cluster_result.get('stats', {}).get('total_clusters', 0)}")
+    print(f"聚类数量: {cluster_result.get('stats', {}).get('total_clusters', 0)}")
     
-    # 瀵煎嚭鍙鍖?    if 'figure' in graph_result:
+    # 导出可视化
+    if 'figure' in graph_result:
         output_file = viz_engine.export_visualization(
             graph_result, 
             format="html",
             filename="knowledge_graph_demo"
         )
-        print(f"鍙鍖栧凡瀵煎嚭鍒? {output_file}")
+        print(f"可视化已导出到 {output_file}")
 
 
 if __name__ == "__main__":

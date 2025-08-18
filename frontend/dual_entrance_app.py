@@ -7,20 +7,25 @@
 
 import asyncio
 import logging
-import uuid
+import sys
+from pathlib import Path
 
-from components.chat_interface import ChatInterface
-from components.task_panel import TaskPanel
-from components.transparency_monitor import TransparencyMonitor
-from components.wiki_panel import WikiPanel
+# 添加项目根目录到Python路径
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from frontend.components.chat_interface import ChatInterface
+from frontend.components.task_panel import TaskPanel
+from frontend.components.transparency_monitor import TransparencyMonitor
+from frontend.components.wiki_panel import WikiPanel
 from lona import LonaApp, View
 from lona.html import H1, HTML, Button, Div, Form, Head, Link, Option, P, Select, TextInput, Title
-from services.backend_connector import BackendConnector
+from frontend.services.backend_connector import BackendConnector
 
 # 导入服务和组件
-from services.dual_entrance_websocket_manager import EntranceType, dual_entrance_websocket_manager
-from services.entrance_manager import entrance_manager
-from services.personal_assistant import PersonalAssistantService
+from frontend.services.dual_entrance_websocket_manager import EntranceType, dual_entrance_websocket_manager
+from frontend.services.entrance_manager import entrance_manager
+from frontend.services.personal_assistant import PersonalAssistantService
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -33,12 +38,7 @@ class DualEntranceApp:
     def __init__(self):
         self.app = LonaApp(__file__)
         self.backend_connector = BackendConnector()
-        self.assistant_service = PersonalAssistantService(
-            intent_analysis_service=self.backend_connector.intent_analysis_service,
-            role_manager=self.backend_connector.role_manager,
-            workflow_integrator=self.backend_connector.workflow_integrator,
-            consensus_selector=self.backend_connector.consensus_selector
-        )
+        self.assistant_service = PersonalAssistantService(self.backend_connector)
         
         # 设置路由
         self._setup_routes()

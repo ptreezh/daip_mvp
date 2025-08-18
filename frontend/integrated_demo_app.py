@@ -7,20 +7,25 @@
 
 import asyncio
 import logging
-import uuid
+import sys
+from pathlib import Path
+
+# 添加项目根目录到Python路径
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 # 导入现有组件
-from components.chat_interface import ChatInterface
-from components.task_panel import TaskPanel
-from components.transparency_monitor import TransparencyMonitor
-from components.wiki_panel import WikiPanel
+from frontend.components.chat_interface import ChatInterface
+from frontend.components.task_panel import TaskPanel
+from frontend.components.transparency_monitor import TransparencyMonitor
+from frontend.components.wiki_panel import WikiPanel
 from lona import LonaApp, View
 from lona.html import H1, H2, HTML, Button, Div, Head, Option, P, Select, Span, Title
-from services.backend_connector import BackendConnector
+from frontend.services.backend_connector import BackendConnector
 
 # 导入服务
-from services.personal_assistant import PersonalAssistantService
-from services.websocket_manager import realtime_manager, websocket_manager
+from frontend.services.personal_assistant import PersonalAssistantService
+from frontend.services.websocket_manager import realtime_manager, websocket_manager
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)

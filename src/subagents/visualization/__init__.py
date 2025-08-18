@@ -5,8 +5,9 @@
     Visualization subagents for multi-perspective analysis.
 """
 
-from .perspective_visualizer import MultiPerspectiveVisualizer
+from .perspective_visualizer import MultiPerspectiveVisualizer, VisualizationType
 
 __all__ = [
-    "MultiPerspectiveVisualizer"
+    "MultiPerspectiveVisualizer",
+    "VisualizationType"
 ]

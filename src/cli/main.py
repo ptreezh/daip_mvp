@@ -17,6 +17,14 @@ from rich.table import Table
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from src.config import settings
+from src.cli.commands import run_assistant_chat_command # New import
+
+from src.config import settings # Import settings
+
+def version_callback(value: bool):
+    if value:
+        print(f"DAIP-LIVE CLI Version: {settings.version}")
+        raise typer.Exit()
 
 # Initialize CLI app and console
 app = typer.Typer(
@@ -24,6 +32,21 @@ app = typer.Typer(
     help="DAIP-LIVE CLI - Dynamic AI-driven Project-execution LIVE system",
     add_completion=False,
 )
+
+@app.callback()
+def main_callback(
+    version: bool = typer.Option(
+        None,
+        "--version",
+        callback=version_callback,
+        is_eager=True,
+        help="Show the CLI version and exit.",
+    )
+):
+    # This function will be called before any command.
+    # The 'version' option is handled by its callback.
+    pass
+
 console = Console()
 
 # Create a Typer application for the 'assistant' command group
@@ -456,5 +479,17 @@ def help():
     console.print("  • Use 'daip-cli roles' to see available roles for debates")
 
 
+@assistant_app.command()
+def chat(query: str = typer.Argument(..., help="The query for the personal assistant.")):
+    """Interact with the personal assistant."""
+    asyncio.run(run_assistant_chat_command(query))
+
+
+from src.cli.interactive_cli import main_menu_loop, start_role_management
+
 if __name__ == "__main__":
-    app()
+    # If no arguments are provided, run the interactive menu
+    if len(sys.argv) == 1:
+        main_menu_loop()
+    else:
+        app()

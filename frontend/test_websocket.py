@@ -7,9 +7,15 @@
 
 import asyncio
 import json
+import sys
+from pathlib import Path
 from datetime import datetime
 
-from services.websocket_manager import MessageType, websocket_manager
+# 添加项目根目录到Python路径
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from frontend.services.websocket_manager import MessageType, websocket_manager
 
 
 async def test_agent_status_updates():

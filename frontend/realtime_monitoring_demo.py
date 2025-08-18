@@ -8,12 +8,17 @@
 import asyncio
 import logging
 import sys
+from pathlib import Path
+
+# 添加项目根目录到Python路径
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 # 导入组件和服务
-from components.transparency_monitor import TransparencyMonitor
+from frontend.components.transparency_monitor import TransparencyMonitor
 from lona import LonaApp, View
 from lona.html import H1, H2, HTML, Button, Div, P, Span
-from services.websocket_manager import realtime_manager, websocket_manager
+from frontend.services.websocket_manager import realtime_manager, websocket_manager
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

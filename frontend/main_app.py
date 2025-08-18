@@ -7,6 +7,12 @@
 
 import asyncio
 import logging
+import sys
+from pathlib import Path
+
+# 添加项目根目录到Python路径
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 from lona import LonaApp, View
 from lona.html import H1, HTML, Div, Head, Link, Title
@@ -14,15 +20,15 @@ from lona.html import H1, HTML, Div, Head, Link, Title
 logger = logging.getLogger(__name__)
 
 # 导入组件
-from components.chat_interface import ChatInterface
-from components.task_panel import TaskPanel
-from components.transparency_monitor import TransparencyMonitor
-from components.wiki_panel import WikiPanel
-from services.backend_connector import BackendConnector
+from frontend.components.chat_interface import ChatInterface
+from frontend.components.task_panel import TaskPanel
+from frontend.components.transparency_monitor import TransparencyMonitor
+from frontend.components.wiki_panel import WikiPanel
+from frontend.services.backend_connector import BackendConnector
 
 # 导入服务
-from services.personal_assistant import PersonalAssistantService
-from services.websocket_manager import realtime_manager, websocket_manager
+from frontend.services.personal_assistant import PersonalAssistantService
+from frontend.services.websocket_manager import realtime_manager, websocket_manager
 
 # 创建Lona应用实例
 app = LonaApp(__file__)
