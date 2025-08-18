@@ -13,14 +13,58 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+# Initialize console for rich output
+console = Console() # Added this line
+
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from src.config import settings
-from src.cli.commands import run_assistant_chat_command # New import
+from src.config import settings
+from src.config import settings
 from src.cli.commands import check_system_health # Moved import to top
 
-from src.config import settings # Import settings
+# New imports for core services
+from src.application.personal_assistant_router import PersonalAssistantRouter
+from src.core_services.user_profile_service import UserProfileService
+from src.core_services.intent_analysis_service import BasicIntentAnalysisService
+from src.core_services.role_manager import RoleManager
+from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
+from src.core_services.memory_agent import MemAgent
+from src.core_services.real_llm_context_optimizer import RealLLMClient, IntelligentContextOptimizer
+from src.core_services.integrated_llm_manager import IntegratedLLMManager
+from src.core_services.task_manager import TaskManager
+from src.institutional_primitives.registry import PrimitiveRegistry
+from src.institutional_primitives.workflow_engine import WorkflowEngine
+
+# Initialize core services (order matters due to dependencies)
+# Note: Some services might have their own dependencies that need to be initialized first.
+# This is a simplified instantiation for CLI purposes.
+user_profile_service = UserProfileService()
+intent_analysis_service = BasicIntentAnalysisService(user_profile_service=user_profile_service)
+
+role_manager = RoleManager()
+
+# EnhancedSSKGManager needs a path for persistence
+enhanced_sskg_manager = EnhancedSSKGManager(graph_path=Path("data/sskg_graph.graphml"), vector_store_path=Path("data/sskg_vector_store"))
+mem_agent = MemAgent(sskg_manager=enhanced_sskg_manager)
+
+# RealLLMClient and IntelligentContextOptimizer are instantiated internally by IntegratedLLMManager
+# We pass the necessary dependencies to IntegratedLLMManager
+integrated_llm_manager = IntegratedLLMManager() # This will initialize its own context_optimizer, role_manager, mem_agent
+
+task_manager = TaskManager()
+
+primitive_registry = PrimitiveRegistry()
+workflow_engine = WorkflowEngine(primitive_registry=primitive_registry)
+
+# Initialize PersonalAssistantRouter
+personal_assistant_router = PersonalAssistantRouter(
+    intent_analysis_service=intent_analysis_service,
+    llm_manager=integrated_llm_manager,
+    workflow_engine=workflow_engine,
+    task_manager=task_manager
+)
 
 def version_callback(value: bool):
     if value:
@@ -48,15 +92,216 @@ def main_callback(
     # The 'version' option is handled by its callback.
     pass
 
-console = Console()
-
-# Create a Typer application for the 'assistant' command group
-assistant_app = typer.Typer(
-    name="assistant",
+# Create a Typer application for the 'pa' command group (Personal Assistant)
+pa_app = typer.Typer(
+    name="pa",
     help="Commands for interacting with the Personal Assistant.",
     add_completion=False,
 )
-app.add_typer(assistant_app, name="assistant")
+app.add_typer(pa_app, name="pa")
+
+# Add Personal Assistant commands
+@pa_app.command("chat")
+def pa_chat(query: str = typer.Argument(..., help="The query for the Personal Assistant.")):
+    """Interact with the personal assistant."""
+    asyncio.run(personal_assistant_router.process_query(query))
+
+@pa_app.command("status")
+def pa_status(task_id: str = typer.Argument(..., help="The ID of the task to check status for.")):
+    """Check the status of a complex task."""
+    asyncio.run(personal_assistant_router.get_task_status(task_id))
+
+@pa_app.command("logs")
+def pa_logs(limit: int = typer.Option(10, "--limit", "-l", help="Number of log entries to retrieve.")):
+    """View recent log entries from the personal assistant."""
+    asyncio.run(personal_assistant_router.get_logs(limit))
+
+
+# New imports for core services
+from src.application.personal_assistant_router import PersonalAssistantRouter
+from src.core_services.user_profile_service import UserProfileService
+from src.core_services.intent_analysis_service import BasicIntentAnalysisService
+from src.core_services.role_manager import RoleManager
+from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
+from src.core_services.memory_agent import MemAgent
+from src.core_services.real_llm_context_optimizer import RealLLMClient, IntelligentContextOptimizer
+from src.core_services.integrated_llm_manager import IntegratedLLMManager
+from src.core_services.task_manager import TaskManager
+from src.institutional_primitives.registry import PrimitiveRegistry
+from src.institutional_primitives.workflow_engine import WorkflowEngine
+
+# Initialize core services (order matters due to dependencies)
+# Note: Some services might have their own dependencies that need to be initialized first.
+# This is a simplified instantiation for CLI purposes.
+user_profile_service = UserProfileService()
+intent_analysis_service = BasicIntentAnalysisService(user_profile_service=user_profile_service)
+
+role_manager = RoleManager()
+
+# EnhancedSSKGManager needs a path for persistence
+enhanced_sskg_manager = EnhancedSSKGManager(graph_path=Path("data/sskg_graph.graphml"), vector_store_path=Path("data/sskg_vector_store"))
+mem_agent = MemAgent(sskg_manager=enhanced_sskg_manager)
+
+# RealLLMClient and IntelligentContextOptimizer are instantiated internally by IntegratedLLMManager
+# We pass the necessary dependencies to IntegratedLLMManager
+integrated_llm_manager = IntegratedLLMManager() # This will initialize its own context_optimizer, role_manager, mem_agent
+
+task_manager = TaskManager()
+
+primitive_registry = PrimitiveRegistry()
+workflow_engine = WorkflowEngine(primitive_registry=primitive_registry)
+
+# Initialize PersonalAssistantRouter
+personal_assistant_router = PersonalAssistantRouter(
+    intent_analysis_service=intent_analysis_service,
+    llm_manager=integrated_llm_manager,
+    workflow_engine=workflow_engine,
+    task_manager=task_manager
+)
+
+def version_callback(value: bool):
+    if value:
+        print(f"DAIP-LIVE CLI Version: {settings.version}")
+        raise typer.Exit()
+
+# Initialize CLI app and console
+app = typer.Typer(
+    name="daip-cli",
+    help="DAIP-LIVE CLI - Dynamic AI-driven Project-execution LIVE system",
+    add_completion=False,
+)
+
+@app.callback()
+def main_callback(
+    version: bool = typer.Option(
+        None,
+        "--version",
+        callback=version_callback,
+        is_eager=True,
+        help="Show the CLI version and exit.",
+    )
+):
+    # This function will be called before any command.
+    # The 'version' option is handled by its callback.
+    pass
+
+# Create a Typer application for the 'pa' command group (Personal Assistant)
+pa_app = typer.Typer(
+    name="pa",
+    help="Commands for interacting with the Personal Assistant.",
+    add_completion=False,
+)
+app.add_typer(pa_app, name="pa")
+
+# Add Personal Assistant commands
+@pa_app.command("chat")
+def pa_chat(query: str = typer.Argument(..., help="The query for the Personal Assistant.")):
+    """Interact with the personal assistant."""
+    asyncio.run(personal_assistant_router.process_query(query))
+
+@pa_app.command("status")
+def pa_status(task_id: str = typer.Argument(..., help="The ID of the task to check status for.")):
+    """Check the status of a complex task."""
+    asyncio.run(personal_assistant_router.get_task_status(task_id))
+
+@pa_app.command("logs")
+def pa_logs(limit: int = typer.Option(10, "--limit", "-l", help="Number of log entries to retrieve.")):
+    """View recent log entries from the personal assistant."""
+    asyncio.run(personal_assistant_router.get_logs(limit))
+
+
+# New imports for core services
+from src.application.personal_assistant_router import PersonalAssistantRouter
+from src.core_services.user_profile_service import UserProfileService
+from src.core_services.intent_analysis_service import BasicIntentAnalysisService
+from src.core_services.role_manager import RoleManager
+from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
+from src.core_services.memory_agent import MemAgent
+from src.core_services.real_llm_context_optimizer import RealLLMClient, IntelligentContextOptimizer
+from src.core_services.integrated_llm_manager import IntegratedLLMManager
+from src.core_services.task_manager import TaskManager
+from src.institutional_primitives.registry import PrimitiveRegistry
+from src.institutional_primitives.workflow_engine import WorkflowEngine
+
+# Initialize core services (order matters due to dependencies)
+# Note: Some services might have their own dependencies that need to be initialized first.
+# This is a simplified instantiation for CLI purposes.
+user_profile_service = UserProfileService()
+intent_analysis_service = BasicIntentAnalysisService(user_profile_service=user_profile_service)
+
+role_manager = RoleManager()
+
+# EnhancedSSKGManager needs a path for persistence
+enhanced_sskg_manager = EnhancedSSKGManager(graph_path=Path("data/sskg_graph.graphml"), vector_store_path=Path("data/sskg_vector_store"))
+mem_agent = MemAgent(sskg_manager=enhanced_sskg_manager)
+
+# RealLLMClient and IntelligentContextOptimizer are instantiated internally by IntegratedLLMManager
+# We pass the necessary dependencies to IntegratedLLMManager
+integrated_llm_manager = IntegratedLLMManager() # This will initialize its own context_optimizer, role_manager, mem_agent
+
+task_manager = TaskManager()
+
+primitive_registry = PrimitiveRegistry()
+workflow_engine = WorkflowEngine(primitive_registry=primitive_registry)
+
+# Initialize PersonalAssistantRouter
+personal_assistant_router = PersonalAssistantRouter(
+    intent_analysis_service=intent_analysis_service,
+    llm_manager=integrated_llm_manager,
+    workflow_engine=workflow_engine,
+    task_manager=task_manager
+)
+
+def version_callback(value: bool):
+    if value:
+        print(f"DAIP-LIVE CLI Version: {settings.version}")
+        raise typer.Exit()
+
+# Initialize CLI app and console
+app = typer.Typer(
+    name="daip-cli",
+    help="DAIP-LIVE CLI - Dynamic AI-driven Project-execution LIVE system",
+    add_completion=False,
+)
+
+@app.callback()
+def main_callback(
+    version: bool = typer.Option(
+        None,
+        "--version",
+        callback=version_callback,
+        is_eager=True,
+        help="Show the CLI version and exit.",
+    )
+):
+    # This function will be called before any command.
+    # The 'version' option is handled by its callback.
+    pass
+
+# Create a Typer application for the 'pa' command group (Personal Assistant)
+pa_app = typer.Typer(
+    name="pa",
+    help="Commands for interacting with the Personal Assistant.",
+    add_completion=False,
+)
+app.add_typer(pa_app, name="pa")
+
+# Add Personal Assistant commands
+@pa_app.command("chat")
+def pa_chat(query: str = typer.Argument(..., help="The query for the Personal Assistant.")):
+    """Interact with the personal assistant."""
+    asyncio.run(personal_assistant_router.process_query(query))
+
+@pa_app.command("status")
+def pa_status(task_id: str = typer.Argument(..., help="The ID of the task to check status for.")):
+    """Check the status of a complex task."""
+    asyncio.run(personal_assistant_router.get_task_status(task_id))
+
+@pa_app.command("logs")
+def pa_logs(limit: int = typer.Option(10, "--limit", "-l", help="Number of log entries to retrieve.")):
+    """View recent log entries from the personal assistant."""
+    asyncio.run(personal_assistant_router.get_logs(limit))
+
 
 # Create a Typer application for the 'debate' command group
 debate_app = typer.Typer(
@@ -72,6 +317,7 @@ logger = logging.getLogger(__name__)
 
 
 @debate_app.command()
+def start(
     topic: str = typer.Argument(..., help="The debate topic"),
     roles: list[str] = typer.Option([], "--role", "-r", help="AI roles to participate in the debate"),
     rounds: int = typer.Option(3, "--rounds", help="Number of debate rounds"),
@@ -384,7 +630,11 @@ def help():
     console.print("  [cyan]start[/cyan]   - Start a new debate")
     console.print("  [cyan]roles[/cyan]   - List available roles for debates")
     console.print("  [cyan]status[/cyan]  - Check system status")
-    console.print("  [cyan]assistant[/cyan] - Commands for the Personal Assistant")
+    console.print("  [cyan]pa[/cyan]        - Commands for the Personal Assistant")
+    console.print("  [cyan]intv[/cyan]    - Provide an intervention to the current session.")
+    console.print("  [cyan]cons[/cyan]    - Get consensus information for the current session.")
+    console.print("  [cyan]disag[/cyan]   - Get key disagreement points for the current session.")
+    console.print("  [cyan]sess[/cyan]    - List all sessions.")
     console.print("  [cyan]help[/cyan]    - Show this help message")
     console.print()
     
@@ -398,8 +648,14 @@ def help():
     console.print("  # List available roles")
     console.print("  [dim]daip-cli roles[/dim]")
     console.print()
-    console.print("  # Send a query to the personal assistant")
-    console.print("  [dim]daip-cli assistant chat 'Summarize the latest AI research.'[/dim]")
+    console.print("  # Interact with the personal assistant")
+    console.print("  [dim]daip-cli pa chat 'Summarize the latest AI research.'[/dim]")
+    console.print()
+    console.print("  # Check the status of a personal assistant task")
+    console.print("  [dim]daip-cli pa status <task_id>[/dim]")
+    console.print()
+    console.print("  # View personal assistant logs")
+    console.print("  [dim]daip-cli pa logs[/dim]")
     console.print()
     console.print("  # Start a longer debate with verbose output")
     console.print("  [dim]daip-cli start 'Future of work' --role 'Futurist' --role 'Labor Expert' --rounds 5 --verbose[/dim]")
@@ -416,10 +672,56 @@ def help():
     console.print("  • Use 'daip-cli roles' to see available roles for debates")
 
 
-@assistant_app.command()
-def chat(query: str = typer.Argument(..., help="The query for the personal assistant.")):
-    """Interact with the personal assistant."""
-    asyncio.run(run_assistant_chat_command(query))
+
+
+
+@app.command()
+def intv(
+    content: str = typer.Option(..., "--content", "-c", help="The content of the intervention."),
+    intent: str = typer.Option("comment", "--intent", "-i", help="The intent of the intervention (comment, suggestion, correction, question).")
+):
+    """Provide an intervention to the current assistant session."""
+    # This will need to interact with PersonalAssistantRouter or a dedicated service
+    console.print(f"Intervention: {content} with intent: {intent}")
+    # Placeholder for actual logic
+
+@app.command()
+def cons():
+    """Get consensus information for the current session."""
+    # This will need to interact with PersonalAssistantRouter or a dedicated service
+    console.print("Getting consensus information...")
+    # Placeholder for actual logic
+
+@app.command()
+def disag():
+    """Get key disagreement points for the current session."""
+    # This will need to interact with PersonalAssistantRouter or a dedicated service
+    console.print("Getting disagreement points...")
+    # Placeholder for actual logic
+
+@app.command()
+def sess():
+    """List all sessions."""
+    sessions = personal_assistant_router.get_session_list() # Removed asyncio.run()
+    if not sessions:
+        console.print("[yellow]No active sessions found.[/yellow]")
+        return
+
+    table = Table(title="Active Sessions")
+    table.add_column("Session ID", style="cyan", no_wrap=True)
+    table.add_column("User ID", style="magenta")
+    table.add_column("Type", style="green")
+    table.add_column("Last Activity", style="blue")
+
+    for session_data in sessions:
+        session_id = session_data.get("session_id", "N/A")
+        user_id = session_data.get("user_id", "N/A")
+        session_type = session_data.get("type", "N/A") # Assuming 'type' is available in session_data
+        last_activity = session_data.get("last_activity", "N/A") # Assuming 'last_activity' is available
+
+        table.add_row(session_id, user_id, session_type, last_activity)
+    
+    console.print(table)
 
 
 from src.cli.interactive_cli import main_menu_loop, start_role_management

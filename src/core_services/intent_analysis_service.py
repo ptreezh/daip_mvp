@@ -22,6 +22,7 @@ class IntentAnalysis(BaseModel):
     user_input: str
     detected_intent: str
     confidence: float = Field(ge=0.0, le=1.0)
+    complexity_score: float = Field(ge=0.0, le=1.0) # Added this line
     context_requirements: list[str] = Field(default_factory=list)
     suggested_enhancements: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -170,6 +171,7 @@ class BasicIntentAnalysisService(IntentAnalysisServiceInterface):
         detected_intent = "general"
         max_matches = 0
         confidence = 0.5  # Default confidence
+        complexity_score = 0.0 # Initialize complexity_score
 
         for intent, keywords in intent_patterns.items():
             matches = sum(1 for keyword in keywords if keyword in input_lower)
@@ -177,6 +179,14 @@ class BasicIntentAnalysisService(IntentAnalysisServiceInterface):
                 max_matches = matches
                 detected_intent = intent
                 confidence = min(0.5 + (matches * 0.1), 0.9)  # Scale confidence
+        
+        # Determine complexity_score based on detected_intent
+        if detected_intent in ["question", "request", "help"]:
+            complexity_score = 0.7 # Higher complexity for task-oriented intents
+        elif detected_intent in ["feedback", "clarification"]:
+            complexity_score = 0.5
+        else:
+            complexity_score = 0.3 # Lower complexity for idle chat/general intents
 
         # Use LLM for more advanced analysis if available
         if self.llm_interface and len(user_input) > 10:
@@ -205,6 +215,7 @@ class BasicIntentAnalysisService(IntentAnalysisServiceInterface):
             user_input=user_input,
             detected_intent=detected_intent,
             confidence=confidence,
+            complexity_score=complexity_score, # Pass complexity_score
             context_requirements=context_requirements,
             suggested_enhancements=suggested_enhancements
         )

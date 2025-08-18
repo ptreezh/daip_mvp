@@ -187,6 +187,47 @@ class SessionAggregate:
     def __str__(self):
         return f"SessionAggregate(id={self.session_id}, user={self.user_id}, type={self.entrance_type}, tasks={len(self._tasks)})"
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        """从字典重建SessionAggregate"""
+        session_id = data.get("session_id")
+        user_id = data.get("user_id")
+        entrance_type = EntranceType(data.get("entrance_type"))
+        
+        if not all([session_id, user_id, entrance_type]):
+            raise ValueError("Missing essential data for SessionAggregate reconstruction")
+
+        instance = cls(user_id=user_id, entrance_type=entrance_type, session_id=session_id)
+        instance.status = SessionStatus(data.get("status", SessionStatus.ACTIVE.value))
+        instance.created_at = datetime.fromisoformat(data["created_at"]) if "created_at" in data else datetime.now()
+        instance.updated_at = datetime.fromisoformat(data["updated_at"]) if "updated_at" in data else datetime.now()
+        instance.metadata = data.get("metadata", {})
+
+        # Reconstruct nested entities
+        if "tasks" in data:
+            instance._tasks = [Task.from_dict(t) for t in data["tasks"]]
+        if "messages" in data:
+            instance._messages = [Message.from_dict(m) for m in data["messages"]]
+        if "debate" in data and data["debate"] is not None:
+            instance._debate = Debate.from_dict(data["debate"])
+        
+        return instance
+
+    def to_dict(self) -> dict[str, Any]:
+        """将SessionAggregate转换为字典"""
+        return {
+            "session_id": self.session_id,
+            "user_id": self.user_id,
+            "entrance_type": self.entrance_type.value,
+            "status": self.status.value,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "metadata": self.metadata,
+            "tasks": [t.to_dict() for t in self._tasks],
+            "messages": [m.to_dict() for m in self._messages],
+            "debate": self._debate.to_dict() if self._debate else None,
+        }
+
 
 class TaskAggregate:
     """任务聚合根"""

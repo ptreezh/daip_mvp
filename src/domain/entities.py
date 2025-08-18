@@ -114,6 +114,29 @@ class Session:
     def __str__(self):
         return f"Session(id={self.session_id}, user={self.user_id}, type={self.entrance_type}, status={self.status})"
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "session_id": self.session_id,
+            "user_id": self.user_id,
+            "entrance_type": self.entrance_type.value,
+            "status": self.status.value,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "metadata": self.metadata,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        return cls(
+            session_id=data["session_id"],
+            user_id=data["user_id"],
+            entrance_type=EntranceType(data["entrance_type"]),
+            status=SessionStatus(data["status"]),
+            created_at=datetime.fromisoformat(data["created_at"]),
+            updated_at=datetime.fromisoformat(data["updated_at"]),
+            metadata=data.get("metadata", {}),
+        )
+
 
 @dataclass
 class Task:
@@ -174,6 +197,37 @@ class Task:
     def __str__(self):
         return f"Task(id={self.task_id}, session={self.session_id}, intent={self.intent_type}, status={self.status})"
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "task_id": self.task_id,
+            "session_id": self.session_id,
+            "content": self.content,
+            "intent_type": self.intent_type.value,
+            "status": self.status.value,
+            "priority": self.priority.value,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "result": self.result,
+            "metadata": self.metadata,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        return cls(
+            task_id=data["task_id"],
+            session_id=data["session_id"],
+            content=data["content"],
+            intent_type=IntentType(data["intent_type"]),
+            status=TaskStatus(data["status"]),
+            priority=TaskPriority(data["priority"]),
+            created_at=datetime.fromisoformat(data["created_at"]),
+            updated_at=datetime.fromisoformat(data["updated_at"]),
+            completed_at=datetime.fromisoformat(data["completed_at"]) if data["completed_at"] else None,
+            result=data["result"],
+            metadata=data.get("metadata", {}),
+        )
+
 
 @dataclass
 class Message:
@@ -208,6 +262,16 @@ class Message:
     def __str__(self):
         return f"Message(id={self.message_id}, session={self.session_id}, sender={self.sender})"
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "message_id": self.message_id,
+            "session_id": self.session_id,
+            "content": self.content,
+            "sender": self.sender,
+            "timestamp": self.timestamp.isoformat(),
+            "metadata": self.metadata,
+        }
+
 
 @dataclass
 class UserMessage(Message):
@@ -225,6 +289,29 @@ class UserMessage(Message):
         self.content = optimized_content
         self.is_optimized = True
         self.metadata["optimized_at"] = datetime.now()
+
+    def to_dict(self) -> dict[str, Any]:
+        base_dict = super().to_dict()
+        base_dict.update({
+            "intent": self.intent.value,
+            "is_optimized": self.is_optimized,
+            "target_agent": self.target_agent,
+        })
+        return base_dict
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        return cls(
+            message_id=data["message_id"],
+            session_id=data["session_id"],
+            content=data["content"],
+            sender=data["sender"],
+            timestamp=datetime.fromisoformat(data["timestamp"]),
+            metadata=data.get("metadata", {}),
+            intent=MessageIntent(data["intent"]),
+            is_optimized=data["is_optimized"],
+            target_agent=data["target_agent"],
+        )
 
 
 @dataclass
@@ -251,6 +338,31 @@ class AgentMessage(Message):
         """检查是否为高置信度"""
         return self.confidence >= 0.8
 
+    def to_dict(self) -> dict[str, Any]:
+        base_dict = super().to_dict()
+        base_dict.update({
+            "agent_role": self.agent_role,
+            "confidence": self.confidence,
+            "target_message_id": self.target_message_id,
+            "message_type": self.message_type,
+        })
+        return base_dict
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        return cls(
+            message_id=data["message_id"],
+            session_id=data["session_id"],
+            content=data["content"],
+            sender=data["sender"],
+            timestamp=datetime.fromisoformat(data["timestamp"]),
+            metadata=data.get("metadata", {}),
+            agent_role=data["agent_role"],
+            confidence=data["confidence"],
+            target_message_id=data["target_message_id"],
+            message_type=data["message_type"],
+        )
+
 
 @dataclass
 class SystemMessage(Message):
@@ -269,6 +381,27 @@ class SystemMessage(Message):
     def is_warning(self) -> bool:
         """是否为警告消息"""
         return self.severity == "warning"
+
+    def to_dict(self) -> dict[str, Any]:
+        base_dict = super().to_dict()
+        base_dict.update({
+            "system_event": self.system_event,
+            "severity": self.severity,
+        })
+        return base_dict
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        return cls(
+            message_id=data["message_id"],
+            session_id=data["session_id"],
+            content=data["content"],
+            sender=data["sender"],
+            timestamp=datetime.fromisoformat(data["timestamp"]),
+            metadata=data.get("metadata", {}),
+            system_event=data["system_event"],
+            severity=data["severity"],
+        )
 
 
 @dataclass
@@ -330,3 +463,30 @@ class Debate:
     
     def __str__(self):
         return f"Debate(id={self.debate_id}, topic={self.topic}, participants={len(self.participants)}, consensus={self.consensus_level})"
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "debate_id": self.debate_id,
+            "session_id": self.session_id,
+            "topic": self.topic,
+            "participants": self.participants,
+            "messages": [m.to_dict() for m in self.messages],
+            "consensus_level": self.consensus_level.value,
+            "status": self.status,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        return cls(
+            debate_id=data["debate_id"],
+            session_id=data["session_id"],
+            topic=data["topic"],
+            participants=data["participants"],
+            messages=[Message.from_dict(m) for m in data["messages"]], # Assuming Message.from_dict handles subclasses
+            consensus_level=ConsensusLevel(data["consensus_level"]),
+            status=data["status"],
+            created_at=datetime.fromisoformat(data["created_at"]),
+            updated_at=datetime.fromisoformat(data["updated_at"]),
+        )
