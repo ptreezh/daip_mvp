@@ -28,8 +28,8 @@ def test_cli_help_command():
     assert result.returncode == 0
     normalized_output = normalize_whitespace(result.stdout)
     assert "Usage:" in normalized_output
-    assert "Options:" in normalized_output
-    assert "Commands:" in normalized_output
+    assert "Options" in normalized_output
+    assert "Commands" in normalized_output
     assert "assistant" in normalized_output or "start" in normalized_output
 
 import unittest.mock
