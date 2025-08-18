@@ -1,130 +1,157 @@
-# 阶段 2: 智能体助手 - 任务清单
+# 阶段 2: 智能体助手 - 任务分解与TDD存档
 
-## 核心任务 (TDD 驱动)
+## 核心目标
+实现一个基于工作流驱动的智能个人助手，能够根据用户意图智能选择入口类型（Secretariat/Forum），规划并执行复杂任务，同时提供透明度和状态跟踪。
 
-*   **2.1 实现 `PersonalAssistantRouter` 的意图分类与模式分派**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证 `PersonalAssistantRouter` 能正确识别“闲聊”和“复杂任务”意图，并能根据意图分派到不同的处理流程。测试 LLM 意图分析失败时的优雅降级（回退到关键词或默认）。
-        *   **GREEN:** 实现 `PersonalAssistantRouter` 的核心逻辑，集成增强型 `IntentAnalysisService`。
-        *   **REFACTOR:** 优化意图分类的 Prompt，确保其准确性和鲁棒性。
-*   **2.2 增强 `IntentAnalysisService`**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证 `IntentAnalysisService` 能够调用 `IntegratedLLMManager.call_llm_for_role` 并使用“分类器”角色，返回结构化意图。测试 LLM 响应解析的健壮性。
-        *   **GREEN:** 修改 `IntentAnalysisService`，使其使用 LLM 进行意图分类，并处理 LLM 响应。
-        *   **REFACTOR:** 优化 LLM 调用参数和错误处理。
-*   **2.3 实现闲聊模式**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证在闲聊模式下，助手能进行多轮对话，并使用 Paul Graham/Arthur Brooks 风格的 Prompt。测试用户输入复杂任务指令时能正确退出闲聊模式。
-        *   **GREEN:** 在 `PersonalAssistantRouter` 中实现闲聊模式的对话循环，调用 `IntegratedLLMManager.call_llm_for_role`。
-        *   **REFACTOR:** 优化对话上下文管理和 Prompt。
-# 阶段 2: 智能体助手 - 任务清单
+## TDD原则回顾
+1. **先写测试**: 在实现任何功能之前，先编写测试用例
+2. **红-绿-重构**: 
+   - 红: 编写一个失败的测试
+   - 绿: 编写最少的代码让测试通过
+   - 重构: 优化代码结构，保持测试通过
+3. **小步快跑**: 每次只实现一个小功能
+4. **测试驱动设计**: 通过测试来指导代码设计
 
-## 核心任务 (TDD 驱动)
+## 任务分解与TDD存档
 
-*   **2.1 实现 `PersonalAssistantRouter` 的意图分类与模式分派**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证 `PersonalAssistantRouter` 能正确识别“闲聊”和“复杂任务”意图，并能根据意图分派到不同的处理流程。测试 LLM 意图分析失败时的优雅降级（回退到关键词或默认）。
-        *   **GREEN:** 实现 `PersonalAssistantRouter` 的核心逻辑，集成增强型 `IntentAnalysisService`。
-        *   **REFACTOR:** 优化意图分类的 Prompt，确保其准确性和鲁棒性。
-*   **2.2 增强 `IntentAnalysisService`**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证 `IntentAnalysisService` 能够调用 `IntegratedLLMManager.call_llm_for_role` 并使用“分类器”角色，返回结构化意图。测试 LLM 响应解析的健壮性。
-        *   **GREEN:** 修改 `IntentAnalysisService`，使其使用 LLM 进行意图分类，并处理 LLM 响应。
-        *   **REFACTOR:** 优化 LLM 调用参数和错误处理。
-*   **2.3 实现闲聊模式**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证在闲聊模式下，助手能进行多轮对话，并使用 Paul Graham/Arthur Brooks 风格的 Prompt。测试用户输入复杂任务指令时能正确退出闲聊模式。
-        *   **GREEN:** 在 `PersonalAssistantRouter` 中实现闲聊模式的对话循环，调用 `IntegratedLLMManager.call_llm_for_role`。
-        *   **REFACTOR:** 优化对话上下文管理和 Prompt。
-*   **2.4 实现复杂任务的意图精炼与规划 (规划师 LLM)**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证“秘书”LLM 能精炼用户指令，并验证“规划师”LLM 能根据精炼后的指令和提供的 API Schema 生成有效的 JSON 工作流定义，**包括辩论和聊天模块的“议事规则”制度原语**。测试生成无效 API 调用时的错误处理。
-        *   **GREEN:** 实现调用“秘书”和“规划师”LLM 的逻辑，并解析其输出为工作流定义。
-        *   **REFACTOR:** 优化 LLM Prompt，确保生成的 API 调用符合 `GLOBAL_API_DICTIONARY.md` **并能正确包含和配置议事规则**。
-*   **2.5 实现角色匹配与创建逻辑**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证“规划师”LLM 或辅助服务能根据辩论/聊天议题，智能匹配现有角色或生成创建新角色的指令。
-        *   **GREEN:** 实现 Planner LLM 与 `RoleManager` 交互的逻辑，包括 `list_roles`, `get_role_by_id`, `save_role`。
-        *   **REFACTOR:** 优化角色匹配算法和新角色创建的 Prompt。
-*   **2.6 集成 `TaskManager`**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证复杂任务创建后能被 `TaskManager` 正确持久化，并能通过 ID 查询其状态。
-        *   **GREEN:** 在 `PersonalAssistantRouter` 中集成 `TaskManager`，用于创建和更新任务状态。
-        *   **REFACTOR:** 优化任务状态流转和错误处理。
-*   **2.7 启动工作流执行**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证 `PersonalAssistantRouter` 能将生成的复杂任务工作流定义传递给 `WorkflowEngine` 并成功启动执行。
-        *   **GREEN:** 实现将工作流定义传递给 `WorkflowEngine` 的逻辑。
-        *   **REFACTOR:** 确保工作流启动的参数正确。
-*   **2.8 实现 `daip-cli assistant chat` 命令**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证 `daip-cli assistant chat <query>` 能正确调用 `PersonalAssistantRouter` 并显示其返回的响应。
-        *   **GREEN:** 在 `src/cli/main.py` 中添加 `assistant` 子命令组，并实现 `chat` 命令，调用 `PersonalAssistantRouter`。
-        *   **REFACTOR:** 优化 CLI 输出的用户体验。
-*   **2.9 实现 `daip-cli assistant status <task_id>` 命令**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证 `daip-cli assistant status <task_id>` 能正确查询 `TaskManager` 并显示任务状态。
-        *   **GREEN:** 在 `assistant` 子命令组中添加 `status` 命令，调用 `TaskManager`。
-        *   **REFACTOR:** 优化任务状态的显示格式。
-*   **2.10 实现 `daip-cli assistant logs` 命令**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证 `daip-cli assistant logs` 能正确读取 `secretary_log.jsonl` 并显示最新日志。
-        *   **GREEN:** 在 `assistant` 子命令组中添加 `logs` 命令，读取日志文件。
-        *   **REFACTOR:** 优化日志显示格式和分页。
+### 任务1: 实现入口选择服务的TDD测试
+**存档时间**: 2025-08-18
+**状态**: 未开始
 
-## 扩展任务 (来自 IMPLEMENTATION_PLAN.md)
+#### 测试用例
+1. 测试用户偏好入口选择
+2. 测试基于上下文特征的入口选择
+3. 测试时间敏感性分析
+4. 测试查询复杂性分析
+5. 测试用户专业水平评估
+6. 测试历史偏好分析
+7. 测试交互模式分析
+8. 测试最优入口预测
 
-*   **2.11 实现 `daip-cli debate view-disagreements` 命令**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，模拟后端服务返回特定辩论的分歧点数据，并断言 CLI 输出能清晰展示这些分歧点。
-        *   **GREEN:** 在 `src/cli/main.py` 中创建 `debate` Typer 子命令组，并添加 `view-disagreements` 命令，调用相关后端服务。
-        *   **REFACTOR:** 优化分歧点的展示格式，使其易于理解和分析。
-*   **2.12 实现 `daip-cli debate select-consensus-algorithm` 命令**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，模拟后端服务成功更新辩论的共识算法，并断言 CLI 输出确认信息。测试无效算法名称的错误处理。
-        *   **GREEN:** 在 `debate` 子命令组中添加 `select-consensus-algorithm` 命令，调用 `consensus_algorithm_selector`。
-        *   **REFACTOR:** 增加对可用共识算法的提示或验证。
+#### 验收标准
+- [ ] 所有测试用例通过
+- [ ] 代码覆盖率 >= 90%
+- [ ] 有明确的文档说明
 
-*   **2.5 实现角色匹配与创建逻辑**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证“规划师”LLM 或辅助服务能根据辩论/聊天议题，智能匹配现有角色或生成创建新角色的指令。
-        *   **GREEN:** 实现 Planner LLM 与 `RoleManager` 交互的逻辑，包括 `list_roles`, `get_role_by_id`, `save_role`。
-        *   **REFACTOR:** 优化角色匹配算法和新角色创建的 Prompt。
-*   **2.6 集成 `TaskManager`**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证复杂任务创建后能被 `TaskManager` 正确持久化，并能通过 ID 查询其状态。
-        *   **GREEN:** 在 `PersonalAssistantRouter` 中集成 `TaskManager`，用于创建和更新任务状态。
-        *   **REFACTOR:** 优化任务状态流转和错误处理。
-*   **2.7 启动工作流执行**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证 `PersonalAssistantRouter` 能将生成的复杂任务工作流定义传递给 `WorkflowEngine` 并成功启动执行。
-        *   **GREEN:** 实现将工作流定义传递给 `WorkflowEngine` 的逻辑。
-        *   **REFACTOR:** 确保工作流启动的参数正确。
-*   **2.8 实现 `daip-cli assistant chat` 命令**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证 `daip-cli assistant chat <query>` 能正确调用 `PersonalAssistantRouter` 并显示其返回的响应。
-        *   **GREEN:** 在 `src/cli/main.py` 中添加 `assistant` 子命令组，并实现 `chat` 命令，调用 `PersonalAssistantRouter`。
-        *   **REFACTOR:** 优化 CLI 输出的用户体验。
-*   **2.9 实现 `daip-cli assistant status <task_id>` 命令**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证 `daip-cli assistant status <task_id>` 能正确查询 `TaskManager` 并显示任务状态。
-        *   **GREEN:** 在 `assistant` 子命令组中添加 `status` 命令，调用 `TaskManager`。
-        *   **REFACTOR:** 优化任务状态的显示格式。
-*   **2.10 实现 `daip-cli assistant logs` 命令**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，验证 `daip-cli assistant logs` 能正确读取 `secretary_log.jsonl` 并显示最新日志。
-        *   **GREEN:** 在 `assistant` 子命令组中添加 `logs` 命令，读取日志文件。
-        *   **REFACTOR:** 优化日志显示格式和分页。
+### 任务2: 实现工作流编排器的TDD测试
+**存档时间**: 2025-08-18
+**状态**: 未开始
 
-## 扩展任务 (来自 IMPLEMENTATION_PLAN.md)
+#### 测试用例
+1. 测试工作流规划
+2. 测试不同类型意图的工作流模板
+3. 测试执行时间估算
+4. 测试所需Agent确定
+5. 测试工作流启动
+6. 测试工作流步骤执行
+7. 测试工作流进度获取
+8. 测试剩余时间计算
+9. 测试工作流完成和失败处理
 
-*   **2.11 实现 `daip-cli debate view-disagreements` 命令**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，模拟后端服务返回特定辩论的分歧点数据，并断言 CLI 输出能清晰展示这些分歧点。
-        *   **GREEN:** 在 `src/cli/main.py` 中创建 `debate` Typer 子命令组，并添加 `view-disagreements` 命令，调用相关后端服务。
-        *   **REFACTOR:** 优化分歧点的展示格式，使其易于理解和分析。
-*   **2.12 实现 `daip-cli debate select-consensus-algorithm` 命令**
-    *   **TDD Cycle:**
-        *   **RED:** 编写测试用例，模拟后端服务成功更新辩论的共识算法，并断言 CLI 输出确认信息。测试无效算法名称的错误处理。
-        *   **GREEN:** 在 `debate` 子命令组中添加 `select-consensus-algorithm` 命令，调用 `consensus_algorithm_selector`。
-        *   **REFACTOR:** 增加对可用共识算法的提示或验证。
+#### 验收标准
+- [ ] 所有测试用例通过
+- [ ] 代码覆盖率 >= 90%
+- [ ] 有明确的文档说明
+
+### 任务3: 实现用户干预服务的TDD测试
+**存档时间**: 2025-08-18
+**状态**: 未开始
+
+#### 测试用例
+1. 测试用户输入优化
+2. 测试不同类型意图的输入优化
+3. 测试用户干预集成
+4. 测试干预影响分析
+5. 测试集成建议生成
+6. 测试影响分数计算
+7. 测试优化历史记录
+8. 测试优化统计信息获取
+
+#### 验收标准
+- [ ] 所有测试用例通过
+- [ ] 代码覆盖率 >= 90%
+- [ ] 有明确的文档说明
+
+### 任务4: 实现共识跟踪服务的TDD测试
+**存档时间**: 2025-08-18
+**状态**: 未开始
+
+#### 测试用例
+1. 测试共识水平计算
+2. 测试简单多数共识算法
+3. 测试加权投票共识算法
+4. 测试情感分析共识算法
+5. 测试Agent观点添加
+6. 测试消息添加
+7. 测试关键论点提取
+8. 测试辩论摘要获取
+
+#### 验收标准
+- [ ] 所有测试用例通过
+- [ ] 代码覆盖率 >= 90%
+- [ ] 有明确的文档说明
+
+### 任务5: 实现PersonalAssistantService核心功能的TDD测试
+**存档时间**: 2025-08-18
+**状态**: 未开始
+
+#### 测试用例
+1. 测试服务初始化
+2. 测试会话创建
+3. 测试用户输入处理
+4. 测试Secretariat输入处理
+5. 测试Forum输入处理
+6. 测试输入意图分析
+7. 测试会话状态获取
+8. 测试任务状态获取
+9. 测试透明度数据获取
+10. 测试入口切换
+11. 测试入口切换建议获取
+12. 测试系统健康状态获取
+13. 测试过期会话清理
+14. 测试用户统计信息获取
+
+#### 验收标准
+- [ ] 所有测试用例通过
+- [ ] 代码覆盖率 >= 90%
+- [ ] 有明确的文档说明
+
+### 任务6: 实现CLI命令的TDD测试
+**存档时间**: 2025-08-18
+**状态**: 未开始
+
+#### 测试用例
+1. 测试assistant chat命令
+2. 测试输入验证
+3. 测试响应显示
+4. 测试错误处理
+5. 测试异步执行
+
+#### 验收标准
+- [ ] 所有测试用例通过
+- [ ] 代码覆盖率 >= 90%
+- [ ] 有明确的文档说明
+
+## 实施计划
+
+### 阶段1: 核心领域服务实现 (任务1-4)
+1. 为每个领域服务编写测试用例
+2. 实现红绿重构循环
+3. 确保代码覆盖率达标
+4. 编写文档
+
+### 阶段2: 应用服务实现 (任务5)
+1. 为PersonalAssistantService编写测试用例
+2. 实现红绿重构循环
+3. 确保代码覆盖率达标
+4. 编写文档
+
+### 阶段3: CLI命令实现 (任务6)
+1. 为CLI命令编写测试用例
+2. 实现红绿重构循环
+3. 确保代码覆盖率达标
+4. 编写文档
+
+## 依赖关系
+- 需要先完成核心领域服务(任务1-4)才能实现应用服务(任务5)
+- 需要完成应用服务(任务5)才能实现CLI命令(任务6)
