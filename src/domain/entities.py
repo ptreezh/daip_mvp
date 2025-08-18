@@ -216,8 +216,7 @@ class UserMessage(Message):
     is_optimized: bool = False
     target_agent: Optional[str] = None
     
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __post_init__(self):
         if not self.sender.startswith("user_"):
             self.sender = f"user_{self.sender}"
     
