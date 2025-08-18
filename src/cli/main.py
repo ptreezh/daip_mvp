@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from src.config import settings
 from src.cli.commands import run_assistant_chat_command # New import
+from src.cli.commands import check_system_health # Moved import to top
 
 from src.config import settings # Import settings
 
@@ -57,13 +58,20 @@ assistant_app = typer.Typer(
 )
 app.add_typer(assistant_app, name="assistant")
 
+# Create a Typer application for the 'debate' command group
+debate_app = typer.Typer(
+    name="debate",
+    help="Commands for managing debates.",
+    add_completion=False,
+)
+app.add_typer(debate_app, name="debate")
+
 # Configure logging
 logging.basicConfig(level=getattr(logging, settings.log_level.upper()))
 logger = logging.getLogger(__name__)
 
 
-@app.command()
-def start(
+@debate_app.command()
     topic: str = typer.Argument(..., help="The debate topic"),
     roles: list[str] = typer.Option([], "--role", "-r", help="AI roles to participate in the debate"),
     rounds: int = typer.Option(3, "--rounds", help="Number of debate rounds"),
@@ -211,69 +219,17 @@ def status():
     table.add_column("Details", style="dim")
     
     overall_health = True
-    
-    # Check configuration
-    try:
-        config_status = "✅ Loaded"
-        config_details = f"Log Level: {settings.log_level}"
-        table.add_row("Configuration", config_status, config_details)
-    except Exception as e:
-        config_status = "❌ Failed"
-        config_details = f"Error: {str(e)[:50]}..."
-        table.add_row("Configuration", config_status, config_details, style="red")
-        overall_health = False
-    
-    # Check LLM configuration
-    try:
-        if hasattr(settings, 'llm') and settings.llm.provider:
-            llm_status = "✅ Configured"
-            llm_details = f"Provider: {settings.llm.provider}"
-            if hasattr(settings.llm, 'ollama') and hasattr(settings.llm.ollama, 'generation_model'):
-                llm_details += f", Model: {settings.llm.ollama.generation_model}"
-        else:
-            llm_status = "⚠️  Not configured"
-            llm_details = "No LLM provider configured"
+    health_info = check_system_health()
+
+    # Add rows to the table based on health_info
+    for component, info in health_info.items():
+        status_icon = "✅" if "✅" in info["status"] else ("⚠️" if "⚠️" in info["status"] else "❌")
+        table.add_row(component.replace("_", " ").title(), info["status"], info["details"])
+        if "❌" in info["status"] or "⚠️" in info["status"]:
             overall_health = False
-        table.add_row("LLM Provider", llm_status, llm_details)
-    except Exception as e:
-        llm_status = "❌ Error"
-        llm_details = f"Configuration error: {str(e)[:40]}..."
-        table.add_row("LLM Provider", llm_status, llm_details, style="red")
-        overall_health = False
-    
-    # Check vector store
-    try:
-        if hasattr(settings, 'vector_store') and hasattr(settings.vector_store, 'chroma_db_path'):
-            vector_status = "✅ Configured"
-            vector_details = f"Path: {settings.vector_store.chroma_db_path}"
-        else:
-            vector_status = "⚠️  Not configured"
-            vector_details = "Vector store path not set"
-        table.add_row("Vector Store", vector_status, vector_details)
-    except Exception as e:
-        vector_status = "❌ Error"
-        vector_details = f"Configuration error: {str(e)[:40]}..."
-        table.add_row("Vector Store", vector_status, vector_details, style="red")
-        overall_health = False
-    
-    # Check dependencies
-    try:
-        from src.cli.commands import MISSING_DEPENDENCIES
-        if MISSING_DEPENDENCIES:
-            dep_status = "❌ Missing dependencies"
-            dep_details = f"{len(MISSING_DEPENDENCIES)} packages missing"
-            table.add_row("Dependencies", dep_status, dep_details, style="red")
-            overall_health = False
-        else:
-            table.add_row("Dependencies", "✅ All installed", "Required packages found")
-    except Exception as e:
-        dep_status = "❌ Check failed"
-        dep_details = f"Cannot verify dependencies: {str(e)[:30]}..."
-        table.add_row("Dependencies", dep_status, dep_details, style="red")
-        overall_health = False
-    
+
     console.print(table)
-    
+
     # Show overall health status
     if overall_health:
         console.print("\n[bold green]🎉 System Status: HEALTHY[/bold green]")
@@ -281,66 +237,22 @@ def status():
     else:
         console.print("\n[bold yellow]⚠️  System Status: NEEDS ATTENTION[/bold yellow]")
         console.print("[yellow]Some components require configuration or repair.[/yellow]")
-    
+
     # If there are missing dependencies, show them with enhanced feedback
-    try:
+    if "dependencies" in health_info and "❌" in health_info["dependencies"]["status"]:
+        console.print("\n[bold red]🔧 Missing Dependencies:[/bold red]")
+        # Assuming MISSING_DEPENDENCIES is still accessible or passed
         from src.cli.commands import MISSING_DEPENDENCIES
-        if MISSING_DEPENDENCIES:
-            console.print("\n[bold red]🔧 Missing Dependencies:[/bold red]")
-            for dep in MISSING_DEPENDENCIES:
-                console.print(f"[red]   • {dep}[/red]")
-            
-            console.print("\n[yellow]💡 Installation Options:[/yellow]")
-            # Filter out error messages that aren't actual package names
-            install_deps = [dep for dep in MISSING_DEPENDENCIES if not dep.startswith("No module named") and "Error" not in dep]
-            if install_deps:
-                console.print(f"[dim]   pip install {' '.join(install_deps)}[/dim]")
-            console.print("[dim]   pip install -r requirements.txt[/dim]")
-            console.print("[dim]   pip install daip-live[/dim]")
-    except Exception as e:
-        console.print(f"\n[red]❌ Could not check dependencies: {e}[/red]")
-    
-    # Enhanced API connectivity test
-    console.print("\n[bold]🌐 API Connectivity Test[/bold]")
-    try:
-        with console.status("[dim]Testing API import...[/dim]", spinner="dots"):
-            from src.main import app as fastapi_app
-        console.print("[green]✅ FastAPI application can be imported[/green]")
-        
-        # Count available routes
-        try:
-            routes = [route.path for route in fastapi_app.routes if not route.path.startswith('/docs')]
-            console.print(f"[green]✅ {len(routes)} API endpoints available[/green]")
-            
-            # Show some example endpoints
-            if routes:
-                example_routes = routes[:3]  # Show first 3 routes
-                console.print(f"[dim]   Example endpoints: {', '.join(example_routes)}[/dim]")
-        except Exception as e:
-            console.print(f"[yellow]⚠️  Could not enumerate routes: {e}[/yellow]")
-            
-    except ImportError as e:
-        console.print(f"[red]❌ API import failed: {e}[/red]")
-        console.print("[yellow]💡 This usually indicates missing dependencies or configuration issues.[/yellow]")
-    except Exception as e:
-        console.print(f"[red]❌ API connectivity issue: {e}[/red]")
-        console.print("[yellow]💡 Check your configuration and dependencies.[/yellow]")
-    
-    # Service initialization test
-    console.print("\n[bold]🔧 Service Initialization Test[/bold]")
-    try:
-        with console.status("[dim]Testing service initialization...[/dim]", spinner="dots"):
-            from src.cli.commands import check_system_health
-            health_info = check_system_health()
-        
-        for component, info in health_info.items():
-            status_icon = "✅" if "✅" in info["status"] else ("⚠️" if "⚠️" in info["status"] else "❌")
-            console.print(f"{status_icon} {component.title()}: {info['details']}")
-            
-    except Exception as e:
-        console.print(f"[red]❌ Service test failed: {e}[/red]")
-        console.print("[yellow]💡 Run with verbose logging to see detailed error information.[/yellow]")
-    
+        for dep in MISSING_DEPENDENCIES:
+            console.print(f"[red]   • {dep}[/red]")
+
+        console.print("\n[yellow]💡 Installation Options:[/yellow]")
+        install_deps = [dep for dep in MISSING_DEPENDENCIES if not dep.startswith("No module named") and "Error" not in dep]
+        if install_deps:
+            console.print(f"[dim]   pip install {' '.join(install_deps)}[/dim]")
+        console.print("[dim]   pip install -r requirements.txt[/dim]")
+        console.print("[dim]   pip install daip-live[/dim]")
+
     # Final recommendations
     console.print("\n[bold]💡 Next Steps:[/bold]")
     if overall_health:
@@ -355,7 +267,14 @@ def status():
 @app.command()
 def roles():
     """List available roles for debates."""
-    console.print("[bold blue]🎭 DAIP-LIVE Available Roles[/bold blue]")
+    # Check if the system supports Unicode emojis
+    try:
+        "🎭".encode("gbk")
+        # If we get here, gbk supports the emoji
+        console.print("[bold blue]🎭 DAIP-LIVE Available Roles[/bold blue]")
+    except UnicodeEncodeError:
+        # Fallback for systems that don't support emojis
+        console.print("[bold blue]DAIP-LIVE Available Roles[/bold blue]")
     
     try:
         with console.status("[dim]Loading available roles...[/dim]", spinner="dots"):
@@ -403,7 +322,16 @@ def roles():
         console.print(table)
         
         # Show usage information
-        console.print("\n[bold]📋 Role Usage:[/bold]")
+        # Check if the system supports Unicode emojis
+        try:
+            "\U0001f4cb".encode("gbk")
+            # If we get here, gbk supports the emoji
+            emoji = "\U0001f4cb"
+        except UnicodeEncodeError:
+            # Fallback for systems that don't support emojis
+            emoji = ""
+        
+        console.print(f"\n[bold]{emoji} Role Usage:[/bold]")
         console.print("[dim]   Use role names with the --role option when starting a debate.[/dim]")
         console.print("[dim]   Example: daip-cli start 'Topic' --role 'Expert' --role 'Critic'[/dim]")
         
@@ -419,7 +347,16 @@ def roles():
                 all_tags.update(role["tags"])
         
         if all_tags:
-            console.print("\n[bold]🏷️  Available Categories:[/bold]")
+            # Check if the system supports Unicode emojis
+            try:
+                "🏷️".encode("gbk")
+                # If we get here, gbk supports the emoji
+                category_emoji = "🏷️"
+            except UnicodeEncodeError:
+                # Fallback for systems that don't support emojis
+                category_emoji = ""
+            
+            console.print(f"\n[bold]{category_emoji} Available Categories:[/bold]")
             sorted_tags = sorted(list(all_tags))
             console.print(f"[dim]   {', '.join(sorted_tags[:10])}{'...' if len(sorted_tags) > 10 else ''}[/dim]")
             

@@ -258,12 +258,15 @@ class ProcessSecretariatRequestUseCase:
         """Determine intent from content (simplified)"""
         content_lower = content.lower()
         
-        if any(keyword in content_lower for keyword in ["analyze", "research", "study"]):
+        # Check for industry analysis first (more specific)
+        if any(keyword in content_lower for keyword in ["industry", "market", "business"]):
+            return IntentType.INDUSTRY_ANALYSIS
+        # Check for academic research (but exclude market/industry analysis)
+        elif any(keyword in content_lower for keyword in ["analyze", "research", "study"]) and \
+             not any(keyword in content_lower for keyword in ["market", "industry"]):
             return IntentType.ACADEMIC_RESEARCH
         elif any(keyword in content_lower for keyword in ["expert", "consult", "advice"]):
             return IntentType.EXPERT_CONSULTATION
-        elif any(keyword in content_lower for keyword in ["industry", "market", "business"]):
-            return IntentType.INDUSTRY_ANALYSIS
         else:
             return IntentType.CASUAL_DISCUSSION
 

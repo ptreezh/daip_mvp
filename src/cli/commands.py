@@ -450,39 +450,68 @@ async def run_debate_command(topic: str, roles: list[str], rounds: int, consensu
 
 def check_system_health():
     """Check system health and return status information."""
-    health_info = {
-        "configuration": {"status": "✅ Loaded", "details": "Configuration loaded successfully"},
-        "dependencies": {"status": "⏳ Checking", "details": "Checking required modules..."},
-        "services": {"status": "⏳ Checking", "details": "Initializing services..."},
-        "api": {"status": "⏳ Checking", "details": "Testing API connectivity..."}
-    }
-    
-    # Check dependencies
+    health_info = {}
+
+    # 1. Configuration Loading Check
+    try:
+        from src.config import settings
+        health_info["configuration"] = {"status": "✅ Loaded", "details": f"Log Level: {settings.log_level}"}
+    except Exception as e:
+        health_info["configuration"] = {"status": "❌ Failed", "details": f"Error loading config: {str(e)}"}
+
+    # 2. LLM Configuration Check
+    try:
+        if health_info["configuration"]["status"] == "✅ Loaded" and hasattr(settings, 'llm') and settings.llm.provider:
+            llm_details = f"Provider: {settings.llm.provider}"
+            if hasattr(settings.llm, 'ollama') and hasattr(settings.llm.ollama, 'generation_model'):
+                llm_details += f", Model: {settings.llm.ollama.generation_model}"
+            health_info["llm_provider"] = {"status": "✅ Configured", "details": llm_details}
+        else:
+            health_info["llm_provider"] = {"status": "⚠️  Not configured", "details": "No LLM provider configured or config not loaded"}
+    except Exception as e:
+        health_info["llm_provider"] = {"status": "❌ Error", "details": f"LLM config error: {str(e)}"}
+
+    # 3. Vector Store Configuration Check
+    try:
+        if health_info["configuration"]["status"] == "✅ Loaded" and hasattr(settings, 'vector_store') and hasattr(settings.vector_store, 'chroma_db_path'):
+            health_info["vector_store"] = {"status": "✅ Configured", "details": f"Path: {settings.vector_store.chroma_db_path}"}
+        else:
+            health_info["vector_store"] = {"status": "⚠️  Not configured", "details": "Vector store path not set or config not loaded"}
+    except Exception as e:
+        health_info["vector_store"] = {"status": "❌ Error", "details": f"Vector store config error: {str(e)}"}
+
+    # 4. Dependencies Check
     if MISSING_DEPENDENCIES:
         health_info["dependencies"] = {
-            "status": "❌ Missing dependencies", 
-            "details": f"{len(MISSING_DEPENDENCIES)} packages missing"
+            "status": "❌ Missing dependencies",
+            "details": f"{len(MISSING_DEPENDENCIES)} packages missing: {', '.join(MISSING_DEPENDENCIES)}"
         }
-        health_info["services"] = {"status": "❌ Not available", "details": "Missing dependencies"}
-        health_info["api"] = {"status": "❌ Not available", "details": "Missing dependencies"}
-        return health_info
     else:
         health_info["dependencies"] = {"status": "✅ Ready", "details": "All required modules installed"}
-    
+
+    # 5. Service Initialization Check (AppState)
     try:
-        # Test service initialization
-        app_state = AppState()
-        health_info["services"] = {"status": "✅ Ready", "details": "All core services initialized"}
-        
-        # Test API
-        from src.main import app as fastapi_app # Reverted to original import for FastAPI app
-        routes = [route.path for route in fastapi_app.routes if not route.path.startswith('/docs')]
-        health_info["api"] = {"status": "✅ Ready", "details": f"{len(routes)} endpoints available"}
-        
+        # Only attempt if dependencies are met
+        if health_info["dependencies"]["status"] == "✅ Ready":
+            app_state = AppState()
+            health_info["core_services"] = {"status": "✅ Initialized", "details": "Core services (AppState) initialized"}
+        else:
+            health_info["core_services"] = {"status": "⚠️  Skipped", "details": "Dependencies missing, skipping service init"}
     except Exception as e:
-        health_info["services"] = {"status": "❌ Failed", "details": str(e)}
-        health_info["api"] = {"status": "❌ Failed", "details": "Cannot connect to API"}
-    
+        health_info["core_services"] = {"status": "❌ Failed", "details": f"Service initialization error: {str(e)}"}
+
+    # 6. API Connection Check
+    try:
+        # Only attempt if core services are initialized
+        if health_info["core_services"]["status"] == "✅ Initialized":
+            from src.main import app as fastapi_app
+            routes = [route.path for route in fastapi_app.routes if not route.path.startswith('/docs')]
+            health_info["api_connectivity"] = {"status": "✅ Connected", "details": f"{len(routes)} API endpoints available"}
+        else:
+            health_info["api_connectivity"] = {"status": "⚠️  Skipped", "details": "Core services not initialized, skipping API check"}
+    except Exception as e:
+        health_info["api_connectivity"] = {"status": "❌ Failed", "details": f"API connection error: {str(e)}"}
+
     return health_info
 
 

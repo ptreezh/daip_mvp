@@ -39,7 +39,7 @@ from test_entrance_use_cases import (
     ProcessForumRequestUseCase,
     ProcessSecretariatRequestUseCase,
     SessionRepository,
-    SwitchEntranceUseCase,
+    EntranceSwitchingUseCase,
     TransparencyService,
     UserRepository,
     WorkflowService,
@@ -362,7 +362,7 @@ class TestIntegrationScenarios:
                 test_infrastructure["user_repository"],
                 test_infrastructure["session_repository"]
             ),
-            "switch_entrance": SwitchEntranceUseCase(
+            "switch_entrance": EntranceSwitchingUseCase(
                 test_infrastructure["session_repository"]
             ),
             "process_secretariat": ProcessSecretariatRequestUseCase(
