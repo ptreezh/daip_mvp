@@ -8,12 +8,13 @@
 import json
 import logging
 import os
+import shutil
 import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 import chromadb
 import ollama
@@ -153,6 +154,67 @@ class WikiService:
             # Fallback for non-standard versioning
             return f"{current_version}-next"
 
+    def _create_new_version(self, entry_name: str, content: str, author_role: str, change_summary: str) -> Optional[WikiVersion]:
+        """Creates a new version of an existing wiki entry.
+        
+        Args:
+            entry_name (str): The name of the entry.
+            content (str): The content of the new version.
+            author_role (str): The role of the author creating the version.
+            change_summary (str): A summary of the changes.
+            
+        Returns:
+            Optional[WikiVersion]: The newly created WikiVersion object, or None if it fails.
+        """
+        try:
+            # Read existing metadata
+            metadata = self._read_entry_metadata(entry_name)
+            if not metadata:
+                logging.error(f"Cannot create new version for '{entry_name}': metadata not found")
+                return None
+            
+            # Calculate next version
+            latest_version = self._get_latest_version(metadata)
+            new_version = self._calculate_next_version(latest_version)
+            
+            # Create new version file
+            entry_dir = self._get_entry_path(entry_name)
+            versions_dir = entry_dir / "versions"
+            
+            timestamp = datetime.now().isoformat()
+            version_metadata = {
+                "version": new_version,
+                "author": author_role,
+                "timestamp": timestamp,
+                "change_summary": change_summary,
+            }
+            version_content = f"---\n{yaml.dump(version_metadata)}---\n\n{content}"
+            (versions_dir / f"{new_version}.md").write_text(
+                version_content, encoding="utf-8"
+            )
+            
+            # Update metadata
+            metadata.versions.append(new_version)
+            metadata.last_editor = author_role
+            metadata.last_modified = timestamp
+            self._write_entry_metadata(entry_name, metadata)
+            
+            # Update vector index
+            self._update_vector_index(entry_name, content)
+            
+            logging.info(f"Successfully created new version '{new_version}' for wiki entry '{entry_name}'.")
+            return WikiVersion(
+                entry_name=entry_name,
+                version=new_version,
+                author=author_role,
+                timestamp=timestamp,
+                content=content,
+                change_summary=change_summary,
+            )
+        except Exception as e:
+            logging.error(f"Failed to create new version for wiki entry '{entry_name}': {e}")
+            return None
+
     def create_entry(
         self, entry_name: str, content: str, author_role: str, tags: list[str], category: str
     ) -> Optional[WikiVersion]:
@@ -172,10 +234,9 @@ class WikiService:
         logging.info(f"Creating new wiki entry: '{entry_name}' by '{author_role}'.")
         entry_dir = self._get_entry_path(entry_name)
         if entry_dir.exists():
-            logging.warning(
-                f"Wiki entry '{entry_name}' already exists. Creation aborted."
-            )
-            return None
+            # If entry already exists, create a new version
+            logging.info(f"Wiki entry '{entry_name}' already exists. Creating new version.")
+            return self._create_new_version(entry_name, content, author_role, "New version created")
 
         try:
             versions_dir = entry_dir / "versions"
@@ -445,3 +506,325 @@ class WikiService:
         except Exception as e:
             logging.error(f"Semantic search failed: {e}")
             return []
+
+    def list_all_entries(self) -> List[str]:
+        """List all wiki entry names.
+        
+        Returns:
+            List[str]: A list of all entry names.
+        """
+        try:
+            if not self._wiki_directory.exists():
+                return []
+            
+            entries = []
+            for entry_dir in self._wiki_directory.iterdir():
+                if entry_dir.is_dir():
+                    metadata = self._read_entry_metadata(entry_dir.name)
+                    if metadata:
+                        entries.append(entry_dir.name)
+            
+            return sorted(entries)
+        except Exception as e:
+            logging.error(f"Failed to list entries: {e}")
+            return []
+
+    def get_entry_statistics(self, entry_name: str) -> Dict[str, Any]:
+        """Get statistics about a wiki entry.
+        
+        Args:
+            entry_name (str): The name of the entry.
+            
+        Returns:
+            Dict[str, Any]: Statistics about the entry.
+        """
+        try:
+            metadata = self._read_entry_metadata(entry_name)
+            if not metadata:
+                return {}
+            
+            return {
+                "entry_name": entry_name,
+                "total_versions": len(metadata.versions),
+                "creator": metadata.creator,
+                "created_at": metadata.created_at,
+                "last_editor": metadata.last_editor,
+                "last_modified": metadata.last_modified,
+                "tags": metadata.tags,
+                "category": metadata.category,
+                "latest_version": self._get_latest_version(metadata),
+                "total_proposals": len(self._get_entry_proposals(entry_name))
+            }
+        except Exception as e:
+            logging.error(f"Failed to get entry statistics: {e}")
+            return {}
+
+    def _get_entry_proposals(self, entry_name: str) -> List[WikiProposal]:
+        """Get all proposals for an entry.
+        
+        Args:
+            entry_name (str): The name of the entry.
+            
+        Returns:
+            List[WikiProposal]: List of proposals.
+        """
+        proposals = []
+        proposals_dir = self._get_entry_path(entry_name) / "proposals"
+        
+        if not proposals_dir.exists():
+            return proposals
+        
+        try:
+            for proposal_file in proposals_dir.glob("*.json"):
+                try:
+                    proposal_data = json.loads(proposal_file.read_text(encoding="utf-8"))
+                    proposal_data["status"] = EditStatus(proposal_data["status"])
+                    proposals.append(WikiProposal(**proposal_data))
+                except Exception as e:
+                    logging.warning(f"Failed to read proposal {proposal_file}: {e}")
+            
+            return sorted(proposals, key=lambda p: p.timestamp, reverse=True)
+        except Exception as e:
+            logging.error(f"Failed to get entry proposals: {e}")
+            return []
+
+    def export_entry(self, entry_name: str, output_path: str, format: str = "json") -> bool:
+        """Export a wiki entry to a file.
+        
+        Args:
+            entry_name (str): The name of the entry to export.
+            output_path (str): The path to export to.
+            format (str): Export format ("json" or "markdown").
+            
+        Returns:
+            bool: True if export was successful, False otherwise.
+        """
+        try:
+            metadata = self._read_entry_metadata(entry_name)
+            if not metadata:
+                return False
+            
+            output_file = Path(output_path)
+            
+            if format.lower() == "json":
+                # Export as JSON with all versions
+                export_data = {
+                    "metadata": asdict(metadata),
+                    "versions": []
+                }
+                
+                for version in metadata.versions:
+                    version_file = self._get_entry_path(entry_name) / "versions" / f"{version}.md"
+                    if version_file.exists():
+                        full_content = version_file.read_text(encoding="utf-8")
+                        parts = full_content.split("---", 2)
+                        if len(parts) >= 3:
+                            front_matter = yaml.safe_load(parts[1])
+                            content = parts[2].strip()
+                            export_data["versions"].append({
+                                "version": version,
+                                "front_matter": front_matter,
+                                "content": content
+                            })
+                
+                output_file.write_text(json.dumps(export_data, indent=2, ensure_ascii=False), encoding="utf-8")
+                
+            elif format.lower() == "markdown":
+                # Export as markdown (latest version only)
+                latest_version = self.get_entry(entry_name)
+                if not latest_version:
+                    return False
+                
+                markdown_content = f"""# {entry_name}
+
+**Author:** {latest_version.author}  
+**Created:** {metadata.created_at}  
+**Last Modified:** {metadata.last_modified}  
+**Version:** {latest_version.version}  
+**Tags:** {', '.join(metadata.tags) if metadata.tags else 'None'}  
+**Category:** {metadata.category}
+
+---
+
+{latest_version.content}
+"""
+                output_file.write_text(markdown_content, encoding="utf-8")
+                
+            else:
+                logging.error(f"Unsupported export format: {format}")
+                return False
+            
+            logging.info(f"Successfully exported entry '{entry_name}' to {output_path}")
+            return True
+            
+        except Exception as e:
+            logging.error(f"Failed to export entry '{entry_name}': {e}")
+            return False
+
+    def import_entry_from_json(self, json_path: str, overwrite: bool = False) -> bool:
+        """Import a wiki entry from a JSON file.
+        
+        Args:
+            json_path (str): Path to the JSON file to import.
+            overwrite (bool): Whether to overwrite if entry already exists.
+            
+        Returns:
+            bool: True if import was successful, False otherwise.
+        """
+        try:
+            json_file = Path(json_path)
+            if not json_file.exists():
+                logging.error(f"JSON file not found: {json_path}")
+                return False
+            
+            import_data = json.loads(json_file.read_text(encoding="utf-8"))
+            
+            if "metadata" not in import_data:
+                logging.error("Invalid import format: missing metadata")
+                return False
+            
+            metadata = import_data["metadata"]
+            entry_name = metadata["entry_name"]
+            
+            # Check if entry already exists
+            entry_path = self._get_entry_path(entry_name)
+            if entry_path.exists() and not overwrite:
+                logging.error(f"Entry '{entry_name}' already exists and overwrite is False")
+                return False
+            
+            # If overwriting, delete existing entry first
+            if entry_path.exists() and overwrite:
+                shutil.rmtree(entry_path)
+            
+            # Create entry directory structure
+            versions_dir = entry_path / "versions"
+            proposals_dir = entry_path / "proposals"
+            os.makedirs(versions_dir, exist_ok=True)
+            os.makedirs(proposals_dir, exist_ok=True)
+            
+            # Write metadata
+            entry_metadata = WikiEntryMetadata(**metadata)
+            self._write_entry_metadata(entry_name, entry_metadata)
+            
+            # Import versions
+            if "versions" in import_data:
+                for version_data in import_data["versions"]:
+                    version = version_data["version"]
+                    front_matter = version_data["front_matter"]
+                    content = version_data["content"]
+                    
+                    version_content = f"---\n{yaml.dump(front_matter)}---\n\n{content}"
+                    (versions_dir / f"{version}.md").write_text(version_content, encoding="utf-8")
+            
+            # Update vector index with the latest content
+            if import_data.get("versions"):
+                latest_content = import_data["versions"][-1]["content"]
+                self._update_vector_index(entry_name, latest_content)
+            
+            logging.info(f"Successfully imported entry '{entry_name}' from {json_path}")
+            return True
+            
+        except Exception as e:
+            logging.error(f"Failed to import entry from {json_path}: {e}")
+            return False
+
+    def delete_entry(self, entry_name: str, backup: bool = True) -> bool:
+        """Delete a wiki entry.
+        
+        Args:
+            entry_name (str): The name of the entry to delete.
+            backup (bool): Whether to create a backup before deletion.
+            
+        Returns:
+            bool: True if deletion was successful, False otherwise.
+        """
+        try:
+            entry_path = self._get_entry_path(entry_name)
+            if not entry_path.exists():
+                logging.warning(f"Entry '{entry_name}' does not exist")
+                return False
+            
+            # Create backup if requested
+            if backup:
+                backup_path = self._wiki_directory / "backups" / f"{entry_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                backup_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure backup directory exists
+                if backup_path.parent.exists():
+                    shutil.copytree(entry_path, backup_path)
+                    logging.info(f"Created backup at {backup_path}")
+            
+            # Remove from vector index
+            try:
+                self.chroma_collection.delete(ids=[entry_name])
+                logging.info(f"Removed entry '{entry_name}' from vector index")
+            except Exception as e:
+                logging.warning(f"Failed to remove from vector index: {e}")
+            
+            # Delete the entry directory
+            shutil.rmtree(entry_path)
+            logging.info(f"Successfully deleted entry '{entry_name}'")
+            
+            return True
+            
+        except Exception as e:
+            logging.error(f"Failed to delete entry '{entry_name}': {e}")
+            return False
+
+    def compare_versions(self, entry_name: str, version1: str, version2: str) -> Dict[str, Any]:
+        """Compare two versions of a wiki entry.
+        
+        Args:
+            entry_name (str): The name of the entry.
+            version1 (str): First version to compare.
+            version2 (str): Second version to compare.
+            
+        Returns:
+            Dict[str, Any]: Comparison result.
+        """
+        try:
+            v1 = self.get_entry(entry_name, version1)
+            v2 = self.get_entry(entry_name, version2)
+            
+            if not v1 or not v2:
+                return {"error": "One or both versions not found"}
+            
+            # Simple text comparison (could be enhanced with diff algorithms)
+            lines1 = v1.content.splitlines()
+            lines2 = v2.content.splitlines()
+            
+            added = []
+            removed = []
+            
+            # Simple line-by-line comparison
+            for line in lines2:
+                if line not in lines1:
+                    added.append(line)
+            
+            for line in lines1:
+                if line not in lines2:
+                    removed.append(line)
+            
+            return {
+                "entry_name": entry_name,
+                "version1": {
+                    "version": version1,
+                    "author": v1.author,
+                    "timestamp": v1.timestamp,
+                    "content_length": len(v1.content)
+                },
+                "version2": {
+                    "version": version2,
+                    "author": v2.author,
+                    "timestamp": v2.timestamp,
+                    "content_length": len(v2.content)
+                },
+                "changes": {
+                    "added_lines": len(added),
+                    "removed_lines": len(removed),
+                    "added_preview": added[:5] if added else [],
+                    "removed_preview": removed[:5] if removed else []
+                }
+            }
+            
+        except Exception as e:
+            logging.error(f"Failed to compare versions: {e}")
+            return {"error": str(e)}
