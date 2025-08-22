@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """@Time    : 2025-07-19 03:00:00
 @Author  : DAIP-LIVE Team
 @File    : main.py
@@ -20,9 +21,11 @@ console = Console() # Added this line
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from src.config import settings
-from src.config import settings
-from src.config import settings
-from src.cli.commands import check_system_health # Moved import to top
+from src.cli.commands.system_commands import check_system_health
+from src.cli.commands.role_commands import role_app
+from src.cli.commands.workflow_commands import workflow_app
+from src.cli.chat_commands import app as chat_app
+from src.cli.wiki_commands import app as wiki_app
 
 # New imports for core services
 from src.application.personal_assistant_router import PersonalAssistantRouter
@@ -36,6 +39,14 @@ from src.core_services.integrated_llm_manager import IntegratedLLMManager
 from src.core_services.task_manager import TaskManager
 from src.institutional_primitives.registry import PrimitiveRegistry
 from src.institutional_primitives.workflow_engine import WorkflowEngine
+from src.virtual_role_chat.chat_coordinator import ChatCoordinator
+from src.virtual_role_chat.chat_room_manager import ChatRoomManager
+from src.virtual_role_chat.chat_session_service import ChatSessionService
+from src.core_services.wiki_service import WikiService
+
+def get_wiki_service():
+    """Get the global wiki service instance."""
+    return WikiService()
 
 # Initialize core services (order matters due to dependencies)
 # Note: Some services might have their own dependencies that need to be initialized first.
@@ -58,191 +69,18 @@ task_manager = TaskManager()
 primitive_registry = PrimitiveRegistry()
 workflow_engine = WorkflowEngine(primitive_registry=primitive_registry)
 
-# Initialize PersonalAssistantRouter
-personal_assistant_router = PersonalAssistantRouter(
-    intent_analysis_service=intent_analysis_service,
-    llm_manager=integrated_llm_manager,
-    workflow_engine=workflow_engine,
-    task_manager=task_manager
+# Initialize services for ChatCoordinator
+chat_room_manager = ChatRoomManager(storage_path="data/chat_rooms.json")
+chat_session_service = ChatSessionService(chat_room_manager=chat_room_manager, storage_path="data/chat_sessions.json")
+wiki_service = get_wiki_service() # Assuming get_wiki_service is defined and works
+
+chat_coordinator = ChatCoordinator(
+    chat_room_manager=chat_room_manager,
+    chat_session_service=chat_session_service,
+    role_manager=role_manager,
+    primitive_registry=primitive_registry,
+    wiki_service=wiki_service
 )
-
-def version_callback(value: bool):
-    if value:
-        print(f"DAIP-LIVE CLI Version: {settings.version}")
-        raise typer.Exit()
-
-# Initialize CLI app and console
-app = typer.Typer(
-    name="daip-cli",
-    help="DAIP-LIVE CLI - Dynamic AI-driven Project-execution LIVE system",
-    add_completion=False,
-)
-
-@app.callback()
-def main_callback(
-    version: bool = typer.Option(
-        None,
-        "--version",
-        callback=version_callback,
-        is_eager=True,
-        help="Show the CLI version and exit.",
-    )
-):
-    # This function will be called before any command.
-    # The 'version' option is handled by its callback.
-    pass
-
-# Create a Typer application for the 'pa' command group (Personal Assistant)
-pa_app = typer.Typer(
-    name="pa",
-    help="Commands for interacting with the Personal Assistant.",
-    add_completion=False,
-)
-app.add_typer(pa_app, name="pa")
-
-# Add Personal Assistant commands
-@pa_app.command("chat")
-def pa_chat(query: str = typer.Argument(..., help="The query for the Personal Assistant.")):
-    """Interact with the personal assistant."""
-    asyncio.run(personal_assistant_router.process_query(query))
-
-@pa_app.command("status")
-def pa_status(task_id: str = typer.Argument(..., help="The ID of the task to check status for.")):
-    """Check the status of a complex task."""
-    asyncio.run(personal_assistant_router.get_task_status(task_id))
-
-@pa_app.command("logs")
-def pa_logs(limit: int = typer.Option(10, "--limit", "-l", help="Number of log entries to retrieve.")):
-    """View recent log entries from the personal assistant."""
-    asyncio.run(personal_assistant_router.get_logs(limit))
-
-
-# New imports for core services
-from src.application.personal_assistant_router import PersonalAssistantRouter
-from src.core_services.user_profile_service import UserProfileService
-from src.core_services.intent_analysis_service import BasicIntentAnalysisService
-from src.core_services.role_manager import RoleManager
-from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
-from src.core_services.memory_agent import MemAgent
-from src.core_services.real_llm_context_optimizer import RealLLMClient, IntelligentContextOptimizer
-from src.core_services.integrated_llm_manager import IntegratedLLMManager
-from src.core_services.task_manager import TaskManager
-from src.institutional_primitives.registry import PrimitiveRegistry
-from src.institutional_primitives.workflow_engine import WorkflowEngine
-
-# Initialize core services (order matters due to dependencies)
-# Note: Some services might have their own dependencies that need to be initialized first.
-# This is a simplified instantiation for CLI purposes.
-user_profile_service = UserProfileService()
-intent_analysis_service = BasicIntentAnalysisService(user_profile_service=user_profile_service)
-
-role_manager = RoleManager()
-
-# EnhancedSSKGManager needs a path for persistence
-enhanced_sskg_manager = EnhancedSSKGManager(graph_path=Path("data/sskg_graph.graphml"), vector_store_path=Path("data/sskg_vector_store"))
-mem_agent = MemAgent(sskg_manager=enhanced_sskg_manager)
-
-# RealLLMClient and IntelligentContextOptimizer are instantiated internally by IntegratedLLMManager
-# We pass the necessary dependencies to IntegratedLLMManager
-integrated_llm_manager = IntegratedLLMManager() # This will initialize its own context_optimizer, role_manager, mem_agent
-
-task_manager = TaskManager()
-
-primitive_registry = PrimitiveRegistry()
-workflow_engine = WorkflowEngine(primitive_registry=primitive_registry)
-
-# Initialize PersonalAssistantRouter
-personal_assistant_router = PersonalAssistantRouter(
-    intent_analysis_service=intent_analysis_service,
-    llm_manager=integrated_llm_manager,
-    workflow_engine=workflow_engine,
-    task_manager=task_manager
-)
-
-def version_callback(value: bool):
-    if value:
-        print(f"DAIP-LIVE CLI Version: {settings.version}")
-        raise typer.Exit()
-
-# Initialize CLI app and console
-app = typer.Typer(
-    name="daip-cli",
-    help="DAIP-LIVE CLI - Dynamic AI-driven Project-execution LIVE system",
-    add_completion=False,
-)
-
-@app.callback()
-def main_callback(
-    version: bool = typer.Option(
-        None,
-        "--version",
-        callback=version_callback,
-        is_eager=True,
-        help="Show the CLI version and exit.",
-    )
-):
-    # This function will be called before any command.
-    # The 'version' option is handled by its callback.
-    pass
-
-# Create a Typer application for the 'pa' command group (Personal Assistant)
-pa_app = typer.Typer(
-    name="pa",
-    help="Commands for interacting with the Personal Assistant.",
-    add_completion=False,
-)
-app.add_typer(pa_app, name="pa")
-
-# Add Personal Assistant commands
-@pa_app.command("chat")
-def pa_chat(query: str = typer.Argument(..., help="The query for the Personal Assistant.")):
-    """Interact with the personal assistant."""
-    asyncio.run(personal_assistant_router.process_query(query))
-
-@pa_app.command("status")
-def pa_status(task_id: str = typer.Argument(..., help="The ID of the task to check status for.")):
-    """Check the status of a complex task."""
-    asyncio.run(personal_assistant_router.get_task_status(task_id))
-
-@pa_app.command("logs")
-def pa_logs(limit: int = typer.Option(10, "--limit", "-l", help="Number of log entries to retrieve.")):
-    """View recent log entries from the personal assistant."""
-    asyncio.run(personal_assistant_router.get_logs(limit))
-
-
-# New imports for core services
-from src.application.personal_assistant_router import PersonalAssistantRouter
-from src.core_services.user_profile_service import UserProfileService
-from src.core_services.intent_analysis_service import BasicIntentAnalysisService
-from src.core_services.role_manager import RoleManager
-from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
-from src.core_services.memory_agent import MemAgent
-from src.core_services.real_llm_context_optimizer import RealLLMClient, IntelligentContextOptimizer
-from src.core_services.integrated_llm_manager import IntegratedLLMManager
-from src.core_services.task_manager import TaskManager
-from src.institutional_primitives.registry import PrimitiveRegistry
-from src.institutional_primitives.workflow_engine import WorkflowEngine
-
-# Initialize core services (order matters due to dependencies)
-# Note: Some services might have their own dependencies that need to be initialized first.
-# This is a simplified instantiation for CLI purposes.
-user_profile_service = UserProfileService()
-intent_analysis_service = BasicIntentAnalysisService(user_profile_service=user_profile_service)
-
-role_manager = RoleManager()
-
-# EnhancedSSKGManager needs a path for persistence
-enhanced_sskg_manager = EnhancedSSKGManager(graph_path=Path("data/sskg_graph.graphml"), vector_store_path=Path("data/sskg_vector_store"))
-mem_agent = MemAgent(sskg_manager=enhanced_sskg_manager)
-
-# RealLLMClient and IntelligentContextOptimizer are instantiated internally by IntegratedLLMManager
-# We pass the necessary dependencies to IntegratedLLMManager
-integrated_llm_manager = IntegratedLLMManager() # This will initialize its own context_optimizer, role_manager, mem_agent
-
-task_manager = TaskManager()
-
-primitive_registry = PrimitiveRegistry()
-workflow_engine = WorkflowEngine(primitive_registry=primitive_registry)
 
 # Initialize PersonalAssistantRouter
 personal_assistant_router = PersonalAssistantRouter(
@@ -310,6 +148,11 @@ debate_app = typer.Typer(
     add_completion=False,
 )
 app.add_typer(debate_app, name="debate")
+app.add_typer(role_app, name="roles")
+app.add_typer(workflow_app, name="workflow")
+app.add_typer(chat_app, name="chat")
+app.add_typer(wiki_app, name="wiki")
+
 
 # Configure logging
 logging.basicConfig(level=getattr(logging, settings.log_level.upper()))
@@ -367,7 +210,7 @@ def start(
         console.print("[red]❌ Input validation failed:[/red]")
         for error in validation_errors:
             console.print(f"[red]   • {error}[/red]")
-        console.print("\n[yellow]💡 Use 'daip-cli help' for usage examples[/yellow]")
+        console.print("\n[yellow]💡 Use 'daip-cli help' for usage examples")
         raise typer.Exit(1)
     
     # Show startup information
@@ -378,22 +221,24 @@ def start(
     try:
         # Run the debate asynchronously with save parameters
         with console.status("[bold blue]Starting debate system...[/bold blue]", spinner="dots"):
-            success = asyncio.run(run_debate_command(
-                topic=topic, 
-                roles=roles, 
-                rounds=rounds, 
-                consensus_strategy=consensus_strategy, 
-                verbose=verbose,
-                save_results=save,
-                output_file=output
-            ))
+            success = asyncio.run(
+                run_debate_command(
+                    topic=topic, 
+                    roles=roles, 
+                    rounds=rounds, 
+                    consensus_strategy=consensus_strategy, 
+                    verbose=verbose,
+                    save_results=save,
+                    output_file=output
+                )
+            )
         
         if not success:
             console.print("\n[red]❌ Debate failed to complete successfully.[/red]")
             console.print("[yellow]💡 Troubleshooting tips:[/yellow]")
-            console.print("[yellow]   • Run with --verbose flag for detailed error information[/yellow]")
-            console.print("[yellow]   • Check system status with 'daip-cli status'[/yellow]")
-            console.print("[yellow]   • Try with fewer rounds or simpler topic[/yellow]")
+            console.print("   • Run with --verbose flag for detailed error information")
+            console.print("   • Check system status with 'daip-cli status'")
+            console.print("   • Try with fewer rounds or simpler topic")
             raise typer.Exit(1)
         else:
             console.print("\n[bold green]🎉 Debate completed successfully![/bold green]")
@@ -402,21 +247,21 @@ def start(
             
     except KeyboardInterrupt:
         console.print("\n[yellow]⏸️  Debate interrupted by user.[/yellow]")
-        console.print("[dim]💡 You can resume a similar debate by running the same command again.[/dim]")
+        console.print("[dim]💡 You can resume a similar debate by running the same command again.")
         raise typer.Exit(0)
     except asyncio.TimeoutError:
         console.print("\n[red]⏱️  Debate timed out.[/red]")
         console.print("[yellow]💡 The debate took too long to complete. Try:[/yellow]")
-        console.print("[yellow]   • Reducing the number of rounds[/yellow]")
-        console.print("[yellow]   • Using fewer participants[/yellow]")
-        console.print("[yellow]   • Checking your internet connection[/yellow]")
+        console.print("   • Reducing the number of rounds")
+        console.print("   • Using fewer participants")
+        console.print("   • Checking your internet connection")
         raise typer.Exit(1)
     except MemoryError:
         console.print("\n[red]💾 System ran out of memory.[/red]")
         console.print("[yellow]💡 Try reducing the complexity:[/yellow]")
-        console.print("[yellow]   • Use fewer rounds (--rounds 2)[/yellow]")
-        console.print("[yellow]   • Use fewer roles[/yellow]")
-        console.print("[yellow]   • Close other applications[/yellow]")
+        console.print("   • Use fewer rounds (--rounds 2)")
+        console.print("   • Use fewer roles")
+        console.print("   • Close other applications")
         raise typer.Exit(1)
     except Exception as e:
         console.print(f"\n[red]❌ Unexpected error: {e}[/red]")
@@ -425,31 +270,128 @@ def start(
         error_str = str(e).lower()
         if "no module named" in error_str:
             console.print("[yellow]🔧 Missing dependency detected:[/yellow]")
-            console.print("[yellow]   • Run: pip install -r requirements.txt[/yellow]")
-            console.print("[yellow]   • Or: pip install daip-live[/yellow]")
+            console.print("   • Run: pip install -r requirements.txt")
+            console.print("   • Or: pip install daip-live")
         elif "connection refused" in error_str or "connection error" in error_str:
             console.print("[yellow]🌐 Connection issue detected:[/yellow]")
-            console.print("[yellow]   • Check if LLM server is running (e.g., Ollama)[/yellow]")
-            console.print("[yellow]   • Verify network connectivity[/yellow]")
-            console.print("[yellow]   • Check firewall settings[/yellow]")
+            console.print("   • Check if LLM server is running (e.g., Ollama)")
+            console.print("   • Verify network connectivity")
+            console.print("   • Check firewall settings")
         elif "permission denied" in error_str:
             console.print("[yellow]🔒 Permission issue detected:[/yellow]")
-            console.print("[yellow]   • Check file/directory permissions[/yellow]")
-            console.print("[yellow]   • Try running with appropriate privileges[/yellow]")
-            console.print("[yellow]   • Ensure output directory is writable[/yellow]")
+            console.print("   • Check file/directory permissions")
+            console.print("   • Try running with appropriate privileges")
+            console.print("   • Ensure output directory is writable")
         elif "config" in error_str or "settings" in error_str:
             console.print("[yellow]⚙️  Configuration issue detected:[/yellow]")
-            console.print("[yellow]   • Check config.yaml file[/yellow]")
-            console.print("[yellow]   • Run 'daip-cli status' to verify configuration[/yellow]")
-            console.print("[yellow]   • Ensure all required settings are present[/yellow]")
+            console.print("   • Check config.yaml file")
+            console.print("   • Run 'daip-cli status' to verify configuration")
+            console.print("   • Ensure all required settings are present")
         else:
             console.print("[yellow]💡 General troubleshooting:[/yellow]")
-            console.print("[yellow]   • Run 'daip-cli status' to check system health[/yellow]")
-            console.print("[yellow]   • Try with --verbose flag for more details[/yellow]")
-            console.print("[yellow]   • Check the logs for more information[/yellow]")
+            console.print("   • Run 'daip-cli status' to check system health")
+            console.print("   • Try with --verbose flag for more details")
+            console.print("   • Check the logs for more information")
         
         # Log the full error for debugging
         logger.error(f"CLI start command failed: {e}", exc_info=True)
+        raise typer.Exit(1)
+
+
+@debate_app.command()
+def export_to_wiki(
+    debate_id: str = typer.Argument(..., help="The ID or topic of the debate to export"),
+    title: str = typer.Option(None, "--title", "-t", help="Title for the wiki page (defaults to debate topic)"),
+    format: str = typer.Option("markdown", "--format", "-f", help="Wiki format (markdown, html)"),
+):
+    """Export debate results to a wiki page."""
+    from rich.console import Console
+    console = Console()
+    
+    try:
+        # Import the debate export functionality
+        from src.cli.commands.debate_commands import export_debate_to_wiki
+        
+        # Generate default title if not provided
+        if not title:
+            title = f"Debate: {debate_id}"
+        
+        console.print(f"[bold blue]EXPORTING: Exporting debate '{debate_id}' to wiki...[/bold blue]")
+        
+        # Perform the export
+        success = export_debate_to_wiki(
+            debate_id=debate_id,
+            wiki_title=title,
+            format=format
+        )
+        
+        if success:
+            console.print(f"[green]SUCCESS: Debate successfully exported to wiki page: '{title}'")
+        else:
+            console.print(f"[red]ERROR: Failed to export debate to wiki")
+            console.print("[yellow]TIP: Make sure the debate was completed and results were saved")
+            raise typer.Exit(1)
+            
+    except Exception as e:
+        console.print(f"[red]ERROR: Error exporting debate to wiki: {e}[/red]")
+        logger.error(f"Debate export to wiki failed: {e}", exc_info=True)
+        raise typer.Exit(1)
+
+
+@debate_app.command("view-disagreements")
+def view_disagreements(
+    debate_id: str = typer.Argument(..., help="The ID or topic of the debate to analyze"),
+):
+    """View key disagreement points in a debate."""
+    from rich.console import Console
+    console = Console()
+    
+    try:
+        # Import the debate analysis functionality
+        from src.cli.commands.debate_commands import view_debate_disagreements
+        
+        console.print(f"[bold blue]ANALYZING: Analyzing disagreements in debate '{debate_id}'...[/bold blue]")
+        
+        # Perform the analysis
+        success = view_debate_disagreements(debate_id)
+        
+        if not success:
+            console.print(f"[red]ERROR: Failed to analyze debate disagreements")
+            console.print("[yellow]TIP: Make sure the debate was completed and results were saved")
+            raise typer.Exit(1)
+            
+    except Exception as e:
+        console.print(f"[red]ERROR: Error analyzing debate disagreements: {e}[/red]")
+        logger.error(f"Debate disagreement analysis failed: {e}", exc_info=True)
+        raise typer.Exit(1)
+
+
+@debate_app.command("select-consensus-algorithm")
+def select_consensus_algorithm(
+    debate_id: str = typer.Argument(..., help="The ID or topic of the debate"),
+    algorithm_name: str = typer.Argument(..., help="Name of the consensus algorithm to use"),
+):
+    """Select or change the consensus algorithm for a debate."""
+    from rich.console import Console
+    console = Console()
+    
+    try:
+        # Import the consensus algorithm selection functionality
+        from src.cli.commands.debate_commands import select_consensus_algorithm
+        
+        console.print(f"[bold blue]UPDATING: Setting consensus algorithm for debate '{debate_id}' to '{algorithm_name}'...[/bold blue]")
+        
+        # Perform the selection
+        success = select_consensus_algorithm(debate_id, algorithm_name)
+        
+        if not success:
+            console.print(f"[red]ERROR: Failed to select consensus algorithm")
+            console.print("[yellow]TIP: Valid algorithms are: simple_majority_vote, weighted_vote, consensus_building, expert_judgment")
+            raise typer.Exit(1)
+            
+    except Exception as e:
+        console.print(f"[red]ERROR: Error selecting consensus algorithm: {e}[/red]")
+        logger.error(f"Consensus algorithm selection failed: {e}", exc_info=True)
         raise typer.Exit(1)
 
 
@@ -505,119 +447,9 @@ def status():
         console.print("[green]   • System is ready! Try: daip-cli start 'Your debate topic'[/green]")
         console.print("[green]   • View available roles: daip-cli roles[/green]")
     else:
-        console.print("[yellow]   • Fix missing dependencies first[/yellow]")
-        console.print("[yellow]   • Check configuration files[/yellow]")
-        console.print("[yellow]   • Run this status check again after fixes[/yellow]")
-
-
-@app.command()
-def roles():
-    """List available roles for debates."""
-    # Check if the system supports Unicode emojis
-    try:
-        "🎭".encode("gbk")
-        # If we get here, gbk supports the emoji
-        console.print("[bold blue]🎭 DAIP-LIVE Available Roles[/bold blue]")
-    except UnicodeEncodeError:
-        # Fallback for systems that don't support emojis
-        console.print("[bold blue]DAIP-LIVE Available Roles[/bold blue]")
-    
-    try:
-        with console.status("[dim]Loading available roles...[/dim]", spinner="dots"):
-            from src.cli.commands import list_available_roles
-            available_roles = list_available_roles()
-        
-        if not available_roles:
-            console.print("[yellow]⚠️  No roles available or could not access role information.[/yellow]")
-            console.print("\n[yellow]💡 Troubleshooting:[/yellow]")
-            console.print("[yellow]   • Check system status: daip-cli status[/yellow]")
-            console.print("[yellow]   • Verify roles directory exists[/yellow]")
-            console.print("[yellow]   • Check for missing dependencies[/yellow]")
-            return
-        
-        # Create a table to display roles
-        table = Table(title=f"Available Roles ({len(available_roles)})")
-        table.add_column("Role Name", style="cyan", no_wrap=True)
-        table.add_column("Description", style="white")
-        table.add_column("Tags", style="dim")
-        
-        # Add roles to the table with error handling for malformed role data
-        valid_roles = 0
-        for role in available_roles:
-            try:
-                name = role.get("name", "Unknown")
-                description = role.get("description", "No description available")
-                tags = role.get("tags", [])
-                
-                # Truncate long descriptions for better display
-                if len(description) > 80:
-                    description = description[:77] + "..."
-                
-                tags_str = ", ".join(tags) if tags else ""
-                table.add_row(name, description, tags_str)
-                valid_roles += 1
-            except Exception as e:
-                logger.warning(f"Skipping malformed role data: {e}")
-                continue
-        
-        if valid_roles == 0:
-            console.print("[red]❌ No valid roles found in the system.[/red]")
-            console.print("[yellow]💡 This may indicate corrupted role files or configuration issues.[/yellow]")
-            return
-        
-        console.print(table)
-        
-        # Show usage information
-        # Check if the system supports Unicode emojis
-        try:
-            "\U0001f4cb".encode("gbk")
-            # If we get here, gbk supports the emoji
-            emoji = "\U0001f4cb"
-        except UnicodeEncodeError:
-            # Fallback for systems that don't support emojis
-            emoji = ""
-        
-        console.print(f"\n[bold]{emoji} Role Usage:[/bold]")
-        console.print("[dim]   Use role names with the --role option when starting a debate.[/dim]")
-        console.print("[dim]   Example: daip-cli start 'Topic' --role 'Expert' --role 'Critic'[/dim]")
-        
-        # Show statistics
-        if valid_roles != len(available_roles):
-            skipped = len(available_roles) - valid_roles
-            console.print(f"\n[yellow]⚠️  {skipped} role(s) skipped due to data issues.[/yellow]")
-        
-        # Show role categories if tags are available
-        all_tags = set()
-        for role in available_roles:
-            if isinstance(role.get("tags"), list):
-                all_tags.update(role["tags"])
-        
-        if all_tags:
-            # Check if the system supports Unicode emojis
-            try:
-                "🏷️".encode("gbk")
-                # If we get here, gbk supports the emoji
-                category_emoji = "🏷️"
-            except UnicodeEncodeError:
-                # Fallback for systems that don't support emojis
-                category_emoji = ""
-            
-            console.print(f"\n[bold]{category_emoji} Available Categories:[/bold]")
-            sorted_tags = sorted(list(all_tags))
-            console.print(f"[dim]   {', '.join(sorted_tags[:10])}{'...' if len(sorted_tags) > 10 else ''}[/dim]")
-            
-    except ImportError as e:
-        console.print(f"[red]❌ Cannot import role listing functionality: {e}[/red]")
-        console.print("[yellow]💡 This usually indicates missing dependencies.[/yellow]")
-        console.print("[yellow]   • Run: pip install -r requirements.txt[/yellow]")
-        console.print("[yellow]   • Check system status: daip-cli status[/yellow]")
-    except Exception as e:
-        console.print(f"[red]❌ Failed to list roles: {e}[/red]")
-        console.print("[yellow]💡 Troubleshooting:[/yellow]")
-        console.print("[yellow]   • Check system status: daip-cli status[/yellow]")
-        console.print("[yellow]   • Verify role files are accessible[/yellow]")
-        console.print("[yellow]   • Try running with verbose logging[/yellow]")
-        logger.error(f"Role listing failed: {e}", exc_info=True)
+        console.print("[yellow]   • Fix missing dependencies first")
+        console.print("[yellow]   • Check configuration files")
+        console.print("[yellow]   • Run this status check again after fixes")
 
 
 @app.command()
@@ -630,7 +462,8 @@ def help():
     console.print("  [cyan]start[/cyan]   - Start a new debate")
     console.print("  [cyan]roles[/cyan]   - List available roles for debates")
     console.print("  [cyan]status[/cyan]  - Check system status")
-    console.print("  [cyan]pa[/cyan]        - Commands for the Personal Assistant")
+    console.print("  [cyan]pa[/cyan]      - Commands for the Personal Assistant")
+    console.print("  [cyan]debate[/cyan]  - Debate management commands")
     console.print("  [cyan]intv[/cyan]    - Provide an intervention to the current session.")
     console.print("  [cyan]cons[/cyan]    - Get consensus information for the current session.")
     console.print("  [cyan]disag[/cyan]   - Get key disagreement points for the current session.")
@@ -663,6 +496,15 @@ def help():
     console.print("  # Check system status")
     console.print("  [dim]daip-cli status[/dim]")
     console.print()
+    console.print("  # View debate disagreements")
+    console.print("  [dim]daip-cli debate view-disagreements 'AI Ethics Debate'[/dim]")
+    console.print()
+    console.print("  # Select consensus algorithm for a debate")
+    console.print("  [dim]daip-cli debate select-consensus-algorithm 'AI Ethics Debate' weighted_vote[/dim]")
+    console.print()
+    console.print("  # Export debate to wiki")
+    console.print("  [dim]daip-cli debate export-to-wiki 'AI Ethics Debate' --title 'AI Ethics Analysis'[/dim]")
+    console.print()
     
     console.print("[bold]Tips:[/bold]")
     console.print("  • Use quotes around topics and role names that contain spaces")
@@ -670,9 +512,6 @@ def help():
     console.print("  • Multiple roles can be specified with multiple --role flags")
     console.print("  • Check 'daip-cli status' if you encounter issues")
     console.print("  • Use 'daip-cli roles' to see available roles for debates")
-
-
-
 
 
 @app.command()

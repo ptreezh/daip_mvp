@@ -1,0 +1,10 @@
+{
+    "proposal_id": "41aad381-544b-43cd-9c12-d788134566b7",
+    "entry_name": "test_approve_entry",
+    "author": "cli_user",
+    "timestamp": "2025-08-21T09:00:22.565403",
+    "base_version": "1.0.0",
+    "new_content": "Edited content",
+    "change_summary": "CLI edit",
+    "status": "applied"
+}

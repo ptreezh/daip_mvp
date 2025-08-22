@@ -7,6 +7,7 @@ from pathlib import Path
 import json
 
 from .models import ChatRoomConfig
+from .chat_rules_engine import ChatRulesEngine, ChatRuleContext
 
 if TYPE_CHECKING:
     from .chat_room_manager import ChatRoomManager
@@ -27,16 +28,30 @@ class ChatCoordinator:
         primitive_registry: Optional["PrimitiveRegistry"] = None,
         wiki_service: Optional["WikiService"] = None,
         state_file: Path = Path("data/chat_coordinator_state.json"),
+        debug: bool = False,
     ):
-        """Initialize the ChatCoordinator."""
+        """Initialize the ChatCoordinator.
+        
+        Args:
+            chat_room_manager: The chat room manager.
+            chat_session_service: The chat session service.
+            role_manager: Optional role manager for role operations.
+            primitive_registry: Optional primitive registry for chat rules.
+            wiki_service: Optional wiki service for knowledge integration.
+            state_file: Path to the state file for persistence.
+            debug: Whether to enable debug mode for detailed output.
+        """
         self.chat_room_manager = chat_room_manager
         self.chat_session_service = chat_session_service
         self.role_manager = role_manager
         self.primitive_registry = primitive_registry
         self.wiki_service = wiki_service
-        self._current_room_id: Optional[str] = None
         self.state_file = state_file
-        self.load_state()
+        self._current_room_id: Optional[str] = None
+        self.debug = debug
+        
+        # 初始化聊天规则引擎
+        self.rules_engine = ChatRulesEngine(debug=debug)
 
     def save_state(self):
         """Saves the current state of the coordinator to a file."""

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title_or_id }}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .metadata {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3498db;
+        }
+        .metadata dt {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 10px;
+        }
+        .metadata dd {
+            margin-left: 0;
+            margin-bottom: 5px;
+        }
+        .content {
+            margin-top: 30px;
+        }
+        .content h2, .content h3 {
+            color: #2c3e50;
+        }
+        .content code {
+            background: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .content pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+        }
+        .content blockquote {
+            border-left: 4px solid #3498db;
+            margin: 0;
+            padding-left: 20px;
+            color: #666;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .tag {
+            background: #3498db;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ title_or_id }}</h1>
+        
+        <div class="metadata">
+            <dl>
+                <dt>Author</dt>
+                <dd>{{ wiki_version.author }}</dd>
+                
+                <dt>Created</dt>
+                <dd>{{ metadata.created_at }}</dd>
+                
+                <dt>Last Modified</dt>
+                <dd>{{ metadata.last_modified }}</dd>
+                
+                <dt>Version</dt>
+                <dd>{{ wiki_version.version }}</dd>
+                
+                <dt>Category</dt>
+                <dd>{{ metadata.category }}</dd>
+                
+                <dt>Tags</dt>
+                <dd>
+                    <div class="tags">
+                        {% for tag in metadata.tags %}
+                        <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </dd>
+            </dl>
+        </div>
+        
+        <div class="content">
+            {{ content_html | safe }}
+        </div>
+        
+        <div class="footer">
+            <p>Exported from DAIP-LIVE Wiki System</p>
+            <p>Generated on {{ metadata.last_modified }}</p>
+        </div>
+    </div>
+</body>
+</html>

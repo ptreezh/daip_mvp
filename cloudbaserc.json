@@ -1,0 +1,15 @@
+{
+  "envId": "{{env.ENV_ID}}",
+  "functionRoot": "./functions",
+  "functions": [],
+  "ai": {
+    "defaultAgent": "{{env.AI_DEFAULT_AGENT}}",
+    "agents": {
+      "qwen": {
+        "type": "cloudbase",
+        "provider": "kimi-exp",
+        "model": "kimi-k2-instruct-local"
+      }
+    }
+  }
+}

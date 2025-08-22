@@ -1,0 +1,10 @@
+{
+    "proposal_id": "d1142278-5e08-4871-9e69-3f018f961198",
+    "entry_name": "Test Page",
+    "author": "cli_user",
+    "timestamp": "2025-08-19T18:57:16.935886",
+    "base_version": "1.0.0",
+    "new_content": "# Test Page Updated\\n\\nThis is updated content via CLI.",
+    "change_summary": "CLI edit",
+    "status": "proposed"
+}

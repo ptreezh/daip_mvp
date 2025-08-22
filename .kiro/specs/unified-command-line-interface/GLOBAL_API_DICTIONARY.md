@@ -63,8 +63,8 @@
 
 ### 服务: `src.core_services.chat_service.ChatService`
 - **描述**: 旨在处理聊天室内的实时消息和多角色对话。
-- **审查备注**: **严重警告**: 此服务是围绕一个名为 `MultiRoleChatEngine` 的核心类构建的，但该类在代码库中完全缺失。因此，除了一个简单的模拟方法外，所有相关功能都无法实现。
-- **依赖**: `MultiRoleChatEngine` (不存在)
+- **审查备注**: **严重警告**: 此服务是围绕一个名为 `MultiRoleChatEngine` 的核心类构建的，但该类在代码库中完全缺失。因此，除了一个简单的模拟方法外，所有相关功能都无法实现。**该服务已被标记为"待重构"，计划通过集成 `virtual_role_chat` 模块的新组件来完善功能。**
+- **依赖**: `MultiRoleChatEngine` (不存在), `virtual_role_chat.ChatRoomManager` (待集成), `virtual_role_chat.ChatSessionService` (待实现)
 
 | 方法签名 | 功能描述 | 实现状态 |
 | --- | --- | --- |
@@ -74,6 +74,34 @@
 | `generate_responses_for_room(self, ...)` | 在聊天室中为一个或多个AI角色生成响应。 | **桩 (依赖缺失)** |
 | `get_room_details(self, ...)` | 检索特定聊天室的详细信息。 | **桩 (依赖缺失)** |
 | `list_all_rooms(self, ...)` | 列出指定引擎中的所有聊天室。 | **桩 (依赖缺失)** |
+
+### 服务: `src.virtual_role_chat.chat_room_manager.ChatRoomManager`
+- **描述**: 管理聊天室的生命周期，包括创建、配置、更新、删除和列出。不处理实时消息。
+- **审查备注**: 这是一个稳定且完全实现的模块。它可以配置为使用内存或文件持久化。
+- **依赖**: `File System` (可选)
+
+| 方法签名 | 功能描述 | 实现状态 |
+| --- | --- | --- |
+| `__init__(self, storage_path: Optional[str] = None, ...)` | 初始化管理器。如果提供了`storage_path`，则从文件加载/保存聊天室。 | **完整** |
+| `create_chat_room(self, config: ChatRoomConfig) -> ChatRoomID` | 根据提供的配置创建一个新的聊天室。 | **完整** |
+| `get_chat_room(self, room_id: ChatRoomID) -> ChatRoom` | 根据ID获取一个聊天室的完整信息。 | **完整** |
+| `update_chat_room(self, room_id: ChatRoomID, config: ChatRoomConfig) -> bool` | 更新一个现有聊天室的配置。 | **完整** |
+| `delete_chat_room(self, room_id: ChatRoomID) -> bool` | 删除一个聊天室。 | **完整** |
+| `list_chat_rooms(self) -> List[ChatRoomSummary]` | 列出系统中所有聊天室的摘要信息。 | **完整** |
+| `archive_chat_room(self, room_id: ChatRoomID) -> bool` | 归档一个聊天室（设置为非活动状态）。 | **完整** |
+
+### 服务: `src.virtual_role_chat.chat_session_service.ChatSessionService` (计划中)
+- **描述**: 管理聊天会话的生命周期和消息处理。
+- **审查备注**: **即将实现**: 此服务将实现 `ChatSessionServiceInterface` 接口，提供会话管理、消息存储和检索功能。
+- **依赖**: `ChatRoomManager` (用于验证聊天室存在), `ChatStorage` (用于消息持久化)
+
+| 方法签名 | 功能描述 | 实现状态 |
+| --- | --- | --- |
+| `start_session(self, room_id: ChatRoomID) -> SessionID` | 在指定聊天室启动一个新的会话。 | **计划中** |
+| `end_session(self, session_id: SessionID) -> bool` | 结束一个会话。 | **计划中** |
+| `add_message(self, session_id: SessionID, message: ChatMessage) -> bool` | 向会话中添加一条消息。 | **计划中** |
+| `get_messages(self, session_id: SessionID, limit: int = 50, offset: int = 0) -> List[ChatMessage]` | 获取会话中的消息历史。 | **计划中** |
+| `get_session_summary(self, session_id: SessionID) -> SessionSummary` | 获取会话摘要。 | **计划中** |
 
 ---
 

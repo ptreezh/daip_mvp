@@ -22,7 +22,7 @@ class ChatRoomConfig(BaseModel):
     description: str = ""
     topic: str
     roles: List[str]  # Role IDs
-    mode: Literal["free_form", "structured", "debate"] = "free_form"
+    mode: Literal["free_form", "structured", "debate", "turn_based", "random"] = "free_form"
     interaction_rules: Dict[str, Any] = {}  # Mode-specific configuration
 
 

@@ -1,0 +1,9 @@
+{
+    "id": "test_cli_role",
+    "name": "Test CLI Role",
+    "description": "Updated description via CLI",
+    "system_prompt": "You are Test CLI Role. A role created via CLI",
+    "capabilities": [
+        "general_assistance"
+    ]
+}

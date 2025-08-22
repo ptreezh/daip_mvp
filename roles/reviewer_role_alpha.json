@@ -1,0 +1,9 @@
+{
+    "id": "reviewer_role_alpha",
+    "name": "Reviewer Role Alpha",
+    "description": "A role created during review",
+    "system_prompt": "You are Reviewer Role Alpha. A role created during review",
+    "capabilities": [
+        "general_assistance"
+    ]
+}

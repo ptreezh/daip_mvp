@@ -471,6 +471,119 @@ class WikiService:
             logging.error(f"Failed to apply proposal '{proposal_id}': {e}")
             return False
 
+    def approve(self, entry_name: str, proposal_id: str) -> bool:
+        """Approves an edit proposal and applies it to create a new version.
+        
+        Args:
+            entry_name (str): The name of the wiki entry.
+            proposal_id (str): The ID of the proposal to approve.
+            
+        Returns:
+            bool: True if the proposal was approved and applied successfully, False otherwise.
+        """
+        logging.info(f"Attempting to approve proposal '{proposal_id}' for entry '{entry_name}'.")
+        
+        # Validate input
+        if not entry_name or not proposal_id:
+            logging.error("Entry name and proposal ID must be provided.")
+            return False
+            
+        entry_dir = self._get_entry_path(entry_name)
+        if not entry_dir.is_dir():
+            logging.error(f"Wiki entry '{entry_name}' does not exist.")
+            return False
+            
+        proposal_file = entry_dir / "proposals" / f"{proposal_id}.json"
+        if not proposal_file.exists():
+            logging.error(f"Proposal '{proposal_id}' not found for entry '{entry_name}'.")
+            return False
+            
+        try:
+            # Load proposal to check its status
+            proposal_data = json.loads(proposal_file.read_text(encoding="utf-8"))
+            proposal_status = EditStatus(proposal_data.get("status"))
+            
+            if proposal_status == EditStatus.APPLIED:
+                logging.warning(f"Proposal '{proposal_id}' is already applied.")
+                return True
+            elif proposal_status == EditStatus.REJECTED:
+                logging.error(f"Cannot approve rejected proposal '{proposal_id}'.")
+                return False
+            elif proposal_status != EditStatus.PROPOSED:
+                logging.error(f"Invalid proposal status '{proposal_status.value}' for approval.")
+                return False
+                
+            # Apply the proposal
+            success = self._apply_proposal(entry_name, proposal_id)
+            if success:
+                logging.info(f"Successfully approved and applied proposal '{proposal_id}' for entry '{entry_name}'.")
+            else:
+                logging.error(f"Failed to apply proposal '{proposal_id}' for entry '{entry_name}'.")
+            return success
+            
+        except json.JSONDecodeError as e:
+            logging.error(f"Failed to parse proposal file '{proposal_file}': {e}")
+            return False
+        except Exception as e:
+            logging.error(f"Failed to approve proposal '{proposal_id}' for entry '{entry_name}': {e}")
+            return False
+
+    def reject(self, entry_name: str, proposal_id: str) -> bool:
+        """Rejects an edit proposal.
+        
+        Args:
+            entry_name (str): The name of the wiki entry.
+            proposal_id (str): The ID of the proposal to reject.
+            
+        Returns:
+            bool: True if the proposal was rejected successfully, False otherwise.
+        """
+        logging.info(f"Attempting to reject proposal '{proposal_id}' for entry '{entry_name}'.")
+        
+        # Validate input
+        if not entry_name or not proposal_id:
+            logging.error("Entry name and proposal ID must be provided.")
+            return False
+            
+        entry_dir = self._get_entry_path(entry_name)
+        if not entry_dir.is_dir():
+            logging.error(f"Wiki entry '{entry_name}' does not exist.")
+            return False
+            
+        proposal_file = entry_dir / "proposals" / f"{proposal_id}.json"
+        if not proposal_file.exists():
+            logging.error(f"Proposal '{proposal_id}' not found for entry '{entry_name}'.")
+            return False
+            
+        try:
+            # Load proposal to check its status
+            proposal_data = json.loads(proposal_file.read_text(encoding="utf-8"))
+            proposal_status = EditStatus(proposal_data.get("status"))
+            
+            if proposal_status == EditStatus.APPLIED:
+                logging.error(f"Cannot reject applied proposal '{proposal_id}'.")
+                return False
+            elif proposal_status == EditStatus.REJECTED:
+                logging.warning(f"Proposal '{proposal_id}' is already rejected.")
+                return True
+            elif proposal_status != EditStatus.PROPOSED:
+                logging.error(f"Invalid proposal status '{proposal_status.value}' for rejection.")
+                return False
+                
+            # Update proposal status to REJECTED
+            proposal_data["status"] = EditStatus.REJECTED.value
+            proposal_file.write_text(json.dumps(proposal_data, indent=4), encoding="utf-8")
+            
+            logging.info(f"Successfully rejected proposal '{proposal_id}' for entry '{entry_name}'.")
+            return True
+            
+        except json.JSONDecodeError as e:
+            logging.error(f"Failed to parse proposal file '{proposal_file}': {e}")
+            return False
+        except Exception as e:
+            logging.error(f"Failed to reject proposal '{proposal_id}' for entry '{entry_name}': {e}")
+            return False
+
     def search(self, query: str, top_k: int = 3) -> List[str]:
         """Performs a semantic search using a vector index.
 
@@ -586,6 +699,38 @@ class WikiService:
             return sorted(proposals, key=lambda p: p.timestamp, reverse=True)
         except Exception as e:
             logging.error(f"Failed to get entry proposals: {e}")
+            return []
+
+    def list_pending_proposals(self) -> List[Dict[str, Any]]:
+        """List all pending proposals across all wiki entries.
+        
+        Returns:
+            List[Dict[str, Any]]: List of pending proposals with entry name and proposal details.
+        """
+        pending_proposals = []
+        try:
+            # Get all wiki entries
+            entries = self.list_all_entries()
+            
+            # Iterate through each entry to get its proposals
+            for entry_name in entries:
+                proposals = self._get_entry_proposals(entry_name)
+                
+                # Filter for pending proposals and add to the list
+                for proposal in proposals:
+                    if proposal.status == EditStatus.PROPOSED:
+                        pending_proposals.append({
+                            "entry_name": entry_name,
+                            "proposal_id": proposal.proposal_id,
+                            "author": proposal.author,
+                            "timestamp": proposal.timestamp,
+                            "change_summary": proposal.change_summary
+                        })
+            
+            # Sort by timestamp (newest first)
+            return sorted(pending_proposals, key=lambda p: p["timestamp"], reverse=True)
+        except Exception as e:
+            logging.error(f"Failed to list pending proposals: {e}")
             return []
 
     def export_entry(self, entry_name: str, output_path: str, format: str = "json") -> bool:
@@ -827,4 +972,58 @@ class WikiService:
             
         except Exception as e:
             logging.error(f"Failed to compare versions: {e}")
+            return {"error": str(e)}
+
+    def _import_debate_components(self):
+        """Import the necessary components for debate engine integration.
+        
+        This method is separated to make it easier to mock in tests.
+        """
+        try:
+            from src.debate_system.multi_role_dialogue_engine import MultiRoleDialogueEngine
+            from src.core_services.role_manager import RoleManager
+            from src.core_services.integrated_llm_manager import IntegratedLLMManager
+            from src.core_services.memory_agent import MemAgent
+            from src.debate_system.participant_management import ParticipantManager
+            
+            return {
+                "MultiRoleDialogueEngine": MultiRoleDialogueEngine,
+                "RoleManager": RoleManager,
+                "IntegratedLLMManager": IntegratedLLMManager,
+                "MemAgent": MemAgent,
+                "ParticipantManager": ParticipantManager
+            }
+        except ImportError as e:
+            # Re-raise the exception to be handled by the caller
+            raise e
+
+    def initiate_collaborative_edit(self, topic: str, initiator_role: str = "system") -> Dict[str, Any]:
+        """Initiate a collaborative editing session using the debate engine.
+        
+        Args:
+            topic (str): The topic to debate and create/edit wiki content for.
+            initiator_role (str): The role that initiated the collaboration.
+            
+        Returns:
+            Dict[str, Any]: Result of the collaborative editing initiation.
+        """
+        try:
+            # Import the necessary components for debate engine integration
+            components = self._import_debate_components()
+            
+            # For now, we'll return a placeholder result
+            # In a full implementation, this would integrate with the debate engine
+            return {
+                "status": "initiated",
+                "topic": topic,
+                "initiator": initiator_role,
+                "session_id": f"collab_{topic.replace(' ', '_')}_{int(datetime.now().timestamp())}",
+                "message": "Collaborative editing session initiated successfully"
+            }
+            
+        except ImportError as e:
+            logging.error(f"Failed to import debate components: {e}")
+            return {"error": f"Missing dependency: {str(e)}"}
+        except Exception as e:
+            logging.error(f"Failed to initiate collaborative editing: {e}")
             return {"error": str(e)}

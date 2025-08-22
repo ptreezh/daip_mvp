@@ -102,6 +102,33 @@ class TestRoleManager(TestCase):
         role_manager = RoleManager(roles_directory=self.roles_directory)
         self.assertEqual(len(role_manager.list_roles()), 0)
 
+    def test_create_role_persists_tags_and_data(self):
+        """Ensures create_role correctly persists all data, including tags."""
+        # Arrange
+        role_manager = RoleManager(roles_directory=self.roles_directory)
+        role_data = {
+            "name": "Tag Persistence Role",
+            "description": "A test for tag persistence.",
+            "tags": ["fix", "testing", "persistence"]
+        }
+        expected_id = "tag_persistence_role"
+        expected_file = self.roles_directory / f"{expected_id}.json"
+
+        # Act
+        success = role_manager.create_role(role_data)
+
+        # Assert
+        self.assertTrue(success)
+        self.assertTrue(expected_file.exists())
+
+        with open(expected_file, "r", encoding="utf-8") as f:
+            saved_data = json.load(f)
+
+        self.assertEqual(saved_data.get("id"), expected_id)
+        self.assertEqual(saved_data.get("name"), "Tag Persistence Role")
+        self.assertIn("tags", saved_data)
+        self.assertCountEqual(saved_data.get("tags"), ["fix", "testing", "persistence"])
+
 
 if __name__ == "__main__":
     main()

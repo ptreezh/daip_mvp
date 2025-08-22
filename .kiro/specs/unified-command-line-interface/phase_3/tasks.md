@@ -42,33 +42,34 @@
 ## 任务分解与优先级 (按可用性优先级排序)
 
 ### 高优先级 (必须完成 - 核心功能完整性)
-1.  **实现 `wiki proposal approve` 命令** - ⚠️ 部分实现
+1.  **实现 `wiki proposal approve` 命令** - ✅ 已完成
     *   **文件**: `src/cli/wiki_commands.py`, `src/core_services/wiki_service.py`
     *   **任务**: 添加新命令来批准和应用编辑提议，使wiki edit功能形成完整闭环。
     *   **预计工作量**: 4小时
-    *   **状态**: 需要实现自动批准机制，目前需要手动处理
+    *   **状态**: 已实现自动批准机制
 
 ### 中优先级 (应优先完成 - 功能增强)
-2.  **实现 `wiki proposal list` 命令** - ❌ 建议新增
+2.  **实现 `wiki proposal list` 命令** - ✅ 已完成
     *   **文件**: `src/cli/wiki_commands.py`, `src/core_services/wiki_service.py`
     *   **任务**: 添加新命令来列出所有待审批的编辑提议。
     *   **预计工作量**: 2小时
 
-3.  **实现 `wiki proposal reject` 命令** - ❌ 建议新增
+3.  **实现 `wiki proposal reject` 命令** - ✅ 已完成
     *   **文件**: `src/cli/wiki_commands.py`, `src/core_services/wiki_service.py`
     *   **任务**: 添加新命令来拒绝编辑提议。
     *   **预计工作量**: 2小时
 
 ### 低优先级 (后续完善 - 增强功能)
-4.  **实现聊天室推荐功能** - ❌ 未实现
+4.  **实现聊天室推荐功能** - ✅ 已完成
     *   **文件**: `src/cli/chat_commands.py`, `src/virtual_role_chat/chat_coordinator.py`
-    *   **任务**: 完善聊天室推荐功能。
+    *   **任务**: 实现基于主题的智能虚拟角色推荐和匹配功能，用户可确认或系统自动确认。
     *   **预计工作量**: 4小时
 
-5.  **实现聊天室规则功能** - ❌ 未实现
-    *   **文件**: `src/cli/chat_commands.py`, `src/virtual_role_chat/chat_coordinator.py`
-    *   **任务**: 完善聊天室规则配置功能。
+5.  **实现聊天室规则功能** - ✅ 已完成
+    *   **文件**: `src/cli/chat_commands.py`, `src/virtual_role_chat/chat_coordinator.py`, `src/virtual_role_chat/chat_rules_engine.py`
+    *   **任务**: 实现聊天室内的制度原语规则引擎，控制虚拟角色发言行为和交互规则（轮流发言、随机发言、提示词组织等）。
     *   **预计工作量**: 4小时
+    *   **状态**: 已实现基础规则引擎，支持多种交互模式和提示词策略
 
 6.  **实现聊天历史导出功能** - ❌ 建议新增
     *   **文件**: `src/cli/chat_commands.py`, `src/virtual_role_chat/chat_coordinator.py`
@@ -79,6 +80,13 @@
     *   **文件**: `src/core_services/wiki_service.py`
     *   **任务**: 实现Wiki页面的权限管理功能。
     *   **预计工作量**: 5小时
+
+8.  **实现简化版Wiki协作功能** - <|fim_pad|> ✅ 已完成
+    *   **文件**: `src/cli/wiki_commands.py`, `src/core_services/wiki_service.py`, `src/core_services/wiki_collaboration_simplified.py`
+    *   **任务**: 实现基于KISS/YAGNI/SOLID原则的简化Wiki协作功能，用户表达意图后由智能助手优化并自动执行。
+    *   **预计工作量**: 10小时
+    *   **详细规划**: 参见 `.kiro/specs/unified-command-line-interface/phase_3/wiki_collaboration/`
+    *   **实施清单**: 参见 `.kiro/specs/unified-command-line-interface/phase_3/wiki_collaboration/IMPLEMENTATION_TODO_LIST.md`
 
 ---
 
@@ -98,13 +106,28 @@
 #### 短期（1-2天内）:
 1.  **完善编辑工作流**:
     ```bash
-    - 实现wiki proposal approve命令（自动批准编辑提议）
-    - 实现wiki proposal list命令（查看所有待审批的提议）
-    - 实现wiki proposal reject命令
+    - 实现wiki proposal approve命令（自动批准编辑提议）✅
+    - 实现wiki proposal list命令（查看所有待审批的提议）✅
+    - 实现wiki proposal reject命令 ✅
     ```
 
-#### 中期（1周内）:
-1. **增强聊天功能**:
+2.  **开始实现简化版Wiki协作功能**:
+    ```bash
+    - 实现基础数据模型 ✅
+    - 实现核心组件接口 ✅
+    - 开始意图优化器开发
+    ```
+
+#### 中期（1-2个月）:
+1. **实现基于角色的Wiki协作功能**:
+   ```bash
+   - 实现用户发起协作任务功能
+   - 实现系统指派角色参与机制
+   - 实现角色间协同工作流程
+   - 实现用户监督与确认机制
+   ```
+
+2. **增强聊天功能**:
    ```bash
    - 实现聊天室状态显示（活跃/归档等）
    - 实现聊天室推荐功能
@@ -116,6 +139,7 @@
    ```
    - 更丰富的Wiki导出格式
    - Wiki页面权限管理
+   - 高级Wiki协作功能（如角色间辩论、复杂共识机制等）
    ```
 
 ## 版本发布策略

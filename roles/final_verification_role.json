@@ -1,0 +1,13 @@
+{
+    "id": "final_verification_role",
+    "name": "Final Verification Role",
+    "description": "An updated description for the manage command test.",
+    "system_prompt": "You are Final Verification Role. This role confirms the end-to-end fix",
+    "capabilities": [
+        "general_assistance"
+    ],
+    "tags": [
+        "verified",
+        "updated"
+    ]
+}

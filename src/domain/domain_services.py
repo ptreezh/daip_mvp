@@ -7,7 +7,10 @@
 """
 
 import asyncio
+import json
+import logging
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Optional
 
 from .entities import User
@@ -777,18 +780,199 @@ class UserInterventionService:
             "intent_distribution": intent_distribution
         }
 
+    async def process_intervention(self, session_id: str, intervention_data: dict[str, Any]) -> dict[str, Any]:
+        """Process a user intervention."""
+        content = intervention_data.get("content", "")
+        intent = intervention_data.get("intent", "comment")
+        task_id = intervention_data.get("task_id")
+
+        logger.info(f"Processing intervention for session {session_id}: {content} (Intent: {intent})")
+
+        # Optimize the user input
+        optimized_content = await self.optimize_input(content, intent, {"session_id": session_id, "task_id": task_id})
+
+        # Integrate the intervention
+        integration_result = await self.integrate_intervention(session_id, {
+            "content": optimized_content,
+            "intent": intent,
+            "task_id": task_id
+        })
+
+        return {
+            "status": "processed",
+            "message": f"Intervention '{content[:50]}...' processed successfully.",
+            "optimized_input": optimized_content,
+            "integration_result": integration_result,
+            "timestamp": datetime.now()
+        }
+
+    async def integrate_intervention(self, session_id: str, user_intervention: dict[str, Any]) -> dict[str, Any]:
+        """Integrate user intervention into the discussion."""
+        # Analyze the intervention's impact
+        impact_analysis = await self._analyze_intervention_impact(user_intervention)
+
+        # Generate integration suggestions
+        integration_suggestions = await self._generate_integration_suggestions(user_intervention, impact_analysis)
+
+        # Calculate impact score
+        impact_score = self._calculate_impact_score(impact_analysis)
+
+        return {
+            "status": "integrated",
+            "impact_analysis": impact_analysis,
+            "integration_suggestions": integration_suggestions,
+            "impact_score": impact_score,
+            "timestamp": datetime.now()
+        }
+
+    async def _analyze_intervention_impact(self, intervention: dict[str, Any]) -> dict[str, Any]:
+        """Analyze intervention impact."""
+        content = intervention.get("content", "")
+        intent = intervention.get("intent", "comment")
+
+        # Analyze content features
+        content_length = len(content)
+        complexity = self._analyze_content_complexity(content)
+        constructiveness = self._analyze_constructiveness(content)
+
+        return {
+            "content_length": content_length,
+            "complexity": complexity,
+            "constructiveness": constructiveness,
+            "intent": intent,
+            "relevance": 0.8  # Simplified relevance scoring
+        }
+
+    def _analyze_content_complexity(self, content: str) -> float:
+        """Analyze content complexity."""
+        # Based on length, vocabulary diversity, etc.
+        words = content.split()
+        unique_words = set(words)
+
+        if len(words) == 0:
+            return 0.0
+
+        vocabulary_diversity = len(unique_words) / len(words)
+        length_factor = min(len(content) / 200, 1.0)
+
+        return (vocabulary_diversity * 0.6 + length_factor * 0.4)
+
+    def _analyze_constructiveness(self, content: str) -> float:
+        """Analyze constructiveness."""
+        constructive_words = [
+            "建议", "改进", "优化", "解决方案", "方法", "策略",
+            "suggest", "improve", "optimize", "solution", "method", "strategy"
+        ]
+
+        constructive_count = sum(1 for word in constructive_words if word in content)
+        return min(constructive_count / 2, 1.0)
+
+    async def _generate_integration_suggestions(self, intervention: dict[str, Any], impact_analysis: dict[str, Any]) -> list[str]:
+        """Generate integration suggestions."""
+        suggestions = []
+
+        if impact_analysis["constructiveness"] > 0.7:
+            suggestions.append("该干预具有高度建设性，建议优先考虑")
+
+        if impact_analysis["complexity"] > 0.8:
+            suggestions.append("内容较为复杂，建议分解讨论")
+
+        if impact_analysis["content_length"] > 200:
+            suggestions.append("内容较长，建议提取关键点")
+
+        if not suggestions:
+            suggestions.append("可以正常集成到讨论中")
+
+        return suggestions
+
+    def _calculate_impact_score(self, impact_analysis: dict[str, Any]) -> float:
+        """Calculate impact score."""
+        weights = {
+            "constructiveness": 0.4,
+            "complexity": 0.3,
+            "relevance": 0.3
+        }
+
+        score = (
+            impact_analysis["constructiveness"] * weights["constructiveness"] +
+            impact_analysis["complexity"] * weights["complexity"] +
+            impact_analysis["relevance"] * weights["relevance"]
+        )
+
+        return min(score, 1.0)
+
+    async def process_intervention(self, session_id: str, intervention_data: dict[str, Any]) -> dict[str, Any]:
+        """处理用户干预"""
+        content = intervention_data.get("content", "")
+        intent = intervention_data.get("intent", "comment")
+        task_id = intervention_data.get("task_id")
+        
+        # 优化用户输入
+        context = {"session_id": session_id, "task_id": task_id}
+        optimized_content = await self.optimize_input(content, intent, context)
+        
+        # 生成响应消息
+        message = f"已处理您的干预: '{content}' (优化后: '{optimized_content}')"
+        
+        return {
+            "status": "processed",
+            "message": message,
+            "optimized_content": optimized_content,
+            "intent": intent,
+            "task_id": task_id
+        }
+
 
 class ConsensusTrackingService:
     """共识跟踪服务 - 实时计算和跟踪共识水平"""
     
-    def __init__(self):
+    def __init__(self, storage_path: Optional[str] = None):
         self.active_debates = {}
+        self.storage_path = Path(storage_path) if storage_path else Path("data/consensus_data.json")
         self.consensus_algorithms = {
             "simple_majority": self._simple_majority_consensus,
             "weighted_voting": self._weighted_voting_consensus,
             "sentiment_analysis": self._sentiment_analysis_consensus
         }
+        # 确保存储目录存在
+        self.storage_path.parent.mkdir(parents=True, exist_ok=True)
+        # 加载现有数据（如果存在）
+        self._load_data()
     
+    def _load_data(self):
+        """从存储文件加载数据"""
+        if self.storage_path.exists():
+            try:
+                with open(self.storage_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    # 转换时间戳字符串为datetime对象
+                    for debate_id, debate_data in data.items():
+                        for message in debate_data.get("messages", []):
+                            if "timestamp" in message:
+                                message["timestamp"] = datetime.fromisoformat(message["timestamp"])
+                    self.active_debates = data
+                logger.info(f"Loaded consensus data from {self.storage_path}")
+            except Exception as e:
+                logger.error(f"Error loading consensus data: {e}")
+                self.active_debates = {}
+
+    def _save_data(self):
+        """将数据保存到存储文件"""
+        try:
+            # 转换datetime对象为时间戳字符串以便序列化
+            serializable_data = {}
+            for debate_id, debate_data in self.active_debates.items():
+                serializable_data[debate_id] = debate_data.copy()
+                for message in serializable_data[debate_id].get("messages", []):
+                    if "timestamp" in message and isinstance(message["timestamp"], datetime):
+                        message["timestamp"] = message["timestamp"].isoformat()
+            
+            with open(self.storage_path, 'w', encoding='utf-8') as f:
+                json.dump(serializable_data, f, ensure_ascii=False, indent=2)
+            logger.info(f"Saved consensus data to {self.storage_path}")
+        except Exception as e:
+            logger.error(f"Error saving consensus data: {e}")
+
     async def calculate_consensus(self, debate_id: str) -> ConsensusLevel:
         """计算共识水平"""
         if debate_id not in self.active_debates:
@@ -941,6 +1125,9 @@ class ConsensusTrackingService:
         
         if agent_id not in debate_data["participants"]:
             debate_data["participants"].append(agent_id)
+            
+        # 保存数据
+        self._save_data()
     
     async def add_message(self, debate_id: str, message: dict[str, Any]):
         """添加消息"""
@@ -957,6 +1144,9 @@ class ConsensusTrackingService:
         sender = message.get("sender")
         if sender and sender not in debate_data["participants"]:
             debate_data["participants"].append(sender)
+            
+        # 保存数据
+        self._save_data()
     
     async def extract_key_arguments(self, debate_id: str) -> list[dict[str, Any]]:
         """提取关键论点"""
@@ -999,6 +1189,119 @@ class ConsensusTrackingService:
         length_factor = min(len(content) / 100, 1.0)
         
         return min((keyword_count * 0.6 + length_factor * 0.4), 1.0)
+    
+    async def identify_disagreement_points(self, debate_id: str) -> list[dict[str, Any]]:
+        """识别分歧点"""
+        if debate_id not in self.active_debates:
+            return []
+        
+        debate_data = self.active_debates[debate_id]
+        messages = debate_data.get("messages", [])
+        
+        # 分析消息中的立场
+        positions = {}
+        for message in messages:
+            sender = message.get("sender")
+            content = message.get("content", "")
+            position = self._extract_message_position(message)
+            
+            if sender and position:
+                if sender not in positions:
+                    positions[sender] = []
+                positions[sender].append({
+                    "content": content,
+                    "position": position,
+                    "timestamp": message.get("timestamp")
+                })
+        
+        # 识别分歧点
+        disagreement_points = []
+        
+        # 按时间顺序分析分歧演化
+        sorted_senders = sorted(positions.keys())
+        for i, sender1 in enumerate(sorted_senders):
+            for sender2 in sorted_senders[i+1:]:
+                # 比较两个参与者之间的立场差异
+                positions1 = positions[sender1]
+                positions2 = positions[sender2]
+                
+                for pos1 in positions1:
+                    for pos2 in positions2:
+                        # 如果立场相反，则标记为潜在分歧点
+                        if (pos1["position"] == "agree" and pos2["position"] == "disagree") or \
+                           (pos1["position"] == "disagree" and pos2["position"] == "agree"):
+                            disagreement_points.append({
+                                "point_id": f"{sender1}_{sender2}_{len(disagreement_points)}",
+                                "participants": [sender1, sender2],
+                                "content1": pos1["content"],
+                                "content2": pos2["content"],
+                                "position1": pos1["position"],
+                                "position2": pos2["position"],
+                                "category": "立场分歧",
+                                "description": f"{sender1}和{sender2}在该议题上持有相反立场",
+                                "timestamp": max(pos1.get("timestamp", datetime.now()), 
+                                               pos2.get("timestamp", datetime.now()))
+                            })
+        
+        # 基于内容相似性识别分歧点
+        for sender, sender_positions in positions.items():
+            for other_sender, other_positions in positions.items():
+                if sender != other_sender:
+                    # 比较内容相似性
+                    for pos in sender_positions:
+                        for other_pos in other_positions:
+                            similarity = self._calculate_content_similarity(pos["content"], other_pos["content"])
+                            # 如果内容相似但立场相反，则标记为分歧点
+                            if similarity > 0.7 and pos["position"] != other_pos["position"]:
+                                # 检查是否已存在相似的分歧点
+                                existing_point = None
+                                for dp in disagreement_points:
+                                    if (set(dp["participants"]) == {sender, other_sender} and 
+                                        dp["category"] == "内容分歧"):
+                                        existing_point = dp
+                                        break
+                                
+                                if not existing_point:
+                                    disagreement_points.append({
+                                        "point_id": f"content_{sender}_{other_sender}_{len(disagreement_points)}",
+                                        "participants": [sender, other_sender],
+                                        "content1": pos["content"],
+                                        "content2": other_pos["content"],
+                                        "position1": pos["position"],
+                                        "position2": other_pos["position"],
+                                        "category": "内容分歧",
+                                        "description": f"{sender}和{other_sender}对相似内容有不同的理解和立场",
+                                        "similarity": similarity,
+                                        "timestamp": max(pos.get("timestamp", datetime.now()), 
+                                                       other_pos.get("timestamp", datetime.now()))
+                                    })
+        
+        # 按时间戳排序
+        disagreement_points.sort(key=lambda x: x["timestamp"])
+        
+        return disagreement_points
+    
+    def _calculate_content_similarity(self, content1: str, content2: str) -> float:
+        """计算内容相似性"""
+        # 简单的基于词汇重叠的相似性计算
+        words1 = set(content1.lower().split())
+        words2 = set(content2.lower().split())
+        
+        if not words1 and not words2:
+            return 1.0
+        
+        if not words1 or not words2:
+            return 0.0
+        
+        intersection = words1.intersection(words2)
+        union = words1.union(words2)
+        
+        return len(intersection) / len(union)
+    
+    def get_disagreement_points(self, debate_id: str) -> list[dict[str, Any]]:
+        """获取分歧点"""
+        # 这是一个同步包装器，用于异步方法
+        return asyncio.run(self.identify_disagreement_points(debate_id))
     
     def get_debate_summary(self, debate_id: str) -> dict[str, Any]:
         """获取辩论摘要"""

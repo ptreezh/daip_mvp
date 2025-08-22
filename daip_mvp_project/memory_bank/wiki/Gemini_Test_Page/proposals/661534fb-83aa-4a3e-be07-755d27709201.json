@@ -1,0 +1,10 @@
+{
+    "proposal_id": "661534fb-83aa-4a3e-be07-755d27709201",
+    "entry_name": "Gemini_Test_Page",
+    "author": "cli_user",
+    "timestamp": "2025-08-20T10:12:41.253093",
+    "base_version": "1.0.0",
+    "new_content": "This is the edited content for the test page.",
+    "change_summary": "CLI edit",
+    "status": "proposed"
+}

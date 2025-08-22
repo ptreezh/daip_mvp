@@ -1,12 +1,46 @@
-     进入每个阶段时，你需要遵循 研究 创意 计划 实施                                                     │
-│    回顾的原则，对这个阶段的任务进一步遵循TDD测试驱动的原则细分，存档，再执行----你必须永久记住，全局记忆！
-# 阶段 3: 聊天室与基础知识管理 (Wiki) - 设计
+# 阶段 3: 聊天室与基础知识管理 (Wiki) - 设计 (更新版 - 重构后)
 
-*   **子命令组:** 为聊天相关命令创建 `chat` 子命令组，为 Wiki 相关命令创建 `wiki` 子命令组。
-*   **后端集成:**
-    *   `chat` 命令将调用 `src/core_services/chat_service.py` 和 `src/virtual_role_chat/chat_room_manager.py` 中的现有逻辑。
-    *   **聊天室规则:** `ChatRoomManager` 的 `create_chat_room` 方法将扩展以接受包含发言规则（如轮流发言、随机发言、话题兴趣匹配激活发言等）的配置（例如，一个 `ChatRulesConfig` 对象，该配置可由 `ChatRulePrimitive` 定义）。
-    *   **虚拟角色管理:** 默认匹配或创建聊天室的虚拟角色，并支持新增角色。
-    *   **上下文传递:** 聊天历史记录将作为上下文传递给虚拟角色，以支持连贯的对话。
-    *   `wiki` 命令将调用 `src/core_services/wiki_service.py` 和 `src/real_demo_system/wiki_knowledge_system.py` 中的现有逻辑。
-*   **文件处理:** CLI 需要能够读取本地文件内容并将其作为参数传递给后端服务。
+## KISS/YAGNI/SOLID/TDD 原则应用
+
+*   **KISS (Keep It Simple, Stupid)**: 保持命令结构和交互流程简单直观，避免过度复杂的选项和嵌套。
+*   **YAGNI (You Aren't Gonna Need It)**: 优先实现MVP核心功能，如聊天室创建、消息发送、历史查看、清除、关闭、删除以及Wiki的核心增删改查功能。暂缓实现复杂的聊天室切换、自动存档、权限管理等高级功能。
+*   **SOLID**:
+    *   **单一职责原则 (SRP)**: 每个CLI命令、服务类和数据访问类都有明确的单一职责。
+    *   **开闭原则 (OCP)**: 通过接口定义（如 `WikiServiceInterface`），允许未来轻松扩展实现。
+    *   **里氏替换原则 (LSP)**: 所有服务实现都遵循其接口定义。
+    *   **接口隔离原则 (ISP)**: 定义了细粒度的接口，避免胖接口。
+    *   **依赖倒置原则 (DIP)**: CLI命令依赖于服务接口，而不是具体实现。
+*   **TDD (Test-Driven Development)**: 所有核心功能的实现都将遵循严格的TDD流程。
+
+## 具体设计
+
+### 子命令组
+*   为聊天相关命令创建 `chat` 子命令组。
+*   为 Wiki 相关命令创建 `wiki` 子命令组。
+
+### 后端集成
+
+#### 聊天功能
+*   `chat` 命令将调用 `src/virtual_role_chat/` 模块中的现有和新增组件：
+    *   `ChatRoomManager`：管理聊天室生命周期（已实现）。
+    *   `ChatSessionService`：管理会话和消息（已实现）。
+    *   `ChatCoordinator`：作为核心协调者，集成角色管理、规则设置、文档上传、共识分歧查看等功能（待完善）。
+*   **聊天室规则**: `ChatRoomManager` 的 `create_chat_room` 方法将扩展以接受包含发言规则配置的 `ChatRulesConfig` 对象。
+*   **虚拟角色管理**: 默认匹配或创建聊天室的虚拟角色，并支持新增角色。此功能由 `ChatCoordinator` 调用 `RoleManager` 实现。
+*   **上下文传递**: 聊天历史记录和上传的文档将作为上下文传递给虚拟角色，以支持连贯的对话。
+
+#### Wiki功能
+*   `wiki` 命令将调用 `src/core_services/wiki_service.py` 和 `src/real_demo_system/wiki_knowledge_system.py` 中的现有逻辑。
+*   **文件处理**: CLI 需要能够读取本地文件内容并将其作为参数传递给后端服务。
+
+### 功能协调
+
+#### 聊天功能
+*   **角色智能匹配**: 集成 `RoleManager`，在创建聊天室时根据主题自动推荐或匹配相关角色。
+*   **聊天室规则灵活配置**: 集成制度原语系统，允许用户选择已注册的聊天规则原语或创建新的规则原语。
+*   **文档支持**: 实现文档上传功能，将文档作为虚拟角色讨论的参考资料。
+*   **共识与分歧查看**: 集成已有的智能助手服务，允许在聊天室中直接查看当前讨论的共识和分歧。
+
+#### Wiki功能
+*   **Wiki内容优化**: 在CLI中实现更友好的Wiki内容显示，如分页或截断长内容。
+*   **Wiki内容创建**: 支持从标准输入读取Wiki内容。

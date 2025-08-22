@@ -1,0 +1,9 @@
+{
+    "id": "reviewer_role_beta",
+    "name": "Reviewer Role Beta",
+    "description": "A role with tags",
+    "system_prompt": "You are Reviewer Role Beta. A role with tags",
+    "capabilities": [
+        "general_assistance"
+    ]
+}

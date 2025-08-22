@@ -44,7 +44,7 @@ from .debate_flow_definition import (
     DebateSession, DebateRound, DebateContribution, 
     DebatePhase, ParticipantRole, DebateParticipant
 )
-from participant_management import ParticipantManager, Permission, ActionType
+from .participant_management import ParticipantManager, Permission, ActionType
 
 
 class DialogueState(Enum):

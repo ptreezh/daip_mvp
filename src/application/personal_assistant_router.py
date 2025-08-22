@@ -8,6 +8,7 @@ from src.core_services.integrated_llm_manager import IntegratedLLMManager
 from src.core_services.intent_analysis_service import BasicIntentAnalysisService
 from src.institutional_primitives.workflow_engine import WorkflowEngine, WorkflowDefinition
 from src.core_services.task_manager import TaskManager # Assuming TaskManager exists
+from src.domain.domain_services import UserInterventionService # Import UserInterventionService
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ class PersonalAssistantRouter:
         session_file: str = "data/pa_sessions.json" # Add session_file parameter here
         # Add other necessary core services here via dependency injection
     ):
+        self.user_intervention_service = UserInterventionService() # Initialize UserInterventionService
         self.intent_analysis_service = intent_analysis_service
         self.llm_manager = llm_manager
         self.workflow_engine = workflow_engine
@@ -145,6 +147,20 @@ class PersonalAssistantRouter:
         task_id = created_task.task_id
         logger.info(f"Complex task created with ID: {task_id}")
 
+        # Store task_id in the current session for intervention purposes
+        # Assuming a session is active and we can associate the task with it.
+        # This needs a proper session management mechanism if not already present.
+        # For now, we'll assume a simple way to link the last created task to a 'current' session.
+        # A more robust solution would involve passing session_id to _handle_complex_task
+        # and storing task_id within that specific session's data.
+        # For demonstration, let's assume a global 'current_task_id' or similar for the CLI user.
+        # In a multi-user system, this would be tied to the user's active session.
+        # For now, let's add it to the conversation history or a simple in-memory store.
+        # This is a placeholder for proper session-task linking.
+        self.sessions["cli_user_session"] = self.sessions.get("cli_user_session", {})
+        self.sessions["cli_user_session"]["current_task_id"] = task_id
+        self._save_sessions() # Save sessions after updating
+
         # Step 4: Execute Workflow
         # This should ideally be non-blocking for the CLI, or provide status updates
         # For now, we'll run it and return the final status
@@ -221,47 +237,110 @@ class PersonalAssistantRouter:
         
         return len(expired_sessions)
 
+    async def get_consensus_info(self) -> Dict[str, Any]:
+        """Placeholder for getting consensus information."""
+        # In a real scenario, this would interact with ConsensusTrackingService
+        # and potentially the debate system to retrieve actual consensus data.
+        logger.info("Retrieving consensus information (placeholder).")
+        return {
+            "type": "consensus_info",
+            "topic": "Sample Debate Topic",
+            "consensus_level": 0.75, # 75% consensus
+            "consensus_description": "Participants largely agree on the need for action, but differ on implementation details.",
+            "key_arguments": [
+                {"argument": "Argument A: Pro-active measures are essential.", "support": 0.8},
+                {"argument": "Argument B: Economic impact must be minimized.", "support": 0.6},
+                {"argument": "Argument C: Technological solutions are key.", "support": 0.7}
+            ]
+        }
+
+    async def get_disagreement_points(self) -> Dict[str, Any]:
+        """Placeholder for getting disagreement points."""
+        logger.info("Retrieving disagreement points (placeholder).")
+        return {
+            "type": "disagreement_points",
+            "topic": "Sample Debate Topic",
+            "key_arguments": [
+                {"argument": "Disagreement 1: The timeline for implementation is too aggressive.", "opposing_views": ["View 1.1", "View 1.2"]},
+                {"argument": "Disagreement 2: Funding mechanisms are unclear.", "opposing_views": ["View 2.1", "View 2.2"]}
+            ]
+        }
+
+    def get_session_list(self) -> List[Dict[str, Any]]:
+        """Returns a list of all conversation sessions."""
+        # For now, return the raw sessions dictionary values.
+        # In a real scenario, you might want to filter, sort, or format these.
+        return list(self.sessions.values())
+
+    def save_session(self, session_id: str):
+        """保存会话"""
+        if session_id not in self.sessions:
+            raise ValueError(f"Session {session_id} not found")
+        # In a real application, this would involve writing the session_aggregate
+        # to a persistent storage (database, file system, etc.)
+        # For now, we just ensure the session exists.
+        pass # The actual saving logic would go here
+
+    def load_session(self, session_data: Dict[str, Any]):
+        """加载会话"""
+        # In a real application, this would involve loading session data from
+        # persistent storage and reconstructing the SessionAggregate.
+        # For now, we simulate loading by creating a mock SessionAggregate
+        # and adding it to self.sessions.
+        try:
+            # Assuming SessionAggregate has a from_dict method
+            session_aggregate = SessionAggregate.from_dict(session_data)
+            self.sessions[session_aggregate.session_id] = session_aggregate
+        except Exception as e:
+            raise ValueError(f"Invalid session data: {e}")
+
+    def cleanup_expired_sessions(self, timeout_hours: int = 24):
+        """清理过期会话"""
+        expired_sessions = []
+        
+        for session_id, session_data in self.sessions.items():
+            last_activity_str = session_data.get("last_activity")
+            if last_activity_str:
+                last_activity = datetime.fromisoformat(last_activity_str)
+                if (datetime.now() - last_activity) > timedelta(hours=timeout_hours):
+                    expired_sessions.append(session_id)
+        
+        for session_id in expired_sessions:
+            del self.sessions[session_id]
+        
+        if expired_sessions:
+            logger.info(f"Cleaned up {len(expired_sessions)} expired sessions.")
+            self._save_sessions() # Save changes after cleanup
+        
+        return len(expired_sessions)
+
     async def handle_intervention(self, content: str, intent: str) -> Dict[str, Any]:
         """Handles user interventions."""
         logger.info(f"Handling intervention: {content} with intent: {intent}")
-        # This is a placeholder. In a real system, this would:
-        # 1. Analyze the intervention content and intent.
-        # 2. Potentially update the current session's state or task.
-        # 3. Interact with other services (e.g., debate system, task manager) based on intent.
-        # 4. Generate a response to the user.
 
-        # For now, just return a confirmation message.
-        response_message = f"Intervention received: '{content}' with intent '{intent}'. Processing..."
+        # Retrieve the current task ID from the session
+        current_task_id = self.sessions.get("cli_user_session", {}).get("current_task_id")
+
+        intervention_data = {
+            "content": content,
+            "intent": intent,
+            "task_id": current_task_id # Pass the current task ID to the intervention service
+        }
+
+        # Call the UserInterventionService to process the intervention
+        response = await self.user_intervention_service.process_intervention(
+            session_id="cli_user_session", # Assuming a fixed session ID for CLI for now
+            intervention_data=intervention_data
+        )
+
+        # Log and return the response from the intervention service
+        logger.info(f"Intervention service response: {response}")
         self.conversation_history.append({"role": "user", "content": f"Intervention: {content} (Intent: {intent})"})
-        self.conversation_history.append({"role": "assistant", "content": response_message})
-        return {"status": "success", "message": response_message}
+        self.conversation_history.append({"role": "assistant", "content": response.get("message", "Intervention processed.")})
+        return response
 
-    async def handle_intervention(self, content: str, intent: str) -> Dict[str, Any]:
-        """Handles user interventions."""
-        logger.info(f"Handling intervention: {content} with intent: {intent}")
-        # This is a placeholder. In a real system, this would:
-        # 1. Analyze the intervention content and intent.
-        # 2. Potentially update the current session's state or task.
-        # 3. Interact with other services (e.g., debate system, task manager) based on intent.
-        # 4. Generate a response to the user.
-
-        # For now, just return a confirmation message.
-        response_message = f"Intervention received: '{content}' with intent '{intent}'. Processing..."
+        # Log and return the response from the intervention service
+        logger.info(f"Intervention service response: {response}")
         self.conversation_history.append({"role": "user", "content": f"Intervention: {content} (Intent: {intent})"})
-        self.conversation_history.append({"role": "assistant", "content": response_message})
-        return {"status": "success", "message": response_message}
-
-    async def handle_intervention(self, content: str, intent: str) -> Dict[str, Any]:
-        """Handles user interventions."""
-        logger.info(f"Handling intervention: {content} with intent: {intent}")
-        # This is a placeholder. In a real system, this would:
-        # 1. Analyze the intervention content and intent.
-        # 2. Potentially update the current session's state or task.
-        # 3. Interact with other services (e.g., debate system, task manager) based on intent.
-        # 4. Generate a response to the user.
-
-        # For now, just return a confirmation message.
-        response_message = f"Intervention received: '{content}' with intent '{intent}'. Processing..."
-        self.conversation_history.append({"role": "user", "content": f"Intervention: {content} (Intent: {intent})"})
-        self.conversation_history.append({"role": "assistant", "content": response_message})
-        return {"status": "success", "message": response_message}
+        self.conversation_history.append({"role": "assistant", "content": response.get("message", "Intervention processed.")})
+        return response

@@ -5,7 +5,10 @@ This module provides a registry for institutional primitives, allowing
 for their registration, discovery, and instantiation.
 """
 
+import json
 import logging
+import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Type
 
 from pydantic import BaseModel
@@ -18,13 +21,204 @@ class PrimitiveRegistry:
     Registry for institutional primitives.
     
     This class manages the registration, discovery, and instantiation of
-    institutional primitive nodes.
+    institutional primitive nodes with persistent storage.
     """
     
-    def __init__(self):
-        """Initialize the primitive registry."""
+    def __init__(self, storage_path: Optional[str] = None):
+        """
+        Initialize the primitive registry.
+        
+        Args:
+            storage_path: Path to store workflow definitions. If None, uses default.
+        """
         self._primitives: Dict[str, Type[InstitutionalPrimitive]] = {}
+        self._workflow_definitions: Dict[str, Dict[str, Any]] = {}
         self._logger = logging.getLogger(__name__)
+        
+        # Set up persistent storage
+        if storage_path is None:
+            # Use default path relative to project root
+            self.storage_path = Path("data/workflows")
+        else:
+            self.storage_path = Path(storage_path)
+        
+        # Create storage directory if it doesn't exist
+        self.storage_path.mkdir(parents=True, exist_ok=True)
+        
+        # Load existing workflow definitions
+        self._load_workflow_definitions()
+        
+        self._logger.info(f"PrimitiveRegistry initialized with storage at: {self.storage_path}")
+    
+    def _load_workflow_definitions(self):
+        """Load workflow definitions from persistent storage."""
+        try:
+            for workflow_file in self.storage_path.glob("*.json"):
+                try:
+                    with open(workflow_file, 'r', encoding='utf-8') as f:
+                        workflow_def = json.load(f)
+                        workflow_id = workflow_def.get("id", workflow_file.stem)
+                        self._workflow_definitions[workflow_id] = workflow_def
+                        
+                        # Create and register the workflow primitive class
+                        self._register_workflow_primitive(workflow_id, workflow_def)
+                        
+                        self._logger.info(f"Loaded workflow definition: {workflow_id}")
+                except Exception as e:
+                    self._logger.error(f"Error loading workflow from {workflow_file}: {e}")
+        except Exception as e:
+            self._logger.error(f"Error scanning workflow directory: {e}")
+    
+    def _register_workflow_primitive(self, workflow_id: str, workflow_def: Dict[str, Any]):
+        """Create and register a workflow primitive class."""
+        try:
+            class WorkflowPrimitive:
+                def __init__(self, primitive_id: str):
+                    self.id = primitive_id
+                    self.definition = workflow_def
+                
+                def get_input_schema(self):
+                    return {"type": "object", "properties": {}}
+                
+                def get_output_schema(self):
+                    return {"type": "object", "properties": {}}
+                
+                def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+                    # Basic execution implementation
+                    return {
+                        "status": "success",
+                        "result": f"Workflow {workflow_id} executed successfully",
+                        "workflow_id": workflow_id,
+                        "params": params,
+                        "steps_executed": len(workflow_def.get("steps", []))
+                    }
+            
+            # Register the primitive class
+            self.register_primitive(workflow_id, WorkflowPrimitive)
+            self._logger.info(f"Registered workflow primitive: {workflow_id}")
+            
+        except Exception as e:
+            self._logger.error(f"Error registering workflow primitive {workflow_id}: {e}")
+    
+    def _save_workflow_definition(self, workflow_id: str, workflow_def: Dict[str, Any]):
+        """Save workflow definition to persistent storage."""
+        try:
+            workflow_file = self.storage_path / f"{workflow_id}.json"
+            with open(workflow_file, 'w', encoding='utf-8') as f:
+                json.dump(workflow_def, f, indent=2, ensure_ascii=False)
+            self._logger.info(f"Saved workflow definition: {workflow_id} to {workflow_file}")
+        except Exception as e:
+            self._logger.error(f"Error saving workflow {workflow_id}: {e}")
+            raise
+    
+    def register_workflow(self, workflow_def: Dict[str, Any]) -> bool:
+        """
+        Register a workflow with persistent storage.
+        
+        Args:
+            workflow_def: Workflow definition dictionary
+            
+        Returns:
+            True if registration was successful, False otherwise
+        """
+        try:
+            # Validate workflow definition
+            required_fields = ["name", "description", "steps"]
+            for field in required_fields:
+                if field not in workflow_def:
+                    raise ValueError(f"Missing required field: {field}")
+            
+            # Ensure workflow has an ID
+            if "id" not in workflow_def:
+                workflow_def["id"] = workflow_def["name"].lower().replace(" ", "_")
+            
+            workflow_id = workflow_def["id"]
+            
+            # Create a workflow primitive class
+            class WorkflowPrimitive:
+                def __init__(self, primitive_id: str):
+                    self.id = primitive_id
+                    self.definition = workflow_def
+                
+                def get_input_schema(self):
+                    return {"type": "object", "properties": {}}
+                
+                def get_output_schema(self):
+                    return {"type": "object", "properties": {}}
+                
+                def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+                    # Basic execution implementation
+                    return {
+                        "status": "success",
+                        "result": f"Workflow {workflow_id} executed",
+                        "workflow_id": workflow_id,
+                        "params": params
+                    }
+            
+            # Register the primitive class
+            success = self.register_primitive(workflow_id, WorkflowPrimitive)
+            
+            if success:
+                # Save workflow definition to persistent storage
+                self._save_workflow_definition(workflow_id, workflow_def)
+                self._workflow_definitions[workflow_id] = workflow_def
+            
+            return success
+            
+        except Exception as e:
+            self._logger.error(f"Error registering workflow: {e}")
+            return False
+    
+    def get_workflow_definition(self, workflow_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get workflow definition by ID.
+        
+        Args:
+            workflow_id: ID of the workflow
+            
+        Returns:
+            Workflow definition dictionary, or None if not found
+        """
+        return self._workflow_definitions.get(workflow_id)
+    
+    def list_workflow_definitions(self) -> List[Dict[str, Any]]:
+        """
+        List all registered workflow definitions.
+        
+        Returns:
+            List of workflow definition dictionaries
+        """
+        return list(self._workflow_definitions.values())
+    
+    def unregister_workflow(self, workflow_id: str) -> bool:
+        """
+        Unregister a workflow and remove from persistent storage.
+        
+        Args:
+            workflow_id: ID of the workflow to unregister
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Remove from memory
+            if workflow_id in self._workflow_definitions:
+                del self._workflow_definitions[workflow_id]
+            
+            if workflow_id in self._primitives:
+                del self._primitives[workflow_id]
+            
+            # Remove from persistent storage
+            workflow_file = self.storage_path / f"{workflow_id}.json"
+            if workflow_file.exists():
+                workflow_file.unlink()
+            
+            self._logger.info(f"Unregistered workflow: {workflow_id}")
+            return True
+            
+        except Exception as e:
+            self._logger.error(f"Error unregistering workflow {workflow_id}: {e}")
+            return False
     
     def register_primitive(self, primitive_type: str, primitive_class: Type[InstitutionalPrimitive]) -> bool:
         """

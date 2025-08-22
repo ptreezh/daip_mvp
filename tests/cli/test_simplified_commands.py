@@ -2,6 +2,7 @@ import pytest
 import subprocess
 import sys
 from pathlib import Path
+from unittest.mock import Mock, AsyncMock, patch
 
 # Define the path to the daip-cli.py script
 CLI_SCRIPT = Path(__file__).parent.parent.parent / "daip-cli.py"
@@ -47,5 +48,48 @@ def test_sess_command_exists():
     assert exit_code == 0
     assert "List all sessions." in stdout
 
-# Note: Functional tests for these commands will require mocking underlying services
-# or setting up a more complex test environment.
+# Functional tests for the commands
+
+@pytest.mark.asyncio
+async def test_intv_command_functionality():
+    """Test the functionality of the 'intv' command."""
+    # Run the command
+    exit_code, stdout, stderr = run_cli_command([
+        "intv", 
+        "--content", "This is a test intervention",
+        "--intent", "comment"
+    ])
+    
+    # Verify the command executed successfully
+    # Note: Since we're testing the CLI command directly, we can only check the exit code
+    assert exit_code == 0
+
+@pytest.mark.asyncio
+async def test_cons_command_functionality():
+    """Test the functionality of the 'cons' command."""
+    # Run the command
+    exit_code, stdout, stderr = run_cli_command(["cons"])
+    
+    # Verify the command executed successfully
+    # Note: Since we're testing the CLI command directly, we can only check the exit code
+    assert exit_code == 0
+
+@pytest.mark.asyncio
+async def test_disag_command_functionality():
+    """Test the functionality of the 'disag' command."""
+    # Run the command
+    exit_code, stdout, stderr = run_cli_command(["disag"])
+    
+    # Verify the command executed successfully
+    # Note: Since we're testing the CLI command directly, we can only check the exit code
+    assert exit_code == 0
+
+@pytest.mark.asyncio
+async def test_sess_command_functionality():
+    """Test the functionality of the 'sess' command."""
+    # Run the command
+    exit_code, stdout, stderr = run_cli_command(["sess"])
+    
+    # Verify the command executed successfully
+    # Note: Since we're testing the CLI command directly, we can only check the exit code
+    assert exit_code == 0
