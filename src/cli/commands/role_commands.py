@@ -1,11 +1,13 @@
 """
 Role management commands for the DAIP CLI.
 """
-
+from typing import Optional
 import typer
 from rich.console import Console
+from rich.table import Table
+from datetime import datetime
 
-from src.core_services.role_manager import RoleManager
+from src.core_services.role_manager import RoleManager, Role
 from src.debate_system.debate_state_manager import DebateStateManager
 from src.debate_system.debate_flow_definition import DebateParticipant, ParticipantRole
 
@@ -14,6 +16,62 @@ console = Console()
 
 # Create role management app
 role_app = typer.Typer(help="Role management commands for DAIP-LIVE.")
+
+@role_app.command("create")
+def create_role(
+    name: str = typer.Argument(..., help="Name of the new role"),
+    description: str = typer.Option(..., "--description", help="Role description"),
+    tags: Optional[str] = typer.Option(None, "--tags", help="Comma-separated tags")
+):
+    """Create a new AI role with specified attributes."""
+    if not name or len(name.strip()) < 3:
+        console.print("[red]Error: Role name must be at least 3 characters long and cannot be empty.[/red]")
+        raise typer.Exit(code=1)
+
+    try:
+        role_manager = RoleManager()
+        role_data = {
+            "name": name,
+            "description": description,
+            "tags": [tag.strip() for tag in tags.split(",")] if tags else []
+        }
+        success = role_manager.create_role(role_data)
+        if success:
+            console.print(f"✅ Role '{name}' created successfully.")
+        else:
+            console.print(f"❌ Failed to create role '{name}'.")
+            raise typer.Exit(code=1)
+            
+    except Exception as e:
+        console.print(f"[red]An unexpected error occurred: {e}[/red]")
+        raise typer.Exit(code=1)
+
+@role_app.command("manage")
+def manage_role(
+    role_id: str = typer.Argument(..., help="ID of the role to manage"),
+    update_description: Optional[str] = typer.Option(None, "--update-description", help="New description")
+):
+    """Update role attributes."""
+    if update_description is not None and not update_description.strip():
+        console.print("[red]Error: Description cannot be empty.[/red]")
+        raise typer.Exit(code=1)
+
+    try:
+        role_manager = RoleManager()
+        update_data = {}
+        if update_description:
+            update_data["description"] = update_description
+        
+        success = role_manager.update_role(role_id, update_data)
+        if success:
+            console.print(f"✅ Role '{role_id}' updated successfully")
+        else:
+            console.print(f"❌ Failed to update role '{role_id}'.")
+            raise typer.Exit(code=1)
+            
+    except Exception as e:
+        console.print(f"[red]An unexpected error occurred: {e}[/red]")
+        raise typer.Exit(code=1)
 
 @role_app.command("invite")
 def invite_role(
@@ -210,3 +268,51 @@ def role_stats():
         console.print(f"[red]An unexpected error occurred: {e}[/red]")
         logger.error(f"Error getting role stats: {e}")
         raise typer.Exit(code=1)
+
+@role_app.command("list")
+def list_roles():
+    """List all available AI roles."""
+    try:
+        role_manager = RoleManager()
+        roles = role_manager.list_roles()
+        if not roles:
+            console.print("[yellow]No roles available.[/yellow]")
+            console.print("[bold]Troubleshooting:[/bold]")
+            console.print("  - Ensure roles are defined in the `roles` directory.")
+            console.print("  - Check file permissions for the `roles` directory.")
+            return
+
+        table = Table(title=f"DAIP-LIVE Available Roles ({len(roles)})")
+        table.add_column("ID", style="cyan", no_wrap=True)
+        table.add_column("Name", style="magenta")
+        table.add_column("Description", style="green")
+        table.add_column("Tags", style="blue")
+
+        for role in roles:
+            tags = ", ".join(role.tags) if role.tags else ""
+            table.add_row(role.id, role.name, role.description, tags)
+
+        console.print(table)
+
+    except Exception as e:
+        console.print(f"[red]An unexpected error occurred: {e}[/red]")
+        raise typer.Exit(code=1)
+
+from src.cli.commands.utils import print_command_help
+
+@role_app.command("help")
+def roles_help():
+    """Show detailed help for role management commands."""
+    title = "Role Management Commands Help"
+    description = "Manage AI roles within the DAIP-LIVE system."
+    commands = [
+        {"name": "list", "description": "List all available roles.", "example": "daip-cli roles list"},
+        {"name": "create", "description": "Create a new role.", "example": "daip-cli roles create \"New Analyst\" --description \"A new analyst role.\" --tags \"analyst,finance\"" },
+        {"name": "manage", "description": "Update an existing role.", "example": "daip-cli roles manage \"analyst\" --update-description \"An updated description.\""},
+        {"name": "invite", "description": "Invite a role to a debate.", "example": "daip-cli roles invite \"analyst\" --debate-id \"debate_123\""},
+        {"name": "match", "description": "Match roles to a task.", "example": "daip-cli roles match \"Analyze market trends for AI startups\""},
+        {"name": "stats", "description": "Show role statistics.", "example": "daip-cli roles stats"},
+        {"name": "help", "description": "Show this detailed help message.", "example": "daip-cli roles help"}
+    ]
+    print_command_help(title, description, commands)
+

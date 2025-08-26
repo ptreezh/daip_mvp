@@ -242,7 +242,7 @@ class TestEnhancedIntentRecognition:
             
             # Configuration
             ("Configure settings", IntentCategory.CONFIGURE, 0.9),
-            "System configuration", IntentCategory.CONFIGURE, 0.9),
+            ("System configuration", IntentCategory.CONFIGURE, 0.9),
             ("配置系统", IntentCategory.CONFIGURE, 0.9),
         ]
         

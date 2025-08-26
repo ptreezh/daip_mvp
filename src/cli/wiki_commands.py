@@ -212,7 +212,7 @@ def create(
 ):
     """Create a new wiki page."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Read content from file if provided
@@ -252,7 +252,7 @@ def view(
 ):
     """View a wiki page."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Get the wiki page using the service
@@ -281,7 +281,7 @@ def edit(
 ):
     """Edit an existing wiki page."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Read content from file if provided
@@ -320,7 +320,7 @@ def delete(
 ):
     """Delete a wiki page."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Confirm deletion if not already confirmed
@@ -349,7 +349,7 @@ def search(
 ):
     """Search for wiki pages."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Search for wiki pages
@@ -379,7 +379,7 @@ def export(
     console = Console()
     
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Generate output path if not provided
@@ -529,91 +529,6 @@ def generate_content(
         raise typer.Exit(1)
 
 
-@collaborate_app.command("capabilities")
-def show_capabilities():
-    """Show wiki content generation capabilities."""
-    from rich.console import Console
-    from rich.table import Table
-    from rich.panel import Panel
-    from src.core_services.wiki_content_generator import WikiContentGenerator
-    
-    console = Console()
-    
-    try:
-        generator = WikiContentGenerator()
-        capabilities = generator.get_content_generation_capabilities()
-        
-        console.print("[bold blue]🤖 Wiki Content Generation Capabilities[/bold blue]")
-        
-        # Content types
-        console.print("\n[bold]Content Types:[/bold]")
-        types_table = Table(show_header=True, box=None)
-        types_table.add_column("Type", style="cyan")
-        types_table.add_column("Description", style="dim")
-        
-        type_descriptions = {
-            "article": "Structured article with introduction, sections, and conclusion",
-            "debate_summary": "Summary of debate with participant positions and consensus",
-            "analysis": "In-depth analysis with executive summary and recommendations",
-            "tutorial": "Step-by-step tutorial with clear instructions",
-            "overview": "General overview covering key points and insights"
-        }
-        
-        for content_type in capabilities["content_types"]:
-            types_table.add_row(content_type.title(), type_descriptions.get(content_type, "No description"))
-        console.print(types_table)
-        
-        # Target audiences
-        console.print("\n[bold]Target Audiences:[/bold]")
-        audience_table = Table(show_header=True, box=None)
-        audience_table.add_column("Audience", style="cyan")
-        audience_table.add_column("Description", style="dim")
-        
-        audience_descriptions = {
-            "beginner": "Introductory content with basic concepts and simple language",
-            "intermediate": "Content assuming some prior knowledge and experience",
-            "expert": "Advanced content with technical details and depth",
-            "general": "Balanced content suitable for all knowledge levels"
-        }
-        
-        for audience in capabilities["target_audiences"]:
-            audience_table.add_row(audience.title(), audience_descriptions.get(audience, "No description"))
-        console.print(audience_table)
-        
-        # Quality metrics
-        console.print("\n[bold]Quality Metrics:[/bold]")
-        metrics_table = Table(show_header=True, box=None)
-        metrics_table.add_column("Metric", style="cyan")
-        metrics_table.add_column("Description", style="dim")
-        
-        metric_descriptions = {
-            "structure_score": "Measures content organization and logical flow",
-            "coherence_score": "Evaluates textual coherence and readability",
-            "completeness_score": "Assesses coverage of key topics and points",
-            "participant_diversity": "Measures diversity of perspectives and contributions",
-            "consensus_strength": "Evaluates strength of consensus and agreement"
-        }
-        
-        for metric in capabilities["quality_metrics"]:
-            metrics_table.add_row(metric.replace("_", " ").title(), metric_descriptions.get(metric, "No description"))
-        console.print(metrics_table)
-        
-        # System info
-        console.print("\n[bold]System Information:[/bold]")
-        info_table = Table(show_header=False, box=None)
-        info_table.add_column("Property", style="cyan")
-        info_table.add_column("Value", style="magenta")
-        
-        info_table.add_row("Max Participants", str(capabilities["max_participants"]))
-        info_table.add_row("Estimated Generation Time", capabilities["estimated_generation_time"])
-        
-        console.print(info_table)
-        
-        console.print("\n[dim]✨ Content is generated through structured AI debates, ensuring multiple perspectives and high-quality output.[/dim]")
-        
-    except Exception as e:
-        console.print(f"[red]❌ Error showing capabilities: {e}[/red]")
-        raise typer.Exit(1)
 
 
 @collaborate_app.command("optimize")
@@ -728,7 +643,7 @@ def optimize_intent(
 def list():
     """List all wiki pages."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # List wiki pages
@@ -759,7 +674,7 @@ def approve(
 ):
     """Approve an edit proposal."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Approve the edit proposal
@@ -779,7 +694,7 @@ def approve(
 def list_proposals():
     """List all pending edit proposals."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # List pending proposals
@@ -808,7 +723,7 @@ def reject_proposal(
 ):
     """Reject an edit proposal."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Reject the edit proposal
@@ -831,7 +746,7 @@ def update(
     """Collaboratively update a wiki entry based on a natural language request."""
     try:
         # 导入必要的模块
-        from src.cli.main import get_wiki_service
+        from src.cli.service_utils import get_wiki_service
         from src.core_services.role_manager import RoleManager
         from src.core_services.wiki_collaboration_simplified import (
             SimpleIntentOptimizer,
@@ -885,7 +800,7 @@ def debate(
     """Initiate a debate on a topic and generate wiki content from the discussion."""
     try:
         # 获取wiki服务
-        from src.cli.main import get_wiki_service
+        from src.cli.service_utils import get_wiki_service
         wiki_service = get_wiki_service()
         
         # 发起协作编辑任务
@@ -920,7 +835,7 @@ def create(
 ):
     """Create a new wiki page."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Read content from file if provided
@@ -960,7 +875,7 @@ def view(
 ):
     """View a wiki page."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Get the wiki page using the service
@@ -989,7 +904,7 @@ def edit(
 ):
     """Edit an existing wiki page."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Read content from file if provided
@@ -1028,7 +943,7 @@ def delete(
 ):
     """Delete a wiki page."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Confirm deletion if not already confirmed
@@ -1057,7 +972,7 @@ def search(
 ):
     """Search for wiki pages."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Search for wiki pages
@@ -1087,7 +1002,7 @@ def export(
     console = Console()
     
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Generate output path if not provided
@@ -1237,91 +1152,6 @@ def generate_content(
         raise typer.Exit(1)
 
 
-@collaborate_app.command("capabilities")
-def show_capabilities():
-    """Show wiki content generation capabilities."""
-    from rich.console import Console
-    from rich.table import Table
-    from rich.panel import Panel
-    from src.core_services.wiki_content_generator import WikiContentGenerator
-    
-    console = Console()
-    
-    try:
-        generator = WikiContentGenerator()
-        capabilities = generator.get_content_generation_capabilities()
-        
-        console.print("[bold blue]🤖 Wiki Content Generation Capabilities[/bold blue]")
-        
-        # Content types
-        console.print("\n[bold]Content Types:[/bold]")
-        types_table = Table(show_header=True, box=None)
-        types_table.add_column("Type", style="cyan")
-        types_table.add_column("Description", style="dim")
-        
-        type_descriptions = {
-            "article": "Structured article with introduction, sections, and conclusion",
-            "debate_summary": "Summary of debate with participant positions and consensus",
-            "analysis": "In-depth analysis with executive summary and recommendations",
-            "tutorial": "Step-by-step tutorial with clear instructions",
-            "overview": "General overview covering key points and insights"
-        }
-        
-        for content_type in capabilities["content_types"]:
-            types_table.add_row(content_type.title(), type_descriptions.get(content_type, "No description"))
-        console.print(types_table)
-        
-        # Target audiences
-        console.print("\n[bold]Target Audiences:[/bold]")
-        audience_table = Table(show_header=True, box=None)
-        audience_table.add_column("Audience", style="cyan")
-        audience_table.add_column("Description", style="dim")
-        
-        audience_descriptions = {
-            "beginner": "Introductory content with basic concepts and simple language",
-            "intermediate": "Content assuming some prior knowledge and experience",
-            "expert": "Advanced content with technical details and depth",
-            "general": "Balanced content suitable for all knowledge levels"
-        }
-        
-        for audience in capabilities["target_audiences"]:
-            audience_table.add_row(audience.title(), audience_descriptions.get(audience, "No description"))
-        console.print(audience_table)
-        
-        # Quality metrics
-        console.print("\n[bold]Quality Metrics:[/bold]")
-        metrics_table = Table(show_header=True, box=None)
-        metrics_table.add_column("Metric", style="cyan")
-        metrics_table.add_column("Description", style="dim")
-        
-        metric_descriptions = {
-            "structure_score": "Measures content organization and logical flow",
-            "coherence_score": "Evaluates textual coherence and readability",
-            "completeness_score": "Assesses coverage of key topics and points",
-            "participant_diversity": "Measures diversity of perspectives and contributions",
-            "consensus_strength": "Evaluates strength of consensus and agreement"
-        }
-        
-        for metric in capabilities["quality_metrics"]:
-            metrics_table.add_row(metric.replace("_", " ").title(), metric_descriptions.get(metric, "No description"))
-        console.print(metrics_table)
-        
-        # System info
-        console.print("\n[bold]System Information:[/bold]")
-        info_table = Table(show_header=False, box=None)
-        info_table.add_column("Property", style="cyan")
-        info_table.add_column("Value", style="magenta")
-        
-        info_table.add_row("Max Participants", str(capabilities["max_participants"]))
-        info_table.add_row("Estimated Generation Time", capabilities["estimated_generation_time"])
-        
-        console.print(info_table)
-        
-        console.print("\n[dim]✨ Content is generated through structured AI debates, ensuring multiple perspectives and high-quality output.[/dim]")
-        
-    except Exception as e:
-        console.print(f"[red]❌ Error showing capabilities: {e}[/red]")
-        raise typer.Exit(1)
 
 
 @collaborate_app.command("optimize")
@@ -1436,7 +1266,7 @@ def optimize_intent(
 def list():
     """List all wiki pages."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # List wiki pages
@@ -1467,7 +1297,7 @@ def approve(
 ):
     """Approve an edit proposal."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Approve the edit proposal
@@ -1487,7 +1317,7 @@ def approve(
 def list_proposals():
     """List all pending edit proposals."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # List pending proposals
@@ -1516,7 +1346,7 @@ def reject_proposal(
 ):
     """Reject an edit proposal."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Reject the edit proposal
@@ -1539,7 +1369,7 @@ def update(
     """Collaboratively update a wiki entry based on a natural language request."""
     try:
         # 导入必要的模块
-        from src.cli.main import get_wiki_service
+        from src.cli.service_utils import get_wiki_service
         from src.core_services.role_manager import RoleManager
         from src.core_services.wiki_collaboration_simplified import (
             SimpleIntentOptimizer,
@@ -1593,7 +1423,7 @@ def debate(
     """Initiate a debate on a topic and generate wiki content from the discussion."""
     try:
         # 获取wiki服务
-        from src.cli.main import get_wiki_service
+        from src.cli.service_utils import get_wiki_service
         wiki_service = get_wiki_service()
         
         # 发起协作编辑任务

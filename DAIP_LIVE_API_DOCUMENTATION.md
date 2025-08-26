@@ -814,6 +814,56 @@ stats = task_manager.get_task_statistics()
 
 ---
 
+### 11. ChatRulePrimitive 聊天规则原语
+
+#### 服务描述
+管理和执行聊天室规则，如内容过滤、频率限制和参与人数限制。
+
+#### 核心方法
+
+```python
+class ChatRulePrimitive(InstitutionalPrimitive):
+    async def execute(self, inputs: Dict[str, Any], context: ExecutionContext) -> Dict[str, Any]
+```
+
+#### 数据模型
+
+```python
+class ChatRuleConfiguration(BaseModel):
+    rule_id: str
+    name: str
+    description: str
+    rule_type: ChatRuleType
+    prohibited_keywords: List[str]
+    max_message_length: Optional[int]
+    max_messages_per_minute: Optional[int]
+    min_participants: int
+    max_participants: int
+```
+
+#### 使用示例
+
+```python
+# 初始化聊天规则原语
+config = {
+    "rule_id": "rate_limit_rule",
+    "name": "Rate Limit",
+    "description": "Limit messages per minute",
+    "rule_type": "rate_limit",
+    "max_messages_per_minute": 5
+}
+chat_rule_primitive = ChatRulePrimitive("rate_limiter", config)
+
+# 执行规则
+inputs = {
+    "chat_session": {"session_id": "s1", "participants": ["u1", "u2"]},
+    "message": {"message_id": "m1", "author_id": "u1", "content": "Hello"}
+}
+result = await chat_rule_primitive.execute(inputs, execution_context)
+```
+
+---
+
 ## 🌐 HTTP API 接口
 
 ### 1. Chat API (`/chat`)
@@ -1021,10 +1071,12 @@ daip-cli debate export-to-wiki <debate_id> # 导出辩论到维基
 daip-cli roles list                        # 列出所有角色
 daip-cli roles create <name>              # 创建角色
 daip-cli roles search <query>              # 搜索角色
+daip-cli roles help                        # 显示角色命令的详细帮助
 
 # 工作流命令
 daip-cli workflow list                    # 列出工作流
 daip-cli workflow start <workflow_id>      # 启动工作流
+daip-cli workflow help                     # 显示工作流命令的详细帮助
 
 # 聊天命令
 daip-cli chat start <topic>               # 开始聊天
@@ -1064,6 +1116,9 @@ daip-cli wiki create "AI Ethics Guidelines" \
 
 # 搜索角色
 daip-cli roles search "AI ethics specialist"
+
+# 获取角色命令帮助
+daip-cli roles help
 
 # 开始聊天
 daip-cli chat start "AI Ethics Discussion" \
@@ -1151,7 +1206,7 @@ vector_store:
   role_collection_name: "roles"
 logging:
   level: "INFO"
-  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  format: "%("asctime")s - %(name)s - %(levelname)s - %(message)s"
 token_management:
   max_context_tokens: 4096
   cost_per_1k_input_tokens: 0.0
@@ -1426,6 +1481,9 @@ class PermissionError(Exception):
 ```
 
 ### 2. 错误处理最佳实践
+
+#### CLI全局错误处理
+`daip-cli.py` 入口文件包含一个全局异常处理块。这意味着任何在命令执行过程中未被捕获的异常都会被此处理器捕获，并向用户显示一个统一、友好的错误信息，而不是一个完整的Python错误堆栈。这极大地改善了用户体验，并有助于快速定位问题。
 
 ```python
 # 服务层错误处理

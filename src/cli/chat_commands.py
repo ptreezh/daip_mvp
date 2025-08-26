@@ -13,8 +13,8 @@ app = typer.Typer(
 
 def get_chat_coordinator():
     """Get the global chat coordinator instance."""
-    from src.cli.main import chat_coordinator
-    return chat_coordinator
+    from src.cli.service_utils import get_chat_coordinator
+    return get_chat_coordinator()
 
 
 @app.command()
@@ -421,12 +421,12 @@ def test_rules(
     # 如果启用了调试模式，重新初始化协调器以启用调试
     if debug:
         # 重新创建协调器并启用调试模式
-        from src.cli.main import (
-            chat_room_manager, 
-            chat_session_service, 
-            role_manager, 
-            primitive_registry, 
-            wiki_service
+        from src.cli.service_utils import (
+            get_chat_room_manager as chat_room_manager, 
+            get_chat_session_service as chat_session_service, 
+            get_role_manager as role_manager, 
+            get_primitive_registry as primitive_registry, 
+            get_wiki_service as wiki_service
         )
         
         from src.virtual_role_chat.chat_coordinator import ChatCoordinator

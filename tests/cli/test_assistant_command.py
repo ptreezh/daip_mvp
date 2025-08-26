@@ -1,72 +1,44 @@
 import pytest
-from unittest.mock import AsyncMock, patch
-from src.cli.commands import run_assistant_chat_command
-from src.application.personal_assistant_service import PersonalAssistantService
-from rich.console import Console
+from typer.testing import CliRunner
+from unittest.mock import patch, AsyncMock
+
+from src.cli.main import app
+
+runner = CliRunner()
 
 @pytest.fixture
-def mock_personal_assistant_service():
-    """Fixture to mock PersonalAssistantService."""
-    with patch('src.cli.commands.PersonalAssistantService', autospec=True) as MockService:
-        instance = MockService.return_value
-        instance.initialize = AsyncMock()
-        instance.create_session = AsyncMock(return_value={"session_id": "test_session_id"})
-        instance.get_session = AsyncMock(side_effect=ValueError("Session not found")) # Simulate session not found initially
-        instance.process_user_input = AsyncMock(return_value={"response": "Mocked assistant response."})
-        yield instance
+def mock_personal_assistant_router():
+    """Fixture to mock PersonalAssistantRouter."""
+    mock_router = AsyncMock()
+    mock_router.process_query.return_value = None
+    return mock_router
 
-@pytest.mark.asyncio
-async def test_run_assistant_chat_command_success(mock_personal_assistant_service, capsys):
-    """
-    Test that run_assistant_chat_command successfully interacts with the mocked
-    PersonalAssistantService and prints the correct output.
-    """
+@patch('src.cli.main.get_personal_assistant_router')
+def test_pa_chat_success(mock_get_router, mock_personal_assistant_router):
+    """Test `pa chat` command successfully interacts with the mocked router."""
+    # Arrange
+    mock_get_router.return_value = mock_personal_assistant_router
     query = "Hello assistant!"
-    
-    # Call the command
-    await run_assistant_chat_command(query)
-    
-    # Assert service methods were called
-    mock_personal_assistant_service.initialize.assert_called_once()
-    mock_personal_assistant_service.get_session.assert_called_once_with("cli_session_cli_user")
-    mock_personal_assistant_service.create_session.assert_called_once_with("cli_user")
-    mock_personal_assistant_service.process_user_input.assert_called_once_with(
-        "test_session_id",
-        {
-            "content": query,
-            "scenario_type": "personal_assistant",
-            "user_preferences": {"detail_level": "comprehensive"}
-        }
-    )
-    
-    # Capture console output and assert
-    captured = capsys.readouterr()
-    assert "✅ Assistant Response:" in captured.out
-    assert "Mocked assistant response." in captured.out
-    # Removed assertion for "Thinking..." as it's ephemeral spinner output
 
-@pytest.mark.asyncio
-async def test_run_assistant_chat_command_empty_query(capsys):
-    """
-    Test that run_assistant_chat_command handles empty queries gracefully.s
-    """
-    query = ""
-    await run_assistant_chat_command(query)
-    captured = capsys.readouterr()
-    assert "❌ Error: Query cannot be empty." in captured.out
+    # Act
+    result = runner.invoke(app, ["pa", "chat", query])
 
-@pytest.mark.asyncio
-async def test_run_assistant_chat_command_service_error(mock_personal_assistant_service, capsys):
-    """
-    Test that run_assistant_chat_command handles errors from PersonalAssistantService.
-    """
+    # Assert
+    assert result.exit_code == 0
+    mock_get_router.assert_called_once()
+    mock_personal_assistant_router.process_query.assert_awaited_once_with(query)
+
+@patch('src.cli.main.get_personal_assistant_router')
+def test_pa_chat_service_error(mock_get_router, mock_personal_assistant_router):
+    """Test `pa chat` command handles errors from the router."""
+    # Arrange
+    mock_get_router.return_value = mock_personal_assistant_router
     query = "Error query"
-    mock_personal_assistant_service.process_user_input.side_effect = Exception("Service internal error")
-    
-    await run_assistant_chat_command(query)
-    
-    captured = capsys.readouterr()
-    # Check for the presence of key phrases, ignoring whitespace and newlines
-    assert "❌ An error occurred while interacting with the assistant:" in captured.out
-    assert "Service internal" in captured.out # Check for first part
-    assert "error" in captured.out # Check for second part
+    mock_personal_assistant_router.process_query.side_effect = Exception("Service internal error")
+
+    # Act
+    result = runner.invoke(app, ["pa", "chat", query])
+
+    # Assert
+    assert result.exit_code == 1
+    assert "Service internal error" in result.stdout

@@ -56,42 +56,58 @@ class MockRole:
         self.system_prompt = system_prompt
         self.tags = tags if tags is not None else []
 
-def test_cli_roles_command_no_roles():
-    """Test that the roles command correctly indicates no roles found."""
-    # Patch AppState where it's used in src.cli.commands
-    with unittest.mock.patch('src.cli.commands.AppState') as MockAppState:
-        MockAppState.return_value.all_roles_details = {}
-        MockAppState.return_value.load_all_roles.return_value = None # load_all_roles doesn't return anything
-        result = runner.invoke(app, ["roles"])
+def test_cli_roles_list_command_no_roles():
+    """Test that the 'roles list' command correctly indicates no roles found."""
+    with unittest.mock.patch('src.cli.commands.role_commands.RoleManager') as MockRoleManager:
+        # Configure the mock instance that the RoleManager constructor will return
+        mock_instance = MockRoleManager.return_value
+        mock_instance.get_all_roles.return_value = [] # Should return an empty list
+
+        result = runner.invoke(app, ["roles", "list"])
         assert result.exit_code == 0
         
-        # Strip ANSI codes before checking
         clean_stdout = strip_ansi(result.stdout)
         assert "No roles available" in clean_stdout
-        assert "Troubleshooting" in clean_stdout # Check for troubleshooting tips
+        assert "Troubleshooting" in clean_stdout
 
-def test_cli_roles_command_with_roles():
-    """Test that the roles command displays a list of roles."""
-    mock_roles_data = {
-        "role1": {"name": "AI Ethicist", "desc": "Expert in AI ethics and societal impact.", "tags": ["AI", "Ethics"]},
-        "role2": {"name": "Tech Innovator", "desc": "Focuses on cutting-edge technology development.", "tags": ["Technology", "Innovation"]},
-    }
-    with unittest.mock.patch('src.cli.commands.AppState') as MockAppState: # Mock AppState
-        # Mock load_all_roles to populate all_roles_details
-        MockAppState.return_value.all_roles_details = mock_roles_data
-        MockAppState.return_value.load_all_roles.return_value = None # load_all_roles doesn't return anything
-        result = runner.invoke(app, ["roles"])
+def test_cli_roles_list_command_with_roles():
+    """Test that the 'roles list' command displays a table of roles."""
+    mock_roles_list = [
+        MockRole(id="role1", name="AI Ethicist", description="Expert in AI ethics and societal impact.", system_prompt="You are an AI Ethicist.", tags=["AI", "Ethics"]),
+        MockRole(id="role2", name="Tech Innovator", description="Focuses on cutting-edge technology development.", system_prompt="You are a Tech Innovator.", tags=["Technology", "Innovation"]),
+    ]
+    with unittest.mock.patch('src.cli.commands.role_commands.RoleManager') as MockRoleManager:
+        mock_instance = MockRoleManager.return_value
+        mock_instance.get_all_roles.return_value = mock_roles_list
+
+        result = runner.invoke(app, ["roles", "list"])
         assert result.exit_code == 0
         
-        # Strip ANSI codes before normalizing and checking
         clean_stdout = strip_ansi(result.stdout)
-        normalized_stdout = normalize_whitespace(clean_stdout) # Apply normalization here
+        normalized_stdout = normalize_whitespace(clean_stdout)
 
-        assert "DAIP-LIVE Available Roles" in normalized_stdout
-        # The actual output shows role IDs (role1, role2) instead of role names
-        assert "role1" in normalized_stdout # Check for role ID
-        assert "role2" in normalized_stdout # Check for role ID
-        assert "Expert in AI ethics" in normalized_stdout # Check for normalized description snippet
-        assert "Technology, Innovation" in normalized_stdout # Check for normalized tags
-        assert "Available Roles (2)" in normalized_stdout # Check table title
+        assert "DAIP-LIVE Available Roles (2)" in normalized_stdout
+        assert "role1" in normalized_stdout
+        assert "AI Ethicist" in normalized_stdout
+        assert "Expert in AI ethics and" in normalized_stdout
+        assert "societal impact." in normalized_stdout
+        assert "AI, Ethics" in normalized_stdout
+        assert "role2" in normalized_stdout
+        assert "Tech Innovator" in normalized_stdout
+        assert "Focuses on cutting-edge" in normalized_stdout
+        assert "technology development." in normalized_stdout
+        assert "Technology, Innovation" in normalized_stdout
+
+def test_cli_roles_help_command():
+    """Test that the roles --help command works."""
+    result = runner.invoke(app, ["roles", "--help"])
+    assert result.exit_code == 0
+    assert "Usage: daip-cli roles [OPTIONS] COMMAND [ARGS]..." in result.stdout
+    assert "Role management commands for DAIP-LIVE." in result.stdout
+    assert "Commands" in result.stdout
+    assert "create" in result.stdout
+    assert "manage" in result.stdout
+    assert "invite" in result.stdout
+    assert "match" in result.stdout
+    assert "stats" in result.stdout
 

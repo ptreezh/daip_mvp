@@ -12,6 +12,17 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from src.cli.main import app
+from rich.console import Console
 
 if __name__ == "__main__":
-    app()
+    try:
+        app()
+    except Exception as e:
+        console = Console()
+        console.print(f"[bold red]An unexpected error occurred:[/bold red] {e}")
+        # Optionally, add more logic here for logging or debugging
+        # For example, you could write the full traceback to a log file
+        # import traceback
+        # with open("error.log", "a") as f:
+        #     f.write(traceback.format_exc())
+        sys.exit(1)

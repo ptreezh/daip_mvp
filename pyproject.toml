@@ -35,6 +35,8 @@ aiosqlite = "^0.20.0"
 httpx = "^0.27.0"
 textstat = "^0.7.0"
 pocketflow = {git = "https://github.com/The-Pocket/PocketFlow.git"}
+lona = "^1.16.2"
+anthropic = "^0.64.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"

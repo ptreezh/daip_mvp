@@ -307,7 +307,7 @@ def update(
     """Collaboratively update a wiki entry based on a natural language request."""
     try:
         # 导入必要的模块
-        from src.cli.main import get_wiki_service
+        from src.cli.service_utils import get_wiki_service
         from src.core_services.role_manager import RoleManager
         from src.core_services.wiki_collaboration_simplified import (
             SimpleIntentOptimizer,
@@ -361,7 +361,7 @@ def debate(
     """Initiate a debate on a topic and generate wiki content from the discussion."""
     try:
         # 获取wiki服务
-        from src.cli.main import get_wiki_service
+        from src.cli.service_utils import get_wiki_service
         wiki_service = get_wiki_service()
         
         # 发起协作编辑任务

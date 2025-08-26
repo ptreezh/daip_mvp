@@ -77,10 +77,6 @@ class DebateBasedContentGenerator(ContentGenerationStrategy):
         self.wiki_service = wiki_service
         self.role_manager = role_manager
         self.llm_manager = llm_manager
-        self.dialogue_engine = MultiRoleDialogueEngine(
-            role_manager=role_manager,
-            llm_manager=llm_manager
-        )
         self.logger = logging.getLogger(__name__)
     
     async def generate_content(self, request: ContentGenerationRequest) -> ContentGenerationResult:
@@ -102,8 +98,8 @@ class DebateBasedContentGenerator(ContentGenerationStrategy):
             # 2. Configure debate parameters for wiki content generation
             debate_config = self._create_debate_config(request, selected_roles)
             
-            # 3. Run structured debate
-            debate_result = await self.dialogue_engine.run_structured_debate(debate_config)
+            # 3. Run simplified debate (replacing MultiRoleDialogueEngine)
+            debate_result = await self._run_simplified_debate(debate_config)
             
             if not debate_result.get("success", False):
                 return ContentGenerationResult(
@@ -542,6 +538,118 @@ class DebateBasedContentGenerator(ContentGenerationStrategy):
                 relevant_content.append(f"{turn.get('role', 'Unknown')}: {content}")
         
         return "\n\n".join(relevant_content[:2]) if relevant_content else "Content not found for this point."
+    
+    async def _run_simplified_debate(self, debate_config: Dict[str, Any]) -> Dict[str, Any]:
+        """Run a simplified debate using available dependencies."""
+        try:
+            topic = debate_config.get("topic", "")
+            roles = debate_config.get("roles", [])
+            rounds = debate_config.get("rounds", 2)
+            
+            debate_history = []
+            consensus = ""
+            key_points = []
+            
+            # Simulate debate rounds
+            for round_num in range(rounds):
+                self.logger.info(f"Running debate round {round_num + 1}/{rounds}")
+                
+                # Each role contributes in this round
+                for role in roles:
+                    # Generate role response using LLM
+                    prompt = self._build_role_prompt_simplified(role, topic, round_num, debate_history)
+                    response = await self._call_llm_simplified(prompt)
+                    
+                    if response:
+                        debate_history.append({
+                            "role": role.role_name,
+                            "content": response,
+                            "round": round_num + 1
+                        })
+            
+            # Generate consensus and key points
+            consensus, key_points = await self._generate_consensus(debate_history, topic)
+            
+            return {
+                "success": True,
+                "history": debate_history,
+                "consensus": consensus,
+                "key_points": key_points,
+                "participants": [role.role_name for role in roles]
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Simplified debate failed: {e}")
+            return {
+                "success": False,
+                "error": str(e)
+            }
+    
+    def _build_role_prompt_simplified(self, role: RoleContext, topic: str, round_num: int, history: List[Dict]) -> str:
+        """Build prompt for role response in simplified debate."""
+        prompt = f"""
+You are {role.role_name}, an expert in {', '.join(role.expertise_areas)}.
+Your speaking style is {role.speaking_style}.
+
+Topic: {topic}
+Round: {round_num + 1}
+
+Previous discussion:"""
+        
+        if history:
+            for turn in history[-3:]:  # Show last 3 turns
+                prompt += f"\n{turn['role']}: {turn['content']}"
+        else:
+            prompt += "\n(No previous discussion)"
+        
+        prompt += f"\n\nPlease provide your perspective on this topic. Keep your response concise (200-300 words)."
+        
+        return prompt
+    
+    async def _call_llm_simplified(self, prompt: str) -> Optional[str]:
+        """Call LLM with simplified error handling."""
+        try:
+            response = await self.llm_manager.generate_response(
+                prompt=prompt,
+                model_preference="gpt-4",
+                timeout=30
+            )
+            return response.strip() if response else None
+        except Exception as e:
+            self.logger.warning(f"LLM call failed: {e}")
+            return None
+    
+    async def _generate_consensus(self, history: List[Dict], topic: str) -> Tuple[str, List[str]]:
+        """Generate consensus and key points from debate history."""
+        if not history:
+            return "No consensus reached", []
+        
+        # Extract key points from all contributions
+        all_content = "\n".join([turn["content"] for turn in history])
+        
+        # Use LLM to generate consensus
+        consensus_prompt = f"""
+Based on the following discussion about "{topic}", please provide:
+1. A brief consensus statement (1-2 sentences)
+2. 3-5 key points that emerged from the discussion
+
+Discussion:
+{all_content}
+
+Consensus:"""
+        
+        try:
+            consensus_response = await self._call_llm_simplified(consensus_prompt)
+            if consensus_response:
+                # Simple parsing of consensus response
+                lines = consensus_response.split('\n')
+                consensus = lines[0].strip() if lines else "Discussion completed"
+                key_points = [line.strip('- ').strip() for line in lines[1:] if line.strip() and not line.startswith('Consensus:')]
+                return consensus, key_points[:5]  # Limit to 5 key points
+        except Exception as e:
+            self.logger.error(f"Consensus generation failed: {e}")
+        
+        return "Discussion completed", ["Multiple perspectives were shared"]
     
     # Additional content generation helper methods would go here...
     # (Omitted for brevity, but would include methods for generating specific content types)

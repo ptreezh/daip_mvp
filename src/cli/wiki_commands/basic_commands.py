@@ -22,7 +22,7 @@ def create(
     category: str = typer.Option("general", "--category", "-c", help="The category for the wiki page."),
 ):
     """Create a new wiki page."""
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     if file:
@@ -58,7 +58,7 @@ def view(
     title_or_id: str = typer.Argument(..., help="The title or ID of the wiki page."),
 ):
     """View a wiki page."""
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     try:
@@ -85,7 +85,7 @@ def edit(
     file: str = typer.Option(None, "--file", "-f", help="The file containing the new content of the wiki page."),
 ):
     """Edit an existing wiki page."""
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     if file:
@@ -121,7 +121,7 @@ def delete(
     confirm: bool = typer.Option(False, "--confirm", "-y", help="Skip confirmation prompt."),
 ):
     """Delete a wiki page."""
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     if not confirm:
@@ -147,7 +147,7 @@ def search(
     limit: int = typer.Option(3, "--limit", "-l", help="Maximum number of results to return."),
 ):
     """Search for wiki pages."""
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     try:
@@ -175,7 +175,7 @@ def export(
     from pathlib import Path
     console = Console()
     
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     if not output:
@@ -392,7 +392,7 @@ def _markdown_to_html(markdown_text: str) -> str:
 @app.command()
 def list():
     """List all wiki pages."""
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     try:
@@ -421,7 +421,7 @@ def approve(
     proposal_id: str = typer.Argument(..., help="The ID of the edit proposal to approve."),
 ):
     """Approve an edit proposal."""
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     try:
@@ -439,7 +439,7 @@ def approve(
 @app.command(name="list")
 def list_proposals():
     """List all pending edit proposals."""
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     try:
@@ -466,7 +466,7 @@ def reject_proposal(
     proposal_id: str = typer.Argument(..., help="The ID of the edit proposal to reject."),
 ):
     """Reject an edit proposal."""
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     try:

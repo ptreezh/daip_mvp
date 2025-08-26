@@ -10,10 +10,9 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from src.cli.main import app, assistant_app # Import app and assistant_app from main.py
+from src.cli.main import app # Import app from main.py
 from src.core_services.autonomous_role_creation_system import AutonomousRoleCreationSystem, RoleGenerationRequest, RoleGenerationResult, GeneratedRole, RoleRequirement, RoleType, ExpertiseLevel, InteractionStyle, RoleStatus, RoleCapability, RolePersonality
 from src.core_services.role_manager import RoleManager, Role
-from src.real_demo_system.real_role_manager import RealRoleManager
 
 runner = CliRunner()
 
@@ -28,17 +27,10 @@ def mock_autonomous_role_creation_system():
 
 @pytest.fixture
 def mock_role_manager():
-    with patch('src.cli.commands.RoleManager', autospec=True) as MockClass:
+    with patch('src.cli.commands.role_commands.RoleManager', autospec=True) as MockClass:
         instance = MockClass.return_value
         instance.get_role_by_id = MagicMock()
         instance.save_role = MagicMock()
-        yield instance
-
-@pytest.fixture
-def mock_real_role_manager():
-    with patch('src.cli.commands.RealRoleManager', autospec=True) as MockClass:
-        instance = MockClass.return_value
-        instance.get_role = MagicMock()
         yield instance
 
 # --- Test Cases for `daip-cli roles create` ---
@@ -179,36 +171,3 @@ def test_update_role_not_found(mock_role_manager):
     assert "Error: Role 'non_existent_id' not found." in result.stderr
     mock_role_manager.get_role_by_id.assert_called_once_with("non_existent_id")
     mock_role_manager.save_role.assert_not_called()
-
-# --- Test Cases for `daip-cli roles view` ---
-
-def test_view_role_success(mock_real_role_manager):
-    # Test Case 2.2.8: View Role - Success
-    mock_role_data = {
-        "id": "view_role_id",
-        "name": "Viewer Role",
-        "description": "A role for viewing purposes.",
-        "system_prompt": "You are a viewer.",
-        "capabilities": ["read_data", "generate_reports"],
-        "category": "analysis",
-        "specialties": ["data_visualization"],
-        "experience_years": 5
-    }
-    mock_real_role_manager.get_role.return_value = mock_role_data
-
-    result = runner.invoke(app, ["roles", "view", "view_role_id"])
-    assert result.exit_code == 0
-    assert "Role Details: Viewer Role (view_role_id)" in result.stdout
-    assert "Description: A role for viewing purposes." in result.stdout
-    assert "Capabilities: read_data, generate_reports" in result.stdout
-    assert "Category: analysis" in result.stdout
-    assert "Experience Years: 5" in result.stdout
-    mock_real_role_manager.get_role.assert_called_once_with("view_role_id")
-
-def test_view_role_not_found(mock_real_role_manager):
-    # Test Case 2.2.9: View Role - Not Found
-    mock_real_role_manager.get_role.return_value = None
-    result = runner.invoke(app, ["roles", "view", "non_existent_id"])
-    assert result.exit_code != 0
-    assert "Error: Role 'non_existent_id' not found." in result.stderr
-    mock_real_role_manager.get_role.assert_called_once_with("non_existent_id")

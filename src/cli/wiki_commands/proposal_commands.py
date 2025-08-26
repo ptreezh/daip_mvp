@@ -16,7 +16,7 @@ app = typer.Typer(help="Edit proposal management commands.")
 def list_proposals():
     """List all pending edit proposals."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # List pending proposals
@@ -45,7 +45,7 @@ def reject_proposal(
 ):
     """Reject an edit proposal."""
     # Get the wiki service
-    from src.cli.main import get_wiki_service
+    from src.cli.service_utils import get_wiki_service
     wiki_service = get_wiki_service()
     
     # Reject the edit proposal

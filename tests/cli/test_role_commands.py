@@ -32,6 +32,93 @@ MOCK_DEBATE_SESSION_WITH_PARTICIPANT.id = "debate_002"
 MOCK_DEBATE_SESSION_WITH_PARTICIPANT.participants = [MOCK_PARTICIPANT]
 
 
+@patch('src.cli.commands.role_commands.RoleManager')
+def test_create_role_success(MockRoleManager):
+    """Test creating a role successfully."""
+    # Arrange
+    mock_role_manager = MockRoleManager.return_value
+    mock_role_manager.create_role.return_value = True
+
+    # Act
+    result = runner.invoke(app, ["roles", "create", "New Role", "--description", "A new test role", "--tags", "test,new"])
+
+    # Assert
+    assert result.exit_code == 0
+    assert "Role 'New Role' created successfully" in result.stdout
+    mock_role_manager.create_role.assert_called_once()
+
+@patch('src.cli.commands.role_commands.RoleManager')
+def test_create_role_invalid_name(MockRoleManager):
+    """Test creating a role with an invalid name."""
+    # Arrange
+    mock_role_manager = MockRoleManager.return_value
+
+    # Act
+    result = runner.invoke(app, ["roles", "create", "  ", "--description", "A role with an invalid name"])
+
+    # Assert
+    assert result.exit_code == 1
+    assert "Error: Role name must be at least 3 characters long and cannot be empty." in result.stdout
+    mock_role_manager.create_role.assert_not_called()
+
+@patch('src.cli.commands.role_commands.RoleManager')
+def test_create_role_failure(MockRoleManager):
+    """Test role creation failure."""
+    # Arrange
+    mock_role_manager = MockRoleManager.return_value
+    mock_role_manager.create_role.return_value = False
+
+    # Act
+    result = runner.invoke(app, ["roles", "create", "New Role", "--description", "A new test role"])
+
+    # Assert
+    assert "Failed to create role 'New Role'" in result.stdout
+    mock_role_manager.create_role.assert_called_once()
+
+@patch('src.cli.commands.role_commands.RoleManager')
+def test_manage_role_success(MockRoleManager):
+    """Test managing a role successfully."""
+    # Arrange
+    mock_role_manager = MockRoleManager.return_value
+    mock_role_manager.update_role.return_value = True
+
+    # Act
+    result = runner.invoke(app, ["roles", "manage", MOCK_ROLE.id, "--update-description", "Updated description"])
+
+    # Assert
+    assert result.exit_code == 0
+    assert f"Role '{MOCK_ROLE.id}' updated successfully" in result.stdout
+    mock_role_manager.update_role.assert_called_once_with(MOCK_ROLE.id, {"description": "Updated description"})
+
+@patch('src.cli.commands.role_commands.RoleManager')
+def test_manage_role_invalid_description(MockRoleManager):
+    """Test managing a role with an invalid description."""
+    # Arrange
+    mock_role_manager = MockRoleManager.return_value
+
+    # Act
+    result = runner.invoke(app, ["roles", "manage", "any_role", "--update-description", "  "])
+
+    # Assert
+    assert result.exit_code == 1
+    assert "Error: Description cannot be empty." in result.stdout
+    mock_role_manager.update_role.assert_not_called()
+
+@patch('src.cli.commands.role_commands.RoleManager')
+def test_manage_role_not_found(MockRoleManager):
+    """Test managing a role that does not exist."""
+    # Arrange
+    mock_role_manager = MockRoleManager.return_value
+    mock_role_manager.update_role.return_value = False
+
+    # Act
+    result = runner.invoke(app, ["roles", "manage", "nonexistent_role", "--update-description", "Updated description"])
+
+    # Assert
+    assert "Failed to update role 'nonexistent_role'" in result.stdout
+    mock_role_manager.update_role.assert_called_once_with("nonexistent_role", {"description": "Updated description"})
+
+
 @patch('src.cli.commands.role_commands.DebateStateManager')
 @patch('src.cli.commands.role_commands.RoleManager')
 def test_invite_role_success(MockRoleManager, MockDebateStateManager):
@@ -115,3 +202,10 @@ def test_invite_role_duplicate(MockRoleManager, MockDebateStateManager):
     mock_role_manager.get_role_by_id.assert_called_once_with(MOCK_ROLE.id)
     mock_debate_manager.storage.load_session.assert_called_once_with(MOCK_DEBATE_SESSION_WITH_PARTICIPANT.id)
     mock_debate_manager.storage.save_session.assert_not_called()
+
+def test_roles_help_command():
+    """Test the `roles help` command."""
+    result = runner.invoke(app, ["roles", "help"])
+    assert result.exit_code == 0
+    assert "Role Management Commands Help" in result.stdout
+    assert "daip-cli roles create" in result.stdout

@@ -1,0 +1,10 @@
+{
+    "id": "new_role",
+    "name": "New Role",
+    "description": "A test role.",
+    "system_prompt": "You are New Role. A test role.",
+    "capabilities": [
+        "general_assistance"
+    ],
+    "tags": []
+}

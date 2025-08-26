@@ -24,7 +24,7 @@ def export_debate_to_wiki(debate_id: str, wiki_title: str, format: str = "markdo
     """
     try:
         # Import wiki service
-        from src.cli.main import get_wiki_service
+        from src.cli.service_utils import get_wiki_service
         wiki_service = get_wiki_service()
         
         # Load debate results from saved files

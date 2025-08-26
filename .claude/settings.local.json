@@ -3,7 +3,18 @@
     "allow": [
       "Bash(python:*)",
       "Bash(del:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(timeout:*)",
+      "Bash(cd:*)",
+      "Bash(poetry:*)",
+      "Bash(where:*)",
+      "Bash(set)",
+      "Bash(find:*)",
+      "Bash(py:*)",
+      "Bash(git --version)"
+    ],
+    "additionalDirectories": [
+      "D:\\d D:\\DAIP\\daipMVPbackup"
     ]
   },
   "enableAllProjectMcpServers": true,

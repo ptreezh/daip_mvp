@@ -8,6 +8,18 @@ DAIP-LIVE (Dynamic AI-driven Project-execution LIVE) is an intelligent collabora
 
 ## Common Development Commands
 
+### Environment Setup
+```bash
+# Install dependencies with Poetry
+poetry install
+
+# Activate virtual environment
+poetry shell
+
+# Install specific dependencies
+poetry add package_name
+```
+
 ### Testing
 ```bash
 # Run all tests
@@ -21,6 +33,16 @@ pytest --cov=src
 
 # Run tests with verbose output
 pytest -v --tb=short
+
+# Run tests and exit on first failure
+pytest -x
+
+# Run tests in parallel
+pytest -n auto
+
+# Run specific test category
+pytest tests/cli/ -v
+pytest tests/core_services/ -v
 ```
 
 ### Code Quality
@@ -33,6 +55,9 @@ black src/ tests/
 
 # Type checking with mypy
 mypy src/
+
+# Fix linting issues automatically
+ruff check --fix src/ tests/
 ```
 
 ### CLI Usage
@@ -48,15 +73,31 @@ python -m src.cli.main status
 
 # Interactive mode (no arguments)
 python -m src.cli.main
+
+# Run with Poetry
+poetry run python -m src.cli.main
 ```
 
 ### API Server
 ```bash
-# Start FastAPI server
+# Start FastAPI server with auto-reload
 uvicorn src.main:app --reload
 
 # Run on specific port
 uvicorn src.main:app --host 0.0.0.0 --port 8000
+
+# Production deployment (no reload)
+uvicorn src.main:app --host 0.0.0.0 --port 8000
+```
+
+### Comprehensive Testing
+```bash
+# Run the complete test suite
+./run_comprehensive_tests.bat  # Windows
+./run_comprehensive_tests.sh   # Linux/Mac
+
+# Run DDD integration tests
+python tests/ddd/test_runner.py
 ```
 
 ## Architecture Overview
@@ -67,11 +108,13 @@ uvicorn src.main:app --host 0.0.0.0 --port 8000
    - Main API server with comprehensive routing
    - Central application state management
    - Health check and status endpoints
+   - CORS middleware configuration
 
 2. **Application Layer** (`src/application/`)
    - `personal_assistant_router.py` - Routes user queries to appropriate services
    - `session_manager.py` - Manages user sessions and context
    - `task_orchestrator.py` - Coordinates complex task execution
+   - `entrance_selector.py` - Dual entrance system management
 
 3. **Core Services** (`src/core_services/`)
    - `role_manager.py` - Manages AI roles and their definitions
@@ -79,17 +122,34 @@ uvicorn src.main:app --host 0.0.0.0 --port 8000
    - `memory_service.py` - Memory management and retrieval
    - `synthesis_engine.py` - Content synthesis and analysis
    - `debate_manager.py` - Multi-role debate coordination
+   - `intent_analysis_service.py` - User intent recognition
+   - `user_profile_service.py` - User profile management
 
 4. **CLI Interface** (`src/cli/`)
    - `main.py` - Main CLI entry point with Typer
    - `chat_commands.py` - Chat and communication commands
    - `wiki_commands.py` - Wiki management commands
    - `commands/` - Various command implementations
+     - `role_commands.py` - Role management
+     - `workflow_commands.py` - Workflow execution
+     - `system_commands.py` - System operations
+     - `debate_commands.py` - Debate management
 
 5. **Virtual Role Chat** (`src/virtual_role_chat/`)
    - `chat_coordinator.py` - Coordinates multi-role conversations
    - `chat_room_manager.py` - Manages chat rooms and sessions
-   - `models.py` - Data models for chat system
+   - `chat_session_service.py` - Session management
+   - `cognitive_agent/` - Advanced cognitive agent implementations
+
+6. **Institutional Primitives** (`src/institutional_primitives/`)
+   - Advanced workflow and consensus patterns
+   - Customizable debate rules and protocols
+   - Multi-perspective analysis frameworks
+
+7. **Domain-Driven Design** (`src/domain/`)
+   - Domain models and business logic
+   - Aggregates, entities, and value objects
+   - Domain services implementation
 
 ### Key Dependencies
 
@@ -99,6 +159,11 @@ uvicorn src.main:app --host 0.0.0.0 --port 8000
 - **Ollama** - Local LLM provider
 - **Pydantic** - Data validation and settings management
 - **Rich** - CLI formatting and output
+- **Poetry** - Dependency management and packaging
+- **Pytest** - Testing framework
+- **Ruff** - Fast Python linter
+- **Black** - Code formatter
+- **Mypy** - Static type checking
 
 ### Configuration System
 
@@ -106,6 +171,7 @@ Configuration is managed through `src/config.py` with Pydantic models:
 - `config.yaml` - Main configuration file
 - Environment variables override config values
 - Settings include LLM configuration, vector store paths, logging levels
+- Configuration validation at application startup
 
 ### Data Storage
 
@@ -113,14 +179,18 @@ Configuration is managed through `src/config.py` with Pydantic models:
 - **File Storage**: JSON files for wiki content, chat logs, user profiles
 - **Memory Banks**: Structured memory storage in `data/memory_banks/`
 - **Wiki Data**: Markdown files with version control in `data/wiki/`
+- **Session Data**: User sessions and authentication in `data/auth/`
 
 ### Testing Structure
 
 - `tests/` - Root test directory
 - `tests/core_services/` - Tests for core services
 - `tests/cli/` - CLI interface tests
+- `tests/application/` - Application layer tests
 - `tests/integration/` - Integration tests
+- `tests/ddd/` - Domain-driven design tests
 - `tests/conftest.py` - Pytest configuration and fixtures
+- Comprehensive end-to-end testing suite
 
 ### Code Style and Quality
 
@@ -129,6 +199,7 @@ Configuration is managed through `src/config.py` with Pydantic models:
 - **Linter**: Ruff with custom rules (configured in `ruff.toml`)
 - **Type Hints**: Required for all new code
 - **Docstrings**: Google-style docstrings preferred
+- **Async/Await**: Used for I/O-bound operations
 
 ## Development Guidelines
 
@@ -139,6 +210,8 @@ Configuration is managed through `src/config.py` with Pydantic models:
 3. **CLI Layer**: Command-line interface in `src/cli/`
 4. **API Layer**: REST API endpoints in `src/api/`
 5. **Models**: Data models near their usage context
+6. **Domain Layer**: Business domain logic in `src/domain/`
+7. **Infrastructure**: Technical implementations in `src/infrastructure/`
 
 ### Error Handling
 
@@ -146,6 +219,7 @@ Configuration is managed through `src/config.py` with Pydantic models:
 - Implement proper logging with appropriate levels
 - Graceful degradation for non-critical services
 - User-friendly error messages in CLI responses
+- Comprehensive error handling in API endpoints
 
 ### Asynchronous Patterns
 
@@ -153,6 +227,7 @@ Configuration is managed through `src/config.py` with Pydantic models:
 - Proper error handling in async contexts
 - Avoid blocking operations in async functions
 - Use `asyncio.run()` for async entry points
+- Implement proper cancellation handling
 
 ### Configuration Management
 
@@ -160,6 +235,7 @@ Configuration is managed through `src/config.py` with Pydantic models:
 - Never hardcode configuration values
 - Support environment variable overrides
 - Validate configuration at startup
+- Use type-safe configuration with Pydantic
 
 ### Memory and State Management
 
@@ -167,6 +243,7 @@ Configuration is managed through `src/config.py` with Pydantic models:
 - Implement proper caching strategies
 - Handle service initialization order carefully
 - Use lazy loading for optional services
+- Manage vector database connections properly
 
 ### Testing Best Practices
 
@@ -175,6 +252,7 @@ Configuration is managed through `src/config.py` with Pydantic models:
 - Mock external dependencies (LLM calls, database)
 - Test both success and error scenarios
 - Use fixtures for common test setup
+- Include comprehensive end-to-end tests
 
 ### CLI Development
 
@@ -183,6 +261,7 @@ Configuration is managed through `src/config.py` with Pydantic models:
 - Support both interactive and batch modes
 - Include proper input validation
 - Use Rich for formatted output
+- Implement comprehensive help documentation
 
 ## Common Issues and Solutions
 
@@ -196,6 +275,7 @@ If ChromaDB fails to initialize:
 1. Check if the data directory exists and is writable
 2. Verify the ChromaDB version compatibility
 3. Try deleting the vector database to force re-initialization
+4. Check collection names and configurations
 
 ### LLM Connection Problems
 
@@ -203,6 +283,7 @@ If Ollama connections fail:
 1. Verify Ollama is running on the configured port
 2. Check if the required models are downloaded
 3. Test the connection manually with `ollama list`
+4. Verify model names in configuration
 
 ### Memory Management
 
@@ -210,6 +291,7 @@ For memory-related issues:
 1. Check memory bank directory permissions
 2. Verify memory consolidation service is running
 3. Monitor memory usage and implement cleanup if needed
+4. Validate memory storage adapters
 
 ### CLI Performance
 
@@ -217,6 +299,7 @@ For slow CLI operations:
 1. Implement proper caching for repeated operations
 2. Use async operations for I/O-bound tasks
 3. Consider pagination for large result sets
+4. Optimize vector database queries
 
 ## Extension Points
 
@@ -226,6 +309,7 @@ For slow CLI operations:
 2. Add role to `configs/roles.yaml` if needed
 3. Update role embeddings in vector database
 4. Test role functionality with sample queries
+5. Register role in role manager service
 
 ### Creating New Commands
 
@@ -233,6 +317,7 @@ For slow CLI operations:
 2. Register with Typer app in `src/cli/main.py`
 3. Add tests in `tests/cli/`
 4. Update help documentation
+5. Include proper error handling
 
 ### Extending Core Services
 
@@ -240,6 +325,7 @@ For slow CLI operations:
 2. Add proper dependency injection
 3. Include comprehensive error handling
 4. Write unit and integration tests
+5. Document service functionality
 
 ### Adding New API Endpoints
 
@@ -247,6 +333,7 @@ For slow CLI operations:
 2. Add proper request/response models
 3. Include authentication if needed
 4. Register router in `src/main.py`
+5. Add comprehensive testing
 
 ## Performance Considerations
 
@@ -255,6 +342,7 @@ For slow CLI operations:
 - Monitor memory usage, especially for vector operations
 - Consider connection pooling for database operations
 - Use async operations for I/O-bound tasks
+- Optimize vector database queries with proper indexing
 
 ## Security Considerations
 
@@ -263,3 +351,5 @@ For slow CLI operations:
 - Implement proper authentication for protected endpoints
 - Use environment variables for sensitive configuration
 - Follow principle of least privilege for service permissions
+- Sanitize user inputs to prevent injection attacks
+- Implement proper CORS configuration for production

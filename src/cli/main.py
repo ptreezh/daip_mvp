@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- 
 """@Time    : 2025-07-19 03:00:00
 @Author  : DAIP-LIVE Team
 @File    : main.py
@@ -27,68 +27,9 @@ from src.cli.commands.workflow_commands import workflow_app
 from src.cli.chat_commands import app as chat_app
 from src.cli.wiki_commands import app as wiki_app
 
-# New imports for core services
-from src.application.personal_assistant_router import PersonalAssistantRouter
-from src.core_services.user_profile_service import UserProfileService
-from src.core_services.intent_analysis_service import BasicIntentAnalysisService
-from src.core_services.role_manager import RoleManager
-from src.core_services.enhanced_sskg_manager import EnhancedSSKGManager
-from src.core_services.memory_agent import MemAgent
-from src.core_services.real_llm_context_optimizer import RealLLMClient, IntelligentContextOptimizer
-from src.core_services.integrated_llm_manager import IntegratedLLMManager
-from src.core_services.task_manager import TaskManager
-from src.institutional_primitives.registry import PrimitiveRegistry
-from src.institutional_primitives.workflow_engine import WorkflowEngine
-from src.virtual_role_chat.chat_coordinator import ChatCoordinator
-from src.virtual_role_chat.chat_room_manager import ChatRoomManager
-from src.virtual_role_chat.chat_session_service import ChatSessionService
-from src.core_services.wiki_service import WikiService
+# Service imports moved to src.cli.service_utils to avoid circular imports
 
-def get_wiki_service():
-    """Get the global wiki service instance."""
-    return WikiService()
-
-# Initialize core services (order matters due to dependencies)
-# Note: Some services might have their own dependencies that need to be initialized first.
-# This is a simplified instantiation for CLI purposes.
-user_profile_service = UserProfileService()
-intent_analysis_service = BasicIntentAnalysisService(user_profile_service=user_profile_service)
-
-role_manager = RoleManager()
-
-# EnhancedSSKGManager needs a path for persistence
-enhanced_sskg_manager = EnhancedSSKGManager(graph_path=Path("data/sskg_graph.graphml"), vector_store_path=Path("data/sskg_vector_store"))
-mem_agent = MemAgent(sskg_manager=enhanced_sskg_manager)
-
-# RealLLMClient and IntelligentContextOptimizer are instantiated internally by IntegratedLLMManager
-# We pass the necessary dependencies to IntegratedLLMManager
-integrated_llm_manager = IntegratedLLMManager() # This will initialize its own context_optimizer, role_manager, mem_agent
-
-task_manager = TaskManager()
-
-primitive_registry = PrimitiveRegistry()
-workflow_engine = WorkflowEngine(primitive_registry=primitive_registry)
-
-# Initialize services for ChatCoordinator
-chat_room_manager = ChatRoomManager(storage_path="data/chat_rooms.json")
-chat_session_service = ChatSessionService(chat_room_manager=chat_room_manager, storage_path="data/chat_sessions.json")
-wiki_service = get_wiki_service() # Assuming get_wiki_service is defined and works
-
-chat_coordinator = ChatCoordinator(
-    chat_room_manager=chat_room_manager,
-    chat_session_service=chat_session_service,
-    role_manager=role_manager,
-    primitive_registry=primitive_registry,
-    wiki_service=wiki_service
-)
-
-# Initialize PersonalAssistantRouter
-personal_assistant_router = PersonalAssistantRouter(
-    intent_analysis_service=intent_analysis_service,
-    llm_manager=integrated_llm_manager,
-    workflow_engine=workflow_engine,
-    task_manager=task_manager
-)
+from src.cli.service_utils import get_personal_assistant_router
 
 def version_callback(value: bool):
     if value:
@@ -128,17 +69,24 @@ app.add_typer(pa_app, name="pa")
 @pa_app.command("chat")
 def pa_chat(query: str = typer.Argument(..., help="The query for the Personal Assistant.")):
     """Interact with the personal assistant."""
-    asyncio.run(personal_assistant_router.process_query(query))
+    try:
+        router = get_personal_assistant_router()
+        asyncio.run(router.process_query(query))
+    except Exception as e:
+        console.print(f"[red]An error occurred: {e}[/red]")
+        raise typer.Exit(code=1)
 
 @pa_app.command("status")
 def pa_status(task_id: str = typer.Argument(..., help="The ID of the task to check status for.")):
     """Check the status of a complex task."""
-    asyncio.run(personal_assistant_router.get_task_status(task_id))
+    router = get_personal_assistant_router()
+    asyncio.run(router.get_task_status(task_id))
 
 @pa_app.command("logs")
 def pa_logs(limit: int = typer.Option(10, "--limit", "-l", help="Number of log entries to retrieve.")):
     """View recent log entries from the personal assistant."""
-    asyncio.run(personal_assistant_router.get_logs(limit))
+    router = get_personal_assistant_router()
+    asyncio.run(router.get_logs(limit))
 
 
 # Create a Typer application for the 'debate' command group
@@ -170,7 +118,7 @@ def start(
     output: str = typer.Option("debate_results.txt", "--output", "-o", help="Output file for saved results"),
 ):
     """Start a new debate with specified topic and roles."""
-    from src.cli.commands import run_debate_command
+    from src.cli.debate_execution import run_debate_command
     
     # Enhanced input validation with detailed feedback
     validation_errors = []
@@ -430,7 +378,7 @@ def status():
     if "dependencies" in health_info and "❌" in health_info["dependencies"]["status"]:
         console.print("\n[bold red]🔧 Missing Dependencies:[/bold red]")
         # Assuming MISSING_DEPENDENCIES is still accessible or passed
-        from src.cli.commands import MISSING_DEPENDENCIES
+        from src.cli.debate_execution import MISSING_DEPENDENCIES
         for dep in MISSING_DEPENDENCIES:
             console.print(f"[red]   • {dep}[/red]")
 
@@ -541,7 +489,8 @@ def disag():
 @app.command()
 def sess():
     """List all sessions."""
-    sessions = personal_assistant_router.get_session_list() # Removed asyncio.run()
+    router = get_personal_assistant_router()
+    sessions = router.get_session_list() # Removed asyncio.run()
     if not sessions:
         console.print("[yellow]No active sessions found.[/yellow]")
         return

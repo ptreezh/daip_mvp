@@ -124,7 +124,6 @@ def test_workflow_create_validation_fails(MockPrimitiveRegistry):
     mock_registry.validate_primitive.assert_called_once_with(workflow_def)
     mock_registry.register_primitive.assert_not_called()
 
-
 @patch('src.cli.commands.workflow_commands.WorkflowEngine')
 @patch('src.cli.commands.workflow_commands.PrimitiveRegistry')
 def test_workflow_execute_success(MockPrimitiveRegistry, MockWorkflowEngine):
@@ -171,3 +170,47 @@ def test_workflow_execute_invalid_params():
     # Assert
     assert result.exit_code == 1
     assert "Error: Invalid JSON format for --params." in result.stdout
+
+@patch('src.cli.commands.workflow_commands.WorkflowSelector')
+@patch('src.cli.commands.workflow_commands.PrimitiveRegistry')
+def test_workflow_select_success(MockPrimitiveRegistry, MockWorkflowSelector):
+    """Test `workflow select` successfully."""
+    # Arrange
+    mock_registry = MockPrimitiveRegistry.return_value
+    mock_selector = MockWorkflowSelector.return_value
+    mock_registry.get_primitive.return_value = MOCK_PRIMITIVE_INFO_1
+    mock_selector.select_workflow.return_value = True
+
+    # Act
+    result = runner.invoke(app, ["workflow", "select", "test_workflow_1", "--for-scenario", "test_scenario"])
+
+    # Assert
+    assert result.exit_code == 0
+    assert "Workflow 'test_workflow_1' selected for 'test_scenario'" in result.stdout
+    mock_registry.get_primitive.assert_called_once_with("test_workflow_1")
+    mock_selector.select_workflow.assert_called_once_with("test_workflow_1", "test_scenario")
+
+@patch('src.cli.commands.workflow_commands.WorkflowSelector')
+@patch('src.cli.commands.workflow_commands.PrimitiveRegistry')
+def test_workflow_select_workflow_not_found(MockPrimitiveRegistry, MockWorkflowSelector):
+    """Test `workflow select` when the workflow is not found."""
+    # Arrange
+    mock_registry = MockPrimitiveRegistry.return_value
+    mock_selector = MockWorkflowSelector.return_value
+    mock_registry.get_primitive.return_value = None
+
+    # Act
+    result = runner.invoke(app, ["workflow", "select", "nonexistent_workflow", "--for-scenario", "test_scenario"])
+
+    # Assert
+    assert result.exit_code == 1
+    assert "Workflow 'nonexistent_workflow' not found" in result.stdout
+    mock_registry.get_primitive.assert_called_once_with("nonexistent_workflow")
+    mock_selector.select_workflow.assert_not_called()
+
+def test_workflow_help_command():
+    """Test the `workflow help` command."""
+    result = runner.invoke(app, ["workflow", "help"])
+    assert result.exit_code == 0
+    assert "Workflow and Primitive Management Commands" in result.stdout
+    assert "daip-cli workflow list" in result.stdout
