@@ -6,50 +6,20 @@
 """
 
 import asyncio
-import logging
-from typing import Callable, Dict, List, Optional, Any
 
 from prompt_toolkit import Application
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.document import Document
-from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import (
     Layout,
     HSplit,
-    VSplit,
     Window,
     FormattedTextControl,
-    BufferControl,
-    ConditionalContainer,
-    ScrollablePane
-)
-from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
-from prompt_toolkit.layout.layout import Layout
-from prompt_toolkit.layout.menus import CompletionsMenu
-from prompt_toolkit.layout.processors import (
-    Processor,
-    Transformation,
-    TransformationInput
+    BufferControl
 )
 from prompt_toolkit.styles import Style
-from prompt_toolkit.widgets import (
-    Box,
-    Button,
-    Checkbox,
-    Dialog,
-    Frame,
-    Label,
-    MenuContainer,
-    MenuItem,
-    ProgressBar,
-    RadioList,
-    TextArea
-)
 
 from rich.console import Console
-from rich.panel import Panel
-from rich.text import Text
 
 console = Console()
 

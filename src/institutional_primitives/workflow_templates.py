@@ -11,7 +11,7 @@ import logging
 import json
 import yaml
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 from enum import Enum
 

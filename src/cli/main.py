@@ -7,6 +7,7 @@
 
 import asyncio
 import logging
+import re
 import sys
 from pathlib import Path
 
@@ -65,22 +66,61 @@ pa_app = typer.Typer(
 )
 app.add_typer(pa_app, name="pa")
 
+def validate_input(text: str, min_length: int = 1, max_length: int = 1000, field_name: str = "input") -> str:
+    """Validate input text with length and content checks."""
+    if not text or not text.strip():
+        raise typer.BadParameter(f"{field_name} cannot be empty")
+    
+    text = text.strip()
+    if len(text) < min_length:
+        raise typer.BadParameter(f"{field_name} must be at least {min_length} characters")
+    if len(text) > max_length:
+        raise typer.BadParameter(f"{field_name} must not exceed {max_length} characters")
+    
+    # Basic XSS prevention
+    if re.search(r'<script|javascript:|data:', text, re.IGNORECASE):
+        raise typer.BadParameter(f"{field_name} contains potentially unsafe content")
+    
+    return text
+
+def validate_file_path(path: str, must_exist: bool = False) -> Path:
+    """Validate file path for security and existence."""
+    try:
+        file_path = Path(path).resolve()
+        
+        # Prevent path traversal
+        if ".." in str(file_path) or str(file_path).startswith("/"):
+            raise typer.BadParameter("Invalid file path: path traversal detected")
+        
+        if must_exist and not file_path.exists():
+            raise typer.BadParameter(f"File does not exist: {path}")
+        
+        return file_path
+    except Exception as e:
+        raise typer.BadParameter(f"Invalid file path: {e}") from e
+
 # Add Personal Assistant commands
 @pa_app.command("chat")
 def pa_chat(query: str = typer.Argument(..., help="The query for the Personal Assistant.")):
     """Interact with the personal assistant."""
     try:
+        validated_query = validate_input(query, min_length=2, max_length=5000, field_name="Query")
         router = get_personal_assistant_router()
-        asyncio.run(router.process_query(query))
+        asyncio.run(router.process_query(validated_query))
     except Exception as e:
         console.print(f"[red]An error occurred: {e}[/red]")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
 @pa_app.command("status")
 def pa_status(task_id: str = typer.Argument(..., help="The ID of the task to check status for.")):
     """Check the status of a complex task."""
-    router = get_personal_assistant_router()
-    asyncio.run(router.get_task_status(task_id))
+    try:
+        validated_task_id = validate_input(task_id, min_length=1, max_length=100, field_name="Task ID")
+        router = get_personal_assistant_router()
+        asyncio.run(router.get_task_status(validated_task_id))
+    except Exception as e:
+        console.print(f"[red]An error occurred: {e}[/red]")
+        raise typer.Exit(code=1) from e
 
 @pa_app.command("logs")
 def pa_logs(limit: int = typer.Option(10, "--limit", "-l", help="Number of log entries to retrieve.")):
@@ -110,14 +150,28 @@ logger = logging.getLogger(__name__)
 @debate_app.command()
 def start(
     topic: str = typer.Argument(..., help="The debate topic"),
-    roles: list[str] = typer.Option([], "--role", "-r", help="AI roles to participate in the debate"),
-    rounds: int = typer.Option(3, "--rounds", help="Number of debate rounds"),
-    consensus_strategy: str = typer.Option("simple_majority_vote", "--consensus", help="Consensus strategy to use"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
-    save: bool = typer.Option(False, "--save", "-s", help="Save debate results to a file"),
-    output: str = typer.Option("debate_results.txt", "--output", "-o", help="Output file for saved results"),
+    roles: Optional[list[str]] = typer.Option(None, "--role", "-r", help="AI roles to participate in the debate"),
+    rounds: int = typer.Option(None, "--rounds", help="Number of debate rounds"),
+    consensus_strategy: str = typer.Option(None, "--consensus", help="Consensus strategy to use"),
+    verbose: bool = typer.Option(None, "--verbose", "-v", help="Enable verbose output"),
+    save: bool = typer.Option(None, "--save", "-s", help="Save debate results to a file"),
+    output: str = typer.Option(None, "--output", "-o", help="Output file for saved results"),
 ):
     """Start a new debate with specified topic and roles."""
+    # Set default values
+    if roles is None:
+        roles = []
+    if rounds is None:
+        rounds = 3
+    if consensus_strategy is None:
+        consensus_strategy = "simple_majority_vote"
+    if verbose is None:
+        verbose = False
+    if save is None:
+        save = False
+    if output is None:
+        output = "debate_results.txt"
+        
     from src.cli.debate_execution import run_debate_command
     
     # Enhanced input validation with detailed feedback
@@ -141,17 +195,17 @@ def start(
     # Validate output file path if saving
     if save:
         try:
-            import os
-            output_dir = os.path.dirname(os.path.abspath(output))
-            if output_dir and not os.path.exists(output_dir):
+            output_path = validate_file_path(output)
+            output_dir = output_path.parent
+            if output_dir and not output_dir.exists():
                 try:
-                    os.makedirs(output_dir, exist_ok=True)
+                    output_dir.mkdir(parents=True, exist_ok=True)
                 except PermissionError:
                     validation_errors.append(f"Cannot create output directory: {output_dir} (permission denied)")
                 except Exception as e:
                     validation_errors.append(f"Cannot create output directory: {e}")
         except Exception as e:
-            validation_errors.append(f"Invalid output file path: {e}")
+            validation_errors.append(str(e))
     
     # Display validation errors if any
     if validation_errors:
@@ -159,7 +213,7 @@ def start(
         for error in validation_errors:
             console.print(f"[red]   • {error}[/red]")
         console.print("\n[yellow]💡 Use 'daip-cli help' for usage examples")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None from None from None
     
     # Show startup information
     console.print(f"[bold blue]🚀 Initializing debate: {topic}[/bold blue]")
@@ -196,7 +250,7 @@ def start(
     except KeyboardInterrupt:
         console.print("\n[yellow]⏸️  Debate interrupted by user.[/yellow]")
         console.print("[dim]💡 You can resume a similar debate by running the same command again.")
-        raise typer.Exit(0)
+        raise typer.Exit(0) from None
     except asyncio.TimeoutError:
         console.print("\n[red]⏱️  Debate timed out.[/red]")
         console.print("[yellow]💡 The debate took too long to complete. Try:[/yellow]")
@@ -243,7 +297,7 @@ def start(
         
         # Log the full error for debugging
         logger.error(f"CLI start command failed: {e}", exc_info=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @debate_app.command()
@@ -276,14 +330,14 @@ def export_to_wiki(
         if success:
             console.print(f"[green]SUCCESS: Debate successfully exported to wiki page: '{title}'")
         else:
-            console.print(f"[red]ERROR: Failed to export debate to wiki")
+            console.print("[red]ERROR: Failed to export debate to wiki")
             console.print("[yellow]TIP: Make sure the debate was completed and results were saved")
             raise typer.Exit(1)
             
     except Exception as e:
         console.print(f"[red]ERROR: Error exporting debate to wiki: {e}[/red]")
         logger.error(f"Debate export to wiki failed: {e}", exc_info=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @debate_app.command("view-disagreements")
@@ -304,14 +358,14 @@ def view_disagreements(
         success = view_debate_disagreements(debate_id)
         
         if not success:
-            console.print(f"[red]ERROR: Failed to analyze debate disagreements")
+            console.print("[red]ERROR: Failed to analyze debate disagreements")
             console.print("[yellow]TIP: Make sure the debate was completed and results were saved")
             raise typer.Exit(1)
             
     except Exception as e:
         console.print(f"[red]ERROR: Error analyzing debate disagreements: {e}[/red]")
         logger.error(f"Debate disagreement analysis failed: {e}", exc_info=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @debate_app.command("select-consensus-algorithm")
@@ -333,14 +387,14 @@ def select_consensus_algorithm(
         success = select_consensus_algorithm(debate_id, algorithm_name)
         
         if not success:
-            console.print(f"[red]ERROR: Failed to select consensus algorithm")
+            console.print("[red]ERROR: Failed to select consensus algorithm")
             console.print("[yellow]TIP: Valid algorithms are: simple_majority_vote, weighted_vote, consensus_building, expert_judgment")
             raise typer.Exit(1)
             
     except Exception as e:
         console.print(f"[red]ERROR: Error selecting consensus algorithm: {e}[/red]")
         logger.error(f"Consensus algorithm selection failed: {e}", exc_info=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -359,7 +413,6 @@ def status():
 
     # Add rows to the table based on health_info
     for component, info in health_info.items():
-        status_icon = "✅" if "✅" in info["status"] else ("⚠️" if "⚠️" in info["status"] else "❌")
         table.add_row(component.replace("_", " ").title(), info["status"], info["details"])
         if "❌" in info["status"] or "⚠️" in info["status"]:
             overall_health = False
@@ -512,7 +565,7 @@ def sess():
     console.print(table)
 
 
-from src.cli.interactive_cli import main_menu_loop, start_role_management
+from src.cli.interactive_cli import main_menu_loop
 
 if __name__ == "__main__":
     # If no arguments are provided, run the interactive menu

@@ -6,9 +6,6 @@
 """
 
 import typer
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
 from pathlib import Path
 
 app = typer.Typer(help="Basic wiki management commands.")
@@ -31,7 +28,7 @@ def create(
                 content = f.read()
         except Exception as e:
             typer.echo(f"Error reading file {file}: {e}")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     
     tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
     
@@ -47,10 +44,10 @@ def create(
             typer.echo(f"Wiki page '{title}' created successfully with ID: {wiki_version.entry_name}")
         else:
             typer.echo(f"Failed to create wiki page '{title}'")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error creating wiki page: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -72,10 +69,10 @@ def view(
             typer.echo(f"Version: {wiki_version.version}")
         else:
             typer.echo(f"Wiki page '{title_or_id}' not found.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error viewing wiki page: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -94,7 +91,7 @@ def edit(
                 content = f.read()
         except Exception as e:
             typer.echo(f"Error reading file {file}: {e}")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     
     try:
         # Use propose_edit method to create an edit proposal
@@ -109,10 +106,10 @@ def edit(
             typer.echo("Note: This edit is proposed and needs to be applied by a wiki administrator.")
         else:
             typer.echo(f"Failed to create edit proposal for '{title_or_id}'")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error editing wiki page: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -127,7 +124,7 @@ def delete(
     if not confirm:
         if not typer.confirm(f"Are you sure you want to delete the wiki page '{title_or_id}'? This action cannot be undone."):
             typer.echo("Deletion cancelled.")
-            raise typer.Exit(0)
+            raise typer.Exit(0) from e
     
     try:
         success = wiki_service.delete_entry(title_or_id)
@@ -138,7 +135,7 @@ def delete(
             raise typer.Exit(1)
     except Exception as e:
         typer.echo(f"Error deleting wiki page: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -160,7 +157,7 @@ def search(
             typer.echo(f"No results found for '{keywords}'.")
     except Exception as e:
         typer.echo(f"Error searching wiki pages: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -171,7 +168,6 @@ def export(
 ):
     """Export a wiki page to various formats."""
     from rich.console import Console
-    from rich.panel import Panel
     from pathlib import Path
     console = Console()
     
@@ -186,7 +182,7 @@ def export(
     if format.lower() not in supported_formats:
         console.print(f"[red]❌ Unsupported format: {format}[/red]")
         console.print(f"[yellow]Supported formats: {', '.join(supported_formats)}[/yellow]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     
     try:
         if format.lower() == "pdf":
@@ -211,7 +207,7 @@ def export(
             
     except Exception as e:
         console.print(f"[red]ERROR: Error exporting wiki page: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 def _export_to_pdf(wiki_service, title_or_id: str, output_path: Path) -> bool:
@@ -398,7 +394,6 @@ def list():
     try:
         # Note: WikiService doesn't have a direct list method, so we'll need to implement it
         # For now, we'll show the wiki directory contents
-        import os
         wiki_dir = wiki_service._wiki_directory
         if wiki_dir.exists():
             entries = [d.name for d in wiki_dir.iterdir() if d.is_dir()]
@@ -412,7 +407,7 @@ def list():
             typer.echo("Wiki directory does not exist.")
     except Exception as e:
         typer.echo(f"Error listing wiki pages: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -430,10 +425,10 @@ def approve(
             typer.echo(f"Successfully approved and applied proposal '{proposal_id}' for entry '{entry_name}'.")
         else:
             typer.echo(f"Failed to approve proposal '{proposal_id}' for entry '{entry_name}'.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error approving edit proposal: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command(name="list")
@@ -457,7 +452,7 @@ def list_proposals():
             typer.echo("No pending edit proposals found.")
     except Exception as e:
         typer.echo(f"Error listing edit proposals: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command(name="reject")
@@ -475,7 +470,7 @@ def reject_proposal(
             typer.echo(f"Successfully rejected proposal '{proposal_id}' for entry '{entry_name}'.")
         else:
             typer.echo(f"Failed to reject proposal '{proposal_id}' for entry '{entry_name}'.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error rejecting edit proposal: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e

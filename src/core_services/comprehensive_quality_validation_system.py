@@ -703,7 +703,7 @@ class ComprehensiveQualityValidator:
         """Collect Python files for validation."""
         python_files = []
         
-        for root, dirs, files in os.walk('src'):
+        for root, _, files in os.walk('src'):
             for file in files:
                 if file.endswith('.py'):
                     python_files.append(os.path.join(root, file))

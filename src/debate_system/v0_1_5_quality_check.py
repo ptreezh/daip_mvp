@@ -14,12 +14,10 @@ V0.1.5 全面质量检查和端到端测试
 import asyncio
 import time
 import sys
-import os
 import logging
-import subprocess
 import psutil
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from datetime import datetime
 import json
 
@@ -194,8 +192,8 @@ class V015QualityChecker:
         result.start()
         
         try:
-            from src.debate_system.debate_flow_definition import DebateSession, DebatePhase, DebateStatus
-            from src.debate_system.participant_management import ParticipantManager, Permission
+            from src.debate_system.debate_flow_definition import DebateSession
+            from src.debate_system.participant_management import ParticipantManager
             from src.debate_system.debate_state_manager import DebateStateManager
             
             # 测试组件创建
@@ -286,8 +284,6 @@ class V015QualityChecker:
             # 测试系统启动时间
             startup_start = time.time()
             
-            from src.debate_system.debate_state_manager import DebateStateManager
-            from src.real_demo_system.multi_role_debate_system import MultiRoleDebateSystem
             
             startup_time = time.time() - startup_start
             

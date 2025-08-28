@@ -36,7 +36,6 @@ from src.app_state import AppState
 from src.models import DebateConfig
 from src.protocols.debate_protocol import DebateProtocol
 # from src.application.personal_assistant_service import PersonalAssistantService  # Commented out
-from src.domain.entities import UserMessage
 try:
     pass # Placeholder for other imports that might need try-except
 except ImportError as e:
@@ -493,7 +492,7 @@ def check_system_health():
     try:
         # Only attempt if dependencies are met
         if health_info["dependencies"]["status"] == "✅ Ready":
-            app_state = AppState()
+            AppState()  # Initialize AppState
             health_info["core_services"] = {"status": "✅ Initialized", "details": "Core services (AppState) initialized"}
         else:
             health_info["core_services"] = {"status": "⚠️  Skipped", "details": "Dependencies missing, skipping service init"}

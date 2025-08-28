@@ -12,8 +12,7 @@ from datetime import datetime
 from enum import Enum
 
 from .advanced_consensus_algorithms import (
-    ConsensusInput, ConsensusResult, ConsensusAlgorithmType,
-    WeightedVotingConsensus, BayesianConsensus, CognitiveDiversityPreservingConsensus
+    ConsensusInput, ConsensusResult, WeightedVotingConsensus, BayesianConsensus, CognitiveDiversityPreservingConsensus
 )
 from src.protocols.consensus_strategies import SimpleMajorityVoteStrategy, ConsensusStrategyFactory
 
@@ -85,9 +84,12 @@ class UnifiedConsensusDispatcher:
             # 统一结果格式
             unified_result = self._unify_result_format(result, method)
             
-            logger.info(f"共识计算完成，方法: {method}, 强度: {unified_result.get('consensus_strength', 0):.2f}")
+            logger.info(f"共识计算完成，方法: {method}, 强度: {unified_result.confidence:.2f}")
             return unified_result
             
+        except ValueError as e:
+            logger.error(f"共识计算失败: {e}")
+            raise # Re-raise ValueError for specific test cases
         except Exception as e:
             logger.error(f"共识计算失败: {e}")
             return {
@@ -141,23 +143,11 @@ class UnifiedConsensusDispatcher:
     
     async def _execute_advanced_consensus(
         self,
-        inputs: List[Dict[str, Any]],
+        inputs: List[ConsensusInput],
         method: ConsensusMethod,
         context: Optional[Dict[str, Any]] = None
     ) -> ConsensusResult:
         """执行高级共识算法"""
-        
-        # 转换为ConsensusInput格式
-        consensus_inputs = []
-        for input_data in inputs:
-            consensus_input = ConsensusInput(
-                agent_id=input_data.get("agent_id", "unknown"),
-                position=input_data.get("position", ""),
-                confidence=input_data.get("confidence", 0.5),
-                reasoning=input_data.get("reasoning", ""),
-                timestamp=datetime.now()
-            )
-            consensus_inputs.append(consensus_input)
         
         # 获取对应的算法
         algorithm = self.advanced_algorithms.get(method)
@@ -165,26 +155,15 @@ class UnifiedConsensusDispatcher:
             raise ValueError(f"不支持的共识方法: {method}")
         
         # 执行算法
-        result = algorithm.calculate_consensus(consensus_inputs, context)
+        result = algorithm.calculate_consensus(inputs, context)
         return result
     
-    def _unify_result_format(self, result: Union[Dict[str, Any], ConsensusResult], method: ConsensusMethod) -> Dict[str, Any]:
+    def _unify_result_format(self, result: Union[Dict[str, Any], ConsensusResult], method: ConsensusMethod) -> Union[Dict[str, Any], ConsensusResult]:
         """统一结果格式"""
         
         if isinstance(result, ConsensusResult):
             # 高级算法结果
-            return {
-                "algorithm_type": result.algorithm_used.value,
-                "consensus_strength": result.confidence_level,
-                "summary": f"使用{result.algorithm_used.value}算法完成共识计算",
-                "confidence": result.confidence_level,
-                "consensus_value": result.consensus_value,
-                "participant_count": result.participant_count,
-                "diversity_score": result.diversity_score,
-                "emergent_insights": result.emergent_insights,
-                "timestamp": result.timestamp.isoformat(),
-                "method_used": method
-            }
+            return result
         else:
             # 简单算法结果
             return {

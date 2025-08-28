@@ -8,7 +8,6 @@
     Sends low-credibility content back for evidence-based revision.
 """
 import logging
-from datetime import datetime
 from typing import Any, Dict, List
 
 from .base import InstitutionalPrimitive, ExecutionContext
@@ -154,15 +153,15 @@ class RevisionNode(InstitutionalPrimitive):
             if self.provide_evidence_details and details:
                 method = details.get("method", "unknown")
                 if method == "weighted_average":
-                    instructions += f"   评估方法：加权平均\n"
+                    instructions += "   评估方法：加权平均\n"
                     instructions += f"   支持性证据强度：{details.get('supporting_score', 0):.2f}\n"
                     instructions += f"   质疑性证据强度：{details.get('challenging_score', 0):.2f}\n"
                 elif method == "majority_vote":
-                    instructions += f"   评估方法：多数投票\n"
+                    instructions += "   评估方法：多数投票\n"
                     instructions += f"   支持票数：{details.get('supporting_votes', 0)}\n"
                     instructions += f"   质疑票数：{details.get('challenging_votes', 0)}\n"
                 elif method == "synthesis":
-                    instructions += f"   评估方法：综合分析\n"
+                    instructions += "   评估方法：综合分析\n"
                     if "reasoning" in details:
                         instructions += f"   分析理由：{details.get('reasoning', '')[:200]}...\n"
             

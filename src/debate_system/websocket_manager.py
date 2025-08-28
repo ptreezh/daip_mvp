@@ -17,11 +17,10 @@ import asyncio
 import json
 import logging
 from typing import Dict, List, Optional, Any, Callable, Set
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 import uuid
-import weakref
 
 logger = logging.getLogger(__name__)
 

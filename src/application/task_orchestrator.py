@@ -198,7 +198,7 @@ class TaskOrchestrator:
             self._cleanup_task.cancel()
         
         # 取消所有运行中的任务
-        for task_id, task in self.running_tasks.items():
+        for _, task in self.running_tasks.items():
             task.cancel()
         
         # 清空队列
@@ -750,24 +750,7 @@ class TaskOrchestrator:
             try:
                 await asyncio.sleep(60)  # 每分钟检查一次
                 
-                # 记录资源使用情况
-                resource_usage = {
-                    "cpu_cores": {
-                        "available": self.available_resources["cpu_cores"],
-                        "allocated": sum(r.cpu_cores for r in self.allocated_resources.values()),
-                        "total": self.available_resources["cpu_cores"] + sum(r.cpu_cores for r in self.allocated_resources.values())
-                    },
-                    "memory_mb": {
-                        "available": self.available_resources["memory_mb"],
-                        "allocated": sum(r.memory_mb for r in self.allocated_resources.values()),
-                        "total": self.available_resources["memory_mb"] + sum(r.memory_mb for r in self.allocated_resources.values())
-                    },
-                    "gpu_count": {
-                        "available": self.available_resources["gpu_count"],
-                        "allocated": sum(1 for r in self.allocated_resources.values() if r.gpu_required),
-                        "total": self.available_resources["gpu_count"] + sum(1 for r in self.allocated_resources.values() if r.gpu_required)
-                    }
-                }
+                
                 
                 # 可以在这里添加资源告警逻辑
                 

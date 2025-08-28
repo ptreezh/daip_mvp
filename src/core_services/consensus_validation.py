@@ -23,12 +23,11 @@
 import json
 import re
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union, Type
+from typing import Any, Dict, List, Type
 from pydantic import ValidationError
 
-from consensus_models import (
-    ConsensusInput, ConsensusRequest, ConsensusResponse,
-    AlgorithmMetadata, ValidationResult, QualityRequirements
+from src.core_services.consensus_models import (
+    ConsensusInput, ConsensusRequest, AlgorithmMetadata, ValidationResult
 )
 
 
@@ -207,9 +206,9 @@ class ConsensusDataSerializer:
                 return target_type(**data)
                 
         except json.JSONDecodeError as e:
-            raise ValueError(f"JSON格式错误: {str(e)}")
+            raise ValueError(f"JSON格式错误: {str(e)}") from e
         except Exception as e:
-            raise ValueError(f"反序列化失败: {str(e)}")
+            raise ValueError(f"反序列化失败: {str(e)}") from e
             
     @staticmethod
     def _convert_datetime_fields(data: Dict[str, Any]) -> Dict[str, Any]:

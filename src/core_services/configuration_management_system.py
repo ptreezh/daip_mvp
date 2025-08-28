@@ -345,23 +345,16 @@ class ConfigurationManager:
         
         return asyncio.run(_load_remote())
     
-    def _merge_config(self, config_data: dict[str, Any], source: str):
+    def _merge_config(self, config_data: dict[str, Any], source: str, prefix: str = ""):
         """Merge configuration data with existing configuration."""
         for key, value in config_data.items():
+            full_key = f"{prefix}{key}" if prefix else key
             if isinstance(value, dict):
-                # Handle nested configuration
-                for sub_key, sub_value in value.items():
-                    full_key = f"{key}.{sub_key}"
-                    self.config_values[full_key] = ConfigValue(
-                        key=full_key,
-                        value=sub_value,
-                        type=type(sub_value).__name__,
-                        source=source,
-                        description=f"Merged from {source}"
-                    )
+                # Recursively handle nested configuration
+                self._merge_config(value, source, prefix=f"{full_key}.")
             else:
-                self.config_values[key] = ConfigValue(
-                    key=key,
+                self.config_values[full_key] = ConfigValue(
+                    key=full_key,
                     value=value,
                     type=type(value).__name__,
                     source=source,
@@ -392,6 +385,7 @@ class ConfigurationManager:
     def get(self, key: str, default: Any = None, required: bool = False) -> Any:
         """Get configuration value."""
         config_value = self.config_values.get(key)
+        print(f"DEBUG: config_values: {self.config_values}")
         
         if config_value is None:
             if required:

@@ -2,13 +2,10 @@
 System health check command for the DAIP CLI.
 """
 
-import asyncio
 import importlib.util
 import logging
 
 from rich.console import Console
-from rich.panel import Panel
-from rich.text import Text
 
 # Initialize console and logger
 console = Console()
@@ -30,9 +27,6 @@ for module in REQUIRED_MODULES:
 # Only import if dependencies are available
 if not MISSING_DEPENDENCIES:
     from src.app_state import AppState
-    from src.models import DebateConfig
-    from src.protocols.debate_protocol import DebateProtocol
-    from src.domain.entities import UserMessage
 
 
 def check_system_health():
@@ -80,7 +74,7 @@ def check_system_health():
     try:
         # Only attempt if dependencies are met
         if health_info["dependencies"]["status"] == "✅ Ready":
-            app_state = AppState()
+            AppState()  # Initialize AppState
             health_info["core_services"] = {"status": "✅ Initialized", "details": "Core services (AppState) initialized"}
         else:
             health_info["core_services"] = {"status": "⚠️  Skipped", "details": "Dependencies missing, skipping service init"}
@@ -99,7 +93,7 @@ def check_system_health():
     # 7. Wiki Service Check
     try:
         from src.core_services.wiki_service import WikiService
-        wiki_service = WikiService()
+        WikiService()  # Initialize WikiService
         health_info["wiki_service"] = {"status": "✅ Ready", "details": "Wiki service initialized"}
     except Exception as e:
         health_info["wiki_service"] = {"status": "❌ Error", "details": f"Wiki service error: {str(e)}"}

@@ -6,7 +6,7 @@
     all institutional primitive nodes for systematic fact validation.
 """
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from src.institutional_primitives.base import ExecutionContext
 from src.institutional_primitives.consensus_node import ConsensusNode

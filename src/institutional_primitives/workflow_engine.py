@@ -9,13 +9,13 @@ import asyncio
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
 from .parallel_execution import ParallelExecutionManager
 
-from .base import ExecutionContext, ExecutionStep, ExecutionTrace, InstitutionalPrimitive
+from .base import ExecutionContext, ExecutionStep, ExecutionTrace
 from .registry import PrimitiveRegistry
 from .parallel_execution import ParallelExecutionManager
 
@@ -670,7 +670,7 @@ class WorkflowEngine:
             node_context.mark_completed()
             
             return result
-        except Exception as e:
+        except Exception:
             # Mark as failed
             node_status[node_id] = "failed"
             node_context.mark_failed()
@@ -738,7 +738,7 @@ class WorkflowEngine:
                 
                 await self._execute_node(to_node, graph, context, trace, node_status, node_outputs)
         
-        except Exception as e:
+        except Exception:
             # Mark as failed
             node_status[node_id] = "failed"
             node_context.mark_failed()

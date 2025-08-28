@@ -307,6 +307,15 @@ class TestServiceHealthCheckErrorScenarios:
         # the API status is reported as ready when imports succeed
         from src.cli.debate_execution import check_system_health
         health_info = check_system_health()
+        
+        # Verify API status is ready when imports succeed
+        assert "✅ Ready" in health_info["core_services"]["status"]
+        
+        # Verify API status is ready when imports succeed
+        assert "✅ Ready" in health_info["core_services"]["status"]
+        
+        # Verify API status is ready when imports succeed
+        assert "✅ Ready" in health_info["core_services"]["status"]
 
         # The API should be ready since imports are working
         assert "✅ Connected" in health_info["api_connectivity"]["status"]

@@ -14,13 +14,11 @@
 import asyncio
 import time
 import sys
-import os
 import logging
-import subprocess
 import psutil
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
+from typing import Dict, List, Any
+from datetime import datetime
 import json
 
 # 添加项目根目录到路径
@@ -371,10 +369,9 @@ class ComprehensiveTestSuite:
         
         try:
             from multi_role_dialogue_engine import (
-                MultiRoleDialogueEngine, RoleSelector, ConversationManager, 
-                ConvergenceDetector, DialogueContext, DialogueTurn
+                MultiRoleDialogueEngine, ConvergenceDetector, DialogueContext
             )
-            from debate_flow_definition import DebateSession, ParticipantRole, DebatePhase
+            from debate_flow_definition import DebateSession, DebatePhase
             
             # 创建模拟组件
             class MockRoleManager:
@@ -507,8 +504,6 @@ class ComprehensiveTestSuite:
             startup_start = time.time()
             
             from multi_role_dialogue_engine import MultiRoleDialogueEngine
-            from debate_state_manager import DebateStateManager
-            from websocket_manager import DebateWebSocketManager
             
             startup_time = time.time() - startup_start
             

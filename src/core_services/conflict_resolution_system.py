@@ -499,7 +499,7 @@ class ConflictResolutionSystem:
         """Check if annotations overlap spatially"""
         # Simple overlap detection
         for i, ann1 in enumerate(annotations):
-            for j, ann2 in enumerate(annotations[i + 1:], i + 1):
+            for _, ann2 in enumerate(annotations[i + 1:], i + 1):
                 pos1 = ann1.get('position', {})
                 pos2 = ann2.get('position', {})
                 
@@ -648,7 +648,7 @@ class ConflictResolutionSystem:
             op_types[op_type].append(op)
             
         # Take latest operation of each type
-        for op_type, ops in op_types.items():
+        for _, ops in op_types.items():
             latest_op = max(ops, key=lambda x: x.get('timestamp', datetime.now()))
             merged_ops.append(latest_op)
             
@@ -736,7 +736,7 @@ class ConflictResolutionSystem:
                 # Get conflict from queue with timeout
                 try:
                     conflict = self.conflict_queue.get(timeout=1.0)
-                except:
+                except Exception:
                     continue
                     
                 # Process conflict in background

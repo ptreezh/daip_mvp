@@ -15,7 +15,6 @@ http://localhost:8080
 
 import asyncio
 import logging
-import os
 import sys
 from pathlib import Path
 

@@ -6,7 +6,7 @@ and enforcing debate rules within the DAIP-LIVE system.
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 from enum import Enum
 import time
@@ -725,11 +725,11 @@ class DebateRulePrimitive(InstitutionalPrimitive):
         """Generate enforcement actions for violations."""
         actions = []
         
-        # Group violations by severity
+        # Separate violations by severity
         critical_violations = [v for v in violations if v.severity == "critical"]
         high_violations = [v for v in violations if v.severity == "high"]
         medium_violations = [v for v in violations if v.severity == "medium"]
-        low_violations = [v for v in violations if v.severity == "low"]
+        # low_violations is not used, so we don't need to create it
         
         # Generate actions based on violation count and severity
         if critical_violations:

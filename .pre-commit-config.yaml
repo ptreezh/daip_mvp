@@ -9,26 +9,18 @@ repos:
     -   id: check-yaml
     -   id: check-added-large-files
 
--   repo: https://github.com/psf/black
-    rev: 24.4.2
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.0
     hooks:
-    -   id: black
-
--   repo: https://github.com/pycqa/pylint
-    rev: v3.1.0
-    hooks:
-    -   id: pylint
-        args:
-        - --rcfile=pyproject.toml
-        # You can add more specific paths here if needed, e.g., src/
-        files: \.py$
+    -   id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+    -   id: ruff-format
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.9.0
     hooks:
     -   id: mypy
         args: [--config-file=pyproject.toml]
-        # Exclude files if necessary, e.g., tests/
         exclude: ^(docs/|tests/)
 
 -   repo: local
@@ -39,4 +31,3 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
-        # This hook will block commits if any mandatory rules are violated

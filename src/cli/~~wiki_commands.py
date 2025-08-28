@@ -191,9 +191,9 @@
               typer.echo(f"Wiki page '{title}' created successfully with ID: {wiki_version.entry_name}")
           else:
               typer.echo(f"Failed to create wiki page '{title}'")
-              raise typer.Exit(1)
+              raise typer.Exit(1) from e
       except Exception as e:        typer.echo(f"Error creating wiki page: {e}")
-          raise typer.Exit(1)
+          raise typer.Exit(1) from e
 
   @app.command()def view( title_or_id: str = typer.Argument(..., help="The title or ID of the wiki page."),
   ):    """View a wiki page."""
@@ -230,7 +230,7 @@
               typer.echo(f"Failed to create edit proposal for '{title_or_id}'")            raise typer.Exit(1)
       except Exception as e:
           typer.echo(f"Error editing wiki page: {e}")
-          raise typer.Exit(1)
+          raise typer.Exit(1) from e
 
   @app.command()
   def delete(
@@ -243,7 +243,7 @@
           if not typer.confirm(f"Are you sure you want to delete the wiki page '{title_or_id}'? This action cannot be undone."):
   typer.echo("Deletion cancelled.") raise typer.Exit(0)    # Delete the wiki page    try: success = wiki_service.delete_entry(title_or_id) if
   success: typer.echo(f"Wiki page '{title_or_id}' deleted successfully.")        else: typer.echo(f"Failed to delete wiki page '{title_or_id}'.")
-              raise typer.Exit(1)
+              raise typer.Exit(1) from e
       except Exception as e:        typer.echo(f"Error deleting wiki page: {e}")        raise typer.Exit(1)@app.command()
   def search(
       keywords: str = typer.Argument(..., help="The keywords to search for."),
@@ -255,7 +255,7 @@
   for '{keywords}':") for i, result in enumerate(results, 1): typer.echo(f"{i}. {result}")
           else:            typer.echo(f"No results found for '{keywords}'.")    except Exception as e:        typer.echo(f"Error searching wiki
   pages: {e}")
-          raise typer.Exit(1)
+          raise typer.Exit(1) from e
 
   @app.command()def export( title_or_id: str = typer.Argument(..., help="The title or ID of the wiki page to export."), format: str =
   typer.Option("markdown", "--format", "-f", help="Export format (markdown, json, html, pdf)."),    output: str = typer.Option(None, "--output",
@@ -271,7 +271,7 @@
   Validate format supported_formats = ["markdown", "json", "html", "pdf"]    if format.lower() not in supported_formats:
           console.print(f"[red]❌ Unsupported format: {format}[/red]")
           console.print(f"[yellow]Supported formats: {', '.join(supported_formats)}[/yellow]")
-          raise typer.Exit(1)
+          raise typer.Exit(1) from e
   Export the wiki page
       try:        if format.lower() == "pdf":
   PDF export requires additional processing success = _export_to_pdf(wiki_service, title_or_id, output_path)
@@ -337,14 +337,14 @@
                   request, entry_name, "ai_content_generator"            )) if save_result["success"]:                console.print(f"[green]✅
   Content saved to wiki successfully![/green]") console.print(f"[dim]Wiki version: {save_result.get('wiki_version', 'N/A')}[/dim]")            else:
   console.print(f"[red]❌ Failed to save to wiki: {save_result.get('error', 'Unknown error')}[/red]")
-                  raise typer.Exit(1)
+                  raise typer.Exit(1) from e
   Ask user if they want to see full content
           if typer.confirm("Would you like to see the full generated content?"): console.print(f"\n[bold]📄 Full Generated Content:[/bold]")
               console.print(Panel(result.generated_content, title=f"Generated Content: {topic}", border_style="blue"))
 
       except Exception as e:
           console.print(f"[red]❌ Error generating content: {e}[/red]")
-          raise typer.Exit(1)@collaborate_app.command("capabilities")
+          raise typer.Exit(1) from e@collaborate_app.command("capabilities")
   def show_capabilities():
       """Show wiki content generation capabilities."""    from rich.console import Console from rich.table import Table    from rich.panel import
   Panel
@@ -383,7 +383,7 @@
 
           console.print(info_table)        console.print("\n[dim]✨ Content is generated through structured AI debates, ensuring multiple
   perspectives and high-quality output.[/dim]") except Exception as e:        console.print(f"[red]❌ Error showing capabilities: {e}[/red]")
-  raise typer.Exit(1)@collaborate_app.command("optimize")
+  raise typer.Exit(1) from e@collaborate_app.command("optimize")
   def optimize_intent(
       user_input: str = typer.Argument(..., help="User's raw input or request"),
       show_details: bool = typer.Option(False, "--details", "-d", help="Show detailed optimization process"),):
@@ -397,7 +397,7 @@
           optimizer = IntentOptimizer() # Optimize intent        optimization_result = asyncio.run(optimizer.optimize_user_intent(user_input)) if
   not optimization_result["success"]: console.print(f"[red]❌ Intent optimization failed: {optimization_result.get('error', 'Unknown
   error')}[/red]")
-              raise typer.Exit(1) # Display optimization results optimized_intent = optimization_result["optimized_intent"] confidence =
+              raise typer.Exit(1) from e # Display optimization results optimized_intent = optimization_result["optimized_intent"] confidence =
   optimization_result["confidence"]
           suggested_actions = optimization_result["suggested_actions"]
           console.print(f"\n[green]✅ Intent optimized successfully![/green]")
@@ -457,7 +457,7 @@
                       typer.echo(f"  - {entry}")            else: typer.echo("No wiki pages found.") else:
               typer.echo("Wiki directory does not exist.")
       except Exception as e:        typer.echo(f"Error listing wiki pages: {e}")
-          raise typer.Exit(1)
+          raise typer.Exit(1) from e
 
   @app.command()def approve( entry_name: str = typer.Argument(..., help="The name of the wiki entry."), proposal_id: str = typer.Argument(...,
   help="The ID of the edit proposal to approve."),):
@@ -470,10 +470,10 @@
           success = wiki_service.approve(entry_name, proposal_id) if success: typer.echo(f"Successfully approved and applied proposal
   '{proposal_id}' for entry '{entry_name}'.") else:
               typer.echo(f"Failed to approve proposal '{proposal_id}' for entry '{entry_name}'.")
-              raise typer.Exit(1)
+              raise typer.Exit(1) from e
       except Exception as e:
           typer.echo(f"Error approving edit proposal: {e}")
-          raise typer.Exit(1)
+          raise typer.Exit(1) from e
 
   @proposal_app.command(name="list")
   def list_proposals():    """List all pending edit proposals.""" # Get the wiki service    from src.cli.main import get_wiki_service
@@ -496,9 +496,9 @@
           success = wiki_service.reject(entry_name, proposal_id)
           if success: typer.echo(f"Successfully rejected proposal '{proposal_id}' for entry '{entry_name}'.")
           else:            typer.echo(f"Failed to reject proposal '{proposal_id}' for entry '{entry_name}'.")
-              raise typer.Exit(1)
+              raise typer.Exit(1) from e
       except Exception as e:        typer.echo(f"Error rejecting edit proposal: {e}")
-          raise typer.Exit(1)@collaborate_app.command()
+          raise typer.Exit(1) from e@collaborate_app.command()
   def update(    request: str = typer.Argument(..., help="The update request in natural language."),
   ): """Collaboratively update a wiki entry based on a natural language request."""
       try:        # 导入必要的模块 from src.cli.main import get_wiki_service        from src.core_services.role_manager import RoleManager

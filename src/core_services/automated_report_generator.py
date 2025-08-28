@@ -245,16 +245,14 @@ class AutomatedReportGenerator:
                     'status': 'active',
                     'request': request.to_dict()
                 }
-            elif request_id in self.completed_reports:
-                result = self.completed_reports.get(request_id)
-                if result:
-                    return {
-                        'status': 'completed',
-                        'result': result.to_dict()
-                    }
-                else:
-                    return {'status': 'not_found'}
             else:
+                # Search in completed reports by request_id
+                for report_id, result in self.completed_reports.items():
+                    if result.request_id == request_id:
+                        return {
+                            'status': 'completed',
+                            'result': result.to_dict()
+                        }
                 return {'status': 'not_found'}
                 
     async def download_report(self, report_id: str) -> Optional[str]:
@@ -552,7 +550,7 @@ class AutomatedReportGenerator:
             })
             
             # Render template
-            content = jinja_template.render(**data)
+            content = jinja_template.render(data=data)
             
             return content
             
@@ -583,7 +581,7 @@ class AutomatedReportGenerator:
                 </div>
                 <div class="section">
                     <h2>Report Data</h2>
-                    <pre>{json.dumps(data, indent=2)}</pre>
+                    <pre>{json.dumps(data, indent=2, default=str)}</pre>
                 </div>
             </body>
             </html>
@@ -596,7 +594,7 @@ class AutomatedReportGenerator:
 ## Report Data
 
 ```json
-{json.dumps(data, indent=2)}
+{json.dumps(data, indent=2, default=str)}
 ```
 """
         elif request.report_format == ReportFormat.JSON:
@@ -604,7 +602,7 @@ class AutomatedReportGenerator:
                 'report_type': request.report_type.value,
                 'generated_at': datetime.now().isoformat(),
                 'data': data
-            }, indent=2)
+            }, indent=2, default=str)
         else:
             return str(data)
             
@@ -701,9 +699,18 @@ class AutomatedReportGenerator:
                 logger.error(f"Error in completion handler: {e}")
                 
     # Template helper functions
-    def _format_datetime(self, dt: datetime) -> str:
+    def _format_datetime(self, dt: Any) -> str:
         """Format datetime for template"""
-        return dt.strftime('%Y-%m-%d %H:%M:%S')
+        if isinstance(dt, datetime):
+            return dt.strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(dt, str):
+            try:
+                # Attempt to parse ISO format string
+                parsed_dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
+                return parsed_dt.strftime('%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                return dt # Return original string if parsing fails
+        return str(dt) # Fallback for other types
         
     def _format_duration(self, seconds: float) -> str:
         """Format duration for template"""
@@ -733,7 +740,7 @@ class AutomatedReportGenerator:
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Report: {{ report_type }}</title>
+    <title>Report: {{ data.metadata.report_type }}</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; }
         .header { background: #f0f0f0; padding: 20px; margin-bottom: 20px; }
@@ -743,8 +750,8 @@ class AutomatedReportGenerator:
 </head>
 <body>
     <div class="header">
-        <h1>{{ report_type }}</h1>
-        <p>Generated: {{ format_datetime(metadata.generated_at) }}</p>
+        <h1>{{ data.metadata.report_type.replace('_', ' ').title() }}</h1>
+        <p>Generated: {{ format_datetime(data.metadata.generated_at) }}</p>
     </div>
     <div class="section">
         <h2>Report Data</h2>
@@ -785,33 +792,33 @@ class AutomatedReportGenerator:
 <body>
     <div class="header">
         <h1>Session Summary</h1>
-        <p>Session ID: {{ session_data.session_id }}</p>
-        <p>Generated: {{ format_datetime(metadata.generated_at) }}</p>
+        <p>Session ID: {{ data.session_data.session_id }}</p>
+        <p>Generated: {{ format_datetime(data.metadata.generated_at) }}</p>
     </div>
     
     <div class="stats">
         <div class="stat">
-            <div class="stat-value">{{ session_data.participants }}</div>
+            <div class="stat-value">{{ data.session_data.participants }}</div>
             <div class="stat-label">Participants</div>
         </div>
         <div class="stat">
-            <div class="stat-value">{{ session_data.comments }}</div>
+            <div class="stat-value">{{ data.session_data.comments }}</div>
             <div class="stat-label">Comments</div>
         </div>
         <div class="stat">
-            <div class="stat-value">{{ format_duration(session_data.duration) }}</div>
+            <div class="stat-value">{{ format_duration(data.session_data.duration) }}</div>
             <div class="stat-label">Duration</div>
         </div>
         <div class="stat">
-            <div class="stat-value">{{ session_data.resolutions }}</div>
+            <div class="stat-value">{{ data.session_data.resolutions }}</div>
             <div class="stat-label">Resolutions</div>
         </div>
     </div>
     
     <div class="section">
         <h2>Session Details</h2>
-        <p>This session had {{ session_data.participants }} participants who generated {{ session_data.comments }} comments over {{ format_duration(session_data.duration) }}.</p>
-        <p>{{ session_data.resolutions }} issues were successfully resolved during this session.</p>
+        <p>This session had {{ data.session_data.participants }} participants who generated {{ data.session_data.comments }} comments over {{ format_duration(data.session_data.duration) }}.</p>
+        <p>{{ data.session_data.resolutions }} issues were successfully resolved during this session.</p>
     </div>
 </body>
 </html>

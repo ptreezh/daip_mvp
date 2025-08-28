@@ -50,20 +50,15 @@ def list_workflows():
         raise typer.Exit(code=1)
 
 @workflow_app.command("create")
-def create_workflow(
-    definition_file: typer.FileText = typer.Option(
-        ..., 
-        "--definition-file", 
-        help="Path to the workflow definition JSON file.",
-        exists=True, 
-        file_okay=True, 
-        dir_okay=False, 
-        readable=True
-    )
-):
+def create_workflow(definition_file: typer.FileText = typer.Option(..., "--definition-file", help="Path to the workflow definition JSON file.")):
     """
     Create and register a new workflow from a definition file.
     """
+    # Add file validation
+    if not definition_file.name.endswith('.json'):
+        console.print("[red]Error: Definition file must be a JSON file.[/red]")
+        raise typer.Exit(code=1)
+        
     try:
         # Parse the JSON file
         try:
@@ -114,7 +109,7 @@ def select_workflow(
         if success:
             console.print(f"✅ Workflow '{workflow.name}' selected for '{scenario_type}'")
         else:
-            console.print(f"❌ Failed to select workflow")
+            console.print("❌ Failed to select workflow")
             
     except Exception as e:
         console.print(f"[red]An unexpected error occurred: {e}[/red]")

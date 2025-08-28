@@ -7,7 +7,6 @@
     Decorator for automatically integrating knowledge persistence into workflows.
 """
 import logging
-import asyncio
 import functools
 from typing import Any, Dict, Optional, Callable, Awaitable
 

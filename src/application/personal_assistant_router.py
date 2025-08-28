@@ -1,14 +1,15 @@
-from typing import Any, Dict, List, Optional
-import asyncio
+from typing import Any, Dict, List
 import logging
 import json
 from pathlib import Path
+from datetime import datetime, timedelta
 
 from src.core_services.integrated_llm_manager import IntegratedLLMManager
 from src.core_services.intent_analysis_service import BasicIntentAnalysisService
 from src.institutional_primitives.workflow_engine import WorkflowEngine, WorkflowDefinition
 from src.core_services.task_manager import TaskManager # Assuming TaskManager exists
 from src.domain.domain_services import UserInterventionService # Import UserInterventionService
+from src.domain.aggregates import SessionAggregate
 
 logger = logging.getLogger(__name__)
 
@@ -215,7 +216,7 @@ class PersonalAssistantRouter:
             session_aggregate = SessionAggregate.from_dict(session_data)
             self.sessions[session_aggregate.session_id] = session_aggregate
         except Exception as e:
-            raise ValueError(f"Invalid session data: {e}")
+            raise ValueError(f"Invalid session data: {e}") from e
 
     def cleanup_expired_sessions(self, timeout_hours: int = 24):
         """清理过期会话"""

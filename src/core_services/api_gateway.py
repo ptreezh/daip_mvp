@@ -8,6 +8,7 @@
 
 import asyncio
 import hashlib
+import json
 import logging
 import time
 import uuid
@@ -370,7 +371,7 @@ class APIGateway:
             if request.method in ["POST", "PUT", "PATCH"]:
                 try:
                     gateway_request.body = await request.json()
-                except:
+                except (aiohttp.ContentTypeError, json.decoder.JSONDecodeError):
                     gateway_request.body = await request.text()
             
             # Route request
@@ -481,7 +482,7 @@ class APIGateway:
             return self.routes[route_key]
         
         # Pattern matching
-        for route_key, route_config in self.routes.items():
+        for _, route_config in self.routes.items():
             if self._path_matches(path, route_config.path):
                 return route_config
         

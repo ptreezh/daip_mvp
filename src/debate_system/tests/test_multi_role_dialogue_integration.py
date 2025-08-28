@@ -9,7 +9,7 @@
 import asyncio
 import unittest
 import logging
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import Mock, AsyncMock
 from datetime import datetime
 import sys
 import os
@@ -18,13 +18,11 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
 
 from src.debate_system.multi_role_dialogue_engine import (
-    MultiRoleDialogueEngine, RoleSelector, ConversationManager, 
-    ConvergenceDetector, DialogueState, ConversationTurn, RoleContext
+    MultiRoleDialogueEngine, DialogueState, ConversationTurn, RoleContext
 )
 from src.debate_system.debate_flow_definition import (
-    DebateSession, DebateRules, DebateParticipant, ParticipantRole, DebatePhase
+    DebateSession, ParticipantRole, DebatePhase
 )
-from src.debate_system.participant_management import ParticipantManager
 
 
 class TestMultiRoleDialogueIntegration(unittest.TestCase):

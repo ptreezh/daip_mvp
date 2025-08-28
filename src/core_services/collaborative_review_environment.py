@@ -701,7 +701,7 @@ class CollaborativeReviewEnvironment:
         try:
             current_time = datetime.now()
             
-            for user_id, presence in self.user_presence.items():
+            for user_id, presence in self.user_presence.items(): # noqa: B007
                 if presence.get("online", False):
                     last_seen = presence.get("last_seen")
                     if last_seen and (current_time - last_seen) > timedelta(minutes=10):

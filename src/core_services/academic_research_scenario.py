@@ -16,6 +16,21 @@ from .collaborative_review_environment import CollaborativeReviewEnvironment, Re
 from .conflict_resolution_system import ConflictResolutionSystem
 from .multidimensional_assessment_engine import MultiDimensionalAssessmentEngine
 from .smart_reviewer_allocator_simple import SmartReviewerAllocator
+try:
+    from .expert_consultation_scenario import AssessmentRequest
+except ImportError:
+    # Fallback definition if import fails
+    from dataclasses import dataclass
+    from typing import Any
+    
+    @dataclass
+    class AssessmentRequest:
+        id: str
+        content: str
+        assessment_type: str
+        dimensions: list[str]
+        context: dict[str, Any]
+
 
 
 class ResearchType(Enum):

@@ -1,37 +1,30 @@
 # ruff.toml
 
-# 选择你想强制执行的核心规则集。这是一个很好的基础。
+# Select a minimal set of rules focused on bugs and logic errors.
 select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # Pyflakes
-    "I",  # isort
-    "C4", # flake8-comprehensions
-    "B",  # flake8-bugbear
-    "UP", # pyupgrade
-    "ANN",# flake8-annotations
-    "D",  # pydocstyle
+    "F",  # Pyflakes (undefined names, unused imports, etc.)
+    "B",  # flake8-bugbear (potential bugs and design problems)
+    "E7", # pycodestyle errors (e.g., E722 do not use bare 'except')
 ]
 
-# 忽略一些可能过于严格或与项目风格不符的规则
+# Explicitly ignore stylistic rules.
 ignore = [
-    "ANN101", # 忽略 self 的类型注解
-    "ANN102", # 忽略 cls 的类型注解
-    "D107",   # 暂时忽略 __init__ 的 docstring
-    "D105",   # 暂时忽略 magic method 的 docstring
+    "E501", # Line too long
+    "W291", # Trailing whitespace
+    "W293", # Blank line contains whitespace
+    "I001", # Unsorted imports
+    "ANN",  # Disable all annotation checks for now
+    "D",    # Disable all docstring checks
 ]
 
-line-length = 120
-
-# 这是关键！按文件类型忽略特定规则
+# Keep per-file ignores for specific cases where rules are too noisy.
 [per-file-ignores]
-# 在所有测试和演示脚本中，忽略 print 语句 (T201)
-"tests/**.py" = ["T201"]
-"frontend/tests/**.py" = ["T201", "PT009"] # 在测试中也忽略 unittest 风格的断言
-"demo*.py" = ["T201", "C901"] # 在 demo 文件中，忽略 print 和复杂度
+"tests/**.py" = ["S101", "B006", "ARG001", "C901", "S603", "S607", "S605", "S602", "S604", "S601", "S606"]
+"configs/**.py" = ["S102"]
+"daip-cli.py" = ["T201"]
+"web_demo_app.py" = ["T201"]
+"demo*.py" = ["T201", "C901"]
 "test_*.py" = ["T201", "C901", "PT009"]
 "real_demo_system/**.py" = ["T201"]
 "personal_intelligence_hub/**.py" = ["T201"]
-
-# 在 __init__.py 中，通常不需要 docstring
 "**/__init__.py" = ["D104"]

@@ -8,24 +8,16 @@
     Tests requirements 7.4, 7.5, 7.6, 7.7 for task 11.2.
 """
 import pytest
-import asyncio
-import time
-from datetime import datetime
-from typing import Dict, Any, List
 
 from .role_customization import (
-    RoleConfigurationManager, RoleConfiguration, RoleTemplate,
-    ExpertiseProfile, RolePersonality, RolePromptTemplate,
+    RoleConfigurationManager, RoleConfiguration, ExpertiseProfile, RolePersonality, RolePromptTemplate,
     ExpertiseLevel, CognitiveStyle, InteractionMode
 )
 from .consensus_customization import (
-    ConsensusManager, ConsensusInput, ConsensusConfiguration,
-    ConsensusType, VotingStrategy, EvidenceWeightingStrategy,
-    ConsensusResult
+    ConsensusManager, ConsensusInput
 )
 from .performance_optimization import (
-    PerformanceOptimizationManager, PerformanceProfiler, ConfigurationValidator,
-    PerformanceMetricType, BottleneckType
+    PerformanceOptimizationManager, PerformanceMetricType
 )
 
 

@@ -8,8 +8,9 @@
 
 import logging
 import uuid
-from typing import Any, Dict, List, Optional, Tuple
-from datetime import datetime, timedelta
+from typing import Any, Dict, List
+from src.core_services.consensus_dispatcher import UnifiedConsensusDispatcher
+from datetime import datetime
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -38,8 +39,9 @@ class ConflictType(str, Enum):
 class ConsensusFormationProcess:
     """共识形成过程管理器"""
     
-    def __init__(self):
+    def __init__(self, dispatcher: UnifiedConsensusDispatcher):
         """初始化共识形成过程管理器"""
+        self.dispatcher = dispatcher
         self.formation_stages = list(FormationStage)
         self.process_history = []
         self.active_processes = {}

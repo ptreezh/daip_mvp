@@ -71,7 +71,7 @@ def _load_debate_results(debate_id: str) -> Optional[Dict[str, Any]]:
         possible_files = [
             f"{debate_id}.json",
             f"debate_results_{debate_id}.json",
-            f"debate_results.txt",
+            "debate_results.txt",
             "debate_results.json"
         ]
         
@@ -467,7 +467,7 @@ def view_debate_disagreements(debate_id: str) -> bool:
         if consensus:
             console.print(f"\n[green]🎯 Despite disagreements, the debate reached consensus: {consensus}[/green]")
         else:
-            console.print(f"\n[yellow]⚠️  No final consensus was reached due to these disagreements[/yellow]")
+            console.print("\n[yellow]⚠️  No final consensus was reached due to these disagreements[/yellow]")
         
         return True
         
@@ -514,7 +514,7 @@ def select_consensus_algorithm(debate_id: str, algorithm_name: str) -> bool:
         
         # Save updated debate results
         if _save_debate_results(debate_id, debate_results):
-            console.print(f"[green]✅ Consensus algorithm updated successfully[/green]")
+            console.print("[green]✅ Consensus algorithm updated successfully[/green]")
             console.print(f"[dim]Previous: {old_algorithm} → New: {algorithm_name}[/dim]")
             
             if new_consensus:
@@ -522,7 +522,7 @@ def select_consensus_algorithm(debate_id: str, algorithm_name: str) -> bool:
             
             return True
         else:
-            console.print(f"[red]❌ Failed to save updated debate results[/red]")
+            console.print("[red]❌ Failed to save updated debate results[/red]")
             return False
             
     except Exception as e:

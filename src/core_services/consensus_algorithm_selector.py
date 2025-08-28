@@ -12,6 +12,7 @@ Requirements: 11.4, 11.5, 11.8, 11.10
 
 import logging
 from typing import Any, Dict, List, Optional, Type
+from src.core_services.consensus_models import AlgorithmSelection
 from dataclasses import dataclass
 from enum import Enum
 
@@ -184,7 +185,7 @@ class ConsensusAlgorithmSelector:
         self,
         inputs: List[ConsensusInput],
         context: Optional[Dict[str, Any]] = None
-    ) -> ConsensusAlgorithmType:
+    ) -> AlgorithmSelection:
         """Select the most appropriate consensus algorithm."""
         self.logger.info(f"Selecting consensus algorithm for {len(inputs)} inputs")
         
@@ -199,7 +200,14 @@ class ConsensusAlgorithmSelector:
         
         self.logger.info(f"Selected algorithm: {best_algorithm.value} (score: {algorithm_scores[best_algorithm]:.3f})")
         
-        return best_algorithm
+        # Return AlgorithmSelection object
+        return AlgorithmSelection(
+            algorithm_id=best_algorithm.value,
+            confidence=algorithm_scores[best_algorithm],
+            reasoning="Based on context analysis and historical performance",
+            alternatives=[algo.value for algo in algorithm_scores if algo != best_algorithm][:2],
+            selection_time=0.0 # Placeholder, actual time can be calculated
+        )
     
     def _analyze_context(
         self,
@@ -418,7 +426,10 @@ class ConsensusAlgorithmSelector:
         context: SelectionContext
     ) -> AdvancedConsensusAlgorithm:
         """Create an instance of the selected algorithm with optimized parameters."""
-        algorithm_class = self.algorithms[algorithm_type]
+        algorithm_class = self.algorithms.get(algorithm_type)
+        
+        if algorithm_class is None:
+            raise ValueError(f"Unknown algorithm type: {algorithm_type}")
         
         # Create algorithm with context-optimized parameters
         if algorithm_type == ConsensusAlgorithmType.WEIGHTED_VOTING:
@@ -463,7 +474,7 @@ class ConsensusAlgorithmSelector:
         performance_score = 0.0
         
         # Confidence level contributes to performance
-        performance_score += result.confidence_level * 0.4
+        performance_score += result.confidence * 0.4
         
         # Diversity preservation contributes to performance
         performance_score += result.diversity_score * 0.3
@@ -473,7 +484,7 @@ class ConsensusAlgorithmSelector:
             performance_score += user_satisfaction * 0.3
         else:
             # Default satisfaction based on confidence and diversity
-            performance_score += (result.confidence_level + result.diversity_score) / 2 * 0.3
+            performance_score += (result.confidence + result.diversity_score) / 2 * 0.3
         
         # Record the performance
         self.performance_tracker.record_performance(

@@ -15,8 +15,7 @@
 """
 
 import asyncio
-import json
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
@@ -41,10 +40,9 @@ except ImportError:
         pass
 
 from .debate_flow_definition import (
-    DebateSession, DebateRound, DebateContribution, 
-    DebatePhase, ParticipantRole, DebateParticipant
+    DebateSession, DebatePhase, ParticipantRole
 )
-from .participant_management import ParticipantManager, Permission, ActionType
+from .participant_management import ParticipantManager
 
 
 class DialogueState(Enum):

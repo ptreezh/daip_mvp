@@ -31,29 +31,7 @@ class ConsensusAlgorithmType(str, Enum):
     MULTI_CRITERIA_DECISION = "multi_criteria_decision"
 
 
-@dataclass
-class ConsensusInput:
-    """Input data for consensus algorithms."""
-    agent_id: str
-    position: Union[str, float, dict[str, Any]]
-    confidence: float
-    reasoning: Optional[str] = None
-    evidence: Optional[list[str]] = None
-    cognitive_profile: Optional[dict[str, Any]] = None
-    timestamp: Optional[datetime] = None
-
-
-@dataclass
-class ConsensusResult:
-    """Result of consensus algorithm execution."""
-    consensus_value: Union[str, float, dict[str, Any]]
-    confidence_level: float
-    algorithm_used: ConsensusAlgorithmType
-    participant_count: int
-    diversity_score: float
-    emergent_insights: list[str]
-    reasoning_trace: dict[str, Any]
-    timestamp: datetime
+from src.core_services.consensus_models import ConsensusResult, ConsensusInput, AlgorithmType as ConsensusAlgorithmType
 
 
 class EmergentInsight(BaseModel):
@@ -129,7 +107,7 @@ class AdvancedConsensusAlgorithm(ABC):
         """Detect contradictory positions in inputs."""
         contradictions = []
         for i, input1 in enumerate(inputs):
-            for j, input2 in enumerate(inputs[i+1:], i+1):
+            for _, input2 in enumerate(inputs[i+1:], i+1):
                 if self._are_contradictory(input1, input2):
                     contradictions.append((input1, input2))
         return contradictions
@@ -246,15 +224,15 @@ class WeightedVotingConsensus(AdvancedConsensusAlgorithm):
         # Detect emergent insights
         result = ConsensusResult(
             consensus_value=consensus_value,
-            confidence_level=confidence_level,
-            algorithm_used=self.algorithm_type,
-            participant_count=len(inputs),
+            confidence=confidence_level,
+            algorithm_used=self.algorithm_type.value,
+            participants=[inp.agent_id for inp in inputs],
             diversity_score=diversity_score,
-            emergent_insights=[],
             reasoning_trace={
                 "weights": weights,
                 "method": "weighted_voting"
             },
+            metadata={},
             timestamp=datetime.now()
         )
         
@@ -519,15 +497,15 @@ class BayesianConsensus(AdvancedConsensusAlgorithm):
         
         result = ConsensusResult(
             consensus_value=consensus_value,
-            confidence_level=confidence,
-            algorithm_used=self.algorithm_type,
-            participant_count=len(inputs),
+            confidence=confidence,
+            algorithm_used=self.algorithm_type.value,
+            participants=[inp.agent_id for inp in inputs],
             diversity_score=diversity_score,
-            emergent_insights=[],
             reasoning_trace={
                 "method": "bayesian_updating",
                 "prior_strength": self.prior_strength
             },
+            metadata={},
             timestamp=datetime.now()
         )
         
@@ -646,16 +624,16 @@ class CognitiveDiversityPreservingConsensus(AdvancedConsensusAlgorithm):
         
         result = ConsensusResult(
             consensus_value=consensus_value,
-            confidence_level=confidence_level,
-            algorithm_used=self.algorithm_type,
-            participant_count=len(inputs),
+            confidence=confidence_level,
+            algorithm_used=self.algorithm_type.value,
+            participants=[inp.agent_id for inp in inputs],
             diversity_score=diversity_score,
-            emergent_insights=[],
             reasoning_trace={
                 "method": "diversity_preserving",
                 "clusters": len(cognitive_clusters),
                 "diversity_bonus": diversity_bonus
             },
+            metadata={},
             timestamp=datetime.now()
         )
         
@@ -831,7 +809,6 @@ class CognitiveDiversityPreservingConsensus(AdvancedConsensusAlgorithm):
         elif isinstance(representatives[0].position, (int, float)):
             # Weighted average with diversity consideration
             positions = [rep.position for rep in representatives]
-            confidences = [rep.confidence for rep in representatives]
             
             # Give equal weight to each cluster representative
             return sum(positions) / len(positions)

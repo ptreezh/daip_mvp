@@ -18,6 +18,13 @@ from ..domain.domain_services import (
     UserInterventionService,
     WorkflowOrchestratorService,
 )
+from ..infrastructure.database import (
+    UserRepository,
+    SessionRepository,
+    TaskRepository,
+    MessageRepository,
+    DebateRepository,
+)
 from ..domain.entities import User
 from ..domain.value_objects import (
     EntranceType,
@@ -171,7 +178,7 @@ class CreateSessionUseCase(BaseUseCase):
                 )
                 
                 # 保存会话到数据库
-                session_record = await session_repo.create_session(
+                await session_repo.create_session(
                     session_id=session_aggregate.session_id,
                     user_id=user_id,
                     entrance_type=selected_entrance.value,
@@ -243,7 +250,7 @@ class CreateTaskUseCase(BaseUseCase):
                     task_aggregate.set_priority(priority)
                 
                 # 保存任务到数据库
-                task_record = await task_repo.create_task(
+                await task_repo.create_task(
                     task_id=task_aggregate.task_id,
                     session_id=session_id,
                     content=content,
@@ -349,7 +356,7 @@ class ProcessMessageUseCase(BaseUseCase):
                     )
                 
                 # 保存消息到数据库
-                message_record = await message_repo.create_message(
+                await message_repo.create_message(
                     message_id=message.message_id,
                     session_id=session_id,
                     content=optimized_content,
@@ -433,7 +440,7 @@ class StartDebateUseCase(BaseUseCase):
                     debate_aggregate.add_participant(participant)
                 
                 # 保存辩论到数据库
-                debate_record = await debate_repo.create_debate(
+                await debate_repo.create_debate(
                     debate_id=debate_aggregate.debate_id,
                     session_id=session_id,
                     topic=topic,
@@ -605,8 +612,8 @@ class ExecuteTaskUseCase(BaseUseCase):
                 async with self.db_manager.get_session() as session:
                     task_repo = TaskRepository(session)
                     await task_repo.update_task_status(task_id, TaskStatus.FAILED.value)
-            except:
-                pass
+            except Exception as inner_e:
+                self.logger.error(f"Error updating task status to failed: {inner_e}")
             
             return UseCaseResult(False, error=str(e))
 

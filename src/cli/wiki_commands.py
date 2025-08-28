@@ -222,7 +222,7 @@ def create(
                 content = f.read()
         except Exception as e:
             typer.echo(f"Error reading file {file}: {e}")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     
     # Parse tags
     tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
@@ -240,10 +240,10 @@ def create(
             typer.echo(f"Wiki page '{title}' created successfully with ID: {wiki_version.entry_name}")
         else:
             typer.echo(f"Failed to create wiki page '{title}'")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error creating wiki page: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -267,10 +267,10 @@ def view(
             typer.echo(f"Version: {wiki_version.version}")
         else:
             typer.echo(f"Wiki page '{title_or_id}' not found.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error viewing wiki page: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -291,7 +291,7 @@ def edit(
                 content = f.read()
         except Exception as e:
             typer.echo(f"Error reading file {file}: {e}")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     
     # Edit the wiki page using the service
     try:
@@ -307,10 +307,10 @@ def edit(
             typer.echo("Note: This edit is proposed and needs to be applied by a wiki administrator.")
         else:
             typer.echo(f"Failed to create edit proposal for '{title_or_id}'")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error editing wiki page: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -327,7 +327,7 @@ def delete(
     if not confirm:
         if not typer.confirm(f"Are you sure you want to delete the wiki page '{title_or_id}'? This action cannot be undone."):
             typer.echo("Deletion cancelled.")
-            raise typer.Exit(0)
+            raise typer.Exit(0) from e
     
     # Delete the wiki page
     try:
@@ -339,7 +339,7 @@ def delete(
             raise typer.Exit(1)
     except Exception as e:
         typer.echo(f"Error deleting wiki page: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -363,7 +363,7 @@ def search(
             typer.echo(f"No results found for '{keywords}'.")
     except Exception as e:
         typer.echo(f"Error searching wiki pages: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -392,7 +392,7 @@ def export(
     if format.lower() not in supported_formats:
         console.print(f"[red]❌ Unsupported format: {format}[/red]")
         console.print(f"[yellow]Supported formats: {', '.join(supported_formats)}[/yellow]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     
     # Export the wiki page
     try:
@@ -419,7 +419,7 @@ def export(
     except Exception as e:
         console.print(f"[red]ERROR: Error exporting wiki page: {e}[/red]")
         logging.error(f"Wiki export failed: {e}", exc_info=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @collaborate_app.command("generate")
@@ -471,7 +471,7 @@ def generate_content(
         
         if not result.success:
             console.print(f"[red]❌ Content generation failed: {result.error_message}[/red]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         
         # Display generation results
         console.print(f"[green]✅ Content generated successfully![/green]")
@@ -526,7 +526,7 @@ def generate_content(
         
     except Exception as e:
         console.print(f"[red]❌ Error generating content: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 
@@ -560,7 +560,7 @@ def optimize_intent(
         
         if not optimization_result["success"]:
             console.print(f"[red]❌ Intent optimization failed: {optimization_result.get('error', 'Unknown error')}[/red]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         
         # Display optimization results
         optimized_intent = optimization_result["optimized_intent"]
@@ -636,7 +636,7 @@ def optimize_intent(
         
     except Exception as e:
         console.print(f"[red]❌ Error optimizing intent: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -664,7 +664,7 @@ def list():
             typer.echo("Wiki directory does not exist.")
     except Exception as e:
         typer.echo(f"Error listing wiki pages: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -684,10 +684,10 @@ def approve(
             typer.echo(f"Successfully approved and applied proposal '{proposal_id}' for entry '{entry_name}'.")
         else:
             typer.echo(f"Failed to approve proposal '{proposal_id}' for entry '{entry_name}'.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error approving edit proposal: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @proposal_app.command(name="list")
@@ -713,7 +713,7 @@ def list_proposals():
             typer.echo("No pending edit proposals found.")
     except Exception as e:
         typer.echo(f"Error listing edit proposals: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @proposal_app.command(name="reject")
@@ -733,10 +733,10 @@ def reject_proposal(
             typer.echo(f"Successfully rejected proposal '{proposal_id}' for entry '{entry_name}'.")
         else:
             typer.echo(f"Failed to reject proposal '{proposal_id}' for entry '{entry_name}'.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error rejecting edit proposal: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @collaborate_app.command()
@@ -784,13 +784,13 @@ def update(
             typer.echo("✅ 词条更新已完成！")
         elif status.get("status") == "failed":
             typer.echo("❌ 词条更新失败，请稍后重试。")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         else:
             typer.echo("⚠️  词条更新状态未知。")
             
     except Exception as e:
         typer.echo(f"❌ 处理请求时出错: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @collaborate_app.command()
@@ -809,7 +809,7 @@ def debate(
         
         if "error" in result:
             typer.echo(f"[ERROR] 发起辩论失败: {result['error']}")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         else:
             typer.echo(f"[SUCCESS] 辩论已发起: {result['message']}")
             typer.echo(f"   话题: {result['topic']}")
@@ -817,7 +817,7 @@ def debate(
             
     except Exception as e:
         typer.echo(f"[ERROR] 处理请求时出错: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 if __name__ == "__main__":
@@ -845,7 +845,7 @@ def create(
                 content = f.read()
         except Exception as e:
             typer.echo(f"Error reading file {file}: {e}")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     
     # Parse tags
     tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
@@ -863,10 +863,10 @@ def create(
             typer.echo(f"Wiki page '{title}' created successfully with ID: {wiki_version.entry_name}")
         else:
             typer.echo(f"Failed to create wiki page '{title}'")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error creating wiki page: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -890,10 +890,10 @@ def view(
             typer.echo(f"Version: {wiki_version.version}")
         else:
             typer.echo(f"Wiki page '{title_or_id}' not found.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error viewing wiki page: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -914,7 +914,7 @@ def edit(
                 content = f.read()
         except Exception as e:
             typer.echo(f"Error reading file {file}: {e}")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     
     # Edit the wiki page using the service
     try:
@@ -930,10 +930,10 @@ def edit(
             typer.echo("Note: This edit is proposed and needs to be applied by a wiki administrator.")
         else:
             typer.echo(f"Failed to create edit proposal for '{title_or_id}'")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error editing wiki page: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -950,7 +950,7 @@ def delete(
     if not confirm:
         if not typer.confirm(f"Are you sure you want to delete the wiki page '{title_or_id}'? This action cannot be undone."):
             typer.echo("Deletion cancelled.")
-            raise typer.Exit(0)
+            raise typer.Exit(0) from e
     
     # Delete the wiki page
     try:
@@ -962,7 +962,7 @@ def delete(
             raise typer.Exit(1)
     except Exception as e:
         typer.echo(f"Error deleting wiki page: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -986,7 +986,7 @@ def search(
             typer.echo(f"No results found for '{keywords}'.")
     except Exception as e:
         typer.echo(f"Error searching wiki pages: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -1015,7 +1015,7 @@ def export(
     if format.lower() not in supported_formats:
         console.print(f"[red]❌ Unsupported format: {format}[/red]")
         console.print(f"[yellow]Supported formats: {', '.join(supported_formats)}[/yellow]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     
     # Export the wiki page
     try:
@@ -1042,7 +1042,7 @@ def export(
     except Exception as e:
         console.print(f"[red]ERROR: Error exporting wiki page: {e}[/red]")
         logging.error(f"Wiki export failed: {e}", exc_info=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @collaborate_app.command("generate")
@@ -1094,7 +1094,7 @@ def generate_content(
         
         if not result.success:
             console.print(f"[red]❌ Content generation failed: {result.error_message}[/red]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         
         # Display generation results
         console.print(f"[green]✅ Content generated successfully![/green]")
@@ -1149,7 +1149,7 @@ def generate_content(
         
     except Exception as e:
         console.print(f"[red]❌ Error generating content: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 
@@ -1183,7 +1183,7 @@ def optimize_intent(
         
         if not optimization_result["success"]:
             console.print(f"[red]❌ Intent optimization failed: {optimization_result.get('error', 'Unknown error')}[/red]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         
         # Display optimization results
         optimized_intent = optimization_result["optimized_intent"]
@@ -1259,7 +1259,7 @@ def optimize_intent(
         
     except Exception as e:
         console.print(f"[red]❌ Error optimizing intent: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -1287,7 +1287,7 @@ def list():
             typer.echo("Wiki directory does not exist.")
     except Exception as e:
         typer.echo(f"Error listing wiki pages: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -1307,10 +1307,10 @@ def approve(
             typer.echo(f"Successfully approved and applied proposal '{proposal_id}' for entry '{entry_name}'.")
         else:
             typer.echo(f"Failed to approve proposal '{proposal_id}' for entry '{entry_name}'.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error approving edit proposal: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @proposal_app.command(name="list")
@@ -1336,7 +1336,7 @@ def list_proposals():
             typer.echo("No pending edit proposals found.")
     except Exception as e:
         typer.echo(f"Error listing edit proposals: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @proposal_app.command(name="reject")
@@ -1356,10 +1356,10 @@ def reject_proposal(
             typer.echo(f"Successfully rejected proposal '{proposal_id}' for entry '{entry_name}'.")
         else:
             typer.echo(f"Failed to reject proposal '{proposal_id}' for entry '{entry_name}'.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error rejecting edit proposal: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @collaborate_app.command()
@@ -1407,13 +1407,13 @@ def update(
             typer.echo("✅ 词条更新已完成！")
         elif status.get("status") == "failed":
             typer.echo("❌ 词条更新失败，请稍后重试。")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         else:
             typer.echo("⚠️  词条更新状态未知。")
             
     except Exception as e:
         typer.echo(f"❌ 处理请求时出错: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @collaborate_app.command()
@@ -1432,7 +1432,7 @@ def debate(
         
         if "error" in result:
             typer.echo(f"[ERROR] 发起辩论失败: {result['error']}")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         else:
             typer.echo(f"[SUCCESS] 辩论已发起: {result['message']}")
             typer.echo(f"   话题: {result['topic']}")
@@ -1440,7 +1440,7 @@ def debate(
             
     except Exception as e:
         typer.echo(f"[ERROR] 处理请求时出错: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 if __name__ == "__main__":

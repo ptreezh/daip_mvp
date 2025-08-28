@@ -1,1 +1,0 @@
-This is a test page for Gemini CLI verification.

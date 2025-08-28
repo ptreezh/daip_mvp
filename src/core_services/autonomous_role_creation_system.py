@@ -443,10 +443,9 @@ class RoleIntelligenceEngine(IRoleIntelligenceEngine):
         object_words = ["系统", "产品", "策略", "方案", "技术", "数据", "流程", "团队"]
         
         keywords = []
-        task_lower = task_description.lower()
         
         for word in action_words + object_words:
-            if word in task_description:
+            if word in task_description.lower():
                 keywords.append(word)
         
         return keywords
@@ -839,8 +838,6 @@ class RoleTemplateGenerator(IRoleTemplateGenerator):
             # 使用通用模板
             base_template_key = list(self.role_templates.keys())[0]
         
-        base_template = self.role_templates.get(base_template_key, {})
-        
         # 生成模板内容
         template_content = self.system_prompt_templates.get(role_type.value, "")
         
@@ -960,9 +957,9 @@ class RoleValidator(IRoleValidator):
         }
         
         # 检查必需字段
-        for field in self.validation_rules["required_fields"]:
-            if not hasattr(role, field) or not getattr(role, field):
-                validation_result["errors"].append(f"缺少必需字段: {field}")
+        for required_field in self.validation_rules["required_fields"]:
+            if not hasattr(role, required_field) or not getattr(role, required_field):
+                validation_result["errors"].append(f"缺少必需字段: {required_field}")
                 validation_result["is_valid"] = False
         
         # 验证角色名称

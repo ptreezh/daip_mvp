@@ -65,7 +65,7 @@ def message(
                 if success:
                     typer.echo(f"Message sent to current room ({current_room}): {content}")
                 else:
-                    typer.echo(f"Failed to send message to current room. There may be no active session.")
+                    typer.echo("Failed to send message to current room. There may be no active session.")
             else:
                 typer.echo("No current chat room is active. Please specify a room ID or start a new chat room.")
     except Exception as e:
@@ -265,7 +265,7 @@ def consensus(
 
 
 @app.command()
-def rules():
+def list_rules():
     """Show available chat rules/primitives."""
     # Get the chat coordinator
     coordinator = get_chat_coordinator()
@@ -373,7 +373,7 @@ def rules(
         room = coordinator.chat_room_manager.get_chat_room(room_id)
         if not room:
             typer.echo(f"Chat room with ID '{room_id}' not found.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         
         # Update interaction mode if provided
         updated = False
@@ -382,7 +382,7 @@ def rules(
             valid_modes = ["free_form", "structured", "debate", "turn_based", "random"]
             if mode not in valid_modes:
                 typer.echo(f"Invalid mode: {mode}. Valid modes are: {', '.join(valid_modes)}")
-                raise typer.Exit(1)
+                raise typer.Exit(1) from e
                 
             room.config.mode = mode
             updated = True
@@ -406,7 +406,7 @@ def rules(
             
     except Exception as e:
         typer.echo(f"Error configuring chat room rules: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -444,7 +444,7 @@ def test_rules(
         room = coordinator.chat_room_manager.get_chat_room(room_id)
         if not room:
             typer.echo(f"Chat room with ID '{room_id}' not found.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         
         typer.echo(f"Testing chat room rules for '{room_id}' with mode: {room.config.mode}")
         typer.echo(f"Debug mode: {'enabled' if debug else 'disabled'}")
@@ -487,7 +487,7 @@ def test_rules(
                 
     except Exception as e:
         typer.echo(f"Error testing chat room rules: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 if __name__ == "__main__":

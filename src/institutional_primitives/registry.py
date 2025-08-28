@@ -7,11 +7,9 @@ for their registration, discovery, and instantiation.
 
 import json
 import logging
-import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type
 
-from pydantic import BaseModel
 
 from .base import InstitutionalPrimitive, PrimitiveInfo, ValidationResult
 

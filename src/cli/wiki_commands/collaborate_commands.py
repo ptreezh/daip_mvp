@@ -9,7 +9,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from rich.text import Text
+from rich.progress import Progress, SpinnerColumn, TextColumn
 import asyncio
 
 app = typer.Typer(help="Collaborative wiki features.")
@@ -62,7 +62,7 @@ def generate_content(
             raise typer.Exit(1)
         
         # Display generation results
-        console.print(f"[green]✅ Content generated successfully![/green]")
+        console.print("[green]✅ Content generated successfully![/green]")
         console.print(f"[dim]Content length: {len(result.generated_content)} characters[/dim]")
         console.print(f"[dim]Generation time: {result.generation_time:.2f} seconds[/dim]")
         
@@ -99,7 +99,7 @@ def generate_content(
             ))
             
             if save_result["success"]:
-                console.print(f"[green]✅ Content saved to wiki successfully![/green]")
+                console.print("[green]✅ Content saved to wiki successfully![/green]")
                 console.print(f"[dim]Wiki version: {save_result.get('wiki_version', 'N/A')}[/dim]")
             else:
                 console.print(f"[red]❌ Failed to save to wiki: {save_result.get('error', 'Unknown error')}[/red]")
@@ -107,12 +107,12 @@ def generate_content(
         
         # Ask user if they want to see full content
         if typer.confirm("Would you like to see the full generated content?"):
-            console.print(f"\n[bold]📄 Full Generated Content:[/bold]")
+            console.print("\n[bold]📄 Full Generated Content:[/bold]")
             console.print(Panel(result.generated_content, title=f"Generated Content: {topic}", border_style="blue"))
         
     except Exception as e:
         console.print(f"[red]❌ Error generating content: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command("capabilities")
@@ -195,7 +195,7 @@ def show_capabilities():
         
     except Exception as e:
         console.print(f"[red]❌ Error showing capabilities: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command("optimize")
@@ -207,7 +207,7 @@ def optimize_intent(
     console = Console()
     
     try:
-        console.print(f"[bold blue]🎯 Optimizing Intent for Wiki Generation[/bold blue]")
+        console.print("[bold blue]🎯 Optimizing Intent for Wiki Generation[/bold blue]")
         console.print(f"[dim]Original input: {user_input}[/dim]")
         
         # Import intent optimization
@@ -221,21 +221,21 @@ def optimize_intent(
         
         if not optimization_result["success"]:
             console.print(f"[red]❌ Intent optimization failed: {optimization_result.get('error', 'Unknown error')}[/red]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         
         # Display optimization results
         optimized_intent = optimization_result["optimized_intent"]
         confidence = optimization_result["confidence"]
         suggested_actions = optimization_result["suggested_actions"]
         
-        console.print(f"\n[green]✅ Intent optimized successfully![/green]")
-        console.print(f"[bold]Optimized Intent:[/bold]")
+        console.print("\n[green]✅ Intent optimized successfully![/green]")
+        console.print("[bold]Optimized Intent:[/bold]")
         console.print(f"[cyan]{optimized_intent}[/cyan]")
         console.print(f"[dim]Confidence: {confidence:.2f}[/dim]")
         
         # Show suggested actions
         if suggested_actions:
-            console.print(f"\n[bold]Suggested Actions:[/bold]")
+            console.print("\n[bold]Suggested Actions:[/bold]")
             actions_table = Table(show_header=False, box=None)
             actions_table.add_column("Action", style="cyan")
             actions_table.add_column("Priority", style="magenta")
@@ -248,7 +248,7 @@ def optimize_intent(
         
         # Show detailed process if requested
         if show_details:
-            console.print(f"\n[bold]🔍 Optimization Details:[/bold]")
+            console.print("\n[bold]🔍 Optimization Details:[/bold]")
             
             details = optimization_result.get("optimization_details", {})
             
@@ -285,19 +285,19 @@ def optimize_intent(
             result = asyncio.run(generator.generate_wiki_content(request))
             
             if result.success:
-                console.print(f"[green]✅ Content generated with optimized intent![/green]")
+                console.print("[green]✅ Content generated with optimized intent![/green]")
                 console.print(f"[dim]Content length: {len(result.generated_content)} characters[/dim]")
                 
                 # Show preview
                 preview = result.generated_content[:500] + "..." if len(result.generated_content) > 500 else result.generated_content
-                console.print(f"\n[dim]Preview:[/dim]")
+                console.print("\n[dim]Preview:[/dim]")
                 console.print(f"[dim]{preview}[/dim]")
             else:
                 console.print(f"[red]❌ Content generation failed: {result.error_message}[/red]")
         
     except Exception as e:
         console.print(f"[red]❌ Error optimizing intent: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -345,13 +345,13 @@ def update(
             typer.echo("✅ 词条更新已完成！")
         elif status.get("status") == "failed":
             typer.echo("❌ 词条更新失败，请稍后重试。")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         else:
             typer.echo("⚠️  词条更新状态未知。")
             
     except Exception as e:
         typer.echo(f"❌ 处理请求时出错: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -370,7 +370,7 @@ def debate(
         
         if "error" in result:
             typer.echo(f"[ERROR] 发起辩论失败: {result['error']}")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
         else:
             typer.echo(f"[SUCCESS] 辩论已发起: {result['message']}")
             typer.echo(f"   话题: {result['topic']}")
@@ -378,4 +378,4 @@ def debate(
             
     except Exception as e:
         typer.echo(f"[ERROR] 处理请求时出错: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e

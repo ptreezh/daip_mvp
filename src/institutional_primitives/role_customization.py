@@ -8,12 +8,11 @@
     Implements requirement 7.4 - dynamic role configuration capabilities.
 """
 import logging
-import json
-from typing import Any, Dict, List, Optional, Callable, Union
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 

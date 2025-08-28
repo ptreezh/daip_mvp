@@ -503,7 +503,7 @@ class AdaptiveLearningSystem:
                 try:
                     dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
                     hour_counts[dt.hour] += 1
-                except:
+                except ValueError:
                     pass
         
         if not hour_counts:
@@ -574,7 +574,7 @@ class AdaptiveLearningSystem:
         
         for i, item1 in enumerate(order1):
             if item1 in common_items:
-                for j, item2 in enumerate(order1[i+1:], i+1):
+                for _, item2 in enumerate(order1[i+1:], i+1):
                     if item2 in common_items:
                         # 检查在order2中的相对位置是否一致
                         pos1_in_order2 = order2.index(item1) if item1 in order2 else -1

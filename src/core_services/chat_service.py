@@ -8,6 +8,7 @@ from fastapi import HTTPException
 
 from src.models import ChatMessage, MultiRoleChatRequest, MultiRoleChatResponse
 from src.multi_role_chat import MultiRoleChatEngine, RoleResponse
+from src.virtual_role_chat.models import ChatRoom
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,9 @@ class ChatService:
         if not room:
             raise HTTPException(status_code=404, detail=f"Chat room with ID '{room_id}' not found.")
 
-        participant_names = {p.role_name for p in room.participants}
+        # Get participants from chat_engine, not room
+        participants = chat_engine.room_participants.get(room_id, [])
+        participant_names = {p["role_name"] for p in participants}
         if sender_name != "User" and sender_name not in participant_names:
             raise HTTPException(
                 status_code=400,

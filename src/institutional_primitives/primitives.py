@@ -6,7 +6,7 @@ used in the DAIP-LIVE system for collective intelligence and decision-making.
 """
 
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 from abc import ABC, abstractmethod
 
 logger = logging.getLogger(__name__)

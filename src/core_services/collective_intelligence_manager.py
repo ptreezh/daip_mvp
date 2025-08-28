@@ -15,11 +15,11 @@ from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
 from dataclasses import dataclass
 
-from .cognitive_diversity_evaluator import CognitiveDiversityEvaluator, DiversityScore
+from .cognitive_diversity_evaluator import CognitiveDiversityEvaluator
 from .advanced_consensus_algorithms import (
-    ConsensusInput, ConsensusResult, ConsensusAlgorithmType
+    ConsensusInput, ConsensusResult
 )
-from .consensus_algorithm_selector import ConsensusAlgorithmSelector, SelectionContext
+from .consensus_algorithm_selector import ConsensusAlgorithmSelector
 from .emergent_insight_detector import EmergentInsightDetector, EmergentInsight
 
 
@@ -69,7 +69,7 @@ class CollectiveIntelligenceManager:
         
         self.logger.info("Collective Intelligence Manager initialized")
     
-    def start_collective_intelligence_session(
+    async def start_collective_intelligence_session(
         self,
         session_id: str,
         participants: List[str],
@@ -91,7 +91,7 @@ class CollectiveIntelligenceManager:
         self.logger.info(f"Starting collective intelligence session '{session_id}' with {len(participants)} participants")
         
         # Evaluate initial diversity
-        diversity_score = self.diversity_evaluator.calculate_group_diversity(
+        diversity_score_obj = await self.diversity_evaluator.calculate_group_diversity(
             participant_profiles, session_id
         )
         
@@ -101,17 +101,17 @@ class CollectiveIntelligenceManager:
             participants=participants,
             topic=topic,
             start_time=datetime.now(),
-            diversity_score=diversity_score.overall_score,
+            diversity_score=diversity_score_obj.overall_score,
             consensus_results=[],
             emergent_insights=[]
         )
         
         self.active_sessions[session_id] = session
         
-        self.logger.info(f"Session '{session_id}' started with diversity score: {diversity_score.overall_score:.3f}")
+        self.logger.info(f"Session '{session_id}' started with diversity score: {diversity_score_obj.overall_score:.3f}")
         return session
     
-    def process_collective_input(
+    async def process_collective_input(
         self,
         session_id: str,
         inputs: List[ConsensusInput],
@@ -136,7 +136,7 @@ class CollectiveIntelligenceManager:
         
         # Select appropriate consensus algorithm
         algorithm_type = self.algorithm_selector.select_algorithm(inputs, context)
-        self.logger.info(f"Selected consensus algorithm: {algorithm_type.value}")
+        self.logger.info(f"Selected consensus algorithm: {algorithm_type.algorithm_id}")
         
         # Create algorithm instance with optimized parameters
         selection_context = self.algorithm_selector._analyze_context(inputs, context)
@@ -262,7 +262,7 @@ class CollectiveIntelligenceManager:
         session.end_time = datetime.now()
         
         # Final evaluation
-        final_evaluation = self.evaluate_intelligence_emergence(session_id)
+        
         
         # Move to history
         self.session_history.append(session)

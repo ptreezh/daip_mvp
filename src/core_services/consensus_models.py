@@ -64,6 +64,7 @@ class ConsensusInput(BaseModel):
     confidence: float = Field(..., ge=0.0, le=1.0, description="置信度 (0.0-1.0)")
     reasoning: Optional[str] = Field(None, description="推理过程")
     evidence: Optional[List[str]] = Field(default_factory=list, description="支持证据")
+    cognitive_profile: Optional[Dict[str, Any]] = Field(None, description="认知画像")
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="元数据")
     timestamp: datetime = Field(default_factory=datetime.now, description="时间戳")
     
@@ -94,6 +95,7 @@ class ConsensusResult(BaseModel):
     consensus_value: Any = Field(..., description="共识结果值")
     confidence: float = Field(..., ge=0.0, le=1.0, description="结果置信度")
     participants: List[str] = Field(..., description="参与者ID列表")
+    diversity_score: float = Field(..., ge=0.0, le=1.0, description="多样性得分")
     reasoning_trace: Dict[str, Any] = Field(default_factory=dict, description="推理轨迹")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="结果元数据")
 

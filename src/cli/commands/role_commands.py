@@ -1,13 +1,13 @@
 """
 Role management commands for the DAIP CLI.
 """
+import logging
 from typing import Optional
 import typer
 from rich.console import Console
 from rich.table import Table
-from datetime import datetime
 
-from src.core_services.role_manager import RoleManager, Role
+from src.core_services.role_manager import RoleManager
 from src.debate_system.debate_state_manager import DebateStateManager
 from src.debate_system.debate_flow_definition import DebateParticipant, ParticipantRole
 
@@ -16,6 +16,9 @@ console = Console()
 
 # Create role management app
 role_app = typer.Typer(help="Role management commands for DAIP-LIVE.")
+
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 @role_app.command("create")
 def create_role(
@@ -44,7 +47,7 @@ def create_role(
             
     except Exception as e:
         console.print(f"[red]An unexpected error occurred: {e}[/red]")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
 @role_app.command("manage")
 def manage_role(

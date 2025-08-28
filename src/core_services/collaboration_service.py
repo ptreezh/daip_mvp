@@ -4,8 +4,6 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from typing import Any, Dict, List, Optional
-
 from src.models import Task, TaskBase, WikiEntryRequest
 
 logger = logging.getLogger(__name__)
@@ -54,7 +52,7 @@ class CollaborationService:
         return tasks
 
     def update_task(
-        self, task_id: str, status: Optional[str], progress: Optional[int], comment: Optional[str]
+        self, task_id: str, status: Optional[str] = None, progress: Optional[int] = None, comment: Optional[str] = None
     ) -> Task:
         """Update a task's status, progress, or add a comment."""
         if task_id not in self.app_state.tasks_db:

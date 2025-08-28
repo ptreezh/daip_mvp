@@ -72,7 +72,7 @@ class TaskDecompositionNode(InstitutionalPrimitive):
                     planner_role_prompt = planner_role.system_prompt
             
             if not planner_role_prompt:
-                planner_role_prompt = f"""你是一位专业的任务分解专家，擅长将复杂问题分解为多个子问题，以便从不同角度进行分析。
+                planner_role_prompt = """你是一位专业的任务分解专家，擅长将复杂问题分解为多个子问题，以便从不同角度进行分析。
 你的任务是将给定的主题分解为多个子问题，每个子问题代表一个不同的视角。
 对于每个子问题，你需要提供：
 1. 视角名称（如经济、社会、技术、伦理等）

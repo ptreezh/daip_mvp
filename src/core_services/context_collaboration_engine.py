@@ -7,9 +7,8 @@
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Tuple
 from datetime import datetime
-import json
 import re
 from dataclasses import dataclass
 from enum import Enum
@@ -72,6 +71,9 @@ class ContextCollaborationEngine:
         self.quality_evaluator = ContextQualityEvaluator()
         self.suggestion_generator = ContextSuggestionGenerator()
         self.personalization_engine = PersonalizationEngine()
+        
+        self.shared_context_pool = {}
+        self.participant_context_relevance = {}
         
         # 协作模式配置
         self.collaboration_modes = {
@@ -330,7 +332,53 @@ class ContextCollaborationEngine:
         except Exception as e:
             logger.error(f"完成协作失败: {e}")
             return {"error": str(e)}
-    
+
+    async def share_context(self, context_id: str, content: str, source_participant_id: str, target_participant_ids: List[str]):
+        """分享上下文到共享池"""
+        self.shared_context_pool[context_id] = {
+            "content": content,
+            "source_participant_id": source_participant_id,
+            "timestamp": datetime.now()
+        }
+        for participant_id in target_participant_ids:
+            if participant_id not in self.participant_context_relevance:
+                self.participant_context_relevance[participant_id] = {}
+            self.participant_context_relevance[participant_id][context_id] = {
+                "relevance_score": 0.5, # Initial relevance
+                "last_updated": datetime.now()
+            }
+        logger.info(f"上下文 {context_id} 已由 {source_participant_id} 分享给 {target_participant_ids}")
+
+    async def retrieve_shared_context(self, participant_id: str, keywords: str = None) -> List[Dict[str, Any]]:
+        """为参与者检索共享上下文"""
+        retrieved_contexts = []
+        if participant_id in self.participant_context_relevance:
+            for context_id, relevance_info in self.participant_context_relevance[participant_id].items():
+                if context_id in self.shared_context_pool:
+                    context_data = self.shared_context_pool[context_id].copy()
+                    context_data["relevance_score"] = relevance_info["relevance_score"]
+                    context_data["last_updated_relevance"] = relevance_info["last_updated"]
+                    
+                    if keywords:
+                        if keywords.lower() in context_data["content"].lower():
+                            retrieved_contexts.append(context_data)
+                    else:
+                        retrieved_contexts.append(context_data)
+        
+        # Sort by relevance score
+        retrieved_contexts.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)
+        logger.info(f"为 {participant_id} 检索到 {len(retrieved_contexts)} 个共享上下文")
+        return retrieved_contexts
+
+    async def update_context_relevance(self, participant_id: str, context_id: str, new_relevance_score: float):
+        """更新上下文对参与者的相关性"""
+        if participant_id in self.participant_context_relevance and context_id in self.participant_context_relevance[participant_id]:
+            self.participant_context_relevance[participant_id][context_id]["relevance_score"] = new_relevance_score
+            self.participant_context_relevance[participant_id][context_id]["last_updated"] = datetime.now()
+            logger.info(f"更新了 {participant_id} 对上下文 {context_id} 的相关性至 {new_relevance_score}")
+        else:
+            logger.warning(f"尝试更新不存在的上下文相关性: 参与者 {participant_id}, 上下文 {context_id}")
+
     def _apply_suggestions(
         self,
         context: str,

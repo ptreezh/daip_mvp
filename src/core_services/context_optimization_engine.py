@@ -9,10 +9,9 @@
 import logging
 import numpy as np
 from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime
 from dataclasses import dataclass
 from collections import defaultdict
-import json
 import re
 
 logger = logging.getLogger(__name__)
@@ -97,7 +96,7 @@ class MultiAspectEmbeddingModel:
         pattern_vector = np.zeros(self.embedding_dim)
         
         # 基于关键词匹配计算模式向量
-        for i, (pattern_type, keywords) in enumerate(self.pattern_keywords.items()):
+        for i, (_, keywords) in enumerate(self.pattern_keywords.items()):
             score = sum(1 for keyword in keywords if keyword in text.lower())
             if score > 0:
                 # 在向量的不同位置编码不同模式
@@ -117,7 +116,7 @@ class MultiAspectEmbeddingModel:
         goal_vector = np.zeros(self.embedding_dim)
         
         # 基于关键词匹配计算目标向量
-        for i, (goal_type, keywords) in enumerate(self.goal_keywords.items()):
+        for i, (_, keywords) in enumerate(self.goal_keywords.items()):
             score = sum(1 for keyword in keywords if keyword in text.lower())
             if score > 0:
                 # 在向量的不同位置编码不同目标
@@ -388,7 +387,7 @@ class ConversationHistoryAnalyzer:
                     
                     # 记录活跃时间
                     time_patterns["active_hours"][timestamp.hour] += 1
-                except:
+                except Exception:
                     continue
         
         if len(timestamps) >= 2:
@@ -878,7 +877,7 @@ class ContextOptimizationEngine:
             detail_level = "detailed"
         
         # 选择最相关的上下文元素
-        selected_elements = self._select_relevant_elements(
+        selected_elements = await self._select_relevant_elements(
             context_elements, 
             request.current_query,
             max_elements
@@ -1066,7 +1065,7 @@ class ContextOptimizationEngine:
         
         return experience_level
     
-    def _select_relevant_elements(
+    async def _select_relevant_elements(
         self, 
         elements: List[ContextElement], 
         query: str, 
@@ -1074,14 +1073,14 @@ class ContextOptimizationEngine:
     ) -> List[ContextElement]:
         """选择相关的上下文元素"""
         # 计算查询嵌入
-        query_pattern, query_goal, _, _ = self.embedding_model.encode_multi_aspect(query)
+        query_pattern, query_goal, _, _ = await self.embedding_model.encode_multi_aspect(query, {})
         
         # 为每个元素计算与查询的相似度
         for element in elements:
             if element.embedding is None:
                 # 为元素生成嵌入
-                elem_pattern, elem_goal, _, _ = self.embedding_model.encode_multi_aspect(
-                    element.content
+                elem_pattern, elem_goal, _, _ = await self.embedding_model.encode_multi_aspect(
+                    element.content, {}
                 )
                 element.embedding = elem_pattern  # 简化，只使用模式嵌入
             
@@ -1106,7 +1105,7 @@ class ContextOptimizationEngine:
                 return 0.0
             
             return dot_product / (norm1 * norm2)
-        except:
+        except Exception:
             return 0.0
     
     def _generate_optimized_prompt(

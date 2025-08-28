@@ -21,11 +21,11 @@ from datetime import datetime
 from typing import Any, Optional
 
 # 导入现有的BayesianConsensus实现
-from advanced_consensus_algorithms import BayesianConsensus
-from advanced_consensus_algorithms import ConsensusInput as LegacyConsensusInput
-from advanced_consensus_algorithms import ConsensusResult as LegacyConsensusResult
-from consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm, ConsensusContext
-from consensus_models import AlgorithmMetadata, AlgorithmType, ConsensusInput, ConsensusResult, ValidationResult
+from .advanced_consensus_algorithms import BayesianConsensus
+from .advanced_consensus_algorithms import ConsensusInput as LegacyConsensusInput
+from .advanced_consensus_algorithms import ConsensusResult as LegacyConsensusResult
+from .consensus_algorithm_interface import AlgorithmCapabilities, ConsensusAlgorithm, ConsensusContext
+from .consensus_models import AlgorithmMetadata, AlgorithmType, ConsensusInput, ConsensusResult, ValidationResult
 
 
 class BayesianAlgorithm(ConsensusAlgorithm):
@@ -89,7 +89,7 @@ class BayesianAlgorithm(ConsensusAlgorithm):
             
         except Exception as e:
             context.set_metric("algorithm_error", str(e))
-            raise RuntimeError(f"贝叶斯共识算法执行失败: {e}")
+            raise RuntimeError(f"贝叶斯共识算法执行失败: {e}") from e
     
     def _convert_inputs_to_legacy(self, inputs: list[ConsensusInput]) -> list[LegacyConsensusInput]:
         """将统一格式输入转换为遗留格式"""
@@ -165,7 +165,10 @@ class BayesianAlgorithm(ConsensusAlgorithm):
             confidence=legacy_result.confidence_level,
             participants=[inp.agent_id for inp in original_inputs],
             reasoning_trace=reasoning_trace,
-            metadata=metadata
+            metadata={
+                **metadata,
+                "algorithm_used": legacy_result.algorithm_used.value
+            }
         )
     
     def get_metadata(self) -> AlgorithmMetadata:

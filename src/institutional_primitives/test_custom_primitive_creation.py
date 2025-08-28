@@ -8,24 +8,18 @@
     Tests requirements 7.1, 7.2, 7.3 for task 11.1.
 """
 import pytest
-import asyncio
 import tempfile
-import json
-import yaml
 from pathlib import Path
-from datetime import datetime
-from typing import Dict, Any
 
 from .plugin_interface import (
-    PluginLoader, PluginManager, CustomPrimitiveBase, PluginInterface, PluginMetadata
+    PluginManager, CustomPrimitiveBase, PluginMetadata
 )
 from .workflow_templates import (
     TemplateEngine, TemplateLibrary, WorkflowTemplate, TemplateParameter, 
     WorkflowNode, WorkflowEdge, TemplateParameterValues, ParameterType
 )
 from .service_adapters import (
-    ServiceAdapterManager, ServiceAdapter, ServiceAdapterMetadata, 
-    ServiceType, AdapterCapability, ServiceRequest, ServiceResponse
+    ServiceAdapterManager, ServiceType, AdapterCapability
 )
 from .registry import PrimitiveRegistry
 from .base import ExecutionContext

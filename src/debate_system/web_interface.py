@@ -21,9 +21,8 @@ from datetime import datetime
 from enum import Enum
 
 from lona.html.widget import Widget
-from lona.html import HTML, Div, H1, H2, H3, P, Span, Button, TextInput, Select, Option
-from lona.html import Table, Tr, Td, Th, THead, TBody
-from lona.html import Nav, Ul, Li, A
+from lona.html import HTML, Div, H2, H3, P, Span, Button, TextInput, Select, Option
+from lona.html import Nav, A
 
 # 导入现有组件
 try:
@@ -44,8 +43,8 @@ except ImportError:
             pass
 
 # 导入辩论系统组件
-from multi_role_dialogue_engine import MultiRoleDialogueEngine, DialogueState, ConversationTurn
-from .debate_flow_definition import DebateSession, DebateStatus, DebatePhase, ParticipantRole
+from multi_role_dialogue_engine import MultiRoleDialogueEngine
+from .debate_flow_definition import DebateSession, DebateStatus
 from debate_state_manager import DebateStateManager
 
 logger = logging.getLogger(__name__)

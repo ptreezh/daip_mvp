@@ -6,9 +6,6 @@
 """
 
 import typer
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
 
 app = typer.Typer(help="Edit proposal management commands.")
 
@@ -35,7 +32,7 @@ def list_proposals():
             typer.echo("No pending edit proposals found.")
     except Exception as e:
         typer.echo(f"Error listing edit proposals: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command(name="reject")
@@ -55,7 +52,7 @@ def reject_proposal(
             typer.echo(f"Successfully rejected proposal '{proposal_id}' for entry '{entry_name}'.")
         else:
             typer.echo(f"Failed to reject proposal '{proposal_id}' for entry '{entry_name}'.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"Error rejecting edit proposal: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e

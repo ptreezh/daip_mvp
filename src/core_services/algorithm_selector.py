@@ -466,7 +466,7 @@ class AlgorithmSelector:
                     selection_time=time.time() - start_time
                 )
             else:
-                raise ValueError(f"Algorithm selection failed and no fallback available: {str(e)}")
+                raise ValueError(f"Algorithm selection failed and no fallback available: {str(e)}") from e
                 
     def _filter_compatible_algorithms(self, 
                                     request: ConsensusRequest, 

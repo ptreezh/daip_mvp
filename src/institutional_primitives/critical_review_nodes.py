@@ -10,7 +10,7 @@
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Literal
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -1096,7 +1096,7 @@ class CriticalReviewWorkflow:
         summary += f"平均可信度评分：{avg_credibility:.2f}"
         
         if low_credibility_facts:
-            summary += f"。低可信度事实已标记为需要修订。"
+            summary += "。低可信度事实已标记为需要修订。"
         
         return summary
 

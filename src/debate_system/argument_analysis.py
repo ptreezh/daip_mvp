@@ -18,15 +18,14 @@
 import re
 import asyncio
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Any, Set, Tuple
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 import uuid
-import math
 from collections import defaultdict
 
-from .debate_flow_definition import DebateContribution, DebateSession, DebateRound
+from .debate_flow_definition import DebateContribution, DebateSession
 
 
 class ArgumentType(Enum):

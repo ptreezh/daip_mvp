@@ -7,11 +7,23 @@
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
+from src.core_services.consensus_models import ConsensusInput, ConsensusResult
 from datetime import datetime
 import statistics
+from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
+
+@dataclass
+class ConsensusQualityReport:
+    report_id: str
+    timestamp: datetime
+    overall_score: float
+    quality_grade: str
+    metrics: Dict[str, float]
+    recommendations: List[str]
+    summary: Dict[str, Any] = field(default_factory=dict)
 
 
 class ConsensusQualityEvaluator:
@@ -36,27 +48,21 @@ class ConsensusQualityEvaluator:
     
     def evaluate_consensus_quality(
         self,
-        consensus_data: Dict[str, Any],
-        participants_data: List[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        inputs: List[ConsensusInput],
+        consensus_result: ConsensusResult
+    ) -> ConsensusQualityReport:
         """评估共识质量"""
         try:
-            evaluation_result = {
-                "evaluation_id": f"quality_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
-                "timestamp": datetime.now().isoformat(),
-                "overall_quality": 0.0,
-                "metrics": {},
-                "quality_grade": "unknown",
-                "recommendations": []
-            }
+            report_id = f"quality_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             
+            metrics = {}
             # 计算各项质量指标
-            evaluation_result["metrics"]["consensus_score"] = self._calculate_consensus_score(consensus_data)
-            evaluation_result["metrics"]["coherence_score"] = self.calculate_coherence_score(consensus_data)
-            evaluation_result["metrics"]["participant_satisfaction"] = self.assess_participant_satisfaction(participants_data or [])
-            evaluation_result["metrics"]["convergence_rate"] = self._calculate_convergence_rate(consensus_data)
-            evaluation_result["metrics"]["stability_index"] = self._calculate_stability_index(consensus_data)
-            evaluation_result["metrics"]["diversity_preservation"] = self._calculate_diversity_preservation(consensus_data)
+            metrics["consensus_score"] = self._calculate_consensus_score(consensus_result.confidence)
+            metrics["coherence_score"] = self.calculate_coherence_score(inputs)
+            metrics["participant_satisfaction"] = self.assess_participant_satisfaction(inputs)
+            metrics["convergence_rate"] = self._calculate_convergence_rate(consensus_result)
+            metrics["stability_index"] = self._calculate_stability_index(consensus_result)
+            metrics["diversity_preservation"] = self._calculate_diversity_preservation(consensus_result)
             
             # 计算总体质量分数
             metric_weights = {
@@ -69,37 +75,46 @@ class ConsensusQualityEvaluator:
             }
             
             weighted_sum = sum(
-                evaluation_result["metrics"][metric] * weight
+                metrics[metric] * weight
                 for metric, weight in metric_weights.items()
-                if metric in evaluation_result["metrics"]
+                if metric in metrics
             )
             
-            evaluation_result["overall_quality"] = weighted_sum
-            evaluation_result["quality_grade"] = self._determine_quality_grade(weighted_sum)
-            evaluation_result["recommendations"] = self._generate_improvement_recommendations(evaluation_result["metrics"])
+            overall_quality = weighted_sum
+            quality_grade = self._determine_quality_grade(overall_quality)
+            recommendations = self._generate_improvement_recommendations(metrics)
+            
+            report = ConsensusQualityReport(
+                report_id=report_id,
+                timestamp=datetime.now(),
+                overall_score=overall_quality,
+                quality_grade=quality_grade,
+                metrics=metrics,
+                recommendations=recommendations,
+                summary={}
+            )
             
             # 保存评估历史
-            self.evaluation_history.append(evaluation_result)
+            self.evaluation_history.append(report)
             
-            return evaluation_result
+            return report
             
         except Exception as e:
             logger.error(f"评估共识质量失败: {e}")
             return {"error": str(e)}
     
-    def calculate_coherence_score(self, consensus_data: Dict[str, Any]) -> float:
+    def calculate_coherence_score(self, inputs: List[ConsensusInput]) -> float:
         """计算一致性分数"""
         try:
             # 获取参与者立场
-            positions = consensus_data.get("participant_positions", [])
-            if not positions:
+            if not inputs:
                 return 0.0
             
             # 计算立场间的相似度
             similarity_scores = []
-            for i in range(len(positions)):
-                for j in range(i + 1, len(positions)):
-                    similarity = self._calculate_position_similarity(positions[i], positions[j])
+            for i in range(len(inputs)):
+                for j in range(i + 1, len(inputs)):
+                    similarity = self._calculate_position_similarity(inputs[i], inputs[j])
                     similarity_scores.append(similarity)
             
             if not similarity_scores:
@@ -113,21 +128,21 @@ class ConsensusQualityEvaluator:
             logger.error(f"计算一致性分数失败: {e}")
             return 0.0
     
-    def assess_participant_satisfaction(self, participants_data: List[Dict[str, Any]]) -> float:
+    def assess_participant_satisfaction(self, inputs: List[ConsensusInput]) -> float:
         """评估参与者满意度"""
         try:
-            if not participants_data:
+            if not inputs:
                 return 0.0
             
             satisfaction_scores = []
             
-            for participant in participants_data:
+            for input_item in inputs:
                 # 基于多个因素计算满意度
                 factors = {
-                    "agreement_with_consensus": participant.get("agreement_level", 0.5),
-                    "participation_level": participant.get("participation_score", 0.5),
-                    "influence_on_outcome": participant.get("influence_score", 0.5),
-                    "process_fairness": participant.get("fairness_perception", 0.5)
+                    "agreement_with_consensus": input_item.confidence,
+                    "participation_level": input_item.metadata.get("participation_score", 0.5),
+                    "influence_on_outcome": input_item.metadata.get("influence_score", 0.5),
+                    "process_fairness": input_item.metadata.get("fairness_perception", 0.5)
                 }
                 
                 # 加权平均计算个人满意度
@@ -156,28 +171,19 @@ class ConsensusQualityEvaluator:
             logger.error(f"评估参与者满意度失败: {e}")
             return 0.0
     
-    def _calculate_consensus_score(self, consensus_data: Dict[str, Any]) -> float:
+    def _calculate_consensus_score(self, confidence: float) -> float:
         """计算共识分数"""
         try:
-            # 从共识数据中提取分数
-            if "consensus_score" in consensus_data:
-                return float(consensus_data["consensus_score"])
-            
-            # 如果没有直接的共识分数，基于其他数据计算
-            agreement_levels = consensus_data.get("agreement_levels", [])
-            if agreement_levels:
-                return statistics.mean(agreement_levels)
-            
-            return 0.5  # 默认中等共识
+            return confidence
             
         except Exception as e:
             logger.error(f"计算共识分数失败: {e}")
             return 0.0
     
-    def _calculate_convergence_rate(self, consensus_data: Dict[str, Any]) -> float:
+    def _calculate_convergence_rate(self, consensus_result: ConsensusResult) -> float:
         """计算收敛速度"""
         try:
-            convergence_history = consensus_data.get("convergence_history", [])
+            convergence_history = consensus_result.reasoning_trace.get("convergence_history", [])
             if len(convergence_history) < 2:
                 return 0.0
             
@@ -196,10 +202,10 @@ class ConsensusQualityEvaluator:
             logger.error(f"计算收敛速度失败: {e}")
             return 0.0
     
-    def _calculate_stability_index(self, consensus_data: Dict[str, Any]) -> float:
+    def _calculate_stability_index(self, consensus_result: ConsensusResult) -> float:
         """计算稳定性指数"""
         try:
-            stability_data = consensus_data.get("stability_measurements", [])
+            stability_data = consensus_result.reasoning_trace.get("stability_measurements", [])
             if not stability_data:
                 return 0.5  # 默认中等稳定性
             
@@ -217,11 +223,11 @@ class ConsensusQualityEvaluator:
             logger.error(f"计算稳定性指数失败: {e}")
             return 0.0
     
-    def _calculate_diversity_preservation(self, consensus_data: Dict[str, Any]) -> float:
+    def _calculate_diversity_preservation(self, consensus_result: ConsensusResult) -> float:
         """计算多样性保持度"""
         try:
-            initial_diversity = consensus_data.get("initial_diversity", 0.0)
-            final_diversity = consensus_data.get("final_diversity", 0.0)
+            initial_diversity = consensus_result.reasoning_trace.get("initial_diversity", 0.0)
+            final_diversity = consensus_result.diversity_score
             
             if initial_diversity > 0:
                 preservation_ratio = final_diversity / initial_diversity
@@ -233,12 +239,12 @@ class ConsensusQualityEvaluator:
             logger.error(f"计算多样性保持度失败: {e}")
             return 0.0
     
-    def _calculate_position_similarity(self, position1: Dict[str, Any], position2: Dict[str, Any]) -> float:
+    def _calculate_position_similarity(self, position1: ConsensusInput, position2: ConsensusInput) -> float:
         """计算立场相似度"""
         try:
             # 简单的文本相似度计算（实际应用中可以使用更复杂的NLP方法）
-            text1 = str(position1.get("content", ""))
-            text2 = str(position2.get("content", ""))
+            text1 = str(position1.position)
+            text2 = str(position2.position)
             
             if not text1 or not text2:
                 return 0.0

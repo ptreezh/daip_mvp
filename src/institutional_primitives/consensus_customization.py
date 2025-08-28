@@ -8,13 +8,10 @@
     Implements requirement 7.5 - custom consensus mechanism registration.
 """
 import logging
-import asyncio
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Callable, Union, Tuple
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 from enum import Enum
-import statistics
-import math
 
 from pydantic import BaseModel, Field
 
@@ -578,7 +575,7 @@ class ConsensusRegistry:
             True if registration was successful
         """
         if not issubclass(algorithm_class, ConsensusAlgorithm):
-            logger.error(f"Algorithm class must inherit from ConsensusAlgorithm")
+            logger.error("Algorithm class must inherit from ConsensusAlgorithm")
             return False
         
         if algorithm_id in self.algorithms:

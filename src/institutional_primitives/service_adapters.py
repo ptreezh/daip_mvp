@@ -9,7 +9,7 @@
 """
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type, Callable
+from typing import Any, Dict, List, Optional, Type
 from datetime import datetime
 from enum import Enum
 

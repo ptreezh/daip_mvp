@@ -17,14 +17,13 @@
 - 异步支持：支持异步执行模式
 """
 
-import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Set
 from datetime import datetime
 
-from consensus_models import (
+from .consensus_models import (
     ConsensusInput, ConsensusResult, ConsensusRequest,
-    AlgorithmMetadata, ValidationResult, AlgorithmType
+    AlgorithmMetadata, ValidationResult
 )
 
 

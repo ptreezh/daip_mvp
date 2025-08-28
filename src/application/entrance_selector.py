@@ -181,9 +181,9 @@ class EntranceSelector:
         # 使用机器学习模型进行精细选择
         ml_recommendation = await self._ml_based_selection(user_profile, context_features)
         
-        # 综合选择结果
+        # 综合选择结果，考虑上下文复杂度
         final_recommendation = await self._combine_recommendations(
-            base_recommendation, ml_recommendation, user_profile, context_features
+            base_recommendation, ml_recommendation, user_profile, context_features, context_complexity
         )
         
         # 生成选择结果
@@ -526,8 +526,8 @@ class EntranceSelector:
         return reasoning
     
     async def _combine_recommendations(self, base_entrance: EntranceType, ml_result: dict[str, Any], 
-                                    user_profile: UserProfile, features: ContextFeatures) -> dict[str, Any]:
-        """综合推荐结果"""
+                                    user_profile: UserProfile, features: ContextFeatures, context_complexity: float) -> dict[str, Any]:
+        """综合推荐结果，考虑上下文复杂度"""
         # 如果两者一致，直接返回
         if base_entrance == ml_result["entrance"]:
             return {
@@ -537,9 +537,20 @@ class EntranceSelector:
                 "alternatives": ml_result["alternatives"]
             }
         
-        # 如果不一致，进行权衡
+        # 如果不一致，进行权衡，并考虑上下文复杂度
+        # 对于复杂任务，稍微偏向论坛模式；对于简单任务，偏向秘书模式
         base_weight = 0.4
         ml_weight = 0.6
+        
+        # 调整权重以考虑上下文复杂度
+        if context_complexity > 0.7:
+            # 复杂任务，稍微偏向论坛模式
+            base_weight = 0.3
+            ml_weight = 0.7
+        elif context_complexity < 0.3:
+            # 简单任务，稍微偏向秘书模式
+            base_weight = 0.5
+            ml_weight = 0.5
         
         # 计算综合分数
         base_score = 0.7  # 基础选择器的默认分数
@@ -565,6 +576,9 @@ class EntranceSelector:
             alternatives = [(ml_result["entrance"], ml_final_score)] + [
                 (alt, score * 0.8) for alt, score in ml_result["alternatives"]
             ]
+        
+        # 添加关于上下文复杂度的推理信息
+        reasoning.append(f"上下文复杂度评估: {context_complexity:.2f}")
         
         return {
             "entrance": final_entrance,

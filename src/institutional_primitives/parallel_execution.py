@@ -10,7 +10,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple, Callable, Coroutine
 
-from .base import ExecutionContext, ExecutionStep, ExecutionTrace
+from .base import ExecutionTrace
 
 
 class ParallelExecutionGroup:
