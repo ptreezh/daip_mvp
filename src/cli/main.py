@@ -10,6 +10,7 @@ import logging
 import re
 import sys
 from pathlib import Path
+from typing import Optional
 
 import typer
 from rich.console import Console
@@ -213,7 +214,7 @@ def start(
         for error in validation_errors:
             console.print(f"[red]   • {error}[/red]")
         console.print("\n[yellow]💡 Use 'daip-cli help' for usage examples")
-        raise typer.Exit(1) from None from None from None
+        raise typer.Exit(1)
     
     # Show startup information
     console.print(f"[bold blue]🚀 Initializing debate: {topic}[/bold blue]")

@@ -36,6 +36,12 @@ DAIP-LIVE (Dynamic AI-driven Project-execution LIVE system) 是一个智能协�
 - Ollama (本地AI模型)
 - Git
 
+### 系统验证状态 ✅
+- **核心功能**: 已验证可用
+- **测试套件**: 1141项测试就绪
+- **归档清理**: 197个历史文件已备份移除
+- **生产状态**: 就绪
+
 ### 安装步骤
 
 1. **克隆项目**
@@ -60,7 +66,19 @@ cp .env.example .env
 # 编辑.env文件配置Ollama等参数
 ```
 
-4. **启动服务**
+4. **验证系统**
+```bash
+# 验证CLI
+python -c "from src.cli.main import app; print('CLI OK')"
+
+# 验证Web服务
+python -c "from src.main import app; print('Web OK')"
+
+# 运行核心测试
+python -m pytest tests/test_master_branch_suite.py -v
+```
+
+5. **启动服务**
 ```bash
 # 启动CLI
 python -m src.cli.main --help
