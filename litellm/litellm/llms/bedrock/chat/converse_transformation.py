@@ -233,7 +233,7 @@ class AmazonConverseConfig(BaseConfig):
         """Check if computer use tools are being used in the request."""
         if tools is None:
             return False
-        
+
         for tool in tools:
             if "type" in tool:
                 tool_type = tool["type"]
@@ -247,17 +247,17 @@ class AmazonConverseConfig(BaseConfig):
     ) -> List[dict]:
         """Transform computer use tools to Bedrock format."""
         transformed_tools: List[dict] = []
-        
+
         for tool in computer_use_tools:
             tool_type = tool.get("type", "")
-            
+
             # Check if this is a computer use tool with the startswith method
             is_computer_use_tool = False
             for computer_use_prefix in BEDROCK_COMPUTER_USE_TOOLS:
                 if tool_type.startswith(computer_use_prefix):
                     is_computer_use_tool = True
                     break
-            
+
             transformed_tool: dict = {}
             if is_computer_use_tool:
                 if tool_type.startswith("computer_") and "function" in tool:
@@ -279,9 +279,9 @@ class AmazonConverseConfig(BaseConfig):
             else:
                 # Pass through other tools as-is
                 transformed_tool = dict(tool)
-                
+
             transformed_tools.append(transformed_tool)
-            
+
         return transformed_tools
 
     def _separate_computer_use_tools(
@@ -299,7 +299,7 @@ class AmazonConverseConfig(BaseConfig):
         """
         computer_use_tools = []
         regular_tools = []
-        
+
         for tool in tools:
             if "type" in tool:
                 tool_type = tool["type"]
@@ -314,7 +314,7 @@ class AmazonConverseConfig(BaseConfig):
                     regular_tools.append(tool)
             else:
                 regular_tools.append(tool)
-            
+
         return computer_use_tools, regular_tools
 
 
@@ -653,26 +653,26 @@ class AmazonConverseConfig(BaseConfig):
         )
 
         original_tools = inference_params.pop("tools", [])
-        
+
         # Initialize bedrock_tools
         bedrock_tools: List[ToolBlock] = []
-        
+
         # Collect anthropic_beta values from user headers
         anthropic_beta_list = []
         if headers:
             user_betas = get_anthropic_beta_from_headers(headers)
             anthropic_beta_list.extend(user_betas)
-        
+
         # Only separate tools if computer use tools are actually present
         if original_tools and self.is_computer_use_tool_used(original_tools, model):
             # Separate computer use tools from regular function tools
             computer_use_tools, regular_tools = self._separate_computer_use_tools(
                 original_tools, model
             )
-            
+
             # Process regular function tools using existing logic
             bedrock_tools = _bedrock_tools_pt(regular_tools)
-            
+
             # Add computer use tools and anthropic_beta if needed (only when computer use tools are present)
             if computer_use_tools:
                 anthropic_beta_list.append("computer-use-2024-10-22")
@@ -682,7 +682,7 @@ class AmazonConverseConfig(BaseConfig):
         else:
             # No computer use tools, process all tools as regular tools
             bedrock_tools = _bedrock_tools_pt(original_tools)
-        
+
         # Set anthropic_beta in additional_request_params if we have any beta features
         if anthropic_beta_list:
             # Remove duplicates while preserving order
@@ -693,7 +693,7 @@ class AmazonConverseConfig(BaseConfig):
                     unique_betas.append(beta)
                     seen.add(beta)
             additional_request_params["anthropic_beta"] = unique_betas
-        
+
         bedrock_tool_config: Optional[ToolConfigBlock] = None
         if len(bedrock_tools) > 0:
             tool_choice_values: ToolChoiceValuesBlock = inference_params.pop(
@@ -1182,7 +1182,7 @@ class AmazonConverseConfig(BaseConfig):
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
         return headers
-    
+
 
     def should_fake_stream(
         self,

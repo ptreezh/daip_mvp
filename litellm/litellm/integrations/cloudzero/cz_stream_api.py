@@ -74,7 +74,7 @@ class CloudZeroStreamer:
         if 'time/usage_start' not in data.columns:
             self.console.print("[red]Error: Missing 'time/usage_start' column for date grouping[/red]")
             return {}
-        
+
         timestamp_str: Optional[str] = None
         for row in data.iter_rows(named=True):
             try:

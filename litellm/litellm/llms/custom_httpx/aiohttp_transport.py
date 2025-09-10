@@ -192,7 +192,7 @@ class LiteLLMAiohttpTransport(AiohttpTransport):
                 self.client = ClientSession()
 
         return self.client
-    
+
     async def handle_async_request(
         self,
         request: httpx.Request,
@@ -238,7 +238,7 @@ class LiteLLMAiohttpTransport(AiohttpTransport):
             content=AiohttpResponseStream(response),
             request=request,
         )
-    
+
 
     async def _get_proxy_settings(self, request: httpx.Request):
         proxy = None
@@ -252,7 +252,7 @@ class LiteLLMAiohttpTransport(AiohttpTransport):
                 verbose_logger.debug(f"Error reading proxy env: {e}")
 
         return proxy
-    
+
 
     def _proxy_from_env(self, url: httpx.URL) -> typing.Optional[str]:
         """
@@ -266,7 +266,7 @@ class LiteLLMAiohttpTransport(AiohttpTransport):
         #########################################################
         if self.checked_proxy_env_settings is True:
             return self.proxy
-        
+
         #########################################################
         # set self.checked_proxy_env_settings to True
         #########################################################

@@ -90,12 +90,12 @@ async def aimage_generation(*args, **kwargs) -> ImageResponse:
             response = init_response
         elif asyncio.iscoroutine(init_response):
             response = await init_response  # type: ignore
-        
+
         if response is None:
             raise ValueError(
                 "Unable to get Image Response. Please pass a valid llm_provider."
             )
-        
+
         return response
     except Exception as e:
         custom_llm_provider = custom_llm_provider or "openai"
@@ -345,7 +345,7 @@ def image_generation(  # noqa: PLR0915
         ):
             if image_generation_config is None:
                 raise ValueError(f"image generation config is not supported for {custom_llm_provider}")
-            
+
             return llm_http_handler.image_generation_handler(
                 api_key=api_key,
                 model=model,

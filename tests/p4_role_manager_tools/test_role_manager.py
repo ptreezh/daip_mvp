@@ -1,10 +1,11 @@
-import unittest
 import os
 import shutil
+import unittest
+
 import yaml
 
-from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
 from src.daip_live.core.models import Role
+from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
 
 
 class TestRoleManagerFromDirectory(unittest.TestCase):
@@ -36,9 +37,9 @@ class TestRoleManagerFromDirectory(unittest.TestCase):
     def test_load_from_directory_successfully(self):
         """Test that valid roles are loaded correctly from a directory."""
         manager = RoleManager(roles_dir_path=self.test_dir)
-        
+
         self.assertEqual(len(manager._roles), 2)
-        
+
         pro_role = manager.get_role_by_name("pro")
         self.assertIsNotNone(pro_role)
         self.assertEqual(pro_role.name, "pro")

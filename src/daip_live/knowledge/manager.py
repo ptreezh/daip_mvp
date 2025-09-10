@@ -1,14 +1,14 @@
 """This module contains the KnowledgeManager class."""
 
-import hashlib
 import asyncio
-import faiss
-import numpy as np
+import hashlib
 from pathlib import Path
 from typing import Dict, List
 
-from daip_live.core.models import KnowledgeSource, KnowledgeBaseChanges
+import faiss
+import numpy as np
 from daip_live.core.interfaces import IKnowledgeManager, IModelProvider
+from daip_live.core.models import KnowledgeBaseChanges, KnowledgeSource
 from daip_live.persistence.database import DatabaseManager
 
 
@@ -26,7 +26,7 @@ class KnowledgeManager(IKnowledgeManager):
         self.config = config
         self.knowledge_dir = Path(self.config["knowledge_dir"])
         self.index_path = self.knowledge_dir / "index.faiss"
-        
+
         # Dimension for the embedding model, e.g., all-MiniLM-L6-v2 has 384
         embedding_dim = 384 # TODO: Make this configurable
 
@@ -59,7 +59,7 @@ class KnowledgeManager(IKnowledgeManager):
                     changes.updated.append((file_path_str, db_record))
                 else:
                     changes.unchanged.append(db_record)
-        
+
         db_files = set(db_sources.keys())
         deleted_files = db_files - disk_files
         for file_path_str in deleted_files:
@@ -80,14 +80,14 @@ class KnowledgeManager(IKnowledgeManager):
             content = await asyncio.to_thread(file_path.read_text, encoding="utf-8")
             file_hash = await asyncio.to_thread(self._get_file_hash, file_path)
             embedding = await self.model_provider.embed(content)
-            
+
             source = KnowledgeSource(file_path=file_path_str, file_hash=file_hash, status="indexed")
             new_id = await self.db_manager.upsert_knowledge_source(source)
-            
+
             if self.faiss_index and new_id is not None:
                 # FAISS requires a 2D array for additions
                 self.faiss_index.add_with_ids(np.array([embedding], dtype=np.float32), np.array([new_id], dtype=np.int64))
-            
+
             summary["added"] += 1
 
         # Process deleted files
@@ -102,12 +102,12 @@ class KnowledgeManager(IKnowledgeManager):
             # Essentially a delete then an add
             if self.faiss_index and old_source.id is not None:
                 self.faiss_index.remove_ids(np.array([old_source.id], dtype=np.int64))
-            
+
             file_path = Path(file_path_str)
             content = await asyncio.to_thread(file_path.read_text, encoding="utf-8")
             file_hash = await asyncio.to_thread(self._get_file_hash, file_path)
             embedding = await self.model_provider.embed(content)
-            
+
             source = KnowledgeSource(file_path=file_path_str, file_hash=file_hash, status="indexed", id=old_source.id)
             updated_id = await self.db_manager.upsert_knowledge_source(source)
 
@@ -115,7 +115,7 @@ class KnowledgeManager(IKnowledgeManager):
                 self.faiss_index.add_with_ids(np.array([embedding], dtype=np.float32), np.array([updated_id], dtype=np.int64))
 
             summary["updated"] += 1
-        
+
         # Persist the index to disk
         if self.faiss_index:
             faiss.write_index(self.faiss_index, str(self.index_path))
@@ -140,7 +140,7 @@ class KnowledgeManager(IKnowledgeManager):
         # 3. Retrieve the corresponding sources from the database.
         if ids.size == 0:
             return []
-        
+
         # The returned ids is a 2D array, e.g., [[1, 5, 3]]. Flatten it.
         # FAISS returns -1 for empty slots, so we filter them out.
         source_ids = [int(i) for i in ids[0] if i != -1]
@@ -153,7 +153,7 @@ class KnowledgeManager(IKnowledgeManager):
         # 4. Format the results.
         # Create a mapping from id to source for easy lookup
         source_map = {s.id: s for s in sources}
-        
+
         results = []
         for i, source_id in enumerate(source_ids):
             source = source_map.get(source_id)
@@ -164,5 +164,5 @@ class KnowledgeManager(IKnowledgeManager):
                     "status": source.status,
                     "indexed_at": source.indexed_at
                 })
-        
+
         return results

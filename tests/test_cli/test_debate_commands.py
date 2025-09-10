@@ -1,10 +1,10 @@
-import asyncio
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from typer.testing import CliRunner
 
 from src.daip_live.cli import app
-from src.daip_live.core.models import Session, AgentState
+from src.daip_live.core.models import AgentState, Session
 
 runner = CliRunner()
 

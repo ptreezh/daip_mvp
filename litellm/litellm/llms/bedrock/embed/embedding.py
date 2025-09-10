@@ -163,7 +163,7 @@ class BedrockEmbedding(BaseAWSLLM):
             headers = {"Content-Type": "application/json"}
             if extra_headers is not None:
                 headers = {"Content-Type": "application/json", **extra_headers}
-                
+
             prepped = self.get_request_headers(
                  credentials=credentials,
                  aws_region_name=aws_region_name,
@@ -247,7 +247,7 @@ class BedrockEmbedding(BaseAWSLLM):
             headers = {"Content-Type": "application/json"}
             if extra_headers is not None:
                 headers = {"Content-Type": "application/json", **extra_headers}
-                
+
             prepped = self.get_request_headers(
                  credentials=credentials,
                  aws_region_name=aws_region_name,
@@ -437,7 +437,7 @@ class BedrockEmbedding(BaseAWSLLM):
         headers = {"Content-Type": "application/json"}
         if extra_headers is not None:
             headers = {"Content-Type": "application/json", **extra_headers}
-        
+
         prepped = self.get_request_headers(
             credentials=credentials,
             aws_region_name=aws_region_name,

@@ -348,7 +348,7 @@ class LoggingCallbackManager:
         elif callable(callback):
             return getattr(callback, "__name__", str(callback))
         return str(callback)
-    
+
 
     def get_active_custom_logger_for_callback_name(
         self,

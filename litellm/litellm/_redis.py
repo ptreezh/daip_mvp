@@ -116,7 +116,7 @@ def _generate_gcp_iam_access_token(service_account: str) -> str:
             "google-cloud-iam is required for GCP IAM Redis authentication. "
             "Install it with: pip install google-cloud-iam"
         )
-    
+
     client = iam_credentials_v1.IAMCredentialsClient()
     request = iam_credentials_v1.GenerateAccessTokenRequest(
         name=service_account,
@@ -144,12 +144,12 @@ def create_gcp_iam_redis_connect_func(
         """Initialize the connection and authenticate using GCP IAM"""
         from redis.exceptions import AuthenticationError, AuthenticationWrongNumberOfArgsError
         from redis.utils import str_if_bytes
-        
+
         self._parser.on_connect(self)
-        
+
         auth_args = (_generate_gcp_iam_access_token(service_account),)
         self.send_command("AUTH", *auth_args, check_health=False)
-        
+
         try:
             auth_response = self.read_response()
         except AuthenticationWrongNumberOfArgsError:
@@ -159,10 +159,10 @@ def create_gcp_iam_redis_connect_func(
                 auth_response = self.read_response()
             else:
                 raise
-        
+
         if str_if_bytes(auth_response) != "OK":
             raise AuthenticationError("GCP IAM authentication failed")
-    
+
     return iam_connect
 
 
@@ -232,7 +232,7 @@ def _get_redis_client_logic(**env_overrides):
     # Handle GCP IAM authentication
     _gcp_service_account = redis_kwargs.get("gcp_service_account") or get_secret_str("REDIS_GCP_SERVICE_ACCOUNT")
     _gcp_ssl_ca_certs = redis_kwargs.get("gcp_ssl_ca_certs") or get_secret_str("REDIS_GCP_SSL_CA_CERTS")
-    
+
     if _gcp_service_account is not None:
         verbose_logger.debug("Setting up GCP IAM authentication for Redis with service account.")
         redis_kwargs["redis_connect_func"] = create_gcp_iam_redis_connect_func(
@@ -241,11 +241,11 @@ def _get_redis_client_logic(**env_overrides):
         )
         # Store GCP service account in redis_connect_func for async cluster access
         redis_kwargs["redis_connect_func"]._gcp_service_account = _gcp_service_account
-        
+
         # Remove GCP-specific kwargs that shouldn't be passed to Redis client
         redis_kwargs.pop("gcp_service_account", None)
         redis_kwargs.pop("gcp_ssl_ca_certs", None)
-        
+
         # Only enable SSL if explicitly requested AND SSL CA certs are provided
         if _gcp_ssl_ca_certs and redis_kwargs.get("ssl", False):
             redis_kwargs["ssl_ca_certs"] = _gcp_ssl_ca_certs
@@ -395,16 +395,16 @@ def get_redis_async_client(
         # Handle GCP IAM authentication for async clusters
         redis_connect_func = cluster_kwargs.pop("redis_connect_func", None)
         from litellm import get_secret_str
-        
+
         # Get GCP service account - first try from redis_connect_func, then from environment
         gcp_service_account = None
         if redis_connect_func and hasattr(redis_connect_func, '_gcp_service_account'):
             gcp_service_account = redis_connect_func._gcp_service_account
         else:
             gcp_service_account = redis_kwargs.get("gcp_service_account") or get_secret_str("REDIS_GCP_SERVICE_ACCOUNT")
-        
+
         verbose_logger.info(f"DEBUG: Redis cluster kwargs: redis_connect_func={redis_connect_func is not None}, gcp_service_account_provided={gcp_service_account is not None}")
-        
+
         # If GCP IAM is configured (indicated by redis_connect_func), generate access token and use as password
         if redis_connect_func and gcp_service_account:
             verbose_logger.info("DEBUG: Generating IAM token for service account (value not logged for security reasons)")
@@ -419,18 +419,18 @@ def get_redis_async_client(
                 raise AuthenticationError("Failed to generate GCP IAM access token")
         else:
             verbose_logger.info(f"DEBUG: Not using GCP IAM auth - redis_connect_func={redis_connect_func is not None}, gcp_service_account={gcp_service_account}")
-        
+
         new_startup_nodes: List[ClusterNode] = []
 
         for item in redis_kwargs["startup_nodes"]:
             new_startup_nodes.append(ClusterNode(**item))
         cluster_kwargs.pop("startup_nodes", None)
-        
+
         # Create async RedisCluster with IAM token as password if available
         cluster_client = async_redis.RedisCluster(
             startup_nodes=new_startup_nodes, **cluster_kwargs  # type: ignore
         )
-            
+
         return cluster_client
 
     # Check for Redis Sentinel
@@ -475,7 +475,7 @@ def _pretty_print_redis_config(redis_kwargs: dict) -> None:
 
         # Initialize the sensitive data masker
         masker = SensitiveDataMasker()
-        
+
         # Mask sensitive data in redis_kwargs
         masked_redis_kwargs = masker.mask_dict(redis_kwargs)
 
@@ -507,7 +507,7 @@ def _pretty_print_redis_config(redis_kwargs: dict) -> None:
                         value_str = str(value)
                 else:
                     value_str = str(value)
-                
+
                 config_table.add_row(key, value_str)
 
         # Determine connection type

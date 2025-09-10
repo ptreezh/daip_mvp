@@ -1,16 +1,16 @@
 """Defines the database schema using SQLAlchemy Core."""
 
 from sqlalchemy import (
-    Table,
-    Column,
-    Integer,
-    String,
-    Text,
-    MetaData,
-    ForeignKey,
-    DateTime,
-    func,
     JSON,  # Import JSON type
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    MetaData,
+    String,
+    Table,
+    Text,
+    func,
 )
 
 metadata_obj = MetaData()

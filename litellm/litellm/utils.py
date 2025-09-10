@@ -840,7 +840,7 @@ async def _client_async_logging_helper(
         GLOBAL_LOGGING_WORKER.ensure_initialized_and_enqueue(
             async_coroutine = logging_obj.async_success_handler(
                 result=result,
-                start_time=start_time, 
+                start_time=start_time,
                 end_time=end_time
             )
         )

@@ -1,12 +1,11 @@
 """Tests for the LiteLLMProvider."""
 
-import asyncio
 import pytest
-import litellm
-
-from daip_live.model_provider.provider import LiteLLMProvider
-from daip_live.core.models import ProviderConfig
 from daip_live.core.exceptions import ModelAuthenticationError
+from daip_live.core.models import ProviderConfig
+from daip_live.model_provider.provider import LiteLLMProvider
+
+import litellm
 
 
 class TestLiteLLMProvider:
@@ -16,7 +15,7 @@ class TestLiteLLMProvider:
             model="gpt-4o",
             api_key="test_key"
         )
-        
+
         provider = LiteLLMProvider(config=config)
 
         assert provider.config == config
@@ -33,7 +32,7 @@ class TestLiteLLMProvider:
         mock_response.choices = [mock_choice]
 
         mock_litellm_completion = mocker.patch(
-            "daip_live.model_provider.provider.litellm.completion", 
+            "daip_live.model_provider.provider.litellm.completion",
             return_value=mock_response
         )
 
@@ -49,17 +48,17 @@ class TestLiteLLMProvider:
         provider = LiteLLMProvider(config=config)
 
         mocker.patch(
-            "daip_live.model_provider.provider.litellm.completion", 
+            "daip_live.model_provider.provider.litellm.completion",
             side_effect=litellm.exceptions.AuthenticationError(
-                message="Invalid API Key", 
-                llm_provider="test_provider", 
+                message="Invalid API Key",
+                llm_provider="test_provider",
                 model="test_model"
             )
         )
 
         with pytest.raises(ModelAuthenticationError) as excinfo:
             await provider.generate(prompt="Anything")
-        
+
         assert "Invalid API Key" in str(excinfo.value)
 
     @pytest.mark.asyncio
@@ -71,7 +70,7 @@ class TestLiteLLMProvider:
 
         mock_response = mocker.Mock()
         mock_response.data = [mocker.Mock(embedding=expected_vector)]
-        
+
         mock_aembedding = mocker.patch(
             "daip_live.model_provider.provider.litellm.aembedding",
             new=mocker.AsyncMock(return_value=mock_response)
@@ -104,5 +103,5 @@ class TestLiteLLMProvider:
 
         with pytest.raises(ModelAuthenticationError) as excinfo:
             await provider.embed(text="Anything")
-        
+
         assert "Invalid API Key" in str(excinfo.value)

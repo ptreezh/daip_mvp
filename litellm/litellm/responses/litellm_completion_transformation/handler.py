@@ -58,7 +58,7 @@ class LiteLLMCompletionTransformationHandler:
                 responses_api_request=responses_api_request,
                 **kwargs,
             )
-        
+
         completion_args = {}
         completion_args.update(kwargs)
         completion_args.update(litellm_completion_request)
@@ -106,7 +106,7 @@ class LiteLLMCompletionTransformationHandler:
                 previous_response_id=previous_response_id,
                 litellm_completion_request=litellm_completion_request,
             )
-        
+
         acompletion_args = {}
         acompletion_args.update(kwargs)
         acompletion_args.update(litellm_completion_request)

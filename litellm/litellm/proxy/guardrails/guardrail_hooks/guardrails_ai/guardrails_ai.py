@@ -121,7 +121,7 @@ class GuardrailsAI(CustomGuardrail):
     ) -> str:
         from httpx import URL
 
-        # This branch of code does not work with current version of GuardrailsAI API (as of July 2025), and it is unclear if it ever worked. 
+        # This branch of code does not work with current version of GuardrailsAI API (as of July 2025), and it is unclear if it ever worked.
         # Use guardrails_ai_api_input_format: "llmOutput" config line for all guardrails (which is the default anyway)
         # We can still use the "pre_call" mode to validate the inputs even if the API input format is technicallt "llmOutput"
 

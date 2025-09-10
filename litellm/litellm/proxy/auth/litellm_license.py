@@ -140,7 +140,7 @@ class LicenseCheck:
         ):
             return False
         return total_users > self.airgapped_license_data["max_users"]
-    
+
     def is_team_count_over_limit(self, team_count: int) -> bool:
         """
         Check if the license is over the limit

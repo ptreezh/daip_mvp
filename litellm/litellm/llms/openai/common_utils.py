@@ -215,10 +215,10 @@ class BaseOpenAILLM:
     def _get_sync_http_client() -> Optional[httpx.Client]:
         if litellm.client_session is not None:
             return litellm.client_session
-        
+
         # Get unified SSL configuration
         ssl_config = get_ssl_configuration()
-        
+
         return httpx.Client(
             limits=httpx.Limits(max_connections=1000, max_keepalive_connections=100),
             verify=ssl_config,

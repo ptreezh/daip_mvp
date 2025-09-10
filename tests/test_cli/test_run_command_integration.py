@@ -1,9 +1,13 @@
-import pytest
 from unittest.mock import MagicMock, patch
 
 from daip_live.cli import app
+from daip_live.core.models import (
+    AppConfig,
+    DatabaseConfig,
+    KnowledgeBaseConfig,
+    LLMProviderConfig,
+)
 from typer.testing import CliRunner
-from daip_live.core.models import AppConfig, DatabaseConfig, LLMProviderConfig, KnowledgeBaseConfig
 
 runner = CliRunner()
 
@@ -39,7 +43,7 @@ def test_run_command_initializes_and_runs_tui(
     the AgentExecutor, and the TUI, then starts the TUI.
     """
     goal = "Test goal"
-    
+
     # Configure the mock config manager
     mock_config = create_mock_config()
     MockConfigManager.get_config.return_value = mock_config

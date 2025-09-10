@@ -1,16 +1,17 @@
 """Implements the DatabaseManager for all database interactions."""
 
 from typing import List, Optional
-from sqlalchemy import create_engine, delete, insert, select, update
-from sqlalchemy.engine import Engine
-from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
-from src.daip_live.core.models import KnowledgeSource, Session, DialogueTurn, AgentState
+from sqlalchemy import create_engine, delete, insert, select
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+from sqlalchemy.engine import Engine
+
+from src.daip_live.core.models import AgentState, DialogueTurn, KnowledgeSource, Session
 from src.daip_live.persistence.tables import (
-    metadata_obj,
-    sessions_table,
     dialogue_turns_table,
     knowledge_sources_table,
+    metadata_obj,
+    sessions_table,
 )
 
 
@@ -63,7 +64,7 @@ class DatabaseManager:
             session_row = conn.execute(session_stmt).first()
             if not session_row:
                 return None
-            
+
             session_data = dict(session_row._asdict())
             # Convert status string back to AgentState enum
             session_data["status"] = AgentState[session_data["status"]]
@@ -79,7 +80,7 @@ class DatabaseManager:
         stmt = select(sessions_table).order_by(sessions_table.c.start_time.desc())
         with self.engine.connect() as conn:
             rows = conn.execute(stmt).all()
-        
+
         sessions = []
         for row in rows:
             session_data = dict(row._asdict())
@@ -113,14 +114,14 @@ class DatabaseManager:
                 indexed_at=insert_stmt.excluded.indexed_at,
             )
         ).returning(knowledge_sources_table)
-        
+
         with self.engine.begin() as conn:
             result = conn.execute(update_stmt)
             upserted_row = result.first()
 
         if not upserted_row:
             raise RuntimeError("Failed to upsert knowledge source.")
-        
+
         return KnowledgeSource(**upserted_row._asdict())
 
     def delete_knowledge_source(self, file_path: str) -> None:

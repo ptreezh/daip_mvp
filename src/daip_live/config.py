@@ -1,8 +1,8 @@
 
-import yaml
 import os
 from typing import Optional
 
+import yaml
 from pydantic import ValidationError
 
 from daip_live.core.models import AppConfig
@@ -22,7 +22,7 @@ class ConfigManager:
     def _load(self) -> None:
         """Loads, validates, and stores the configuration."""
         try:
-            with open(self._config_path, 'r', encoding='utf-8') as f:
+            with open(self._config_path, encoding='utf-8') as f:
                 raw_config = yaml.safe_load(f)
             self._config = AppConfig(**raw_config)
         except FileNotFoundError:
@@ -38,10 +38,10 @@ class ConfigManager:
         """Returns the loaded configuration, loading it first if necessary."""
         if not self.is_loaded():
             self._load()
-        
+
         if self._config is None: # Should not happen if load() works correctly
             raise ConfigError("Configuration is None after loading.")
-            
+
         return self._config
 
 def create_config_yaml_if_not_exists(path: str = "config.yaml") -> None:

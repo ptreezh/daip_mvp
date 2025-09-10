@@ -16,7 +16,7 @@ class ColdStorageHandler:
 
     It allows fetching a dict of the proxy server request from s3 or GCS bucket.
     """
-    
+
     async def get_proxy_server_request_from_cold_storage_with_object_key(
         self,
         object_key: str,
@@ -30,7 +30,7 @@ class ColdStorageHandler:
         Returns:
             Optional[dict]: The proxy server request dict or None if not found
         """
-        
+
         # select the custom logger to use for cold storage
         custom_logger_name: Optional[_custom_logger_compatible_callbacks_literal] = self._select_custom_logger_for_cold_storage()
 
@@ -43,14 +43,14 @@ class ColdStorageHandler:
 
         # if no custom logger is found, return None
         if custom_logger is None:
-            return None 
-        
+            return None
+
         proxy_server_request = await custom_logger.get_proxy_server_request_from_cold_storage_with_object_key(
             object_key=object_key,
         )
 
         return proxy_server_request
-        
+
 
 
     def _select_custom_logger_for_cold_storage(

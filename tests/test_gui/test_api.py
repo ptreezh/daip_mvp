@@ -1,10 +1,10 @@
-import pytest
-from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
 
-from src.daip_live.p7_gui.main import app, get_session_manager
-from src.daip_live.core.models import Session, AgentState
+from fastapi.testclient import TestClient
+
+from src.daip_live.core.models import AgentState, Session
 from src.daip_live.memory.session_manager import SessionManager
+from src.daip_live.p7_gui.main import app, get_session_manager
 
 # Mock SessionManager
 mock_session_manager = MagicMock(spec=SessionManager)

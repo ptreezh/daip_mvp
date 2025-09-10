@@ -56,7 +56,7 @@ else:
 class CustomLogger:  # https://docs.litellm.ai/docs/observability/custom_callback#callback-class
     # Class variables or attributes
     def __init__(
-        self, 
+        self,
         turn_off_message_logging: bool = False,
 
         # deprecated param, use `turn_off_message_logging` instead
@@ -495,7 +495,7 @@ class CustomLogger:  # https://docs.litellm.ai/docs/observability/custom_callbac
         if LITELLM_METADATA_FIELD in request_kwargs:
             return LITELLM_METADATA_FIELD
         return OLD_LITELLM_METADATA_FIELD
-    
+
     def redact_standard_logging_payload_from_model_call_details(
         self, model_call_details: Dict
     ) -> Dict:
@@ -514,10 +514,10 @@ class CustomLogger:  # https://docs.litellm.ai/docs/observability/custom_callbac
         from litellm import Choices, Message, ModelResponse
         from litellm.types.utils import LiteLLMCommonStrings
         turn_off_message_logging: bool = getattr(self, "turn_off_message_logging", False)
-        
+
         if turn_off_message_logging is False:
             return model_call_details
-        
+
         # Only make a shallow copy of the top-level dict to avoid deepcopy issues
         # with complex objects like AuthenticationError that may be present
         model_call_details_copy = copy(model_call_details)
@@ -541,9 +541,9 @@ class CustomLogger:  # https://docs.litellm.ai/docs/observability/custom_callbac
 
         model_call_details_copy["standard_logging_object"] = standard_logging_object_copy
         return model_call_details_copy
-    
 
-    
+
+
     async def get_proxy_server_request_from_cold_storage_with_object_key(
         self,
         object_key: str,

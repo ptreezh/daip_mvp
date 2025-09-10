@@ -31,7 +31,7 @@ class GetRoutes:
         }
         routes.append(route_info)
         return routes
-    
+
     @staticmethod
     def get_routes_for_mounted_app(
         route: BaseRoute,
@@ -46,11 +46,11 @@ class GetRoutes:
             for sub_route in sub_app.routes:
                 # Get endpoint - either from endpoint attribute or app attribute
                 endpoint_func = getattr(sub_route, "endpoint", None) or getattr(sub_route, "app", None)
-                
+
                 if endpoint_func is not None:
                     sub_route_path = getattr(sub_route, "path", "")
                     full_path = mount_path.rstrip('/') + sub_route_path
-                    
+
                     route_info = {
                         "path": full_path,
                         "methods": getattr(sub_route, "methods", ["GET", "POST"]),
@@ -60,7 +60,7 @@ class GetRoutes:
                     }
                     routes.append(route_info)
         return routes
-    
+
 
     @staticmethod
     def _safe_get_endpoint_name(endpoint_function: Any) -> Optional[str]:

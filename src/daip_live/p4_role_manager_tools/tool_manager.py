@@ -1,13 +1,14 @@
 """The ToolManager and its secure execution pipeline."""
 
-import inspect
-from functools import wraps
-from typing import Any, Callable, Dict, Type, Optional, Set
+from typing import Any, Callable, Dict
 
-from pydantic import BaseModel, create_model, ValidationError
+from pydantic import ValidationError
 
 from daip_live.core.exceptions import DAIPError
-from daip_live.core.models import SessionContext, ToolPermissionConfig # Assuming SessionContext is defined here
+from daip_live.core.models import (  # Assuming SessionContext is defined here
+    SessionContext,
+    ToolPermissionConfig,
+)
 
 
 # Custom Exceptions for the Tool Pipeline
@@ -55,13 +56,13 @@ class ToolManager:
         """Registers a function decorated with @tool."""
         if not getattr(tool_func, "is_tool", False):
             raise ValueError("Function must be decorated with @tool to be registered.")
-        
+
         tool_name = tool_func.__name__
         if tool_name in self._registry:
             # For now, let's allow re-registration for easier interactive development
             # In a stricter environment, this might raise an error.
             pass
-        
+
         self._registry[tool_name] = tool_func
 
     def execute_tool(self, name: str, args: Dict[str, Any], session_context: SessionContext, confirmation_granted: bool = False) -> Any:
@@ -71,7 +72,7 @@ class ToolManager:
         # Stage 1: Discovery
         if name not in self._registry:
             raise ToolNotFoundError(f"Tool '{name}' not found.")
-        
+
         tool_func = self._registry[name]
         input_schema = getattr(tool_func, "input_schema", None)
 
@@ -98,7 +99,7 @@ class ToolManager:
                     f"Resource '{resource_path}' was not recently read. "
                     "Write operations require a prior read operation on the target resource."
                 )
-        
+
         # Stage 4: Permission Check
         permission_status = self.tool_permission_config.tools.get(name, self.tool_permission_config.default)
 

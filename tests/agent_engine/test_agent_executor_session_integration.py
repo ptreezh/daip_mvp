@@ -1,11 +1,12 @@
 import asyncio
 import unittest
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 from src.daip_live.agent_engine.executor import AgentExecutor
-from src.daip_live.core.models import Session, AgentState
-from src.daip_live.memory.session_manager import SessionManager
+from src.daip_live.core.models import AgentState, Session
 from src.daip_live.memory.service import MemoryService
+from src.daip_live.memory.session_manager import SessionManager
+
 
 class TestAgentExecutorSessionIntegration(unittest.TestCase):
 
@@ -33,10 +34,10 @@ class TestAgentExecutorSessionIntegration(unittest.TestCase):
             goal = "A simple goal"
             final_llm_response = "Confidence: 1.0\nFinal Answer: All done."
             prompt = "Generated Prompt"
-            
+
             self.mock_memory_service.construct_prompt.return_value = prompt
             self.mock_model_provider.generate = AsyncMock(return_value=final_llm_response)
-            
+
             mock_session = Session(goal=goal, session_type="workflow", participant_ids=["agent", "system"])
             self.mock_session_manager.create_session.return_value = mock_session
 
@@ -51,7 +52,7 @@ class TestAgentExecutorSessionIntegration(unittest.TestCase):
             )
             self.mock_session_manager.save_session.assert_called_once()
             saved_session_arg = self.mock_session_manager.save_session.call_args[0][0]
-            
+
             self.assertIsInstance(saved_session_arg, Session)
             self.assertEqual(saved_session_arg.status, AgentState.COMPLETED)
             self.assertEqual(saved_session_arg.summary, "Final Answer: All done.")

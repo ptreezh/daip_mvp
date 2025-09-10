@@ -5,22 +5,30 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+from unittest.mock import AsyncMock, Mock
+
 import pytest
-from unittest.mock import Mock, AsyncMock
 
 # Add the src directory to the path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.daip_live.tui import DAIP_TUI
+from src.daip_live.agent_engine.executor import AgentExecutor
+from src.daip_live.config import ConfigManager
+from src.daip_live.core.models import (
+    AppConfig,
+    DatabaseConfig,
+    KnowledgeBaseConfig,
+    LLMProviderConfig,
+    RoleManagerConfig,
+)
+from src.daip_live.knowledge.manager import KnowledgeManager
 from src.daip_live.memory.session_manager import SessionManager
+from src.daip_live.model_provider.provider import LiteLLMProvider
 from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
 from src.daip_live.p8_debate_system.manager import DebateManager
-from src.daip_live.knowledge.manager import KnowledgeManager
-from src.daip_live.model_provider.provider import LiteLLMProvider
 from src.daip_live.persistence.database import DatabaseManager
-from src.daip_live.config import ConfigManager
-from src.daip_live.core.models import AppConfig, DatabaseConfig, LLMProviderConfig, KnowledgeBaseConfig, RoleManagerConfig
-from src.daip_live.agent_engine.executor import AgentExecutor
+from src.daip_live.tui import DAIP_TUI
+
 
 @pytest.fixture(scope="class")
 def test_env(request):
@@ -38,7 +46,7 @@ def test_env(request):
         knowledge_base=KnowledgeBaseConfig(directory=test_dir.name),
         role_manager=RoleManagerConfig(roles_dir=roles_dir)
     )
-    
+
     config_manager = ConfigManager()
     config_manager._config = mock_config
 
@@ -65,7 +73,7 @@ tools: []
     role_path = os.path.join(roles_dir, "test_assistant.yaml")
     with open(role_path, 'w', encoding='utf-8') as f:
         f.write(role_content)
-    
+
     # Update role_manager to use the test roles directory
     role_manager.roles_dir = roles_dir
     role_manager._load_roles_from_directory(roles_dir)
@@ -100,7 +108,7 @@ class TestTUIIntegration:
             db_manager=self.db_manager,
             config_manager=self.config_manager
         )
-        
+
         assert tui._session_manager is not None
         assert tui._role_manager is not None
         assert tui._knowledge_manager is not None
@@ -113,7 +121,7 @@ class TestTUIIntegration:
             session_type="chat",
             participant_ids=["user", "assistant"]
         )
-        
+
         retrieved_session = self.session_manager.get_session(session.session_id)
         assert retrieved_session is not None
         assert retrieved_session.goal == "Test session"
@@ -173,7 +181,7 @@ class TestTUIIntegration:
             await pilot.press("l")
             await pilot.press("o")
             await pilot.press("enter")
-            
+
             # Give the TUI and agent time to process
             await pilot.pause(1.0)
 

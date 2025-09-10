@@ -18,7 +18,7 @@ else:
     GenerateContentResponse = Any
     LiteLLMLoggingObj = Any
     ToolConfigDict = Any
-    
+
 from litellm.types.router import GenericLiteLLMParams
 
 
@@ -81,7 +81,7 @@ class BaseGoogleGenAIGenerateContentConfig(ABC):
 
     @abstractmethod
     def validate_environment(
-        self, 
+        self,
         api_key: Optional[str],
         headers: Optional[dict],
         model: str,
@@ -100,7 +100,7 @@ class BaseGoogleGenAIGenerateContentConfig(ABC):
             Updated headers
         """
         raise NotImplementedError("validate_environment is not implemented")
-    
+
     def sync_get_auth_token_and_url(
         self,
         api_base: Optional[str],
@@ -121,7 +121,7 @@ class BaseGoogleGenAIGenerateContentConfig(ABC):
             Tuple of headers and API base
         """
         raise NotImplementedError("sync_get_auth_token_and_url is not implemented")
-    
+
     async def get_auth_token_and_url(
         self,
         api_base: Optional[str],

@@ -3,9 +3,10 @@
 import uuid
 from datetime import datetime
 from typing import List, Optional
-from src.daip_live.core.models import Session, DialogueTurn, AgentState
-from src.daip_live.persistence.database import DatabaseManager
+
 from src.daip_live.config import config_manager
+from src.daip_live.core.models import AgentState, DialogueTurn, Session
+from src.daip_live.persistence.database import DatabaseManager
 
 
 class SessionManager:
@@ -35,7 +36,7 @@ class SessionManager:
             participant_ids=participant_ids,
             status=AgentState.INIT
         )
-        
+
         # Persist the session to the database
         self.db_manager.save_session(session)
         return session
@@ -92,7 +93,7 @@ class SessionManager:
             A list of Session objects.
         """
         return self.db_manager.list_sessions()
-        
+
     def save_session(self, session: Session) -> None:
         """
         Saves or updates a session and its dialogue turns in the database.

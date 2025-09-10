@@ -24,10 +24,10 @@ class CloudZeroLogger(CustomLogger):
     def __init__(self, api_key: Optional[str] = None, connection_id: Optional[str] = None, timezone: Optional[str] = None, **kwargs):
         """Initialize CloudZero logger with configuration from parameters or environment variables."""
         super().__init__(**kwargs)
-        
+
         # Get configuration from parameters first, fall back to environment variables
         self.api_key = api_key or os.getenv("CLOUDZERO_API_KEY")
-        self.connection_id = connection_id or os.getenv("CLOUDZERO_CONNECTION_ID") 
+        self.connection_id = connection_id or os.getenv("CLOUDZERO_CONNECTION_ID")
         self.timezone = timezone or os.getenv("CLOUDZERO_TIMEZONE", "UTC")
 
     async def export_usage_data(self, target_hour: datetime, limit: Optional[int] = 1000, operation: str = "replace_hourly"):
@@ -45,7 +45,7 @@ class CloudZeroLogger(CustomLogger):
         """
         try:
             verbose_logger.debug("CloudZero Logger: Starting usage data export")
-            
+
             # Validate required configuration
             if not self.api_key or not self.connection_id:
                 raise ValueError(
@@ -54,7 +54,7 @@ class CloudZeroLogger(CustomLogger):
 
             # Fetch and transform data using helper
             cbf_data = await self._fetch_cbf_data_for_hour(target_hour, limit)
-            
+
             if cbf_data.is_empty():
                 verbose_logger.info("CloudZero Logger: No usage data found to export")
                 return
@@ -65,12 +65,12 @@ class CloudZeroLogger(CustomLogger):
                 connection_id=self.connection_id,
                 user_timezone=self.timezone
             )
-            
+
             verbose_logger.debug(f"CloudZero Logger: Transmitting {len(cbf_data)} records to CloudZero")
             streamer.send_batched(cbf_data, operation=operation)
-            
+
             verbose_logger.info(f"CloudZero Logger: Successfully exported {len(cbf_data)} records to CloudZero")
-            
+
         except Exception as e:
             verbose_logger.error(f"CloudZero Logger: Error exporting usage data: {str(e)}")
             raise
@@ -90,20 +90,20 @@ class CloudZeroLogger(CustomLogger):
         database = LiteLLMDatabase()
         verbose_logger.debug(f"CloudZero Logger: Loading spend logs for hour {target_hour}")
         data = await database.get_usage_data_for_hour(target_hour=target_hour, limit=limit)
-        
+
         if data.is_empty():
             verbose_logger.info("CloudZero Logger: No usage data found for the specified hour")
             return data  # Return empty data
 
         verbose_logger.debug(f"CloudZero Logger: Processing {len(data)} records")
-        
+
         # Transform data to CloudZero CBF format
         transformer = CBFTransformer()
         cbf_data = transformer.transform(data)
-        
+
         if cbf_data.is_empty():
             verbose_logger.warning("CloudZero Logger: No valid data after transformation")
-            
+
         return cbf_data
 
     async def dry_run_export_usage_data(self, target_hour: datetime, limit: Optional[int] = 1000):
@@ -116,19 +116,19 @@ class CloudZeroLogger(CustomLogger):
         """
         try:
             verbose_logger.debug("CloudZero Logger: Starting dry run export")
-            
+
             # Fetch and transform data using helper
             cbf_data = await self._fetch_cbf_data_for_hour(target_hour, limit)
-            
+
             if cbf_data.is_empty():
                 verbose_logger.warning("CloudZero Dry Run: No usage data found")
                 return
 
             # Display the transformed data on screen
             self._display_cbf_data_on_screen(cbf_data)
-            
+
             verbose_logger.info(f"CloudZero Logger: Dry run completed for {len(cbf_data)} records")
-            
+
         except Exception as e:
             verbose_logger.error(f"CloudZero Logger: Error in dry run export: {str(e)}")
             verbose_logger.error(f"CloudZero Dry Run Error: {str(e)}")
@@ -139,9 +139,9 @@ class CloudZeroLogger(CustomLogger):
         from rich.box import SIMPLE
         from rich.console import Console
         from rich.table import Table
-        
+
         console = Console()
-        
+
         if cbf_data.is_empty():
             console.print("[yellow]No CBF data to display[/yellow]")
             return
@@ -211,10 +211,10 @@ class CloudZeroLogger(CustomLogger):
         from litellm.proxy.db.db_transaction_queue.pod_lock_manager import (
             PodLockManager,
         )
-        
+
         lock_manager = PodLockManager(redis_cache=redis_cache)
         cronjob_id = "cloudzero_hourly_export"
-        
+
         async def hourly_export_task():
             while True:
                 try:
@@ -223,10 +223,10 @@ class CloudZeroLogger(CustomLogger):
                     target_hour = now.replace(minute=0, second=0, microsecond=0)
                     # Export data for the previous hour to ensure all data is available
                     target_hour = target_hour - timedelta(hours=1)
-                    
+
                     # Try to acquire lock
                     lock_acquired = await lock_manager.acquire_lock(cronjob_id)
-                    
+
                     if lock_acquired:
                         try:
                             verbose_logger.info(f"CloudZero Background Job: Starting export for hour {target_hour}")
@@ -237,17 +237,17 @@ class CloudZeroLogger(CustomLogger):
                             await lock_manager.release_lock(cronjob_id)
                     else:
                         verbose_logger.debug("CloudZero Background Job: Another instance is already running the export")
-                    
+
                     # Wait until the next hour
                     next_hour = (datetime.utcnow() + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
                     sleep_seconds = (next_hour - datetime.utcnow()).total_seconds()
                     await asyncio.sleep(sleep_seconds)
-                    
+
                 except Exception as e:
                     verbose_logger.error(f"CloudZero Background Job: Error in hourly export task: {str(e)}")
                     # Sleep for 5 minutes before retrying on error
                     await asyncio.sleep(300)
-        
+
         # Start the background task
         asyncio.create_task(hourly_export_task())
         verbose_logger.debug("CloudZero Background Job: Initialized hourly export task")

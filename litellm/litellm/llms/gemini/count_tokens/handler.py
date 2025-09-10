@@ -20,7 +20,7 @@ class GoogleAIStudioTokenCounter:
         base_url = api_base or "https://generativelanguage.googleapis.com"
         return f"{base_url}/v1beta/models/{model}:countTokens"
 
-        
+
     async def validate_environment(
         self,
         api_base: Optional[str] = None,
@@ -94,12 +94,12 @@ class GoogleAIStudioTokenCounter:
             model=model,
             litellm_params=kwargs,
         )
-        
+
         # Prepare request body
         request_body = {
             "contents": contents
         }
-        
+
         async_httpx_client = get_async_httpx_client(
             llm_provider=LlmProviders.GEMINI,
         )
@@ -110,14 +110,14 @@ class GoogleAIStudioTokenCounter:
                 headers=headers,
                 json=request_body
             )
-            
+
             # Check for HTTP errors
             response.raise_for_status()
-            
+
             # Parse response
             result = response.json()
             return result
-                
+
         except httpx.HTTPStatusError as e:
             error_msg = f"Google Gen AI Studio API error: {e.response.status_code} - {e.response.text}"
             raise litellm.APIError(

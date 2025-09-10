@@ -60,7 +60,7 @@ class AgentOps(OpenTelemetry):
                 pass
 
         headers = f"Authorization=Bearer {jwt_token}" if jwt_token else None
-        
+
         otel_config = OpenTelemetryConfig(
             exporter="otlp_http",
             endpoint=config.endpoint,
@@ -79,10 +79,10 @@ class AgentOps(OpenTelemetry):
             "deployment.environment": config.deployment_environment or "production",
             "telemetry.sdk.name": "agentops",
         }
-        
+
         if project_id:
             resource_attrs["project.id"] = project_id
-            
+
         self.resource_attributes = resource_attrs
 
     def _fetch_auth_token(self, api_key: str, auth_endpoint: str) -> Dict[str, Any]:
@@ -100,7 +100,7 @@ class AgentOps(OpenTelemetry):
             "Content-Type": "application/json",
             "Connection": "keep-alive",
         }
-        
+
         client = _get_httpx_client()
         try:
             response = client.post(
@@ -109,10 +109,10 @@ class AgentOps(OpenTelemetry):
                 json={"api_key": api_key},
                 timeout=10
             )
-            
+
             if response.status_code != 200:
                 raise Exception(f"Failed to fetch auth token: {response.text}")
-            
+
             return response.json()
         finally:
-            client.close() 
+            client.close()

@@ -20,12 +20,12 @@ class LiteLLM_Proxy_MCP_Handler:
         """
         if tools:
             for tool in tools:
-                if (isinstance(tool, dict) and 
-                    tool.get("type") == "mcp" and 
+                if (isinstance(tool, dict) and
+                    tool.get("type") == "mcp" and
                     tool.get("server_url") == "litellm_proxy"):
                     return True
         return False
-    
+
     @staticmethod
     def _parse_mcp_tools(tools: Optional[Iterable[ToolParam]]) -> Tuple[List[ToolParam], List[Any]]:
         """
@@ -36,44 +36,44 @@ class LiteLLM_Proxy_MCP_Handler:
         """
         mcp_tools_with_litellm_proxy: List[ToolParam] = []
         other_tools: List[Any] = []
-        
+
         if tools:
             for tool in tools:
-                if (isinstance(tool, dict) and 
-                    tool.get("type") == "mcp" and 
+                if (isinstance(tool, dict) and
+                    tool.get("type") == "mcp" and
                     tool.get("server_url") == "litellm_proxy"):
                     mcp_tools_with_litellm_proxy.append(tool)
                 else:
                     other_tools.append(tool)
-        
+
         return mcp_tools_with_litellm_proxy, other_tools
-    
+
     @staticmethod
     async def _get_mcp_tools_from_manager(user_api_key_auth: Any) -> List[Any]:
         """Get available tools from the MCP server manager."""
         from litellm.proxy._experimental.mcp_server.mcp_server_manager import (
             global_mcp_server_manager,
         )
-        
+
         return await global_mcp_server_manager.list_tools(user_api_key_auth=user_api_key_auth)
-    
+
     @staticmethod
     def _transform_mcp_tools_to_openai(mcp_tools: List[Any]) -> List[Any]:
         """Transform MCP tools to OpenAI-compatible format."""
         from litellm.experimental_mcp_client.tools import (
             transform_mcp_tool_to_openai_responses_api_tool,
         )
-        
+
         openai_tools = []
         for mcp_tool in mcp_tools:
             openai_tool = transform_mcp_tool_to_openai_responses_api_tool(mcp_tool)
             openai_tools.append(openai_tool)
-        
+
         return openai_tools
-    
+
     @staticmethod
     def _should_auto_execute_tools(
-        mcp_tools_with_litellm_proxy: Union[List[Dict[str, Any]], List[ToolParam]], 
+        mcp_tools_with_litellm_proxy: Union[List[Dict[str, Any]], List[ToolParam]],
     ) -> bool:
         """Check if we should auto-execute tool calls.
 
@@ -88,22 +88,22 @@ class LiteLLM_Proxy_MCP_Handler:
             elif getattr(tool, "require_approval", None) == "never":
                 return True
         return False
-    
+
     @staticmethod
     def _extract_tool_calls_from_response(response: ResponsesAPIResponse) -> List[Any]:
         """Extract tool calls from the response output."""
         tool_calls: List[Any] = []
         for output_item in response.output:
             # Check if this is a function call output item
-            if (isinstance(output_item, dict) and 
+            if (isinstance(output_item, dict) and
                 output_item.get("type") == "function_call"):
                 tool_calls.append(output_item)
             elif hasattr(output_item, 'type') and getattr(output_item, 'type') == "function_call":
                 # Handle pydantic model case
                 tool_calls.append(output_item)
-        
+
         return tool_calls
-    
+
     @staticmethod
     def _extract_tool_call_details(tool_call) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         """Extract tool name, arguments, and call_id from a tool call."""
@@ -115,14 +115,14 @@ class LiteLLM_Proxy_MCP_Handler:
             tool_name = getattr(tool_call, "name", None)
             tool_arguments = getattr(tool_call, "arguments", None)
             tool_call_id = getattr(tool_call, "call_id", None) or getattr(tool_call, "id", None)
-        
+
         return tool_name, tool_arguments, tool_call_id
-    
+
     @staticmethod
     def _parse_tool_arguments(tool_arguments: Any) -> Dict[str, Any]:
         """Parse tool arguments, handling both string and dict formats."""
         import json
-        
+
         if isinstance(tool_arguments, str):
             try:
                 return json.loads(tool_arguments)
@@ -130,23 +130,23 @@ class LiteLLM_Proxy_MCP_Handler:
                 return {}
         else:
             return tool_arguments or {}
-    
+
     @staticmethod
     def _parse_mcp_result(result: Any) -> str:
         """Parse MCP tool call result and extract meaningful content."""
         if not result or not hasattr(result, 'content') or not result.content:
             return "Tool executed successfully"
-        
+
         # Import MCP content types for isinstance checks
         try:
             from mcp.types import EmbeddedResource, ImageContent, TextContent
         except ImportError:
             # Fallback to generic handling if MCP types not available
             return "Tool executed successfully"
-        
+
         text_parts = []
         other_content_types = []
-        
+
         for content_item in result.content:
             if isinstance(content_item, TextContent):
                 # Text content - extract the text
@@ -161,20 +161,20 @@ class LiteLLM_Proxy_MCP_Handler:
                 # Other unknown content types
                 content_type = type(content_item).__name__
                 other_content_types.append(content_type)
-        
+
         # Combine text parts if any
         result_text = " ".join(text_parts) if text_parts else ""
-        
+
         # Add info about other content types
         if other_content_types:
             other_info = f"[Generated {', '.join(other_content_types)}]"
             result_text = f"{result_text} {other_info}".strip()
-        
+
         return result_text or "Tool executed successfully"
-    
+
     @staticmethod
     async def _execute_tool_calls(
-        tool_calls: List[Any], 
+        tool_calls: List[Any],
         user_api_key_auth: Any
     ) -> List[Dict[str, Any]]:
         """Execute tool calls and return results."""
@@ -183,36 +183,36 @@ class LiteLLM_Proxy_MCP_Handler:
         )
         from litellm.exceptions import BlockedPiiEntityError, GuardrailRaisedException
         from fastapi import HTTPException
-        
+
         tool_results = []
         tool_call_id: Optional[str] = None
         for tool_call in tool_calls:
             try:
                 tool_name, tool_arguments, tool_call_id = LiteLLM_Proxy_MCP_Handler._extract_tool_call_details(tool_call)
-                
+
                 if not tool_name:
                     verbose_logger.warning(f"Tool call missing name: {tool_call}")
                     continue
-                
+
                 parsed_arguments = LiteLLM_Proxy_MCP_Handler._parse_tool_arguments(tool_arguments)
-                
+
                 # Import here to avoid circular import
                 from litellm.proxy.proxy_server import proxy_logging_obj
-                
+
                 result = await global_mcp_server_manager.call_tool(
                     name=tool_name,
                     arguments=parsed_arguments,
                     user_api_key_auth=user_api_key_auth,
                     proxy_logging_obj=proxy_logging_obj,
                 )
-                
+
                 # Format result for inclusion in response
                 result_text = LiteLLM_Proxy_MCP_Handler._parse_mcp_result(result)
                 tool_results.append({
                     "tool_call_id": tool_call_id,
                     "result": result_text
                 })
-                
+
             except BlockedPiiEntityError as e:
                 verbose_logger.error(f"BlockedPiiEntityError in MCP tool call: {str(e)}")
                 error_message = f"Tool call blocked: PII entity '{getattr(e, 'entity_type', 'unknown')}' detected by guardrail '{getattr(e, 'guardrail_name', 'unknown')}'. {str(e)}"
@@ -240,18 +240,18 @@ class LiteLLM_Proxy_MCP_Handler:
                     "tool_call_id": tool_call_id,
                     "result": f"Error executing tool: {str(e)}"
                 })
-        
+
         return tool_results
-    
+
     @staticmethod
     def _create_follow_up_input(
-        response: ResponsesAPIResponse, 
-        tool_results: List[Dict[str, Any]], 
+        response: ResponsesAPIResponse,
+        tool_results: List[Dict[str, Any]],
         original_input: Any = None
     ) -> List[Any]:
         """Create follow-up input with tool results in proper format."""
         follow_up_input: List[Any] = []
-        
+
         # Add original user input if available to maintain conversation context
         if original_input:
             if isinstance(original_input, str):
@@ -264,18 +264,18 @@ class LiteLLM_Proxy_MCP_Handler:
                 follow_up_input.extend(original_input)
             else:
                 follow_up_input.append(original_input)
-        
+
         # Add the assistant message with function calls
         assistant_message_content: List[Any] = []
         function_calls: List[Dict[str, Any]] = []
-        
+
         for output_item in response.output:
             if isinstance(output_item, dict):
                 if output_item.get("type") == "function_call":
                     call_id = output_item.get("call_id") or output_item.get("id")
                     name = output_item.get("name")
                     arguments = output_item.get("arguments")
-                    
+
                     # Only add if we have required fields
                     if call_id and name:
                         function_calls.append({
@@ -291,7 +291,7 @@ class LiteLLM_Proxy_MCP_Handler:
                         assistant_message_content.extend(content)
                     else:
                         assistant_message_content.append(content)
-        
+
         # Add assistant message with content and function calls
         if assistant_message_content or function_calls:
             follow_up_input.append({
@@ -299,11 +299,11 @@ class LiteLLM_Proxy_MCP_Handler:
                 "role": "assistant",
                 "content": assistant_message_content
             })
-            
+
             # Add function calls after assistant message
             for function_call in function_calls:
                 follow_up_input.append(function_call)
-        
+
         # Add tool results (function call outputs)
         for tool_result in tool_results:
             follow_up_input.append({
@@ -311,9 +311,9 @@ class LiteLLM_Proxy_MCP_Handler:
                 "call_id": tool_result["tool_call_id"],
                 "output": tool_result["result"]
             })
-        
+
         return follow_up_input
-    
+
     @staticmethod
     async def _make_follow_up_call(
         follow_up_input: List[Any],
@@ -358,7 +358,7 @@ class LiteLLM_Proxy_MCP_Handler:
                 )
             ]
         )
-        
+
         # Create output element for tool execution results
         tool_results_output = GenericResponseOutputItem(
             type="tool_execution_results",
@@ -373,9 +373,9 @@ class LiteLLM_Proxy_MCP_Handler:
                 )
             ]
         )
-        
+
         # Add the new output elements to the response
         response.output.append(mcp_tools_output.model_dump())  # type: ignore
         response.output.append(tool_results_output.model_dump())  # type: ignore
-        
+
         return response

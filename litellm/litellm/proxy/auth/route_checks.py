@@ -300,7 +300,7 @@ class RouteChecks:
         if re.match(pattern, route):
             return True
         return False
-    
+
     @staticmethod
     def _is_wildcard_pattern(pattern: str) -> bool:
         """
@@ -354,7 +354,7 @@ class RouteChecks:
         #########################################################
         if route in allowed_routes:
             return True
-        
+
         #########################################################
         # wildcard match route is in allowed_routes
         # e.g calling /anthropic/v1/messages is allowed if allowed_routes has /anthropic/*
@@ -363,7 +363,7 @@ class RouteChecks:
         for allowed_route in wildcard_allowed_routes:
             if RouteChecks._route_matches_wildcard_pattern(route=route, pattern=allowed_route):
                 return True
-        
+
         #########################################################
         # pattern match route is in allowed_routes
         # pattern: "/threads/{thread_id}"
@@ -375,7 +375,7 @@ class RouteChecks:
             for allowed_route in allowed_routes
         ):
             return True
-        
+
         return False
 
     @staticmethod
@@ -420,7 +420,7 @@ class RouteChecks:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"user not allowed to access this OpenAI routes, role= {_user_role}",
             )
-        
+
         # Check if this is a write operation on management routes
         if RouteChecks.check_route_access(
             route=route, allowed_routes=LiteLLMRoutes.management_routes.value

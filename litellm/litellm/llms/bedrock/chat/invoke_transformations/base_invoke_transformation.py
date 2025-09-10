@@ -197,7 +197,7 @@ class AmazonInvokeConfig(BaseConfig, BaseAWSLLM):
                 litellm_params=litellm_params,
                 headers=headers,
             )
-            
+
             return transformed_request
         elif provider == "nova":
             return litellm.AmazonInvokeNovaConfig().transform_request(

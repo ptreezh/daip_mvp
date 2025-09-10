@@ -1,25 +1,24 @@
 """Tests for TUI knowledge commands."""
 
-import asyncio
-import os
 import sys
-import tempfile
 from pathlib import Path
+from unittest.mock import AsyncMock, Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock, AsyncMock
 
 # Add the src directory to the path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from daip_live.tui import DAIP_TUI
+from daip_live.config import ConfigManager
+from daip_live.knowledge.manager import KnowledgeManager
 from daip_live.memory.session_manager import SessionManager
+from daip_live.model_provider.provider import LiteLLMProvider
 from daip_live.p4_role_manager_tools.role_manager import RoleManager
 from daip_live.p8_debate_system.manager import DebateManager
-from daip_live.knowledge.manager import KnowledgeManager
-from daip_live.model_provider.provider import LiteLLMProvider
 from daip_live.persistence.database import DatabaseManager
-from daip_live.config import ConfigManager
+from daip_live.tui import DAIP_TUI
 from textual.widgets import RichLog
+
 
 @pytest.fixture
 def mock_knowledge_manager() -> KnowledgeManager:
@@ -55,7 +54,7 @@ async def test_knowledge_sync_command(mock_knowledge_manager):
 
         log_widget = pilot.app.query_one("#main_log", RichLog)
         log_content = "".join(line.text for line in log_widget.lines)
-        
+
         assert "Knowledge base sync complete" in log_content
         assert "Added: 1" in log_content
         assert "Updated: 2" in log_content

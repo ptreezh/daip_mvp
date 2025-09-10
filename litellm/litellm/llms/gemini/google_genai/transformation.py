@@ -25,7 +25,7 @@ else:
     GenerateContentContentListUnionDict = Any
     GenerateContentResponse = Any
     ToolConfigDict = Any
-    
+
 from ..common_utils import get_api_key_from_env
 
 class GoogleGenAIConfig(BaseGoogleGenAIGenerateContentConfig, VertexLLM):
@@ -37,15 +37,15 @@ class GoogleGenAIConfig(BaseGoogleGenAIGenerateContentConfig, VertexLLM):
     ##############################
     XGOOGLE_API_KEY = "x-goog-api-key"
     ##############################
-    
+
     @property
     def custom_llm_provider(self) -> Literal["gemini", "vertex_ai"]:
         return "gemini"
-    
+
     def __init__(self):
         super().__init__()
         VertexLLM.__init__(self)
-    
+
     def get_supported_generate_content_optional_params(self, model: str) -> List[str]:
         """
         Get the list of supported Google GenAI parameters for the model.
@@ -58,7 +58,7 @@ class GoogleGenAIConfig(BaseGoogleGenAIGenerateContentConfig, VertexLLM):
         """
         return [
             "http_options",
-            "system_instruction", 
+            "system_instruction",
             "temperature",
             "top_p",
             "top_k",
@@ -110,9 +110,9 @@ class GoogleGenAIConfig(BaseGoogleGenAIGenerateContentConfig, VertexLLM):
             if param in supported_google_genai_params:
                 _generate_content_config_dict[param] = value
         return dict(_generate_content_config_dict)
-    
+
     def validate_environment(
-        self, 
+        self,
         api_key: Optional[str],
         headers: Optional[dict],
         model: str,
@@ -136,7 +136,7 @@ class GoogleGenAIConfig(BaseGoogleGenAIGenerateContentConfig, VertexLLM):
             or get_api_key_from_env()
             or litellm.api_key
         )
-    
+
     def _get_common_auth_components(
         self,
         litellm_params: dict,
@@ -151,7 +151,7 @@ class GoogleGenAIConfig(BaseGoogleGenAIGenerateContentConfig, VertexLLM):
         vertex_project = self.get_vertex_ai_project(litellm_params)
         vertex_location = self.get_vertex_ai_location(litellm_params)
         return vertex_credentials, vertex_project, vertex_location
-    
+
     def _build_final_headers_and_url(
         self,
         model: str,
@@ -167,7 +167,7 @@ class GoogleGenAIConfig(BaseGoogleGenAIGenerateContentConfig, VertexLLM):
         Build final headers and API URL from auth components.
         """
         gemini_api_key = self._get_google_ai_studio_api_key(litellm_params)
-        
+
         auth_header, api_base = self._get_token_and_url(
             model=model,
             gemini_api_key=gemini_api_key,
@@ -255,7 +255,7 @@ class GoogleGenAIConfig(BaseGoogleGenAIGenerateContentConfig, VertexLLM):
             api_base=api_base,
             litellm_params=litellm_params,
         )
-    
+
 
     def transform_generate_content_request(
         self,
@@ -278,7 +278,7 @@ class GoogleGenAIConfig(BaseGoogleGenAIGenerateContentConfig, VertexLLM):
         request_dict = cast(dict, typed_generate_content_request)
 
         return request_dict
-    
+
     def transform_generate_content_response(
         self,
         model: str,
@@ -304,7 +304,7 @@ class GoogleGenAIConfig(BaseGoogleGenAIGenerateContentConfig, VertexLLM):
                 status_code=raw_response.status_code,
                 headers=raw_response.headers,
             )
-        
+
         logging_obj.model_call_details["httpx_response"] = raw_response
-        
+
         return GenerateContentResponse(**response)

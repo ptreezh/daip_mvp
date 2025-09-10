@@ -792,7 +792,7 @@ class VertexGeminiConfig(VertexAIBaseConfig, BaseConfig):
                     content_str += _content_str
 
         return content_str, reasoning_content_str
-    
+
     def _extract_image_response_from_parts(
         self, parts: List[HttpxPartType]
     ) -> Optional[ImageURLObject]:
@@ -1127,7 +1127,7 @@ class VertexGeminiConfig(VertexAIBaseConfig, BaseConfig):
                 elif web_search_queries:
                     web_search_requests = len(grounding_metadata)
         return web_search_requests
-    
+
     @staticmethod
     def _create_streaming_choice(
         chat_completion_message: ChatCompletionResponseMessage,
@@ -1178,7 +1178,7 @@ class VertexGeminiConfig(VertexAIBaseConfig, BaseConfig):
         url_context_metadata: List[dict] = []
         safety_ratings: List = []
         citation_metadata: List = []
-        
+
         if "groundingMetadata" in candidate:
             if isinstance(candidate["groundingMetadata"], list):
                 grounding_metadata.extend(candidate["groundingMetadata"])  # type: ignore
@@ -1194,7 +1194,7 @@ class VertexGeminiConfig(VertexAIBaseConfig, BaseConfig):
         if "urlContextMetadata" in candidate:
             # Add URL context metadata to grounding metadata
             url_context_metadata.append(cast(dict, candidate["urlContextMetadata"]))
-            
+
         return grounding_metadata, url_context_metadata, safety_ratings, citation_metadata
 
     @staticmethod
@@ -1239,7 +1239,7 @@ class VertexGeminiConfig(VertexAIBaseConfig, BaseConfig):
                 candidate_safety_ratings,
                 candidate_citation_metadata,
             ) = VertexGeminiConfig._extract_candidate_metadata(candidate)
-            
+
             grounding_metadata.extend(candidate_grounding_metadata)
             url_context_metadata.extend(candidate_url_context_metadata)
             safety_ratings.extend(candidate_safety_ratings)
@@ -1301,10 +1301,10 @@ class VertexGeminiConfig(VertexAIBaseConfig, BaseConfig):
             if isinstance(model_response, ModelResponseStream):
                 choice = VertexGeminiConfig._create_streaming_choice(
                     chat_completion_message=chat_completion_message,
-                    candidate=candidate, 
-                    idx=idx, 
-                    tools=tools, 
-                    functions=functions, 
+                    candidate=candidate,
+                    idx=idx,
+                    tools=tools,
+                    functions=functions,
                     chat_completion_logprobs=chat_completion_logprobs,
                     image_response=image_response
                 )

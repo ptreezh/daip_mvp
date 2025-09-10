@@ -52,7 +52,7 @@ def cost_per_token(model: str, usage: Usage) -> Tuple[float, float]:
     # Also check completion_tokens_details if reasoning_tokens is not directly available
     if reasoning_tokens == 0 and hasattr(usage, "completion_tokens_details") and usage.completion_tokens_details:
         reasoning_tokens = getattr(usage.completion_tokens_details, "reasoning_tokens", 0) or 0
-    
+
     reasoning_cost_value = model_info.get("output_cost_per_reasoning_token")
     if reasoning_tokens > 0 and reasoning_cost_value is not None:
         reasoning_cost_per_token = _safe_float_cast(reasoning_cost_value)
@@ -62,7 +62,7 @@ def cost_per_token(model: str, usage: Usage) -> Tuple[float, float]:
     num_search_queries = 0
     if hasattr(usage, "prompt_tokens_details") and usage.prompt_tokens_details:
         num_search_queries = getattr(usage.prompt_tokens_details, "web_search_requests", 0) or 0
-    
+
     # Check both possible keys for search cost (legacy and current)
     search_cost_value = model_info.get("search_queries_cost_per_query") or model_info.get("search_context_cost_per_query")
     if num_search_queries > 0 and search_cost_value is not None:
@@ -76,4 +76,4 @@ def cost_per_token(model: str, usage: Usage) -> Tuple[float, float]:
         # Add search cost to completion cost (similar to how other providers handle it)
         completion_cost += search_cost
 
-    return prompt_cost, completion_cost 
+    return prompt_cost, completion_cost

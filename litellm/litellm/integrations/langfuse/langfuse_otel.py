@@ -203,7 +203,7 @@ class LangfuseOtelLogger(OpenTelemetry):
         return LangfuseOtelConfig(
             otlp_auth_headers=otlp_auth_headers, protocol="otlp_http"
         )
-    
+
     @staticmethod
     def _get_langfuse_authorization_header(public_key: str, secret_key: str) -> str:
         """
@@ -212,9 +212,9 @@ class LangfuseOtelLogger(OpenTelemetry):
         auth_string = f"{public_key}:{secret_key}"
         auth_header = base64.b64encode(auth_string.encode()).decode()
         return f'Basic {auth_header}'
-    
+
     def construct_dynamic_otel_headers(
-        self, 
+        self,
         standard_callback_dynamic_params: StandardCallbackDynamicParams
     ) -> Optional[dict]:
         """
@@ -235,5 +235,5 @@ class LangfuseOtelLogger(OpenTelemetry):
                 secret_key=dynamic_langfuse_secret_key
             )
             dynamic_headers["Authorization"] = auth_header
-        
+
         return dynamic_headers

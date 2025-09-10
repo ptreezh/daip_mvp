@@ -47,7 +47,7 @@ class BaseAnthropicMessagesStreamingIterator:
                 end_time=end_time,
             )
         )
-    
+
     def get_async_streaming_response_iterator(
         self,
         httpx_response,
@@ -98,11 +98,11 @@ class BaseAnthropicMessagesStreamingIterator:
         This method provides the common logic for both Anthropic and Bedrock implementations.
         """
         collected_chunks = []
-        
+
         async for chunk in completion_stream:
             encoded_chunk = self._convert_chunk_to_sse_format(chunk)
             collected_chunks.append(encoded_chunk)
             yield encoded_chunk
-        
+
         # Handle logging after all chunks are processed
         await self._handle_streaming_logging(collected_chunks)

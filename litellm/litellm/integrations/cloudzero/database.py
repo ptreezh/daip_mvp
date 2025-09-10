@@ -40,15 +40,15 @@ class LiteLLMDatabase:
     async def get_usage_data_for_hour(self, target_hour: datetime, limit: Optional[int] = 1000) -> pl.DataFrame:
         """Retrieve spend logs for a specific hour from LiteLLM_SpendLogs table with batching."""
         client = self._ensure_prisma_client()
-        
+
         # Calculate hour range
         hour_start = target_hour.replace(minute=0, second=0, microsecond=0)
         hour_end = hour_start + timedelta(hours=1)
-        
+
         # Convert datetime objects to ISO format strings for PostgreSQL compatibility
         hour_start_str = hour_start.isoformat()
         hour_end_str = hour_end.isoformat()
-        
+
         # Query to get spend logs for the specific hour
         query = """
         SELECT *
@@ -72,7 +72,7 @@ class LiteLLMDatabase:
     async def get_table_info(self) -> Dict[str, Any]:
         """Get information about the LiteLLM_SpendLogs table."""
         client = self._ensure_prisma_client()
-        
+
         try:
             # Get row count from SpendLogs table
             spend_logs_count = await self._get_table_row_count('LiteLLM_SpendLogs')
@@ -99,11 +99,11 @@ class LiteLLMDatabase:
     async def _get_table_row_count(self, table_name: str) -> int:
         """Get row count from specified table."""
         client = self._ensure_prisma_client()
-        
+
         try:
             query = f'SELECT COUNT(*) as count FROM "{table_name}"'
             response = await client.db.query_raw(query)
-            
+
             if response and len(response) > 0:
                 return response[0].get('count', 0)
             return 0
@@ -113,7 +113,7 @@ class LiteLLMDatabase:
     async def discover_all_tables(self) -> Dict[str, Any]:
         """Discover all tables in the LiteLLM database and their schemas."""
         client = self._ensure_prisma_client()
-        
+
         try:
             # Get all LiteLLM tables
             litellm_tables_query = """

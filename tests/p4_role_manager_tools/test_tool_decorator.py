@@ -1,10 +1,7 @@
 """Tests for the @tool decorator."""
 
-import pytest
-from pydantic import BaseModel, Field
-from typing import Type
-
 from daip_live.p4_role_manager_tools.tools import tool
+from pydantic import BaseModel
 
 
 def test_decorator_creates_pydantic_model():

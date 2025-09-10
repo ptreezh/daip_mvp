@@ -13,14 +13,14 @@ class VertexAIGoogleGenAIConfig(GoogleGenAIConfig):
     """
     HEADER_NAME = "Authorization"
     BEARER_PREFIX = "Bearer"
-    
+
     @property
     def custom_llm_provider(self) -> Literal["gemini", "vertex_ai"]:
         return "vertex_ai"
-    
+
 
     def validate_environment(
-        self, 
+        self,
         api_key: Optional[str],
         headers: Optional[dict],
         model: str,
@@ -36,4 +36,3 @@ class VertexAIGoogleGenAIConfig(GoogleGenAIConfig):
             default_headers.update(headers)
 
         return default_headers
-    

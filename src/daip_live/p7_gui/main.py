@@ -1,17 +1,18 @@
 import asyncio
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
-from pydantic import BaseModel
 from typing import List
 
-from src.daip_live.core.models import Session, AgentEvent, ProviderConfig
-from src.daip_live.memory.session_manager import SessionManager
-from src.daip_live.persistence.database import DatabaseManager
-from src.daip_live.config import config_manager, create_config_yaml_if_not_exists
+from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel
+
 from src.daip_live.agent_engine.executor import AgentExecutor
+from src.daip_live.config import config_manager, create_config_yaml_if_not_exists
+from src.daip_live.core.models import ProviderConfig, Session
 from src.daip_live.knowledge.manager import KnowledgeManager
+from src.daip_live.memory.service import MemoryService
+from src.daip_live.memory.session_manager import SessionManager
 from src.daip_live.model_provider.provider import LiteLLMProvider
 from src.daip_live.p4_role_manager_tools.tool_manager import ToolManager
-from src.daip_live.memory.service import MemoryService
+from src.daip_live.persistence.database import DatabaseManager
 
 app = FastAPI()
 
@@ -68,8 +69,8 @@ def list_sessions(session_manager: SessionManager = Depends(get_session_manager)
 
 @app.websocket("/ws/sessions/{session_id}")
 async def websocket_endpoint(
-    websocket: WebSocket, 
-    session_id: str, 
+    websocket: WebSocket,
+    session_id: str,
     agent_executor: AgentExecutor = Depends(get_agent_executor),
     session_manager: SessionManager = Depends(get_session_manager)
 ):

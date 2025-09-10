@@ -148,7 +148,7 @@ class ResponsesAPIRequestUtils:
         responses_api_response: ResponsesAPIResponse,
         custom_llm_provider: Optional[str],
         litellm_metadata: Optional[Dict[str, Any]] = None,
-    ) -> ResponsesAPIResponse: 
+    ) -> ResponsesAPIResponse:
         ...
 
     @overload
@@ -157,7 +157,7 @@ class ResponsesAPIRequestUtils:
         responses_api_response: Dict[str, Any],
         custom_llm_provider: Optional[str],
         litellm_metadata: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]: 
+    ) -> Dict[str, Any]:
         ...
 
     # fmt: on

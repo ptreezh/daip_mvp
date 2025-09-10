@@ -1,26 +1,27 @@
 """Tests for TUI role commands."""
 
-import asyncio
-import os
 import sys
-import tempfile
 from pathlib import Path
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
-from textual.widgets import RichLog, ListView, ListItem, Label
+from textual.widgets import Label, ListItem, ListView, RichLog
 
 # Add the src directory to the path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from daip_live.tui import DAIP_TUI
+from daip_live.config import ConfigManager
+from daip_live.core.models import (
+    Role,
+)
+from daip_live.knowledge.manager import KnowledgeManager
 from daip_live.memory.session_manager import SessionManager
+from daip_live.model_provider.provider import LiteLLMProvider
 from daip_live.p4_role_manager_tools.role_manager import RoleManager
 from daip_live.p8_debate_system.manager import DebateManager
-from daip_live.knowledge.manager import KnowledgeManager
-from daip_live.model_provider.provider import LiteLLMProvider
 from daip_live.persistence.database import DatabaseManager
-from daip_live.config import ConfigManager
-from daip_live.core.models import AppConfig, DatabaseConfig, LLMProviderConfig, KnowledgeBaseConfig, RoleManagerConfig, Role
+from daip_live.tui import DAIP_TUI
+
 
 @pytest.fixture
 def mock_role_manager() -> RoleManager:

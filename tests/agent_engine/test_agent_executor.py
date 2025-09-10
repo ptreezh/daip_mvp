@@ -1,10 +1,17 @@
 import asyncio
+from unittest.mock import AsyncMock, MagicMock, PropertyMock
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock, PropertyMock
 
 from src.daip_live.agent_engine.executor import AgentExecutor
 from src.daip_live.core.models import (
-    AgentState, ThoughtEvent, ToolCallEvent, ToolOutputEvent, FinalResponseEvent, Session, AgentStatus
+    AgentState,
+    AgentStatus,
+    FinalResponseEvent,
+    Session,
+    ThoughtEvent,
+    ToolCallEvent,
+    ToolOutputEvent,
 )
 
 pytestmark = pytest.mark.asyncio

@@ -1,12 +1,12 @@
 import asyncio
 import unittest
-from unittest.mock import MagicMock, AsyncMock, call
+from unittest.mock import AsyncMock, MagicMock, call
 
-from src.daip_live.p8_debate_system.manager import DebateManager
-from src.daip_live.core.models import Session, Role, DialogueTurn, AgentState
+from src.daip_live.core.models import AgentState, Role, Session
 from src.daip_live.memory.session_manager import SessionManager
-from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
 from src.daip_live.model_provider.provider import LiteLLMProvider
+from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
+from src.daip_live.p8_debate_system.manager import DebateManager
 
 
 class TestDebateManager(unittest.TestCase):
@@ -48,8 +48,8 @@ class TestDebateManager(unittest.TestCase):
 
             # Act
             final_session = await self.debate_manager.run_debate(
-                topic=topic, 
-                roles_names=roles, 
+                topic=topic,
+                roles_names=roles,
                 num_rounds=num_rounds
             )
 

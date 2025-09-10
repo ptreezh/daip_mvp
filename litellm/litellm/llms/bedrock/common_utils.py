@@ -448,16 +448,16 @@ class BedrockModelInfo(BaseLLMModelInfo):
         """
         route_mappings: Dict[str, Literal["invoke", "converse_like", "converse", "agent"]] = {
             "invoke/": "invoke",
-            "converse_like/": "converse_like", 
+            "converse_like/": "converse_like",
             "converse/": "converse",
             "agent/": "agent"
         }
-        
+
         # Check explicit routes first
         for prefix, route_type in route_mappings.items():
             if prefix in model:
                 return route_type
-        
+
         base_model = BedrockModelInfo.get_base_model(model)
         alt_model = BedrockModelInfo.get_non_litellm_routing_model_name(model=model)
         if (
@@ -466,35 +466,35 @@ class BedrockModelInfo(BaseLLMModelInfo):
         ):
             return "converse"
         return "invoke"
-    
+
     @staticmethod
     def _explicit_converse_route(model: str) -> bool:
         """
         Check if the model is an explicit converse route.
         """
         return "converse/" in model
-    
+
     @staticmethod
     def _explicit_invoke_route(model: str) -> bool:
         """
         Check if the model is an explicit invoke route.
         """
         return "invoke/" in model
-    
+
     @staticmethod
     def _explicit_agent_route(model: str) -> bool:
         """
         Check if the model is an explicit agent route.
         """
         return "agent/" in model
-    
+
     @staticmethod
     def _explicit_converse_like_route(model: str) -> bool:
         """
         Check if the model is an explicit converse like route.
         """
         return "converse_like/" in model
-    
+
 
     @staticmethod
     def get_bedrock_provider_config_for_messages_api(model: str) -> Optional[BaseAnthropicMessagesConfig]:
@@ -510,14 +510,14 @@ class BedrockModelInfo(BaseLLMModelInfo):
         # Converse routes should go through litellm.completion()
         if BedrockModelInfo._explicit_converse_route(model):
             return None
-        
+
         #########################################################
         # This goes through litellm.AmazonAnthropicClaude3MessagesConfig()
         # Since bedrock Invoke supports Native Anthropic Messages API
         #########################################################
         if "claude" in model:
             return litellm.AmazonAnthropicClaudeMessagesConfig()
-        
+
         #########################################################
         # These routes will go through litellm.completion()
         #########################################################
@@ -605,6 +605,6 @@ def get_anthropic_beta_from_headers(headers: dict) -> List[str]:
     anthropic_beta_header = headers.get("anthropic-beta")
     if not anthropic_beta_header:
         return []
-    
+
     # Split comma-separated values and strip whitespace
     return [beta.strip() for beta in anthropic_beta_header.split(",")]

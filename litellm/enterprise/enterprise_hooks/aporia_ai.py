@@ -17,7 +17,6 @@ from typing import Any, List, Literal, Optional
 
 from fastapi import HTTPException
 
-import litellm
 from litellm._logging import verbose_proxy_logger
 from litellm.integrations.custom_guardrail import CustomGuardrail
 from litellm.litellm_core_utils.logging_utils import (

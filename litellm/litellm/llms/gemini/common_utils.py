@@ -90,7 +90,7 @@ class GeminiModelInfo(BaseLLMModelInfo):
         return GeminiError(
             status_code=status_code, message=error_message, headers=headers
         )
-    
+
     def get_token_counter(self) -> Optional[BaseTokenCounter]:
         """
         Factory method to create a token counter for this provider.
@@ -153,12 +153,12 @@ def get_api_key_from_env() -> Optional[str]:
 class GoogleAIStudioTokenCounter(BaseTokenCounter):
     """Token counter implementation for Google AI Studio provider."""
     def should_use_token_counting_api(
-        self, 
+        self,
         custom_llm_provider: Optional[str] = None,
     ) -> bool:
         from litellm.types.utils import LlmProviders
         return custom_llm_provider == LlmProviders.GEMINI.value
-    
+
     async def count_tokens(
         self,
         model_to_use: str,
@@ -180,7 +180,7 @@ class GoogleAIStudioTokenCounter(BaseTokenCounter):
         result = await GoogleAIStudioTokenCounter().acount_tokens(
             **count_tokens_params_request,
         )
-        
+
         if result is not None:
             return TokenCountResponse(
                 total_tokens=result.get("totalTokens", 0),
@@ -189,5 +189,5 @@ class GoogleAIStudioTokenCounter(BaseTokenCounter):
                 tokenizer_type=result.get("tokenizer_used", ""),
                 original_response=result,
             )
-        
+
         return None

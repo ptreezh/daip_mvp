@@ -45,7 +45,7 @@ def process_audio_file(audio_file: FileTypes) -> ProcessedAudioFile:
     """
     file_content = None
     filename = None
-    
+
     if isinstance(audio_file, (bytes, bytearray)):
         # Raw bytes
         filename = 'audio.wav'
@@ -99,7 +99,7 @@ def process_audio_file(audio_file: FileTypes) -> ProcessedAudioFile:
         except ValueError:
             # If extension is not recognized, fallback to audio/wav
             content_type = 'audio/wav'
-    
+
     return ProcessedAudioFile(
         file_content=file_content,
         filename=filename,

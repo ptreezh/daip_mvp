@@ -236,7 +236,7 @@ if MCP_AVAILABLE:
             all_health_results = await global_mcp_server_manager.health_check_allowed_servers(
                 user_api_key_auth=user_api_key_dict
             )
-            
+
             return {
                 "total_servers": len(all_health_results),
                 "healthy_count": len([r for r in all_health_results.values() if r["status"] == "healthy"]),
@@ -403,7 +403,7 @@ if MCP_AVAILABLE:
                 touched_by=user_api_key_dict.user_id or LITELLM_PROXY_ADMIN_NAME,
             )
             global_mcp_server_manager.add_update_server(new_mcp_server)
-            
+
             # Ensure registry is up to date by reloading from database
             await global_mcp_server_manager.reload_servers_from_database()
         except Exception as e:
@@ -464,7 +464,7 @@ if MCP_AVAILABLE:
                 detail={"error": f"MCP Server not found, passed server_id={server_id}"},
             )
         global_mcp_server_manager.remove_server(mcp_server_record_deleted)
-        
+
         # Ensure registry is up to date by reloading from database
         await global_mcp_server_manager.reload_servers_from_database()
 
@@ -539,7 +539,7 @@ if MCP_AVAILABLE:
                 },
             )
         global_mcp_server_manager.add_update_server(mcp_server_record_updated)
-        
+
         # Ensure registry is up to date by reloading from database
         await global_mcp_server_manager.reload_servers_from_database()
 

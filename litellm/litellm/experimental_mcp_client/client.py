@@ -84,19 +84,19 @@ class MCPClient:
         """Initialize the transport and session."""
         if self._session:
             return  # Already connected
-            
+
         try:
             if self.transport_type == MCPTransport.stdio:
                 # For stdio transport, use stdio_client with command-line parameters
                 if not self.stdio_config:
                     raise ValueError("stdio_config is required for stdio transport")
-                    
+
                 server_params = StdioServerParameters(
                     command=self.stdio_config.get("command", ""),
                     args=self.stdio_config.get("args", []),
                     env=self.stdio_config.get("env", {})
                 )
-                
+
                 self._transport_ctx = stdio_client(server_params)
                 self._transport = await self._transport_ctx.__aenter__()
                 self._session_ctx = ClientSession(self._transport[0], self._transport[1])
@@ -185,7 +185,7 @@ class MCPClient:
     def _get_auth_headers(self) -> dict:
         """Generate authentication headers based on auth type."""
         headers = {}
-        
+
         if self._mcp_auth_value:
             if self.auth_type == MCPAuth.bearer_token:
                 headers["Authorization"] = f"Bearer {self._mcp_auth_value}"
@@ -201,7 +201,7 @@ class MCPClient:
         else:
             # It's a string
             protocol_version_str = str(self.protocol_version)
-        
+
         headers["MCP-Protocol-Version"] = protocol_version_str
         return headers
 
@@ -214,7 +214,7 @@ class MCPClient:
             except Exception as e:
                 verbose_logger.warning(f"MCP client connection failed: {str(e)}")
                 return []
-        
+
         if self._session is None:
             verbose_logger.warning("MCP client session is not initialized")
             return []
@@ -253,7 +253,7 @@ class MCPClient:
                 content=[TextContent(type="text", text="MCP client session is not initialized")],
                 isError=True,
             )
-        
+
         try:
             tool_result = await self._session.call_tool(
                 name=call_tool_request_params.name,
@@ -271,5 +271,5 @@ class MCPClient:
                 content=[TextContent(type="text", text=f"{str(e)}")],  # Empty content for error case
                 isError=True,
             )
-        
+
 

@@ -38,8 +38,8 @@ def safe_divide_seconds(
 
 
 def safe_divide(
-    numerator: Union[int, float], 
-    denominator: Union[int, float], 
+    numerator: Union[int, float],
+    denominator: Union[int, float],
     default: Union[int, float] = 0
 ) -> Union[int, float]:
     """

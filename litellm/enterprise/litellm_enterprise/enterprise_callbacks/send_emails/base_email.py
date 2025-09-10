@@ -235,25 +235,25 @@ class BaseEmailLogger(CustomLogger):
         if not user_id:
             verbose_proxy_logger.debug("No user_id provided for invitation link")
             return base_url
-            
+
         if not await self._is_prisma_client_available():
             return base_url
-            
+
         # Wait for any concurrent invitation creation to complete
         await self._wait_for_invitation_creation()
-        
+
         # Get or create invitation
         invitation = await self._get_or_create_invitation(user_id)
         if not invitation:
             verbose_proxy_logger.warning(f"Failed to get/create invitation for user_id: {user_id}")
             return base_url
-            
+
         return self._construct_invitation_link(invitation.id, base_url)
 
     async def _is_prisma_client_available(self) -> bool:
         """Check if Prisma client is available"""
         from litellm.proxy.proxy_server import prisma_client
-        
+
         if prisma_client is None:
             verbose_proxy_logger.debug("Prisma client not found. Unable to lookup invitation")
             return False
@@ -280,29 +280,29 @@ class BaseEmailLogger(CustomLogger):
             create_invitation_for_user,
         )
         from litellm.proxy.proxy_server import prisma_client
-        
+
         if prisma_client is None:
             verbose_proxy_logger.error("Prisma client is None in _get_or_create_invitation")
             return None
-            
+
         try:
             # Try to get existing invitation
             existing_invitations = await prisma_client.db.litellm_invitationlink.find_many(
                 where={"user_id": user_id},
                 order={"created_at": "desc"},
             )
-            
+
             if existing_invitations and len(existing_invitations) > 0:
                 verbose_proxy_logger.debug(f"Found existing invitation for user_id: {user_id}")
                 return existing_invitations[0]
-            
+
             # Create new invitation if none exists
             verbose_proxy_logger.debug(f"Creating new invitation for user_id: {user_id}")
             return await create_invitation_for_user(
                 data=InvitationNew(user_id=user_id),
                 user_api_key_dict=UserAPIKeyAuth(user_id=user_id),
             )
-            
+
         except Exception as e:
             verbose_proxy_logger.error(f"Error getting/creating invitation for user_id {user_id}: {e}")
             return None

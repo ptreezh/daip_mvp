@@ -325,7 +325,7 @@ class OpenAIGPTConfig(BaseLLMModelInfo, BaseConfig):
     @overload
     def _transform_messages(
         self, messages: List[AllMessageValues], model: str, is_async: Literal[True]
-    ) -> Coroutine[Any, Any, List[AllMessageValues]]: 
+    ) -> Coroutine[Any, Any, List[AllMessageValues]]:
         ...
 
     @overload

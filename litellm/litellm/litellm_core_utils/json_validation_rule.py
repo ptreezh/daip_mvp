@@ -24,27 +24,27 @@ def normalize_json_schema_types(schema: Union[Dict[str, Any], List[Any], Any], d
     # Prevent infinite recursion
     if depth >= max_depth:
         return schema
-        
+
     if not isinstance(schema, (dict, list)):
         return schema
-        
+
     # Type mapping from uppercase to lowercase
     type_mapping = {
         'BOOLEAN': 'boolean',
-        'STRING': 'string', 
+        'STRING': 'string',
         'ARRAY': 'array',
         'OBJECT': 'object',
         'NUMBER': 'number',
         'INTEGER': 'integer',
         'NULL': 'null'
     }
-    
+
     if isinstance(schema, list):
         return [normalize_json_schema_types(item, depth + 1, max_depth) for item in schema]
-    
+
     if isinstance(schema, dict):
         normalized_schema: Dict[str, Any] = {}
-        
+
         for key, value in schema.items():
             if key == 'type' and isinstance(value, str) and value in type_mapping:
                 normalized_schema[key] = type_mapping[value]
@@ -62,9 +62,9 @@ def normalize_json_schema_types(schema: Union[Dict[str, Any], List[Any], Any], d
                 normalized_schema[key] = normalize_json_schema_types(value, depth + 1, max_depth)
             else:
                 normalized_schema[key] = value
-                
+
         return normalized_schema
-    
+
     return schema
 
 
@@ -80,9 +80,9 @@ def normalize_tool_schema(tool: Dict[str, Any]) -> Dict[str, Any]:
     """
     if not isinstance(tool, dict):
         return tool
-        
+
     normalized_tool = tool.copy()
-    
+
     # Normalize function parameters if present
     if 'function' in tool and isinstance(tool['function'], dict):
         normalized_tool['function'] = tool['function'].copy()
@@ -90,7 +90,7 @@ def normalize_tool_schema(tool: Dict[str, Any]) -> Dict[str, Any]:
             normalized_tool['function']['parameters'] = normalize_json_schema_types(
                 tool['function']['parameters']
             )
-    
+
     return normalized_tool
 
 

@@ -30,7 +30,7 @@ def _update_request_data_with_litellm_managed_vector_store_registry(
         if vector_store_to_run is not None:
             if "custom_llm_provider" in vector_store_to_run:
                 data["custom_llm_provider"] = vector_store_to_run.get("custom_llm_provider")
-            
+
             if "litellm_credential_name" in vector_store_to_run:
                 data["litellm_credential_name"] = vector_store_to_run.get("litellm_credential_name")
 
@@ -71,12 +71,12 @@ async def vector_store_search(
     data = await _read_request_body(request=request)
     if "vector_store_id" not in data:
         data["vector_store_id"] = vector_store_id
-    
+
     data = _update_request_data_with_litellm_managed_vector_store_registry(
         data=data,
         vector_store_id=vector_store_id
     )
-    
+
     processor = ProxyBaseLLMRequestProcessing(data=data)
     try:
         return await processor.base_process_llm_request(

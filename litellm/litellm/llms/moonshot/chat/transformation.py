@@ -86,17 +86,17 @@ class MoonshotChatConfig(OpenAIGPTConfig):
         - kimi-thinking-preview doesn't support tool calls at all
         """
         excluded_params: List[str] = ["functions"]
-        
+
         # kimi-thinking-preview has additional limitations
         if "kimi-thinking-preview" in model:
             excluded_params.extend(["tools", "tool_choice"])
-        
+
         base_openai_params = super().get_supported_openai_params(model=model)
         final_params: List[str] = []
         for param in base_openai_params:
             if param not in excluded_params:
                 final_params.append(param)
-        
+
         return final_params
 
     def map_openai_params(
@@ -123,7 +123,7 @@ class MoonshotChatConfig(OpenAIGPTConfig):
         ##########################################
         # temperature limitations
         # 1. `temperature` on KIMI API is [0, 1] but OpenAI is [0, 2]
-        # 2. If temperature < 0.3 and n > 1, KIMI will raise an exception. 
+        # 2. If temperature < 0.3 and n > 1, KIMI will raise an exception.
         #       If we enter this condition, we set the temperature to 0.3 as suggested by Moonshot AI
         ##########################################
         if "temperature" in optional_params:
@@ -132,7 +132,7 @@ class MoonshotChatConfig(OpenAIGPTConfig):
             if optional_params["temperature"] < 0.3 and optional_params.get("n", 1) > 1:
                 optional_params["temperature"] = 0.3
         return optional_params
-    
+
 
     def transform_request(
         self,
@@ -162,7 +162,7 @@ class MoonshotChatConfig(OpenAIGPTConfig):
             litellm_params=litellm_params,
             headers=headers,
         )
-    
+
 
     def _add_tool_choice_required_message(self, messages: List[AllMessageValues], optional_params: dict) -> List[AllMessageValues]:
         """

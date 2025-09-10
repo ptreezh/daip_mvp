@@ -29,7 +29,7 @@ def load_token() -> Optional[Dict[str, Any]]:
     token_file = get_token_file_path()
     if not os.path.exists(token_file):
         return None
-    
+
     try:
         with open(token_file, 'r') as f:
             return json.load(f)
@@ -61,30 +61,30 @@ def login(ctx: click.Context):
 
     from litellm.constants import LITELLM_CLI_SOURCE_IDENTIFIER
     from litellm.proxy.client.cli.interface import show_commands
-    
+
     base_url = ctx.obj["base_url"]
-    
+
     # Generate unique key ID for this login session
     key_id = f"sk-{str(uuid.uuid4())}"
-    
+
     try:
         # Construct SSO login URL with CLI source and pre-generated key
         sso_url = f"{base_url}/sso/key/generate?source={LITELLM_CLI_SOURCE_IDENTIFIER}&key={key_id}"
-        
+
         click.echo(f"Opening browser to: {sso_url}")
         click.echo("Please complete the SSO authentication in your browser...")
         click.echo(f"Session ID: {key_id}")
-        
+
         # Open browser
         webbrowser.open(sso_url)
-        
+
         # Poll for key creation
         click.echo("Waiting for authentication...")
-        
+
         poll_url = f"{base_url}/sso/cli/poll/{key_id}"
         timeout = 300  # 5 minute timeout
         poll_interval = 2  # Poll every 2 seconds
-        
+
         for attempt in range(timeout // poll_interval):
             try:
                 response = requests.get(poll_url, timeout=10)
@@ -104,11 +104,11 @@ def login(ctx: click.Context):
                                 'jwt_token': '',
                                 'timestamp': time.time()
                             })
-                            
+
                             click.echo("✅ Login successful!")
                             click.echo(f"API Key: {api_key[:20]}...")
                             click.echo("You can now use the CLI without specifying --api-key")
-                            
+
                             # Show available commands after successful login
                             click.echo("\n" + "="*60)
                             show_commands()
@@ -119,16 +119,16 @@ def login(ctx: click.Context):
                         click.echo("Still waiting for authentication...")
                 else:
                     click.echo(f"Polling error: HTTP {response.status_code}")
-                    
+
             except requests.RequestException as e:
                 if attempt % 10 == 0:
                     click.echo(f"Connection error (will retry): {e}")
-            
+
             time.sleep(poll_interval)
-        
+
         click.echo("❌ Authentication timed out. Please try again.")
         return
-            
+
     except KeyboardInterrupt:
         click.echo("\n❌ Authentication cancelled by user.")
         return
@@ -146,23 +146,23 @@ def logout():
 def whoami():
     """Show current authentication status"""
     token_data = load_token()
-    
+
     if not token_data:
         click.echo("❌ Not authenticated. Run 'litellm-proxy login' to authenticate.")
         return
-    
+
     click.echo("✅ Authenticated")
     click.echo(f"User Email: {token_data.get('user_email', 'Unknown')}")
     click.echo(f"User ID: {token_data.get('user_id', 'Unknown')}")
     click.echo(f"User Role: {token_data.get('user_role', 'Unknown')}")
-    
+
     # Check if token is still valid (basic timestamp check)
     timestamp = token_data.get('timestamp', 0)
     age_hours = (time.time() - timestamp) / 3600
     click.echo(f"Token age: {age_hours:.1f} hours")
-    
+
     if age_hours > 24:
         click.echo("⚠️ Warning: Token is more than 24 hours old and may have expired.")
 
 # Export individual commands instead of grouping them
-# login, logout, and whoami will be added as top-level commands 
+# login, logout, and whoami will be added as top-level commands

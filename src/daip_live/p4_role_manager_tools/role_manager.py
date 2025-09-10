@@ -1,9 +1,9 @@
-import yaml
-import os
-import logging
 import glob
+import logging
+import os
 from typing import Dict, Optional
 
+import yaml
 from pydantic import ValidationError
 
 from src.daip_live.core.models import Role
@@ -26,7 +26,7 @@ class RoleManager:
         for extension in ["*.yaml", "*.yml"]:
             for file_path in glob.glob(os.path.join(dir_path, extension)):
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
+                    with open(file_path, encoding='utf-8') as f:
                         role_data = yaml.safe_load(f)
                         if not isinstance(role_data, dict):
                             log.warning(f"Skipping {file_path}: content is not a dictionary.")
@@ -34,7 +34,7 @@ class RoleManager:
 
                         role_name = os.path.splitext(os.path.basename(file_path))[0]
                         role_data["name"] = role_name
-                        
+
                         role = Role(**role_data)
                         self._roles[role.name] = role
 

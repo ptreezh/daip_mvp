@@ -1,5 +1,5 @@
 import pytest
-from daip_live.core.interfaces import IModelProvider, IKnowledgeManager, ITool
+from daip_live.core.interfaces import IKnowledgeManager, IModelProvider, ITool
 
 
 def test_cannot_instantiate_incomplete_model_provider():

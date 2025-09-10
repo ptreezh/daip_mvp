@@ -1,6 +1,8 @@
 
+from unittest.mock import patch
+
 from typer.testing import CliRunner
-from unittest.mock import patch, MagicMock
+
 from src.daip_live.cli import app
 
 runner = CliRunner()

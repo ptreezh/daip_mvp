@@ -440,14 +440,14 @@ class LiteLLMCompletionResponsesConfig:
             ),
             index=0,
         )
-        
+
         # Create an assistant message with the tool call
         chat_completion_response_message = ChatCompletionResponseMessage(
             tool_calls=[tool_call],
             role="assistant",
             content=None,  # Function calls don't have content
         )
-        
+
         return [chat_completion_response_message]
 
     @staticmethod

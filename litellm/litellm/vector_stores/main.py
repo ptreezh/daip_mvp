@@ -47,7 +47,7 @@ def mock_vector_store_search_response(
                 ]
             )
         ]
-    
+
     return VectorStoreSearchResponse(
         object="vector_store.search_results.page",
         search_query="sample query",
@@ -79,7 +79,7 @@ def mock_vector_store_create_response(
             last_active_at=None,
             metadata=None,
         )
-    
+
     return mock_response
 
 
@@ -209,7 +209,7 @@ def create(
             )
 
         local_vars.update(kwargs)
-        
+
         # Get VectorStoreCreateOptionalRequestParams with only valid parameters
         vector_store_create_optional_params: VectorStoreCreateOptionalRequestParams = (
             VectorStoreRequestUtils.get_requested_vector_store_create_optional_param(
@@ -242,7 +242,7 @@ def create(
             _is_async=_is_async,
             client=kwargs.get("client"),
         )
-        
+
         return response
     except Exception as e:
         raise litellm.exception_type(
@@ -401,7 +401,7 @@ def search(
             )
 
         local_vars.update(kwargs)
-        
+
         # Get VectorStoreSearchOptionalRequestParams with only valid parameters
         vector_store_search_optional_params: VectorStoreSearchOptionalRequestParams = (
             VectorStoreRequestUtils.get_requested_vector_store_search_optional_param(
@@ -438,7 +438,7 @@ def search(
             _is_async=_is_async,
             client=kwargs.get("client"),
         )
-        
+
         return response
     except Exception as e:
         raise litellm.exception_type(

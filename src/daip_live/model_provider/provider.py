@@ -1,12 +1,13 @@
 """This module contains the LiteLLMProvider adapter."""
 
 import asyncio
-import litellm
 from typing import Any, Dict, List, Tuple
 
+from daip_live.core.exceptions import ModelAuthenticationError, ModelError
 from daip_live.core.interfaces import IModelProvider
 from daip_live.core.models import ProviderConfig
-from daip_live.core.exceptions import ModelAuthenticationError, ModelError
+
+import litellm
 
 
 class LiteLLMProvider(IModelProvider):

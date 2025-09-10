@@ -1,12 +1,12 @@
-import pytest
-from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, AsyncMock
 import asyncio
+from unittest.mock import MagicMock
 
-from src.daip_live.p7_gui.main import app, get_agent_executor, get_session_manager
-from src.daip_live.core.models import ThoughtEvent, Session
+from fastapi.testclient import TestClient
+
 from src.daip_live.agent_engine.executor import AgentExecutor
+from src.daip_live.core.models import Session, ThoughtEvent
 from src.daip_live.memory.session_manager import SessionManager
+from src.daip_live.p7_gui.main import app, get_agent_executor, get_session_manager
 
 # Mock dependencies
 mock_agent_executor = MagicMock(spec=AgentExecutor)
@@ -44,10 +44,10 @@ def test_websocket_communication():
 
         # 2. Test client-to-server communication
         websocket.send_json({"type": "user_input", "content": "Hello from client"})
-        
+
         # Allow the server-side task to process the message
         async def get_from_queue():
             return await asyncio.wait_for(mock_agent_executor.user_input_queue.get(), timeout=1)
-        
+
         user_message = asyncio.run(get_from_queue())
         assert user_message == {"type": "user_input", "content": "Hello from client"}

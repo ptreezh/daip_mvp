@@ -1,28 +1,31 @@
 import asyncio
-import sys
-import typer
 from pathlib import Path
-import yaml
-from typing_extensions import Annotated
+from typing import Annotated
+
+import typer
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
 from rich.syntax import Syntax
+from rich.table import Table
+
+from daip_live.agent_engine.executor import AgentExecutor
+from daip_live.config import (
+    config_manager,
+    create_config_yaml_if_not_exists,
+)
+from daip_live.core.models import ProviderConfig
+from daip_live.knowledge.manager import KnowledgeManager
+from daip_live.model_provider.provider import LiteLLMProvider
+from daip_live.p4_role_manager_tools.role_manager import RoleManager
+from daip_live.p4_role_manager_tools.tool_manager import ToolManager
+from daip_live.persistence.database import DatabaseManager
 
 # Import the SessionManager
 from daip_live.tui import DAIP_TUI
-from daip_live.agent_engine.executor import AgentExecutor
-from daip_live.knowledge.manager import KnowledgeManager
-from daip_live.model_provider.provider import LiteLLMProvider
-from daip_live.p4_role_manager_tools.tool_manager import ToolManager
-from daip_live.p4_role_manager_tools.role_manager import RoleManager
-from daip_live.core.models import ProviderConfig
-from daip_live.persistence.database import DatabaseManager
-from src.daip_live.memory.session_manager import SessionManager
-from src.daip_live.memory.service import MemoryService
-from src.daip_live.p8_debate_system.manager import DebateManager
-from src.daip_live.scaffolding.manager import ScaffoldingManager
-from daip_live.config import config_manager, create_config_yaml_if_not_exists, ConfigError
+from daip_live.memory.service import MemoryService
+from daip_live.memory.session_manager import SessionManager
+from daip_live.p8_debate_system.manager import DebateManager
+from daip_live.scaffolding.manager import ScaffoldingManager
 
 app = typer.Typer()
 session_app = typer.Typer()
@@ -37,8 +40,6 @@ app.add_typer(project_app, name="project", help="Manage and scaffold new project
 
 console = Console()
 
-from rich.panel import Panel
-from rich.syntax import Syntax
 
 @project_app.command(name="scaffold", help="Generates project structure from a description.")
 def project_scaffold(
@@ -51,12 +52,12 @@ def project_scaffold(
 
     if from_file:
         try:
-            with open(from_file, 'r') as f:
+            with open(from_file) as f:
                 description = f.read()
         except FileNotFoundError:
             console.print(f"[bold red]Error: File not found at {from_file}[/bold red]")
             raise typer.Exit(code=1)
-    
+
     if not description:
         console.print("[bold red]Error: Project description is empty. Use --description or --from-file.[/bold red]")
         raise typer.Exit(code=1)
@@ -68,7 +69,7 @@ def project_scaffold(
     console.print("[cyan]Generating project structure from description...[/cyan]")
     try:
         parsed_structure = asyncio.run(scaffolder.generate_structure(description))
-        
+
         console.print("--- [bold green]Plan for File Creation[/bold green] ---")
         for item in parsed_structure:
             console.print(
@@ -82,7 +83,7 @@ def project_scaffold(
 
         if not yes:
             typer.confirm("Do you want to create these files?", abort=True)
-        
+
         console.print("\n[bold green]Creating files...[/bold green]")
         try:
             for item in parsed_structure:
@@ -123,8 +124,8 @@ def run(
     embed_provider = LiteLLMProvider(embed_provider_config)
     knowledge_config = {"knowledge_dir": cfg.knowledge_base.directory}
     knowledge_manager = KnowledgeManager(
-        db_manager=db_manager, 
-        model_provider=embed_provider, 
+        db_manager=db_manager,
+        model_provider=embed_provider,
         config=knowledge_config
     )
     model_provider = LiteLLMProvider(config=cfg.llm_provider)
@@ -151,7 +152,7 @@ def run(
     )
 
     tui = DAIP_TUI(
-        executor=agent_executor, 
+        executor=agent_executor,
         goal=goal,
         session_manager=session_manager,
         role_manager=role_manager,
@@ -175,8 +176,8 @@ def knowledge_sync():
     embed_provider = LiteLLMProvider(embed_provider_config)
     knowledge_config = {"knowledge_dir": cfg.knowledge_base.directory}
     knowledge_manager = KnowledgeManager(
-        db_manager=db_manager, 
-        model_provider=embed_provider, 
+        db_manager=db_manager,
+        model_provider=embed_provider,
         config=knowledge_config
     )
     knowledge_manager.sync()
@@ -205,7 +206,7 @@ def session_list():
 
     for s in sessions:
         table.add_row(s.session_id, s.goal, s.session_type, s.status.name, str(s.start_time))
-    
+
     console.print(table)
 
 @session_app.command(name="view", help="Displays the full dialogue for a specific session.")
@@ -229,7 +230,7 @@ def session_view(session_id: Annotated[str, typer.Argument(help="The ID of the s
     for turn in session.history:
         console.print(f"[cyan]{turn.participant_id}[/cyan] ([dim]{turn.timestamp}[/dim]):")
         console.print(f"> {turn.content}")
-    
+
     if session.summary:
         console.print("--- [bold]Summary[/] ---")
         console.print(session.summary)
@@ -255,7 +256,7 @@ def role_list():
 
     for name, role in roles.items():
         table.add_row(name, role.persona[:50] + "..." if len(role.persona) > 50 else role.persona)
-    
+
     console.print(table)
 
 @role_app.command(name="view", help="Displays details of a specific role.")

@@ -194,7 +194,7 @@ class GroqChatConfig(OpenAILikeChatConfig):
         )
 
         return optional_params
-    
+
 
     def transform_response(
         self,
@@ -227,7 +227,7 @@ class GroqChatConfig(OpenAILikeChatConfig):
         mapped_service_tier: Literal["auto", "default", "flex"] = self._map_groq_service_tier(original_service_tier=getattr(model_response, "service_tier"))
         setattr(model_response, "service_tier", mapped_service_tier)
         return model_response
-    
+
 
     def _map_groq_service_tier(self, original_service_tier: Optional[str]) -> Literal["auto", "default", "flex"]:
         """
@@ -237,5 +237,5 @@ class GroqChatConfig(OpenAILikeChatConfig):
             return "auto"
         if original_service_tier not in ["auto", "default", "flex"]:
             return "auto"
-        
+
         return cast(Literal["auto", "default", "flex"], original_service_tier)

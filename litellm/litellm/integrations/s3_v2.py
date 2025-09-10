@@ -203,7 +203,7 @@ class S3Logger(CustomBatchLogger, BaseAWSLLM):
             start_time=start_time,
             end_time=end_time,
         )
-    
+
     async def async_log_failure_event(self, kwargs, response_obj, start_time, end_time):
         await self._async_log_event_base(
             kwargs=kwargs,
@@ -212,7 +212,7 @@ class S3Logger(CustomBatchLogger, BaseAWSLLM):
             end_time=end_time,
         )
         pass
-    
+
 
     async def _async_log_event_base(self, kwargs, response_obj, start_time, end_time):
         try:
@@ -481,7 +481,7 @@ class S3Logger(CustomBatchLogger, BaseAWSLLM):
             from botocore.awsrequest import AWSRequest
         except ImportError:
             raise ImportError("Missing boto3 to call S3. Run 'pip install boto3'.")
-            
+
         try:
             from litellm.litellm_core_utils.asyncify import asyncify
 
@@ -535,10 +535,10 @@ class S3Logger(CustomBatchLogger, BaseAWSLLM):
             if response.status_code != 200:
                 verbose_logger.exception("S3 object not found, saw response=", response.text)
                 return None
-            
+
             # Parse JSON response
             return response.json()
-            
+
         except Exception as e:
             verbose_logger.exception(f"Error downloading from S3: {str(e)}")
             return None

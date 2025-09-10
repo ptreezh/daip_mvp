@@ -531,10 +531,10 @@ class HttpPassThroughEndpointHelpers(BasePassthroughUtils):
             subpath = subpath[1:]
 
         return base_target + subpath
-    
+
     @staticmethod
     def _update_stream_param_based_on_request_body(
-        parsed_body: dict, 
+        parsed_body: dict,
         stream: Optional[bool] = None,
     ) -> Optional[bool]:
         """

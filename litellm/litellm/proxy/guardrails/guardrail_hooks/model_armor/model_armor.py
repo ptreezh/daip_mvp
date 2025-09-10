@@ -58,7 +58,7 @@ class ModelArmorGuardrail(CustomGuardrail, VertexBase):
         # Initialize parent classes first
         super().__init__(**kwargs)
         VertexBase.__init__(self)
-        
+
         # Then set our attributes (this ensures project_id is not overwritten)
         self.async_handler = get_async_httpx_client(
             llm_provider=httpxSpecialProvider.GuardrailCallback

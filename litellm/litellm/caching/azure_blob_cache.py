@@ -57,7 +57,7 @@ class AzureBlobCache(BaseCache):
 
     def get_cache(self, key, **kwargs):
         from azure.core.exceptions import ResourceNotFoundError
-        
+
         try:
             print_verbose(f"Get Azure Blob Cache: key: {key}")
             as_bytes = self.container_client.download_blob(key).readall()
@@ -74,7 +74,7 @@ class AzureBlobCache(BaseCache):
 
     async def async_get_cache(self, key, **kwargs):
         from azure.core.exceptions import ResourceNotFoundError
-        
+
         try:
             print_verbose(f"Get Azure Blob Cache: key: {key}")
             blob = await self.async_container_client.download_blob(key)

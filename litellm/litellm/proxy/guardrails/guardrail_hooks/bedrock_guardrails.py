@@ -118,7 +118,7 @@ class BedrockGuardrail(CustomGuardrail, BaseAWSLLM):
         """
         If True, will not raise an exception when the guardrail is blocked.
         """
-        
+
 
         # Set supported event hooks to include MCP hooks
         if 'supported_event_hooks' not in kwargs:
@@ -129,7 +129,7 @@ class BedrockGuardrail(CustomGuardrail, BaseAWSLLM):
                 GuardrailEventHooks.pre_mcp_call,
                 GuardrailEventHooks.during_mcp_call,
             ]
-        
+
         super().__init__(**kwargs)
         BaseAWSLLM.__init__(self)
 
@@ -138,7 +138,7 @@ class BedrockGuardrail(CustomGuardrail, BaseAWSLLM):
             self.guardrailIdentifier,
             self.guardrailVersion,
         )
-    
+
 
     def _create_bedrock_input_content_request(self, messages: Optional[List[AllMessageValues]]) -> BedrockRequest:
         """
@@ -257,7 +257,7 @@ class BedrockGuardrail(CustomGuardrail, BaseAWSLLM):
             headers = {"Content-Type": "application/json", **extra_headers}
         api_base = f"https://bedrock-runtime.{aws_region_name}.amazonaws.com/guardrail/{self.guardrailIdentifier}/version/{self.guardrailVersion}/apply"
         encoded_data = json.dumps(data).encode("utf-8")
-        
+
         # first check api-key, if none, fall back to sigV4
         if api_key is not None:
             aws_bearer_token: Optional[str] = api_key
@@ -294,7 +294,7 @@ class BedrockGuardrail(CustomGuardrail, BaseAWSLLM):
         return prepped_request
 
     async def make_bedrock_api_request(
-        self, 
+        self,
         source: Literal["INPUT", "OUTPUT"],
         messages: Optional[List[AllMessageValues]] = None,
         response: Optional[Union[Any, litellm.ModelResponse]] = None,
@@ -305,8 +305,8 @@ class BedrockGuardrail(CustomGuardrail, BaseAWSLLM):
         credentials, aws_region_name = self._load_credentials()
         bedrock_request_data: dict = dict(
             self.convert_to_bedrock_format(
-                source=source, 
-                messages=messages, 
+                source=source,
+                messages=messages,
                 response=response
             )
         )
@@ -320,7 +320,7 @@ class BedrockGuardrail(CustomGuardrail, BaseAWSLLM):
             )
             if request_data.get("api_key") is not None:
                 api_key = request_data["api_key"]
-    
+
         prepared_request = self._prepare_request(
             credentials=credentials,
             data=bedrock_request_data,
@@ -372,7 +372,7 @@ class BedrockGuardrail(CustomGuardrail, BaseAWSLLM):
             )
 
         return bedrock_guardrail_response
-    
+
     def _get_bedrock_guardrail_response_status(self, response: httpx.Response) -> Literal["success", "failure"]:
         """
         Get the status of the bedrock guardrail response.
@@ -393,12 +393,12 @@ class BedrockGuardrail(CustomGuardrail, BaseAWSLLM):
             for output in outputs:
                 if output.get("text"):
                     bedrock_guardrail_output_text += output.get("text") or ""
-                
-        
+
+
         return HTTPException(
             status_code=400,
             detail={
-                "error": "Violated guardrail policy", 
+                "error": "Violated guardrail policy",
                 "bedrock_guardrail_response": bedrock_guardrail_output_text,
             }
         )
@@ -416,7 +416,7 @@ class BedrockGuardrail(CustomGuardrail, BaseAWSLLM):
         # if user opted into masking, return False. since we'll use the masked output from the guardrail
         if self.mask_request_content or self.mask_response_content:
             return False
-        
+
         if self.disable_exception_on_block is True:
             return False
 
@@ -631,7 +631,7 @@ class BedrockGuardrail(CustomGuardrail, BaseAWSLLM):
         ########## 1. Make parallel Bedrock API requests ##########
         #########################################################
         output_content_bedrock = await self.make_bedrock_api_request(
-            source="OUTPUT", 
+            source="OUTPUT",
             response=response,
             request_data=data
         )  # Only response
@@ -928,7 +928,7 @@ class BedrockGuardrail(CustomGuardrail, BaseAWSLLM):
             masked_texts: List of masked text strings from guardrail
         """
         masking_index = 0
-        
+
         for choice in response.choices:
             if isinstance(choice, Choices):
                 # For chat completions

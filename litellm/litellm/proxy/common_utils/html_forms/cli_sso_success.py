@@ -8,7 +8,7 @@ def render_cli_sso_success_page() -> str:
     Returns:
         str: HTML content for the success page
     """
-    
+
     html_content = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -204,4 +204,4 @@ def render_cli_sso_success_page() -> str:
     </body>
     </html>
     """
-    return html_content 
+    return html_content

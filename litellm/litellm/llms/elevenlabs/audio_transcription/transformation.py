@@ -72,14 +72,14 @@ class ElevenLabsAudioTranscriptionConfig(BaseAudioTranscriptionConfig):
         Returns:
             AudioTranscriptionRequestData: Structured data with form data and files
         """
-        
+
         # Use common utility to process the audio file
         processed_audio = process_audio_file(audio_file)
-        
+
         # Prepare form data
         form_data = {"model_id": model}
 
-        
+
         #########################################################
         # Add OpenAI Compatible Parameters
         #########################################################
@@ -87,7 +87,7 @@ class ElevenLabsAudioTranscriptionConfig(BaseAudioTranscriptionConfig):
             if key in self.get_supported_openai_params(model) and value is not None:
                 # Convert values to strings for form data, but skip None values
                 form_data[key] = str(value)
-        
+
         #########################################################
         # Add Provider Specific Parameters
         #########################################################
@@ -101,10 +101,10 @@ class ElevenLabsAudioTranscriptionConfig(BaseAudioTranscriptionConfig):
             form_data[key] = str(value)
         #########################################################
         #########################################################
-        
+
         # Prepare files
         files = {"file": (processed_audio.filename, processed_audio.file_content, processed_audio.content_type)}
-        
+
         return AudioTranscriptionRequestData(
             data=form_data,
             files=files
@@ -130,7 +130,7 @@ class ElevenLabsAudioTranscriptionConfig(BaseAudioTranscriptionConfig):
             # Add additional metadata matching OpenAI format
             response["task"] = "transcribe"
             response["language"] = response_json.get("language_code", "unknown")
-            
+
             # Map ElevenLabs words to OpenAI format
             if "words" in response_json:
                 response["words"] = []
@@ -194,4 +194,4 @@ class ElevenLabsAudioTranscriptionConfig(BaseAudioTranscriptionConfig):
         }
 
         headers.update(auth_header)
-        return headers 
+        return headers

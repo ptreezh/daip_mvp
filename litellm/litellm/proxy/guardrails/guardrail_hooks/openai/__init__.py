@@ -14,7 +14,7 @@ def initialize_guardrail(litellm_params: "LitellmParams", guardrail: "Guardrail"
     guardrail_name = guardrail.get("guardrail_name")
     if not guardrail_name:
         raise ValueError("OpenAI Moderation: guardrail_name is required")
-    
+
     openai_moderation_guardrail = OpenAIModerationGuardrail(
         guardrail_name=guardrail_name,
         **{

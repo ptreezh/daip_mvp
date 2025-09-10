@@ -1,7 +1,6 @@
 
 import pytest
-from pydantic import ValidationError
-from daip_live.config import ConfigManager, ConfigError
+from daip_live.config import ConfigError, ConfigManager
 from daip_live.core.models import AppConfig
 
 VALID_CONFIG_PATH = "tests/config/test_config.yaml"

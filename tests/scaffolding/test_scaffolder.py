@@ -1,6 +1,7 @@
-import pytest
-from unittest.mock import AsyncMock
 from pathlib import Path
+from unittest.mock import AsyncMock
+
+import pytest
 
 # This import will fail initially, which is the point of the RED step.
 from src.daip_live.scaffolding.scaffolder import Scaffolder
@@ -64,7 +65,7 @@ async def test_scaffolder_retries_on_invalid_yaml():
 files:
   - path: roles/analyst.yaml
     content: 'persona: test'"""
-    
+
     mock_model_provider.generate.side_effect = [invalid_yaml, valid_yaml]
 
     scaffolder = Scaffolder(model_provider=mock_model_provider, max_retries=1)

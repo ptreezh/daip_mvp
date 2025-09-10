@@ -7,7 +7,6 @@ to update all users in the system at once.
 """
 
 import requests
-import json
 
 # Configuration
 PROXY_BASE_URL = "http://localhost:4000"

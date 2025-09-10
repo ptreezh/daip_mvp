@@ -505,13 +505,13 @@ async def bedrock_llm_proxy_route(
                 "error": "Model missing from endpoint. Expected format: /model/<Model>/<endpoint>. Got: "
                 + endpoint,
             },
-        ) 
+        )
 
     data["method"] = request.method
     data["endpoint"] = endpoint
     data["data"] = request_body
     data["custom_llm_provider"] = "bedrock"
-    
+
     try:
         result = await base_llm_response_processor.base_passthrough_process_llm_request(
             request=request,

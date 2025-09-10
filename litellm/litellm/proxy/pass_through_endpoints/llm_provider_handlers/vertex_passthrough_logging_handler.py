@@ -110,7 +110,7 @@ class VertexPassthroughLoggingHandler:
                     PassthroughCallTypes.passthrough_image_generation.value
                 )
             elif VertexPassthroughLoggingHandler._is_multimodal_embedding_response(
-                json_response=_json_response, 
+                json_response=_json_response,
             ):
                 # Use multimodal embedding transformation
                 vertex_multimodal_config = VertexAIMultimodalEmbeddingConfig()
@@ -361,7 +361,7 @@ class VertexPassthroughLoggingHandler:
                         for key in ["textEmbedding", "imageEmbedding", "videoEmbeddings"]
                     ):
                         return True
-        
+
         return False
 
     @staticmethod

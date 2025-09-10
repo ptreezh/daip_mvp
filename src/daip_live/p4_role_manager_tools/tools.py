@@ -2,7 +2,7 @@
 
 import inspect
 from functools import wraps
-from typing import Any, Callable, Dict, Type, Literal, Optional
+from typing import Any, Callable, Dict, Literal, Optional, Type
 
 from pydantic import BaseModel, create_model
 
@@ -21,17 +21,17 @@ def tool(
 
     # 1. Inspect the function signature
     sig = inspect.signature(func)
-    
+
     # 2. Create a dictionary of fields for the Pydantic model
     fields: Dict[str, Any] = {}
     for param in sig.parameters.values():
         # Exclude self, cls, args, kwargs for now
         if param.name in ('self', 'cls', 'args', 'kwargs'):
             continue
-        
+
         # Get type annotation and default value
         param_type = param.annotation if param.annotation is not inspect.Parameter.empty else Any
-        
+
         if param.default is inspect.Parameter.empty:
             # This is a required argument
             fields[param.name] = (param_type, ...)
@@ -55,5 +55,5 @@ def tool(
     setattr(wrapper, "tool_type", tool_type)
     setattr(wrapper, "is_write", tool_type == "write") # Convenience flag
     setattr(wrapper, "resource_arg", resource_arg)
-    
+
     return wrapper

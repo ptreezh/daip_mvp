@@ -24,7 +24,7 @@ else:
 class RecraftImageGenerationConfig(BaseImageGenerationConfig):
     DEFAULT_BASE_URL: str = "https://external.api.recraft.ai"
     IMAGE_GENERATION_ENDPOINT: str = "v1/images/generations"
-    
+
     def get_supported_openai_params(
         self, model: str
     ) -> List[OpenAIImageGenerationOptionalParams]:
@@ -37,7 +37,7 @@ class RecraftImageGenerationConfig(BaseImageGenerationConfig):
             "size",
             "style"
         ]
-    
+
     def map_openai_params(
         self,
         non_default_params: dict,
@@ -74,8 +74,8 @@ class RecraftImageGenerationConfig(BaseImageGenerationConfig):
         Some providers need `model` in `api_base`
         """
         complete_url: str = (
-            api_base 
-            or get_secret_str("RECRAFT_API_BASE") 
+            api_base
+            or get_secret_str("RECRAFT_API_BASE")
             or self.DEFAULT_BASE_URL
         )
 
@@ -94,13 +94,13 @@ class RecraftImageGenerationConfig(BaseImageGenerationConfig):
         api_base: Optional[str] = None,
     ) -> dict:
         final_api_key: Optional[str] = (
-            api_key or 
+            api_key or
             get_secret_str("RECRAFT_API_KEY")
         )
         if not final_api_key:
             raise ValueError("RECRAFT_API_KEY is not set")
-        
-        headers["Authorization"] = f"Bearer {final_api_key}"        
+
+        headers["Authorization"] = f"Bearer {final_api_key}"
         return headers
 
 
@@ -153,11 +153,11 @@ class RecraftImageGenerationConfig(BaseImageGenerationConfig):
             )
         if not model_response.data:
             model_response.data = []
-        
+
         for image_data in response_data["data"]:
             model_response.data.append(ImageObject(
                 url=image_data.get("url", None),
                 b64_json=image_data.get("b64_json", None),
             ))
-        
+
         return model_response

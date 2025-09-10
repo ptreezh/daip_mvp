@@ -69,7 +69,7 @@ class DeepgramAudioTranscriptionConfig(BaseAudioTranscriptionConfig):
         """
         # Use common utility to process the audio file
         processed_audio = process_audio_file(audio_file)
-        
+
         # Return structured data with binary content and no files
         # For Deepgram, we send binary data directly as request body
         return AudioTranscriptionRequestData(

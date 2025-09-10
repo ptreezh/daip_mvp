@@ -10,17 +10,16 @@ has already authenticated the user) and you need to extract user information fro
 custom headers or other request attributes.
 """
 
-from typing import TYPE_CHECKING, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, cast
 
 from fastapi import Request
 from fastapi.responses import RedirectResponse
 
 if TYPE_CHECKING:
-    from fastapi_sso.sso.base import OpenID
+    pass
 else:
-    from typing import Any as OpenID
+    pass
 
-from litellm.proxy.management_endpoints.types import CustomOpenID
 
 
 class EnterpriseCustomSSOHandler:
@@ -31,7 +30,7 @@ class EnterpriseCustomSSOHandler:
     where users can implement their own authentication logic by processing
     request headers and returning user information in OpenID format.
     """
-    
+
     @staticmethod
     async def handle_custom_ui_sso_sign_in(
         request: Request,
@@ -65,22 +64,22 @@ class EnterpriseCustomSSOHandler:
         )
         if premium_user is not True:
             raise ValueError(CommonProxyErrors.not_premium_user.value)
-        
+
         if user_custom_ui_sso_sign_in_handler is None:
             raise ValueError("custom_ui_sso_sign_in_handler is not configured. Please set it in general_settings.")
-        
+
         custom_sso_login_handler = cast(CustomSSOLoginHandler, user_custom_ui_sso_sign_in_handler)
         openid_response: OpenID = await custom_sso_login_handler.handle_custom_ui_sso_sign_in(
             request=request,
         )
-        
+
         # Import here to avoid circular imports
         from litellm.proxy.management_endpoints.ui_sso import SSOAuthenticationHandler
-        
+
         return await SSOAuthenticationHandler.get_redirect_response_from_openid(
             result=openid_response,
             request=request,
             received_response=None,
             generic_client_id=None,
             ui_access_mode=None,
-        ) 
+        )

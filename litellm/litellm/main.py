@@ -2695,7 +2695,7 @@ def completion(  # type: ignore # noqa: PLR0915
                 vercel_headers.update(_headers)
 
             headers = vercel_headers
-            
+
             ## Load Config
             config = litellm.VercelAIGatewayConfig.get_config()
             for k, v in config.items():
@@ -3737,7 +3737,7 @@ def embedding(
     *,
     aembedding: Literal[True],
     **kwargs,
-) -> Coroutine[Any, Any, EmbeddingResponse]: 
+) -> Coroutine[Any, Any, EmbeddingResponse]:
     ...
 
 
@@ -3763,7 +3763,7 @@ def embedding(
     *,
     aembedding: Literal[False] = False,
     **kwargs,
-) -> EmbeddingResponse: 
+) -> EmbeddingResponse:
     ...
 
 # fmt: on

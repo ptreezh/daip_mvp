@@ -25,7 +25,7 @@ async def close_litellm_async_clients():
             except Exception:
                 # Silently ignore errors during cleanup
                 pass
-        
+
         # Handle AsyncHTTPHandler instances (used by Gemini and other providers)
         elif hasattr(handler, 'client'):
             client = handler.client
@@ -43,7 +43,7 @@ async def close_litellm_async_clients():
                 except Exception:
                     # Silently ignore errors during cleanup
                     pass
-        
+
         # Handle any other objects with aclose method
         elif hasattr(handler, 'aclose'):
             try:

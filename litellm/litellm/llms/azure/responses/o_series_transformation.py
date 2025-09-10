@@ -40,16 +40,16 @@ class AzureOpenAIOSeriesResponsesAPIConfig(AzureOpenAIResponsesAPIConfig):
         """
         # Get the base Azure supported params
         base_supported_params = super().get_supported_openai_params(model)
-        
+
         # O-series models don't support temperature parameter in responses API
         o_series_unsupported_params = ["temperature"]
-        
+
         # Filter out unsupported parameters for O-series models
         o_series_supported_params = [
-            param for param in base_supported_params 
+            param for param in base_supported_params
             if param not in o_series_unsupported_params
         ]
-        
+
         return o_series_supported_params
 
     def map_openai_params(
@@ -65,14 +65,14 @@ class AzureOpenAIOSeriesResponsesAPIConfig(AzureOpenAIResponsesAPIConfig):
         don't support temperature in the responses API.
         """
         mapped_params = dict(response_api_optional_params)
-        
+
         # If drop_params is enabled, remove temperature parameter for O-series models
         if drop_params and "temperature" in mapped_params:
             verbose_logger.debug(
                 f"Dropping unsupported parameter 'temperature' for Azure OpenAI O-series responses API model {model}"
             )
             mapped_params.pop("temperature", None)
-            
+
         return mapped_params
 
     def is_o_series_model(self, model: str) -> bool:
@@ -88,6 +88,6 @@ class AzureOpenAIOSeriesResponsesAPIConfig(AzureOpenAIResponsesAPIConfig):
         # Check if model name contains o_series or if it's a known O-series model
         if "o_series" in model.lower():
             return True
-            
+
         # Check if the model supports reasoning (which is O-series specific)
-        return supports_reasoning(model) 
+        return supports_reasoning(model)

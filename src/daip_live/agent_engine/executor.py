@@ -1,14 +1,24 @@
+import ast
 import asyncio
 import re
-import ast
-from typing import Any, Dict, List, Tuple, Optional, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Any, Dict, Optional, Tuple
 
-from src.daip_live.memory.session_manager import SessionManager
-from src.daip_live.memory.service import MemoryService
+from src.daip_live.core.exceptions import ToolError
 from src.daip_live.core.models import (
-    AgentState, AgentEvent, ThoughtEvent, ToolCallEvent, ToolOutputEvent,
-    FinalResponseEvent, ErrorEvent, SessionContext, DialogueTurn, Session, AgentStatus
+    AgentEvent,
+    AgentState,
+    AgentStatus,
+    DialogueTurn,
+    FinalResponseEvent,
+    Session,
+    SessionContext,
+    ThoughtEvent,
+    ToolCallEvent,
+    ToolOutputEvent,
 )
+from src.daip_live.memory.service import MemoryService
+from src.daip_live.memory.session_manager import SessionManager
 
 
 class AgentExecutor:
@@ -32,7 +42,7 @@ class AgentExecutor:
         self.tool_manager = tool_manager
         self.user_input_queue = user_input_queue
         self.max_reflections = max_reflections
-        
+
         self.state: AgentState = AgentState.IDLE
         self.session: Optional[Session] = None
         self.llm_response: str = ""
@@ -68,7 +78,7 @@ class AgentExecutor:
             while not await self.memory_service.is_todo_list_complete():
                 # --- Outer loop: Get next task and delegate execution ---
                 current_task = todo_list[current_task_index]
-                
+
                 # Reset context for the new step
                 self.llm_response = ""
                 self.last_tool_result = None

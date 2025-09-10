@@ -1,10 +1,9 @@
 import pytest
-
 from daip_live.core.exceptions import (
     DAIPError,
-    ModelError,
-    ModelConnectionError,
     ModelAuthenticationError,
+    ModelConnectionError,
+    ModelError,
     ToolError,
     ToolInputError,
     ToolPermissionError,

@@ -72,7 +72,7 @@ class BaseAudioTranscriptionConfig(BaseConfig, ABC):
         )
 
 
-    
+
     def transform_audio_transcription_response(
         self,
         raw_response: httpx.Response,
@@ -110,7 +110,7 @@ class BaseAudioTranscriptionConfig(BaseConfig, ABC):
         raise NotImplementedError(
             "AudioTranscriptionConfig does not need a response transformation for audio transcription models"
         )
-    
+
 
     def get_provider_specific_params(
         self,
@@ -141,7 +141,7 @@ class BaseAudioTranscriptionConfig(BaseConfig, ABC):
             provider_specific_params[key] = value
 
         return provider_specific_params
-    
+
     def _should_exclude_param(
         self,
         param_name: str,

@@ -37,4 +37,4 @@ class HealthManagementClient:
             Optional[str]: The server version if available, otherwise None.
         """
         readiness = self.get_readiness()
-        return readiness.get("litellm_version") 
+        return readiness.get("litellm_version")

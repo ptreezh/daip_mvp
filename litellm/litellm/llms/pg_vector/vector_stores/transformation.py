@@ -32,16 +32,16 @@ class PGVectorStoreConfig(OpenAIVectorStoreConfig):
         Validate environment and set headers for PG vector service authentication
         """
         litellm_params = litellm_params or GenericLiteLLMParams()
-        
+
         # Get API key from various sources
         api_key = (
             litellm_params.api_key
             or get_secret_str("PG_VECTOR_API_KEY")
         )
-        
+
         if not api_key:
             raise ValueError("PG Vector API key is required. Set PG_VECTOR_API_KEY environment variable or pass api_key in litellm_params.")
-        
+
         headers.update(
             {
                 "Authorization": f"Bearer {api_key}",
@@ -64,15 +64,15 @@ class PGVectorStoreConfig(OpenAIVectorStoreConfig):
             api_base
             or get_secret_str("PG_VECTOR_API_BASE")
         )
-        
+
         if not api_base:
             raise ValueError("PG Vector API base URL is required. Set PG_VECTOR_API_BASE environment variable or pass api_base in litellm_params.")
 
         # Remove trailing slashes
         api_base = api_base.rstrip("/")
 
-        return f"{api_base}/v1/vector_stores" 
-    
+        return f"{api_base}/v1/vector_stores"
+
 
     def transform_search_vector_store_request(
         self,

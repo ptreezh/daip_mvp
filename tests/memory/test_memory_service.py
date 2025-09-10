@@ -1,9 +1,9 @@
-import pytest
-import os
 from unittest.mock import AsyncMock, Mock, patch
 
+import pytest
+
+from src.daip_live.core.models import DialogueTurn, Session, TodoItem
 from src.daip_live.memory.service import MemoryService
-from src.daip_live.core.models import Session, DialogueTurn, AgentState, TodoItem
 from src.daip_live.model_provider.provider import LiteLLMProvider
 
 
@@ -113,7 +113,7 @@ class TestMemoryService:
         assert goal in prompt
         assert session.compressed_history in prompt
         assert "Hello" in prompt
-        
+
     @pytest.mark.asyncio
     async def test_construct_prompt_auto_compress(self, memory_service):
         """Test that construct_prompt automatically compresses history."""
@@ -161,7 +161,7 @@ class TestMemoryService:
         """Test that compress_history calls the LLM via the model_provider."""
         # Arrange
         mock_session.history = [DialogueTurn(participant_id="user", content=f"Message {i}") for i in range(20)]
-        
+
         # Act
         await memory_service.compress_history(mock_session)
 

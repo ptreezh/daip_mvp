@@ -1,8 +1,8 @@
-import pytest
 from datetime import datetime
 
-from daip_live.persistence.database import DatabaseManager
+import pytest
 from daip_live.core.models import KnowledgeSource
+from daip_live.persistence.database import DatabaseManager
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ class TestKnowledgeSourceDB:
             file_hash="abc",
             status="pending",
         )
-        
+
         upserted_source = db_manager.upsert_knowledge_source(source)
 
         assert upserted_source.id is not None
@@ -72,7 +72,7 @@ class TestKnowledgeSourceDB:
     def test_delete_source(self, db_manager: DatabaseManager):
         """Tests deleting a knowledge source."""
         db_manager.upsert_knowledge_source(KnowledgeSource(file_path="delete_me.txt", file_hash="h", status="indexed"))
-        
+
         # Verify it exists
         assert db_manager.get_knowledge_source_by_path("delete_me.txt") is not None
 

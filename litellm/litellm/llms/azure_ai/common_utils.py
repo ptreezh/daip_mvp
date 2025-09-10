@@ -14,7 +14,7 @@ class AzureFoundryModelInfo(BaseLLMModelInfo):
                 or litellm.api_base
                 or get_secret_str("AZURE_AI_API_BASE")
         )
-    
+
     @staticmethod
     def get_api_key(api_key: Optional[str] = None) -> Optional[str]:
         return (
@@ -23,7 +23,7 @@ class AzureFoundryModelInfo(BaseLLMModelInfo):
                 or litellm.openai_key
                 or get_secret_str("AZURE_AI_API_KEY")
             )
-    
+
     @property
     def api_version(self, api_version: Optional[str] = None) -> Optional[str]:
         api_version = (
@@ -32,11 +32,11 @@ class AzureFoundryModelInfo(BaseLLMModelInfo):
             or get_secret_str("AZURE_API_VERSION")
         )
         return api_version
-    
+
     #########################################################
     # Not implemented methods
     #########################################################
-        
+
 
     @staticmethod
     def get_base_model(model: str) -> Optional[str]:

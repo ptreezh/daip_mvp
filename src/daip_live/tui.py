@@ -1,40 +1,56 @@
 """Enhanced TUI with command auto-completion and new features."""
 
-from enum import Enum, auto
 import asyncio
-import sys
 import os
-import yaml
+from enum import Enum
+from typing import Any, List, Optional
+
 import pyperclip
-from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, Static, Input, Button, Label, RichLog, ListView, ListItem
-from textual.containers import Container, Vertical, Horizontal
-from textual.screen import Screen
-from textual.message import Message
+import yaml
+from rich.syntax import Syntax
 from rich.text import Text
+from textual.app import App, ComposeResult
+from textual.binding import Binding
+from textual.containers import Container, Horizontal
+from textual.keys import Keys
+from textual.message import Message
+from textual.screen import Screen
+from textual.widgets import (
+    Button,
+    Footer,
+    Header,
+    Input,
+    Label,
+    ListItem,
+    ListView,
+    RichLog,
+    Static,
+)
+
+from src.daip_live.agent_engine.executor import AgentExecutor
+from src.daip_live.core.models import (
+    AgentEvent,
+    FinalResponseEvent,
+    PermissionRequestEvent,
+    ThoughtEvent,
+    ToolCallEvent,
+    ToolOutputEvent,
+)
+from src.daip_live.knowledge.manager import KnowledgeManager
+from src.daip_live.memory.service import MemoryService
+from src.daip_live.memory.session_manager import SessionManager
+from src.daip_live.model_provider.provider import LiteLLMProvider
+from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
+from src.daip_live.p4_role_manager_tools.tool_manager import ToolManager
+from src.daip_live.p8_debate_system.manager import DebateManager
+from src.daip_live.persistence.database import DatabaseManager
+
 
 class CommandSelected(Message):
     """Posted when a command is selected from the autocomplete popup."""
     def __init__(self, command: str) -> None:
         super().__init__()
         self.command = command
-
-from textual.keys import Keys
-from textual.binding import Binding
-from typing import Optional, List, Any
-
-from src.daip_live.core.models import AgentEvent, FinalResponseEvent, ThoughtEvent, ToolCallEvent, ToolOutputEvent, Session, PermissionRequestEvent, AgentState, Role
-from src.daip_live.agent_engine.executor import AgentExecutor
-from src.daip_live.memory.service import MemoryService
-from src.daip_live.memory.session_manager import SessionManager
-from src.daip_live.p4_role_manager_tools.tool_manager import ToolManager
-from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
-from src.daip_live.knowledge.manager import KnowledgeManager
-from src.daip_live.p8_debate_system.manager import DebateManager
-from src.daip_live.model_provider.provider import LiteLLMProvider
-from src.daip_live.core.models import ProviderConfig
-from src.daip_live.persistence.database import DatabaseManager
-from src.daip_live.config import config_manager
 
 
 async def run_agent_and_feed_tui(agent: AgentExecutor, tui: "DAIP_TUI", goal: str):
@@ -49,7 +65,7 @@ async def run_agent_and_feed_tui(agent: AgentExecutor, tui: "DAIP_TUI", goal: st
 
 class PermissionDialog(Screen):
     """A dialog for permission requests."""
-    
+
     def __init__(self, tool_name: str, args: dict, callback) -> None:
         super().__init__()
         self.tool_name = tool_name
@@ -73,7 +89,7 @@ class PermissionDialog(Screen):
 
 class CommandHelpDialog(Screen):
     """A dialog to show available commands."""
-    
+
     def __init__(self, help_text: str) -> None:
         super().__init__()
         self.help_text = help_text
@@ -134,7 +150,7 @@ class AutocompletePopup(Container):
 
 class DAIP_TUI(App):
     """A Textual app to interact with the DAIP Agent."""
-    
+
     BINDINGS = [
         Binding("ctrl+tab", "toggle_focus", "切换焦点"),
         Binding("ctrl+a", "select_all", "全选", show=False),
@@ -183,10 +199,10 @@ class DAIP_TUI(App):
                 handler = getattr(self, name)
                 help_text = (handler.__doc__ or "").strip().split('\n')[0]
                 self._available_commands.append((command_name, help_text))
-        
+
         try:
             help_file_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "tui_commands_help.md")
-            with open(help_file_path, "r", encoding="utf-8") as f:
+            with open(help_file_path, encoding="utf-8") as f:
                 self._help_text = f.read()
         except FileNotFoundError:
             self._help_text = "Help document not found."
@@ -257,12 +273,12 @@ class DAIP_TUI(App):
                 self._executor.user_input_queue.put_nowait(user_input)
                 self._update_log_view(f"[bold blue]> [/bold blue]User: {user_input}")
             else:
-                self._update_log_view(f"[bold red]> [/bold red]Error: Agent not ready for input")
+                self._update_log_view("[bold red]> [/bold red]Error: Agent not ready for input")
 
     def _get_autocomplete_suggestions(self, value: str) -> List[str]:
         """Gets autocomplete suggestions based on the input value."""
         parts = value.split(" ")
-        
+
         # Case 1: Main command completion
         if len(parts) == 1 and value.startswith("/"):
             return [f"{cmd} - {help_text}" for cmd, help_text in self._available_commands if cmd.startswith(value)]
@@ -279,7 +295,7 @@ class DAIP_TUI(App):
 
         return []
 
-    
+
 
     def on_input_changed(self, message: Input.Changed) -> None:
         value = message.value
@@ -307,7 +323,7 @@ class DAIP_TUI(App):
             input_widget.value = new_value
         else: # Otherwise, replace the whole command
             input_widget.value = message.command
-        
+
         input_widget.focus()
         for popup in self.query("#autocomplete-popup"):
             popup.remove()
@@ -345,10 +361,10 @@ class DAIP_TUI(App):
         parts = command[1:].strip().split(" ", 1)
         cmd = parts[0].lower() if parts else ""
         args = parts[1] if len(parts) > 1 else ""
-        
+
         handler_name = f"_handle_{cmd}_command"
         handler = getattr(self, handler_name, lambda _: self._update_log_view(f"[bold red]> Unknown command: {cmd}"))
-        
+
         if asyncio.iscoroutinefunction(handler):
             await handler(args)
         else:
@@ -382,7 +398,7 @@ class DAIP_TUI(App):
             if not roles:
                 self._update_log_view("[bold yellow]> No roles found.[/bold yellow]")
                 return
-            
+
             table_str = "Available Roles:\n"
             table_str += "- " + "\n- ".join([f"{role.name}: {role.persona}" for role in roles])
             self._update_log_view(f"[bold green]>{table_str}[/bold green]")
@@ -395,7 +411,7 @@ class DAIP_TUI(App):
             if not role:
                 self._update_log_view(f"[bold red]> Role '{role_name}' not found.[/bold red]")
                 return
-            
+
             details = (
                 f"Role Details: {role.name}\n"
                 f"  Persona: {role.persona}\n"
@@ -424,7 +440,7 @@ class DAIP_TUI(App):
             if not results:
                 self._update_log_view("[bold yellow]> No results found.[/bold yellow]")
                 return
-            
+
             results_str = "Knowledge Search Results:\n"
             for res in results:
                 results_str += f"- {res['file_path']} (Distance: {res['distance']:.4f})\n"
@@ -444,7 +460,7 @@ class DAIP_TUI(App):
             if not sessions:
                 self._update_log_view("[bold yellow]> No sessions found.[/bold yellow]")
                 return
-            
+
             table_str = "Available Sessions:\n"
             for s in sessions:
                 table_str += f"- {s.session_id} | {s.status.name} | {s.goal}\n"
@@ -458,7 +474,7 @@ class DAIP_TUI(App):
             if not session:
                 self._update_log_view(f"[bold red]> Session '{session_id}' not found.[/bold red]")
                 return
-            
+
             details = (
                 f"Session Details: {session.session_id}\n"
                 f"  Goal: {session.goal}\n"

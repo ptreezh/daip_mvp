@@ -2344,7 +2344,6 @@ def get_custom_labels_from_tags(tags: List[str]) -> Dict[str, str]:
         "tag_Service_web_app_v1": "false",
     }
     """
-    import re
 
     from litellm.router_utils.pattern_match_deployments import PatternMatchRouter
     from litellm.types.integrations.prometheus import _sanitize_prometheus_label_name
@@ -2358,17 +2357,17 @@ def get_custom_labels_from_tags(tags: List[str]) -> Dict[str, str]:
 
     for configured_tag in configured_tags:
         label_name = _sanitize_prometheus_label_name(f"tag_{configured_tag}")
-        
+
         # Check for exact match first (backwards compatibility)
         if configured_tag in tags:
             result[label_name] = "true"
             continue
-            
+
         # Use PatternMatchRouter for wildcard pattern matching
         if "*" in configured_tag and _tag_matches_wildcard_configured_pattern(tags=tags, configured_tag=configured_tag):
             result[label_name] = "true"
             continue
-        
+
         # No match found
         result[label_name] = "false"
 

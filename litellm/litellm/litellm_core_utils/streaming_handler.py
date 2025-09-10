@@ -780,21 +780,21 @@ class CustomStreamWrapper:
         """
         if len(model_response.choices) == 0:
             return False
-            
+
         delta = model_response.choices[0].delta
-        
+
         # Check for tool_calls or function_call
         if getattr(delta, TOOL_CALLS_ATTRIBUTE, None) is not None or getattr(delta, FUNCTION_CALL_ATTRIBUTE, None) is not None:
             return True
-            
+
         # Check for audio
         if hasattr(delta, AUDIO_ATTRIBUTE) and getattr(delta, AUDIO_ATTRIBUTE, None) is not None:
             return True
-            
+
         # Check for image
         if hasattr(delta, IMAGE_ATTRIBUTE) and getattr(delta, IMAGE_ATTRIBUTE, None) is not None:
             return True
-            
+
         return False
 
     def _handle_special_delta_content(self, model_response: ModelResponseStream) -> ModelResponseStream:

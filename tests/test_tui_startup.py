@@ -1,22 +1,27 @@
 """Tests for TUI startup behavior."""
 
-import asyncio
 import os
-import sys
 import tempfile
-from pathlib import Path
-import pytest
 from unittest.mock import Mock
 
+import pytest
 from daip_live.tui import DAIP_TUI
+
+from src.daip_live.config import ConfigManager
+from src.daip_live.core.models import (
+    AppConfig,
+    DatabaseConfig,
+    KnowledgeBaseConfig,
+    LLMProviderConfig,
+    RoleManagerConfig,
+)
+from src.daip_live.knowledge.manager import KnowledgeManager
 from src.daip_live.memory.session_manager import SessionManager
+from src.daip_live.model_provider.provider import LiteLLMProvider
 from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
 from src.daip_live.p8_debate_system.manager import DebateManager
-from src.daip_live.knowledge.manager import KnowledgeManager
-from src.daip_live.model_provider.provider import LiteLLMProvider
 from src.daip_live.persistence.database import DatabaseManager
-from src.daip_live.config import ConfigManager
-from src.daip_live.core.models import AppConfig, DatabaseConfig, LLMProviderConfig, KnowledgeBaseConfig, RoleManagerConfig
+
 
 @pytest.fixture(scope="class")
 def test_env(request):
@@ -32,7 +37,7 @@ def test_env(request):
             knowledge_base=KnowledgeBaseConfig(directory=test_dir),
             role_manager=RoleManagerConfig(roles_dir=roles_dir)
         )
-        
+
         config_manager = ConfigManager()
         config_manager._config = mock_config
 
@@ -59,7 +64,7 @@ def test_env(request):
         request.cls.knowledge_manager = knowledge_manager
         request.cls.debate_manager = debate_manager
         request.cls.config_manager = config_manager
-        
+
         yield
 
         db_manager.engine.dispose()
@@ -89,10 +94,10 @@ class TestTUIStartup:
             # We need to find the StatusBar widget. Let's assume it has an ID.
             # If not, we might need to query by class.
             await pilot.pause(0.1) # Allow UI to settle
-            
+
             status_bar = pilot.app.query_one("#status_bar")
             status_text = str(status_bar.renderable)
-            
+
             assert "Welcome" in status_text or "Ready" in status_text, \
                 f"Expected 'Welcome' or 'Ready' in status bar, but got '{status_text}'"
 

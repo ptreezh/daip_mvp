@@ -2495,7 +2495,7 @@ class BedrockImageProcessor:
                     f"Unsupported image format: {image_format}. Supported formats: {supported_image_and_video_formats}"
                 )
             return image_format
-    
+
     @staticmethod
     def _get_document_format(
         mime_type: str,
@@ -2686,7 +2686,7 @@ def _convert_to_bedrock_tool_call_invoke(
                 )
                 bedrock_content_block = BedrockContentBlock(toolUse=bedrock_tool)
                 _parts_list.append(bedrock_content_block)
-                
+
                 # Check for cache_control and add a separate cachePoint block
                 if tool.get("cache_control", None) is not None:
                     cache_point_block = BedrockContentBlock(cachePoint=CachePointBlock(type="default"))
@@ -2751,7 +2751,7 @@ def _convert_to_bedrock_tool_call_result(
         for content in content_list:
             if content["type"] == "text":
                 content_str += content["text"]
-    
+
     message.get("name", "")
     id = str(message.get("tool_call_id", str(uuid.uuid4())))
 
@@ -2760,7 +2760,7 @@ def _convert_to_bedrock_tool_call_result(
         content=[tool_result_content_block],
         toolUseId=id,
     )
-    
+
     content_block = BedrockContentBlock(toolResult=tool_result)
 
     return content_block
@@ -3196,26 +3196,26 @@ class BedrockConverseMessagesProcessor:
                 current_message = messages[msg_i]
                 tool_call_result = _convert_to_bedrock_tool_call_result(current_message)
                 tool_content.append(tool_call_result)
-                            
+
                 # Check if we need to add a separate cachePoint block
                 has_cache_control = False
-                
+
                 # Check for message-level cache_control
                 if current_message.get("cache_control", None) is not None:
                     has_cache_control = True
                 # Check for content-level cache_control in list content
                 elif isinstance(current_message.get("content"), list):
                     for content_element in current_message["content"]:
-                        if (isinstance(content_element, dict) and 
+                        if (isinstance(content_element, dict) and
                             content_element.get("cache_control", None) is not None):
                             has_cache_control = True
                             break
-                
+
                 # Add a separate cachePoint block if cache_control is present
                 if has_cache_control:
                     cache_point_block = BedrockContentBlock(cachePoint=CachePointBlock(type="default"))
                     tool_content.append(cache_point_block)
-            
+
 
                 msg_i += 1
             if tool_content:
@@ -3562,29 +3562,29 @@ def _bedrock_converse_messages_pt(  # noqa: PLR0915
         while msg_i < len(messages) and messages[msg_i]["role"] == "tool":
             tool_call_result = _convert_to_bedrock_tool_call_result(messages[msg_i])
             current_message = messages[msg_i]
-            
+
             # Add the tool result first
             tool_content.append(tool_call_result)
-            
+
             # Check if we need to add a separate cachePoint block
             has_cache_control = False
-            
+
             # Check for message-level cache_control
             if current_message.get("cache_control", None) is not None:
                 has_cache_control = True
             # Check for content-level cache_control in list content
             elif isinstance(current_message.get("content"), list):
                 for content_element in current_message["content"]:
-                    if (isinstance(content_element, dict) and 
+                    if (isinstance(content_element, dict) and
                         content_element.get("cache_control", None) is not None):
                         has_cache_control = True
                         break
-            
+
             # Add a separate cachePoint block if cache_control is present
             if has_cache_control:
                 cache_point_block = BedrockContentBlock(cachePoint=CachePointBlock(type="default"))
                 tool_content.append(cache_point_block)
-            
+
             msg_i += 1
         if tool_content:
             # if last message was a 'user' message, then add a blank assistant message (bedrock requires alternating roles)

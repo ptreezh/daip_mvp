@@ -27,7 +27,7 @@ class AutoRouter(CustomLogger):
         litellm_router_instance: "Router",
         auto_router_config_path: Optional[str] = None,
         auto_router_config: Optional[str] = None,
-    ):  
+    ):
         """
         Auto-Router class that uses a semantic router to route requests to the appropriate model.
 
@@ -49,7 +49,7 @@ class AutoRouter(CustomLogger):
         self.default_model = default_model
         self.embedding_model: str = embedding_model
         self.litellm_router_instance: "Router" = litellm_router_instance
-    
+
     def _load_semantic_routing_routes(self) -> List[Route]:
         from semantic_router.routers import SemanticRouter
         if self.auto_router_config_path:
@@ -58,13 +58,13 @@ class AutoRouter(CustomLogger):
             return self._load_auto_router_routes_from_config_json()
         else:
             raise ValueError("No router config provided")
-    
+
 
     def _load_auto_router_routes_from_config_json(self) -> List[Route]:
         import json
 
         from semantic_router.routers.base import Route
-        
+
         if self.auto_router_config is None:
             raise ValueError("No auto router config provided")
         auto_router_routes: List[Route] = []
@@ -104,7 +104,7 @@ class AutoRouter(CustomLogger):
         if messages is None:
             # do nothing, return same inputs
             return None
-        
+
         if self.routelayer is None:
             #######################
             # Create the route layer
@@ -117,7 +117,7 @@ class AutoRouter(CustomLogger):
                     ),
                     auto_sync=self.auto_sync_value,
             )
-        
+
         user_message: Dict[str, str] = messages[-1]
         message_content: str = user_message.get("content", "")
         route_choice: Optional[Union[RouteChoice, List[RouteChoice]]] = self.routelayer(text=message_content)
@@ -126,7 +126,7 @@ class AutoRouter(CustomLogger):
             model = route_choice.name or self.default_model
         elif isinstance(route_choice, list):
             model = route_choice[0].name or self.default_model
-        
+
         return PreRoutingHookResponse(
             model=model,
             messages=messages,

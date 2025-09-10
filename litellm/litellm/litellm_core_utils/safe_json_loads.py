@@ -11,4 +11,4 @@ def safe_json_loads(data: str, default: Any = None) -> Any:
     try:
         return json.loads(data)
     except Exception:
-        return default 
+        return default

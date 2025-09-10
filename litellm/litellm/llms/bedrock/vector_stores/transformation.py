@@ -117,7 +117,7 @@ class BedrockVectorStoreConfig(BaseVectorStoreConfig, BaseAWSLLM):
         source_uri = metadata.get("x-amz-bedrock-kb-source-uri", "") if metadata else ""
         if source_uri:
             return source_uri
-        
+
         chunk_id = metadata.get("x-amz-bedrock-kb-chunk-id", "unknown") if metadata else "unknown"
         return f"bedrock-kb-{chunk_id}"
 
@@ -127,7 +127,7 @@ class BedrockVectorStoreConfig(BaseVectorStoreConfig, BaseAWSLLM):
         Tries to extract filename from source URI, falls back to domain name or data source ID.
         """
         source_uri = metadata.get("x-amz-bedrock-kb-source-uri", "") if metadata else ""
-        
+
         if source_uri:
             try:
                 parsed_uri = urlparse(source_uri)
@@ -137,7 +137,7 @@ class BedrockVectorStoreConfig(BaseVectorStoreConfig, BaseAWSLLM):
                 return filename
             except Exception:
                 return source_uri
-        
+
         data_source_id = metadata.get("x-amz-bedrock-kb-data-source-id", "unknown") if metadata else "unknown"
         return f"bedrock-kb-document-{data_source_id}"
 
@@ -161,13 +161,13 @@ class BedrockVectorStoreConfig(BaseVectorStoreConfig, BaseAWSLLM):
                 text = content.get("text") if content else None
                 if text is None:
                     continue
-                
+
                 # Extract metadata and use helper functions
                 metadata = item.get("metadata", {}) or {}
                 file_id = self._get_file_id_from_metadata(metadata)
                 filename = self._get_filename_from_metadata(metadata)
                 attributes = self._get_attributes_from_metadata(metadata)
-                
+
                 results.append(
                     VectorStoreSearchResult(
                         score=item.get("score"),

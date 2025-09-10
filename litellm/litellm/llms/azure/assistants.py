@@ -111,7 +111,7 @@ class AzureAssistantsAPI(BaseAzureLLM):
 
     @overload
     def get_assistants(
-        self, 
+        self,
         api_key: Optional[str],
         api_base: Optional[str],
         api_version: Optional[str],
@@ -119,13 +119,13 @@ class AzureAssistantsAPI(BaseAzureLLM):
         timeout: Union[float, httpx.Timeout],
         max_retries: Optional[int],
         client: Optional[AsyncAzureOpenAI],
-        aget_assistants: Literal[True], 
+        aget_assistants: Literal[True],
     ) -> Coroutine[None, None, AsyncCursorPage[Assistant]]:
         ...
 
     @overload
     def get_assistants(
-        self, 
+        self,
         api_key: Optional[str],
         api_base: Optional[str],
         api_version: Optional[str],
@@ -133,8 +133,8 @@ class AzureAssistantsAPI(BaseAzureLLM):
         timeout: Union[float, httpx.Timeout],
         max_retries: Optional[int],
         client: Optional[AzureOpenAI],
-        aget_assistants: Optional[Literal[False]], 
-    ) -> SyncCursorPage[Assistant]: 
+        aget_assistants: Optional[Literal[False]],
+    ) -> SyncCursorPage[Assistant]:
         ...
 
     # fmt: on

@@ -1,7 +1,8 @@
-import yaml
-import typer
 import os
 from pathlib import Path
+
+import typer
+import yaml
 from rich import print
 from rich.panel import Panel
 from rich.syntax import Syntax
@@ -58,7 +59,7 @@ class Scaffolder:
             preview += f"- [cyan]{path}[/cyan]\n"
             panel_content = Syntax(content, "yaml", theme="monokai", line_numbers=True)
             print(Panel(panel_content, title=f"Preview of {path}", border_style="blue"))
-        
+
         prompt_text = f"\n[bold]Ready to create the following files?[/bold]\n{preview}"
         confirmed = typer.confirm(prompt_text, abort=True)
 
@@ -71,7 +72,7 @@ class Scaffolder:
                 # Ensure parent directory exists
                 if file_path.parent:
                     os.makedirs(file_path.parent, exist_ok=True)
-                
+
                 # Write the file
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(content)
@@ -85,7 +86,7 @@ class Scaffolder:
 
         for attempt in range(self.max_retries + 1):
             generated_yaml_str = await self.model_provider.generate(prompt)
-            
+
             try:
                 parsed_output = yaml.safe_load(generated_yaml_str)
                 if not isinstance(parsed_output, dict) or "files" not in parsed_output:
@@ -99,5 +100,5 @@ class Scaffolder:
                     description=description,
                     invalid_yaml=generated_yaml_str
                 )
-        
+
         raise ValueError(f"Failed to generate valid YAML after {self.max_retries} retries.") from last_error

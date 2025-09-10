@@ -42,7 +42,7 @@ class CBFTransformer:
         # Filter out records with zero spend or invalid team_id
         original_count = len(data)
         filtered_data = data.filter(
-            (pl.col('spend') > 0) & 
+            (pl.col('spend') > 0) &
             (pl.col('team_id').is_not_null()) &
             (pl.col('team_id') != "")
         )
@@ -57,11 +57,11 @@ class CBFTransformer:
 
         # Aggregate data to hourly level
         hourly_aggregated = self._aggregate_to_hourly(filtered_data)
-        
+
         # Transform aggregated data to CBF format
         cbf_data = []
         czrn_dropped_count = 0
-        
+
         for row in hourly_aggregated.iter_rows(named=True):
             try:
                 cbf_record = self._create_cbf_record(row)
@@ -88,23 +88,23 @@ class CBFTransformer:
 
     def _aggregate_to_hourly(self, data: pl.DataFrame) -> pl.DataFrame:
         """Aggregate spend logs to hourly level by team_id, key_name, model, and tags."""
-        
+
         # Extract hour from startTime, skip tags and metadata for now
         data_with_hour = data.with_columns([
             pl.col('startTime').str.to_datetime().dt.truncate('1h').alias('usage_hour'),
             pl.lit([]).cast(pl.List(pl.String)).alias('parsed_tags'),  # Empty tags list for now
             pl.lit("").alias('key_name')  # Empty key name for now
         ])
-        
+
         # Skip tag explosion for now - just add a null tag column
         all_data = data_with_hour.with_columns([
             pl.lit(None, dtype=pl.String).alias('tag')
         ])
-        
+
         # Group by hour, team_id, key_name, model, provider, and tag
         aggregated = all_data.group_by([
             'usage_hour',
-            'team_id', 
+            'team_id',
             'key_name',
             'model',
             'model_group',
@@ -134,7 +134,7 @@ class CBFTransformer:
 
         # Use the aggregated hour as usage time
         usage_time = self._parse_datetime(extract_scalar(row.get('usage_hour')))
-        
+
         # Use team_id as the primary entity_id
         entity_id = str(extract_scalar(row.get('team_id', '')))
         key_name = str(extract_scalar(row.get('key_name', '')))
@@ -142,7 +142,7 @@ class CBFTransformer:
         model_group = str(extract_scalar(row.get('model_group', '')))
         provider = str(extract_scalar(row.get('custom_llm_provider', '')))
         tag = extract_scalar(row.get('tag'))
-        
+
         # Calculate aggregated metrics
         total_spend = float(extract_scalar(row.get('total_spend', 0.0)) or 0.0)
         total_tokens = int(extract_scalar(row.get('total_tokens', 0)) or 0)
@@ -175,7 +175,7 @@ class CBFTransformer:
             'successful_requests': str(successful_requests),
             'failed_requests': str(failed_requests),
         }
-        
+
         # Add tag if present
         if tag is not None and str(tag) not in ['', 'null', 'None']:
             dimensions['tag'] = str(tag)

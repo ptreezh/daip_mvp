@@ -1,10 +1,10 @@
-import pytest
 import hashlib
-import numpy as np
 from pathlib import Path
 
+import numpy as np
+import pytest
+from daip_live.core.models import KnowledgeBaseChanges, KnowledgeSource
 from daip_live.knowledge.manager import KnowledgeManager
-from daip_live.core.models import KnowledgeSource, KnowledgeBaseChanges
 
 
 def _get_file_hash(file_path: Path) -> str:

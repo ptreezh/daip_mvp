@@ -13,7 +13,7 @@ class V0ChatConfig(OpenAILikeChatConfig):
     """
     v0 is OpenAI-compatible with standard endpoints
     """
-    
+
     @property
     def custom_llm_provider(self) -> Optional[str]:
         return "v0"

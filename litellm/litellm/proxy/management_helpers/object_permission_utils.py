@@ -36,7 +36,7 @@ async def attach_object_permission_to_dict(
     """
     if prisma_client is None:
         raise ValueError("Prisma client not found")
-        
+
     object_permission_id = data_dict.get("object_permission_id")
     if object_permission_id:
         object_permission = await prisma_client.db.litellm_objectpermissiontable.find_unique(

@@ -146,21 +146,21 @@ def _get_token_base_cost(model_info: ModelInfo, usage: Usage) -> Tuple[float, fl
                         f"output_cost_per_token_above_{threshold_str}_tokens",
                         completion_base_cost,
                     ))
-                    
+
                     # Apply tiered pricing to cache costs
                     cache_creation_tiered_key = f"cache_creation_input_token_cost_above_{threshold_str}_tokens"
                     cache_read_tiered_key = f"cache_read_input_token_cost_above_{threshold_str}_tokens"
-                    
+
                     if cache_creation_tiered_key in model_info:
                         cache_creation_cost = cast(float, _get_cost_per_unit(
                             model_info, cache_creation_tiered_key, cache_creation_cost
                         ))
-                    
+
                     if cache_read_tiered_key in model_info:
                         cache_read_cost = cast(float, _get_cost_per_unit(
                             model_info, cache_read_tiered_key, cache_read_cost
                         ))
-                    
+
                     break
             except (IndexError, ValueError):
                 continue
@@ -210,7 +210,7 @@ def _get_cost_per_unit(model_info: ModelInfo, cost_key: str, default_value: Opti
                 f"litellm.litellm_core_utils.llm_cost_calc.utils.py::calculate_cost_per_component(): Exception occured - {cost_per_unit}\nDefaulting to 0.0"
             )
     return default_value
-    
+
 
 
 def generic_cost_per_token(
@@ -397,7 +397,7 @@ class CostCalculatorUtils:
         ]:
             return True
         return False
-    
+
     @staticmethod
     def route_image_generation_cost_calculator(
         model: str,

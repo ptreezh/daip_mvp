@@ -148,4 +148,4 @@ class AsyncGoogleGenAIGenerateContentStreamingIterator(BaseGoogleGenAIGenerateCo
             return chunk
         except StopAsyncIteration:
             await self._handle_async_streaming_logging()
-            raise StopAsyncIteration 
+            raise StopAsyncIteration

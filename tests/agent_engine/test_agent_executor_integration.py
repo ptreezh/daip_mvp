@@ -1,11 +1,12 @@
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
+
 from src.daip_live.agent_engine.executor import AgentExecutor
+from src.daip_live.core.models import FinalResponseEvent, ToolCallEvent, ToolOutputEvent
 from src.daip_live.p4_role_manager_tools.tool_manager import ToolManager
 from src.daip_live.p4_role_manager_tools.tools import tool
-from src.daip_live.core.models import ToolCallEvent, ToolOutputEvent, FinalResponseEvent
 
 pytestmark = pytest.mark.asyncio
 
@@ -47,7 +48,7 @@ async def test_agent_executes_real_tool_via_tool_manager(integrated_agent_execut
     # Arrange
     agent = integrated_agent_executor
     agent.tool_manager.tool_permission_config.tools['add'] = 'allow'
-    
+
     # Mock the model_provider to simulate an LLM deciding to use the 'add' tool
     agent.model_provider.generate.side_effect = [
         "I need to add two numbers. Use Tool: add(a=5, b=10) Confidence: 0.99",

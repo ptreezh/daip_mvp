@@ -1,13 +1,10 @@
-import pytest
-from textual.app import App
-from textual.widgets import RichLog, Input
-from textual.containers import Vertical
-from textual.events import Click
 from unittest.mock import MagicMock, patch
-import pyperclip
+
+import pytest
 
 # Assuming DAIP_TUI and FocusMode are correctly imported
 from daip_live.tui import DAIP_TUI, FocusMode
+
 
 # Mock the executor and other dependencies for DAIP_TUI
 @pytest.fixture

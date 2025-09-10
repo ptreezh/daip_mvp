@@ -73,7 +73,7 @@ class BaseVectorStoreConfig:
         if api_base is None:
             raise ValueError("api_base is required")
         return api_base
-    
+
 
     def get_error_class(
         self, error_message: str, status_code: int, headers: Union[dict, httpx.Headers]

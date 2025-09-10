@@ -14,7 +14,7 @@ from litellm.types.utils import StandardCallbackDynamicParams
 class EnterpriseCallbackControls:
     @staticmethod
     def is_callback_disabled_dynamically(
-            callback: litellm.CALLBACK_TYPES, 
+            callback: litellm.CALLBACK_TYPES,
             litellm_params: dict,
             standard_callback_dynamic_params: StandardCallbackDynamicParams
         ) -> bool:
@@ -73,16 +73,16 @@ class EnterpriseCallbackControls:
         if disabled_callbacks is not None:
             disabled_callbacks = set([cb.strip().lower() for cb in disabled_callbacks.split(",")])
             return list(disabled_callbacks)
-        
+
 
         #########################################################
         # check if disabled via request body
         #########################################################
         if standard_callback_dynamic_params.get("litellm_disabled_callbacks", None) is not None:
             return standard_callback_dynamic_params.get("litellm_disabled_callbacks", None)
-        
+
         return None
-    
+
     @staticmethod
     def _premium_user_check():
         from litellm.proxy.proxy_server import premium_user

@@ -78,7 +78,7 @@ class ResponsesSessionHandler:
             messages=chat_completion_message_history,
             litellm_session_id=litellm_session_id,
         )
-    
+
     @staticmethod
     async def extend_chat_completion_message_with_spend_log_payload(
         spend_log: SpendLogsPayload,
@@ -150,7 +150,7 @@ class ResponsesSessionHandler:
                         getattr(choice, "message")
                     )
         return chat_completion_message_history
-    
+
     @staticmethod
     async def get_proxy_server_request_from_spend_log(
         spend_log: SpendLogsPayload,
@@ -166,7 +166,7 @@ class ResponsesSessionHandler:
             proxy_server_request_dict = proxy_server_request
         else:
             proxy_server_request_dict = json.loads(proxy_server_request)
-        
+
 
         ############################################################
         # Check if user has setup cold storage for session handling
@@ -182,9 +182,9 @@ class ResponsesSessionHandler:
                 )
             if _proxy_server_request_dict:
                 proxy_server_request_dict = _proxy_server_request_dict
-        
+
         return proxy_server_request_dict
-        
+
     @staticmethod
     def _get_cold_storage_object_key_from_spend_log(spend_log: SpendLogsPayload) -> Optional[str]:
         """

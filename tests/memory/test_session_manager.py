@@ -1,7 +1,9 @@
+
 import pytest
-from datetime import datetime
-from src.daip_live.core.models import Session, DialogueTurn, AgentState
+
+from src.daip_live.core.models import AgentState, DialogueTurn
 from src.daip_live.memory.session_manager import SessionManager
+
 
 @pytest.fixture
 def session_manager():
@@ -23,7 +25,7 @@ def test_full_session_lifecycle(session_manager):
 
     # Act
     session = session_manager.create_session(goal, session_type, participant_ids)
-    
+
     # Assert
     assert session.goal == goal
     assert session.session_type == session_type
@@ -52,7 +54,7 @@ def test_get_nonexistent_session(session_manager):
     """Test retrieving a session that does not exist."""
     # Act
     retrieved_session = session_manager.get_session("nonexistent_session_id")
-    
+
     # Assert
     assert retrieved_session is None
 
@@ -60,6 +62,6 @@ def test_list_sessions_empty(session_manager):
     """Test listing sessions when none exist."""
     # Act
     sessions = session_manager.list_sessions()
-    
+
     # Assert
     assert sessions == []

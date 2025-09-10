@@ -1,11 +1,13 @@
 
 import asyncio
-import yaml
 import re
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from daip_live.model_provider.provider import LiteLLMProvider
+import yaml
+
 from daip_live.core.models import ProviderConfig
+from daip_live.model_provider.provider import LiteLLMProvider
+
 
 class ScaffoldingManager:
     def __init__(self, model_provider: LiteLLMProvider, max_retries: int = 2):
@@ -79,7 +81,7 @@ async def main():
     provider_config = ProviderConfig(model="gpt-3.5-turbo") # Or any other configured model
     model_provider = LiteLLMProvider(provider_config)
     scaffolder = ScaffoldingManager(model_provider)
-    
+
     description = "A simple project with a project manager role and a main workflow."
     try:
         parsed_structure = await scaffolder.generate_structure(description)

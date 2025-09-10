@@ -196,7 +196,7 @@ async def google_count_tokens(request: Request, model_name: str):
             totalTokens=original_response.get("totalTokens", 0),
             promptTokensDetails=original_response.get("promptTokensDetails", []),
         )
-    
+
     #########################################################
     # Return the response in the well known format
     #########################################################

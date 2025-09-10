@@ -71,7 +71,7 @@ def cli(ctx: click.Context, base_url: str, api_key: Optional[str]) -> None:
 
     ctx.obj["base_url"] = base_url
     ctx.obj["api_key"] = api_key
-    
+
     # If no subcommand was invoked, start interactive mode
     if ctx.invoked_subcommand is None:
         interactive_shell(ctx)

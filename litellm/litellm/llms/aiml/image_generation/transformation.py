@@ -24,7 +24,7 @@ else:
 class AimlImageGenerationConfig(BaseImageGenerationConfig):
     DEFAULT_BASE_URL: str = "https://api.aimlapi.com"
     IMAGE_GENERATION_ENDPOINT: str = "v1/images/generations"
-    
+
     def get_supported_openai_params(
         self, model: str
     ) -> List[OpenAIImageGenerationOptionalParams]:
@@ -33,10 +33,10 @@ class AimlImageGenerationConfig(BaseImageGenerationConfig):
         """
         return [
             "n",
-            "response_format", 
+            "response_format",
             "size"
         ]
-    
+
     def map_openai_params(
         self,
         non_default_params: dict,
@@ -45,7 +45,7 @@ class AimlImageGenerationConfig(BaseImageGenerationConfig):
         drop_params: bool,
     ) -> dict:
         supported_params = self.get_supported_openai_params(model)
-        
+
         for k in non_default_params.keys():
             if k not in optional_params.keys():
                 if k in supported_params:
@@ -53,7 +53,7 @@ class AimlImageGenerationConfig(BaseImageGenerationConfig):
                     if k == "n":
                         optional_params["num_images"] = non_default_params[k]
                     elif k == "response_format":
-                        optional_params["output_format"] = non_default_params[k] 
+                        optional_params["output_format"] = non_default_params[k]
                     elif k == "size":
                         # Map OpenAI size format to AI/ML image_size
                         size_value = non_default_params[k]
@@ -91,8 +91,8 @@ class AimlImageGenerationConfig(BaseImageGenerationConfig):
         Get the complete url for the request
         """
         complete_url: str = (
-            api_base 
-            or get_secret_str("AIML_API_BASE") 
+            api_base
+            or get_secret_str("AIML_API_BASE")
             or self.DEFAULT_BASE_URL
         )
 
@@ -111,15 +111,15 @@ class AimlImageGenerationConfig(BaseImageGenerationConfig):
         api_base: Optional[str] = None,
     ) -> dict:
         final_api_key: Optional[str] = (
-            api_key or 
+            api_key or
             get_secret_str("AIML_API_KEY") or
             get_secret_str("AIMLAPI_KEY")  # Alternative name
         )
         if not final_api_key:
             raise ValueError("AIML_API_KEY or AIMLAPI_KEY is not set")
-        
+
         headers["Authorization"] = f"Bearer {final_api_key}"
-        headers["Content-Type"] = "application/json"        
+        headers["Content-Type"] = "application/json"
         return headers
 
     def transform_image_generation_request(
@@ -168,14 +168,14 @@ class AimlImageGenerationConfig(BaseImageGenerationConfig):
                 status_code=raw_response.status_code,
                 headers=raw_response.headers,
             )
-            
+
         if not model_response.data:
             model_response.data = []
-        
+
         # AI/ML API can return images in two different formats:
         # 1. output.choices array with image_base64
         # 2. images array with url (and optional width, height, content_type)
-        
+
         if "output" in response_data and "choices" in response_data["output"]:
             for choice in response_data["output"]["choices"]:
                 if "image_base64" in choice:

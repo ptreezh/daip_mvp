@@ -1,7 +1,8 @@
 """Defines the core interface contracts (Abstract Base Classes) for services."""
 
 from abc import ABC, abstractmethod
-from typing import Any, AsyncGenerator, Dict, List
+from collections.abc import AsyncGenerator
+from typing import Any, Dict, List
 
 
 class IModelProvider(ABC):

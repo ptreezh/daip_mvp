@@ -216,7 +216,7 @@ class MistralConfig(OpenAIGPTConfig):
     @overload
     def _transform_messages(
         self, messages: List[AllMessageValues], model: str, is_async: Literal[True]
-    ) -> Coroutine[Any, Any, List[AllMessageValues]]: 
+    ) -> Coroutine[Any, Any, List[AllMessageValues]]:
         ...
 
     @overload
@@ -225,7 +225,7 @@ class MistralConfig(OpenAIGPTConfig):
         messages: List[AllMessageValues],
         model: str,
         is_async: Literal[False] = False,
-    ) -> List[AllMessageValues]: 
+    ) -> List[AllMessageValues]:
         ...
     # fmt: on
 
@@ -303,7 +303,7 @@ class MistralConfig(OpenAIGPTConfig):
         """
         for m in messages:
             _content_block = m.get("content")
-            if _content_block and isinstance(_content_block, list):                
+            if _content_block and isinstance(_content_block, list):
                 if any(c.get("type") == "file" for c in _content_block):
                     # If file content is present, we get file_id from 'file' attribute of content block
                     # then replace 'file' with 'file_id' and assign the value of 'file_id' attribute to it.

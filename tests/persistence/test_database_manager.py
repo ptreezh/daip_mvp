@@ -1,6 +1,8 @@
 import pytest
+
+from src.daip_live.core.models import AgentState, DialogueTurn, KnowledgeSource, Session
 from src.daip_live.persistence.database import DatabaseManager
-from src.daip_live.core.models import Session, DialogueTurn, AgentState, KnowledgeSource
+
 
 @pytest.fixture
 def db_manager() -> DatabaseManager:
@@ -91,7 +93,7 @@ async def test_get_knowledge_sources_by_ids(db_manager: DatabaseManager):
     source1 = KnowledgeSource(file_path="/path/1", file_hash="hash1")
     source2 = KnowledgeSource(file_path="/path/2", file_hash="hash2")
     source3 = KnowledgeSource(file_path="/path/3", file_hash="hash3")
-    
+
     # The upsert method returns the object with the assigned ID
     s1_saved = db_manager.upsert_knowledge_source(source1)
     s2_saved = db_manager.upsert_knowledge_source(source2)

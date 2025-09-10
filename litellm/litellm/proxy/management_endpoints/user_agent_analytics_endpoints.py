@@ -110,13 +110,13 @@ async def get_distinct_user_agent_tags(
         DistinctTagsResponse: List of distinct user agent tags
     """
     from litellm.proxy.proxy_server import prisma_client
-    
+
     if prisma_client is None:
         raise HTTPException(
             status_code=500,
             detail={"error": CommonProxyErrors.db_not_connected_error.value},
         )
-    
+
     try:
         sql_query = f"""
         SELECT 
@@ -128,16 +128,16 @@ async def get_distinct_user_agent_tags(
         ORDER BY usage_count DESC
         LIMIT {MAX_TAGS}
         """
-        
+
         db_response = await prisma_client.db.query_raw(sql_query)
-        
+
         results = [
             DistinctTagResponse(tag=row["tag"])
             for row in db_response
         ]
-        
+
         return DistinctTagsResponse(results=results)
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -176,27 +176,27 @@ async def get_daily_active_users(
         ActiveUsersAnalyticsResponse: DAU data by tag for each of the last {MAX_DAYS} days
     """
     from litellm.proxy.proxy_server import prisma_client
-    
+
     if prisma_client is None:
         raise HTTPException(
             status_code=500,
             detail={"error": CommonProxyErrors.db_not_connected_error.value},
         )
-    
+
     try:
         # Calculate end_date as UTC today + 1 day
         from datetime import timezone
         end_dt = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
         end_date = end_dt.strftime("%Y-%m-%d")
-        
+
         # Calculate date range (last MAX_DAYS days)
         start_dt = end_dt - timedelta(days=MAX_DAYS)
         start_date = start_dt.strftime("%Y-%m-%d")
-        
+
         # Build SQL query with optional tag filter(s)
         where_clause = "WHERE dts.date >= $1 AND dts.date <= $2 AND vt.user_id IS NOT NULL"
         params = [start_date, end_date]
-        
+
         # Handle multiple tag filters (takes precedence over single tag filter)
         if tag_filters and len(tag_filters) > 0:
             tag_conditions = []
@@ -208,7 +208,7 @@ async def get_daily_active_users(
         elif tag_filter:
             where_clause += " AND dts.tag ILIKE $3"
             params.append(f"%{tag_filter}%")
-        
+
         sql_query = f"""
         SELECT 
             dts.tag,
@@ -220,9 +220,9 @@ async def get_daily_active_users(
         GROUP BY dts.tag, dts.date
         ORDER BY dts.date DESC, active_users DESC
         """
-        
+
         db_response = await prisma_client.db.query_raw(sql_query, *params)
-        
+
         results = [
             TagActiveUsersResponse(
                 tag=row["tag"],
@@ -231,9 +231,9 @@ async def get_daily_active_users(
             )
             for row in db_response
         ]
-        
+
         return ActiveUsersAnalyticsResponse(results=results)
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -276,28 +276,28 @@ async def get_weekly_active_users(
         ActiveUsersAnalyticsResponse: WAU data by tag for each of the last {MAX_WEEKS} weeks with descriptive week labels (e.g., "Week 1 (Jan 1)")
     """
     from litellm.proxy.proxy_server import prisma_client
-    
+
     if prisma_client is None:
         raise HTTPException(
             status_code=500,
             detail={"error": CommonProxyErrors.db_not_connected_error.value},
         )
-    
+
     try:
         # Calculate end_date as UTC today + 1 day
         from datetime import timezone
         end_dt = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
         end_date = end_dt.strftime("%Y-%m-%d")
-        
+
         # Calculate date range for all weeks (49 days total)
         # Start from 48 days before end_date to cover exactly MAX_WEEKS complete weeks
         start_dt = end_dt - timedelta(days=(MAX_WEEKS * 7 - 1))  # MAX_WEEKS weeks * 7 days - 1
         start_date = start_dt.strftime("%Y-%m-%d")
-        
+
         # Build SQL query with optional tag filter(s)
         where_clause = "WHERE dts.date >= $1 AND dts.date <= $2 AND vt.user_id IS NOT NULL"
         params = [start_date, end_date]
-        
+
         # Handle multiple tag filters (takes precedence over single tag filter)
         if tag_filters and len(tag_filters) > 0:
             tag_conditions = []
@@ -309,7 +309,7 @@ async def get_weekly_active_users(
         elif tag_filter:
             where_clause += " AND dts.tag ILIKE $3"
             params.append(f"%{tag_filter}%")
-        
+
         # Use window function to group by weeks with clear week numbering
         sql_query = f"""
         WITH weekly_data AS (
@@ -338,9 +338,9 @@ async def get_weekly_active_users(
         GROUP BY tag, week_offset
         ORDER BY week_offset DESC, active_users DESC
         """
-        
+
         db_response = await prisma_client.db.query_raw(sql_query, *params)
-        
+
         results = [
             TagActiveUsersResponse(
                 tag=row["tag"],
@@ -351,9 +351,9 @@ async def get_weekly_active_users(
             )
             for row in db_response
         ]
-        
+
         return ActiveUsersAnalyticsResponse(results=results)
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -396,28 +396,28 @@ async def get_monthly_active_users(
         ActiveUsersAnalyticsResponse: MAU data by tag for each of the last {MAX_MONTHS} months with descriptive month labels (e.g., "Month 1 (Nov)")
     """
     from litellm.proxy.proxy_server import prisma_client
-    
+
     if prisma_client is None:
         raise HTTPException(
             status_code=500,
             detail={"error": CommonProxyErrors.db_not_connected_error.value},
         )
-    
+
     try:
         # Calculate end_date as UTC today + 1 day
         from datetime import timezone
         end_dt = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
         end_date = end_dt.strftime("%Y-%m-%d")
-        
+
         # Calculate date range for all months (210 days total)
         # Start from 209 days before end_date to cover exactly MAX_MONTHS complete months
         start_dt = end_dt - timedelta(days=(MAX_MONTHS * 30 - 1))  # MAX_MONTHS months * 30 days - 1
         start_date = start_dt.strftime("%Y-%m-%d")
-        
+
         # Build SQL query with optional tag filter(s)
         where_clause = "WHERE dts.date >= $1 AND dts.date <= $2 AND vt.user_id IS NOT NULL"
         params = [start_date, end_date]
-        
+
         # Handle multiple tag filters (takes precedence over single tag filter)
         if tag_filters and len(tag_filters) > 0:
             tag_conditions = []
@@ -429,7 +429,7 @@ async def get_monthly_active_users(
         elif tag_filter:
             where_clause += " AND dts.tag ILIKE $3"
             params.append(f"%{tag_filter}%")
-        
+
         # Use window function to group by months (30-day periods) with clear month numbering
         sql_query = f"""
         WITH monthly_data AS (
@@ -458,9 +458,9 @@ async def get_monthly_active_users(
         GROUP BY tag, month_offset
         ORDER BY month_offset DESC, active_users DESC
         """
-        
+
         db_response = await prisma_client.db.query_raw(sql_query, *params)
-        
+
         results = [
             TagActiveUsersResponse(
                 tag=row["tag"],
@@ -471,9 +471,9 @@ async def get_monthly_active_users(
             )
             for row in db_response
         ]
-        
+
         return ActiveUsersAnalyticsResponse(results=results)
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -517,22 +517,22 @@ async def get_tag_summary(
         TagSummaryResponse: Summary analytics data by tag
     """
     from litellm.proxy.proxy_server import prisma_client
-    
+
     if prisma_client is None:
         raise HTTPException(
             status_code=500,
             detail={"error": CommonProxyErrors.db_not_connected_error.value},
         )
-    
+
     try:
         # Validate date format
         datetime.strptime(start_date, "%Y-%m-%d")
         datetime.strptime(end_date, "%Y-%m-%d")
-        
+
         # Build SQL query with optional tag filter(s)
         where_clause = "WHERE dts.date >= $1 AND dts.date <= $2"
         params = [start_date, end_date]
-        
+
         # Handle multiple tag filters (takes precedence over single tag filter)
         if tag_filters and len(tag_filters) > 0:
             tag_conditions = []
@@ -544,7 +544,7 @@ async def get_tag_summary(
         elif tag_filter:
             where_clause += " AND dts.tag ILIKE $3"
             params.append(f"%{tag_filter}%")
-        
+
         sql_query = f"""
         SELECT 
             dts.tag,
@@ -560,9 +560,9 @@ async def get_tag_summary(
         GROUP BY dts.tag
         ORDER BY total_requests DESC
         """
-        
+
         db_response = await prisma_client.db.query_raw(sql_query, *params)
-        
+
         results = [
             TagSummaryMetrics(
                 tag=row["tag"],
@@ -575,9 +575,9 @@ async def get_tag_summary(
             )
             for row in db_response
         ]
-        
+
         return TagSummaryResponse(results=results)
-        
+
     except ValueError as e:
         raise HTTPException(
             status_code=400,
@@ -627,42 +627,42 @@ async def get_per_user_analytics(
         PerUserAnalyticsResponse: Analytics data broken down by individual users for the last 30 days
     """
     from litellm.proxy.proxy_server import prisma_client
-    
+
     if prisma_client is None:
         raise HTTPException(
             status_code=500,
             detail={"error": CommonProxyErrors.db_not_connected_error.value},
         )
-    
+
     try:
         # Calculate end_date as UTC today + 1 day
         from datetime import timezone
         end_dt = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
         end_date = end_dt.strftime("%Y-%m-%d")
-        
+
         # Calculate date range (last 30 days)
         start_dt = end_dt - timedelta(days=30)
         start_date = start_dt.strftime("%Y-%m-%d")
-        
+
         # Build where clause with date range
         where_clause: Dict[str, Any] = {
             "date": {"gte": start_date, "lte": end_date}
         }
-        
+
         # Add tag filtering if provided
         if tag_filters and len(tag_filters) > 0:
             where_clause["tag"] = {"in": tag_filters}
         elif tag_filter:
             where_clause["tag"] = {"contains": tag_filter}
-        
+
         # Get all tag records in the date range with optional tag filtering
         tag_records = await prisma_client.db.litellm_dailytagspend.find_many(
             where=where_clause
         )
-        
+
         # Get unique api_keys
         api_keys = set(record.api_key for record in tag_records if record.api_key)
-        
+
         if not api_keys:
             return PerUserAnalyticsResponse(
                 results=[],
@@ -671,31 +671,31 @@ async def get_per_user_analytics(
                 page_size=page_size,
                 total_pages=0,
             )
-        
+
         # Lookup user_id for each api_key
         api_key_records = await prisma_client.db.litellm_verificationtoken.find_many(
             where={"token": {"in": list(api_keys)}}
         )
-        
+
         # Create mapping from api_key to user_id
         api_key_to_user_id = {
-            record.token: record.user_id 
-            for record in api_key_records 
+            record.token: record.user_id
+            for record in api_key_records
             if record.user_id
         }
-        
+
         # Get user emails for the user_ids
         user_ids = list(set(api_key_to_user_id.values()))
         user_records = await prisma_client.db.litellm_usertable.find_many(
             where={"user_id": {"in": user_ids}}
         )
-        
+
         # Create mapping from user_id to user_email
         user_id_to_email = {
-            record.user_id: record.user_email 
+            record.user_id: record.user_email
             for record in user_records
         }
-        
+
         # Aggregate metrics by user
         user_metrics: Dict[str, PerUserMetrics] = {}
 
@@ -703,7 +703,7 @@ async def get_per_user_analytics(
             if record.api_key in api_key_to_user_id:
                 user_id = api_key_to_user_id[record.api_key]
                 tag = record.tag  # Use the full tag as user_agent
-                
+
                 if user_id not in user_metrics:
                     user_metrics[user_id] = PerUserMetrics(
                         user_id=user_id,
@@ -714,7 +714,7 @@ async def get_per_user_analytics(
                     # If tag is different, keep the first one or prioritize certain ones
                     if tag and not user_metrics[user_id].user_agent:
                         user_metrics[user_id].user_agent = tag
-                
+
                 # Aggregate metrics
                 user_metrics[user_id].successful_requests += record.successful_requests or 0
                 user_metrics[user_id].failed_requests += record.failed_requests or 0
@@ -724,21 +724,21 @@ async def get_per_user_analytics(
                 completion_tokens = record.completion_tokens or 0
                 user_metrics[user_id].total_tokens += int(prompt_tokens + completion_tokens)
                 user_metrics[user_id].spend += record.spend or 0.0
-        
+
         # Convert to list and sort by successful requests (descending)
         results = sorted(
             list(user_metrics.values()),
             key=lambda x: x.successful_requests,
             reverse=True
         )
-        
+
         # Apply pagination
         total_count = len(results)
         total_pages = (total_count + page_size - 1) // page_size
         start_idx = (page - 1) * page_size
         end_idx = start_idx + page_size
         paginated_results = results[start_idx:end_idx]
-        
+
         return PerUserAnalyticsResponse(
             results=paginated_results,
             total_count=total_count,
@@ -746,7 +746,7 @@ async def get_per_user_analytics(
             page_size=page_size,
             total_pages=total_pages,
         )
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=500,

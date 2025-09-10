@@ -788,7 +788,7 @@ class DBSpendUpdateWriter:
         entity_id_field: str,
         table_name: str,
         unique_constraint_name: str,
-    ) -> None: 
+    ) -> None:
         ...
 
     @overload
@@ -816,7 +816,7 @@ class DBSpendUpdateWriter:
         entity_id_field: str,
         table_name: str,
         unique_constraint_name: str,
-    ) -> None: 
+    ) -> None:
         ...
     # fmt: on
 

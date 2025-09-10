@@ -28,7 +28,7 @@ class MCPRequestHandler:
     LITELLM_MCP_SERVERS_HEADER_NAME = SpecialHeaders.mcp_servers.value
 
     LITELLM_MCP_ACCESS_GROUPS_HEADER_NAME = SpecialHeaders.mcp_access_groups.value
-    
+
     # MCP Protocol Version header
     MCP_PROTOCOL_VERSION_HEADER_NAME = "MCP-Protocol-Version"
 
@@ -58,10 +58,10 @@ class MCPRequestHandler:
         litellm_api_key = (
             MCPRequestHandler.get_litellm_api_key_from_headers(headers) or ""
         )
-        
+
         # Get the old mcp_auth_header for backward compatibility
         mcp_auth_header = MCPRequestHandler._get_mcp_auth_header_from_headers(headers)
-        
+
         # Get the new server-specific auth headers
         mcp_server_auth_headers = MCPRequestHandler._get_mcp_server_auth_headers_from_headers(headers)
 
@@ -90,7 +90,7 @@ class MCPRequestHandler:
             api_key=litellm_api_key, request=request
         )
         return validated_user_api_key_auth, mcp_auth_header, mcp_servers, mcp_server_auth_headers, mcp_protocol_version
-    
+
 
     @staticmethod
     def _get_mcp_auth_header_from_headers(headers: Headers) -> Optional[str]:
@@ -115,7 +115,7 @@ class MCPRequestHandler:
                 f"Please use server-specific auth headers in the format 'x-mcp-{{server_alias}}-{{header_name}}' instead."
             )
         return auth_header
-    
+
     @staticmethod
     def _get_mcp_server_auth_headers_from_headers(headers: Headers) -> Dict[str, str]:
         """
@@ -132,13 +132,13 @@ class MCPRequestHandler:
         """
         server_auth_headers = {}
         prefix = "x-mcp-"
-        
+
         for header_name, header_value in headers.items():
             if header_name.lower().startswith(prefix):
                 # Skip the access groups header as it's not a server auth header
                 if header_name.lower() == MCPRequestHandler.LITELLM_MCP_ACCESS_GROUPS_HEADER_NAME.lower() or header_name.lower() == MCPRequestHandler.LITELLM_MCP_SERVERS_HEADER_NAME.lower():
                     continue
-                    
+
                 # Extract server_alias and header_name from x-mcp-{server_alias}-{header_name}
                 remaining = header_name[len(prefix):].lower()
                 if '-' in remaining:
@@ -148,9 +148,9 @@ class MCPRequestHandler:
                         server_alias, auth_header_name = parts
                         server_auth_headers[server_alias] = header_value
                         verbose_logger.debug(f"Found server auth header: {server_alias} -> {auth_header_name}: {header_value[:10]}...")
-        
+
         return server_auth_headers
-    
+
     @staticmethod
     def _get_mcp_client_side_auth_header_name() -> str:
         """
@@ -282,12 +282,12 @@ class MCPRequestHandler:
 
             # Get direct MCP servers
             direct_mcp_servers = key_object_permission.mcp_servers or []
-            
+
             # Get MCP servers from access groups
             access_group_servers = await MCPRequestHandler._get_mcp_servers_from_access_groups(
                 key_object_permission.mcp_access_groups or []
             )
-            
+
             # Combine both lists
             all_servers = direct_mcp_servers + access_group_servers
             return list(set(all_servers))
@@ -333,12 +333,12 @@ class MCPRequestHandler:
 
             # Get direct MCP servers
             direct_mcp_servers = object_permissions.mcp_servers or []
-            
+
             # Get MCP servers from access groups
             access_group_servers = await MCPRequestHandler._get_mcp_servers_from_access_groups(
                 object_permissions.mcp_access_groups or []
             )
-            
+
             # Combine both lists
             all_servers = direct_mcp_servers + access_group_servers
             return list(set(all_servers))
@@ -391,7 +391,7 @@ class MCPRequestHandler:
         try:
             # Import here to avoid circular import
             from litellm.proxy._experimental.mcp_server.mcp_server_manager import global_mcp_server_manager
-            
+
             # Use the new helper for config-loaded servers
             server_ids = MCPRequestHandler._get_config_server_ids_for_access_groups(
                 global_mcp_server_manager.config_mcp_servers, access_groups

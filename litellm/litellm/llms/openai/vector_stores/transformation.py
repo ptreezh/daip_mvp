@@ -76,7 +76,7 @@ class OpenAIVectorStoreConfig(BaseVectorStoreConfig):
         api_base = api_base.rstrip("/")
 
         return f"{api_base}/vector_stores"
-    
+
 
     def transform_search_vector_store_request(
         self,
@@ -98,7 +98,7 @@ class OpenAIVectorStoreConfig(BaseVectorStoreConfig):
 
         dict_request_body = cast(dict, typed_request_body)
         return url, dict_request_body
-    
+
 
 
     def transform_search_vector_store_response(self, response: httpx.Response, litellm_logging_obj: LiteLLMLoggingObj) -> VectorStoreSearchResponse:
@@ -109,8 +109,8 @@ class OpenAIVectorStoreConfig(BaseVectorStoreConfig):
             )
         except Exception as e:
             raise self.get_error_class(
-                error_message=str(e), 
-                status_code=response.status_code, 
+                error_message=str(e),
+                status_code=response.status_code,
                 headers=response.headers
             )
 
@@ -140,12 +140,11 @@ class OpenAIVectorStoreConfig(BaseVectorStoreConfig):
             )
         except Exception as e:
             raise self.get_error_class(
-                error_message=str(e), 
-                status_code=response.status_code, 
+                error_message=str(e),
+                status_code=response.status_code,
                 headers=response.headers
             )
 
-    
 
-    
-    
+
+

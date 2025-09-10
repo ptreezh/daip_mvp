@@ -1,10 +1,9 @@
-import asyncio
 from typing import List
 
-from src.daip_live.core.models import Session, Role, DialogueTurn, AgentState
+from src.daip_live.core.models import AgentState, DialogueTurn, Session
 from src.daip_live.memory.session_manager import SessionManager
-from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
 from src.daip_live.model_provider.provider import LiteLLMProvider
+from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
 
 
 class DebateManager:
@@ -40,11 +39,11 @@ class DebateManager:
             for role in roles:
                 history_str = "\n".join([f"{turn.participant_id}: {turn.content}" for turn in session.history])
                 prompt = f"Debate Topic: {topic}\n\nYour Persona: {role.persona}\n\nConversation History:\n{history_str}\n\nBased on the history and your persona, what is your next argument?"
-                
+
                 response = await self.model_provider.generate(prompt)
                 turn = DialogueTurn(participant_id=role.name, content=response)
                 session.history.append(turn)
-        
+
         # Generate summary
         history_str = "\n".join([f"{turn.participant_id}: {turn.content}" for turn in session.history])
         summary_prompt = f"Please provide a neutral summary of the following debate, identifying key arguments, points of contention, and any potential consensus.\n\nDebate History:\n{history_str}"

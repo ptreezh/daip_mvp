@@ -97,13 +97,13 @@ class LowestLatencyLoggingHandler(CustomLogger):
                     if _usage is not None:
                         completion_tokens = _usage.completion_tokens
                         total_tokens = _usage.total_tokens
-                        
+
                         # Handle both timedelta and float response times
                         if isinstance(response_ms, timedelta):
                             response_seconds = response_ms.total_seconds()
                         else:
                             response_seconds = response_ms
-                            
+
                         final_value = safe_divide_seconds(response_seconds, completion_tokens)
                         if final_value is not None:
                             final_value = float(final_value)
@@ -318,13 +318,13 @@ class LowestLatencyLoggingHandler(CustomLogger):
                     if _usage is not None:
                         completion_tokens = _usage.completion_tokens
                         total_tokens = _usage.total_tokens
-                        
+
                         # Handle both timedelta and float response times
                         if isinstance(response_ms, timedelta):
                             response_seconds = response_ms.total_seconds()
                         else:
                             response_seconds = response_ms
-                            
+
                         final_value = safe_divide_seconds(response_seconds, completion_tokens)
                         if final_value is not None:
                             final_value = float(final_value)

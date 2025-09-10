@@ -1,19 +1,19 @@
 """Tests for the ToolManager."""
 
-import pytest
+from typing import Any, Dict, List
 
+import pytest
+from daip_live.core.models import SessionContext, ToolPermissionConfig
 from daip_live.p4_role_manager_tools.tool_manager import (
-    ToolManager, 
-    ToolNotFoundError, 
     ToolInputError,
-    ToolPreconditionError,
+    ToolManager,
+    ToolNotFoundError,
     ToolPermissionError,
     ToolPermissionRequest,
-    ToolTimeoutError
+    ToolPreconditionError,
+    ToolTimeoutError,
 )
 from daip_live.p4_role_manager_tools.tools import tool
-from daip_live.core.models import SessionContext, ToolPermissionConfig
-from typing import Dict, Any, List
 
 
 # A simple tool for testing
@@ -39,12 +39,12 @@ class TestToolManagerDiscovery:
         self.manager.tool_permission_config = ToolPermissionConfig(default="allow")
 
     def test_register_tool_success(self):
-        """Tests that a valid tool can be registered."""        
+        """Tests that a valid tool can be registered."""
         self.manager.register_tool(add)
         assert "add" in self.manager._registry
 
     def test_register_non_tool_fails(self):
-        """Tests that registering a non-decorated function fails."""        
+        """Tests that registering a non-decorated function fails."""
         def non_tool_func():
             pass
         with pytest.raises(ValueError):
@@ -58,7 +58,7 @@ class TestToolManagerDiscovery:
         session_context = SessionContext()
         with pytest.raises(ToolNotFoundError) as excinfo:
             self.manager.execute_tool("subtract", {"a": 10, "b": 5}, session_context)
-        
+
         assert "Tool 'subtract' not found" in str(excinfo.value)
 
     def test_full_execution_success_path_simplified(self):
@@ -67,9 +67,9 @@ class TestToolManagerDiscovery:
         """
         self.manager.register_tool(add)
         session_context = SessionContext()
-        
+
         result = self.manager.execute_tool("add", {"a": 10, "b": 5}, session_context)
-        
+
         assert result == "15"
 
 
@@ -88,7 +88,7 @@ class TestToolManagerInputValidation:
 
         with pytest.raises(ToolInputError) as excinfo:
             self.manager.execute_tool("add", {"a": 10}, session_context)
-        
+
         assert "Input validation failed" in str(excinfo.value)
         assert "Field required" in str(excinfo.value)
 
@@ -122,7 +122,7 @@ class TestToolManagerPreconditionCheck:
 
         with pytest.raises(ToolPreconditionError) as excinfo:
             self.manager.execute_tool("write_file_tool", {"file_path": "test.txt", "content": "hello"}, session_context)
-        
+
         assert "Resource 'test.txt' was not recently read" in str(excinfo.value)
 
     def test_write_after_read_succeeds_if_read(self):
@@ -134,7 +134,7 @@ class TestToolManagerPreconditionCheck:
         session_context = SessionContext(recently_read_resources={"test.txt"})
 
         result = self.manager.execute_tool("write_file_tool", {"file_path": "test.txt", "content": "hello"}, session_context)
-        
+
         assert "Wrote 'hello' to 'test.txt'" in result
 
     def test_read_tool_adds_to_recently_read_resources(self):
@@ -160,7 +160,7 @@ class TestToolManagerPermissionCheck:
         """
         self.manager.register_tool(add)
         session_context = SessionContext()
-        
+
         # Mock ToolPermissionConfig to deny 'add' tool
         self.manager.tool_permission_config = ToolPermissionConfig(
             default="allow", # Default to allow, but specifically deny 'add'
@@ -171,7 +171,7 @@ class TestToolManagerPermissionCheck:
 
         with pytest.raises(ToolPermissionError) as excinfo:
             self.manager.execute_tool("add", {"a": 1, "b": 2}, session_context)
-        
+
         assert "Tool 'add' is denied by policy." in str(excinfo.value)
 
     def test_permission_check_allow_succeeds(self):
@@ -211,7 +211,7 @@ class TestToolManagerPermissionCheck:
 
         with pytest.raises(ToolPermissionRequest) as excinfo:
             self.manager.execute_tool("add", {"a": 1, "b": 2}, session_context)
-        
+
         assert "Permission required for tool 'add'" in str(excinfo.value)
 
     def test_permission_check_ask_with_confirmation_succeeds(self):
@@ -250,7 +250,7 @@ class TestToolManagerInputValidation:
 
         with pytest.raises(ToolInputError) as excinfo:
             self.manager.execute_tool("add", {"a": 10}, session_context)
-        
+
         assert "Input validation failed" in str(excinfo.value)
         assert "Field required" in str(excinfo.value)
 
@@ -284,7 +284,7 @@ class TestToolManagerPreconditionCheck:
 
         with pytest.raises(ToolPreconditionError) as excinfo:
             self.manager.execute_tool("write_file_tool", {"file_path": "test.txt", "content": "hello"}, session_context)
-        
+
         assert "Resource 'test.txt' was not recently read" in str(excinfo.value)
 
     def test_write_after_read_succeeds_if_read(self):
@@ -296,7 +296,7 @@ class TestToolManagerPreconditionCheck:
         session_context = SessionContext(recently_read_resources={"test.txt"})
 
         result = self.manager.execute_tool("write_file_tool", {"file_path": "test.txt", "content": "hello"}, session_context)
-        
+
         assert "Wrote 'hello' to 'test.txt'" in result
 
     def test_read_tool_adds_to_recently_read_resources(self):
@@ -322,7 +322,7 @@ class TestToolManagerPermissionCheck:
         """
         self.manager.register_tool(add)
         session_context = SessionContext()
-        
+
         # Mock ToolPermissionConfig to deny 'add' tool
         self.manager.tool_permission_config = ToolPermissionConfig(
             default="allow", # Default to allow, but specifically deny 'add'
@@ -333,7 +333,7 @@ class TestToolManagerPermissionCheck:
 
         with pytest.raises(ToolPermissionError) as excinfo:
             self.manager.execute_tool("add", {"a": 1, "b": 2}, session_context)
-        
+
         assert "Tool 'add' is denied by policy." in str(excinfo.value)
 
     def test_permission_check_allow_succeeds(self):
@@ -373,7 +373,7 @@ class TestToolManagerPermissionCheck:
 
         with pytest.raises(ToolPermissionRequest) as excinfo:
             self.manager.execute_tool("add", {"a": 1, "b": 2}, session_context)
-        
+
         assert "Permission required for tool 'add'" in str(excinfo.value)
 
     def test_permission_check_ask_with_confirmation_succeeds(self):
@@ -411,7 +411,7 @@ class TestToolManagerExecutionAndFormatting:
         @tool
         def echo(message: str) -> str:
             return message
-        
+
         self.manager.register_tool(echo)
         result = self.manager.execute_tool("echo", {"message": "hello"}, self.session_context)
         assert result == "hello"
@@ -425,16 +425,16 @@ class TestToolManagerExecutionAndFormatting:
         def long_running_tool() -> str:
             # Simulate a timeout by raising an exception that would be caught by the timeout mechanism
             raise TimeoutError("Tool execution timed out")
-        
+
         self.manager.register_tool(long_running_tool)
-        
+
         # Temporarily set a very short timeout for testing purposes
         # In a real scenario, this would be configured externally
         self.manager.tool_timeout = 0.001 # Very short timeout
 
         with pytest.raises(ToolTimeoutError) as excinfo:
             self.manager.execute_tool("long_running_tool", {}, self.session_context)
-        
+
         assert "Tool 'long_running_tool' timed out." in str(excinfo.value)
 
     def test_execution_exception_handling(self):
@@ -445,9 +445,9 @@ class TestToolManagerExecutionAndFormatting:
         @tool
         def tool_with_error() -> str:
             raise ValueError("Something went wrong")
-        
+
         self.manager.register_tool(tool_with_error)
-        
+
         result = self.manager.execute_tool("tool_with_error", {}, self.session_context)
         assert "Error executing tool 'tool_with_error': ValueError('Something went wrong')" in result
 
@@ -458,7 +458,7 @@ class TestToolManagerExecutionAndFormatting:
         @tool
         def get_string() -> str:
             return "This is a string result."
-        
+
         self.manager.register_tool(get_string)
         result = self.manager.execute_tool("get_string", {}, self.session_context)
         assert result == "This is a string result."
@@ -470,7 +470,7 @@ class TestToolManagerExecutionAndFormatting:
         @tool
         def get_dict() -> Dict[str, Any]:
             return {"key": "value", "number": 123}
-        
+
         self.manager.register_tool(get_dict)
         result = self.manager.execute_tool("get_dict", {}, self.session_context)
         assert result == "{'key': 'value', 'number': 123}"
@@ -478,7 +478,7 @@ class TestToolManagerExecutionAndFormatting:
         @tool
         def get_list() -> List[str]:
             return ["item1", "item2"]
-        
+
         self.manager.register_tool(get_list)
         result = self.manager.execute_tool("get_list", {}, self.session_context)
         assert result == "['item1', 'item2']"

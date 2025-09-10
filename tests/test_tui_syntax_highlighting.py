@@ -1,9 +1,8 @@
-import unittest
-from unittest.mock import Mock, patch, MagicMock
-from textual.widgets import TextArea
-import sys
-import os
 import json
+import os
+import sys
+import unittest
+from unittest.mock import Mock
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -20,10 +19,10 @@ class TestTUISyntaxHighlighting(unittest.TestCase):
         self.mock_executor = Mock()
         self.mock_session_manager = Mock()
         self.mock_role_manager = Mock()
-        
+
         # Create TUI instance
         self.tui = DAIP_TUI(self.mock_executor, "test goal")
-        
+
         # Replace the internal session manager and role manager with our mocks
         self.tui._session_manager = self.mock_session_manager
         self.tui._role_manager = self.mock_role_manager
@@ -42,10 +41,10 @@ class TestTUISyntaxHighlighting(unittest.TestCase):
                 "null_value": None
             }
         }
-        
+
         json_string = json.dumps(test_json, ensure_ascii=False)
         highlighted = self.tui._highlight_code_and_json(json_string)
-        
+
         # Verify that the function didn't crash and returned a string
         self.assertIsInstance(highlighted, str)
 
@@ -54,14 +53,14 @@ class TestTUISyntaxHighlighting(unittest.TestCase):
         # Test with plain text
         plain_text = "This is just plain text with no JSON structure"
         highlighted = self.tui._highlight_code_and_json(plain_text)
-        
+
         # Should return the same text
         self.assertEqual(highlighted, plain_text)
 
     def test_highlight_code_and_json_with_empty_string(self):
         """Test syntax highlighting with empty string."""
         highlighted = self.tui._highlight_code_and_json("")
-        
+
         # Should return empty string
         self.assertEqual(highlighted, "")
 
@@ -69,7 +68,7 @@ class TestTUISyntaxHighlighting(unittest.TestCase):
         """Test syntax highlighting with malformed JSON."""
         malformed_json = '{"key": "value", "missing_quote: true}'
         highlighted = self.tui._highlight_code_and_json(malformed_json)
-        
+
         # Should return the same text since it's not valid JSON
         self.assertEqual(highlighted, malformed_json)
 

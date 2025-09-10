@@ -63,7 +63,7 @@ class DataDogLLMObsLogger(DataDogLogger, CustomBatchLogger):
             asyncio.create_task(self.periodic_flush())
             self.flush_lock = asyncio.Lock()
             self.log_queue: List[LLMObsPayload] = []
-            
+
             #########################################################
             # Handle datadog_llm_observability_params set as litellm.datadog_llm_observability_params
             #########################################################
@@ -88,7 +88,7 @@ class DataDogLLMObsLogger(DataDogLogger, CustomBatchLogger):
                 # only allow params that are of DatadogLLMObsInitParams
                 dict_datadog_llm_obs_params = DatadogLLMObsInitParams(**litellm.datadog_llm_observability_params).model_dump()
         return dict_datadog_llm_obs_params
-            
+
 
     async def async_log_success_event(self, kwargs, response_obj, start_time, end_time):
         try:
@@ -107,7 +107,7 @@ class DataDogLLMObsLogger(DataDogLogger, CustomBatchLogger):
             verbose_logger.exception(
                 f"DataDogLLMObs: Error logging success event - {str(e)}"
             )
-    
+
     async def async_log_failure_event(self, kwargs, response_obj, start_time, end_time):
         try:
             verbose_logger.debug(
@@ -230,18 +230,18 @@ class DataDogLLMObsLogger(DataDogLogger, CustomBatchLogger):
                 self._get_datadog_tags(standard_logging_object=standard_logging_payload)
             ],
         )
-    
+
     def _assemble_error_info(self, standard_logging_payload: StandardLoggingPayload) -> Optional[DDLLMObsError]:
         """
         Assemble error information for failure cases according to DD LLM Obs API spec
         """
         # Handle error information for failure cases according to DD LLM Obs API spec
         error_info: Optional[DDLLMObsError] = None
-        
+
         if standard_logging_payload.get("status") == "failure":
             # Try to get structured error information first
             error_information: Optional[StandardLoggingPayloadErrorInformation] = standard_logging_payload.get("error_information")
-            
+
             if error_information:
                 error_info = DDLLMObsError(
                     message=error_information.get("error_message") or standard_logging_payload.get("error_str") or "Unknown error",
@@ -280,7 +280,7 @@ class DataDogLLMObsLogger(DataDogLogger, CustomBatchLogger):
         """
         if response_obj is None:
             return []
-        
+
         if call_type in [CallTypes.completion.value, CallTypes.acompletion.value]:
             try:
                 # Safely extract message from response_obj, handle failure cases
@@ -302,94 +302,94 @@ class DataDogLLMObsLogger(DataDogLogger, CustomBatchLogger):
         """
         if call_type is None:
             return "llm"
-        
+
         # Embedding operations
         if call_type in [CallTypes.embedding.value, CallTypes.aembedding.value]:
             return "embedding"
-        
-        # LLM completion operations  
+
+        # LLM completion operations
         if call_type in [
-            CallTypes.completion.value, 
+            CallTypes.completion.value,
             CallTypes.acompletion.value,
-            CallTypes.text_completion.value, 
+            CallTypes.text_completion.value,
             CallTypes.atext_completion.value,
-            CallTypes.generate_content.value, 
+            CallTypes.generate_content.value,
             CallTypes.agenerate_content.value,
-            CallTypes.generate_content_stream.value, 
+            CallTypes.generate_content_stream.value,
             CallTypes.agenerate_content_stream.value,
             CallTypes.anthropic_messages.value
         ]:
             return "llm"
-        
+
         # Tool operations
         if call_type in [CallTypes.call_mcp_tool.value]:
             return "tool"
-            
+
         # Retrieval operations
         if call_type in [
-            CallTypes.get_assistants.value, 
+            CallTypes.get_assistants.value,
             CallTypes.aget_assistants.value,
-            CallTypes.get_thread.value, 
+            CallTypes.get_thread.value,
             CallTypes.aget_thread.value,
-            CallTypes.get_messages.value, 
+            CallTypes.get_messages.value,
             CallTypes.aget_messages.value,
-            CallTypes.afile_retrieve.value, 
+            CallTypes.afile_retrieve.value,
             CallTypes.file_retrieve.value,
-            CallTypes.afile_list.value, 
+            CallTypes.afile_list.value,
             CallTypes.file_list.value,
-            CallTypes.afile_content.value, 
+            CallTypes.afile_content.value,
             CallTypes.file_content.value,
-            CallTypes.retrieve_batch.value, 
+            CallTypes.retrieve_batch.value,
             CallTypes.aretrieve_batch.value,
-            CallTypes.retrieve_fine_tuning_job.value, 
+            CallTypes.retrieve_fine_tuning_job.value,
             CallTypes.aretrieve_fine_tuning_job.value,
-            CallTypes.responses.value, 
+            CallTypes.responses.value,
             CallTypes.aresponses.value,
             CallTypes.alist_input_items.value
         ]:
             return "retrieval"
-            
+
         # Task operations (batch, fine-tuning, file operations, etc.)
         if call_type in [
-            CallTypes.create_batch.value, 
+            CallTypes.create_batch.value,
             CallTypes.acreate_batch.value,
-            CallTypes.create_fine_tuning_job.value, 
+            CallTypes.create_fine_tuning_job.value,
             CallTypes.acreate_fine_tuning_job.value,
-            CallTypes.cancel_fine_tuning_job.value, 
+            CallTypes.cancel_fine_tuning_job.value,
             CallTypes.acancel_fine_tuning_job.value,
-            CallTypes.list_fine_tuning_jobs.value, 
+            CallTypes.list_fine_tuning_jobs.value,
             CallTypes.alist_fine_tuning_jobs.value,
-            CallTypes.create_assistants.value, 
+            CallTypes.create_assistants.value,
             CallTypes.acreate_assistants.value,
-            CallTypes.delete_assistant.value, 
+            CallTypes.delete_assistant.value,
             CallTypes.adelete_assistant.value,
-            CallTypes.create_thread.value, 
+            CallTypes.create_thread.value,
             CallTypes.acreate_thread.value,
-            CallTypes.add_message.value, 
+            CallTypes.add_message.value,
             CallTypes.a_add_message.value,
-            CallTypes.run_thread.value, 
+            CallTypes.run_thread.value,
             CallTypes.arun_thread.value,
-            CallTypes.run_thread_stream.value, 
+            CallTypes.run_thread_stream.value,
             CallTypes.arun_thread_stream.value,
-            CallTypes.file_delete.value, 
+            CallTypes.file_delete.value,
             CallTypes.afile_delete.value,
-            CallTypes.create_file.value, 
+            CallTypes.create_file.value,
             CallTypes.acreate_file.value,
-            CallTypes.image_generation.value, 
+            CallTypes.image_generation.value,
             CallTypes.aimage_generation.value,
-            CallTypes.image_edit.value, 
+            CallTypes.image_edit.value,
             CallTypes.aimage_edit.value,
-            CallTypes.moderation.value, 
+            CallTypes.moderation.value,
             CallTypes.amoderation.value,
-            CallTypes.transcription.value, 
+            CallTypes.transcription.value,
             CallTypes.atranscription.value,
-            CallTypes.speech.value, 
+            CallTypes.speech.value,
             CallTypes.aspeech.value,
-            CallTypes.rerank.value, 
+            CallTypes.rerank.value,
             CallTypes.arerank.value
         ]:
             return "task"
-            
+
         # Default fallback for unknown or passthrough operations
         return "llm"
 
@@ -461,5 +461,5 @@ class DataDogLLMObsLogger(DataDogLogger, CustomBatchLogger):
             if _guardrail_duration_seconds is not None:
                 # Convert from seconds to milliseconds for consistency
                 latency_metrics["guardrail_overhead_time_ms"] = _guardrail_duration_seconds * 1000
-            
+
         return latency_metrics

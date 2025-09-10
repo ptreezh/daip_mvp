@@ -104,17 +104,17 @@ if MCP_AVAILABLE:
         from litellm.proxy._experimental.mcp_server.auth.user_api_key_auth_mcp import (
             MCPRequestHandler,
         )
-        
+
         try:
             # Extract auth headers from request
             headers = request.headers
             mcp_auth_header = MCPRequestHandler._get_mcp_auth_header_from_headers(headers)
             mcp_server_auth_headers = MCPRequestHandler._get_mcp_server_auth_headers_from_headers(headers)
             mcp_protocol_version = headers.get(MCPRequestHandler.MCP_PROTOCOL_VERSION_HEADER_NAME)
-            
+
             list_tools_result = []
             error_message = None
-            
+
             # If server_id is specified, only query that specific server
             if server_id:
                 server = global_mcp_server_manager.get_mcp_server_by_id(server_id)
@@ -124,9 +124,9 @@ if MCP_AVAILABLE:
                         "error": "server_not_found",
                         "message": f"Server with id {server_id} not found"
                     }
-                
+
                 server_auth_header = _get_server_auth_header(server, mcp_server_auth_headers, mcp_auth_header)
-                
+
                 try:
                     list_tools_result = await _get_tools_for_single_server(server, server_auth_header, mcp_protocol_version)
                 except Exception as e:
@@ -141,7 +141,7 @@ if MCP_AVAILABLE:
                 errors = []
                 for server in global_mcp_server_manager.get_registry().values():
                     server_auth_header = _get_server_auth_header(server, mcp_server_auth_headers, mcp_auth_header)
-                    
+
                     try:
                         tools_result = await _get_tools_for_single_server(server, server_auth_header, mcp_protocol_version)
                         list_tools_result.extend(tools_result)
@@ -149,16 +149,16 @@ if MCP_AVAILABLE:
                         verbose_logger.exception(f"Error getting tools from {server.name}: {e}")
                         errors.append(f"{server.name}: {str(e)}")
                         continue
-                
+
                 if errors and not list_tools_result:
                     error_message = "Failed to get tools from servers: " + "; ".join(errors)
-            
+
             return {
                 "tools": list_tools_result,
                 "error": "partial_failure" if error_message else None,
                 "message": error_message if error_message else "Successfully retrieved tools"
             }
-            
+
         except Exception as e:
             verbose_logger.exception("Unexpected error in list_tool_rest_api: %s", str(e))
             return {
@@ -223,7 +223,7 @@ if MCP_AVAILABLE:
                     "message": f"An unexpected error occurred: {str(e)}"
                 }
             )
-    
+
     ########################################################
     # MCP Connection testing routes
     # /health -> Test if we can connect to the MCP server
@@ -234,7 +234,7 @@ if MCP_AVAILABLE:
     from litellm.proxy.management_endpoints.mcp_management_endpoints import (
         NewMCPServerRequest,
     )
-    
+
     async def _execute_with_mcp_client(request: NewMCPServerRequest, operation):
         """
         Common helper to create MCP client, execute operation, and ensure proper cleanup.
@@ -260,9 +260,9 @@ if MCP_AVAILABLE:
                 ),
                 mcp_auth_header=None,
             )
-            
+
             return await operation(client)
-            
+
         except Exception as e:
             verbose_logger.error(f"Error in MCP operation: {e}", exc_info=True)
             return {"status": "error", "message": "An internal error has occurred."}
@@ -283,10 +283,10 @@ if MCP_AVAILABLE:
         async def _test_connection_operation(client):
             await client.connect()
             return {"status": "ok"}
-        
+
         return await _execute_with_mcp_client(request, _test_connection_operation)
-        
-    
+
+
     @router.post("/test/tools/list")
     async def test_tools_list(
         request: NewMCPServerRequest,
@@ -303,5 +303,5 @@ if MCP_AVAILABLE:
                 "error": None,
                 "message": "Successfully retrieved tools"
             }
-        
+
         return await _execute_with_mcp_client(request, _list_tools_operation)

@@ -47,7 +47,7 @@ from litellm.types.proxy.management_endpoints.scim_v2 import *
 
 class UserProvisionerHelpers:
     """Helper methods for user provisioning operations."""
-    
+
     @staticmethod
     async def handle_existing_user_by_email(
         prisma_client,
@@ -65,14 +65,14 @@ class UserProvisionerHelpers:
         """
         if not new_user_request.user_email:
             return None
-            
+
         existing_user = await prisma_client.db.litellm_usertable.find_first(
             where={"user_email": new_user_request.user_email}
         )
-        
+
         if not existing_user:
             return None
-            
+
         # Update the user
         updated_user = await prisma_client.db.litellm_usertable.update(
             where={"user_id": existing_user.user_id},
@@ -84,7 +84,7 @@ class UserProvisionerHelpers:
                 "metadata": safe_dumps(new_user_request.metadata),
             },
         )
-        
+
         return await ScimTransformations.transform_litellm_user_to_scim_user(updated_user)
 
 
@@ -110,7 +110,7 @@ scim_router = APIRouter(
 async def _get_prisma_client_or_raise_exception():
     """Check if database is connected and raise HTTPException if not."""
     from litellm.proxy.proxy_server import prisma_client
-    
+
     if prisma_client is None:
         raise HTTPException(status_code=500, detail={"error": "No database connected"})
     return prisma_client
@@ -119,32 +119,32 @@ async def _get_prisma_client_or_raise_exception():
 async def _check_user_exists(user_id: str):
     """Check if user exists and return user, raise 404 if not found."""
     prisma_client = await _get_prisma_client_or_raise_exception()
-    
+
     user = await prisma_client.db.litellm_usertable.find_unique(
         where={"user_id": user_id}
     )
-    
+
     if not user:
         raise HTTPException(
             status_code=404, detail={"error": f"User not found with ID: {user_id}"}
         )
-    
+
     return user
 
 
 async def _check_team_exists(team_id: str):
     """Check if team exists and return team, raise 404 if not found."""
     prisma_client = await _get_prisma_client_or_raise_exception()
-    
+
     team = await prisma_client.db.litellm_teamtable.find_unique(
         where={"team_id": team_id}
     )
-    
+
     if not team:
         raise HTTPException(
             status_code=404, detail={"error": f"Group not found with ID: {team_id}"}
         )
-    
+
     return team
 
 
@@ -181,10 +181,10 @@ def _build_scim_metadata(given_name: Optional[str], family_name: Optional[str], 
             familyName=family_name,
         ).model_dump()
     }
-    
+
     if active is not None:
         metadata["scim_active"] = active
-    
+
     return metadata
 
 
@@ -192,7 +192,7 @@ async def _extract_group_member_ids(group: SCIMGroup) -> List[str]:
     """Extract valid member IDs from SCIMGroup, verifying users exist."""
     prisma_client = await _get_prisma_client_or_raise_exception()
     member_ids = []
-    
+
     if group.members:
         for member in group.members:
             # Check if user exists
@@ -201,7 +201,7 @@ async def _extract_group_member_ids(group: SCIMGroup) -> List[str]:
             )
             if user:
                 member_ids.append(member.value)
-    
+
     return member_ids
 
 
@@ -209,7 +209,7 @@ async def _get_team_members_display(member_ids: List[str]) -> List[SCIMMember]:
     """Get SCIMMember objects with display names for a list of member IDs."""
     prisma_client = await _get_prisma_client_or_raise_exception()
     members: List[SCIMMember] = []
-    
+
     for member_id in member_ids:
         user = await prisma_client.db.litellm_usertable.find_unique(
             where={"user_id": member_id}
@@ -217,7 +217,7 @@ async def _get_team_members_display(member_ids: List[str]) -> List[SCIMMember]:
         if user:
             display_name = user.user_email or user.user_id
             members.append(SCIMMember(value=user.user_id, display=display_name))
-    
+
     return members
 
 
@@ -225,10 +225,10 @@ async def _handle_team_membership_changes(user_id: str, existing_teams: List[str
     """Handle adding/removing user from teams based on changes."""
     existing_teams_set = set(existing_teams)
     new_teams_set = set(new_teams)
-    
+
     teams_to_add = new_teams_set - existing_teams_set
     teams_to_remove = existing_teams_set - new_teams_set
-    
+
     if teams_to_add or teams_to_remove:
         await patch_team_membership(
             user_id=user_id,
@@ -336,7 +336,7 @@ async def get_user(
     """
     try:
         user = await _check_user_exists(user_id)
-        
+
         # Convert to SCIM format
         scim_user = await ScimTransformations.transform_litellm_user_to_scim_user(user)
         return scim_user
@@ -359,7 +359,7 @@ async def create_user(
     try:
         verbose_proxy_logger.debug("SCIM CREATE USER request: %s", user)
         prisma_client = await _get_prisma_client_or_raise_exception()
-        
+
         # Extract data from SCIM user
         user_data = _extract_scim_user_data(user)
 
@@ -404,14 +404,14 @@ async def create_user(
             prisma_client=prisma_client,
             new_user_request=new_user_request
         )
-        
+
         if existing_user_scim:
             return existing_user_scim
 
         created_user = await new_user(
             data=new_user_request,
         )
-        
+
         scim_user = await ScimTransformations.transform_litellm_user_to_scim_user(
             user=created_user
         )
@@ -444,10 +444,10 @@ async def update_user(
         # Extract data from SCIM user
         user_data = _extract_scim_user_data(user)
 
-        # Build metadata with SCIM data  
+        # Build metadata with SCIM data
         metadata = _build_scim_metadata(
-            user_data["given_name"], 
-            user_data["family_name"], 
+            user_data["given_name"],
+            user_data["family_name"],
             user_data["active"]
         )
 
@@ -479,7 +479,7 @@ async def update_user(
 
         # Convert back to SCIM format
         scim_user = await ScimTransformations.transform_litellm_user_to_scim_user(updated_user)
-        
+
         return scim_user
 
     except Exception as e:
@@ -674,7 +674,7 @@ async def patch_team_membership(
             )
         except Exception as e:
             verbose_proxy_logger.exception(f"Error removing user from team {_team_id}: {e}")
-    
+
 
     return True
 
@@ -841,7 +841,7 @@ async def create_group(
     """
     try:
         prisma_client = await _get_prisma_client_or_raise_exception()
-        
+
         # Generate ID if not provided
         team_id = group.id or str(uuid.uuid4())
 
@@ -856,7 +856,7 @@ async def create_group(
                 detail={"error": f"Group already exists with ID: {team_id}"},
             )
 
-        # Extract valid member IDs  
+        # Extract valid member IDs
         member_ids = await _extract_group_member_ids(group)
         members_with_roles = [Member(user_id=member_id, role="user") for member_id in member_ids]
 
@@ -902,7 +902,7 @@ async def update_group(
         # Update team in database
         existing_metadata = existing_team.metadata if existing_team.metadata else {}
         updated_metadata = {**existing_metadata, "scim_data": group.model_dump()}
-        
+
         updated_team = await prisma_client.db.litellm_teamtable.update(
             where={"team_id": group_id},
             data={
@@ -1013,15 +1013,15 @@ async def _process_group_patch_operations(
 ) -> Tuple[Dict[str, Any], Set[str]]:
     """Process patch operations for a group and return update data and final members."""
     update_data: Dict[str, Any] = {}
-    
+
     # Create a fresh copy of existing metadata to avoid Prisma issues
     existing_metadata = existing_team.metadata or {}
     metadata = dict(existing_metadata) if existing_metadata else {}
-    
+
     # Track member changes
     current_members = set(existing_team.members or [])
     final_members = current_members.copy()
-    
+
     # Process each patch operation
     for op in patch_ops.Operations:
         path = (op.path or "").lower()
@@ -1049,7 +1049,7 @@ async def _process_group_patch_operations(
                 )
                 if user:
                     valid_members.append(member_id)
-            
+
             if op_type == "replace":
                 final_members = set(valid_members)
             elif op_type == "add":
@@ -1067,7 +1067,7 @@ async def _process_group_patch_operations(
     # Include metadata in update data if it exists
     if metadata:
         update_data["metadata"] = metadata
-    
+
     return update_data, final_members
 
 
@@ -1081,7 +1081,7 @@ async def _apply_group_patch_updates(
     # Serialize metadata if present
     if "metadata" in update_data and isinstance(update_data["metadata"], dict):
         update_data["metadata"] = safe_dumps(update_data["metadata"])
-    
+
     # Update members list
     update_data["members"] = list(final_members)
 
@@ -1090,7 +1090,7 @@ async def _apply_group_patch_updates(
         where={"team_id": group_id},
         data=update_data,
     )
-    
+
     return updated_team
 
 
@@ -1102,10 +1102,10 @@ async def _handle_group_membership_changes(
     """Handle adding/removing members from the group."""
     members_to_add = final_members - current_members
     members_to_remove = current_members - final_members
-    
+
     verbose_proxy_logger.debug(f"members_to_add: {members_to_add}")
     verbose_proxy_logger.debug(f"members_to_remove: {members_to_remove}")
-    
+
     # Use existing helper functions for team membership changes
     for member_id in members_to_add:
         await patch_team_membership(
@@ -1145,7 +1145,7 @@ async def patch_group(
         update_data, final_members = await _process_group_patch_operations(
             patch_ops, existing_team, prisma_client
         )
-        
+
         # Track current members for comparison
         current_members = set(existing_team.members or [])
 
