@@ -2,6 +2,27 @@
 
 ## 2025-09-10 星期三
 
+### 任务：完善TUI可用性 - 复制/粘贴功能
+
+**TDD 状态:**
+*   **RED (完成)**: 在 `tests/test_tui_focus.py` 中添加了新的测试用例 `test_copy_paste_in_output_mode`。在经历了多次由于对 `RichLog` 控件的实现细节和 `pyperclip` 在测试环境中的行为理解不充分而导致的失败后，最终确定了可靠的测试失败场景（RED状态）。
+*   **GREEN (完成)**:
+    1.  **最终实现**: 放弃了从 `RichLog` 控件“提取”文本的方案，改为在 `DAIP_TUI` 中维护一个独立的纯文本缓冲区 `_log_text_buffer`。
+    2.  **代码修改**:
+        *   在 `DAIP_TUI.__init__` 中添加了 `_log_text_buffer`。
+        *   添加了 `clear_log` 方法用于同时清空屏幕和缓冲区。
+        *   修改了 `_update_log_view` 方法，在写入控件的同时，将纯文本存入缓冲区。
+        *   重写了 `action_copy_text` 方法，使其直接从缓冲区复制内容。
+    3.  **测试修正**:
+        *   修改了测试用例，使其通过调用应用的 `clear_log` 和 `_update_log_view` 方法来与应用交互。
+        *   使用 `unittest.mock.patch` 来模拟 `pyperclip.copy`，解决了环境依赖问题。
+    4.  **验证**: 最终测试 `poetry run pytest tests/test_tui_focus.py` 成功通过。
+*   **REFACTOR (完成)**: 最终的代码逻辑清晰，责任分离，无需重构。
+
+**结论**: TUI的复制功能已成功实现并经过严格的TDD流程验证。
+
+---
+
 ### 任务：TUI 重构 (TextArea -> RichLog) - (续)
 
 **TDD 状态:**

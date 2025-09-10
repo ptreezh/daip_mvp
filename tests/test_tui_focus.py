@@ -62,3 +62,24 @@ async def test_action_exit_output_mode_when_already_in_input_mode(mock_daip_tui_
         await harness.press("escape")
         assert daip_tui.focus_mode == FocusMode.INPUT
         assert harness.app.focused == harness.app.query_one("#user_input")
+
+    @pytest.mark.asyncio
+    async def test_copy_paste_in_output_mode(mock_daip_tui_dependencies):
+        """Test that Ctrl+A and Ctrl+C work in output mode."""
+        daip_tui = DAIP_TUI(**mock_daip_tui_dependencies, goal="test goal")
+        with patch("daip_live.tui.pyperclip.copy") as mock_copy:
+            async with daip_tui.run_test() as pilot:
+                test_text = "This is the text to be copied."
+
+                # Clear log and write new text using the TUI's own methods
+                daip_tui.call_later(daip_tui.clear_log)
+                daip_tui.call_later(daip_tui._update_log_view, test_text)
+                await pilot.pause()
+
+                # Switch to output mode and copy
+                await pilot.press("ctrl+tab")
+                await pilot.press("ctrl+c")
+                await pilot.pause()
+
+                # Check that pyperclip.copy was called with the correct text
+                mock_copy.assert_called_once_with(test_text)

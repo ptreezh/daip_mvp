@@ -11,6 +11,7 @@ from textual.widgets import Header, Footer, Static, Input, Button, Label, RichLo
 from textual.containers import Container, Vertical, Horizontal
 from textual.screen import Screen
 from textual.message import Message
+from rich.text import Text
 
 class CommandSelected(Message):
     """Posted when a command is selected from the autocomplete popup."""
@@ -164,6 +165,7 @@ class DAIP_TUI(App):
         self._model_provider = model_provider
         self._db_manager = db_manager
         self._config_manager = config_manager
+        self._log_text_buffer: List[str] = []
 
         if self._executor is not None:
             self._executor.goal = goal
@@ -212,16 +214,21 @@ class DAIP_TUI(App):
             self._update_status_bar("Idle")
 
     def action_select_all(self) -> None:
+        """Select all text in the output log.
+        Note: RichLog does not natively support select_all, so this
+        is a no-op for now, but the binding is kept for user familiarity.
+        The copy action will handle copying all text.
+        """
         if self.focus_mode == FocusMode.OUTPUT:
-            self.query_one("#main_log", RichLog).select_all()
+            pass # RichLog does not support programmatic selection.
 
     def action_copy_text(self) -> None:
+        """Copy all text from the output log to the clipboard."""
         if self.focus_mode == FocusMode.OUTPUT:
-            main_log = self.query_one("#main_log", RichLog)
-            selected_text = main_log.get_selected_text()
-            if selected_text:
-                pyperclip.copy(selected_text)
-                self._update_log_view("[bold green]> Text copied to clipboard.[/bold green]")
+            all_text = "\n".join(self._log_text_buffer)
+            pyperclip.copy(all_text)
+            self._update_log_view("[bold green]> All log content copied to clipboard.[/bold green]")
+
 
     def on_click(self, event) -> None:
         main_log = self.query_one("#main_log")
@@ -519,8 +526,14 @@ class DAIP_TUI(App):
             self._executor.permission_queue.put_nowait(allowed)
         self._update_log_view(f"[bold green]> Permission {'granted' if allowed else 'denied'}.[/bold green]")
 
+    def clear_log(self) -> None:
+        """Clears the log display and the internal text buffer."""
+        self.query_one("#main_log", RichLog).clear()
+        self._log_text_buffer.clear()
+
     def _update_log_view(self, text: str) -> None:
         self.query_one("#main_log", RichLog).write(text)
+        self._log_text_buffer.append(Text.from_markup(text).plain)
 
     def _highlight_code_and_json(self, text: str) -> str:
         try:
