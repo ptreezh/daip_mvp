@@ -3,7 +3,7 @@ import os
 from unittest.mock import AsyncMock, Mock, patch
 
 from src.daip_live.memory.service import MemoryService
-from src.daip_live.core.models import Session, DialogueTurn, AgentState
+from src.daip_live.core.models import Session, DialogueTurn, AgentState, TodoItem
 from src.daip_live.model_provider.provider import LiteLLMProvider
 
 
@@ -167,3 +167,30 @@ class TestMemoryService:
 
         # Assert
         mock_model_provider.generate.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_add_and_get_todo_list(self, memory_service):
+        """Test adding and getting a to-do item."""
+        # Arrange
+        item = TodoItem(description="Test to-do item")
+
+        # Act
+        memory_service.add_todo_item(item)
+        todo_list = await memory_service.get_todo_list()
+
+        # Assert
+        assert len(todo_list) == 1
+        assert todo_list[0] == item
+
+    @pytest.mark.asyncio
+    async def test_is_todo_list_complete_when_one_pending(self, memory_service):
+        """Test is_todo_list_complete returns False when there's a pending item."""
+        # Arrange
+        memory_service.add_todo_item(TodoItem(description="Completed item", status="completed"))
+        memory_service.add_todo_item(TodoItem(description="Pending item", status="pending"))
+
+        # Act
+        is_complete = await memory_service.is_todo_list_complete()
+
+        # Assert
+        assert is_complete is False

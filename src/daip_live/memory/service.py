@@ -1,6 +1,6 @@
 import os
-from typing import Optional
-from src.daip_live.core.models import Session, AppConfig
+from typing import Optional, List
+from src.daip_live.core.models import Session, AppConfig, TodoItem
 from src.daip_live.model_provider.provider import LiteLLMProvider
 from src.daip_live.config import config_manager
 
@@ -12,6 +12,7 @@ class MemoryService:
         config = config_manager.get_config()
         self.long_term_memory_file = os.path.join(os.path.dirname(config.database.path), "project_context.md")
         self.model_provider = model_provider
+        self.todo_list: List[TodoItem] = []
 
     def get_long_term_memory(self) -> str:
         """Gets the long term memory from a file."""
@@ -20,13 +21,17 @@ class MemoryService:
                 return f.read()
         return ""
 
-    async def get_todo_list(self):
+    def add_todo_item(self, item: TodoItem) -> None:
+        """Adds an item to the to-do list."""
+        self.todo_list.append(item)
+
+    async def get_todo_list(self) -> List[TodoItem]:
         """Returns a list of tasks to be completed."""
-        return []
+        return self.todo_list
 
     async def is_todo_list_complete(self) -> bool:
         """Checks if the to-do list is complete."""
-        return True
+        return all(item.status == "completed" for item in self.todo_list)
         
     async def compress_history(self, session: Session) -> None:
         """

@@ -2,6 +2,25 @@
 
 ## 2025-09-10 星期三
 
+### 任务：完善MemoryService - 实现待办事项列表功能 (get_todo_list, is_todo_list_complete)
+
+**TDD 状态:**
+*   **RED (get_todo_list)**:
+    1.  **代码实现**: 在 `MemoryService` 中添加了 `self.todo_list` 属性，实现了 `add_todo_item` 方法，并用返回 `self.todo_list` 的真实逻辑替换了 `get_todo_list` 的占位符。
+    2.  **测试用例**: 添加了 `test_add_and_get_todo_list` 测试用例。
+    3.  **验证**: 运行测试后，该测试成功通过。
+*   **RED (is_todo_list_complete)**:
+    1.  **测试用例**: 添加了 `test_is_todo_list_complete_when_one_pending` 测试用例，它断言当列表中存在未完成项时，`is_todo_list_complete` 应该返回 `False`。
+    2.  **验证**: 运行测试后，该测试如期失败，因为占位符始终返回 `True`。
+*   **GREEN (is_todo_list_complete)**:
+    1.  **代码实现**: 实现了 `is_todo_list_complete` 的正确逻辑：`return all(item.status == "completed" for item in self.todo_list)`。
+    2.  **验证**: 再次运行测试后，所有测试（包括 `test_is_todo_list_complete_when_one_pending`）均成功通过。
+*   **REFACTOR (完成)**: 新的代码逻辑清晰，无需重构。
+
+**结论**: `MemoryService` 的待办事项列表功能已完全实现并经过验证。
+
+---
+
 ### 任务：完善MemoryService - 实现LLM驱动的历史压缩
 
 **TDD 状态:**
