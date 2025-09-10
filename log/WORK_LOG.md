@@ -2,6 +2,23 @@
 
 ## 2025-09-10 星期三
 
+### 任务：完善MemoryService - 实现LLM驱动的历史压缩
+
+**TDD 状态:**
+*   **RED (完成)**:
+    1.  **重构**: 首先重构了 `MemoryService` 的 `__init__` 方法，以接受 `LiteLLMProvider` 的依赖注入，使其变得可测试。
+    2.  **测试准备**: 更新了 `tests/memory/test_memory_service.py` 中的测试夹具（fixture）以注入模拟的 `ModelProvider`。
+    3.  **测试用例**: 添加了新的异步测试 `test_compress_history_calls_llm`，它断言 `compress_history` 方法会调用 `model_provider.generate`。
+    4.  **验证**: 运行测试后，该新测试如期失败，而旧测试因 `async` 不匹配而失败，在修正后通过，最终达到了一个纯净的RED状态。
+*   **GREEN (完成)**:
+    1.  **代码实现**: 重写了 `compress_history` 方法，实现了一个调用LLM进行结构化摘要的完整逻辑，取代了之前的占位符。该方法现在会构建一个包含8个方面的摘要prompt，并调用 `self.model_provider.generate`。
+    2.  **验证**: 再次运行 `poetry run pytest tests/memory/test_memory_service.py`，全部8个测试用例均成功通过。
+*   **REFACTOR (完成)**: 新的代码逻辑清晰，无需重构。
+
+**结论**: `MemoryService` 的核心技术债务已解决，中期记忆压缩功能现在由LLM驱动。
+
+---
+
 ### 任务：研究并修复TUI on_click 测试问题
 
 **TDD 状态:**

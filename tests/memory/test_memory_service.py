@@ -4,19 +4,27 @@ from unittest.mock import AsyncMock, Mock, patch
 
 from src.daip_live.memory.service import MemoryService
 from src.daip_live.core.models import Session, DialogueTurn, AgentState
+from src.daip_live.model_provider.provider import LiteLLMProvider
 
 
 class TestMemoryService:
     """Tests for the MemoryService class."""
 
     @pytest.fixture
-    def memory_service(self):
+    def mock_model_provider(self):
+        """Fixture for a mock LiteLLMProvider."""
+        mock_provider = Mock(spec=LiteLLMProvider)
+        mock_provider.generate = AsyncMock(return_value=("LLM summary", {}))
+        return mock_provider
+
+    @pytest.fixture
+    def memory_service(self, mock_model_provider):
         """Fixture to create a MemoryService instance."""
         with patch("src.daip_live.memory.service.config_manager") as mock_config_manager:
             mock_config = Mock()
             mock_config.database.path = "daip_live.db"
             mock_config_manager.get_config.return_value = mock_config
-            service = MemoryService()
+            service = MemoryService(model_provider=mock_model_provider)
             # Override the long term memory file path for testing
             service.long_term_memory_file = "project_context.md"
             return service
@@ -32,7 +40,8 @@ class TestMemoryService:
         session.compressed_history = None
         return session
 
-    def test_construct_prompt_initial(self, memory_service, mock_session):
+    @pytest.mark.asyncio
+    async def test_construct_prompt_initial(self, memory_service, mock_session):
         """Test constructing an initial prompt."""
         # Arrange
         goal = "Test goal"
@@ -40,7 +49,7 @@ class TestMemoryService:
         last_llm_response = None
 
         # Act
-        prompt = memory_service.construct_prompt(goal, last_tool_result, last_llm_response, mock_session)
+        prompt = await memory_service.construct_prompt(goal, last_tool_result, last_llm_response, mock_session)
 
         # Assert
         assert goal in prompt
@@ -48,7 +57,8 @@ class TestMemoryService:
         assert "Hello" in prompt
         assert "Hi, how can I help you?" in prompt
 
-    def test_construct_prompt_with_tool_result(self, memory_service, mock_session):
+    @pytest.mark.asyncio
+    async def test_construct_prompt_with_tool_result(self, memory_service, mock_session):
         """Test constructing a prompt with a tool result."""
         # Arrange
         goal = "Test goal"
@@ -56,7 +66,7 @@ class TestMemoryService:
         last_llm_response = None
 
         # Act
-        prompt = memory_service.construct_prompt(goal, last_tool_result, last_llm_response, mock_session)
+        prompt = await memory_service.construct_prompt(goal, last_tool_result, last_llm_response, mock_session)
 
         # Assert
         assert goal in prompt
@@ -65,7 +75,8 @@ class TestMemoryService:
         assert "Hello" in prompt
         assert "Hi, how can I help you?" in prompt
 
-    def test_construct_prompt_with_llm_response(self, memory_service, mock_session):
+    @pytest.mark.asyncio
+    async def test_construct_prompt_with_llm_response(self, memory_service, mock_session):
         """Test constructing a prompt with a previous LLM response."""
         # Arrange
         goal = "Test goal"
@@ -73,7 +84,7 @@ class TestMemoryService:
         last_llm_response = "Previous response"
 
         # Act
-        prompt = memory_service.construct_prompt(goal, last_tool_result, last_llm_response, mock_session)
+        prompt = await memory_service.construct_prompt(goal, last_tool_result, last_llm_response, mock_session)
 
         # Assert
         assert goal in prompt
@@ -82,7 +93,8 @@ class TestMemoryService:
         assert "Hello" in prompt
         assert "Hi, how can I help you?" in prompt
 
-    def test_construct_prompt_with_compressed_history(self, memory_service):
+    @pytest.mark.asyncio
+    async def test_construct_prompt_with_compressed_history(self, memory_service):
         """Test constructing a prompt with compressed history."""
         # Arrange
         goal = "Test goal"
@@ -95,14 +107,15 @@ class TestMemoryService:
         session.compressed_history = "Compressed history summary"
 
         # Act
-        prompt = memory_service.construct_prompt(goal, last_tool_result, last_llm_response, session)
+        prompt = await memory_service.construct_prompt(goal, last_tool_result, last_llm_response, session)
 
         # Assert
         assert goal in prompt
         assert session.compressed_history in prompt
         assert "Hello" in prompt
         
-    def test_construct_prompt_auto_compress(self, memory_service):
+    @pytest.mark.asyncio
+    async def test_construct_prompt_auto_compress(self, memory_service):
         """Test that construct_prompt automatically compresses history."""
         # Arrange
         goal = "Test goal"
@@ -117,18 +130,19 @@ class TestMemoryService:
         session.compressed_history = None
 
         # Act
-        prompt = memory_service.construct_prompt(goal, last_tool_result, last_llm_response, session)
+        prompt = await memory_service.construct_prompt(goal, last_tool_result, last_llm_response, session)
 
         # Assert
         assert session.compressed_history is not None
 
-    def test_compress_history(self, memory_service, mock_session):
+    @pytest.mark.asyncio
+    async def test_compress_history(self, memory_service, mock_session):
         """Test compressing history."""
         # Arrange
         mock_session.history = [DialogueTurn(participant_id="user", content=f"Message {i}") for i in range(20)]
 
         # Act
-        memory_service.compress_history(mock_session)
+        await memory_service.compress_history(mock_session)
 
         # Assert
         assert mock_session.compressed_history is not None
@@ -141,3 +155,15 @@ class TestMemoryService:
 
         # Assert
         assert "AI-driven application" in long_term_memory
+
+    @pytest.mark.asyncio
+    async def test_compress_history_calls_llm(self, memory_service, mock_session, mock_model_provider):
+        """Test that compress_history calls the LLM via the model_provider."""
+        # Arrange
+        mock_session.history = [DialogueTurn(participant_id="user", content=f"Message {i}") for i in range(20)]
+        
+        # Act
+        await memory_service.compress_history(mock_session)
+
+        # Assert
+        mock_model_provider.generate.assert_called_once()

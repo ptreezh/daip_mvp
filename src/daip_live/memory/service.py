@@ -1,15 +1,17 @@
 import os
 from typing import Optional
 from src.daip_live.core.models import Session, AppConfig
+from src.daip_live.model_provider.provider import LiteLLMProvider
 from src.daip_live.config import config_manager
 
 class MemoryService:
     """A simple placeholder for the agent's memory service."""
     
-    def __init__(self):
+    def __init__(self, model_provider: LiteLLMProvider):
         # Load the long term memory file path from the configuration
         config = config_manager.get_config()
         self.long_term_memory_file = os.path.join(os.path.dirname(config.database.path), "project_context.md")
+        self.model_provider = model_provider
 
     def get_long_term_memory(self) -> str:
         """Gets the long term memory from a file."""
@@ -26,22 +28,44 @@ class MemoryService:
         """Checks if the to-do list is complete."""
         return True
         
-    def compress_history(self, session: Session) -> None:
-        """Compresses the history if it is too long."""
-        # For now, we'll just take the first 5 and last 5 turns and concatenate them
-        # In a real implementation, this would call an LLM to summarize the history
-        if len(session.history) > 10:
-            compressed = "Summary of conversation:\n"
-            for turn in session.history[:5]:
-                compressed += f"{turn.participant_id}: {turn.content}\n"
-            compressed += "...\n"
-            for turn in session.history[-5:]:
-                compressed += f"{turn.participant_id}: {turn.content}\n"
-            session.compressed_history = compressed
-            # In a real implementation, we might want to truncate the history
-            # session.history = session.history[-5:]
+    async def compress_history(self, session: Session) -> None:
+        """
+        Compresses the history using an LLM to create a structured summary,
+        as per the requirements.
+        """
+        if len(session.history) <= 10:  # Only compress if history is sufficiently long
+            return
 
-    def construct_prompt(
+        # 1. Format dialogue history into a string
+        history_string = "\n".join(
+            f"{turn.participant_id}: {turn.content}" for turn in session.history
+        )
+
+        # 2. Create the summarization prompt
+        prompt = f"""You are a summarization expert. Condense the following dialogue history into a structured summary covering these 8 aspects:
+1.  **Background Context**: What was the initial situation or problem?
+2.  **Key Decisions**: What were the most important decisions made?
+3.  **User Intent Evolution**: How did the user's goal change over time?
+4.  **Key Information**: What are the most critical pieces of information or data mentioned?
+5.  **Agent's Actions**: What were the main actions or tools used by the assistant?
+6.  **Unresolved Questions**: What questions remain unanswered?
+7.  **Next Steps**: What are the implied or stated next actions?
+8.  **Final Goal**: What is the user's ultimate objective in this conversation?
+
+Dialogue History:
+---
+{history_string}
+---
+Structured Summary:
+"""
+
+        # 3. Call the LLM to get the summary
+        summary, _ = await self.model_provider.generate(prompt)
+        
+        # 4. Store the summary
+        session.compressed_history = summary
+
+    async def construct_prompt(
         self, 
         goal: str,
         last_tool_result: Optional[str],
@@ -51,7 +75,7 @@ class MemoryService:
         """Constructs a simple prompt for the LLM."""
         # Compress history if it is too long
         if len(session.history) > 15:  # Threshold for compression
-            self.compress_history(session)
+            await self.compress_history(session)
             
         prompt = f"Goal: {goal}\n"
         
