@@ -6,8 +6,8 @@ from sqlalchemy import create_engine, delete, insert, select
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.engine import Engine
 
-from src.daip_live.core.models import AgentState, DialogueTurn, KnowledgeSource, Session
-from src.daip_live.persistence.tables import (
+from daip_live.core.models import AgentState, DialogueTurn, KnowledgeSource, Session
+from daip_live.persistence.tables import (
     dialogue_turns_table,
     knowledge_sources_table,
     metadata_obj,

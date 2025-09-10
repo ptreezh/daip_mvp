@@ -6,7 +6,7 @@ from typing import Dict, Optional
 import yaml
 from pydantic import ValidationError
 
-from src.daip_live.core.models import Role
+from daip_live.core.models import Role
 
 log = logging.getLogger(__name__)
 

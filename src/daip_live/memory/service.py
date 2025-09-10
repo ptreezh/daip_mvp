@@ -1,9 +1,9 @@
 import os
 from typing import List, Optional
 
-from src.daip_live.config import config_manager
-from src.daip_live.core.models import Session, TodoItem
-from src.daip_live.model_provider.provider import LiteLLMProvider
+from daip_live.config import config_manager
+from daip_live.core.models import Session, TodoItem
+from daip_live.model_provider.provider import LiteLLMProvider
 
 
 class MemoryService:

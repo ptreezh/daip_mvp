@@ -27,8 +27,8 @@ from textual.widgets import (
     Static,
 )
 
-from src.daip_live.agent_engine.executor import AgentExecutor
-from src.daip_live.core.models import (
+from daip_live.agent_engine.executor import AgentExecutor
+from daip_live.core.models import (
     AgentEvent,
     FinalResponseEvent,
     PermissionRequestEvent,
@@ -36,14 +36,14 @@ from src.daip_live.core.models import (
     ToolCallEvent,
     ToolOutputEvent,
 )
-from src.daip_live.knowledge.manager import KnowledgeManager
-from src.daip_live.memory.service import MemoryService
-from src.daip_live.memory.session_manager import SessionManager
-from src.daip_live.model_provider.provider import LiteLLMProvider
-from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
-from src.daip_live.p4_role_manager_tools.tool_manager import ToolManager
-from src.daip_live.p8_debate_system.manager import DebateManager
-from src.daip_live.persistence.database import DatabaseManager
+from daip_live.knowledge.manager import KnowledgeManager
+from daip_live.memory.service import MemoryService
+from daip_live.memory.session_manager import SessionManager
+from daip_live.model_provider.provider import LiteLLMProvider
+from daip_live.p4_role_manager_tools.role_manager import RoleManager
+from daip_live.p4_role_manager_tools.tool_manager import ToolManager
+from daip_live.p8_debate_system.manager import DebateManager
+from daip_live.persistence.database import DatabaseManager
 
 
 class CommandSelected(Message):

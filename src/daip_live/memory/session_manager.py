@@ -4,9 +4,9 @@ import uuid
 from datetime import datetime
 from typing import List, Optional
 
-from src.daip_live.config import config_manager
-from src.daip_live.core.models import AgentState, DialogueTurn, Session
-from src.daip_live.persistence.database import DatabaseManager
+from daip_live.config import config_manager
+from daip_live.core.models import AgentState, DialogueTurn, Session
+from daip_live.persistence.database import DatabaseManager
 
 
 class SessionManager:

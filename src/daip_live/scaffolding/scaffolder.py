@@ -7,7 +7,7 @@ from rich import print
 from rich.panel import Panel
 from rich.syntax import Syntax
 
-from src.daip_live.core.interfaces import IModelProvider
+from daip_live.core.interfaces import IModelProvider
 
 SCAFFOLD_META_PROMPT = """
 You are an expert system architect. Based on the user's project description, generate a complete set of YAML configuration files for all necessary roles and workflows. The output should be a single, valid YAML document containing a list of files.

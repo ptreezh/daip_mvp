@@ -1,9 +1,9 @@
 from typing import List
 
-from src.daip_live.core.models import AgentState, DialogueTurn, Session
-from src.daip_live.memory.session_manager import SessionManager
-from src.daip_live.model_provider.provider import LiteLLMProvider
-from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
+from daip_live.core.models import AgentState, DialogueTurn, Session
+from daip_live.memory.session_manager import SessionManager
+from daip_live.model_provider.provider import LiteLLMProvider
+from daip_live.p4_role_manager_tools.role_manager import RoleManager
 
 
 class DebateManager:

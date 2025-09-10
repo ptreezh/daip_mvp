@@ -4,15 +4,15 @@ from typing import List
 from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
-from src.daip_live.agent_engine.executor import AgentExecutor
-from src.daip_live.config import config_manager, create_config_yaml_if_not_exists
-from src.daip_live.core.models import ProviderConfig, Session
-from src.daip_live.knowledge.manager import KnowledgeManager
-from src.daip_live.memory.service import MemoryService
-from src.daip_live.memory.session_manager import SessionManager
-from src.daip_live.model_provider.provider import LiteLLMProvider
-from src.daip_live.p4_role_manager_tools.tool_manager import ToolManager
-from src.daip_live.persistence.database import DatabaseManager
+from daip_live.agent_engine.executor import AgentExecutor
+from daip_live.config import config_manager, create_config_yaml_if_not_exists
+from daip_live.core.models import ProviderConfig, Session
+from daip_live.knowledge.manager import KnowledgeManager
+from daip_live.memory.service import MemoryService
+from daip_live.memory.session_manager import SessionManager
+from daip_live.model_provider.provider import LiteLLMProvider
+from daip_live.p4_role_manager_tools.tool_manager import ToolManager
+from daip_live.persistence.database import DatabaseManager
 
 app = FastAPI()
 

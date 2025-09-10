@@ -4,8 +4,8 @@ import re
 from collections.abc import AsyncGenerator
 from typing import Any, Dict, Optional, Tuple
 
-from src.daip_live.core.exceptions import ToolError
-from src.daip_live.core.models import (
+from daip_live.core.exceptions import ToolError
+from daip_live.core.models import (
     AgentEvent,
     AgentState,
     AgentStatus,
@@ -17,8 +17,8 @@ from src.daip_live.core.models import (
     ToolCallEvent,
     ToolOutputEvent,
 )
-from src.daip_live.memory.service import MemoryService
-from src.daip_live.memory.session_manager import SessionManager
+from daip_live.memory.service import MemoryService
+from daip_live.memory.session_manager import SessionManager
 
 
 class AgentExecutor:
