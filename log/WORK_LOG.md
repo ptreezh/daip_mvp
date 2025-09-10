@@ -2,6 +2,20 @@
 
 ## 2025-09-10 星期三
 
+### 任务：研究并修复TUI on_click 测试问题
+
+**TDD 状态:**
+*   **RED (完成)**: 在 `tests/test_tui_focus.py` 中添加了新的测试用例 `test_on_click_focus_switch`，用于复现 `on_click` 事件处理的不可靠问题。测试如期失败，断言显示点击事件未能触发焦点切换。
+*   **GREEN (完成)**:
+    1.  **问题诊断**: 确认了问题根源在于测试环境中 `event.control` 属性的不可靠性。
+    2.  **代码修改**: 修改了 `src/daip_live/tui.py` 中的 `on_click` 方法。不再直接比较事件的控件对象，而是通过 `main_log.region.contains(event.screen_x, event.screen_y)` 判断点击坐标是否在目标控件区域内，这是一种更健壮的检测方法。
+    3.  **验证**: 重新运行 `poetry run pytest tests/test_tui_focus.py` 后，所有测试均成功通过。
+*   **REFACTOR (完成)**: 新的实现逻辑清晰，无需重构。
+
+**结论**: TUI的 `on_click` 焦点切换功能已修复，并通过了自动化测试的验证。
+
+---
+
 ### 任务：完善TUI可用性 - 复制/粘贴功能
 
 **TDD 状态:**

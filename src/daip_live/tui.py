@@ -229,10 +229,10 @@ class DAIP_TUI(App):
             pyperclip.copy(all_text)
             self._update_log_view("[bold green]> All log content copied to clipboard.[/bold green]")
 
-
     def on_click(self, event) -> None:
         main_log = self.query_one("#main_log")
-        if event.control == main_log:
+        # Use region check for more robust click detection in tests
+        if main_log.region.contains(event.screen_x, event.screen_y):
             if self.focus_mode == FocusMode.INPUT:
                 self.action_toggle_focus()
 

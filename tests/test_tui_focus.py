@@ -83,3 +83,20 @@ async def test_action_exit_output_mode_when_already_in_input_mode(mock_daip_tui_
 
                 # Check that pyperclip.copy was called with the correct text
                 mock_copy.assert_called_once_with(test_text)
+
+@pytest.mark.asyncio
+async def test_on_click_focus_switch(mock_daip_tui_dependencies):
+    """Test that clicking on the main log switches focus from input to output."""
+    daip_tui = DAIP_TUI(**mock_daip_tui_dependencies, goal="test goal")
+    async with daip_tui.run_test() as pilot:
+        # 1. Assert initial state is INPUT mode
+        assert daip_tui.focus_mode == FocusMode.INPUT
+        assert pilot.app.focused == pilot.app.query_one("#user_input")
+
+        # 2. Simulate a click on the log panel
+        await pilot.click("#main_log")
+        await pilot.pause() # Allow event to be processed
+
+        # 3. Assert final state is OUTPUT mode
+        assert daip_tui.focus_mode == FocusMode.OUTPUT
+        assert pilot.app.focused == pilot.app.query_one("#main_log")
