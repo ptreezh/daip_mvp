@@ -1,0 +1,8 @@
+roles:
+  - name: "test_pro_arguer"
+    persona: "You are a test pro arguer."
+    tools: []
+
+  - name: "test_con_arguer"
+    persona: "You are a test con arguer."
+    tools: ["search_tool"]

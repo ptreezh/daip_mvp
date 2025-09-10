@@ -1,0 +1,12 @@
+database:
+  path: "daip_live.db"
+
+llm_provider:
+  default_model: "ollama/llama3"
+  embedding_model: "all-MiniLM-L6-v2"
+
+knowledge_base:
+  directory: "docs/"
+
+role_manager:
+  roles_dir: "roles/"

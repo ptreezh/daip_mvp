@@ -1,0 +1,72 @@
+# pyproject.toml
+
+[tool.poetry]
+name = "daip_live"
+version = "0.1.0"
+description = "Dynamic AI-driven Project-execution LIVE system"
+authors = ["DAIP-LIVE Team"]
+readme = "README.md"
+packages = [{include = "daip_live", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+typer = "0.9.0"
+textual = "^0.66.0"
+streamlit = {version = "^1.35.0", python = ">=3.9,<3.9.7 || >3.9.7,<3.12"}
+pydantic = "^2.7.4"
+PyYAML = "^6.0.1"
+# For data persistence
+sqlalchemy = "^2.0.30"
+# For knowledge management
+faiss-cpu = "^1.8.0" # or faiss-gpu
+langchain = "^0.2.5"
+# For built-in tools
+python-docx = "^1.1.2"
+arxiv = "^2.1.0"
+litellm = "^1.76.1"
+rich = "^14.1.0"
+fastapi = "^0.116.1"
+uvicorn = {extras = ["standard"], version = "^0.35.0"}
+pyperclip = "^1.8.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+pre-commit = "^3.7.1"
+mypy = "^1.10.0"
+ruff = "^0.4.4"
+pytest-mock = "^3.14.1"
+pytest-asyncio = "^1.1.0"
+httpx = "^0.28.1"
+
+[tool.poetry.scripts]
+daip = "daip_live.cli:app"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# --- Tool Configurations ---
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+# See https://docs.astral.sh/ruff/rules/ for all rules
+select = ["E", "F", "W", "I", "UP", "C4", "T20", "PYI"]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+# For stricter checking
+strict = true
+
+
+
+

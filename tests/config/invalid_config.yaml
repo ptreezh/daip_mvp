@@ -1,0 +1,9 @@
+database:
+  path: "test_daip_live.db"
+
+llm_provider:
+  # default_model is intentionally missing
+  embedding_model: "test_embedding_model"
+
+knowledge_base:
+  directory: "test_docs/"
