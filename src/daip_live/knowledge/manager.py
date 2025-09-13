@@ -7,8 +7,9 @@ from typing import Dict, List
 
 import faiss
 import numpy as np
+
 from daip_live.core.interfaces import IKnowledgeManager, IModelProvider
-from daip_live.core.models import KnowledgeBaseChanges, KnowledgeSource
+from daip_live.core.models import KnowledgeBaseChanges, KnowledgeSource, KnowledgeBaseConfig
 from daip_live.persistence.database import DatabaseManager
 
 
@@ -19,12 +20,12 @@ class KnowledgeManager(IKnowledgeManager):
         self,
         db_manager: DatabaseManager,
         model_provider: IModelProvider,
-        config: Dict,
+        config: KnowledgeBaseConfig,
     ):
         self.db_manager = db_manager
         self.model_provider = model_provider
         self.config = config
-        self.knowledge_dir = Path(self.config["knowledge_dir"])
+        self.knowledge_dir = Path(self.config.directory)
         self.index_path = self.knowledge_dir / "index.faiss"
 
         # Dimension for the embedding model, e.g., all-MiniLM-L6-v2 has 384
@@ -43,7 +44,16 @@ class KnowledgeManager(IKnowledgeManager):
     def _scan_and_detect_changes(self) -> KnowledgeBaseChanges:
         """Compares files on disk with records in the DB to find changes."""
         db_sources = {s.file_path: s for s in self.db_manager.get_all_knowledge_sources()}
-        disk_files = {str(p) for p in self.knowledge_dir.rglob("*") if p.is_file()}
+        
+        # Only process text files, skip binary files like .faiss, .pkl, etc.
+        text_extensions = {'.txt', '.md', '.py', '.js', '.html', '.css', '.json', '.xml', '.yaml', '.yml', '.csv', '.log'}
+        disk_files = {
+            str(p) for p in self.knowledge_dir.rglob("*") 
+            if p.is_file() and (
+                p.suffix.lower() in text_extensions or
+                not p.suffix  # Include files without extensions
+            )
+        }
 
         changes = KnowledgeBaseChanges()
 
@@ -77,12 +87,18 @@ class KnowledgeManager(IKnowledgeManager):
         # Process added files
         for file_path_str in changes.added:
             file_path = Path(file_path_str)
-            content = await asyncio.to_thread(file_path.read_text, encoding="utf-8")
-            file_hash = await asyncio.to_thread(self._get_file_hash, file_path)
-            embedding = await self.model_provider.embed(content)
+            try:
+                content = await asyncio.to_thread(file_path.read_text, encoding="utf-8")
+                file_hash = await asyncio.to_thread(self._get_file_hash, file_path)
+                embedding = await self.model_provider.embed(content)
+            except (UnicodeDecodeError, IOError) as e:
+                self._logger.warning(f"Skipping file {file_path_str} due to read error: {e}")
+                summary["added"] -= 1  # Don't count this as added
+                continue
 
             source = KnowledgeSource(file_path=file_path_str, file_hash=file_hash, status="indexed")
-            new_id = await self.db_manager.upsert_knowledge_source(source)
+            new_source = await asyncio.to_thread(self.db_manager.upsert_knowledge_source, source)
+            new_id = new_source.id
 
             if self.faiss_index and new_id is not None:
                 # FAISS requires a 2D array for additions
@@ -94,7 +110,7 @@ class KnowledgeManager(IKnowledgeManager):
         for source in changes.deleted:
             if self.faiss_index and source.id is not None:
                 self.faiss_index.remove_ids(np.array([source.id], dtype=np.int64))
-            await self.db_manager.delete_knowledge_source(file_path=source.file_path)
+            await asyncio.to_thread(self.db_manager.delete_knowledge_source, file_path=source.file_path)
             summary["removed"] += 1
 
         # Process updated files
@@ -104,12 +120,18 @@ class KnowledgeManager(IKnowledgeManager):
                 self.faiss_index.remove_ids(np.array([old_source.id], dtype=np.int64))
 
             file_path = Path(file_path_str)
-            content = await asyncio.to_thread(file_path.read_text, encoding="utf-8")
-            file_hash = await asyncio.to_thread(self._get_file_hash, file_path)
-            embedding = await self.model_provider.embed(content)
+            try:
+                content = await asyncio.to_thread(file_path.read_text, encoding="utf-8")
+                file_hash = await asyncio.to_thread(self._get_file_hash, file_path)
+                embedding = await self.model_provider.embed(content)
+            except (UnicodeDecodeError, IOError) as e:
+                self._logger.warning(f"Skipping file {file_path_str} due to read error: {e}")
+                summary["updated"] -= 1  # Don't count this as updated
+                continue
 
             source = KnowledgeSource(file_path=file_path_str, file_hash=file_hash, status="indexed", id=old_source.id)
-            updated_id = await self.db_manager.upsert_knowledge_source(source)
+            updated_source = await asyncio.to_thread(self.db_manager.upsert_knowledge_source, source)
+            updated_id = updated_source.id
 
             if self.faiss_index and updated_id is not None:
                 self.faiss_index.add_with_ids(np.array([embedding], dtype=np.float32), np.array([updated_id], dtype=np.int64))
@@ -148,7 +170,7 @@ class KnowledgeManager(IKnowledgeManager):
             return []
 
         # This method needs to be implemented in the DatabaseManager
-        sources = await self.db_manager.get_knowledge_sources_by_ids(source_ids)
+        sources = await asyncio.to_thread(self.db_manager.get_knowledge_sources_by_ids, source_ids)
 
         # 4. Format the results.
         # Create a mapping from id to source for easy lookup

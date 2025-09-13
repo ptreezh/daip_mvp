@@ -19,7 +19,12 @@ class DatabaseManager:
     """Encapsulates all direct interactions with the SQLite database."""
 
     def __init__(self, db_path: str):
-        self.engine: Engine = create_engine(f"sqlite:///{db_path}")
+        if db_path == ":memory:":
+            self.engine: Engine = create_engine("sqlite:///:memory:")
+        elif db_path.startswith("sqlite:///"):
+            self.engine: Engine = create_engine(db_path)
+        else:
+            self.engine: Engine = create_engine(f"sqlite:///{db_path}")
         self._create_tables()
 
     def _create_tables(self):
@@ -129,7 +134,7 @@ class DatabaseManager:
         with self.engine.begin() as conn:
             conn.execute(stmt)
 
-    async def get_knowledge_sources_by_ids(self, ids: List[int]) -> List[KnowledgeSource]:
+    def get_knowledge_sources_by_ids(self, ids: List[int]) -> List[KnowledgeSource]:
         """Retrieves a list of KnowledgeSource objects by their primary key IDs."""
         stmt = select(knowledge_sources_table).where(knowledge_sources_table.c.id.in_(ids))
         with self.engine.connect() as conn:
