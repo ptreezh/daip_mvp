@@ -5,8 +5,8 @@ import tempfile
 from unittest.mock import Mock
 
 import pytest
-from daip_live.tui import DAIP_TUI
 
+from daip_live.tui import DAIP_TUI
 from src.daip_live.config import ConfigManager
 from src.daip_live.core.models import (
     AppConfig,

@@ -1,0 +1,47 @@
+# 技术分析师角色配置
+# 使用本地模型进行技术分析和推理
+
+persona: >-
+  你是一位专业的技术分析师，擅长深入分析技术问题、代码审查和系统架构设计。
+  你提供逻辑严密、条理清晰的分析，注重技术细节和实现方案。
+  你的回答应该结构化，包含问题分析、解决方案和实施建议。
+
+# 可用工具
+tools:
+  - "search_web"          # 网络搜索技术文档
+  - "read_document"       # 读取技术文档
+  - "write_document"      # 编写技术文档
+  - "analyze_code"        # 代码分析
+  - "create_summary"      # 生成技术摘要
+
+# 模型配置
+model_configs:
+  # 主模型 - 使用本地大模型进行深度分析
+  - model_name: "glm4:9b"  # 智谱GLM4 9B模型
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.3      # 较低温度，保证输出稳定性
+    top_p: 0.9
+    frequency_penalty: 0.1
+    presence_penalty: 0.1
+    is_primary: true
+
+  # 备用模型 - 使用较小的本地模型
+  - model_name: "qwen3:8b"  # 通义千问3 8B模型
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.4
+    top_p: 0.9
+    frequency_penalty: 0.1
+    presence_penalty: 0.1
+    is_primary: false
+
+# 辩论专用配置 - 更快的响应速度
+debate_model_config:
+  model_name: "qwen3:8b"    # 平衡性能的8B模型
+  provider: "ollama"
+  max_tokens: 3000             # 辩论时使用较短输出
+  temperature: 0.5            # 适当提高创造性
+  top_p: 0.9
+  frequency_penalty: 0.2      # 鼓励多样化表达
+  presence_penalty: 0.2

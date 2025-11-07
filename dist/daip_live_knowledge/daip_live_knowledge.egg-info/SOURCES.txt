@@ -1,0 +1,8 @@
+setup.py
+daip_live_knowledge.egg-info/PKG-INFO
+daip_live_knowledge.egg-info/SOURCES.txt
+daip_live_knowledge.egg-info/dependency_links.txt
+daip_live_knowledge.egg-info/requires.txt
+daip_live_knowledge.egg-info/top_level.txt
+knowledge/__init__.py
+knowledge/manager.py

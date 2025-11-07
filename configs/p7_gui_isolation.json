@@ -1,0 +1,123 @@
+{
+  "module_name": "P7 GUI",
+  "original_paths": [
+    "src/daip_live/p7_gui"
+  ],
+  "isolated_paths": [
+    "src/daip_live/p7_gui_v1"
+  ],
+  "config_overrides": {
+    "config/gui.yaml": {
+      "gui": {
+        "version": "v1_full_implementation",
+        "framework": "customtkinter",
+        "architecture": "mvvm",
+        "theme": "dark_blue"
+      },
+      "window": {
+        "title": "DAIP-LIVE (Isolated v1)",
+        "min_width": 1024,
+        "min_height": 768,
+        "default_width": 1400,
+        "default_height": 900,
+        "resizable": true,
+        "center_on_screen": true
+      },
+      "mvvm": {
+        "data_binding": "reactive",
+        "command_pattern": true,
+        "property_notification": true
+      },
+      "views": {
+        "main": {
+          "layout": "responsive",
+          "sidebar": {
+            "collapsible": true,
+            "default_width": 250
+          },
+          "content_area": {
+            "flexible": true,
+            "min_width": 800
+          }
+        },
+        "chat": {
+          "message_history": true,
+          "input_auto_resize": true,
+          "markdown_support": true
+        },
+        "role_management": {
+          "drag_drop": true,
+          "batch_operations": true
+        },
+        "session_management": {
+          "tabbed_interface": true,
+          "session_search": true
+        },
+        "debate_system": {
+          "real_time_updates": true,
+          "visual_feedback": true
+        },
+        "knowledge_base": {
+          "tree_view": true,
+          "search_filter": true,
+          "preview_panel": true
+        }
+      }
+    },
+    "config/gui_styling.yaml": {
+      "themes": {
+        "dark_blue": {
+          "primary": "#1e3a8a",
+          "secondary": "#3b82f6",
+          "accent": "#60a5fa",
+          "background": "#0f172a",
+          "surface": "#1e293b",
+          "text": "#f1f5f9",
+          "text_secondary": "#94a3b8"
+        },
+        "light": {
+          "primary": "#2563eb",
+          "secondary": "#3b82f6",
+          "accent": "#60a5fa",
+          "background": "#ffffff",
+          "surface": "#f8fafc",
+          "text": "#1e293b",
+          "text_secondary": "#64748b"
+        }
+      },
+      "fonts": {
+        "primary": {
+          "family": "Segoe UI",
+          "size": 12
+        },
+        "monospace": {
+          "family": "Consolas",
+          "size": 11
+        },
+        "heading": {
+          "family": "Segoe UI",
+          "size": 16,
+          "weight": "bold"
+        }
+      },
+      "icons": {
+        "theme": "material",
+        "size": 16,
+        "color": "auto"
+      }
+    }
+  },
+  "port_overrides": {
+    "gui_service": 8020,
+    "viewmodel_service": 8021,
+    "binding_service": 8022
+  },
+  "data_overrides": {
+    "viewmodel_cache": "cache_v1/gui/viewmodels",
+    "binding_cache": "cache_v1/gui/bindings",
+    "theme_cache": "cache_v1/gui/themes",
+    "user_preferences": "data_v1/gui/preferences.json",
+    "window_layouts": "data_v1/gui/layouts.json",
+    "logs": "logs_v1/gui"
+  }
+}

@@ -41,17 +41,27 @@ class TestDebateManager(unittest.TestCase):
 
             # Mock model provider responses
             self.mock_model_provider.generate = AsyncMock(side_effect=[
-                "Pro argument 1", "Con argument 1",
-                "Pro argument 2", "Con argument 2",
-                "Final summary of the debate."
+                ("Pro argument 1", {"total_tokens": 10}), 
+                ("Con argument 1", {"total_tokens": 10}),
+                ("Pro argument 2", {"total_tokens": 10}), 
+                ("Con argument 2", {"total_tokens": 10}),
+                ("Final summary of the debate.", {"total_tokens": 10})
             ])
 
             # Act
-            final_session = await self.debate_manager.run_debate(
+            final_session = None
+            def track_session(session):
+                nonlocal final_session
+                final_session = session
+
+            self.mock_session_manager.save_session.side_effect = track_session
+
+            async for event in self.debate_manager.run_debate(
                 topic=topic,
                 roles_names=roles,
                 num_rounds=num_rounds
-            )
+            ):
+                pass  # Run through all events
 
             # Assert
             self.mock_session_manager.create_session.assert_called_once_with(
@@ -61,7 +71,9 @@ class TestDebateManager(unittest.TestCase):
                 call("pro_arguer"), call("con_arguer")
             ])
             self.assertEqual(self.mock_model_provider.generate.call_count, 5)
-            self.assertEqual(final_session.status, AgentState.COMPLETED)
+
+            # Check status by value to handle potential enum instance differences
+            self.assertEqual(final_session.status.value, AgentState.COMPLETED.value)
             self.assertEqual(len(final_session.history), 4)
             self.assertEqual(final_session.history[0].content, "Pro argument 1")
             self.assertEqual(final_session.history[3].content, "Con argument 2")

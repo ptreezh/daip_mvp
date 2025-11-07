@@ -1,0 +1,80 @@
+# DAIP-LIVE 模块配置
+modules:
+  core:
+    version: "1.0.0"
+    enabled: true
+    priority: 0
+    dependencies: []
+    description: "核心接口和模型定义"
+
+  persistence:
+    version: "1.0.0"
+    enabled: true
+    priority: 1
+    dependencies: ["core"]
+    description: "数据持久化服务"
+    test_patterns: ["tests/persistence/**/*.py"]
+
+  knowledge:
+    version: "1.0.0"
+    enabled: true
+    priority: 2
+    dependencies: ["core", "persistence"]
+    description: "知识管理和检索服务"
+    test_patterns: ["tests/knowledge/**/*.py", "tests/wiki/**/*.py"]
+
+  model_provider:
+    version: "1.0.0"
+    enabled: true
+    priority: 2
+    dependencies: ["core"]
+    description: "模型提供者抽象层"
+    test_patterns: ["tests/model_provider/**/*.py"]
+
+  role_manager_tools:
+    version: "1.0.0"
+    enabled: true
+    priority: 3
+    dependencies: ["core", "persistence"]
+    description: "角色和工具管理"
+    test_patterns: ["tests/p4_role_manager_tools/**/*.py"]
+
+  agent_engine:
+    version: "1.0.0"
+    enabled: true
+    priority: 4
+    dependencies: ["core", "persistence", "knowledge", "model_provider", "role_manager_tools"]
+    description: "Agent执行引擎"
+    test_patterns: ["tests/agent_engine/**/*.py"]
+
+  cli:
+    version: "1.0.0"
+    enabled: true
+    priority: 5
+    dependencies: ["core", "container"]
+    description: "命令行界面"
+    test_patterns: ["tests/test_cli/**/*.py"]
+
+  debate_system:
+    version: "1.0.0"
+    enabled: true
+    priority: 3
+    dependencies: ["core", "persistence", "model_provider", "role_manager_tools"]
+    description: "多Agent辩论系统"
+    test_patterns: ["tests/p8_debate_system/**/*.py"]
+
+  memory:
+    version: "1.0.0"
+    enabled: true
+    priority: 2
+    dependencies: ["core", "persistence"]
+    description: "内存管理服务"
+    test_patterns: ["tests/memory/**/*.py"]
+
+  permission:
+    version: "1.0.0"
+    enabled: true
+    priority: 1
+    dependencies: ["core"]
+    description: "权限和安全系统"
+    test_patterns: ["tests/permission/**/*.py", "tests/security/**/*.py"]

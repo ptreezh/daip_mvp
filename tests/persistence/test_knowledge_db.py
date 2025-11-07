@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pytest
+
 from daip_live.core.models import KnowledgeSource
 from daip_live.persistence.database import DatabaseManager
 

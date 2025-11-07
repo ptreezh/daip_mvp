@@ -1,6 +1,6 @@
 import asyncio
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from litellm._logging import verbose_logger
@@ -219,7 +219,7 @@ class CloudZeroLogger(CustomLogger):
             while True:
                 try:
                     # Calculate the previous completed hour
-                    now = datetime.utcnow()
+                    now = datetime.now(timezone.utc)
                     target_hour = now.replace(minute=0, second=0, microsecond=0)
                     # Export data for the previous hour to ensure all data is available
                     target_hour = target_hour - timedelta(hours=1)
@@ -239,8 +239,8 @@ class CloudZeroLogger(CustomLogger):
                         verbose_logger.debug("CloudZero Background Job: Another instance is already running the export")
 
                     # Wait until the next hour
-                    next_hour = (datetime.utcnow() + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
-                    sleep_seconds = (next_hour - datetime.utcnow()).total_seconds()
+                    next_hour = (datetime.now(timezone.utc) + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+                    sleep_seconds = (next_hour - datetime.now(timezone.utc)).total_seconds()
                     await asyncio.sleep(sleep_seconds)
 
                 except Exception as e:

@@ -1,23 +1,65 @@
-# DAIP-LIVE 项目实施计划
+# Refactoring Plan: Centralized Dependency Injection
 
-基于对 `GEMINI.md` 和 `docs` 目录结构的分析，项目将采用与工作包（Work Packages）完全对应的分阶段实施计划。
+**Date:** 2025-09-12
 
-## 核心开发原则
+**Author:** Gemini
 
-*   **测试驱动开发 (TDD)**：为每个功能模块先编写测试用例，再进行功能实现。
-*   **代码质量**：遵循 `pyproject.toml` 中定义的 `ruff` 和 `mypy` 规范，确保代码风格和类型安全。
-*   **模块化**：严格按照 P0-P8 的模块划分进行开发，确保高内聚、低耦合。
+## 1. Problem Analysis
 
-## 实施阶段详情
+The current application exhibits significant technical debt related to dependency management:
 
-| 阶段 | 工作包 (WP) | 核心任务 | 主要产出 | 关联文档 |
-| :--- | :--- | :--- | :--- | :--- |
-| 1 | **P0 & P1** | **核心接口与数据持久化**<br>- 定义所有核心数据模型 (Pydantic Models)<br>- 实现基于 SQLAlchemy 的数据库会话管理<br>- 实现数据模型的CRUD操作 | `src/core/`, `src/persistence/` 模块及单元测试 | `docs/p0_.../`, `docs/p1_.../` |
-| 2 | **P2** | **知识库管理器**<br>- 实现文档加载与文本分割<br>- 集成 `faiss-cpu` 和 `langchain` 构建向量存储<br>- 实现知识库的创建、同步和查询接口 | `src/knowledge/` 模块及单元测试 | `docs/p2_.../` |
-| 2 | **P-AUX-MEMORY** | **实现内存服务**<br>- 实现三层记忆架构（短期、中期、长期）<br>- 上下文构建与管理策略 | `src/memory/` 模块及单元测试 | `docs/p_aux_memory/README.md` |
-| 3 | **P3** | **模型供应器**<br>- 构建与不同 LLM API (本地/云端)交互的工厂类<br>- 统一输入/输出接口<br>- 处理 API 认证和异常 | `src/models/` 模块及单元测试 | `docs/p3_.../` |
-| 3 | **P3** | **增强模型供应器：集成LiteLLM Router**<br>- 实现多LLM透明管理（负载均衡、故障转移）<br>- 动态模型选择 | `src/model_provider/` 模块更新，支持多LLM管理 | `docs/p3_model_provider/README.md` |
-| 4 | **P4** | **角色与工具管理器**<br>- 定义角色(Persona)的数据结构<br>- 实现工具的动态加载与安全执行管道<br>- 管理工具的输入/输出验证 | `src/roles/`, `src/tools/` 模块及单元测试 | `docs/p4_.../` |
-| 5 | **P5** | **Agent 引擎**<br>- 实现核心的“信度驱动状态机”<br>- 编排规划、执行、反思的 Agent 循环<br>- 集成 P1-P4 的所有服务 | `src/agent/` 模块及集成测试 | `docs/p5_.../` |
-| 6 | **P6** | **CLI / TUI 接口**<br>- 使用 `Typer` 构建命令行接口<br>- 使用 `Textual` 开发交互式 TUI<br>- 将 CLI/TUI 命令连接到 Agent 引擎 | `src/cli/` 模块及端到端测试 | `docs/p6_.../` |
-| 7 | **P7 & P8** | **GUI 与人类助手**<br>- (可选) 使用 `Streamlit` 构建基础的 Web GUI<br>- (可选) 实现人机协作与干预功能 | `src/gui/`, `src/assistant/` 模块 | `docs/p7_.../`, `docs/p8_.../` |
+*   **Manual Instantiation:** Services are manually created and passed through multiple constructor arguments. This is verbose, error-prone, and hard to maintain.
+*   **Inconsistent Environments:** The TUI runner (`tui_runner.py`) is a development stub that uses mock objects and is out of sync with the proper application assembly shown in integration tests (`tests/test_tui_integration.py`). This creates confusion about the correct way to run the application.
+*   **Difficult Mocking:** While tests use mocking, the manual setup is complex and varies between test files. Centralizing dependency management will simplify overriding services for testing.
+
+## 2. Proposed Solution
+
+I will refactor the application to use a centralized dependency injection (DI) container. This will provide a single source of truth for service instantiation and wiring.
+
+**Chosen Library:** `dependency-injector` - It is a popular, mature, and feature-rich library for Python that integrates well with existing code.
+
+## 3. TDD-based Refactoring Workflow
+
+I will follow a strict Test-Driven Development process.
+
+### Step 1: SPEC (Documentation First)
+
+*   **Action:** Create a new specification document: `docs/specifications/P_AUX_DEPENDENCY_INJECTION.md`.
+*   **Content:** This document will detail the design of the new DI container. It will define:
+    *   The container structure.
+    *   How configuration from `config.yaml` will be wired into the container.
+    *   A list of all services that will be managed by the container.
+    *   Examples of how to resolve services and override them for testing.
+
+### Step 2: RED (Write a Failing Test)
+
+*   **Action:** Create a new test file: `tests/core/test_container.py`.
+*   **Content:** The test will attempt to:
+    1.  Import a `Container` class from `src/daip_live/container.py`.
+    2.  Instantiate the container.
+    3.  Resolve a core service (e.g., `KnowledgeManager`) from the container.
+    4.  Assert that the resolved service is a valid instance of the expected class.
+*   **Expected Outcome:** The test will fail because `src/daip_live/container.py` and the `Container` class do not exist.
+
+### Step 3: GREEN (Implement the Container)
+
+*   **Action:**
+    1.  Add `dependency-injector` to the `[tool.poetry.dependencies]` section of `pyproject.toml`.
+    2.  Run `poetry install` to install the new dependency.
+    3.  Create the `src/daip_live/container.py` file.
+    4.  Implement the `Container` class using `dependency_injector.containers.DeclarativeContainer`.
+    5.  Define providers for all core application services (e.g., `ConfigManager`, `DatabaseManager`, `LiteLLMProvider`, `ToolManager`, `KnowledgeManager`, etc.).
+    6.  Wire the application configuration (`config.yaml`) into the container's providers.
+*   **Expected Outcome:** The test created in the RED step will now pass.
+
+### Step 4: REFACTOR (Integrate the Container)
+
+*   **Action:**
+    1.  Refactor the main CLI entry point (`main.py` or `src/daip_live/cli.py`) to use the `Container` to get the required services.
+    2.  Delete the outdated `tui_runner.py` and create a new, clean entry point for the TUI that uses the `Container`.
+    3.  Refactor the integration tests (starting with `tests/test_tui_integration.py`) to use the container for setting up the test environment. This will involve using the container's `override()` feature to inject mocks.
+*   **Expected Outcome:** The application (CLI and TUI) will be fully functional, using the new DI container. The test suite will pass, demonstrating that the refactoring has not introduced regressions.
+
+## 4. Next Step
+
+I will now proceed with **Step 1: SPEC** by creating the specification document.

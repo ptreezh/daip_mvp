@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(poetry run pytest:*)",
+      "Bash(python:*)",
+      "Bash(poetry run python:*)",
+      "mcp__context7__resolve-library-id",
+      "WebSearch",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(del:*)",
+      "Bash(timeout:*)",
+      "Bash(ollama list:*)",
+      "Bash(pkill:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(git reset:*)",
+      "Bash(poetry run daip:*)",
+      "Bash(find:*)",
+      "Read(//d/**)",
+      "Bash(poetry show:*)",
+      "Bash(poetry run ruff check --help:*)",
+      "Bash(poetry run mypy --help:*)",
+      "Bash(chmod:*)",
+      "Bash(./scripts/implement_modularization.sh:*)",
+      "Bash(npm install:*)",
+      "Bash(pip install:*)",
+      "Bash(pip search:*)",
+      "Bash(mkdir:*)",
+      "Bash(poetry add:*)",
+      "Bash(cd:*)",
+      "mcp__gemini-cli__brainstorm"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

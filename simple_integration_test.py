@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 from unittest.mock import Mock
 
 from daip_live.memory.session_manager import SessionManager
+from daip_live.persistence.database import DatabaseManager
 from daip_live.p4_role_manager_tools.role_manager import RoleManager
 from daip_live.tui import DAIP_TUI
 
@@ -37,7 +38,8 @@ tools: ["read_file", "write_file"]
 """)
 
         # Initialize components
-        session_manager = SessionManager()
+        db_manager = DatabaseManager(db_path=":memory:")
+        session_manager = SessionManager(db_manager=db_manager)
         role_manager = RoleManager(roles_dir)
         mock_executor = Mock()
 

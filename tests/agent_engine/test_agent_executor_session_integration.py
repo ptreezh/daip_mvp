@@ -2,10 +2,10 @@ import asyncio
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 
-from src.daip_live.agent_engine.executor import AgentExecutor
-from src.daip_live.core.models import AgentState, Session
-from src.daip_live.memory.service import MemoryService
-from src.daip_live.memory.session_manager import SessionManager
+from daip_live.agent_engine.executor import AgentExecutor
+from daip_live.core.models import AgentState, Session
+from daip_live.memory.service import MemoryService
+from daip_live.memory.session_manager import SessionManager
 
 
 class TestAgentExecutorSessionIntegration(unittest.TestCase):
@@ -36,9 +36,11 @@ class TestAgentExecutorSessionIntegration(unittest.TestCase):
             prompt = "Generated Prompt"
 
             self.mock_memory_service.construct_prompt.return_value = prompt
-            self.mock_model_provider.generate = AsyncMock(return_value=final_llm_response)
+            self.mock_memory_service.get_todo_list.return_value = [MagicMock(description="Test Task")]
+            self.mock_memory_service.is_todo_list_complete.side_effect = [False, True]
+            self.mock_model_provider.generate = AsyncMock(return_value=(final_llm_response, {}))
 
-            mock_session = Session(goal=goal, session_type="workflow", participant_ids=["agent", "system"])
+            mock_session = Session(goal=goal, session_type="workflow", participant_ids=["agent", "system", "user"])
             self.mock_session_manager.create_session.return_value = mock_session
 
             # Act
@@ -48,14 +50,14 @@ class TestAgentExecutorSessionIntegration(unittest.TestCase):
             # Assert
             self.mock_memory_service.construct_prompt.assert_called_once()
             self.mock_session_manager.create_session.assert_called_once_with(
-                goal=goal, session_type="workflow", participant_ids=["agent", "system"]
+                goal=goal, session_type="workflow", participant_ids=["agent", "system", "user"]
             )
             self.mock_session_manager.save_session.assert_called_once()
             saved_session_arg = self.mock_session_manager.save_session.call_args[0][0]
 
             self.assertIsInstance(saved_session_arg, Session)
             self.assertEqual(saved_session_arg.status, AgentState.COMPLETED)
-            self.assertEqual(saved_session_arg.summary, "Final Answer: All done.")
+            self.assertEqual(saved_session_arg.summary, "All done.")
             self.assertEqual(len(saved_session_arg.history), 1)
             self.assertEqual(saved_session_arg.history[0].participant_id, "agent")
             self.assertEqual(saved_session_arg.history[0].content, final_llm_response)

@@ -1,0 +1,94 @@
+{
+  "test_time": 1760271023.9865913,
+  "total_tests": 12,
+  "passed": 4,
+  "partial": 8,
+  "failed": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "test": "TUI界面启动",
+      "status": "PASS",
+      "details": "界面完整加载，所有组件正常",
+      "response_time": 0.0,
+      "timestamp": 1760271023.9865913
+    },
+    {
+      "test": "界面元素完整性",
+      "status": "PASS",
+      "details": "所有UI元素正常显示",
+      "response_time": 0,
+      "timestamp": 1760271023.9865913
+    },
+    {
+      "test": "快捷键提示",
+      "status": "PASS",
+      "details": "所有快捷键提示正常显示",
+      "response_time": 0,
+      "timestamp": 1760271023.9865913
+    },
+    {
+      "test": "帮助系统",
+      "status": "PARTIAL",
+      "details": "需要手动验证帮助信息完整性",
+      "response_time": 0,
+      "timestamp": 1760271036.0521915
+    },
+    {
+      "test": "自动补全系统",
+      "status": "PARTIAL",
+      "details": "需要手动验证补全准确性",
+      "response_time": 0,
+      "timestamp": 1760271043.0867558
+    },
+    {
+      "test": "角色管理",
+      "status": "PARTIAL",
+      "details": "需要手动验证角色CRUD操作",
+      "response_time": 0,
+      "timestamp": 1760271053.1310139
+    },
+    {
+      "test": "会话管理",
+      "status": "PARTIAL",
+      "details": "需要手动验证会话操作",
+      "response_time": 0,
+      "timestamp": 1760271063.16476
+    },
+    {
+      "test": "基础对话",
+      "status": "PARTIAL",
+      "details": "需要手动验证对话质量和连贯性",
+      "response_time": 0,
+      "timestamp": 1760271077.2225223
+    },
+    {
+      "test": "模型管理",
+      "status": "PARTIAL",
+      "details": "需要手动验证模型操作",
+      "response_time": 0,
+      "timestamp": 1760271085.2590501
+    },
+    {
+      "test": "高级功能",
+      "status": "PARTIAL",
+      "details": "需要手动验证高级功能可用性",
+      "response_time": 0,
+      "timestamp": 1760271101.335089
+    },
+    {
+      "test": "错误处理",
+      "status": "PARTIAL",
+      "details": "需要手动验证错误处理友好性",
+      "response_time": 0,
+      "timestamp": 1760271107.3801582
+    },
+    {
+      "test": "性能监控",
+      "status": "PASS",
+      "details": "状态栏监控功能正常",
+      "response_time": 0,
+      "timestamp": 1760271112.4070168
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+setup.py
+daip_live_security.egg-info/PKG-INFO
+daip_live_security.egg-info/SOURCES.txt
+daip_live_security.egg-info/dependency_links.txt
+daip_live_security.egg-info/requires.txt
+daip_live_security.egg-info/top_level.txt
+security/__init__.py
+security/permissions.py

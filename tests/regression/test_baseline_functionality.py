@@ -183,6 +183,13 @@ def test_agent_executor_creation():
                 user_input_queue=user_input_queue
             )
             assert executor is not None
+            
+            # 测试新增的工作流相关属性
+            assert hasattr(executor, 'workflow_definition')
+            assert hasattr(executor, 'current_element_id')
+            assert hasattr(executor, 'element_outputs')
+            assert hasattr(executor, 'loop_counters')
+            assert hasattr(executor, 'execution_history')
         except Exception as e:
             pytest.fail(f"Agent executor creation failed: {e}")
         finally:
@@ -206,6 +213,31 @@ def test_tui_module_import():
         assert DAIP_TUI is not None
     except Exception as e:
         pytest.fail(f"TUI module import failed: {e}")
+
+def test_workflow_parser_import():
+    """测试工作流解析器导入"""
+    try:
+        from daip_live.workflow.parser import WorkflowParser, WorkflowDefinition
+        assert WorkflowParser is not None
+        assert WorkflowDefinition is not None
+    except Exception as e:
+        pytest.fail(f"Workflow parser import failed: {e}")
+
+def test_workflow_elements_import():
+    """测试工作流元素导入"""
+    try:
+        from daip_live.workflow.parser import (
+            WorkflowElement, TaskElement, ConditionElement, 
+            LoopElement, SubWorkflowElement, WorkflowElementType
+        )
+        assert WorkflowElement is not None
+        assert TaskElement is not None
+        assert ConditionElement is not None
+        assert LoopElement is not None
+        assert SubWorkflowElement is not None
+        assert WorkflowElementType is not None
+    except Exception as e:
+        pytest.fail(f"Workflow elements import failed: {e}")
 
 class TestSystemIntegration:
     """系统集成测试类"""
@@ -273,6 +305,76 @@ class TestSystemIntegration:
 
             except Exception as e:
                 pytest.fail(f"Full component integration failed: {e}")
+            finally:
+                if os.path.exists(tmp.name):
+                    os.unlink(tmp.name)
+
+    def test_agent_executor_with_workflow_components(self):
+        """测试包含工作流组件的智能体执行器集成"""
+        import asyncio
+
+        from daip_live.agent_engine.executor import AgentExecutor
+        from daip_live.config import config_manager
+        from daip_live.core.models import ProviderConfig
+        from daip_live.knowledge.manager import KnowledgeManager
+        from daip_live.memory.service import MemoryService
+        from daip_live.memory.session_manager import SessionManager
+        from daip_live.model_provider.provider import LiteLLMProvider
+        from daip_live.p4_role_manager_tools.tool_manager import ToolManager
+        from daip_live.persistence.database import DatabaseManager
+        from daip_live.workflow.parser import WorkflowParser
+
+        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp:
+            try:
+                # 创建所需组件
+                session_manager = SessionManager()
+
+                db_manager = DatabaseManager(tmp.name)
+                provider_config = ProviderConfig(model="test-model")
+                model_provider = LiteLLMProvider(provider_config)
+                memory_service = MemoryService(model_provider)
+
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    config = {"knowledge_dir": temp_dir}
+                    knowledge_manager = KnowledgeManager(
+                        db_manager=db_manager,
+                        model_provider=model_provider,
+                        config=config
+                    )
+
+                tool_manager = ToolManager()
+                user_input_queue = asyncio.Queue()
+
+                # 创建智能体执行器
+                executor = AgentExecutor(
+                    session_manager=session_manager,
+                    memory_service=memory_service,
+                    knowledge_manager=knowledge_manager,
+                    model_provider=model_provider,
+                    tool_manager=tool_manager,
+                    user_input_queue=user_input_queue
+                )
+
+                # 测试工作流解析器功能
+                workflow_yaml = """
+                name: integration_test_workflow
+                elements:
+                  task1:
+                    type: task
+                    name: "集成测试任务"
+                start: task1
+                """
+                
+                workflow_definition = WorkflowParser.parse(workflow_yaml)
+                assert workflow_definition.name == "integration_test_workflow"
+                assert len(workflow_definition.elements) == 1
+                
+                # 验证执行器可以接受工作流定义
+                executor.workflow_definition = workflow_definition
+                assert executor.workflow_definition is not None
+
+            except Exception as e:
+                pytest.fail(f"Agent executor with workflow components failed: {e}")
             finally:
                 if os.path.exists(tmp.name):
                     os.unlink(tmp.name)

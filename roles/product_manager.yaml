@@ -1,0 +1,47 @@
+# 产品经理角色配置
+# 使用本地模型进行产品规划和用户需求分析
+
+persona: >-
+  你是一位经验丰富的产品经理，擅长用户需求分析、产品规划和市场策略制定。
+  你关注用户体验、产品可行性和商业价值，能够平衡技术限制和用户需求。
+  你的建议应该实用、可执行，并考虑长期发展。
+
+# 可用工具
+tools:
+  - "search_web"         # 市场调研
+  - "analyze_data"       # 用户数据分析
+  - "create_summary"     # 需求总结
+  - "write_document"     # 产品文档
+  - "brainstorm_ideas"   # 产品创意
+
+# 模型配置
+model_configs:
+  # 主模型 - 使用通用能力强的本地模型
+  - model_name: "llama3:instruct"   # LLaMA 3指令模型
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.6      # 中等温度，平衡创造性和逻辑性
+    top_p: 0.9
+    frequency_penalty: 0.1
+    presence_penalty: 0.2
+    is_primary: true
+
+  # 备用模型 - 使用其他模型
+  - model_name: "phi3:mini"            # Phi-3 Mini小型模型
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.5
+    top_p: 0.85
+    frequency_penalty: 0.1
+    presence_penalty: 0.1
+    is_primary: false
+
+# 辩论专用配置 - 更强的表达和说服力
+debate_model_config:
+  model_name: "llama3:instruct"
+  provider: "ollama"
+  max_tokens: 3500
+  temperature: 0.7            # 较高温度，增强说服力
+  top_p: 0.95
+  frequency_penalty: 0.1
+  presence_penalty: 0.3

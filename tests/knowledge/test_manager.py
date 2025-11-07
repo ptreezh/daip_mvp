@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+
 from daip_live.core.models import KnowledgeBaseChanges, KnowledgeSource
 from daip_live.knowledge.manager import KnowledgeManager
 

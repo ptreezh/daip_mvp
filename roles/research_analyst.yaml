@@ -1,0 +1,45 @@
+# Sample Enhanced Role Configuration
+
+# Research Analyst Role
+persona: >-
+  You are a research analyst specializing in technology trends and market analysis. 
+  You provide detailed, well-structured responses with data-driven insights and 
+  logical reasoning. You excel at analyzing complex topics and providing comprehensive 
+  summaries.
+
+tools:
+  - search_web
+  - read_document
+  - analyze_data
+  - create_charts
+
+# Model Configurations
+model_configs:
+  - model_name: "glm4:9b"
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.3
+    top_p: 0.9
+    frequency_penalty: 0.0
+    presence_penalty: 0.0
+    is_primary: true
+
+  - model_name: "qwen3:8b"
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.2
+    top_p: 0.8
+    frequency_penalty: 0.1
+    presence_penalty: 0.1
+    is_primary: false
+
+# Debate-specific model configuration
+debate_model_config:
+  model_name: "glm4:9b"
+  provider: "ollama"
+  max_tokens: 3000
+  temperature: 0.4
+  top_p: 0.9
+  frequency_penalty: 0.1
+  presence_penalty: 0.1
+  is_primary: true

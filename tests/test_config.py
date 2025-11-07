@@ -1,5 +1,6 @@
 
 import pytest
+
 from daip_live.config import ConfigError, ConfigManager
 from daip_live.core.models import AppConfig
 

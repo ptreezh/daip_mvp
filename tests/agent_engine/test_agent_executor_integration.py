@@ -3,10 +3,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from src.daip_live.agent_engine.executor import AgentExecutor
-from src.daip_live.core.models import FinalResponseEvent, ToolCallEvent, ToolOutputEvent
-from src.daip_live.p4_role_manager_tools.tool_manager import ToolManager
-from src.daip_live.p4_role_manager_tools.tools import tool
+from daip_live.agent_engine.executor import AgentExecutor
+from daip_live.core.models import FinalResponseEvent, ToolCallEvent, ToolOutputEvent
+from daip_live.p4_role_manager_tools.tool_manager import ToolManager
+from daip_live.p4_role_manager_tools.tools import tool
 
 pytestmark = pytest.mark.asyncio
 
@@ -48,11 +48,18 @@ async def test_agent_executes_real_tool_via_tool_manager(integrated_agent_execut
     # Arrange
     agent = integrated_agent_executor
     agent.tool_manager.tool_permission_config.tools['add'] = 'allow'
+    
+    # Configure memory service mock
+    from daip_live.core.models import TodoItem
+    agent.memory_service.construct_prompt = AsyncMock(return_value="mocked prompt")
+    agent.memory_service.get_todo_list = AsyncMock(return_value=[TodoItem(id=1, description="test", status="pending", priority=1)])
+    agent.memory_service.is_todo_list_complete = AsyncMock(side_effect=[False, True])
+    agent.memory_service.update_todo_status = AsyncMock()
 
     # Mock the model_provider to simulate an LLM deciding to use the 'add' tool
     agent.model_provider.generate.side_effect = [
-        "I need to add two numbers. Use Tool: add(a=5, b=10) Confidence: 0.99",
-        "The result of the addition is 15. Confidence: 0.99"
+        ("I need to add two numbers. Use Tool: add(a=5, b=10) Confidence: 0.99", {}),
+        ("The result of the addition is 15. Confidence: 0.99", {})
     ]
 
     # Act

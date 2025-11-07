@@ -151,12 +151,6 @@
 - 焦点模式行为测试
 - 错误处理测试
 
-#### 实施规范
-- **TDD原则**: 先测试后实现
-- **BMAD方法**: 行为驱动开发
-- **KIRO规范**: 清晰的需求-设计-实现分离
-- **SOLID原则**: 单一职责、开闭原则等
-
 ### 任务2：TDD工作流规范建立
 **状态**: 进行中
 **优先级**: 高
@@ -213,3 +207,56 @@
 2.  再次运行 `tests/test_tui_integration.py`，预期 `test_output_widget_is_richlog` 测试将会通过，使TDD状态进入 **GREEN**。
 3.  进行代码重构 (REFACTOR)，清理代码并审查变更。
 4.  更新 `PROJECT_STATUS.md` 中的TUI测试失败条目。
+
+---
+
+## 2025-10-09 星期四
+
+### 任务：GUI后端 (P7) 启动与 `SessionManager` 重构
+
+**目标**: 修复 `memory.SessionManager` 的设计缺陷，并更新所有调用它的地方，以确保整个项目的一致性。
+
+**详细成果**:
+
+1.  **GUI后端 (P7) 启动**:
+    *   确认GUI后端（FastAPI + SPA）是下一个主要任务。
+    *   创建 `tests/p7_gui/test_api.py` 和 `src/daip_live/p7_gui/` 目录。
+    *   修复了 `tests/p7_gui/test_api.py` 中的 `httpx.AsyncClient` 兼容性问题（使用 `httpx.ASGITransport`）。
+    *   修复了 `tests/p7_gui/test_api.py` 中 `POST /api/sessions` 请求体缺失导致的 `422` 错误。
+    *   **`tests/p7_gui/test_api.py` 现在已通过。**
+
+2.  **`SessionManager` 架构缺陷修复**:
+    *   将 `src/daip_live/memory/session_manager.py` 的 `__init__` 方法修改为接受 `db_manager` 依赖注入。
+    *   更新了 `src/daip_live/container.py` 以正确注入 `db_manager` 到 `SessionManager`。
+    *   修复了 `src/daip_live/cli.py` 中手动实例化 `SessionManager` 的地方。
+    *   修复了 `src/daip_live/tui.py` 中手动实例化 `SessionManager` 的地方。
+    *   **`tests/memory/test_session_manager.py` 现在已通过。**
+
+3.  **测试环境清理**:
+    *   配置 `pytest.ini` 忽略 `litellm/` 目录，大幅减少了无关错误。
+    *   删除了过时的 `tests/test_gui/` 目录。
+    *   重命名了冲突的测试文件 (`tests/permission/test_tui_commands.py` -> `test_permission_rule_manager.py`, `tests/permission/test_tui_integration.py` -> `test_tui_permission_commands.py`)，解决了 `import file mismatch` 错误。
+    *   重命名了脚本文件 (`quick_test.py` -> `quick_test_script.py`, `test_e2e_debate_functionality.py` -> `e2e_script_debate_functionality.py`, `test_current_debate_system.py` -> `analysis_debate_system.py`)，防止 `pytest` 错误收集。
+    *   修复了 `test_logo.py` 中的 `IndentationError` 和 `asyncio` 装饰器缺失问题。
+    *   修复了 `tests/test_status_bar_synchronization.py` 中 `ModelProvider` 的导入错误。
+    *   修复了 `tests/test_token_calculation_consistency.py` 中 `TUIApp` 和 `ModelProvider` 的导入/实例化错误。
+    *   **`test_logo.py` 现在已通过。**
+
+4.  **`AgentExecutor` 重构对齐**:
+    *   在 `src/daip_live/memory/service.py` 中添加了缺失的 `update_todo_status` 方法。
+    *   协调修改了 `src/daip_live/agent_engine/step_executor.py`, `src/daip_live/agent_engine/executor.py`, `src/daip_live/agent_engine/chat_executor.py` 三个文件，确保 `session` 对象正确传递，并将会话历史记录到 `session.history`。
+    *   修复了 `tests/agent_engine/test_agent_executor.py` 中 `mocker.patch` 目标错误的问题。
+    *   修复了 `tests/agent_engine/test_agent_executor_session_integration.py` 中的 `AssertionError` (关于 `participant_ids` 和 `summary` 字段的期望值)。
+    *   **`tests/agent_engine/test_agent_executor.py` 现在已通过。**
+    *   **`tests/agent_engine/test_agent_executor_session_integration.py` 现在已通过。**
+
+**当前状态**:
+*   `SessionManager` 的底层缺陷已修复，并已在多个关键应用代码和测试文件中得到验证。
+*   测试环境已大幅清理，排除了大量干扰。
+*   `agent_engine` 目录下最核心的几个测试现在都已通过。
+
+**下一步计划**:
+*   明天将继续运行完整的 `pytest` 套件，获取最新的失败列表。
+*   系统性地修复剩余的测试失败，特别是 `agent_engine` 目录下其他未通过的测试，以及其他模块中因 `SessionManager` 变更而导致的失败。
+
+---

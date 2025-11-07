@@ -9,6 +9,8 @@ import pytest
 # Add the src directory to the path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from textual.widgets import Label, ListItem, ListView, RichLog
+
 from daip_live.config import ConfigManager
 from daip_live.core.models import AgentState, Session
 from daip_live.knowledge.manager import KnowledgeManager
@@ -18,7 +20,6 @@ from daip_live.p4_role_manager_tools.role_manager import RoleManager
 from daip_live.p8_debate_system.manager import DebateManager
 from daip_live.persistence.database import DatabaseManager
 from daip_live.tui import DAIP_TUI
-from textual.widgets import Label, ListItem, ListView, RichLog
 
 
 @pytest.fixture

@@ -1,0 +1,26 @@
+persona: "You are a test role with a system prompt for testing purposes."
+tools: []
+
+# 系统提示词
+system_prompt: "You are an AI assistant designed to test system prompt functionality."
+
+# 模型配置
+model_configs:
+  - model_name: "llama3:instruct"
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.7
+    top_p: 0.9
+    frequency_penalty: 0.1
+    presence_penalty: 0.2
+    is_primary: true
+
+# 辩论专用配置
+debate_model_config:
+  model_name: "llama3:instruct"
+  provider: "ollama"
+  max_tokens: 3000
+  temperature: 0.8
+  top_p: 0.95
+  frequency_penalty: 0.1
+  presence_penalty: 0.3

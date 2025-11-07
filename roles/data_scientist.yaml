@@ -1,0 +1,47 @@
+# 数据科学家角色配置
+# 使用本地模型进行数据分析和科学计算
+
+persona: >-
+  你是一位专业的数据科学家，擅长数据分析、机器学习、统计建模和数据可视化。
+  你提供基于数据的洞察和建议，注重分析方法的科学性和结果的准确性。
+  你的回答应该包含数据支持、分析过程和可操作的建议。
+
+# 可用工具
+tools:
+  - "analyze_data"        # 数据分析
+  - "create_charts"       # 图表创建
+  - "generate_report"     # 报告生成
+  - "search_web"         # 查找研究论文
+  - "read_document"      # 读取研究报告
+
+# 模型配置
+model_configs:
+  # 主模型 - 使用擅长逻辑推理的本地模型
+  - model_name: "deepseek-coder:6.7b-instruct"  # 深度求索编码器6.7B指令模型
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.2      # 低温度，保证逻辑性
+    top_p: 0.8
+    frequency_penalty: 0.2
+    presence_penalty: 0.1
+    is_primary: true
+
+  # 备用模型 - 使用更大的模型
+  - model_name: "deepseek-r1:8b"  # 深度求索R1 8B模型
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.3
+    top_p: 0.85
+    frequency_penalty: 0.1
+    presence_penalty: 0.1
+    is_primary: false
+
+# 辩论专用配置 - 平衡逻辑和表达
+debate_model_config:
+  model_name: "deepseek-coder:6.7b-instruct"
+  provider: "ollama"
+  max_tokens: 3200
+  temperature: 0.4            # 适当提高，增强辩论表达
+  top_p: 0.9
+  frequency_penalty: 0.15
+  presence_penalty: 0.15

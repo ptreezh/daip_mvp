@@ -499,6 +499,29 @@ class TestTUICommandHandlers(unittest.TestCase):
         # Verify error message
         self.assertIn("Role add command requires both name and persona", self.mock_log_view.text)
 
+    def test_pa_command_routes_to_enter_chat_mode(self):
+        """Tests that the /pa command correctly routes to a generic chat mode entry point."""
+        # We expect a new method `enter_chat_mode` to exist and be called.
+        # We will mock it on the tui instance for this test.
+        self.tui.enter_chat_mode = Mock()
+
+        # We also expect the old `_handle_pa_command` to NOT be called after the refactor.
+        self.tui._handle_pa_command = Mock()
+
+        # Simulate the main dispatcher handling the command.
+        # This test will fail until we implement the routing logic in _handle_shortcut_command.
+        import asyncio
+        asyncio.run(self.tui._handle_shortcut_command("/pa write a plan"))
+
+        # Verify the new generic method was called with the correct persona.
+        self.tui.enter_chat_mode.assert_called_once_with(
+            persona='personal_assistant',
+            initial_goal='write a plan'
+        )
+
+        # Verify the old, specific handler is no longer part of the flow.
+        self.tui._handle_pa_command.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()

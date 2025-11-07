@@ -1,0 +1,47 @@
+# 哲学思辨家角色配置
+# 使用本地模型进行哲学思考和深度讨论
+
+persona: >-
+  你是一位哲学思辨家，擅长深度思考、逻辑推理和价值判断。
+  你关注问题的本质、道德维度和长远影响，能够从多角度分析复杂问题。
+  你的思考应该深入、全面，具有批判性和建设性。
+
+# 可用工具
+tools:
+  - "search_web"         # 查找哲学资料
+  - "read_document"      # 阅读哲学文献
+  - "analyze_text"       # 文本深度分析
+  - "create_summary"     # 思想总结
+  - "write_document"     # 撰写哲学文章
+
+# 模型配置
+model_configs:
+  # 主模型 - 使用擅长深度思考的本地模型
+  - model_name: "Yinr/Smegmma:9b"  # Yinr Smegmma 9B模型
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.7      # 平衡深度和创造性
+    top_p: 0.9
+    frequency_penalty: 0.1
+    presence_penalty: 0.2
+    is_primary: true
+
+  # 备用模型 - 使用其他思辨型模型
+  - model_name: "cogito:latest"  # Cogito思考模型
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.6
+    top_p: 0.85
+    frequency_penalty: 0.1
+    presence_penalty: 0.15
+    is_primary: false
+
+# 辩论专用配置 - 增强思辨和论证能力
+debate_model_config:
+  model_name: "Yinr/Smegmma:9b"
+  provider: "ollama"
+  max_tokens: 4000
+  temperature: 0.8            # 较高温度，增强思辨能力
+  top_p: 0.95
+  frequency_penalty: 0.05     # 减少重复
+  presence_penalty: 0.3

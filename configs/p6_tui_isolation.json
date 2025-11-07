@@ -1,0 +1,76 @@
+{
+  "module_name": "P6 TUI",
+  "original_paths": [
+    "src/daip_live/tui.py",
+    "src/daip_live/tui_enhanced.py",
+    "src/daip_live/tui_logo.py"
+  ],
+  "isolated_paths": [
+    "src/daip_live/tui_v1/main.py",
+    "src/daip_live/tui_v1/enhanced.py",
+    "src/daip_live/tui_v1/logo.py"
+  ],
+  "config_overrides": {
+    "config/tui.yaml": {
+      "tui": {
+        "version": "v1_componentized",
+        "theme": "dark",
+        "components": {
+          "enabled": true,
+          "state_management": true,
+          "event_system": true
+        }
+      },
+      "components": {
+        "layout": {
+          "type": "responsive",
+          "auto_resize": true
+        },
+        "navigation": {
+          "show_breadcrumbs": true,
+          "quick_actions": true
+        },
+        "input_area": {
+          "auto_complete": true,
+          "history_size": 1000
+        },
+        "display_area": {
+          "auto_scroll": true,
+          "max_lines": 10000,
+          "syntax_highlighting": true
+        },
+        "status_bar": {
+          "show_metrics": true,
+          "update_interval": 1
+        }
+      }
+    },
+    "config/themes.yaml": {
+      "themes": {
+        "dark": {
+          "primary": "#00ff41",
+          "secondary": "#008f11",
+          "background": "#0d0d0d",
+          "foreground": "#ffffff"
+        },
+        "light": {
+          "primary": "#006400",
+          "secondary": "#228b22",
+          "background": "#ffffff",
+          "foreground": "#000000"
+        }
+      }
+    }
+  },
+  "port_overrides": {
+    "tui_service": 8010,
+    "component_manager": 8011,
+    "state_manager": 8012
+  },
+  "data_overrides": {
+    "component_cache": "cache_v1/tui/components",
+    "state_storage": "data_v1/tui/state.json",
+    "theme_cache": "cache_v1/tui/themes",
+    "logs": "logs_v1/tui"
+  }
+}

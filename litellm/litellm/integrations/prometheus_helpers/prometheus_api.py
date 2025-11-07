@@ -3,7 +3,7 @@ Helper functions to query prometheus API
 """
 
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from litellm import get_secret
@@ -97,7 +97,7 @@ async def get_daily_spend_from_prometheus(api_key: Optional[str]):
         )
 
     # Calculate the start and end dates for the last 30 days
-    end_date = datetime.utcnow()
+    end_date = datetime.now(timezone.utc)
     start_date = end_date - timedelta(days=30)
 
     # Format dates as ISO 8601 strings with UTC offset

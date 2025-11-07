@@ -1,33 +1,41 @@
 # pyproject.toml
 
-[tool.poetry]
-name = "daip_live"
+[project]
+name = "daip-live"
 version = "0.1.0"
 description = "Dynamic AI-driven Project-execution LIVE system"
-authors = ["DAIP-LIVE Team"]
+authors = [
+    {name = "DAIP-LIVE Team"}
+]
 readme = "README.md"
-packages = [{include = "daip_live", from = "src"}]
+requires-python = ">=3.9,<3.9.7 || >3.9.7,<3.13"
+dependencies = [
+    "typer>=0.17.0,<1.0.0",
+    "textual>=0.66.0,<1.0.0",
+    "streamlit>=1.35.0,<2.0.0",
+    "pydantic>=2.7.4,<3.0.0",
+    "PyYAML>=6.0.1,<7.0.0",
+    "sqlalchemy>=2.0.30,<3.0.0",
+    "faiss-cpu>=1.8.0,<2.0.0",
+    "langchain>=0.2.5,<1.0.0",
+    "python-docx>=1.1.2,<2.0.0",
+    "arxiv>=2.1.0,<3.0.0",
+    "litellm>=1.76.1,<2.0.0",
+    "rich>=14.1.0,<15.0.0",
+    "uvicorn[standard]>=0.35.0,<1.0.0",
+    "pyperclip>=1.8.2,<2.0.0",
+    "fastapi>=0.116.1,<1.0.0",
+    "dependency-injector>=4.41.0,<5.0.0",
+    "scholarly>=1.7.11,<2.0.0",
+    "pytest-asyncio (>=1.2.0,<2.0.0)"
+]
 
-[tool.poetry.dependencies]
-python = ">=3.9,<3.13"
-typer = "^0.17.0"
-textual = "^0.66.0"
-streamlit = {version = "^1.35.0", python = ">=3.9,<3.9.7 || >3.9.7,<3.12"}
-pydantic = "^2.7.4"
-PyYAML = "^6.0.1"
-# For data persistence
-sqlalchemy = "^2.0.30"
-# For knowledge management
-faiss-cpu = "^1.8.0" # or faiss-gpu
-langchain = "^0.2.5"
-# For built-in tools
-python-docx = "^1.1.2"
-arxiv = "^2.1.0"
-litellm = "^1.76.1"
-rich = "^14.1.0"
-fastapi = "^0.116.1"
-uvicorn = {extras = ["standard"], version = "^0.35.0"}
-pyperclip = "^1.8.2"
+[project.scripts]
+daip = "daip_live.cli:app"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
@@ -36,14 +44,6 @@ mypy = "^1.10.0"
 ruff = "^0.4.4"
 pytest-mock = "^3.14.1"
 pytest-asyncio = "^1.1.0"
-httpx = "^0.28.1"
-
-[tool.poetry.scripts]
-daip = "daip_live.cli:app"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
 
 # --- Tool Configurations ---
 
@@ -66,6 +66,16 @@ warn_unused_configs = true
 ignore_missing_imports = true
 # For stricter checking
 strict = true
+
+
+
+
+
+
+
+
+
+
 
 
 

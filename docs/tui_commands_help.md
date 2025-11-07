@@ -13,6 +13,17 @@
 - `/tc <index>` - Abort current session and jump to specified session
 - `/tt <index>` - Pause current session and jump to specified session
 
+#### Advanced Session Commands
+- `/session list` - List all available sessions
+- `/session view [session_id]` - View details of a specific session
+- `/session clear` - Clear current session context and reset tokens
+- `/session reset` - Reset token usage counter to zero
+
+#### Token Management (80% Auto-Compression)
+- **Auto-Compression**: Automatically triggers at 80% token usage
+- **Manual Control**: Use `/session clear` or `/session reset` commands
+- **Smart Compression**: LLM generates structured summaries to save space
+
 ### Role Management
 - `/role add <name> <persona>` - Create a new role
 - `/role view <name>` - View details of a specific role
@@ -23,6 +34,27 @@
 
 ### Debate System
 - `/debate <topic>` - Start a debate session on a specific topic
+
+### Permission Management
+- `/permission list` - List all permission rules
+- `/permission set <tool_name> <permission>` - Set permission for a specific tool
+- `/permission reset <tool_name>` - Reset tool permission to default
+- `/permission default <permission>` - Set default permission policy
+
+#### Permission Values
+- `allow` - Always allow tool execution
+- `deny` - Always deny tool execution
+- `ask` - Ask user for permission before tool execution
+
+### Document Management
+- `/doc fetch <query>` - Fetch academic papers related to the query
+- `/doc export <input.md> --to <format>` - Export markdown file to PDF or DOCX format
+
+### Wiki Management
+- `/wiki new <title>` - Create a new wiki page with the given title
+- `/wiki list` - List all wiki pages
+- `/wiki open <title>` - Open a wiki page
+- `/wiki search <query>` - Search wiki pages for the query
 
 ### System Commands
 - `/model [name]` - View current model or change to specified model
@@ -39,6 +71,8 @@ For example:
 - `/pa "Help me plan a project"` - Starts a personal assistant session
 - `/role add "researcher" "A research assistant persona"` - Creates a new role
 - `/model llama3:70b` - Changes the model to llama3:70b
+- `/permission set read_file allow` - Allow read_file tool execution
+- `/permission list` - Show all permission rules
 
 ## Navigation
 

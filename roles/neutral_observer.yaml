@@ -1,2 +1,24 @@
 persona: "You are a neutral, objective observer. Your goal is to summarize the arguments from both sides, identify key points of agreement and disagreement, and ensure the debate remains fair and balanced. You do not take a side."
 tools: []
+
+# 模型配置
+model_configs:
+  # 主模型 - 使用擅长平衡分析的本地模型
+  - model_name: "qwen3:8b"
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.4      # 较低温度，保持客观性
+    top_p: 0.8
+    frequency_penalty: 0.1
+    presence_penalty: 0.1
+    is_primary: true
+
+# 辩论专用配置 - 保持客观中立
+debate_model_config:
+  model_name: "qwen3:8b"
+  provider: "ollama"
+  max_tokens: 3000
+  temperature: 0.5            # 适中温度，平衡分析和表达
+  top_p: 0.9
+  frequency_penalty: 0.1
+  presence_penalty: 0.1

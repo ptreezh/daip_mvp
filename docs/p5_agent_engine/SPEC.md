@@ -40,3 +40,23 @@ The `AgentExecutor` will source the data for the `AgentStatus` model as follows:
 -   `model_name`: From the configuration of the loaded model provider: `self.model_provider.config.model`.
 -   `tokens_used`: **This requires implementation.** The `AgentExecutor` must be modified to inspect the response object from `litellm.completion` after each call and accumulate the `usage.total_tokens` value.
 -   `tokens_total`: This will be based on the context window of the current `model_name`. A mapping of model names to context window sizes will need to be added to the system, likely within the `ModelProvider` or a new configuration service.
+
+## 3. Execution Modes
+
+The Agent Engine supports two distinct execution modes to handle different use cases: a task-oriented mode for automated workflows and a conversational mode for interactive sessions.
+
+### 3.1. Task-Oriented Mode (`run`)
+
+-   **Method**: `async def run(self, goal: str, ...) -> AsyncGenerator[AgentEvent, None]`
+-   **Purpose**: To execute a predefined, non-interactive sequence of tasks.
+-   **Mechanism**: This mode is driven by a `todo_list` or a formal `workflow_definition`. The agent executes each step in the sequence until the list is complete or a failure occurs.
+-   **Use Case**: Ideal for automated workflows where the agent is given a complex goal that can be broken down into a plan and executed without user intervention.
+-   **Lifecycle**: The `run` method terminates once the task sequence is finished. It is not designed for persistent, back-and-forth interaction.
+
+### 3.2. Conversational Mode (`chat_run`)
+
+-   **Method**: `async def chat_run(self, initial_goal: str) -> AsyncGenerator[AgentEvent, None]`
+-   **Purpose**: To engage in an open-ended, interactive conversation with a user.
+-   **Mechanism**: This mode is driven by a `user_input_queue`. After processing the `initial_goal`, the agent enters a persistent loop, waiting for new input from the queue. Each new input is treated as the next conversational turn.
+-   **Use Case**: The primary mode for the "Personal Assistant" (`/pa`) feature in the TUI, where the user expects a continuous dialogue.
+-   **Lifecycle**: The `chat_run` method runs indefinitely until the session is explicitly terminated, allowing for a stateful, multi-turn conversation.

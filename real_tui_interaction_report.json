@@ -1,0 +1,220 @@
+{
+  "timestamp": "2025-10-24T20:01:55.239586",
+  "summary": {
+    "total_tests": 4,
+    "passed_tests": 4,
+    "failed_tests": 0,
+    "success_rate": 100.0,
+    "total_steps": 26
+  },
+  "test_results": [
+    {
+      "test": "TUI启动和退出",
+      "status": "成功",
+      "summary": "TUI启动和退出流程正常",
+      "steps": 4
+    },
+    {
+      "test": "CLI命令测试",
+      "status": "成功",
+      "summary": "CLI命令测试完成",
+      "steps": 8
+    },
+    {
+      "test": "TUI交互命令测试",
+      "status": "成功",
+      "summary": "TUI交互命令测试完成",
+      "steps": 3
+    },
+    {
+      "test": "系统集成测试",
+      "status": "成功",
+      "summary": "系统集成测试完成",
+      "steps": 11
+    }
+  ],
+  "detailed_log": [
+    {
+      "timestamp": "20:01:03",
+      "step": "TUI启动和退出",
+      "action": "启动TUI进程",
+      "result": "进行中",
+      "details": ""
+    },
+    {
+      "timestamp": "20:01:06",
+      "step": "TUI启动和退出",
+      "action": "发送退出命令",
+      "result": "进行中",
+      "details": "/quit"
+    },
+    {
+      "timestamp": "20:01:07",
+      "step": "TUI启动和退出",
+      "action": "TUI正常退出",
+      "result": "成功",
+      "details": "进程已终止"
+    },
+    {
+      "timestamp": "20:01:07",
+      "step": "TUI启动和退出",
+      "action": "TUI进程状态",
+      "result": "成功",
+      "details": "退出码: 0"
+    },
+    {
+      "timestamp": "20:01:07",
+      "step": "CLI命令测试",
+      "action": "执行命令: daip --help",
+      "result": "进行中",
+      "details": "显示帮助信息"
+    },
+    {
+      "timestamp": "20:01:13",
+      "step": "CLI命令测试",
+      "action": "命令: daip --help",
+      "result": "成功",
+      "details": "执行完成"
+    },
+    {
+      "timestamp": "20:01:13",
+      "step": "CLI命令测试",
+      "action": "执行命令: daip role list",
+      "result": "进行中",
+      "details": "列出角色"
+    },
+    {
+      "timestamp": "20:01:19",
+      "step": "CLI命令测试",
+      "action": "命令: daip role list",
+      "result": "成功",
+      "details": "执行完成"
+    },
+    {
+      "timestamp": "20:01:19",
+      "step": "CLI命令测试",
+      "action": "执行命令: daip session list",
+      "result": "进行中",
+      "details": "列出会话"
+    },
+    {
+      "timestamp": "20:01:25",
+      "step": "CLI命令测试",
+      "action": "命令: daip session list",
+      "result": "成功",
+      "details": "执行完成"
+    },
+    {
+      "timestamp": "20:01:25",
+      "step": "CLI命令测试",
+      "action": "执行命令: daip knowledge sync",
+      "result": "进行中",
+      "details": "同步知识库"
+    },
+    {
+      "timestamp": "20:01:30",
+      "step": "CLI命令测试",
+      "action": "命令: daip knowledge sync",
+      "result": "警告",
+      "details": "返回码: 2"
+    },
+    {
+      "timestamp": "20:01:30",
+      "step": "TUI交互命令测试",
+      "action": "执行交互测试脚本",
+      "result": "进行中",
+      "details": ""
+    },
+    {
+      "timestamp": "20:01:35",
+      "step": "TUI交互命令测试",
+      "action": "交互测试",
+      "result": "成功",
+      "details": "脚本执行完成"
+    },
+    {
+      "timestamp": "20:01:35",
+      "step": "TUI交互命令测试",
+      "action": "测试过程",
+      "result": "失败",
+      "details": "argument of type 'NoneType' is not iterable"
+    },
+    {
+      "timestamp": "20:01:35",
+      "step": "系统集成测试",
+      "action": "检查配置文件",
+      "result": "成功",
+      "details": "文件存在，大小: 622 字节"
+    },
+    {
+      "timestamp": "20:01:35",
+      "step": "系统集成测试",
+      "action": "检查数据库文件",
+      "result": "成功",
+      "details": "文件存在，大小: 675840 字节"
+    },
+    {
+      "timestamp": "20:01:35",
+      "step": "系统集成测试",
+      "action": "检查知识库目录",
+      "result": "成功",
+      "details": "目录存在，包含 1 个文件"
+    },
+    {
+      "timestamp": "20:01:35",
+      "step": "系统集成测试",
+      "action": "检查角色目录",
+      "result": "成功",
+      "details": "目录存在，包含 12 个文件"
+    },
+    {
+      "timestamp": "20:01:35",
+      "step": "系统集成测试",
+      "action": "检查Wiki目录",
+      "result": "成功",
+      "details": "目录存在，包含 3 个文件"
+    },
+    {
+      "timestamp": "20:01:35",
+      "step": "系统集成测试",
+      "action": "检查辩论角色目录",
+      "result": "成功",
+      "details": "文件存在，大小: 0 字节"
+    },
+    {
+      "timestamp": "20:01:40",
+      "step": "系统集成测试",
+      "action": "导入TUI主模块",
+      "result": "失败",
+      "details": "argument of type 'NoneType' is not iterable"
+    },
+    {
+      "timestamp": "20:01:45",
+      "step": "系统集成测试",
+      "action": "导入CLI模块",
+      "result": "失败",
+      "details": "argument of type 'NoneType' is not iterable"
+    },
+    {
+      "timestamp": "20:01:50",
+      "step": "系统集成测试",
+      "action": "导入Agent执行器",
+      "result": "失败",
+      "details": "argument of type 'NoneType' is not iterable"
+    },
+    {
+      "timestamp": "20:01:50",
+      "step": "系统集成测试",
+      "action": "导入知识管理器",
+      "result": "失败",
+      "details": "argument of type 'NoneType' is not iterable"
+    },
+    {
+      "timestamp": "20:01:55",
+      "step": "系统集成测试",
+      "action": "导入辩论管理器",
+      "result": "失败",
+      "details": "argument of type 'NoneType' is not iterable"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+setup.py
+basic_tools/__init__.py
+basic_tools/core.py
+daip_live_basic_tools.egg-info/PKG-INFO
+daip_live_basic_tools.egg-info/SOURCES.txt
+daip_live_basic_tools.egg-info/dependency_links.txt
+daip_live_basic_tools.egg-info/requires.txt
+daip_live_basic_tools.egg-info/top_level.txt

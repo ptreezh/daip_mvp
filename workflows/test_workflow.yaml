@@ -1,0 +1,138 @@
+name: test_workflow
+version: 1.0.0
+description: A test workflow with various elements
+
+# 定义工作流变量
+variables:
+  project_name: "Test Project"
+  max_retries: 3
+
+# 定义数据流
+data_flow:
+  task1:
+    result: task2.input_data
+  task2:
+    output: task3.processed_data
+
+# 是否启用持久化
+persistence: true
+
+# 定义工作流元素
+elements:
+  # 任务元素
+  task1:
+    type: task
+    name: "初始化项目"
+    description: "初始化项目目录和基本配置"
+    role: "项目经理"
+    timeout: 300
+    retry_count: 2
+    retry_delay: 5
+    parallel: false
+    data_outputs:
+      - "result"
+    next:
+      - task2
+
+  task2:
+    type: task
+    name: "数据处理"
+    description: "处理输入数据"
+    role: "数据工程师"
+    parallel: true
+    data_inputs:
+      input_data: "task1.result"
+    data_outputs:
+      - "output"
+    next:
+      - condition1
+
+  # 条件分支元素
+  condition1:
+    type: condition
+    name: "检查数据质量"
+    description: "根据数据质量决定下一步操作"
+    data_inputs:
+      quality_score: "task2.output.quality"
+    condition: "quality_score > 0.8"
+    branches:
+      "true":
+        - task3
+      "false":
+        - task4
+    next:
+      - task5  # 默认路径
+
+  # 循环元素
+  loop1:
+    type: loop
+    name: "批量处理"
+    description: "对数据集进行批量处理"
+    data_inputs:
+      dataset: "task3.results"
+    condition: "index < len(dataset)"
+    max_iterations: 100
+    variable: "index"
+    next:
+      - task6
+
+  # 子工作流元素
+  subworkflow1:
+    type: subworkflow
+    name: "代码审查流程"
+    description: "执行代码审查子流程"
+    workflow_ref: "code_review_workflow"
+    next:
+      - task7
+
+  # 更多任务元素
+  task3:
+    type: task
+    name: "生成报告"
+    description: "生成数据分析报告"
+    role: "数据分析师"
+    data_inputs:
+      processed_data: "task2.output"
+    next:
+      - loop1
+
+  task4:
+    type: task
+    name: "数据清洗"
+    description: "清洗低质量数据"
+    role: "数据工程师"
+    retry_count: 3
+    retry_delay: 10
+    next:
+      - task2  # 重新处理
+
+  task5:
+    type: task
+    name: "存档结果"
+    description: "将结果存档到数据库"
+    role: "系统管理员"
+    next:
+      - end
+
+  task6:
+    type: task
+    name: "验证结果"
+    description: "验证批量处理结果"
+    next:
+      - subworkflow1
+
+  task7:
+    type: task
+    name: "发布版本"
+    description: "发布最终版本"
+    role: "项目经理"
+    next:
+      - end
+
+  end:
+    type: task
+    name: "工作流结束"
+    description: "工作流执行完成"
+
+# 指定起始元素
+start: task1

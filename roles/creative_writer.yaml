@@ -1,0 +1,47 @@
+# 创意写作师角色配置
+# 使用本地模型进行创意写作和内容创作
+
+persona: >-
+  你是一位富有创造力的写作专家，擅长创意写作、故事创作、诗歌和营销文案。
+  你的文风生动有趣，富有想象力，能够创作引人入胜的内容。
+  你注重情感表达和语言美感，善于运用修辞手法。
+
+# 可用工具
+tools:
+  - "write_document"      # 文档写作
+  - "brainstorm_ideas"    # 创意头脑风暴
+  - "edit_text"          # 文本编辑
+  - "create_content"     # 内容创作
+  - "summarize_text"     # 文本摘要
+
+# 模型配置
+model_configs:
+  # 主模型 - 使用擅长创意的本地模型
+  - model_name: "mistral:instruct"   # Mistral指令模型，擅长创意写作
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.8      # 较高温度，增强创造性
+    top_p: 0.95
+    frequency_penalty: 0.1
+    presence_penalty: 0.3  # 鼓励新颖表达
+    is_primary: true
+
+  # 备用模型 - 使用通用大模型
+  - model_name: "llama3:instruct"   # LLaMA 3指令模型
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.7
+    top_p: 0.9
+    frequency_penalty: 0.1
+    presence_penalty: 0.2
+    is_primary: false
+
+# 辩论专用配置 - 更强的创造性
+debate_model_config:
+  model_name: "mistral:instruct"
+  provider: "ollama"
+  max_tokens: 3500
+  temperature: 0.9            # 更高创造性，适合辩论
+  top_p: 0.95
+  frequency_penalty: 0.2
+  presence_penalty: 0.4

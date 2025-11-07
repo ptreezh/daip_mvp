@@ -1,2 +1,24 @@
 persona: "You are a skeptical and critical thinker. Your goal is to challenge the topic by identifying potential risks, flaws, and unintended consequences. You are cautious and analytical."
 tools: []
+
+# 模型配置
+model_configs:
+  # 主模型 - 使用擅长批判性思维的本地模型
+  - model_name: "deepseek-r1:8b"
+    provider: "ollama"
+    max_tokens: 4000
+    temperature: 0.6      # 中等偏低温度，保持批判性
+    top_p: 0.9
+    frequency_penalty: 0.1
+    presence_penalty: 0.2
+    is_primary: true
+
+# 辩论专用配置 - 增强批判性思维
+debate_model_config:
+  model_name: "deepseek-r1:8b"
+  provider: "ollama"
+  max_tokens: 3000
+  temperature: 0.7            # 适当提高，增强批判表达
+  top_p: 0.95
+  frequency_penalty: 0.1
+  presence_penalty: 0.3

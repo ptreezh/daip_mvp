@@ -51,13 +51,13 @@ def test_env(request):
     config_manager._config = mock_config
 
     db_manager = DatabaseManager(db_path=db_path)
-    session_manager = SessionManager()
+    session_manager = SessionManager(db_manager=db_manager)
     role_manager = RoleManager()
     model_provider = LiteLLMProvider(config=mock_config.llm_provider)
     knowledge_manager = KnowledgeManager(
         db_manager=db_manager,
         model_provider=model_provider,
-        config={"knowledge_dir": test_dir.name}
+        config=KnowledgeBaseConfig(directory=test_dir.name)
     )
     debate_manager = DebateManager(
         session_manager=session_manager,

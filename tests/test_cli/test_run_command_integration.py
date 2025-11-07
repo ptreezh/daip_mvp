@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock, patch
 
+from typer.testing import CliRunner
+
 from daip_live.cli import app
 from daip_live.core.models import (
     AppConfig,
@@ -7,7 +9,6 @@ from daip_live.core.models import (
     KnowledgeBaseConfig,
     LLMProviderConfig,
 )
-from typer.testing import CliRunner
 
 runner = CliRunner()
 

@@ -1,18 +1,19 @@
 """Tests for the LiteLLMProvider."""
 
 import pytest
+
+import litellm
 from daip_live.core.exceptions import ModelAuthenticationError
 from daip_live.core.models import ProviderConfig
 from daip_live.model_provider.provider import LiteLLMProvider
-
-import litellm
+from daip_live.core.config import get_safe_test_model
 
 
 class TestLiteLLMProvider:
     def test_initialization(self):
         """Tests that the provider can be initialized successfully."""
         config = ProviderConfig(
-            model="gpt-4o",
+            model=get_safe_test_model(),
             api_key="test_key"
         )
 

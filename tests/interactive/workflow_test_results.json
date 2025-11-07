@@ -1,0 +1,405 @@
+{
+  "test_time": 1760271483.459428,
+  "total_tests": 6,
+  "passed": 0,
+  "partial": 6,
+  "failed": 0,
+  "skipped": 0,
+  "workflow_steps": 57,
+  "workflows": [
+    "错误恢复工作流",
+    "协作工作流",
+    "学习工作流",
+    "研究工作流",
+    "生产力工作流",
+    "辩论工作流"
+  ],
+  "results": [
+    {
+      "test": "研究工作流程",
+      "status": "PARTIAL",
+      "details": "完整研究流程模拟完成",
+      "response_time": 15.090552568435669,
+      "timestamp": 1760271498.5499806
+    },
+    {
+      "test": "学习工作流程",
+      "status": "PARTIAL",
+      "details": "完整学习流程模拟完成",
+      "response_time": 15.055530786514282,
+      "timestamp": 1760271515.616434
+    },
+    {
+      "test": "辩论工作流程",
+      "status": "PARTIAL",
+      "details": "完整辩论流程模拟完成",
+      "response_time": 16.042582273483276,
+      "timestamp": 1760271533.6727452
+    },
+    {
+      "test": "协作工作流程",
+      "status": "PARTIAL",
+      "details": "完整协作流程模拟完成",
+      "response_time": 13.586317539215088,
+      "timestamp": 1760271549.2720184
+    },
+    {
+      "test": "生产力工作流程",
+      "status": "PARTIAL",
+      "details": "完整生产力流程模拟完成",
+      "response_time": 15.119767189025879,
+      "timestamp": 1760271566.402197
+    },
+    {
+      "test": "错误恢复工作流程",
+      "status": "PARTIAL",
+      "details": "完整错误恢复流程模拟完成",
+      "response_time": 10.078568935394287,
+      "timestamp": 1760271578.4950852
+    }
+  ],
+  "steps": [
+    {
+      "workflow": "研究工作流",
+      "step": "步骤1",
+      "description": "/role create \"AI研究员\" --description \"专注于人工智能研究的专家角色\"",
+      "timestamp": 1760271483.459428
+    },
+    {
+      "workflow": "研究工作流",
+      "step": "步骤2",
+      "description": "/role activate \"AI研究员\"",
+      "timestamp": 1760271484.968825
+    },
+    {
+      "workflow": "研究工作流",
+      "step": "步骤3",
+      "description": "/wiki create \"机器学习研究笔记\" --tags \"机器学习,AI,研究\"",
+      "timestamp": 1760271486.4787269
+    },
+    {
+      "workflow": "研究工作流",
+      "step": "步骤4",
+      "description": "/doc search \"transformer architecture attention mechanism\" --max 5",
+      "timestamp": 1760271487.9845023
+    },
+    {
+      "workflow": "研究工作流",
+      "step": "步骤5",
+      "description": "/doc download \"attention is all you need\" --max 3 --arxiv",
+      "timestamp": 1760271489.4917073
+    },
+    {
+      "workflow": "研究工作流",
+      "step": "步骤6",
+      "description": "/doc list",
+      "timestamp": 1760271491.0036256
+    },
+    {
+      "workflow": "研究工作流",
+      "step": "步骤7",
+      "description": "/wiki create \"Transformer模型研究\" --tags \"transformer,attention,NLP\"",
+      "timestamp": 1760271492.5119636
+    },
+    {
+      "workflow": "研究工作流",
+      "step": "步骤8",
+      "description": "请帮我总结Transformer模型的核心创新点",
+      "timestamp": 1760271494.0268607
+    },
+    {
+      "workflow": "研究工作流",
+      "step": "步骤9",
+      "description": "/compact current",
+      "timestamp": 1760271495.5414772
+    },
+    {
+      "workflow": "研究工作流",
+      "step": "步骤10",
+      "description": "/wiki export markdown ./research_export",
+      "timestamp": 1760271497.0455148
+    },
+    {
+      "workflow": "学习工作流",
+      "step": "步骤1",
+      "description": "/role create \"深度学习学生\" --description \"正在学习深度学习的学生\"",
+      "timestamp": 1760271500.561883
+    },
+    {
+      "workflow": "学习工作流",
+      "step": "步骤2",
+      "description": "/session create \"深度学习基础学习\"",
+      "timestamp": 1760271502.0636795
+    },
+    {
+      "workflow": "学习工作流",
+      "step": "步骤3",
+      "description": "/role activate \"深度学习学生\"",
+      "timestamp": 1760271503.5638604
+    },
+    {
+      "workflow": "学习工作流",
+      "step": "步骤4",
+      "description": "/wiki create \"深度学习学习笔记\" --tags \"深度学习,学习,笔记\"",
+      "timestamp": 1760271505.074361
+    },
+    {
+      "workflow": "学习工作流",
+      "step": "步骤5",
+      "description": "请详细解释什么是神经网络，包括基本结构和原理",
+      "timestamp": 1760271506.5764444
+    },
+    {
+      "workflow": "学习工作流",
+      "step": "步骤6",
+      "description": "请解释反向传播算法的工作原理",
+      "timestamp": 1760271508.0838377
+    },
+    {
+      "workflow": "学习工作流",
+      "step": "步骤7",
+      "description": "能给我一个简单的神经网络实现的代码示例吗？",
+      "timestamp": 1760271509.5880444
+    },
+    {
+      "workflow": "学习工作流",
+      "step": "步骤8",
+      "description": "/wiki create \"反向传播算法详解\" --tags \"算法,优化,梯度下降\"",
+      "timestamp": 1760271511.1010828
+    },
+    {
+      "workflow": "学习工作流",
+      "step": "步骤9",
+      "description": "请帮我总结今天学习的主要内容",
+      "timestamp": 1760271512.6051207
+    },
+    {
+      "workflow": "学习工作流",
+      "step": "步骤10",
+      "description": "/compact current",
+      "timestamp": 1760271514.112651
+    },
+    {
+      "workflow": "辩论工作流",
+      "step": "步骤1",
+      "description": "/role create \"AI乐观派\" --description \"认为AI将极大改善人类生活的专家\"",
+      "timestamp": 1760271517.630163
+    },
+    {
+      "workflow": "辩论工作流",
+      "step": "步骤2",
+      "description": "/role create \"AI谨慎派\" --description \"对AI发展持谨慎态度的专家\"",
+      "timestamp": 1760271519.6311631
+    },
+    {
+      "workflow": "辩论工作流",
+      "step": "步骤3",
+      "description": "/session create \"AI发展影响辩论\"",
+      "timestamp": 1760271521.6375086
+    },
+    {
+      "workflow": "辩论工作流",
+      "step": "步骤4",
+      "description": "/debate start \"人工智能对就业市场的影响是利大于弊还是弊大于利？\" --roles \"AI乐观派,AI谨慎派\" --rounds 3",
+      "timestamp": 1760271523.6521897
+    },
+    {
+      "workflow": "辩论工作流",
+      "step": "步骤5",
+      "description": "请关注辩论的进展，记录主要论点",
+      "timestamp": 1760271525.662479
+    },
+    {
+      "workflow": "辩论工作流",
+      "step": "步骤6",
+      "description": "/wiki create \"AI就业影响辩论记录\" --tags \"辩论,AI,就业\"",
+      "timestamp": 1760271527.6677
+    },
+    {
+      "workflow": "辩论工作流",
+      "step": "步骤7",
+      "description": "请总结这场辩论的主要观点和结论",
+      "timestamp": 1760271529.67127
+    },
+    {
+      "workflow": "辩论工作流",
+      "step": "步骤8",
+      "description": "/compact full",
+      "timestamp": 1760271531.672124
+    },
+    {
+      "workflow": "协作工作流",
+      "step": "步骤1",
+      "description": "/permission list",
+      "timestamp": 1760271535.685701
+    },
+    {
+      "workflow": "协作工作流",
+      "step": "步骤2",
+      "description": "/permission grant wiki-manager collaborator",
+      "timestamp": 1760271537.1995564
+    },
+    {
+      "workflow": "协作工作流",
+      "step": "步骤3",
+      "description": "/wiki create \"团队协作项目\" --tags \"协作,团队,项目\"",
+      "timestamp": 1760271538.6996458
+    },
+    {
+      "workflow": "协作工作流",
+      "step": "步骤4",
+      "description": "/wiki create \"共享知识库\" --tags \"知识库,共享,团队\"",
+      "timestamp": 1760271540.21349
+    },
+    {
+      "workflow": "协作工作流",
+      "step": "步骤5",
+      "description": "/wiki create \"项目规范文档\" --tags \"规范,文档,协作\"",
+      "timestamp": 1760271541.7217715
+    },
+    {
+      "workflow": "协作工作流",
+      "step": "步骤6",
+      "description": "/sync all",
+      "timestamp": 1760271543.2383988
+    },
+    {
+      "workflow": "协作工作流",
+      "step": "步骤7",
+      "description": "/search \"协作项目\"",
+      "timestamp": 1760271544.738859
+    },
+    {
+      "workflow": "协作工作流",
+      "step": "步骤8",
+      "description": "/wiki export markdown ./collaboration_results",
+      "timestamp": 1760271546.2545362
+    },
+    {
+      "workflow": "协作工作流",
+      "step": "步骤9",
+      "description": "/permission check wiki-manager",
+      "timestamp": 1760271547.7686613
+    },
+    {
+      "workflow": "生产力工作流",
+      "step": "步骤1",
+      "description": "/role create \"内容创作者\" --description \"专业的内容创作和知识管理专家\"",
+      "timestamp": 1760271551.2824297
+    },
+    {
+      "workflow": "生产力工作流",
+      "step": "步骤2",
+      "description": "/session create \"技术博客创作\"",
+      "timestamp": 1760271552.7957315
+    },
+    {
+      "workflow": "生产力工作流",
+      "step": "步骤3",
+      "description": "/role activate \"内容创作者\"",
+      "timestamp": 1760271554.306671
+    },
+    {
+      "workflow": "生产力工作流",
+      "step": "步骤4",
+      "description": "/doc search \"technical writing best practices\" --max 3",
+      "timestamp": 1760271555.8217437
+    },
+    {
+      "workflow": "生产力工作流",
+      "step": "步骤5",
+      "description": "/wiki create \"博客创作大纲\" --tags \"博客,大纲,创作\"",
+      "timestamp": 1760271557.3362834
+    },
+    {
+      "workflow": "生产力工作流",
+      "step": "步骤6",
+      "description": "请帮我写一篇关于机器学习入门的技术博客大纲",
+      "timestamp": 1760271558.8461204
+    },
+    {
+      "workflow": "生产力工作流",
+      "step": "步骤7",
+      "description": "请详细展开第一个章节的内容",
+      "timestamp": 1760271560.3614855
+    },
+    {
+      "workflow": "生产力工作流",
+      "step": "步骤8",
+      "description": "/wiki create \"参考资料列表\" --tags \"参考,资源,链接\"",
+      "timestamp": 1760271561.8670697
+    },
+    {
+      "workflow": "生产力工作流",
+      "step": "步骤9",
+      "description": "/compact current",
+      "timestamp": 1760271563.3807154
+    },
+    {
+      "workflow": "生产力工作流",
+      "step": "步骤10",
+      "description": "/wiki export html ./blog_output",
+      "timestamp": 1760271564.8899472
+    },
+    {
+      "workflow": "错误恢复工作流",
+      "step": "步骤1",
+      "description": "/invalid_command_name",
+      "timestamp": 1760271568.4165163
+    },
+    {
+      "workflow": "错误恢复工作流",
+      "step": "步骤2",
+      "description": "/role create",
+      "timestamp": 1760271569.420442
+    },
+    {
+      "workflow": "错误恢复工作流",
+      "step": "步骤3",
+      "description": "/model switch nonexistent_model_name",
+      "timestamp": 1760271570.430692
+    },
+    {
+      "workflow": "错误恢复工作流",
+      "step": "步骤4",
+      "description": "/session switch nonexistent_session",
+      "timestamp": 1760271571.4392426
+    },
+    {
+      "workflow": "错误恢复工作流",
+      "step": "步骤5",
+      "description": "/help",
+      "timestamp": 1760271572.4488928
+    },
+    {
+      "workflow": "错误恢复工作流",
+      "step": "步骤6",
+      "description": "/role list",
+      "timestamp": 1760271573.4560785
+    },
+    {
+      "workflow": "错误恢复工作流",
+      "step": "步骤7",
+      "description": "/session list",
+      "timestamp": 1760271574.4638598
+    },
+    {
+      "workflow": "错误恢复工作流",
+      "step": "步骤8",
+      "description": "/model info",
+      "timestamp": 1760271575.4713237
+    },
+    {
+      "workflow": "错误恢复工作流",
+      "step": "步骤9",
+      "description": "测试系统恢复后的对话功能",
+      "timestamp": 1760271576.4847648
+    },
+    {
+      "workflow": "错误恢复工作流",
+      "step": "步骤10",
+      "description": "/help status",
+      "timestamp": 1760271577.492115
+    }
+  ]
+}

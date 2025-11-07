@@ -1,14 +1,16 @@
 
 import pytest
 
-from src.daip_live.core.models import AgentState, DialogueTurn
-from src.daip_live.memory.session_manager import SessionManager
+from daip_live.core.models import AgentState, DialogueTurn
+from daip_live.memory.session_manager import SessionManager
+from daip_live.persistence.database import DatabaseManager
 
 
 @pytest.fixture
 def session_manager():
     """Provides a SessionManager instance for testing."""
-    return SessionManager()
+    db_manager = DatabaseManager(db_path=":memory:")
+    return SessionManager(db_manager=db_manager)
 
 def test_full_session_lifecycle(session_manager):
     """

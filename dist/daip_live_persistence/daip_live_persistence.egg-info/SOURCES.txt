@@ -1,0 +1,9 @@
+setup.py
+daip_live_persistence.egg-info/PKG-INFO
+daip_live_persistence.egg-info/SOURCES.txt
+daip_live_persistence.egg-info/dependency_links.txt
+daip_live_persistence.egg-info/requires.txt
+daip_live_persistence.egg-info/top_level.txt
+persistence/__init__.py
+persistence/database.py
+persistence/tables.py

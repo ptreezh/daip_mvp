@@ -1,12 +1,29 @@
 database:
-  path: "daip_live.db"
-
-llm_provider:
-  default_model: "ollama/llama3"
-  embedding_model: "all-MiniLM-L6-v2"
-
+  path: daip_live.db
 knowledge_base:
-  directory: "docs/"
-
+  directory: docs/
+llm_provider:
+  default_model: ollama/glm-4.6:cloud
+  embedding_model: mock-embedding
+mcp:
+  markdownify:
+    auth:
+      token_env: MCP_MARKDOWNIFY_TOKEN
+      type: none
+    enabled: true
+    endpoint: http://localhost:8081
+    timeout_seconds: 15
+  permissions:
+    allowed_domains:
+    - arxiv.org
+    - doi.org
+    default: ask
+  scihub:
+    auth:
+      token_env: MCP_SCIHUB_TOKEN
+      type: none
+    enabled: true
+    endpoint: http://localhost:8082
+    timeout_seconds: 15
 role_manager:
-  roles_dir: "roles/"
+  roles_dir: roles/

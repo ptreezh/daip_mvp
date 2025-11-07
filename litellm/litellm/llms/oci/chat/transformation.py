@@ -3,6 +3,7 @@ import datetime
 import hashlib
 import json
 from typing import TYPE_CHECKING, Any, AsyncIterator, Dict, List, Optional, Tuple, Union
+from datetime import timezone
 from urllib.parse import urlparse
 
 import httpx
@@ -272,7 +273,7 @@ class OCIChatConfig(BaseConfig):
         path = parsed.path or "/"
         host = parsed.netloc
 
-        date = datetime.datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
+        date = datetime.datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")
         content_type = headers.get("content-type", "application/json")
         content_length = str(len(body))
         x_content_sha256 = sha256_base64(body)

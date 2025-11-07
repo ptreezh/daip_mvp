@@ -1,25 +1,50 @@
-# P8: Debate System Task List
+# TASK LIST: Debate Transcript Saving Enhancement
 
-This task list breaks down the implementation of the Debate System.
+- **SPEC Document**: `IMPROVEMENT_SAVE_TRANSCRIPT_SPEC.md`
+- **Overall Goal**: Enhance the debate report to include the full transcript and metadata, not just the summary.
 
-## Stage 1: Role Management Foundation (P4 Enhancement)
+---
 
-- [ ] **Task 1.1 (ROLE-MODEL)**: Verify that the `Role` model in `core/models.py` is sufficient. It should contain at least a `name` and a `persona` (prompt).
-- [ ] **Task 1.2 (ROLE-MANAGER)**: Implement the `RoleManager` in `p4_role_manager_tools`. It needs a method `get_role_by_name(name: str) -> Role`. For now, this can be hardcoded to return a few sample roles (e.g., a "pro" arguer and a "con" arguer).
-- [ ] **Task 1.3 (TEST-ROLE-MANAGER)**: Write tests for the `RoleManager` to ensure it correctly returns role objects.
+### TDD-Driven Task Breakdown
 
-## Stage 2: Debate Manager Implementation (TDD)
+-   [ ] **T01: [RED] Create a Failing Test for Transcript Saving**
+    -   **Objective**: Write an integration test that verifies the full debate transcript is saved, not just the summary.
+    -   **File**: Create a new test file, e.g., `tests/tui/test_debate_report_saving.py`.
+    -   **Method**:
+        1.  Set up a mock TUI environment with a `SessionManager` that holds a mock `Session` object containing a history of several `DialogueTurn`s.
+        2.  Create a mock `DebateCompleteEvent`.
+        3.  Call the `tui._save_debate_results(event)` method. This will create a file in a temporary directory.
+        4.  Read the content of the saved file.
+        5.  Assert that the file content contains the text from the mock `DialogueTurn`s.
+    -   **Expected Result**: The test will fail because the current implementation only writes the summary to the file.
 
-- [ ] **Task 2.1 (TEST-RED)**: Create `tests/p8_debate_system/test_debate_manager.py`. Write a failing test `test_debate_lifecycle` that mocks all dependencies (`SessionManager`, `RoleManager`, `ModelProvider`) and verifies that a full debate runs, creates a session, calls the model for each turn, and saves the final session with a summary.
-- [ ] **Task 2.2 (DEBATE-MANAGER-GREEN)**: Create `src/daip_live/p8_debate_system/manager.py`. Implement the `DebateManager` class and its `run_debate` method to make the test from 2.1 pass.
-- [ ] **Task 2.3 (TEST-REFACTOR)**: Add tests for edge cases, like invalid role names.
+-   [ ] **T02: [GREEN] Modify Save Logic to Access Full History**
+    -   **Objective**: Update the `_save_debate_results` method to access the complete debate history.
+    -   **File**: `src/daip_live/tui.py`.
+    -   **Method**:
+        1.  Modify `_save_debate_results` to use the `event.session_id` to fetch the full `Session` object from `self._session_manager`.
+        2.  Retrieve the `session.history` list, which contains all `DialogueTurn` objects.
 
-## Stage 3: CLI Integration
+-   [ ] **T03: [GREEN] Construct and Save the Full Report**
+    -   **Objective**: Format the full transcript and save it to the report file.
+    -   **File**: `src/daip_live/tui.py`.
+    -   **Method**:
+        1.  Inside `_save_debate_results`, create a list of strings for the report content.
+        2.  Add formatted metadata (Topic, Roles, etc.) from the `session` object.
+        3.  Iterate through `session.history` and append each turn's speaker and content to the list.
+        4.  Append the final `session.summary`.
+        5.  Join the list into a single string and write it to the file.
 
-- [ ] **Task 3.1 (CLI)**: Add the `daip debate start` command to `cli.py`.
-- [ ] **Task 3.2 (TEST-CLI)**: Write a test for the new CLI command.
+-   [ ] **T04: [GREEN] Verify the Fix**
+    -   **Objective**: Ensure the test created in T01 now passes.
+    -   **Method**: Run the test file `tests/tui/test_debate_report_saving.py`.
+    -   **Expected Result**: The test should now pass, as the full transcript is being saved.
 
-## Stage 4: Documentation & Logging
+-   [ ] **T05: [REFACTOR] Code Cleanup**
+    -   **Objective**: Review the modified code and tests for clarity and efficiency.
+    -   **Method**:
+        1.  Refactor `_save_debate_results` if needed to improve readability.
+        2.  Ensure test code is clean and comments are relevant.
+        3.  Remove any temporary debugging statements.
 
-- [ ] **Task 4.1 (DOCS)**: Update `README.md` with the new `debate` command.
-- [ ] **Task 4.2 (LOG)**: Update `WORK_LOG.md` to mark the completion of this work package.
+---

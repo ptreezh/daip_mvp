@@ -1,0 +1,53 @@
+{
+  "module_name": "P5 Agent Engine",
+  "original_paths": [
+    "src/daip_live/agent_engine"
+  ],
+  "isolated_paths": [
+    "src/daip_live/agent_engine_v1"
+  ],
+  "config_overrides": {
+    "config/agent_engine.yaml": {
+      "engine": {
+        "version": "v1_refactored",
+        "mode": "isolated"
+      },
+      "events": {
+        "enabled": true,
+        "bus_type": "memory"
+      },
+      "services": {
+        "intent_recognition": {
+          "provider": "isolated"
+        },
+        "execution_engine": {
+          "provider": "isolated"
+        },
+        "state_management": {
+          "provider": "isolated"
+        },
+        "permission_service": {
+          "provider": "isolated"
+        }
+      }
+    },
+    "config/database.yaml": {
+      "database": {
+        "url": "sqlite:///data_v1/daip_live_isolated.db",
+        "echo": false,
+        "pool_pre_ping": true
+      }
+    }
+  },
+  "port_overrides": {
+    "agent_engine": 8001,
+    "event_bus": 8002,
+    "state_service": 8003
+  },
+  "data_overrides": {
+    "database": "data_v1/isolated.db",
+    "logs": "logs_v1/agent_engine",
+    "cache": "cache_v1/agent_engine",
+    "sessions": "sessions_v1/agent_engine"
+  }
+}

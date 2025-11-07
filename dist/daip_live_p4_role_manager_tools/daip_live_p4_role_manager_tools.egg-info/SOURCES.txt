@@ -1,0 +1,13 @@
+setup.py
+daip_live_p4_role_manager_tools.egg-info/PKG-INFO
+daip_live_p4_role_manager_tools.egg-info/SOURCES.txt
+daip_live_p4_role_manager_tools.egg-info/dependency_links.txt
+daip_live_p4_role_manager_tools.egg-info/requires.txt
+daip_live_p4_role_manager_tools.egg-info/top_level.txt
+p4_role_manager_tools/__init__.py
+p4_role_manager_tools/role_manager.py
+p4_role_manager_tools/role_model_config.py
+p4_role_manager_tools/role_model_manager.py
+p4_role_manager_tools/tool_extension.py
+p4_role_manager_tools/tool_manager.py
+p4_role_manager_tools/tools.py
