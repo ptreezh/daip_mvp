@@ -9,6 +9,7 @@ from pathlib import Path
 from datetime import datetime
 from enum import Enum
 from typing import Any, List, Optional
+from difflib import get_close_matches
 
 import pyperclip
 import yaml
@@ -189,13 +190,14 @@ class AutocompletePopup(Container):
 
 
 class DAIP_TUI(App):
-    """A Textual app to interact with the 人格AI Agent."""
+    """A Textual app to interact with the AGENT PSY LAB Agent."""
 
     BINDINGS = [
         Binding("shift_tab", "toggle_focus", "切换焦点"),
         Binding("ctrl+a", "select_all", "全选", show=False),
         Binding("ctrl+c", "copy_text", "复制", show=False),
         Binding("ctrl+e", "_handle_ctrl_e_exit", "退出应用", show=False),
+        Binding("ctrl+q", "_handle_ctrl_q_exit", "退出会话/应用", show=False),
         Binding("escape", "_handle_escape_key", "退出输出模式", show=False),
     ]
 
@@ -341,6 +343,9 @@ class DAIP_TUI(App):
         self._debate_completed_event = asyncio.Event()
         self._participant_events = {}  # participant -> asyncio.Event
         
+        # Track background tasks for proper cleanup
+        self._background_tasks = set()
+        
         # System activity monitoring
         self._system_activity = {
             'events_processed': 0,
@@ -359,6 +364,10 @@ class DAIP_TUI(App):
         # Double CTRL+E exit detection
         self._last_ctrl_e_time: float = 0
         self._exit_hint_shown: bool = False
+        
+        # Double CTRL+Q exit detection
+        self._last_ctrl_q_time: float = 0
+        self._ctrl_q_press_count: int = 0
 
         # Discover available commands
         self._available_commands = []
@@ -457,15 +466,23 @@ class DAIP_TUI(App):
         """Action method for CTRL+E exit binding."""
         self._handle_ctrl_e_exit()
 
+    def action__handle_ctrl_q_exit(self) -> None:
+        """Action method for CTRL+Q exit binding."""
+        self._handle_ctrl_q_exit()
+
     def on_click(self, event) -> None:
-        main_log = self.query_one("#main_log")
-        # Use region check for more robust click detection in tests
-        if main_log.region.contains(event.screen_x, event.screen_y):
-            # Try to detect and handle link clicks
-            if self._handle_link_click(event):
-                return
-            if self.focus_mode == FocusMode.INPUT:
-                self.action_toggle_focus()
+        try:
+            main_log = self.query_one("#main_log")
+            # Use region check for more robust click detection in tests
+            if main_log.region.contains(event.screen_x, event.screen_y):
+                # Try to detect and handle link clicks
+                if self._handle_link_click(event):
+                    return
+                if self.focus_mode == FocusMode.INPUT:
+                    self.action_toggle_focus()
+        except NoMatches:
+            # If main_log is not found, ignore the click event
+            return
 
     def _handle_link_click(self, event) -> bool:
         """Handle link clicks in the output log.
@@ -590,16 +607,16 @@ class DAIP_TUI(App):
         self.query_one("#user_input").styles.border = ("heavy", "blue")
         print("Initial focus styles applied: input=heavy blue, log=solid grey")  # Debug
 
-        # Display 人格AI logo on startup with animation
+        # Display AGENT PSY LAB logo on startup with animation
         try:
             await self._display_startup_logo()
         except Exception as e:
             # If logo display fails, show simple welcome message
-            self._update_log_view("[bold green]Welcome to 人格AI! Ready for your command.[/bold green]")
+            self._update_log_view("[bold green]Welcome to AGENT PSY LAB! Ready for your command.[/bold green]")
 
         if self._goal is None:
             # This is a cold start, show welcome message
-            self._update_log_view("[bold green]Welcome to 人格AI! Ready for your command.[/bold green]")
+            self._update_log_view("[bold green]Welcome to AGENT PSY LAB! Ready for your command.[/bold green]")
             self._update_status_bar("Ready")
         else:
             # A goal was provided. Display it and wait for user to press Enter or edit.
@@ -629,13 +646,18 @@ class DAIP_TUI(App):
             await self._handle_shortcut_command(user_input)
         else:
             # Check if we have an active chat session
-            if hasattr(self._executor, 'user_input_queue') and self._executor.user_input_queue is not None:
-                try:
-                    self._executor.user_input_queue.put_nowait(user_input)
-                    self._update_log_view(f"[bold blue]> You:[/bold blue] {user_input}")
-                except Exception as e:
-                    # Queue might be full or session broken
-                    self._update_log_view(f"[bold red]> Error: Could not send message to session ({str(e)})[/bold red]")
+            if hasattr(self, '_executor') and self._executor is not None:
+                # Check if the executor has a user_input_queue and it's valid
+                if hasattr(self._executor, 'user_input_queue') and self._executor.user_input_queue is not None:
+                    try:
+                        self._executor.user_input_queue.put_nowait(user_input)
+                        self._update_log_view(f"[bold blue]> You:[/bold blue] {user_input}")
+                    except Exception as e:
+                        # Queue might be full or session broken
+                        self._update_log_view(f"[bold red]> Error: Could not send message to session ({str(e)})[/bold red]")
+                        self._start_new_chat_session(user_input)
+                else:
+                    # Executor exists but no input queue, start new session
                     self._start_new_chat_session(user_input)
             else:
                 # No active agent session, create one automatically
@@ -883,19 +905,13 @@ class DAIP_TUI(App):
                 input_widget = self.query_one(Input)
                 
                 # Only auto-complete if the suggestion is longer than current input
-                # This allows users to delete content without it being auto-completed back
-                if len(clean_suggestion) > len(value):
-                    # Replace only the part that matches what user was typing
-                    # This prevents duplication when user has already typed some letters
-                    if clean_suggestion.startswith(value):
-                        input_widget.value = clean_suggestion
-                    else:
-                        # Fallback to original behavior
-                        input_widget.value = clean_suggestion
-                    
-                    # Move cursor to end of the completed command
-                    input_widget.action_end()
-                    
+                # AND if the user is likely still typing (not deleting)
+                # Check if the clean suggestion starts with current value to avoid overwriting user's intent
+                if len(clean_suggestion) > len(value) and clean_suggestion.startswith(value):
+                    # Instead of auto-completing, just show the suggestion in popup
+                    # This allows users to accept or reject the suggestion
+                    pass
+                else:
                     # Remove any existing popup
                     if existing_popup_query:
                         existing_popup_query.first().remove()
@@ -908,73 +924,7 @@ class DAIP_TUI(App):
                 popup = AutocompletePopup(suggestions=suggestions, id="autocomplete-popup")
                 self.mount(popup)
                 popup.styles.offset = (self.query_one("#user_input").region.x, -3)
-        # Assign distinct colors to debate participants for visual identification
-        participant_colors = {}
-        colors = [
-            "cyan",      # Light blue
-            "magenta",   # Purple
-            "yellow",    # Yellow
-            "green",     # Green
-            "blue",      # Blue
-            "bright_magenta",  # Bright purple
-            "bright_cyan",     # Bright cyan
-            "bright_yellow",   # Bright yellow
-        ]
-        
-        for i, name in enumerate(participant_names):
-            color = colors[i % len(colors)]  # Cycle through colors if more participants than colors
-            participant_colors[name] = color
-        
-        return participant_colors
 
-
-    def on_input_changed(self, message: Input.Changed) -> None:
-        value = message.value
-        
-        # Reset history navigation when user starts typing
-        if self._history_index != -1:
-            self._history_index = -1
-            self._current_input_before_history = ""
-        
-        suggestions = self._get_autocomplete_suggestions(value)
-        existing_popup_query = self.query("#autocomplete-popup")
-
-        if suggestions:
-            # Always show popup for parameter suggestions (never auto-select parameters)
-            parts = value.strip().split(" ")
-            is_parameter_suggestion = len(parts) >= 2
-            
-            # Only auto-select for single command suggestions (not parameters)
-            # But only when user is adding characters, not deleting
-            if len(suggestions) == 1 and not is_parameter_suggestion:
-                # Clean the suggestion by removing help text if present
-                clean_suggestion = suggestions[0].split(" - ")[0]
-                input_widget = self.query_one(Input)
-                
-                # Only auto-complete if the suggestion is longer than current input
-                # This allows users to delete content without it being auto-completed back
-                if len(clean_suggestion) > len(value):
-                    # Replace only the part that matches what user was typing
-                    # This prevents duplication when user has already typed some letters
-                    if clean_suggestion.startswith(value):
-                        input_widget.value = clean_suggestion
-                    else:
-                        # Fallback to original behavior
-                        input_widget.value = clean_suggestion
-                    
-                    # Move cursor to end of the completed command
-                    input_widget.action_end()
-                    
-                    # Remove any existing popup
-                    if existing_popup_query:
-                        existing_popup_query.first().remove()
-                    return
-            
-            # Show popup for multiple suggestions or parameter suggestions
-            if existing_popup_query:
-                existing_popup_query.first().update_commands(suggestions)
-        elif existing_popup_query:
-            existing_popup_query.first().remove()
 
     def on_command_selected(self, message: CommandSelected) -> None:
         input_widget = self.query_one(Input)
@@ -1149,12 +1099,32 @@ class DAIP_TUI(App):
         args = parts[1] if len(parts) > 1 else ""
 
         handler_name = f"_handle_{cmd}_command"
-        handler = getattr(self, handler_name, lambda _: self._update_log_view(f"[bold red]> Unknown command: {cmd}"))
-
-        if asyncio.iscoroutinefunction(handler):
-            await handler(args)
+        handler = getattr(self, handler_name, None)
+        
+        if handler:
+            if asyncio.iscoroutinefunction(handler):
+                await handler(args)
+            else:
+                handler(args)
         else:
-            handler(args)
+            # 指令不存在，提供智能建议
+            self._suggest_similar_commands(cmd)
+
+    def _suggest_similar_commands(self, unknown_cmd: str) -> None:
+        """为未知指令提供智能建议"""
+        # 获取所有可用命令名称
+        available_commands = [cmd_name[1:] for cmd_name, _ in self._available_commands]  # 移除开头的'/'
+        
+        # 使用difflib查找最相似的命令
+        suggestions = get_close_matches(unknown_cmd, available_commands, n=3, cutoff=0.3)
+        
+        if suggestions:
+            suggestion_text = ", ".join([f"/{suggestion}" for suggestion in suggestions])
+            self._update_log_view(f"[bold red]> Unknown command: /{unknown_cmd}[/bold red]")
+            self._update_log_view(f"[bold yellow]> Did you mean: {suggestion_text}?[/bold yellow]")
+        else:
+            self._update_log_view(f"[bold red]> Unknown command: /{unknown_cmd}[/bold red]")
+            self._update_log_view("[bold yellow]> Type /help to see all available commands.[/bold yellow]")
 
     def _handle_pa_command(self, args: str) -> None:
         """Personal assistant shortcut for interactive chat sessions."""
@@ -1304,7 +1274,9 @@ class DAIP_TUI(App):
             self._update_log_view(f"[dim]> Roles: {roles}, Rounds: {rounds}[/dim]")
             
             # Start debate in background
-            asyncio.create_task(self._start_debate(topic, roles, rounds))
+            task = asyncio.create_task(self._start_debate(topic, roles, rounds))
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
         elif subcommand == "history":
             remaining_history_args = " ".join(args_list[1:])
             self._handle_debate_history_command(remaining_history_args)
@@ -1451,6 +1423,9 @@ class DAIP_TUI(App):
                         )
                         self._model_provider = LiteLLMProvider(new_config)
                         
+                        # Update current model display
+                        self._update_current_model(model_name)
+                        
                         # Show success message
                         self._safe_log_callback(lambda: f"[bold green]> ✓ Successfully switched to model: {model_name}[/bold green]", "model", model_name)
                         self._safe_log_callback(lambda: "[bold dim]> Configuration updated. New model will be used for future requests.[/bold dim]", "model", model_name)
@@ -1497,6 +1472,9 @@ class DAIP_TUI(App):
                     embedding_model="mock-embedding"
                 )
                 self._model_provider = LiteLLMProvider(new_config)
+                
+                # Update current model display
+                self._update_current_model(model_name)
                 
                 self._update_log_view(f"[bold green]> ✓ Successfully switched to model: {model_name}[/bold green]")
                 self._update_log_view(f"[bold dim]> Configuration updated. New model will be used for future requests.[/bold dim]")
@@ -1562,7 +1540,9 @@ class DAIP_TUI(App):
         # Start scaffolding process
         try:
             loop = asyncio.get_running_loop()
-            loop.create_task(self._execute_scaffolding(description, parsed_args.yes))
+            task = loop.create_task(self._execute_scaffolding(description, parsed_args.yes))
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
         except RuntimeError:
             # No running event loop, create a new one
             asyncio.run(self._execute_scaffolding(description, parsed_args.yes))
@@ -1653,7 +1633,9 @@ class DAIP_TUI(App):
             agent.goal = args.strip()
             
             # Run agent in background
-            asyncio.create_task(run_agent_and_feed_tui(agent, self, args.strip()))
+            task = asyncio.create_task(run_agent_and_feed_tui(agent, self, args.strip()))
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
         else:
             self._update_log_view("[bold yellow]> Please enter your task goal:[/bold yellow]")
             self._update_log_view("[bold dim]> (Type your goal and press Enter to run the agent)[/bold dim]")
@@ -1705,7 +1687,9 @@ class DAIP_TUI(App):
 
                 # Run compression asynchronously
                 loop = asyncio.get_running_loop()
-                loop.create_task(self._compress_session_context_async(session))
+                task = loop.create_task(self._compress_session_context_async(session))
+                self._background_tasks.add(task)
+                task.add_done_callback(self._background_tasks.discard)
             else:
                 # Fallback: manual compression - keep recent entries
                 self._update_log_view("[bold yellow]> 🔄 使用手动压缩方法...[/bold yellow]")
@@ -1791,7 +1775,9 @@ class DAIP_TUI(App):
 
             # Start download process
             loop = asyncio.get_running_loop()
-            loop.create_task(self._execute_paper_download(downloader, query, max_results, use_arxiv))
+            task = loop.create_task(self._execute_paper_download(downloader, query, max_results, use_arxiv))
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
 
         except ImportError:
             self._update_log_view("[bold red]> ❌ 论文下载功能不可用，缺少相关模块[/bold red]")
@@ -2395,6 +2381,11 @@ class DAIP_TUI(App):
 
     def _handle_quit_command(self, args: str) -> None:
         """Exit the application and close TUI."""
+        # Cancel all background tasks before exiting
+        for task in self._background_tasks:
+            if not task.done():
+                task.cancel()
+        self._background_tasks.clear()
         self.exit()
 
     def _handle_clear_command(self, args: str) -> None:
@@ -2423,6 +2414,11 @@ class DAIP_TUI(App):
         
         if current_time - self._last_ctrl_e_time <= 2.0:  # 2秒窗口内
             # 第二次CTRL+E，执行退出
+            # Cancel all background tasks before exiting
+            for task in self._background_tasks:
+                if not task.done():
+                    task.cancel()
+            self._background_tasks.clear()
             self.exit()
         else:
             # 第一次CTRL+E，显示提示
@@ -2437,6 +2433,48 @@ class DAIP_TUI(App):
                     self._exit_hint_shown = False
             
             self.set_timer(2.0, clear_hint)
+
+    def _handle_ctrl_q_exit(self) -> None:
+        """Handle CTRL+Q exit sequence for session and application."""
+        import time
+        
+        current_time = time.time()
+        
+        # 检查是否在2秒窗口内按下
+        if current_time - self._last_ctrl_q_time <= 2.0:
+            # 连续按下CTRL+Q，退出整个应用
+            # Cancel all background tasks before exiting
+            for task in self._background_tasks:
+                if not task.done():
+                    task.cancel()
+            self._background_tasks.clear()
+            self.exit()
+        else:
+            # 第一次按下CTRL+Q，退出当前会话
+            self._last_ctrl_q_time = current_time
+            self._ctrl_q_press_count = 1
+            
+            # 终止当前会话
+            if hasattr(self, '_executor') and self._executor:
+                # 显示提示信息
+                self._update_log_view("[yellow]会话已终止。再次按 CTRL+Q 退出应用。[/yellow]")
+                self._update_status_bar("会话已终止 - 再次按 CTRL+Q 退出应用")
+                
+                # 重置执行器
+                self._executor = None
+            else:
+                # 没有活动会话，提示退出应用
+                self._update_log_view("[yellow]再次按 CTRL+Q 退出应用。[/yellow]")
+                self._update_status_bar("再次按 CTRL+Q 退出应用")
+            
+            # 5秒后重置状态
+            def reset_state():
+                if time.time() - self._last_ctrl_q_time > 5.0:
+                    self._ctrl_q_press_count = 0
+                    if not hasattr(self, '_exit_hint_shown') or not self._exit_hint_shown:
+                        self._update_status_bar("Ready")
+            
+            self.set_timer(5.0, reset_state)
 
     def _start_new_chat_session(self, initial_message: str) -> None:
         """Start a new chat session with the given initial message."""
@@ -2465,8 +2503,15 @@ class DAIP_TUI(App):
         self._update_log_view(f"[bold blue]> You:[/bold blue] {initial_message}")
         self._update_log_view(f"[bold green]> Chat session started. You can now continue the conversation.[/bold green]")
 
-    def _load_input_history(self) -> None:
-        """Load input history from file."""
+    def on_unmount(self) -> None:
+        """Clean up background tasks when the app is unmounted."""
+        # Cancel all background tasks
+        for task in self._background_tasks:
+            if not task.done():
+                task.cancel()
+        
+        # Clear the background tasks set
+        self._background_tasks.clear()
         try:
             from pathlib import Path
             history_file = Path.home() / ".daip" / "input_history.txt"
@@ -2829,34 +2874,26 @@ class DAIP_TUI(App):
             print(f"{item_type.capitalize()} details: {fallback_info}")
 
     async def _display_startup_logo(self) -> None:
-        """Display 人格AI logo on startup with animation."""
+        """Display simple welcome message instead of complex ASCII logo."""
         try:
             # Wait a bit for UI to fully initialize
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.1)
 
             # Debug: Check if RichLog is available
             try:
                 self.query_one("#main_log", RichLog)
-                self._update_log_view("[dim]🎨 Displaying 人格AI logo...[/dim]")
+                self._update_log_view("[dim]Starting DAIP-LIVE...[/dim]")
             except Exception as log_error:
                 print(f"RichLog not available: {log_error}")
                 return
 
-            # Create logo instance (automatically selects random variant)
-            logo = PersonalAILogo()
+            # Display simple welcome message instead of complex logo
+            self._update_log_view("[bold green]Welcome to DAIP-LIVE![/bold green]")
+            self._update_log_view("[dim]System initialized and ready.[/dim]")
 
-            # Randomly select animation style
-            import random
-            animation_styles = ["typewriter", "gradient", "cyberpunk"]
-            selected_style = random.choice(animation_styles)
-
-            # Display animated logo with random style
-            await logo.display_animated_tui(self._update_log_view, selected_style)
-
-            # Add startup message
-            self._update_log_view("[dim]===============================================[/dim]")
-            self._update_log_view("[dim]           人格AI Initialized!           [/dim]")
-            self._update_log_view("[dim]===============================================[/dim]")
+        except Exception as e:
+            # If logo display fails, show simple welcome message
+            self._update_log_view("[bold green]Welcome to DAIP-LIVE! Ready for your command.[/bold green]")
             self._update_log_view("[dim]                                              [/dim]")
 
         except Exception as e:
@@ -2925,7 +2962,7 @@ class DAIP_TUI(App):
                 report_parts.append(f"\n{session.summary}")
 
             report_parts.append("\n---")
-            report_parts.append("*此报告由人格AI系统自动生成*")
+            report_parts.append("*此报告由AGENT PSY LAB系统自动生成*")
 
             debate_content = "\n".join(report_parts)
 
@@ -3004,7 +3041,9 @@ class DAIP_TUI(App):
                 # Use memory service to compress history
                 if hasattr(self, '_memory_service') and self._memory_service:
                     self._update_log_view("[bold blue]> 🔄 正在智能压缩上下文...[/bold blue]")
-                    asyncio.create_task(self._compress_session_context_async(session))
+                    task = asyncio.create_task(self._compress_session_context_async(session))
+                    self._background_tasks.add(task)
+                    task.add_done_callback(self._background_tasks.discard)
                 else:
                     # Fallback: clear oldest history entries
                     session.history = session.history[-3:]  # Keep last 3 entries
@@ -3019,6 +3058,21 @@ class DAIP_TUI(App):
         except Exception as e:
             self._update_log_view(f"[bold red]> 处理80%Token压缩时出错: {e}[/bold red]")
 
+    def _load_input_history(self) -> None:
+        """Load input history from file."""
+        try:
+            from pathlib import Path
+            history_file = Path.home() / ".daip" / "input_history.txt"
+            
+            if history_file.exists():
+                with open(history_file, 'r', encoding='utf-8') as f:
+                    lines = f.read().strip().split('\n')
+                    # 只保留最近的10条记录
+                    self._input_history = lines[-10:] if lines else []
+        except Exception as e:
+            # 如果加载历史记录失败，继续使用空历史记录
+            self._input_history = []
+            
     async def _compress_session_context_async(self, session) -> None:
         """Asynchronously compress session context using memory service."""
         try:
