@@ -1,0 +1,392 @@
+# {{ project_name }} 需求规格说明书
+
+## 1. 项目概述
+
+### 1.1 项目背景
+{{ project_background }}
+
+### 1.2 项目目标
+{% for goal in project_goals %}
+- {{ loop.index }}. {{ goal }}
+{% endfor %}
+
+### 1.3 项目范围
+#### 1.3.1 包含功能
+{% for feature in included_features %}
+- {{ feature }}
+{% endfor %}
+
+#### 1.3.2 不包含功能
+{% for feature in excluded_features %}
+- {{ feature }}
+{% endfor %}
+
+### 1.4 成功标准
+{% for criteria in success_criteria %}
+- **{{ criteria.name }}**: {{ criteria.description }} ({{ criteria.measurement }})
+{% endfor %}
+
+## 2. 用户角色和场景
+
+### 2.1 用户角色定义
+{% for role in user_roles %}
+#### {{ role.name }}
+- **描述**: {{ role.description }}
+- **权限**: {{ role.permissions }}
+- **使用频率**: {{ role.usage_frequency }}
+{% endfor %}
+
+### 2.2 用户场景
+{% for scenario in user_scenarios %}
+#### {{ scenario.title }}
+**角色**: {{ scenario.role }}
+**描述**: {{ scenario.description }}
+**步骤**:
+{% for step in scenario.steps %}
+{{ loop.index }}. {{ step }}
+{% endfor %}
+**预期结果**: {{ scenario.expected_result }}
+{% endfor %}
+
+## 3. 功能需求
+
+### 3.1 核心功能
+
+{% for feature in core_features %}
+#### 3.1.{{ loop.index }} {{ feature.name }}
+
+**功能描述**: {{ feature.description }}
+**优先级**: {{ feature.priority }}
+**用户价值**: {{ feature.user_value }}
+
+**详细需求**:
+{% for requirement in feature.requirements %}
+- {{ requirement }}
+{% endfor %}
+
+**验收标准**:
+{% for criteria in feature.acceptance_criteria %}
+- [ ] {{ criteria }}
+{% endfor %}
+
+---
+{% endfor %}
+
+### 3.2 辅助功能
+
+{% for feature in supporting_features %}
+#### 3.2.{{ loop.index }} {{ feature.name }}
+
+**功能描述**: {{ feature.description }}
+**优先级**: {{ feature.priority }}
+
+**详细需求**:
+{% for requirement in feature.requirements %}
+- {{ requirement }}
+{% endfor %}
+
+**验收标准**:
+{% for criteria in feature.acceptance_criteria %}
+- [ ] {{ criteria }}
+{% endfor %}
+
+---
+{% endfor %}
+
+### 3.3 系统管理功能
+
+{% for feature in admin_features %}
+#### 3.3.{{ loop.index }} {{ feature.name }}
+
+**功能描述**: {{ feature.description }}
+**权限要求**: {{ feature.permissions_required }}
+
+**详细需求**:
+{% for requirement in feature.requirements %}
+- {{ requirement }}
+{% endfor %}
+
+**验收标准**:
+{% for criteria in feature.acceptance_criteria %}
+- [ ] {{ criteria }}
+{% endfor %}
+
+---
+{% endfor %}
+
+## 4. 非功能需求
+
+### 4.1 性能需求
+{% for requirement in performance_requirements %}
+- **{{ requirement.metric }}**: {{ requirement.value }} {{ requirement.unit }}
+  - **描述**: {{ requirement.description }}
+  - **测试条件**: {{ requirement.test_conditions }}
+{% endfor %}
+
+### 4.2 可用性需求
+{% for requirement in usability_requirements %}
+- **{{ requirement.aspect }}**: {{ requirement.standard }}
+  - **描述**: {{ requirement.description }}
+  - **验证方法**: {{ requirement.validation_method }}
+{% endfor %}
+
+### 4.3 可靠性需求
+{% for requirement in reliability_requirements %}
+- **{{ requirement.metric }}**: {{ requirement.target }}
+  - **描述**: {{ requirement.description }}
+  - **监控指标**: {{ requirement.monitoring_metrics }}
+{% endfor %}
+
+### 4.4 安全性需求
+{% for requirement in security_requirements %}
+- **{{ requirement.category }}**: {{ requirement.requirement }}
+  - **风险等级**: {{ requirement.risk_level }}
+  - **缓解措施**: {{ requirement.mitigation }}
+{% endfor %}
+
+### 4.5 兼容性需求
+{% for requirement in compatibility_requirements %}
+- **{{ requirement.platform }}**: {{ requirement.version_range }}
+  - **支持状态**: {{ requirement.support_status }}
+  - **测试要求**: {{ requirement.testing_requirements }}
+{% endfor %}
+
+## 5. 技术约束
+
+### 5.1 技术栈要求
+{% for tech in technology_stack %}
+- **{{ tech.category }}**: {{ tech.technology }} {{ tech.version }}
+  - **使用原因**: {{ tech.reason }}
+  - **约束条件**: {{ tech.constraints }}
+{% endfor %}
+
+### 5.2 集成要求
+{% for integration in integrations %}
+- **{{ integration.name }}**: {{ integration.version }}
+  - **接口类型**: {{ integration.interface_type }}
+  - **数据格式**: {{ integration.data_format }}
+  - **认证方式**: {{ integration.authentication }}
+{% endfor %}
+
+### 5.3 部署约束
+- **环境**: {{ deployment.environment }}
+- **架构**: {{ deployment.architecture }}
+- **扩展性**: {{ deployment.scalability_requirements }}
+- **监控**: {{ deployment.monitoring_requirements }}
+
+## 6. 数据需求
+
+### 6.1 数据模型
+{% for model in data_models %}
+#### {{ model.name }}
+**描述**: {{ model.description }}
+
+| 字段名 | 类型 | 必填 | 描述 | 约束 |
+|--------|------|------|------|------|
+{% for field in model.fields %}
+| `{{ field.name }}` | {{ field.type }} | {% if field.required %}是{% else %}否{% endif %} | {{ field.description }} | {{ field.constraints }} |
+{% endfor %}
+
+{% endfor %}
+
+### 6.2 数据量预估
+- **初始数据量**: {{ data_volume.initial }}
+- **年增长率**: {{ data_volume.growth_rate }}%
+- **峰值并发**: {{ data_volume.peak_concurrent_users }}
+- **存储需求**: {{ data_volume.storage_requirements }}
+
+### 6.3 数据质量要求
+{% for requirement in data_quality_requirements %}
+- **{{ requirement.dimension }}**: {{ requirement.standard }}
+  - **验证方式**: {{ requirement.validation_method }}
+  - **容错机制**: {{ requirement.error_handling }}
+{% endfor %}
+
+## 7. 用户界面需求
+
+### 7.1 设计原则
+{% for principle in design_principles %}
+- **{{ principle.name }}**: {{ principle.description }}
+{% endfor %}
+
+### 7.2 界面规范
+{% for spec in ui_specifications %}
+#### {{ spec.component_name }}
+- **用途**: {{ spec.purpose }}
+- **设计要求**: {{ spec.design_requirements }}
+- **交互方式**: {{ spec.interaction_patterns }}
+- **响应式要求**: {{ spec.responsive_requirements }}
+{% endfor %}
+
+### 7.3 可访问性要求
+{% for requirement in accessibility_requirements %}
+- **{{ requirement.standard }}**: {{ requirement.compliance_level }}
+  - **具体要求**: {{ requirement.specific_requirements }}
+  - **测试方法**: {{ requirement.testing_method }}
+{% endfor %}
+
+## 8. 测试需求
+
+### 8.1 测试类型
+{% for test_type in testing_requirements %}
+#### {{ test_type.type }}
+- **范围**: {{ test_type.scope }}
+- **覆盖率要求**: {{ test_type.coverage_requirement }}
+- **测试环境**: {{ test_type.environment }}
+- **自动化程度**: {{ test_type.automation_level }}
+{% endfor %}
+
+### 8.2 测试数据
+- **测试数据来源**: {{ test_data.source }}
+- **数据脱敏要求**: {{ test_data.anonymization_requirements }}
+- **测试数据管理**: {{ test_data.management_strategy }}
+
+### 8.3 性能测试
+{% for test in performance_tests %}
+- **{{ test.name }}**: {{ test.description }}
+  - **目标指标**: {{ test.target_metrics }}
+  - **测试场景**: {{ test.test_scenarios }}
+  - **通过标准**: {{ test.pass_criteria }}
+{% endfor %}
+
+## 9. 部署和运维需求
+
+### 9.1 部署环境
+{% for env in deployment_environments %}
+#### {{ env.name }}
+- **用途**: {{ env.purpose }}
+- **配置要求**: {{ env.configuration_requirements }}
+- **资源需求**: {{ env.resource_requirements }}
+- **网络要求**: {{ env.network_requirements }}
+{% endfor %}
+
+### 9.2 监控和日志
+{% for requirement in monitoring_requirements %}
+- **{{ requirement.category }}**: {{ requirement.requirements }}
+  - **监控指标**: {{ requirement.metrics }}
+  - **告警阈值**: {{ requirement.alert_thresholds }}
+  - **日志格式**: {{ requirement.log_format }}
+{% endfor %}
+
+### 9.3 备份和恢复
+- **备份策略**: {{ backup.strategy }}
+- **备份频率**: {{ backup.frequency }}
+- **恢复时间目标(RTO)**: {{ backup.rto }}
+- **恢复点目标(RPO)**: {{ backup.rpo }}
+
+## 10. 项目约束和假设
+
+### 10.1 项目约束
+{% for constraint in project_constraints %}
+- **{{ constraint.type }}**: {{ constraint.description }}
+  - **影响**: {{ constraint.impact }}
+  - **缓解措施**: {{ constraint.mitigation }}
+{% endfor %}
+
+### 10.2 项目假设
+{% for assumption in project_assumptions %}
+- **{{ assumption.category }}**: {{ assumption.assumption }}
+  - **风险评估**: {{ assumption.risk_assessment }}
+  - **验证计划**: {{ assumption.verification_plan }}
+{% endfor %}
+
+## 11. 风险评估
+
+### 11.1 技术风险
+| 风险 | 概率 | 影响 | 风险等级 | 缓解措施 |
+|------|------|------|----------|----------|
+{% for risk in technical_risks %}
+| {{ risk.description }} | {{ risk.probability }} | {{ risk.impact }} | {{ risk.level }} | {{ risk.mitigation }} |
+{% endfor %}
+
+### 11.2 业务风险
+| 风险 | 概率 | 影响 | 风险等级 | 缓解措施 |
+|------|------|------|----------|----------|
+{% for risk in business_risks %}
+| {{ risk.description }} | {{ risk.probability }} | {{ risk.impact }} | {{ risk.level }} | {{ risk.mitigation }} |
+{% endfor %}
+
+### 11.3 项目风险
+| 风险 | 概率 | 影响 | 风险等级 | 缓解措施 |
+|------|------|------|----------|----------|
+{% for risk in project_risks %}
+| {{ risk.description }} | {{ risk.probability }} | {{ risk.impact }} | {{ risk.level }} | {{ risk.mitigation }} |
+{% endfor %}
+
+## 12. 验收标准
+
+### 12.1 功能验收标准
+{% for criteria in functional_acceptance %}
+- [ ] **{{ criteria.feature }}**: {{ criteria.test_case }}
+  - **预期结果**: {{ criteria.expected_result }}
+  - **验收方法**: {{ criteria.acceptance_method }}
+{% endfor %}
+
+### 12.2 性能验收标准
+{% for criteria in performance_acceptance %}
+- [ ] **{{ criteria.metric }}**: {{ criteria.target_value }} {{ criteria.unit }}
+  - **测试条件**: {{ criteria.test_conditions }}
+  - **验证方法**: {{ criteria.validation_method }}
+{% endfor %}
+
+### 12.3 质量验收标准
+{% for criteria in quality_acceptance %}
+- [ ] **{{ criteria.quality_aspect }}**: {{ criteria.standard }}
+  - **测量指标**: {{ criteria.measurement_metrics }}
+  - **验收工具**: {{ criteria.acceptance_tools }}
+{% endfor %}
+
+## 13. 项目里程碑
+
+### 13.1 开发里程碑
+{% for milestone in development_milestones %}
+#### {{ milestone.name }}
+- **计划完成日期**: {{ milestone.planned_date }}
+- **交付物**: {{ milestone.deliverables }}
+- **验收标准**: {{ milestone.acceptance_criteria }}
+- **依赖关系**: {{ milestone.dependencies }}
+{% endfor %}
+
+### 13.2 测试里程碑
+{% for milestone in testing_milestones %}
+#### {{ milestone.name }}
+- **计划完成日期**: {{ milestone.planned_date }}
+- **测试范围**: {{ milestone.test_scope }}
+- **通过标准**: {{ milestone.pass_criteria }}
+{% endfor %}
+
+## 14. 附录
+
+### A. 术语表
+{% for term in glossary %}
+- **{{ term.term }}**: {{ term.definition }}
+{% endfor %}
+
+### B. 参考文档
+{% for doc in references %}
+- [{{ doc.title }}]({{ doc.url }}) - {{ doc.description }}
+{% endfor %}
+
+### C. 相关规范和标准
+{% for standard in standards %}
+- **{{ standard.name }}**: {{ standard.reference }}
+{% endfor %}
+
+### D. 联系信息
+{% for contact in contacts %}
+- **{{ contact.role }}**: {{ contact.name }} - {{ contact.email }}
+{% endfor %}
+
+---
+
+## 文档版本信息
+
+| 版本 | 日期 | 作者 | 变更内容 |
+|------|------|------|----------|
+{% for version in document_versions %}
+| {{ version.number }} | {{ version.date }} | {{ version.author }} | {{ version.changes }} |
+{% endfor %}
+
+**审核状态**: {{ review_status }}
+**最后更新**: {{ last_updated_date }}
+**下次审核**: {{ next_review_date }}

@@ -1,0 +1,281 @@
+# {{ project_name }} 项目计划书
+
+## 📋 项目概述
+
+### 1.1 项目信息
+- **项目名称**: {{ project_name }}
+- **项目编号**: {{ project_id }}
+- **项目经理**: {{ project_manager }}
+- **技术负责人**: {{ tech_lead }}
+- **创建日期**: {{ creation_date }}
+- **预计完成日期**: {{ target_completion_date }}
+- **项目优先级**: {{ priority }}
+
+### 1.2 项目目标
+{% for goal in project_goals %}
+- **{{ goal.title }}**: {{ goal.description }}
+{% endfor %}
+
+### 1.3 成功标准
+{% for criteria in success_criteria %}
+- [ ] {{ criteria.description }} ({{ criteria.measurement }})
+{% endfor %}
+
+### 1.4 项目范围
+#### 包含内容
+{% for item in included_items %}
+- [ ] {{ item }}
+{% endfor %}
+
+#### 不包含内容
+{% for item in excluded_items %}
+- ❌ {{ item }}
+{% endfor %}
+
+## 🏗️ 技术架构
+
+### 2.1 系统架构
+```mermaid
+{{ architecture_diagram }}
+```
+
+### 2.2 技术栈
+- **编程语言**: {{ tech_stack.language }}
+- **框架**: {{ tech_stack.frameworks | join(', ') }}
+- **数据库**: {{ tech_stack.database }}
+- **缓存**: {{ tech_stack.cache }}
+- **部署**: {{ tech_stack.deployment }}
+
+### 2.3 关键依赖
+{% for dependency in dependencies %}
+- **{{ dependency.name }}**: {{ dependency.version }} - {{ dependency.purpose }}
+{% endfor %}
+
+## 📅 项目时间线
+
+### 3.1 里程碑计划
+{% for milestone in milestones %}
+#### {{ milestone.name }}
+- **预计完成**: {{ milestone.planned_date }}
+- **交付物**: {{ milestone.deliverables | join(', ') }}
+- **验收标准**: {{ milestone.acceptance_criteria }}
+- **依赖项**: {{ milestone.dependencies | join(', ') or '无' }}
+
+{% endfor %}
+
+### 3.2 甘特图
+```mermaid
+gantt
+    title {{ project_name }} 项目时间线
+    dateFormat  YYYY-MM-DD
+    section {{ phases[0].name }}
+    {% for task in phases[0].tasks %}
+    {{ task.name }} :{{ task.id}}, {{ task.start }}, {{ task.end }}
+    {% endfor %}
+
+    section {{ phases[1].name }}
+    {% for task in phases[1].tasks %}
+    {{ task.name }} :{{ task.id}}, {{ task.start }}, {{ task.end }}
+    {% endfor %}
+
+    section {{ phases[2].name }}
+    {% for task in phases[2].tasks %}
+    {{ task.name }} :{{ task.id}}, {{ task.start }}, {{ task.end }}
+    {% endfor %}
+```
+
+## 👥 团队分工
+
+### 4.1 团队成员
+{% for member in team_members %}
+- **{{ member.name }}** - {{ member.role }}
+  - **职责**: {{ member.responsibilities | join(', ') }}
+  - **联系方式**: {{ member.contact }}
+{% endfor %}
+
+### 4.2 角色职责矩阵
+| 任务/角色 | {% for role in roles %}{{ role }} | {% endfor %}
+|----------|{% for role in roles }}:---:|{% endfor %}
+{% for task in tasks %}
+| {{ task.name }} |{% for role in roles }}{% if task.assignees[role] %}✅{% else %}❌{% endif %}|{% endfor %}
+{% endfor %}
+
+## 🎯 交付物清单
+
+### 5.1 代码交付物
+{% for deliverable in code_deliverables %}
+- [ ] **{{ deliverable.name }}**: {{ deliverable.description }}
+  - **位置**: `{{ deliverable.path }}`
+  - **标准**: {{ deliverable.completion_criteria }}
+{% endfor %}
+
+### 5.2 文档交付物
+{% for deliverable in doc_deliverables %}
+- [ ] **{{ deliverable.name }}**: {{ deliverable.description }}
+  - **位置**: `{{ deliverable.path }}`
+  - **标准**: {{ deliverable.completion_criteria }}
+{% endfor %}
+
+### 5.3 测试交付物
+{% for deliverable in test_deliverables %}
+- [ ] **{{ deliverable.name }}**: {{ deliverable.description }}
+  - **位置**: `{{ deliverable.path }}`
+  - **标准**: {{ deliverable.completion_criteria }}
+{% endfor %}
+
+## 🔍 风险管理
+
+### 6.1 风险矩阵
+| 风险描述 | 概率 | 影响 | 风险等级 | 缓解措施 | 负责人 | 状态 |
+|----------|------|------|----------|----------|--------|------|
+{% for risk in risks %}
+| {{ risk.description }} | {{ risk.probability }} | {{ risk.impact }} | {{ risk.level }} | {{ risk.mitigation }} | {{ risk.owner }} | {{ risk.status }} |
+{% endfor %}
+
+### 6.2 风险监控计划
+- **风险审查频率**: {{ risk_review_frequency }}
+- **监控指标**: {{ monitoring_metrics | join(', ') }}
+- **预警阈值**: {{ alert_thresholds | join(', ') }}
+
+## 📊 质量管理
+
+### 7.1 质量目标
+{% for quality_goal in quality_goals %}
+- **{{ quality_goal.metric }}**: {{ quality_goal.target }} ({{ quality_goal.measurement_method }})
+{% endfor %}
+
+### 7.2 测试策略
+{% for test_strategy in test_strategies %}
+- **{{ test_strategy.type }}**: {{ test_strategy.description }}
+  - **工具**: {{ test_strategy.tools | join(', ') }}
+  - **覆盖率目标**: {{ test_strategy.coverage_target }}
+  - **执行频率**: {{ test_strategy.execution_frequency }}
+{% endfor %}
+
+### 7.3 代码审查标准
+- **审查者**: {{ code_review.reviewers | join(', ') }}
+- **审查标准**: {{ code_review.standards | join(', ') }}
+- **审查工具**: {{ code_review.tools | join(', ') }}
+
+## 💰 资源计划
+
+### 8.1 人力资源
+| 角色 | 人数 | 参与阶段 | 工作量(人天) |
+|------|------|----------|-------------|
+{% for resource in human_resources %}
+| {{ resource.role }} | {{ resource.count }} | {{ resource.phases | join(', ') }} | {{ resource.effort }} |
+{% endfor %}
+
+### 8.2 技术资源
+{% for resource in tech_resources %}
+- **{{ resource.name }}**: {{ resource.specification }} ({{ resource.quantity }})
+{% endfor %}
+
+### 8.3 预算估算
+| 类别 | 预算(元) | 说明 |
+|------|----------|------|
+| 人力成本 | {{ budget.labor_cost }} | {{ budget.labor_description }} |
+| 技术成本 | {{ budget.tech_cost }} | {{ budget.tech_description }} |
+| 其他成本 | {{ budget.other_cost }} | {{ budget.other_description }} |
+| **总计** | **{{ budget.total_cost }}** | **-** |
+
+## 📈 性能指标
+
+### 9.1 关键性能指标 (KPI)
+{% for kpi in performance_kpis %}
+- **{{ kpi.name }}**: {{ kpi.target }} {{ kpi.unit }}
+  - **当前值**: {{ kpi.current_value }}
+  - **测量方法**: {{ kpi.measurement_method }}
+  - **报告频率**: {{ kpi.reporting_frequency }}
+{% endfor %}
+
+### 9.2 监控和报告
+- **监控工具**: {{ monitoring.tools | join(', ') }}
+- **报告频率**: {{ monitoring.reporting_frequency }}
+- **报告模板**: {{ monitoring.report_template }}
+
+## 🔄 变更管理
+
+### 10.1 变更控制流程
+1. **变更提交**: {{ change_control.submission_process }}
+2. **影响评估**: {{ change_control.impact_assessment }}
+3. **审批决策**: {{ change_control.approval_process }}
+4. **实施跟踪**: {{ change_control.implementation_tracking }}
+
+### 10.2 变更历史
+| 日期 | 变更内容 | 影响评估 | 批准人 | 状态 |
+|------|----------|----------|--------|------|
+{% for change in change_history %}
+| {{ change.date }} | {{ change.content }} | {{ change.impact }} | {{ change.approver }} | {{ change.status }} |
+{% endfor %}
+
+## 📞 沟通计划
+
+### 11.1 沟通矩阵
+| 沟通类型 | 频率 | 参与者 | 目的 |
+|----------|------|--------|------|
+{% for communication in communications %}
+| {{ communication.type }} | {{ communication.frequency }} | {{ communication.participants | join(', ') }} | {{ communication.purpose }} |
+{% endfor %}
+
+### 11.2 会议安排
+{% for meeting in meetings %}
+- **{{ meeting.name }}**: {{ meeting.schedule }} ({{ meeting.duration }})
+  - **参与者**: {{ meeting.attendees | join(', ') }}
+  - **议程**: {{ meeting.agenda | join(', ') }}
+{% endfor %}
+
+## 📚 附录
+
+### A. 术语表
+{% for term in glossary %}
+- **{{ term.term }}**: {{ term.definition }}
+{% endfor %}
+
+### B. 参考资料
+{% for ref in references %}
+- [{{ ref.title }}]({{ ref.url }}) - {{ ref.description }}
+{% endfor %}
+
+### C. 工具和资源
+{% for tool in tools_and_resources %}
+- **{{ tool.name }}**: {{ tool.description }} - [{{ tool.link }}]({{ tool.link }})
+{% endfor %}
+
+---
+
+## 📝 文档控制
+
+| 版本 | 日期 | 作者 | 变更内容 | 状态 |
+|------|------|------|----------|------|
+{% for version in document_versions %}
+| {{ version.number }} | {{ version.date }} | {{ version.author }} | {{ version.changes }} | {{ version.status }} |
+{% endfor %}
+
+**最后更新**: {{ last_updated_date }}
+**下次审查**: {{ next_review_date }}
+**文档状态**: {{ document_status }}
+
+---
+
+## ✅ 验收检查清单
+
+### 功能验收
+{% for item in functional_acceptance %}
+- [ ] {{ item }}
+{% endfor %}
+
+### 质量验收
+{% for item in quality_acceptance %}
+- [ ] {{ item }}
+{% endfor %}
+
+### 文档验收
+{% for item in documentation_acceptance %}
+- [ ] {{ item }}
+{% endfor %}
+
+### 部署验收
+{% for item in deployment_acceptance %}
+- [ ] {{ item }}
+{% endfor %}

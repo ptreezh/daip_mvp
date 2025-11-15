@@ -1,0 +1,267 @@
+# {{ project_name }} 任务分解清单
+
+## 🎯 项目总览
+
+- **项目名称**: {{ project_name }}
+- **项目经理**: {{ project_manager }}
+- **开始日期**: {{ start_date }}
+- **预计完成**: {{ end_date }}
+- **总任务数**: {{ total_tasks }}
+- **总工作量**: {{ total_effort }} 人天
+
+## 📊 项目进度概览
+
+| 阶段 | 任务数 | 完成数 | 完成率 | 状态 |
+|------|--------|--------|--------|------|
+{% for phase in phases %}
+| {{ phase.name }} | {{ phase.total_tasks }} | {{ phase.completed_tasks }} | {{ phase.completion_rate }}% | {{ phase.status }} |
+{% endfor %}
+| **总计** | **{{ total_tasks }}** | **{{ total_completed }}** | **{{ overall_completion_rate }}%** | **{{ overall_status }}** |
+
+---
+
+{% for phase in phases %}
+## {{ loop.index }}. {{ phase.name }}阶段
+
+### 📅 时间安排
+- **开始日期**: {{ phase.start_date }}
+- **结束日期**: {{ phase.end_date }}
+- **工作日数**: {{ phase.working_days }} 天
+- **负责人**: {{ phase.lead }}
+
+### 🎯 阶段目标
+{% for goal in phase.goals %}
+- {{ loop.index }}. {{ goal }}
+{% endfor %}
+
+### 📋 任务清单
+
+{% for category in phase.categories %}
+#### {{ category.name }}
+
+{% if category.tasks %}
+| 任务ID | 任务名称 | 负责人 | 预估时间 | 状态 | 优先级 | 依赖项 | 完成日期 |
+|--------|----------|--------|----------|------|--------|--------|----------|
+{% for task in category.tasks %}
+| {{ task.id }} | [{{ task.status }}] {{ task.name }} | {{ task.assignee }} | {{ task.estimated_hours }}h | {{ task.status }} | {{ task.priority }} | {{ task.dependencies | join(', ') or '-' }} | {{ task.completion_date or '-' }} |
+{% endfor %}
+{% else %}
+*暂无任务*
+{% endif %}
+
+{% endfor %}
+
+### 📊 阶段统计
+- **总任务数**: {{ phase.total_tasks }}
+- **已完成**: {{ phase.completed_tasks }}
+- **进行中**: {{ phase.in_progress_tasks }}
+- **待开始**: {{ phase.pending_tasks }}
+- **完成率**: {{ phase.completion_rate }}%
+- **总工时**: {{ phase.total_hours }}h
+- **已用工时**: {{ phase.spent_hours }}h
+
+---
+
+{% endfor %}
+
+## 🚨 风险和阻塞点
+
+### 当前风险
+{% for risk in current_risks %}
+- 🔴 **{{ risk.title }}** ({{ risk.severity }})
+  - **描述**: {{ risk.description }}
+  - **影响**: {{ risk.impact }}
+  - **缓解措施**: {{ risk.mitigation }}
+  - **负责人**: {{ risk.owner }}
+  - **截止日期**: {{ risk.due_date }}
+{% endfor %}
+
+### 当前阻塞点
+{% for blocker in current_blockers %}
+- 🚫 **{{ blocker.task }}** 被 {{ blocker.blocking_item }} 阻塞
+  - **原因**: {{ blocker.reason }}
+  - **影响**: {{ blocker.impact }}
+  - **解决方案**: {{ blocker.solution }}
+  - **预计解决**: {{ blocker.estimated_resolution }}
+{% endfor %}
+
+## 📈 质量指标
+
+### 代码质量
+- **代码覆盖率**: {{ quality_metrics.code_coverage }}%
+- **静态分析通过率**: {{ quality_metrics.static_analysis_pass_rate }}%
+- **代码审查完成率**: {{ quality_metrics.code_review_completion_rate }}%
+
+### 测试质量
+- **单元测试通过率**: {{ quality_metrics.unit_test_pass_rate }}%
+- **集成测试通过率**: {{ quality_metrics.integration_test_pass_rate }}%
+- **性能测试达标率**: {{ quality_metrics.performance_test_pass_rate }}%
+
+### 文档质量
+- **API文档完整性**: {{ quality_metrics.api_documentation_completeness }}%
+- **用户文档完成度**: {{ quality_metrics.user_documentation_completion }}%
+
+## 👥 人员工作量分析
+
+### 团队成员工作量
+| 成员 | 分配任务 | 预估工时 | 已用工时 | 完成任务数 | 完成率 | 负载状态 |
+|------|----------|----------|----------|------------|--------|----------|
+{% for member in team_members %}
+| {{ member.name }} | {{ member.assigned_tasks }} | {{ member.estimated_hours }}h | {{ member.spent_hours }}h | {{ member.completed_tasks }} | {{ member.completion_rate }}% | {{ member.workload_status }} |
+{% endfor %}
+
+### 工作负载分布
+{% for workload in workload_distribution %}
+- **{{ workload.category }}**: {{ workload.percentage }}% ({{ workload.hours }}h)
+{% endfor %}
+
+## 🎯 里程碑跟踪
+
+### 已完成里程碑
+{% for milestone in completed_milestones %}
+- ✅ **{{ milestone.name }}** ({{ milestone.completion_date }})
+  - **实际完成**: {{ milestone.actual_completion }}
+  - **偏差**: {{ milestone.variance }}
+  - **质量评分**: {{ milestone.quality_score }}/10
+{% endfor %}
+
+### 即将到来的里程碑
+{% for milestone in upcoming_milestones %}
+- 🎯 **{{ milestone.name }}** (预计 {{ milestone.planned_date }})
+  - **当前进度**: {{ milestone.current_progress }}%
+  - **风险因素**: {{ milestone.risk_factors | join(', ') }}
+  - **所需资源**: {{ milestone.required_resources | join(', ') }}
+{% endfor %}
+
+## 📋 每日任务跟踪
+
+### 今日任务 ({{ today_date }})
+{% for task in today_tasks %}
+- [ ] {{ task.name }} ({{ task.assignee }}) - {{ task.estimated_hours }}h - {{ task.priority }}
+{% endfor %}
+
+### 本周重点任务
+{% for task in weekly_focus %}
+- 🎯 **{{ task.name }}** ({{ task.assignee }}) - {{ task.priority }} - {{ task.due_date }}
+{% endfor %}
+
+## 🔍 问题跟踪
+
+### 开放问题
+{% for issue in open_issues %}
+- 🔍 **{{ issue.title }}** ({{ issue.severity }})
+  - **描述**: {{ issue.description }}
+  - **报告人**: {{ issue.reporter }}
+  - **分配给**: {{ issue.assignee }}
+  - **创建日期**: {{ issue.created_date }}
+  - **状态**: {{ issue.status }}
+{% endfor %}
+
+### 已解决问题
+{% for issue in resolved_issues %}
+- ✅ **{{ issue.title }}** (解决于 {{ issue.resolution_date }})
+  - **解决方案**: {{ issue.solution }}
+  - **解决时间**: {{ issue.resolution_time }}
+{% endfor %}
+
+## 📊 性能跟踪
+
+### 时间跟踪
+- **总计划工时**: {{ time_tracking.total_planned_hours }}h
+- **实际用工时**: {{ time_tracking.actual_hours }}h
+- **效率比**: {{ time_tracking.efficiency_ratio }}%
+- **时间偏差**: {{ time_tracking.time_variance }}
+
+### 成本跟踪
+{% for cost in cost_tracking %}
+- **{{ cost.category }}**: {{ cost.planned_cost }}元 (计划) / {{ cost.actual_cost }}元 (实际)
+  - **偏差**: {{ cost.variance }}元 ({{ cost.variance_percentage }}%)
+{% endfor %}
+
+## 🎯 下一步行动
+
+### 立即行动项 (24小时内)
+{% for action in immediate_actions %}
+1. **{{ action.title }}** - {{ action.assignee }} - {{ action.due_time }}
+{% endfor %}
+
+### 短期行动项 (本周内)
+{% for action in short_term_actions %}
+1. **{{ action.title }}** - {{ action.assignee }} - {{ action.due_date }}
+{% endfor %}
+
+### 中期行动项 (本月内)
+{% for action in medium_term_actions %}
+1. **{{ action.title }}** - {{ action.assignee }} - {{ action.due_date }}
+{% endfor %}
+
+---
+
+## 📝 任务详情
+
+{% for phase in phases %}
+### {{ phase.name }}阶段 - 详细任务
+
+{% for category in phase.categories %}
+{% for task in category.tasks %}
+#### {{ task.id }}: {{ task.name }}
+
+**基本信息**:
+- **负责人**: {{ task.assignee }}
+- **预估工时**: {{ task.estimated_hours }}h
+- **实际工时**: {{ task.actual_hours }}h
+- **状态**: {{ task.status }}
+- **优先级**: {{ task.priority }}
+- **开始日期**: {{ task.start_date or '未开始' }}
+- **完成日期**: {{ task.completion_date or '未完成' }}
+
+**任务描述**: {{ task.description }}
+
+**验收标准**:
+{% for criteria in task.acceptance_criteria %}
+- [ ] {{ criteria }}
+{% endfor %}
+
+**依赖项**: {{ task.dependencies | join(', ') or '无' }}
+
+**子任务**:
+{% for subtask in task.subtasks %}
+- [ ] {{ subtask.name }} ({{ subtask.estimated_hours }}h)
+{% endfor %}
+
+**风险和问题**:
+{% for issue in task.issues %}
+- 🚨 **{{ issue.title }}**: {{ issue.description }}
+{% endfor %}
+
+**备注**: {{ task.notes or '无' }}
+
+---
+
+{% endfor %}
+{% endfor %}
+{% endfor %}
+
+## 📊 报告统计
+
+### 生成时间: {{ report_generation_time }}
+### 数据截止时间: {{ data_cutoff_time }}
+### 报告周期: {{ reporting_period }}
+
+---
+
+## 📞 联系信息
+
+### 项目团队
+{% for member in project_team %}
+- **{{ member.name }}** ({{ member.role }}): {{ member.email }} | {{ member.phone }}
+{% endfor %}
+
+### 相关方
+{% for stakeholder in stakeholders %}
+- **{{ stakeholder.name }}** ({{ stakeholder.role }}): {{ stakeholder.email }} | {{ stakeholder.phone }}
+{% endfor %}
+
+---
+
+*本任务清单由 DAIP-LIVE Spec-Kit 自动生成*

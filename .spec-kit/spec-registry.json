@@ -1,0 +1,228 @@
+{
+  "templates": {
+    "cli-command-specification": {
+      "file": "cli-command-specification.md",
+      "description": "CLI命令功能规范模板",
+      "category": "technical",
+      "version": "1.0.0",
+      "last_updated": "2024-01-15"
+    },
+    "cli-implementation-plan": {
+      "file": "cli-implementation-plan.md",
+      "description": "CLI命令实施计划和技术架构",
+      "category": "implementation",
+      "version": "1.0.0",
+      "last_updated": "2024-01-15"
+    },
+    "optimized-cli-implementation-plan": {
+      "file": "optimized-cli-implementation-plan.md",
+      "description": "优化版CLI实施计划（基于现有服务复用）",
+      "category": "implementation",
+      "version": "1.1.0",
+      "last_updated": "2024-01-16"
+    },
+    "cli-optimization-standards": {
+      "file": "cli-optimization-standards.md",
+      "description": "CLI优化标准和最佳实践（异步、性能、错误处理）",
+      "category": "optimization",
+      "version": "1.0.0",
+      "last_updated": "2024-01-16"
+    },
+    "final-implementation-guide": {
+      "file": "final-implementation-guide.md",
+      "description": "最终实施指南和交付标准",
+      "category": "implementation",
+      "version": "1.0.0",
+      "last_updated": "2024-01-16"
+    },
+    "api-specification": {
+      "file": "api-specification.md.j2",
+      "description": "API接口规范模板（Jinja2格式）",
+      "category": "technical",
+      "version": "1.0.0",
+      "last_updated": "2024-01-15"
+    },
+    "requirements-specification": {
+      "file": "requirements-specification.md.j2",
+      "description": "软件需求规格说明书模板（Jinja2格式）",
+      "category": "business",
+      "version": "1.0.0",
+      "last_updated": "2024-01-15"
+    },
+    "project-plan-specification": {
+      "file": "project-plan-specification.md.j2",
+      "description": "项目计划书模板（Jinja2格式）",
+      "category": "management",
+      "version": "1.0.0",
+      "last_updated": "2024-01-16"
+    },
+    "task-breakdown-template": {
+      "file": "task-breakdown-template.md.j2",
+      "description": "任务分解清单模板（Jinja2格式）",
+      "category": "management",
+      "version": "1.0.0",
+      "last_updated": "2024-01-16"
+    }
+  },
+  "categories": {
+    "business": {
+      "description": "业务需求和功能规范",
+      "color": "#4CAF50"
+    },
+    "technical": {
+      "description": "技术实现和接口规范",
+      "color": "#2196F3"
+    },
+    "implementation": {
+      "description": "实施计划和架构设计",
+      "color": "#FF9800"
+    },
+    "optimization": {
+      "description": "性能优化和最佳实践",
+      "color": "#9C27B0"
+    },
+    "management": {
+      "description": "项目管理和任务跟踪",
+      "color": "#607D8B"
+    },
+    "testing": {
+      "description": "测试策略和验收标准",
+      "color": "#E91E63"
+    }
+  },
+  "usage": {
+    "cli_creation": {
+      "command": "spec-create cli-command <command_name> <output_file>",
+      "description": "创建CLI命令规范文档",
+      "template": "cli-command-specification"
+    },
+    "api_creation": {
+      "command": "spec-create api <api_name> <output_file>",
+      "description": "创建API规范文档",
+      "template": "api-specification"
+    },
+    "requirements_creation": {
+      "command": "spec-create requirements <project_name> <output_file>",
+      "description": "创建需求规格说明书",
+      "template": "requirements-specification"
+    },
+    "project_plan_creation": {
+      "command": "spec-create project-plan <project_name> <output_file>",
+      "description": "创建项目计划书",
+      "template": "project-plan-specification"
+    },
+    "task_breakdown_creation": {
+      "command": "spec-create task-breakdown <project_name> <output_file>",
+      "description": "创建任务分解清单",
+      "template": "task-breakdown-template"
+    }
+  },
+  "validation_rules": {
+    "required_sections": {
+      "cli-command": [
+        "功能定义",
+        "输出格式规范",
+        "技术实现要求",
+        "命令行选项"
+      ],
+      "api-specification": [
+        "API概述",
+        "接口定义",
+        "数据模型",
+        "错误处理"
+      ],
+      "requirements": [
+        "项目概述",
+        "功能需求",
+        "非功能需求",
+        "验收标准"
+      ],
+      "project-plan": [
+        "项目概述",
+        "技术架构",
+        "项目时间线",
+        "团队分工",
+        "风险管理",
+        "质量管理"
+      ],
+      "task-breakdown": [
+        "项目总览",
+        "阶段划分",
+        "任务清单",
+        "风险管理",
+        "质量指标"
+      ]
+    },
+    "quality_checks": {
+      "no_ambiguous_terms": "避免使用模糊不清的术语",
+      "measurable_criteria": "所有验收标准必须可测量",
+      "complete_error_handling": "必须包含完整的错误处理方案",
+      "performance_requirements": "必须明确性能指标和要求",
+      "risk_assessment": "必须包含风险识别和缓解措施",
+      "resource_planning": "必须包含详细的人力和技术资源计划"
+    }
+  },
+  "integration": {
+    "ci_cd": {
+      "github_actions": ".github/workflows/spec-validation.yml",
+      "gitlab_ci": ".gitlab-ci.yml",
+      "jenkins": "Jenkinsfile"
+    },
+    "ide_plugins": {
+      "vscode": "spec-kit-vscode",
+      "jetbrains": "spec-kit-intellij"
+    },
+    "documentation": {
+      "mkdocs": "mkdocs.yml",
+      "sphinx": "conf.py",
+      "docusaurus": "docusaurus.config.js"
+    },
+    "project_management": {
+      "github_projects": "GitHub Projects integration",
+      "jira": "Jira integration",
+      "trello": "Trello integration"
+    }
+  },
+  "daip_live_cli_project": {
+    "name": "DAIP-LIVE CLI系统增强",
+    "status": "planned",
+    "start_date": "2024-01-15",
+    "end_date": "2024-02-09",
+    "documents": {
+      "project_plan": "docs/cli-enhancement/PROJECT_PLAN.md",
+      "task_breakdown": "docs/cli-enhancement/TASK_BREAKDOWN.md",
+      "technical_spec": ".spec-kit/templates/cli-implementation-plan.md",
+      "optimization_standards": ".spec-kit/templates/cli-optimization-standards.md"
+    },
+    "milestones": [
+      {
+        "name": "基础设施搭建",
+        "date": "2024-01-19",
+        "status": "planned"
+      },
+      {
+        "name": "核心命令实现",
+        "date": "2024-01-26",
+        "status": "planned"
+      },
+      {
+        "name": "功能完善",
+        "date": "2024-02-02",
+        "status": "planned"
+      },
+      {
+        "name": "测试交付",
+        "date": "2024-02-09",
+        "status": "planned"
+      }
+    ],
+    "deliverables": [
+      "5个CLI命令",
+      "错误处理系统",
+      "性能监控系统",
+      "缓存机制",
+      "完整测试套件",
+      "用户文档"
+    ]
+  }
+}

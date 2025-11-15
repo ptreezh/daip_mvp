@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "ask": [
+      "Read(!D:\\DAIP\\refactdoc/**)",
+      "Edit(!D:\\DAIP\\refactdoc/**)"
+    ],
+    "allow": [
+      "Read(D:\\DAIP\\refactdoc/**)",
+      "Edit(D:\\DAIP\\refactdoc/**)"
+    ]
+  },
+  "memoryImport": {},
+  "monitoring": {}
+}

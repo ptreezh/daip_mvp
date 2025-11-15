@@ -292,8 +292,8 @@ class PersonalAILogo:
         panel = Panel(
             Align.center(logo_text),
             border_style="bright_cyan",
-            title="[bold magenta]AI PSY[/bold magenta]",
-            subtitle="[dim]Psychological AI System[/dim]"
+            title="[bold cyan]AGENT PSY LAB[/bold cyan]",
+            subtitle="[dim]Intelligent Agent Laboratory[/dim]"
         )
         
         self.console.print(panel)
@@ -320,8 +320,8 @@ class PersonalAILogo:
                 panel = Panel(
                     Align.center(partial_line),
                     border_style="bright_cyan",
-                    title="[bold magenta]AI PSY[/bold magenta]",
-                    subtitle="[dim]Psychological AI System[/dim]"
+                    title="[bold cyan]AGENT PSY LAB[/bold cyan]",
+                    subtitle="[dim]Intelligent Agent Laboratory[/dim]"
                 )
                 self.console.clear()
                 self.console.print(panel)
@@ -339,8 +339,8 @@ class PersonalAILogo:
             log_callback(Panel(
                 Align.center(logo_text),
                 border_style="bright_cyan",
-                title="[bold magenta]AI PSY[/bold magenta]",
-                subtitle="[dim]Psychological AI System[/dim]"
+                title="[bold cyan]AGENT PSY LAB[/bold cyan]",
+                subtitle="[dim]Intelligent Agent Laboratory[/dim]"
             ))
     
     def get_logo_styles(self) -> list:

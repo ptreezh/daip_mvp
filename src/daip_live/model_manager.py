@@ -106,21 +106,50 @@ class ModelManager:
         except Exception as e:
             raise ModelError(f"Failed to update configuration: {e}")
     
-    def get_current_model(self) -> str:
-        """Get the current model name."""
-        if self._current_model:
+    def get_current_model(self) -> Optional[Dict]:
+        """Get the current model information."""
+        if self._current_model and isinstance(self._current_model, dict):
             return self._current_model
-        
+
         # Try to read from config
         try:
             import yaml
             with open("config.yaml", 'r', encoding='utf-8') as f:
                 config = yaml.safe_load(f)
-                model = config.get("llm_provider", {}).get("default_model", "unknown")
-                self._current_model = model
-                return model
+                model = config.get("llm_provider", {}).get("default_model")
+                if model:
+                    # Parse model name from provider/model format
+                    if "/" in model:
+                        provider, name = model.split("/", 1)
+                        model_info = {
+                            'name': name,
+                            'provider': provider,
+                            'status': 'ready',
+                            'uptime': 'Unknown'
+                        }
+                    else:
+                        model_info = {
+                            'name': model,
+                            'provider': 'unknown',
+                            'status': 'ready',
+                            'uptime': 'Unknown'
+                        }
+                    self._current_model = model_info
+                    return model_info
         except Exception:
-            return "unknown"
+            pass
+
+        return None
+
+    def get_model_info(self, model_name: str) -> Optional[Dict]:
+        """Get detailed information about a specific model."""
+        available_models = self.get_available_models()
+
+        for model in available_models:
+            if model.get('name') == model_name:
+                return model
+
+        return None
     
     def format_model_list(self) -> str:
         """Format the model list for display."""
