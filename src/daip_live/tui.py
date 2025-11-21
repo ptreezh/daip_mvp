@@ -37,6 +37,7 @@ from textual.css.query import NoMatches
 
 
 from daip_live.agent_engine.executor import AgentExecutor
+from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer
 from daip_live.core.models import (
     AgentEvent,
     DebateCompleteEvent,
@@ -196,6 +197,7 @@ class DAIP_TUI(App):
         Binding("shift_tab", "toggle_focus", "切换焦点"),
         Binding("ctrl+a", "select_all", "全选", show=False),
         Binding("ctrl+c", "copy_text", "复制", show=False),
+        Binding("ctrl+v", "paste_text", "粘贴", show=False),
         Binding("ctrl+e", "_handle_ctrl_e_exit", "退出应用", show=False),
         Binding("ctrl+q", "_handle_ctrl_q_exit", "退出会话/应用", show=False),
         Binding("escape", "_handle_escape_key", "退出输出模式", show=False),
@@ -280,6 +282,8 @@ class DAIP_TUI(App):
                 role_model_manager=self._role_model_manager,
                 model_provider=self._model_provider
             )
+            # Initialize enhanced intent recognizer
+            self._intent_recognizer = EnhancedIntentRecognizer()
         else:
             # Use provided dependencies
             self._executor = executor
@@ -303,7 +307,88 @@ class DAIP_TUI(App):
                 role_model_manager=self._role_model_manager,
                 model_provider=self._model_provider
             )
-        
+            # Initialize enhanced intent recognizer
+            self._intent_recognizer = EnhancedIntentRecognizer()
+
+            # Initialize skill manager
+            from daip_live.skills.manager import SkillManager
+            self._skill_manager = SkillManager()
+
+            # Initialize Claude Skills integration service and connect to intent recognizer
+            try:
+                from daip_live.skills.enhanced_integration import EnhancedClaudeSkillsManager, integrate_with_intent_recognizer
+                from daip_live.skills.claude_skill_adapter import ClaudeSkillAdapterManager
+
+                self._claude_integration_service = EnhancedClaudeSkillsManager(
+                    skill_manager=self._skill_manager,
+                    model_provider=self._model_provider
+                )
+
+                # Initialize Claude Skill Adapter Manager for Claude Skills format compatibility
+                self._claude_skill_adapter_manager = ClaudeSkillAdapterManager(self._skill_manager)
+
+                # Connect the Claude integration service to the intent recognizer
+                integrate_with_intent_recognizer(
+                    self._intent_recognizer,
+                    self._skill_manager,
+                    self._model_provider
+                )
+
+                # Also set the integration service directly to the recognizer to avoid calling function again
+                self._intent_recognizer.claude_integration_service = self._claude_integration_service
+                print("✅ Claude Skills integration service connected to intent recognizer")
+                print("✅ Claude Skill Adapter Manager initialized for format compatibility")
+
+            except ImportError as e:
+                print(f"⚠️  Claude Skills adapter manager not found: {e}")
+                try:
+                    from daip_live.skills.integration import ClaudeSkillsIntegrationService
+                    self._claude_integration_service = ClaudeSkillsIntegrationService(
+                        skill_manager=self._skill_manager,
+                        model_provider=self._model_provider
+                    )
+
+                    # Initialize adapter manager separately if needed
+                    try:
+                        from daip_live.skills.claude_skill_adapter import ClaudeSkillAdapterManager
+                        self._claude_skill_adapter_manager = ClaudeSkillAdapterManager(self._skill_manager)
+                        print("✅ Claude Skill Adapter Manager initialized for format compatibility")
+                    except ImportError:
+                        self._claude_skill_adapter_manager = None
+                        print("⚠️  Claude Skill Adapter Manager not available")
+
+                    # Also set the integration service directly to the recognizer
+                    self._intent_recognizer.claude_integration_service = self._claude_integration_service
+                    print("✅ Claude Skills integration service connected to intent recognizer (using legacy)")
+                except Exception as e:
+                    print(f"⚠️  Claude Skills integration service initialization failed: {e}")
+                    self._intent_recognizer.claude_integration_service = None
+                    self._claude_skill_adapter_manager = None
+            except Exception as e:
+                print(f"⚠️  Claude Skills integration service initialization failed: {e}")
+                self._intent_recognizer.claude_integration_service = None
+                self._claude_skill_adapter_manager = None
+
+            # Initialize Model Adapter Manager for skill-intent integration
+            try:
+                from daip_live.skills.model_adapter_manager import ModelAdapterManager
+                self._model_adapter_manager = ModelAdapterManager()
+                print("✅ Model adapter manager initialized with dynamic model detection")
+            except Exception as e:
+                print(f"⚠️  Model adapter manager initialization failed: {e}")
+                self._model_adapter_manager = None
+
+            # Auto-register default skills
+            try:
+                from daip_live.skills.text_analysis import TextAnalysisSkill
+                text_skill = TextAnalysisSkill()
+                self._skill_manager.register_skill(text_skill)
+            except ImportError:
+                # TextAnalysisSkill might not be available, that's OK
+                pass
+            except Exception as e:
+                print(f"Warning: Could not register default text analysis skill: {e}")
+
         self._goal = goal
         self._log_text_buffer: List[str] = []
 
@@ -371,12 +456,20 @@ class DAIP_TUI(App):
 
         # Discover available commands
         self._available_commands = []
+        # List of unimplemented or internal commands to exclude
+        excluded_commands = {"init", "shortcut"}
+        
         for name in dir(self):
             if name.startswith("_handle_") and name.endswith("_command"):
-                command_name = f"/{name.replace('_handle_', '').replace('_command', '')}"
+                command_name = name.replace('_handle_', '').replace('_command', '')
+                
+                # Skip unimplemented or internal commands
+                if command_name in excluded_commands:
+                    continue
+                    
                 handler = getattr(self, name)
                 help_text = (handler.__doc__ or "").strip().split('\n')[0]
-                self._available_commands.append((command_name, help_text))
+                self._available_commands.append((f"/{command_name}", help_text))
         
         # Load input history from file
         self._load_input_history()
@@ -443,9 +536,29 @@ class DAIP_TUI(App):
                     self._update_log_view(f"[dim]{line}[/dim]")
 
     def action_copy_text(self) -> None:
-        """Copy all text from the output log to the clipboard."""
-        all_text = "\n".join(self._log_text_buffer)
+        """Copy selected text or all text from the output log to the clipboard."""
         try:
+            # Try to get selected text from RichLog first
+            main_log = self.query_one("#main_log", RichLog)
+            # Check if there's a selection in the RichLog
+            selected_text = None
+            try:
+                # Try different methods to get selection
+                if hasattr(main_log, 'get_selection') and callable(getattr(main_log, 'get_selection')):
+                    selected_text = main_log.get_selection()
+                elif hasattr(main_log, 'selected_text') and callable(getattr(main_log, 'selected_text')):
+                    selected_text = main_log.selected_text()
+            except Exception:
+                # If getting selection fails, fall back to copying all text
+                pass
+            
+            if selected_text and selected_text.strip():
+                pyperclip.copy(selected_text)
+                self._update_log_view("[bold green]> Selected text copied to clipboard.[/bold green]")
+                return
+            
+            # If no selection or selection failed, copy all text
+            all_text = "\n".join(self._log_text_buffer)
             pyperclip.copy(all_text)
             # Let's also show a visual indication that text was copied
             self._update_log_view("[bold green]> All log content copied to clipboard.[/bold green]")
@@ -461,6 +574,35 @@ class DAIP_TUI(App):
                     self._update_log_view(f"[dim]{line}[/dim]")
                 if i >= 10:  # Limit to 10 lines to avoid spam
                     break
+
+    def action_paste_text(self) -> None:
+        """Paste text from clipboard to input area."""
+        try:
+            # Get text from clipboard
+            clipboard_text = pyperclip.paste()
+            if clipboard_text:
+                # Get the input widget
+                input_widget = self.query_one("#user_input", Input)
+                # Insert clipboard text at cursor position
+                current_value = input_widget.value
+                cursor_position = input_widget.cursor_position
+                
+                # Insert clipboard text at cursor position
+                new_value = current_value[:cursor_position] + clipboard_text + current_value[cursor_position:]
+                input_widget.value = new_value
+                
+                # Move cursor to end of inserted text
+                new_cursor_position = cursor_position + len(clipboard_text)
+                input_widget.cursor_position = new_cursor_position
+                
+                # Focus the input widget
+                input_widget.focus()
+                
+                self._update_log_view("[bold green]> Text pasted from clipboard.[/bold green]")
+            else:
+                self._update_log_view("[yellow]> Clipboard is empty.[/bold yellow]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]> Failed to paste from clipboard: {e}[/bold red]")
 
     def action__handle_ctrl_e_exit(self) -> None:
         """Action method for CTRL+E exit binding."""
@@ -645,23 +787,226 @@ class DAIP_TUI(App):
         if user_input.startswith("/"):
             await self._handle_shortcut_command(user_input)
         else:
-            # Check if we have an active chat session
-            if hasattr(self, '_executor') and self._executor is not None:
-                # Check if the executor has a user_input_queue and it's valid
-                if hasattr(self._executor, 'user_input_queue') and self._executor.user_input_queue is not None:
-                    try:
-                        self._executor.user_input_queue.put_nowait(user_input)
-                        self._update_log_view(f"[bold blue]> You:[/bold blue] {user_input}")
-                    except Exception as e:
-                        # Queue might be full or session broken
-                        self._update_log_view(f"[bold red]> Error: Could not send message to session ({str(e)})[/bold red]")
+            # Use enhanced intent recognizer for natural language input
+            try:
+                intent = self._intent_recognizer.recognize_intent(user_input)
+
+                if intent:
+                    # Handle recognized intent
+                    self._update_log_view(f"[bold blue]> 检测到意图: {intent.description} (置信度: {intent.confidence:.2f})[/bold blue]")
+
+                    # Check if intent requires clarification
+                    if getattr(intent, 'requires_clarification', False):
+                        # Handle clarification request
+                        clarification_msg = self._get_clarification_message(intent)
+                        self._update_log_view(f"[bold yellow]> {clarification_msg}[/bold yellow]")
+                        # Don't execute the command yet, wait for user to provide missing information
+                        return  # Exit early to avoid command execution
+                    else:
+                        # Map intent to appropriate command handler
+                        if intent.name == "search_papers":
+                            # Convert to /doc search command
+                            query = intent.parameters.get("query", user_input)
+                            if query and query.strip() != "" and query != "machine learning":  # Only if we have a real query
+                                await self._handle_doc_command(f"search {query}")
+                            else:
+                                # Query is missing or default, ask user for keywords
+                                self._update_log_view("[bold yellow]> 请输入搜索关键词，例如：论文 人工智能[/bold yellow]")
+                        elif intent.name == "download_paper":
+                            # Convert to /doc download command
+                            paper_id = intent.parameters.get("paper_id")
+                            if paper_id:
+                                await self._handle_doc_command(f"download {paper_id}")
+                            else:
+                                self._update_log_view("[bold yellow]> 请提供论文标题、主题或arXiv ID[/bold yellow]")
+                        elif intent.name == "start_debate":
+                            # Convert to /debate start command
+                            topic = intent.parameters.get("topic", user_input)
+                            if topic and topic.strip() != "":
+                                await self._handle_debate_command(f"start {topic}")
+                            else:
+                                self._update_log_view("[bold yellow]> 请输入辩论主题[/bold yellow]")
+                        elif intent.name == "create_wiki":
+                            # Convert to /wiki create command
+                            title = intent.parameters.get("title", user_input)
+                            if title and title.strip() != "":
+                                await self._handle_wiki_command(f"create {title}")
+                            else:
+                                self._update_log_view("[bold yellow]> 请输入Wiki页面标题[/bold yellow]")
+                        elif intent.name == "initialize_project":
+                            # Convert to /project scaffold command
+                            description = intent.parameters.get("description", user_input)
+                            self._handle_project_command(f"scaffold --description \"{description}\"")  # This is a sync method, don't await
+                        elif intent.name == "view_debate_history":
+                            # Convert to /debate history command
+                            self._handle_debate_command("history")  # This is a sync method, don't await
+                        elif intent.name == "view_specific_debate":
+                            # Convert to /debate history view command
+                            session_id = intent.parameters.get("session_id")
+                            if session_id:
+                                self._handle_debate_command(f"history view {session_id}")  # This is a sync method, don't await
+                            else:
+                                self._handle_debate_command("history")  # This is a sync method, don't await
+                        elif intent.name == "execute_skill":
+                            # Convert to skill execution
+                            skill_type = intent.parameters.get("target_skill", "general")
+                            skill_content = intent.parameters.get("content", "")
+                            original_request = intent.parameters.get("original_request_text", "")
+
+                            if skill_content and skill_content.strip():
+                                self._update_log_view(f"[bold blue]> 🤖 执行技能: {skill_type} ('{skill_content[:50]}...')[/bold blue]")
+
+                                # Execute appropriate skill based on type
+                                if skill_type == "analysis" or any(keyword in skill_content for keyword in ["分析", "analyze", "text", "内容"]):
+                                    from daip_live.skills.text_analysis import TextAnalysisSkill
+                                    text_skill = TextAnalysisSkill()
+                                    # Create skill input
+                                    from daip_live.skills.base import SkillInput
+                                    skill_input = SkillInput(
+                                        data=skill_content,
+                                        context={"source": "intent_recognition", "session_id": getattr(self, '_current_session_id', 'default')},
+                                        metadata={}
+                                    )
+                                    # Execute and show result
+                                    result = text_skill.execute(skill_input)
+                                    self._update_log_view(f"[bold green]> ✅ 技能执行成功:[/bold green]")
+                                    self._update_log_view(f"[cyan]{result.result}[/cyan]")
+                                elif skill_type == "search" or any(keyword in skill_content for keyword in ["搜索", "查找", "find", "search"]):
+                                    # Execute search skill through doc command
+                                    await self._handle_doc_command(f"search {skill_content}")
+                                elif skill_type == "claude_skill":
+                                    # Execute Claude-specific skill
+                                    self._update_log_view(f"[bold blue]> 🤖 Claude Skill 执行: {original_request}[/bold blue]")
+                                    # Use Claude skills manager if available
+                                    if hasattr(self, '_claude_skill_adapter_manager') and self._claude_skill_adapter_manager:
+                                        try:
+                                            # Attempt to execute Claude Skills
+                                            from daip_live.skills.text_analysis import TextAnalysisSkill
+                                            claude_skill = TextAnalysisSkill()
+                                            from daip_live.skills.base import SkillInput
+                                            skill_input = SkillInput(
+                                                data=skill_content,
+                                                context={"source": "intent_recognition", "session_id": getattr(self, '_current_session_id', 'default')},
+                                                metadata={"skill_type": "claude_like"}
+                                            )
+                                            result = claude_skill.execute(skill_input)
+                                            self._update_log_view(f"[bold green]> ✅ Claude 技能执行成功:[/bold green]")
+                                            self._update_log_view(f"[cyan]{result.result}[/cyan]")
+                                        except Exception as e:
+                                            self._update_log_view(f"[bold red]> ❌ Claude 技能执行失败: {e}[/bold red]")
+                                    else:
+                                        self._update_log_view(f"[bold yellow]> 未找到Claude技能适配器，使用通用技能处理[/bold yellow]")
+                                        self._start_new_chat_session(skill_content)
+                                else:
+                                    # For other skill types or when content is missing
+                                    self._update_log_view(f"[bold yellow]> 识别为技能请求: {skill_type}, 内容: '{skill_content[:30]}...'[/bold yellow]")
+                                    # Try to find and execute specific skill
+                                    skill_found = False
+                                    if self._skill_manager:
+                                        available_skills = self._skill_manager.list_skills()
+                                        if skill_content.replace(" ", "_") in available_skills:
+                                            # Execute the found skill
+                                            specific_skill = self._skill_manager.get_skill(skill_content.replace(" ", "_"))
+                                            if specific_skill:
+                                                from daip_live.skills.base import SkillInput
+                                                skill_input = SkillInput(
+                                                    data=original_request,
+                                                    context={"source": "intent_recognition", "session_id": getattr(self, '_current_session_id', 'default')},
+                                                    metadata={}
+                                                )
+                                                result = specific_skill.execute(skill_input)
+                                                self._update_log_view(f"[bold green]> ✅ 识别并执行具体技能:[/bold green]")
+                                                self._update_log_view(f"[cyan]{result.result}[/cyan]")
+                                                skill_found = True
+
+                                    if not skill_found:
+                                        self._update_log_view(f"[bold yellow]> 请输入技能执行内容，例如：帮我分析 这段文字内容[/bold yellow]")
+                            else:
+                                self._update_log_view(f"[bold yellow]> 请输入要执行的技能和内容，例如：帮我分析 这段文本[/bold yellow]")
+                                # If skill_content is missing, suggest to user in natural language
+                                if original_request:
+                                    self._update_log_view(f"[dim]> 您的请求: '{original_request}'[/dim]")
+                        elif intent.name == "compress_context":
+                            # Convert to /compact command
+                            self._handle_compact_command("")  # This is a sync method, don't await
+                        elif intent.name in ["question", "chat"]:
+                            # For question or chat intents, determine if slow thinking is needed
+
+                            # Check if user wants fast response by including keywords
+                            user_input_lower = user_input.lower()
+                            needs_fast_response = any(keyword in user_input_lower for keyword in [
+                                "快点", "赶紧", "立刻", "马上", "速速", "尽快", "快", "急速",
+                                "fast", "quick", "rapid", "now", "asap", "急需", "急着要",
+                                "速度", "迅速", "立即", "立马", "马上"
+                            ])
+
+                            # Check if question might require deeper thinking
+                            needs_slow_thinking = any(keyword in user_input_lower for keyword in [
+                                "分析", "解释", "总结", "评估", "评估一下", "深入", "深刻", "详细",
+                                "详细分析", "深度", "复杂", "复杂问题", "研究", "探究", "探讨",
+                                "eval", "analyze", "evaluate", "consider", "think deeply",
+                                "深思", "仔细", "仔细想想", "认真", "认真考虑", "审慎",
+                                "帮我分析", "帮我理解", "帮我评估", "帮我研究", "帮我解释",
+                                "详细说说", "深入分析", "详细解释", "全面分析", "仔细分析"
+                            ])
+
+                            # Special processing if slow thinking is detected
+                            if needs_slow_thinking and not needs_fast_response:
+                                # Respond with slow thinking notification first
+                                self._update_log_view(f"[bold yellow]> ⏳ 正在进行深度思考...我需要审慎的回答这个问题: '{user_input[:50]}{'...' if len(user_input) > 50 else ''}'[/bold yellow]")
+                                self._update_log_view(f"[dim]> 系统正在整合知识库、分析参数并准备多角色协作回答[/dim]")
+
+                                # Then start chat session with slow thinking context
+                                self._start_new_chat_session(user_input)
+                            elif needs_fast_response:
+                                # User wants fast response, provide quick feedback
+                                self._update_log_view(f"[bold blue]> ⚡ 快速响应模式: '{user_input}'[/bold blue]")
+                                self._start_new_chat_session(user_input)
+                            else:
+                                # Default behavior - start chat session
+                                self._start_new_chat_session(user_input)
+                                # Add informational note if it was a question that doesn't obviously need deep thinking
+                                if intent.name == "question" and not needs_slow_thinking and not needs_fast_response:
+                                    # This is a general question, user might want to know system is processing
+                                    pass  # General chat processing will already be done by _start_new_chat_session
+                        else:
+                            # For other intents, fall back to chat mode
+                            self._start_new_chat_session(user_input)
+                else:
+                    # No intent recognized, fall back to existing chat behavior
+                    # Check if we have an active chat session
+                    if hasattr(self, '_executor') and self._executor is not None:
+                        # Check if the executor has a user_input_queue and it's valid
+                        if hasattr(self._executor, 'user_input_queue') and self._executor.user_input_queue is not None:
+                            try:
+                                self._executor.user_input_queue.put_nowait(user_input)
+                                self._update_log_view(f"[bold blue]> You:[/bold blue] {user_input}")
+                            except Exception as e:
+                                # Queue might be full or session broken
+                                self._update_log_view(f"[bold red]> Error: Could not send message to session ({str(e)})[/bold red]")
+                                self._start_new_chat_session(user_input)
+                        else:
+                            # Executor exists but no input queue, start new session
+                            self._start_new_chat_session(user_input)
+                    else:
+                        # No active agent session, create one automatically
+                        self._start_new_chat_session(user_input)
+            except Exception as e:
+                # Handle any errors during intent recognition
+                self._update_log_view(f"[bold red]> 意图识别出错: {str(e)}[/bold red]")
+                # Fall back to existing chat behavior
+                if hasattr(self, '_executor') and self._executor is not None:
+                    if hasattr(self._executor, 'user_input_queue') and self._executor.user_input_queue is not None:
+                        try:
+                            self._executor.user_input_queue.put_nowait(user_input)
+                            self._update_log_view(f"[bold blue]> You:[/bold blue] {user_input}")
+                        except Exception as inner_e:
+                            self._update_log_view(f"[bold red]> Error: Could not send message to session ({str(inner_e)})[/bold red]")
+                            self._start_new_chat_session(user_input)
+                    else:
                         self._start_new_chat_session(user_input)
                 else:
-                    # Executor exists but no input queue, start new session
                     self._start_new_chat_session(user_input)
-            else:
-                # No active agent session, create one automatically
-                self._start_new_chat_session(user_input)
 
     def _get_autocomplete_suggestions(self, value: str) -> List[str]:
         """Gets autocomplete suggestions based on the input value."""
@@ -675,7 +1020,7 @@ class DAIP_TUI(App):
         if len(parts) == 1 and value.startswith("/"):
             cmd = value.strip()
             # Don't show main command completion for commands that have subcommands
-            known_multi_commands = {"/role", "/session", "/knowledge", "/project", "/debate", "/model", "/compact", "/doc", "/wiki", "/permission"}
+            known_multi_commands = {"/role", "/session", "/knowledge", "/project", "/debate", "/model", "/compact", "/doc", "/wiki", "/permission", "/skill"}
             if cmd not in known_multi_commands or len(cmd) < len("/role"):  # Allow partial matches
                 return [f"{cmd} - {help_text}" for cmd, help_text in self._available_commands if cmd.startswith(value)]
 
@@ -979,9 +1324,13 @@ class DAIP_TUI(App):
             
         # Handle focus-specific key behavior
         if self.focus_mode == FocusMode.OUTPUT:
-            # In output mode, only handle copy key
+            # In output mode, handle copy and paste keys
             if event == Keys.ControlC:
                 self.action_copy_text()
+                event.prevent_default()
+                return
+            elif event == Keys.ControlV:
+                self.action_paste_text()
                 event.prevent_default()
                 return
             elif event == Keys.ControlA:
@@ -1007,6 +1356,12 @@ class DAIP_TUI(App):
             input_widget = self.query_one(Input)
         except NoMatches:
             # If Input widget not found, ignore the key event
+            return
+        
+        # Handle Ctrl+V in input mode for paste functionality
+        if event == Keys.ControlV:
+            self.action_paste_text()
+            event.prevent_default()
             return
         
         popup_query = self.query("#autocomplete-popup")
@@ -1227,8 +1582,55 @@ class DAIP_TUI(App):
             for res in results:
                 results_str += f"- {res['file_path']} (Distance: {res['distance']:.4f})\n"
             self._update_log_view(f"[bold green]>{results_str}[/bold green]")
+        elif subcommand == "collaborate" or subcommand == "multirole":
+            # 协作创建维基词条功能
+            if len(parts) < 2:
+                self._update_log_view("[bold red]> Missing title for /knowledge collaborate. Usage: /knowledge collaborate <title>[/bold red]")
+                return
+            title = parts[1]
+            if hasattr(self._wiki_manager, 'create_collaborative_page') and self._wiki_manager:
+                self._update_log_view(f"[bold yellow]> Creating collaborative wiki page: '{title}'...[/bold yellow]")
+                try:
+                    # 使用默认角色创建协作页面
+                    roles_instructions = {
+                        "domain_expert": "作为领域专家，请提供专业知识和核心技术要点",
+                        "researcher": "作为研究员，请提供研究依据和参考资料",
+                        "editor": "作为编辑，请负责内容结构和语言润色",
+                        "analyst": "作为分析师，请提供批判性思考和改进建议"
+                    }
+                    collaborative_page = await self._wiki_manager.create_collaborative_page(
+                        title=title,
+                        roles_instructions=roles_instructions
+                    )
+                    self._update_log_view(f"[bold green]> ✅ Collaborative wiki page created: {collaborative_page.title}[/bold green]")
+                except Exception as e:
+                    self._update_log_view(f"[bold red]> ❌ Error creating collaborative wiki page: {e}[/bold red]")
+            elif hasattr(self._wiki_manager, '_add_content_by_all_roles') and self._wiki_manager:
+                # 如果没有create_collaborative_page方法，先创建页面然后协作
+                self._update_log_view(f"[bold yellow]> Creating wiki page: '{title}' and adding collaborative content...[/bold yellow]")
+                try:
+                    # 先创建一个空页面
+                    initial_page = self._wiki_manager.create_page(title=title, content=f"# {title}\n\n此页面由多个AI角色协作创建于{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}。\n\n## 协作内容\n", tags=["collaborative"])
+
+                    # 然后让多个角色协作添加内容
+                    roles_instructions = {
+                        "domain_expert": "作为领域专家，请提供专业知识和核心技术要点",
+                        "researcher": "作为研究员，请提供研究依据和参考资料",
+                        "editor": "作为编辑，请负责内容结构和语言润色",
+                        "analyst": "作为分析师，请提供批判性思考和改进建议"
+                    }
+                    updated_page = await self._wiki_manager._add_content_by_all_roles(
+                        title=title,
+                        roles_instructions=roles_instructions,
+                        instruction=f"协作完善维基词条: {title}"
+                    )
+                    self._update_log_view(f"[bold green]> ✅ Collaborative wiki page created and updated: {updated_page.title}[/bold green]")
+                except Exception as e:
+                    self._update_log_view(f"[bold red]> ❌ Error creating collaborative wiki page: {e}[/bold red]")
+            else:
+                self._update_log_view("[bold red]> Wiki manager doesn't support collaborative features[/bold red]")
         else:
-            self._update_log_view(f"[bold red]> Unknown subcommand for /knowledge: {subcommand}. Try /knowledge sync.[/bold red]")
+            self._update_log_view(f"[bold red]> Unknown subcommand for /knowledge: {subcommand}. Available: sync, search, collaborate[/bold red]")
 
     def _handle_debate_command(self, args: str) -> None:
         """Debate system commands (start with topic and options)."""
@@ -1305,8 +1707,8 @@ class DAIP_TUI(App):
 
                 # Store role-model mappings
                 for mapping in role_mappings:
-                    self._current_debate['role_models'][mapping.role_name] = mapping.model_config.model_name
-                    self._debate_active_models[mapping.role_name] = mapping.model_config.model_name
+                    self._current_debate['role_models'][mapping.role_name] = mapping.role_model_config.model_name
+                    self._debate_active_models[mapping.role_name] = mapping.role_model_config.model_name
 
                 # Log model assignments
                 model_assignments = [f"{role}→{model}" for role, model in self._current_debate['role_models'].items()]
@@ -1665,14 +2067,21 @@ class DAIP_TUI(App):
                 self._update_log_view(f"[bold red]> 会话 '{self._current_session_id}' 不存在[/bold red]")
                 return
 
-            # Check if there's enough history to compress
+            # Check if there's a reason to compress (either history exists OR token usage is high)
             history_count = len(session.history)
-            if history_count == 0:
-                self._update_log_view("[bold yellow]> ⚠️ 会话历史为空，无需压缩[/bold yellow]")
+            used_tokens, total_tokens = self._real_token_usage
+            current_percentage = (used_tokens / total_tokens) * 100 if total_tokens > 0 else 0
+
+            # Continue with compression if we have history OR if token usage is high
+            if history_count == 0 and current_percentage < 50:  # Only skip if no history AND low token usage
+                self._update_log_view("[bold yellow]> ⚠️ 会话历史为空且token使用量低，无需压缩[/bold yellow]")
                 return
-            elif history_count <= 3:
-                self._update_log_view("[bold yellow]> ⚠️ 会话历史较短({history_count}条记录)，跳过压缩[/bold yellow]")
-                return
+            elif history_count == 0:
+                self._update_log_view("[bold yellow]> ⚠️ 会话历史为空，但token使用量较高({current_percentage:.1f}%)，继续压缩...[/bold yellow]")
+            elif history_count <= 3 and current_percentage < 70:
+                self._update_log_view(f"[bold yellow]> ⚠️ 会话历史较短({history_count}条记录)，token使用量{current_percentage:.1f}%，但仍进行轻量压缩...[/bold yellow]")
+            elif history_count <= 3 and current_percentage >= 70:
+                self._update_log_view(f"[bold blue]> 🔄 会话历史较短但token使用量高({current_percentage:.1f}%)，执行上下文优化...[/bold blue]")
 
             # Get current token usage before compression
             used_tokens, total_tokens = self._real_token_usage
@@ -1713,11 +2122,12 @@ class DAIP_TUI(App):
         except Exception as e:
             self._update_log_view(f"[bold red]> 压缩过程中出错: {e}[/bold red]")
 
-    def _handle_doc_command(self, args: str) -> None:
+    async def _handle_doc_command(self, args: str) -> None:
         """Paper download and management commands."""
         args_list = args.split()
         if not args_list:
             self._update_log_view("[bold red]> Usage: /doc [download|list|search] [options][/bold red]")
+            self._update_log_view("[bold yellow]> Example: /doc search AI ethics[/bold yellow]")
             return
 
         subcommand = args_list[0].lower()
@@ -1728,10 +2138,271 @@ class DAIP_TUI(App):
         elif subcommand == "list":
             self._handle_doc_list()
         elif subcommand == "search":
-            self._handle_doc_search(remaining_args)
+            self._handle_doc_search(remaining_args)  # This is sync method, don't await
+        elif subcommand in ["skill", "skills", "claude", "claude_skill", "claude_skills"]:
+            # Claude Skills相关命令
+            skill_args = remaining_args.strip()
+
+            # 分割命令和参数
+            skill_parts = skill_args.split(" ", 1) if skill_args else []
+            skill_subcmd = skill_parts[0].lower() if skill_parts else "list"
+            skill_remaining = skill_parts[1] if len(skill_parts) > 1 else ""
+
+            if skill_subcmd == "list":
+                await self._handle_claude_skills_list_command(skill_remaining)
+            elif skill_subcmd == "run" or skill_subcmd == "execute":
+                await self._handle_claude_skills_run_command(skill_remaining)
+            elif skill_subcmd == "search":
+                await self._handle_claude_skills_search_command(skill_remaining)
+            elif skill_subcmd == "sync":
+                await self._handle_claude_skills_sync_command(skill_remaining)
+            elif skill_subcmd == "info":
+                await self._handle_claude_skills_info_command(skill_remaining)
+            else:
+                self._update_log_view(f"[bold red]> Unknown Claude Skills subcommand: {skill_subcmd}[/bold red]")
+                self._update_log_view("[bold yellow]> Available: list, run, search, sync, info[/bold yellow]")
+                self._update_log_view("[bold yellow]> Example: /doc skills list, /doc skills run <skill_name>, /doc skills sync[/bold yellow]")
         else:
             self._update_log_view(f"[bold red]> Unknown doc subcommand: {subcommand}[/bold red]")
-            self._update_log_view("[bold yellow]> Available: download, list, search[/bold yellow]")
+            self._update_log_view("[bold yellow]> Available: download, list, search, skills[/bold yellow]")
+            self._update_log_view("[bold yellow]> Example: /doc search AI ethics, /doc skills list[/bold yellow]")
+
+    async def _handle_claude_skills_list_command(self, args: str) -> None:
+        """Handle Claude Skills list command."""
+        self._update_log_view("[bold blue]> 📚 Listing available Claude Skills...[/bold blue]")
+
+        try:
+            if not self._skill_manager:
+                self._update_log_view("[bold red]> ❌ Skill manager not initialized[/bold red]")
+                return
+
+            skill_list = self._skill_manager.list_skills()
+            if skill_list:
+                self._update_log_view(f"[bold green]> ✅ Found {len(skill_list)} skills:[/bold green]")
+                for i, skill_name in enumerate(skill_list, 1):
+                    skill = self._skill_manager.get_skill(skill_name)
+                    if skill and hasattr(skill, 'metadata'):
+                        desc = skill.metadata.description
+                        tags = ", ".join(skill.metadata.tags[:3])  # Show first 3 tags
+                        self._update_log_view(f"  {i:2d}. [cyan]{skill_name}[/cyan] - {desc[:100]}...")
+                        self._update_log_view(f"      [dim]Tags: {tags}[/dim]")
+                    else:
+                        self._update_log_view(f"  {i:2d}. [cyan]{skill_name}[/cyan] - No metadata available")
+            else:
+                self._update_log_view("[bold yellow]> No skills available in the system[/bold yellow]")
+
+                # Suggest registering a basic skill
+                self._update_log_view("[dim]> Tip: Skills can be registered automatically through intent recognition[/dim]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error listing skills: {e}[/bold red]")
+
+    async def _handle_claude_skills_run_command(self, args: str) -> None:
+        """Handle Claude Skills run command."""
+        try:
+            if not self._skill_manager:
+                self._update_log_view("[bold red]> ❌ Skill manager not initialized[/bold red]")
+                return
+
+            args_list = args.split()
+            if not args_list:
+                self._update_log_view("[bold red]> Missing skill name for /doc skills run. Usage: /doc skills run <skill_name> <input>[/bold red]")
+                return
+
+            skill_name = args_list[0]
+            skill_input = " ".join(args_list[1:]) if len(args_list) > 1 else ""
+
+            self._update_log_view(f"[bold blue]> 🚀 Running skill '{skill_name}'...[/bold blue]")
+
+            skill = self._skill_manager.get_skill(skill_name)
+            if not skill:
+                available_skills = self._skill_manager.list_skills()
+                self._update_log_view(f"[bold red]> ❌ Skill '{skill_name}' not found. Available: {available_skills}[/bold red]")
+                return
+
+            if not skill_input:
+                self._update_log_view(f"[bold yellow]> Missing input for skill '{skill_name}'. Please provide input text.[/bold yellow]")
+                return
+
+            from daip_live.skills.base import SkillInput, SkillOutput
+            skill_input_obj = SkillInput(
+                data=skill_input,
+                context={"source": "tui_command", "session_id": getattr(self, '_current_session_id', 'default')}
+            )
+
+            result: SkillOutput = skill.execute(skill_input_obj)
+
+            self._update_log_view(f"[bold green]> ✅ Skill '{skill_name}' executed successfully:[/bold green]")
+            self._update_log_view(f"[dim]> Confidence: {result.confidence:.2f}, Execution time: {result.execution_time:.2f}s[/dim]")
+            self._update_log_view(f"[cyan]{result.result}[/cyan]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error running skill: {e}[/bold red]")
+
+    async def _handle_claude_skills_search_command(self, args: str) -> None:
+        """Handle Claude Skills search command."""
+        if not args.strip():
+            self._update_log_view("[bold red]> Missing search query for /doc skills search. Usage: /doc skills search <query>[/bold red]")
+            return
+
+        self._update_log_view(f"[bold blue]> 🔍 Searching for skills related to: '{args}'...[/bold blue]")
+
+        try:
+            if not self._skill_manager or not hasattr(self._skill_manager, 'list_skills'):
+                self._update_log_view("[bold red]> ❌ Skill manager not initialized[/bold red]")
+                return
+
+            # 使用集成的服务进行技能搜索和推荐
+            if hasattr(self, '_intent_recognizer') and self._intent_recognizer and hasattr(self._intent_recognizer, 'claude_integration_service'):
+                integration_service = self._intent_recognizer.claude_integration_service
+                if hasattr(integration_service, 'recommend_skills'):
+                    recommendations = await integration_service.recommend_skills(args)
+                    if recommendations:
+                        self._update_log_view(f"[bold green]> ✅ Found {len(recommendations)} recommended skills:[/bold green]")
+                        for rec in recommendations:
+                            self._update_log_view(f"  • [cyan]{rec[0]}[/cyan] ({rec[1]:.2f}) - {rec[2][:100]}...")
+                    else:
+                        self._update_log_view("[bold yellow]> No skills closely match your query[/bold yellow]")
+                else:
+                    self._update_log_view("[bold yellow]> Claude integration service doesn't support skill recommendation[/bold yellow]")
+            else:
+                # 简单搜索所有可用技能
+                skill_list = self._skill_manager.list_skills()
+                matches = []
+                search_lower = args.lower()
+
+                for skill_name in skill_list:
+                    skill = self._skill_manager.get_skill(skill_name)
+                    if skill and hasattr(skill, 'metadata'):
+                        if search_lower in skill.metadata.name.lower() or search_lower in skill.metadata.description.lower() or any(search_lower in tag.lower() for tag in skill.metadata.tags):
+                            matches.append(skill_name)
+
+                if matches:
+                    self._update_log_view(f"[bold green]> ✅ Found {len(matches)} matching skills:[/bold green]")
+                    for match in matches:
+                        skill = self._skill_manager.get_skill(match)
+                        desc = skill.metadata.description[:100] if skill and hasattr(skill, 'metadata') else "No description"
+                        self._update_log_view(f"  • [cyan]{match}[/cyan] - {desc}...")
+                else:
+                    self._update_log_view("[bold yellow]> No skills match your query. Available skills:[/bold yellow]")
+                    for skill_name in skill_list:
+                        self._update_log_view(f"  • {skill_name}")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error searching skills: {e}[/bold red]")
+
+    async def _handle_claude_skills_sync_command(self, args: str) -> None:
+        """Handle Claude Skills synchronization command."""
+        self._update_log_view("[bold blue]> 🔄 同步本地Claude技能库...[/bold blue]")
+
+        try:
+            # 检查增强技能管理器是否存在
+            if hasattr(self, '_claude_integration_service') and self._claude_integration_service:
+                # 使用Claude集成服务的增强功能进行同步
+                if hasattr(self._claude_integration_service, 'load_skills_from_github'):
+                    # 如果参数是URL，则从GitHub同步
+                    if args and args.startswith('http'):
+                        try:
+                            skill_names = await self._claude_integration_service.load_skills_from_github(args)
+                            self._update_log_view(f"[bold green]> ✅ 从GitHub同步了 {len(skill_names)} 个技能: {', '.join(skill_names)}[/bold green]")
+                        except Exception as e:
+                            self._update_log_view(f"[bold red]> ❌ 从GitHub同步失败: {e}[/bold red]")
+                    else:
+                        # 否则同步本地技能目录
+                        self._update_log_view("[bold yellow]> 📁 扫描本地技能目录...[/bold yellow]")
+                        # 实际的本地文件监控同步已经在后台运行
+
+                        # 检查本地技能目录
+                        from pathlib import Path
+                        skills_dir = Path("./claude_skills")
+                        if skills_dir.exists():
+                            skill_count = 0
+                            for skill_dir in skills_dir.iterdir():
+                                if skill_dir.is_dir():
+                                    manifest_file = skill_dir / "manifest.json"
+                                    if manifest_file.exists():
+                                        self._update_log_view(f"[dim]> 发现技能: {skill_dir.name}[/dim]")
+                                        skill_count += 1
+
+                            self._update_log_view(f"[bold green]> ✅ 检查了技能目录，找到 {skill_count} 个有效技能[/bold green]")
+                            self._update_log_view(f"[bold green]> 📚 系统当前可用技能: {len(self._skill_manager.list_skills())} 个[/bold green]")
+                        else:
+                            self._update_log_view("[bold yellow]> 📂 本地技能目录不存在或无技能文件[/bold yellow]")
+                            self._update_log_view("[bold yellow]> 提示: 创建 claude_skills 目录并放入技能文件[/bold yellow]")
+                else:
+                    # 直接同步本地技能目录
+                    import os
+                    from pathlib import Path
+
+                    skills_dir = Path("./claude_skills")
+                    if skills_dir.exists():
+                        skill_count = 0
+                        for skill_dir in skills_dir.iterdir():
+                            if skill_dir.is_dir():
+                                manifest_file = skill_dir / "manifest.json"
+                                if manifest_file.exists():
+                                    self._update_log_view(f"[dim]> 发现技能: {skill_dir.name}[/dim]")
+                                    skill_count += 1
+                        self._update_log_view(f"[bold green]> ✅ 检查了技能目录，找到 {skill_count} 个技能目录[/bold green]")
+                    else:
+                        self._update_log_view("[bold yellow]> 📂 本地技能目录不存在或无技能文件[/bold yellow]")
+                        self._update_log_view("[bold yellow]> 提示: 创建 claude_skills 目录并放入技能文件[/bold yellow]")
+            else:
+                self._update_log_view("[bold yellow]> ⚠️ Claude技能集成服务未初始化[/bold yellow]")
+                self._update_log_view("[bold yellow]> 提示: 系统支持Claude技能，但集成服务未完全加载[/bold yellow]")
+
+                # 尝试从意图识别器获取集成服务
+                if hasattr(self, '_intent_recognizer') and self._intent_recognizer:
+                    if hasattr(self._intent_recognizer, 'claude_integration_service') and self._intent_recognizer.claude_integration_service:
+                        self._claude_integration_service = self._intent_recognizer.claude_integration_service
+                        self._update_log_view("[bold green]> ✅ 从意图识别器获取了Claude集成服务[/bold green]")
+                    else:
+                        self._update_log_view("[dim]> 意图识别器中也未找到Claude集成服务[/dim]")
+                else:
+                    self._update_log_view("[dim]> 意图识别器未初始化[/dim]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 技能同步错误: {e}[/bold red]")
+            import traceback
+            traceback.print_exc()
+
+    async def _handle_claude_skills_info_command(self, args: str) -> None:
+        """Handle Claude Skills info command."""
+        if not args.strip():
+            self._update_log_view("[bold red]> Missing skill name for /doc skills info. Usage: /doc skills info <skill_name>[/bold red]")
+            return
+
+        skill_name = args.strip()
+        self._update_log_view(f"[bold blue]> 📋 获取技能 '{skill_name}' 信息...[/bold blue]")
+
+        try:
+            skill = self._skill_manager.get_skill(skill_name)
+            if skill and hasattr(skill, 'metadata'):
+                metadata = skill.metadata
+                info_str = f"""
+[cyan]=== 技能信息: {metadata.name} ===[/cyan]
+[b]描述:[/b] {metadata.description}
+[b]版本:[/b] {metadata.version}
+[b]作者:[/b] {metadata.author}
+[b]标签:[/b] {', '.join(metadata.tags)}
+[b]输入参数:[/b] 请使用自然语言表达需求
+[b]示例命令:[/b]
+  - {skill_name} <input>
+  - 运行{skill_name}处理<input>
+  - 帮我{skill_name}<input>
+                """
+                self._update_log_view(info_str)
+            else:
+                available_skills = self._skill_manager.list_skills()
+                self._update_log_view(f"[bold red]> ❌ 技能 '{skill_name}' 未找到[/bold red]")
+                if available_skills:
+                    self._update_log_view(f"[bold yellow]> 📚 可用技能: {', '.join(available_skills)}[/bold yellow]")
+                else:
+                    self._update_log_view(f"[bold yellow]> 📚 当前无可用技能[/bold yellow]")
+                    self._update_log_view(f"[bold yellow]> 提示: 请将技能文件放在 claude_skills 目录中[/bold yellow]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 获取技能信息错误: {e}[/bold red]")
 
     def _handle_doc_download(self, args: str) -> None:
         """Handle paper download command."""
@@ -1783,6 +2454,119 @@ class DAIP_TUI(App):
             self._update_log_view("[bold red]> ❌ 论文下载功能不可用，缺少相关模块[/bold red]")
         except Exception as e:
             self._update_log_view(f"[bold red]> ❌ 下载失败: {e}[/bold red]")
+
+    def _handle_skill_command(self, args: str) -> None:
+        """Handle skill management commands (list, run, info)."""
+        args_list = args.split()
+        if not args_list:
+            self._update_log_view("[bold red]> Usage: /skill [list|run|info] [options][/bold red]")
+            self._update_log_view("[bold yellow]> Available: list, run, info[/bold yellow]")
+            self._update_log_view("[bold yellow]> Example: /skill list or /skill run text_analysis 'input text'[/bold yellow]")
+            return
+
+        subcommand = args_list[0].lower()
+        remaining_args = " ".join(args_list[1:])
+
+        if subcommand == "list":
+            self._handle_skill_list()
+        elif subcommand == "run":
+            if len(args_list) < 2:
+                self._update_log_view("[bold red]> Missing skill name for /skill run. Usage: /skill run <skill_name> [arguments][/bold red]")
+                return
+            # Extract skill name and parameters
+            skill_name = args_list[1]
+            skill_args = " ".join(args_list[2:]) if len(args_list) > 2 else ""
+            self._handle_skill_run(skill_name, skill_args)
+        elif subcommand == "info":
+            if len(args_list) < 2:
+                self._update_log_view("[bold red]> Missing skill name for /skill info. Usage: /skill info <skill_name>[/bold red]")
+                return
+            skill_name = args_list[1]
+            self._handle_skill_info(skill_name)
+        else:
+            self._update_log_view(f"[bold red]> Unknown skill subcommand: {subcommand}. Available: list, run, info[/bold red]")
+            self._update_log_view("[bold yellow]> Example: /skill list, /skill run text_analysis 'text', /skill info text_analysis[/bold yellow]")
+
+    def _handle_skill_list(self) -> None:
+        """List all available skills."""
+        try:
+            if hasattr(self, '_skill_manager') and self._skill_manager:
+                skill_names = self._skill_manager.list_skills()
+                if skill_names:
+                    self._update_log_view(f"[bold green]> 🧩 Available Skills ({len(skill_names)} total):[/bold green]")
+                    for i, skill_name in enumerate(skill_names, 1):
+                        # Get skill metadata if available
+                        metadata = self._skill_manager.get_metadata(skill_name)
+                        desc = getattr(metadata, 'description', 'No description') if metadata else 'No description'
+                        self._update_log_view(f"  {i:2d}. {skill_name} - {desc}")
+                else:
+                    self._update_log_view("[bold yellow]> 🧩 No skills registered in the system[/bold yellow]")
+                    self._update_log_view("[dim]> Skills can be loaded from skills directory[/dim]")
+            else:
+                self._update_log_view("[bold red]> ❌ Skill manager not initialized[/bold red]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error listing skills: {e}[/bold red]")
+
+    def _handle_skill_run(self, skill_name: str, skill_args: str) -> None:
+        """Run a specific skill with provided arguments."""
+        try:
+            if not hasattr(self, '_skill_manager') or not self._skill_manager:
+                self._update_log_view("[bold red]> ❌ Skill manager not initialized[/bold red]")
+                return
+
+            # Get the skill
+            skill = self._skill_manager.get_skill(skill_name)
+            if not skill:
+                self._update_log_view(f"[bold red]> ❌ Skill '{skill_name}' not found. Available skills:[/bold red]")
+                self._handle_skill_list()
+                return
+
+            # Prepare skill input
+            from daip_live.skills.base import SkillInput, SkillOutput
+            skill_input = SkillInput(
+                data=skill_args or "No specific input provided",
+                context={"source": "tui_command", "session_id": getattr(self, '_current_session_id', 'default')},
+                metadata={"command_args": skill_args}
+            )
+
+            # Execute the skill
+            self._update_log_view(f"[bold blue]> 🚀 Running skill '{skill_name}'...[/bold blue]")
+            result: SkillOutput = skill.execute(skill_input)
+
+            # Display result
+            self._update_log_view(f"[bold green]> ✅ Skill '{skill_name}' executed successfully:[/bold green]")
+            self._update_log_view(f"[dim]> Confidence: {result.confidence:.2f}, Execution time: {result.execution_time:.2f}s[/dim]")
+            self._update_log_view(f"📝 Result: {result.result}")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error running skill '{skill_name}': {e}[/bold red]")
+            import traceback
+            traceback.print_exc()
+
+    def _handle_skill_info(self, skill_name: str) -> None:
+        """Show information about a specific skill."""
+        try:
+            if not hasattr(self, '_skill_manager') or not self._skill_manager:
+                self._update_log_view("[bold red]> ❌ Skill manager not initialized[/bold red]")
+                return
+
+            metadata = self._skill_manager.get_metadata(skill_name)
+            if not metadata:
+                self._update_log_view(f"[bold red]> ❌ No information available for skill '{skill_name}'[/bold red]")
+                self._handle_skill_list()
+                return
+
+            self._update_log_view(f"[bold blue]> 📘 Skill Information: {skill_name}[/bold blue]")
+            self._update_log_view(f"   Description: {metadata.description}")
+            self._update_log_view(f"   Version: {metadata.version}")
+            self._update_log_view(f"   Author: {metadata.author}")
+            if metadata.tags:
+                self._update_log_view(f"   Tags: {', '.join(metadata.tags)}")
+            if metadata.dependencies:
+                self._update_log_view(f"   Dependencies: {', '.join(metadata.dependencies)}")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error getting skill info for '{skill_name}': {e}[/bold red]")
 
     def _handle_doc_list(self) -> None:
         """List downloaded papers."""
@@ -2662,9 +3446,13 @@ class DAIP_TUI(App):
             formatted_event = f"[bold green]> 🎬 Debate started: {event.topic}[/bold green]"
             formatted_event += f"\n[cyan]> Participants: {', '.join(event.roles)}[/cyan]"
             formatted_event += f"\n[cyan]> Rounds: {event.rounds}[/cyan]"
+            self._update_log_view(formatted_event)
+            return
         elif isinstance(event, DebateRoundStartEvent):
             self._current_debate['current_round'] = event.round_number
             formatted_event = f"[bold blue]> 🔄 Round {event.round_number}/{event.total_rounds} starting...[/bold blue]"
+            self._update_log_view(formatted_event)
+            return
         elif isinstance(event, DebateTurnStartEvent):
             self._current_debate['current_participant'] = event.participant
 
@@ -2681,6 +3469,8 @@ class DAIP_TUI(App):
             # Get participant-specific color for better visual identification
             participant_color = self._current_debate['participant_colors'].get(event.participant, 'yellow')
             formatted_event = f"[bold {participant_color}]> 🗣️  {event.participant} speaking (Round {event.round_number})...[/bold {participant_color}]"
+            self._update_log_view(formatted_event)
+            return
         elif isinstance(event, DebateTurnCompleteEvent):
             # Show complete response with participant-specific coloring for better visual separation
             participant_color = self._current_debate['participant_colors'].get(event.participant, 'white')
@@ -2689,6 +3479,8 @@ class DAIP_TUI(App):
             formatted_event = f"[bold {header_color}]> ✅ {event.participant} finished (Round {event.round_number})[/bold {header_color}]"
             formatted_event += f"\n[bold {participant_color}]Response:[/bold {participant_color}]"
             formatted_event += f"\n[{participant_color}]{event.content_preview}[/{participant_color}]"
+            self._update_log_view(formatted_event)
+            return
         elif isinstance(event, DebateCompleteEvent):
             self._current_debate['is_active'] = False
             self._current_debate['current_participant'] = None
@@ -3037,20 +3829,39 @@ class DAIP_TUI(App):
             else:
                 session = self._session_manager.get_session(self._current_session_id)
 
-            if session and len(session.history) > 5:  # Lower threshold for compression
-                # Use memory service to compress history
-                if hasattr(self, '_memory_service') and self._memory_service:
-                    self._update_log_view("[bold blue]> 🔄 正在智能压缩上下文...[/bold blue]")
-                    task = asyncio.create_task(self._compress_session_context_async(session))
-                    self._background_tasks.add(task)
-                    task.add_done_callback(self._background_tasks.discard)
+            if session:
+                # Check if token usage is high enough to warrant compression, regardless of history length
+                used_tokens, total_tokens = self._real_token_usage
+                current_percentage = (used_tokens / total_tokens) * 100 if total_tokens > 0 else 0
+
+                if current_percentage >= 80 or len(session.history) > 5:  # Compress if high token usage OR long history
+                    # Use memory service to compress history
+                    if hasattr(self, '_memory_service') and self._memory_service:
+                        self._update_log_view("[bold blue]> 🔄 正在智能压缩上下文...[/bold blue]")
+                        task = asyncio.create_task(self._compress_session_context_async(session))
+                        self._background_tasks.add(task)
+                        task.add_done_callback(self._background_tasks.discard)
+                    else:
+                        # Fallback: clear oldest history entries to reduce token usage
+                        history_count = len(session.history)
+                        keep_count = max(2, min(5, history_count // 2))  # Keep half the entries, minimum 2, max 5
+                        original_count = len(session.history)
+
+                        session.history = session.history[-keep_count:]  # Keep last N entries
+                        session.compressed_history = None
+
+                        if original_count > 0:
+                            self._update_log_view(f"[bold green]> ✅ 历史记录已压缩: 保留{keep_count}/{original_count}条记录[/bold green]")
+                        else:
+                            self._update_log_view("[bold green]> ✅ 历史记录已优化[/bold green]")
                 else:
-                    # Fallback: clear oldest history entries
-                    session.history = session.history[-3:]  # Keep last 3 entries
-                    session.compressed_history = None
-                    self._update_log_view("[bold green]> ✅ 已手动清理历史记录[/bold green]")
+                    # Even if history is short, still try to reduce context if token usage is high
+                    if current_percentage >= 70:  # Still warn if approaching limit
+                        self._update_log_view(f"[bold yellow]> 📊 Token使用量: {current_percentage:.1f}% (历史较短但接近限制)[/bold yellow]")
+                    else:
+                        self._update_log_view("[bold blue]> 📝 会话历史较短，当前token使用量较低，暂时跳过压缩[/bold blue]")
             else:
-                self._update_log_view("[bold blue]> 📝 会话历史较短，跳过压缩[/bold blue]")
+                self._update_log_view("[bold red]> ❌ 无法获取当前会话进行压缩[/bold red]")
 
             # Show compression complete message
             self._update_status_bar("80%压缩完成")
@@ -3112,13 +3923,45 @@ class DAIP_TUI(App):
             "#20B2AA",  # Light sea green
             "#9370DB",  # Medium purple
         ]
-        
+
         participant_colors = {}
         for i, name in enumerate(participant_names):
             color = colors[i % len(colors)]  # Cycle through colors if more participants than colors
             participant_colors[name] = color
-        
+
         return participant_colors
+
+    def _get_clarification_message(self, intent) -> str:
+        """Get appropriate clarification message based on intent."""
+        # Get clarification info from intent if available
+        clarification_needed = getattr(intent, 'clarification_needed', None)
+
+        if clarification_needed:
+            if hasattr(clarification_needed, 'message'):
+                return clarification_needed.message
+            elif hasattr(clarification_needed, 'type'):
+                # Handle different types of clarification
+                clarification_type = getattr(clarification_needed, 'type', 'unknown')
+                if clarification_type == 'missing_keywords':
+                    return "请输入搜索关键词，例如：论文 人工智能 或 搜索 深度学习"
+                elif clarification_type == 'missing_parameters':
+                    required_params = getattr(clarification_needed, 'required_parameters', [])
+                    if required_params:
+                        return f"需要补充信息: {', '.join(required_params)}"
+                elif clarification_type == 'ambiguous_intent':
+                    return "请提供更多信息以明确您的需求"
+
+        # Fallback message based on intent name
+        if intent.name == "search_papers":
+            return "请输入搜索关键词，例如：论文 人工智能"
+        elif intent.name == "download_paper":
+            return "请提供论文标题或主题"
+        elif intent.name == "start_debate":
+            return "请输入辩论主题"
+        elif intent.name == "create_wiki":
+            return "请输入Wiki页面标题"
+
+        return "请提供更多信息"
 
     async def wait_participant(self, participant: str, timeout: float = 60.0) -> None:
         """Wait for a specific participant to take their turn."""
