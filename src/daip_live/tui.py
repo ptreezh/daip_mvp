@@ -310,84 +310,84 @@ class DAIP_TUI(App):
             # Initialize enhanced intent recognizer
             self._intent_recognizer = EnhancedIntentRecognizer()
 
-            # Initialize skill manager
-            from daip_live.skills.manager import SkillManager
-            self._skill_manager = SkillManager()
+        # Initialize skill manager (always needed regardless of dependency injection)
+        from daip_live.skills.manager import SkillManager
+        self._skill_manager = SkillManager()
 
-            # Initialize Claude Skills integration service and connect to intent recognizer
+        # Initialize Claude Skills integration service and connect to intent recognizer
+        try:
+            from daip_live.skills.enhanced_integration import EnhancedClaudeSkillsManager, integrate_with_intent_recognizer
+            from daip_live.skills.claude_skill_adapter import ClaudeSkillAdapterManager
+
+            self._claude_integration_service = EnhancedClaudeSkillsManager(
+                skill_manager=self._skill_manager,
+                model_provider=self._model_provider
+            )
+
+            # Initialize Claude Skill Adapter Manager for Claude Skills format compatibility
+            self._claude_skill_adapter_manager = ClaudeSkillAdapterManager(self._skill_manager)
+
+            # Connect the Claude integration service to the intent recognizer
+            integrate_with_intent_recognizer(
+                self._intent_recognizer,
+                self._skill_manager,
+                self._model_provider
+            )
+
+            # Also set the integration service directly to the recognizer to avoid calling function again
+            self._intent_recognizer.claude_integration_service = self._claude_integration_service
+            print("✅ Claude Skills integration service connected to intent recognizer")
+            print("✅ Claude Skill Adapter Manager initialized for format compatibility")
+
+        except ImportError as e:
+            print(f"⚠️  Claude Skills adapter manager not found: {e}")
             try:
-                from daip_live.skills.enhanced_integration import EnhancedClaudeSkillsManager, integrate_with_intent_recognizer
-                from daip_live.skills.claude_skill_adapter import ClaudeSkillAdapterManager
-
-                self._claude_integration_service = EnhancedClaudeSkillsManager(
+                from daip_live.skills.integration import ClaudeSkillsIntegrationService
+                self._claude_integration_service = ClaudeSkillsIntegrationService(
                     skill_manager=self._skill_manager,
                     model_provider=self._model_provider
                 )
 
-                # Initialize Claude Skill Adapter Manager for Claude Skills format compatibility
-                self._claude_skill_adapter_manager = ClaudeSkillAdapterManager(self._skill_manager)
-
-                # Connect the Claude integration service to the intent recognizer
-                integrate_with_intent_recognizer(
-                    self._intent_recognizer,
-                    self._skill_manager,
-                    self._model_provider
-                )
-
-                # Also set the integration service directly to the recognizer to avoid calling function again
-                self._intent_recognizer.claude_integration_service = self._claude_integration_service
-                print("✅ Claude Skills integration service connected to intent recognizer")
-                print("✅ Claude Skill Adapter Manager initialized for format compatibility")
-
-            except ImportError as e:
-                print(f"⚠️  Claude Skills adapter manager not found: {e}")
+                # Initialize adapter manager separately if needed
                 try:
-                    from daip_live.skills.integration import ClaudeSkillsIntegrationService
-                    self._claude_integration_service = ClaudeSkillsIntegrationService(
-                        skill_manager=self._skill_manager,
-                        model_provider=self._model_provider
-                    )
-
-                    # Initialize adapter manager separately if needed
-                    try:
-                        from daip_live.skills.claude_skill_adapter import ClaudeSkillAdapterManager
-                        self._claude_skill_adapter_manager = ClaudeSkillAdapterManager(self._skill_manager)
-                        print("✅ Claude Skill Adapter Manager initialized for format compatibility")
-                    except ImportError:
-                        self._claude_skill_adapter_manager = None
-                        print("⚠️  Claude Skill Adapter Manager not available")
-
-                    # Also set the integration service directly to the recognizer
-                    self._intent_recognizer.claude_integration_service = self._claude_integration_service
-                    print("✅ Claude Skills integration service connected to intent recognizer (using legacy)")
-                except Exception as e:
-                    print(f"⚠️  Claude Skills integration service initialization failed: {e}")
-                    self._intent_recognizer.claude_integration_service = None
+                    from daip_live.skills.claude_skill_adapter import ClaudeSkillAdapterManager
+                    self._claude_skill_adapter_manager = ClaudeSkillAdapterManager(self._skill_manager)
+                    print("✅ Claude Skill Adapter Manager initialized for format compatibility")
+                except ImportError:
                     self._claude_skill_adapter_manager = None
+                    print("⚠️  Claude Skill Adapter Manager not available")
+
+                # Also set the integration service directly to the recognizer
+                self._intent_recognizer.claude_integration_service = self._claude_integration_service
+                print("✅ Claude Skills integration service connected to intent recognizer (using legacy)")
             except Exception as e:
                 print(f"⚠️  Claude Skills integration service initialization failed: {e}")
                 self._intent_recognizer.claude_integration_service = None
                 self._claude_skill_adapter_manager = None
+        except Exception as e:
+            print(f"⚠️  Claude Skills integration service initialization failed: {e}")
+            self._intent_recognizer.claude_integration_service = None
+            self._claude_skill_adapter_manager = None
 
-            # Initialize Model Adapter Manager for skill-intent integration
-            try:
-                from daip_live.skills.model_adapter_manager import ModelAdapterManager
-                self._model_adapter_manager = ModelAdapterManager()
-                print("✅ Model adapter manager initialized with dynamic model detection")
-            except Exception as e:
-                print(f"⚠️  Model adapter manager initialization failed: {e}")
-                self._model_adapter_manager = None
+        # Initialize Model Adapter Manager for skill-intent integration
+        try:
+            from daip_live.skills.model_adapter_manager import ModelAdapterManager
+            self._model_adapter_manager = ModelAdapterManager()
+            print("✅ Model adapter manager initialized with dynamic model detection")
+        except Exception as e:
+            print(f"⚠️  Model adapter manager initialization failed: {e}")
+            self._model_adapter_manager = None
 
-            # Auto-register default skills
-            try:
-                from daip_live.skills.text_analysis import TextAnalysisSkill
-                text_skill = TextAnalysisSkill()
-                self._skill_manager.register_skill(text_skill)
-            except ImportError:
-                # TextAnalysisSkill might not be available, that's OK
-                pass
-            except Exception as e:
-                print(f"Warning: Could not register default text analysis skill: {e}")
+        # Auto-register default skills
+        try:
+            from daip_live.skills.text_analysis import TextAnalysisSkill
+            text_skill = TextAnalysisSkill()
+            self._skill_manager.register_skill(text_skill)
+        except ImportError:
+            # TextAnalysisSkill might not be available, that's OK
+            pass
+        except Exception as e:
+            print(f"Warning: Could not register default text analysis skill: {e}")
 
         self._goal = goal
         self._log_text_buffer: List[str] = []
