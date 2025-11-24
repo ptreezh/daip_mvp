@@ -52,7 +52,7 @@ class EnhancedDebateManager:
         # Initialize model cache for both architectures
         self.model_cache: Dict[str, LiteLLMProvider] = {}
         if use_optimized_architecture:
-            self.ollama_manager = OllamaInstanceManager()
+            self.ollama_manager = OllamaInstanceManager(shared_provider=model_provider)
             self.role_sessions: Dict[str, RoleDebateSession] = {}
             self.memory_system = LayeredMemorySystem()
         else:

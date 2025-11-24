@@ -1,0 +1,4 @@
+## Qwen Added Memories
+- 用户正在处理DAIP-LIVE项目的统一命令行界面第三阶段任务，目标是实现聊天室和Wiki管理功能。当前工作涉及到重构虚拟角色聊天功能，简化用户交互流程，为聊天室创建提供默认配置，并更新了相关的用户故事文档和业务流程图。项目位于D:\DAIP\refactdoc目录下，用户偏好使用中文交流。
+- 用户正在处理DAIP-LIVE（动态AI驱动项目执行系统）项目的第三阶段任务，目标是实现聊天室和Wiki管理功能。项目位于D:\DAIP\refactdoc目录下。当前系统架构包含：辩论系统（p8_debate_system）、角色管理（p4_role_manager_tools）、知识管理（knowledge）、意图识别（intent_recognition）、技能系统（skills）、工作流（workflow）、TUI界面（tui）和GUI界面（p7_gui）等模块。系统已实现基础辩论、文档处理、角色管理等功能。当前重点是基于TDD原则实现虚拟角色聊天室功能和Wiki协作功能。需要遵循KISS、YAGNI、SOLID原则进行开发。项目已建立完整的依赖注入容器（container.py）和CLI架构。用户偏好使用中文交流。
+- 用户正在处理DAIP-LIVE（动态AI驱动项目执行系统）项目，项目位于D:\DAIP\refactdoc目录下。系统架构包含：辩论系统（p8_debate_system）、角色管理（p4_role_manager_tools）、知识管理（knowledge）、意图识别（intent_recognition）、技能系统（skills）、工作流（workflow）、TUI界面（tui）和GUI界面（p7_gui）等模块。系统已实现基础辩论、文档处理、角色管理、权限管理等功能。项目已建立完整的依赖注入容器（container.py）和CLI架构，使用Pydantic模型定义核心数据结构。用户偏好使用中文交流。

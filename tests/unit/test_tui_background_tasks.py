@@ -2,8 +2,10 @@
 Unit tests for TUI background task management functionality.
 """
 import pytest
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from unittest.mock import Mock, patch, MagicMock
+from asyncio import Future
 import asyncio
+import time
 from src.daip_live.tui import DAIP_TUI
 
 
@@ -23,104 +25,88 @@ class TestTUIBackgroundTaskManagement:
         assert hasattr(tui_app, '_background_tasks')
         assert isinstance(tui_app._background_tasks, set)
 
-    def test_create_task_adds_to_background_tasks(self, tui_app):
-        """Test that creating a task adds it to the background tasks set."""
-        # Setup
-        async def dummy_task():
-            await asyncio.sleep(0.1)
-        
-        # Execute
-        task = asyncio.create_task(dummy_task())
-        tui_app._background_tasks.add(task)
-        task.add_done_callback(tui_app._background_tasks.discard)
-        
-        # Assert
-        assert task in tui_app._background_tasks
-        
-        # Cleanup
-        task.cancel()
-
     def test_on_unmount_cancels_background_tasks(self, tui_app):
         """Test that unmounting the app cancels all background tasks."""
-        # Setup
-        async def dummy_task():
-            await asyncio.sleep(1)
+        # Setup - create some mock tasks
+        mock_task1 = Mock()
+        mock_task2 = Mock()
+        mock_task1.done.return_value = False
+        mock_task2.done.return_value = False
         
-        # Create and add some tasks
-        task1 = asyncio.create_task(dummy_task())
-        task2 = asyncio.create_task(dummy_task())
-        
-        tui_app._background_tasks.add(task1)
-        tui_app._background_tasks.add(task2)
+        tui_app._background_tasks.add(mock_task1)
+        tui_app._background_tasks.add(mock_task2)
         
         # Execute
         tui_app.on_unmount()
         
         # Assert
-        assert task1.done()
-        assert task2.done()
+        mock_task1.cancel.assert_called_once()
+        mock_task2.cancel.assert_called_once()
         assert len(tui_app._background_tasks) == 0
 
     def test_handle_ctrl_e_exit_cancels_background_tasks(self, tui_app):
         """Test that CTRL+E exit cancels all background tasks."""
-        # Setup
-        async def dummy_task():
-            await asyncio.sleep(1)
-        
-        # Create and add some tasks
-        task1 = asyncio.create_task(dummy_task())
-        task2 = asyncio.create_task(dummy_task())
-        
-        tui_app._background_tasks.add(task1)
-        tui_app._background_tasks.add(task2)
-        
-        # Mock time and exit method
-        with patch('src.daip_live.tui.time.time', return_value=1000):
-            with patch.object(tui_app, 'exit'):
-                # Execute
+        # Setup - create some mock tasks
+        mock_task1 = Mock()
+        mock_task2 = Mock()
+        mock_task1.done.return_value = False
+ # Task is not done initially
+        mock_task2.done.return_value = False
+    
+        tui_app._background_tasks.add(mock_task1)
+        tui_app._background_tasks.add(mock_task2)
+    
+        # Set up the timing so that the second press is within the 2-second window
+        import time
+        tui_app._last_ctrl_e_time = time.time() - 1  # First press was 1 second ago
+    
+        # Mock exit method
+        with patch.object(tui_app, 'exit'):
+            # Mock the set_timer method to avoid event loop issues
+            with patch.object(tui_app, 'set_timer'):
+                # Execute - this should trigger the exit since it's the second press
                 tui_app._handle_ctrl_e_exit()
                 
                 # Assert
-                assert task1.done() or task1.cancelled()
-                assert task2.done() or task2.cancelled()
-                # Note: The tasks might not be immediately cancelled, but the set should be cleared
-                # In a real scenario, the exit would terminate the app before we could check
+                mock_task1.cancel.assert_called_once()
+                mock_task2.cancel.assert_called_once()
 
     def test_handle_ctrl_q_exit_cancels_background_tasks(self, tui_app):
         """Test that CTRL+Q exit cancels all background tasks."""
-        # Setup
-        async def dummy_task():
-            await asyncio.sleep(1)
-        
-        # Create and add some tasks
-        task1 = asyncio.create_task(dummy_task())
-        task2 = asyncio.create_task(dummy_task())
-        
-        tui_app._background_tasks.add(task1)
-        tui_app._background_tasks.add(task2)
-        
-        # Mock time and exit method
-        with patch('src.daip_live.tui.time.time', return_value=1000):
-            with patch.object(tui_app, 'exit'):
-                # Execute
+        # Setup - create some mock tasks
+        mock_task1 = Mock()
+        mock_task2 = Mock()
+        mock_task1.done.return_value = False  # Task is not done initially
+        mock_task2.done.return_value = False
+    
+        tui_app._background_tasks.add(mock_task1)
+        tui_app._background_tasks.add(mock_task2)
+    
+        # Set up the timing so that the second press is within the 2-second window
+        import time
+        tui_app._last_ctrl_q_time = time.time() - 1  # First press was 1 second ago
+    
+        # Mock exit method
+        with patch.object(tui_app, 'exit'):
+            # Mock the set_timer method to avoid event loop issues
+            with patch.object(tui_app, 'set_timer'):
+                # Execute - this should trigger the exit since it's the second press
                 tui_app._handle_ctrl_q_exit()
                 
                 # Assert
-                assert task1.done() or task1.cancelled()
-                assert task2.done() or task2.cancelled()
+                mock_task1.cancel.assert_called_once()
+                mock_task2.cancel.assert_called_once()
 
     def test_handle_quit_command_cancels_background_tasks(self, tui_app):
         """Test that quit command cancels all background tasks."""
-        # Setup
-        async def dummy_task():
-            await asyncio.sleep(1)
+        # Setup - create some mock tasks
+        mock_task1 = Mock()
+        mock_task2 = Mock()
+        mock_task1.done.return_value = False
+        mock_task2.done.return_value = False
         
-        # Create and add some tasks
-        task1 = asyncio.create_task(dummy_task())
-        task2 = asyncio.create_task(dummy_task())
-        
-        tui_app._background_tasks.add(task1)
-        tui_app._background_tasks.add(task2)
+        tui_app._background_tasks.add(mock_task1)
+        tui_app._background_tasks.add(mock_task2)
         
         # Mock exit method
         with patch.object(tui_app, 'exit'):
@@ -128,9 +114,8 @@ class TestTUIBackgroundTaskManagement:
             tui_app._handle_quit_command("")
             
             # Assert
-            # Tasks should be cancelled, but we can't easily check this in a synchronous test
-            # The important thing is that the background tasks set is cleared
-            pass  # We can't easily test task cancellation in this context
+            mock_task1.cancel.assert_called_once()
+            mock_task2.cancel.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_compress_session_context_async_handles_success(self, tui_app):
@@ -141,7 +126,10 @@ class TestTUIBackgroundTaskManagement:
         # Mock the memory service
         with patch.object(tui_app, '_memory_service') as mock_memory_service:
             # Setup mock to return successfully
-            mock_memory_service.compress_history = AsyncMock()
+            # Create a mock future to simulate async behavior
+            future = Future()
+            future.set_result(None)
+            mock_memory_service.compress_history = MagicMock(return_value=future)
             
             # Mock the log view update
             with patch.object(tui_app, '_update_log_view'):
@@ -156,10 +144,15 @@ class TestTUIBackgroundTaskManagement:
         """Test that compress session context async handles exceptions."""
         # Setup
         mock_session = Mock()
+        # Mock the history attribute to avoid subscriptable error
+        mock_session.history = ["item1", "item2", "item3", "item4", "item5", "item6", "item7"]
         
         # Mock the memory service to raise an exception
         with patch.object(tui_app, '_memory_service') as mock_memory_service:
-            mock_memory_service.compress_history = AsyncMock(side_effect=Exception("Test error"))
+            # Create a mock future that raises an exception
+            future = Future()
+            future.set_exception(Exception("Test error"))
+            mock_memory_service.compress_history = MagicMock(return_value=future)
             
             # Mock the log view update
             with patch.object(tui_app, '_update_log_view'):

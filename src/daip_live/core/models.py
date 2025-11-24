@@ -377,6 +377,23 @@ class DebateCompleteEvent(BaseModel):
     session_id: str
     summary: str
 
+class ClarificationRequestEvent(BaseModel):
+    """Event requesting clarification from user."""
+    type: Literal["clarification_request"] = "clarification_request"
+    session_id: str
+    clarification_type: str  # missing_keywords, missing_parameters, ambiguous_intent
+    message: str
+    options: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
+    required_parameters: Optional[List[str]] = Field(default_factory=list)
+
+class ClarificationResponseEvent(BaseModel):
+    """Event representing user's response to clarification request."""
+    type: Literal["clarification_response"] = "clarification_response"
+    session_id: str
+    response: str
+    selected_option_id: Optional[str] = None
+    provided_parameters: Optional[Dict[str, Any]] = Field(default_factory=dict)
+
 AgentEvent = Union[
     ThoughtEvent,
     ToolCallEvent,
@@ -392,6 +409,8 @@ AgentEvent = Union[
     DebateTurnStartEvent,
     DebateTurnCompleteEvent,
     DebateCompleteEvent,
+    ClarificationRequestEvent,
+    ClarificationResponseEvent,
 ]
 
 
@@ -451,9 +470,14 @@ class RoleManagerConfig(BaseModel):
     """Pydantic model for role manager configuration."""
     roles_dir: str = Field(..., description="Path to the directory containing role definitions.")
 
+class WikiConfig(BaseModel):
+    """Pydantic model for wiki configuration."""
+    pages_directory: str = Field(..., description="Path to the directory for wiki pages storage.")
+
 class AppConfig(BaseModel):
     """Top-level Pydantic model for the entire application configuration."""
     database: DatabaseConfig
     llm_provider: LLMProviderConfig
     knowledge_base: KnowledgeBaseConfig
     role_manager: RoleManagerConfig
+    wiki: WikiConfig

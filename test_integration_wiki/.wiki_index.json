@@ -1,0 +1,15 @@
+{
+  "pages": [
+    {
+      "title": "测试命令协作维基",
+      "content": "# 测试命令协作维基\n\n开始编辑您的内容...",
+      "file_path": "test_integration_wiki\\测试命令协作维基.md",
+      "created_at": "2025-11-23T23:29:25.074227",
+      "modified_at": "2025-11-23T23:29:25.074227",
+      "tags": [],
+      "word_count": 3,
+      "reading_time": 1
+    }
+  ],
+  "last_updated": "2025-11-23T23:29:25.076227"
+}

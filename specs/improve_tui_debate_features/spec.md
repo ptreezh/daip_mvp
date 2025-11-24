@@ -20,7 +20,24 @@
   - Demonstrated to users independently
 -->
 
-### User Story 1 - Enhanced Debate View (Priority: P1)
+### User Story
+
+ *(mandatory)*
+
+### User Story 1 - Personal Assistant Access (Priority: P1)
+用户希望通过自然语言访问个人助手功能，系统应提供智能助理服务能力。
+
+**Why this priority**: 智能个人助手是现代AI系统的核心功能，需支持自然语言访问。
+
+**Independent Test**: 用户能用多种自然语言表达启动助手功能，系统识别并提供相应服务。
+
+**Acceptance Scenarios**:
+1. **Given** 用户输入"个人助手，请帮我分析这段代码", **When** 请求处理, **Then** 系统启动个人助手分析模式
+2. **Given** 用户输入"PA助手，帮我总结这份报告", **When** 请求处理, **Then** 系统启动个人助手总结模式  
+3. **Given** 用户输入"智能助手，搜索一下AI伦理", **When** 请求处理, **Then** 系统启动搜索和分析功能
+4. **Given** 用户输入"我的助手能做什么", **When** 请
+
+ 1 - Enhanced Debate View (Priority: P1)
 
 用户希望在TUI中更清晰地看到辩论过程，包括每个参与者的发言和轮次信息。
 

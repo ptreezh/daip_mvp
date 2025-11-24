@@ -1,0 +1,14 @@
+{
+  "test_subagent_plugin": {
+    "name": "test_subagent_plugin",
+    "version": "1.0.0",
+    "description": "Test Subagent plugin",
+    "type": "subagent",
+    "url": "file://D:\\DAIP\\refactdoc\\tests\\unit\\temp_test_plugins\\test_subagent.py",
+    "checksum": "",
+    "dependencies": [],
+    "tags": [
+      "test"
+    ]
+  }
+}

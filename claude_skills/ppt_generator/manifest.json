@@ -1,0 +1,15 @@
+{
+  "manifest_version": "1.0",
+  "name": "ppt_generator",
+  "description": "Generates PowerPoint presentations from content",
+  "version": "1.1.0",
+  "author": "DAIP-LIVE Team",
+  "tags": ["ppt", "presentation", "powerpoint", "document"],
+  "api": {
+    "type": "http",
+    "base_url": "https://api.daip.live/ppt",
+    "description": "PPT Generation API"
+  },
+  "tos": "Terms of service for PPT generation",
+  "privacy_policy": "Privacy policy for PPT generation"
+}

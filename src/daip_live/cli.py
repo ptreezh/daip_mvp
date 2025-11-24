@@ -26,7 +26,7 @@ from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
 from daip_live.model_provider.provider import LiteLLMProvider  # Fixed import
 from daip_live.persistence.database import DatabaseManager
 from daip_live.tui import DAIP_TUI
-from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer
+from daip_live.agent_engine.enhanced_intent_recognizer import Intent
 from rich.console import Console
 from rich.table import Table
 
@@ -35,6 +35,21 @@ app = typer.Typer()
 
 # Container for dependency injection
 container = Container()
+
+# Global intent recognizer instance
+intent_recognizer = None
+
+
+@app.callback()
+def initialize_app():
+    """Initialize the CLI app and set up global components"""
+    global intent_recognizer
+    try:
+        # Initialize the enhanced intent recognizer from container
+        intent_recognizer = container.intent_recognizer()
+        print("✅ CLI initialized with enhanced intent recognition")
+    except Exception as e:
+        print(f"⚠️ Warning: Failed to initialize intent recognizer: {e}")
 
 
 @app.command()
@@ -374,6 +389,155 @@ def doc_search(
             console.print("No papers found for the query.")
     
     asyncio.run(run_search_async())
+
+
+@app.command("ask")
+def process_natural_language(
+    query: str = typer.Argument(..., help="Natural language query to process")
+):
+    """Process natural language input and execute appropriate actions"""
+    global intent_recognizer
+    
+    if intent_recognizer is None:
+        print("❌ Intent recognizer not initialized")
+        return
+    
+    try:
+        # Recognize the intent from the natural language input
+        intent = intent_recognizer.recognize_intent(query)
+        
+        if intent is None:
+            print(f"❓ Sorry, I couldn't understand your request: '{query}'")
+            print("💡 Try rephrasing or use specific commands like:")
+            print("   - 'start debate about AI ethics'")
+            print("   - 'search papers about machine learning'")
+            print("   - 'download paper with ID 1234.5678'")
+            return
+        
+        print(f"🎯 Recognized intent: {intent.name} (confidence: {intent.confidence:.2f})")
+        
+        # Process based on the recognized intent
+        if intent.name == "start_debate":
+            _handle_debate_intent(intent)
+        elif intent.name == "search_papers":
+            _handle_search_papers_intent(intent)
+        elif intent.name == "download_paper":
+            _handle_download_paper_intent(intent)
+        elif intent.name == "view_debate_history":
+            _handle_view_debate_history_intent(intent)
+        elif intent.name == "view_specific_debate":
+            _handle_view_specific_debate_intent(intent)
+        elif intent.name in ["chat", "question"]:
+            _handle_conversation_intent(intent)
+        else:
+            print(f"🚧 Intent '{intent.name}' recognized but not yet implemented")
+            print(f"📝 Parameters: {intent.parameters}")
+    
+    except Exception as e:
+        print(f"❌ Error processing natural language input: {e}")
+
+
+def _handle_debate_intent(intent: Intent):
+    """Handle debate start intent"""
+    try:
+        topic = intent.parameters.get("topic", "General Discussion")
+        roles = intent.parameters.get("roles")
+        rounds = intent.parameters.get("rounds", 3)
+        
+        print(f"🗣️ Starting debate on topic: {topic}")
+        print(f"🎭 Roles: {roles or 'default'}")
+        print(f"🔄 Rounds: {rounds}")
+        
+        # Call the existing debate start command
+        debate_start(topic=topic, roles=roles or "pro_arguer,con_arguer", rounds=rounds)
+        
+    except Exception as e:
+        print(f"❌ Error starting debate: {e}")
+
+
+def _handle_search_papers_intent(intent: Intent):
+    """Handle paper search intent"""
+    try:
+        query = intent.parameters.get("query", "")
+        source = intent.parameters.get("source", "arxiv")
+        max_results = intent.parameters.get("max_results", 5)  # Default to 5 to match CLI
+        
+        if not query:
+            print("❌ No search query provided")
+            return
+            
+        print(f"📚 Searching for papers about: {query}")
+        print(f"🌐 Source: {source}")
+        print(f"🔢 Max results: {max_results}")
+        
+        # Call the existing document search command
+        doc_search(query=query, source=source, max_results=max_results)
+        
+    except Exception as e:
+        print(f"❌ Error searching papers: {e}")
+
+
+def _handle_download_paper_intent(intent: Intent):
+    """Handle paper download intent"""
+    try:
+        paper_id = intent.parameters.get("paper_id")
+        if not paper_id:
+            print("❌ No paper ID provided for download")
+            return
+            
+        print(f"📥 Downloading paper with ID: {paper_id}")
+        
+        # Call the existing document download command
+        doc_download(topic=paper_id, source="arxiv")
+        
+    except Exception as e:
+        print(f"❌ Error downloading paper: {e}")
+
+
+def _handle_view_debate_history_intent(intent: Intent):
+    """Handle debate history viewing intent"""
+    try:
+        session_id = intent.parameters.get("session_id")
+        print(f"📜 Viewing debate history{' for session: ' + session_id if session_id else ''}")
+        
+        # Call the existing debate history command
+        debate_history(session_id=session_id)
+        
+    except Exception as e:
+        print(f"❌ Error viewing debate history: {e}")
+
+
+def _handle_view_specific_debate_intent(intent: Intent):
+    """Handle specific debate viewing intent"""
+    try:
+        session_id = intent.parameters.get("session_id")
+        if not session_id:
+            print("❌ No session ID provided")
+            return
+            
+        print(f"🔍 Viewing specific debate session: {session_id}")
+        
+        # Call the existing debate history command with specific session
+        debate_history(session_id=session_id)
+        
+    except Exception as e:
+        print(f"❌ Error viewing specific debate: {e}")
+
+
+def _handle_conversation_intent(intent: Intent):
+    """Handle conversation/chat/question intent"""
+    try:
+        if intent.intent_type == IntentType.QUESTION:
+            question = intent.parameters.get("question", "")
+            print(f"🤔 Question: {question}")
+            print("💡 For questions, please use the TUI interface for interactive responses")
+        else:
+            chat_content = intent.parameters.get("chat_content", "")
+            print(f"💬 Chat: {chat_content}")
+            print("👋 Hello! For chat interactions, please use the TUI interface")
+            
+    except Exception as e:
+        print(f"❌ Error handling conversation: {e}")
 
 
 if __name__ == "__main__":

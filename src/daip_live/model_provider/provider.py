@@ -25,7 +25,7 @@ class LiteLLMProvider(IModelProvider):
         config_base_url = getattr(self.config, 'base_url', None)
         config_temperature = getattr(self.config, 'temperature', None)
         config_max_tokens = getattr(self.config, 'max_tokens', None)
-        
+
         params = {
             "model": config_model,
             "messages": [{"role": "user", "content": prompt}],
@@ -41,8 +41,23 @@ class LiteLLMProvider(IModelProvider):
         if config_max_tokens is not None:
             params["max_tokens"] = config_max_tokens
 
-        # Allow runtime overrides
-        params.update(kwargs)
+        # Filter out parameters that Ollama doesn't support
+        # Only add supported parameters from kwargs
+        for key, value in kwargs.items():
+            if key in ['temperature', 'max_tokens', 'top_p', 'stop', 'stream', 'seed']:
+                # These are generally supported by most providers including Ollama
+                params[key] = value
+            elif key in ['frequency_penalty', 'presence_penalty'] and not config_model.startswith("ollama/"):
+                # frequency_penalty and presence_penalty are not supported by Ollama
+                params[key] = value
+            elif key not in ['frequency_penalty', 'presence_penalty']:
+                # Add other parameters that are not known problematic ones
+                params[key] = value
+
+        # For Ollama models, explicitly set drop_params to True to ignore unsupported parameters
+        if config_model.startswith("ollama/"):
+            params["drop_params"] = True
+
         return params
 
     async def generate(self, prompt: str, **kwargs) -> Tuple[str, Any]:

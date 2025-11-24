@@ -1,0 +1,27 @@
+{
+  "tools": [
+    {
+      "name": "summarize_text",
+      "description": "Summarizes text content",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text to summarize"
+          },
+          "max_length": {
+            "type": "integer",
+            "description": "Maximum length for summary",
+            "minimum": 50,
+            "maximum": 1000,
+            "default": 200
+          }
+        },
+        "required": [
+          "text"
+        ]
+      }
+    }
+  ]
+}

@@ -26,7 +26,7 @@ from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
 from daip_live.model_provider.provider import LiteLLMProvider  # Fixed import
 from daip_live.persistence.database import DatabaseManager
 from daip_live.tui import DAIP_TUI
-from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer
+from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer, Intent
 from rich.console import Console
 from rich.table import Table
 
@@ -374,6 +374,131 @@ def doc_search(
             console.print("No papers found for the query.")
     
     asyncio.run(run_search_async())
+
+
+@app.command("ask")
+def process_natural_language(
+    query: str = typer.Argument(..., help="Natural language query to process")
+):
+    """Process natural language input and execute appropriate actions"""
+    # Import the intent recognizer
+    from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer, Intent
+    
+    try:
+        # Create intent recognizer
+        intent_recognizer = EnhancedIntentRecognizer()
+        
+        # Recognize the intent from the natural language input
+        intent = intent_recognizer.recognize_intent(query)
+        
+        if intent is None:
+            print(f"❓ Sorry, I couldn't understand your request: '{query}'")
+            print("💡 Try rephrasing or use specific commands like:")
+            print("   - 'start debate about AI ethics'")
+            print("   - 'search papers about machine learning'")
+            print("   - 'download paper with ID 1234.5678'")
+            return
+        
+        print(f"🎯 Recognized intent: {intent.name} (confidence: {intent.confidence:.2f})")
+        
+        # Process based on the recognized intent
+        if intent.name == "start_debate":
+            _handle_debate_intent(intent)
+        elif intent.name == "search_papers":
+            _handle_search_papers_intent(intent)
+        elif intent.name == "download_paper":
+            _handle_download_paper_intent(intent)
+        elif intent.name in ["chat", "question"]:
+            _handle_conversation_intent(intent)
+        else:
+            print(f"🚧 Intent '{intent.name}' recognized but not yet implemented")
+            print(f"📝 Parameters: {intent.parameters}")
+    
+    except Exception as e:
+        print(f"❌ Error processing natural language input: {e}")
+
+
+def _handle_debate_intent(intent: Intent):
+    """Handle debate start intent"""
+    try:
+        topic = intent.parameters.get("topic", "General Discussion")
+        roles = intent.parameters.get("roles")
+        rounds = intent.parameters.get("rounds", 3)
+        
+        print(f"🗣️ Starting debate on topic: {topic}")
+        print(f"🎭 Roles: {roles or 'default'}")
+        print(f"🔄 Rounds: {rounds}")
+        
+        # For now, just print what would be done
+        print(f"Would start debate with topic='{topic}', roles='{roles or 'pro_arguer,con_arguer'}', rounds={rounds}")
+        
+    except Exception as e:
+        print(f"❌ Error starting debate: {e}")
+
+
+def _handle_search_papers_intent(intent: Intent):
+    """Handle paper search intent"""
+    try:
+        query = intent.parameters.get("query", "")
+        source = intent.parameters.get("source", "arxiv")
+        max_results = intent.parameters.get("max_results", 5)  # Default to 5 to match CLI
+        
+        if not query:
+            print("❌ No search query provided")
+            return
+            
+        print(f"📚 Searching for papers about: {query}")
+        print(f"🌐 Source: {source}")
+        print(f"🔢 Max results: {max_results}")
+        
+        # For now, just print what would be done
+        print(f"Would search for papers with query='{query}', source='{source}', max_results={max_results}")
+        
+    except Exception as e:
+        print(f"❌ Error searching papers: {e}")
+
+
+def _handle_download_paper_intent(intent: Intent):
+    """Handle paper download intent"""
+    try:
+        paper_id = intent.parameters.get("paper_id")
+        if not paper_id:
+            print("❌ No paper ID provided for download")
+            return
+            
+        print(f"📥 Downloading paper with ID: {paper_id}")
+        
+        # For now, just print what would be done
+        print(f"Would download paper with ID='{paper_id}'")
+        
+    except Exception as e:
+        print(f"❌ Error downloading paper: {e}")
+
+
+def _handle_conversation_intent(intent: Intent):
+    """Handle conversation intents"""
+    try:
+        question = intent.parameters.get("question", "")
+        chat_content = intent.parameters.get("chat_content", "")
+        
+        if question:
+            print(f"💬 Question: {question}")
+        elif chat_content:
+            print(f"💬 Chat: {chat_content}")
+        else:
+            print(f"💬 General conversation request")
+            
+        print("Would process conversation with AI assistant")
+        
+    except Exception as e:
+        print(f"❌ Error handling conversation: {e}")
+
+
+# Import knowledge commands
+from .commands import knowledge
+
+# Register the knowledge commands directly
+app.add_typer(knowledge.app, name="knowledge", help="Knowledge management commands")
 
 
 if __name__ == "__main__":

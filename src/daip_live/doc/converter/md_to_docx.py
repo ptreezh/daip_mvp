@@ -148,9 +148,9 @@ class MarkdownToDocxConverter(BaseConverter):
                 p.add_run(line)
 
 
-class DocxToMarkdownConverter:
+class DocxToMarkdownConverter(BaseConverter):
     """Convert DOCX files to Markdown format."""
-    
+
     def __init__(self):
         super().__init__()
         self.supported_formats = {".docx", ".doc"}

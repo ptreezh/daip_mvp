@@ -58,12 +58,13 @@ from daip_live.knowledge.manager import KnowledgeManager
 from daip_live.memory.service import MemoryService
 from daip_live.memory.session_manager import SessionManager
 from daip_live.model_manager import ModelManager
+from daip_live.todo.tui_todo_manager import initialize_tui_todo_manager, tui_todo_manager
 from daip_live.model_provider.provider import LiteLLMProvider
 from daip_live.p4_role_manager_tools.role_manager import RoleManager
 from daip_live.p4_role_manager_tools.tool_manager import ToolManager
 from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
 from daip_live.p8_debate_system.manager import DebateManager
-from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
+from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager as OriginalEnhancedDebateManager
 from daip_live.persistence.database import DatabaseManager
 from daip_live.scaffolding.manager import ScaffoldingManager
 from daip_live.wiki.manager import WikiManager
@@ -214,7 +215,7 @@ class DAIP_TUI(App):
         db_manager: DatabaseManager = None,
         config_manager: Any = None,
         role_model_manager: RoleModelManager = None,
-        enhanced_debate_manager: EnhancedDebateManager = None,
+        enhanced_debate_manager: OriginalEnhancedDebateManager = None,
         goal: Optional[str] = None,
     ):
         super().__init__()
@@ -252,13 +253,35 @@ class DAIP_TUI(App):
             if hasattr(container.config, 'knowledge_base') and hasattr(container.config.knowledge_base, 'directory'):
                 if container.config.knowledge_base.directory() is None:
                     container.config.knowledge_base.directory.from_value("knowledge")
-            
+
+            # Handle paper download directory configuration
+            if hasattr(container.config, 'paper') and hasattr(container.config.paper, 'download_directory'):
+                if container.config.paper.download_directory() is None:
+                    container.config.paper.download_directory.from_value("knowledge/paper")
+
+            # Handle wiki pages directory configuration
+            if hasattr(container.config, 'wiki') and hasattr(container.config.wiki, 'pages_directory'):
+                if container.config.wiki.pages_directory() is None:
+                    container.config.wiki.pages_directory.from_value("knowledge/wiki")
+
+            # Handle debate logs directory configuration
+            if hasattr(container.config, 'debate') and hasattr(container.config.debate, 'logs_directory'):
+                if container.config.debate.logs_directory() is None:
+                    container.config.debate.logs_directory.from_value("knowledge/debate")
+
             # Create directories if they don't exist
             import os
             roles_dir = container.config.role_manager.roles_dir() if hasattr(container.config, 'role_manager') else "roles"
             knowledge_dir = container.config.knowledge_base.directory() if hasattr(container.config, 'knowledge_base') else "knowledge"
+            paper_dir = container.config.paper.download_directory() if hasattr(container.config, 'paper') and hasattr(container.config.paper, 'download_directory') else "knowledge/paper"
+            wiki_dir = container.config.wiki.pages_directory() if hasattr(container.config, 'wiki') and hasattr(container.config.wiki, 'pages_directory') else "knowledge/wiki"
+            debate_dir = container.config.debate.logs_directory() if hasattr(container.config, 'debate') and hasattr(container.config.debate, 'logs_directory') else "knowledge/debate"
+
             os.makedirs(roles_dir, exist_ok=True)
             os.makedirs(knowledge_dir, exist_ok=True)
+            os.makedirs(paper_dir, exist_ok=True)
+            os.makedirs(wiki_dir, exist_ok=True)
+            os.makedirs(debate_dir, exist_ok=True)
             
             # Resolve dependencies from container
             self._executor = executor or container.agent_executor()
@@ -268,7 +291,8 @@ class DAIP_TUI(App):
             self._debate_manager = debate_manager or container.debate_manager()
             self._model_provider = model_provider or container.model_provider()
             self._role_model_manager = role_model_manager or RoleModelManager()
-            self._enhanced_debate_manager = enhanced_debate_manager or EnhancedDebateManager(
+            # 使用原始的增强辩论管理器（保持向后兼容）
+            self._enhanced_debate_manager = enhanced_debate_manager or OriginalEnhancedDebateManager(
                 self._session_manager, self._role_manager, self._role_model_manager, self._model_provider
             )
             self._db_manager = db_manager or container.db_manager()
@@ -277,11 +301,33 @@ class DAIP_TUI(App):
             self._memory_service = MemoryService(model_provider=self._model_provider)
             self._tool_manager = ToolManager()
             self._permission_manager = PermissionManager()
-            self._wiki_manager = WikiManager(
-                wiki_root=Path.cwd() / "wiki",
-                role_model_manager=self._role_model_manager,
-                model_provider=self._model_provider
-            )
+            # 从配置中获取Wiki目录（如果配置存在）
+            try:
+                wiki_dir = self.container.config.wiki.pages_directory()
+                if wiki_dir is None:
+                    wiki_dir = "wiki"  # 默认值
+            except (AttributeError, TypeError):
+                wiki_dir = "wiki"  # 默认值
+
+            # 使用增强的Wiki管理器（支持协作功能），如果所有依赖都可用
+            try:
+                from daip_live.wiki.collaborative_wiki import EnhancedWikiManager
+                self._wiki_manager = EnhancedWikiManager(
+                    wiki_root=Path(os.getcwd()) / wiki_dir,
+                    role_model_manager=self._role_model_manager,
+                    model_provider=self._model_provider,
+                    session_manager=self._session_manager,
+                    role_manager=self._role_manager
+                )
+            except Exception as e:
+                print(f"⚠️  无法初始化增强Wiki管理器，使用基础管理器: {e}")
+                # 降级到基础Wiki管理器
+                from daip_live.wiki.manager import WikiManager
+                self._wiki_manager = WikiManager(
+                    wiki_root=Path(os.getcwd()) / wiki_dir,
+                    role_model_manager=self._role_model_manager,
+                    model_provider=self._model_provider
+                )
             # Initialize enhanced intent recognizer
             self._intent_recognizer = EnhancedIntentRecognizer()
         else:
@@ -293,7 +339,8 @@ class DAIP_TUI(App):
             self._debate_manager = debate_manager
             self._model_provider = model_provider
             self._role_model_manager = role_model_manager or RoleModelManager()
-            self._enhanced_debate_manager = enhanced_debate_manager or EnhancedDebateManager(
+            # 使用原始的增强辩论管理器（保持向后兼容）
+            self._enhanced_debate_manager = enhanced_debate_manager or OriginalEnhancedDebateManager(
                 self._session_manager, self._role_manager, self._role_model_manager, self._model_provider
             )
             self._db_manager = db_manager
@@ -302,11 +349,28 @@ class DAIP_TUI(App):
             self._memory_service = MemoryService(model_provider=self._model_provider) if model_provider else None
             self._tool_manager = ToolManager() if model_provider else None
             self._permission_manager = PermissionManager()
-            self._wiki_manager = WikiManager(
-                wiki_root=Path.cwd() / "wiki",
-                role_model_manager=self._role_model_manager,
-                model_provider=self._model_provider
-            )
+            # 为提供的依赖设置默认wiki目录（在else分支中container未定义）
+            wiki_dir = "wiki"  # 默认值
+
+            # 使用增强的Wiki管理器（支持协作功能），如果所有依赖都可用
+            try:
+                from daip_live.wiki.collaborative_wiki import EnhancedWikiManager
+                self._wiki_manager = EnhancedWikiManager(
+                    wiki_root=Path(os.getcwd()) / wiki_dir,
+                    role_model_manager=self._role_model_manager,
+                    model_provider=self._model_provider,
+                    session_manager=self._session_manager,
+                    role_manager=self._role_manager
+                )
+            except Exception as e:
+                print(f"⚠️  无法初始化增强Wiki管理器，使用基础管理器: {e}")
+                # 降级到基础Wiki管理器
+                from daip_live.wiki.manager import WikiManager
+                self._wiki_manager = WikiManager(
+                    wiki_root=Path(os.getcwd()) / wiki_dir,
+                    role_model_manager=self._role_model_manager,
+                    model_provider=self._model_provider
+                )
             # Initialize enhanced intent recognizer
             self._intent_recognizer = EnhancedIntentRecognizer()
 
@@ -389,6 +453,42 @@ class DAIP_TUI(App):
         except Exception as e:
             print(f"Warning: Could not register default text analysis skill: {e}")
 
+        # Initialize task visualization manager
+        try:
+            from daip_live.task_decomposition.task_visualization import get_task_visualization_manager
+            self._task_visualization_manager = get_task_visualization_manager()
+            print("✅ Task visualization manager initialized")
+        except ImportError as e:
+            print(f"⚠️ Task visualization manager not found: {e}")
+            self._task_visualization_manager = None
+        except Exception as e:
+            print(f"⚠️ Task visualization manager initialization failed: {e}")
+            self._task_visualization_manager = None
+
+        # Initialize task decomposition integrator
+        try:
+            from daip_live.task_decomposition.task_decomposition_integrator import TaskDecompositionIntegrator
+            self._task_decomposition_integrator = TaskDecompositionIntegrator(self._model_provider)
+            print("✅ Task decomposition integrator initialized")
+        except ImportError as e:
+            print(f"⚠️ Task decomposition integrator not found: {e}")
+            self._task_decomposition_integrator = None
+        except Exception as e:
+            print(f"⚠️ Task decomposition integrator initialization failed: {e}")
+            self._task_decomposition_integrator = None
+
+        # Initialize complex task manager integrator
+        try:
+            from daip_live.task_decomposition.task_manager import ComplexTaskIntegrator
+            self._complex_task_integrator = ComplexTaskIntegrator(self._model_provider)
+            print("✅ Complex task integrator initialized")
+        except ImportError as e:
+            print(f"⚠️ Complex task integrator not found: {e}")
+            self._complex_task_integrator = None
+        except Exception as e:
+            print(f"⚠️ Complex task integrator initialization failed: {e}")
+            self._complex_task_integrator = None
+
         self._goal = goal
         self._log_text_buffer: List[str] = []
 
@@ -398,7 +498,11 @@ class DAIP_TUI(App):
         self._session_stack: List[str] = []
         self._model_name = "llama3:8b"
         self._token_usage = (0, 8192)
-        
+
+        # Initialize Todo Manager
+        self._todo_manager = initialize_tui_todo_manager(self)
+
+
         # Real-time tracking variables
         self._real_token_usage = (0, 8192)  # (used, total)
         self._model_metrics = {
@@ -787,6 +891,12 @@ class DAIP_TUI(App):
         if user_input.startswith("/"):
             await self._handle_shortcut_command(user_input)
         else:
+            # Provide immediate feedback that input is received
+            self._update_log_view(f"[bold cyan]> 📥 输入收到: '{user_input[:50]}{'...' if len(user_input) > 50 else ''}'[/bold cyan]")
+
+            # Indicate that intent recognition is starting
+            self._update_log_view(f"[dim]> 正在分析您的请求，识别意图...[/dim]")
+
             # Use enhanced intent recognizer for natural language input
             try:
                 intent = self._intent_recognizer.recognize_intent(user_input)
@@ -803,6 +913,45 @@ class DAIP_TUI(App):
                         # Don't execute the command yet, wait for user to provide missing information
                         return  # Exit early to avoid command execution
                     else:
+                        # 检查是否需要将此复杂任务分解为待办事项清单
+                        should_decompose_via_task_engine = False
+                        if self._task_decomposition_integrator is not None:
+                            try:
+                                should_decompose_via_task_engine = await self._task_decomposition_integrator.should_decompose_request(user_input)
+                            except Exception as e:
+                                self._update_log_view(f"[bold yellow]> 任务分解检查失败: {e}[/bold yellow]")
+                                should_decompose_via_task_engine = False
+
+                        if should_decompose_via_task_engine:
+                            # 使用任务分解系统处理复杂请求
+                            self._update_log_view(f"[bold magenta]> 🧩 检测到复杂任务，启动自动分解流程...[/bold magenta]")
+
+                            # 生成并执行任务分解，以事件流形式处理
+                            if self._task_decomposition_integrator is not None:
+                                try:
+                                    # Note: The method is decompose_and_execute, not decompose_and_execute_task
+                                    # 在执行任务分解前显示初始任务清单
+                                    if self._task_visualization_manager:
+                                        self._display_task_visualization(user_input)
+
+                                    result = await self._task_decomposition_integrator.decompose_and_execute(user_input)
+                                    # Handle and display the result
+                                    self._update_log_view(f"[bold green]> 任务分解执行完成:[/bold green]")
+                                    self._update_log_view(f"[cyan]{result['final_result']}[/cyan]")
+
+                                    # 显示最终任务清单状态
+                                    if self._task_visualization_manager:
+                                        self._display_task_visualization(user_input)
+                                except Exception as e:
+                                    self._update_log_view(f"[bold red]> 任务分解执行失败: {e}[/bold red]")
+                                    should_decompose_via_task_engine = False
+                            else:
+                                self._update_log_view(f"[bold yellow]> 任务分解系统未初始化，使用常规处理...[/bold yellow]")
+
+                            # 任务分解完成后提前返回
+                            if should_decompose_via_task_engine:
+                                return
+
                         # Map intent to appropriate command handler
                         if intent.name == "search_papers":
                             # Convert to /doc search command
@@ -823,14 +972,16 @@ class DAIP_TUI(App):
                             # Convert to /debate start command
                             topic = intent.parameters.get("topic", user_input)
                             if topic and topic.strip() != "":
-                                await self._handle_debate_command(f"start {topic}")
+                                self._handle_debate_command(f"start {topic}")  # This is a sync method, don't await
                             else:
                                 self._update_log_view("[bold yellow]> 请输入辩论主题[/bold yellow]")
                         elif intent.name == "create_wiki":
-                            # Convert to /wiki create command
+                            # 直接触发多角色协作创建Wiki
                             title = intent.parameters.get("title", user_input)
                             if title and title.strip() != "":
-                                await self._handle_wiki_command(f"create {title}")
+                                # 调用协作创建方法而不是基础命令
+                                # 在非异步方法中使用asyncio来运行异步方法
+                                asyncio.create_task(self._handle_collaborative_wiki_creation(title))
                             else:
                                 self._update_log_view("[bold yellow]> 请输入Wiki页面标题[/bold yellow]")
                         elif intent.name == "initialize_project":
@@ -847,6 +998,42 @@ class DAIP_TUI(App):
                                 self._handle_debate_command(f"history view {session_id}")  # This is a sync method, don't await
                             else:
                                 self._handle_debate_command("history")  # This is a sync method, don't await
+                        elif intent.name == "complex_task":
+                            # 处理复杂任务意图
+                            original_request = intent.parameters.get("original_request", user_input)
+                            task_description = intent.parameters.get("task_description", user_input)
+                            task_type = intent.parameters.get("task_type", "general")
+
+                            self._update_log_view(f"[bold magenta]> 🧩 识别到复杂任务: {task_type} 类型[/bold magenta]")
+                            self._update_log_view(f"[bold blue]> 正在为您创建任务列表来完成: '{task_description[:50]}{'...' if len(task_description) > 50 else ''}'[/bold blue]")
+
+                            # 检查是否存在复杂任务管理器
+                            if hasattr(self, '_complex_task_integrator') and self._complex_task_integrator:
+                                try:
+                                    # 执行复杂任务
+                                    result = await self._complex_task_integrator.process_complex_task(original_request)
+
+                                    # 显示任务分解列表
+                                    if self._task_visualization_manager:
+                                        self._update_log_view(f"[bold green]> 任务分解完成，以下是子任务列表:[/bold green]")
+                                        self._display_task_visualization(original_request)
+
+                                    self._update_log_view(f"[bold green]> 复杂任务执行完成:[/bold green]")
+                                    self._update_log_view(f"[cyan]{result['summary']}[/cyan]")
+
+                                    # 显示最终任务状态
+                                    if self._task_visualization_manager:
+                                        self._display_task_visualization(original_request)
+
+                                except Exception as e:
+                                    self._update_log_view(f"[bold red]> 复杂任务执行失败: {e}[/bold red]")
+                                    # 降级到常规处理
+                                    self._start_new_chat_session(user_input)
+                            else:
+                                self._update_log_view(f"[bold yellow]> 复杂任务管理器未就绪，使用常规处理...[/bold yellow]")
+                                # 降级到常规处理
+                                self._start_new_chat_session(user_input)
+
                         elif intent.name == "execute_skill":
                             # Convert to skill execution
                             skill_type = intent.parameters.get("target_skill", "general")
@@ -964,16 +1151,25 @@ class DAIP_TUI(App):
                                 self._start_new_chat_session(user_input)
                             else:
                                 # Default behavior - start chat session
+                                # Provide feedback that system is processing
+                                if intent.name == "question":
+                                    self._update_log_view(f"[bold blue]> 🤔 正在处理您的问题: '{user_input[:50]}{'...' if len(user_input) > 50 else ''}'[/bold blue]")
+                                elif intent.name == "chat":
+                                    self._update_log_view(f"[bold blue]> 💬 开始聊天会话: '{user_input[:50]}{'...' if len(user_input) > 50 else ''}'[/bold blue]")
+
                                 self._start_new_chat_session(user_input)
+
                                 # Add informational note if it was a question that doesn't obviously need deep thinking
                                 if intent.name == "question" and not needs_slow_thinking and not needs_fast_response:
-                                    # This is a general question, user might want to know system is processing
+                                    # This is a general question, user knows system is processing
                                     pass  # General chat processing will already be done by _start_new_chat_session
                         else:
                             # For other intents, fall back to chat mode
                             self._start_new_chat_session(user_input)
                 else:
                     # No intent recognized, fall back to existing chat behavior
+                    self._update_log_view(f"[bold yellow]> 未检测到特定意图，启动常规聊天会话: '{user_input[:50]}{'...' if len(user_input) > 50 else ''}'[/bold yellow]")
+
                     # Check if we have an active chat session
                     if hasattr(self, '_executor') and self._executor is not None:
                         # Check if the executor has a user_input_queue and it's valid
@@ -994,6 +1190,10 @@ class DAIP_TUI(App):
             except Exception as e:
                 # Handle any errors during intent recognition
                 self._update_log_view(f"[bold red]> 意图识别出错: {str(e)}[/bold red]")
+
+                # Still provide feedback that we're falling back to chat
+                self._update_log_view(f"[bold yellow]> 正在使用常规聊天模式处理您的请求: '{user_input[:50]}{'...' if len(user_input) > 50 else ''}'[/bold yellow]")
+
                 # Fall back to existing chat behavior
                 if hasattr(self, '_executor') and self._executor is not None:
                     if hasattr(self._executor, 'user_input_queue') and self._executor.user_input_queue is not None:
@@ -1469,10 +1669,10 @@ class DAIP_TUI(App):
         """为未知指令提供智能建议"""
         # 获取所有可用命令名称
         available_commands = [cmd_name[1:] for cmd_name, _ in self._available_commands]  # 移除开头的'/'
-        
+
         # 使用difflib查找最相似的命令
         suggestions = get_close_matches(unknown_cmd, available_commands, n=3, cutoff=0.3)
-        
+
         if suggestions:
             suggestion_text = ", ".join([f"/{suggestion}" for suggestion in suggestions])
             self._update_log_view(f"[bold red]> Unknown command: /{unknown_cmd}[/bold red]")
@@ -1480,6 +1680,13 @@ class DAIP_TUI(App):
         else:
             self._update_log_view(f"[bold red]> Unknown command: /{unknown_cmd}[/bold red]")
             self._update_log_view("[bold yellow]> Type /help to see all available commands.[/bold yellow]")
+
+    def _handle_todo_command(self, args: str) -> None:
+        """Handle todo list commands for task decomposition and management."""
+        if tui_todo_manager:
+            tui_todo_manager.handle_todo_command(args)
+        else:
+            self._update_log_view("[bold red]> TODO管理系统未初始化[/bold red]")
 
     def _handle_pa_command(self, args: str) -> None:
         """Personal assistant shortcut for interactive chat sessions."""
@@ -1671,10 +1878,11 @@ class DAIP_TUI(App):
                     i += 1
             
             topic = " ".join(topic_parts)
-            
-            self._update_log_view(f"[bold blue]> Starting debate on topic: {topic}[/bold blue]")
-            self._update_log_view(f"[dim]> Roles: {roles}, Rounds: {rounds}[/dim]")
-            
+
+            self._update_log_view(f"[bold blue]> 🤖 启动多模型辩论系统...[/bold blue]")
+            self._update_log_view(f"[bold blue]> 主题: {topic}[/bold blue]")
+            self._update_log_view(f"[dim]> 角色: {roles}, 轮次: {rounds}[/dim]")
+
             # Start debate in background
             task = asyncio.create_task(self._start_debate(topic, roles, rounds))
             self._background_tasks.add(task)
@@ -2134,10 +2342,13 @@ class DAIP_TUI(App):
         remaining_args = " ".join(args_list[1:])
 
         if subcommand == "download":
+            self._update_log_view("[bold blue]> 📥 开始下载论文流程...[/bold blue]")
             self._handle_doc_download(remaining_args)
         elif subcommand == "list":
+            self._update_log_view("[bold blue]> 📋 列出文档列表...[/bold blue]")
             self._handle_doc_list()
         elif subcommand == "search":
+            self._update_log_view("[bold blue]> 🔍 开始搜索论文...[/bold blue]")
             self._handle_doc_search(remaining_args)  # This is sync method, don't await
         elif subcommand in ["skill", "skills", "claude", "claude_skill", "claude_skills"]:
             # Claude Skills相关命令
@@ -2437,10 +2648,14 @@ class DAIP_TUI(App):
         # Import and use paper downloader
         try:
             from daip_live.doc.paper_downloader import PaperDownloader
-
-            # Create download directory
             from pathlib import Path
-            download_dir = Path.cwd() / "docs" / "papers"
+            import os
+
+            # 从配置中获取下载目录（相对于工作目录）
+            config_download_dir = self.container.config.paper.download_directory
+            # 确保使用绝对路径
+            download_dir = Path(os.getcwd()) / config_download_dir
+            download_dir.mkdir(parents=True, exist_ok=True)  # 创建目录如果不存在
 
             downloader = PaperDownloader(download_dir=download_dir)
 
@@ -2715,10 +2930,14 @@ class DAIP_TUI(App):
         remaining_args = " ".join(args_list[1:])
 
         if subcommand == "create":
-            self._handle_wiki_create(remaining_args)
+            self._update_log_view("[bold blue]> 🤖 开始协作创建维基页面...[/bold blue]")
+            # 在非异步方法中使用asyncio来运行异步方法
+            asyncio.create_task(self._handle_wiki_create(remaining_args))
         elif subcommand == "list":
+            self._update_log_view("[bold blue]> 📋 列出维基页面...[/bold blue]")
             self._handle_wiki_list()
         elif subcommand == "export":
+            self._update_log_view("[bold blue]> 📤 正在导出维基内容...[/bold blue]")
             self._handle_wiki_export(remaining_args)
         else:
             self._update_log_view(f"[bold red]> Unknown wiki subcommand: {subcommand}[/bold red]")
@@ -2828,8 +3047,8 @@ class DAIP_TUI(App):
         except Exception as e:
             self._update_log_view(f"[bold red]> ❌ Error retrieving debate history: {e}[/bold red]")
 
-    def _handle_wiki_create(self, args: str) -> None:
-        """Create a new wiki page."""
+    async def _handle_wiki_create(self, args: str) -> None:
+        """Create a new wiki page using multi-role collaboration by default."""
         args_list = args.split()
         if len(args_list) < 1:
             self._update_log_view("[bold red]> Usage: /wiki create <title> [--tags <tag1,tag2>][/bold red]")
@@ -2844,22 +3063,124 @@ class DAIP_TUI(App):
             if tags_index + 1 < len(args_list):
                 tags = [tag.strip() for tag in args_list[tags_index + 1].split(",")]
 
-        self._update_log_view(f"[bold blue]> 📝 创建Wiki页面: '{title}'[/bold blue]")
+        self._update_log_view(f"[bold blue]> 🤖 协作创建Wiki页面: '{title}'[/bold blue]")
         if tags:
             self._update_log_view(f"[dim]> 标签: {', '.join(tags)}[/dim]")
+        self._update_log_view("[dim]> 正在启动多角色AI协作流程...[/dim]")
 
         try:
-            manager = self._wiki_manager
+            # 检查是否已初始化协作器
+            if not hasattr(self, '_wiki_manager') or not self._wiki_manager:
+                self._update_log_view("[bold red]> ❌ Wiki管理器未初始化[/bold red]")
+                return
 
-            page = manager.create_page(title, f"# {title}\n\n开始编辑您的内容...", tags)
+            if not hasattr(self._wiki_manager, 'collaborator') or not self._wiki_manager.collaborator:
+                # 如果没有协作器，使用标准创建但给出提示
+                self._update_log_view("[bold yellow]> ⚠️ 协作器未就绪，使用基础创建流程...[/bold yellow]")
+                manager = self._wiki_manager
+                page = manager.create_page(title, f"# {title}\n\n开始编辑您的内容...", tags)
+                self._update_log_view(f"[bold green]> ✅ Wiki页面创建成功: {page.file_path}[/bold green]")
+                self._update_log_view(f"[dim]> 文件位置: {page.file_path}[/dim]")
+                return
 
-            self._update_log_view(f"[bold green]> ✅ Wiki页面创建成功: {page.file_path}[/bold green]")
+            # 启动协作创建流程
+            self._update_log_view("[bold blue]> 🔄 启动多角色AI协作...[/bold blue]")
+
+            # 定义参与协作的角色
+            collaborative_roles = [
+                "Researcher_Agent",      # 研究专家
+                "Writer_Agent",          # 写作专家
+                "Fact_Checker_Agent",    # 事实核查专家
+                "Editor_Agent"           # 编辑专家
+            ]
+
+            # 启动协作创建
+            initial_content = f"# {title}\n\n开始协同创建关于“{title}”的维基页面...\n"
+            page = await self._wiki_manager.create_collaborative_wiki(
+                title=title,
+                topic=title,
+                roles=collaborative_roles,
+                rounds=2  # 进行2轮协作编辑
+            )
+
+            self._update_log_view(f"[bold green]> ✅ 协作维基页面创建成功: {page.file_path}[/bold green]")
             self._update_log_view(f"[dim]> 文件位置: {page.file_path}[/dim]")
+            self._update_log_view("[dim]> 由多个AI角色协同完成内容创建[/dim]")
 
         except ImportError:
-            self._update_log_view("[bold red]> ❌ Wiki功能不可用，缺少相关模块[/bold red]")
+            self._update_log_view("[bold red]> ❌ Wiki协作功能不可用，缺少相关模块[/bold red]")
+            # 降级到标准创建流程
+            try:
+                manager = self._wiki_manager
+                page = manager.create_page(title, f"# {title}\n\n开始编辑您的内容...", tags)
+                self._update_log_view(f"[bold green]> ✅ Wiki页面基础创建成功: {page.file_path}[/bold green]")
+                self._update_log_view(f"[dim]> 文件位置: {page.file_path}[/dim]")
+            except Exception as e:
+                self._update_log_view(f"[bold red]> ❌ 基础创建也失败: {e}[/bold red]")
         except Exception as e:
-            self._update_log_view(f"[bold red]> ❌ 创建Wiki页面失败: {e}[/bold red]")
+            self._update_log_view(f"[bold red]> ❌ 协作创建Wiki页面失败: {e}[/bold red]")
+            import traceback
+            traceback.print_exc()
+            # 降级到标准创建流程
+            try:
+                manager = self._wiki_manager
+                page = manager.create_page(title, f"# {title}\n\n开始编辑您的内容...", tags)
+                self._update_log_view(f"[bold green]> ✅ 降级基础创建成功: {page.file_path}[/bold green]")
+                self._update_log_view(f"[dim]> 文件位置: {page.file_path}[/dim]")
+            except Exception as fallback_e:
+                self._update_log_view(f"[bold red]> ❌ 降级创建也失败: {fallback_e}[/bold red]")
+
+    async def _handle_collaborative_wiki_creation(self, title: str) -> None:
+        """使用多角色协作创建Wiki页面"""
+        self._update_log_view(f"[bold blue]> 🤖 协作创建维基页面: '{title}'[/bold blue]")
+        self._update_log_view("[dim]> 正在启动多角色AI协作流程...[/dim]")
+
+        try:
+            # 检查是否已初始化协作器
+            if not hasattr(self, '_wiki_manager') or not self._wiki_manager:
+                self._update_log_view("[bold red]> ❌ Wiki管理器未初始化[/bold red]")
+                return
+
+            if not hasattr(self._wiki_manager, 'collaborator') or not self._wiki_manager.collaborator:
+                # 如果没有协作器，使用标准创建
+                self._update_log_view("[bold yellow]> ⚠️ 协作器未就绪，使用标准创建流程...[/bold yellow]")
+                self._handle_wiki_create(title)
+                return
+
+            # 启动协作创建流程
+            self._update_log_view("[bold blue]> 🔄 启动多角色AI协作...[/bold blue]")
+
+            # 定义参与协作的角色
+            collaborative_roles = [
+                "Researcher_Agent",      # 研究专家
+                "Writer_Agent",          # 写作专家
+                "Fact_Checker_Agent",    # 事实核查专家
+                "Editor_Agent"           # 编辑专家
+            ]
+
+            # 启动协作创建
+            initial_content = f"# {title}\n\n开始协同创建关于“{title}”的维基页面...\n"
+            page = await self._wiki_manager.create_collaborative_wiki(
+                title=title,
+                topic=title,
+                roles=collaborative_roles,
+                rounds=2  # 进行2轮协作编辑
+            )
+
+            self._update_log_view(f"[bold green]> ✅ 协作维基页面创建成功: {page.file_path}[/bold green]")
+            self._update_log_view(f"[dim]> 文件位置: {page.file_path}[/dim]")
+            self._update_log_view("[dim]> 由多个AI角色协同完成内容创建[/dim]")
+
+        except ImportError:
+            self._update_log_view("[bold red]> ❌ Wiki协作功能不可用，缺少相关模块[/bold red]")
+            # 降级到标准创建流程
+            self._handle_wiki_create(title)
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 协作创建Wiki页面失败: {e}[/bold red]")
+            import traceback
+            traceback.print_exc()
+            # 降级到标准创建流程
+            self._handle_wiki_create(title)
 
     def _handle_wiki_list(self) -> None:
         """List wiki pages."""
@@ -3262,7 +3583,8 @@ class DAIP_TUI(App):
 
     def _start_new_chat_session(self, initial_message: str) -> None:
         """Start a new chat session with the given initial message."""
-        self._update_log_view("[bold yellow]> Starting new chat session...[/bold yellow]")
+        self._update_log_view("[bold yellow]> 🤖 启动智能助手会话...[/bold yellow]")
+        self._update_log_view("[dim]> 正在初始化对话环境，加载知识库...[/dim]")
         
         # Create a new executor instance for the session
         pa_executor = AgentExecutor(
@@ -3722,9 +4044,17 @@ class DAIP_TUI(App):
                 self._update_log_view(f"[bold red]> 无法找到会话 {event.session_id} 来保存报告。[/bold red]")
                 return
 
-            # Use explicit output_dir if provided, otherwise default to ./workout
+            # Use explicit output_dir if provided, otherwise fetch from config, otherwise default to ./workout
             if output_dir is None:
-                output_dir = Path(os.getcwd()) / "workout"
+                try:
+                    # Try to get debate logs directory from config
+                    debate_logs_dir = self.container.config.debate.logs_directory()
+                    if debate_logs_dir is None:
+                        debate_logs_dir = "workout"  # default fallback
+                except (AttributeError, TypeError):
+                    debate_logs_dir = "workout"  # default fallback
+
+                output_dir = Path(os.getcwd()) / debate_logs_dir
             
             output_dir.mkdir(exist_ok=True)
 
@@ -3962,6 +4292,71 @@ class DAIP_TUI(App):
             return "请输入Wiki页面标题"
 
         return "请提供更多信息"
+
+    def _display_task_visualization(self, original_request: str = "") -> None:
+        """在TUI中显示任务可视化"""
+        if self._task_visualization_manager:
+            try:
+                # 创建一个临时的RichLog组件来显示任务可视化
+                from rich.console import Console
+                from rich.text import Text
+
+                # 将可视化内容转换为文本并发送到日志
+                # 由于TUI的限制，我们不能直接显示Rich组件，所以将内容格式化为文本
+                if self._task_visualization_manager.tasks_data:
+                    self._update_log_view(f"[bold cyan]📋 任务清单可视化 - 原始请求: {original_request[:50]}{'...' if len(original_request) > 50 else ''}[/bold cyan]")
+
+                    # 状态计数
+                    total = len(self._task_visualization_manager.tasks_data)
+                    completed = len([t for t in self._task_visualization_manager.tasks_data if t.status.name == 'COMPLETED'])
+                    in_progress = len([t for t in self._task_visualization_manager.tasks_data if t.status.name == 'IN_PROGRESS'])
+                    failed = len([t for t in self._task_visualization_manager.tasks_data if t.status.name == 'FAILED'])
+                    pending = len([t for t in self._task_visualization_manager.tasks_data if t.status.name == 'PENDING'])
+                    skipped = len([t for t in self._task_visualization_manager.tasks_data if t.status.name == 'SKIPPED'])
+
+                    self._update_log_view(f"[green]✅ 已完成: {completed}[/green] | [yellow]🔄 进行中: {in_progress}[/yellow] | [red]❌ 已失败: {failed}[/red] | [blue]⏳ 待处理: {pending}[/blue] | [dim]⏭️ 已跳过: {skipped}[/dim] | [bold]总计: {total}[/bold]")
+
+                    # 显示任务列表
+                    status_icons = {
+                        'PENDING': "⏳",
+                        'IN_PROGRESS': "🔄",
+                        'COMPLETED': "✅",
+                        'FAILED': "❌",
+                        'SKIPPED': "⏭️"
+                    }
+
+                    for i, task_data in enumerate(self._task_visualization_manager.tasks_data, 1):
+                        status_icon = status_icons.get(task_data.status.name, "❓")
+                        status_text = task_data.status.name.lower()
+
+                        # 根据状态设置颜色
+                        if task_data.status.name == 'PENDING':
+                            color = "yellow"
+                        elif task_data.status.name == 'IN_PROGRESS':
+                            color = "blue"
+                        elif task_data.status.name == 'COMPLETED':
+                            color = "green"
+                        elif task_data.status.name == 'FAILED':
+                            color = "red"
+                        elif task_data.status.name == 'SKIPPED':
+                            color = "dim"
+                        else:
+                            color = "white"
+
+                        self._update_log_view(f"[{color}]{i}. {status_icon} {task_data.title} ({status_text})[/]")
+                        self._update_log_view(f"   [dim]{task_data.description}[/]")
+
+                        if task_data.result:
+                            result_preview = task_data.result[:100] + "..." if len(task_data.result) > 100 else task_data.result
+                            self._update_log_view(f"   [bold cyan]结果:[/] {result_preview}")
+                        elif task_data.error:
+                            self._update_log_view(f"   [bold red]错误:[/] {task_data.error}")
+                else:
+                    self._update_log_view("[yellow]当前没有任务清单[/yellow]")
+            except Exception as e:
+                self._update_log_view(f"[red]显示任务可视化时出错: {e}[/red]")
+        else:
+            self._update_log_view("[yellow]任务可视化管理器未初始化[/yellow]")
 
     async def wait_participant(self, participant: str, timeout: float = 60.0) -> None:
         """Wait for a specific participant to take their turn."""

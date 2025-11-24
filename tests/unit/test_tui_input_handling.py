@@ -45,11 +45,14 @@ class TestTUIInputHandling:
         # Mock the autocomplete suggestions method
         with patch.object(tui_app, '_get_autocomplete_suggestions', return_value=["/help", "/history"]):
             with patch.object(tui_app, 'query', return_value=[]):
-                # Execute
-                tui_app.on_input_changed(message)
-                
-                # The method should complete without error
-                assert True
+                # Mock the mount method to avoid screen mounting issues
+                with patch.object(tui_app, 'mount'):
+                    with patch.object(tui_app, 'query_one'):
+                        # Execute
+                        tui_app.on_input_changed(message)
+                        
+                        # The method should complete without error
+                        assert True
 
     def test_input_changed_handles_empty_suggestions(self, tui_app):
         """Test that input changes handle empty autocomplete suggestions."""

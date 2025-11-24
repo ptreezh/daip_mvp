@@ -1,0 +1,19 @@
+{
+  "manifest_version": "1.0",
+  "name": "text_summarizer",
+  "description": "Summarizes long texts into concise summaries",
+  "version": "1.0.0",
+  "author": "Test Developer",
+  "tags": [
+    "text",
+    "summary",
+    "analysis"
+  ],
+  "api": {
+    "type": "http",
+    "base_url": "https://test.api.example.com",
+    "description": "Text Summarization API"
+  },
+  "tos": "Terms of service link",
+  "privacy_policy": "Privacy policy link"
+}

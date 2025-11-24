@@ -19,6 +19,10 @@ from daip_live.agent_engine.executor import AgentExecutor
 from daip_live.core.models import KnowledgeBaseConfig, ProviderConfig
 from daip_live.permission.permission_manager import PermissionManager
 from daip_live.permission.tui_interface import PermissionTUIInterface
+from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer
+from src.intent_recognition.context_manager import ContextManager
+from src.intent_recognition.history_aware_context_manager import HistoryAwareContextManager
+from src.intent_recognition.context_aware_intent_recognizer import ContextAwareIntentRecognizer
 
 
 class Container(containers.DeclarativeContainer):
@@ -123,4 +127,32 @@ class Container(containers.DeclarativeContainer):
         permission_manager=permission_manager
     )
     
+    intent_recognizer = providers.Singleton(EnhancedIntentRecognizer)
+
+    context_manager = providers.Singleton(HistoryAwareContextManager)
+
+    # 添加Wiki目录配置
+    wiki_pages_directory = providers.Factory(
+        lambda config: config.wiki.pages_directory,
+        config
+    )
+
+    # 添加论文下载目录配置
+    paper_download_directory = providers.Factory(
+        lambda config: config.paper.download_directory,
+        config
+    )
+
+    # 添加辩论日志目录配置
+    debate_logs_directory = providers.Factory(
+        lambda config: config.debate.logs_directory,
+        config
+    )
+
+    context_aware_intent_recognizer = providers.Singleton(
+        ContextAwareIntentRecognizer,
+        context_manager=context_manager,
+        base_intent_recognizer=intent_recognizer
+    )
+
     tui_app = providers.Factory("daip_live.tui.DAIP_TUI")

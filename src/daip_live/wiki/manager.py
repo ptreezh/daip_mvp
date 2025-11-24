@@ -465,6 +465,99 @@ class WikiManager:
         )
         return sorted_pages[:limit]
 
+    # 多角色协作功能 - 用于AI协同创建Wiki内容
+    async def _add_content_by_all_roles(
+        self,
+        page_title: str,
+        roles_instructions: Dict[str, str],
+        instruction: str = ""
+    ) -> WikiPage:
+        """使用多个角色的AI模型协同生成内容并添加到页面"""
+        if not self.role_model_manager or not self.model_provider:
+            raise WikiError("WikiManager is not configured for AI content generation. RoleModelManager and ModelProvider must be provided.")
+
+        page = self.get_page_by_title(page_title)
+        if not page:
+            raise PageNotFoundError(f"Page '{page_title}' not found.")
+
+        # 获取所有角色的模型配置
+        all_content_parts = []
+
+        for role_name, role_instruction in roles_instructions.items():
+            try:
+                mapping = self.role_model_manager.get_role_model_mapping(role_name, use_debate_config=True)
+                if not mapping:
+                    raise WikiError(f"Could not find model configuration for role '{role_name}'.")
+
+                model_config = mapping.role_model_config
+
+                # 构建Prompt
+                full_instruction = f"{instruction} {role_instruction}".strip()
+                prompt = f"""You are an AI assistant acting as the role '{role_name}'.
+                The current content of the wiki page '{page_title}' is:
+                ---
+                {page.content}
+                ---
+                Your task is to contribute to this page based on the following instruction:
+                Instruction: {full_instruction}
+
+                Please provide only your contribution to add to this page.
+                """
+
+                # 修复模型名称格式：如果模型名不包含provider前缀，添加ollama前缀
+                model_name = model_config.model_name
+                if '/' not in model_name:
+                    # 假设未指定provider的模型都是ollama模型
+                    model_name = f"ollama/{model_name}"
+
+                # 生成内容
+                generated_content, _ = await self.model_provider.generate(
+                    prompt,
+                    model=model_name,
+                    temperature=model_config.temperature,
+                    max_tokens=model_config.max_tokens
+                )
+
+                all_content_parts.append(f"### Contribution by {role_name}\n{generated_content}\n")
+
+            except Exception as e:
+                # 记录错误但继续处理其他角色
+                print(f"Error generating content for role '{role_name}': {e}")
+                continue
+
+        if not all_content_parts:
+            raise WikiError(f"Failed to generate content for any roles: {list(roles_instructions.keys())}")
+
+        # 合并所有角色的贡献
+        new_content = page.content + "\n\n---\n" + "\n".join(all_content_parts)
+
+        # 更新页面
+        return self.update_page(page_title, new_content)
+
+    async def create_collaborative_page(
+        self,
+        title: str,
+        initial_content: str = "",
+        roles_instructions: Optional[Dict[str, str]] = None,
+        tags: Optional[List[str]] = None
+    ) -> WikiPage:
+        """创建由多个AI角色协作完成的Wiki页面"""
+        if roles_instructions is None:
+            roles_instructions = {
+                "domain_expert": "作为领域专家，请提供专业知识和核心技术要点",
+                "researcher": "作为研究员，请提供研究依据和参考资料",
+                "editor": "作为编辑，请负责内容结构和语言润色",
+                "analyst": "作为分析师，请提供批判性思考和改进建议"
+            }
+
+        # 首先创建基础页面
+        page = self.create_page(title, initial_content, tags or [])
+
+        # 然后让多个角色协作丰富内容
+        await self._add_content_by_all_roles(title, roles_instructions, f"协作完善维基词条: {title}")
+
+        return page
+
     async def add_content_by_role(self, page_title: str, role_name: str, instruction: str) -> WikiPage:
         """使用指定角色的AI模型生成内容并追加到页面末尾"""
         if not self.role_model_manager or not self.model_provider:

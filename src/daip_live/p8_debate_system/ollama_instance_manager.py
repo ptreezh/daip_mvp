@@ -11,10 +11,10 @@ from daip_live.core.exceptions import ModelError
 class OllamaInstanceManager:
     """Ollama实例管理器 - 确保分时复用"""
 
-    def __init__(self):
+    def __init__(self, shared_provider=None):
         self._current_model: Optional[str] = None
         self._lock = asyncio.Lock()
-        self._provider = None  # 单一Provider实例
+        self._provider = shared_provider  # 共享的Provider实例
         self._model_configs = {}  # 模型配置缓存
 
     async def generate_with_model(self, model_name: str, prompt: str, **kwargs) -> Tuple[str, Any]:
@@ -45,15 +45,48 @@ class OllamaInstanceManager:
         if self._current_model is None:
             raise ModelError("No model is currently selected")
 
-        # 这里应该调用实际的Ollama实例
-        # 当前使用模拟实现
-        await asyncio.sleep(0.01)  # 模拟网络延迟
+        # 初始化或获取模型提供者
+        if self._provider is None:
+            from daip_live.model_provider.provider import LiteLLMProvider
+            from daip_live.core.models import ProviderConfig
+            # 创建Ollama配置的LiteLLMProvider
+            config = ProviderConfig(
+                model=self._current_model,
+                base_url="http://localhost:11434"  # Ollama默认端口
+            )
+            self._provider = LiteLLMProvider(config)
 
-        # 模拟响应
-        response = f"Response from {self._current_model}"
-        usage = {"total_tokens": len(prompt.split()) * 2}  # 简单的token估算
+        # 为Ollama模型调用实际的模型提供者
+        try:
+            # 确保模型名称以"ollama/"开头，否则添加前缀
+            model_name = self._current_model
+            if not model_name.startswith("ollama/"):
+                if model_name.startswith("ollama:"):  # 如果是 ollama:llama3:instruct 格式
+                    model_name = "ollama/" + model_name[7:]  # 替换为 ollama/llama3:instruct
+                else:
+                    model_name = f"ollama/{model_name}"
 
-        return response, usage
+            # 过滤掉Ollama不支持的参数
+            filtered_kwargs = {}
+            for key, value in kwargs.items():
+                if key in ['frequency_penalty', 'presence_penalty'] and model_name.startswith("ollama/"):
+                    # Ollama不支持这些参数
+                    continue
+                else:
+                    filtered_kwargs[key] = value
+
+            # 生成响应
+            response, usage = await self._provider.generate(
+                prompt=prompt,
+                model=model_name,
+                **filtered_kwargs
+            )
+
+            return response, usage
+        except Exception as e:
+            # 如果调用失败，抛出错误以便系统可以回退到传统模式
+            model_name = getattr(self, '_current_model', 'unknown')
+            raise ModelError(f"Error calling model {model_name}: {str(e)}")
 
     def _load_model_config(self, model_name: str) -> dict:
         """加载模型配置"""

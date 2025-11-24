@@ -35,6 +35,10 @@ from daip_live.agent_engine.step_executor import StepExecutor
 from daip_live.agent_engine.workflow_executor import WorkflowExecutor
 from daip_live.agent_engine.chat_executor import ChatExecutor
 
+# 导入任务分解引擎
+from daip_live.task_decomposition.task_decomposition_engine import TaskDecompositionEngine, SequentialTaskExecutor
+from daip_live.task_decomposition.task_decomposition_integrator import TaskDecompositionIntegrator
+
 logger = logging.getLogger(__name__)
 
 
@@ -93,69 +97,164 @@ class AgentExecutor:
         )
         self.state_manager.change_state(AgentState.RUNNING)
         self.session_manager.update_session_status(self.session, self.state_manager.state)
-        
+
         # 设置工作流定义
         self.workflow_definition = workflow_definition
 
-        todo_list = await self.memory_service.get_todo_list()
-        current_task_index = 0
-        self.step_executor.last_final_response = None
+        # 首先检测是否是复杂任务，需要任务分解
+        # 导入任务分解处理器
+        from daip_live.task_decomposition.automatic_task_decomposition_engine import AutoTaskDecompositionEngine
 
-        try:
-            workflow_failed = False
+        # 检查模型提供者是否可用
+        if self.model_provider:
+            task_decomposition_engine = AutoTaskDecompositionEngine(self.model_provider)
+            should_decompose = await task_decomposition_engine.should_process_with_task_decomposition(goal)
 
-            # 如果有工作流定义，按工作流执行
-            if self.workflow_definition:
-                async for event in self.workflow_executor.execute_workflow(self.workflow_definition):
+            if should_decompose:
+                # 使用任务分解处理复杂请求
+                print(f"[AGENT EXECUTOR] 检测到复杂任务，使用任务分解流程: {goal[:50]}...")
+
+                # 生成任务清单并执行
+                async for event in task_decomposition_engine.process_with_task_decomposition(goal):
                     yield event
-                    # 检查是否有工作流失败的特殊事件
-                    if (isinstance(event, ThoughtEvent) and
-                        event.content.startswith("WORKFLOW_EXECUTION_FAILED:")):
-                        workflow_failed = True
-                        self.state_manager.change_state(AgentState.FAILED)
-                        break
             else:
-                # 否则按原有的Todo列表执行
-                while not await self.memory_service.is_todo_list_complete():
-                    # --- Outer loop: Get next task and delegate execution ---
-                    current_task = todo_list[current_task_index]
+                # 不需要任务分解，按原有的Todo列表执行
+                todo_list = await self.memory_service.get_todo_list()
+                current_task_index = 0
+                self.step_executor.last_final_response = None
 
-                    # Reset context for the new step
-                    self.step_executor.llm_response = ""
-                    self.step_executor.last_tool_result = None
-                    self.state_manager.change_state(AgentState.THINKING)
+                try:
+                    workflow_failed = False
 
-                    # Delegate the entire step execution to the helper method
-                    async for event in self.step_executor.execute_step(current_task, self.session):
+                    # 如果有工作流定义，按工作流执行
+                    if self.workflow_definition:
+                        async for event in self.workflow_executor.execute_workflow(self.workflow_definition):
+                            yield event
+                            # 检查是否有工作流失败的特殊事件
+                            if (isinstance(event, ThoughtEvent) and
+                                event.content.startswith("WORKFLOW_EXECUTION_FAILED:")):
+                                workflow_failed = True
+                                self.state_manager.change_state(AgentState.FAILED)
+                                break
+                    else:
+                        # 否则按原有的Todo列表执行
+                        while current_task_index < len(todo_list) and not await self.memory_service.is_todo_list_complete():
+                            # --- Outer loop: Get next task and delegate execution ---
+                            current_task = todo_list[current_task_index]
+
+                            # Reset context for the new step
+                            self.step_executor.llm_response = ""
+                            self.step_executor.last_tool_result = None
+                            self.state_manager.change_state(AgentState.THINKING)
+
+                            # Delegate the entire step execution to the helper method
+                            async for event in self.step_executor.execute_step(current_task, self.session):
+                                yield event
+
+                            if self.state_manager.state == AgentState.FAILED:
+                                workflow_failed = True
+                                break # Exit outer loop on failure
+
+                            await self.memory_service.update_todo_status(current_task_index)
+                            current_task_index += 1
+
+                    if not workflow_failed and self.state_manager.state != AgentState.FAILED:
+                        self.state_manager.change_state(AgentState.COMPLETED)
+                        if not self.step_executor.last_final_response:
+                             yield FinalResponseEvent(content="Plan completed successfully.")
+
+                finally:
+                    if self.session:
+                        if self.step_executor.last_final_response:
+                            final_answer_pattern = re.compile(r"Final Answer:\s*", re.IGNORECASE)
+                            summary_content = final_answer_pattern.sub("", self.step_executor.last_final_response.content).strip()
+                            self.session.summary = summary_content
+                        self.session_manager.update_session_status(self.session, self.state_manager.state)
+                        self.session_manager.save_session(self.session)
+                        session_event = await self.session_manager.create_session_event(self.session.session_id, self.state_manager.state)
+                        yield session_event
+        else:
+            # 如果没有模型提供者，按原有的Todo列表执行
+            todo_list = await self.memory_service.get_todo_list()
+            current_task_index = 0
+            self.step_executor.last_final_response = None
+
+            try:
+                workflow_failed = False
+
+                # 如果有工作流定义，按工作流执行
+                if self.workflow_definition:
+                    async for event in self.workflow_executor.execute_workflow(self.workflow_definition):
                         yield event
+                        # 检查是否有工作流失败的特殊事件
+                        if (isinstance(event, ThoughtEvent) and
+                            event.content.startswith("WORKFLOW_EXECUTION_FAILED:")):
+                            workflow_failed = True
+                            self.state_manager.change_state(AgentState.FAILED)
+                            break
+                else:
+                    # 否则按原有的Todo列表执行
+                    while current_task_index < len(todo_list) and not await self.memory_service.is_todo_list_complete():
+                        # --- Outer loop: Get next task and delegate execution ---
+                        current_task = todo_list[current_task_index]
 
-                    if self.state_manager.state == AgentState.FAILED:
-                        workflow_failed = True
-                        break # Exit outer loop on failure
+                        # Reset context for the new step
+                        self.step_executor.llm_response = ""
+                        self.step_executor.last_tool_result = None
+                        self.state_manager.change_state(AgentState.THINKING)
 
-                    await self.memory_service.update_todo_status(current_task_index)
-                    current_task_index += 1
+                        # Delegate the entire step execution to the helper method
+                        async for event in self.step_executor.execute_step(current_task, self.session):
+                            yield event
 
-            if not workflow_failed and self.state_manager.state != AgentState.FAILED:
-                self.state_manager.change_state(AgentState.COMPLETED)
-                if not self.step_executor.last_final_response:
-                     yield FinalResponseEvent(content="Plan completed successfully.")
+                        if self.state_manager.state == AgentState.FAILED:
+                            workflow_failed = True
+                            break # Exit outer loop on failure
 
-        finally:
-            if self.session:
-                if self.step_executor.last_final_response:
-                    final_answer_pattern = re.compile(r"Final Answer:\s*", re.IGNORECASE)
-                    summary_content = final_answer_pattern.sub("", self.step_executor.last_final_response.content).strip()
-                    self.session.summary = summary_content
-                self.session_manager.update_session_status(self.session, self.state_manager.state)
-                self.session_manager.save_session(self.session)
-                session_event = await self.session_manager.create_session_event(self.session.session_id, self.state_manager.state)
-                yield session_event
+                        await self.memory_service.update_todo_status(current_task_index)
+                        current_task_index += 1
+
+                if not workflow_failed and self.state_manager.state != AgentState.FAILED:
+                    self.state_manager.change_state(AgentState.COMPLETED)
+                    if not self.step_executor.last_final_response:
+                         yield FinalResponseEvent(content="Plan completed successfully.")
+
+            finally:
+                if self.session:
+                    if self.step_executor.last_final_response:
+                        final_answer_pattern = re.compile(r"Final Answer:\s*", re.IGNORECASE)
+                        summary_content = final_answer_pattern.sub("", self.step_executor.last_final_response.content).strip()
+                        self.session.summary = summary_content
+                    self.session_manager.update_session_status(self.session, self.state_manager.state)
+                    self.session_manager.save_session(self.session)
+                    session_event = await self.session_manager.create_session_event(self.session.session_id, self.state_manager.state)
+                    yield session_event
 
     async def chat_run(self, initial_goal: str) -> AsyncGenerator[AgentEvent, None]:
         """Runs the agent in an interactive chat mode."""
-        async for event in self.chat_executor.chat_run(initial_goal, self.step_executor):
-            yield event
+        # 检测初始目标是否需要任务分解
+        from daip_live.task_decomposition.automatic_task_decomposition_engine import AutoTaskDecompositionEngine
+
+        # 检查模型提供者是否可用
+        if self.model_provider:
+            task_decomposition_engine = AutoTaskDecompositionEngine(self.model_provider)
+            should_decompose = await task_decomposition_engine.should_process_with_task_decomposition(initial_goal)
+
+            if should_decompose:
+                # 使用任务分解处理复杂初始目标
+                print(f"[CHAT EXECUTOR] 检测到复杂聊天目标，使用任务分解流程: {initial_goal[:50]}...")
+
+                # 生成任务清单并执行
+                async for event in task_decomposition_engine.process_with_task_decomposition(initial_goal):
+                    yield event
+            else:
+                # 不需要任务分解，使用常规聊天执行器
+                async for event in self.chat_executor.chat_run(initial_goal, self.step_executor):
+                    yield event
+        else:
+            # 如果没有模型提供者，直接使用常规聊天执行器
+            async for event in self.chat_executor.chat_run(initial_goal, self.step_executor):
+                yield event
 
     def _change_state(self, new_state: AgentState):
         self.state_manager.change_state(new_state)

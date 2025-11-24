@@ -1,9 +1,11 @@
 database:
   path: daip_live.db
+debate:
+  logs_directory: knowledge/debate/
 knowledge_base:
-  directory: docs/
+  directory: knowledge/
 llm_provider:
-  default_model: ollama/glm-4.6:cloud
+  default_model: ollama/qwen3-vl:235b-cloud
   embedding_model: mock-embedding
 mcp:
   markdownify:
@@ -25,5 +27,9 @@ mcp:
     enabled: true
     endpoint: http://localhost:8082
     timeout_seconds: 15
+paper:
+  download_directory: knowledge/paper/
 role_manager:
   roles_dir: roles/
+wiki:
+  pages_directory: knowledge/wiki/

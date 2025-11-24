@@ -1,0 +1,33 @@
+{
+  "tools": [
+    {
+      "name": "analyze_text_semantics",
+      "description": "Analyzes text content for semantic understanding, key themes, and important concepts",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text content to analyze, must be at least 10 characters and no more than 10000 characters",
+            "minLength": 10,
+            "maxLength": 10000
+          },
+          "analysis_type": {
+            "type": "string",
+            "description": "Type of analysis to perform: 'semantic', 'sentiment', 'entities', 'themes'",
+            "enum": [
+              "semantic",
+              "sentiment",
+              "entities",
+              "themes"
+            ],
+            "default": "semantic"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      }
+    }
+  ]
+}

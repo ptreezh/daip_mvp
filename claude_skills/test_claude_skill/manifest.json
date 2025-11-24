@@ -1,0 +1,25 @@
+{
+  "manifest_version": "2.0",
+  "name": "text_analyzer_tool",
+  "description": "Advanced text analysis tool with semantic understanding",
+  "version": "1.0.0",
+  "author": "DAIP-LIVE",
+  "contact": "dev@daip.live",
+  "tags": [
+    "text",
+    "analysis",
+    "nlp",
+    "semantic"
+  ],
+  "api": {
+    "type": "http",
+    "auth": {
+      "type": "none",
+      "instructions": "No authentication required for this example"
+    },
+    "base_url": "http://localhost:11434",
+    "description": "Text Analysis API"
+  },
+  "tos": "Terms of service for text analysis tool",
+  "privacy_policy": "Privacy policy for text analysis tool"
+}

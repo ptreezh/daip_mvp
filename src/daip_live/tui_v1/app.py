@@ -38,6 +38,8 @@ from daip_live.p4_role_manager_tools.role_manager import RoleManager
 from daip_live.p8_debate_system.manager import DebateManager
 from daip_live.persistence.database import DatabaseManager
 from daip_live.config import ConfigManager
+from daip_live.skills.manager import SkillManager
+from daip_live.skills.enhanced_integration import EnhancedClaudeSkillsManager
 
 # Import DAIP event models
 from daip_live.core.models import (
@@ -158,6 +160,9 @@ class DAIPScreen(Screen):
         # Start background monitoring
         await self._start_monitoring()
 
+        # Initialize skill system and load existing skills after services are set up
+        await self._initialize_skills()
+
     async def _initialize_components(self) -> None:
         """Initialize all newP6 components."""
         for component in self.components.values():
@@ -181,6 +186,10 @@ class DAIPScreen(Screen):
             "label": "Debate System",
             "action": "debate_system"
         })
+        navigation.add_menu_item({
+            "label": "Skills Management",
+            "action": "skills_manage"
+        })
 
         # Set up input area with DAIP commands
         input_area = self.components['input_area']
@@ -193,11 +202,27 @@ class DAIPScreen(Screen):
                 "session list", "session show <id>",
                 "knowledge sync", "knowledge search <query>",
                 "debate start <topic>", "debate list",
-                "model list", "model status"
+                "model list", "model status",
+                "/skill", "/ppt", "/survey"
             ]
             return [cmd for cmd in commands if cmd.startswith(input_text.lower())]
 
         input_area.set_suggestions_callback(daip_command_suggestions)
+
+    async def _initialize_skills(self) -> None:
+        """Initialize skill system and load existing skills."""
+        skill_manager = self.daip_services.get('skill_manager')
+        if skill_manager:
+            # Load any existing Claude skills from the claude_skills directory
+            try:
+                loaded_count = skill_manager.load_claude_skills_from_directory("./claude_skills")
+                display_area = self.components['display_area']
+                if loaded_count > 0:
+                    display_area.write(f"🔄 已从 ./claude_skills 加载 {loaded_count} 个Claude技能")
+                else:
+                    display_area.write("📁 未找到本地Claude技能，可在需要时从GitHub下载")
+            except Exception as e:
+                print(f"⚠️ 加载本地技能时出错: {e}")
 
     async def _setup_daip_integrations(self) -> None:
         """Set up integration with DAIP services."""
@@ -242,8 +267,53 @@ class DAIPScreen(Screen):
 
     async def _setup_command_processing(self, input_area: InputAreaComponent) -> None:
         """Set up command processing for input area."""
-        # This would integrate with DAIP's command processing
-        # For now, we'll handle basic commands
+        # Get the skill manager and Claude integration service from DAIP services
+        skill_manager = self.daip_services.get('skill_manager')
+        claude_integration_service = self.daip_services.get('claude_integration_service')
+
+        if skill_manager is None:
+            # If not provided in daip_services, create a default one
+            from daip_live.skills.manager import SkillManager
+            skill_manager = SkillManager()
+            self.daip_services['skill_manager'] = skill_manager
+
+        if claude_integration_service is None:
+            # Initialize Claude integration service if not provided
+            from daip_live.skills.enhanced_integration import EnhancedClaudeSkillsManager
+            claude_integration_service = EnhancedClaudeSkillsManager(skill_manager)
+            self.daip_services['claude_integration_service'] = claude_integration_service
+
+        # Setup command processing system
+        from daip_live.tui_v1.command.command_processor import setup_command_processing
+        self.command_processor = setup_command_processing(
+            self,  # Pass self as the tui_app parameter
+            skill_manager,
+            claude_integration_service
+        )
+
+        # Set up event handling for user input
+        async def handle_user_input(event):
+            """Handle user input from input area."""
+            user_input = input_area.get_input_text()
+            if user_input.strip():
+                # Try to process as a command first
+                result = self.command_processor.process_command(user_input)
+
+                if result:  # If command was processed
+                    # Display the command result
+                    display_area = self.components['display_area']
+                    display_area.write(result)
+                    input_area.clear_input()
+                else:
+                    # If not a recognized command, it might be a natural language query
+                    # This would be handled by the intent recognition system
+                    display_area = self.components['display_area']
+                    display_area.write(f"🤔 检测到非命令输入: {user_input}")
+                    display_area.write("💡 提示: 输入 /help 查看可用命令")
+                    input_area.clear_input()
+
+        # Add callback to input area's submit event
+        # This is a simplified implementation - in a real app, you'd connect to actual events
         pass
 
     async def _start_monitoring(self) -> None:

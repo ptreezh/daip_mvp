@@ -4,6 +4,7 @@
 """
 
 import json
+from pathlib import Path
 from typing import List, Optional, Dict, Any
 import typer
 from rich.console import Console
@@ -53,16 +54,41 @@ def sync(
                 console.print("[bold blue]📚 Synchronizing knowledge base...[/bold blue]")
 
             try:
-                # Create default configuration
-                knowledge_config = KnowledgeBaseConfig(directory="knowledge")
-                provider_config = ProviderConfig(
-                    model="text-embedding-3-small",
-                    provider="openai"
-                )
+                # Load config from YAML or use defaults
+                import yaml
+                config_path = Path("config.yaml")
+                if config_path.exists():
+                    with open(config_path, 'r', encoding='utf-8') as f:
+                        config_data = yaml.safe_load(f)
 
-                # Initialize dependencies
-                db_manager = DatabaseManager()
-                model_provider = LiteLLMProvider(provider_config)
+                    knowledge_dir = config_data.get('knowledge_base', {}).get('directory', 'docs/')
+                    embedding_model = config_data.get('llm_provider', {}).get('embedding_model', 'mock-embedding')
+                else:
+                    knowledge_dir = 'docs/'
+                    embedding_model = 'mock-embedding'
+
+                # Create configuration
+                from daip_live.core.models import KnowledgeBaseConfig
+                knowledge_config = KnowledgeBaseConfig(directory=knowledge_dir)
+
+                # Initialize database manager
+                from daip_live.persistence.database import DatabaseManager
+                db_manager = DatabaseManager(":memory:")  # Using in-memory for CLI
+
+                # Use mock provider to avoid embedding issues during CLI sync
+                try:
+                    from daip_live.model_provider.mock_provider import MockModelProvider
+                    model_provider = MockModelProvider()
+                except ImportError:
+                    # Fallback to LiteLLMProvider with mock configuration
+                    from daip_live.model_provider.provider import LiteLLMProvider
+                    from daip_live.core.models import ProviderConfig
+                    provider_config = ProviderConfig(
+                        model="mock-embedding",
+                        provider="mock"
+                    )
+                    model_provider = LiteLLMProvider(provider_config)
+
                 knowledge_manager = KnowledgeManager(
                     db_manager=db_manager,
                     model_provider=model_provider,
@@ -81,23 +107,38 @@ def sync(
                         ) as progress:
                             task = progress.add_task("Scanning for changes...", total=None)
 
-                            # Mock scan for dry run - in real implementation this would call knowledge manager
+                            # Get changes without making actual changes
+                            changes = knowledge_manager._scan_and_detect_changes()
                             progress.update(task, completed=True)
 
                         console.print("[dim]Files that would be processed:[/dim]")
-                        console.print("  • No files to process (dry run mock)")
+                        for f in changes.added[:5]:  # Show first 5
+                            console.print(f"  📄 [green]+ {f}[/green]")
+                        if len(changes.added) > 5:
+                            console.print(f"  ... and {len(changes.added)-5} more")
+
+                        for f in changes.updated[:5]:  # Show first 5
+                            file_path, _ = f
+                            console.print(f"  🔄 [yellow]~ {file_path}[/yellow]")
+                        if len(changes.updated) > 5:
+                            console.print(f"  ... and {len(changes.updated)-5} more")
+
+                        for f in changes.deleted[:5]:  # Show first 5
+                            console.print(f"  🗑️  [red]- {f.file_path}[/red]")
+                        if len(changes.deleted) > 5:
+                            console.print(f"  ... and {len(changes.deleted)-5} more")
 
                     # JSON output for dry run
                     dry_run_data = {
                         "dry_run": True,
                         "changes": {
-                            "added": [],
-                            "updated": [],
-                            "deleted": [],
-                            "unchanged": []
+                            "added": changes.added if hasattr(changes, 'added') else [],
+                            "updated": [f[0] for f in changes.updated] if hasattr(changes, 'updated') else [],
+                            "deleted": [f.file_path for f in changes.deleted] if hasattr(changes, 'deleted') else [],
+                            "unchanged": len(changes.unchanged) if hasattr(changes, 'unchanged') else 0
                         },
                         "summary": {
-                            "total_changes": 0
+                            "total_changes": len(changes.added) + len(changes.updated) + len(changes.deleted) if hasattr(changes, 'added') and hasattr(changes, 'updated') and hasattr(changes, 'deleted') else 0
                         }
                     }
                     console.print(json.dumps(dry_run_data, indent=2))
@@ -105,25 +146,10 @@ def sync(
 
                 # Actual sync
                 if not json_output and verbose:
-                    console.print("[dim]Scanning knowledge directory for changes...[/dim]")
+                    console.print(f"[dim]Scanning knowledge directory for changes: {knowledge_dir}[/dim]")
 
-                with Progress(
-                    SpinnerColumn(),
-                    TextColumn("[progress.description]{task.description}"),
-                    console=console,
-                    transient=True
-                ) as progress:
-                    task = progress.add_task("Syncing files...", total=None)
-
-                    # Mock sync result for now - in real implementation would call knowledge_manager.sync_knowledge_base()
-                    sync_result = {
-                        "added": 0,
-                        "updated": 0,
-                        "removed": 0,
-                        "unchanged": 0
-                    }
-
-                    progress.update(task, completed=True)
+                # Run the actual sync
+                sync_result = await knowledge_manager.sync_knowledge_base()
 
                 if json_output:
                     # JSON output

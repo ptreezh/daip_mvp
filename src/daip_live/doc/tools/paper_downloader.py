@@ -92,17 +92,19 @@ class PaperDownloader:
             )
         
         try:
-            # Search for papers using arXiv API
+            # Search for papers using arXiv API with Client (recommended approach)
             search = arxiv.Search(
                 query=query,
                 max_results=1,
-                sort_by=arxiv.SortCriterion.Relevance
+                sort_by=arxiv.SortCriterion.Relevance,
+                sort_order=arxiv.SortOrder.Descending
             )
-            
-            paper_iter = search.results()
-            try:
-                paper = next(paper_iter)
-            except StopIteration:
+
+            # Use Client.results() method as recommended
+            client = arxiv.Client()
+            results = list(client.results(search))
+
+            if not results:
                 return PaperDownloadResult(
                     paper_id=f"arxiv_no_results_{query.replace(' ', '_')}",
                     title=query,
@@ -112,6 +114,8 @@ class PaperDownloader:
                     download_time=asyncio.get_event_loop().time() - start_time,
                     error_message="No papers found matching query"
                 )
+
+            paper = results[0]  # Get the first result
             
             # Create download directory for this paper
             paper_dir = self.download_dir / "arxiv" 
@@ -135,7 +139,7 @@ class PaperDownloader:
                 doi=paper.doi,
                 arxiv_id=paper.entry_id.split('/')[-1] if paper.entry_id else paper.get_short_id(),
                 url=paper.entry_id,
-                categories=[tag.term for tag in paper.tags],
+                categories=paper.categories,  # Use categories attribute instead of tags
                 source=PaperSource.ARXIV,
                 file_path=str(file_path)
             )
@@ -177,16 +181,17 @@ class PaperDownloader:
         try:
             # Clean the arXiv ID
             clean_arxiv_id = arxiv_id.replace("arxiv:", "").replace("arXiv:", "").strip()
-            
+
             # Search for the specific paper
             search = arxiv.Search(
                 id_list=[clean_arxiv_id]
             )
-            
-            paper_iter = search.results()
-            try:
-                paper = next(paper_iter)
-            except StopIteration:
+
+            # Use Client.results() method as recommended
+            client = arxiv.Client()
+            results = list(client.results(search))
+
+            if not results:
                 return PaperDownloadResult(
                     paper_id=arxiv_id,
                     title=f"Paper {arxiv_id}",
@@ -196,6 +201,8 @@ class PaperDownloader:
                     download_time=asyncio.get_event_loop().time() - start_time,
                     error_message="Paper not found with provided ID"
                 )
+
+            paper = results[0]  # Get the first result
             
             # Create download directory for this paper
             paper_dir = self.download_dir / "arxiv" 
@@ -219,7 +226,7 @@ class PaperDownloader:
                 doi=paper.doi,
                 arxiv_id=paper.entry_id.split('/')[-1] if paper.entry_id else arxiv_id,
                 url=paper.entry_id,
-                categories=[tag.term for tag in paper.tags],
+                categories=paper.categories,  # Use categories attribute instead of tags
                 source=PaperSource.ARXIV,
                 file_path=str(file_path)
             )
@@ -282,11 +289,15 @@ class PaperDownloader:
             search = arxiv.Search(
                 query=query,
                 max_results=max_results,
-                sort_by=arxiv.SortCriterion.Relevance
+                sort_by=arxiv.SortCriterion.Relevance,
+                sort_order=arxiv.SortOrder.Descending
             )
-            
+
+            # Use Client.results() method as recommended
+            client = arxiv.Client()
+
             results = []
-            for paper in search.results():
+            for paper in client.results(search):
                 metadata = PaperMetadata(
                     title=paper.title,
                     authors=[author.name for author in paper.authors],
@@ -295,11 +306,11 @@ class PaperDownloader:
                     doi=paper.doi,
                     arxiv_id=paper.entry_id.split('/')[-1] if paper.entry_id else paper.get_short_id(),
                     url=paper.entry_id,
-                    categories=[tag.term for tag in paper.tags],
+                    categories=paper.categories,  # Use categories attribute instead of tags
                     source=PaperSource.ARXIV
                 )
                 results.append(metadata)
-                
+
             return results
             
         except Exception as e:
