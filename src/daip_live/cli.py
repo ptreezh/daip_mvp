@@ -25,13 +25,22 @@ from daip_live.p4_role_manager_tools.role_manager import RoleManager
 from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
 from daip_live.model_provider.provider import LiteLLMProvider  # Fixed import
 from daip_live.persistence.database import DatabaseManager
-from daip_live.tui import DAIP_TUI
+from daip_live.tui_modular import DAIP_TUI
 from daip_live.agent_engine.enhanced_intent_recognizer import Intent
 from rich.console import Console
 from rich.table import Table
 
 # Create CLI app
 app = typer.Typer()
+
+# Container for dependency injection
+container = Container()
+
+# Container for dependency injection
+container = Container()
+
+# Global intent recognizer instance
+intent_recognizer = None
 
 # Container for dependency injection
 container = Container()
@@ -51,6 +60,15 @@ def initialize_app():
     except Exception as e:
         print(f"⚠️ Warning: Failed to initialize intent recognizer: {e}")
 
+
+# Create CLI app
+app = typer.Typer()
+
+# Container for dependency injection
+container = Container()
+
+# Global intent recognizer instance
+intent_recognizer = None
 
 @app.command()
 def run():

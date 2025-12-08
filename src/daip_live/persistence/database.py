@@ -112,6 +112,46 @@ class DatabaseManager:
             result = conn.execute(delete(sessions_table))
             return result.rowcount
 
+    # --- Context Manager Support for Database Operations ---
+
+    def get_connection(self):
+        """
+        Get a database connection for general database operations.
+
+        This method provides a context manager for database operations
+        that don't involve session-specific data retrieval.
+
+        Usage:
+            with db_manager.get_connection() as conn:
+                result = conn.execute("SELECT 1").fetchone()
+
+        Returns:
+            SQLAlchemy connection context manager
+        """
+        return self.engine.connect()
+
+    # For backward compatibility, make get_session work as both session retriever and connection provider
+    def __call__(self, session_id: Optional[str] = None):
+        """
+        Make DatabaseManager callable to provide flexible access patterns.
+
+        This allows the manager to work in multiple ways:
+        1. db_manager(session_id) -> Get specific session
+        2. db_manager() -> Get connection context manager
+        3. with db_manager() as conn: -> Use as context manager
+
+        Args:
+            session_id: Optional session ID to retrieve
+
+        Returns:
+            Session object if session_id provided,
+            Connection context manager if no session_id
+        """
+        if session_id is not None:
+            return self.get_session(session_id)
+        else:
+            return self.get_connection()
+
     # --- Knowledge Source Methods (Unchanged) ---
 
     def get_knowledge_source_by_path(self, file_path: str) -> Optional[KnowledgeSource]:

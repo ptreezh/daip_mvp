@@ -148,7 +148,7 @@ def enhance_executor_with_task_decomposition(executor):
             # 如果没有原始执行方法，返回基本响应
             return {
                 "type": "simple_response",
-                "response": f"正在处理您的请求: {user_request[:100]}...",
+                "response": "思考中...",
                 "request": user_request
             }
     

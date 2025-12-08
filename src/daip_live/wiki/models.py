@@ -16,11 +16,12 @@ def validate_tag(tag: str) -> str:
     """验证并清理标签"""
     if not isinstance(tag, str):
         raise TypeError("Tag must be a string")
-    clean_tag = tag.strip().lower()
+    clean_tag = tag.strip()
     if not clean_tag:
         raise ValueError("Tag cannot be empty")
-    # 移除特殊字符，只保留字母、数字、连字符和下划线
-    clean_tag = re.sub(r'[^a-z0-9_-]', '', clean_tag)
+    # 移除有问题的特殊字符，但保留Unicode字符（包括中文）
+    # 只移除可能导致文件系统问题的字符
+    clean_tag = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '', clean_tag)
     return clean_tag
 
 

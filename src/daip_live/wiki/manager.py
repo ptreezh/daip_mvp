@@ -140,11 +140,41 @@ class WikiManager:
         Raises:
             ValueError: 如果标题为空或已存在（保持向后兼容）
         """
+        # 检查上下文以提供更好的参数提取
+        if not title or not title.strip():
+            # 尝试从内容中提取标题
+            if content and len(content) > 0:
+                # 提取内容的第一行或第一个标题作为标题
+                lines = content.split("\n")
+                for line in lines:
+                    line = line.strip()
+                    if line.startswith("# "):
+                        title = line[2:].strip()
+                        break
+                    elif line and not line.startswith("#"):
+                        title = line[:50].strip()  # 取首行前50个字符作为标题
+                        break
+
         if not title or not title.strip():
             raise ValueError("Title cannot be empty")
 
+        # 检查页面是否已存在
         if title in self._pages:
-            raise ValueError(f"Page with title '{title}' already exists")
+            existing_page = self._pages[title]
+
+            # 检查文档是否为空或只有默认模板内容
+            if self._is_empty_document(existing_page.content):
+                # 文档为空，直接返回当作新建的文档
+                self._update_existing_page(existing_page, content, tags)
+                return existing_page
+            else:
+                # 文档不为空，改为协同编辑模式
+                raise ValueError(f"Page '{title}' already exists and contains content. Use collaborative editing instead.")
+
+        # 处理标签，过滤空字符串
+        processed_tags = []
+        if tags:
+            processed_tags = [tag.strip() for tag in tags if tag and tag.strip()]
 
         now = datetime.now()
         file_path = self._get_page_file_path(title)
@@ -155,7 +185,7 @@ class WikiManager:
             file_path=file_path,
             created_at=now,
             modified_at=now,
-            tags=tags or []
+            tags=processed_tags
         )
 
         # 保存页面到文件
@@ -597,3 +627,61 @@ class WikiManager:
         # 更新页面
         new_content = page.content + "\n\n---\n" + f"## Contribution by {role_name}\n\n" + generated_content
         return self.update_page(page_title, new_content)
+
+    def _is_empty_document(self, content: str) -> bool:
+        """检查文档是否为空（10字以下视为空，可直接覆盖）
+
+        Args:
+            content: 文档内容
+
+        Returns:
+            bool: True表示文档为空（可覆盖），False表示有内容（需要协同编辑）
+        """
+        if not content or not content.strip():
+            return True
+
+        content_stripped = content.strip()
+
+        # 10字以下都视为空文件，直接覆盖
+        if len(content_stripped) <= 10:
+            return True
+
+        # 定义常见的空文档或默认模板模式
+        empty_patterns = [
+            r'^#\s*$',  # 只有标题符号
+            r'^#\s+\w+$',  # 只有标题和一个词
+            r'^#\s+.*?\n\n开始编辑您的内容\.\.\.\s*$',  # 默认编辑提示
+            r'^#\s+.*?\n\n开始协同创建关于.*的维基页面\.\.\.\s*$',  # 协同创建默认提示
+            r'^#\s+.*?\n\n\s*$',  # 标题后只有空行
+        ]
+
+        # 检查是否匹配空文档模式
+        for pattern in empty_patterns:
+            if re.fullmatch(pattern, content_stripped, re.IGNORECASE | re.MULTILINE | re.DOTALL):
+                return True
+
+        # 其他情况认为有内容
+        return False
+
+    def _update_existing_page(self, page: WikiPage, new_content: str, new_tags: Optional[List[str]] = None) -> None:
+        """更新已存在的页面（用于空文档的情况）
+
+        Args:
+            page: 已存在的页面对象
+            new_content: 新的内容
+            new_tags: 新的标签列表
+        """
+        # 更新内容
+        page.update_content(new_content)
+
+        # 更新标签
+        if new_tags is not None:
+            page.tags = [tag for tag in new_tags if tag]  # 清理空标签
+            page.modified_at = datetime.now()
+
+        # 保存到文件
+        with open(page.file_path, 'w', encoding='utf-8') as f:
+            f.write(new_content)
+
+        # 更新索引
+        self._save_index()

@@ -5,8 +5,8 @@ debate:
 knowledge_base:
   directory: knowledge/
 llm_provider:
-  default_model: ollama/qwen3-vl:235b-cloud
-  embedding_model: mock-embedding
+  default_model: ollama/llama3
+  embedding_model: ollama/nomic-embed-text
 mcp:
   markdownify:
     auth:

@@ -95,7 +95,7 @@ class InteractiveDemo:
                 "timestamp": datetime.now().isoformat()
             }
 
-            print(f"🤖 正在处理您的请求: '{user_input}'")
+            print("🤖 思考中...")
             start_time = time.time()
 
             # Process through orchestrator

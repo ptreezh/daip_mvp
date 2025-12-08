@@ -95,22 +95,22 @@ class ChatExecutor:
     async def _process_chat_turn(self, turn_description: str, step_executor: Any, session: Any) -> AsyncGenerator[AgentEvent, None]:
         """
         处理单个聊天回合
-        
+
         Args:
             turn_description: 回合描述
             step_executor: 步骤执行器
             session: 会话
-            
+
         Yields:
             AgentEvent: 处理事件
         """
         # 首先尝试识别用户意图
         intent = self.intent_recognizer.recognize_intent(turn_description)
-        
+
         if intent and intent.confidence > 0.5:  # 设置置信度阈值
             # 如果识别到意图，显示意图信息
             yield ThoughtEvent(content=f"识别到意图: {intent.description} (置信度: {intent.confidence:.2f})")
-            
+
             # 检查工具可用性并执行相应操作
             tool_executed_result = None
             async for result in self._try_execute_tool(intent, step_executor, session):
@@ -118,14 +118,24 @@ class ChatExecutor:
                     tool_executed_result = result
                 else:
                     yield result
-            
+
             if tool_executed_result:
                 return  # 工具已执行，不需要继续处理
-        
+
         # 没有识别到意图或工具执行失败，按普通聊天处理
         current_task = TodoItem(id=0, description=turn_description, status="pending", priority=1)
+
+        # 添加一个标志，确保至少有一个事件被发出
+        events_generated = False
+
         async for event in step_executor.execute_step(current_task, session):
             yield event
+            events_generated = True
+
+        # 如果执行步骤后没有生成任何事件，发送一个基本响应以确保TUI收到反馈
+        if not events_generated:
+            yield ThoughtEvent(content="正在处理您的请求...")
+            # 可能需要触发一次简单的响应
     
     async def _try_execute_tool(self, intent: Any, step_executor: Any, session: Any):
         """

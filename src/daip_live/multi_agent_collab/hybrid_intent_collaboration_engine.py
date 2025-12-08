@@ -43,19 +43,23 @@ class HybridIntentRecognizer(EnhancedIntentRecognizer):
             print(f"[HYBRID RECOGNIZER] 规则匹配: '{text}' -> {rule_intent.name} (置信度: {getattr(rule_intent, 'confidence', 'N/A')})")
             return rule_intent
 
-        # 如果规则匹配失败或置信度不够，使用大模型分析
+        # 如果规则匹配失败或置信度不够，使用真实的大模型分析
         try:
             import asyncio
             # 在异步环境中运行LLM分析
             try:
                 loop = asyncio.get_running_loop()
-                llm_result_task = asyncio.create_task(self.llm_analyzer.analyze_intent_with_llm(text))
-                # 由于recognize_intent是同步方法，我们不能使用await
-                # 为了TDD的简单实现，这里使用同步模拟
-                llm_result = self._simulate_llm_analysis(text)
+                if loop and self.llm_analyzer:
+                    # 使用真实的LLM分析器
+                    llm_result_task = asyncio.create_task(self.llm_analyzer.analyze_intent_with_llm(text))
+                    # 等待任务完成
+                    llm_result = llm_result_task
+                else:
+                    # 如果没有LLM分析器或不在事件循环中，跳过LLM分析
+                    llm_result = None
             except RuntimeError:
-                # 如果不在事件循环中，也使用同步模拟
-                llm_result = self._simulate_llm_analysis(text)
+                # 如果不在事件循环中，跳过LLM分析
+                llm_result = None
 
             # 根据大模型分析结果创建意图对象
             if isinstance(llm_result, dict) and "intent_name" in llm_result:
@@ -93,67 +97,6 @@ class HybridIntentRecognizer(EnhancedIntentRecognizer):
 
         # 如果都失败，返回规则匹配结果
         return rule_intent
-
-    def _simulate_llm_analysis(self, text: str) -> Dict[str, Any]:
-        """模拟LLM分析 - 在实际实现中会被真实LLM调用替代"""
-        # 使用启发式规则模拟大模型分析
-        import re
-        text_lower = text.lower()
-
-        # 模拟大模型理解能力
-        if any(keyword in text_lower for keyword in ["协作", "一起", "共同", "多模型", "多角色"]):
-            if any(keyword in text_lower for keyword in ["维基", "百科", "wiki", "词条"]):
-                return {
-                    "intent_name": "create_wiki",
-                    "parameters": {"title": re.sub(r".*[创建|写|新建].*[维基|百科|wiki|词条]", "", text).strip() or ""},
-                    "requires_clarification": not re.sub(r".*[创建|写|新建].*[维基|百科|wiki|词条]", "", text).strip(),
-                    "confidence": 0.85,
-                    "explanation": "检测到多角色协作编辑维基意图"
-                }
-
-        elif "帮我" in text_lower or "请帮我" in text_lower:
-            # 确定是否是技能请求还是问题
-            skill_indicators = ["分析", "处理", "总结", "搜索", "查找", "翻译", "写", "生成", "整理"]
-            if any(indicator in text_lower for indicator in skill_indicators):
-                return {
-                    "intent_name": "execute_skill",
-                    "parameters": {
-                        "skill_type": "general",
-                        "content": re.sub(r".*[帮我|请帮我]", "", text).strip()
-                    },
-                    "requires_clarification": not re.sub(r".*[帮我|请帮我]", "", text).strip(),
-                    "confidence": 0.9,
-                    "explanation": "检测到技能执行请求"
-                }
-            else:
-                return {
-                    "intent_name": "question",
-                    "parameters": {"query": text},
-                    "requires_clarification": False,
-                    "confidence": 0.7,
-                    "explanation": "检测到问题或求助意图"
-                }
-
-        elif "辩论" in text_lower and any(keyword in text_lower for keyword in ["多模型", "多角色", "协同"]):
-            return {
-                "intent_name": "start_debate",
-                "parameters": {
-                    "topic": re.sub(r".*[辩论|讨论].*", "", text).strip() or "",
-                    "collaborative": True
-                },
-                "requires_clarification": not re.sub(r".*[辩论|讨论].*", "", text).strip(),
-                "confidence": 0.88,
-                "explanation": "检测到多模型辩论意图"
-            }
-
-        # 默认情况 - 返回原始文本作为一般意图
-        return {
-            "intent_name": "question",
-            "parameters": {"query": text},
-            "requires_clarification": False,
-            "confidence": 0.6,
-            "explanation": "通过模拟大模型分析识别的通用意图"
-        }
 
 
 # 为集成论文搜索下载功能而创建的增强版本

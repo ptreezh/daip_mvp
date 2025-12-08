@@ -61,7 +61,7 @@ class DualProcessingArchitecture:
             print(f"[DUAL ARCH] 对话处理: {user_request[:30]}...")
             # 这里使用传统的状态循环处理对话
             from daip_live.core.models import ThoughtEvent
-            yield ThoughtEvent(content=f"正在处理对话: {user_request[:50]}...") # 占位响应
+            yield ThoughtEvent(content="思考中...") # 占位响应
 
 
 class RequestClassifier:

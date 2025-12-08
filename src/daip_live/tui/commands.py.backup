@@ -1,0 +1,317 @@
+"""TUI命令处理模块 - 处理所有斜杠命令的核心逻辑"""
+
+from typing import Optional, List
+import asyncio
+
+
+class TUICommandHandler:
+    """TUI命令处理器"""
+
+    def __init__(self, tui_instance):
+        self.tui = tui_instance
+
+    async def handle_command(self, cmd: str, args: str) -> None:
+        """处理命令 - 包括特殊命令处理"""
+        # 移除开头的斜杠
+        cmd = cmd.lstrip('/')
+
+        # 特殊处理自定义命令（不在TUI主类中的命令）
+        if cmd == 'copy_main':
+            self.tui.utility_commands.handle_copy_main_command(args)
+            return
+        elif cmd == 'copy_system':
+            self.tui.utility_commands.handle_copy_system_command(args)
+            return
+
+        # 特殊处理Claude Skills相关的命令（处理包含下划线的命令）
+        if cmd.startswith('claude_skills'):
+            # 将类似 claude_skills_list 的命令转换为对应的方法调用
+            if cmd == 'claude_skills_list':
+                handler = getattr(self.tui, '_handle_claude_skills_list_command', None)
+            elif cmd == 'claude_skills_run':
+                handler = getattr(self.tui, '_handle_claude_skills_run_command', None)
+            elif cmd == 'claude_skills_sync':
+                handler = getattr(self.tui, '_handle_claude_skills_sync_command', None)
+            elif cmd == 'claude_skills_search':
+                handler = getattr(self.tui, '_handle_claude_skills_search_command', None)
+            elif cmd == 'claude_skills_info':
+                handler = getattr(self.tui, '_handle_claude_skills_info_command', None)
+            else:
+                handler = None
+
+            if handler:
+                if asyncio.iscoroutinefunction(handler):
+                    await handler(args)
+                else:
+                    handler(args)
+                return
+
+        # 构造处理函数名（用于其他命令）
+        handler_name = f"_handle_{cmd}_command"
+        handler = getattr(self.tui, handler_name, None)
+
+        if handler:
+            if asyncio.iscoroutinefunction(handler):
+                await handler(args)
+            else:
+                handler(args)
+        else:
+            # 指令不存在，提供智能建议
+            self.tui._suggest_similar_commands(cmd)
+
+    def get_available_commands(self) -> List[tuple[str, str]]:
+        """获取可用命令列表"""
+        return self.tui._available_commands
+
+
+class SearchCommands:
+    """搜索相关命令"""
+
+    def __init__(self, tui_instance):
+        self.tui = tui_instance
+
+    def search_conversation_history(self, query: str) -> None:
+        """搜索历史对话记录中的相关信息"""
+        try:
+            self.tui._update_log_view(f"[bold cyan]🔍 正在搜索历史对话中的相关信息...[/bold cyan]")
+            self.tui._update_log_view(f"[dim]📝 搜索关键词: {query}[/dim]")
+            self.tui._update_log_view("")
+
+            # 获取所有会话
+            all_sessions = self.tui._session_manager.list_sessions()
+            if not all_sessions:
+                self.tui._update_log_view("[yellow]📚 未找到任何历史会话记录[/yellow]")
+                return
+
+            # 搜索相关的会话和对话
+            found_results = []
+            query_lower = query.lower()
+
+            for session in all_sessions:
+                session_relevance = 0
+
+                # 检查会话目标/主题的相关性
+                if session.goal and query_lower in session.goal.lower():
+                    session_relevance += 10
+
+                # 检查会话摘要的相关性
+                if session.summary and query_lower in session.summary.lower():
+                    session_relevance += 8
+
+                # 检查会话类型（如果是辩论且查询包含辩论关键词）
+                if session.session_type == "debate" and any(keyword in query_lower for keyword in ["辩论", "debate", "讨论"]):
+                    session_relevance += 5
+
+                # 如果有会话记录，进一步搜索对话内容
+                full_session = self.tui._session_manager.get_session(session.session_id)
+                if full_session and full_session.history:
+                    for turn in full_session.history:
+                        # 检查发言者消息的相关性
+                        if turn.speaker_message and query_lower in turn.speaker_message.lower():
+                            session_relevance += 3
+
+                        # 检查响应消息的相关性
+                        if turn.response_message and query_lower in turn.response_message.lower():
+                            session_relevance += 3
+
+                        # 检查思考过程的相关性
+                        if turn.thinking_process and query_lower in turn.thinking_process.lower():
+                            session_relevance += 2
+
+                if session_relevance > 0:
+                    found_results.append((session_relevance, session, full_session))
+
+            # 按相关性排序
+            found_results.sort(key=lambda x: x[0], reverse=True)
+
+            if not found_results:
+                self.tui._update_log_view("[yellow]🔍 未找到与查询相关的历史对话记录[/yellow]")
+                self.tui._update_log_view(f"[dim]💡 提示: 您可以尝试使用不同的关键词进行搜索[/dim]")
+                return
+
+            # 显示搜索结果
+            self.tui._update_log_view(f"[bold green]✅ 找到 {len(found_results)} 个相关的历史对话记录:[/bold green]")
+            self.tui._update_log_view("")
+
+            for i, (relevance, session, full_session) in enumerate(found_results[:5], 1):  # 最多显示5个结果
+                # 显示会话基本信息
+                session_type_emoji = {"debate": "🏛️", "chat": "💬", "workflow": "⚙️"}.get(session.session_type, "📝")
+
+                self.tui._update_log_view(f"[bold cyan]{i}. {session_type_emoji} {session.session_id}[/bold cyan]")
+                self.tui._update_log_view(f"   [dim]📋 主题:[/dim] {session.goal}")
+                self.tui._update_log_view(f"   [dim]📊 类型:[/dim] {session.session_type} | [dim]状态:[/dim] {session.status.name}")
+                self.tui._update_log_view(f"   [dim]🎯 相关度:[/dim] {'⭐' * min(relevance // 2, 5)}")
+
+                # 显示时间信息
+                if session.start_time:
+                    time_str = session.start_time.strftime("%Y-%m-%d %H:%M")
+                    self.tui._update_log_view(f"   [dim]📅 时间:[/dim] {time_str}")
+
+                # 显示相关对话片段
+                if full_session and full_session.history:
+                    relevant_snippets = []
+                    for turn in full_session.history[-3:]:  # 只检查最后3轮对话
+                        snippets = []
+                        if turn.speaker_message and query_lower in turn.speaker_message.lower():
+                            snippet = turn.speaker_message[:100] + "..." if len(turn.speaker_message) > 100 else turn.speaker_message
+                            snippets.append(f"👤: {snippet}")
+
+                        if turn.response_message and query_lower in turn.response_message.lower():
+                            snippet = turn.response_message[:100] + "..." if len(turn.response_message) > 100 else turn.response_message
+                            snippets.append(f"🤖: {snippet}")
+
+                        relevant_snippets.extend(snippets)
+
+                    if relevant_snippets:
+                        self.tui._update_log_view(f"   [dim]💬 相关对话片段:[/dim]")
+                        for snippet in relevant_snippets[:2]:  # 最多显示2个片段
+                            self.tui._update_log_view(f"      [dim]{snippet}[/dim]")
+
+                self.tui._update_log_view("")
+
+                # 提供查看详细信息的选项
+                self.tui._update_log_view(f"   [dim]💡 使用命令查看详情: /debate history view {session.session_id}[/dim]")
+                self.tui._update_log_view("")
+
+            # 提供进一步的操作建议
+            self.tui._update_log_view("[bold blue]📋 操作建议:[/bold blue]")
+            self.tui._update_log_view("[dim]• 使用上述命令查看具体的对话详情[/dim]")
+            self.tui._update_log_view("[dim]• 在新对话中引用这些历史信息[/dim]")
+
+        except Exception as e:
+            self.tui._update_log_view(f"[bold red]❌ 搜索历史对话时出错: {e}[/bold red]")
+
+
+class DebateCommands:
+    """辩论相关命令"""
+
+    def __init__(self, tui_instance):
+        self.tui = tui_instance
+
+    def handle_debate_command(self, args: str) -> None:
+        """辩论系统命令处理"""
+        args_list = args.split()
+        if not args_list:
+            self.tui._update_log_view("[bold red]> Usage: /debate <start|history|search> [options][/bold red]")
+            self.tui._update_log_view("[dim]Examples:[/dim]")
+            self.tui._update_log_view("[dim]  /debate start AI发展的伦理问题 --roles philosopher,engineer --rounds 3[/dim]")
+            self.tui._update_log_view("[dim]  /debate history list[/dim]")
+            self.tui._update_log_view("[dim]  /debate history view <session_id>[/dim]")
+            self.tui._update_log_view("[dim]  /debate search 之前的辩论主题[/dim]")
+            return
+
+        subcommand = args_list[0]
+        remaining_args = " ".join(args_list[1:])
+
+        if subcommand == "start":
+            self._handle_start_command(remaining_args)
+        elif subcommand == "history":
+            self.tui._handle_debate_history_command(remaining_args)
+        elif subcommand == "search":
+            self._handle_search_command(remaining_args)
+        else:
+            self.tui._update_log_view(f"[bold red]> Unknown debate subcommand: {subcommand}[/bold red]")
+            self.tui._update_log_view("[bold yellow]> Available: start, history, search[/bold yellow]")
+
+    def _handle_start_command(self, args: str) -> None:
+        """处理辩论开始命令"""
+        if not args.strip():
+            self.tui._update_log_view("[bold red]> Usage: /debate start <topic> [--roles <roles>] [--rounds <rounds>][/bold red]")
+            return
+
+        # Parse arguments (simple parsing)
+        topic_parts = []
+        roles = "pro_arguer,con_arguer"
+        rounds = 3
+
+        # Simple argument parsing
+        remaining_parts = args.strip().split()
+        i = 0
+        while i < len(remaining_parts):
+            if remaining_parts[i] == "--roles" and i + 1 < len(remaining_parts):
+                roles = remaining_parts[i + 1]
+                i += 2
+            elif remaining_parts[i] == "--rounds" and i + 1 < len(remaining_parts):
+                try:
+                    rounds = int(remaining_parts[i + 1])
+                    i += 2
+                except ValueError:
+                    self.tui._update_log_view("[bold red]> Invalid rounds value, must be a number[/bold red]")
+                    return
+            else:
+                topic_parts.append(remaining_parts[i])
+                i += 1
+
+        topic = " ".join(topic_parts)
+
+        self.tui._update_system_log(f"[bold blue]> 🤖 启动多模型辩论系统...[/bold blue]")
+        self.tui._update_system_log(f"[bold blue]> 主题: {topic}[/bold blue]")
+        self.tui._update_system_log(f"[dim]> 角色: {roles}, 轮次: {rounds}[/dim]")
+
+        # Start debate in background
+        task = asyncio.create_task(self.tui._start_debate(topic, roles, rounds))
+        self.tui._background_tasks.add(task)
+        task.add_done_callback(self.tui._background_tasks.discard)
+
+    def _handle_search_command(self, args: str) -> None:
+        """处理辩论搜索命令"""
+        if not args.strip():
+            self.tui._update_log_view("[bold red]> Usage: /debate search <query>[/bold red]")
+            self.tui._update_log_view("[dim]Example: /debate search 之前的辩论主题[/dim]")
+            self.tui._update_log_view("[dim]Example: /debate search AI伦理[/dim]")
+            self.tui._update_log_view("[dim]Example: /debate search technology debate[/dim]")
+            return
+
+        search_handler = SearchCommands(self.tui)
+        search_handler.search_conversation_history(args.strip())
+
+
+class UtilityCommands:
+    """实用工具命令"""
+
+    def __init__(self, tui_instance):
+        self.tui = tui_instance
+
+    def handle_search_command(self, args: str) -> None:
+        """搜索历史对话记录的专用命令"""
+        if not args.strip():
+            self.tui._update_log_view("[bold yellow]> Usage: /search <query>[/bold yellow]")
+            self.tui._update_log_view("[dim]Examples:[/dim]")
+            self.tui._update_log_view("[dim]  /search 辩论主题[/dim]")
+            self.tui._update_log_view("[dim]  /search AI伦理讨论[/dim]")
+            self.tui._update_log_view("[dim]  /search 关于技术的对话[/dim]")
+            self.tui._update_log_view("[dim]  /search 哲学思考[/dim]")
+            return
+
+        search_handler = SearchCommands(self.tui)
+        search_handler.search_conversation_history(args.strip())
+
+    def handle_copy_main_command(self, args: str) -> None:
+        """复制主对话区内容"""
+        if hasattr(self.tui, 'copy_paste_enhancer'):
+            success = self.tui.copy_paste_enhancer.copy_main_log_content()
+            if not success:
+                self.tui._update_log_view("[yellow]⚠️ 主对话区暂无内容可复制[/yellow]")
+        else:
+            self.tui._update_log_view("[red]❌ 复制功能未就绪[/red]")
+
+    def handle_copy_system_command(self, args: str) -> None:
+        """复制系统状态区内容"""
+        if hasattr(self.tui, 'copy_paste_enhancer'):
+            success = self.tui.copy_paste_enhancer.copy_system_log_content()
+            if not success:
+                self.tui._update_log_view("[yellow]⚠️ 系统状态区暂无内容可复制[/yellow]")
+        else:
+            self.tui._update_log_view("[red]❌ 复制功能未就绪[/red]")
+
+
+class WikiCommands:
+    """Wiki相关命令"""
+
+    def __init__(self, tui_instance):
+        self.tui = tui_instance
+
+    async def handle_wiki_command(self, args: str) -> None:
+        """处理wiki命令"""
+        # 调用TUI中已有的异步方法
+        await self.tui._handle_wiki_command(args)

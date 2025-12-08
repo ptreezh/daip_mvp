@@ -4,7 +4,6 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from daip_live.config import config_manager
 from daip_live.core.models import AgentState, DialogueTurn, Session
 from daip_live.persistence.database import DatabaseManager
 

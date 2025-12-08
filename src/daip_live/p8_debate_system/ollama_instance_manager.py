@@ -28,17 +28,21 @@ class OllamaInstanceManager:
 
     async def _switch_model(self, model_name: str):
         """切换当前模型"""
+        old_model = self._current_model
+
         # 只有在模型不同时才切换
-        if self._current_model == model_name:
-            return
+        if self._current_model != model_name:
+            # 这里实现实际的模型切换逻辑
+            # 在实际实现中，这可能需要重新配置Ollama实例
+            self._current_model = model_name
 
-        # 这里实现实际的模型切换逻辑
-        # 在实际实现中，这可能需要重新配置Ollama实例
-        self._current_model = model_name
+            # 可以添加模型特定的配置加载
+            if model_name not in self._model_configs:
+                self._model_configs[model_name] = self._load_model_config(model_name)
 
-        # 可以添加模型特定的配置加载
-        if model_name not in self._model_configs:
-            self._model_configs[model_name] = self._load_model_config(model_name)
+            print(f"🔄 模型已从 '{old_model}' 切换至 '{model_name}'")
+        else:
+            print(f"🔄 模型保持为 '{model_name}'，无需切换")
 
     async def _generate(self, prompt: str, **kwargs) -> Tuple[str, Any]:
         """使用当前模型生成回复"""
@@ -84,9 +88,20 @@ class OllamaInstanceManager:
 
             return response, usage
         except Exception as e:
-            # 如果调用失败，抛出错误以便系统可以回退到传统模式
+            # 捕获并处理特定的Ollama相关异常，提供更友好的错误信息
+            error_msg = str(e)
             model_name = getattr(self, '_current_model', 'unknown')
-            raise ModelError(f"Error calling model {model_name}: {str(e)}")
+
+            # 检查是否为Ollama连接相关错误
+            if "OllamaException" in error_msg or "ConnectionError" in error_msg or "connect to Ollama" in error_msg:
+                raise ModelError(f"无法连接到Ollama服务。请确认Ollama服务正在运行，模型'{model_name}'已安装并可访问。")
+            elif "not found" in error_msg.lower() or "model" in error_msg.lower() and "not" in error_msg.lower():
+                raise ModelError(f"模型'{model_name}'未找到。请确认模型已正确下载到Ollama。")
+            elif "Connection refused" in error_msg:
+                raise ModelError(f"无法连接到Ollama服务。请确认Ollama服务在端口11434上运行。")
+            else:
+                # 其他未处理的异常
+                raise ModelError(f"调用模型'{model_name}'时发生错误: {str(e)}")
 
     def _load_model_config(self, model_name: str) -> dict:
         """加载模型配置"""

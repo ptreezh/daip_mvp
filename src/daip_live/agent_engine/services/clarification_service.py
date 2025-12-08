@@ -50,6 +50,19 @@ class ClarificationService:
             
             # Check if parameter is missing or empty
             param_value = parameters.get(param_name, "")
+
+            # 对于create_wiki意图，检查标题是否看起来像完整的命令而不是实际标题
+            if intent_name == "create_wiki" and param_value:
+                # 如果标题包含命令关键词，说明参数提取不完整，需要澄清
+                command_keywords = ["创建", "新建", "编辑", "写个", "做个", "协同编辑", "协作编辑", "词条", "维基", "百科", "wiki", "Wiki"]
+                if any(keyword in param_value for keyword in command_keywords):
+                    message = f"{config['message']}\n例如: {config['example']}"
+                    return ClarificationRequest(
+                        type=ClarificationType.MISSING_KEYWORDS,
+                        message=message,
+                        required_parameters=[param_name]
+                    )
+
             if not param_value or param_value.strip() == "":
                 message = f"{config['message']}\n例如: {config['example']}"
                 return ClarificationRequest(

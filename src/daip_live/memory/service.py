@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional
 
-from daip_live.config import config_manager
+from daip_live.config_bridge import config_bridge
 from daip_live.core.models import Session, TodoItem
 from daip_live.model_provider.provider import LiteLLMProvider
 
@@ -11,8 +11,9 @@ class MemoryService:
 
     def __init__(self, model_provider: LiteLLMProvider):
         # Load the long term memory file path from the configuration
-        config = config_manager.get_config()
-        self.long_term_memory_file = os.path.join(os.path.dirname(config.database.path), "project_context.md")
+        config = config_bridge.get_config_data()
+        db_path = config.get('database', {}).get('path', 'daip_live.db')
+        self.long_term_memory_file = os.path.join(os.path.dirname(db_path), "project_context.md")
         self.model_provider = model_provider
         self.todo_list: List[TodoItem] = []
 
@@ -97,10 +98,10 @@ Structured Summary:
             prompt += f"Previous model response: {last_llm_response}\n"
         if session.compressed_history:
             prompt += f"Compressed history: {session.compressed_history}\n"
-        cfg = config_manager.get_config()
-        rag_cfg = getattr(cfg, "rag", None)
-        if rag_cfg and getattr(rag_cfg, "enabled", False) and hasattr(self, "knowledge_manager") and self.knowledge_manager:
-            top_k = getattr(rag_cfg, "top_k", 5)
+        config_data = config_bridge.get_config_data()
+        rag_cfg = config_data.get("rag", {})
+        if rag_cfg.get("enabled", False) and hasattr(self, "knowledge_manager") and self.knowledge_manager:
+            top_k = rag_cfg.get("top_k", 5)
             results = await self.knowledge_manager.search(goal, top_k=top_k)
             if results:
                 prompt += "RAG Snippets:\n"

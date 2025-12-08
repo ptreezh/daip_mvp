@@ -176,3 +176,57 @@ class LiteLLMProvider(IModelProvider):
         """Try fallback embedding when primary model fails."""
         # Use mock embedding as fallback to avoid API calls
         return self._generate_mock_embedding()
+
+    def get_available_models(self) -> List[str]:
+        """
+        Get list of available models from the provider.
+
+        Returns:
+            List of available model names
+        """
+        available_models = []
+
+        # Common Ollama models that are likely available
+        ollama_models = [
+            "ollama/llama3",
+            "ollama/llama3:instruct",
+            "ollama/llama2",
+            "ollama/mistral",
+            "ollama/mistral:instruct",
+            "ollama/codellama",
+            "ollama/nomic-embed-text",
+            "ollama/phi",
+            "ollama/neural-chat"
+        ]
+
+        # Common cloud models
+        cloud_models = [
+            "gpt-3.5-turbo",
+            "gpt-4",
+            "claude-3-sonnet-20240229",
+            "claude-3-haiku-20240307",
+            "gemini-pro"
+        ]
+
+        # Try to determine if we have access to cloud models
+        if (hasattr(self.config, 'api_key') and self.config.api_key and
+            self.config.api_key.strip() and self.config.api_key != "your-api-key-here"):
+            available_models.extend(cloud_models)
+
+        # Always include common Ollama models (users may have them installed)
+        available_models.extend(ollama_models)
+
+        return available_models
+
+    def is_model_available(self, model_name: str) -> bool:
+        """
+        Check if a specific model is available.
+
+        Args:
+            model_name: Name of the model to check
+
+        Returns:
+            True if model is likely available, False otherwise
+        """
+        available_models = self.get_available_models()
+        return model_name in available_models

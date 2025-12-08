@@ -161,7 +161,7 @@ class StepExecutor:
                         name, args = tool_call
                         # Create a unique key for this tool call to detect repetitions
                         tool_call_key = f"{name}:{sorted(args.items()) if args else ''}"
-                        
+
                         if tool_call_key in failed_tool_calls:
                             yield ThoughtEvent(content=f"Tool '{name}' with these arguments already failed. Skipping to avoid repetition.")
                             state = AgentState.RESPONDING
@@ -174,6 +174,7 @@ class StepExecutor:
                             else:
                                 state = AgentState.EXECUTING_TOOL
                     else:
+                        # For chat scenarios, ensure we always move to responding state to generate a response
                         state = AgentState.RESPONDING
 
             elif state == AgentState.EXECUTING_TOOL:
@@ -212,11 +213,29 @@ class StepExecutor:
                         step_completed = True
 
             elif state == AgentState.RESPONDING:
+                # Process the response to extract meaningful content
                 final_answer = self.CONFIDENCE_PATTERN.sub("", self.llm_response).strip()
                 final_answer = self.TOOL_CALL_PATTERN.sub("", final_answer).strip()
                 final_answer = self.FINAL_ANSWER_PATTERN.sub("", final_answer).strip()
-                self.last_final_response = FinalResponseEvent(content=final_answer)
-                yield self.last_final_response
+
+                # Ensure we have some content to return, especially for chat scenarios
+                if not final_answer or final_answer.isspace():
+                    # If the processed answer is empty, use the original response
+                    # This is particularly important for chat responses that may not follow strict format
+                    final_answer = self.llm_response.strip()
+
+                # Sanitize the final answer to remove any remaining patterns
+                final_answer = final_answer.replace("Confidence: 1.0", "").strip()
+
+                # Ensure we have meaningful content to return
+                if final_answer and final_answer not in ["", " ", "\n"]:
+                    self.last_final_response = FinalResponseEvent(content=final_answer)
+                    yield self.last_final_response
+                else:
+                    # If all processing resulted in empty content, provide a default response
+                    self.last_final_response = FinalResponseEvent(content="处理完成，但未生成明确的响应内容。")
+                    yield self.last_final_response
+
                 step_completed = True  # This step is done
     
     async def _execute_tool_with_permission_check(

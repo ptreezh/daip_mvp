@@ -6,7 +6,8 @@ from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconn
 from pydantic import BaseModel
 
 from daip_live.agent_engine.executor import AgentExecutor
-from daip_live.config import config_manager, create_config_yaml_if_not_exists
+from daip_live.config import create_config_yaml_if_not_exists
+from daip_live.config_bridge import config_bridge
 from daip_live.core.models import ProviderConfig, Session
 from daip_live.knowledge.manager import KnowledgeManager
 from daip_live.memory.service import MemoryService
@@ -22,20 +23,20 @@ app = FastAPI()
 
 def get_config():
     create_config_yaml_if_not_exists()
-    # Lazy loading is now handled by get_config() itself
-    return config_manager.get_config()
+    # Use config bridge to get configuration data
+    return config_bridge.get_config_data()
 
 def get_db_manager(cfg=Depends(get_config)) -> DatabaseManager:
-    return DatabaseManager(db_path=cfg.database.path)
+    return DatabaseManager(db_path=cfg.get('database', {}).get('path', 'daip_live.db'))
 
 def get_session_manager(db_manager=Depends(get_db_manager)) -> SessionManager:
     return SessionManager(db_manager=db_manager)
 
 def get_agent_executor(session_id: str, cfg=Depends(get_config), db_manager=Depends(get_db_manager), session_manager=Depends(get_session_manager)) -> AgentExecutor:
-    model_provider = LiteLLMProvider(ProviderConfig(model=cfg.llm_provider.default_model))
+    model_provider = LiteLLMProvider(ProviderConfig(model=cfg.get('llm_provider', {}).get('default_model', 'gpt-3.5-turbo')))
     tool_manager = ToolManager()
-    knowledge_manager = KnowledgeManager(db_manager=db_manager, model_provider=model_provider, config=cfg.knowledge_base)
-    memory_service = MemoryService()
+    knowledge_manager = KnowledgeManager(db_manager=db_manager, model_provider=model_provider, config=cfg.get('knowledge_base', {}))
+    memory_service = MemoryService(model_provider)  # Pass model_provider to MemoryService
     user_input_queue = asyncio.Queue()
 
     return AgentExecutor(
@@ -49,12 +50,12 @@ def get_agent_executor(session_id: str, cfg=Depends(get_config), db_manager=Depe
 
 def get_role_manager(cfg=Depends(get_config)) -> RoleManager:
     """Dependency injection for RoleManager."""
-    return RoleManager(roles_dir_path=cfg.role_manager.roles_dir)
+    return RoleManager(roles_dir_path=cfg.get('role_manager', {}).get('roles_dir', 'roles/'))
 
 def get_knowledge_manager(cfg=Depends(get_config), db_manager=Depends(get_db_manager)) -> KnowledgeManager:
     """Dependency injection for KnowledgeManager."""
-    model_provider = LiteLLMProvider(ProviderConfig(model=cfg.llm_provider.default_model))
-    return KnowledgeManager(db_manager=db_manager, model_provider=model_provider, config=cfg.knowledge_base)
+    model_provider = LiteLLMProvider(ProviderConfig(model=cfg.get('llm_provider', {}).get('default_model', 'gpt-3.5-turbo')))
+    return KnowledgeManager(db_manager=db_manager, model_provider=model_provider, config=cfg.get('knowledge_base', {}))
 
 # --- API Endpoints ---
 

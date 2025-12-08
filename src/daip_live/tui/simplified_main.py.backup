@@ -1,0 +1,902 @@
+"""简化的TUI主控文件 - 仅保留核心功能"""
+
+import os
+import time
+import asyncio
+import inspect
+from typing import Optional, List, Dict, Any
+from datetime import datetime
+
+from textual.app import App, ComposeResult
+from textual.binding import Binding
+from textual.widgets import Header, Footer, Input, Static, RichLog
+from textual.containers import Horizontal, Vertical
+from textual import events
+
+# 导入TUI模块
+from .autocomplete import TUIAutocomplete
+from .commands import TUICommandHandler, SearchCommands, DebateCommands, UtilityCommands
+from .screens import CommandHelpDialog
+from .utils import FocusMode, HistoryManager, PerformanceMonitor, ConfigManager, Logger
+
+# 导入意图识别和Agent执行器
+from daip_live.agent_engine.executor import AgentExecutor
+from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer
+
+# 延迟导入Container以避免循环依赖
+def get_container():
+    """延迟获取Container实例以避免循环导入"""
+    from daip_live.container import Container
+    return Container()
+
+
+class SimplifiedTUI(App):
+    """简化的DAIP-LIVE TUI核心控制器"""
+
+    CSS = """
+    .panel-header {
+        text-align: center;
+        background: $primary;
+        color: $text;
+        padding: 0 1;
+        height: 1;
+    }
+
+    .system-panel {
+        width: 30%;
+        border: solid $primary;
+    }
+
+    .system-log {
+        height: 1fr;
+        background: $surface;
+        border: solid $primary;
+    }
+
+    .output-mode {
+        height: 1fr;
+        background: $surface;
+    }
+
+    Horizontal {
+        height: 3fr;
+    }
+
+    Vertical {
+        height: 100%;
+    }
+    """
+
+    BINDINGS = [
+        Binding("shift_tab", "toggle_focus", "切换焦点"),
+        Binding("ctrl+a", "select_all", "全选", show=False),
+        Binding("ctrl+c", "copy_text", "复制", show=False),
+        Binding("ctrl+v", "paste_text", "粘贴", show=False),
+        Binding("ctrl+e", "quit", "退出应用", show=False),
+        Binding("escape", "_handle_escape_key", "退出输出模式", show=False),
+    ]
+
+    def __init__(self, executor: Optional[AgentExecutor] = None, *args, **kwargs):
+        super().__init__()
+
+        # 初始化依赖注入容器（延迟导入以避免循环依赖）
+        try:
+            self.container = get_container()
+        except Exception as e:
+            print(f"Warning: Could not initialize container: {e}")
+            self.container = None
+
+        # 初始化Agent执行器和意图识别器
+        if self.container:
+            try:
+                self._executor = executor or self.container.agent_executor()
+            except Exception as e:
+                print(f"Warning: Could not initialize executor: {e}")
+                self._executor = executor
+        else:
+            self._executor = executor
+
+        self._intent_recognizer = EnhancedIntentRecognizer()
+
+        # 初始化TUI模块
+        self._initialize_tui_modules()
+
+        # 初始化状态
+        self._initialize_state()
+
+    def _initialize_tui_modules(self):
+        """初始化TUI模块组件"""
+        # 初始化自动补全系统
+        self.autocomplete = TUIAutocomplete(self)
+
+        # 初始化命令处理器
+        self.command_handler = TUICommandHandler(self)
+
+        # 初始化专门的命令处理器
+        self.search_commands = SearchCommands(self)
+        self.debate_commands = DebateCommands(self)
+        self.utility_commands = UtilityCommands(self)
+
+        # 初始化工具和配置管理
+        self.config_manager = ConfigManager()
+        self.performance_monitor = PerformanceMonitor()
+        self.logger = Logger()
+
+    def _initialize_state(self):
+        """初始化状态"""
+        # Focus mode
+        self.focus_mode = FocusMode.INPUT
+
+        # Current session tracking
+        self._current_session_id = None
+
+        # Current model tracking
+        self._current_model = "default"
+
+        # System log tracking
+        self._system_log_buffer = []
+        self._max_system_log_entries = 50
+
+        # Available commands
+        self._available_commands = [
+            ("/help", "显示帮助信息"),
+            ("/search", "搜索历史对话"),
+            ("/debate", "辩论系统"),
+            ("/model", "模型管理"),
+            ("/compact", "压缩会话历史"),
+            ("/doc", "文档搜索"),
+            ("/wiki", "Wiki管理"),
+            ("/permission", "权限管理"),
+            ("/role", "角色管理"),
+            ("/knowledge", "知识库管理")
+        ]
+
+        # Input history management
+        self.history_manager = HistoryManager(self.config_manager.get('max_history', 100))
+        self._history_index = -1
+        self._current_input_before_history = ""
+
+    # === UI布局和组件 ===
+
+    def compose(self) -> ComposeResult:
+        """构建UI布局"""
+        yield Header()
+
+        # Main content area with conversation and system activity
+        with Horizontal():
+            # Conversation area - takes most of the space
+            with Vertical():
+                yield Static("💬 对话区域", classes="panel-header")
+                yield RichLog(id="main_log", classes="output-mode", highlight=True, markup=True, wrap=True)
+
+            # System activity panel - narrow sidebar for system messages
+            with Vertical(classes="system-panel"):
+                yield Static("🔧 系统状态", classes="panel-header")
+                yield RichLog(id="system_log", classes="system-log", highlight=True, markup=True, wrap=True)
+
+        yield Input(placeholder="Enter command or message...", id="user_input")
+        yield Static("DAIP-LIVE Modular TUI | Status: Ready | Focus: Input", id="status_bar")
+        yield Footer()
+
+    # === 生命周期方法 ===
+
+    async def on_mount(self) -> None:
+        """应用启动时的初始化"""
+        # Set up input widget with initial focus
+        input_widget = self.query_one(Input)
+        input_widget.focus()
+
+        # Set up initial status
+        self._update_status_bar("Ready")
+
+        # Welcome message
+        self._update_log_view("[bold green]🚀 Welcome to DAIP-LIVE Modular TUI![/bold green]")
+        self._update_log_view("[dim]✨ 现在支持渐进式信息披露和模块化架构[/dim]")
+        self._update_system_log("[dim]🎯 Modular TUI initialized successfully[/dim]")
+
+    # === 核心方法 ===
+
+    def _update_log_view(self, text: str) -> None:
+        """更新主对话视图"""
+        try:
+            self.query_one("#main_log", RichLog).write(text)
+        except Exception:
+            pass
+
+    def _update_system_log(self, text: str) -> None:
+        """更新系统状态面板"""
+        try:
+            # Only log system-relevant messages
+            if self._should_log_to_system_panel(text):
+                self.query_one("#system_log", RichLog).write(text)
+
+                # Track system messages with rotation
+                self._system_log_buffer.append(text)
+                if len(self._system_log_buffer) > self._max_system_log_entries:
+                    self._system_log_buffer.pop(0)
+        except Exception:
+            pass
+
+    def _should_log_to_system_panel(self, text: str) -> bool:
+        """判断消息是否应该显示在系统面板"""
+        text_lower = text.lower()
+
+        # Enhanced system message patterns
+        system_patterns = [
+            "command-message", "system-reminder", "status:", "error:",
+            "model:", "tokens:", "tools:", "events:", "processing",
+            "working on", "completed", "failed", "syncing", "loading",
+            "saving", "initializing", "shutting down", "🧠", "✅", "❌",
+            "⚠️", "💬", "🚀", "💭", "🎯", "🔍", "intent", "execution",
+            "session", "context", "agent", "module", "component", "service"
+        ]
+
+        # Emoji indicators for system messages
+        system_emojis = ["🧠", "✅", "❌", "⚠️", "💬", "🚀", "💭", "🎯", "🔍", "⚙️", "📊", "📈"]
+
+        # Check for system patterns
+        for pattern in system_patterns:
+            if pattern in text_lower:
+                return True
+
+        # Check for system emojis (strong indicator of system messages)
+        if any(emoji in text for emoji in system_emojis):
+            return True
+
+        # Check for dim/formatted system messages (marked with [dim])
+        if "[dim]" in text:
+            return True
+
+        # Technical/operational messages with specific keywords
+        technical_keywords = [
+            "recognition", "execution", "processing", "initialized",
+            "started", "completed", "failed", "error", "warning",
+            "session", "context", "agent", "intent", "callback"
+        ]
+
+        if any(keyword in text_lower for keyword in technical_keywords):
+            return True
+
+        # User messages and actual conversation content go to main panel
+        conversation_indicators = [
+            ">", "💬 收到消息:", "🎉", "✨", "欢迎", "输入", "搜索历史对话",
+            "检测到", "请提供", "聊天模式", "辩论系统", "帮助信息"
+        ]
+
+        if any(indicator in text for indicator in conversation_indicators):
+            return False
+
+        # Default to main conversation area for ambiguous messages
+        return False
+
+    def _update_status_bar(self, status: str) -> None:
+        """更新状态栏"""
+        try:
+            status_bar = self.query_one("#status_bar", Static)
+            status_text = f"DAIP-LIVE Modular TUI | Status: {status} | Focus: {self.focus_mode}"
+            status_bar.update(status_text)
+        except Exception:
+            pass
+
+    # === 输入处理 ===
+
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        """处理用户输入"""
+        user_input = event.value.strip()
+
+        if not user_input:
+            # Clear the input field
+            input_widget = self.query_one("#user_input", Input)
+            input_widget.value = ""
+            return
+
+        # Add to history
+        self.history_manager.add(user_input)
+
+        # Reset history index
+        self._history_index = -1
+        self._current_input_before_history = ""
+
+        # Log the input
+        self._update_log_view(f"[bold cyan]> {user_input}[/bold cyan]")
+
+        # Process the input
+        await self._process_user_input(user_input)
+
+        # Clear the input field after processing
+        input_widget = self.query_one("#user_input", Input)
+        input_widget.value = ""
+
+    async def on_key(self, event: events.Key) -> None:
+        """处理键盘事件，用于历史记录导航"""
+        try:
+            input_widget = self.query_one("#user_input", Input)
+
+            # Handle up arrow (previous history)
+            if event.key == "up":
+                if self._history_index < len(self.history_manager.history) - 1:
+                    # Save current input if we're starting to browse history
+                    if self._history_index == -1:
+                        self._current_input_before_history = input_widget.value
+
+                    self._history_index += 1
+                    history_item = self.history_manager.history[-(self._history_index + 1)]
+                    input_widget.value = history_item
+                    # Move cursor to end
+                    input_widget.cursor_position = len(history_item)
+                return
+
+            # Handle down arrow (next history)
+            elif event.key == "down":
+                if self._history_index > -1:
+                    self._history_index -= 1
+
+                    if self._history_index == -1:
+                        # Restore the input we had before browsing history
+                        input_widget.value = self._current_input_before_history
+                    else:
+                        history_item = self.history_manager.history[-(self._history_index + 1)]
+                        input_widget.value = history_item
+
+                    # Move cursor to end
+                    input_widget.cursor_position = len(input_widget.value)
+                return
+
+            # Let other keys be handled normally
+            await super().on_key(event)
+
+        except Exception as e:
+            # If anything goes wrong, let the normal key handling proceed
+            await super().on_key(event)
+
+    async def _process_user_input(self, user_input: str) -> None:
+        """处理用户输入的主要逻辑"""
+        try:
+            # Record start time for performance monitoring
+            start_time = time.time()
+
+            # Check if it's a command
+            if user_input.startswith('/'):
+                await self._handle_command_input(user_input)
+            else:
+                await self._handle_chat_input(user_input)
+
+            # Record performance metrics
+            duration = time.time() - start_time
+            self.performance_monitor.record_response_time(duration)
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]Error processing input: {e}[/bold red]")
+            self.logger.error(f"Input processing error: {e}")
+
+    async def _handle_command_input(self, user_input: str) -> None:
+        """处理命令输入"""
+        # Parse command
+        parts = user_input.split(maxsplit=1)
+        cmd = parts[0].lstrip('/')
+        args = parts[1] if len(parts) > 1 else ""
+
+        # Record command usage
+        self.performance_monitor.record_command(cmd)
+
+        # Handle command using the modular command handler
+        await self.command_handler.handle_command(cmd, args)
+
+    async def _handle_chat_input(self, user_input: str) -> None:
+        """处理聊天输入"""
+        try:
+            # Check for conversation search request
+            if self._is_conversation_search_request(user_input):
+                query = self._extract_search_query(user_input)
+                if query:
+                    self._update_log_view(f"[bold cyan]🔍 检测到历史对话搜索请求...[/bold cyan]")
+                    self.search_commands.search_conversation_history(query)
+                else:
+                    self._update_log_view("[bold yellow]💡 请提供更具体的搜索关键词[/bold yellow]")
+                return
+
+            # Use intent recognition for natural language input
+            self._update_system_log(f"[dim]🧠 Intent recognition started for: {user_input[:50]}...[/dim]")
+
+            try:
+                # Get current session ID for context
+                session_id = getattr(self, '_current_session_id', 'default')
+
+                # Check if the intent recognizer supports context-aware recognition
+                if hasattr(self._intent_recognizer, 'recognize_intent_with_context'):
+                    intent = self._intent_recognizer.recognize_intent_with_context(user_input, session_id)
+                else:
+                    # Check method signature compatibility
+                    sig = inspect.signature(self._intent_recognizer.recognize_intent)
+                    if 'session_id' in sig.parameters:
+                        intent = self._intent_recognizer.recognize_intent(user_input, session_id=session_id)
+                    else:
+                        intent = self._intent_recognizer.recognize_intent(user_input)
+
+                if intent:
+                    self._update_system_log(f"[dim]✅ Intent recognized: {intent.name}[/dim]")
+
+                    # Execute the intent using the executor
+                    await self._execute_intent(intent, user_input, session_id)
+                else:
+                    # No intent recognized, handle as regular chat
+                    self._update_system_log(f"[dim]💬 No specific intent, handling as chat message[/dim]")
+                    await self._handle_regular_chat(user_input, session_id)
+
+            except Exception as intent_error:
+                self._update_log_view(f"[bold yellow]⚠️ Intent recognition failed: {intent_error}[/bold yellow]")
+                self._update_system_log(f"[dim]⚠️ Intent recognition error: {intent_error}[/dim]")
+                # Fallback to regular chat handling
+                await self._handle_regular_chat(user_input, getattr(self, '_current_session_id', 'default'))
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]Error in chat processing: {e}[/bold red]")
+            self._update_system_log(f"[dim]❌ Chat processing error: {e}[/dim]")
+            self.logger.error(f"Chat processing error: {e}")
+
+    def _is_conversation_search_request(self, user_input: str) -> bool:
+        """检测是否是对话搜索请求"""
+        search_keywords = ["参考", "之前的", "历史", "过去", "之前", "以前", "查找", "搜索", "引用"]
+        history_keywords = ["对话", "聊天", "辩论", "讨论", "记录", "内容", "信息"]
+
+        return any(keyword in user_input for keyword in search_keywords) and \
+               any(keyword in user_input for keyword in history_keywords)
+
+    def _extract_search_query(self, user_input: str) -> str:
+        """提取搜索查询"""
+        search_query = user_input
+        # 移除常见的搜索触发词
+        for remove_word in ["参考", "之前的", "历史", "过去", "之前", "以前", "查找", "搜索", "引用", "对话", "聊天", "记录"]:
+            search_query = search_query.replace(remove_word, "").strip()
+        return search_query
+
+    async def _execute_intent(self, intent, user_input: str, session_id: str) -> None:
+        """执行识别到的意图"""
+        try:
+            self._update_system_log(f"[dim]🚀 Executing intent: {intent.name}[/dim]")
+
+            # Prepare execution context
+            execution_context = {
+                "source": "intent_recognition",
+                "session_id": session_id,
+                "user_input": user_input,
+                "intent": intent.name,
+                "confidence": getattr(intent, 'confidence', 0.0)
+            }
+
+            # Execute the intent using the executor
+            if hasattr(self._executor, 'execute_intent'):
+                result = await self._executor.execute_intent(
+                    intent=intent,
+                    user_input=user_input,
+                    session_id=session_id,
+                    execution_context=execution_context,
+                    callback=self._safe_log_callback
+                )
+            else:
+                # Fallback execution method - Handle intents directly
+                self._update_log_view(f"[dim]🔧 执行意图: {intent.name}[/dim]")
+                await self._handle_intent_directly(intent, user_input, session_id, execution_context)
+                return
+
+            # Handle execution result
+            if result and hasattr(result, 'success') and result.success:
+                self._update_system_log(f"[dim]✅ Intent executed successfully[/dim]")
+            else:
+                self._update_system_log(f"[dim]⚠️ Intent execution completed with warnings[/dim]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ Error executing intent: {e}[/bold red]")
+            self._update_system_log(f"[dim]❌ Intent execution error: {e}[/dim]")
+            self.logger.error(f"Intent execution error: {e}")
+
+    async def _handle_intent_directly(self, intent, user_input: str, session_id: str, execution_context: dict) -> None:
+        """直接处理各种意图，不依赖执行器的execute_intent方法"""
+        try:
+            intent_name = intent.name
+            parameters = getattr(intent, 'parameters', {})
+            description = getattr(intent, 'description', user_input)
+
+            self._update_log_view(f"[dim]🎯 处理意图: {intent_name}[/dim]")
+
+            # 根据意图类型处理
+            if intent_name == "search_papers":
+                query = parameters.get("query", "").strip()
+                if query:
+                    self._update_log_view(f"[dim]🔍 搜索论文: {query}[/dim]")
+                    # 调用论文搜索功能
+                    await self._handle_paper_search(query)
+                else:
+                    self._update_log_view("[yellow]⚠️ 搜索论文需要提供关键词[/yellow]")
+
+            elif intent_name == "download_paper":
+                paper_id = parameters.get("paper_id", "").strip()
+                search_query = parameters.get("search_query", "").strip()
+                if paper_id or search_query:
+                    self._update_log_view(f"[dim]📥 下载论文: {paper_id or search_query}[/dim]")
+                    # 调用论文下载功能
+                    await self._handle_paper_download(paper_id or search_query)
+                else:
+                    self._update_log_view("[yellow]⚠️ 下载论文需要提供论文ID或搜索词[/yellow]")
+
+            elif intent_name == "start_debate":
+                topic = parameters.get("topic", "").strip()
+                if topic:
+                    self._update_log_view(f"[dim]🗣️ 开始辩论: {topic}[/dim]")
+                    # 调用辩论功能
+                    self.debate_commands.handle_debate_command(f"start {topic}")
+                else:
+                    self._update_log_view("[yellow]⚠️ 开始辩论需要提供主题[/yellow]")
+
+            elif intent_name == "create_wiki":
+                title = parameters.get("title", "").strip()
+                if title:
+                    self._update_log_view(f"[dim]📝 创建Wiki: {title}[/dim]")
+                    # 调用Wiki创建功能
+                    self.wiki_commands.handle_wiki_command(f"create {title}")
+                else:
+                    self._update_log_view("[yellow]⚠️ 创建Wiki需要提供标题[/yellow]")
+
+            elif intent_name == "knowledge_search":
+                query = parameters.get("query", "").strip()
+                if query:
+                    self._update_log_view(f"[dim]🔍 知识库搜索: {query}[/dim]")
+                    # 调用知识库搜索功能
+                    await self._handle_knowledge_search(query)
+                else:
+                    self._update_log_view("[yellow]⚠️ 知识库搜索需要提供关键词[/yellow]")
+
+            elif intent_name == "execute_skill":
+                content = parameters.get("content", "").strip()
+                if content:
+                    self._update_log_view(f"[dim]⚡ 执行技能: {content[:50]}...[/dim]")
+                    # 调用技能执行功能
+                    await self._handle_skill_execution(content, parameters)
+                else:
+                    self._update_log_view("[yellow]⚠️ 执行技能需要提供内容[/yellow]")
+
+            elif intent_name in ["question", "chat"]:
+                # 处理一般问答和聊天
+                self._update_log_view(f"[dim]💬 处理对话: {description[:50]}...[/dim]")
+                await self._handle_regular_chat(user_input, session_id)
+
+            else:
+                # 未知意图，作为常规聊天处理
+                self._update_log_view(f"[dim]⚠️ 未知意图 {intent_name}，作为对话处理[/dim]")
+                await self._handle_regular_chat(user_input, session_id)
+
+        except Exception as e:
+            self._update_log_view(f"[red]❌ 意图处理失败: {str(e)}[/red]")
+            # 回退到常规聊天
+            await self._handle_regular_chat(user_input, session_id)
+
+    async def _handle_paper_search(self, query: str) -> None:
+        """处理论文搜索"""
+        try:
+            self._update_log_view("[dim]🔍 正在搜索论文...[/dim]")
+            # 这里可以集成实际的论文搜索功能
+            # 暂时提供模拟响应
+            self._update_log_view("[green]✅ 论文搜索完成 (模拟)[/green]")
+            self._update_log_view(f"[cyan]找到关于 '{query}' 的相关论文[/cyan]")
+        except Exception as e:
+            self._update_log_view(f"[red]❌ 论文搜索失败: {str(e)}[/red]")
+
+    async def _handle_paper_download(self, identifier: str) -> None:
+        """处理论文下载"""
+        try:
+            self._update_log_view(f"[dim]📥 正在下载论文: {identifier}[/dim]")
+            # 这里可以集成实际的论文下载功能
+            # 暂时提供模拟响应
+            self._update_log_view("[green]✅ 论文下载完成 (模拟)[/green]")
+            self._update_log_view(f"[cyan]论文已保存到下载目录[/cyan]")
+        except Exception as e:
+            self._update_log_view(f"[red]❌ 论文下载失败: {str(e)}[/red]")
+
+    async def _handle_knowledge_search(self, query: str) -> None:
+        """处理知识库搜索"""
+        try:
+            self._update_log_view(f"[dim]🔍 正在搜索知识库: {query}[/dim]")
+            # 这里可以集成实际的知识库搜索功能
+            # 暂时提供模拟响应
+            self._update_log_view("[green]✅ 知识库搜索完成 (模拟)[/green]")
+            self._update_log_view(f"[cyan]在知识库中找到关于 '{query}' 的内容[/cyan]")
+        except Exception as e:
+            self._update_log_view(f"[red]❌ 知识库搜索失败: {str(e)}[/red]")
+
+    async def _handle_skill_execution(self, content: str, parameters: dict) -> None:
+        """处理技能执行"""
+        try:
+            self._update_log_view(f"[dim]⚡ 正在执行技能...[/dim]")
+            # 这里可以集成实际的Claude技能执行功能
+            # 暂时提供模拟响应
+            self._update_log_view("[green]✅ 技能执行完成 (模拟)[/green]")
+            self._update_log_view(f"[cyan]已处理: {content[:50]}...[/cyan]")
+        except Exception as e:
+            self._update_log_view(f"[red]❌ 技能执行失败: {str(e)}[/red]")
+
+    async def _handle_regular_chat(self, user_input: str, session_id: str) -> None:
+        """处理常规聊天消息"""
+        try:
+            self._update_system_log(f"[dim]💬 Processing as regular chat message[/dim]")
+
+            # Create a simple chat message (simplified, without ChatIntent)
+            chat_message = {
+                message=user_input,
+                session_id=session_id,
+                context={}
+            )
+
+            # Execute through the executor
+            if hasattr(self._executor, 'execute_chat'):
+                await self._executor.execute_chat(
+                    message=chat_message,
+                    callback=self._safe_log_callback,
+                    context={"source": "chat", "session_id": session_id}
+                )
+            else:
+                # Fallback: display a simple message
+                self._update_log_view(f"[bold blue]💬 收到消息: {user_input}[/bold blue]")
+                self._update_log_view("[dim]🤖 Agent执行器未完全集成，使用简化响应模式[/dim]")
+                self._update_system_log("[dim]💭 Chat message processed in fallback mode[/dim]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]Error in chat processing: {e}[/bold red]")
+            self._update_system_log(f"[dim]❌ Regular chat error: {e}[/dim]")
+            self.logger.error(f"Regular chat error: {e}")
+
+    def _safe_log_callback(self, message_func, message_type: str = "info", context: str = ""):
+        """安全的日志回调函数，用于Agent执行器"""
+        try:
+            if callable(message_func):
+                message = message_func()
+                if message:
+                    # Route messages based on type
+                    if message_type in ["error", "warning"]:
+                        self._update_log_view(f"[bold {'red' if message_type == 'error' else 'yellow'}]{message}[/bold {'red' if message_type == 'error' else 'yellow'}]")
+                    elif message_type == "system":
+                        self._update_system_log(f"[dim]{message}[/dim]")
+                    else:
+                        self._update_log_view(message)
+        except Exception as e:
+            self.logger.error(f"Error in log callback: {e}")
+
+    # === 键盘快捷键处理 ===
+
+    def action_toggle_focus(self) -> None:
+        """切换焦点模式"""
+        if self.focus_mode == FocusMode.INPUT:
+            self.focus_mode = FocusMode.OUTPUT
+            self.query_one("#main_log").focus()
+        else:
+            self.focus_mode = FocusMode.INPUT
+            self.query_one("#user_input").focus()
+        self._update_status_bar("Ready")
+        self.refresh()
+
+    def action_exit_output_mode(self) -> None:
+        """退出输出模式"""
+        self.focus_mode = FocusMode.INPUT
+        try:
+            self.query_one("#user_input").focus()
+            self._update_status_bar("Ready")
+            self.refresh()
+        except Exception as e:
+            pass
+
+    async def action_select_all(self) -> None:
+        """全选文本 - 改进版本，直接复制所有内容到剪贴板"""
+        try:
+            import pyperclip
+
+            # 获取主日志区域的所有文本内容
+            main_log = self.query_one("#main_log", RichLog)
+            all_text = ""
+
+            # 尝试获取日志内容
+            if hasattr(self, '_log_text_buffer') and self._log_text_buffer:
+                all_text = "\n".join(self._log_text_buffer)
+            else:
+                # 尝试从RichLog获取内容
+                try:
+                    if hasattr(main_log, 'lines'):
+                        all_text = "\n".join(str(line) for line in main_log.lines)
+                    elif hasattr(main_log, '_lines'):
+                        all_text = "\n".join(str(line) for line in main_log._lines)
+                except Exception:
+                    pass
+
+            # 如果有内容就复制到剪贴板
+            if all_text and all_text.strip():
+                pyperclip.copy(all_text)
+                self._update_log_view("[bold green]✅ 所有内容已复制到剪贴板！[/bold green]")
+                self._update_log_view(f"[dim]📝 文本长度: {len(all_text)} 字符[/dim]")
+                self._update_log_view("[dim]💡 使用 Ctrl+V 可以在任何地方粘贴[/dim]")
+            else:
+                self._update_log_view("[yellow]⚠️ 没有内容可以复制[/yellow]")
+
+        except ImportError:
+            self._update_log_view("[red]❌ 需要安装 pyperclip 库: pip install pyperclip[/red]")
+        except Exception as e:
+            self._update_log_view(f"[red]❌ 复制失败: {str(e)}[/red]")
+            # 回退：显示最近内容供手动复制
+            self._update_log_view("[yellow]📋 最近内容 (供手动复制):[/yellow]")
+            recent_lines = getattr(self, '_log_text_buffer', [])[-10:]
+            for line in recent_lines[-5:]:  # 显示最后5行
+                if line.strip():
+                    self._update_log_view(f"[cyan]    {line}[/cyan]")
+
+    async def action_copy_text(self) -> None:
+        """复制文本 - 改进版本，复制所有可见内容"""
+        try:
+            import pyperclip
+
+            # 获取主日志区域的所有内容
+            main_log = self.query_one("#main_log", RichLog)
+            all_text = ""
+
+            # 尝试获取日志内容
+            if hasattr(self, '_log_text_buffer') and self._log_text_buffer:
+                all_text = "\n".join(self._log_text_buffer)
+            else:
+                # 尝试从RichLog获取内容
+                try:
+                    if hasattr(main_log, 'lines'):
+                        all_text = "\n".join(str(line) for line in main_log.lines)
+                    elif hasattr(main_log, '_lines'):
+                        all_text = "\n".join(str(line) for line in main_log._lines)
+                except Exception:
+                    pass
+
+            # 复制到剪贴板
+            if all_text and all_text.strip():
+                pyperclip.copy(all_text)
+                self._update_log_view("[bold green]✅ 所有日志内容已复制到剪贴板！[/bold green]")
+                self._update_log_view(f"[dim]📝 复制了 {len(all_text)} 个字符[/dim]")
+                self._update_log_view("[dim]💡 提示: 可以在记事本、微信等任何地方粘贴[/dim]")
+            else:
+                self._update_log_view("[yellow]⚠️ 没有内容可以复制[/yellow]")
+
+        except ImportError:
+            self._update_log_view("[red]❌ 需要安装 pyperclip 库: pip install pyperclip[/red]")
+        except Exception as e:
+            self._update_log_view(f"[red]❌ 复制失败: {str(e)}[/red]")
+            # 回退：显示最近内容供手动复制
+            self._update_log_view("[yellow]📋 最近内容 (手动复制):[/yellow]")
+            recent_lines = getattr(self, '_log_text_buffer', [])[-8:]
+            for line in recent_lines:
+                if line.strip():
+                    self._update_log_view(f"[cyan]    {line}[/cyan]")
+
+    def _handle_escape_key(self) -> None:
+        """处理ESC键"""
+        self.action_exit_output_mode()
+
+    async def action_quit(self) -> None:
+        """退出应用"""
+        try:
+            self._update_log_view("[bold yellow]👋 正在退出 DAIP-LIVE...[/bold yellow]")
+            self._update_system_log("[dim]🔄 正在清理资源...[/dim]")
+
+            # 清理资源
+            if hasattr(self, '_executor') and self._executor:
+                try:
+                    # 如果执行器有清理方法，调用它
+                    if hasattr(self._executor, 'cleanup'):
+                        await self._executor.cleanup()
+                    self._update_system_log("[dim]✓ Agent执行器已清理[/dim]")
+                except Exception as e:
+                    self._update_system_log(f"[dim]⚠️ 执行器清理警告: {e}[/dim]")
+
+            # 清理容器
+            if hasattr(self, 'container') and self.container:
+                try:
+                    # 如果容器有清理方法，调用它
+                    if hasattr(self.container, 'shutdown'):
+                        self.container.shutdown()
+                    self._update_system_log("[dim]✓ 依赖注入容器已清理[/dim]")
+                except Exception as e:
+                    self._update_system_log(f"[dim]⚠️ 容器清理警告: {e}[/dim]")
+
+            self._update_log_view("[bold green]✅ 资源清理完成，再见！[/bold green]")
+
+            # 短暂延迟后退出
+            await asyncio.sleep(0.5)
+            self.exit()
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 退出时发生错误: {e}[/bold red]")
+            # 即使出错也要退出
+            self.exit()
+
+    # === 自动补全 ===
+
+    def get_command_suggestions(self, parts: List[str]) -> List[str]:
+        """获取命令建议"""
+        return self.autocomplete.get_command_suggestions(parts)
+
+    # === 命令处理器（委托给模块） ===
+
+    def _handle_search_command(self, args: str) -> None:
+        """处理搜索命令 - 委托给UtilityCommands"""
+        self.utility_commands.handle_search_command(args)
+
+    def _handle_debate_command(self, args: str) -> None:
+        """处理辩论命令 - 委托给DebateCommands"""
+        self.debate_commands.handle_debate_command(args)
+
+    def _handle_help_command(self, args: str) -> None:
+        """处理帮助命令"""
+        help_text = """
+🚀 DAIP-LIVE 模块化TUI帮助系统
+
+📋 可用命令（支持渐进式信息披露）：
+
+🔍 搜索和查询
+  /search <关键词>          - 搜索历史对话记录
+  /doc search <论文>         - 搜索论文
+  /wiki search <页面>        - 搜索Wiki页面
+
+🏛️ 辩论系统
+  /debate start <主题>       - 启动新辩论
+  /debate history list      - 查看辩论历史
+  /debate search <关键词>    - 搜索辩论记录
+
+⚙️ 系统管理
+  /model list              - 查看可用模型
+  /compact current         - 压缩当前会话
+  /permission list          - 查看权限设置
+
+📚 帮助信息
+  使用Tab键自动补全命令
+  输入命令后按Tab查看参数建议
+
+💡 特性
+  ✨ 渐进式信息披露
+  🔧 模块化架构
+  📊 系统状态面板
+  🔍 智能搜索功能
+        """
+        self.push_screen(CommandHelpDialog(help_text))
+
+    def _suggest_similar_commands(self, unknown_cmd: str) -> None:
+        """为未知命令提供建议"""
+        from difflib import get_close_matches
+
+        available_commands = [cmd_name[1:] for cmd_name, _ in self._available_commands]
+        suggestions = get_close_matches(unknown_cmd, available_commands, n=3, cutoff=0.3)
+
+        if suggestions:
+            self._update_log_view(f"[bold yellow]> Unknown command: /{unknown_cmd}[/bold yellow]")
+            self._update_log_view("[bold yellow]> Did you mean:[/bold yellow]")
+            for suggestion in suggestions:
+                self._update_log_view(f"[bold yellow]   /{suggestion}[/bold yellow]")
+        else:
+            self._update_log_view(f"[bold red]> Unknown command: /{unknown_cmd}[/bold red]")
+            self._update_log_view("[bold yellow]> Type /help to see available commands[/bold yellow]")
+
+    # === 错误处理和日志 ===
+
+    def _handle_critical_error(self, error: Exception, context: str = "") -> None:
+        """处理关键错误"""
+        error_msg = f"Critical error in {context}: {str(error)}"
+        self.logger.error(error_msg)
+        self._update_log_view(f"[bold red]❌ {error_msg}[/bold red]")
+
+    # === 清理和关闭 ===
+
+    async def cleanup(self) -> None:
+        """清理资源"""
+        try:
+            # Save any pending data
+            self.config_manager.save_config()
+
+            # Log session statistics
+            stats = self.performance_monitor.get_stats_summary()
+            self.logger.info(f"Session completed: {stats}")
+
+        except Exception as e:
+            self.logger.error(f"Error during cleanup: {e}")
+
+    def on_unmount(self) -> None:
+        """应用卸载时的清理"""
+        asyncio.create_task(self.cleanup())

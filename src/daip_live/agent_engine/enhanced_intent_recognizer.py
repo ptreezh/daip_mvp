@@ -42,6 +42,12 @@ class EnhancedIntentRecognizer:
         from daip_live.skills.integration import ClaudeSkillsIntegrationService
         self.claude_integration_service = None  # 初始化为None，将在系统启动时赋值
 
+        # 初始化技能管理器引用（将在系统启动时设置）
+        self.skill_manager = None
+
+        # 初始化技能匹配缓存
+        self._skill_match_cache = {}
+
         # 导入模型适配管理器
         try:
             from daip_live.skills.model_adapter_manager import ModelAdapterManager
@@ -286,6 +292,8 @@ class EnhancedIntentRecognizer:
                     r"新建.*词条.*",
                     r"写.*词条.*",
                     r"编辑.*词条.*",
+                    r"协同编辑.*词条.*",
+                    r"协作编辑.*词条.*",
                     r"创造.*词条.*",
                     r"制作.*词条.*",
                     r"做个.*词条.*",
@@ -834,8 +842,8 @@ class EnhancedIntentRecognizer:
 
         # 特殊处理：检查维基意图是否缺少标题参数
         if intent.name == "create_wiki":
-            title = intent.parameters.get("title", "").strip()
-            original_clean = original_text.strip()
+            title = (intent.parameters.get("title") or "").strip()
+            original_clean = original_text.strip() if original_text else ""
 
             # 检查参数是否确实缺失
             if not title or title == "":
@@ -863,8 +871,8 @@ class EnhancedIntentRecognizer:
 
         # 特殊处理：检查论文搜索意图是否缺少查询参数
         elif intent.name == "search_papers":
-            query = intent.parameters.get("query", "").strip()
-            original_clean = original_text.strip()
+            query = (intent.parameters.get("query") or "").strip()
+            original_clean = original_text.strip() if original_text else ""
 
             if not query or query == "":
                 # 检查是否是通用搜索词汇或短语
@@ -877,7 +885,7 @@ class EnhancedIntentRecognizer:
                 # 如果原始输入包含足够的信息，直接使用作为查询，而不是要求澄清
                 if is_generic:
                     # 检查是否输入太短，如果是则要求澄清
-                    if len(original_clean.strip()) <= 3:
+                    if len(original_clean) <= 3:
                         intent.requires_clarification = True
                         intent.clarification_needed = {
                             "type": "missing_keywords",
@@ -907,7 +915,7 @@ class EnhancedIntentRecognizer:
         elif intent.name == "download_paper":
             paper_id = intent.parameters.get("paper_id")
             search_query = intent.parameters.get("search_query", "")
-            original_clean = original_text.strip()
+            original_clean = original_text.strip() if original_text else ""
 
             # 如果既没有ID也没有有效的搜索查询，需要澄清
             if not paper_id and (not search_query or search_query == ""):
@@ -945,11 +953,11 @@ class EnhancedIntentRecognizer:
 
         # 特殊处理：检查技能执行意图是否缺少参数
         elif intent.name == "execute_skill":
-            skill_name = intent.parameters.get("skill_name", "").strip()
-            query = intent.parameters.get("query", "").strip()
-            content = intent.parameters.get("content", "").strip()
-            action = intent.parameters.get("action", "").strip()
-            original_clean = original_text.strip()
+            skill_name = (intent.parameters.get("skill_name") or "").strip()
+            query = (intent.parameters.get("query") or "").strip()
+            content = (intent.parameters.get("content") or "").strip()
+            action = (intent.parameters.get("action") or "").strip()
+            original_clean = original_text.strip() if original_text else ""
 
             # 使用content作为主要参数，如果为空则使用query
             main_content = content if content else query
@@ -990,8 +998,8 @@ class EnhancedIntentRecognizer:
 
         # 特殊处理：检查辩论意图是否缺少参数
         elif intent.name == "start_debate":
-            topic = intent.parameters.get("topic", "").strip()
-            original_clean = original_text.strip()
+            topic = (intent.parameters.get("topic") or "").strip()
+            original_clean = original_text.strip() if original_text else ""
 
             # 检查是否缺少辩论主题
             if not topic or topic == "":
@@ -1289,21 +1297,52 @@ class EnhancedIntentRecognizer:
             # 智能提取标题：处理"创建维基 项目计划"、"创建词条 人工智能"这种格式
             # 分割文本并尝试找到标题
             parts = text.split()
-            if len(parts) > 2:  # 如果有至少3个词
-                # 检查是否是"创建维基/词条/百科" + 标题 的格式
-                command_part = parts[0] + parts[1]  # 组合前两个词
+            if len(parts) >= 2:  # 如果有至少2个词，就可以尝试智能提取
+                # 特殊处理：检查是否包含"词条"、"维基"、"百科"等关键词
+                has_target_keyword = any(keyword in text for keyword in ["词条", "维基", "百科", "wiki", "Wiki"])
 
                 # 检查各种可能的创建/编辑/查看命令
                 creation_patterns = [
                     "创建维基", "新建维基", "写个维基", "创建百科", "新建百科", "写个百科",
                     "创建词条", "新建词条", "写个词条", "做个词条", "创建条目", "新建条目",
-                    "编辑词条", "编辑维基", "编辑百科", "修改词条", "修改维基", "修改百科",
+                    "编辑词条", "协同编辑词条", "协同编辑一个词条", "协作编辑词条", "协作编辑一个词条", "编辑维基", "编辑百科", "修改词条", "修改维基", "修改百科",
                     "查看词条", "查看维基", "查看百科", "浏览词条", "浏览维基", "浏览百科"
                 ]
 
-                if any(cmd in command_part for cmd in creation_patterns):
-                    # 取后续的所有词作为标题
-                    title = " ".join(parts[2:]).strip()
+                # 更智能的命令检测：直接检查文本中是否包含创建/编辑相关的命令
+                is_command_pattern = any(cmd_pattern in text for cmd_pattern in creation_patterns)
+
+                if is_command_pattern and has_target_keyword:
+                    # 更智能的标题提取：找到"词条"、"维基"、"百科"等关键词的位置
+                    title_parts = []
+                    found_keyword = False
+
+                    for i, part in enumerate(parts):
+                        if found_keyword:
+                            # 已经找到关键词，之后的所有内容都是标题
+                            title_parts.append(part)
+                        elif any(keyword in part for keyword in ["词条", "维基", "百科", "wiki", "Wiki"]):
+                            # 找到关键词
+                            found_keyword = True
+
+                    # 如果找到了关键词且后面有内容，提取标题
+                    if found_keyword and title_parts:
+                        title = " ".join(title_parts).strip()
+                    else:
+                        # 如果没有找到标题内容，尝试从命令后的词开始提取
+                        # 找到第一个包含关键词的词的位置
+                        keyword_idx = -1
+                        for i, part in enumerate(parts):
+                            if any(keyword in part for keyword in ["词条", "维基", "百科", "wiki", "Wiki"]):
+                                keyword_idx = i
+                                break
+
+                        if keyword_idx >= 0 and keyword_idx < len(parts) - 1:
+                            # 取关键词之后的所有词作为标题
+                            title = " ".join(parts[keyword_idx + 1:]).strip()
+                        elif len(parts) > 2:
+                            # 最后的备用方案：取最后几个词作为标题
+                            title = " ".join(parts[2:]).strip()
 
             # 如果还是没有找到标题，检查是否使用了空格分隔的格式
             if not title:
@@ -1383,10 +1422,10 @@ class EnhancedIntentRecognizer:
 
             # 检查是否是通用命令（只有命令词，没有具体内容）
             # 提取命令操作部分，看是否只有操作词没有具体内容
-            command_match = re.search(r'(?:创建|新建|写|写个|做个|创造|制作|编辑)\s*(?:维基|百科|词条|wiki|Wiki)\s*$', text, re.IGNORECASE)
+            command_match = re.search(r'(?:创建|新建|写|写个|做个|创造|制作|编辑|协同编辑|协作编辑)\s*(?:维基|百科|词条|wiki|Wiki)\s*$', text, re.IGNORECASE)
             if is_generic and (not title or command_match or text.strip() in ["创建词条", "新建词条", "写个词条", "做个词条",
                 "创造词条", "制作词条", "创建维基", "新建维基", "写个维基", "做个维基", "创造维基", "制作维基",
-                "创建百科", "新建百科", "写个百科", "创造百科", "制作百科"]):  # 如果是通用命令且没有找到标题
+                "创建百科", "新建百科", "写个百科", "创造百科", "制作百科", "协同编辑一个词条", "协作编辑一个词条"]):  # 如果是通用命令且没有找到标题
                 title = ""  # 设置为空值以触发澄清
             elif not title:  # 如果仍然没有找到标题，使用原始文本
                 title = text
@@ -1644,6 +1683,41 @@ class EnhancedIntentRecognizer:
             is_just_command = any(text.strip() == cmd or text.strip().startswith(cmd) for cmd in command_words)
             if not is_just_command:
                 skill_content = text
+
+        # 增强技能匹配逻辑 - 尝试根据技能管理器中的可用技能匹配
+        target_skill_name = skill_type  # 默认技能类型
+        if self.skill_manager:  # 如果技能管理器可用
+            available_skills = self.skill_manager.list_skills()
+
+            # 尝试根据用户输入的意图匹配最相关的技能
+            for skill_name in available_skills:
+                # 检查技能名称是否在用户输入中
+                if skill_name.lower() in text.lower():
+                    target_skill_name = skill_name
+                    break
+                # 检查技能是否匹配输入中的关键词
+                elif skill_name == "text_analysis" and any(kw in text.lower() for kw in ["分析", "analyze", "text", "内容"]):
+                    target_skill_name = skill_name
+                    break
+                elif skill_name == "search" and any(kw in text.lower() for kw in ["搜索", "查找", "find", "search"]):
+                    target_skill_name = skill_name
+                    break
+                elif skill_name == "writing" and any(kw in text.lower() for kw in ["写", "写作", "create", "write"]):
+                    target_skill_name = skill_name
+                    break
+                elif skill_name == "translation" and any(kw in text.lower() for kw in ["翻译", "translate"]):
+                    target_skill_name = skill_name
+                    break
+                elif skill_name == "summarization" and any(kw in text.lower() for kw in ["总结", "摘要", "summarize"]):
+                    target_skill_name = skill_name
+                    break
+                elif skill_name == "calculation" and any(kw in text.lower() for kw in ["计算", "计算", "算", "math"]):
+                    target_skill_name = skill_name
+                    break
+
+        # 如果找到了匹配的技能名称，更新skill_type
+        if target_skill_name in available_skills:
+            skill_type = target_skill_name
 
         return {
             "target_skill": skill_type,

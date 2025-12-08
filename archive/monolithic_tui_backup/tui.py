@@ -1,0 +1,5398 @@
+"""Enhanced TUI with command auto-completion and new features."""
+
+import asyncio
+import os
+import re
+import webbrowser
+import subprocess
+from pathlib import Path
+from datetime import datetime
+from enum import Enum
+from typing import Any, List, Optional
+from difflib import get_close_matches
+
+import pyperclip
+import yaml
+from rich.syntax import Syntax
+from rich.text import Text
+from textual.app import App, ComposeResult
+from textual.binding import Binding
+from textual.containers import Container, Horizontal
+from textual.keys import Keys
+from textual import events
+from textual.message import Message
+from textual.screen import Screen
+from textual.widgets import (
+    Button,
+    Footer,
+    Header,
+    Input,
+    Label,
+    ListItem,
+    ListView,
+    RichLog,
+    Static,
+    TextArea,
+)
+from textual.css.query import NoMatches
+
+
+from daip_live.agent_engine.executor import AgentExecutor
+from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer
+from daip_live.core.models import (
+    AgentEvent,
+    DebateCompleteEvent,
+    DebateRoundStartEvent,
+    DebateStartEvent,
+    DebateTurnCompleteEvent,
+    DebateTurnStartEvent,
+    ErrorEvent,
+    FinalResponseEvent,
+    ModelMetricsEvent,
+    PermissionRequestEvent,
+    ThoughtEvent,
+    ToolCallEvent,
+    ToolOutputEvent,
+    TokenUsageEvent,
+)
+from daip_live.knowledge.manager import KnowledgeManager
+from daip_live.memory.service import MemoryService
+from daip_live.memory.session_manager import SessionManager
+from daip_live.model_manager import ModelManager
+from daip_live.todo.tui_todo_manager import initialize_tui_todo_manager, tui_todo_manager
+from daip_live.model_provider.provider import LiteLLMProvider
+from daip_live.p4_role_manager_tools.role_manager import RoleManager
+from daip_live.p4_role_manager_tools.tool_manager import ToolManager
+from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
+from daip_live.p8_debate_system.manager import DebateManager
+from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager as OriginalEnhancedDebateManager
+from daip_live.persistence.database import DatabaseManager
+from daip_live.scaffolding.manager import ScaffoldingManager
+from daip_live.wiki.manager import WikiManager
+from daip_live.tui_logo import PersonalAILogo
+from daip_live.selection_dialog import (
+    SessionSelectionDialog,
+    RoleSelectionDialog,
+    ModelSelectionDialog
+)
+from daip_live.permissions.manager import PermissionManager, PermissionLevel
+
+
+class CommandSelected(Message):
+    """Posted when a command is selected from the autocomplete popup."""
+    def __init__(self, command: str) -> None:
+        super().__init__()
+        self.command = command
+
+
+async def run_agent_and_feed_tui(agent: AgentExecutor, tui: "DAIP_TUI", goal: str):
+    """Runs the agent in non-interactive mode and posts its events to the TUI."""
+    try:
+        async for event in agent.run(goal=goal):
+            tui.post_event(event)
+        tui.post_event(FinalResponseEvent(content="Agent run finished."))
+    except Exception as e:
+        tui.post_event(ThoughtEvent(content=f"An error occurred: {e}"))
+
+async def run_chat_agent_and_feed_tui(agent: AgentExecutor, tui: "DAIP_TUI", initial_goal: str):
+    """Runs the agent in chat mode and posts its events to the TUI."""
+    try:
+        async for event in agent.chat_run(initial_goal=initial_goal):
+            tui.post_event(event)
+    except Exception as e:
+        tui.post_event(ThoughtEvent(content=f"An error occurred in the agent's chat loop: {e}"))
+
+
+class PermissionDialog(Screen):
+    """A dialog for permission requests."""
+
+    def __init__(self, tool_name: str, args: dict, callback) -> None:
+        super().__init__()
+        self.tool_name = tool_name
+        self.args = args
+        self.callback = callback
+
+    def compose(self) -> ComposeResult:
+        with Container(id="dialog"):
+            yield Label(f"Tool '{self.tool_name}' requests permission to execute with args: {self.args}", id="permission-label")
+            with Horizontal():
+                yield Button("Allow", id="allow", variant="success")
+                yield Button("Deny", id="deny", variant="error")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "allow":
+            self.callback(True)
+        else:
+            self.callback(False)
+        self.app.pop_screen()
+
+
+class CommandHelpDialog(Screen):
+    """A dialog to show available commands."""
+
+    def __init__(self, help_text: str) -> None:
+        super().__init__()
+        self.help_text = help_text
+
+    def compose(self) -> ComposeResult:
+        with Container(id="dialog"):
+            yield Label("Available Commands:", id="help-label")
+            rich_log = RichLog(id="help-content")
+            rich_log.write(self.help_text)
+            yield rich_log
+            yield Button("Close", id="close", variant="primary")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "close":
+            self.app.pop_screen()
+
+
+class FocusMode(Enum):
+    INPUT = "input"
+    OUTPUT = "output"
+
+
+class AutocompletePopup(Container):
+    """A popup for command autocompletion."""
+
+    def __init__(self, suggestions: List[str], **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.suggestions = suggestions
+
+    def compose(self) -> ComposeResult:
+        items = [ListItem(Label(s)) for s in self.suggestions]
+        yield ListView(*items, id="autocomplete-list")
+
+    def _accept_selection(self, list_item: ListItem) -> None:
+        """Accepts the selected item and posts a message."""
+        full_suggestion = str(list_item.query_one(Label).renderable)
+        # Remove help text if present (e.g., "/role view - Role management")
+        command = full_suggestion.split(" - ", 1)[0]
+        self.post_message(CommandSelected(command))
+
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        self._accept_selection(event.item)
+
+    def cursor_up(self) -> None:
+        self.query_one(ListView).action_cursor_up()
+
+    def cursor_down(self) -> None:
+        self.query_one(ListView).action_cursor_down()
+
+    def accept_suggestion(self) -> None:
+        list_view = self.query_one(ListView)
+        if list_view.highlighted_child is not None:
+            self._accept_selection(list_view.highlighted_child)
+
+    def update_commands(self, new_suggestions: List[str]) -> None:
+        list_view = self.query_one(ListView)
+        list_view.clear()
+        new_items = [ListItem(Label(s)) for s in new_suggestions]
+        for item in new_items:
+            list_view.append(item)
+
+
+class DAIP_TUI(App):
+    """A Textual app to interact with the AGENT PSY LAB Agent."""
+
+    CSS = """
+    .panel-header {
+        text-align: center;
+        background: $primary;
+        color: $text;
+        padding: 0 1;
+        height: 1;
+    }
+
+    .system-panel {
+        width: 30%;
+        border: solid $primary;
+    }
+
+    .system-log {
+        height: 1fr;
+        background: $surface;
+        border: solid $primary;
+    }
+
+    .output-mode {
+        height: 1fr;
+        background: $surface;
+    }
+
+    Horizontal {
+        height: 3fr;
+    }
+
+    Vertical {
+        height: 100%;
+    }
+
+    #dialog {
+        width: 60%;
+        height: auto;
+        min-height: 8;
+        background: $surface;
+        border: thick $primary;
+        border-radius: 1;
+        padding: 1;
+    }
+
+    #title {
+        text-align: center;
+        text-style: bold;
+        color: $primary;
+        margin: 0 0 1 0;
+    }
+
+    #message {
+        text-align: center;
+        margin: 0 0 2 0;
+    }
+
+    #buttons {
+        height: auto;
+        align: center middle;
+        gap: 2;
+    }
+
+    Button {
+        min-width: 12;
+        margin: 0 1;
+    }
+    """
+
+    BINDINGS = [
+        Binding("shift_tab", "toggle_focus", "切换焦点"),
+        Binding("ctrl+a", "select_all", "全选", show=False),
+        Binding("ctrl+c", "copy_text", "复制", show=False),
+        Binding("ctrl+v", "paste_text", "粘贴", show=False),
+        Binding("ctrl+e", "_handle_ctrl_e_exit", "退出应用", show=False),
+        Binding("ctrl+q", "_handle_ctrl_q_exit", "退出会话/应用", show=False),
+        Binding("escape", "_handle_escape_key", "退出输出模式", show=False),
+    ]
+
+    def __init__(
+        self,
+        executor: AgentExecutor = None,
+        session_manager: SessionManager = None,
+        role_manager: RoleManager = None,
+        knowledge_manager: KnowledgeManager = None,
+        debate_manager: DebateManager = None,
+        model_provider: LiteLLMProvider = None,
+        db_manager: DatabaseManager = None,
+        config_manager: Any = None,
+        role_model_manager: RoleModelManager = None,
+        enhanced_debate_manager: OriginalEnhancedDebateManager = None,
+        goal: Optional[str] = None,
+    ):
+        super().__init__()
+        
+        # Import and initialize container if dependencies are not provided
+        import os
+        if any(dep is None for dep in [session_manager, role_manager, knowledge_manager]):
+            from daip_live.container import Container
+            container = Container()
+            
+            # Load configuration from YAML if it exists
+            config_file = "config.yaml"
+            if os.path.exists(config_file):
+                try:
+                    container.config.from_yaml(config_file)
+                except Exception as e:
+                    print(f"Warning: Could not load config from {config_file}: {e}")
+            
+            # Set minimal config if not already set
+            if hasattr(container.config, 'database') and hasattr(container.config.database, 'path'):
+                if container.config.database.path() is None:
+                    container.config.database.path.from_value(":memory:")
+            
+            # Set required config values with proper default model
+            if hasattr(container.config, 'llm_provider'):
+                if container.config.llm_provider.default_model() is None:
+                    container.config.llm_provider.default_model.from_value("ollama/llama3")
+                if container.config.llm_provider.embedding_model() is None:
+                    container.config.llm_provider.embedding_model.from_value("mock-embedding")
+            
+            if hasattr(container.config, 'role_manager') and hasattr(container.config.role_manager, 'roles_dir'):
+                if container.config.role_manager.roles_dir() is None:
+                    container.config.role_manager.roles_dir.from_value("roles")
+            
+            if hasattr(container.config, 'knowledge_base') and hasattr(container.config.knowledge_base, 'directory'):
+                if container.config.knowledge_base.directory() is None:
+                    container.config.knowledge_base.directory.from_value("knowledge")
+
+            # Handle paper download directory configuration
+            if hasattr(container.config, 'paper') and hasattr(container.config.paper, 'download_directory'):
+                if container.config.paper.download_directory() is None:
+                    container.config.paper.download_directory.from_value("knowledge/paper")
+
+            # Handle wiki pages directory configuration
+            if hasattr(container.config, 'wiki') and hasattr(container.config.wiki, 'pages_directory'):
+                if container.config.wiki.pages_directory() is None:
+                    container.config.wiki.pages_directory.from_value("knowledge/wiki")
+
+            # Handle debate logs directory configuration
+            if hasattr(container.config, 'debate') and hasattr(container.config.debate, 'logs_directory'):
+                if container.config.debate.logs_directory() is None:
+                    container.config.debate.logs_directory.from_value("knowledge/debate")
+
+            # Create directories if they don't exist
+            import os
+            roles_dir = container.config.role_manager.roles_dir() if hasattr(container.config, 'role_manager') else "roles"
+            knowledge_dir = container.config.knowledge_base.directory() if hasattr(container.config, 'knowledge_base') else "knowledge"
+            paper_dir = container.config.paper.download_directory() if hasattr(container.config, 'paper') and hasattr(container.config.paper, 'download_directory') else "knowledge/paper"
+            wiki_dir = container.config.wiki.pages_directory() if hasattr(container.config, 'wiki') and hasattr(container.config.wiki, 'pages_directory') else "knowledge/wiki"
+            debate_dir = container.config.debate.logs_directory() if hasattr(container.config, 'debate') and hasattr(container.config.debate, 'logs_directory') else "knowledge/debate"
+
+            os.makedirs(roles_dir, exist_ok=True)
+            os.makedirs(knowledge_dir, exist_ok=True)
+            os.makedirs(paper_dir, exist_ok=True)
+            os.makedirs(wiki_dir, exist_ok=True)
+            os.makedirs(debate_dir, exist_ok=True)
+            
+            # Resolve dependencies from container
+            self._executor = executor or container.agent_executor()
+            self._session_manager = session_manager or container.session_manager()
+            self._role_manager = role_manager or container.role_manager()
+            self._knowledge_manager = knowledge_manager or container.knowledge_manager()
+            self._debate_manager = debate_manager or container.debate_manager()
+            self._model_provider = model_provider or container.model_provider()
+            self._role_model_manager = role_model_manager or RoleModelManager()
+            # 使用原始的增强辩论管理器（保持向后兼容）
+            self._enhanced_debate_manager = enhanced_debate_manager or OriginalEnhancedDebateManager(
+                self._session_manager, self._role_manager, self._role_model_manager, self._model_provider
+            )
+            self._db_manager = db_manager or container.db_manager()
+            self._config_manager = config_manager or getattr(container, 'config_manager', None)
+            self._model_manager = ModelManager()
+            self._memory_service = MemoryService(model_provider=self._model_provider)
+            self._tool_manager = ToolManager()
+            self._permission_manager = PermissionManager()
+            # 从配置中获取Wiki目录（如果配置存在）
+            try:
+                wiki_dir = self.container.config.wiki.pages_directory()
+                if wiki_dir is None:
+                    wiki_dir = "wiki"  # 默认值
+            except (AttributeError, TypeError):
+                wiki_dir = "wiki"  # 默认值
+
+            # 使用增强的Wiki管理器（支持协作功能），如果所有依赖都可用
+            try:
+                from daip_live.wiki.collaborative_wiki import EnhancedWikiManager
+                self._wiki_manager = EnhancedWikiManager(
+                    wiki_root=Path(os.getcwd()) / wiki_dir,
+                    role_model_manager=self._role_model_manager,
+                    model_provider=self._model_provider,
+                    session_manager=self._session_manager,
+                    role_manager=self._role_manager
+                )
+            except Exception as e:
+                print(f"⚠️  无法初始化增强Wiki管理器，使用基础管理器: {e}")
+                # 降级到基础Wiki管理器
+                from daip_live.wiki.manager import WikiManager
+                self._wiki_manager = WikiManager(
+                    wiki_root=Path(os.getcwd()) / wiki_dir,
+                    role_model_manager=self._role_model_manager,
+                    model_provider=self._model_provider
+                )
+            # Initialize enhanced intent recognizer
+            self._intent_recognizer = EnhancedIntentRecognizer()
+        else:
+            # Use provided dependencies
+            self._executor = executor
+            self._session_manager = session_manager
+            self._role_manager = role_manager
+            self._knowledge_manager = knowledge_manager
+            self._debate_manager = debate_manager
+            self._model_provider = model_provider
+            self._role_model_manager = role_model_manager or RoleModelManager()
+            # 使用原始的增强辩论管理器（保持向后兼容）
+            self._enhanced_debate_manager = enhanced_debate_manager or OriginalEnhancedDebateManager(
+                self._session_manager, self._role_manager, self._role_model_manager, self._model_provider
+            )
+            self._db_manager = db_manager
+            self._config_manager = config_manager
+            self._model_manager = ModelManager()
+            self._memory_service = MemoryService(model_provider=self._model_provider) if model_provider else None
+            self._tool_manager = ToolManager() if model_provider else None
+            self._permission_manager = PermissionManager()
+            # 为提供的依赖设置默认wiki目录（在else分支中container未定义）
+            wiki_dir = "wiki"  # 默认值
+
+            # 使用增强的Wiki管理器（支持协作功能），如果所有依赖都可用
+            try:
+                from daip_live.wiki.collaborative_wiki import EnhancedWikiManager
+                self._wiki_manager = EnhancedWikiManager(
+                    wiki_root=Path(os.getcwd()) / wiki_dir,
+                    role_model_manager=self._role_model_manager,
+                    model_provider=self._model_provider,
+                    session_manager=self._session_manager,
+                    role_manager=self._role_manager
+                )
+            except Exception as e:
+                print(f"⚠️  无法初始化增强Wiki管理器，使用基础管理器: {e}")
+                # 降级到基础Wiki管理器
+                from daip_live.wiki.manager import WikiManager
+                self._wiki_manager = WikiManager(
+                    wiki_root=Path(os.getcwd()) / wiki_dir,
+                    role_model_manager=self._role_model_manager,
+                    model_provider=self._model_provider
+                )
+            # Initialize enhanced intent recognizer
+            self._intent_recognizer = EnhancedIntentRecognizer()
+
+        # Initialize skill manager (always needed regardless of dependency injection)
+        from daip_live.skills.manager import SkillManager
+        self._skill_manager = SkillManager()
+
+        # Initialize Claude Skills integration service and connect to intent recognizer
+        try:
+            from daip_live.skills.enhanced_integration import EnhancedClaudeSkillsManager, integrate_with_intent_recognizer
+            from daip_live.skills.claude_skill_adapter import ClaudeSkillAdapterManager
+
+            self._claude_integration_service = EnhancedClaudeSkillsManager(
+                skill_manager=self._skill_manager,
+                model_provider=self._model_provider
+            )
+
+            # Initialize Claude Skill Adapter Manager for Claude Skills format compatibility
+            self._claude_skill_adapter_manager = ClaudeSkillAdapterManager(self._skill_manager)
+
+            # Connect the Claude integration service to the intent recognizer
+            integrate_with_intent_recognizer(
+                self._intent_recognizer,
+                self._skill_manager,
+                self._model_provider
+            )
+
+            # Also set the integration service directly to the recognizer to avoid calling function again
+            self._intent_recognizer.claude_integration_service = self._claude_integration_service
+            print("✅ Claude Skills integration service connected to intent recognizer")
+            print("✅ Claude Skill Adapter Manager initialized for format compatibility")
+
+            # Integrate context-aware functionality to improve session continuity
+            try:
+                from daip_live.intent_recognition.context_integration import ContextAwareEnhancedRecognizer
+                from daip_live.intent_recognition.enhanced_context_manager import EnhancedContextManager
+
+                # Create enhanced context manager
+                enhanced_context_manager = EnhancedContextManager()
+
+                # Create context-aware wrapper for the intent recognizer
+                self._context_aware_recognizer = ContextAwareEnhancedRecognizer(
+                    base_recognizer=self._intent_recognizer,
+                    context_manager=enhanced_context_manager
+                )
+
+                # Replace the original intent recognizer with the context-aware version
+                # But keep a reference to the original for backward compatibility
+                self._original_intent_recognizer = self._intent_recognizer
+                self._intent_recognizer = self._context_aware_recognizer
+
+                # Ensure Claude integration is preserved in the new recognizer
+                self._intent_recognizer.claude_integration_service = self._claude_integration_service
+                if hasattr(self._context_aware_recognizer.base_recognizer, 'claude_integration_service'):
+                    self._context_aware_recognizer.base_recognizer.claude_integration_service = self._claude_integration_service
+
+                print("🔄 意图识别器已升级为上下文感知版本")
+                print("🔄 会话上下文和参数提取功能已激活")
+
+            except ImportError as e:
+                print(f"⚠️  无法集成上下文感知功能: {e}")
+                print("⚠️  将使用原始意图识别器，会话连续性功能受限")
+
+        except ImportError as e:
+            print(f"⚠️  Claude Skills integration not found: {e}")
+            try:
+                from daip_live.skills.integration import ClaudeSkillsIntegrationService
+                self._claude_integration_service = ClaudeSkillsIntegrationService(
+                    skill_manager=self._skill_manager,
+                    model_provider=self._model_provider
+                )
+
+                # Initialize adapter manager separately if needed
+                try:
+                    from daip_live.skills.claude_skill_adapter import ClaudeSkillAdapterManager
+                    self._claude_skill_adapter_manager = ClaudeSkillAdapterManager(self._skill_manager)
+                    print("✅ Claude Skill Adapter Manager initialized for format compatibility")
+                except ImportError as e:
+                    print(f"⚠️  Claude Skill Adapter Manager not found: {e}")
+                    self._claude_integration_service = None
+
+            except Exception as e:
+                print(f"⚠️  Claude Skills integration service initialization failed: {e}")
+                self._claude_integration_service = None
+                self._claude_skill_adapter_manager = None
+
+        # Initialize Model Adapter Manager for skill-intent integration
+        try:
+            from daip_live.skills.model_adapter_manager import ModelAdapterManager
+            self._model_adapter_manager = ModelAdapterManager()
+            print("✅ Model adapter manager initialized with dynamic model detection")
+        except Exception as e:
+            print(f"⚠️  Model adapter manager initialization failed: {e}")
+            self._model_adapter_manager = None
+
+        # Auto-register default skills
+        try:
+            from daip_live.skills.text_analysis import TextAnalysisSkill
+            text_skill = TextAnalysisSkill()
+            self._skill_manager.register_skill(text_skill)
+        except ImportError:
+            # TextAnalysisSkill might not be available, that's OK
+            pass
+        except Exception as e:
+            print(f"Warning: Could not register default text analysis skill: {e}")
+
+        # Initialize task visualization manager
+        try:
+            from daip_live.task_decomposition.task_visualization import get_task_visualization_manager
+            self._task_visualization_manager = get_task_visualization_manager()
+            print("✅ Task visualization manager initialized")
+        except ImportError as e:
+            print(f"⚠️ Task visualization manager not found: {e}")
+            self._task_visualization_manager = None
+        except Exception as e:
+            print(f"⚠️ Task visualization manager initialization failed: {e}")
+            self._task_visualization_manager = None
+
+        # Initialize task decomposition integrator
+        try:
+            from daip_live.task_decomposition.task_decomposition_integrator import TaskDecompositionIntegrator
+            self._task_decomposition_integrator = TaskDecompositionIntegrator(self._model_provider)
+            print("✅ Task decomposition integrator initialized")
+        except ImportError as e:
+            print(f"⚠️ Task decomposition integrator not found: {e}")
+            self._task_decomposition_integrator = None
+        except Exception as e:
+            print(f"⚠️ Task decomposition integrator initialization failed: {e}")
+            self._task_decomposition_integrator = None
+
+        # Initialize complex task manager integrator
+        try:
+            from daip_live.task_decomposition.task_manager import ComplexTaskIntegrator
+            self._complex_task_integrator = ComplexTaskIntegrator(self._model_provider)
+            print("✅ Complex task integrator initialized")
+        except ImportError as e:
+            print(f"⚠️ Complex task integrator not found: {e}")
+            self._complex_task_integrator = None
+        except Exception as e:
+            print(f"⚠️ Complex task integrator initialization failed: {e}")
+            self._complex_task_integrator = None
+
+        self._goal = goal
+        self._log_text_buffer: List[str] = []
+
+        if self._executor is not None:
+            self._executor.goal = self._goal
+        self._current_session_id: Optional[str] = None
+        self._session_stack: List[str] = []
+        self._model_name = "llama3:8b"
+        self._token_usage = (0, 8192)
+
+        # Initialize Todo Manager
+        self._todo_manager = initialize_tui_todo_manager(self)
+
+        # Initialize clarification state management
+        self._pending_clarification = None  # Stores current clarification request
+        self._original_intent_context = {}  # Stores original intent when clarification is needed
+        self._awaiting_clarification = False  # Flag indicating we're waiting for clarification
+
+
+        # Real-time tracking variables
+        self._real_token_usage = (0, 8192)  # (used, total)
+        self._model_metrics = {
+            'request_count': 0,
+            'total_latency': 0.0,
+            'last_request_time': None
+        }
+        
+        # Debate tracking variables
+        self._current_debate = {
+            'session_id': None,
+            'topic': None,
+            'current_round': 0,
+            'total_rounds': 0,
+            'current_participant': None,
+            'is_active': False,
+            'role_models': {},  # Track model for each role
+            'participant_colors': {}  # Track color assignments for participants
+        }
+
+        # Current model tracking
+        self._current_model = "default"  # Track current active model
+        self._debate_active_models = {}  # Track models for active debate participants
+
+        # Debate lifecycle events for testing
+        self._debate_started_event = asyncio.Event()
+        self._debate_completed_event = asyncio.Event()
+        self._participant_events = {}  # participant -> asyncio.Event
+        
+        # Track background tasks for proper cleanup
+        self._background_tasks = set()
+        
+        # System activity monitoring
+        self._system_activity = {
+            'events_processed': 0,
+            'tools_executed': 0,
+            'errors_encountered': 0,
+            'session_start_time': None,
+            'last_activity_time': None
+        }
+
+        # System log tracking
+        self._system_log_buffer = []  # Track system messages separately
+        self._max_system_log_entries = 50  # Limit system log entries
+
+        self.focus_mode = FocusMode.INPUT
+        
+        # Input history for command recall
+        self._input_history: List[str] = []
+        self._history_index: int = -1  # -1 means current input, not browsing history
+        self._current_input_before_history: str = ""  # Store input when starting history navigation
+        
+        # Double CTRL+E exit detection
+        self._last_ctrl_e_time: float = 0
+        self._exit_hint_shown: bool = False
+        
+        # Double CTRL+Q exit detection
+        self._last_ctrl_q_time: float = 0
+        self._ctrl_q_press_count: int = 0
+
+        # Discover available commands
+        self._available_commands = []
+        # List of unimplemented or internal commands to exclude
+        excluded_commands = {"init", "shortcut", "project", "session"}
+        
+        for name in dir(self):
+            if name.startswith("_handle_") and name.endswith("_command"):
+                command_name = name.replace('_handle_', '').replace('_command', '')
+                
+                # Skip unimplemented or internal commands
+                if command_name in excluded_commands:
+                    continue
+                    
+                handler = getattr(self, name)
+                help_text = (handler.__doc__ or "").strip().split('\n')[0]
+                self._available_commands.append((f"/{command_name}", help_text))
+        
+        # Load input history from file
+        self._load_input_history()
+
+        try:
+            help_file_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "tui_commands_help.md")
+            with open(help_file_path, encoding="utf-8") as f:
+                self._help_text = f.read()
+        except FileNotFoundError:
+            self._help_text = "Help document not found."
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+
+        # Main content area with conversation and system activity
+        with Horizontal():
+            # Conversation area - takes most of the space
+            with Vertical():
+                yield Static("💬 对话区域", classes="panel-header")
+                yield RichLog(id="main_log", classes="output-mode", highlight=True, markup=True, wrap=True)
+
+            # System activity panel - narrow sidebar for system messages
+            with Vertical(classes="system-panel"):
+                yield Static("🔧 系统状态", classes="panel-header")
+                yield RichLog(id="system_log", classes="system-log", highlight=True, markup=True, wrap=True)
+
+        yield Input(placeholder="Enter command or message...", id="user_input")
+        yield Static("Model: llama3:8b | Tokens: 0/8192 (0%) | Status: Idle | Focus: Input", id="status_bar")
+        yield Footer()
+
+    def action_toggle_focus(self) -> None:
+        if self.focus_mode == FocusMode.INPUT:
+            self.focus_mode = FocusMode.OUTPUT
+            self.query_one("#main_log").focus()
+            # Add visual feedback for focus
+            self.query_one("#main_log").styles.border = ("heavy", "blue")
+            self.query_one("#user_input").styles.border = ("solid", "grey")
+        else:
+            self.focus_mode = FocusMode.INPUT
+            self.query_one("#user_input").focus()
+            # Add visual feedback for focus
+            self.query_one("#main_log").styles.border = ("solid", "grey")
+            self.query_one("#user_input").styles.border = ("heavy", "blue")
+        self._update_status_bar("Idle")
+        # Force a refresh of the screen to ensure the focus change is visible
+        self.refresh()
+
+    def action_exit_output_mode(self) -> None:
+        # Always switch to input mode, regardless of current mode
+        self.focus_mode = FocusMode.INPUT
+        try:
+            self.query_one("#user_input").focus()
+            # Add visual feedback for focus
+            self.query_one("#main_log").styles.border = ("solid", "grey")
+            self.query_one("#user_input").styles.border = ("heavy", "blue")
+            self._update_status_bar("Idle")
+            # Force a refresh of the screen to ensure the focus change is visible
+            self.refresh()
+        except Exception as e:
+            print(f"Error in action_exit_output_mode: {e}")  # Debug
+
+    def action_select_all(self) -> None:
+        """Select all text in the output log (copy all to clipboard)."""
+        try:
+            import pyperclip
+
+            # Get all text from the log buffer
+            all_text = ""
+            if hasattr(self, '_log_text_buffer') and self._log_text_buffer:
+                all_text = "\n".join(self._log_text_buffer)
+
+            if all_text and all_text.strip():
+                pyperclip.copy(all_text)
+                self._update_log_view("[bold green]> ✅ All log content copied to clipboard![/bold green]")
+                self._update_log_view(f"[dim]> 📝 Total lines: {len(self._log_text_buffer)}[/dim]")
+                self._update_log_view(f"[dim]> 📝 Text length: {len(all_text)} characters[/dim]")
+                self._update_log_view("[dim]> 💡 Use Ctrl+V to paste anywhere[/dim]")
+            else:
+                self._update_log_view("[yellow]> ⚠️ No content available to select[/yellow]")
+
+        except ImportError:
+            self._update_log_view("[red]> ❌ pyperclip library not installed. Install with: pip install pyperclip[/red]")
+        except Exception as e:
+            self._update_log_view(f"[red]> ❌ Failed to copy all text: {str(e)}[/red]")
+            # Fallback: show last few lines for manual copy
+            self._update_log_view("[yellow]> 📋 Recent content (for manual copy):[/yellow]")
+            lines = getattr(self, '_log_text_buffer', [])
+            for line in lines[-5:]:  # Show last 5 lines
+                if line.strip():
+                    self._update_log_view(f"[cyan]    {line}[/cyan]")
+
+    def action_copy_text(self) -> None:
+        """Copy selected text or all text from the output log to the clipboard."""
+        try:
+            import pyperclip
+
+            # Since RichLog doesn't support selection well, we'll copy all visible content
+            # and provide better user feedback
+            main_log = self.query_one("#main_log", RichLog)
+
+            # Get all lines from the log buffer
+            all_text = ""
+            if hasattr(self, '_log_text_buffer') and self._log_text_buffer:
+                # Use the internal buffer if available
+                all_text = "\n".join(self._log_text_buffer)
+            else:
+                # Try to get text from RichLog using alternative method
+                try:
+                    # Access the RichLog's internal lines if possible
+                    if hasattr(main_log, 'lines'):
+                        all_text = "\n".join(str(line) for line in main_log.lines)
+                    elif hasattr(main_log, '_lines'):
+                        all_text = "\n".join(str(line) for line in main_log._lines)
+                    else:
+                        # Final fallback - show informative message
+                        all_text = "[Log content not accessible for copying]"
+                except Exception:
+                    all_text = "[Unable to access log content]"
+
+            # Copy to clipboard if we have meaningful content
+            if all_text and all_text.strip() and not all_text.startswith("["):
+                pyperclip.copy(all_text)
+                self._update_log_view("[bold green]> ✅ All log content copied to clipboard![/bold green]")
+                self._update_log_view(f"[dim]> 📝 Text length: {len(all_text)} characters[/dim]")
+                self._update_log_view("[dim]> 💡 Tip: You can paste this text in any text editor[/dim]")
+            else:
+                self._update_log_view("[yellow]> ⚠️ No content available to copy[/yellow]")
+
+        except ImportError:
+            self._update_log_view("[red]> ❌ pyperclip library not installed. Install with: pip install pyperclip[/red]")
+        except Exception as e:
+            self._update_log_view(f"[red]> ❌ Failed to copy to clipboard: {str(e)}[/red]")
+            # Provide fallback - show recent content for manual copying
+            self._update_log_view("[yellow]> 📋 Recent content (for manual copy):[/yellow]")
+            recent_lines = self._log_text_buffer[-10:] if hasattr(self, '_log_text_buffer') else []
+            for i, line in enumerate(recent_lines):
+                if line.strip():
+                    self._update_log_view(f"[cyan]    {line}[/cyan]")
+                if i >= 8:  # Limit to prevent spam
+                    break
+
+    def action_paste_text(self) -> None:
+        """Paste text from clipboard to input area."""
+        try:
+            # Get text from clipboard
+            clipboard_text = pyperclip.paste()
+            if clipboard_text:
+                # Get the input widget
+                input_widget = self.query_one("#user_input", Input)
+                # Insert clipboard text at cursor position
+                current_value = input_widget.value
+                cursor_position = input_widget.cursor_position
+                
+                # Insert clipboard text at cursor position
+                new_value = current_value[:cursor_position] + clipboard_text + current_value[cursor_position:]
+                input_widget.value = new_value
+                
+                # Move cursor to end of inserted text
+                new_cursor_position = cursor_position + len(clipboard_text)
+                input_widget.cursor_position = new_cursor_position
+                
+                # Focus the input widget
+                input_widget.focus()
+                
+                self._update_log_view("[bold green]> Text pasted from clipboard.[/bold green]")
+            else:
+                self._update_log_view("[yellow]> Clipboard is empty.[/bold yellow]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]> Failed to paste from clipboard: {e}[/bold red]")
+
+    def action__handle_ctrl_e_exit(self) -> None:
+        """Action method for CTRL+E exit binding."""
+        self._handle_ctrl_e_exit()
+
+    def action__handle_ctrl_q_exit(self) -> None:
+        """Action method for CTRL+Q exit binding."""
+        self._handle_ctrl_q_exit()
+
+    def on_click(self, event) -> None:
+        try:
+            main_log = self.query_one("#main_log")
+            # Use region check for more robust click detection in tests
+            if main_log.region.contains(event.screen_x, event.screen_y):
+                # Try to detect and handle link clicks
+                if self._handle_link_click(event):
+                    return
+                if self.focus_mode == FocusMode.INPUT:
+                    self.action_toggle_focus()
+        except NoMatches:
+            # If main_log is not found, ignore the click event
+            return
+
+    def _handle_link_click(self, event) -> bool:
+        """Handle link clicks in the output log.
+        
+        Args:
+            event: The click event
+            
+        Returns:
+            True if a link was clicked and handled, False otherwise
+        """
+        try:
+            # Get the RichLog widget
+            main_log = self.query_one("#main_log", RichLog)
+            
+            # Convert screen coordinates to widget coordinates
+            widget_x = event.screen_x - main_log.region.x
+            widget_y = event.screen_y - main_log.region.y
+            
+            # Get the text at the click position
+            # This is a simplified approach - in a real implementation,
+            # you'd need to parse the RichLog content more carefully
+            log_content = "\n".join(self._log_text_buffer)
+            
+            # Find URLs in the log content with their positions
+            url_pattern = r'https?://[^\s<>"{}|\\^`\[\]]+|www\.[^\s<>"{}|\\^`\[\]]+|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+            
+            # Find all URLs with their start and end positions
+            urls_with_positions = []
+            for match in re.finditer(url_pattern, log_content):
+                urls_with_positions.append({
+                    'url': match.group(),
+                    'start': match.start(),
+                    'end': match.end()
+                })
+            
+            if not urls_with_positions:
+                return False
+            
+            # Calculate approximate line and character position
+            # This is a simplified calculation - in a real implementation,
+            # you'd need to get the exact text at the click position
+            lines = log_content.split('\n')
+            char_position = 0
+            clicked_line = -1
+            
+            for i, line in enumerate(lines):
+                line_start = char_position
+                line_end = char_position + len(line)
+                
+                # Approximate the character position based on widget coordinates
+                # This is a rough estimate - for precise detection, you'd need
+                # to query the actual text at the click position from RichLog
+                estimated_char_pos = line_start + (widget_x * 2)  # Rough estimate
+                
+                if line_start <= estimated_char_pos <= line_end:
+                    clicked_line = i
+                    break
+                    
+                char_position = line_end + 1  # +1 for the newline
+            
+            if clicked_line == -1:
+                return False
+            
+            # Check if click is near any URL in the clicked line
+            line_start = sum(len(lines[j]) + 1 for j in range(clicked_line))
+            line_text = lines[clicked_line]
+            
+            for url_info in urls_with_positions:
+                url_start = url_info['start']
+                url_end = url_info['end']
+                
+                # Check if URL is in the clicked line
+                if line_start <= url_start <= line_start + len(line_text):
+                    # Calculate relative position within the line
+                    relative_start = url_start - line_start
+                    relative_end = url_end - line_start
+                    
+                    # Check if click is within URL bounds (with some tolerance)
+                    click_char_pos = widget_x * 2  # Rough estimate
+                    
+                    if relative_start - 5 <= click_char_pos <= relative_end + 5:
+                        url = url_info['url']
+                        
+                        # Add www. prefix if missing for http/https URLs
+                        if url.startswith('www.') and not url.startswith('http'):
+                            url = 'https://' + url
+                        
+                        # Check if it's an email address
+                        if '@' in url and not url.startswith('mailto:'):
+                            url = 'mailto:' + url
+                        
+                        try:
+                            self._update_log_view(f"[bold blue]> 🌐 正在打开链接: {url}[/bold blue]")
+                            
+                            # Use appropriate method to open the URL
+                            if url.startswith('mailto:'):
+                                # Open email client
+                                subprocess.run(['start', 'mailto:' + url[7:]], shell=True)
+                            else:
+                                # Open web browser
+                                webbrowser.open(url)
+                            
+                            return True
+                        except Exception as e:
+                            try:
+                                self._update_log_view(f"[bold red]> ❌ 无法打开链接: {e}[/bold red]")
+                            except:
+                                print(f"Cannot open link: {e}")
+                            return False
+            
+            return False
+            
+        except Exception as e:
+            print(f"Error handling link click: {e}")
+            return False
+
+    async def on_mount(self) -> None:
+        self.query_one("#user_input").focus()
+        
+        # Set initial visual styles for focus feedback
+        self.query_one("#main_log").styles.border = ("solid", "grey")
+        self.query_one("#user_input").styles.border = ("heavy", "blue")
+        print("Initial focus styles applied: input=heavy blue, log=solid grey")  # Debug
+
+        # Display AGENT PSY LAB logo on startup with animation
+        try:
+            await self._display_startup_logo()
+        except Exception as e:
+            # If logo display fails, show simple welcome message
+            self._update_log_view("[bold green]Welcome to AGENT PSY LAB! Ready for your command.[/bold green]")
+
+        if self._goal is None:
+            # This is a cold start, show welcome message
+            self._update_log_view("[bold green]Welcome to AGENT PSY LAB! Ready for your command.[/bold green]")
+            self._update_status_bar("Ready")
+        else:
+            # A goal was provided. Display it and wait for user to press Enter or edit.
+            self.query_one("#user_input").value = f"/pa {self._goal}"
+            self._update_log_view(f"[bold green]Goal loaded. Press Enter to start or edit the command.[/bold green]")
+            self._update_status_bar("Ready")
+
+    async def on_input_submitted(self, message: Input.Submitted) -> None:
+        user_input = message.value.strip()
+        if not user_input:  # Skip empty inputs
+            return
+            
+        self.query_one("#user_input", Input).value = ""
+        
+        # Add to input history (skip duplicates and empty inputs)
+        if user_input and (not self._input_history or self._input_history[-1] != user_input):
+            self._input_history.append(user_input)
+            # Keep only last 10 entries
+            if len(self._input_history) > 10:
+                self._input_history.pop(0)
+        
+        # Reset history navigation
+        self._history_index = -1
+        self._current_input_before_history = ""
+        
+        if user_input.startswith("/"):
+            await self._handle_shortcut_command(user_input)
+        else:
+            # Show minimal feedback that input is received and being processed
+            self._update_log_view("[cyan]> 🤔 思考中...[/cyan]")
+
+            # Check if we're currently waiting for clarification
+            if self._awaiting_clarification and self._pending_clarification:
+                # Process the clarification response
+                await self._process_clarification_response(user_input)
+                return
+
+            # Use enhanced intent recognizer for natural language input
+            try:
+                # Pass session_id to intent recognizer for context awareness
+                session_id = getattr(self, '_current_session_id', 'default')
+
+                # Check if we should combine with previous context for clarification
+                if self._original_intent_context:
+                    # Combine user input with original context
+                    combined_input = f"{self._original_intent_context.get('original_input', '')} {user_input}"
+                    self._update_log_view(f"[dim]> 结合上下文重新分析: {combined_input}[/dim]")
+                    input_to_analyze = combined_input
+                else:
+                    input_to_analyze = user_input
+
+                # Check if the intent recognizer supports context-aware recognition
+                if hasattr(self._intent_recognizer, 'recognize_intent_with_context'):
+                    intent = self._intent_recognizer.recognize_intent_with_context(input_to_analyze, session_id)
+                else:
+                    # Use standard recognize_intent but try to pass session_id if supported
+                    import inspect
+                    sig = inspect.signature(self._intent_recognizer.recognize_intent)
+                    if 'session_id' in sig.parameters:
+                        intent = self._intent_recognizer.recognize_intent(input_to_analyze, session_id=session_id)
+                    else:
+                        intent = self._intent_recognizer.recognize_intent(input_to_analyze)
+
+                if intent:
+                    # Handle recognized intent
+                    self._update_log_view(f"[bold blue]> 检测到意图: {intent.description} (置信度: {intent.confidence:.2f})[/bold blue]")
+
+                    # Check if intent requires clarification
+                    if getattr(intent, 'requires_clarification', False):
+                        # Store original context and set clarification state
+                        self._original_intent_context = {
+                            'original_input': user_input,
+                            'original_intent': intent,
+                            'session_id': session_id
+                        }
+                        self._pending_clarification = intent
+                        self._awaiting_clarification = True
+
+                        # Handle clarification request
+                        clarification_msg = self._get_clarification_message(intent)
+                        self._update_log_view(f"[bold yellow]> {clarification_msg}[/bold yellow]")
+                        # Don't execute the command yet, wait for user to provide missing information
+                        return  # Exit early to avoid command execution
+                    else:
+                        # 检查是否是历史对话搜索请求
+                        search_keywords = ["参考", "之前的", "历史", "过去", "之前", "以前", "查找", "搜索", "引用"]
+                        history_keywords = ["对话", "聊天", "辩论", "讨论", "记录", "内容", "信息"]
+
+                        is_search_request = any(keyword in user_input for keyword in search_keywords) and \
+                                          any(keyword in user_input for keyword in history_keywords)
+
+                        if is_search_request:
+                            # 提取搜索查询
+                            search_query = user_input
+                            # 移除常见的搜索触发词
+                            for remove_word in ["参考", "之前的", "历史", "过去", "之前", "以前", "查找", "搜索", "引用", "对话", "聊天", "记录"]:
+                                search_query = search_query.replace(remove_word, "").strip()
+
+                            if search_query:
+                                self._update_log_view(f"[bold cyan]🔍 检测到历史对话搜索请求...[/bold cyan]")
+                                self._search_conversation_history(search_query)
+                                return
+                            else:
+                                self._update_log_view("[bold yellow]💡 请提供更具体的搜索关键词，例如：'参考之前的辩论主题'或'搜索关于AI的对话'[/bold yellow]")
+                                return
+
+                        # 检查是否需要将此复杂任务分解为待办事项清单
+                        should_decompose_via_task_engine = False
+                        if self._task_decomposition_integrator is not None:
+                            try:
+                                should_decompose_via_task_engine = await self._task_decomposition_integrator.should_decompose_request(user_input)
+                            except Exception as e:
+                                self._update_log_view(f"[bold yellow]> 任务分解检查失败: {e}[/bold yellow]")
+                                should_decompose_via_task_engine = False
+
+                        if should_decompose_via_task_engine:
+                            # 使用任务分解系统处理复杂请求
+                            self._update_log_view(f"[bold magenta]> 🧩 检测到复杂任务，启动自动分解流程...[/bold magenta]")
+
+                            # 生成并执行任务分解，以事件流形式处理
+                            if self._task_decomposition_integrator is not None:
+                                try:
+                                    # 🚀 第一阶段：显示任务分解计划
+                                    self._update_log_view("")
+                                    self._update_log_view("[bold magenta]╔══════════════════════════════════════════════════════════════╗[/bold magenta]")
+                                    self._update_log_view("[bold magenta]║               🧩 复杂任务分解流程启动                          ║[/bold magenta]")
+                                    self._update_log_view("[bold magenta]╚══════════════════════════════════════════════════════════════╝[/bold magenta]")
+                                    self._update_log_view("")
+
+                                    # 阶段1：显示任务计划
+                                    self._display_task_planning_phase(user_input)
+
+                                    # 阶段2：执行任务并显示进度
+                                    self._update_log_view("")
+                                    self._update_log_view("[bold yellow]🔄 第二阶段：开始逐步执行任务...[/bold yellow]")
+                                    self._update_log_view("[dim]" + "─" * 60 + "[/dim]")
+                                    self._update_log_view("")
+
+                                    # 保存初始任务状态
+                                    initial_task_count = len(self._task_visualization_manager.tasks_data) if self._task_visualization_manager else 0
+
+                                    # 执行任务分解
+                                    result = await self._task_decomposition_integrator.decompose_and_execute(user_input)
+
+                                    # 阶段3：显示执行结果汇总
+                                    self._update_log_view("")
+                                    self._update_log_view("[bold green]🎉 第三阶段：任务执行完成汇总[/bold green]")
+                                    self._update_log_view("[bold green]" + "═" * 60 + "[/bold green]")
+                                    self._update_log_view("")
+
+                                    # 显示最终结果
+                                    self._update_log_view("[bold cyan]📋 最终任务成果：[/bold cyan]")
+                                    self._update_log_view(f"[white]{result['final_result']}[/white]")
+                                    self._update_log_view("")
+
+                                    # 显示最终任务状态
+                                    if self._task_visualization_manager:
+                                        self._display_task_final_summary(initial_task_count)
+
+                                except Exception as e:
+                                    self._update_log_view("")
+                                    self._update_log_view(f"[bold red]❌ 任务分解执行失败: {e}[/bold red]")
+                                    self._update_log_view(f"[dim]错误详情: {str(e)}[/dim]")
+                                    should_decompose_via_task_engine = False
+                            else:
+                                self._update_log_view(f"[bold yellow]> 任务分解系统未初始化，使用常规处理...[/bold yellow]")
+
+                            # 任务分解完成后提前返回
+                            if should_decompose_via_task_engine:
+                                return
+
+                        # Map intent to appropriate command handler
+                        if intent.name == "search_papers":
+                            # Convert to /doc search command
+                            query = intent.parameters.get("query", user_input)
+                            if query and query.strip() != "" and query != "machine learning":  # Only if we have a real query
+                                await self._handle_doc_command(f"search {query}")
+                            else:
+                                # Query is missing or default, ask user for keywords
+                                self._update_log_view("[bold yellow]> 请输入搜索关键词，例如：论文 人工智能[/bold yellow]")
+                        elif intent.name == "download_paper":
+                            # Convert to /doc download command
+                            paper_id = intent.parameters.get("paper_id")
+                            if paper_id:
+                                await self._handle_doc_command(f"download {paper_id}")
+                            else:
+                                self._update_log_view("[bold yellow]> 请提供论文标题、主题或arXiv ID[/bold yellow]")
+                        elif intent.name == "start_debate":
+                            # Convert to /debate start command
+                            topic = intent.parameters.get("topic", user_input)
+                            if topic and topic.strip() != "":
+                                self._handle_debate_command(f"start {topic}")  # This is a sync method, don't await
+                            else:
+                                self._update_log_view("[bold yellow]> 请输入辩论主题[/bold yellow]")
+                        elif intent.name == "create_wiki":
+                            # 直接触发多角色协作创建Wiki
+                            title = intent.parameters.get("title", user_input)
+                            if title and title.strip() != "":
+                                # 调用协作创建方法而不是基础命令
+                                # 在非异步方法中使用asyncio来运行异步方法
+                                asyncio.create_task(self._handle_collaborative_wiki_creation(title))
+                            else:
+                                self._update_log_view("[bold yellow]> 请输入Wiki页面标题[/bold yellow]")
+                        elif intent.name == "initialize_project":
+                            # Convert to /project scaffold command
+                            description = intent.parameters.get("description", user_input)
+                            self._handle_project_command(f"scaffold --description \"{description}\"")  # This is a sync method, don't await
+                        elif intent.name == "view_debate_history":
+                            # Convert to /debate history command
+                            self._handle_debate_command("history")  # This is a sync method, don't await
+                        elif intent.name == "view_specific_debate":
+                            # Convert to /debate history view command
+                            session_id = intent.parameters.get("session_id")
+                            if session_id:
+                                self._handle_debate_command(f"history view {session_id}")  # This is a sync method, don't await
+                            else:
+                                self._handle_debate_command("history")  # This is a sync method, don't await
+                        elif intent.name == "complex_task":
+                            # 处理复杂任务意图
+                            original_request = intent.parameters.get("original_request", user_input)
+                            task_description = intent.parameters.get("task_description", user_input)
+                            task_type = intent.parameters.get("task_type", "general")
+
+                            self._update_log_view(f"[bold magenta]> 🧩 识别到复杂任务: {task_type} 类型[/bold magenta]")
+                            self._update_log_view(f"[bold blue]> 正在为您创建任务列表来完成: '{task_description[:50]}{'...' if len(task_description) > 50 else ''}'[/bold blue]")
+
+                            # 检查是否存在复杂任务管理器
+                            if hasattr(self, '_complex_task_integrator') and self._complex_task_integrator:
+                                try:
+                                    # 执行复杂任务
+                                    result = await self._complex_task_integrator.process_complex_task(original_request)
+
+                                    # 显示任务分解列表
+                                    if self._task_visualization_manager:
+                                        self._update_log_view(f"[bold green]> 任务分解完成，以下是子任务列表:[/bold green]")
+                                        self._display_task_visualization(original_request)
+
+                                    self._update_log_view(f"[bold green]> 复杂任务执行完成:[/bold green]")
+                                    self._update_log_view(f"[cyan]{result['summary']}[/cyan]")
+
+                                    # 显示最终任务状态
+                                    if self._task_visualization_manager:
+                                        self._display_task_visualization(original_request)
+
+                                except Exception as e:
+                                    self._update_log_view(f"[bold red]> 复杂任务执行失败: {e}[/bold red]")
+                                    # 降级到常规处理
+                                    self._start_new_chat_session(user_input)
+                            else:
+                                self._update_log_view(f"[bold yellow]> 复杂任务管理器未就绪，使用常规处理...[/bold yellow]")
+                                # 降级到常规处理
+                                self._start_new_chat_session(user_input)
+
+                        elif intent.name == "execute_skill":
+                            # Convert to skill execution
+                            skill_type = intent.parameters.get("target_skill", "general")
+                            skill_content = intent.parameters.get("content", "")
+                            original_request = intent.parameters.get("original_request_text", "")
+
+                            if skill_content and skill_content.strip():
+                                self._update_log_view(f"[bold blue]> 🤖 执行技能: {skill_type} ('{skill_content[:50]}...')[/bold blue]")
+
+                                # Execute appropriate skill based on type
+                                if skill_type == "analysis" or any(keyword in skill_content for keyword in ["分析", "analyze", "text", "内容"]):
+                                    from daip_live.skills.text_analysis import TextAnalysisSkill
+                                    text_skill = TextAnalysisSkill()
+                                    # Create skill input
+                                    from daip_live.skills.base import SkillInput
+                                    skill_input = SkillInput(
+                                        data=skill_content,
+                                        context={"source": "intent_recognition", "session_id": getattr(self, '_current_session_id', 'default')},
+                                        metadata={}
+                                    )
+                                    # Execute and show result
+                                    result = text_skill.execute(skill_input)
+                                    self._update_log_view(f"[bold green]> ✅ 技能执行成功:[/bold green]")
+                                    self._update_log_view(f"[cyan]{result.result}[/cyan]")
+                                elif skill_type == "search" or any(keyword in skill_content for keyword in ["搜索", "查找", "find", "search"]):
+                                    # Execute search skill through doc command
+                                    await self._handle_doc_command(f"search {skill_content}")
+                                elif skill_type == "claude_skill":
+                                    # Execute Claude-specific skill
+                                    self._update_log_view(f"[bold blue]> 🤖 Claude Skill 执行: {original_request}[/bold blue]")
+                                    # Use Claude skills manager if available
+                                    if hasattr(self, '_claude_skill_adapter_manager') and self._claude_skill_adapter_manager:
+                                        try:
+                                            # Attempt to execute Claude Skills
+                                            from daip_live.skills.text_analysis import TextAnalysisSkill
+                                            claude_skill = TextAnalysisSkill()
+                                            from daip_live.skills.base import SkillInput
+                                            skill_input = SkillInput(
+                                                data=skill_content,
+                                                context={"source": "intent_recognition", "session_id": getattr(self, '_current_session_id', 'default')},
+                                                metadata={"skill_type": "claude_like"}
+                                            )
+                                            result = claude_skill.execute(skill_input)
+                                            self._update_log_view(f"[bold green]> ✅ Claude 技能执行成功:[/bold green]")
+                                            self._update_log_view(f"[cyan]{result.result}[/cyan]")
+                                        except Exception as e:
+                                            self._update_log_view(f"[bold red]> ❌ Claude 技能执行失败: {e}[/bold red]")
+                                    else:
+                                        self._update_log_view(f"[bold yellow]> 未找到Claude技能适配器，使用通用技能处理[/bold yellow]")
+                                        self._start_new_chat_session(skill_content)
+                                else:
+                                    # For other skill types or when content is missing
+                                    self._update_log_view(f"[bold yellow]> 识别为技能请求: {skill_type}, 内容: '{skill_content[:30]}...'[/bold yellow]")
+                                    # Try to find and execute specific skill
+                                    skill_found = False
+                                    if self._skill_manager:
+                                        available_skills = self._skill_manager.list_skills()
+                                        if skill_content.replace(" ", "_") in available_skills:
+                                            # Execute the found skill
+                                            specific_skill = self._skill_manager.get_skill(skill_content.replace(" ", "_"))
+                                            if specific_skill:
+                                                from daip_live.skills.base import SkillInput
+                                                skill_input = SkillInput(
+                                                    data=original_request,
+                                                    context={"source": "intent_recognition", "session_id": getattr(self, '_current_session_id', 'default')},
+                                                    metadata={}
+                                                )
+                                                result = specific_skill.execute(skill_input)
+                                                self._update_log_view(f"[bold green]> ✅ 识别并执行具体技能:[/bold green]")
+                                                self._update_log_view(f"[cyan]{result.result}[/cyan]")
+                                                skill_found = True
+
+                                    if not skill_found:
+                                        self._update_log_view(f"[bold yellow]> 请输入技能执行内容，例如：帮我分析 这段文字内容[/bold yellow]")
+                            else:
+                                self._update_log_view(f"[bold yellow]> 请输入要执行的技能和内容，例如：帮我分析 这段文本[/bold yellow]")
+                                # If skill_content is missing, suggest to user in natural language
+                                if original_request:
+                                    self._update_log_view(f"[dim]> 您的请求: '{original_request}'[/dim]")
+                        elif intent.name == "compress_context":
+                            # Convert to /compact command
+                            self._handle_compact_command("")  # This is a sync method, don't await
+                        elif intent.name in ["question", "chat"]:
+                            # For question or chat intents, determine if slow thinking is needed
+
+                            # Check if user wants fast response by including keywords
+                            user_input_lower = user_input.lower()
+                            needs_fast_response = any(keyword in user_input_lower for keyword in [
+                                "快点", "赶紧", "立刻", "马上", "速速", "尽快", "快", "急速",
+                                "fast", "quick", "rapid", "now", "asap", "急需", "急着要",
+                                "速度", "迅速", "立即", "立马", "马上"
+                            ])
+
+                            # Check if question might require deeper thinking
+                            needs_slow_thinking = any(keyword in user_input_lower for keyword in [
+                                "分析", "解释", "总结", "评估", "评估一下", "深入", "深刻", "详细",
+                                "详细分析", "深度", "复杂", "复杂问题", "研究", "探究", "探讨",
+                                "eval", "analyze", "evaluate", "consider", "think deeply",
+                                "深思", "仔细", "仔细想想", "认真", "认真考虑", "审慎",
+                                "帮我分析", "帮我理解", "帮我评估", "帮我研究", "帮我解释",
+                                "详细说说", "深入分析", "详细解释", "全面分析", "仔细分析"
+                            ])
+
+                            # Special processing if slow thinking is detected
+                            if needs_slow_thinking and not needs_fast_response:
+                                # Respond with slow thinking notification first
+                                self._update_log_view(f"[bold yellow]> ⏳ 正在进行深度思考...我需要审慎的回答这个问题: '{user_input[:50]}{'...' if len(user_input) > 50 else ''}'[/bold yellow]")
+                                # Move system status messages to system panel
+                                self._update_system_log(f"[dim]🔍 系统正在整合知识库、分析参数并准备多角色协作回答[/dim]")
+
+                                # Then start chat session with slow thinking context
+                                self._start_new_chat_session(user_input)
+                            elif needs_fast_response:
+                                # User wants fast response, provide quick feedback
+                                self._update_log_view(f"[bold blue]> ⚡ 快速响应模式: '{user_input}'[/bold blue]")
+                                self._update_system_log(f"[dim]⚡ Fast response mode activated[/dim]")
+                                self._start_new_chat_session(user_input)
+                            else:
+                                # Default behavior - start chat session
+                                # Provide feedback that system is processing
+                                if intent.name == "question":
+                                    self._update_log_view("[cyan]> 🤔 思考中...[/cyan]")
+                                    self._update_system_log(f"[dim]❓ Question processing initiated[/dim]")
+                                elif intent.name == "chat":
+                                    self._update_log_view("[cyan]> 🤔 思考中...[/cyan]")
+                                    self._update_system_log(f"[dim]💬 Chat session started[/dim]")
+
+                                # 保存当前输入，以便在会话中能正确显示
+                                current_input = user_input
+                                self._start_new_chat_session(user_input)
+
+                                # Add informational note if it was a question that doesn't obviously need deep thinking
+                                if intent.name == "question" and not needs_slow_thinking and not needs_fast_response:
+                                    # This is a general question, user knows system is processing
+                                    pass  # General chat processing will already be done by _start_new_chat_session
+                        else:
+                            # For other intents, fall back to chat mode
+                            self._start_new_chat_session(user_input)
+                else:
+                    # No intent recognized, fall back to existing chat behavior
+                    self._update_log_view(f"[bold yellow]> 未检测到特定意图，启动常规聊天会话: '{user_input[:50]}{'...' if len(user_input) > 50 else ''}'[/bold yellow]")
+
+                    # Check if we have an active chat session
+                    if hasattr(self, '_executor') and self._executor is not None:
+                        # Check if the executor has a user_input_queue and it's valid
+                        if hasattr(self._executor, 'user_input_queue') and self._executor.user_input_queue is not None:
+                            try:
+                                self._executor.user_input_queue.put_nowait(user_input)
+                                self._update_log_view(f"[bold blue]> You:[/bold blue] {user_input}")
+                            except Exception as e:
+                                # Queue might be full or session broken
+                                self._update_log_view(f"[bold red]> Error: Could not send message to session ({str(e)})[/bold red]")
+                                self._start_new_chat_session(user_input)
+                        else:
+                            # Executor exists but no input queue, start new session
+                            self._start_new_chat_session(user_input)
+                    else:
+                        # No active agent session, create one automatically
+                        self._start_new_chat_session(user_input)
+            except Exception as e:
+                # Handle any errors during intent recognition
+                self._update_log_view(f"[bold red]> 意图识别出错: {str(e)}[/bold red]")
+
+                # Still provide feedback that we're falling back to chat
+                self._update_log_view(f"[bold yellow]> 正在使用常规聊天模式处理您的请求: '{user_input[:50]}{'...' if len(user_input) > 50 else ''}'[/bold yellow]")
+
+                # Fall back to existing chat behavior
+                if hasattr(self, '_executor') and self._executor is not None:
+                    if hasattr(self._executor, 'user_input_queue') and self._executor.user_input_queue is not None:
+                        try:
+                            self._executor.user_input_queue.put_nowait(user_input)
+                            self._update_log_view(f"[bold blue]> You:[/bold blue] {user_input}")
+                        except Exception as inner_e:
+                            self._update_log_view(f"[bold red]> Error: Could not send message to session ({str(inner_e)})[/bold red]")
+                            self._start_new_chat_session(user_input)
+                    else:
+                        self._start_new_chat_session(user_input)
+                else:
+                    self._start_new_chat_session(user_input)
+
+    def _get_autocomplete_suggestions(self, value: str) -> List[str]:
+        """Gets autocomplete suggestions based on the input value."""
+        parts = value.split(" ")
+        trimmed_value = value.rstrip()
+        
+        # Debug: remove this after testing
+        # print(f"DEBUG: value='{value}', parts={parts}, len={len(parts)}")
+
+        # Case 1: Main command completion (only if exactly 1 part and not a known multi-part command)
+        if len(parts) == 1 and value.startswith("/"):
+            cmd = value.strip()
+            # Don't show main command completion for commands that have subcommands
+            known_multi_commands = {"/role", "/session", "/knowledge", "/project", "/debate", "/model", "/compact", "/doc", "/wiki", "/permission", "/skill"}
+            if cmd not in known_multi_commands or len(cmd) < len("/role"):  # Allow partial matches
+                return [f"{cmd} - {help_text}" for cmd, help_text in self._available_commands if cmd.startswith(value)]
+
+        # Case 2: /role command completions
+        if parts[0] == "/role":
+            if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
+                # Suggest subcommands
+                subcommands = ["list", "view"]
+                if len(parts) >= 2:
+                    prefix = parts[1] if len(parts) == 2 else ""
+                    suggestions = [f"/role {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                    return suggestions
+                else:
+                    return [f"/role {cmd}" for cmd in subcommands]
+            
+            elif len(parts) >= 3 and parts[1] == "view":
+                # Suggest role names for /role view
+                if len(parts) == 3 or (len(parts) == 4 and parts[3] == ""):
+                    prefix = parts[2] if len(parts) >= 3 and parts[2] else ""
+                    try:
+                        roles = self._role_manager.list_roles()
+                        role_names = [role.name for role in roles if role.name.startswith(prefix)]
+                        return [f"/role view {name}" for name in role_names]
+                    except:
+                        return []
+
+        # Session commands removed from interface
+
+        # Case 4: /knowledge command completions
+        if parts[0] == "/knowledge":
+            if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
+                # Suggest subcommands
+                subcommands = ["sync", "search"]
+                if len(parts) >= 2:
+                    prefix = parts[1] if len(parts) == 2 else ""
+                    suggestions = [f"/knowledge {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                    return suggestions
+                else:
+                    return [f"/knowledge {cmd}" for cmd in subcommands]
+
+        # Project commands removed from interface
+
+        # Case 6: /debate command completions with progressive disclosure
+        if parts[0] == "/debate":
+            if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
+                # Phase 1: Show only main subcommands
+                subcommands = ["start", "history", "search"]
+                if len(parts) >= 2:
+                    prefix = parts[1] if len(parts) == 2 else ""
+                    suggestions = [f"/debate {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                    return suggestions
+                else:
+                    return [f"/debate {cmd}" for cmd in subcommands]
+
+            # Phase 2: Handle subcommand-specific suggestions
+            elif len(parts) >= 2:
+                subcommand = parts[1]
+
+                if subcommand == "start":
+                    # For /debate start, ask for topic first, don't show options yet
+                    if len(parts) == 2:
+                        return ["/debate start <辩论主题>"]
+                    elif len(parts) == 3:
+                        # User has entered subcommand but no topic yet
+                        if not parts[2]:
+                            return ["/debate start <辩论主题>"]
+                        # User has entered topic, now show options
+                        else:
+                            return [
+                                f"/debate start {parts[2]}",
+                                f"/debate start {parts[2]} --roles <角色配置>",
+                                f"/debate start {parts[2]} --rounds <轮次数>"
+                            ]
+                    elif len(parts) >= 4:
+                        # User is adding options, provide completion
+                        if parts[3] == "--roles" or (len(parts) == 4 and parts[3].startswith("--")):
+                            if len(parts) == 4:
+                                return [f"/debate start {parts[2]} --roles <角色1,角色2>"]
+                            elif len(parts) == 5 and not parts[4]:
+                                return [f"/debate start {parts[2]} --roles philosopher,engineer"]
+                        elif parts[3] == "--rounds" or (len(parts) == 4 and parts[3].startswith("--")):
+                            if len(parts) == 4:
+                                return [f"/debate start {parts[2]} --rounds <1-10>"]
+                            elif len(parts) == 5 and not parts[4]:
+                                return [f"/debate start {parts[2]} --rounds 3"]
+
+                elif subcommand == "history":
+                    # Phase 2 for history: show subcommands
+                    if len(parts) == 2:
+                        subcommands = ["list", "view"]
+                        return [f"/debate history {cmd}" for cmd in subcommands]
+                    elif len(parts) == 3:
+                        if parts[2] == "view":
+                            # Show session ID prompt
+                            return ["/debate history view <会话ID>"]
+
+                elif subcommand == "search":
+                    # Phase 2 for search: show query prompt
+                    if len(parts) == 2:
+                        return ["/debate search <搜索关键词>"]
+
+        # Case 7: /model command completions - disabled, /model defaults to list
+        if parts[0] == "/model":
+            # No auto-completion for /model command
+            return []
+
+        # Case 8: /compact command completions
+        if parts[0] == "/compact":
+            if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
+                # Suggest subcommands
+                subcommands = ["current", "full", "aggressive"]
+                if len(parts) >= 2:
+                    prefix = parts[1] if len(parts) == 2 else ""
+                    suggestions = [f"/compact {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                    return suggestions
+                else:
+                    return [f"/compact {cmd}" for cmd in subcommands]
+
+        # Case 9: /doc command completions with progressive disclosure
+        if parts[0] == "/doc":
+            if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
+                # Phase 1: Show only main subcommands
+                subcommands = ["search", "download", "list"]
+                if len(parts) >= 2:
+                    prefix = parts[1] if len(parts) == 2 else ""
+                    suggestions = [f"/doc {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                    return suggestions
+                else:
+                    return [f"/doc {cmd}" for cmd in subcommands]
+
+            # Phase 2: Handle subcommand-specific suggestions
+            elif len(parts) >= 2:
+                subcommand = parts[1]
+
+                if subcommand == "search":
+                    if len(parts) == 2:
+                        return ["/doc search <论文关键词>"]
+                    elif len(parts) == 3 and not parts[2]:
+                        return ["/doc search <论文关键词>"]
+
+                elif subcommand == "download":
+                    if len(parts) == 2:
+                        return ["/doc download <论文ID>"]
+                    elif len(parts) == 3 and not parts[2]:
+                        return ["/doc download <论文ID>"]
+                    elif len(parts) == 3:
+                        # User provided paper ID, now show format option
+                        return [
+                            f"/doc download {parts[2]}",
+                            f"/doc download {parts[2]} --format <格式>"
+                        ]
+                    elif len(parts) >= 4 and parts[3] == "--format":
+                        if len(parts) == 4:
+                            formats = ["pdf", "docx", "html", "txt"]
+                            return [f"/doc download {parts[2]} --format {fmt}" for fmt in formats]
+
+                elif subcommand == "list":
+                    if len(parts) == 2:
+                        return ["/doc list", "/doc list --limit <数量>"]
+
+        # Case 10: /wiki command completions with progressive disclosure
+        if parts[0] == "/wiki":
+            if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
+                # Phase 1: Show only main subcommands
+                subcommands = ["create", "search", "list", "export"]
+                if len(parts) >= 2:
+                    prefix = parts[1] if len(parts) == 2 else ""
+                    suggestions = [f"/wiki {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                    return suggestions
+                else:
+                    return [f"/wiki {cmd}" for cmd in subcommands]
+
+            # Phase 2: Handle subcommand-specific suggestions
+            elif len(parts) >= 2:
+                subcommand = parts[1]
+
+                if subcommand == "create":
+                    if len(parts) == 2:
+                        return ["/wiki create <页面标题>"]
+
+                elif subcommand == "search":
+                    if len(parts) == 2:
+                        return ["/wiki search <搜索关键词>"]
+
+                elif subcommand == "list":
+                    if len(parts) == 2:
+                        return ["/wiki list", "/wiki list --limit <数量>"]
+
+                elif subcommand == "export":
+                    if len(parts) == 2:
+                        formats = ["markdown", "html", "obsidian", "json"]
+                        return [f"/wiki export {fmt}" for fmt in formats]
+
+        # Case 11: /permission command completions
+        if parts[0] == "/permission":
+            if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
+                # Suggest subcommands
+                subcommands = ["list", "grant", "revoke", "check", "reset"]
+                if len(parts) >= 2:
+                    prefix = parts[1] if len(parts) == 2 else ""
+                    suggestions = [f"/permission {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                    return suggestions
+                else:
+                    return [f"/permission {cmd}" for cmd in subcommands]
+
+            elif len(parts) >= 2 and parts[1] in ["grant", "revoke", "check", "reset"]:
+                # For /permission subcommands
+                if parts[1] in ["grant", "revoke"]:
+                    if len(parts) == 3 or (len(parts) == 4 and parts[3] == ""):
+                        tools = ["gemini-cli", "playwright", "exa-search", "context7", "deepwiki", "paper-downloader", "format-converter"]
+                        prefix = parts[2] if len(parts) >= 3 else ""
+                        tool_suggestions = [f"/permission {parts[1]} {tool}" for tool in tools if tool.startswith(prefix)]
+                        return tool_suggestions
+                    elif parts[1] == "grant" and len(parts) >= 4:
+                        # Suggest permission levels for grant command
+                        if len(parts) == 4 or (len(parts) == 5 and parts[4] == ""):
+                            levels = ["denied", "read_only", "basic", "advanced", "admin"]
+                            prefix = parts[3] if len(parts) >= 4 else ""
+                            level_suggestions = [f"/permission grant {parts[2]} {level}" for level in levels if level.startswith(prefix)]
+                            return level_suggestions
+                elif parts[1] in ["check"]:
+                    if len(parts) == 3 or (len(parts) == 4 and parts[3] == ""):
+                        tools = ["gemini-cli", "playwright", "exa-search", "context7", "deepwiki", "paper-downloader", "format-converter"]
+                        prefix = parts[2] if len(parts) >= 3 else ""
+                        tool_suggestions = [f"/permission check {tool}" for tool in tools if tool.startswith(prefix)]
+                        return tool_suggestions
+
+        return []
+
+
+
+    def on_input_changed(self, message: Input.Changed) -> None:
+        value = message.value
+        
+        # Reset history navigation when user starts typing
+        if self._history_index != -1:
+            self._history_index = -1
+            self._current_input_before_history = ""
+        
+        suggestions = self._get_autocomplete_suggestions(value)
+        existing_popup_query = self.query("#autocomplete-popup")
+
+        if suggestions:
+            # Always show popup for parameter suggestions (never auto-select parameters)
+            parts = value.strip().split(" ")
+            is_parameter_suggestion = len(parts) >= 2
+            
+            # Only auto-select for single command suggestions (not parameters)
+            # But only when user is adding characters, not deleting
+            if len(suggestions) == 1 and not is_parameter_suggestion:
+                # Clean the suggestion by removing help text if present
+                clean_suggestion = suggestions[0].split(" - ")[0]
+                input_widget = self.query_one(Input)
+                
+                # Only auto-complete if the suggestion is longer than current input
+                # AND if the user is likely still typing (not deleting)
+                # Check if the clean suggestion starts with current value to avoid overwriting user's intent
+                if len(clean_suggestion) > len(value) and clean_suggestion.startswith(value):
+                    # Instead of auto-completing, just show the suggestion in popup
+                    # This allows users to accept or reject the suggestion
+                    pass
+                else:
+                    # Remove any existing popup
+                    if existing_popup_query:
+                        existing_popup_query.first().remove()
+                    return
+            
+            # Show popup for multiple suggestions or parameter suggestions
+            if existing_popup_query:
+                existing_popup_query.first().update_commands(suggestions)
+            else:
+                popup = AutocompletePopup(suggestions=suggestions, id="autocomplete-popup")
+                self.mount(popup)
+                popup.styles.offset = (self.query_one("#user_input").region.x, -3)
+
+
+    def on_command_selected(self, message: CommandSelected) -> None:
+        input_widget = self.query_one(Input)
+        current_value = input_widget.value.strip()
+        parts = current_value.split(" ")
+
+        # Determine if this is a parameter completion
+        current_suggestions = self._get_autocomplete_suggestions(current_value)
+        is_parameter_completion = len(parts) >= 2 and current_suggestions
+
+        if is_parameter_completion:
+            # Parameter completion: replace the last part with the selection
+            # For example: "/role view " + "assistant" -> "/role view assistant"
+            # But we need to handle cases where the suggestion already includes the command
+            if message.command.startswith(parts[0]):
+                # Suggestion already includes the full command (e.g., "/role view assistant")
+                new_value = message.command
+            else:
+                # Suggestion is just the parameter (e.g., "assistant")
+                base_parts = parts[:-1]  # Keep all parts except the last (empty or partial)
+                new_value = " ".join(base_parts) + " " + message.command
+            input_widget.value = new_value
+            # Move cursor to end of the completed parameter for user convenience
+            input_widget.action_end()
+        else:
+            # Command completion: replace the whole input
+            input_widget.value = message.command
+            # Move cursor to end for user to continue typing
+            input_widget.action_end()
+
+        input_widget.focus()
+        for popup in self.query("#autocomplete-popup"):
+            popup.remove()
+
+    def on_key(self, event: events.Key) -> None:
+        # Handle Shift+Tab key specifically
+        if event.key == "shift+tab":
+            self.action_toggle_focus()
+            event.prevent_default()
+            return  # Prevent further processing
+
+        # Handle system-level keys first (should work regardless of focus)
+        if event.key == "ctrl+e":
+            self._handle_ctrl_e_exit()
+            event.prevent_default()
+            return  # Prevent further processing
+
+        if event.key == "ctrl+q":
+            self._handle_ctrl_q_exit()
+            event.prevent_default()
+            return  # Prevent further processing
+
+        if event.key == "escape":
+            self._handle_escape_key()
+            event.prevent_default()
+            return  # Prevent further processing
+
+        # Handle focus-specific key behavior
+        if self.focus_mode == FocusMode.OUTPUT:
+            # In output mode, handle copy and paste keys
+            if event.key == "ctrl+c":
+                self.action_copy_text()
+                event.prevent_default()
+                return
+            elif event.key == "ctrl+v":
+                self.action_paste_text()
+                event.prevent_default()
+                return
+            elif event.key == "ctrl+a":
+                # In output mode, Ctrl+A should copy all text
+                if self.focus_mode == FocusMode.OUTPUT:
+                    self.action_select_all()
+                event.prevent_default()
+                return
+            elif event.key == "escape":
+                # Handle escape key specifically in output mode
+                print(f"Escape key detected in OUTPUT mode, focus mode: {self.focus_mode}")  # Debug
+                self._handle_escape_key()
+                event.prevent_default()
+                return
+            else:
+                # Ignore all other keys in output mode
+                event.prevent_default()
+                return
+        
+        # Handle input mode keys (let them pass through to the input widget)
+        # This ensures normal typing, backspace, delete, etc. work correctly
+        try:
+            input_widget = self.query_one(Input)
+        except NoMatches:
+            # If Input widget not found, ignore the key event
+            return
+
+        # Handle Ctrl+V in input mode for paste functionality
+        if event.key == "ctrl+v":
+            self.action_paste_text()
+            event.prevent_default()
+            return
+        
+        popup_query = self.query("#autocomplete-popup")
+
+        # Handle autocomplete popup navigation
+        if popup_query:
+            popup = popup_query.first()
+            if event.key == "up":
+                event.prevent_default()
+                popup.cursor_up()
+                return
+            if event.key == "down":
+                event.prevent_default()
+                popup.cursor_down()
+                return
+            if event.key in ("tab", "enter"):
+                event.prevent_default()
+                popup.accept_suggestion()
+                return
+            if event.key == "escape":
+                popup.remove()
+                event.prevent_default()
+                return
+            # For all other keys when popup is shown, let the input widget handle them
+            # This ensures normal typing, backspace, delete, etc. work correctly
+            return
+
+        # Handle input history navigation (only when no popup is shown)
+        if not popup_query and self._input_history:
+            if event.key == "up":
+                event.prevent_default()
+                self._navigate_history(-1)  # Go to older history
+                return
+            if event.key == "down":
+                event.prevent_default()
+                self._navigate_history(1)   # Go to newer history
+                return
+                
+        # For all other keys in input mode, let the input widget handle them normally
+        # This ensures normal typing, backspace, delete, enter, etc. work correctly
+        # We don't need to explicitly handle them here
+
+    def _handle_escape_key(self) -> None:
+        # Always switch to input mode when escape is pressed
+        self.action_exit_output_mode()
+
+    def _navigate_history(self, direction: int) -> None:
+        """Navigate through input history.
+        
+        Args:
+            direction: -1 for up (older), 1 for down (newer)
+        """
+        input_widget = self.query_one(Input)
+        
+        # If we're just starting history navigation, save current input
+        if self._history_index == -1:
+            self._current_input_before_history = input_widget.value
+        
+        # Calculate new index
+        if direction == -1:  # Up key - older history
+            if self._history_index == -1:
+                # First up press - go to most recent history
+                if self._input_history:
+                    self._history_index = len(self._input_history) - 1
+            else:
+                # Continue to older history
+                if self._history_index > 0:
+                    self._history_index -= 1
+                    
+        elif direction == 1:  # Down key - newer history
+            if self._history_index != -1:
+                if self._history_index < len(self._input_history) - 1:
+                    self._history_index += 1
+                else:
+                    # Reached the end, restore original input
+                    self._history_index = -1
+        
+        # Update input field with selected history item
+        if self._history_index == -1:
+            input_widget.value = self._current_input_before_history
+        else:
+            input_widget.value = self._input_history[self._history_index]
+        
+        # Move cursor to end of input
+        input_widget.action_end()
+
+    async def _handle_shortcut_command(self, command: str) -> None:
+        parts = command[1:].strip().split(" ", 1)
+        cmd = parts[0].lower() if parts else ""
+        args = parts[1] if len(parts) > 1 else ""
+
+        handler_name = f"_handle_{cmd}_command"
+        handler = getattr(self, handler_name, None)
+        
+        if handler:
+            if asyncio.iscoroutinefunction(handler):
+                await handler(args)
+            else:
+                handler(args)
+        else:
+            # 指令不存在，提供智能建议
+            self._suggest_similar_commands(cmd)
+
+    def _suggest_similar_commands(self, unknown_cmd: str) -> None:
+        """为未知指令提供智能建议"""
+        # 获取所有可用命令名称
+        available_commands = [cmd_name[1:] for cmd_name, _ in self._available_commands]  # 移除开头的'/'
+
+        # 使用difflib查找最相似的命令
+        suggestions = get_close_matches(unknown_cmd, available_commands, n=3, cutoff=0.3)
+
+        if suggestions:
+            suggestion_text = ", ".join([f"/{suggestion}" for suggestion in suggestions])
+            self._update_log_view(f"[bold red]> Unknown command: /{unknown_cmd}[/bold red]")
+            self._update_log_view(f"[bold yellow]> Did you mean: {suggestion_text}?[/bold yellow]")
+        else:
+            self._update_log_view(f"[bold red]> Unknown command: /{unknown_cmd}[/bold red]")
+            self._update_log_view("[bold yellow]> Type /help to see all available commands.[/bold yellow]")
+
+    def _handle_todo_command(self, args: str) -> None:
+        """Handle todo list commands for task decomposition and management."""
+        if tui_todo_manager:
+            tui_todo_manager.handle_todo_command(args)
+        else:
+            self._update_log_view("[bold red]> TODO管理系统未初始化[/bold red]")
+
+    def _handle_pa_command(self, args: str) -> None:
+        """Personal assistant shortcut for interactive chat sessions."""
+        if not args:
+            self._update_log_view("[bold yellow]> Please enter your task goal:[/bold yellow]")
+            self._update_log_view("[bold dim]> (Type your goal and press Enter to start the Personal Assistant)[/bold dim]")
+            # Set input focus and clear for user input
+            input_widget = self.query_one(Input)
+            input_widget.value = "/pa "
+            input_widget.focus()
+            input_widget.action_end()
+            return
+
+        # Create a new executor instance for the session
+        pa_executor = AgentExecutor(
+            session_manager=self._session_manager,
+            memory_service=MemoryService(model_provider=self._model_provider),
+            knowledge_manager=self._knowledge_manager,
+            model_provider=self._model_provider,
+            tool_manager=ToolManager(),
+            user_input_queue=asyncio.Queue(),
+        )
+
+        # Update the TUI's reference to the currently active executor
+        self._executor = pa_executor
+
+        # Run the agent in interactive chat mode
+        agent_coro = run_chat_agent_and_feed_tui(pa_executor, self, args)
+        self.run_worker(agent_coro)
+        self._update_log_view(f"[bold green]> Personal Assistant started. You can now chat.[/bold green]")
+
+    def _handle_role_command(self, args: str) -> None:
+        """Role management commands (list, view)."""
+        parts = args.strip().split(" ", 1)
+        subcommand = parts[0].lower() if parts[0] else ""
+
+        if subcommand == "list":
+            roles = self._role_manager.list_roles()
+            if not roles:
+                self._update_log_view("[bold yellow]> No roles found.[/bold yellow]")
+                return
+
+            table_str = "Available Roles:\n"
+            table_str += "- " + "\n- ".join([f"{role.name}: {role.persona}" for role in roles])
+            self._update_log_view(f"[bold green]>{table_str}[/bold green]")
+        elif subcommand == "view":
+            if len(parts) < 2:
+                # Show role selection dialog
+                roles = self._role_manager.list_roles()
+                if not roles:
+                    self._update_log_view("[bold yellow]> No roles found.[/bold yellow]")
+                    return
+                
+                def on_role_selected(role):
+                    self._safe_log_callback(lambda: (
+                        f"Role Details: {role.name}\n"
+                        f"  Persona: {role.persona}\n"
+                        f"  Tools: {', '.join(role.tools) if role.tools else 'None'}"
+                    ), "role", f"{role.name} - {role.persona}")
+                
+                self.push_screen(RoleSelectionDialog(roles, on_role_selected))
+                return
+            role_name = parts[1]
+            role = self._role_manager.get_role_by_name(role_name)
+            if not role:
+                self._update_log_view(f"[bold red]> Role '{role_name}' not found.[/bold red]")
+                return
+
+            details = (
+                f"Role Details: {role.name}\n"
+                f"  Persona: {role.persona}\n"
+                f"  Tools: {', '.join(role.tools) if role.tools else 'None'}"
+            )
+            self._update_log_view(f"[bold green]>{details}[/bold green]")
+        else:
+            self._update_log_view(f"[bold red]> Unknown subcommand for /role: {subcommand}. Try /role list.[/bold red]")
+
+    async def _handle_knowledge_command(self, args: str) -> None:
+        """Knowledge base operations (sync, search)."""
+        parts = args.strip().split(" ", 1)
+        subcommand = parts[0].lower() if parts and parts[0] else ""
+
+        if subcommand == "sync":
+            self._update_log_view("[bold yellow]> Starting knowledge base sync...[/bold yellow]")
+            summary = await self._knowledge_manager.sync_knowledge_base()
+            summary_str = ", ".join([f"{key.capitalize()}: {value}" for key, value in summary.items()])
+            self._update_log_view(f"[bold green]> Knowledge base sync complete. {summary_str}[/bold green]")
+        elif subcommand == "search":
+            if len(parts) < 2:
+                self._update_log_view("[bold red]> Missing query for /knowledge search.[/bold red]")
+                return
+            query = parts[1]
+            self._update_log_view(f"[bold yellow]> Searching for: '{query}'...[/bold yellow]")
+            results = await self._knowledge_manager.search(query)
+            if not results:
+                self._update_log_view("[bold yellow]> No results found.[/bold yellow]")
+                return
+
+            results_str = "Knowledge Search Results:\n"
+            for res in results:
+                results_str += f"- {res['file_path']} (Distance: {res['distance']:.4f})\n"
+            self._update_log_view(f"[bold green]>{results_str}[/bold green]")
+        elif subcommand == "collaborate" or subcommand == "multirole":
+            # 协作创建维基词条功能
+            if len(parts) < 2:
+                self._update_log_view("[bold red]> Missing title for /knowledge collaborate. Usage: /knowledge collaborate <title>[/bold red]")
+                return
+            title = parts[1]
+            if hasattr(self._wiki_manager, 'create_collaborative_page') and self._wiki_manager:
+                self._update_log_view(f"[bold yellow]> Creating collaborative wiki page: '{title}'...[/bold yellow]")
+                try:
+                    # 使用默认角色创建协作页面
+                    roles_instructions = {
+                        "domain_expert": "作为领域专家，请提供专业知识和核心技术要点",
+                        "researcher": "作为研究员，请提供研究依据和参考资料",
+                        "editor": "作为编辑，请负责内容结构和语言润色",
+                        "analyst": "作为分析师，请提供批判性思考和改进建议"
+                    }
+                    collaborative_page = await self._wiki_manager.create_collaborative_page(
+                        title=title,
+                        roles_instructions=roles_instructions
+                    )
+                    self._update_log_view(f"[bold green]> ✅ Collaborative wiki page created: {collaborative_page.title}[/bold green]")
+                except Exception as e:
+                    self._update_log_view(f"[bold red]> ❌ Error creating collaborative wiki page: {e}[/bold red]")
+            elif hasattr(self._wiki_manager, '_add_content_by_all_roles') and self._wiki_manager:
+                # 如果没有create_collaborative_page方法，先创建页面然后协作
+                self._update_log_view(f"[bold yellow]> Creating wiki page: '{title}' and adding collaborative content...[/bold yellow]")
+                try:
+                    # 先创建一个空页面
+                    initial_page = self._wiki_manager.create_page(title=title, content=f"# {title}\n\n此页面由多个AI角色协作创建于{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}。\n\n## 协作内容\n", tags=["collaborative"])
+
+                    # 然后让多个角色协作添加内容
+                    roles_instructions = {
+                        "domain_expert": "作为领域专家，请提供专业知识和核心技术要点",
+                        "researcher": "作为研究员，请提供研究依据和参考资料",
+                        "editor": "作为编辑，请负责内容结构和语言润色",
+                        "analyst": "作为分析师，请提供批判性思考和改进建议"
+                    }
+                    updated_page = await self._wiki_manager._add_content_by_all_roles(
+                        title=title,
+                        roles_instructions=roles_instructions,
+                        instruction=f"协作完善维基词条: {title}"
+                    )
+                    self._update_log_view(f"[bold green]> ✅ Collaborative wiki page created and updated: {updated_page.title}[/bold green]")
+                except Exception as e:
+                    self._update_log_view(f"[bold red]> ❌ Error creating collaborative wiki page: {e}[/bold red]")
+            else:
+                self._update_log_view("[bold red]> Wiki manager doesn't support collaborative features[/bold red]")
+        else:
+            self._update_log_view(f"[bold red]> Unknown subcommand for /knowledge: {subcommand}. Available: sync, search, collaborate[/bold red]")
+
+    def _handle_debate_command(self, args: str) -> None:
+        """Debate system commands (start with topic and options)."""
+        args_list = args.split()
+        if not args_list:
+            self._update_log_view("[bold red]> Usage: /debate <start|history|search> [options][/bold red]")
+            self._update_log_view("[dim]Examples:[/dim]")
+            self._update_log_view("[dim]  /debate start AI发展的伦理问题 --roles philosopher,engineer --rounds 3[/dim]")
+            self._update_log_view("[dim]  /debate history list[/dim]")
+            self._update_log_view("[dim]  /debate history view <session_id>[/dim]")
+            self._update_log_view("[dim]  /debate search 之前的辩论主题[/dim]")
+            return
+
+        subcommand = args_list[0]
+        remaining_args = " ".join(args_list[1:])
+
+        if subcommand == "start":
+            if not remaining_args.strip():
+                self._update_log_view("[bold red]> Usage: /debate start <topic> [--roles <roles>] [--rounds <rounds>][/bold red]")
+                return
+            
+            # Parse arguments (simple parsing)
+            topic_parts = []
+            roles = "pro_arguer,con_arguer"
+            rounds = 3
+            
+            # Simple argument parsing
+            remaining_parts = remaining_args.split()
+            i = 0
+            while i < len(remaining_parts):
+                if remaining_parts[i] == "--roles" and i + 1 < len(remaining_parts):
+                    roles = remaining_parts[i + 1]
+                    i += 2
+                elif remaining_parts[i] == "--rounds" and i + 1 < len(remaining_parts):
+                    try:
+                        rounds = int(remaining_parts[i + 1])
+                        i += 2
+                    except ValueError:
+                        self._update_log_view("[bold red]> Invalid rounds value, must be a number[/bold red]")
+                        return
+                else:
+                    topic_parts.append(remaining_parts[i])
+                    i += 1
+            
+            topic = " ".join(topic_parts)
+
+            self._update_log_view(f"[bold blue]> 🤖 启动多模型辩论系统...[/bold blue]")
+            self._update_log_view(f"[bold blue]> 主题: {topic}[/bold blue]")
+            self._update_log_view(f"[dim]> 角色: {roles}, 轮次: {rounds}[/dim]")
+
+            # Start debate in background
+            task = asyncio.create_task(self._start_debate(topic, roles, rounds))
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
+        elif subcommand == "history":
+            remaining_history_args = " ".join(args_list[1:])
+            self._handle_debate_history_command(remaining_history_args)
+        elif subcommand == "search":
+            if not remaining_args.strip():
+                self._update_log_view("[bold red]> Usage: /debate search <query>[/bold red]")
+                self._update_log_view("[dim]Example: /debate search 之前的辩论主题[/dim]")
+                self._update_log_view("[dim]Example: /debate search AI伦理[/dim]")
+                self._update_log_view("[dim]Example: /debate search technology debate[/dim]")
+                return
+            self._search_conversation_history(remaining_args)
+        else:
+            self._update_log_view(f"[bold red]> Unknown debate subcommand: {subcommand}[/bold red]")
+            self._update_log_view("[bold yellow]> Available: start, history, search[/bold yellow]")
+
+    async def _start_debate(self, topic: str, roles: str, rounds: int) -> None:
+        """Start a debate asynchronously with multi-model support."""
+        try:
+            role_list = [r.strip() for r in roles.split(",")]
+
+            # Initialize debate tracking
+            self._current_debate.update({
+                'topic': topic,
+                'total_rounds': rounds,
+                'current_round': 0,
+                'current_participant': None,
+                'is_active': True,
+                'role_models': {}
+            })
+
+            # Get model mappings for all roles
+            try:
+                role_mappings = self._role_model_manager.get_debate_model_mappings(role_list)
+
+                # Store role-model mappings
+                for mapping in role_mappings:
+                    self._current_debate['role_models'][mapping.role_name] = mapping.role_model_config.model_name
+                    self._debate_active_models[mapping.role_name] = mapping.role_model_config.model_name
+
+                # Log model assignments
+                model_assignments = [f"{role}→{model}" for role, model in self._current_debate['role_models'].items()]
+                self._update_log_view(f"[bold blue]🎯 Model assignments: {', '.join(model_assignments)}[/bold blue]")
+
+                # Use enhanced debate manager with multi-model support
+                async for event in self._enhanced_debate_manager.run_debate(topic, role_list, rounds):
+                    self.post_event(event)
+
+            except Exception as model_error:
+                # Fall back to standard debate manager if enhanced features fail
+                self._update_log_view(f"[yellow]Multi-model debate failed, using standard mode: {model_error}[/yellow]")
+                async for event in self._debate_manager.run_debate(topic, role_list, rounds):
+                    self.post_event(event)
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]Debate error: {e}[/bold red]")
+            self._current_debate['is_active'] = False
+            self._debate_active_models.clear()
+            self._update_current_model("default")
+
+    def _handle_session_command(self, args: str) -> None:
+        """Session management commands (list, view, clear, reset)."""
+        parts = args.strip().split(" ", 1)
+        subcommand = parts[0].lower() if parts and parts[0] else "list" # Default to list
+
+        if subcommand == "list":
+            sessions = self._session_manager.list_sessions()
+            if not sessions:
+                self._update_log_view("[bold yellow]> No sessions found.[/bold yellow]")
+                return
+
+            table_str = "Available Sessions:\n"
+            for s in sessions:
+                table_str += f"- {s.session_id} | {s.status.name} | {s.goal}\n"
+            self._update_log_view(f"[bold green]>{table_str}[/bold green]")
+        elif subcommand == "view":
+            if len(parts) < 2:
+                # Show session selection dialog
+                sessions = self._session_manager.list_sessions()
+                if not sessions:
+                    self._update_log_view("[bold yellow]> No sessions found.[/bold yellow]")
+                    return
+                
+                def on_session_selected(session):
+                    self._safe_log_callback(lambda: (
+                        f"Session Details: {session.session_id}\n"
+                        f"  Goal: {session.goal}\n"
+                        f"  Status: {session.status.name}\n"
+                        f"  Type: {session.session_type}\n"
+                        f"  Participants: {', '.join(session.participant_ids)}\n"
+                        f"  History: {len(session.history)} turns"
+                    ), "session", f"{session.session_id} - {session.goal}")
+                
+                self.push_screen(SessionSelectionDialog(sessions, on_session_selected))
+                return
+            session_id = parts[1]
+            session = self._session_manager.get_session(session_id)
+            if not session:
+                self._update_log_view(f"[bold red]> Session '{session_id}' not found.[/bold red]")
+                return
+
+            details = (
+                f"Session Details: {session.session_id}\n"
+                f"  Goal: {session.goal}\n"
+                f"  Status: {session.status.name}\n"
+                f"  Type: {session.session_type}\n"
+                f"  Participants: {', '.join(session.participant_ids)}\n"
+                f"  History: {len(session.history)} turns"
+            )
+            self._update_log_view(f"[bold green]>{details}[/bold green]")
+        elif subcommand == "clear":
+            # Clear current session context and reset tokens
+            self._clear_current_session_context()
+        elif subcommand == "reset":
+            # Reset token usage to zero
+            self._reset_token_usage()
+        else:
+            self._update_log_view(f"[bold red]> Unknown subcommand for /session: {subcommand}. Try /session list, clear, or reset.[/bold red]")
+
+    def _handle_model_command(self, args: str) -> None:
+        """Model management commands - always show model list with selection."""
+        # Always show model list with selection dialog, regardless of arguments
+        self._handle_model_list()
+    
+    def _handle_model_list(self) -> None:
+        """List available local models with interactive selection - default behavior for /model command."""
+        self._update_system_log("[bold blue]🔍 Scanning for local models...[/bold blue]")
+        
+        try:
+            models = self._model_manager.get_available_models()
+            if not models:
+                self._update_log_view("[bold yellow]> No local models found.[/bold yellow]")
+                self._update_log_view("[bold dim]> Make sure Ollama is installed and running.[/bold dim]")
+                self._update_log_view("[bold dim]> Install models with: ollama pull <model_name>[/bold dim]")
+                return
+            
+            # Show selection dialog instead of plain list
+            def on_model_selected(model):
+                model_name = model['name']
+                provider = model['provider']
+                
+                # Start model switching process
+                self._safe_log_callback(lambda: f"[bold blue]> Switching to model: {model_name}...[/bold blue]", "model", model_name)
+                
+                try:
+                    success = self._model_manager.switch_model(model_name, provider)
+                    if success:
+                        # Update the current model provider in TUI
+                        from daip_live.core.models import ProviderConfig
+                        new_config = ProviderConfig(
+                            model=f"{provider}/{model_name}",
+                            embedding_model="mock-embedding"
+                        )
+                        self._model_provider = LiteLLMProvider(new_config)
+                        
+                        # Update current model display
+                        self._update_current_model(model_name)
+                        
+                        # Show success message
+                        self._safe_log_callback(lambda: f"[bold green]> ✓ Successfully switched to model: {model_name}[/bold green]", "model", model_name)
+                        self._safe_log_callback(lambda: "[bold dim]> Configuration updated. New model will be used for future requests.[/bold dim]", "model", model_name)
+                    else:
+                        self._safe_log_callback(lambda: f"[bold red]> Failed to switch to model: {model_name}[/bold red]", "model", model_name)
+                except Exception as e:
+                    self._safe_log_callback(lambda: f"[bold red]> Error switching model: {e}[/bold red]", "model", model_name)
+            
+            self.push_screen(ModelSelectionDialog(models, on_model_selected))
+                
+        except Exception as e:
+            self._update_log_view(f"[bold red]> Error listing models: {e}[/bold red]")
+    
+    def _handle_model_switch(self, model_name: str) -> None:
+        """Switch to a different model."""
+        self._update_system_log(f"[bold blue]🔄 Switching to model: {model_name}...[/bold blue]")
+        
+        try:
+            # First, refresh the model list
+            available_models = self._model_manager.get_available_models(force_refresh=True)
+            
+            # Check if model exists (try with ollama provider first)
+            model_found = False
+            provider = "ollama"
+            
+            for model in available_models:
+                if model["name"] == model_name:
+                    model_found = True
+                    provider = model["provider"]
+                    break
+            
+            if not model_found:
+                self._update_log_view(f"[bold red]> Model '{model_name}' not found in available models.[/bold red]")
+                self._update_log_view("[bold yellow]> Use /model list to see available models.[/bold yellow]")
+                return
+            
+            # Switch the model
+            success = self._model_manager.switch_model(model_name, provider)
+            if success:
+                # Update the current model provider in TUI
+                from daip_live.core.models import ProviderConfig
+                new_config = ProviderConfig(
+                    model=f"{provider}/{model_name}",
+                    embedding_model="mock-embedding"
+                )
+                self._model_provider = LiteLLMProvider(new_config)
+                
+                # Update current model display
+                self._update_current_model(model_name)
+                
+                self._update_log_view(f"[bold green]> ✓ Successfully switched to model: {model_name}[/bold green]")
+                self._update_log_view(f"[bold dim]> Configuration updated. New model will be used for future requests.[/bold dim]")
+            else:
+                self._update_log_view(f"[bold red]> Failed to switch to model: {model_name}[/bold red]")
+                
+        except Exception as e:
+            self._update_log_view(f"[bold red]> Error switching model: {e}[/bold red]")
+    
+    
+
+    def _handle_project_command(self, args: str) -> None:
+        """Project scaffolding and management commands."""
+        args_list = args.split()
+        if not args_list:
+            self._update_log_view("[bold red]> Usage: /project scaffold --description <desc> or --from-file <file>[/bold red]")
+            return
+
+        subcommand = args_list[0]
+        remaining_args = " ".join(args_list[1:])
+
+        if subcommand == "scaffold":
+            self._handle_scaffold_command(remaining_args)
+        else:
+            self._update_log_view(f"[bold red]> Unknown project subcommand: {subcommand}[/bold red]")
+
+    def _handle_scaffold_command(self, args: str) -> None:
+        """Handle project scaffolding command."""
+        import argparse
+        import shlex
+
+        # Parse arguments
+        parser = argparse.ArgumentParser(description='Project scaffolding')
+        parser.add_argument('--description', type=str, help='Project description')
+        parser.add_argument('--from-file', type=str, help='Read description from file')
+        parser.add_argument('--yes', '-y', action='store_true', help='Skip confirmation')
+
+        try:
+            # Use shlex to properly handle quoted arguments
+            parsed_args = parser.parse_args(shlex.split(args))
+        except SystemExit:
+            self._update_log_view("[bold red]> Invalid arguments. Use --description <desc> or --from-file <file>[/bold red]")
+            return
+
+        # Get description
+        description = ""
+        if parsed_args.from_file:
+            try:
+                with open(parsed_args.from_file, 'r', encoding='utf-8') as f:
+                    description = f.read()
+            except FileNotFoundError:
+                self._update_log_view(f"[bold red]> File not found: {parsed_args.from_file}[/bold red]")
+                return
+            except Exception as e:
+                self._update_log_view(f"[bold red]> Error reading file: {e}[/bold red]")
+                return
+        elif parsed_args.description:
+            description = parsed_args.description
+        else:
+            self._update_log_view("[bold red]> Please provide either --description or --from-file[/bold red]")
+            return
+
+        # Start scaffolding process
+        try:
+            loop = asyncio.get_running_loop()
+            task = loop.create_task(self._execute_scaffolding(description, parsed_args.yes))
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
+        except RuntimeError:
+            # No running event loop, create a new one
+            asyncio.run(self._execute_scaffolding(description, parsed_args.yes))
+
+    async def _execute_scaffolding(self, description: str, skip_confirmation: bool = False) -> None:
+        """Execute scaffolding process."""
+        try:
+            self._update_log_view("[bold blue]> 🚀 Starting project scaffolding...[/bold blue]")
+
+            # Create scaffolding manager
+            from daip_live.config_bridge import config_bridge
+            cfg_data = config_bridge.get_config_data()
+            llm_provider_cfg = cfg_data.get('llm_provider', {'default_model': 'gpt-3.5-turbo'})
+            model_provider = LiteLLMProvider(config=llm_provider_cfg)
+            scaffolder = ScaffoldingManager(model_provider)
+
+            self._update_log_view("[bold blue]> 📝 Generating project structure...[/bold blue]")
+
+            # Generate structure
+            generated_structure = await scaffolder.generate_structure(description)
+
+            if not generated_structure:
+                self._update_log_view("[bold red]> No structure generated. Please check your description.[/bold red]")
+                return
+
+            # Show preview
+            self._update_log_view("[bold green]> ✅ Project structure generated successfully![/bold green]")
+            self._update_log_view("[bold yellow]> 📋 Generated files:[/bold yellow]")
+
+            for item in generated_structure:
+                filename = item.get('filename', 'Unknown')
+                self._update_log_view(f"[cyan]  - {filename}[/cyan]")
+
+            if not skip_confirmation:
+                self._update_log_view("[bold yellow]> ⚠️  Do you want to create these files? (Use --yes to skip confirmation)[/bold yellow]")
+                self._update_log_view("[bold red]> ❌ Confirmation not yet implemented in TUI. Please use CLI for file creation.[/bold red]")
+                return
+
+            # Create files (if confirmation is skipped)
+            self._update_log_view("[bold blue]> 📁 Creating files...[/bold blue]")
+
+            created_files = []
+            for item in generated_structure:
+                filename = item.get('filename', '')
+                content = item.get('content', '')
+
+                if filename:
+                    try:
+                        # Ensure directory exists
+                        os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+                        # Write file
+                        with open(filename, 'w', encoding='utf-8') as f:
+                            f.write(content)
+
+                        created_files.append(filename)
+                        self._update_log_view(f"[green]  ✓ Created {filename}[/green]")
+                    except Exception as e:
+                        self._update_log_view(f"[bold red]  ✗ Failed to create {filename}: {e}[/bold red]")
+
+            self._update_log_view(f"[bold green]> 🎉 Scaffolding completed! Created {len(created_files)} files.[/bold green]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Scaffolding failed: {e}[/bold red]")
+
+    def _handle_search_command(self, args: str) -> None:
+        """搜索历史对话记录的专用命令"""
+        if not args.strip():
+            self._update_log_view("[bold yellow]> Usage: /search <query>[/bold yellow]")
+            self._update_log_view("[dim]Examples:[/dim]")
+            self._update_log_view("[dim]  /search 辩论主题[/dim]")
+            self._update_log_view("[dim]  /search AI伦理讨论[/dim]")
+            self._update_log_view("[dim]  /search 关于技术的对话[/dim]")
+            self._update_log_view("[dim]  /search 哲学思考[/dim]")
+            return
+
+        self._search_conversation_history(args.strip())
+
+    def _handle_help_command(self, args: str) -> None:
+        """Display help information."""
+        self.push_screen(CommandHelpDialog(self._help_text))
+
+    def _handle_init_command(self, args: str) -> None:
+        """Initialize configuration."""
+        self._update_log_view("[bold yellow]> Init command not yet implemented.")
+
+    def _handle_run_command(self, args: str) -> None:
+        """Run a goal with the agent."""
+        if args.strip():
+            self._update_log_view(f"[bold blue]> Starting agent with goal: {args}[/bold blue]")
+            # Create new agent executor for this run
+            from daip_live.agent_engine.executor import AgentExecutor
+
+            session_manager = self._session_manager
+            agent = AgentExecutor(
+                session_manager=session_manager,
+                memory_service=self._memory_service,
+                knowledge_manager=self._knowledge_manager,
+                model_provider=self._model_provider,
+                tool_manager=self._tool_manager,
+                user_input_queue=asyncio.Queue()
+            )
+            agent.goal = args.strip()
+            
+            # Run agent in background
+            task = asyncio.create_task(run_agent_and_feed_tui(agent, self, args.strip()))
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
+        else:
+            self._update_log_view("[bold yellow]> Please enter your task goal:[/bold yellow]")
+            self._update_log_view("[bold dim]> (Type your goal and press Enter to run the agent)[/bold dim]")
+            # Set input focus and clear for user input
+            input_widget = self.query_one(Input)
+            input_widget.value = "/run "
+            input_widget.focus()
+            input_widget.action_end()
+
+    def _handle_compact_command(self, args: str) -> None:
+        """Manually compress session context to reduce token usage."""
+        try:
+            self._update_log_view("[bold blue]> 🔄 开始手动压缩上下文...[/bold blue]")
+
+            if not self._current_session_id:
+                # Create a default session for compression
+                self._update_log_view("[bold blue]> 🔄 创建默认会话进行压缩...[/bold blue]")
+                session = self._session_manager.create_session(
+                    goal="Context Compression Session",
+                    session_type="compression",
+                    participant_ids=["user", "assistant"]
+                )
+                self._current_session_id = session.session_id
+
+            session = self._session_manager.get_session(self._current_session_id)
+            if not session:
+                self._update_log_view(f"[bold red]> 会话 '{self._current_session_id}' 不存在[/bold red]")
+                return
+
+            # Check if there's a reason to compress (either history exists OR token usage is high)
+            history_count = len(session.history)
+            used_tokens, total_tokens = self._real_token_usage
+            current_percentage = (used_tokens / total_tokens) * 100 if total_tokens > 0 else 0
+
+            # Continue with compression if we have history OR if token usage is high
+            if history_count == 0 and current_percentage < 50:  # Only skip if no history AND low token usage
+                self._update_log_view("[bold yellow]> ⚠️ 会话历史为空且token使用量低，无需压缩[/bold yellow]")
+                return
+            elif history_count == 0:
+                self._update_log_view("[bold yellow]> ⚠️ 会话历史为空，但token使用量较高({current_percentage:.1f}%)，继续压缩...[/bold yellow]")
+            elif history_count <= 3 and current_percentage < 70:
+                self._update_log_view(f"[bold yellow]> ⚠️ 会话历史较短({history_count}条记录)，token使用量{current_percentage:.1f}%，但仍进行轻量压缩...[/bold yellow]")
+            elif history_count <= 3 and current_percentage >= 70:
+                self._update_log_view(f"[bold blue]> 🔄 会话历史较短但token使用量高({current_percentage:.1f}%)，执行上下文优化...[/bold blue]")
+
+            # Get current token usage before compression
+            used_tokens, total_tokens = self._real_token_usage
+            current_percentage = (used_tokens / total_tokens) * 100 if total_tokens > 0 else 0
+
+            self._update_log_view(f"[dim]> 压始状态: {used_tokens}/{total_tokens} tokens ({current_percentage:.1f}%)[/dim]")
+            self._update_log_view(f"[dim]> 历史记录数: {history_count}[/dim]")
+
+            # Perform compression using memory service if available
+            if hasattr(self, '_memory_service') and self._memory_service:
+                self._update_log_view("[bold blue]> 🔄 正在智能压缩上下文...[/bold blue]")
+
+                # Run compression asynchronously
+                loop = asyncio.get_running_loop()
+                task = loop.create_task(self._compress_session_context_async(session))
+                self._background_tasks.add(task)
+                task.add_done_callback(self._background_tasks.discard)
+            else:
+                # Fallback: manual compression - keep recent entries
+                self._update_log_view("[bold yellow]> 🔄 使用手动压缩方法...[/bold yellow]")
+
+                # Keep last 5 entries or 25% of history, whichever is smaller
+                keep_count = min(5, max(2, history_count // 4))
+                original_count = len(session.history)
+
+                session.history = session.history[-keep_count:]
+                session.compressed_history = None
+
+                if session.summary:
+                    # Update summary to reflect compression
+                    session.summary = f"会话已手动压缩 - 保留最近{keep_count}条记录 (共{original_count}条)"
+
+                self._update_log_view(f"[bold green]> ✅ 手动压缩完成: 保留{keep_count}/{original_count}条记录[/bold green]")
+
+                # Update token usage display
+                self._update_status_bar("手动压缩完成")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> 压缩过程中出错: {e}[/bold red]")
+
+    async def _handle_doc_command(self, args: str) -> None:
+        """Paper download and management commands."""
+        args_list = args.split()
+        if not args_list:
+            self._update_log_view("[bold red]> Usage: /doc [download|list|search] [options][/bold red]")
+            self._update_log_view("[bold yellow]> Example: /doc search AI ethics[/bold yellow]")
+            return
+
+        subcommand = args_list[0].lower()
+        remaining_args = " ".join(args_list[1:])
+
+        if subcommand == "download":
+            self._update_log_view("[bold blue]> 📥 开始下载论文流程...[/bold blue]")
+            self._handle_doc_download(remaining_args)
+        elif subcommand == "list":
+            self._update_log_view("[bold blue]> 📋 列出文档列表...[/bold blue]")
+            self._handle_doc_list()
+        elif subcommand == "search":
+            self._update_log_view("[bold blue]> 🔍 开始搜索论文...[/bold blue]")
+            self._handle_doc_search(remaining_args)  # This is sync method, don't await
+        elif subcommand in ["skill", "skills", "claude", "claude_skill", "claude_skills"]:
+            # Claude Skills相关命令
+            skill_args = remaining_args.strip()
+
+            # 分割命令和参数
+            skill_parts = skill_args.split(" ", 1) if skill_args else []
+            skill_subcmd = skill_parts[0].lower() if skill_parts else "list"
+            skill_remaining = skill_parts[1] if len(skill_parts) > 1 else ""
+
+            if skill_subcmd == "list":
+                await self._handle_claude_skills_list_command(skill_remaining)
+            elif skill_subcmd == "run" or skill_subcmd == "execute":
+                await self._handle_claude_skills_run_command(skill_remaining)
+            elif skill_subcmd == "search":
+                await self._handle_claude_skills_search_command(skill_remaining)
+            elif skill_subcmd == "sync":
+                await self._handle_claude_skills_sync_command(skill_remaining)
+            elif skill_subcmd == "info":
+                await self._handle_claude_skills_info_command(skill_remaining)
+            else:
+                self._update_log_view(f"[bold red]> Unknown Claude Skills subcommand: {skill_subcmd}[/bold red]")
+                self._update_log_view("[bold yellow]> Available: list, run, search, sync, info[/bold yellow]")
+                self._update_log_view("[bold yellow]> Example: /doc skills list, /doc skills run <skill_name>, /doc skills sync[/bold yellow]")
+        else:
+            self._update_log_view(f"[bold red]> Unknown doc subcommand: {subcommand}[/bold red]")
+            self._update_log_view("[bold yellow]> Available: download, list, search, skills[/bold yellow]")
+            self._update_log_view("[bold yellow]> Example: /doc search AI ethics, /doc skills list[/bold yellow]")
+
+    async def _handle_claude_skills_list_command(self, args: str) -> None:
+        """Handle Claude Skills list command."""
+        self._update_log_view("[bold blue]> 📚 Listing available Claude Skills...[/bold blue]")
+
+        try:
+            if not self._skill_manager:
+                self._update_log_view("[bold red]> ❌ Skill manager not initialized[/bold red]")
+                return
+
+            skill_list = self._skill_manager.list_skills()
+            if skill_list:
+                self._update_log_view(f"[bold green]> ✅ Found {len(skill_list)} skills:[/bold green]")
+                for i, skill_name in enumerate(skill_list, 1):
+                    skill = self._skill_manager.get_skill(skill_name)
+                    if skill and hasattr(skill, 'metadata'):
+                        desc = skill.metadata.description
+                        tags = ", ".join(skill.metadata.tags[:3])  # Show first 3 tags
+                        self._update_log_view(f"  {i:2d}. [cyan]{skill_name}[/cyan] - {desc[:100]}...")
+                        self._update_log_view(f"      [dim]Tags: {tags}[/dim]")
+                    else:
+                        self._update_log_view(f"  {i:2d}. [cyan]{skill_name}[/cyan] - No metadata available")
+            else:
+                self._update_log_view("[bold yellow]> No skills available in the system[/bold yellow]")
+
+                # Suggest registering a basic skill
+                self._update_log_view("[dim]> Tip: Skills can be registered automatically through intent recognition[/dim]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error listing skills: {e}[/bold red]")
+
+    async def _handle_claude_skills_run_command(self, args: str) -> None:
+        """Handle Claude Skills run command."""
+        try:
+            if not self._skill_manager:
+                self._update_log_view("[bold red]> ❌ Skill manager not initialized[/bold red]")
+                return
+
+            args_list = args.split()
+            if not args_list:
+                self._update_log_view("[bold red]> Missing skill name for /doc skills run. Usage: /doc skills run <skill_name> <input>[/bold red]")
+                return
+
+            skill_name = args_list[0]
+            skill_input = " ".join(args_list[1:]) if len(args_list) > 1 else ""
+
+            self._update_log_view(f"[bold blue]> 🚀 Running skill '{skill_name}'...[/bold blue]")
+
+            skill = self._skill_manager.get_skill(skill_name)
+            if not skill:
+                available_skills = self._skill_manager.list_skills()
+                self._update_log_view(f"[bold red]> ❌ Skill '{skill_name}' not found. Available: {available_skills}[/bold red]")
+                return
+
+            if not skill_input:
+                self._update_log_view(f"[bold yellow]> Missing input for skill '{skill_name}'. Please provide input text.[/bold yellow]")
+                return
+
+            from daip_live.skills.base import SkillInput, SkillOutput
+            skill_input_obj = SkillInput(
+                data=skill_input,
+                context={"source": "tui_command", "session_id": getattr(self, '_current_session_id', 'default')}
+            )
+
+            result: SkillOutput = skill.execute(skill_input_obj)
+
+            self._update_log_view(f"[bold green]> ✅ Skill '{skill_name}' executed successfully:[/bold green]")
+            self._update_log_view(f"[dim]> Confidence: {result.confidence:.2f}, Execution time: {result.execution_time:.2f}s[/dim]")
+            self._update_log_view(f"[cyan]{result.result}[/cyan]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error running skill: {e}[/bold red]")
+
+    async def _handle_claude_skills_search_command(self, args: str) -> None:
+        """Handle Claude Skills search command."""
+        if not args.strip():
+            self._update_log_view("[bold red]> Missing search query for /doc skills search. Usage: /doc skills search <query>[/bold red]")
+            return
+
+        self._update_log_view(f"[bold blue]> 🔍 Searching for skills related to: '{args}'...[/bold blue]")
+
+        try:
+            if not self._skill_manager or not hasattr(self._skill_manager, 'list_skills'):
+                self._update_log_view("[bold red]> ❌ Skill manager not initialized[/bold red]")
+                return
+
+            # 使用集成的服务进行技能搜索和推荐
+            if hasattr(self, '_intent_recognizer') and self._intent_recognizer and hasattr(self._intent_recognizer, 'claude_integration_service'):
+                integration_service = self._intent_recognizer.claude_integration_service
+                if hasattr(integration_service, 'recommend_skills'):
+                    recommendations = await integration_service.recommend_skills(args)
+                    if recommendations:
+                        self._update_log_view(f"[bold green]> ✅ Found {len(recommendations)} recommended skills:[/bold green]")
+                        for rec in recommendations:
+                            self._update_log_view(f"  • [cyan]{rec[0]}[/cyan] ({rec[1]:.2f}) - {rec[2][:100]}...")
+                    else:
+                        self._update_log_view("[bold yellow]> No skills closely match your query[/bold yellow]")
+                else:
+                    self._update_log_view("[bold yellow]> Claude integration service doesn't support skill recommendation[/bold yellow]")
+            else:
+                # 简单搜索所有可用技能
+                skill_list = self._skill_manager.list_skills()
+                matches = []
+                search_lower = args.lower()
+
+                for skill_name in skill_list:
+                    skill = self._skill_manager.get_skill(skill_name)
+                    if skill and hasattr(skill, 'metadata'):
+                        if search_lower in skill.metadata.name.lower() or search_lower in skill.metadata.description.lower() or any(search_lower in tag.lower() for tag in skill.metadata.tags):
+                            matches.append(skill_name)
+
+                if matches:
+                    self._update_log_view(f"[bold green]> ✅ Found {len(matches)} matching skills:[/bold green]")
+                    for match in matches:
+                        skill = self._skill_manager.get_skill(match)
+                        desc = skill.metadata.description[:100] if skill and hasattr(skill, 'metadata') else "No description"
+                        self._update_log_view(f"  • [cyan]{match}[/cyan] - {desc}...")
+                else:
+                    self._update_log_view("[bold yellow]> No skills match your query. Available skills:[/bold yellow]")
+                    for skill_name in skill_list:
+                        self._update_log_view(f"  • {skill_name}")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error searching skills: {e}[/bold red]")
+
+    async def _handle_claude_skills_sync_command(self, args: str) -> None:
+        """Handle Claude Skills synchronization command."""
+        self._update_log_view("[bold blue]> 🔄 同步本地Claude技能库...[/bold blue]")
+
+        try:
+            # 检查增强技能管理器是否存在
+            if hasattr(self, '_claude_integration_service') and self._claude_integration_service:
+                # 使用Claude集成服务的增强功能进行同步
+                if hasattr(self._claude_integration_service, 'load_skills_from_github'):
+                    # 如果参数是URL，则从GitHub同步
+                    if args and args.startswith('http'):
+                        try:
+                            skill_names = await self._claude_integration_service.load_skills_from_github(args)
+                            self._update_log_view(f"[bold green]> ✅ 从GitHub同步了 {len(skill_names)} 个技能: {', '.join(skill_names)}[/bold green]")
+                        except Exception as e:
+                            self._update_log_view(f"[bold red]> ❌ 从GitHub同步失败: {e}[/bold red]")
+                    else:
+                        # 否则同步本地技能目录
+                        self._update_log_view("[bold yellow]> 📁 扫描本地技能目录...[/bold yellow]")
+                        # 实际的本地文件监控同步已经在后台运行
+
+                        # 检查本地技能目录
+                        from pathlib import Path
+                        skills_dir = Path("./claude_skills")
+                        if skills_dir.exists():
+                            skill_count = 0
+                            for skill_dir in skills_dir.iterdir():
+                                if skill_dir.is_dir():
+                                    manifest_file = skill_dir / "manifest.json"
+                                    if manifest_file.exists():
+                                        self._update_log_view(f"[dim]> 发现技能: {skill_dir.name}[/dim]")
+                                        skill_count += 1
+
+                            self._update_log_view(f"[bold green]> ✅ 检查了技能目录，找到 {skill_count} 个有效技能[/bold green]")
+                            self._update_log_view(f"[bold green]> 📚 系统当前可用技能: {len(self._skill_manager.list_skills())} 个[/bold green]")
+                        else:
+                            self._update_log_view("[bold yellow]> 📂 本地技能目录不存在或无技能文件[/bold yellow]")
+                            self._update_log_view("[bold yellow]> 提示: 创建 claude_skills 目录并放入技能文件[/bold yellow]")
+                else:
+                    # 直接同步本地技能目录
+                    import os
+                    from pathlib import Path
+
+                    skills_dir = Path("./claude_skills")
+                    if skills_dir.exists():
+                        skill_count = 0
+                        for skill_dir in skills_dir.iterdir():
+                            if skill_dir.is_dir():
+                                manifest_file = skill_dir / "manifest.json"
+                                if manifest_file.exists():
+                                    self._update_log_view(f"[dim]> 发现技能: {skill_dir.name}[/dim]")
+                                    skill_count += 1
+                        self._update_log_view(f"[bold green]> ✅ 检查了技能目录，找到 {skill_count} 个技能目录[/bold green]")
+                    else:
+                        self._update_log_view("[bold yellow]> 📂 本地技能目录不存在或无技能文件[/bold yellow]")
+                        self._update_log_view("[bold yellow]> 提示: 创建 claude_skills 目录并放入技能文件[/bold yellow]")
+            else:
+                self._update_log_view("[bold yellow]> ⚠️ Claude技能集成服务未初始化[/bold yellow]")
+                self._update_log_view("[bold yellow]> 提示: 系统支持Claude技能，但集成服务未完全加载[/bold yellow]")
+
+                # 尝试从意图识别器获取集成服务
+                if hasattr(self, '_intent_recognizer') and self._intent_recognizer:
+                    if hasattr(self._intent_recognizer, 'claude_integration_service') and self._intent_recognizer.claude_integration_service:
+                        self._claude_integration_service = self._intent_recognizer.claude_integration_service
+                        self._update_log_view("[bold green]> ✅ 从意图识别器获取了Claude集成服务[/bold green]")
+                    else:
+                        self._update_log_view("[dim]> 意图识别器中也未找到Claude集成服务[/dim]")
+                else:
+                    self._update_log_view("[dim]> 意图识别器未初始化[/dim]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 技能同步错误: {e}[/bold red]")
+            import traceback
+            traceback.print_exc()
+
+    async def _handle_claude_skills_info_command(self, args: str) -> None:
+        """Handle Claude Skills info command."""
+        if not args.strip():
+            self._update_log_view("[bold red]> Missing skill name for /doc skills info. Usage: /doc skills info <skill_name>[/bold red]")
+            return
+
+        skill_name = args.strip()
+        self._update_log_view(f"[bold blue]> 📋 获取技能 '{skill_name}' 信息...[/bold blue]")
+
+        try:
+            skill = self._skill_manager.get_skill(skill_name)
+            if skill and hasattr(skill, 'metadata'):
+                metadata = skill.metadata
+                info_str = f"""
+[cyan]=== 技能信息: {metadata.name} ===[/cyan]
+[b]描述:[/b] {metadata.description}
+[b]版本:[/b] {metadata.version}
+[b]作者:[/b] {metadata.author}
+[b]标签:[/b] {', '.join(metadata.tags)}
+[b]输入参数:[/b] 请使用自然语言表达需求
+[b]示例命令:[/b]
+  - {skill_name} <input>
+  - 运行{skill_name}处理<input>
+  - 帮我{skill_name}<input>
+                """
+                self._update_log_view(info_str)
+            else:
+                available_skills = self._skill_manager.list_skills()
+                self._update_log_view(f"[bold red]> ❌ 技能 '{skill_name}' 未找到[/bold red]")
+                if available_skills:
+                    self._update_log_view(f"[bold yellow]> 📚 可用技能: {', '.join(available_skills)}[/bold yellow]")
+                else:
+                    self._update_log_view(f"[bold yellow]> 📚 当前无可用技能[/bold yellow]")
+                    self._update_log_view(f"[bold yellow]> 提示: 请将技能文件放在 claude_skills 目录中[/bold yellow]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 获取技能信息错误: {e}[/bold red]")
+
+    def _handle_doc_download(self, args: str) -> None:
+        """Handle paper download command."""
+        args_list = args.split()
+        if not args_list:
+            self._update_log_view("[bold red]> Usage: /doc download <query> [--max <number>] [--arxiv][/bold red]")
+            return
+
+        query = " ".join([arg for arg in args_list if not arg.startswith("--")])
+        max_results = 5
+        use_arxiv = False
+
+        # Parse options
+        i = 0
+        while i < len(args_list):
+            if args_list[i] == "--max" and i + 1 < len(args_list):
+                try:
+                    max_results = int(args_list[i + 1])
+                    i += 2
+                except ValueError:
+                    self._update_log_view("[bold red]> Invalid max results value[/bold red]")
+                    return
+            elif args_list[i] == "--arxiv":
+                use_arxiv = True
+                i += 1
+            else:
+                i += 1
+
+        self._update_log_view(f"[bold blue]> 📥 开始下载论文: '{query}'[/bold blue]")
+        self._update_log_view(f"[dim]> 最大数量: {max_results}, 使用arXiv: {use_arxiv}[/dim]")
+
+        # Import and use paper downloader
+        try:
+            from daip_live.doc.paper_downloader import PaperDownloader
+            from pathlib import Path
+            import os
+
+            # 从配置中获取下载目录（相对于工作目录）
+            config_download_dir = self.container.config.paper.download_directory
+            # 确保使用绝对路径
+            download_dir = Path(os.getcwd()) / config_download_dir
+            download_dir.mkdir(parents=True, exist_ok=True)  # 创建目录如果不存在
+
+            downloader = PaperDownloader(download_dir=download_dir)
+
+            # Start download process
+            loop = asyncio.get_running_loop()
+            task = loop.create_task(self._execute_paper_download(downloader, query, max_results, use_arxiv))
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
+
+        except ImportError:
+            self._update_log_view("[bold red]> ❌ 论文下载功能不可用，缺少相关模块[/bold red]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 下载失败: {e}[/bold red]")
+
+    def _handle_skill_command(self, args: str) -> None:
+        """Handle skill management commands (list, run, info)."""
+        args_list = args.split()
+        if not args_list:
+            self._update_log_view("[bold red]> Usage: /skill [list|run|info] [options][/bold red]")
+            self._update_log_view("[bold yellow]> Available: list, run, info[/bold yellow]")
+            self._update_log_view("[bold yellow]> Example: /skill list or /skill run text_analysis 'input text'[/bold yellow]")
+            return
+
+        subcommand = args_list[0].lower()
+        remaining_args = " ".join(args_list[1:])
+
+        if subcommand == "list":
+            self._handle_skill_list()
+        elif subcommand == "run":
+            if len(args_list) < 2:
+                self._update_log_view("[bold red]> Missing skill name for /skill run. Usage: /skill run <skill_name> [arguments][/bold red]")
+                return
+            # Extract skill name and parameters
+            skill_name = args_list[1]
+            skill_args = " ".join(args_list[2:]) if len(args_list) > 2 else ""
+            self._handle_skill_run(skill_name, skill_args)
+        elif subcommand == "info":
+            if len(args_list) < 2:
+                self._update_log_view("[bold red]> Missing skill name for /skill info. Usage: /skill info <skill_name>[/bold red]")
+                return
+            skill_name = args_list[1]
+            self._handle_skill_info(skill_name)
+        else:
+            self._update_log_view(f"[bold red]> Unknown skill subcommand: {subcommand}. Available: list, run, info[/bold red]")
+            self._update_log_view("[bold yellow]> Example: /skill list, /skill run text_analysis 'text', /skill info text_analysis[/bold yellow]")
+
+    def _handle_skill_list(self) -> None:
+        """List all available skills."""
+        try:
+            if hasattr(self, '_skill_manager') and self._skill_manager:
+                skill_names = self._skill_manager.list_skills()
+                if skill_names:
+                    self._update_log_view(f"[bold green]> 🧩 Available Skills ({len(skill_names)} total):[/bold green]")
+                    for i, skill_name in enumerate(skill_names, 1):
+                        # Get skill metadata if available
+                        metadata = self._skill_manager.get_metadata(skill_name)
+                        desc = getattr(metadata, 'description', 'No description') if metadata else 'No description'
+                        self._update_log_view(f"  {i:2d}. {skill_name} - {desc}")
+                else:
+                    self._update_log_view("[bold yellow]> 🧩 No skills registered in the system[/bold yellow]")
+                    self._update_log_view("[dim]> Skills can be loaded from skills directory[/dim]")
+            else:
+                self._update_log_view("[bold red]> ❌ Skill manager not initialized[/bold red]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error listing skills: {e}[/bold red]")
+
+    def _handle_skill_run(self, skill_name: str, skill_args: str) -> None:
+        """Run a specific skill with provided arguments."""
+        try:
+            if not hasattr(self, '_skill_manager') or not self._skill_manager:
+                self._update_log_view("[bold red]> ❌ Skill manager not initialized[/bold red]")
+                return
+
+            # Get the skill
+            skill = self._skill_manager.get_skill(skill_name)
+            if not skill:
+                self._update_log_view(f"[bold red]> ❌ Skill '{skill_name}' not found. Available skills:[/bold red]")
+                self._handle_skill_list()
+                return
+
+            # Prepare skill input
+            from daip_live.skills.base import SkillInput, SkillOutput
+            skill_input = SkillInput(
+                data=skill_args or "No specific input provided",
+                context={"source": "tui_command", "session_id": getattr(self, '_current_session_id', 'default')},
+                metadata={"command_args": skill_args}
+            )
+
+            # Execute the skill
+            self._update_log_view(f"[bold blue]> 🚀 Running skill '{skill_name}'...[/bold blue]")
+            result: SkillOutput = skill.execute(skill_input)
+
+            # Display result
+            self._update_log_view(f"[bold green]> ✅ Skill '{skill_name}' executed successfully:[/bold green]")
+            self._update_log_view(f"[dim]> Confidence: {result.confidence:.2f}, Execution time: {result.execution_time:.2f}s[/dim]")
+            self._update_log_view(f"📝 Result: {result.result}")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error running skill '{skill_name}': {e}[/bold red]")
+            import traceback
+            traceback.print_exc()
+
+    def _handle_skill_info(self, skill_name: str) -> None:
+        """Show information about a specific skill."""
+        try:
+            if not hasattr(self, '_skill_manager') or not self._skill_manager:
+                self._update_log_view("[bold red]> ❌ Skill manager not initialized[/bold red]")
+                return
+
+            metadata = self._skill_manager.get_metadata(skill_name)
+            if not metadata:
+                self._update_log_view(f"[bold red]> ❌ No information available for skill '{skill_name}'[/bold red]")
+                self._handle_skill_list()
+                return
+
+            self._update_log_view(f"[bold blue]> 📘 Skill Information: {skill_name}[/bold blue]")
+            self._update_log_view(f"   Description: {metadata.description}")
+            self._update_log_view(f"   Version: {metadata.version}")
+            self._update_log_view(f"   Author: {metadata.author}")
+            if metadata.tags:
+                self._update_log_view(f"   Tags: {', '.join(metadata.tags)}")
+            if metadata.dependencies:
+                self._update_log_view(f"   Dependencies: {', '.join(metadata.dependencies)}")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error getting skill info for '{skill_name}': {e}[/bold red]")
+
+    def _handle_doc_list(self) -> None:
+        """List downloaded papers."""
+        try:
+            from pathlib import Path
+            papers_dir = Path.cwd() / "docs" / "papers"
+
+            if not papers_dir.exists():
+                self._update_log_view("[bold yellow]> 📂 论文目录不存在: {papers_dir}[/bold yellow]")
+                self._update_log_view("[dim]> 请先使用 /doc download 下载论文[/dim]")
+                return
+
+            # Find PDF and metadata files
+            pdf_files = list(papers_dir.glob("*.pdf"))
+            metadata_files = list(papers_dir.glob("*.json"))
+
+            if not pdf_files:
+                self._update_log_view("[bold yellow]> 📄 未找到已下载的论文[/bold yellow]")
+                return
+
+            self._update_log_view("[bold green]> 📚 已下载的论文:[/bold green]")
+
+            for pdf_file in sorted(pdf_files):
+                # Check if corresponding metadata exists
+                metadata_file = pdf_file.with_suffix('.json')
+                if metadata_file.exists():
+                    try:
+                        import json
+                        with open(metadata_file, 'r', encoding='utf-8') as f:
+                            metadata = json.load(f)
+
+                        title = metadata.get('title', pdf_file.stem)
+                        authors = metadata.get('authors', [])
+                        authors_str = ", ".join(authors[:3])  # Show first 3 authors
+                        if len(authors) > 3:
+                            authors_str += f" et al. ({len(authors)} authors)"
+
+                        self._update_log_view(f"[cyan]  📄 {title}[/cyan]")
+                        self._update_log_view(f"[dim]     👥 {authors_str}[/dim]")
+                        self._update_log_view(f"[dim]     📅 {pdf_file.name}[/dim]")
+
+                    except Exception:
+                        self._update_log_view(f"[cyan]  📄 {pdf_file.stem}[/cyan]")
+                else:
+                    self._update_log_view(f"[cyan]  📄 {pdf_file.stem}[/cyan]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 列出论文时出错: {e}[/bold red]")
+
+    def _handle_doc_search(self, args: str) -> None:
+        """Search downloaded papers."""
+        if not args.strip():
+            self._update_log_view("[bold red]> Usage: /doc search <query>[/bold red]")
+            return
+
+        query = args.strip()
+        self._update_log_view(f"[bold blue]> 🔍 搜索论文: '{query}'[/bold blue]")
+
+        try:
+            from pathlib import Path
+            papers_dir = Path.cwd() / "docs" / "papers"
+
+            if not papers_dir.exists():
+                self._update_log_view("[bold yellow]> 📂 论文目录不存在，请先下载论文[/bold yellow]")
+                return
+
+            # Search in metadata files
+            metadata_files = list(papers_dir.glob("*.json"))
+            results = []
+
+            for metadata_file in metadata_files:
+                try:
+                    import json
+                    with open(metadata_file, 'r', encoding='utf-8') as f:
+                        metadata = json.load(f)
+
+                    # Simple text search in title, abstract, and authors
+                    search_text = f"{metadata.get('title', '')} {metadata.get('abstract', '')} {' '.join(metadata.get('authors', []))}".lower()
+                    if query.lower() in search_text:
+                        results.append(metadata)
+
+                except Exception:
+                    continue
+
+            if not results:
+                self._update_log_view("[bold yellow]> 🔍 未找到匹配的论文[/bold yellow]")
+                return
+
+            self._update_log_view(f"[bold green]> 🔍 找到 {len(results)} 个匹配结果:[/bold green]")
+
+            for i, result in enumerate(results[:10], 1):  # Show top 10 results
+                title = result.get('title', 'Unknown Title')
+                authors = result.get('authors', [])
+                authors_str = ", ".join(authors[:2])
+                if len(authors) > 2:
+                    authors_str += f" et al."
+
+                self._update_log_view(f"[cyan]  {i}. {title}[/cyan]")
+                self._update_log_view(f"[dim]     👥 {authors_str}[/dim]")
+
+                # Show abstract preview
+                abstract = result.get('abstract', 'No abstract available')
+                if abstract != 'No abstract available':
+                    preview = abstract[:200] + "..." if len(abstract) > 200 else abstract
+                    self._update_log_view(f"[dim]     📝 {preview}[/dim]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 搜索论文时出错: {e}[/bold red]")
+
+    async def _execute_paper_download(self, downloader, query: str, max_results: int, use_arxiv: bool) -> None:
+        """Execute paper download process."""
+        try:
+            if use_arxiv:
+                # Use arXiv API
+                papers = downloader.search_arxiv(query, max_results=max_results)
+
+                if not papers:
+                    self._update_log_view("[bold yellow]> 🔍 未找到匹配的arXiv论文[/bold yellow]")
+                    return
+
+                self._update_log_view(f"[bold green]> 🎯 找到 {len(papers)} 篇arXiv论文，开始下载...[/bold green]")
+
+                # Download papers
+                for paper in papers:
+                    self._update_log_view(f"[blue] 📥 下载: {paper.title[:50]}...[/blue]")
+                    result = downloader.download_arxiv_paper(paper.arxiv_id)
+
+                    if result.success:
+                        self._update_log_view(f"[green]   ✓ 下载成功: {result.output_file}[/green]")
+                    else:
+                        self._update_log_view(f"[red]   ✗ 下载失败: {result.error_message}[/red]")
+            else:
+                self._update_log_view("[bold yellow]> ⚠️ 目前只支持arXiv下载，请使用 --arxiv 参数[/bold yellow]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 下载过程出错: {e}[/bold red]")
+
+    def _handle_wiki_command(self, args: str) -> None:
+        """Wiki management commands."""
+        args_list = args.split()
+        if not args_list:
+            self._update_log_view("[bold red]> Usage: /wiki [create|list|export] [options][/bold red]")
+            return
+
+        subcommand = args_list[0].lower()
+        remaining_args = " ".join(args_list[1:])
+
+        if subcommand == "create":
+            self._update_log_view("[bold blue]> 🤖 开始协作创建维基页面...[/bold blue]")
+            # 在非异步方法中使用asyncio来运行异步方法
+            asyncio.create_task(self._handle_wiki_create(remaining_args))
+        elif subcommand == "list":
+            self._update_log_view("[bold blue]> 📋 列出维基页面...[/bold blue]")
+            self._handle_wiki_list()
+        elif subcommand == "export":
+            self._update_log_view("[bold blue]> 📤 正在导出维基内容...[/bold blue]")
+            self._handle_wiki_export(remaining_args)
+        else:
+            self._update_log_view(f"[bold red]> Unknown wiki subcommand: {subcommand}[/bold red]")
+            self._update_log_view("[bold yellow]> Available: create, list, export[/bold yellow]")
+
+    def _handle_debate_history_command(self, args: str) -> None:
+        """Debate history commands."""
+        args_list = args.split()
+        if not args_list:
+            # Show debate history selection dialog
+            self._show_debate_history_list()
+            return
+
+        subcommand = args_list[0].lower()
+        remaining_args = " ".join(args_list[1:])
+
+        if subcommand == "list":
+            self._show_debate_history_list()
+        elif subcommand == "view":
+            if len(args_list) < 2:
+                self._update_log_view("[bold red]> Usage: /debate history view <session_id>[/bold red]")
+                return
+            session_id = args_list[1]
+            self._show_debate_history(session_id)
+        else:
+            self._update_log_view(f"[bold red]> Unknown debate history subcommand: {subcommand}[/bold red]")
+            self._update_log_view("[bold yellow]> Available: list, view[/bold yellow]")
+
+    def _search_conversation_history(self, query: str) -> None:
+        """搜索历史对话记录中的相关信息"""
+        try:
+            self._update_log_view(f"[bold cyan]🔍 正在搜索历史对话中的相关信息...[/bold cyan]")
+            self._update_log_view(f"[dim]📝 搜索关键词: {query}[/dim]")
+            self._update_log_view("")
+
+            # 获取所有会话
+            all_sessions = self._session_manager.list_sessions()
+            if not all_sessions:
+                self._update_log_view("[yellow]📚 未找到任何历史会话记录[/yellow]")
+                return
+
+            # 搜索相关的会话和对话
+            found_results = []
+            query_lower = query.lower()
+
+            for session in all_sessions:
+                session_relevance = 0
+
+                # 检查会话目标/主题的相关性
+                if session.goal and query_lower in session.goal.lower():
+                    session_relevance += 10
+
+                # 检查会话摘要的相关性
+                if session.summary and query_lower in session.summary.lower():
+                    session_relevance += 8
+
+                # 检查会话类型（如果是辩论且查询包含辩论关键词）
+                if session.session_type == "debate" and any(keyword in query_lower for keyword in ["辩论", "debate", "讨论"]):
+                    session_relevance += 5
+
+                # 如果有会话记录，进一步搜索对话内容
+                full_session = self._session_manager.get_session(session.session_id)
+                if full_session and full_session.history:
+                    for turn in full_session.history:
+                        # 检查发言者消息的相关性
+                        if turn.speaker_message and query_lower in turn.speaker_message.lower():
+                            session_relevance += 3
+
+                        # 检查响应消息的相关性
+                        if turn.response_message and query_lower in turn.response_message.lower():
+                            session_relevance += 3
+
+                        # 检查思考过程的相关性
+                        if turn.thinking_process and query_lower in turn.thinking_process.lower():
+                            session_relevance += 2
+
+                if session_relevance > 0:
+                    found_results.append((session_relevance, session, full_session))
+
+            # 按相关性排序
+            found_results.sort(key=lambda x: x[0], reverse=True)
+
+            if not found_results:
+                self._update_log_view("[yellow]🔍 未找到与查询相关的历史对话记录[/yellow]")
+                self._update_log_view(f"[dim]💡 提示: 您可以尝试使用不同的关键词进行搜索[/dim]")
+                return
+
+            # 显示搜索结果
+            self._update_log_view(f"[bold green]✅ 找到 {len(found_results)} 个相关的历史对话记录:[/bold green]")
+            self._update_log_view("")
+
+            for i, (relevance, session, full_session) in enumerate(found_results[:5], 1):  # 最多显示5个结果
+                # 显示会话基本信息
+                session_type_emoji = {"debate": "🏛️", "chat": "💬", "workflow": "⚙️"}.get(session.session_type, "📝")
+
+                self._update_log_view(f"[bold cyan]{i}. {session_type_emoji} {session.session_id}[/bold cyan]")
+                self._update_log_view(f"   [dim]📋 主题:[/dim] {session.goal}")
+                self._update_log_view(f"   [dim]📊 类型:[/dim] {session.session_type} | [dim]状态:[/dim] {session.status.name}")
+                self._update_log_view(f"   [dim]🎯 相关度:[/dim] {'⭐' * min(relevance // 2, 5)}")
+
+                # 显示时间信息
+                if session.start_time:
+                    time_str = session.start_time.strftime("%Y-%m-%d %H:%M")
+                    self._update_log_view(f"   [dim]📅 时间:[/dim] {time_str}")
+
+                # 显示相关对话片段
+                if full_session and full_session.history:
+                    relevant_snippets = []
+                    for turn in full_session.history[-3:]:  # 只检查最后3轮对话
+                        snippets = []
+                        if turn.speaker_message and query_lower in turn.speaker_message.lower():
+                            snippet = turn.speaker_message[:100] + "..." if len(turn.speaker_message) > 100 else turn.speaker_message
+                            snippets.append(f"👤: {snippet}")
+
+                        if turn.response_message and query_lower in turn.response_message.lower():
+                            snippet = turn.response_message[:100] + "..." if len(turn.response_message) > 100 else turn.response_message
+                            snippets.append(f"🤖: {snippet}")
+
+                        relevant_snippets.extend(snippets)
+
+                    if relevant_snippets:
+                        self._update_log_view(f"   [dim]💬 相关对话片段:[/dim]")
+                        for snippet in relevant_snippets[:2]:  # 最多显示2个片段
+                            self._update_log_view(f"      [dim]{snippet}[/dim]")
+
+                self._update_log_view("")
+
+                # 提供查看详细信息的选项
+                self._update_log_view(f"   [dim]💡 使用命令查看详情: /debate history view {session.session_id}[/dim]")
+                self._update_log_view("")
+
+            # 提供进一步的操作建议
+            self._update_log_view("[bold blue]📋 操作建议:[/bold blue]")
+            self._update_log_view("[dim]• 使用上述命令查看具体的对话详情[/dim]")
+            self._update_log_view("[dim]• 在新对话中引用这些历史信息[/dim]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 搜索历史对话时出错: {e}[/bold red]")
+
+    def _show_debate_history_list(self) -> None:
+        """Show list of all debate sessions."""
+        try:
+            # Get debate history tracker from container
+            from daip_live.container import Container
+            container = Container()
+            container.config.from_yaml("config.yaml")
+            debate_history_tracker = container.debate_history_tracker()
+            
+            # Get all debate histories
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            histories = loop.run_until_complete(debate_history_tracker.get_all_histories())
+            loop.close()
+            
+            if not histories:
+                self._update_log_view("[bold yellow]> No debate histories found.[/bold yellow]")
+                return
+
+            self._update_log_view(f"[bold green]> 📚 Debate History Sessions ({len(histories)} found):[/bold green]")
+
+            for i, history in enumerate(histories, 1):
+                participants_str = ", ".join([p.name for p in history.participants])
+                self._update_log_view(f"[cyan]  {i}. {history.session_id}[/cyan]")
+                self._update_log_view(f"     [dim]Topic:[/dim] {history.topic}")
+                self._update_log_view(f"     [dim]Status:[/dim] {history.status} | [dim]Rounds:[/dim] {history.total_rounds}")
+                self._update_log_view(f"     [dim]Participants:[/dim] {participants_str}")
+                self._update_log_view("")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error retrieving debate history list: {e}[/bold red]")
+
+    def _show_debate_history(self, session_id: str) -> None:
+        """Show specific debate history."""
+        try:
+            # Get debate history tracker from container
+            from daip_live.container import Container
+            container = Container()
+            container.config.from_yaml("config.yaml")
+            debate_history_tracker = container.debate_history_tracker()
+            
+            # Get specific debate history
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            history = loop.run_until_complete(debate_history_tracker.get_history(session_id))
+            loop.close()
+            
+            if not history:
+                self._update_log_view(f"[bold red]> No debate history found for session ID '{session_id}'.[/bold red]")
+                return
+
+            self._update_log_view(f"[bold blue]> 📖 Debate Session:[/bold blue] {history.session_id}")
+            self._update_log_view(f"[bold]Topic:[/bold] {history.topic}")
+            self._update_log_view(f"[bold]Status:[/bold] {history.status}")
+            self._update_log_view(f"[bold]Total Rounds:[/bold] {history.total_rounds}")
+            self._update_log_view("[bold]Participants:[/bold]")
+            
+            for p in history.participants:
+                self._update_log_view(f"  [cyan]• {p.name}[/cyan] (Order: {p.turn_order})")
+            
+            self._update_log_view("--- [bold]Debate Transcript[/] ---")
+            
+            current_round = 0
+            for turn in history.turns:
+                if turn.round_number != current_round:
+                    current_round = turn.round_number
+                    self._update_log_view(f"\n[bold blue]Round {current_round}:[/bold blue]")
+                
+                # Add visual indicator for the speaker with color
+                participant = next((p for p in history.participants if p.name == turn.participant_name), None)
+                color = participant.color if participant else "white"
+                self._update_log_view(f"[{color}][bold]{turn.participant_name}:[/bold] {turn.content}[/{color}]")
+            
+            if history.end_time:
+                self._update_log_view(f"\n[bold]End Time:[/] {history.end_time}")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Error retrieving debate history: {e}[/bold red]")
+
+    async def _handle_wiki_create(self, args: str) -> None:
+        """Create a new wiki page using multi-role collaboration by default."""
+        args_list = args.split()
+        if len(args_list) < 1:
+            self._update_log_view("[bold red]> Usage: /wiki create <title> [--tags <tag1,tag2>][/bold red]")
+            return
+
+        title = args_list[0]
+        tags = []
+
+        # Parse tags option
+        if "--tags" in args_list:
+            tags_index = args_list.index("--tags")
+            if tags_index + 1 < len(args_list):
+                tags = [tag.strip() for tag in args_list[tags_index + 1].split(",")]
+
+        self._update_log_view(f"[bold blue]> 🤖 协作创建Wiki页面: '{title}'[/bold blue]")
+        if tags:
+            self._update_log_view(f"[dim]> 标签: {', '.join(tags)}[/dim]")
+        self._update_log_view("[dim]> 正在启动多角色AI协作流程...[/dim]")
+
+        try:
+            # 检查是否已初始化协作器
+            if not hasattr(self, '_wiki_manager') or not self._wiki_manager:
+                self._update_log_view("[bold red]> ❌ Wiki管理器未初始化[/bold red]")
+                return
+
+            # 智能处理已存在文档的情况
+            try:
+                # 首先检查文档是否已存在
+                existing_page = self._wiki_manager.get_page_by_title(title)
+                if existing_page:
+                    # 文档已存在，检查是否为空
+                    if hasattr(self._wiki_manager, '_is_empty_document') and self._wiki_manager._is_empty_document(existing_page.content):
+                        # 空文档，当作新建处理
+                        self._update_log_view(f"[bold yellow]> 📄 检测到空文档 '{title}'，当作新建文档处理...[/bold yellow]")
+                        if not hasattr(self._wiki_manager, 'collaborator') or not self._wiki_manager.collaborator:
+                            # 使用基础创建流程
+                            manager = self._wiki_manager
+                            page = manager.create_page(title, f"# {title}\n\n开始编辑您的内容...", tags)
+                            self._update_log_view(f"[bold green]> ✅ Wiki页面创建成功: {page.file_path}[/bold green]")
+                            self._update_log_view(f"[dim]> 文件位置: {page.file_path}[/dim]")
+                            return
+                    else:
+                        # 有内容的文档，启动协同编辑
+                        self._update_log_view(f"[bold blue]> 📝 检测到已有文档 '{title}'，启动协同编辑模式...[/bold blue]")
+                        self._update_log_view(f"[dim]> 当前文档长度: {len(existing_page.content)} 字符[/dim]")
+                        await self._start_collaborative_edit(title, existing_page, tags)
+                        return
+
+            except Exception as check_error:
+                # 检查过程中出错，继续正常的创建流程
+                self._update_log_view(f"[dim]> 文档检查时出现小问题，继续创建流程: {check_error}[/dim]")
+
+            if not hasattr(self._wiki_manager, 'collaborator') or not self._wiki_manager.collaborator:
+                # 如果没有协作器，使用标准创建但给出提示
+                self._update_log_view("[bold yellow]> ⚠️ 协作器未就绪，使用基础创建流程...[/bold yellow]")
+                manager = self._wiki_manager
+                page = manager.create_page(title, f"# {title}\n\n开始编辑您的内容...", tags)
+                self._update_log_view(f"[bold green]> ✅ Wiki页面创建成功: {page.file_path}[/bold green]")
+                self._update_log_view(f"[dim]> 文件位置: {page.file_path}[/dim]")
+                return
+
+            # 启动协作创建流程
+            self._update_log_view("[bold blue]> 🔄 启动多角色AI协作...[/bold blue]")
+
+            # 定义参与协作的角色
+            collaborative_roles = [
+                "Researcher_Agent",      # 研究专家
+                "Writer_Agent",          # 写作专家
+                "Fact_Checker_Agent",    # 事实核查专家
+            ]
+            # 启动协作创建
+            initial_content = f"# {title}\n\n开始协同创建关于\"{title}\"的维基页面...\n"
+            result = await self._wiki_manager.create_collaborative_wiki(
+                title=title,
+                topic=title,
+                roles=collaborative_roles,
+                rounds=2  # 进行2轮协作编辑
+            )
+
+            # 安全处理返回值
+            if isinstance(result, tuple):
+                # 如果返回元组 (page, content)，只取页面对象
+                page = result[0]
+            elif hasattr(result, 'file_path'):
+                # 如果返回的是页面对象
+                page = result
+            else:
+                # 否则尝试创建基础页面
+                page = self._wiki_manager.create_page(title, f"# {title}\n\n协作生成内容:\n{str(result)[:500]}...", tags)
+
+            if hasattr(page, 'file_path'):
+                self._update_log_view(f"[bold green]> ✅ 协作维基页面创建成功: {page.file_path}[/bold green]")
+                self._update_log_view(f"[dim]> 文件位置: {page.file_path}[/dim]")
+                self._update_log_view("[dim]> 由多个AI角色协同完成内容创建[/dim]")
+            else:
+                self._update_log_view(f"[bold yellow]> ⚠️  协作维基页面创建完成，但格式异常: {type(result)}[/bold yellow]")
+            self._update_log_view("[bold red]> ❌ Wiki协作功能不可用，缺少相关模块[/bold red]")
+            # 降级到标准创建流程
+            try:
+                manager = self._wiki_manager
+                page = manager.create_page(title, f"# {title}\n\n开始编辑您的内容...", tags)
+                self._update_log_view(f"[bold green]> ✅ Wiki页面基础创建成功: {page.file_path}[/bold green]")
+                self._update_log_view(f"[dim]> 文件位置: {page.file_path}[/dim]")
+            except Exception as e:
+                self._update_log_view(f"[bold red]> ❌ 基础创建也失败: {e}[/bold red]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 协作创建Wiki页面失败: {e}[/bold red]")
+            import traceback
+            traceback.print_exc()
+            # 降级到标准创建流程
+            try:
+                manager = self._wiki_manager
+                page = manager.create_page(title, f"# {title}\n\n开始编辑您的内容...", tags)
+                self._update_log_view(f"[bold green]> ✅ 降级基础创建成功: {page.file_path}[/bold green]")
+                self._update_log_view(f"[dim]> 文件位置: {page.file_path}[/dim]")
+            except Exception as fallback_e:
+                self._update_log_view(f"[bold red]> ❌ 降级创建也失败: {fallback_e}[/bold red]")
+
+    async def _handle_collaborative_wiki_creation(self, title: str) -> None:
+        """使用多角色协作创建Wiki页面"""
+        self._update_log_view(f"[bold blue]> 🤖 协作创建维基页面: '{title}'[/bold blue]")
+        self._update_log_view("[dim]> 正在启动多角色AI协作流程...[/dim]")
+
+        try:
+            # 检查是否已初始化协作器
+            if not hasattr(self, '_wiki_manager') or not self._wiki_manager:
+                self._update_log_view("[bold red]> ❌ Wiki管理器未初始化[/bold red]")
+                return
+
+            if not hasattr(self._wiki_manager, 'collaborator') or not self._wiki_manager.collaborator:
+                # 如果没有协作器，使用标准创建
+                self._update_log_view("[bold yellow]> ⚠️ 协作器未就绪，使用标准创建流程...[/bold yellow]")
+                self._handle_wiki_create(title)
+                return
+
+            # 启动协作创建流程
+            self._update_log_view("[bold blue]> 🔄 启动多角色AI协作...[/bold blue]")
+
+            # 定义参与协作的角色
+            collaborative_roles = [
+                "Researcher_Agent",      # 研究专家
+                "Writer_Agent",          # 写作专家
+                "Fact_Checker_Agent",    # 事实核查专家
+            ]
+            # 启动协作创建
+            initial_content = f"# {title}\n\n开始协同创建关于\"{title}\"的维基页面...\n"
+            result = await self._wiki_manager.create_collaborative_wiki(
+                title=title,
+                topic=title,
+                roles=collaborative_roles,
+                rounds=2  # 进行2轮协作编辑
+            )
+
+            # 安全处理返回值
+            if isinstance(result, tuple):
+                # 如果返回元组 (page, content)，只取页面对象
+                page = result[0]
+            elif hasattr(result, 'file_path'):
+                # 如果返回的是页面对象
+                page = result
+            else:
+                # 否则尝试创建基础页面
+                page = self._wiki_manager.create_page(title, f"# {title}\n\n协作生成内容:\n{str(result)[:500]}...", tags)
+
+            if hasattr(page, 'file_path'):
+                self._update_log_view(f"[bold green]> ✅ 协作维基页面创建成功: {page.file_path}[/bold green]")
+                self._update_log_view(f"[dim]> 文件位置: {page.file_path}[/dim]")
+                self._update_log_view("[dim]> 由多个AI角色协同完成内容创建[/dim]")
+            else:
+                self._update_log_view(f"[bold yellow]> ⚠️  协作维基页面创建完成，但格式异常: {type(result)}[/bold yellow]")
+            self._update_log_view("[bold red]> ❌ Wiki协作功能不可用，缺少相关模块[/bold red]")
+            # 降级到标准创建流程
+            self._handle_wiki_create(title)
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 协作创建Wiki页面失败: {e}[/bold red]")
+            import traceback
+            traceback.print_exc()
+            # 降级到标准创建流程
+            self._handle_wiki_create(title)
+
+    def _handle_wiki_list(self) -> None:
+        """List wiki pages."""
+        try:
+            manager = self._wiki_manager
+            pages = manager.list_all_pages()
+
+            if not pages:
+                self._update_log_view("[bold yellow]> 📄 未找到Wiki页面[/bold yellow]")
+                return
+
+            self._update_log_view(f"[bold green]> 📚 Wiki页面列表 ({len(pages)} 个页面):[/bold green]")
+
+            for page in pages:
+                tags_str = ", ".join(page.tags) if page.tags else "无标签"
+                modified = page.modified_at.strftime("%Y-%m-%d %H:%M")
+                word_count = page.get_word_count()
+                reading_time = page.get_reading_time()
+
+                self._update_log_view(f"[cyan]  📄 {page.title}[/cyan]")
+                self._update_log_view(f"[dim]     🏷️  标签: {tags_str}[/dim]")
+                self._update_log_view(f"[dim]     📝 字数: {word_count} | 阅读时间: {reading_time}分钟[/dim]")
+                self._update_log_view(f"[dim]     📅 修改时间: {modified}[/dim]")
+
+        except ImportError:
+            self._update_log_view("[bold red]> ❌ Wiki功能不可用，缺少相关模块[/bold red]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 列出Wiki页面失败: {e}[/bold red]")
+
+    def _handle_wiki_export(self, args: str) -> None:
+        """Export wiki to different formats."""
+        args_list = args.split()
+        if len(args_list) < 1:
+            self._update_log_view("[bold red]> Usage: /wiki export <format> [output_dir] [/bold red]")
+            self._update_log_view("[bold yellow]> 支持格式: markdown, html, obsidian[/bold yellow]")
+            return
+
+        format_type = args_list[0].lower()
+        output_dir = args_list[1] if len(args_list) > 1 else None
+
+        if format_type not in ["markdown", "html", "obsidian"]:
+            self._update_log_view(f"[bold red]> 不支持的格式: {format_type}[/bold red]")
+            self._update_log_view("[bold yellow]> 支持格式: markdown, html, obsidian[/bold yellow]")
+            return
+
+        try:
+            if not self._wiki_manager:
+                self._update_log_view("[bold red]> Wiki Manager not initialized.[/bold red]")
+                return
+
+            manager = self._wiki_manager
+            
+            if output_dir:
+                export_path = Path(output_dir)
+            else:
+                export_path = Path.cwd() / "wiki_export" / format_type
+
+            self._update_log_view(f"[bold blue]> 📤 导出Wiki为 {format_type} 格式...[/bold blue]")
+            self._update_log_view(f"[dim]> 导出目录: {export_path}[/dim]")
+
+            from daip_live.wiki.knowledge_integration import WikiKnowledgeExporter
+            exporter = WikiKnowledgeExporter(manager)
+
+            if format_type == "markdown":
+                success = exporter.export_to_markdown(export_path)
+            elif format_type == "html":
+                success = exporter.export_to_html(export_path)
+            elif format_type == "obsidian":
+                success = exporter.export_to_obsidian(export_path)
+
+            if success:
+                self._update_log_view(f"[bold green]> ✅ Wiki导出成功: {export_path}[/bold green]")
+            else:
+                self._update_log_view(f"[bold red]> ❌ Wiki导出失败[/bold red]")
+
+        except ImportError:
+            self._update_log_view("[bold red]> ❌ Wiki导出功能不可用，缺少相关模块[/bold red]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ Wiki导出失败: {e}[/bold red]")
+
+    async def _start_collaborative_edit(self, title: str, existing_page: 'WikiPage', tags: Optional[List[str]] = None) -> None:
+        """启动对已有文档的协同编辑
+
+        Args:
+            title: 文档标题
+            existing_page: 已存在的页面对象
+            tags: 标签列表
+        """
+        try:
+            self._update_log_view(f"[bold blue]> 🔄 启动对 '{title}' 的协同编辑...[/bold blue]")
+            self._update_log_view(f"[dim]> 当前文档长度: {len(existing_page.content)} 字符[/dim]")
+
+            # 检查是否有协同编辑功能
+            if not hasattr(self._wiki_manager, 'collaborator') or not self._wiki_manager.collaborator:
+                self._update_log_view("[bold yellow]> ⚠️ 协同编辑器未就绪，使用基础更新流程...[/bold yellow]")
+                # 使用基础更新功能，询问用户要添加什么内容
+                self._update_log_view(f"[bold cyan]> 📝 当前文档内容预览:[/bold cyan]")
+                self._update_log_view(f"[dim]{existing_page.content[:200]}{'...' if len(existing_page.content) > 200 else ''}[/dim]")
+                self._update_log_view("[bold green]> 💡 提示: 您可以输入要添加的内容，或使用 '/wiki edit <title> <content>' 来编辑文档[/bold green]")
+                return
+
+            # 定义参与协同编辑的角色（与创建稍有不同，更注重编辑和改进）
+            collaborative_roles = [
+                "Content_Editor_Agent",   # 内容编辑
+                "Quality_Reviewer_Agent", # 质量审核
+                "Enhancement_Expert_Agent", # 增强专家
+            ]
+
+            # 使用协同编辑功能
+            self._update_log_view("[bold blue]> 🤖 启动多角色协同编辑...[/bold blue]")
+            self._update_log_view(f"[dim]> 参与角色: {', '.join(collaborative_roles)}[/dim]")
+
+            result = await self._wiki_manager.create_collaborative_wiki(
+                title=title,
+                topic=f"改进和扩展现有的维基页面: {title}",
+                roles=collaborative_roles,
+                rounds=2,  # 编辑轮次可以少一些
+                initial_content=existing_page.content
+            )
+
+            if result and result.get('success'):
+                self._update_log_view(f"[bold green]> ✅ 协同编辑完成: '{title}'[/bold green]")
+                self._update_log_view(f"[dim]> 编辑结果: {result.get('summary', '文档已成功更新')}[/dim]")
+
+                # 显示更新后的文档统计信息
+                updated_page = self._wiki_manager.get_page_by_title(title)
+                if updated_page:
+                    self._update_log_view(f"[dim]> 更新后文档长度: {len(updated_page.content)} 字符[/dim]")
+                    if len(updated_page.content) > len(existing_page.content):
+                        added_chars = len(updated_page.content) - len(existing_page.content)
+                        self._update_log_view(f"[dim green]> 新增内容: +{added_chars} 字符[/dim green]")
+            else:
+                self._update_log_view(f"[bold red]> ❌ 协同编辑失败[/bold red]")
+                if result:
+                    error_msg = result.get('error', '未知错误')
+                    self._update_log_view(f"[dim]> 错误信息: {error_msg}[/dim]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 协同编辑过程中发生错误: {e}[/bold red]")
+            self._update_log_view("[dim]> 已将文档回滚到原始状态[/dim]")
+
+    def _handle_permission_command(self, args: str) -> None:
+        """Permission management commands."""
+        args_list = args.split()
+        if not args_list:
+            self._update_log_view("[bold red]> 用法: /permission [list|grant|revoke|check|reset] [参数][/bold red]")
+            return
+
+        subcommand = args_list[0].lower()
+        remaining_args = " ".join(args_list[1:])
+
+        if subcommand == "list":
+            self._handle_permission_list()
+        elif subcommand == "grant":
+            self._handle_permission_grant(remaining_args)
+        elif subcommand == "revoke":
+            self._handle_permission_revoke(remaining_args)
+        elif subcommand == "check":
+            self._handle_permission_check(remaining_args)
+        elif subcommand == "reset":
+            self._handle_permission_reset(remaining_args)
+        else:
+            self._update_log_view(f"[bold red]> 未知的权限子命令: {subcommand}[/bold red]")
+            self._update_log_view("[bold yellow]> 可用命令: list, grant, revoke, check, reset[/bold yellow]")
+
+    def _handle_permission_list(self) -> None:
+        """List current permission settings."""
+        try:
+            self._update_log_view("[bold green]> 🔐 权限管理系统状态:[/bold green]")
+
+            # Get current user (simplified - use "default" user for now)
+            current_user = "default"
+            user_permissions = self._permission_manager.list_user_permissions(current_user)
+
+            if not user_permissions:
+                self._update_log_view("[yellow]> 当前用户没有特殊权限设置，使用默认权限[/yellow]")
+                self._update_log_view("[dim]> 可以使用 /permission grant <tool> <level> 授予权限[/dim]")
+            else:
+                self._update_log_view(f"[cyan]> 用户 '{current_user}' 的特殊权限:[/cyan]")
+                for tool_name, permission in user_permissions.items():
+                    level_emoji = {
+                        PermissionLevel.DENIED: "🚫",
+                        PermissionLevel.READ_ONLY: "👁️",
+                        PermissionLevel.BASIC: "✅",
+                        PermissionLevel.ADVANCED: "🔧",
+                        PermissionLevel.ADMIN: "👑"
+                    }.get(permission.level, "❓")
+
+                    usage_info = f" (使用 {permission.usage_count} 次)" if permission.usage_count > 0 else ""
+                    self._update_log_view(f"  {level_emoji} {tool_name}: {permission.level.value}{usage_info}")
+
+            # Show default permissions for reference
+            self._update_log_view("[dim]---[/dim]")
+            self._update_log_view("[cyan]> 默认权限级别:[/cyan]")
+            default_perms = self._permission_manager.default_permissions
+            for tool_name, level in default_perms.items():
+                level_emoji = {
+                    PermissionLevel.DENIED: "🚫",
+                    PermissionLevel.READ_ONLY: "👁️",
+                    PermissionLevel.BASIC: "✅",
+                    PermissionLevel.ADVANCED: "🔧",
+                    PermissionLevel.ADMIN: "👑"
+                }.get(level, "❓")
+                self._update_log_view(f"  {level_emoji} {tool_name}: {level.value}")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 获取权限信息失败: {e}[/bold red]")
+
+    def _handle_permission_grant(self, args: str) -> None:
+        """Grant permission to a tool."""
+        args_list = args.strip().split()
+        if len(args_list) < 2:
+            self._update_log_view("[bold red]> 用法: /permission grant <tool_name> <level>[/bold red]")
+            self._update_log_view("[yellow]> 权限级别: denied, read_only, basic, advanced, admin[/yellow]")
+            self._update_log_view("[dim]> 示例: /permission grant gemini-cli advanced[/dim]")
+            return
+
+        tool_name = args_list[0]
+        level_str = args_list[1].lower()
+
+        # Parse permission level
+        level_map = {
+            "denied": PermissionLevel.DENIED,
+            "read_only": PermissionLevel.READ_ONLY,
+            "readonly": PermissionLevel.READ_ONLY,
+            "basic": PermissionLevel.BASIC,
+            "advanced": PermissionLevel.ADVANCED,
+            "admin": PermissionLevel.ADMIN
+        }
+
+        if level_str not in level_map:
+            self._update_log_view(f"[bold red]> 无效的权限级别: {level_str}[/bold red]")
+            self._update_log_view("[yellow]> 有效级别: denied, read_only, basic, advanced, admin[/yellow]")
+            return
+
+        level = level_map[level_str]
+        current_user = "default"  # Simplified user identification
+
+        try:
+            success = self._permission_manager.grant_permission(current_user, tool_name, level, "tui_user")
+            if success:
+                level_emoji = {
+                    PermissionLevel.DENIED: "🚫",
+                    PermissionLevel.READ_ONLY: "👁️",
+                    PermissionLevel.BASIC: "✅",
+                    PermissionLevel.ADVANCED: "🔧",
+                    PermissionLevel.ADMIN: "👑"
+                }.get(level, "❓")
+
+                self._update_log_view(f"[bold green]> ✅ 权限已授予: {level_emoji} {tool_name} -> {level.value}[/bold green]")
+                self._update_log_view(f"[dim]> 用户: {current_user}, 授予者: tui_user[/dim]")
+            else:
+                self._update_log_view(f"[bold red]> ❌ 授予权限失败: {tool_name}[/bold red]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 授予权限时出错: {e}[/bold red]")
+
+    def _handle_permission_revoke(self, tool_name: str) -> None:
+        """Revoke permission from a tool."""
+        if not tool_name.strip():
+            self._update_log_view("[bold red]> 请指定工具名称[/bold red]")
+            self._update_log_view("[dim]> 用法: /permission revoke <tool_name>[/dim]")
+            return
+
+        current_user = "default"  # Simplified user identification
+
+        try:
+            success = self._permission_manager.revoke_permission(current_user, tool_name.strip())
+            if success:
+                self._update_log_view(f"[bold green]> ✅ 权限已撤销: {tool_name.strip()}[/bold green]")
+                self._update_log_view(f"[dim]> 用户: {current_user}[/dim]")
+                self._update_log_view("[dim]> 现在将使用默认权限级别[/dim]")
+            else:
+                self._update_log_view(f"[bold yellow]> ⚠️ 用户没有 '{tool_name.strip()}' 的特殊权限[/bold yellow]")
+                self._update_log_view("[dim]> 该工具已使用默认权限级别[/dim]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 撤销权限时出错: {e}[/bold red]")
+
+    def _handle_permission_check(self, tool_name: str) -> None:
+        """Check permission level for a specific tool."""
+        if not tool_name.strip():
+            self._update_log_view("[bold red]> 请指定工具名称[/bold red]")
+            self._update_log_view("[dim]> 用法: /permission check <tool_name>[/dim]")
+            return
+
+        current_user = "default"  # Simplified user identification
+
+        try:
+            level = self._permission_manager.check_permission(current_user, tool_name.strip())
+
+            level_emoji = {
+                PermissionLevel.DENIED: "🚫",
+                PermissionLevel.READ_ONLY: "👁️",
+                PermissionLevel.BASIC: "✅",
+                PermissionLevel.ADVANCED: "🔧",
+                PermissionLevel.ADMIN: "👑"
+            }.get(level, "❓")
+
+            level_desc = {
+                PermissionLevel.DENIED: "拒绝访问 - 无法使用此工具",
+                PermissionLevel.READ_ONLY: "只读权限 - 可以查看但不能执行",
+                PermissionLevel.BASIC: "基础权限 - 可以使用基本功能",
+                PermissionLevel.ADVANCED: "高级权限 - 可以使用所有功能",
+                PermissionLevel.ADMIN: "管理员权限 - 完全控制"
+            }
+
+            self._update_log_view(f"[bold cyan]> 🔍 权限检查: {level_emoji} {tool_name.strip()}[/bold cyan]")
+            self._update_log_view(f"[dim]> 权限级别: {level.value}[/dim]")
+            self._update_log_view(f"[dim]> 说明: {level_desc.get(level, '未知级别')}[/dim]")
+
+            # Show if this is a user-specific permission or default
+            user_permissions = self._permission_manager.list_user_permissions(current_user)
+            if tool_name.strip() in user_permissions:
+                permission = user_permissions[tool_name.strip()]
+                self._update_log_view(f"[dim]> 类型: 用户特定权限[/dim]")
+                if permission.granted_by:
+                    self._update_log_view(f"[dim]> 授予者: {permission.granted_by}[/dim]")
+                if permission.granted_at:
+                    self._update_log_view(f"[dim]> 授予时间: {permission.granted_at.strftime('%Y-%m-%d %H:%M:%S')}[/dim]")
+            else:
+                self._update_log_view(f"[dim]> 类型: 默认权限[/dim]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 检查权限时出错: {e}[/bold red]")
+
+    def _handle_permission_reset(self, args: str) -> None:
+        """Reset user permissions."""
+        args_list = args.strip().split()
+
+        if args_list and args_list[0].lower() == "--all":
+            # Reset all users (admin operation)
+            try:
+                all_users = self._permission_manager.list_all_users()
+                if not all_users:
+                    self._update_log_view("[yellow]> 没有用户权限需要重置[/yellow]")
+                    return
+
+                self._update_log_view(f"[bold blue]> 🔄 重置所有用户权限 ({len(all_users)} 个用户)...[/bold blue]")
+
+                reset_count = 0
+                for user_id in all_users:
+                    if self._permission_manager.reset_user_permissions(user_id):
+                        reset_count += 1
+
+                self._update_log_view(f"[bold green]> ✅ 已重置 {reset_count} 个用户的权限[/bold green]")
+                self._update_log_view("[dim]> 所有用户现在将使用默认权限级别[/dim]")
+
+            except Exception as e:
+                self._update_log_view(f"[bold red]> ❌ 重置所有权限时出错: {e}[/bold red]")
+        else:
+            # Reset current user
+            current_user = "default"  # Simplified user identification
+
+            try:
+                success = self._permission_manager.reset_user_permissions(current_user)
+                if success:
+                    self._update_log_view(f"[bold green]> ✅ 已重置用户 '{current_user}' 的所有权限[/bold green]")
+                    self._update_log_view("[dim]> 现在将使用默认权限级别[/dim]")
+                else:
+                    self._update_log_view(f"[bold yellow]> ⚠️ 用户 '{current_user}' 没有特殊权限需要重置[/bold yellow]")
+            except Exception as e:
+                self._update_log_view(f"[bold red]> ❌ 重置权限时出错: {e}[/bold red]")
+
+            self._update_log_view("[dim]> 提示: 使用 /permission reset --all 重置所有用户权限[/dim]")
+
+    def _handle_quit_command(self, args: str) -> None:
+        """Exit the application and close TUI."""
+        # Cancel all background tasks before exiting
+        for task in self._background_tasks:
+            if not task.done():
+                task.cancel()
+        self._background_tasks.clear()
+        self.exit()
+
+    def _handle_clear_command(self, args: str) -> None:
+        """Clear the output area."""
+        # 获取主输出区域并清空内容
+        try:
+            log_view = self.query_one("#main_log", RichLog)
+            # RichLog没有直接的清空方法，我们创建一个新的实例
+            # 先获取父容器
+            container = log_view.parent
+            if container:
+                # 移除旧的RichLog
+                log_view.remove()
+                # 创建新的RichLog
+                new_log_view = RichLog(id="main_log", classes="output-mode", highlight=True, markup=True, wrap=True)
+                container.mount(new_log_view, before=container.query_one(Input))
+                self._update_log_view("[dim]Output area cleared.[/dim]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]> Error clearing output: {e}[/bold red]")
+
+    def _handle_ctrl_e_exit(self) -> None:
+        """Handle double CTRL+E exit sequence with user confirmation."""
+        import time
+
+        current_time = time.time()
+
+        if current_time - self._last_ctrl_e_time <= 3.0:  # 3秒窗口内
+            # 第二次CTRL+E，显示确认对话框
+            self._show_exit_confirmation()
+        else:
+            # 第一次CTRL+E，显示提示
+            self._last_ctrl_e_time = current_time
+            self._exit_hint_shown = True
+            self._update_status_bar("再次按 CTRL+E 将显示退出确认")
+
+            # 3秒后清除提示
+            def clear_hint():
+                if time.time() - self._last_ctrl_e_time > 3.0:
+                    self._update_status_bar("Ready")
+                    self._exit_hint_shown = False
+
+            self.set_timer(3.0, clear_hint)
+
+    def _show_exit_confirmation(self) -> None:
+        """Show exit confirmation dialog."""
+        from textual.screen import ModalScreen
+        from textual.containers import Vertical, Horizontal
+        from textual.widgets import Static, Button
+        from textual.binding import Binding
+
+        class ExitConfirmationScreen(ModalScreen):
+            """Screen for confirming application exit."""
+
+            BINDINGS = [
+                Binding("escape,c", "app.pop_screen", "取消"),
+                Binding("enter,y", "confirm_exit", "确认退出"),
+            ]
+
+            def compose(self):
+                with Vertical(id="dialog"):
+                    yield Static("❓ 确认退出", id="title")
+                    yield Static("您确定要退出 DAIP-LIVE 应用吗？", id="message")
+                    with Horizontal(id="buttons"):
+                        yield Button("取消", variant="primary", id="cancel")
+                        yield Button("确认退出", variant="error", id="confirm")
+
+            def on_button_pressed(self, event: Button.Pressed):
+                if event.button.id == "confirm":
+                    self.action_confirm_exit()
+                else:
+                    self.app.pop_screen()
+
+            def action_confirm_exit(self):
+                """Confirm and exit the application."""
+                # Get the parent app and exit
+                app = self.app
+                app.pop_screen()  # Close this dialog first
+
+                # Cancel all background tasks before exiting
+                if hasattr(app, '_background_tasks'):
+                    for task in app._background_tasks:
+                        if not task.done():
+                            task.cancel()
+                    app._background_tasks.clear()
+
+                # Exit the application
+                app.exit()
+
+        # Push the confirmation screen
+        self.push_screen(ExitConfirmationScreen())
+
+    def _handle_ctrl_q_exit(self) -> None:
+        """Handle CTRL+Q exit sequence for session and application."""
+        import time
+        
+        current_time = time.time()
+        
+        # 检查是否在2秒窗口内按下
+        if current_time - self._last_ctrl_q_time <= 2.0:
+            # 连续按下CTRL+Q，退出整个应用
+            # Cancel all background tasks before exiting
+            for task in self._background_tasks:
+                if not task.done():
+                    task.cancel()
+            self._background_tasks.clear()
+            self.exit()
+        else:
+            # 第一次按下CTRL+Q，退出当前会话
+            self._last_ctrl_q_time = current_time
+            self._ctrl_q_press_count = 1
+            
+            # 终止当前会话
+            if hasattr(self, '_executor') and self._executor:
+                # 显示提示信息
+                self._update_log_view("[yellow]会话已终止。再次按 CTRL+Q 退出应用。[/yellow]")
+                self._update_status_bar("会话已终止 - 再次按 CTRL+Q 退出应用")
+                
+                # 重置执行器
+                self._executor = None
+            else:
+                # 没有活动会话，提示退出应用
+                self._update_log_view("[yellow]再次按 CTRL+Q 退出应用。[/yellow]")
+                self._update_status_bar("再次按 CTRL+Q 退出应用")
+            
+            # 5秒后重置状态
+            def reset_state():
+                if time.time() - self._last_ctrl_q_time > 5.0:
+                    self._ctrl_q_press_count = 0
+                    if not hasattr(self, '_exit_hint_shown') or not self._exit_hint_shown:
+                        self._update_status_bar("Ready")
+            
+            self.set_timer(5.0, reset_state)
+
+    def _start_new_chat_session(self, initial_message: str) -> None:
+        """Start a new chat session with the given initial message."""
+        self._update_log_view("[bold yellow]> 🤖 启动智能助手会话...[/bold yellow]")
+        self._update_log_view("[dim]> 正在初始化对话环境，加载知识库...[/dim]")
+
+        # Create a new executor instance for the session
+        pa_executor = AgentExecutor(
+            session_manager=self._session_manager,
+            memory_service=MemoryService(model_provider=self._model_provider),
+            knowledge_manager=self._knowledge_manager,
+            model_provider=self._model_provider,
+            tool_manager=ToolManager(),
+            user_input_queue=asyncio.Queue(),
+        )
+
+        # Set the user input as the initial goal
+        pa_executor.goal = initial_message
+
+        # Update the TUI's reference to the currently active executor
+        self._executor = pa_executor
+
+        # Run the agent in interactive chat mode
+        agent_coro = run_chat_agent_and_feed_tui(pa_executor, self, initial_message)
+        self.run_worker(agent_coro)
+
+        # 显示用户输入，让用户知道系统已接收到请求
+        self._update_log_view(f"[bold blue]> You:[/bold blue] {initial_message}")
+        self._update_log_view(f"[bold green]> Chat session started. You can now continue the conversation.[/bold green]")
+
+        # 添加额外的系统日志，确保系统状态正确记录
+        self._update_system_log(f"[dim]💬 Chat session initiated for: {initial_message[:50]}{'...' if len(initial_message) > 50 else ''}[/dim]")
+
+    def on_unmount(self) -> None:
+        """Clean up background tasks when the app is unmounted."""
+        # Cancel all background tasks
+        for task in self._background_tasks:
+            if not task.done():
+                task.cancel()
+        
+        # Clear the background tasks set
+        self._background_tasks.clear()
+        try:
+            from pathlib import Path
+            history_file = Path.home() / ".daip" / "input_history.txt"
+            
+            if history_file.exists():
+                with open(history_file, 'r', encoding='utf-8') as f:
+                    lines = f.read().strip().split('\n')
+                    # 只保留最近的10条记录
+                    self._input_history = lines[-10:] if lines else []
+        except Exception as e:
+            # 如果加载失败，使用空历史记录
+            self._input_history = []
+
+    def _save_input_history(self) -> None:
+        """Save input history to file."""
+        try:
+            from pathlib import Path
+            history_file = Path.home() / ".daip"
+            history_file.mkdir(exist_ok=True)
+            history_file = history_file / "input_history.txt"
+            
+            # 只保存最近的10条记录
+            history_to_save = self._input_history[-10:] if self._input_history else []
+            
+            with open(history_file, 'w', encoding='utf-8') as f:
+                f.write('\n'.join(history_to_save))
+        except Exception as e:
+            # 静默处理保存失败
+            pass
+
+    def _add_to_input_history(self, input_text: str) -> None:
+        """Add input to history and save to file."""
+        if not input_text.strip():
+            return
+        
+        # 避免重复添加相同的内容
+        if input_text in self._input_history:
+            self._input_history.remove(input_text)
+        
+        # 添加到历史记录开头
+        self._input_history.insert(0, input_text)
+        
+        # 限制为最近10条
+        if len(self._input_history) > 10:
+            self._input_history = self._input_history[:10]
+        
+        # 保存到文件
+        self._save_input_history()
+
+    def post_event(self, event: AgentEvent) -> None:
+        self.call_later(self._post_event, event)
+    
+    def _update_system_activity(self, event: AgentEvent) -> None:
+        """Update system activity monitoring based on event type."""
+        import time
+        
+        # Initialize session start time if not set
+        if self._system_activity['session_start_time'] is None:
+            self._system_activity['session_start_time'] = time.time()
+        
+        # Update last activity time
+        self._system_activity['last_activity_time'] = time.time()
+        
+        # Increment events processed
+        self._system_activity['events_processed'] += 1
+        
+        # Track specific activity types
+        if isinstance(event, ToolCallEvent):
+            self._system_activity['tools_executed'] += 1
+        elif isinstance(event, ErrorEvent):
+            self._system_activity['errors_encountered'] += 1
+
+    def _post_event(self, event: AgentEvent) -> None:
+        # Update system activity monitoring
+        self._update_system_activity(event)
+
+        if isinstance(event, ThoughtEvent):
+            # Hide internal thinking process from user, only show status
+            # Don't display thinking content to user
+            thinking_content = event.content
+            if len(thinking_content) > 50:
+                thinking_content = thinking_content[:47] + "..."
+
+            # Show minimal status without revealing internal process
+            status = "Processing..."
+            self._update_status_bar(status)
+            # Log to system panel instead of conversation
+            self._update_system_log(f"[dim]🧠 Thinking: {thinking_content}[/dim]")
+            return
+        elif isinstance(event, ToolCallEvent):
+            # Hide detailed tool call information from user
+            # Don't show specific tool names and arguments
+            import time
+            self._current_tool_start = time.time()
+
+            # Show minimal progress indicator
+            status = "Working on your request..."
+            self._update_status_bar(status)
+            # Log to system panel instead of conversation
+            tool_name = getattr(event, 'tool_name', 'unknown tool')
+            self._update_system_log(f"[dim]🔧 Executing: {tool_name}[/dim]")
+            return
+        elif isinstance(event, ToolOutputEvent):
+            # Hide tool output details from user unless there's an error
+            if event.status == "success":
+                # Don't show successful tool outputs to user in main conversation
+                import time
+                if hasattr(self, '_current_tool_start'):
+                    execution_time = time.time() - self._current_tool_start
+                    self._update_status_bar("Ready")
+                    # 显示工具执行成功到系统日志
+                    tool_name = getattr(event, 'tool_name', 'task')
+                    self._update_system_log(f"[green]✅ {tool_name} completed in {execution_time:.2f}s[/green]")
+                return
+            else:
+                # Show error outputs to conversation since they're important for user awareness
+                status_color = "red"
+                formatted_event = f"[bold red]> Error: {event.output}[/bold red]"
+                import time
+                if hasattr(self, '_current_tool_start'):
+                    execution_time = time.time() - self._current_tool_start
+                    self._update_status_bar(f"Error occurred")
+                    # 显示工具执行失败到系统日志
+                    tool_name = getattr(event, 'tool_name', 'task')
+                    self._update_system_log(f"[red]❌ {tool_name} failed after {execution_time:.2f}s[/red]")
+                else:
+                    self._update_status_bar("Error")
+                self._update_log_view(formatted_event)
+        elif isinstance(event, FinalResponseEvent):
+            # Show final responses to main conversation
+            formatted_event = f"[bold white]> {event.content}[/bold white]"
+            self._update_status_bar("Idle")
+            self._update_log_view(formatted_event)
+        elif isinstance(event, PermissionRequestEvent):
+            # Show permission requests to main conversation
+            self.push_screen(PermissionDialog(event.tool_name, event.args, self._handle_permission_response))
+            formatted_event = f"[bold yellow]> Permission requested for tool: {event.tool_name}[/bold yellow]"
+            self._update_log_view(formatted_event)
+        elif isinstance(event, TokenUsageEvent):
+            # Update token usage but log to system panel, not conversation
+            self.update_token_usage(event.usage_info)
+            token_info = f"[cyan]Token usage: {event.usage_info.get('total_tokens', 0)} tokens[/cyan]"
+            self._update_system_log(token_info)
+        elif isinstance(event, ModelMetricsEvent):
+            # Update model metrics but log to system panel, not conversation
+            self.update_model_metrics(event.latency)
+            metrics_info = f"[cyan]Model metrics: {event.request_count} requests, {event.latency:.2f}s latency[/cyan]"
+            self._update_system_log(metrics_info)
+        elif isinstance(event, DebateStartEvent):
+            self._current_debate.update({
+                'session_id': event.session_id,
+                'topic': event.topic,
+                'current_round': 0,
+                'total_rounds': event.rounds,
+                'current_participant': None,
+                'is_active': True,
+                'participant_colors': self._get_participant_colors(event.roles)
+            })
+            # Set debate started event for testing
+            self._debate_started_event.set()
+
+            # Reset debate completed event and participant events
+            self._debate_completed_event.clear()
+            self._participant_events.clear()
+
+            # Show debate start info to conversation
+            formatted_event = f"[bold green]> 🎬 Debate started: {event.topic}[/bold green]"
+            formatted_event += f"\n[cyan]> Participants: {', '.join(event.roles)}[/cyan]"
+            formatted_event += f"\n[cyan]> Rounds: {event.rounds}[/cyan]"
+            self._update_log_view(formatted_event)
+        elif isinstance(event, DebateRoundStartEvent):
+            self._current_debate['current_round'] = event.round_number
+            # Show round start to system panel instead of conversation to reduce noise
+            formatted_event = f"[bold blue]> 🔄 Round {event.round_number}/{event.total_rounds} starting...[/bold blue]"
+            self._update_system_log(formatted_event)
+        elif isinstance(event, DebateTurnStartEvent):
+            self._current_debate['current_participant'] = event.participant
+
+            # Update current model when participant changes
+            if self._current_debate['role_models']:
+                participant_model = self._current_debate['role_models'].get(event.participant, self._model_name)
+                self._update_current_model(participant_model)
+
+            # Set participant event for testing
+            if event.participant not in self._participant_events:
+                self._participant_events[event.participant] = asyncio.Event()
+            self._participant_events[event.participant].set()
+
+            # Show turn start to system panel instead of conversation to reduce noise
+            participant_color = self._current_debate['participant_colors'].get(event.participant, 'yellow')
+            formatted_event = f"[bold {participant_color}]> 🗣️  {event.participant} speaking (Round {event.round_number})...[/bold {participant_color}]"
+            self._update_system_log(formatted_event)
+        elif isinstance(event, DebateTurnCompleteEvent):
+            # Show complete response to conversation - this is user-facing content
+            # Show more concise output focusing on the actual content from debate participants
+            participant_color = self._current_debate['participant_colors'].get(event.participant, 'white')
+
+            # Create a more concise and readable format focusing on the debate content
+            formatted_event = f"[bold {participant_color}]🗣️ {event.participant} (R{event.round_number}):[/bold {participant_color}] {event.content_preview}"
+            self._update_log_view(formatted_event)
+        elif isinstance(event, DebateCompleteEvent):
+            self._current_debate['is_active'] = False
+            self._current_debate['current_participant'] = None
+
+            # Reset model display to default when debate completes
+            self._update_current_model("default")
+
+            # Set debate completed event for testing
+            self._debate_completed_event.set()
+
+            # Show debate completion to conversation
+            formatted_event = f"[bold magenta]> 🏁 Debate completed![/bold magenta]"
+            formatted_event += f"\n[cyan]> Summary: {event.summary}[/cyan]"
+
+            # Auto-save debate results
+            self._save_debate_results(event)
+            self._update_log_view(formatted_event)
+        else:
+            # For other events, log to system panel instead of conversation
+            event_info = f"[grey]{str(event)}[/grey]"
+            self._update_system_log(event_info)
+            self._update_status_bar("Idle")
+    
+    def update_token_usage(self, usage_info: dict) -> None:
+        """Update real token usage from model provider calls."""
+        if usage_info:
+            if isinstance(usage_info, dict):
+                prompt_tokens = usage_info.get('prompt_tokens', 0)
+                completion_tokens = usage_info.get('completion_tokens', 0)
+                total_tokens = usage_info.get('total_tokens', prompt_tokens + completion_tokens)
+
+                # Update real token usage
+                current_used, current_total = self._real_token_usage
+                new_used = current_used + total_tokens
+                self._real_token_usage = (new_used, max(current_total, new_used))
+
+                # Check if token usage exceeds 80% and trigger compression
+                usage_percentage = (new_used / max(current_total, 1)) * 100
+                if usage_percentage >= 80:
+                    self._handle_token_limit_exceeded(usage_percentage)
+
+                # Update model metrics
+                self._model_metrics['request_count'] += 1
+    
+    def update_model_metrics(self, latency: float) -> None:
+        """Update model performance metrics."""
+        import time
+        self._model_metrics['total_latency'] += latency
+        self._model_metrics['last_request_time'] = time.time()
+    
+    def get_enhanced_status_text(self, base_status: str) -> str:
+        """Generate enhanced status text with real-time metrics."""
+        import time
+        
+        used_tokens, total_tokens = self._real_token_usage
+        percentage = int((used_tokens / total_tokens) * 100) if total_tokens > 0 else 0
+        token_color = "green"
+        if percentage > 80: token_color = "red"
+        elif percentage > 60: token_color = "yellow"
+        
+        # Calculate average latency
+        avg_latency = 0
+        if self._model_metrics['request_count'] > 0:
+            avg_latency = self._model_metrics['total_latency'] / self._model_metrics['request_count']
+        
+        # Calculate session duration
+        session_duration = 0
+        if self._system_activity['session_start_time']:
+            session_duration = time.time() - self._system_activity['session_start_time']
+        
+        # Calculate activity rate (events per minute)
+        events_per_minute = 0
+        if session_duration > 0:
+            events_per_minute = (self._system_activity['events_processed'] / session_duration) * 60
+        
+        focus_mode_text = "Input" if self.focus_mode == FocusMode.INPUT else "Output"
+        
+        # Build status text
+        # Use current model for display, with special formatting for debate mode
+        if self._current_debate['is_active'] and self._current_debate['current_participant']:
+            current_role = self._current_debate['current_participant']
+            role_model = self._current_debate['role_models'].get(current_role, self._model_name)
+            model_display = f"{role_model} ({current_role})"
+        else:
+            model_display = self._current_model if self._current_model != "default" else self._model_name
+
+        status_parts = [
+            f"Model: {model_display}",
+            f"Tokens: {used_tokens}/{total_tokens} ({percentage}%)",
+            f"Requests: {self._model_metrics['request_count']}",
+            f"Avg Latency: {avg_latency:.2f}s"
+        ]
+        
+        # Add system activity metrics
+        if self._system_activity['events_processed'] > 0:
+            activity_info = (
+                f"Events: {self._system_activity['events_processed']} "
+                f"({events_per_minute:.1f}/min) | "
+                f"Tools: {self._system_activity['tools_executed']}"
+            )
+            if self._system_activity['errors_encountered'] > 0:
+                activity_info += f" | Errors: {self._system_activity['errors_encountered']}"
+            status_parts.append(activity_info)
+        
+        # Add debate status if active
+        if self._current_debate['is_active']:
+            debate_info = (
+                f"Debate: R{self._current_debate['current_round']}/"
+                f"{self._current_debate['total_rounds']} - "
+                f"{self._current_debate['current_participant'] or 'Starting'}"
+            )
+            status_parts.append(debate_info)
+        
+        status_parts.extend([
+            f"Status: {base_status}",
+            f"Focus: {focus_mode_text}"
+        ])
+        
+        status_text = " | ".join(status_parts)
+        return f"[{token_color}]{status_text}[/{token_color}]"
+
+    def _update_current_model(self, model_name: str) -> None:
+        """Update the current model display and status bar."""
+        self._current_model = model_name
+        self._model_name = model_name  # Also update the model_name for status bar
+        # Update status bar to reflect model change
+        current_status = "Idle" if not self._current_debate['is_active'] else "Debating"
+        
+        # Log model change
+        try:
+            self._update_system_log(f"[bold blue]🔄 Model switched to {model_name}[/bold blue]")
+        except:
+            print(f"Model switched to {model_name}")
+        
+        # Log model change in debates
+        if self._current_debate['is_active'] and self._current_debate['current_participant']:
+            try:
+                self._update_system_log(f"[dim]🔄 Model switched to {model_name} for {self._current_debate['current_participant']}[/dim]")
+            except:
+                print(f"Model switched to {model_name} for {self._current_debate['current_participant']}")
+        
+        # Try to update status bar with error handling
+        try:
+            self._update_status_bar(current_status)
+        except:
+            pass  # Status bar update failed, but that's not critical
+
+    def _update_status_bar(self, status: str) -> None:
+        try:
+            status_bar = self.query_one("#status_bar", Static)
+            # Use enhanced status text with real-time metrics
+            enhanced_text = self.get_enhanced_status_text(status)
+            status_bar.update(enhanced_text)
+        except Exception as e:
+            # Fallback if status bar is not available
+            print(f"Error updating status bar: {e}")
+            # Try to log the status instead
+            try:
+                self._update_system_log(f"[dim]Status: {status}[/dim]")
+            except:
+                pass  # If even logging fails, just ignore
+
+    def _handle_permission_response(self, allowed: bool) -> None:
+        if hasattr(self._executor, 'permission_queue') and self._executor.permission_queue is not None:
+            self._executor.permission_queue.put_nowait(allowed)
+        self._update_log_view(f"[bold green]> Permission {'granted' if allowed else 'denied'}.[/bold green]")
+
+    def clear_log(self) -> None:
+        """Clears the log display and the internal text buffer."""
+        self.query_one("#main_log", RichLog).clear()
+        self._log_text_buffer.clear()
+
+    def _safe_log_callback(self, message_func, item_type: str, fallback_info: str) -> None:
+        """Safely update log view with error handling for selection callbacks.
+        
+        Args:
+            message_func: Function that returns the message to log
+            item_type: Type of item being processed ('session', 'role', 'model')
+            fallback_info: Fallback information to print to console if logging fails
+        """
+        try:
+            message = message_func()
+            self._update_log_view(message)
+        except Exception as e:
+            print(f"Error in {item_type} selection callback: {e}")
+            print(f"{item_type.capitalize()} details: {fallback_info}")
+
+    async def _display_startup_logo(self) -> None:
+        """Display simple welcome message instead of complex ASCII logo."""
+        try:
+            # Wait a bit for UI to fully initialize
+            await asyncio.sleep(0.1)
+
+            # Debug: Check if RichLog is available
+            try:
+                self.query_one("#main_log", RichLog)
+                self._update_log_view("[dim]Starting DAIP-LIVE...[/dim]")
+            except Exception as log_error:
+                print(f"RichLog not available: {log_error}")
+                return
+
+            # Display simple welcome message instead of complex logo
+            self._update_log_view("[bold green]Welcome to DAIP-LIVE![/bold green]")
+            self._update_log_view("[dim]System initialized and ready.[/dim]")
+
+        except Exception as e:
+            # If logo display fails, show simple welcome message
+            self._update_log_view("[bold green]Welcome to DAIP-LIVE! Ready for your command.[/bold green]")
+            self._update_log_view("[dim]                                              [/dim]")
+
+        except Exception as e:
+            # If logo display fails, continue with normal startup
+            print(f"Logo display error: {e}")
+            try:
+                self._update_log_view("[yellow]Logo display failed, continuing startup...[/yellow]")
+            except:
+                print("Critical: Cannot update log view")
+            import traceback
+            traceback.print_exc()
+
+    def _update_log_view(self, text: str) -> None:
+        try:
+            self.query_one("#main_log", RichLog).write(text)
+            self._log_text_buffer.append(Text.from_markup(text).plain)
+        except Exception:
+            # 如果main_log还不存在，暂时忽略这个错误
+            # 这通常发生在TUI初始化期间
+            pass
+
+    def _update_system_log(self, text: str) -> None:
+        """Update system activity log with filtering for important system messages only."""
+        try:
+            # Only log system-relevant messages, not conversation content
+            # Filter out user messages and AI responses that belong in conversation
+            if self._should_log_to_system_panel(text):
+                self.query_one("#system_log", RichLog).write(text)
+
+                # Track system messages with rotation
+                self._system_log_buffer.append(text)
+                if len(self._system_log_buffer) > self._max_system_log_entries:
+                    self._system_log_buffer.pop(0)
+        except Exception:
+            # 如果system_log还不存在，暂时忽略这个错误
+            # 这通常发生在TUI初始化期间
+            pass
+
+    def _should_log_to_system_panel(self, text: str) -> bool:
+        """Determine if a message should go to the system panel instead of conversation."""
+        text_lower = text.lower()
+
+        # Messages that should go to system panel
+        system_patterns = [
+            "command-message",
+            "system-reminder",
+            "status:",
+            "error:",
+            "model:",
+            "tokens:",
+            "tools:",
+            "events:",
+            "processing",
+            "working on",
+            "completed",
+            "failed",
+            "syncing",
+            "loading",
+            "saving",
+            "initializing",
+            "shutting down"
+        ]
+
+        # Check if it's a system message
+        for pattern in system_patterns:
+            if pattern in text_lower:
+                return True
+
+        # User messages (starting with >) and AI responses go to conversation
+        if text.strip().startswith("> ") and not any(pattern in text_lower for pattern in ["status:", "error:", "model:"]):
+            return False
+
+        # Technical/operational messages go to system
+        if any(keyword in text_lower for keyword in ["module", "component", "service", "agent", "task", "job"]):
+            return True
+
+        return False
+
+    def _highlight_code_and_json(self, text: str) -> str:
+        try:
+            parsed = yaml.safe_load(text)
+            return Syntax(yaml.dump(parsed, indent=2), "yaml", theme="monokai", line_numbers=True)
+        except (yaml.YAMLError, TypeError):
+            return str(text)
+
+    def _save_debate_results(self, event: DebateCompleteEvent, output_dir: Optional[Path] = None) -> None:
+        """Save debate results to a specified directory, with full transcript."""
+        try:
+            session = self._session_manager.get_session(event.session_id)
+            if not session:
+                self._update_log_view(f"[bold red]> 无法找到会话 {event.session_id} 来保存报告。[/bold red]")
+                return
+
+            # Use explicit output_dir if provided, otherwise fetch from config, otherwise default to ./workout
+            if output_dir is None:
+                try:
+                    # Try to get debate logs directory from config
+                    debate_logs_dir = self.container.config.debate.logs_directory()
+                    if debate_logs_dir is None:
+                        debate_logs_dir = "workout"  # default fallback
+                except (AttributeError, TypeError):
+                    debate_logs_dir = "workout"  # default fallback
+
+                output_dir = Path(os.getcwd()) / debate_logs_dir
+            
+            output_dir.mkdir(exist_ok=True)
+
+            # Sanitize topic for filename
+            clean_topic = "".join(c for c in session.goal if c.isalnum() or c in (' ', '-', '_')).rstrip()
+            date_str = datetime.now().strftime("%Y%m%d-%H%M%S")
+            filename = f"debate_{clean_topic}_{date_str}.md"
+            file_path = output_dir / filename
+
+            # Construct the full report
+            report_parts = []
+            report_parts.append("# 辩论结果报告")
+            report_parts.append(f"\n**辩论主题**: {session.goal}")
+            report_parts.append(f"**辩论时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            report_parts.append(f"**参与角色**: {', '.join(session.participant_ids)}")
+            report_parts.append(f"**辩论轮数**: {self._current_debate.get('total_rounds', 'N/A')}")
+
+            # Add Transcript Section
+            if session.history:
+                report_parts.append("\n## 辩论过程")
+                for turn in session.history:
+                    report_parts.append(f"\n**{turn.participant_id}:** {turn.content}")
+            
+            # Add Summary Section
+            if session.summary:
+                report_parts.append("\n## 辩论总结")
+                report_parts.append(f"\n{session.summary}")
+
+            report_parts.append("\n---")
+            report_parts.append("*此报告由AGENT PSY LAB系统自动生成*")
+
+            debate_content = "\n".join(report_parts)
+
+            # Write to file
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(debate_content)
+
+            self._update_log_view(f"[bold green]> 💾 辩论报告已保存至: {file_path}[/bold green]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> ❌ 保存辩论报告失败: {e}[/bold red]")
+
+    def _clear_current_session_context(self) -> None:
+        """Clear current session context and reset token usage."""
+        try:
+            # Clear current session history
+            if self._current_session_id:
+                session = self._session_manager.get_session(self._current_session_id)
+                if session:
+                    # Clear history and compressed history
+                    session.history = []
+                    session.compressed_history = None
+                    session.summary = None
+                    self._update_log_view(f"[bold green]> ✅ 会话 '{self._current_session_id}' 上下文已清除[/bold green]")
+                else:
+                    self._update_log_view("[bold yellow]> ⚠️ 没有活动的会话[/bold yellow]")
+            else:
+                self._update_log_view("[bold yellow]> ⚠️ 没有活动的会话[/bold yellow]")
+
+            # Also reset token usage
+            self._reset_token_usage()
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> 清除会话上下文时出错: {e}[/bold red]")
+
+    def _reset_token_usage(self) -> None:
+        """Reset token usage counter to zero."""
+        try:
+            # Reset both token usage trackers
+            self._token_usage = (0, 8192)
+            self._real_token_usage = (0, 8192)
+
+            # Reset model metrics
+            self._model_metrics = {
+                'request_count': 0,
+                'total_latency': 0.0,
+                'last_request_time': None
+            }
+
+            self._update_log_view("[bold green]> ✅ Token使用量已重置为 0[/bold green]")
+            self._update_status_bar("Token使用量已重置")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> 重置Token使用量时出错: {e}[/bold red]")
+
+    def _handle_token_limit_exceeded(self, usage_percentage: float) -> None:
+        """Handle token limit exceeded by triggering context compression at 80% threshold."""
+        try:
+            # Show warning message
+            self._update_log_view(f"[bold yellow]> ⚠️ Token使用量已达到 {usage_percentage:.1f}%，触发自动压缩[/bold yellow]")
+
+            # Try to compress current session context
+            if not self._current_session_id:
+                # Create a default session for auto compression
+                self._update_log_view("[bold blue]> 🔄 创建会话进行自动压缩...[/bold blue]")
+                session = self._session_manager.create_session(
+                    goal="Auto Compression Session",
+                    session_type="auto_compression",
+                    participant_ids=["user", "assistant"]
+                )
+                self._current_session_id = session.session_id
+            else:
+                session = self._session_manager.get_session(self._current_session_id)
+
+            if session:
+                # Check if token usage is high enough to warrant compression, regardless of history length
+                used_tokens, total_tokens = self._real_token_usage
+                current_percentage = (used_tokens / total_tokens) * 100 if total_tokens > 0 else 0
+
+                if current_percentage >= 80 or len(session.history) > 5:  # Compress if high token usage OR long history
+                    # Use memory service to compress history
+                    if hasattr(self, '_memory_service') and self._memory_service:
+                        self._update_log_view("[bold blue]> 🔄 正在智能压缩上下文...[/bold blue]")
+                        task = asyncio.create_task(self._compress_session_context_async(session))
+                        self._background_tasks.add(task)
+                        task.add_done_callback(self._background_tasks.discard)
+                    else:
+                        # Fallback: clear oldest history entries to reduce token usage
+                        history_count = len(session.history)
+                        keep_count = max(2, min(5, history_count // 2))  # Keep half the entries, minimum 2, max 5
+                        original_count = len(session.history)
+
+                        session.history = session.history[-keep_count:]  # Keep last N entries
+                        session.compressed_history = None
+
+                        if original_count > 0:
+                            self._update_log_view(f"[bold green]> ✅ 历史记录已压缩: 保留{keep_count}/{original_count}条记录[/bold green]")
+                        else:
+                            self._update_log_view("[bold green]> ✅ 历史记录已优化[/bold green]")
+                else:
+                    # Even if history is short, still try to reduce context if token usage is high
+                    if current_percentage >= 70:  # Still warn if approaching limit
+                        self._update_log_view(f"[bold yellow]> 📊 Token使用量: {current_percentage:.1f}% (历史较短但接近限制)[/bold yellow]")
+                    else:
+                        self._update_log_view("[bold blue]> 📝 会话历史较短，当前token使用量较低，暂时跳过压缩[/bold blue]")
+            else:
+                self._update_log_view("[bold red]> ❌ 无法获取当前会话进行压缩[/bold red]")
+
+            # Show compression complete message
+            self._update_status_bar("80%压缩完成")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]> 处理80%Token压缩时出错: {e}[/bold red]")
+
+    def _load_input_history(self) -> None:
+        """Load input history from file."""
+        try:
+            from pathlib import Path
+            history_file = Path.home() / ".daip" / "input_history.txt"
+            
+            if history_file.exists():
+                with open(history_file, 'r', encoding='utf-8') as f:
+                    lines = f.read().strip().split('\n')
+                    # 只保留最近的10条记录
+                    self._input_history = lines[-10:] if lines else []
+        except Exception as e:
+            # 如果加载历史记录失败，继续使用空历史记录
+            self._input_history = []
+            
+    async def _compress_session_context_async(self, session) -> None:
+        """Asynchronously compress session context using memory service."""
+        try:
+            await self._memory_service.compress_history(session)
+            self._update_log_view("[bold green]> ✅ 上下文压缩完成[/bold green]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]> 压缩上下文时出错: {e}[/bold red]")
+            # Fallback: clear some history
+            session.history = session.history[-5:]
+            session.compressed_history = None
+            self._update_log_view("[bold yellow]> ✅ 已手动清理历史记录[/bold green]")
+
+    # Debate lifecycle wait methods for testing
+    async def wait_debate_started(self, timeout: float = 30.0) -> None:
+        """Wait for the debate to start."""
+        try:
+            await asyncio.wait_for(self._debate_started_event.wait(), timeout=timeout)
+        except asyncio.TimeoutError:
+            raise TimeoutError(f"Debate did not start within {timeout} seconds")
+
+    async def wait_debate_completed(self, timeout: float = 120.0) -> None:
+        """Wait for the debate to complete."""
+        try:
+            await asyncio.wait_for(self._debate_completed_event.wait(), timeout=timeout)
+        except asyncio.TimeoutError:
+            raise TimeoutError(f"Debate did not complete within {timeout} seconds")
+
+    def _get_participant_colors(self, participant_names: list[str]) -> dict:
+        """Get color assignments for debate participants."""
+        colors = [
+            "#87CEEB",  # Light blue
+            "#FFB6C1",  # Light pink
+            "#98FB98",  # Pale green
+            "#DDA0DD",  # Plum
+            "#F0E68C",  # Khaki
+            "#FFA07A",  # Light salmon
+            "#20B2AA",  # Light sea green
+            "#9370DB",  # Medium purple
+        ]
+
+        participant_colors = {}
+        for i, name in enumerate(participant_names):
+            color = colors[i % len(colors)]  # Cycle through colors if more participants than colors
+            participant_colors[name] = color
+
+        return participant_colors
+
+    async def _process_clarification_response(self, user_response: str) -> None:
+        """Process user's clarification response and continue with the original task."""
+        if not self._pending_clarification or not self._original_intent_context:
+            self._update_log_view("[bold red]错误：没有待处理的澄清请求[/bold red]")
+            return
+
+        try:
+            # Initialize clarification service if not already done
+            if not hasattr(self, '_clarification_service'):
+                from daip_live.agent_engine.services.clarification_service import ClarificationService
+                self._clarification_service = ClarificationService()
+
+            # Get session ID from original context
+            session_id = self._original_intent_context.get('session_id', 'default')
+
+            # Process the clarification response
+            updated_params = self._clarification_service.process_user_clarification(
+                session_id,
+                user_response,
+                self._pending_clarification
+            )
+
+            # Combine original parameters with new clarification parameters
+            original_intent = self._original_intent_context['original_intent']
+            original_params = getattr(original_intent, 'parameters', {})
+
+            # Merge parameters
+            merged_params = {**original_params, **updated_params}
+
+            # Create new combined input for re-analysis
+            original_input = self._original_intent_context['original_input']
+            combined_input = f"{original_input} {user_response}".strip()
+
+            self._update_log_view(f"[dim]> 重新分析合并后的任务: {combined_input}[/dim]")
+
+            # Re-analyze the combined input with complete parameters
+            if hasattr(self._intent_recognizer, 'recognize_intent_with_context'):
+                new_intent = self._intent_recognizer.recognize_intent_with_context(combined_input, session_id)
+            else:
+                new_intent = self._intent_recognizer.recognize_intent(combined_input)
+
+            if new_intent:
+                # Update the new intent with merged parameters
+                if hasattr(new_intent, 'parameters'):
+                    new_intent.parameters.update(merged_params)
+
+                self._update_log_view(f"[bold green]> 澄清完成！重新识别意图: {new_intent.description} (置信度: {new_intent.confidence:.2f})[/bold green]")
+
+                # Reset clarification state
+                self._awaiting_clarification = False
+                self._pending_clarification = None
+                self._original_intent_context = {}
+
+                # Execute the command with complete parameters
+                await self._execute_intent_command(new_intent)
+
+            else:
+                self._update_log_view("[bold red]错误：无法重新识别合并后的意图[/bold red]")
+                # Reset clarification state on error
+                self._awaiting_clarification = False
+                self._pending_clarification = None
+                self._original_intent_context = {}
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]澄清处理过程中发生错误: {e}[/bold red]")
+            # Reset clarification state on error
+            self._awaiting_clarification = False
+            self._pending_clarification = None
+            self._original_intent_context = {}
+
+    async def _execute_intent_command(self, intent) -> None:
+        """Execute the intent command with complete parameters."""
+        try:
+            # Create a modified intent that doesn't require clarification
+            intent.requires_clarification = False
+
+            # Extract command and parameters
+            command = intent.name
+            parameters = getattr(intent, 'parameters', {})
+
+            # Execute the command using the existing command handling logic
+            await self._handle_intention_command(command, parameters, intent.description)
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]执行命令时发生错误: {e}[/bold red]")
+
+    async def _handle_intention_command(self, command: str, parameters: dict, description: str) -> None:
+        """Handle the recognized intention with extracted parameters."""
+        try:
+            self._update_log_view(f"[dim]> 🔧 执行意图: {command}[/dim]")
+
+            # Map intent commands to existing command handlers
+            if command == "search_papers":
+                query = parameters.get("query", "").strip()
+                if query:
+                    self._update_log_view(f"[dim]> 🔍 搜索论文: {query}[/dim]")
+                    await self._handle_doc_command(f"search {query}")
+                else:
+                    self._update_log_view("[red]> ❌ 搜索论文需要提供关键词[/red]")
+
+            elif command == "download_paper":
+                paper_id = parameters.get("paper_id", "").strip()
+                search_query = parameters.get("search_query", "").strip()
+                if paper_id:
+                    self._update_log_view(f"[dim]> 📥 下载论文: {paper_id}[/dim]")
+                    await self._handle_doc_command(f"download {paper_id}")
+                elif search_query:
+                    self._update_log_view(f"[dim]> 🔍搜索并下载论文: {search_query}[/dim]")
+                    await self._handle_doc_command(f"download {search_query}")
+                else:
+                    self._update_log_view("[red]> ❌ 下载论文需要提供论文ID或搜索关键词[/red]")
+
+            elif command == "start_debate":
+                topic = parameters.get("topic", "").strip()
+                if topic:
+                    self._update_log_view(f"[dim]> 🗣️ 开始辩论: {topic}[/dim]")
+                    self._handle_debate_command(f"start {topic}")
+                else:
+                    self._update_log_view("[red]> ❌ 开始辩论需要提供主题[/red]")
+
+            elif command == "create_wiki":
+                title = parameters.get("title", "").strip()
+                if title:
+                    self._update_log_view(f"[dim]> 📝 创建Wiki: {title}[/dim]")
+                    self._handle_wiki_command(f"create {title}")
+                else:
+                    self._update_log_view("[red]> ❌ 创建Wiki需要提供标题[/red]")
+
+            elif command == "view_debate_history":
+                self._update_log_view("[dim]> 📚 查看辩论历史[/dim]")
+                self._handle_debate_command("history list")
+
+            elif command == "view_specific_debate":
+                session_id = parameters.get("session_id", "").strip()
+                if session_id:
+                    self._update_log_view(f"[dim]> 📖 查看特定辩论: {session_id}[/dim]")
+                    self._handle_debate_command(f"history view {session_id}")
+                else:
+                    self._update_log_view("[red]> ❌ 查看特定辩论需要提供会话ID[/red]")
+
+            elif command == "knowledge_search":
+                query = parameters.get("query", "").strip()
+                if query:
+                    self._update_log_view(f"[dim]> 🔍 知识库搜索: {query}[/dim]")
+                    await self._handle_knowledge_search(query)
+                else:
+                    self._update_log_view("[red]> ❌ 知识库搜索需要提供关键词[/red]")
+
+            elif command == "knowledge_sync":
+                self._update_log_view("[dim]> 🔄 同步知识库[/dim]")
+                await self._handle_knowledge_sync()
+
+            elif command == "execute_skill":
+                # Handle Claude Skills execution
+                skill_name = parameters.get("target_skill", "general")
+                content = parameters.get("content", "").strip()
+                if content:
+                    self._update_log_view(f"[dim]> ⚡ 执行技能: {skill_name} - {content[:50]}...[/dim]")
+                    await self._execute_claude_skill(skill_name, content, parameters)
+                else:
+                    self._update_log_view("[red]> ❌ 执行技能需要提供内容[/red]")
+
+            elif command == "personal_assistant":
+                # Handle personal assistant workflow
+                request = parameters.get("specific_request", "").strip()
+                if request:
+                    self._update_log_view(f"[dim]> 🤖 个人助手: {request[:50]}...[/dim]")
+                    await self._execute_personal_assistant(request, parameters)
+                else:
+                    self._update_log_view("[red]> ❌ 个人助手需要提供具体请求[/red]")
+
+            elif command == "complex_task":
+                # Handle complex task workflow
+                task_desc = parameters.get("task_description", "").strip()
+                if task_desc:
+                    self._update_log_view(f"[dim]> 🧠 复杂任务: {task_desc[:50]}...[/dim]")
+                    await self._execute_complex_task(task_desc, parameters)
+                else:
+                    self._update_log_view("[red]> ❌ 复杂任务需要提供任务描述[/red]")
+
+            elif command == "question" or command == "chat":
+                # For general questions, use the regular chat flow
+                self._update_log_view(f"[dim]> 💬 常规对话: {description[:50]}...[/dim]")
+                await self._handle_regular_chat(description, parameters)
+
+            else:
+                # For unknown commands, try to handle as regular chat
+                self._update_log_view(f"[dim]> ⚠️ 未知命令类型 '{command}'，作为常规聊天处理[/dim]")
+                await self._handle_regular_chat(description, parameters)
+
+        except Exception as e:
+            self._update_log_view(f"[red]> ❌ 处理意图命令时发生错误: {str(e)}[/red]")
+            # Provide fallback behavior
+            try:
+                await self._handle_regular_chat(description, parameters)
+            except Exception as fallback_error:
+                self._update_log_view(f"[red]> ❌ 连回退处理也失败了: {str(fallback_error)}[/red]")
+
+    async def _handle_knowledge_search(self, query: str) -> None:
+        """Handle knowledge base search."""
+        try:
+            self._update_log_view(f"[dim]> 🔍 正在搜索知识库: {query}[/dim]")
+            # Integrate with knowledge manager
+            if hasattr(self, '_knowledge_manager') and self._knowledge_manager:
+                results = await self._knowledge_manager.search(query, limit=5)
+                if results:
+                    self._update_log_view("[green]> ✅ 找到相关内容:[/green]")
+                    for i, result in enumerate(results, 1):
+                        self._update_log_view(f"[cyan]  {i}. {result.get('title', 'N/A')}[/cyan]")
+                        content_preview = result.get('content', '')[:200]
+                        if content_preview:
+                            self._update_log_view(f"[dim]     {content_preview}...[/dim]")
+                else:
+                    self._update_log_view("[yellow]> ⚠️ 未找到相关内容[/yellow]")
+            else:
+                self._update_log_view("[red]> ❌ 知识库管理器未初始化[/red]")
+        except Exception as e:
+            self._update_log_view(f"[red]> ❌ 知识库搜索失败: {str(e)}[/red]")
+
+    async def _handle_knowledge_sync(self) -> None:
+        """Handle knowledge base synchronization."""
+        try:
+            self._update_log_view("[dim]> 🔄 正在同步知识库...[/dim]")
+            # Integrate with knowledge manager
+            if hasattr(self, '_knowledge_manager') and self._knowledge_manager:
+                await self._knowledge_manager.sync()
+                self._update_log_view("[green]> ✅ 知识库同步完成[/green]")
+            else:
+                self._update_log_view("[red]> ❌ 知识库管理器未初始化[/red]")
+        except Exception as e:
+            self._update_log_view(f"[red]> ❌ 知识库同步失败: {str(e)}[/red]")
+
+    async def _execute_claude_skill(self, skill_name: str, content: str, parameters: dict) -> None:
+        """Execute Claude Skills with given parameters."""
+        try:
+            # Try to use Claude integration service if available
+            claude_service = None
+            if hasattr(self, '_claude_integration_service') and self._claude_integration_service:
+                claude_service = self._claude_integration_service
+            elif hasattr(self, '_intent_recognizer') and self._intent_recognizer:
+                if hasattr(self._intent_recognizer, 'claude_integration_service'):
+                    claude_service = self._intent_recognizer.claude_integration_service
+
+            if claude_service:
+                self._update_log_view(f"[dim]> ⚡ 正在执行Claude技能: {skill_name}[/dim]")
+                result = await claude_service.execute_skill(skill_name, content, parameters)
+                if result:
+                    self._update_log_view("[green]> ✅ Claude技能执行完成[/green]")
+                    self._update_log_view(f"[cyan]{result}[/cyan]")
+                else:
+                    self._update_log_view("[yellow]> ⚠️ Claude技能执行无返回结果[/yellow]")
+            else:
+                self._update_log_view("[yellow]> ⚠️ Claude集成服务不可用，使用常规处理[/yellow]")
+                await self._handle_regular_chat(f"请帮我处理: {content}", parameters)
+        except Exception as e:
+            self._update_log_view(f"[red]> ❌ Claude技能执行失败: {str(e)}[/red]")
+            # Fallback to regular chat
+            await self._handle_regular_chat(f"请帮我处理: {content}", parameters)
+
+    async def _execute_personal_assistant(self, request: str, parameters: dict) -> None:
+        """Execute personal assistant workflow."""
+        try:
+            self._update_log_view("[dim]> 🤖 正在启动个人助手...[/dim]")
+            # Create or use existing agent executor for PA workflow
+            if hasattr(self, '_executor') and self._executor:
+                # Use existing executor to handle the personal assistant request
+                self._update_log_view(f"[dim]> 🎯 处理请求: {request[:100]}...[/dim]")
+                # Feed the request to the executor
+                if hasattr(self._executor, 'user_input_queue') and self._executor.user_input_queue:
+                    await self._executor.user_input_queue.put(request)
+                    self._update_log_view("[green]> ✅ 请求已发送给个人助手[/green]")
+                else:
+                    self._update_log_view("[red]> ❌ 无法连接到个人助手执行器[/red]")
+            else:
+                self._update_log_view("[yellow]> ⚠️ 个人助手未初始化，使用常规处理[/yellow]")
+                await self._handle_regular_chat(request, parameters)
+        except Exception as e:
+            self._update_log_view(f"[red]> ❌ 个人助手执行失败: {str(e)}[/red]")
+            # Fallback to regular chat
+            await self._handle_regular_chat(request, parameters)
+
+    async def _execute_complex_task(self, task_desc: str, parameters: dict) -> None:
+        """Execute complex task workflow."""
+        try:
+            self._update_log_view("[dim]> 🧠 正在启动复杂任务处理...[/dim]")
+            # Create or use existing agent executor for complex task
+            if hasattr(self, '_executor') and self._executor:
+                # Use existing executor to handle the complex task
+                self._update_log_view(f"[dim]> 🎯 处理复杂任务: {task_desc[:100]}...[/dim]")
+                # Feed the task to the executor
+                if hasattr(self._executor, 'user_input_queue') and self._executor.user_input_queue:
+                    await self._executor.user_input_queue.put(task_desc)
+                    self._update_log_view("[green]> ✅ 复杂任务已发送给执行器[/green]")
+                else:
+                    self._update_log_view("[red]> ❌ 无法连接到复杂任务执行器[/red]")
+            else:
+                self._update_log_view("[yellow]> ⚠️ 复杂任务执行器未初始化，使用常规处理[/yellow]")
+                await self._handle_regular_chat(task_desc, parameters)
+        except Exception as e:
+            self._update_log_view(f"[red]> ❌ 复杂任务执行失败: {str(e)}[/red]")
+            # Fallback to regular chat
+            await self._handle_regular_chat(task_desc, parameters)
+
+    async def _handle_regular_chat(self, description: str, parameters: dict) -> None:
+        """Handle regular chat/question commands."""
+        try:
+            # Combine description and parameters into a coherent message
+            if parameters:
+                param_str = ", ".join([f"{k}: {v}" for k, v in parameters.items() if v])
+                full_message = f"{description} (参数: {param_str})"
+            else:
+                full_message = description
+
+            # Add a visual indicator for chat processing in system panel
+            self._update_system_log(f"[dim]💬 Processing chat message...[/dim]")
+
+            # Create a session if none exists
+            if not self._current_session_id:
+                self._current_session_id = f"chat_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+
+            # Process the chat message using existing chat logic
+            # Try to use existing executor if available
+            if hasattr(self, '_executor') and self._executor:
+                if hasattr(self._executor, 'user_input_queue') and self._executor.user_input_queue:
+                    await self._executor.user_input_queue.put(full_message)
+                    self._update_log_view("[green]> ✅ 消息已发送给聊天助手[/green]")
+                else:
+                    self._update_log_view("[yellow]> ⚠️ 聊天执行器不可用[/yellow]")
+                    self._update_log_view(f"[dim]💭 {full_message}[/dim]")
+            else:
+                # Fallback: just display the message
+                self._update_log_view(f"[dim]💭 {full_message}[/dim]")
+            # Show minimal feedback that input is received and being processed
+            self._update_log_view("[cyan]> 🤔 思考中...[/cyan]")
+
+            # TODO: Integrate with actual agent executor for chat responses
+            # if self._executor:
+            #     await self._executor.process_user_input(full_message)
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]处理聊天消息时发生错误: {e}[/bold red]")
+
+    def _get_clarification_message(self, intent) -> str:
+        """Get appropriate clarification message based on intent."""
+        # Get clarification info from intent if available
+        clarification_needed = getattr(intent, 'clarification_needed', None)
+
+        if clarification_needed:
+            if hasattr(clarification_needed, 'message'):
+                return clarification_needed.message
+            elif hasattr(clarification_needed, 'type'):
+                # Handle different types of clarification
+                clarification_type = getattr(clarification_needed, 'type', 'unknown')
+                if clarification_type == 'missing_keywords':
+                    return "请输入搜索关键词，例如：论文 人工智能 或 搜索 深度学习"
+                elif clarification_type == 'missing_parameters':
+                    required_params = getattr(clarification_needed, 'required_parameters', [])
+                    if required_params:
+                        return f"需要补充信息: {', '.join(required_params)}"
+                elif clarification_type == 'ambiguous_intent':
+                    return "请提供更多信息以明确您的需求"
+
+        # Fallback message based on intent name
+        if intent.name == "search_papers":
+            return "请输入搜索关键词，例如：论文 人工智能"
+        elif intent.name == "download_paper":
+            return "请提供论文标题或主题"
+        elif intent.name == "start_debate":
+            return "请输入辩论主题"
+        elif intent.name == "create_wiki":
+            return "请输入Wiki页面标题"
+
+        return "请提供更多信息"
+
+    def _display_task_planning_phase(self, original_request: str = "") -> None:
+        """第一阶段：显示任务计划清单"""
+        if self._task_visualization_manager and self._task_visualization_manager.tasks_data:
+            self._update_log_view("[bold blue]📋 第一阶段：任务分解计划[/bold blue]")
+            self._update_log_view("[bold blue]" + "─" * 40 + "[/bold blue]")
+            self._update_log_view(f"[cyan]🎯 原始请求: {original_request}[/cyan]")
+            self._update_log_view("")
+
+            # 状态计数
+            total = len(self._task_visualization_manager.tasks_data)
+            self._update_log_view(f"[bold white]📊 任务概览: 共分解为 {total} 个子任务[/bold white]")
+            self._update_log_view("")
+
+            # 显示任务清单
+            status_icons = {'PENDING': "⏳", 'IN_PROGRESS': "🔄", 'COMPLETED': "✅", 'FAILED': "❌", 'SKIPPED': "⏭️"}
+
+            self._update_log_view("[yellow]📝 详细任务清单：[/yellow]")
+            for i, task_data in enumerate(self._task_visualization_manager.tasks_data, 1):
+                status_icon = status_icons.get(task_data.status.name, "❓")
+
+                # 根据状态设置颜色
+                if task_data.status.name == 'PENDING':
+                    color = "yellow"
+                elif task_data.status.name == 'IN_PROGRESS':
+                    color = "blue"
+                elif task_data.status.name == 'COMPLETED':
+                    color = "green"
+                elif task_data.status.name == 'FAILED':
+                    color = "red"
+                elif task_data.status.name == 'SKIPPED':
+                    color = "dim"
+                else:
+                    color = "white"
+
+                # 显示任务信息
+                self._update_log_view(f"[{color}]  {i:2d}. {status_icon} {task_data.title}[/]")
+                self._update_log_view(f"[dim]      └─ {task_data.description}[/]")
+                self._update_log_view("")
+
+            # 显示预计执行时间
+            self._update_log_view("[dim]💡 系统将按上述顺序逐步执行每个任务，请稍候...[/dim]")
+            self._update_log_view("[bold green]✅ 任务规划完成，准备开始执行...[/bold green]")
+
+    def _display_task_final_summary(self, initial_task_count: int = 0) -> None:
+        """第三阶段：显示任务执行完成汇总"""
+        if not self._task_visualization_manager:
+            return
+
+        self._update_log_view("[bold green]📈 第三阶段：执行结果统计[/bold green]")
+        self._update_log_view("[bold green]" + "─" * 40 + "[/bold green]")
+
+        if self._task_visualization_manager.tasks_data:
+            # 统计最终状态
+            total = len(self._task_visualization_manager.tasks_data)
+            completed = len([t for t in self._task_visualization_manager.tasks_data if t.status.name == 'COMPLETED'])
+            in_progress = len([t for t in self._task_visualization_manager.tasks_data if t.status.name == 'IN_PROGRESS'])
+            failed = len([t for t in self._task_visualization_manager.tasks_data if t.status.name == 'FAILED'])
+            pending = len([t for t in self._task_visualization_manager.tasks_data if t.status.name == 'PENDING'])
+            skipped = len([t for t in self._task_visualization_manager.tasks_data if t.status.name == 'SKIPPED'])
+
+            # 显示统计信息
+            self._update_log_view(f"[bold white]📊 执行统计:[/bold white]")
+            self._update_log_view(f"   [green]✅ 成功完成: {completed} 个任务[/green]")
+            self._update_log_view(f"   [yellow]🔄 执行中: {in_progress} 个任务[/yellow]")
+            self._update_log_view(f"   [red]❌ 执行失败: {failed} 个任务[/red]")
+            self._update_log_view(f"   [blue]⏳ 待执行: {pending} 个任务[/blue]")
+            self._update_log_view(f"   [dim]⏭️ 已跳过: {skipped} 个任务[/dim]")
+            self._update_log_view(f"   [bold]📋 总计: {total} 个任务[/bold]")
+            self._update_log_view("")
+
+            # 计算成功率
+            success_rate = (completed / total * 100) if total > 0 else 0
+            self._update_log_view(f"[cyan]🎯 执行成功率: {success_rate:.1f}%[/cyan]")
+            self._update_log_view("")
+
+            # 显示详细结果（只显示有结果的）
+            status_icons = {'PENDING': "⏳", 'IN_PROGRESS': "🔄", 'COMPLETED': "✅", 'FAILED': "❌", 'SKIPPED': "⏭️"}
+
+            self._update_log_view("[bold white]📋 任务执行详情：[/bold white]")
+            for i, task_data in enumerate(self._task_visualization_manager.tasks_data, 1):
+                status_icon = status_icons.get(task_data.status.name, "❓")
+                status_text = {
+                    'PENDING': "待执行",
+                    'IN_PROGRESS': "执行中",
+                    'COMPLETED': "已完成",
+                    'FAILED': "执行失败",
+                    'SKIPPED': "已跳过"
+                }.get(task_data.status.name, "未知状态")
+
+                # 根据状态设置颜色
+                if task_data.status.name == 'COMPLETED':
+                    color = "green"
+                elif task_data.status.name == 'FAILED':
+                    color = "red"
+                elif task_data.status.name == 'IN_PROGRESS':
+                    color = "blue"
+                else:
+                    color = "dim"
+
+                self._update_log_view(f"[{color}]  {i:2d}. {status_icon} {task_data.title} - {status_text}[/]")
+
+                # 显示结果或错误
+                if task_data.result:
+                    result_preview = task_data.result[:150] + "..." if len(task_data.result) > 150 else task_data.result
+                    self._update_log_view(f"[dim]      └─ 📄 结果: {result_preview}[/]")
+                elif task_data.error:
+                    self._update_log_view(f"[dim]      └─ ❌ 错误: {task_data.error}[/]")
+                else:
+                    self._update_log_view(f"[dim]      └─ ⏳ 暂无执行结果[/dim]")
+
+            # 显示完成信息
+            if completed == total:
+                self._update_log_view("")
+                self._update_log_view("[bold green]🎉 恭喜！所有任务均已成功完成！[/bold green]")
+            elif completed > 0:
+                self._update_log_view("")
+                self._update_log_view(f"[bold yellow]⚠️ 部分任务已完成，{completed}/{total} 个任务成功执行[/bold yellow]")
+            else:
+                self._update_log_view("")
+                self._update_log_view("[bold red]❌ 未能成功完成任何任务[/bold red]")
+
+    def _display_task_visualization(self, original_request: str = "") -> None:
+        """保持原有的兼容方法"""
+        # 调用新的分阶段显示方法
+        self._display_task_planning_phase(original_request)
+
+    async def wait_participant(self, participant: str, timeout: float = 60.0) -> None:
+        """Wait for a specific participant to take their turn."""
+        if participant not in self._participant_events:
+            self._participant_events[participant] = asyncio.Event()
+
+        try:
+            await asyncio.wait_for(self._participant_events[participant].wait(), timeout=timeout)
+        except asyncio.TimeoutError:
+            raise TimeoutError(f"Participant {participant} did not speak within {timeout} seconds")
