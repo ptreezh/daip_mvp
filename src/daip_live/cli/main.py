@@ -6,10 +6,21 @@ It follows the module-first design principle and integrates with the container s
 """
 import asyncio
 import time
-import typer
 import sys
 from pathlib import Path
 from typing import List, Optional
+
+# Patch click.termui before typer imports it (fix for click 8.x compatibility)
+try:
+    import click.termui
+    import shutil
+    # get_terminal_size was removed from click.termui in click 8.x
+    if not hasattr(click.termui, 'get_terminal_size'):
+        click.termui.get_terminal_size = shutil.get_terminal_size
+except ImportError:
+    pass
+
+import typer
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
