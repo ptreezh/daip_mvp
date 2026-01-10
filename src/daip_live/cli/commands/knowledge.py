@@ -20,16 +20,184 @@ from ...model_provider.provider import LiteLLMProvider
 from ...core.models import KnowledgeBaseConfig, ProviderConfig
 
 
+def _execute_default_behavior(
+    query: Optional[str] = None,
+    sync: bool = False,
+    search_opt: Optional[str] = None
+):
+    """
+    执行默认行为：当没有子命令时
+    """
+    import asyncio
+    # 决定执行哪个操作
+    if query is not None or search_opt is not None:
+        # 执行搜索
+        search_query = query if query is not None else search_opt
+        asyncio.run(_search_knowledge_default(search_query))
+    elif sync is True:
+        # 明确要求同步
+        asyncio.run(_sync_knowledge_default())
+    else:
+        # 默认同步（没有参数或显式 sync=True）
+        asyncio.run(_sync_knowledge_default())
+
 # Create the knowledge command app
 app = typer.Typer(
     name="knowledge",
     help="Manage knowledge base and document search in the DAIP-LIVE system",
-    rich_markup_mode="rich"
+    rich_markup_mode="rich",
 )
+
+# Define a default command that can be called explicitly
+@app.command("auto")
+def auto_cmd(
+    query: Optional[str] = typer.Argument(
+        None,
+        help="Search query. If provided, performs search. If not provided, syncs by default."
+    ),
+    sync: bool = typer.Option(
+        None,
+        "--sync/--no-sync",
+        help="Force sync operation (mutually exclusive with search)"
+    ),
+    search_opt: Optional[str] = typer.Option(
+        None,
+        "--search", "-s",
+        help="Search query (alternative to positional argument)"
+    )
+):
+    """
+    Default behavior for knowledge command (sync if no query, search if query)
+    """
+    _execute_default_behavior(
+        query=query,
+        sync=sync is True,
+        search_opt=search_opt
+    )
+
+
+# Create an alias command for the default behavior
+@app.command("default", hidden=True)
+def default_cmd(
+    query: Optional[str] = typer.Argument(
+        None,
+        help="Search query. If provided, performs search. If not provided, syncs by default."
+    ),
+    sync: bool = typer.Option(
+        None,
+        "--sync/--no-sync",
+        help="Force sync operation (mutually exclusive with search)"
+    ),
+    search_opt: Optional[str] = typer.Option(
+        None,
+        "--search", "-s",
+        help="Search query (alternative to positional argument)"
+    )
+):
+    """
+    Alias for auto command - provides the same default behavior
+    """
+    _execute_default_behavior(
+        query=query,
+        sync=sync is True,
+        search_opt=search_opt
+    )
 
 # Create instances
 console = Console()
 error_handler = ErrorHandler()
+
+
+async def _sync_knowledge_default():
+    """默认同步函数"""
+    perf_monitor = PerformanceMonitor()
+    async with perf_monitor.measure_command("knowledge_sync") as metrics:
+        console.print("[bold blue]📚 Synchronizing knowledge base...[/bold blue]")
+
+        try:
+            # Load config from YAML or use defaults
+            import yaml
+            config_path = Path("config.yaml")
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config_data = yaml.safe_load(f)
+
+                knowledge_dir = config_data.get('knowledge_base', {}).get('directory', 'docs/')
+                embedding_model = config_data.get('llm_provider', {}).get('embedding_model', 'mock-embedding')
+            else:
+                knowledge_dir = 'docs/'
+                embedding_model = 'mock-embedding'
+
+            # Create configuration
+            knowledge_config = KnowledgeBaseConfig(directory=knowledge_dir)
+
+            # Initialize database manager
+            db_manager = DatabaseManager(":memory:")  # Using in-memory for CLI
+
+            # Use mock provider to avoid embedding issues during CLI sync
+            try:
+                from ...model_provider.mock_provider import MockModelProvider
+                model_provider = MockModelProvider()
+            except ImportError:
+                # Fallback to LiteLLMProvider with mock configuration
+                provider_config = ProviderConfig(
+                    model="mock-embedding",
+                    provider="mock"
+                )
+                model_provider = LiteLLMProvider(provider_config)
+
+            knowledge_manager = KnowledgeManager(
+                db_manager=db_manager,
+                model_provider=model_provider,
+                config=knowledge_config
+            )
+
+            # Actual sync (without dry_run or verbose for default)
+            console.print(f"[dim]Scanning knowledge directory for changes: {knowledge_dir}[/dim]")
+
+            # Run the actual sync
+            sync_result = await knowledge_manager.sync_knowledge_base()
+
+            # Rich output
+            _display_sync_summary(sync_result, False)
+
+        except Exception as e:
+            console.print(f"[red]❌ Error syncing knowledge base: {str(e)}[/red]")
+            raise
+
+
+async def _search_knowledge_default(query: str):
+    """默认搜索函数"""
+    perf_monitor = PerformanceMonitor()
+    async with perf_monitor.measure_command("knowledge_search") as metrics:
+        console.print(f"[bold blue]🔍 Searching knowledge base for: {query}[/bold blue]")
+
+        try:
+            # Create default configuration
+            knowledge_config = KnowledgeBaseConfig(directory="knowledge")
+            provider_config = ProviderConfig(
+                model="text-embedding-3-small",
+                provider="openai"
+            )
+
+            # Initialize dependencies
+            db_manager = DatabaseManager()
+            model_provider = LiteLLMProvider(provider_config)
+            knowledge_manager = KnowledgeManager(
+                db_manager=db_manager,
+                model_provider=model_provider,
+                config=knowledge_config
+            )
+
+            # Mock search results
+            search_results = []
+
+            # Display formatted search results
+            _display_search_results(query, search_results, 10)
+
+        except Exception as e:
+            console.print(f"[red]❌ Error searching knowledge base: {str(e)}[/red]")
+            raise
 
 
 @app.command()

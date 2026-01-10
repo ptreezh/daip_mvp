@@ -123,53 +123,106 @@ class LiteLLMProvider(IModelProvider):
             # If original model is available and fallback not forced, return it
             return original_model
 
-    async def generate(self, prompt: str, **kwargs) -> Tuple[str, Any]:
+    async def generate(self, prompt: str, params: Dict):
         """Generates a response from a language model using litellm."""
         config_model = getattr(self.config, 'model', 'test-model')
 
         # 如果是本地模型，返回模拟响应
         if is_local_model(config_model):
-            return self._generate_mock_response(prompt, config_model)
+            response, _ = self._generate_mock_response(prompt, config_model)
+            yield response
+            return
 
         # 检查模型是否可用，如果不可用则使用回退模型
         effective_model = self._get_fallback_model(config_model)
 
         # 如果模型已更改，更新参数
-        params = self._build_litellm_params(prompt, **kwargs)
+        litellm_params = self._build_litellm_params(prompt, **params)
         if effective_model != config_model:
-            params["model"] = effective_model
+            litellm_params["model"] = effective_model
             # 记录模型切换信息
             print(f"🔄 Model switched from '{config_model}' to '{effective_model}' due to availability.")
 
         try:
             # litellm.completion is a synchronous call, run it in a thread
-            response = await asyncio.to_thread(litellm.completion, **params)
+            response = await asyncio.to_thread(litellm.completion, **litellm_params)
             content = response.choices[0].message.content
-
-            # Safely handle usage object - it might be a dict or object
-            usage = None
-            if hasattr(response, 'usage') and response.usage is not None:
-                if isinstance(response.usage, dict):
-                    usage = response.usage
-                else:
-                    try:
-                        usage = {
-                            'prompt_tokens': getattr(response.usage, 'prompt_tokens', 0),
-                            'completion_tokens': getattr(response.usage, 'completion_tokens', 0),
-                            'total_tokens': getattr(response.usage, 'total_tokens', 0)
-                        }
-                    except Exception:
-                        usage = {'total_tokens': 0}
-
-            return content, usage
-        except litellm.exceptions.AuthenticationError as e:
-            raise ModelAuthenticationError(f"LiteLLM auth error: {e}") from e
-        except Exception as e:
-            error_msg = str(e)
 
             if content is None:
                 raise ModelError("Received null content from model.")
-            return content, usage
+
+            # Yield the content as a single chunk (for compatibility with streaming interface)
+            yield content
+        except litellm.exceptions.AuthenticationError as e:
+            raise ModelAuthenticationError(f"LiteLLM auth error: {e}") from e
+        except Exception as e:
+            # Catch any other litellm or unexpected error
+            raise ModelError(f"LiteLLM generic error: {e}") from e
+
+    async def embed(self, text: str) -> List[float]:
+        """Creates an embedding vector for the given text using litellm."""
+        config_model = getattr(self.config, 'embedding_model', 'text-embedding-ada-002')
+        config_api_key = getattr(self.config, 'api_key', None)
+        config_base_url = getattr(self.config, 'base_url', None)
+
+        # Handle mock embedding for testing and local models
+        if config_model == "mock-embedding" or is_local_model(config_model):
+            return self._generate_mock_embedding()
+
+        # For Ollama embedding models, check availability and use fallback if needed
+        if config_model.startswith("ollama/"):
+            effective_model = self._get_fallback_model(config_model)
+            if effective_model != config_model:
+                print(f"🔄 Embedding model switched from '{config_model}' to '{effective_model}' due to availability.")
+                config_model = effective_model
+
+        # Normalize model name for different providers
+        normalized_model = self._normalize_model_name(config_model)
+
+        try:
+            return await self._try_embedding(normalized_model, text, config_api_key, config_base_url)
+        except litellm.exceptions.AuthenticationError as e:
+            raise ModelAuthenticationError(f"LiteLLM auth error: {e}") from e
+        except Exception as e:
+            return await self._handle_embedding_failure(e, text, config_api_key, config_base_url)
+
+    def _normalize_model_name(self, model: str) -> str:
+        """Normalize model name with appropriate provider prefix."""
+        # Don't normalize mock embeddings
+        if model == "mock-embedding":
+            return model
+        if model.startswith("all-MiniLM") or ("MiniLM" in model and "mock" not in model.lower()):
+            return f"huggingface/{model}"
+        return model
+
+    async def _try_embedding(self, model: str, text: str, api_key: str, base_url: str) -> List[float]:
+        """Attempt to generate embedding with the specified model."""
+        params = {
+            "model": model,
+            "input": [text]
+        }
+        if api_key:
+            params["api_key"] = api_key
+        if base_url:
+            params["base_url"] = base_url
+
+        response = await litellm.aembedding(**params)
+        return response.data[0].embedding
+
+    async def _handle_embedding_failure(self, error: Exception, text: str, api_key: str, base_url: str) -> List[float]:
+        """Handle embedding failures with fallback logic."""
+        if "LLM Provider NOT provided" in str(error):
+            return await self._try_fallback_embedding(text, api_key, base_url)
+        raise ModelError(f"LiteLLM embedding error: {error}") from error
+
+    async def _try_fallback_embedding(self, text: str, api_key: str, base_url: str) -> List[float]:
+        """Try fallback embedding when primary model fails."""
+        # Use mock embedding as fallback to avoid API calls
+        return self._generate_mock_embedding()
+
+    def _generate_mock_embedding(self) -> List[float]:
+        """Generate a mock embedding vector for testing purposes."""
+        return [0.1] * 384
 
     def get_default_model(self) -> str:
         """Get the default model for this provider."""

@@ -8,43 +8,74 @@ import requests
 import tempfile
 import zipfile
 import logging
-from typing import Dict, List, Optional, Type
+from typing import Dict, List, Optional, Type, Any, Set
 from pathlib import Path
-from ..skills.base import Skill, SkillMetadata
+from ..skills.base import Skill, SkillMetadata, SkillInput, SkillOutput
+from .cache import SkillCache
+from .dependency import SkillDependencyGraph, DependencyValidationResult, DependencyStatus
 
 
 class SkillManager:
     """Manages registration, discovery, and execution of skills."""
-    
-    def __init__(self):
+
+    def __init__(
+        self,
+        enable_cache: bool = True,
+        cache_max_size: int = 100,
+        cache_default_ttl: Optional[float] = None
+    ):
+        """
+        Initialize the SkillManager.
+
+        Args:
+            enable_cache: Whether to enable skill execution caching
+            cache_max_size: Maximum number of cached entries
+            cache_default_ttl: Default TTL for cached entries in seconds (None = no expiration)
+        """
         self._skills: Dict[str, Skill] = {}
         self._metadata: Dict[str, SkillMetadata] = {}
         self._logger = logging.getLogger(__name__)
+
+        # Initialize skill cache
+        self._cache = SkillCache(
+            max_size=cache_max_size,
+            default_ttl=cache_default_ttl,
+            enabled=enable_cache
+        )
+
+        # Initialize dependency graph
+        self._dependency_graph = SkillDependencyGraph()
     
     def register_skill(self, skill: Skill) -> None:
         """
         Register a skill with the manager.
-        
+
         Args:
             skill: The skill to register
         """
         name = skill.metadata.name
         if name in self._skills:
             raise ValueError(f"Skill with name '{name}' already registered")
-        
+
         self._skills[name] = skill
         self._metadata[name] = skill.metadata
+
+        # Add to dependency graph
+        self._dependency_graph.add_skill(name, skill.metadata.dependencies or [])
     
     def unregister_skill(self, name: str) -> None:
         """
         Unregister a skill from the manager.
-        
+
         Args:
             name: The name of the skill to unregister
         """
         if name in self._skills:
             del self._skills[name]
             del self._metadata[name]
+
+            # Remove from dependency graph
+            self._dependency_graph.remove_skill(name)
     
     def get_skill(self, name: str) -> Optional[Skill]:
         """
@@ -82,10 +113,10 @@ class SkillManager:
     def find_skills_by_tag(self, tag: str) -> List[str]:
         """
         Find skills that have a specific tag.
-        
+
         Args:
             tag: The tag to search for
-            
+
         Returns:
             List of skill names that have the tag
         """
@@ -94,6 +125,298 @@ class SkillManager:
             if tag in metadata.tags:
                 matching_skills.append(name)
         return matching_skills
+
+    def execute(
+        self,
+        skill_name: str,
+        input: SkillInput,
+        use_cache: bool = True,
+        cache_ttl: Optional[float] = None
+    ) -> SkillOutput:
+        """
+        Execute a skill with caching support.
+
+        Args:
+            skill_name: Name of the skill to execute
+            input: Skill input data
+            use_cache: Whether to use cached results if available
+            cache_ttl: Optional override for cache TTL
+
+        Returns:
+            SkillOutput containing the result
+
+        Raises:
+            ValueError: If skill is not found or not enabled
+        """
+        skill = self.get_skill(skill_name)
+        if skill is None:
+            raise ValueError(f"Skill '{skill_name}' not found")
+
+        if not skill.is_enabled:
+            raise ValueError(f"Skill '{skill_name}' is disabled")
+
+        # Check cache if enabled and requested
+        if use_cache and self._cache.enabled:
+            cached_output = self._cache.get(skill_name, input, ttl=cache_ttl)
+            if cached_output is not None:
+                self._logger.debug(f"Cache hit for skill '{skill_name}'")
+                return cached_output
+
+        # Execute the skill
+        self._logger.debug(f"Executing skill '{skill_name}'")
+        output = skill.execute(input)
+
+        # Cache the result if caching is enabled
+        if use_cache and self._cache.enabled:
+            self._cache.put(skill_name, input, output, ttl=cache_ttl)
+
+        return output
+
+    def get_cache(self) -> SkillCache:
+        """
+        Get the skill cache instance.
+
+        Returns:
+            SkillCache instance
+        """
+        return self._cache
+
+    def invalidate_skill_cache(self, skill_name: str, input: Optional[SkillInput] = None) -> int:
+        """
+        Invalidate cached results for a specific skill.
+
+        Args:
+            skill_name: Name of the skill
+            input: Specific input to invalidate (optional)
+
+        Returns:
+            Number of entries invalidated
+        """
+        return self._cache.invalidate(skill_name, input)
+
+    def clear_all_cache(self) -> None:
+        """Clear all cached skill execution results."""
+        self._cache.clear()
+        self._logger.info("All skill cache cleared")
+
+    def cleanup_expired_cache(self) -> int:
+        """
+        Remove expired entries from the cache.
+
+        Returns:
+            Number of entries removed
+        """
+        removed = self._cache.cleanup_expired()
+        if removed > 0:
+            self._logger.info(f"Cleaned up {removed} expired cache entries")
+        return removed
+
+    # Dependency Management Methods
+
+    def validate_dependencies(self, enabled_skills: Optional[Set[str]] = None) -> DependencyValidationResult:
+        """
+        Validate all skill dependencies.
+
+        Args:
+            enabled_skills: Set of enabled skill names (optional)
+
+        Returns:
+            DependencyValidationResult with validation status
+        """
+        if enabled_skills is None:
+            enabled_skills = {name for name, skill in self._skills.items() if skill.is_enabled}
+
+        return self._dependency_graph.validate_dependencies(self._metadata, enabled_skills)
+
+    def get_dependency_graph(self) -> SkillDependencyGraph:
+        """
+        Get the dependency graph instance.
+
+        Returns:
+            SkillDependencyGraph instance
+        """
+        return self._dependency_graph
+
+    def get_execution_order(self, skill_name: str) -> List[str]:
+        """
+        Get the execution order for a skill and its dependencies.
+
+        Args:
+            skill_name: Name of the skill to execute
+
+        Returns:
+            List of skill names in execution order (dependencies first)
+
+        Raises:
+            ValueError: If skill is not found
+        """
+        if skill_name not in self._skills:
+            raise ValueError(f"Skill '{skill_name}' not found")
+
+        return self._dependency_graph.get_execution_order(skill_name)
+
+    def can_execute(self, skill_name: str) -> bool:
+        """
+        Check if a skill can be executed given current state.
+
+        Args:
+            skill_name: Name of the skill to check
+
+        Returns:
+            True if skill exists and all dependencies are enabled, False otherwise
+        """
+        skill = self.get_skill(skill_name)
+        if skill is None or not skill.is_enabled:
+            return False
+
+        enabled_skills = {name for name, skill in self._skills.items() if skill.is_enabled}
+        return self._dependency_graph.can_execute(skill_name, enabled_skills)
+
+    def execute_chain(
+        self,
+        skill_name: str,
+        input: SkillInput,
+        stop_on_failure: bool = False,
+        use_cache: bool = True,
+        require_all_dependencies: bool = True
+    ) -> Dict[str, SkillOutput]:
+        """
+        Execute a skill and its dependencies in the correct order.
+
+        Args:
+            skill_name: Name of the skill to execute
+            input: Skill input data (passed to all skills in chain)
+            stop_on_failure: If True, stops execution on first failure
+            use_cache: Whether to use cached results
+            require_all_dependencies: If True, raises error when dependencies are disabled/missing;
+                                     If False, executes available skills only
+
+        Returns:
+            Dictionary mapping skill names to their outputs
+
+        Raises:
+            ValueError: If skill is not found or require_all_dependencies=True and skill cannot be executed
+        """
+        # Validate skill exists
+        if skill_name not in self._skills:
+            raise ValueError(f"Skill '{skill_name}' not found")
+
+        # Check if all dependencies are available
+        if require_all_dependencies and not self.can_execute(skill_name):
+            raise ValueError(f"Skill '{skill_name}' cannot be executed (missing or disabled dependencies)")
+
+        # Get execution order
+        execution_order = self._dependency_graph.get_execution_order(skill_name)
+
+        # Execute each skill in order
+        results: Dict[str, SkillOutput] = {}
+        failures: List[str] = []
+
+        for name in execution_order:
+            try:
+                # Check if skill is enabled
+                skill = self.get_skill(name)
+                if not skill or not skill.is_enabled:
+                    self._logger.warning(f"Skipping disabled skill in chain: {name}")
+                    failures.append(name)
+                    if stop_on_failure:
+                        break
+                    continue
+
+                # Check if all dependencies were successful
+                dependencies = self._dependency_graph.get_dependencies(name)
+                dependencies_met = True
+                for dep in dependencies:
+                    if dep not in results:
+                        # Dependency failed or was skipped
+                        self._logger.warning(f"Skipping skill '{name}' because dependency '{dep}' failed")
+                        failures.append(name)
+                        dependencies_met = False
+                        break
+
+                if not dependencies_met:
+                    if stop_on_failure:
+                        break
+                    continue
+
+                self._logger.debug(f"Executing skill in chain: {name}")
+                output = self.execute(name, input, use_cache=use_cache)
+                results[name] = output
+            except Exception as e:
+                self._logger.error(f"Failed to execute skill '{name}' in chain: {e}")
+                failures.append(name)
+
+                if stop_on_failure:
+                    break
+
+        if failures:
+            self._logger.warning(f"Failed to execute skills in chain: {', '.join(failures)}")
+
+        return results
+
+    def execute_chain_with_output_transform(
+        self,
+        skill_name: str,
+        initial_input: SkillInput,
+        output_transform=None,
+        stop_on_failure: bool = False,
+        use_cache: bool = True
+    ) -> Dict[str, SkillOutput]:
+        """
+        Execute a skill chain where each skill's output becomes input for the next.
+
+        Args:
+            skill_name: Final skill to execute
+            initial_input: Initial input for the chain
+            output_transform: Optional function to transform output into next input
+            stop_on_failure: If True, stops execution on first failure
+            use_cache: Whether to use cached results
+
+        Returns:
+            Dictionary mapping skill names to their outputs
+        """
+        # Validate skill
+        if skill_name not in self._skills:
+            raise ValueError(f"Skill '{skill_name}' not found")
+
+        if not self.can_execute(skill_name):
+            raise ValueError(f"Skill '{skill_name}' cannot be executed (missing or disabled dependencies)")
+
+        # Get execution order
+        execution_order = self._dependency_graph.get_execution_order(skill_name)
+
+        # Execute each skill with transformed input
+        results: Dict[str, SkillOutput] = {}
+        current_input = initial_input
+        failures: List[str] = []
+
+        for name in execution_order:
+            try:
+                self._logger.debug(f"Executing skill in chain with transform: {name}")
+                output = self.execute(name, current_input, use_cache=use_cache)
+                results[name] = output
+
+                # Transform output into next input
+                if output_transform is not None:
+                    current_input = output_transform(output)
+                else:
+                    # Default: use output as next input's data
+                    current_input = SkillInput(
+                        data=output.result,
+                        context=output.metadata
+                    )
+
+            except Exception as e:
+                self._logger.error(f"Failed to execute skill '{name}' in chain: {e}")
+                failures.append(name)
+
+                if stop_on_failure:
+                    break
+
+        if failures:
+            self._logger.warning(f"Failed to execute skills in chain: {', '.join(failures)}")
+
+        return results
     
     def load_skills_from_directory(self, directory: str) -> int:
         """

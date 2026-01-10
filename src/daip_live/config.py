@@ -59,6 +59,53 @@ def create_config_yaml_if_not_exists(path: str = "config.yaml") -> None:
             yaml.dump(default_config, f, indent=2)
         print(f"Created default configuration file at: {path}")
 
+
+def check_and_update_model_availability() -> str:
+    """
+    Check if the configured default model is available and update to an available model if needed.
+
+    Returns:
+        str: The model that will be used (either original or fallback)
+    """
+    from daip_live.model_provider.provider import LiteLLMProvider
+    from daip_live.core.models import ProviderConfig
+
+    # Get current config
+    config = config_manager.get_config()
+    current_model = config.llm_provider.default_model
+
+    # Create a provider instance to check model availability
+    provider_config = ProviderConfig(model=current_model)
+    provider = LiteLLMProvider(config=provider_config)
+
+    # Check if the current model is available, if not get a fallback
+    fallback_model = provider._get_fallback_model(current_model, force_fallback=False)
+
+    # If the fallback model is different from the current model, update the config
+    if fallback_model != current_model:
+        print(f"🔄 Model '{current_model}' not available, switching to '{fallback_model}'")
+
+        # Update the config file with the new model
+        try:
+            with open(config_manager._config_path, 'r', encoding='utf-8') as f:
+                raw_config = yaml.safe_load(f)
+
+            raw_config["llm_provider"]["default_model"] = fallback_model
+
+            with open(config_manager._config_path, 'w', encoding='utf-8') as f:
+                yaml.dump(raw_config, f, indent=2)
+
+            # Reset the config manager so it reloads the updated config
+            config_manager._config = None
+
+            return fallback_model
+        except Exception as e:
+            print(f"⚠️ Failed to update config file: {e}")
+            return current_model
+    else:
+        return current_model
+
+
 # Global instance of the ConfigManager
 # The application will use this instance throughout.
 config_manager = ConfigManager()

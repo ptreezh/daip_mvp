@@ -255,3 +255,24 @@ Note: This is a Claude Skills format adapter. In production, this would call the
     def has_claude_skills(self) -> bool:
         """检查是否有 Claude Skills"""
         return len(self._claude_skills) > 0
+
+    async def execute_skill(self, skill_name: str, parameters: Dict[str, Any] = None) -> str:
+        """Execute a Claude skill by name - for compatibility with TUI"""
+        if parameters is None:
+            parameters = {}
+
+        # Find the skill adapter by name
+        if skill_name in self._skill_adapters:
+            adapter = self._skill_adapters[skill_name]
+            # Create a basic input from the parameters
+            input_data = parameters.get("input", parameters.get("content", str(parameters)))
+            from .base import SkillInput
+            skill_input = SkillInput(data=input_data, context=parameters)
+
+            # Execute the skill
+            result = adapter.execute(skill_input)
+            return result.result
+        else:
+            # If the skill doesn't exist, return error message
+            available_skills = list(self._skill_adapters.keys())
+            return f"技能 '{skill_name}' 未找到。可用技能: {', '.join(available_skills) if available_skills else '无可用技能'}"

@@ -14,6 +14,7 @@ from daip_live.memory.session_manager import SessionManager
 from daip_live.p4_role_manager_tools.role_manager import RoleManager
 from daip_live.p8_debate_system.manager import DebateManager
 from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
+from daip_live.p4_role_manager_tools.intelligent_role_manager_wrapper import IntelligentRoleManagerWrapper
 from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
 from daip_live.p8_debate_system.history_tracker import DebateHistoryTracker
 from daip_live.agent_engine.executor import AgentExecutor
@@ -21,14 +22,16 @@ from daip_live.core.models import KnowledgeBaseConfig, ProviderConfig
 from daip_live.permission.permission_manager import PermissionManager
 from daip_live.permission.tui_interface import PermissionTUIInterface
 from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer
-# Import TUI class directly to avoid circular imports
-try:
-    from daip_live.tui.tui_modular import DAIP_TUI
-except ImportError:
+# 延迟导入TUI以避免初始化副作用
+def get_daip_tui():
     try:
-        from daip_live.tui_modular import DAIP_TUI
+        from daip_live.tui.tui_modular import DAIP_TUI
     except ImportError:
-        DAIP_TUI = None
+        try:
+            from daip_live.tui_modular import DAIP_TUI
+        except ImportError:
+            return None
+    return DAIP_TUI
 from daip_live.skills.manager import SkillManager
 # Note: Context managers moved to different locations - using available alternatives
 
@@ -36,7 +39,9 @@ from daip_live.skills.manager import SkillManager
 class Container(containers.DeclarativeContainer):
     """Main application dependency injection container."""
 
-    wiring_config = containers.WiringConfiguration(modules=["daip_live.tui_modular", "daip_live.cli"])
+    # 移除了CLI模块的自动绑定以防止TUI初始化
+    # wiring_config = containers.WiringConfiguration(modules=["daip_live.tui_modular", "daip_live.cli"])
+    # 仅绑定需要的服务组件，而不绑定CLI应用本身
 
     # 延迟配置初始化 - 确保ConfigManager先初始化
     config_manager = providers.Singleton(ConfigManager)
@@ -114,10 +119,11 @@ class Container(containers.DeclarativeContainer):
     )
 
     role_manager = providers.Singleton(
-        RoleManager,
+        IntelligentRoleManagerWrapper,
         roles_dir_path=providers.Callable(
             lambda cm=config_manager: cm().get_config().model_dump()['role_manager']['roles_dir']
-        )
+        ),
+        model_provider=model_provider
     )
 
     debate_history_tracker = providers.Singleton(

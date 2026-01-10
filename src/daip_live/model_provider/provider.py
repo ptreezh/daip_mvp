@@ -1,6 +1,7 @@
 """This module contains the LiteLLMProvider adapter."""
 
 import asyncio
+import subprocess
 from typing import Any, Dict, List, Tuple
 
 import litellm
@@ -60,46 +61,6 @@ class LiteLLMProvider(IModelProvider):
 
         return params
 
-    async def generate(self, prompt: str, **kwargs) -> Tuple[str, Any]:
-        """Generates a response from a language model using litellm."""
-        config_model = getattr(self.config, 'model', 'test-model')
-
-        # 如果是本地模型，返回模拟响应
-        if is_local_model(config_model):
-            return self._generate_mock_response(prompt, config_model)
-
-        params = self._build_litellm_params(prompt, **kwargs)
-        try:
-            # litellm.completion is a synchronous call, run it in a thread
-            response = await asyncio.to_thread(litellm.completion, **params)
-            content = response.choices[0].message.content
-
-            # Safely handle usage object - it might be a dict or object
-            usage = None
-            if hasattr(response, 'usage') and response.usage is not None:
-                if isinstance(response.usage, dict):
-                    usage = response.usage
-                else:
-                    # Convert object to dict if it's not already
-                    try:
-                        usage = {
-                            'prompt_tokens': getattr(response.usage, 'prompt_tokens', 0),
-                            'completion_tokens': getattr(response.usage, 'completion_tokens', 0),
-                            'total_tokens': getattr(response.usage, 'total_tokens', 0)
-                        }
-                    except Exception:
-                        usage = {'total_tokens': 0}
-            else:
-                usage = {'total_tokens': 0}
-
-            if content is None:
-                raise ModelError("Received null content from model.")
-            return content, usage
-        except litellm.exceptions.AuthenticationError as e:
-            raise ModelAuthenticationError(f"LiteLLM auth error: {e}") from e
-        except Exception as e:
-            # Catch any other litellm or unexpected error
-            raise ModelError(f"LiteLLM generic error: {e}") from e
 
     def _generate_mock_response(self, prompt: str, model: str) -> Tuple[str, Any]:
         """生成模拟响应用于测试"""
@@ -128,6 +89,13 @@ class LiteLLMProvider(IModelProvider):
         # Handle mock embedding for testing and local models
         if config_model == "mock-embedding" or is_local_model(config_model):
             return self._generate_mock_embedding()
+
+        # For Ollama embedding models, check availability and use fallback if needed
+        if config_model.startswith("ollama/"):
+            effective_model = self._get_fallback_model(config_model)
+            if effective_model != config_model:
+                print(f"🔄 Embedding model switched from '{config_model}' to '{effective_model}' due to availability.")
+                config_model = effective_model
 
         # Normalize model name for different providers
         normalized_model = self._normalize_model_name(config_model)
@@ -230,3 +198,129 @@ class LiteLLMProvider(IModelProvider):
         """
         available_models = self.get_available_models()
         return model_name in available_models
+
+    def _get_available_ollama_models(self) -> List[str]:
+        """Get list of available Ollama models by calling ollama list."""
+        models = []
+        try:
+            result = subprocess.run(
+                ["ollama", "list"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+
+            if result.returncode == 0:
+                # Parse Ollama output
+                lines = result.stdout.strip().split('\n')
+                if len(lines) > 1:  # Skip header line
+                    for line in lines[1:]:
+                        parts = line.split()
+                        if len(parts) >= 1:
+                            model_name = parts[0]
+                            # Add model with ollama/ prefix as expected by the system
+                            full_model_name = f"ollama/{model_name}" if not model_name.startswith("ollama/") else model_name
+                            models.append(full_model_name)
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
+            # Ollama not installed or not running - return empty list
+            pass
+
+        return models
+
+    def _is_model_available(self, model_name: str) -> bool:
+        """Check if a model is available in Ollama."""
+        available_models = self._get_available_ollama_models()
+        return model_name in available_models
+
+    def _get_fallback_model(self, original_model: str, force_fallback: bool = False) -> str:
+        """Get a fallback model if the original model is not available or force_fallback is True."""
+        if force_fallback or not self._is_model_available(original_model):
+            # Get available Ollama models as fallback options
+            available_models = self._get_available_ollama_models()
+
+            # Prefer models similar to the original, otherwise use the first available one
+            if available_models:
+                # Extract just the model name part (after provider prefix)
+                # e.g., "ollama/mistral-something" -> "mistral-something"
+                if "/" in original_model:
+                    model_name_part = original_model.split("/", 1)[1].lower()
+                else:
+                    model_name_part = original_model.lower()
+
+                # Define model family keywords to search for
+                # Order by specificity - more specific matches first to avoid partial matches
+                family_keywords = [
+                    ("codellama", lambda model: "codellama" in model.lower()),
+                    ("llama3", lambda model: "llama3" in model.lower()),
+                    ("llama", lambda model: "llama" in model.lower()),
+                    ("mistral", lambda model: "mistral" in model.lower()),
+                    ("phi3", lambda model: "phi3" in model.lower()),
+                    ("phi", lambda model: "phi" in model.lower()),
+                ]
+
+                for family, match_func in family_keywords:
+                    if match_func(model_name_part):
+                        for model in available_models:
+                            if family in model.lower():
+                                return model
+                        break  # Return first matching model
+
+                # If no similar model found, return first available model
+                return available_models[0]
+
+            # If original model is available and fallback not forced, return it
+            return original_model
+        else:
+            return original_model
+
+    async def generate(self, prompt: str, params: Dict):
+        """Generates a response from a language model using litellm."""
+        config_model = getattr(self.config, 'model', 'test-model')
+
+        # 如果是本地模型，返回模拟响应
+        if is_local_model(config_model):
+            response, _ = self._generate_mock_response(prompt, config_model)
+            yield response
+            return
+
+        # 检查模型是否可用，如果不可用则使用回退模型
+        effective_model = self._get_fallback_model(config_model)
+
+        # 如果模型已更改，更新参数
+        litellm_params = self._build_litellm_params(prompt, **params)
+        if effective_model != config_model:
+            litellm_params["model"] = effective_model
+            # 记录模型切换信息
+            print(f"🔄 Model switched from '{config_model}' to '{effective_model}' due to availability.")
+
+        try:
+            # litellm.completion is a synchronous call, run it in a thread
+            response = await asyncio.to_thread(litellm.completion, **litellm_params)
+            content = response.choices[0].message.content
+
+            if content is None:
+                raise ModelError("Received null content from model.")
+
+            # Yield the content as a single chunk (for compatibility with streaming interface)
+            yield content
+        except litellm.exceptions.AuthenticationError as e:
+            raise ModelAuthenticationError(f"LiteLLM auth error: {e}") from e
+        except Exception as e:
+            # Catch any other litellm or unexpected error
+            raise ModelError(f"LiteLLM generic error: {e}") from e
+
+    def get_default_model(self) -> str:
+        """Get the default model for this provider."""
+        config_model = getattr(self.config, 'model', 'test-model')
+
+        # First try to get the configured model
+        if self._is_model_available(config_model):
+            return config_model
+
+        # Fall back to first available model
+        available_models = self._get_available_ollama_models()
+        if available_models:
+            return available_models[0]
+
+        # Final fallback
+        return 'test-model'

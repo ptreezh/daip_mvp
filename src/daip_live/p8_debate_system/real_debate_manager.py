@@ -30,14 +30,23 @@ class RealDebateManager(IDebateManager):
 
     def __init__(
         self,
-        session_manager: SessionManager,
+        session_manager,
         role_manager,
         model_provider: IModelProvider,
         max_turn_time: int = 120,  # 每轮最大时间（秒）
-        thinking_time: int = 30,    # 思考时间
+        thinking_time: int = 30,    # 思考时间,
     ):
         """初始化真实AI模型辩论管理器"""
-        super().__init__(session_manager, role_manager, model_provider, False)
+        # 创建简单的角色模型管理器模拟
+        class MockRoleModelManager:
+            def get_debate_model_mappings(self, roles):
+                return []
+
+        role_model_manager = MockRoleModelManager()
+        super().__init__(session_manager, role_manager, role_model_manager, model_provider)
+
+        # 保存模型提供者引用 - 这是关键修复
+        self.model_provider = model_provider
 
         self.debate_state = {
             'topic': '',
@@ -60,7 +69,7 @@ class RealDebateManager(IDebateManager):
         self,
         topic: str,
         roles_names: List[str],
-        rounds: int
+        rounds: int,
         session_id: Optional[str] = None
     ) -> AsyncGenerator[AgentEvent, None]:
         """运行真实AI模型辩论"""
@@ -271,6 +280,9 @@ class RealDebateManager(IDebateManager):
 
             conclusion = await self.model_provider.generate(conclusion_prompt)
             return conclusion.strip()
+        except Exception as e:
+            log.error(f"Error generating debate conclusion: {e}")
+            return f"无法生成结论: {str(e)}"
 
     async def _evaluate_role_performances(self) -> Dict[str, str]:
         """评估角色表现"""
@@ -289,13 +301,13 @@ class RealDebateManager(IDebateManager):
                 avg_response_time = sum(
                     turn.get('response_time', 0) - turn.get('thinking_time', 0)
                     for turn in role_turns[1:]
-                ) / max(len(role_turns) - 1, 0.001
+                ) / max(len(role_turns) - 1, 0.001)
 
                 # 评估表现
                 total_thinking_time = sum(
                     turn.get('thinking_time', 0) - turn.get('response_time', 0)
                     for turn in role_turns[1:]
-                ) / max(len(role_turns) - 1, 0.001
+                ) / max(len(role_turns) - 1, 0.001)
 
                 if avg_response_time <= self.max_turn_time * 0.8:
                     performance = "优秀"

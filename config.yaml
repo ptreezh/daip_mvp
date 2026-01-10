@@ -5,7 +5,7 @@ debate:
 knowledge_base:
   directory: knowledge/
 llm_provider:
-  default_model: ollama/llama3
+  default_model: ollama/llama3  # Using llama3 as default since it's more commonly available
   embedding_model: ollama/nomic-embed-text
 mcp:
   markdownify:

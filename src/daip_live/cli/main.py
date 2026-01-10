@@ -20,7 +20,7 @@ from daip_live.core.models import (
     DebateCompleteEvent, TokenUsageEvent, ThoughtEvent, AgentEvent
 )
 from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
-from debate_module.simple_debate import SimpleDebateEngine
+from daip_live.debate_module.simple_debate import SimpleDebateEngine
 from daip_live.p8_debate_system.simple_debate_manager import SimpleDebateManager
 from daip_live.p8_debate_system.history_tracker import DebateHistoryTracker
 from daip_live.memory.session_manager import SessionManager
@@ -110,7 +110,7 @@ def debate_start(
         print("=== 测试模块化辩论系统 ===")
         try:
             # Import simple debate manager directly
-            from debate_module.simple_debate import SimpleDebateEngine
+            from daip_live.debate_module.simple_debate import SimpleDebateEngine
             print("✅ 简化辩论管理器导入成功")
             print("🎮 开始辩论: 测试模块化")
             print(f"👥 角色: {', '.join(['支持者', '反对者'])}")
@@ -571,11 +571,19 @@ def _handle_conversation_intent(intent: Intent):
         print(f"❌ Error handling conversation: {e}")
 
 
-# Import knowledge commands
-from .commands import knowledge
+# Import commands
+from .commands import knowledge, wiki
 
-# Register the knowledge commands directly
+# Import intelligent role management commands
+try:
+    from .commands.role_intelligent import app as role_intelligent_app
+    app.add_typer(role_intelligent_app, name="role-intel", help="Intelligent role management commands")
+except ImportError:
+    print("⚠️  Intelligent role management commands not available")
+
+# Register the commands directly
 app.add_typer(knowledge.app, name="knowledge", help="Knowledge management commands")
+app.add_typer(wiki.app, name="wiki", help="Wiki management commands")
 
 
 if __name__ == "__main__":

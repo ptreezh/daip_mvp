@@ -1,0 +1,22 @@
+{
+  "enable_context_aware": true,
+  "enable_debug": false,
+  "enable_enhanced_features": true,
+  "response_time_threshold": 0.1,
+  "context_cache_ttl": 300,
+  "intent_cache_size": 1000,
+  "padatious_enable": true,
+  "padatious_training_path": "./padatious_models",
+  "misrecognition_protection_enabled": true,
+  "paper_intent_penalty": -0.3,
+  "chat_intent_boost": 0.2,
+  "semantic_disambiguation_enabled": true,
+  "context_injection_enabled": true,
+  "log_level": "INFO",
+  "log_performance_metrics": true,
+  "padatious_weight": 0.6,
+  "original_weight": 0.4,
+  "max_conversation_history": 10,
+  "confidence_threshold": 0.3,
+  "auto_complete_threshold": 0.8
+}

@@ -25,7 +25,14 @@ from daip_live.p4_role_manager_tools.role_manager import RoleManager
 from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
 from daip_live.model_provider.provider import LiteLLMProvider  # Fixed import
 from daip_live.persistence.database import DatabaseManager
-from daip_live.tui_modular import DAIP_TUI
+# 延迟导入TUI以避免初始化副作用
+def get_daip_tui():
+    try:
+        from daip_live.tui.simplified_main import SimplifiedTUI
+        return SimplifiedTUI
+    except ImportError as e:
+        print(f"Warning: Could not import TUI from simplified_main: {e}")
+        return None
 from daip_live.agent_engine.enhanced_intent_recognizer import Intent
 from rich.console import Console
 from rich.table import Table
@@ -74,10 +81,15 @@ intent_recognizer = None
 def run():
     """启动DAIP-TUI界面"""
     try:
-        tui = DAIP_TUI()
-        tui.run()
-    except ImportError as e:
-        print(f"Error importing TUI: {e}")
+        DAIP_TUI = get_daip_tui()
+        if DAIP_TUI:
+            tui = DAIP_TUI()
+            tui.run()
+        else:
+            print("Error: Could not import TUI module")
+            print("Make sure all dependencies are installed")
+    except Exception as e:
+        print(f"Error running TUI: {e}")
         print("Make sure all dependencies are installed")
 
 
@@ -116,8 +128,30 @@ def debate_start(
         console.print(f"[bold]Starting debate on topic:[/bold] {topic}")
         console.print(f"[bold]Roles:[/bold] {roles}")
         console.print(f"[bold]Rounds:[/bold] {rounds}")
+
+        # Check for unavailable roles
+        available_mappings = []
+        unavailable_roles = []
+        for role_name in role_list:
+            role_name_clean = role_name.strip()
+            role = role_manager.get_role_by_name(role_name_clean)
+            if role:
+                available_mappings.append(role_name_clean)
+            else:
+                unavailable_roles.append(role_name_clean)
+
+        if unavailable_roles:
+            console.print(f"[yellow]Warning: Following roles not found in system, will use default model:[/yellow]")
+            for role in unavailable_roles:
+                console.print(f"  - {role}")
+            # 不中断执行，继续使用可用角色
+            role_list = available_mappings if available_mappings else ["pro_arguer", "con_arguer"]  # 至少使用默认值
+        else:
+            # 所有角色都可用
+            available_mappings = role_list
+
         console.print("🤖 Debate started!")
-        
+
         # Track debate in history at start
         start_event = DebateStartEvent(topic=topic, roles=role_list, rounds=rounds)
         await debate_history_tracker.start_tracking(start_event)
@@ -188,16 +222,22 @@ def debate_multimodel(
         available_mappings = []
         unavailable_roles = []
         for role_name in role_list:
-            role = role_manager.get_role_by_name(role_name.strip())
+            role_name_clean = role_name.strip()
+            role = role_manager.get_role_by_name(role_name_clean)
             if role:
-                available_mappings.append(role_name.strip())
+                available_mappings.append(role_name_clean)
             else:
-                unavailable_roles.append(role_name.strip())
-        
+                unavailable_roles.append(role_name_clean)
+
         if unavailable_roles:
             console.print(f"[yellow]Warning: Following roles not found in system, will use default model:[/yellow]")
             for role in unavailable_roles:
                 console.print(f"  - {role}")
+            # 不中断执行，继续使用可用角色
+            role_list = available_mappings if available_mappings else ["pro_arguer", "con_arguer"]  # 至少使用默认值
+        else:
+            # 所有角色都可用
+            available_mappings = role_list
         
         console.print("🤖 Multi-model debate started!")
         

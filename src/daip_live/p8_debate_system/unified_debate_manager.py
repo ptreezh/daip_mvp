@@ -70,7 +70,7 @@ class UnifiedDebateManager(IDebateManager):
         async for event in self.debate_manager.run_debate(topic, roles, rounds):
             yield event
 
-    def get_debate_model_summary(self, roles: List[str]) -> Dict[str, Any]:
+    async def get_debate_model_summary(self, roles: List[str]) -> Dict[str, Any]:
         """获取辩论模型配置摘要"""
         if hasattr(self.debate_manager, 'get_debate_model_summary'):
             return await self.debate_manager.get_debate_model_summary(roles)
@@ -86,6 +86,6 @@ class UnifiedDebateManager(IDebateManager):
         """获取可用模型列表"""
         return await self.debate_manager.get_available_models()
 
-    def get_default_model(self) -> str:
+    async def get_default_model(self) -> str:
         """获取默认模型"""
         return await self.debate_manager.get_default_model()

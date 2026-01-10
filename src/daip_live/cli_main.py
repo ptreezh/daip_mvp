@@ -17,9 +17,9 @@ def main() -> None:
     """Main entry point with dependency injection setup."""
     create_config_yaml_if_not_exists()
     container = Container()
-    container.config.from_yaml("config.yaml")
+    # 只在运行CLI时进行模块绑定，避免在容器初始化时触发TUI加载
     from daip_live import cli
-    container.wire(modules=[cli])
+    container.wire(modules=[cli])  # 仅在此时绑定模块
     app()
 
 

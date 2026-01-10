@@ -9,11 +9,12 @@ import time
 import sys
 sys.path.insert(0, 'src')
 
-from debate_module.events import (
+from daip_live.core.models import (
     DebateStartEvent,
     DebateTurnStartEvent,
     DebateTurnCompleteEvent,
-    DebateCompleteEvent
+    DebateCompleteEvent,
+    DebateRoundStartEvent
 )
 
 
@@ -32,9 +33,8 @@ class CleanSimpleDebateEngine:
         print(f"👥 角色: {', '.join(roles)}")
         print(f"🔢 辩论轮次: {rounds}")
 
-        # 简单的事件产生
+        # 产生开始事件
         yield DebateStartEvent(
-            type="debate_start",
             session_id=session_id,
             topic=topic,
             roles=roles,
@@ -42,35 +42,36 @@ class CleanSimpleDebateEngine:
         )
 
         # 模拟辩论过程
-        for i, role in enumerate(roles, 1):
-            print(f"💬 {role} 第{i+1}轮发言:")
-
-            # 产生发言事件
-            yield DebateTurnStartEvent(
-                type="turn_start",
-                round=i+1,
-                role=role
+        for round_num in range(1, rounds + 1):
+            # 每轮开始事件
+            yield DebateRoundStartEvent(
+                round_number=round_num,
+                total_rounds=rounds,
+                session_id=session_id
             )
 
-            # 模拟发言内容
-            content = f"这是{role}关于'{topic}'的第{i+1}轮观点"
-            yield DebateTurnCompleteEvent(
-                type="turn_complete",
-                round=i+1,
-                role=role,
-                content=content
-            )
+            for role in roles:
+                # 每个参与者开始发言
+                yield DebateTurnStartEvent(
+                    participant=role,
+                    round_number=round_num,
+                    session_id=session_id
+                )
+
+                # 模拟发言内容
+                content = f"这是{role}关于'{topic}'的第{round_num}轮观点"
+                yield DebateTurnCompleteEvent(
+                    participant=role,
+                    round_number=round_num,
+                    content_preview=content[:100],  # 只取前100个字符作为预览
+                    session_id=session_id
+                )
 
         # 完成事件
         end_time = time.time()
         yield DebateCompleteEvent(
-            type="debate_complete",
             session_id=session_id,
-            topic=topic,
-            turns=[],
-            conclusion="简化辩论演示完成！",
-            role_performances={},
-            execution_time=end_time - start_time
+            summary=f"辩论 '{topic}' 完成，共进行了 {rounds} 轮",
         )
 
     async def get_debate_summary(self, session_id: str) -> dict:
@@ -78,5 +79,5 @@ class CleanSimpleDebateEngine:
         return {
             "session_id": session_id,
             "status": "completed",
-            "message": "简化辩论演示已完成"
+            "message": "辩论已完成"
         }

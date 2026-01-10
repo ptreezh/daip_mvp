@@ -2,7 +2,8 @@
 
 from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+from daip_live.core.models import AgentEvent
 
 
 class ModuleContract(ABC):
@@ -86,4 +87,34 @@ class ITool(ABC):
     @abstractmethod
     def execute(self, **kwargs) -> Any:
         """Executes the tool with the given arguments."""
+        pass
+
+
+class IDebateManager(ABC):
+    """Interface for a debate management service."""
+
+    @abstractmethod
+    def __init__(self, session_manager, role_manager, model_provider, use_optimized_architecture: bool = False):
+        """Initialize the debate manager."""
+        pass
+
+    @abstractmethod
+    async def run_debate(
+        self,
+        topic: str,
+        roles: List[str],
+        rounds: int,
+        session_id: Optional[str] = None
+    ) -> AsyncGenerator[AgentEvent, None]:
+        """Run a debate between multiple roles."""
+        pass
+
+    @abstractmethod
+    def get_debate_model_summary(self, roles: List[str]) -> Dict[str, Any]:
+        """Get model configuration summary for the debate."""
+        pass
+
+    @abstractmethod
+    def get_debate_state(self) -> Dict[str, Any]:
+        """Get current debate state."""
         pass
