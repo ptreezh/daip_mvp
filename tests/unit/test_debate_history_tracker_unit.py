@@ -3,23 +3,57 @@ Unit Tests for DebateHistoryTracker
 """
 import pytest
 import asyncio
+import tempfile
+import os
 from daip_live.p8_debate_system.history_tracker import DebateHistoryTracker
 from daip_live.core.models import DebateStartEvent, DebateTurnCompleteEvent, DebateCompleteEvent
+
+
+@pytest.fixture
+def tracker():
+    """Create a tracker with a temporary file for test isolation."""
+    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+        db_path = f.name
+    
+    tracker = DebateHistoryTracker(db_path=db_path)
+    yield tracker
+    
+    # Cleanup
+    try:
+        os.unlink(db_path)
+    except:
+        pass
+
+
+@pytest.fixture
+def tracker_memory():
+    """Create a tracker with in-memory database for testing."""
+    # Note: For in-memory DB, each connection is a separate DB
+    # So we use a file-based approach for reliable testing
+    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+        db_path = f.name
+    
+    tracker = DebateHistoryTracker(db_path=db_path)
+    yield tracker
+    
+    # Cleanup
+    try:
+        os.unlink(db_path)
+    except:
+        pass
 
 
 class TestDebateHistoryTrackerUnit:
     """Unit tests for DebateHistoryTracker service."""
     
-    def test_debate_history_tracker_initialization(self):
+    def test_debate_history_tracker_initialization(self, tracker):
         """Test DebateHistoryTracker initialization."""
-        tracker = DebateHistoryTracker()
-        
-        assert tracker._debate_histories == {}
-        assert tracker._lock is not None
+        # The tracker uses file-based SQLite, not in-memory dict
+        assert tracker.db_path.endswith('.db') or tracker.db_path == ":memory:"
+        assert tracker._db_lock is not None
     
-    def test_start_tracking_creates_history(self):
+    def test_start_tracking_creates_history(self, tracker):
         """Test start_tracking creates a new debate history."""
-        tracker = DebateHistoryTracker()
         
         start_event = DebateStartEvent(
             topic="Test Topic",
@@ -37,9 +71,8 @@ class TestDebateHistoryTrackerUnit:
         assert history.current_round == 0
         assert history.status == "active"
     
-    def test_start_tracking_with_multiple_roles(self):
+    def test_start_tracking_with_multiple_roles(self, tracker):
         """Test start_tracking with multiple roles."""
-        tracker = DebateHistoryTracker()
         
         start_event = DebateStartEvent(
             topic="Multiple Roles Test",
@@ -58,9 +91,8 @@ class TestDebateHistoryTrackerUnit:
         assert "role3" in participant_names
         assert "role4" in participant_names
     
-    def test_add_turn_to_history(self):
+    def test_add_turn_to_history(self, tracker):
         """Test adding a turn to debate history."""
-        tracker = DebateHistoryTracker()
         
         # Start a debate first
         start_event = DebateStartEvent(
@@ -87,9 +119,8 @@ class TestDebateHistoryTrackerUnit:
         assert updated_history.turns[0].round_number == 1
         assert updated_history.current_round == 1
     
-    def test_add_multiple_turns(self):
+    def test_add_multiple_turns(self, tracker):
         """Test adding multiple turns to debate history."""
-        tracker = DebateHistoryTracker()
         
         # Start a debate
         start_event = DebateStartEvent(
@@ -124,9 +155,8 @@ class TestDebateHistoryTrackerUnit:
         assert updated_history.turns[0].content == "First argument from role1"
         assert updated_history.turns[1].content == "Response from role2"
     
-    def test_complete_debate(self):
+    def test_complete_debate(self, tracker):
         """Test completing a debate."""
-        tracker = DebateHistoryTracker()
         
         # Start and add some turns
         start_event = DebateStartEvent(
@@ -156,9 +186,8 @@ class TestDebateHistoryTrackerUnit:
         assert final_history.end_time is not None
         assert final_history.turns[0].content == "Final statement"
     
-    def test_get_history(self):
+    def test_get_history(self, tracker):
         """Test retrieving a specific debate history."""
-        tracker = DebateHistoryTracker()
         
         # Start a debate
         start_event = DebateStartEvent(
@@ -187,17 +216,15 @@ class TestDebateHistoryTrackerUnit:
         assert len(retrieved_history.turns) == 1
         assert retrieved_history.turns[0].content == "Test content for retrieval"
     
-    def test_get_nonexistent_history(self):
+    def test_get_nonexistent_history(self, tracker):
         """Test retrieving a non-existent debate history."""
-        tracker = DebateHistoryTracker()
         
         retrieved_history = asyncio.run(tracker.get_history("nonexistent_007"))
         
         assert retrieved_history is None
     
-    def test_get_all_histories(self):
+    def test_get_all_histories(self, tracker):
         """Test retrieving all debate histories."""
-        tracker = DebateHistoryTracker()
         
         # Create multiple debates
         start_event1 = DebateStartEvent(
@@ -242,9 +269,8 @@ class TestDebateHistoryTrackerUnit:
         assert "all_hist_008" in session_ids
         assert "all_hist_009" in session_ids
     
-    def test_clear_history(self):
+    def test_clear_history(self, tracker):
         """Test clearing a debate history."""
-        tracker = DebateHistoryTracker()
         
         # Start a debate
         start_event = DebateStartEvent(
@@ -278,9 +304,8 @@ class TestDebateHistoryTrackerUnit:
         history_after = asyncio.run(tracker.get_history("clear_test_010"))
         assert history_after is None
     
-    def test_clear_nonexistent_history(self):
+    def test_clear_nonexistent_history(self, tracker):
         """Test clearing a non-existent debate history."""
-        tracker = DebateHistoryTracker()
         
         cleared = asyncio.run(tracker.clear_history("nonexistent_clear_011"))
         
