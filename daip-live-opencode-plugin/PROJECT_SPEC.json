@@ -1,0 +1,380 @@
+{
+  "project": {
+    "name": "daip-live-opencode-plugin",
+    "displayName": "DAIP-LIVE OpenCode Plugin",
+    "version": "1.0.0",
+    "description": "OpenCode plugin bringing DAIP-LIVE's multi-model debate, wiki collaboration, and knowledge synthesis capabilities - Pure Go implementation",
+    "type": "opencode-plugin",
+    "license": "MIT",
+    "author": "DAIP-LIVE Team",
+    "repository": "https://github.com/daip-live/daip-live-opencode-plugin",
+    "tags": [
+      "opencode",
+      "plugin",
+      "debate",
+      "wiki",
+      "knowledge",
+      "multi-agent",
+      "golang"
+    ]
+  },
+  "spec_version": "2.0",
+  "created_at": "2026-01-10T12:00:00Z",
+  "updated_at": "2026-01-10T12:00:00Z",
+  "status": "draft",
+  "technology_stack": {
+    "language": {
+      "primary": "Go",
+      "rationale": "Native OpenCode integration, no bridge needed, better performance"
+    },
+    "backend": {
+      "framework": "Standard library + sqlx",
+      "database": "SQLite"
+    },
+    "frontend": {
+      "framework": "OpenCode TUI",
+      "type": "plugin"
+    },
+    "dependencies": {
+      "go": ">=1.24.0"
+    }
+  },
+  "features": {
+    "core": [
+      {
+        "id": "debate-system",
+        "name": "Multi-Model Multi-Role Debate System",
+        "description": "Structured debates with multiple AI models playing different roles",
+        "priority": "P0",
+        "unique_value": "Only system that enables structured multi-agent debates in OpenCode",
+        "implementation": {
+          "language": "Go",
+          "module": "pkg/debate"
+        },
+        "acceptance_criteria": [
+          "Can start debate with topic",
+          "Supports configurable roles (pro_arguer, con_arguer, moderator, etc.)",
+          "Each role uses different AI model",
+          "Outputs structured debate transcript",
+          "Generates debate summary with conclusions"
+        ]
+      },
+      {
+        "id": "wiki-collaboration",
+        "name": "Multi-Model Wiki Collaboration",
+        "description": "Collaborative wiki creation with multiple AI models",
+        "priority": "P0",
+        "unique_value": "Only system for multi-model collaborative knowledge creation in OpenCode",
+        "implementation": {
+          "language": "Go",
+          "module": "pkg/wiki"
+        },
+        "acceptance_criteria": [
+          "Can create wiki pages",
+          "Supports collaborative editing by multiple roles",
+          "Tracks version history",
+          "Supports markdown format",
+          "Enables semantic search"
+        ]
+      },
+      {
+        "id": "knowledge-synthesis",
+        "name": "Automatic Knowledge Synthesis",
+        "description": "Extracts and synthesizes knowledge from debates and wikis",
+        "priority": "P1",
+        "unique_value": "Only system for automatic knowledge graph building in OpenCode",
+        "implementation": {
+          "language": "Go",
+          "module": "pkg/knowledge"
+        },
+        "acceptance_criteria": [
+          "Extracts concepts from debates",
+          "Extracts concepts from wikis",
+          "Builds knowledge graph",
+          "Supports semantic search",
+          "Provides knowledge recommendations"
+        ]
+      }
+    ],
+    "infrastructure": [
+      {
+        "id": "storage",
+        "name": "SQLite Storage Layer",
+        "description": "Persistent storage for debates, wikis, knowledge using SQLite",
+        "priority": "P0",
+        "implementation": {
+          "language": "Go",
+          "module": "pkg/storage"
+        },
+        "acceptance_criteria": [
+          "SQLite database at ~/.local/share/daip-live-opencode",
+          "Tables for debates, wikis, knowledge",
+          "Version tracking for wikis",
+          "Efficient querying"
+        ]
+      },
+      {
+        "id": "llm-integration",
+        "name": "LLM Provider Integration",
+        "description": "Direct integration with OpenCode's LLM configuration",
+        "priority": "P0",
+        "implementation": {
+          "language": "Go",
+          "module": "pkg/llm"
+        },
+        "acceptance_criteria": [
+          "Read OpenCode config",
+          "Support multiple providers (Anthropic, OpenAI, Google, etc.)",
+          "Model selection per role",
+          "Streaming responses"
+        ]
+      },
+      {
+        "id": "opencode-integration",
+        "name": "OpenCode Plugin Integration",
+        "description": "Native integration with OpenCode tool system",
+        "priority": "P0",
+        "implementation": {
+          "language": "Go",
+          "module": "cmd/daip-live"
+        },
+        "acceptance_criteria": [
+          "Register debate tool",
+          "Register wiki tool",
+          "Register knowledge tool",
+          "Handle tool parameters",
+          "Return formatted responses"
+        ]
+      }
+    ]
+  },
+  "architecture": {
+    "pattern": "modular monolith",
+    "components": [
+      {
+        "name": "CLI/Plugin Entry",
+        "responsibility": "OpenCode plugin entry point, tool registration",
+        "language": "Go",
+        "file": "cmd/daip-live/main.go"
+      },
+      {
+        "name": "Debate Engine",
+        "responsibility": "Multi-model debate orchestration",
+        "language": "Go",
+        "file": "pkg/debate/engine.go"
+      },
+      {
+        "name": "Wiki Engine",
+        "responsibility": "Wiki collaboration management",
+        "language": "Go",
+        "file": "pkg/wiki/engine.go"
+      },
+      {
+        "name": "Knowledge Engine",
+        "responsibility": "Knowledge extraction and synthesis",
+        "language": "Go",
+        "file": "pkg/knowledge/engine.go"
+      },
+      {
+        "name": "Storage Layer",
+        "responsibility": "SQLite persistence",
+        "language": "Go",
+        "file": "pkg/storage/*.go"
+      },
+      {
+        "name": "LLM Provider",
+        "responsibility": "LLM integration",
+        "language": "Go",
+        "file": "pkg/llm/*.go"
+      },
+      {
+        "name": "Models",
+        "responsibility": "Data models and DTOs",
+        "language": "Go",
+        "file": "pkg/models/*.go"
+      }
+    ],
+    "data_flow": {
+      "direction": "bidirectional",
+      "description": "User input → OpenCode TUI → DAIP-LIVE Go Plugin → LLM → Response"
+    }
+  },
+  "interfaces": {
+    "opencode_tools": [
+      {
+        "name": "debate",
+        "description": "Start multi-model structured debate",
+        "parameters": {
+          "topic": "string (required)",
+          "roles": "array (optional, default: pro_arguer,con_arguer,moderator)",
+          "rounds": "integer (optional, default: 3)"
+        },
+        "output": "Debate transcript with summary"
+      },
+      {
+        "name": "wiki",
+        "description": "Create and edit wiki pages",
+        "parameters": {
+          "action": "string (create, edit, view, list, search)",
+          "title": "string",
+          "content": "string",
+          "query": "string"
+        },
+        "output": "Wiki page content or list"
+      },
+      {
+        "name": "knowledge",
+        "description": "Synthesize and search knowledge",
+        "parameters": {
+          "action": "string (synthesize, graph, search)",
+          "query": "string"
+        },
+        "output": "Knowledge graph or search results"
+      }
+    ]
+  },
+  "configuration": {
+    "files": [
+      {
+        "path": ".opencode/opencode.json",
+        "purpose": "OpenCode plugin configuration",
+        "format": "JSON"
+      },
+      {
+        "path": "config/daip-live.yaml",
+        "purpose": "DAIP-LIVE plugin configuration",
+        "format": "YAML"
+      }
+    ],
+    "settings": {
+      "storage_path": "~/.local/share/daip-live-opencode",
+      "default_roles": ["pro_arguer", "con_arguer", "moderator"],
+      "default_rounds": 3,
+      "max_rounds": 10,
+      "default_models": {
+        "reasoning": "anthropic/claude-opus-4-20250506",
+        "standard": "anthropic/claude-sonnet-4-20250506",
+        "fast": "anthropic/claude-haiku-4-20250506"
+      }
+    }
+  },
+  "quality_attributes": {
+    "performance": {
+      "latency": "< 3s for debate turn (pure Go is faster)",
+      "throughput": "50 concurrent debates",
+      "memory": "< 50MB base footprint"
+    },
+    "reliability": {
+      "uptime": "99.9%",
+      "error_recovery": "Auto-retry failed LLM calls, graceful degradation"
+    },
+    "security": {
+      "sandbox": "Process isolation via Go runtime",
+      "permissions": "Inherit OpenCode permissions"
+    },
+    "extensibility": {
+      "custom_roles": "Support custom debate roles via config",
+      "custom_workflows": "Support custom wiki workflows"
+    }
+  },
+  "testing": {
+    "strategy": "Unit + Integration + E2E",
+    "coverage_target": "85%",
+    "tests": [
+      {
+        "type": "unit",
+        "framework": "testing (Go)",
+        "target": "Core engines, models"
+      },
+      {
+        "type": "integration",
+        "framework": "Go integration tests",
+        "target": "Storage, LLM provider"
+      },
+      {
+        "type": "e2e",
+        "framework": "Manual + OpenCode CLI",
+        "target": "Full plugin workflow"
+      }
+    ]
+  },
+  "delivery": {
+    "phases": [
+      {
+        "name": "Phase 1: Core Infrastructure",
+        "description": "Project setup, storage layer, LLM integration",
+        "duration": "1 week",
+        "milestone": "Storage and LLM working"
+      },
+      {
+        "name": "Phase 2: Debate System",
+        "description": "Complete debate engine implementation",
+        "duration": "1.5 weeks",
+        "milestone": "Debate tool functional"
+      },
+      {
+        "name": "Phase 3: Wiki System",
+        "description": "Complete wiki engine implementation",
+        "duration": "1 week",
+        "milestone": "Wiki tool functional"
+      },
+      {
+        "name": "Phase 4: Knowledge System",
+        "description": "Complete knowledge engine implementation",
+        "duration": "1 week",
+        "milestone": "Knowledge tool functional"
+      },
+      {
+        "name": "Phase 5: OpenCode Integration",
+        "description": "Plugin registration, CLI, documentation",
+        "duration": "1 week",
+        "milestone": "First release"
+      }
+    ],
+    "versioning": "Semantic versioning (MAJOR.MINOR.PATCH)",
+    "changelog": "Keep a CHANGELOG.md"
+  },
+  "documentation": {
+    "required": [
+      {
+        "file": "README.md",
+        "description": "Project overview and quick start"
+      },
+      {
+        "file": "ARCHITECTURE.md",
+        "description": "System architecture and design decisions"
+      },
+      {
+        "file": "USER_GUIDE.md",
+        "description": "User manual with examples"
+      },
+      {
+        "file": "DEVELOPER_GUIDE.md",
+        "description": "Development setup and contribution guide"
+      }
+    ]
+  },
+  "risks": [
+    {
+      "id": "R1",
+      "description": "OpenCode API changes breaking plugin",
+      "probability": "low",
+      "impact": "high",
+      "mitigation": "Version pinning, graceful degradation, monitoring"
+    },
+    {
+      "id": "R2",
+      "description": "LLM provider rate limits",
+      "probability": "medium",
+      "impact": "medium",
+      "mitigation": "Rate limiting per provider, retry with backoff, queue system"
+    },
+    {
+      "id": "R3",
+      "description": "SQLite concurrency issues",
+      "probability": "low",
+      "impact": "medium",
+      "mitigation": "Proper transaction management, connection pooling"
+    }
+  ]
+}
