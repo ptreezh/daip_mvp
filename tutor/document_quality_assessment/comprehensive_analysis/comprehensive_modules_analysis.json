@@ -1,0 +1,1064 @@
+{
+  "architecture": {
+    "module_id": "architecture",
+    "module_name": "Architecture Solutions",
+    "module_path": "docs\\architecture",
+    "module_type": "support",
+    "documents": [
+      {
+        "file_name": "ConfigurationBridge_Solution.md",
+        "relative_path": "architecture\\ConfigurationBridge_Solution.md",
+        "file_size": 5421,
+        "file_type": "general"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [],
+    "description": "architecture 模块",
+    "status": "active"
+  },
+  "cli-enhancement": {
+    "module_id": "cli-enhancement",
+    "module_name": "CLI Enhancement Projects",
+    "module_path": "docs\\cli-enhancement",
+    "module_type": "project",
+    "documents": [
+      {
+        "file_name": "PROJECT_PLAN.md",
+        "relative_path": "cli-enhancement\\PROJECT_PLAN.md",
+        "file_size": 13380,
+        "file_type": "plan"
+      },
+      {
+        "file_name": "TASK_BREAKDOWN.md",
+        "relative_path": "cli-enhancement\\TASK_BREAKDOWN.md",
+        "file_size": 17792,
+        "file_type": "task"
+      },
+      {
+        "file_name": "TDD_IMPLEMENTATION_LOG.md",
+        "relative_path": "cli-enhancement\\TDD_IMPLEMENTATION_LOG.md",
+        "file_size": 8649,
+        "file_type": "implementation"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [],
+    "description": "cli-enhancement 模块",
+    "status": "active"
+  },
+  "compliance": {
+    "module_id": "compliance",
+    "module_name": "Compliance Checklists",
+    "module_path": "docs\\compliance",
+    "module_type": "support",
+    "documents": [
+      {
+        "file_name": "P5_AGENT_ENGINE_COMPLIANCE_CHECKLIST.md",
+        "relative_path": "compliance\\P5_AGENT_ENGINE_COMPLIANCE_CHECKLIST.md",
+        "file_size": 7879,
+        "file_type": "checklist"
+      },
+      {
+        "file_name": "P6_TUI_COMPLIANCE_CHECKLIST.md",
+        "relative_path": "compliance\\P6_TUI_COMPLIANCE_CHECKLIST.md",
+        "file_size": 10402,
+        "file_type": "checklist"
+      },
+      {
+        "file_name": "P7_GUI_COMPLIANCE_CHECKLIST.md",
+        "relative_path": "compliance\\P7_GUI_COMPLIANCE_CHECKLIST.md",
+        "file_size": 11959,
+        "file_type": "checklist"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [],
+    "description": "compliance 模块",
+    "status": "active"
+  },
+  "p5": {
+    "module_id": "p5",
+    "module_name": "Agent Engine",
+    "module_path": "docs\\p5_agent_engine",
+    "module_type": "original",
+    "documents": [
+      {
+        "file_name": "README.md",
+        "relative_path": "p5_agent_engine\\README.md",
+        "file_size": 5363,
+        "file_type": "readme"
+      },
+      {
+        "file_name": "SPEC.md",
+        "relative_path": "p5_agent_engine\\SPEC.md",
+        "file_size": 3395,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "TASK_LIST.md",
+        "relative_path": "p5_agent_engine\\TASK_LIST.md",
+        "file_size": 2440,
+        "file_type": "task"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "architecture",
+      "process"
+    ],
+    "description": "---",
+    "status": "active"
+  },
+  "p6": {
+    "module_id": "p6",
+    "module_name": "CLI TUI",
+    "module_path": "docs\\p6_cli_tui",
+    "module_type": "original",
+    "documents": [
+      {
+        "file_name": "README.md",
+        "relative_path": "p6_cli_tui\\README.md",
+        "file_size": 5369,
+        "file_type": "readme"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "architecture",
+      "process"
+    ],
+    "description": "---",
+    "status": "active"
+  },
+  "p7": {
+    "module_id": "p7",
+    "module_name": "GUI",
+    "module_path": "docs\\p7_gui",
+    "module_type": "original",
+    "documents": [
+      {
+        "file_name": "README.md",
+        "relative_path": "p7_gui\\README.md",
+        "file_size": 4715,
+        "file_type": "readme"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "architecture"
+    ],
+    "description": "---",
+    "status": "active"
+  },
+  "p0": {
+    "module_id": "p0",
+    "module_name": "Core Interfaces",
+    "module_path": "docs\\p0_core_interfaces",
+    "module_type": "original",
+    "documents": [
+      {
+        "file_name": "README.md",
+        "relative_path": "p0_core_interfaces\\README.md",
+        "file_size": 7773,
+        "file_type": "readme"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "architecture"
+    ],
+    "description": "---",
+    "status": "active"
+  },
+  "p1": {
+    "module_id": "p1",
+    "module_name": "Data Persistence",
+    "module_path": "docs\\p1_data_persistence",
+    "module_type": "original",
+    "documents": [
+      {
+        "file_name": "README.md",
+        "relative_path": "p1_data_persistence\\README.md",
+        "file_size": 4904,
+        "file_type": "readme"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "architecture"
+    ],
+    "description": "---",
+    "status": "active"
+  },
+  "p2": {
+    "module_id": "p2",
+    "module_name": "Knowledge Manager",
+    "module_path": "docs\\p2_knowledge_manager",
+    "module_type": "original",
+    "documents": [
+      {
+        "file_name": "README.md",
+        "relative_path": "p2_knowledge_manager\\README.md",
+        "file_size": 5046,
+        "file_type": "readme"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "architecture",
+      "process"
+    ],
+    "description": "---",
+    "status": "active"
+  },
+  "p3": {
+    "module_id": "p3",
+    "module_name": "Model Provider",
+    "module_path": "docs\\p3_model_provider",
+    "module_type": "original",
+    "documents": [
+      {
+        "file_name": "README.md",
+        "relative_path": "p3_model_provider\\README.md",
+        "file_size": 7617,
+        "file_type": "readme"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "architecture"
+    ],
+    "description": "---",
+    "status": "active"
+  },
+  "p4": {
+    "module_id": "p4",
+    "module_name": "Role Manager Tools",
+    "module_path": "docs\\p4_role_manager_tools",
+    "module_type": "original",
+    "documents": [
+      {
+        "file_name": "README.md",
+        "relative_path": "p4_role_manager_tools\\README.md",
+        "file_size": 5567,
+        "file_type": "readme"
+      },
+      {
+        "file_name": "SPEC-Roles-From-Directory.md",
+        "relative_path": "p4_role_manager_tools\\SPEC-Roles-From-Directory.md",
+        "file_size": 2142,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "SPEC-Roles-From-File.md",
+        "relative_path": "p4_role_manager_tools\\SPEC-Roles-From-File.md",
+        "file_size": 2371,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "TASK_LIST-Roles-From-Directory.md",
+        "relative_path": "p4_role_manager_tools\\TASK_LIST-Roles-From-Directory.md",
+        "file_size": 1624,
+        "file_type": "task"
+      },
+      {
+        "file_name": "TASK_LIST-Roles-From-File.md",
+        "relative_path": "p4_role_manager_tools\\TASK_LIST-Roles-From-File.md",
+        "file_size": 1670,
+        "file_type": "task"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "architecture",
+      "p4"
+    ],
+    "description": "---",
+    "status": "active"
+  },
+  "p8_debate_system": {
+    "module_id": "p8_debate_system",
+    "module_name": "Debate System Core",
+    "module_path": "docs\\p8_debate_system",
+    "module_type": "original",
+    "documents": [
+      {
+        "file_name": "IMPROVEMENT_SAVE_TRANSCRIPT_SPEC.md",
+        "relative_path": "p8_debate_system\\IMPROVEMENT_SAVE_TRANSCRIPT_SPEC.md",
+        "file_size": 2578,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "SPEC.md",
+        "relative_path": "p8_debate_system\\SPEC.md",
+        "file_size": 3045,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "TASK_LIST.md",
+        "relative_path": "p8_debate_system\\TASK_LIST.md",
+        "file_size": 2824,
+        "file_type": "task"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "process",
+      "p8_debate_system",
+      "p8",
+      "specifications"
+    ],
+    "description": "p8_debate_system 模块",
+    "status": "active"
+  },
+  "p8_human_assistant": {
+    "module_id": "p8_human_assistant",
+    "module_name": "Human Assistant",
+    "module_path": "docs\\p8_human_assistant",
+    "module_type": "original",
+    "documents": [
+      {
+        "file_name": "README.md",
+        "relative_path": "p8_human_assistant\\README.md",
+        "file_size": 5137,
+        "file_type": "readme"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "architecture"
+    ],
+    "description": "---",
+    "status": "active"
+  },
+  "p8_wiki_system": {
+    "module_id": "p8_wiki_system",
+    "module_name": "Wiki System",
+    "module_path": "docs\\p8_wiki_system",
+    "module_type": "original",
+    "documents": [
+      {
+        "file_name": "SPEC.md",
+        "relative_path": "p8_wiki_system\\SPEC.md",
+        "file_size": 2481,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "TASK_LIST.md",
+        "relative_path": "p8_wiki_system\\TASK_LIST.md",
+        "file_size": 3286,
+        "file_type": "task"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [],
+    "description": "p8_wiki_system 模块",
+    "status": "active"
+  },
+  "p9": {
+    "module_id": "p9",
+    "module_name": "Scaffolding",
+    "module_path": "docs\\p9_scaffolding_ARCHIVED",
+    "module_type": "archived",
+    "documents": [
+      {
+        "file_name": "README.md",
+        "relative_path": "p9_scaffolding_ARCHIVED\\README.md",
+        "file_size": 358,
+        "file_type": "readme"
+      },
+      {
+        "file_name": "TASK_LIST.md",
+        "relative_path": "p9_scaffolding_ARCHIVED\\TASK_LIST.md",
+        "file_size": 1749,
+        "file_type": "task"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "process"
+    ],
+    "description": "**Status**: Completed & Merged",
+    "status": "archived"
+  },
+  "procedure": {
+    "module_id": "procedure",
+    "module_name": "Procedures & Guidelines",
+    "module_path": "docs\\procedure",
+    "module_type": "support",
+    "documents": [
+      {
+        "file_name": "DAIP_LIVE_系统评审报告.md",
+        "relative_path": "procedure\\DAIP_LIVE_系统评审报告.md",
+        "file_size": 6732,
+        "file_type": "general"
+      },
+      {
+        "file_name": "DEVELOPMENT_RULES.md",
+        "relative_path": "procedure\\DEVELOPMENT_RULES.md",
+        "file_size": 3321,
+        "file_type": "general"
+      },
+      {
+        "file_name": "INTEGRATION_TEST_PLAN.md",
+        "relative_path": "procedure\\INTEGRATION_TEST_PLAN.md",
+        "file_size": 3327,
+        "file_type": "plan"
+      },
+      {
+        "file_name": "LOCAL_MODEL_GUIDE.md",
+        "relative_path": "procedure\\LOCAL_MODEL_GUIDE.md",
+        "file_size": 4938,
+        "file_type": "guide"
+      },
+      {
+        "file_name": "RAG_Tools_Spec.md",
+        "relative_path": "procedure\\RAG_Tools_Spec.md",
+        "file_size": 3513,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "task0.md",
+        "relative_path": "procedure\\task0.md",
+        "file_size": 8463,
+        "file_type": "task"
+      },
+      {
+        "file_name": "TUI_COMPREHENSIVE_TEST_REPORT.md",
+        "relative_path": "procedure\\TUI_COMPREHENSIVE_TEST_REPORT.md",
+        "file_size": 6517,
+        "file_type": "test"
+      },
+      {
+        "file_name": "TUI_USER_GUIDE.md",
+        "relative_path": "procedure\\TUI_USER_GUIDE.md",
+        "file_size": 6304,
+        "file_type": "guide"
+      },
+      {
+        "file_name": "体验指南.md",
+        "relative_path": "procedure\\体验指南.md",
+        "file_size": 3118,
+        "file_type": "general"
+      },
+      {
+        "file_name": "辩论系统架构分析报告.md",
+        "relative_path": "procedure\\辩论系统架构分析报告.md",
+        "file_size": 6801,
+        "file_type": "general"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [],
+    "description": "procedure 模块",
+    "status": "active"
+  },
+  "process": {
+    "module_id": "process",
+    "module_name": "Process Management",
+    "module_path": "docs\\process",
+    "module_type": "support",
+    "documents": [
+      {
+        "file_name": "SPEC_DRIVEN_DEVELOPMENT.md",
+        "relative_path": "process\\SPEC_DRIVEN_DEVELOPMENT.md",
+        "file_size": 4778,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "CLAUDE_SKILLS_GITHUB_SYNC_SUMMARY.md",
+        "relative_path": "process\\validation_reports\\CLAUDE_SKILLS_GITHUB_SYNC_SUMMARY.md",
+        "file_size": 8380,
+        "file_type": "general"
+      },
+      {
+        "file_name": "CONTEXTUAL_INTENT_SOLUTION_REPORT.md",
+        "relative_path": "process\\validation_reports\\CONTEXTUAL_INTENT_SOLUTION_REPORT.md",
+        "file_size": 6450,
+        "file_type": "report"
+      },
+      {
+        "file_name": "CORE_IMPL_SUMMARY.md",
+        "relative_path": "process\\validation_reports\\CORE_IMPL_SUMMARY.md",
+        "file_size": 1110,
+        "file_type": "general"
+      },
+      {
+        "file_name": "DAIP_FIX_REPORT.md",
+        "relative_path": "process\\validation_reports\\DAIP_FIX_REPORT.md",
+        "file_size": 1949,
+        "file_type": "report"
+      },
+      {
+        "file_name": "DAIP_MODULAR_DEBATE_TDD_FIX_REPORT.md",
+        "relative_path": "process\\validation_reports\\DAIP_MODULAR_DEBATE_TDD_FIX_REPORT.md",
+        "file_size": 5126,
+        "file_type": "report"
+      },
+      {
+        "file_name": "DEBATE_MANAGER_TUI_FIX_REPORT.md",
+        "relative_path": "process\\validation_reports\\DEBATE_MANAGER_TUI_FIX_REPORT.md",
+        "file_size": 2771,
+        "file_type": "report"
+      },
+      {
+        "file_name": "DEBATE_SYSTEM_FIX_REPORT.md",
+        "relative_path": "process\\validation_reports\\DEBATE_SYSTEM_FIX_REPORT.md",
+        "file_size": 2694,
+        "file_type": "report"
+      },
+      {
+        "file_name": "DYNAMIC_LOADING_SUMMARY.md",
+        "relative_path": "process\\validation_reports\\DYNAMIC_LOADING_SUMMARY.md",
+        "file_size": 5784,
+        "file_type": "general"
+      },
+      {
+        "file_name": "FINAL_IMPLEMENTATION_REPORT.md",
+        "relative_path": "process\\validation_reports\\FINAL_IMPLEMENTATION_REPORT.md",
+        "file_size": 8707,
+        "file_type": "implementation"
+      },
+      {
+        "file_name": "FINAL_IMPLEMENTATION_SUMMARY.md",
+        "relative_path": "process\\validation_reports\\FINAL_IMPLEMENTATION_SUMMARY.md",
+        "file_size": 5131,
+        "file_type": "implementation"
+      },
+      {
+        "file_name": "HIERARCHICAL_ARCHITECTURE_SUMMARY.md",
+        "relative_path": "process\\validation_reports\\HIERARCHICAL_ARCHITECTURE_SUMMARY.md",
+        "file_size": 3868,
+        "file_type": "general"
+      },
+      {
+        "file_name": "MODULARIZATION_IMPLEMENTATION_REPORT.md",
+        "relative_path": "process\\validation_reports\\MODULARIZATION_IMPLEMENTATION_REPORT.md",
+        "file_size": 7083,
+        "file_type": "implementation"
+      },
+      {
+        "file_name": "MULTI_MODEL_DEBATE_FIX_SUMMARY.md",
+        "relative_path": "process\\validation_reports\\MULTI_MODEL_DEBATE_FIX_SUMMARY.md",
+        "file_size": 1930,
+        "file_type": "general"
+      },
+      {
+        "file_name": "P5_P6_P7_FINAL_ANALYSIS_REPORT.md",
+        "relative_path": "process\\validation_reports\\P5_P6_P7_FINAL_ANALYSIS_REPORT.md",
+        "file_size": 10696,
+        "file_type": "report"
+      },
+      {
+        "file_name": "PERFECT_SYSTEM_REPORT.md",
+        "relative_path": "process\\validation_reports\\PERFECT_SYSTEM_REPORT.md",
+        "file_size": 7867,
+        "file_type": "report"
+      },
+      {
+        "file_name": "REAL_TEST_REPORT.md",
+        "relative_path": "process\\validation_reports\\REAL_TEST_REPORT.md",
+        "file_size": 5707,
+        "file_type": "test"
+      },
+      {
+        "file_name": "TDD_API_FIX_REPORT.md",
+        "relative_path": "process\\validation_reports\\TDD_API_FIX_REPORT.md",
+        "file_size": 6603,
+        "file_type": "report"
+      },
+      {
+        "file_name": "TUI_COMMAND_CLEANUP_SUMMARY.md",
+        "relative_path": "process\\validation_reports\\TUI_COMMAND_CLEANUP_SUMMARY.md",
+        "file_size": 3478,
+        "file_type": "general"
+      },
+      {
+        "file_name": "TUI_CSS_FIX_REPORT.md",
+        "relative_path": "process\\validation_reports\\TUI_CSS_FIX_REPORT.md",
+        "file_size": 747,
+        "file_type": "report"
+      },
+      {
+        "file_name": "TUI_FUNCTIONALITY_VALIDATION_REPORT.md",
+        "relative_path": "process\\validation_reports\\TUI_FUNCTIONALITY_VALIDATION_REPORT.md",
+        "file_size": 7651,
+        "file_type": "report"
+      },
+      {
+        "file_name": "TUI_MODULARIZATION_SUMMARY.md",
+        "relative_path": "process\\validation_reports\\TUI_MODULARIZATION_SUMMARY.md",
+        "file_size": 5392,
+        "file_type": "general"
+      },
+      {
+        "file_name": "TUI_SIMULATION_REMOVAL_REPORT.md",
+        "relative_path": "process\\validation_reports\\TUI_SIMULATION_REMOVAL_REPORT.md",
+        "file_size": 1507,
+        "file_type": "report"
+      },
+      {
+        "file_name": "VERSION_SUMMARY.md",
+        "relative_path": "process\\validation_reports\\VERSION_SUMMARY.md",
+        "file_size": 982,
+        "file_type": "general"
+      },
+      {
+        "file_name": "WIKI_COLLABORATION_REAL_STATUS_REPORT.md",
+        "relative_path": "process\\validation_reports\\WIKI_COLLABORATION_REAL_STATUS_REPORT.md",
+        "file_size": 4170,
+        "file_type": "report"
+      },
+      {
+        "file_name": "WIKI_IMPROVEMENTS_SUMMARY.md",
+        "relative_path": "process\\validation_reports\\WIKI_IMPROVEMENTS_SUMMARY.md",
+        "file_size": 3976,
+        "file_type": "general"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "p7",
+      "architecture",
+      "p4",
+      "newP6",
+      "specifications",
+      "process",
+      "p8_debate_system",
+      "p8"
+    ],
+    "description": "process 模块",
+    "status": "active"
+  },
+  "p_aux_config": {
+    "module_id": "p_aux_config",
+    "module_name": "Configuration Management",
+    "module_path": "docs\\p_aux_config",
+    "module_type": "auxiliary",
+    "documents": [
+      {
+        "file_name": "README.md",
+        "relative_path": "p_aux_config\\README.md",
+        "file_size": 4507,
+        "file_type": "readme"
+      },
+      {
+        "file_name": "SPEC-Lazy-Loading.md",
+        "relative_path": "p_aux_config\\SPEC-Lazy-Loading.md",
+        "file_size": 1621,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "TASK_LIST-Lazy-Loading.md",
+        "relative_path": "p_aux_config\\TASK_LIST-Lazy-Loading.md",
+        "file_size": 1457,
+        "file_type": "task"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "p7",
+      "process"
+    ],
+    "description": "This document specifies the requirements, design, and implementation plan for a centralized configuration management system for the DAIP-LIVE project, following the Kiro Spec standard.",
+    "status": "active"
+  },
+  "p_aux_memory": {
+    "module_id": "p_aux_memory",
+    "module_name": "Memory Management",
+    "module_path": "docs\\p_aux_memory",
+    "module_type": "auxiliary",
+    "documents": [
+      {
+        "file_name": "README.md",
+        "relative_path": "p_aux_memory\\README.md",
+        "file_size": 3284,
+        "file_type": "readme"
+      },
+      {
+        "file_name": "SPEC.md",
+        "relative_path": "p_aux_memory\\SPEC.md",
+        "file_size": 4322,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "TASK_LIST.md",
+        "relative_path": "p_aux_memory\\TASK_LIST.md",
+        "file_size": 2392,
+        "file_type": "task"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "p0",
+      "specifications"
+    ],
+    "description": "---",
+    "status": "active"
+  },
+  "specifications": {
+    "module_id": "specifications",
+    "module_name": "Specification Documents",
+    "module_path": "docs\\specifications",
+    "module_type": "support",
+    "documents": [],
+    "sub_modules": [],
+    "dependencies": [],
+    "description": "specifications 模块",
+    "status": "empty"
+  },
+  "specs": {
+    "module_id": "specs",
+    "module_name": "Specification Specs",
+    "module_path": "docs\\specs",
+    "module_type": "support",
+    "documents": [
+      {
+        "file_name": "AGENT_EXECUTION_REQUIREMENTS.md",
+        "relative_path": "specs\\AGENT_EXECUTION_REQUIREMENTS.md",
+        "file_size": 4386,
+        "file_type": "requirement"
+      },
+      {
+        "file_name": "agent_executor_permission_integration_spec.md",
+        "relative_path": "specs\\agent_executor_permission_integration_spec.md",
+        "file_size": 20312,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "AGENT_EXECUTOR_REFACTOR_PLAN.md",
+        "relative_path": "specs\\AGENT_EXECUTOR_REFACTOR_PLAN.md",
+        "file_size": 2245,
+        "file_type": "plan"
+      },
+      {
+        "file_name": "BASIC_TOOLS_REQUIREMENTS.md",
+        "relative_path": "specs\\BASIC_TOOLS_REQUIREMENTS.md",
+        "file_size": 12978,
+        "file_type": "requirement"
+      },
+      {
+        "file_name": "CLI_INTERFACE_REQUIREMENTS.md",
+        "relative_path": "specs\\CLI_INTERFACE_REQUIREMENTS.md",
+        "file_size": 2343,
+        "file_type": "requirement"
+      },
+      {
+        "file_name": "command_cleanup_and_status_sync_spec.md",
+        "relative_path": "specs\\command_cleanup_and_status_sync_spec.md",
+        "file_size": 17470,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "command_system_optimization_spec.md",
+        "relative_path": "specs\\command_system_optimization_spec.md",
+        "file_size": 10041,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "CONTEXTUAL_INTENT_SPECS.md",
+        "relative_path": "specs\\CONTEXTUAL_INTENT_SPECS.md",
+        "file_size": 16510,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "DATABASE_DESIGN_SPECIFICATION.md",
+        "relative_path": "specs\\DATABASE_DESIGN_SPECIFICATION.md",
+        "file_size": 7673,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "DEBATE_SYSTEM_OPTIMIZATION_SPEC.md",
+        "relative_path": "specs\\DEBATE_SYSTEM_OPTIMIZATION_SPEC.md",
+        "file_size": 7116,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "DEBATE_SYSTEM_REQUIREMENTS.md",
+        "relative_path": "specs\\DEBATE_SYSTEM_REQUIREMENTS.md",
+        "file_size": 2084,
+        "file_type": "requirement"
+      },
+      {
+        "file_name": "DEPLOYMENT_AND_OPERATIONS_MANUAL.md",
+        "relative_path": "specs\\DEPLOYMENT_AND_OPERATIONS_MANUAL.md",
+        "file_size": 4950,
+        "file_type": "manual"
+      },
+      {
+        "file_name": "DETAILED_SYSTEM_ARCHITECTURE.md",
+        "relative_path": "specs\\DETAILED_SYSTEM_ARCHITECTURE.md",
+        "file_size": 7683,
+        "file_type": "general"
+      },
+      {
+        "file_name": "DOCUMENT_COMPLETENESS_AND_UX_OPTIMIZATION_SPEC.md",
+        "relative_path": "specs\\DOCUMENT_COMPLETENESS_AND_UX_OPTIMIZATION_SPEC.md",
+        "file_size": 5767,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "DOC_TOOLS_MIN_SPEC.md",
+        "relative_path": "specs\\DOC_TOOLS_MIN_SPEC.md",
+        "file_size": 1333,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "end_to_end_permission_integration_spec.md",
+        "relative_path": "specs\\end_to_end_permission_integration_spec.md",
+        "file_size": 15880,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "FUNCTIONALITY_AUDIT_REPORT.md",
+        "relative_path": "specs\\FUNCTIONALITY_AUDIT_REPORT.md",
+        "file_size": 7002,
+        "file_type": "report"
+      },
+      {
+        "file_name": "IFLOW.md",
+        "relative_path": "specs\\IFLOW.md",
+        "file_size": 13287,
+        "file_type": "general"
+      },
+      {
+        "file_name": "INTELLIGENT_ROLE_SELECTION_REQUIREMENTS.md",
+        "relative_path": "specs\\INTELLIGENT_ROLE_SELECTION_REQUIREMENTS.md",
+        "file_size": 9218,
+        "file_type": "requirement"
+      },
+      {
+        "file_name": "KISS_YAGNI_SOLID_TASK_LIST.md",
+        "relative_path": "specs\\KISS_YAGNI_SOLID_TASK_LIST.md",
+        "file_size": 5390,
+        "file_type": "task"
+      },
+      {
+        "file_name": "KNOWLEDGE_MANAGEMENT_REQUIREMENTS.md",
+        "relative_path": "specs\\KNOWLEDGE_MANAGEMENT_REQUIREMENTS.md",
+        "file_size": 3968,
+        "file_type": "requirement"
+      },
+      {
+        "file_name": "LLM_SCHEDULER_REQUIREMENTS.md",
+        "relative_path": "specs\\LLM_SCHEDULER_REQUIREMENTS.md",
+        "file_size": 3407,
+        "file_type": "requirement"
+      },
+      {
+        "file_name": "LOCAL_VCS_MIN_SPEC.md",
+        "relative_path": "specs\\LOCAL_VCS_MIN_SPEC.md",
+        "file_size": 1543,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "MEMORY_SERVICE_REQUIREMENTS.md",
+        "relative_path": "specs\\MEMORY_SERVICE_REQUIREMENTS.md",
+        "file_size": 4464,
+        "file_type": "requirement"
+      },
+      {
+        "file_name": "P5_P6_P7_IMPLEMENTATION_PLAN.md",
+        "relative_path": "specs\\P5_P6_P7_IMPLEMENTATION_PLAN.md",
+        "file_size": 24691,
+        "file_type": "implementation"
+      },
+      {
+        "file_name": "P5_P6_P7_REFACTORING_REQUIREMENTS.md",
+        "relative_path": "specs\\P5_P6_P7_REFACTORING_REQUIREMENTS.md",
+        "file_size": 16107,
+        "file_type": "requirement"
+      },
+      {
+        "file_name": "permission_ask_mode_design.md",
+        "relative_path": "specs\\permission_ask_mode_design.md",
+        "file_size": 5832,
+        "file_type": "design"
+      },
+      {
+        "file_name": "permission_ask_mode_robust_design.md",
+        "relative_path": "specs\\permission_ask_mode_robust_design.md",
+        "file_size": 22347,
+        "file_type": "design"
+      },
+      {
+        "file_name": "permission_ask_mode_tdd_spec.md",
+        "relative_path": "specs\\permission_ask_mode_tdd_spec.md",
+        "file_size": 13324,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "permission_integration_spec.md",
+        "relative_path": "specs\\permission_integration_spec.md",
+        "file_size": 13832,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "permission_tui_interface_spec.md",
+        "relative_path": "specs\\permission_tui_interface_spec.md",
+        "file_size": 15381,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "permission_user_response_spec.md",
+        "relative_path": "specs\\permission_user_response_spec.md",
+        "file_size": 18321,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "PERSONAL_PERMISSION_POLICY_MIN.md",
+        "relative_path": "specs\\PERSONAL_PERMISSION_POLICY_MIN.md",
+        "file_size": 2288,
+        "file_type": "general"
+      },
+      {
+        "file_name": "PROJECT_EXECUTION_STANDARDS.md",
+        "relative_path": "specs\\PROJECT_EXECUTION_STANDARDS.md",
+        "file_size": 12034,
+        "file_type": "general"
+      },
+      {
+        "file_name": "PROJECT_SPEC.md",
+        "relative_path": "specs\\PROJECT_SPEC.md",
+        "file_size": 5643,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "P_AUX_DEPENDENCY_INJECTION.md",
+        "relative_path": "specs\\P_AUX_DEPENDENCY_INJECTION.md",
+        "file_size": 4827,
+        "file_type": "general"
+      },
+      {
+        "file_name": "REQUIREMENTS_SPECIFICATION.md",
+        "relative_path": "specs\\REQUIREMENTS_SPECIFICATION.md",
+        "file_size": 26828,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "ROLE_MANAGEMENT_REQUIREMENTS.md",
+        "relative_path": "specs\\ROLE_MANAGEMENT_REQUIREMENTS.md",
+        "file_size": 4977,
+        "file_type": "requirement"
+      },
+      {
+        "file_name": "ROLE_MODEL_CONFIGURATION_REQUIREMENTS.md",
+        "relative_path": "specs\\ROLE_MODEL_CONFIGURATION_REQUIREMENTS.md",
+        "file_size": 8305,
+        "file_type": "requirement"
+      },
+      {
+        "file_name": "SCAFFOLD_DEIGN_DOCUMENT.md",
+        "relative_path": "specs\\SCAFFOLD_DEIGN_DOCUMENT.md",
+        "file_size": 19883,
+        "file_type": "general"
+      },
+      {
+        "file_name": "SCAFFOLD_REQUIREMENTS_SPEC.md",
+        "relative_path": "specs\\SCAFFOLD_REQUIREMENTS_SPEC.md",
+        "file_size": 8706,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "SCAFFOLD_TDD_TASK_BREAKDOWN.md",
+        "relative_path": "specs\\SCAFFOLD_TDD_TASK_BREAKDOWN.md",
+        "file_size": 14542,
+        "file_type": "task"
+      },
+      {
+        "file_name": "SYSTEMATIC_REVIEW_SUMMARY_REPORT.md",
+        "relative_path": "specs\\SYSTEMATIC_REVIEW_SUMMARY_REPORT.md",
+        "file_size": 11517,
+        "file_type": "report"
+      },
+      {
+        "file_name": "SYSTEM_ARCHITECTURE.md",
+        "relative_path": "specs\\SYSTEM_ARCHITECTURE.md",
+        "file_size": 3378,
+        "file_type": "general"
+      },
+      {
+        "file_name": "TDD_IMPLEMENTATION_PLAN.md",
+        "relative_path": "specs\\TDD_IMPLEMENTATION_PLAN.md",
+        "file_size": 6800,
+        "file_type": "implementation"
+      },
+      {
+        "file_name": "TDD_IMPLEMENTATION_SPEC.md",
+        "relative_path": "specs\\TDD_IMPLEMENTATION_SPEC.md",
+        "file_size": 6846,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "TESTING_STRATEGY_AND_TEST_CASES.md",
+        "relative_path": "specs\\TESTING_STRATEGY_AND_TEST_CASES.md",
+        "file_size": 5899,
+        "file_type": "test"
+      },
+      {
+        "file_name": "TOKEN_MANAGEMENT_COMPRESSION_SPEC.md",
+        "relative_path": "specs\\TOKEN_MANAGEMENT_COMPRESSION_SPEC.md",
+        "file_size": 5713,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "TUI_AUTOCOMPLETION_IMPLEMENTATION_SPEC.md",
+        "relative_path": "specs\\TUI_AUTOCOMPLETION_IMPLEMENTATION_SPEC.md",
+        "file_size": 6982,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "TUI_COMPONENT_SPEC.md",
+        "relative_path": "specs\\TUI_COMPONENT_SPEC.md",
+        "file_size": 2969,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "TUI_NEW_FEATURES_SPEC.md",
+        "relative_path": "specs\\TUI_NEW_FEATURES_SPEC.md",
+        "file_size": 3203,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "TUI_SCAFFOLD_INTEGRATION_SPEC.md",
+        "relative_path": "specs\\TUI_SCAFFOLD_INTEGRATION_SPEC.md",
+        "file_size": 6554,
+        "file_type": "specification"
+      },
+      {
+        "file_name": "USER_MANUAL.md",
+        "relative_path": "specs\\USER_MANUAL.md",
+        "file_size": 5121,
+        "file_type": "manual"
+      },
+      {
+        "file_name": "WEB_API_REQUIREMENTS.md",
+        "relative_path": "specs\\WEB_API_REQUIREMENTS.md",
+        "file_size": 2730,
+        "file_type": "requirement"
+      },
+      {
+        "file_name": "WIKI_MIN_SPEC.md",
+        "relative_path": "specs\\WIKI_MIN_SPEC.md",
+        "file_size": 1342,
+        "file_type": "specification"
+      }
+    ],
+    "sub_modules": [],
+    "dependencies": [
+      "p5",
+      "architecture",
+      "p7",
+      "compliance",
+      "p4",
+      "procedure",
+      "specifications",
+      "process",
+      "p8_debate_system",
+      "p8"
+    ],
+    "description": "specs 模块",
+    "status": "active"
+  }
+}

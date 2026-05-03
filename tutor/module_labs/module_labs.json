@@ -1,0 +1,238 @@
+{
+  "architecture": {
+    "module_id": "architecture",
+    "module_name": "Architecture Solutions",
+    "module_type": "support",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [
+      "litellm\\docs\\my-website\\docs\\proxy\\architecture.md",
+      "HIERARCHICAL_ARCHITECTURE_PLAN.md",
+      "tutor\\platform_architecture.md",
+      "docs\\research\\DUAL_LOOP_AGENT_ARCHITECTURE_REPORT.md",
+      "docs\\specs\\DETAILED_SYSTEM_ARCHITECTURE.md",
+      "docs\\specs\\SYSTEM_ARCHITECTURE.md",
+      "docs\\process\\validation_reports\\HIERARCHICAL_ARCHITECTURE_SUMMARY.md",
+      "litellm\\docs\\my-website\\docs\\router_architecture.md",
+      "litellm\\docs\\my-website\\docs\\proxy\\architecture.md"
+    ],
+    "source_code_files": [],
+    "test_files": [],
+    "compliance_items": []
+  },
+  "cli-enhancement": {
+    "module_id": "cli-enhancement",
+    "module_name": "CLI Enhancement Projects",
+    "module_type": "project",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [],
+    "source_code_files": [],
+    "test_files": [],
+    "compliance_items": []
+  },
+  "compliance": {
+    "module_id": "compliance",
+    "module_name": "Compliance Checklists",
+    "module_type": "support",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [
+      "docs\\newP5\\COMPLIANCE_CHECKLIST.md",
+      "docs\\newP6\\COMPLIANCE_CHECKLIST.md",
+      "docs\\newP7\\COMPLIANCE_CHECKLIST.md",
+      "constitution_compliance_check.md",
+      "docs\\compliance\\P5_AGENT_ENGINE_COMPLIANCE_CHECKLIST.md",
+      "docs\\compliance\\P6_TUI_COMPLIANCE_CHECKLIST.md",
+      "docs\\compliance\\P7_GUI_COMPLIANCE_CHECKLIST.md",
+      "docs\\newP5\\COMPLIANCE_CHECKLIST.md",
+      "docs\\newP6\\COMPLIANCE_CHECKLIST.md",
+      "docs\\newP7\\COMPLIANCE_CHECKLIST.md"
+    ],
+    "source_code_files": [],
+    "test_files": [],
+    "compliance_items": [
+      "docs\\compliance\\P5_AGENT_ENGINE_COMPLIANCE_CHECKLIST.md",
+      "docs\\compliance\\P6_TUI_COMPLIANCE_CHECKLIST.md",
+      "docs\\compliance\\P7_GUI_COMPLIANCE_CHECKLIST.md"
+    ]
+  },
+  "p0": {
+    "module_id": "p0",
+    "module_name": "Core Interfaces",
+    "module_type": "original",
+    "learning_objectives": [
+      {
+        "id": "p0-01",
+        "title": "理解核心接口设计原理",
+        "description": "掌握DAIP-LIVE系统核心接口的设计思想和实现方式",
+        "prerequisites": [
+          "Python基础",
+          "面向对象编程"
+        ],
+        "expected_outcomes": [
+          "能够解释接口设计原则",
+          "能够实现基础接口"
+        ],
+        "estimated_time": "2小时"
+      },
+      {
+        "id": "p0-02",
+        "title": "接口契约与规范理解",
+        "description": "理解接口契约的重要性，学习如何编写清晰的接口规范",
+        "prerequisites": [
+          "接口设计基础"
+        ],
+        "expected_outcomes": [
+          "能够编写接口规范",
+          "理解版本兼容性"
+        ],
+        "estimated_time": "3小时"
+      }
+    ],
+    "lab_exercises": [],
+    "related_documents": [],
+    "source_code_files": [
+      "src\\daip_live\\core\\exceptions.py",
+      "src\\daip_live\\core\\interfaces.py",
+      "src\\daip_live\\core\\models.py",
+      "src\\daip_live\\core\\session_manager.py",
+      "src\\daip_live\\core\\universal_memory_system.py",
+      "src\\daip_live\\core\\universal_model_manager.py",
+      "src\\daip_live\\core\\__init__.py",
+      "src\\daip_live\\core\\config\\local_models.py",
+      "src\\daip_live\\core\\config\\__init__.py"
+    ],
+    "test_files": [],
+    "compliance_items": []
+  },
+  "p8_debate_system": {
+    "module_id": "p8_debate_system",
+    "module_name": "Debate System Core",
+    "module_type": "original",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [],
+    "source_code_files": [
+      "src\\daip_live\\p8_debate_system\\enhanced_debate_manager.py",
+      "src\\daip_live\\p8_debate_system\\history_tracker.py",
+      "src\\daip_live\\p8_debate_system\\layered_memory_system.py",
+      "src\\daip_live\\p8_debate_system\\manager.py",
+      "src\\daip_live\\p8_debate_system\\model_availability_checker.py",
+      "src\\daip_live\\p8_debate_system\\ollama_instance_manager.py",
+      "src\\daip_live\\p8_debate_system\\real_debate_manager.py",
+      "src\\daip_live\\p8_debate_system\\role_debate_session.py",
+      "src\\daip_live\\p8_debate_system\\role_selector.py",
+      "src\\daip_live\\p8_debate_system\\simple_debate_manager.py",
+      "src\\daip_live\\p8_debate_system\\unified_debate_manager.py"
+    ],
+    "test_files": [],
+    "compliance_items": []
+  },
+  "p8_human_assistant": {
+    "module_id": "p8_human_assistant",
+    "module_name": "Human Assistant",
+    "module_type": "original",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [],
+    "source_code_files": [],
+    "test_files": [],
+    "compliance_items": []
+  },
+  "p8_wiki_system": {
+    "module_id": "p8_wiki_system",
+    "module_name": "Wiki System",
+    "module_type": "original",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [],
+    "source_code_files": [],
+    "test_files": [],
+    "compliance_items": []
+  },
+  "p9": {
+    "module_id": "p9",
+    "module_name": "Scaffolding",
+    "module_type": "archived",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [
+      "docs\\decisions\\P6_P9_Scaffold_Conflict.md"
+    ],
+    "source_code_files": [],
+    "test_files": [],
+    "compliance_items": []
+  },
+  "procedure": {
+    "module_id": "procedure",
+    "module_name": "Procedures & Guidelines",
+    "module_type": "support",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [],
+    "source_code_files": [],
+    "test_files": [],
+    "compliance_items": []
+  },
+  "process": {
+    "module_id": "process",
+    "module_name": "Process Management",
+    "module_type": "support",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [
+      "docs\\development_process.md"
+    ],
+    "source_code_files": [],
+    "test_files": [],
+    "compliance_items": []
+  },
+  "p_aux_config": {
+    "module_id": "p_aux_config",
+    "module_name": "Configuration Management",
+    "module_type": "auxiliary",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [],
+    "source_code_files": [],
+    "test_files": [],
+    "compliance_items": []
+  },
+  "p_aux_memory": {
+    "module_id": "p_aux_memory",
+    "module_name": "Memory Management",
+    "module_type": "auxiliary",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [],
+    "source_code_files": [],
+    "test_files": [],
+    "compliance_items": []
+  },
+  "specifications": {
+    "module_id": "specifications",
+    "module_name": "Specification Documents",
+    "module_type": "support",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [],
+    "source_code_files": [],
+    "test_files": [],
+    "compliance_items": []
+  },
+  "specs": {
+    "module_id": "specs",
+    "module_name": "Specification Specs",
+    "module_type": "support",
+    "learning_objectives": [],
+    "lab_exercises": [],
+    "related_documents": [
+      "docs\\specs\\CONTEXTUAL_INTENT_SPECS.md",
+      "tutor\\tutorials\\spec_driven_dev\\how_to_read_specs.md"
+    ],
+    "source_code_files": [],
+    "test_files": [],
+    "compliance_items": []
+  }
+}

@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAIP-LIVE AI规范化编程实验室 - 系统化学习平台</title>
+    <style>
+        :root {
+            /* 专业配色体系 */
+            --primary-dark: #1e293b;
+            --primary: #3b82f6;
+            --primary-light: #60a5fa;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+
+            /* 中性色系 */
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+
+            /* 语义化颜色 */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --border-primary: #e2e8f0;
+            --border-secondary: #cbd5e1;
+
+            /* 交互状态 */
+            --hover-bg: #f1f5f9;
+            --active-bg: #e2e8f0;
+            --focus-ring: 2px solid #3b82f6;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+            /* 渐变色 */
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --gradient-secondary: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            --gradient-tertiary: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+
+            /* 动画 */
+            --transition-fast: 150ms ease;
+            --transition-base: 250ms ease;
+            --transition-slow: 500ms ease;
+
+            /* 断点 */
+            --mobile: 640px;
+            --tablet: 768px;
+            --desktop: 1024px;
+            --wide: 1280px;
+        }
+
+        /* 基础重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 布局容器 */
+        .container {
+            max-width: var(--wide);
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 头部导航 */
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-primary);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition-fast);
+            position: relative;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        /* 英雄区域 */
+        .hero {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 4rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            margin-top: 3rem;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .hero-stat-label {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        /* 原则指导区 */
+        .principles-section {
+            padding: 4rem 0;
+            background: var(--bg-primary);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .principles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .principle-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all var(--transition-base);
+            position: relative;
+        }
+
+        .principle-card:hover {
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .principle-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .principle-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .principle-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .principle-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .principle-key-points {
+            list-style: none;
+        }
+
+        .principle-key-point {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        .principle-key-point::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* 学习路径 */
+        .learning-path-section {
+            padding: 4rem 0;
+            background: var(--bg-tertiary);
+        }
+
+        .learning-path-timeline {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .learning-path-timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-primary);
+            transform: translateX(-50%);
+        }
+
+        .path-stage {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .path-stage:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .path-stage-content {
+            flex: 1;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .path-stage-number {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .path-stage-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .path-stage-duration {
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .path-stage-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .path-stage-modules {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .module-tag {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid var(--border-primary);
+        }
+
+        /* 核心模块实验室 */
+        .labs-section {
+            padding: 4rem 0;
+            background: var(--bg-primary);
+        }
+
+        .labs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .lab-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all var(--transition-base);
+        }
+
+        .lab-card:hover {
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .lab-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .lab-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .lab-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .lab-subtitle {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .lab-content {
+            padding: 1.5rem;
+        }
+
+        .lab-features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .lab-feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        .lab-feature::before {
+            content: '•';
+            color: var(--primary);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .lab-action {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color var(--transition-fast);
+        }
+
+        .lab-action:hover {
+            background: var(--primary-dark);
+        }
+
+        /* 规范文档指南 */
+        .spec-guide-section {
+            padding: 4rem 0;
+            background: var(--bg-tertiary);
+        }
+
+        .spec-guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .spec-guide-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .spec-guide-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .spec-guide-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-secondary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .spec-guide-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .spec-guide-content {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* 快速开始 */
+        .quickstart-section {
+            padding: 4rem 0;
+            background: var(--gradient-secondary);
+            color: white;
+            text-align: center;
+        }
+
+        .quickstart-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .quickstart-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .quickstart-steps {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .quickstart-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quickstart-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .quickstep-number {
+            width: 32px;
+            height: 32px;
+            background: white;
+            color: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .quickstep-content {
+            flex: 1;
+        }
+
+        .quickstep-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .quickstep-description {
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: white;
+            color: var(--secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            transition: transform var(--transition-fast);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: var(--tablet)) {
+            .nav-menu {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-stats {
+                gap: 2rem;
+            }
+
+            .learning-path-timeline::before {
+                left: 20px;
+            }
+
+            .path-stage,
+            .path-stage:nth-child(even) {
+                flex-direction: row;
+                padding-left: 60px;
+            }
+
+            .path-stage-number {
+                position: absolute;
+                left: -30px;
+            }
+        }
+
+        @media (max-width: var(--mobile)) {
+            .hero-stats {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .principles-grid,
+            .labs-grid,
+            .spec-guide-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 工具提示 */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gray-800);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-fast);
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        /* 徽章 */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .badge-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .badge-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .badge-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        /* 加载动画 */
+        .skeleton {
+            background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 50%, var(--gray-200) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* 可访问性 */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* 焦点样式 */
+        *:focus {
+            outline: var(--focus-ring);
+            outline-offset: 2px;
+        }
+
+        /* 高对比度模式 */
+        @media (prefers-contrast: high) {
+            :root {
+                --border-primary: #000000;
+                --text-secondary: #000000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    🎓 DAIP-LIVE 实验室
+                </div>
+                <nav>
+                    <ul class="nav-menu">
+                        <li><a href="#principles" class="nav-link">核心原则</a></li>
+                        <li><a href="#learning-path" class="nav-link">学习路径</a></li>
+                        <li><a href="#labs" class="nav-link">模块实验室</a></li>
+                        <li><a href="#spec-guide" class="nav-link">规范指南</a></li>
+                        <li><a href="#quickstart" class="nav-link">快速开始</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">AI规范化编程实验室</h1>
+                <p class="hero-subtitle">
+                    基于DAIP-LIVE独创AI应用系统，学习SPEC驱动开发的核心原则和实践方法，掌握企业级AI应用开发技能
+                </p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-value">6</span>
+                        <span class="hero-stat-label">核心编程原则</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-value">4</span>
+                        <span class="hero-stat-label">系统化学习路径</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-value">21</span>
+                        <span class="hero-stat-label">实践模块</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-value">246</span>
+                        <span class="hero-stat-label">规范文档</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心编程原则 -->
+    <section class="principles-section" id="principles">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">🎯 核心编程原则与思维模式</h2>
+                <p class="section-subtitle">
+                    掌握这些基本原则，培养专业的AI应用开发思维，建立系统化的代码质量标准
+                </p>
+            </div>
+            <div class="principles-grid">
+                <!-- SOLID原则 -->
+                <div class="principle-card">
+                    <div class="principle-header">
+                        <div class="principle-icon">S</div>
+                        <h3 class="principle-name">SOLID原则</h3>
+                    </div>
+                    <p class="principle-description">
+                        面向对象设计的五个基本原则，创建可维护、可扩展的代码结构
+                    </p>
+                    <ul class="principle-key-points">
+                        <li class="principle-key-point"><strong>S</strong> 单一职责原则 - 一个类只负责一个功能</li>
+                        <li class="principle-key-point"><strong>O</strong> 开闭原则 - 对扩展开放，对修改关闭</li>
+                        <li class="principle-key-point"><strong>L</strong> 里氏替换原则 - 子类可以替换父类</li>
+                        <li class="principle-key-point"><strong>I</strong> 接口隔离原则 - 客户端不应依赖不需要的接口</li>
+                        <li class="principle-key-point"><strong>D</strong> 依赖倒置原则 - 依赖抽象而非具体实现</li>
+                    </ul>
+                </div>
+
+                <!-- KISS原则 -->
+                <div class="principle-card">
+                    <div class="principle-header">
+                        <div class="principle-icon">K</div>
+                        <h3 class="principle-name">KISS原则</h3>
+                    </div>
+                    <p class="principle-description">
+                        保持简单、愚蠢，用最简单的方式解决问题，避免不必要的复杂性
+                    </p>
+                    <ul class="principle-key-points">
+                        <li class="principle-key-point">优先选择简单直接的解决方案</li>
+                        <li class="principle-key-point">避免过度工程化</li>
+                        <li class="principle-key-point">代码应该易于理解和维护</li>
+                        <li class="principle-key-point">单用户场景不需要微服务</li>
+                        <li class="principle-key-point">模块化单体优于复杂分布式</li>
+                    </ul>
+                </div>
+
+                <!-- TDD原则 -->
+                <div class="principle-card">
+                    <div class="principle-header">
+                        <div class="principle-icon">T</div>
+                        <h3 class="principle-name">TDD原则</h3>
+                    </div>
+                    <p class="principle-description">
+                        测试驱动开发，先写测试再写代码，确保代码质量和功能正确性
+                    </p>
+                    <ul class="principle-key-points">
+                        <li class="principle-key-point">Red - 编写失败的测试用例</li>
+                        <li class="principle-key-point">Green - 编写最少的代码让测试通过</li>
+                        <li class="principle-key-point">Refactor - 重构代码保持测试通过</li>
+                        <li class="principle-key-point">测试覆盖率应达到90%以上</li>
+                        <li class="principle-key-point">使用Green/Red模式验证改进</li>
+                    </ul>
+                </div>
+
+                <!-- YAGNI原则 -->
+                <div class="principle-card">
+                    <div class="principle-header">
+                        <div class="principle-icon">Y</div>
+                        <h3 class="principle-name">YAGNI原则</h3>
+                    </div>
+                    <p class="principle-description">
+                        You Aren't Gonna Need It，只实现当前需要的功能
+                    </p>
+                    <ul class="principle-key-points">
+                        <li class="principle-key-point">不要为未来的需求编写代码</li>
+                        <li class="principle-key-point">避免过早优化</li>
+                        <li class="principle-key-point">专注于当前业务需求</li>
+                        <li class="principle-key-point">保持代码的简洁性</li>
+                        <li class="principle-key-point">按需重构，预留扩展点</li>
+                    </ul>
+                </div>
+
+                <!-- DRY原则 -->
+                <div class="principle-card">
+                    <div class="principle-header">
+                        <div class="principle-icon">D</div>
+                        <h3 class="principle-name">DRY原则</h3>
+                    </div>
+                    <p class="principle-description">
+                        Don't Repeat Yourself，避免代码重复，提高代码复用性
+                    </p>
+                    <ul class="principle-key-points">
+                        <li class="principle-key-point">提取公共逻辑到函数或类</li>
+                        <li class="principle-key-point">使用配置文件管理重复数据</li>
+                        <li class="principle-key-point">创建可复用的组件和模板</li>
+                        <li class="principle-key-point">避免复制粘贴代码</li>
+                        <li class="principle-key-point">保持代码的单点修改</li>
+                    </ul>
+                </div>
+
+                <!-- 无歧义原则 -->
+                <div class="principle-card">
+                    <div class="principle-header">
+                        <div class="principle-icon">?</div>
+                        <h3 class="principle-name">无歧义原则</h3>
+                    </div>
+                    <p class="principle-description">
+                        确保代码、文档和需求清晰无歧义，避免理解偏差
+                    </p>
+                    <ul class="principle-key-points">
+                        <li class="principle-key-point">变量和函数命名要清晰明确</li>
+                        <li class="principle-key-point">编写详细的注释和文档</li>
+                        <li class="principle-key-point">使用类型注解减少歧义</li>
+                        <li class="principle-key-point">避免魔术数字和隐式约定</li>
+                        <li class="principle-key-point">建立统一的编码规范</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 学习路径 -->
+    <section class="learning-path-section" id="learning-path">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">🛤️ 系统化学习路径</h2>
+                <p class="section-subtitle">
+                    循序渐进的学习路径，从基础到精通，每一步都有明确的学习目标和实践要求
+                </p>
+            </div>
+            <div class="learning-path-timeline">
+                <!-- 阶段1 -->
+                <div class="path-stage">
+                    <div class="path-stage-content">
+                        <h3 class="path-stage-title">阶段1: 编程思维与基础架构</h3>
+                        <p class="path-stage-duration">⏱️ 4-6周</p>
+                        <p class="path-stage-description">
+                            建立规范的编程思维，掌握基础架构设计原则，理解SPEC驱动开发的核心概念
+                        </p>
+                        <div class="path-stage-modules">
+                            <span class="module-tag">P1 数据持久化</span>
+                            <span class="module-tag">P6 终端界面</span>
+                            <span class="module-tag">SOLID原则</span>
+                            <span class="module-tag">TDD实践</span>
+                        </div>
+                    </div>
+                    <div class="path-stage-number">1</div>
+                </div>
+
+                <!-- 阶段2 -->
+                <div class="path-stage">
+                    <div class="path-stage-content">
+                        <h3 class="path-stage-title">阶段2: AI集成与智能系统</h3>
+                        <p class="path-stage-duration">⏱️ 6-8周</p>
+                        <p class="path-stage-description">
+                            掌握多模型集成技术，学习智能执行引擎设计，理解AI应用的架构模式
+                        </p>
+                        <div class="path-stage-modules">
+                            <span class="module-tag">P2 知识管理</span>
+                            <span class="module-tag">P3 模型提供者</span>
+                            <span class="module-tag">P5 智能引擎</span>
+                            <span class="module-tag">事件驱动架构</span>
+                        </div>
+                    </div>
+                    <div class="path-stage-number">2</div>
+                </div>
+
+                <!-- 阶段3 -->
+                <div class="path-stage">
+                    <div class="path-stage-content">
+                        <h3 class="path-stage-title">阶段3: 高级特性与系统优化</h3>
+                        <p class="path-stage-duration">⏱️ 4-6周</p>
+                        <p class="path-stage-description">
+                            实现高级AI功能，学习系统优化技巧，掌握多模型协作和用户界面设计
+                        </p>
+                        <div class="path-stage-modules">
+                            <span class="module-tag">P4 角色管理</span>
+                            <span class="module-tag">P7 图形界面</span>
+                            <span class="module-tag">P8 辩论系统</span>
+                            <span class="module-tag">性能优化</span>
+                        </div>
+                    </div>
+                    <div class="path-stage-number">3</div>
+                </div>
+
+                <!-- 阶段4 -->
+                <div class="path-stage">
+                    <div class="path-stage-content">
+                        <h3 class="path-stage-title">阶段4: 重构实践与架构精通</h3>
+                        <p class="path-stage-duration">⏱️ 3-4周</p>
+                        <p class="path-stage-description">
+                            参与系统重构实践，掌握架构优化技巧，理解设计模式和最佳实践
+                        </p>
+                        <div class="path-stage-modules">
+                            <span class="module-tag">newP5 重构引擎</span>
+                            <span class="module-tag">newP6 模块化TUI</span>
+                            <span class="module-tag">newP7 MVVM架构</span>
+                            <span class="module-tag">设计模式</span>
+                        </div>
+                    </div>
+                    <div class="path-stage-number">4</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心模块实验室 -->
+    <section class="labs-section" id="labs">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">🔬 核心模块实验室</h2>
+                <p class="section-subtitle">
+                    21个真实模块的交互式学习环境，基于246份规范文档的实践教学
+                </p>
+            </div>
+            <div class="labs-grid">
+                <!-- P1实验室 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <div class="lab-icon">💾</div>
+                        <h3 class="lab-title">P1 数据持久化实验室</h3>
+                        <p class="lab-subtitle">SQLite + SQLAlchemy + 会话管理</p>
+                    </div>
+                    <div class="lab-content">
+                        <ul class="lab-features">
+                            <li class="lab-feature">关系型数据库设计与实现</li>
+                            <li class="lab-feature">SQLAlchemy ORM最佳实践</li>
+                            <li class="lab-feature">数据库迁移和版本管理</li>
+                            <li class="lab-feature">连接池和性能优化</li>
+                            <li class="lab-feature">事务管理和错误处理</li>
+                        </ul>
+                        <button class="lab-action" onclick="openLab('p1')">进入实验室</button>
+                    </div>
+                </div>
+
+                <!-- P2实验室 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <div class="lab-icon">🧠</div>
+                        <h3 class="lab-title">P2 知识管理实验室</h3>
+                        <p class="lab-subtitle">向量搜索 + Wiki协作 + FAISS</p>
+                    </div>
+                    <div class="lab-content">
+                        <ul class="lab-features">
+                            <li class="lab-feature">向量搜索算法实现</li>
+                            <li class="lab-feature">FAISS向量索引优化</li>
+                            <li class="lab-feature">Wiki协作系统设计</li>
+                            <li class="lab-feature">文本向量化处理</li>
+                            <li class="lab-feature">语义搜索和推荐</li>
+                        </ul>
+                        <button class="lab-action" onclick="openLab('p2')">进入实验室</button>
+                    </div>
+                </div>
+
+                <!-- P3实验室 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <div class="lab-icon">🤖</div>
+                        <h3 class="lab-title">P3 模型提供者实验室</h3>
+                        <p class="lab-subtitle">LiteLLM + 多模型集成 + Ollama</p>
+                    </div>
+                    <div class="lab-content">
+                        <ul class="lab-features">
+                            <li class="lab-feature">多模型统一接口设计</li>
+                            <li class="lab-feature">本地模型服务管理</li>
+                            <li class="lab-feature">API限流和错误处理</li>
+                            <li class="lab-feature">模型切换和负载均衡</li>
+                            <li class="lab-feature">成本控制和监控</li>
+                        </ul>
+                        <button class="lab-action" onclick="openLab('p3')">进入实验室</button>
+                    </div>
+                </div>
+
+                <!-- P5实验室 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <div class="lab-icon">⚡</div>
+                        <h3 class="lab-title">P5 智能引擎实验室</h3>
+                        <p class="lab-subtitle">事件驱动 + 意图识别 + 任务执行</p>
+                    </div>
+                    <div class="lab-content">
+                        <ul class="lab-features">
+                            <li class="lab-feature">事件驱动架构设计</li>
+                            <li class="lab-feature">自然语言意图识别</li>
+                            <li class="lab-feature">任务分解和执行引擎</li>
+                            <li class="lab-feature">上下文管理和记忆系统</li>
+                            <li class="lab-feature">实时干预和控制机制</li>
+                        </ul>
+                        <button class="lab-action" onclick="openLab('p5')">进入实验室</button>
+                    </div>
+                </div>
+
+                <!-- P8实验室 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <div class="lab-icon">🗣️</div>
+                        <h3 class="lab-title">P8 辩论系统实验室</h3>
+                        <p class="lab-subtitle">多模型协作 + 角色分配 + 辩论管理</p>
+                    </div>
+                    <div class="lab-content">
+                        <ul class="lab-features">
+                            <li class="lab-feature">多模型协作机制</li>
+                            <li class="lab-feature">角色智能选择算法</li>
+                            <li class="lab-feature">辩论流程管理</li>
+                            <li class="lab-feature">观点生成和评估</li>
+                            <li class="lab-feature">协作推理和共识达成</li>
+                        </ul>
+                        <button class="lab-action" onclick="openLab('p8')">进入实验室</button>
+                    </div>
+                </div>
+
+                <!-- 重构实验室 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <div class="lab-icon">🔄</div>
+                        <h3 class="lab-title">系统重构实验室</h3>
+                        <p class="lab-subtitle">newP5+newP6+newP7 + 架构优化</p>
+                    </div>
+                    <div class="lab-content">
+                        <ul class="lab-features">
+                            <li class="lab-feature">渐进式重构策略</li>
+                            <li class="lab-feature">事件驱动架构迁移</li>
+                            <li class="lab-feature">模块解耦和依赖管理</li>
+                            <li class="lab-feature">性能监控和优化</li>
+                            <li class="lab-feature">向后兼容性设计</li>
+                        </ul>
+                        <button class="lab-action" onclick="openLab('refactoring')">进入实验室</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 规范文档指南 -->
+    <section class="spec-guide-section" id="spec-guide">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">📋 规范文档指南</h2>
+                <p class="section-subtitle">
+                    基于逻辑一致性原则和无歧义原则，建立完善的规范文档体系
+                </p>
+            </div>
+            <div class="spec-guide-grid">
+                <!-- 规格文档指南 -->
+                <div class="spec-guide-card">
+                    <div class="spec-guide-header">
+                        <div class="spec-guide-icon">📝</div>
+                        <h3 class="spec-guide-title">规格文档规范</h3>
+                    </div>
+                    <div class="spec-guide-content">
+                        <p><strong>完整性要求：</strong></p>
+                        <ul style="margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary);">
+                            <li>功能需求描述清晰无歧义</li>
+                            <li>接口定义完整准确</li>
+                            <li>性能指标量化明确</li>
+                            <li>边界条件和异常处理</li>
+                        </ul>
+                        <p><strong>一致性检查：</strong></p>
+                        <ul style="margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary);">
+                            <li>跨模块接口对齐</li>
+                            <li>数据模型一致性</li>
+                            <li>术语使用统一</li>
+                            <li>版本关系清晰</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 代码规范指南 -->
+                <div class="spec-guide-card">
+                    <div class="spec-guide-header">
+                        <div class="spec-guide-icon">💻</div>
+                        <h3 class="spec-guide-title">代码规范指南</h3>
+                    </div>
+                    <div class="spec-guide-content">
+                        <p><strong>命名规范：</strong></p>
+                        <ul style="margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary);">
+                            <li>变量名：snake_case</li>
+                            <li>类名：PascalCase</li>
+                            <li>常量：UPPER_SNAKE_CASE</li>
+                            <li>私有成员：前缀_</li>
+                        </ul>
+                        <p><strong>结构规范：</strong></p>
+                        <ul style="margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary);">
+                            <li>单一文件单一职责</li>
+                            <li>函数长度不超过50行</li>
+                            <li>类长度不超过300行</li>
+                            <li>注释解释原因而非内容</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 测试规范指南 -->
+                <div class="spec-guide-card">
+                    <div class="spec-guide-header">
+                        <div class="spec-guide-icon">🧪</div>
+                        <h3 class="spec-guide-title">测试规范指南</h3>
+                    </div>
+                    <div class="spec-guide-content">
+                        <p><strong>测试分类：</strong></p>
+                        <ul style="margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary);">
+                            <li>单元测试：功能正确性</li>
+                            <li>集成测试：模块协作</li>
+                            <li>端到端测试：完整流程</li>
+                            <li>性能测试：响应时间</li>
+                        </ul>
+                        <p><strong>测试质量：</strong></p>
+                        <ul style="margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary);">
+                            <li>覆盖率≥90%</li>
+                            <li>测试用例独立</li>
+                            <li>边界条件测试</li>
+                            <li>异常场景覆盖</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 文档规范指南 -->
+                <div class="spec-guide-card">
+                    <div class="spec-guide-header">
+                        <div class="spec-guide-icon">📚</div>
+                        <h3 class="spec-guide-title">文档规范指南</h3>
+                    </div>
+                    <div class="spec-guide-content">
+                        <p><strong>API文档：</strong></p>
+                        <ul style="margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary);">
+                            <li>函数签名和参数说明</li>
+                            <li>返回值和异常描述</li>
+                            <li>使用示例和最佳实践</li>
+                            <li>版本变更记录</li>
+                        </ul>
+                        <p><strong>架构文档：</strong></p>
+                        <ul style="margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary);">
+                            <li>系统架构图</li>
+                            <li>模块依赖关系</li>
+                            <li>数据流程图</li>
+                            <li>部署指南</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 快速开始 -->
+    <section class="quickstart-section" id="quickstart">
+        <div class="container">
+            <div class="quickstart-content">
+                <h2 class="quickstart-title">🚀 快速开始学习</h2>
+                <p>按照以下步骤，开启你的AI规范化编程学习之旅</p>
+
+                <div class="quickstart-steps">
+                    <div class="quickstart-step">
+                        <div class="quickstep-number">1</div>
+                        <div class="quickstep-content">
+                            <div class="quickstep-title">环境准备</div>
+                            <div class="quickstep-description">
+                                安装Python 3.9+、Poetry依赖管理器，配置VS Code开发环境
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quickstart-step">
+                        <div class="quickstep-number">2</div>
+                        <div class="quickstep-content">
+                            <div class="quickstep-title">学习核心原则</div>
+                            <div class="quickstep-description">
+                                深入理解SOLID、KISS、TDD等核心编程原则，建立规范化思维
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quickstart-step">
+                        <div class="quickstep-number">3</div>
+                        <div class="quickstep-content">
+                            <div class="quickstep-title">选择学习路径</div>
+                            <div class="quickstep-description">
+                                根据你的经验水平选择合适的学习路径，循序渐进地掌握技能
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quickstart-step">
+                        <div class="quickstep-number">4</div>
+                        <div class="quickstep-content">
+                            <div class="quickstep-title">进入模块实验室</div>
+                            <div class="quickstep-description">
+                                在交互式实验室中实践每个模块，完成规范文档指导的开发任务
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="module_labs/lab_interface.html" class="cta-button">
+                    立即开始学习
+                    <span>→</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // 导航栏激活状态
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            function updateActiveNav() {
+                const scrollPosition = window.scrollY + 100;
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.offsetHeight;
+                    const sectionId = section.getAttribute('id');
+
+                    if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${sectionId}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', updateActiveNav);
+            updateActiveNav();
+
+            // 卡片入场动画
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '0';
+                        entry.target.style.transform = 'translateY(30px)';
+                        entry.target.style.transition = 'all 0.6s ease';
+
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, 100);
+
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            // 观察需要动画的元素
+            const animatedElements = document.querySelectorAll(
+                '.principle-card, .path-stage, .lab-card, .spec-guide-card'
+            );
+            animatedElements.forEach(el => observer.observe(el));
+
+            // 实验室按钮点击事件
+            window.openLab = function(moduleId) {
+                // 记录学习进度
+                const progress = JSON.parse(localStorage.getItem('learningProgress') || '{}');
+                progress[moduleId] = {
+                    started: true,
+                    startTime: new Date().toISOString()
+                };
+                localStorage.setItem('learningProgress', JSON.stringify(progress));
+
+                // 跳转到实验室页面
+                window.open(`module_labs/lab_interface.html?module=${moduleId}`, '_blank');
+            };
+
+            // 添加键盘快捷键支持
+            document.addEventListener('keydown', function(e) {
+                // Alt + 数字键 快速跳转
+                if (e.altKey && e.key >= '1' && e.key <= '5') {
+                    const sections = ['#principles', '#learning-path', '#labs', '#spec-guide', '#quickstart'];
+                    const index = parseInt(e.key) - 1;
+                    if (sections[index]) {
+                        document.querySelector(sections[index]).scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+
+            console.log('🎓 DAIP-LIVE AI规范化编程实验室已加载');
+            console.log('📋 核心编程原则：SOLID, KISS, TDD, YAGNI, DRY, 无歧义原则');
+            console.log('🛤️ 学习路径：4个阶段，循序渐进');
+            console.log('🔬 模块实验室：21个模块，基于246份规范文档');
+            console.log('⌨️ 快捷键：Alt + 1-5 快速导航');
+        });
+
+        // 性能监控
+        if ('performance' in window) {
+            window.addEventListener('load', function() {
+                setTimeout(() => {
+                    const perfData = performance.getEntriesByType('navigation')[0];
+                    console.log(`页面加载时间：${Math.round(perfData.loadEventEnd - perfData.loadEventStart)}ms`);
+                }, 0);
+            });
+        }
+    </script>
+</body>
+</html>

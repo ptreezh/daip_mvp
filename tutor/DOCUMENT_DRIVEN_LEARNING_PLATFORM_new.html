@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文档驱动学习平台 - 0代码AI规范化编程实践教学</title>
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <!-- 统一导航栏 -->
+    <nav class="unified-navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span>🤖</span>
+                0代码AI规范化编程
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="#learning" class="nav-link active">学习</a></li>
+                <li><a href="#modules" class="nav-link">模块</a></li>
+                <li><a href="#projects" class="nav-link">项目</a></li>
+                <li><a href="#resources" class="nav-link">资源</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <a href="#start-learning" class="unified-btn unified-btn-primary">开始学习</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 面包屑导航 -->
+    <div class="container py-6">
+        <nav class="flex items-center gap-2 text-sm text-tertiary mb-8">
+            <a href="index.html" class="text-secondary hover:text-primary">首页</a>
+            <span>›</span>
+            <a href="#learning" class="text-secondary hover:text-primary">学习平台</a>
+            <span>›</span>
+            <span class="text-primary font-medium">文档驱动学习</span>
+        </nav>
+    </div>
+
+    <!-- 页面标题区域 -->
+    <section class="bg-primary py-20 text-center">
+        <div class="container">
+            <div class="mb-6">
+                <span class="unified-tag unified-tag-info mb-4">学习平台</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">
+                文档驱动学习平台
+            </h1>
+            <p class="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
+                基于DAIP-LIVE项目的规范化编程实践学习平台，通过文档驱动的方式深入理解AI规范化编程理念
+            </p>
+            <div class="flex gap-4 justify-center">
+                <a href="#explorer" class="unified-btn unified-btn-secondary">
+                    文档探索器
+                </a>
+                <a href="#learning-path" class="unified-btn unified-btn-outline-light">
+                    学习路径
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心概念 -->
+    <section id="concepts" class="py-16 bg-surface">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-primary mb-4">核心学习理念</h2>
+                <p class="text-lg text-tertiary max-w-4xl mx-auto">
+                    文档驱动学习的四大核心理念，通过系统性方法掌握AI规范化编程
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="unified-card text-center">
+                    <div class="unified-icon-card unified-icon-primary mb-4">
+                        <span class="text-2xl">📋</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary mb-3">规格驱动</h3>
+                    <p class="text-tertiary">
+                        以规格文档为指导的开发方法，确保需求、设计、实现的一致性
+                    </p>
+                </div>
+
+                <div class="unified-card text-center">
+                    <div class="unified-icon-card unified-icon-warning mb-4">
+                        <span class="text-2xl">🔗</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary mb-3">逻辑一致性</h3>
+                    <p class="text-tertiary">
+                        确保从架构设计到代码实现的逻辑链条完整一致
+                    </p>
+                </div>
+
+                <div class="unified-card text-center">
+                    <div class="unified-icon-card unified-icon-success mb-4">
+                        <span class="text-2xl">🎯</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary mb-3">无歧义原则</h3>
+                    <p class="text-tertiary">
+                        在需求分析、接口设计、代码实现等各个环节追求清晰表达
+                    </p>
+                </div>
+
+                <div class="unified-card text-center">
+                    <div class="unified-icon-card unified-tag-info mb-4">
+                        <span class="text-2xl">📈</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary mb-3">渐进式理解</h3>
+                    <p class="text-tertiary">
+                        建立从基础概念到高级应用的学习路径，通过分层设计实现知识的逐步深化
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 文档探索器 -->
+    <section id="explorer" class="py-16">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-primary mb-4">文档探索器</h2>
+                <p class="text-lg text-tertiary max-w-3xl mx-auto">
+                    浏览DAIP-LIVE项目的完整文档库，按照主题分类系统化学习
+                </p>
+            </div>
+
+            <!-- 上下文面板 -->
+            <div class="unified-card mb-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-2xl">📋</span>
+                    <h3 class="text-xl font-semibold text-primary">当前学习上下文</h3>
+                </div>
+                <div class="text-secondary" id="contextInfo">
+                    请选择一个文档开始您的学习之旅。每个文档都是DAIP-LIVE项目中规范化编程理念的具体体现。
+                </div>
+            </div>
+
+            <!-- 搜索和筛选 -->
+            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                <div class="md:col-span-2">
+                    <div class="flex gap-4">
+                        <input type="text" class="unified-input" id="searchInput" placeholder="搜索文档标题、内容或路径...">
+                        <button class="unified-btn unified-btn-primary" onclick="performSearch()">
+                            🔍 搜索
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <select class="unified-input" id="categoryFilter" onchange="filterByCategory(this.value)">
+                        <option value="all">全部文档</option>
+                        <option value="specs">规格文档</option>
+                        <option value="architecture">架构文档</option>
+                        <option value="process">流程文档</option>
+                        <option value="compliance">合规文档</option>
+                        <option value="principles">编程原则</option>
+                        <option value="implementation">实现细节</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 文档网格 -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="documentGrid">
+                <!-- 文档将通过JavaScript动态加载 -->
+            </div>
+
+            <div class="text-center mt-8">
+                <div class="inline-flex items-center gap-2 text-tertiary">
+                    <div class="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                    <span id="loadingText">正在加载文档...</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 学习路径 -->
+    <section id="learning-path" class="py-16 bg-surface">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-primary mb-4">基于文档的学习路径</h2>
+                <p class="text-lg text-tertiary max-w-3xl mx-auto">
+                    按照规范化编程的进阶路径，系统化学习DAIP-LIVE的核心理念
+                </p>
+            </div>
+
+            <div class="max-w-4xl mx-auto">
+                <!-- 第一阶段 -->
+                <div class="flex gap-6 mb-8 last:mb-0">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            1
+                        </div>
+                    </div>
+                    <div class="flex-1 unified-card">
+                        <h3 class="text-xl font-semibold text-primary mb-3">基础理解 - 建立规范化思维</h3>
+                        <p class="text-secondary mb-4">
+                            从基础文档开始，理解DAIP-LIVE的设计哲学和核心原则。建立规范化的编程思维模式。
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="unified-tag unified-tag-info cursor-pointer" onclick="loadDocumentsByTag('基础架构')">基础架构</span>
+                            <span class="unified-tag unified-tag-info cursor-pointer" onclick="loadDocumentsByTag('编程原则')">编程原则</span>
+                            <span class="unified-tag unified-tag-info cursor-pointer" onclick="loadDocumentsByTag('设计模式')">设计模式</span>
+                            <span class="unified-tag unified-tag-info cursor-pointer" onclick="loadDocumentsByTag('最佳实践')">最佳实践</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 第二阶段 -->
+                <div class="flex gap-6 mb-8 last:mb-0">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-warning rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            2
+                        </div>
+                    </div>
+                    <div class="flex-1 unified-card">
+                        <h3 class="text-xl font-semibold text-primary mb-3">架构设计 - 掌握上下文工程</h3>
+                        <p class="text-secondary mb-4">
+                            深入学习系统架构设计，理解上下文工程的核心思想。掌握模块化设计和接口抽象。
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="unified-tag unified-tag-warning cursor-pointer" onclick="loadDocumentsByTag('系统架构')">系统架构</span>
+                            <span class="unified-tag unified-tag-warning cursor-pointer" onclick="loadDocumentsByTag('模块设计')">模块设计</span>
+                            <span class="unified-tag unified-tag-warning cursor-pointer" onclick="loadDocumentsByTag('接口规范')">接口规范</span>
+                            <span class="unified-tag unified-tag-warning cursor-pointer" onclick="loadDocumentsByTag('依赖管理')">依赖管理</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 第三阶段 -->
+                <div class="flex gap-6 mb-8 last:mb-0">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-success rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            3
+                        </div>
+                    </div>
+                    <div class="flex-1 unified-card">
+                        <h3 class="text-xl font-semibold text-primary mb-3">实现细节 - 理解SPEC驱动开发</h3>
+                        <p class="text-secondary mb-4">
+                            学习具体的实现细节，理解如何通过规格文档驱动开发流程。掌握代码实现的规范化方法。
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="unified-tag unified-tag-success cursor-pointer" onclick="loadDocumentsByTag('SPEC文档')">SPEC文档</span>
+                            <span class="unified-tag unified-tag-success cursor-pointer" onclick="loadDocumentsByTag('实现细节')">实现细节</span>
+                            <span class="unified-tag unified-tag-success cursor-pointer" onclick="loadDocumentsByTag('测试规范')">测试规范</span>
+                            <span class="unified-tag unified-tag-success cursor-pointer" onclick="loadDocumentsByTag('代码质量')">代码质量</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 第四阶段 -->
+                <div class="flex gap-6 mb-8 last:mb-0">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-secondary rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            4
+                        </div>
+                    </div>
+                    <div class="flex-1 unified-card">
+                        <h3 class="text-xl font-semibold text-primary mb-3">综合应用 - 融会贯通</h3>
+                        <p class="text-secondary mb-4">
+                            综合运用所学知识，理解整个DAIP-LIVE项目的理念统一性。形成自己的规范化编程方法论。
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="unified-tag unified-tag-secondary cursor-pointer" onclick="loadDocumentsByTag('案例分析')">案例分析</span>
+                            <span class="unified-tag unified-tag-secondary cursor-pointer" onclick="loadDocumentsByTag('最佳实践')">最佳实践</span>
+                            <span class="unified-tag unified-tag-secondary cursor-pointer" onclick="loadDocumentsByTag('经验总结')">经验总结</span>
+                            <span class="unified-tag unified-tag-secondary cursor-pointer" onclick="loadDocumentsByTag('未来展望')">未来展望</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 核心学习原则 -->
+            <div class="unified-card bg-success/10 border-success mt-12">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-2xl">💡</span>
+                    <h3 class="text-xl font-semibold text-primary">核心学习原则</h3>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4 text-secondary">
+                    <div class="space-y-2">
+                        <div class="flex items-start gap-2">
+                            <span class="text-success">✓</span>
+                            <span><strong>从文档到理解</strong>：通过阅读实际的项目文档，理解理论在实践中的应用</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-success">✓</span>
+                            <span><strong>上下文关联</strong>：理解文档之间的关联关系，建立完整的知识体系</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-start gap-2">
+                            <span class="text-success">✓</span>
+                            <span><strong>渐进式学习</strong>：从基础概念到高级应用，循序渐进地掌握核心技能</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-success">✓</span>
+                            <span><strong>实践导向</strong>：将文档中的理念转化为自己的编程实践</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 相关链接 -->
+    <section class="py-16">
+        <div class="container">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-primary mb-8">深入学习</h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <a href="P3_MODEL_PROVIDER.html" class="unified-card hover:scale-105 transition-transform">
+                        <h3 class="text-lg font-semibold text-primary mb-2">P3 模型提供商</h3>
+                        <p class="text-tertiary text-sm">学习模型管理的核心原理</p>
+                    </a>
+                    <a href="P5_AGENT_ENGINE.html" class="unified-card hover:scale-105 transition-transform">
+                        <h3 class="text-lg font-semibold text-primary mb-2">P5 智能体引擎</h3>
+                        <p class="text-tertiary text-sm">掌握智能体执行架构</p>
+                    </a>
+                    <a href="P8_DEBATE_SYSTEM.html" class="unified-card hover:scale-105 transition-transform">
+                        <h3 class="text-lg font-semibold text-primary mb-2">P8 辩论系统</h3>
+                        <p class="text-tertiary text-sm">了解多模型协作机制</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 统一页脚 -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">文档驱动学习</h3>
+                    <p class="text-gray-400 text-sm">
+                        基于DAIP-LIVE项目的规范化编程实践学习平台
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-md font-semibold mb-4">学习资源</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white">文档库</a></li>
+                        <li><a href="#" class="hover:text-white">学习路径</a></li>
+                        <li><a href="#" class="hover:text-white">实践案例</a></li>
+                        <li><a href="#" class="hover:text-white">问答社区</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-md font-semibold mb-4">核心模块</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="modules/P1_PERSISTENCE.html" class="hover:text-white">P1 数据持久化</a></li>
+                        <li><a href="modules/P2_KNOWLEDGE_MANAGEMENT.html" class="hover:text-white">P2 知识管理</a></li>
+                        <li><a href="P3_MODEL_PROVIDER.html" class="hover:text-white">P3 模型提供商</a></li>
+                        <li><a href="P5_AGENT_ENGINE.html" class="hover:text-white">P5 智能体引擎</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-md font-semibold mb-4">技术支持</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white">使用指南</a></li>
+                        <li><a href="#" class="hover:text-white">API文档</a></li>
+                        <li><a href="#" class="hover:text-white">问题反馈</a></li>
+                        <li><a href="#" class="hover:text-white">联系我们</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p>&copy; 2025 0代码AI规范化编程实践教学平台. 强大0代码10万行代码AI知识生成平台.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Prism.js 语法高亮 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <!-- 动画控制脚本 -->
+    <script src="animations.js"></script>
+    
+    <!-- 文档驱动学习平台脚本 -->
+    <script>
+        // 文档数据（模拟真实数据结构）
+        const documents = [
+            {
+                title: "SOLID原则在DAIP-LIVE中的应用",
+                path: "docs/principles/SOLID_IN_DAIP_LIVE.md",
+                category: "principles",
+                description: "详细分析SOLID五大原则在DAIP-LIVE项目中的具体应用，展示如何通过规范化设计提高代码质量",
+                size: 15420,
+                modified: "2025-12-01",
+                tags: ["SOLID", "设计原则", "代码质量", "架构设计"],
+                related: ["TDD_IMPLEMENTATION", "ARCHITECTURE_PATTERNS"]
+            },
+            {
+                title: "TDD驱动开发实践指南",
+                path: "docs/process/TDD_IMPLEMENTATION_GUIDE.md",
+                category: "process",
+                description: "全面的TDD实施指南，包括Red-Green-Refactor循环、测试策略、以及DAIP-LIVE项目中的具体实践",
+                size: 28450,
+                modified: "2025-11-28",
+                tags: ["TDD", "测试驱动", "开发流程", "代码质量"],
+                related: ["SOLID_IN_DAIP_LIVE", "TESTING_STRATEGY"]
+            },
+            {
+                title: "上下文工程架构设计",
+                path: "docs/architecture/CONTEXTUAL_ENGINEERING_ARCHITECTURE.md",
+                category: "architecture",
+                description: "深入解析上下文工程在DAIP-LIVE系统架构中的核心作用，包括数据流设计、状态管理、模块化策略",
+                size: 35200,
+                modified: "2025-11-25",
+                tags: ["上下文工程", "系统架构", "数据流", "模块化"],
+                related: ["MODULE_DESIGN", "STATE_MANAGEMENT"]
+            },
+            {
+                title: "SPEC文档编写规范",
+                path: "docs/specs/SPEC_WRITING_STANDARDS.md",
+                category: "specs",
+                description: "详细的SPEC文档编写标准和最佳实践，确保文档质量、可读性和可维护性",
+                size: 18600,
+                modified: "2025-11-22",
+                tags: ["SPEC文档", "文档规范", "需求分析", "标准化"],
+                related: ["DOCUMENTATION_GUIDELINES", "REQUIREMENTS_ANALYSIS"]
+            }
+        ];
+
+        // 加载文档网格
+        function loadDocuments(category = 'all') {
+            const grid = document.getElementById('documentGrid');
+            const loadingText = document.getElementById('loadingText');
+            
+            // 显示加载状态
+            loadingText.style.display = 'block';
+            grid.innerHTML = '';
+
+            setTimeout(() => {
+                const filteredDocs = category === 'all' 
+                    ? documents 
+                    : documents.filter(doc => doc.category === category);
+
+                filteredDocs.forEach((doc, index) => {
+                    const card = createDocumentCard(doc);
+                    card.style.animationDelay = `${index * 0.1}s`;
+                    grid.appendChild(card);
+                });
+
+                loadingText.style.display = 'none';
+            }, 500);
+        }
+
+        // 创建文档卡片
+        function createDocumentCard(doc) {
+            const card = document.createElement('div');
+            card.className = 'unified-card cursor-pointer transition-all hover:scale-105 fade-in';
+            card.style.animationDelay = '0s';
+            
+            card.innerHTML = `
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold text-primary mb-2">${doc.title}</h3>
+                    <p class="text-sm text-muted mb-2 font-mono">${doc.path}</p>
+                    <p class="text-secondary text-sm leading-relaxed">${doc.description}</p>
+                </div>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    ${doc.tags.map(tag => `<span class="unified-tag unified-tag-info">${tag}</span>`).join('')}
+                </div>
+                <div class="flex items-center justify-between text-xs text-muted">
+                    <span>${doc.size.toLocaleString()} 字节</span>
+                    <span>${doc.modified}</span>
+                </div>
+            `;
+            
+            card.addEventListener('click', () => selectDocument(doc));
+            return card;
+        }
+
+        // 选择文档
+        function selectDocument(doc) {
+            const contextInfo = document.getElementById('contextInfo');
+            contextInfo.innerHTML = `
+                <div class="space-y-3">
+                    <div>
+                        <h4 class="font-semibold text-primary">${doc.title}</h4>
+                        <p class="text-sm text-muted font-mono">${doc.path}</p>
+                    </div>
+                    <p class="text-secondary">${doc.description}</p>
+                    <div class="flex flex-wrap gap-2">
+                        ${doc.tags.map(tag => `<span class="unified-tag">${tag}</span>`).join('')}
+                    </div>
+                    <div class="text-sm text-muted">
+                        <span>大小: ${doc.size.toLocaleString()} 字节</span> | 
+                        <span>修改时间: ${doc.modified}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 搜索功能
+        function performSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const query = searchInput.value.toLowerCase();
+            
+            if (!query) {
+                loadDocuments();
+                return;
+            }
+
+            const filteredDocs = documents.filter(doc => 
+                doc.title.toLowerCase().includes(query) ||
+                doc.description.toLowerCase().includes(query) ||
+                doc.path.toLowerCase().includes(query) ||
+                doc.tags.some(tag => tag.toLowerCase().includes(query))
+            );
+
+            const grid = document.getElementById('documentGrid');
+            grid.innerHTML = '';
+
+            filteredDocs.forEach((doc, index) => {
+                const card = createDocumentCard(doc);
+                card.style.animationDelay = `${index * 0.1}s`;
+                grid.appendChild(card);
+            });
+        }
+
+        // 分类筛选
+        function filterByCategory(category) {
+            loadDocuments(category);
+        }
+
+        // 按标签加载文档
+        function loadDocumentsByTag(tag) {
+            const filteredDocs = documents.filter(doc => 
+                doc.tags.some(t => t.toLowerCase().includes(tag.toLowerCase()))
+            );
+
+            const grid = document.getElementById('documentGrid');
+            grid.innerHTML = '';
+
+            filteredDocs.forEach((doc, index) => {
+                const card = createDocumentCard(doc);
+                card.style.animationDelay = `${index * 0.1}s`;
+                grid.appendChild(card);
+            });
+
+            // 更新上下文信息
+            const contextInfo = document.getElementById('contextInfo');
+            contextInfo.innerHTML = `
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-primary">标签筛选: ${tag}</h4>
+                    <p class="text-secondary">找到 ${filteredDocs.length} 个相关文档</p>
+                </div>
+            `;
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDocuments();
+            
+            // 初始化动画
+            if (typeof initAllAnimations === 'function') {
+                initAllAnimations();
+            }
+
+            // 搜索框回车事件
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

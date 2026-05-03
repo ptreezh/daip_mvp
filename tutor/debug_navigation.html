@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>导航栏调试</title>
+    <style>
+        .nav-section {
+            padding: 0.5rem 1rem;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        
+        .nav-section:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+        
+        .nav-section.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <h1>导航栏调试测试</h1>
+    
+    <div class="nav-flow">
+        <div class="nav-section active" data-dimension="prompt">
+            <div>🤖 规范化提示词</div>
+        </div>
+        <div class="nav-section" data-dimension="spec">
+            <div>📄 规范文档</div>
+        </div>
+        <div class="nav-section" data-dimension="design">
+            <div>🎨 设计文档</div>
+        </div>
+        <div class="nav-section" data-dimension="plan">
+            <div>📋 实施计划</div>
+        </div>
+        <div class="nav-section" data-dimension="code">
+            <div>💻 代码实现</div>
+        </div>
+        <div class="nav-section" data-dimension="correlation">
+            <div>🔗 关联分析</div>
+        </div>
+    </div>
+    
+    <button onclick="testNavigation()">测试导航</button>
+    <button onclick="checkActive()">检查Active状态</button>
+    
+    <script>
+        // 导航到指定维度
+        function navigateDimension(dimension) {
+            console.log(`导航到维度: ${dimension}`);
+            
+            // 更新导航状态
+            document.querySelectorAll('.nav-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            const targetNav = document.querySelector(`[data-dimension="${dimension}"]`);
+            console.log(`找到目标导航元素: ${!!targetNav}`);
+            if (targetNav) {
+                targetNav.classList.add('active');
+                console.log(`已为目标导航添加active类`);
+            }
+        }
+        
+        function testNavigation() {
+            navigateDimension('spec');
+        }
+        
+        function checkActive() {
+            const activeElements = document.querySelectorAll('.nav-section.active');
+            console.log(`Active元素数量: ${activeElements.length}`);
+            activeElements.forEach(el => {
+                console.log(`Active元素维度: ${el.getAttribute('data-dimension')}`);
+            });
+        }
+        
+        // 导航栏点击事件
+        document.querySelectorAll('.nav-section').forEach(nav => {
+            nav.addEventListener('click', function(e) {
+                e.preventDefault();
+                const dim = this.getAttribute('data-dimension');
+                if (dim) {
+                    navigateDimension(dim);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P1 数据持久化模块 - DAIP-LIVE 规范化编程解析</title>
+    <style>
+        :root {
+            --primary: #1A2332;
+            --accent: #2563EB;
+            --success: #059669;
+            --warning: #D97706;
+            --danger: #DC2626;
+            --background: #FFFFFF;
+            --surface: #F8FAFC;
+            --border: #E2E8F0;
+            --text-primary: #0A1929;
+            --text-secondary: #475569;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: var(--surface);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+
+        .section {
+            padding: 60px 0;
+        }
+
+        .section-title {
+            font-size: 36px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .principle-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .principle-solid { background: #EFF6FF; color: #2563EB; border: 1px solid #2563EB; }
+        .principle-tdd { background: #F0FDF4; color: #059669; border: 1px solid #059669; }
+        .principle-kiss { background: #FEF3C7; color: #D97706; border: 1px solid #D97706; }
+        .principle-dry { background: #FDF2F8; color: #EC4899; border: 1px solid #EC4899; }
+        .principle-clarity { background: #F3E8FF; color: #9333EA; border: 1px solid #9333EA; }
+
+        .code-block {
+            background: #1E1E1E;
+            color: #D4D4D4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'SF Mono', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        .file-tree {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 20px 0;
+        }
+
+        .tree-item {
+            margin: 4px 0;
+            padding-left: 20px;
+        }
+
+        .tree-folder {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .tree-file {
+            color: var(--text-secondary);
+        }
+
+        .implementation-step {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--surface);
+            border-radius: 8px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .document-list {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .document-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .document-item:last-child {
+            border-bottom: none;
+        }
+
+        .document-item:hover {
+            background: white;
+            padding-left: 10px;
+            margin: 0 -10px;
+        }
+
+        .document-title {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .document-path {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-family: monospace;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            color: var(--accent);
+        }
+
+        .nav-tab.active {
+            color: var(--accent);
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            .implementation-step {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="container">
+            <a href="DOCUMENT_DRIVEN_LEARNING_PLATFORM.html" class="back-link">
+                ← 返回模块列表
+            </a>
+            <h1 style="font-size: 48px; font-weight: 700; margin-bottom: 16px;">P1 数据持久化模块</h1>
+            <p style="font-size: 20px; opacity: 0.9;">SQLite + SQLAlchemy + 会话管理的规范化实现解析</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 模块概述 -->
+        <section class="section">
+            <h2 class="section-title">模块概述</h2>
+            <p class="section-subtitle">
+                P1数据持久化模块是DAIP-LIVE系统的基础设施层，负责所有数据的存储、检索和管理。
+                该模块完美体现了SOLID原则中的单一职责原则，专注于数据访问的抽象和实现。
+            </p>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">P1</div>
+                    <div>
+                        <h3 class="card-title">核心职责</h3>
+                        <div style="margin-top: 8px;">
+                            <span class="principle-tag principle-solid">单一职责原则</span>
+                            <span class="principle-tag principle-dry">DRY原则</span>
+                            <span class="principle-tag principle-clarity">清晰原则</span>
+                        </div>
+                    </div>
+                </div>
+                <ul style="color: var(--text-secondary); line-height: 1.8;">
+                    <li><strong>数据存储抽象</strong>：提供统一的数据访问接口，隐藏底层存储细节</li>
+                    <li><strong>会话管理</strong>：管理用户会话数据和系统状态</li>
+                    <li><strong>事务管理</strong>：确保数据操作的原子性和一致性</li>
+                    <li><strong>迁移支持</strong>：提供数据库结构版本管理</li>
+                    <li><strong>连接池管理</strong>：优化数据库连接的性能和资源利用</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 标签页导航 -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('architecture')">架构设计</button>
+            <button class="nav-tab" onclick="showTab('implementation')">实现细节</button>
+            <button class="nav-tab" onclick="showTab('principles')">编程原则</button>
+            <button class="nav-tab" onclick="showTab('documents')">相关文档</button>
+        </div>
+
+        <!-- 架构设计标签页 -->
+        <div id="architecture" class="tab-content active">
+            <section class="section">
+                <h2 class="section-title">架构设计</h2>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">分层架构设计</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        P1模块采用经典的分层架构，确保各层职责清晰，依赖关系明确：
+                    </p>
+
+                    <div class="implementation-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>数据访问层 (DAL)</h4>
+                            <p style="color: var(--text-secondary);">提供CRUD操作的基础接口，使用SQLAlchemy ORM实现数据对象的映射和操作。</p>
+                        </div>
+                    </div>
+
+                    <div class="implementation-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>服务层 (Service Layer)</h4>
+                            <p style="color: var(--text-secondary);">封装业务逻辑，提供高级的数据操作接口，处理复杂的业务规则。</p>
+                        </div>
+                    </div>
+
+                    <div class="implementation-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>会话管理层</h4>
+                            <p style="color: var(--text-secondary);">专门负责用户会话的存储和检索，支持会话的创建、更新、删除和查询。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">模块结构</h3>
+                    <div class="file-tree">
+                        <div class="tree-item tree-folder">src/daip_live/persistence/</div>
+                        <div class="tree-item tree-file">├── __init__.py</div>
+                        <div class="tree-item tree-file">├── database.py - 数据库连接和配置</div>
+                        <div class="tree-item tree-file">├── tables.py - 数据表模型定义</div>
+                        <div class="tree-item tree-file">├── session_manager.py - 会话管理器</div>
+                        <div class="tree-item tree-file">├── migration.py - 数据库迁移工具</div>
+                        <div class="tree-item tree-file">└── services/</div>
+                        <div class="tree-item tree-file">    ├── __init__.py</div>
+                        <div class="tree-item tree-file">    ├── base_service.py - 基础服务类</div>
+                        <div class="tree-item tree-file">    ├── user_service.py - 用户数据服务</div>
+                        <div class="tree-item tree-file">    ├── conversation_service.py - 对话数据服务</div>
+                        <div class="tree-item tree-file">    └── wiki_service.py - Wiki数据服务</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">核心设计模式</h3>
+
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="color: var(--accent); margin-bottom: 12px;">1. 仓储模式 (Repository Pattern)</h4>
+                        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                            抽象数据访问逻辑，使业务层不直接依赖具体的数据库实现。
+                        </p>
+                        <div class="code-block">
+class BaseRepository:
+    def __init__(self, session: Session):
+        self.session = session
+
+    def get(self, id: int) -> Optional[ModelType]:
+        return self.session.query(self.model_type).get(id)
+
+    def get_all(self) -> List[ModelType]:
+        return self.session.query(self.model_type).all()
+
+    def create(self, obj_data: dict) -> ModelType:
+        obj = self.model_type(**obj_data)
+        self.session.add(obj)
+        self.session.commit()
+        return obj
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="color: var(--accent); margin-bottom: 12px;">2. 单元工作模式 (Unit of Work)</h4>
+                        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                            管理事务边界，确保一组操作要么全部成功，要么全部失败。
+                        </p>
+                        <div class="code-block">
+class DatabaseManager:
+    def __enter__(self):
+        self.session = create_session()
+        return self.session
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type:
+            self.session.rollback()
+        else:
+            self.session.commit()
+        self.session.close()
+
+# 使用示例
+with DatabaseManager() as session:
+    user_repo = UserRepository(session)
+    user = user_repo.create({"name": "张三", "email": "zhangsan@example.com"})
+    # 如果发生异常，自动回滚
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="color: var(--accent); margin-bottom: 12px;">3. 工厂模式 (Factory Pattern)</h4>
+                        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                            创建数据库连接和服务实例，隐藏复杂的初始化逻辑。
+                        </p>
+                        <div class="code-block">
+class ServiceFactory:
+    @staticmethod
+    def create_user_service() -> UserService:
+        session = create_session()
+        return UserService(session)
+
+    @staticmethod
+    def create_conversation_service() -> ConversationService:
+        session = create_session()
+        return ConversationService(session)
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 实现细节标签页 -->
+        <div id="implementation" class="tab-content">
+            <section class="section">
+                <h2 class="section-title">关键实现细节</h2>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">1. 数据库连接管理</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        使用SQLAlchemy创建引擎和连接池，支持事务管理和连接复用。
+                    </p>
+                    <div class="code-block">
+# database.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
+# 数据库配置
+DATABASE_URL = "sqlite:///daip_live.db"
+
+# 创建引擎
+engine = create_engine(
+    DATABASE_URL,
+    poolclass=StaticPool,
+    connect_args={
+        "check_same_thread": False,
+        "timeout": 20
+    },
+    echo=False  # 设为True可以看到SQL语句
+)
+
+# 创建会话工厂
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
+
+def create_session() -> Session:
+    """创建数据库会话"""
+    return SessionLocal()
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">2. 数据表模型定义</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        使用SQLAlchemy的声明式模型，定义清晰的字段类型和关系。
+                    </p>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-title">SQLAlchemy数据表模型定义</span>
+                            <span class="code-language">Python</span>
+                            <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                        </div>
+                        <div class="code-content code-highlight">
+                            <pre><code># tables.py
+from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
+
+Base = declarative_base()
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    email = Column(String(100), unique=True, nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # 一对多关系
+    conversations = relationship("Conversation", back_populates="user")
+    sessions = relationship("UserSession", back_populates="user")
+
+class Conversation(Base):
+    __tablename__ = "conversations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String(200), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 关系定义
+    user = relationship("User", back_populates="conversations")
+    messages = relationship("Message", back_populates="conversation")
+
+# 更多模型定义...</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">3. 会话管理实现</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        实现完整的用户会话生命周期管理，支持会话的创建、更新、查询和清理。
+                    </p>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-title">会话管理实现</span>
+                            <span class="code-language">Python</span>
+                            <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                        </div>
+                        <div class="code-content code-highlight">
+                            <pre><code># session_manager.py
+from typing import Optional, Dict, Any
+from datetime import datetime, timedelta
+import uuid
+from .database import create_session
+from .tables import UserSession
+
+class SessionManager:
+    def __init__(self):
+        self.session_timeout = timedelta(hours=24)  # 会话超时时间
+
+    def create_session(self, user_id: int, session_data: Dict[str, Any]) -> str:
+        """创建新的用户会话"""
+        session_id = str(uuid.uuid4())
+
+        with create_session() as db_session:
+            user_session = UserSession(
+                session_id=session_id,
+                user_id=user_id,
+                session_data=session_data,
+                created_at=datetime.utcnow(),
+                last_accessed=datetime.utcnow()
+            )
+            db_session.add(user_session)
+            db_session.commit()
+
+        return session_id
+
+    def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """获取会话数据"""
+        with create_session() as db_session:
+            user_session = db_session.query(UserSession).filter(
+                UserSession.session_id == session_id,
+                UserSession.last_accessed > datetime.utcnow() - self.session_timeout</code></pre>
+                        </div>
+                    </div>
+            ).first()
+
+            if user_session:
+                # 更新最后访问时间
+                user_session.last_accessed = datetime.utcnow()
+                db_session.commit()
+                return user_session.session_data
+
+        return None
+
+    def update_session(self, session_id: str, session_data: Dict[str, Any]) -> bool:
+        """更新会话数据"""
+        with create_session() as db_session:
+            user_session = db_session.query(UserSession).filter(
+                UserSession.session_id == session_id
+            ).first()
+
+            if user_session:
+                user_session.session_data.update(session_data)
+                user_session.last_accessed = datetime.utcnow()
+                db_session.commit()
+                return True
+
+        return False
+
+    def delete_session(self, session_id: str) -> bool:
+        """删除会话"""
+        with create_session() as db_session:
+            count = db_session.query(UserSession).filter(
+                UserSession.session_id == session_id
+            ).delete()
+            db_session.commit()
+            return count > 0
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">4. 数据库迁移支持</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        提供数据库结构版本管理，支持平滑的数据库升级和回滚。
+                    </p>
+                    <div class="code-block">
+# migration.py
+from sqlalchemy import text
+from .database import engine
+
+class MigrationManager:
+    def __init__(self):
+        self.migrations = [
+            {"version": "1.0.0", "description": "初始化数据库结构"},
+            {"version": "1.1.0", "description": "添加用户表索引"},
+            {"version": "1.2.0", "description": "添加会话管理表"},
+            # 更多迁移版本...
+        ]
+
+    def run_migration(self, target_version: str = None):
+        """运行数据库迁移"""
+        with engine.connect() as conn:
+            current_version = self._get_current_version(conn)
+
+            for migration in self.migrations:
+                if self._should_apply_migration(migration, current_version, target_version):
+                    print(f"应用迁移: {migration['version']} - {migration['description']}")
+                    self._apply_migration(conn, migration['version'])
+
+            conn.commit()
+
+    def _get_current_version(self, conn) -> str:
+        """获取当前数据库版本"""
+        try:
+            result = conn.execute(text("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1"))
+            row = result.fetchone()
+            return row[0] if row else "0.0.0"
+        except:
+            return "0.0.0"
+
+    def _apply_migration(self, conn, version: str):
+        """应用特定版本的迁移"""
+        if version == "1.0.0":
+            # 创建初始表结构
+            from .tables import Base
+            Base.metadata.create_all(bind=conn)
+
+        elif version == "1.1.0":
+            # 添加索引
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)"))
+
+        elif version == "1.2.0":
+            # 创建会话表
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS user_sessions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    session_id VARCHAR(255) NOT NULL UNIQUE,
+                    user_id INTEGER NOT NULL,
+                    session_data TEXT,
+                    created_at DATETIME NOT NULL,
+                    last_accessed DATETIME NOT NULL,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            """))
+
+        # 记录迁移版本
+        conn.execute(text(
+            "INSERT OR REPLACE INTO schema_migrations (version) VALUES (:version)"
+        ), {"version": version})
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">5. 事务管理和错误处理</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        实现完善的事务管理和异常处理机制，确保数据一致性。
+                    </p>
+                    <div class="code-block">
+# services/base_service.py
+from typing import Optional, TypeVar, Generic
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from ..database import create_session
+import logging
+
+logger = logging.getLogger(__name__)
+
+ModelType = TypeVar('ModelType')
+
+class BaseService(Generic[ModelType]):
+    def __init__(self, session: Session, model_class):
+        self.session = session
+        self.model_class = model_class
+
+    def create(self, obj_data: dict) -> Optional[ModelType]:
+        """创建对象，包含事务管理和错误处理"""
+        try:
+            obj = self.model_class(**obj_data)
+            self.session.add(obj)
+            self.session.flush()  # 预提交，获取ID但不提交事务
+            logger.info(f"创建 {self.model_class.__name__} 成功: ID={obj.id}")
+            return obj
+        except IntegrityError as e:
+            self.session.rollback()
+            logger.error(f"创建 {self.model_class.__name__} 失败 - 数据完整性错误: {e}")
+            raise ValueError("数据完整性约束违反")
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            logger.error(f"创建 {self.model_class.__name__} 失败 - 数据库错误: {e}")
+            raise RuntimeError("数据库操作失败")
+
+    def get_by_id(self, id: int) -> Optional[ModelType]:
+        """根据ID获取对象"""
+        try:
+            return self.session.query(self.model_class).filter(
+                self.model_class.id == id
+            ).first()
+        except SQLAlchemyError as e:
+            logger.error(f"查询 {self.model_class.__name__} 失败: {e}")
+            return None
+
+    def update(self, id: int, update_data: dict) -> Optional[ModelType]:
+        """更新对象"""
+        try:
+            obj = self.get_by_id(id)
+            if not obj:
+                return None
+
+            for key, value in update_data.items():
+                if hasattr(obj, key):
+                    setattr(obj, key, value)
+
+            self.session.flush()
+            logger.info(f"更新 {self.model_class.__name__} 成功: ID={id}")
+            return obj
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            logger.error(f"更新 {self.model_class.__name__} 失败: {e}")
+            raise RuntimeError("数据库操作失败")
+
+    def delete(self, id: int) -> bool:
+        """删除对象"""
+        try:
+            obj = self.get_by_id(id)
+            if not obj:
+                return False
+
+            self.session.delete(obj)
+            self.session.flush()
+            logger.info(f"删除 {self.model_class.__name__} 成功: ID={id}")
+            return True
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            logger.error(f"删除 {self.model_class.__name__} 失败: {e}")
+            raise RuntimeError("数据库操作失败")
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 编程原则标签页 -->
+        <div id="principles" class="tab-content">
+            <section class="section">
+                <h2 class="section-title">编程原则体现</h2>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">
+                        <span class="principle-tag principle-solid">S - 单一职责原则 (SRP)</span>
+                    </h3>
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                            <strong>在P1模块中的体现：</strong>
+                        </p>
+                        <ul style="color: var(--text-secondary); line-height: 1.8;">
+                            <li><strong>DatabaseManager</strong>：只负责数据库连接和会话管理</li>
+                            <li><strong>SessionManager</strong>：只负责用户会话的生命周期管理</li>
+                            <li><strong>MigrationManager</strong>：只负责数据库结构版本管理</li>
+                            <li><strong>BaseService</strong>：只负责基础的CRUD操作抽象</li>
+                        </ul>
+                    </div>
+                    <div class="code-block">
+# 违反单一职责的例子（错误示范）
+class BadPersistenceModule:
+    def __init__(self):
+        self.connection = None
+
+    def manage_database(self):
+        """管理数据库连接"""
+        pass
+
+    def handle_user_logic(self):
+        """处理用户业务逻辑 - 违反SRP"""
+        pass
+
+    def send_email_notifications(self):
+        """发送邮件通知 - 违反SRP"""
+        pass
+
+# 遵循单一职责的正确实现
+class DatabaseManager:  # 只负责数据库管理
+    def manage_database(self):
+        pass
+
+class UserService:  # 只负责用户业务逻辑
+    def handle_user_logic(self):
+        pass
+
+class NotificationService:  # 只负责通知功能
+    def send_email_notifications(self):
+        pass
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">
+                        <span class="principle-tag principle-solid">O - 开闭原则 (OCP)</span>
+                    </h3>
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                            <strong>在P1模块中的体现：</strong>
+                        </p>
+                        <ul style="color: var(--text-secondary); line-height: 1.8;">
+                            <li><strong>抽象基类</strong>：定义了可扩展的接口</li>
+                            <li><strong>配置驱动</strong>：支持不同的数据库后端</li>
+                            <li><strong>插件架构</strong>：可以轻松添加新的数据存储策略</li>
+                        </ul>
+                    </div>
+                    <div class="code-block">
+from abc import ABC, abstractmethod
+
+class DataStorageInterface(ABC):
+    """数据存储接口 - 开闭原则体现"""
+
+    @abstractmethod
+    def save(self, data: dict) -> bool:
+        pass
+
+    @abstractmethod
+    def load(self, key: str) -> Optional[dict]:
+        pass
+
+    @abstractmethod
+    def delete(self, key: str) -> bool:
+        pass
+
+class SQLiteStorage(DataStorageInterface):
+    """SQLite存储实现"""
+    def save(self, data: dict) -> bool:
+        # SQLite实现
+        pass
+
+    def load(self, key: str) -> Optional[dict]:
+        # SQLite实现
+        pass
+
+    def delete(self, key: str) -> bool:
+        # SQLite实现
+        pass
+
+class PostgreSQLStorage(DataStorageInterface):
+    """PostgreSQL存储实现 - 新扩展，不修改现有代码"""
+    def save(self, data: dict) -> bool:
+        # PostgreSQL实现
+        pass
+
+    def load(self, key: str) -> Optional[dict]:
+        # PostgreSQL实现
+        pass
+
+    def delete(self, key: str) -> bool:
+        # PostgreSQL实现
+        pass
+
+class StorageFactory:
+    @staticmethod
+    def create_storage(storage_type: str) -> DataStorageInterface:
+        if storage_type == "sqlite":
+            return SQLiteStorage()
+        elif storage_type == "postgresql":
+            return PostgreSQLStorage()
+        else:
+            raise ValueError(f"Unsupported storage type: {storage_type}")
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">
+                        <span class="principle-tag principle-tdd">T - 测试驱动开发 (TDD)</span>
+                    </h3>
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                            <strong>在P1模块中的体现：</strong>
+                        </p>
+                        <ul style="color: var(--text-secondary); line-height: 1.8;">
+                            <li><strong>单元测试覆盖</strong>：每个组件都有完整的测试用例</li>
+                            <li><strong>集成测试</strong>：测试模块间的协作</li>
+                            <li><strong>测试数据管理</strong>：使用测试数据库和工厂模式</li>
+                            <li><strong>测试隔离</strong>：确保测试之间不会相互影响</li>
+                        </ul>
+                    </div>
+                    <div class="code-block">
+# tests/test_session_manager.py
+import pytest
+from unittest.mock import Mock, patch
+from src.daip_live.persistence.session_manager import SessionManager
+
+class TestSessionManager:
+    def setup_method(self):
+        self.session_manager = SessionManager()
+
+    @patch('src.daip_live.persistence.session_manager.create_session')
+    def test_create_session_success(self, mock_create_session):
+        # Arrange
+        mock_session = Mock()
+        mock_create_session.return_value.__enter__.return_value = mock_session
+        mock_create_session.return_value.__exit__.return_value = None
+
+        # Act
+        session_id = self.session_manager.create_session(123, {"theme": "dark"})
+
+        # Assert
+        assert session_id is not None
+        assert len(session_id) == 36  # UUID length
+        mock_session.add.assert_called_once()
+        mock_session.commit.assert_called_once()
+
+    @patch('src.daip_live.persistence.session_manager.create_session')
+    def test_get_session_valid(self, mock_create_session):
+        # Arrange
+        mock_session = Mock()
+        mock_session.query.return_value.filter.return_value.first.return_value = Mock(
+            session_data={"theme": "dark"}
+        )
+        mock_create_session.return_value.__enter__.return_value = mock_session
+        mock_create_session.return_value.__exit__.return_value = None
+
+        # Act
+        result = self.session_manager.get_session("valid_session_id")
+
+        # Assert
+        assert result == {"theme": "dark"}
+        mock_session.query.assert_called_once()
+
+    @patch('src.daip_live.persistence.session_manager.create_session')
+    def test_get_session_expired(self, mock_create_session):
+        # Arrange
+        mock_session = Mock()
+        mock_session.query.return_value.filter.return_value.first.return_value = None
+        mock_create_session.return_value.__enter__.return_value = mock_session
+        mock_create_session.return_value.__exit__.return_value = None
+
+        # Act
+        result = self.session_manager.get_session("expired_session_id")
+
+        # Assert
+        assert result is None
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">
+                        <span class="principle-tag principle-kiss">K - 保持简单原则 (KISS)</span>
+                    </h3>
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                            <strong>在P1模块中的体现：</strong>
+                        </p>
+                        <ul style="color: var(--text-secondary); line-height: 1.8;">
+                            <li><strong>SQLite选择</strong>：对于单用户场景，SQLite比PostgreSQL更简单</li>
+                            <li><strong>简洁的API</strong>：提供简单直观的方法接口</li>
+                            <li><strong>最小依赖</strong>：只依赖必要的库，避免过度工程化</li>
+                            <li><strong>直接的实现</strong>：避免不必要的抽象层和复杂模式</li>
+                        </ul>
+                    </div>
+                    <div class="code-block">
+# 简单的会话管理实现
+class SimpleSessionManager:
+    def __init__(self):
+        self.sessions = {}  # 使用内存字典存储会话
+
+    def create_session(self, user_id: int, data: dict) -> str:
+        session_id = str(uuid.uuid4())
+        self.sessions[session_id] = {
+            "user_id": user_id,
+            "data": data,
+            "created_at": datetime.utcnow()
+        }
+        return session_id
+
+    def get_session(self, session_id: str) -> Optional[dict]:
+        return self.sessions.get(session_id)
+
+    def delete_session(self, session_id: str) -> bool:
+        return self.sessions.pop(session_id, None) is not None
+
+# 使用简单的SQLAlchemy配置
+def get_database_url():
+    """简单的数据库配置，避免复杂的配置管理"""
+    return "sqlite:///daip_live.db"
+
+# 直接的SQL执行，避免复杂ORM
+def execute_sql(sql: str, params: tuple = None):
+    """直接执行SQL，简化数据操作"""
+    with sqlite3.connect("daip_live.db") as conn:
+        cursor = conn.cursor()
+        if params:
+            cursor.execute(sql, params)
+        else:
+            cursor.execute(sql)
+        conn.commit()
+        return cursor.fetchall()
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">
+                        <span class="principle-tag principle-dry">D - 不要重复原则 (DRY)</span>
+                    </h3>
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                            <strong>在P1模块中的体现：</strong>
+                        </p>
+                        <ul style="color: var(--text-secondary); line-height: 1.8;">
+                            <li><strong>基础服务类</strong>：提取公共的CRUD操作逻辑</li>
+                            <li><strong>通用工具函数</strong>：避免重复的数据库操作代码</li>
+                            <li><strong>配置管理</strong>：统一的数据库配置和连接管理</li>
+                            <li><strong>错误处理</strong>：统一的异常处理和日志记录</li>
+                        </ul>
+                    </div>
+                    <div class="code-block">
+# 违反DRY的重复代码（错误示范）
+class UserService:
+    def create_user(self, user_data):
+        session = create_session()
+        try:
+            user = User(**user_data)
+            session.add(user)
+            session.commit()
+            session.close()
+        except Exception as e:
+            session.rollback()
+            session.close()
+            raise e
+
+class ConversationService:
+    def create_conversation(self, conv_data):
+        session = create_session()  # 重复代码
+        try:
+            conv = Conversation(**conv_data)
+            session.add(conv)
+            session.commit()  # 重复代码
+            session.close()  # 重复代码
+        except Exception as e:
+            session.rollback()  # 重复代码
+            session.close()  # 重复代码
+            raise e
+
+# 遵循DRY的正确实现
+class BaseRepository:  # 消除重复代码
+    def __init__(self, model_class):
+        self.model_class = model_class
+
+    def create(self, data: dict):
+        return self._execute_with_transaction(
+            lambda session: self._create_in_session(session, data)
+        )
+
+    def _execute_with_transaction(self, operation):
+        """统一的事务处理，消除重复代码"""
+        session = create_session()
+        try:
+            result = operation(session)
+            session.commit()
+            return result
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def _create_in_session(self, session, data):
+        """在指定会话中创建对象"""
+        obj = self.model_class(**data)
+        session.add(obj)
+        session.flush()  # 预提交获取ID
+        return obj
+
+class UserService(BaseRepository):
+    def __init__(self, session=None):
+        if session:
+            self.session = session
+            self._manual_session = True
+        else:
+            super().__init__(User)
+            self._manual_session = False
+
+    def create_user(self, user_data):
+        if self._manual_session:
+            return self._create_in_session(self.session, user_data)
+        return super().create(user_data)
+
+class ConversationService(BaseRepository):
+    def __init__(self):
+        super().__init__(Conversation)
+
+    def create_conversation(self, conv_data):
+        return super().create(conv_data)
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 相关文档标签页 -->
+        <div id="documents" class="tab-content">
+            <section class="section">
+                <h2 class="section-title">相关规范文档</h2>
+                <p class="section-subtitle">
+                    深入学习以下文档，理解P1数据持久化模块的设计理念、实现细节和最佳实践。
+                </p>
+
+                <div class="document-list">
+                    <div class="document-item" onclick="openDocument('docs/architecture/DATABASE_DESIGN.md')">
+                        <div class="document-title">数据库架构设计文档</div>
+                        <div class="document-path">docs/architecture/DATABASE_DESIGN.md</div>
+                    </div>
+
+                    <div class="document-item" onclick="openDocument('docs/specs/P1_PERSISTENCE_SPEC.md')">
+                        <div class="document-title">P1数据持久化模块规格文档</div>
+                        <div class="document-path">docs/specs/P1_PERSISTENCE_SPEC.md</div>
+                    </div>
+
+                    <div class="document-item" onclick="openDocument('docs/implementation/SQLALCHEMY_BEST_PRACTICES.md')">
+                        <div class="document-title">SQLAlchemy最佳实践指南</div>
+                        <div class="document-path">docs/implementation/SQLALCHEMY_BEST_PRACTICES.md</div>
+                    </div>
+
+                    <div class="document-item" onclick="openDocument('docs/patterns/REPOSITORY_PATTERN_IMPL.md')">
+                        <div class="document-title">仓储模式实现详解</div>
+                        <div class="document-path">docs/patterns/REPOSITORY_PATTERN_IMPL.md</div>
+                    </div>
+
+                    <div class="document-item" onclick="openDocument('docs/testing/DATABASE_TESTING_STRATEGIES.md')">
+                        <div class="document-title">数据库测试策略和方法</div>
+                        <div class="document-path">docs/testing/DATABASE_TESTING_STRATEGIES.md</div>
+                    </div>
+
+                    <div class="document-item" onclick="openDocument('docs/performance/DATABASE_OPTIMIZATION.md')">
+                        <div class="document-title">数据库性能优化指南</div>
+                        <div class="document-path">docs/performance/DATABASE_OPTIMIZATION.md</div>
+                    </div>
+
+                    <div class="document-item" onclick="openDocument('docs/migration/DATABASE_MIGRATION_GUIDE.md')">
+                        <div class="document-title">数据库迁移完整指南</div>
+                        <div class="document-path">docs/migration/DATABASE_MIGRATION_GUIDE.md</div>
+                    </div>
+
+                    <div class="document-item" onclick="openDocument('docs/security/DATABASE_SECURITY_BEST_PRACTICES.md')">
+                        <div class="document-title">数据库安全最佳实践</div>
+                        <div class="document-path">docs/security/DATABASE_SECURITY_BEST_PRACTICES.md</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">学习路径建议</h3>
+                    <div class="implementation-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>基础理解</h4>
+                            <p>先阅读数据库架构设计文档，理解P1模块的整体设计思路和数据模型。</p>
+                        </div>
+                    </div>
+
+                    <div class="implementation-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>规格研读</h4>
+                            <p>详细研读P1规格文档，了解模块的功能需求和技术约束。</p>
+                        </div>
+                    </div>
+
+                    <div class="implementation-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>实践学习</h4>
+                            <p>通过SQLAlchemy最佳实践和仓储模式实现文档，学习具体的编码技巧。</p>
+                        </div>
+                    </div>
+
+                    <div class="implementation-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>质量保证</h4>
+                            <p>学习数据库测试策略和安全最佳实践，确保代码质量和数据安全。</p>
+                        </div>
+                    </div>
+
+                    <div class="implementation-step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h4>进阶优化</h4>
+                            <p>学习性能优化和迁移指南，掌握数据库的高级管理技能。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 20px; margin-bottom: 16px;">核心理念总结</h3>
+                    <div style="color: var(--text-secondary); line-height: 1.8;">
+                        <p><strong>通过学习P1模块，您将掌握：</strong></p>
+                        <ul>
+                            <li>如何设计职责单一的数据持久化模块</li>
+                            <li>如何在Python中有效使用SQLAlchemy ORM</li>
+                            <li>如何实现安全可靠的事务管理</li>
+                            <li>如何进行数据库性能优化</li>
+                            <li>如何编写可测试的数据访问代码</li>
+                            <li>如何处理数据库迁移和版本管理</li>
+                        </ul>
+                        <p style="margin-top: 20px;">
+                            <strong>这些技能将帮助您：</strong> 构建稳定、可靠的数据访问层，为整个AI应用系统提供坚实的数据基础。
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // 隐藏所有标签页内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 移除所有标签按钮的激活状态
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 显示选中的标签页内容
+            document.getElementById(tabName).classList.add('active');
+
+            // 激活对应的标签按钮
+            event.target.classList.add('active');
+        }
+
+        function openDocument(path) {
+            // 打开文档的逻辑
+            console.log(`打开文档: ${path}`);
+            // 这里可以实现跳转到文档查看页面
+            window.open(`../document_library.html#search=${encodeURIComponent(path)}`, '_blank');
+        }
+
+        // 复制代码功能
+        function copyCode(button) {
+            const codeContainer = button.closest('.code-container');
+            const codeBlock = codeContainer.querySelector('pre');
+            
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '已复制';
+                button.style.background = '#10b981';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                button.textContent = '复制失败';
+                button.style.background = '#ef4444';
+                
+                setTimeout(() => {
+                    button.textContent = '📋 复制';
+                    button.style.background = '';
+                }, 2000);
+            });
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('P1 数据持久化模块解析页面已加载');
+            console.log('核心价值：学习规范化编程理念在数据持久化模块中的具体实现');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+{
+  "timestamp": 1765420092.692053,
+  "test_type": "mcp_playwright_comprehensive_test",
+  "environment": "Windows",
+  "base_directory": "D:\\daip\\refactdoc\\tutor",
+  "files_analyzed": 7,
+  "html_files": 4,
+  "file_results": [
+    {
+      "filename": "javascript验证.html",
+      "exists": true,
+      "size": 13654,
+      "path": "D:\\daip\\refactdoc\\tutor\\javascript验证.html",
+      "analysis": {
+        "has_javascript": true,
+        "has_interactive": true,
+        "has_forms": true,
+        "has_buttons": true,
+        "has_test_classes": true,
+        "has_dimensions": true,
+        "has_six_system": true,
+        "line_count": 340,
+        "size_bytes": 12276
+      }
+    },
+    {
+      "filename": "简单交互测试.html",
+      "exists": true,
+      "size": 11074,
+      "path": "D:\\daip\\refactdoc\\tutor\\简单交互测试.html",
+      "analysis": {
+        "has_javascript": true,
+        "has_interactive": true,
+        "has_forms": true,
+        "has_buttons": true,
+        "has_test_classes": true,
+        "has_dimensions": true,
+        "has_six_system": false,
+        "line_count": 305,
+        "size_bytes": 10061
+      }
+    },
+    {
+      "filename": "P1_SIX_DIMENSION_LEARNING_FIXED.html",
+      "exists": true,
+      "size": 39073,
+      "path": "D:\\daip\\refactdoc\\tutor\\P1_SIX_DIMENSION_LEARNING_FIXED.html",
+      "analysis": {
+        "has_javascript": true,
+        "has_interactive": true,
+        "has_forms": true,
+        "has_buttons": true,
+        "has_test_classes": false,
+        "has_dimensions": true,
+        "has_six_system": true,
+        "line_count": 996,
+        "size_bytes": 35964
+      }
+    },
+    {
+      "filename": "六向联动系统交互修复报告.html",
+      "exists": true,
+      "size": 15902,
+      "path": "D:\\daip\\refactdoc\\tutor\\六向联动系统交互修复报告.html",
+      "analysis": {
+        "has_javascript": true,
+        "has_interactive": true,
+        "has_forms": false,
+        "has_buttons": false,
+        "has_test_classes": true,
+        "has_dimensions": true,
+        "has_six_system": true,
+        "line_count": 460,
+        "size_bytes": 13541
+      }
+    },
+    {
+      "filename": "playwright_interaction_test.py",
+      "exists": true,
+      "size": 11365,
+      "path": "D:\\daip\\refactdoc\\tutor\\playwright_interaction_test.py",
+      "analysis": {
+        "line_count": 263,
+        "size_bytes": 9462,
+        "has_async_functions": true,
+        "has_playwright_import": true,
+        "has_test_functions": true,
+        "has_browser_launch": true,
+        "has_six_dimension_tests": true,
+        "has_error_handling": true,
+        "has_file_analysis": false,
+        "has_test_runner": true,
+        "ready_to_run": true
+      }
+    },
+    {
+      "filename": "alternative_test_runner.py",
+      "exists": true,
+      "size": 8878,
+      "path": "D:\\daip\\refactdoc\\tutor\\alternative_test_runner.py",
+      "analysis": {
+        "line_count": 257,
+        "size_bytes": 7395,
+        "has_async_functions": false,
+        "has_playwright_import": true,
+        "has_test_functions": true,
+        "has_browser_launch": false,
+        "has_six_dimension_tests": true,
+        "has_error_handling": true,
+        "has_file_analysis": true,
+        "has_test_runner": true,
+        "ready_to_run": true
+      }
+    },
+    {
+      "filename": "execute_test_analysis.py",
+      "exists": true,
+      "size": 8633,
+      "path": "D:\\daip\\refactdoc\\tutor\\execute_test_analysis.py",
+      "analysis": {
+        "line_count": 201,
+        "size_bytes": 7825,
+        "has_async_functions": true,
+        "has_playwright_import": true,
+        "has_test_functions": true,
+        "has_browser_launch": true,
+        "has_six_dimension_tests": true,
+        "has_error_handling": true,
+        "has_file_analysis": true,
+        "has_test_runner": true,
+        "ready_to_run": true
+      }
+    }
+  ],
+  "summary": {
+    "total_files": 7,
+    "existing_files": 7,
+    "html_files_with_js": 4,
+    "html_files_with_interactive": 4,
+    "html_files_with_dimensions": 4,
+    "python_scripts_ready": 3
+  }
+}

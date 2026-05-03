@@ -1,0 +1,4101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude技能模块 - DAIP-LIVE 规范化编程模块解析</title>
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            height: fit-content;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h3 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-bottom: 12px;
+        }
+
+        .nav-menu a {
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        .nav-menu a:hover {
+            background: #ffe5e5;
+            color: #ff6b6b;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            color: #34495e;
+            margin: 30px 0 15px;
+            font-size: 1.4rem;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .principle-tag {
+            display: inline-block;
+            background: #ff6b6b;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 5px;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .skills-diagram {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .skill-category {
+            display: inline-block;
+            background: white;
+            border: 2px solid #ff6b6b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .connector {
+            font-size: 1.5rem;
+            color: #ff6b6b;
+            margin: 0 10px;
+        }
+
+        .best-practices {
+            background: linear-gradient(135deg, #ffcccc 0%, #ff9999 100%);
+            color: #2d3748;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .best-practices h4 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .best-practices ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .best-practices li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .best-practices li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .test-example {
+            background: #fef5e7;
+            border: 1px solid #f9e79f;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .navigation-footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 60px;
+        }
+
+        .navigation-footer h3 {
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            background: #ff6b6b;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #ee5a24;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Claude技能模块</h1>
+        <p class="subtitle">DAIP-LIVE Claude技能集成与同步系统的规范化实现</p>
+    </header>
+
+    <div class="container">
+        <div class="content-grid">
+            <nav class="sidebar">
+                <h3>导航目录</h3>
+                <ul class="nav-menu">
+                    <li><a href="#overview">模块概述</a></li>
+                    <li><a href="#architecture">架构设计</a></li>
+                    <li><a href="#skills-system">技能系统</a></li>
+                    <li><a href="#claude-sync">Claude同步</a></li>
+                    <li><a href="#skill-discovery">技能发现</a></li>
+                    <li><a href="#solid-principles">SOLID原则体现</a></li>
+                    <li><a href="#tdd-implementation">TDD实现</a></li>
+                    <li><a href="#code-examples">代码示例</a></li>
+                    <li><a href="#best-practices">最佳实践</a></li>
+                    <li><a href="#related-docs">相关规范文档</a></li>
+                </ul>
+            </nav>
+
+            <main class="main-content">
+                <section id="overview" class="section">
+                    <h2>模块概述</h2>
+                    <div class="card">
+                        <h4>模块职责</h4>
+                        <p>Claude技能模块是DAIP-LIVE系统中负责Claude AI技能发现、集成、同步和管理的核心组件。它实现了与Claude Skills生态系统的无缝集成，为DAIP-LIVE提供丰富的AI能力扩展，包括代码生成、数据分析、文档处理、图像理解等多种专业技能。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>核心功能</h4>
+                        <ul>
+                            <li><strong>技能发现与注册</strong>：自动发现和注册Claude技能，维护技能目录</li>
+                            <li><strong>技能同步机制</strong>：与Claude Skills仓库实时同步，保持技能库最新</li>
+                            <li><strong>技能调用管理</strong>：统一的技能调用接口，支持异步并发调用</li>
+                            <li><strong>技能版本控制</strong>：技能版本管理和兼容性检查</li>
+                            <li><strong>权限与安全</strong>：技能执行权限控制和安全沙箱</li>
+                            <li><strong>性能监控</strong>：技能执行性能监控和统计分析</li>
+                        </ul>
+                    </div>
+
+                    <div class="skills-diagram">
+                        <h4>Claude技能系统架构</h4>
+                        <div style="margin: 30px 0;">
+                            <div class="skill-category">
+                                <strong>Claude Skills</strong><br>
+                                技能仓库<br>
+                                版本管理
+                            </div>
+                            <div class="connector">↔</div>
+                            <div class="skill-category">
+                                <strong>Skills Sync</strong><br>
+                                同步引擎<br>
+                                增量更新
+                            </div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div style="font-size: 2rem; color: #ff6b6b;">↓</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div class="skill-category">
+                                <strong>Skill Registry</strong><br>
+                                技能注册表<br>
+                                元数据管理
+                            </div>
+                            <div class="skill-category">
+                                <strong>Execution Engine</strong><br>
+                                执行引擎<br>
+                                沙箱环境
+                            </div>
+                            <div class="skill-category">
+                                <strong>Cache Manager</strong><br>
+                                缓存管理<br>
+                                性能优化
+                            </div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div style="font-size: 2rem; color: #ff6b6b;">↓</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div class="skill-category">
+                                <strong>DAIP-LIVE Core</strong><br>
+                                核心系统<br>
+                                集成接口
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="architecture" class="section">
+                    <h2>架构设计</h2>
+
+                    <h3>核心组件</h3>
+                    <div class="card">
+                        <h4>1. ClaudeSkillsSync</h4>
+                        <p>Claude技能同步器，负责从Claude Skills仓库获取最新技能信息，支持增量更新和冲突解决。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>2. SkillRegistry</h4>
+                        <p>技能注册表，维护所有可用技能的元数据、版本信息和依赖关系。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>3. SkillExecutor</h4>
+                        <p>技能执行器，提供安全的技能执行环境，支持参数验证、结果处理和错误恢复。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>4. SkillDiscovery</h4>
+                        <p>技能发现器，自动发现和分类新技能，提供智能推荐和搜索功能。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>5. SkillCache</h4>
+                        <p>技能缓存管理器，提供技能执行结果的缓存机制，优化性能和减少重复调用。</p>
+                    </div>
+
+                    <h3>设计原则应用</h3>
+                    <div class="principle-tag">观察者模式</div>
+                    <div class="principle-tag">策略模式</div>
+                    <div class="principle-tag">代理模式</div>
+                    <div class="principle-tag">工厂模式</div>
+                    <div class="principle-tag">缓存模式</div>
+                </section>
+
+                <section id="skills-system" class="section">
+                    <h2>技能系统实现</h2>
+
+                    <h3>技能定义和元数据</h3>
+                    <div class="code-block">
+from typing import Dict, List, Any, Optional, Union
+from dataclasses import dataclass, field
+from enum import Enum
+from datetime import datetime
+import json
+import hashlib
+
+class SkillType(Enum):
+    CODE_GENERATION = "code_generation"
+    DATA_ANALYSIS = "data_analysis"
+    DOCUMENT_PROCESSING = "document_processing"
+    IMAGE_UNDERSTANDING = "image_understanding"
+    TEXT_PROCESSING = "text_processing"
+    WEB_SCraping = "web_scraping"
+    API_INTEGRATION = "api_integration"
+    MACHINE_LEARNING = "machine_learning"
+
+class SkillStatus(Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    DEPRECATED = "deprecated"
+    UNDER_DEVELOPMENT = "under_development"
+
+@dataclass
+class SkillParameter:
+    """技能参数定义"""
+    name: str
+    type: str  # string, number, boolean, array, object
+    required: bool = True
+    default_value: Any = None
+    description: str = ""
+    validation_rules: Dict[str, Any] = field(default_factory=dict)
+
+@dataclass
+class SkillCapability:
+    """技能能力描述"""
+    name: str
+    description: str
+    input_types: List[str]
+    output_types: List[str]
+    examples: List[Dict[str, Any]] = field(default_factory=list)
+
+@dataclass
+class ClaudeSkill:
+    """Claude技能定义"""
+    skill_id: str
+    name: str
+    version: str
+    description: str
+    author: str
+    skill_type: SkillType
+    status: SkillStatus
+    capabilities: List[SkillCapability]
+    parameters: List[SkillParameter]
+    dependencies: List[str] = field(default_factory=list)
+    tags: List[str] = field(default_factory=list)
+    repository_url: str = ""
+    documentation_url: str = ""
+    license: str = ""
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=datetime.now)
+    file_hash: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self):
+        """后处理，生成文件哈希"""
+        if not self.file_hash:
+            self.file_hash = self._generate_hash()
+
+    def _generate_hash(self) -> str:
+        """生成技能文件哈希"""
+        content = {
+            "skill_id": self.skill_id,
+            "name": self.name,
+            "version": self.version,
+            "description": self.description,
+            "parameters": [param.__dict__ for param in self.parameters]
+        }
+        content_str = json.dumps(content, sort_keys=True)
+        return hashlib.sha256(content_str.encode()).hexdigest()[:16]
+
+    def validate_parameters(self, params: Dict[str, Any]) -> Dict[str, str]:
+        """验证参数"""
+        errors = {}
+
+        for param in self.parameters:
+            param_name = param.name
+            param_value = params.get(param_name)
+
+            # 检查必需参数
+            if param.required and param_value is None:
+                errors[param_name] = f"Parameter '{param_name}' is required"
+                continue
+
+            # 跳过可选参数的空值
+            if not param.required and param_value is None:
+                continue
+
+            # 类型检查
+            if not self._validate_parameter_type(param_value, param.type):
+                errors[param_name] = f"Parameter '{param_name}' must be of type {param.type}"
+                continue
+
+            # 验证规则检查
+            validation_errors = self._validate_parameter_rules(param_value, param.validation_rules)
+            if validation_errors:
+                errors[param_name] = validation_errors
+
+        return errors
+
+    def _validate_parameter_type(self, value: Any, expected_type: str) -> bool:
+        """验证参数类型"""
+        type_mapping = {
+            "string": str,
+            "number": (int, float),
+            "boolean": bool,
+            "array": list,
+            "object": dict
+        }
+
+        expected_python_type = type_mapping.get(expected_type)
+        if expected_python_type:
+            return isinstance(value, expected_python_type)
+
+        return True  # 未知类型，跳过验证
+
+    def _validate_parameter_rules(self, value: Any, rules: Dict[str, Any]) -> str:
+        """验证参数规则"""
+        if not rules:
+            return ""
+
+        # 最小值检查
+        if "min" in rules and isinstance(value, (int, float)):
+            if value < rules["min"]:
+                return f"Value must be >= {rules['min']}"
+
+        # 最大值检查
+        if "max" in rules and isinstance(value, (int, float)):
+            if value > rules["max"]:
+                return f"Value must be <= {rules['max']}"
+
+        # 最小长度检查
+        if "min_length" in rules and isinstance(value, (str, list)):
+            if len(value) < rules["min_length"]:
+                return f"Length must be >= {rules['min_length']}"
+
+        # 最大长度检查
+        if "max_length" in rules and isinstance(value, (str, list)):
+            if len(value) > rules["max_length"]:
+                return f"Length must be <= {rules['max_length']}"
+
+        # 正则表达式检查
+        if "pattern" in rules and isinstance(value, str):
+            import re
+            if not re.match(rules["pattern"], value):
+                return f"Value does not match required pattern"
+
+        return ""
+
+class SkillRegistry:
+    """技能注册表"""
+
+    def __init__(self, storage: 'SkillStorage'):
+        self.storage = storage
+        self.skills: Dict[str, ClaudeSkill] = {}
+        self.skills_by_type: Dict[SkillType, List[str]] = {}
+        self.skills_by_tag: Dict[str, List[str]] = {}
+
+    async def register_skill(self, skill: ClaudeSkill) -> bool:
+        """注册技能"""
+        try:
+            # 验证技能定义
+            validation_errors = self._validate_skill(skill)
+            if validation_errors:
+                raise ValueError(f"Skill validation failed: {validation_errors}")
+
+            # 检查技能是否已存在
+            existing_skill = await self.get_skill(skill.skill_id)
+            if existing_skill:
+                # 检查版本兼容性
+                if not self._is_compatible_version(existing_skill.version, skill.version):
+                    raise ValueError(f"Incompatible version: {skill.version}")
+
+            # 保存技能
+            await self.storage.save_skill(skill)
+            self.skills[skill.skill_id] = skill
+
+            # 更新索引
+            self._update_indexes(skill)
+
+            return True
+
+        except Exception as e:
+            print(f"Error registering skill {skill.skill_id}: {e}")
+            return False
+
+    async def get_skill(self, skill_id: str) -> Optional[ClaudeSkill]:
+        """获取技能"""
+        if skill_id in self.skills:
+            return self.skills[skill_id]
+
+        # 从存储加载
+        skill = await self.storage.load_skill(skill_id)
+        if skill:
+            self.skills[skill_id] = skill
+            self._update_indexes(skill)
+
+        return skill
+
+    async def search_skills(self,
+                          query: str = "",
+                          skill_type: Optional[SkillType] = None,
+                          tags: List[str] = None,
+                          status: Optional[SkillStatus] = None,
+                          limit: int = 50) -> List[ClaudeSkill]:
+        """搜索技能"""
+        results = []
+
+        for skill in self.skills.values():
+            # 状态过滤
+            if status and skill.status != status:
+                continue
+
+            # 类型过滤
+            if skill_type and skill.skill_type != skill_type:
+                continue
+
+            # 标签过滤
+            if tags and not any(tag in skill.tags for tag in tags):
+                continue
+
+            # 文本搜索
+            if query:
+                search_text = f"{skill.name} {skill.description} {' '.join(skill.tags)}".lower()
+                if query.lower() not in search_text:
+                    continue
+
+            results.append(skill)
+
+        # 按相关性排序（简化实现）
+        if query:
+            results.sort(key=lambda s: self._calculate_relevance(s, query), reverse=True)
+
+        return results[:limit]
+
+    async def get_skills_by_type(self, skill_type: SkillType) -> List[ClaudeSkill]:
+        """按类型获取技能"""
+        if skill_type in self.skills_by_type:
+            skill_ids = self.skills_by_type[skill_type]
+            return [self.skills[skill_id] for skill_id in skill_ids if skill_id in self.skills]
+        return []
+
+    async def update_skill(self, skill_id: str, updates: Dict[str, Any]) -> bool:
+        """更新技能"""
+        skill = await self.get_skill(skill_id)
+        if not skill:
+            return False
+
+        # 应用更新
+        for key, value in updates.items():
+            if hasattr(skill, key):
+                setattr(skill, key, value)
+
+        skill.updated_at = datetime.now()
+        skill.file_hash = skill._generate_hash()
+
+        # 保存更新
+        return await self.register_skill(skill)
+
+    async def get_skill_dependencies(self, skill_id: str) -> List[ClaudeSkill]:
+        """获取技能依赖"""
+        skill = await self.get_skill(skill_id)
+        if not skill or not skill.dependencies:
+            return []
+
+        dependencies = []
+        for dep_id in skill.dependencies:
+            dep_skill = await self.get_skill(dep_id)
+            if dep_skill:
+                dependencies.append(dep_skill)
+
+        return dependencies
+
+    def _validate_skill(self, skill: ClaudeSkill) -> List[str]:
+        """验证技能定义"""
+        errors = []
+
+        if not skill.skill_id:
+            errors.append("Skill ID is required")
+
+        if not skill.name:
+            errors.append("Skill name is required")
+
+        if not skill.version:
+            errors.append("Skill version is required")
+
+        if not skill.description:
+            errors.append("Skill description is required")
+
+        # 验证参数定义
+        param_names = set()
+        for param in skill.parameters:
+            if not param.name:
+                errors.append("Parameter name is required")
+            elif param.name in param_names:
+                errors.append(f"Duplicate parameter name: {param.name}")
+            else:
+                param_names.add(param.name)
+
+        # 验证依赖技能是否存在
+        for dep_id in skill.dependencies:
+            if dep_id not in self.skills and not self.storage.skill_exists(dep_id):
+                errors.append(f"Dependency skill not found: {dep_id}")
+
+        return errors
+
+    def _is_compatible_version(self, current_version: str, new_version: str) -> bool:
+        """检查版本兼容性"""
+        try:
+            # 简化的版本比较，实际应用中可能需要更复杂的语义版本检查
+            current_parts = [int(x) for x in current_version.split('.')]
+            new_parts = [int(x) for x in new_version.split('.')]
+
+            # 主版本号必须相同
+            return current_parts[0] == new_parts[0]
+        except:
+            return False
+
+    def _update_indexes(self, skill: ClaudeSkill):
+        """更新索引"""
+        # 类型索引
+        if skill.skill_type not in self.skills_by_type:
+            self.skills_by_type[skill.skill_type] = []
+        if skill.skill_id not in self.skills_by_type[skill.skill_type]:
+            self.skills_by_type[skill.skill_type].append(skill.skill_id)
+
+        # 标签索引
+        for tag in skill.tags:
+            if tag not in self.skills_by_tag:
+                self.skills_by_tag[tag] = []
+            if skill.skill_id not in self.skills_by_tag[tag]:
+                self.skills_by_tag[tag].append(skill.skill_id)
+
+    def _calculate_relevance(self, skill: ClaudeSkill, query: str) -> float:
+        """计算搜索相关性分数"""
+        query_lower = query.lower()
+        score = 0.0
+
+        # 名称匹配
+        if query_lower in skill.name.lower():
+            score += 10.0
+
+        # 描述匹配
+        if query_lower in skill.description.lower():
+            score += 5.0
+
+        # 标签匹配
+        for tag in skill.tags:
+            if query_lower in tag.lower():
+                score += 3.0
+
+        return score
+                    </div>
+
+                    <h3>技能执行引擎</h3>
+                    <div class="code-block">
+import asyncio
+import subprocess
+import tempfile
+import os
+from typing import Dict, Any, Optional, List
+from concurrent.futures import ThreadPoolExecutor
+import json
+import time
+
+class SkillExecutionContext:
+    """技能执行上下文"""
+
+    def __init__(self,
+                 skill_id: str,
+                 parameters: Dict[str, Any],
+                 user_id: str = None,
+                 session_id: str = None,
+                 timeout: int = 300):
+        self.skill_id = skill_id
+        self.parameters = parameters
+        self.user_id = user_id
+        self.session_id = session_id
+        self.timeout = timeout
+        self.start_time = time.time()
+        self.end_time = None
+        self.status = "pending"
+        self.result = None
+        self.error = None
+        self.metadata = {}
+
+    def mark_started(self):
+        """标记开始执行"""
+        self.status = "running"
+        self.start_time = time.time()
+
+    def mark_completed(self, result: Any):
+        """标记完成"""
+        self.status = "completed"
+        self.end_time = time.time()
+        self.result = result
+
+    def mark_failed(self, error: Exception):
+        """标记失败"""
+        self.status = "failed"
+        self.end_time = time.time()
+        self.error = str(error)
+
+    @property
+    def duration(self) -> float:
+        """获取执行时长"""
+        end = self.end_time or time.time()
+        return end - self.start_time
+
+class SkillExecutor:
+    """技能执行器"""
+
+    def __init__(self,
+                 skill_registry: SkillRegistry,
+                 sandbox_manager: 'SandboxManager',
+                 cache_manager: 'SkillCache'):
+        self.skill_registry = skill_registry
+        self.sandbox_manager = sandbox_manager
+        self.cache_manager = cache_manager
+        self.executor_pool = ThreadPoolExecutor(max_workers=10)
+        self.active_executions: Dict[str, SkillExecutionContext] = {}
+
+    async def execute_skill(self,
+                          skill_id: str,
+                          parameters: Dict[str, Any],
+                          user_id: str = None,
+                          session_id: str = None,
+                          use_cache: bool = True) -> Any:
+        """执行技能"""
+        # 检查缓存
+        if use_cache:
+            cache_key = self._generate_cache_key(skill_id, parameters)
+            cached_result = await self.cache_manager.get(cache_key)
+            if cached_result:
+                return cached_result
+
+        # 获取技能定义
+        skill = await self.skill_registry.get_skill(skill_id)
+        if not skill:
+            raise ValueError(f"Skill not found: {skill_id}")
+
+        # 验证参数
+        validation_errors = skill.validate_parameters(parameters)
+        if validation_errors:
+            raise ValueError(f"Parameter validation failed: {validation_errors}")
+
+        # 创建执行上下文
+        execution_id = self._generate_execution_id()
+        context = SkillExecutionContext(
+            skill_id=skill_id,
+            parameters=parameters,
+            user_id=user_id,
+            session_id=session_id
+        )
+
+        self.active_executions[execution_id] = context
+
+        try:
+            context.mark_started()
+
+            # 检查依赖
+            await self._check_dependencies(skill)
+
+            # 执行技能
+            result = await self._execute_skill_in_sandbox(skill, parameters, context)
+
+            context.mark_completed(result)
+
+            # 缓存结果
+            if use_cache:
+                await self.cache_manager.set(cache_key, result, ttl=3600)
+
+            return result
+
+        except Exception as e:
+            context.mark_failed(e)
+            raise
+
+        finally:
+            # 清理活跃执行
+            self.active_executions.pop(execution_id, None)
+
+    async def execute_skill_batch(self,
+                                 skill_requests: List[Dict[str, Any]]) -> List[Any]:
+        """批量执行技能"""
+        tasks = []
+        for request in skill_requests:
+            task = self.execute_skill(
+                skill_id=request["skill_id"],
+                parameters=request.get("parameters", {}),
+                user_id=request.get("user_id"),
+                session_id=request.get("session_id")
+            )
+            tasks.append(task)
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        return results
+
+    async def _execute_skill_in_sandbox(self,
+                                      skill: ClaudeSkill,
+                                      parameters: Dict[str, Any],
+                                      context: SkillExecutionContext) -> Any:
+        """在沙箱中执行技能"""
+        # 创建沙箱环境
+        sandbox = await self.sandbox_manager.create_sandbox(
+            sandbox_id=context.skill_id,
+            dependencies=skill.dependencies
+        )
+
+        try:
+            # 准备技能执行环境
+            await self._prepare_sandbox_environment(sandbox, skill, parameters)
+
+            # 执行技能
+            result = await self._run_skill_code(sandbox, skill, parameters, context)
+
+            return result
+
+        finally:
+            # 清理沙箱
+            await self.sandbox_manager.cleanup_sandbox(sandbox.sandbox_id)
+
+    async def _prepare_sandbox_environment(self,
+                                         sandbox: 'Sandbox',
+                                         skill: ClaudeSkill,
+                                         parameters: Dict[str, Any]):
+        """准备沙箱环境"""
+        # 创建参数文件
+        params_file = os.path.join(sandbox.work_dir, "parameters.json")
+        with open(params_file, 'w') as f:
+            json.dump(parameters, f, indent=2)
+
+        # 创建技能脚本
+        skill_script = self._generate_skill_script(skill)
+        script_file = os.path.join(sandbox.work_dir, "skill.py")
+        with open(script_file, 'w') as f:
+            f.write(skill_script)
+
+        # 安装依赖
+        if skill.dependencies:
+            await sandbox.install_dependencies(skill.dependencies)
+
+    async def _run_skill_code(self,
+                             sandbox: 'Sandbox',
+                             skill: ClaudeSkill,
+                             parameters: Dict[str, Any],
+                             context: SkillExecutionContext) -> Any:
+        """运行技能代码"""
+        # 构建执行命令
+        cmd = [
+            "python",
+            "skill.py",
+            "--parameters", "parameters.json",
+            "--output", "result.json"
+        ]
+
+        # 在沙箱中执行
+        loop = asyncio.get_event_loop()
+        process = await loop.run_in_executor(
+            self.executor_pool,
+            lambda: subprocess.run(
+                cmd,
+                cwd=sandbox.work_dir,
+                capture_output=True,
+                text=True,
+                timeout=context.timeout
+            )
+        )
+
+        # 检查执行结果
+        if process.returncode != 0:
+            error_output = process.stderr.strip()
+            raise RuntimeError(f"Skill execution failed: {error_output}")
+
+        # 读取结果
+        result_file = os.path.join(sandbox.work_dir, "result.json")
+        if os.path.exists(result_file):
+            with open(result_file, 'r') as f:
+                return json.load(f)
+        else:
+            return {"stdout": process.stdout.strip()}
+
+    def _generate_skill_script(self, skill: ClaudeSkill) -> str:
+        """生成技能执行脚本"""
+        return f'''
+import json
+import sys
+import argparse
+from typing import Any, Dict
+
+def main():
+    parser = argparse.ArgumentParser(description='Execute Claude skill')
+    parser.add_argument('--parameters', required=True, help='Parameters file')
+    parser.add_argument('--output', required=True, help='Output file')
+
+    args = parser.parse_args()
+
+    # 加载参数
+    with open(args.parameters, 'r') as f:
+        parameters = json.load(f)
+
+    try:
+        # 这里应该加载实际的技能代码
+        # 简化实现，返回参数作为结果
+        result = {{
+            "skill_id": "{skill.skill_id}",
+            "parameters": parameters,
+            "execution_time": None,
+            "status": "success"
+        }}
+
+        # 保存结果
+        with open(args.output, 'w') as f:
+            json.dump(result, f, indent=2)
+
+        print(f"Skill executed successfully")
+        return 0
+
+    except Exception as e:
+        error_result = {{
+            "skill_id": "{skill.skill_id}",
+            "error": str(e),
+            "status": "error"
+        }}
+
+        with open(args.output, 'w') as f:
+            json.dump(error_result, f, indent=2)
+
+        print(f"Skill execution failed: {{e}}", file=sys.stderr)
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+'''
+
+    async def _check_dependencies(self, skill: ClaudeSkill):
+        """检查技能依赖"""
+        if not skill.dependencies:
+            return
+
+        for dep_id in skill.dependencies:
+            dep_skill = await self.skill_registry.get_skill(dep_id)
+            if not dep_skill:
+                raise ValueError(f"Dependency skill not found: {dep_id}")
+
+            if dep_skill.status != SkillStatus.ACTIVE:
+                raise ValueError(f"Dependency skill is not active: {dep_id}")
+
+    def _generate_cache_key(self, skill_id: str, parameters: Dict[str, Any]) -> str:
+        """生成缓存键"""
+        import hashlib
+        content = f"{skill_id}:{json.dumps(parameters, sort_keys=True)}"
+        return hashlib.md5(content.encode()).hexdigest()
+
+    def _generate_execution_id(self) -> str:
+        """生成执行ID"""
+        import uuid
+        return str(uuid.uuid4())
+
+    async def get_execution_status(self, execution_id: str) -> Optional[Dict[str, Any]]:
+        """获取执行状态"""
+        context = self.active_executions.get(execution_id)
+        if not context:
+            return None
+
+        return {
+            "execution_id": execution_id,
+            "skill_id": context.skill_id,
+            "status": context.status,
+            "duration": context.duration,
+            "start_time": context.start_time,
+            "end_time": context.end_time,
+            "error": context.error
+        }
+
+    async def cancel_execution(self, execution_id: str) -> bool:
+        """取消执行"""
+        context = self.active_executions.get(execution_id)
+        if not context or context.status != "running":
+            return False
+
+        context.status = "cancelled"
+        context.end_time = time.time()
+
+        # 这里应该实现实际的取消逻辑
+        # 比如终止子进程等
+
+        return True
+
+    async def get_active_executions(self) -> List[Dict[str, Any]]:
+        """获取所有活跃执行"""
+        return [
+            await self.get_execution_status(execution_id)
+            for execution_id in self.active_executions.keys()
+        ]
+                    </div>
+                </section>
+
+                <section id="claude-sync" class="section">
+                    <h2>Claude同步机制</h2>
+
+                    <h3>技能同步引擎</h3>
+                    <div class="code-block">
+import asyncio
+import aiohttp
+import aiofiles
+import os
+import json
+from typing import Dict, List, Any, Optional
+from datetime import datetime, timedelta
+import git
+from pathlib import Path
+
+class ClaudeSkillsSync:
+    """Claude技能同步引擎"""
+
+    def __init__(self,
+                 skills_registry: SkillRegistry,
+                 repository_url: str = "https://github.com/anthropics/claude-skills",
+                 local_path: str = "./claude-skills",
+                 sync_interval: int = 3600):  # 1小时
+        self.registry = skills_registry
+        self.repository_url = repository_url
+        self.local_path = Path(local_path)
+        self.sync_interval = sync_interval
+        self.last_sync_time = None
+        self.sync_lock = asyncio.Lock()
+
+    async def start_sync_service(self):
+        """启动同步服务"""
+        while True:
+            try:
+                await self.sync_skills()
+                await asyncio.sleep(self.sync_interval)
+            except Exception as e:
+                print(f"Sync service error: {e}")
+                await asyncio.sleep(60)  # 错误时等待1分钟再试
+
+    async def sync_skills(self, force: bool = False) -> Dict[str, Any]:
+        """同步技能"""
+        async with self.sync_lock:
+            try:
+                # 检查是否需要同步
+                if not force and not await self._should_sync():
+                    return {"status": "skipped", "reason": "No updates available"}
+
+                # 克隆或更新仓库
+                await self._update_repository()
+
+                # 扫描技能文件
+                skill_files = await self._scan_skill_files()
+
+                # 处理技能文件
+                sync_results = await self._process_skill_files(skill_files)
+
+                # 更新同步时间
+                self.last_sync_time = datetime.now()
+
+                return {
+                    "status": "success",
+                    "synced_at": self.last_sync_time.isoformat(),
+                    "total_files": len(skill_files),
+                    "results": sync_results
+                }
+
+            except Exception as e:
+                print(f"Skills sync failed: {e}")
+                return {
+                    "status": "error",
+                    "error": str(e),
+                    "synced_at": datetime.now().isoformat()
+                }
+
+    async def _should_sync(self) -> bool:
+        """检查是否需要同步"""
+        if not self.last_sync_time:
+            return True
+
+        # 检查远程仓库是否有更新
+        try:
+            async with aiohttp.ClientSession() as session:
+                # 获取远程仓库最新提交信息
+                api_url = "https://api.github.com/repos/anthropics/claude-skills/commits/main"
+                async with session.get(api_url) as response:
+                    if response.status == 200:
+                        commit_info = await response.json()
+                        commit_time = datetime.fromisoformat(
+                            commit_info["commit"]["committer"]["date"].replace("Z", "+00:00")
+                        )
+                        return commit_time > self.last_sync_time
+        except Exception as e:
+            print(f"Error checking remote updates: {e}")
+
+        # 如果无法检查远程，基于时间间隔决定
+        return (datetime.now() - self.last_sync_time).seconds >= self.sync_interval
+
+    async def _update_repository(self):
+        """更新本地仓库"""
+        if not self.local_path.exists():
+            # 克隆仓库
+            print(f"Cloning Claude skills repository to {self.local_path}")
+            await self._run_command(["git", "clone", self.repository_url, str(self.local_path)])
+        else:
+            # 更新仓库
+            print(f"Updating Claude skills repository")
+            await self._run_command(["git", "pull"], cwd=self.local_path)
+
+    async def _scan_skill_files(self) -> List[Path]:
+        """扫描技能文件"""
+        skill_files = []
+        skills_dir = self.local_path / "skills"
+
+        if not skills_dir.exists():
+            return skill_files
+
+        # 扫描所有.py文件
+        for skill_file in skills_dir.rglob("*.py"):
+            if skill_file.name.startswith("__"):
+                continue
+
+            # 检查是否是技能文件（通过文件内容判断）
+            if await self._is_skill_file(skill_file):
+                skill_files.append(skill_file)
+
+        return skill_files
+
+    async def _is_skill_file(self, file_path: Path) -> bool:
+        """检查是否是技能文件"""
+        try:
+            async with aiofiles.open(file_path, 'r', encoding='utf-8') as f:
+                content = await f.read()
+
+                # 简单的技能文件识别逻辑
+                indicators = [
+                    "@skill",
+                    "def skill(",
+                    "claude_skill",
+                    "skill_definition"
+                ]
+
+                content_lower = content.lower()
+                return any(indicator in content_lower for indicator in indicators)
+
+        except Exception:
+            return False
+
+    async def _process_skill_files(self, skill_files: List[Path]) -> List[Dict[str, Any]]:
+        """处理技能文件"""
+        results = []
+        semaphore = asyncio.Semaphore(10)  # 限制并发数
+
+        async def process_single_file(file_path: Path) -> Dict[str, Any]:
+            async with semaphore:
+                return await self._process_skill_file(file_path)
+
+        tasks = [process_single_file(file_path) for file_path in skill_files]
+        file_results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        for file_path, result in zip(skill_files, file_results):
+            if isinstance(result, Exception):
+                print(f"Error processing {file_path}: {result}")
+                results.append({
+                    "file": str(file_path),
+                    "status": "error",
+                    "error": str(result)
+                })
+            else:
+                results.append(result)
+
+        return results
+
+    async def _process_skill_file(self, file_path: Path) -> Dict[str, Any]:
+        """处理单个技能文件"""
+        try:
+            # 解析技能定义
+            skill = await self._parse_skill_file(file_path)
+            if not skill:
+                return {
+                    "file": str(file_path),
+                    "status": "skipped",
+                    "reason": "No valid skill definition found"
+                }
+
+            # 注册技能
+            success = await self.registry.register_skill(skill)
+
+            return {
+                "file": str(file_path),
+                "skill_id": skill.skill_id,
+                "status": "success" if success else "failed",
+                "skill_name": skill.name,
+                "skill_version": skill.version
+            }
+
+        except Exception as e:
+            return {
+                "file": str(file_path),
+                "status": "error",
+                "error": str(e)
+            }
+
+    async def _parse_skill_file(self, file_path: Path) -> Optional[ClaudeSkill]:
+        """解析技能文件"""
+        async with aiofiles.open(file_path, 'r', encoding='utf-8') as f:
+            content = await f.read()
+
+        # 使用AST解析技能定义
+        try:
+            import ast
+
+            tree = ast.parse(content)
+            skill_definition = None
+
+            for node in ast.walk(tree):
+                if (isinstance(node, ast.FunctionDef) and
+                    node.name.startswith("skill_")):
+                    skill_definition = node
+                    break
+
+            if not skill_definition:
+                return None
+
+            # 提取技能信息
+            skill_info = self._extract_skill_info(skill_definition, content, file_path)
+            return self._create_skill_from_info(skill_info, file_path)
+
+        except Exception as e:
+            print(f"Error parsing skill file {file_path}: {e}")
+            return None
+
+    def _extract_skill_info(self, node: ast.FunctionDef, content: str, file_path: Path) -> Dict[str, Any]:
+        """从AST节点提取技能信息"""
+        skill_info = {
+            "name": node.name.replace("skill_", "").replace("_", " ").title(),
+            "description": "",
+            "parameters": [],
+            "tags": []
+        }
+
+        # 提取文档字符串
+        if (node.body and isinstance(node.body[0], ast.Expr) and
+            isinstance(node.body[0].value, ast.Constant) and
+            isinstance(node.body[0].value.value, str)):
+            skill_info["description"] = node.body[0].value.value
+
+        # 提取参数
+        if node.args.args:
+            for arg in node.args.args[1:]:  # 跳过self参数
+                param_info = {
+                    "name": arg.arg,
+                    "type": "string",
+                    "required": True
+                }
+                skill_info["parameters"].append(param_info)
+
+        # 从文件路径和内容提取标签
+        relative_path = file_path.relative_to(self.local_path)
+        path_parts = str(relative_path).lower().split(os.sep)
+
+        # 从路径提取类别标签
+        if len(path_parts) > 1:
+            skill_info["tags"].extend(path_parts[:-1])
+
+        # 从内容提取功能标签
+        content_lower = content.lower()
+        if "database" in content_lower:
+            skill_info["tags"].append("database")
+        if "api" in content_lower:
+            skill_info["tags"].append("api")
+        if "file" in content_lower:
+            skill_info["tags"].append("file")
+
+        return skill_info
+
+    def _create_skill_from_info(self, skill_info: Dict[str, Any], file_path: Path) -> ClaudeSkill:
+        """从技能信息创建ClaudeSkill对象"""
+        skill_id = file_path.stem
+
+        # 确定技能类型
+        skill_type = self._determine_skill_type(skill_info, file_path)
+
+        # 创建参数对象
+        parameters = []
+        for param_info in skill_info["parameters"]:
+            parameter = SkillParameter(
+                name=param_info["name"],
+                type=param_info.get("type", "string"),
+                required=param_info.get("required", True),
+                description=param_info.get("description", "")
+            )
+            parameters.append(parameter)
+
+        # 创建能力描述
+        capability = SkillCapability(
+            name="main",
+            description=skill_info["description"],
+            input_types=["text", "dict"],
+            output_types=["text", "dict"],
+            examples=[]
+        )
+
+        return ClaudeSkill(
+            skill_id=skill_id,
+            name=skill_info["name"],
+            version="1.0.0",
+            description=skill_info["description"],
+            author="Claude Skills Community",
+            skill_type=skill_type,
+            status=SkillStatus.ACTIVE,
+            capabilities=[capability],
+            parameters=parameters,
+            tags=list(set(skill_info["tags"])),
+            repository_url=self.repository_url,
+            file_path=str(file_path.relative_to(self.local_path))
+        )
+
+    def _determine_skill_type(self, skill_info: Dict[str, Any], file_path: Path) -> SkillType:
+        """确定技能类型"""
+        content_lower = " ".join([
+            skill_info["name"],
+            skill_info["description"],
+            str(file_path)
+        ]).lower()
+
+        # 基于关键词判断技能类型
+        type_keywords = {
+            SkillType.CODE_GENERATION: ["code", "generate", "programming", "development"],
+            SkillType.DATA_ANALYSIS: ["data", "analysis", "analytics", "statistics"],
+            SkillType.DOCUMENT_PROCESSING: ["document", "pdf", "text", "processing"],
+            SkillType.IMAGE_UNDERSTANDING: ["image", "vision", "picture", "photo"],
+            SkillType.WEB_SCRAPING: ["scrape", "crawl", "web", "extract"],
+            SkillType.API_INTEGRATION: ["api", "integration", "service", "endpoint"]
+        }
+
+        scores = {}
+        for skill_type, keywords in type_keywords.items():
+            score = sum(1 for keyword in keywords if keyword in content_lower)
+            scores[skill_type] = score
+
+        # 返回得分最高的类型
+        if scores:
+            return max(scores.keys(), key=lambda k: scores[k])
+
+        return SkillType.TEXT_PROCESSING  # 默认类型
+
+    async def _run_command(self, command: List[str], cwd: Optional[Path] = None) -> str:
+        """运行命令"""
+        process = await asyncio.create_subprocess_exec(
+            *command,
+            cwd=cwd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+
+        stdout, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            raise RuntimeError(f"Command failed: {command}, Error: {stderr.decode()}")
+
+        return stdout.decode()
+
+    async def get_sync_status(self) -> Dict[str, Any]:
+        """获取同步状态"""
+        return {
+            "last_sync_time": self.last_sync_time.isoformat() if self.last_sync_time else None,
+            "sync_interval": self.sync_interval,
+            "repository_url": self.repository_url,
+            "local_path": str(self.local_path),
+            "next_sync_time": (
+                self.last_sync_time + timedelta(seconds=self.sync_interval)
+            ).isoformat() if self.last_sync_time else None
+        }
+
+    async def force_sync(self) -> Dict[str, Any]:
+        """强制同步"""
+        return await self.sync_skills(force=True)
+                    </div>
+
+                    <h3>增量更新机制</h3>
+                    <div class="code-block">
+class IncrementalSkillUpdater:
+    """增量技能更新器"""
+
+    def __init__(self,
+                 skills_registry: SkillRegistry,
+                 change_detector: 'SkillChangeDetector'):
+        self.registry = skills_registry
+        self.change_detector = change_detector
+        self.update_queue = asyncio.Queue()
+        self.is_running = False
+
+    async def start_monitoring(self):
+        """开始监控变化"""
+        self.is_running = True
+
+        # 启动变化检测任务
+        asyncio.create_task(self._monitor_changes())
+
+        # 启动更新处理任务
+        asyncio.create_task(self._process_updates())
+
+    async def stop_monitoring(self):
+        """停止监控"""
+        self.is_running = False
+
+    async def _monitor_changes(self):
+        """监控技能变化"""
+        while self.is_running:
+            try:
+                # 检测变化
+                changes = await self.change_detector.detect_changes()
+
+                if changes:
+                    for change in changes:
+                        await self.update_queue.put(change)
+
+                # 等待下次检查
+                await asyncio.sleep(60)  # 每分钟检查一次
+
+            except Exception as e:
+                print(f"Error monitoring changes: {e}")
+                await asyncio.sleep(60)
+
+    async def _process_updates(self):
+        """处理更新队列"""
+        while self.is_running:
+            try:
+                # 从队列获取更新任务
+                change = await asyncio.get_event_loop().run_in_executor(
+                    None, self.update_queue.get, True, 5.0  # 5秒超时
+                )
+
+                if change:
+                    await self._handle_skill_change(change)
+
+            except Exception as e:
+                print(f"Error processing update: {e}")
+
+    async def _handle_skill_change(self, change: Dict[str, Any]):
+        """处理技能变化"""
+        change_type = change["type"]
+        file_path = change["file_path"]
+
+        try:
+            if change_type == "added":
+                await self._handle_skill_added(file_path)
+            elif change_type == "modified":
+                await self._handle_skill_modified(file_path)
+            elif change_type == "deleted":
+                await self._handle_skill_deleted(file_path)
+
+        except Exception as e:
+            print(f"Error handling skill change {change_type} for {file_path}: {e}")
+
+    async def _handle_skill_added(self, file_path: str):
+        """处理新增技能"""
+        print(f"Processing new skill: {file_path}")
+
+        # 解析新技能
+        skill = await self._parse_skill_file(Path(file_path))
+        if skill:
+            await self.registry.register_skill(skill)
+            print(f"Registered new skill: {skill.skill_id}")
+        else:
+            print(f"Failed to parse skill file: {file_path}")
+
+    async def _handle_skill_modified(self, file_path: str):
+        """处理技能修改"""
+        print(f"Processing modified skill: {file_path}")
+
+        # 重新解析技能
+        skill = await self._parse_skill_file(Path(file_path))
+        if skill:
+            # 检查版本变化
+            existing_skill = await self.registry.get_skill(skill.skill_id)
+            if existing_skill:
+                # 比较版本或哈希
+                if existing_skill.file_hash != skill.file_hash:
+                    await self.registry.register_skill(skill)
+                    print(f"Updated skill: {skill.skill_id}")
+                else:
+                    print(f"Skill unchanged: {skill.skill_id}")
+            else:
+                await self.registry.register_skill(skill)
+                print(f"Registered new skill: {skill.skill_id}")
+        else:
+            print(f"Failed to parse modified skill file: {file_path}")
+
+    async def _handle_skill_deleted(self, file_path: str):
+        """处理技能删除"""
+        print(f"Processing deleted skill: {file_path}")
+
+        # 从文件路径推断技能ID
+        skill_id = Path(file_path).stem
+
+        # 标记技能为非活跃状态
+        success = await self.registry.update_skill(
+            skill_id,
+            {"status": SkillStatus.INACTIVE}
+        )
+
+        if success:
+            print(f"Marked skill as inactive: {skill_id}")
+        else:
+            print(f"Skill not found: {skill_id}")
+
+class SkillChangeDetector:
+    """技能变化检测器"""
+
+    def __init__(self, skills_directory: str):
+        self.skills_directory = Path(skills_directory)
+        self.file_hashes: Dict[str, str] = {}
+        self.last_scan_time = None
+
+    async def detect_changes(self) -> List[Dict[str, Any]]:
+        """检测技能文件变化"""
+        changes = []
+        current_files = set()
+
+        try:
+            # 扫描当前文件
+            for file_path in self.skills_directory.rglob("*.py"):
+                if self._is_skill_file(file_path):
+                    current_files.add(str(file_path))
+                    current_hash = await self._calculate_file_hash(file_path)
+
+                    if str(file_path) not in self.file_hashes:
+                        # 新文件
+                        changes.append({
+                            "type": "added",
+                            "file_path": str(file_path),
+                            "timestamp": datetime.now().isoformat()
+                        })
+                    elif self.file_hashes[str(file_path)] != current_hash:
+                        # 修改文件
+                        changes.append({
+                            "type": "modified",
+                            "file_path": str(file_path),
+                            "timestamp": datetime.now().isoformat()
+                        })
+
+                    self.file_hashes[str(file_path)] = current_hash
+
+            # 检查删除的文件
+            for file_path in set(self.file_hashes.keys()) - current_files:
+                changes.append({
+                    "type": "deleted",
+                    "file_path": file_path,
+                    "timestamp": datetime.now().isoformat()
+                })
+                del self.file_hashes[file_path]
+
+            self.last_scan_time = datetime.now()
+            return changes
+
+        except Exception as e:
+            print(f"Error detecting changes: {e}")
+            return []
+
+    def _is_skill_file(self, file_path: Path) -> bool:
+        """判断是否是技能文件"""
+        # 简化的判断逻辑
+        return (
+            file_path.name != "__init__.py" and
+            not file_path.name.startswith("test_") and
+            "skills" in str(file_path).lower()
+        )
+
+    async def _calculate_file_hash(self, file_path: Path) -> str:
+        """计算文件哈希"""
+        import hashlib
+
+        try:
+            async with aiofiles.open(file_path, 'rb') as f:
+                content = await f.read()
+                return hashlib.md5(content).hexdigest()
+        except Exception:
+            return ""
+                    </div>
+                </section>
+
+                <section id="skill-discovery" class="section">
+                    <h2>技能发现系统</h2>
+
+                    <h3>智能技能推荐</h3>
+                    <div class="code-block">
+from typing import List, Dict, Any, Tuple
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+class SkillDiscoveryEngine:
+    """技能发现引擎"""
+
+    def __init__(self,
+                 skills_registry: SkillRegistry,
+                 usage_analyzer: 'SkillUsageAnalyzer'):
+        self.registry = skills_registry
+        self.usage_analyzer = usage_analyzer
+        self.skill_vectors = None
+        self.vectorizer = None
+        self.skill_index_map = {}
+
+    async def initialize(self):
+        """初始化发现引擎"""
+        await self._build_skill_vectors()
+        await self._build_usage_patterns()
+
+    async def _build_skill_vectors(self):
+        """构建技能向量表示"""
+        # 获取所有活跃技能
+        all_skills = await self.registry.search_skills(status=SkillStatus.ACTIVE, limit=1000)
+
+        if not all_skills:
+            return
+
+        # 构建技能文本表示
+        skill_texts = []
+        skill_ids = []
+
+        for skill in all_skills:
+            # 组合技能的文本信息
+            text_parts = [
+                skill.name,
+                skill.description,
+                " ".join(skill.tags),
+                " ".join([cap.name + " " + cap.description for cap in skill.capabilities])
+            ]
+
+            skill_text = " ".join(text_parts)
+            skill_texts.append(skill_text)
+            skill_ids.append(skill.skill_id)
+
+        # 创建TF-IDF向量
+        self.vectorizer = TfidfVectorizer(
+            max_features=1000,
+            stop_words='english',
+            ngram_range=(1, 2),
+            min_df=1,
+            max_df=0.8
+        )
+
+        self.skill_vectors = self.vectorizer.fit_transform(skill_texts)
+
+        # 建立索引映射
+        self.skill_index_map = {i: skill_id for i, skill_id in enumerate(skill_ids)}
+
+    async def _build_usage_patterns(self):
+        """构建使用模式"""
+        # 这里应该从使用分析器获取历史使用数据
+        # 简化实现
+        pass
+
+    async def discover_skills(self,
+                            query: str,
+                            context: Dict[str, Any] = None,
+                            limit: int = 10) -> List[Dict[str, Any]]:
+        """发现相关技能"""
+        if self.skill_vectors is None:
+            return await self._fallback_search(query, limit)
+
+        # 向量化查询
+        query_vector = self.vectorizer.transform([query])
+
+        # 计算相似度
+        similarities = cosine_similarity(query_vector, self.skill_vectors)[0]
+
+        # 获取最相似的技能
+        top_indices = np.argsort(similarities)[::-1][:limit]
+
+        results = []
+        for idx in top_indices:
+            if similarities[idx] > 0.1:  # 相似度阈值
+                skill_id = self.skill_index_map[idx]
+                skill = await self.registry.get_skill(skill_id)
+
+                if skill and skill.status == SkillStatus.ACTIVE:
+                    results.append({
+                        "skill": skill,
+                        "relevance_score": float(similarities[idx]),
+                        "match_reasons": await self._explain_match(skill, query)
+                    })
+
+        return results
+
+    async def recommend_skills(self,
+                              user_id: str,
+                              session_context: Dict[str, Any] = None,
+                              limit: int = 5) -> List[Dict[str, Any]]:
+        """为用户推荐技能"""
+        # 获取用户历史使用记录
+        user_history = await self.usage_analyzer.get_user_history(user_id)
+
+        # 获取会话上下文
+        context_keywords = self._extract_context_keywords(session_context)
+
+        # 基于历史记录的协同过滤
+        collaborative_recs = await self._collaborative_filtering(user_id, user_history)
+
+        # 基于内容的推荐
+        content_recs = await self._content_based_filtering(user_history, context_keywords)
+
+        # 合并和排序推荐
+        recommendations = self._merge_recommendations(
+            collaborative_recs, content_recs, limit
+        )
+
+        return recommendations
+
+    async def _collaborative_filtering(self,
+                                      user_id: str,
+                                      user_history: List[Dict]) -> List[Dict[str, Any]]:
+        """协同过滤推荐"""
+        # 找到相似用户
+        similar_users = await self.usage_analyzer.find_similar_users(user_id, user_history)
+
+        # 获取相似用户使用的技能
+        recommended_skills = {}
+        for similar_user in similar_users:
+            user_skills = await self.usage_analyzer.get_user_skills(similar_user["user_id"])
+            for skill_usage in user_skills:
+                skill_id = skill_usage["skill_id"]
+                if skill_id not in recommended_skills:
+                    recommended_skills[skill_id] = {
+                        "skill_id": skill_id,
+                        "score": 0,
+                        "reason": "similar_users",
+                        "similar_users": []
+                    }
+
+                recommended_skills[skill_id]["score"] += similar_user["similarity"] * skill_usage["frequency"]
+                recommended_skills[skill_id]["similar_users"].append(similar_user["user_id"])
+
+        # 排序并返回
+        sorted_recs = sorted(
+            recommended_skills.values(),
+            key=lambda x: x["score"],
+            reverse=True
+        )
+
+        return sorted_recs[:10]
+
+    async def _content_based_filtering(self,
+                                       user_history: List[Dict],
+                                       context_keywords: List[str]) -> List[Dict[str, Any]]:
+        """基于内容的推荐"""
+        # 分析用户偏好的技能类型和标签
+        user_preferences = self._analyze_user_preferences(user_history)
+
+        # 搜索符合偏好的技能
+        recommended_skills = []
+
+        for skill_type, preference_score in user_preferences["types"].items():
+            skills = await self.registry.search_skills(
+                skill_type=skill_type,
+                status=SkillStatus.ACTIVE,
+                limit=20
+            )
+
+            for skill in skills:
+                # 计算匹配分数
+                match_score = self._calculate_skill_match_score(
+                    skill, user_preferences, context_keywords
+                )
+
+                if match_score > 0.3:  # 匹配阈值
+                    recommended_skills.append({
+                        "skill_id": skill.skill_id,
+                        "score": match_score * preference_score,
+                        "reason": "content_based",
+                        "skill": skill
+                    })
+
+        # 排序
+        recommended_skills.sort(key=lambda x: x["score"], reverse=True)
+        return recommended_skills[:10]
+
+    def _analyze_user_preferences(self, user_history: List[Dict]) -> Dict[str, Any]:
+        """分析用户偏好"""
+        type_counts = {}
+        tag_counts = {}
+
+        for usage in user_history:
+            skill_type = usage.get("skill_type")
+            tags = usage.get("tags", [])
+
+            if skill_type:
+                type_counts[skill_type] = type_counts.get(skill_type, 0) + 1
+
+            for tag in tags:
+                tag_counts[tag] = tag_counts.get(tag, 0) + 1
+
+        # 归一化分数
+        total_usages = len(user_history)
+        type_preferences = {
+            skill_type: count / total_usages
+            for skill_type, count in type_counts.items()
+        }
+
+        tag_preferences = {
+            tag: count / total_usages
+            for tag, count in tag_counts.items()
+        }
+
+        return {
+            "types": type_preferences,
+            "tags": tag_preferences
+        }
+
+    def _calculate_skill_match_score(self,
+                                    skill: ClaudeSkill,
+                                    user_preferences: Dict[str, Any],
+                                    context_keywords: List[str]) -> float:
+        """计算技能匹配分数"""
+        score = 0.0
+
+        # 类型匹配
+        if skill.skill_type.value in user_preferences["types"]:
+            score += user_preferences["types"][skill.skill_type.value] * 0.5
+
+        # 标签匹配
+        tag_matches = sum(
+            user_preferences["tags"].get(tag, 0)
+            for tag in skill.tags
+            if tag in user_preferences["tags"]
+        )
+        score += tag_matches * 0.3
+
+        # 上下文关键词匹配
+        context_matches = sum(
+            1 for keyword in context_keywords
+            if keyword.lower() in skill.description.lower() or
+            keyword.lower() in skill.name.lower()
+        )
+        if context_keywords:
+            score += (context_matches / len(context_keywords)) * 0.2
+
+        return min(score, 1.0)
+
+    def _merge_recommendations(self,
+                             collaborative_recs: List[Dict],
+                             content_recs: List[Dict],
+                             limit: int) -> List[Dict[str, Any]]:
+        """合并推荐结果"""
+        skill_scores = {}
+
+        # 合并协同过滤结果
+        for rec in collaborative_recs:
+            skill_id = rec["skill_id"]
+            if skill_id not in skill_scores:
+                skill_scores[skill_id] = {
+                    "skill_id": skill_id,
+                    "collaborative_score": 0,
+                    "content_score": 0,
+                    "combined_score": 0,
+                    "reasons": []
+                }
+
+            skill_scores[skill_id]["collaborative_score"] = rec["score"]
+            skill_scores[skill_id]["reasons"].append(rec["reason"])
+
+        # 合并基于内容的推荐
+        for rec in content_recs:
+            skill_id = rec["skill_id"]
+            if skill_id not in skill_scores:
+                skill_scores[skill_id] = {
+                    "skill_id": skill_id,
+                    "collaborative_score": 0,
+                    "content_score": 0,
+                    "combined_score": 0,
+                    "reasons": []
+                }
+
+            skill_scores[skill_id]["content_score"] = rec["score"]
+            skill_scores[skill_id]["reasons"].append(rec["reason"])
+
+        # 计算综合分数
+        for skill_id, scores in skill_scores.items():
+            # 加权平均
+            scores["combined_score"] = (
+                scores["collaborative_score"] * 0.6 +
+                scores["content_score"] * 0.4
+            )
+
+        # 排序并返回
+        sorted_scores = sorted(
+            skill_scores.values(),
+            key=lambda x: x["combined_score"],
+            reverse=True
+        )
+
+        return sorted_scores[:limit]
+
+    def _extract_context_keywords(self, context: Dict[str, Any]) -> List[str]:
+        """从上下文中提取关键词"""
+        if not context:
+            return []
+
+        keywords = []
+
+        # 从用户输入提取
+        if "user_input" in context:
+            import re
+            words = re.findall(r'\b\w+\b', context["user_input"].lower())
+            keywords.extend(words)
+
+        # 从会话历史提取
+        if "recent_topics" in context:
+            keywords.extend(context["recent_topics"])
+
+        # 从当前任务提取
+        if "current_task" in context:
+            keywords.append(context["current_task"])
+
+        return list(set(keywords))
+
+    async def _explain_match(self, skill: ClaudeSkill, query: str) -> List[str]:
+        """解释匹配原因"""
+        explanations = []
+
+        query_lower = query.lower()
+
+        # 名称匹配
+        if any(word in skill.name.lower() for word in query_lower.split()):
+            explanations.append("Name matches query")
+
+        # 描述匹配
+        if any(word in skill.description.lower() for word in query_lower.split()):
+            explanations.append("Description matches query")
+
+        # 标签匹配
+        matching_tags = [
+            tag for tag in skill.tags
+            if tag.lower() in query_lower
+        ]
+        if matching_tags:
+            explanations.append(f"Tags match: {', '.join(matching_tags)}")
+
+        # 能力匹配
+        for capability in skill.capabilities:
+            if any(word in capability.description.lower() for word in query_lower.split()):
+                explanations.append(f"Capability matches: {capability.name}")
+
+        return explanations or ["General similarity match"]
+
+    async def _fallback_search(self, query: str, limit: int) -> List[Dict[str, Any]]:
+        """回退搜索（当向量未初始化时）"""
+        skills = await self.registry.search_skills(query=query, limit=limit)
+
+        return [
+            {
+                "skill": skill,
+                "relevance_score": 0.5,  # 默认分数
+                "match_reasons": ["Keyword match"]
+            }
+            for skill in skills
+        ]
+
+class SkillUsageAnalyzer:
+    """技能使用分析器"""
+
+    def __init__(self, storage: 'UsageStorage'):
+        self.storage = storage
+
+    async def record_usage(self,
+                          user_id: str,
+                          skill_id: str,
+                          context: Dict[str, Any],
+                          result: Any = None):
+        """记录技能使用"""
+        usage_record = {
+            "user_id": user_id,
+            "skill_id": skill_id,
+            "timestamp": datetime.now().isoformat(),
+            "context": context,
+            "success": result is not None,
+            "execution_time": context.get("execution_time", 0)
+        }
+
+        await self.storage.save_usage_record(usage_record)
+
+    async def get_user_history(self, user_id: str, limit: int = 100) -> List[Dict]:
+        """获取用户历史"""
+        return await self.storage.get_user_usage_history(user_id, limit)
+
+    async def get_user_skills(self, user_id: str) -> List[Dict]:
+        """获取用户使用的技能"""
+        return await self.storage.get_user_skill_usage(user_id)
+
+    async def find_similar_users(self, user_id: str, user_history: List[Dict], limit: int = 10) -> List[Dict]:
+        """找到相似用户"""
+        # 简化实现：基于技能使用重叠度找相似用户
+        user_skills = set(usage["skill_id"] for usage in user_history)
+
+        all_users = await self.storage.get_all_users()
+        similarities = []
+
+        for other_user_id in all_users:
+            if other_user_id == user_id:
+                continue
+
+            other_history = await self.get_user_history(other_user_id, 50)
+            other_skills = set(usage["skill_id"] for usage in other_history)
+
+            # 计算Jaccard相似度
+            intersection = len(user_skills & other_skills)
+            union = len(user_skills | other_skills)
+
+            if union > 0:
+                similarity = intersection / union
+                if similarity > 0.1:  # 相似度阈值
+                    similarities.append({
+                        "user_id": other_user_id,
+                        "similarity": similarity
+                    })
+
+        # 按相似度排序
+        similarities.sort(key=lambda x: x["similarity"], reverse=True)
+        return similarities[:limit]
+                    </div>
+                </section>
+
+                <section id="solid-principles" class="section">
+                    <h2>SOLID原则的具体体现</h2>
+
+                    <h3>S - 单一职责原则 (Single Responsibility Principle)</h3>
+                    <div class="code-block">
+class SkillRegistry:
+    """只负责技能注册和管理"""
+
+    async def register_skill(self, skill: ClaudeSkill) -> bool:
+        """专门处理技能注册"""
+        pass
+
+    async def get_skill(self, skill_id: str) -> Optional[ClaudeSkill]:
+        """专门处理技能获取"""
+        pass
+
+class SkillExecutor:
+    """只负责技能执行"""
+
+    async def execute_skill(self, skill_id: str, parameters: Dict) -> Any:
+        """专门处理技能执行"""
+        pass
+
+class ClaudeSkillsSync:
+    """只负责技能同步"""
+
+    async def sync_skills(self) -> Dict[str, Any]:
+        """专门处理技能同步"""
+        pass
+
+class SkillDiscovery:
+    """只负责技能发现"""
+
+    async def discover_skills(self, query: str) -> List[ClaudeSkill]:
+        """专门处理技能发现"""
+        pass
+                    </div>
+
+                    <h3>O - 开放封闭原则 (Open-Closed Principle)</h3>
+                    <div class="code-block">
+from abc import ABC, abstractmethod
+
+class SkillStorage(ABC):
+    """技能存储基类"""
+
+    @abstractmethod
+    async def save_skill(self, skill: ClaudeSkill) -> bool:
+        pass
+
+    @abstractmethod
+    async def load_skill(self, skill_id: str) -> Optional[ClaudeSkill]:
+        pass
+
+class FileSystemSkillStorage(SkillStorage):
+    """文件系统存储实现"""
+
+    async def save_skill(self, skill: ClaudeSkill) -> bool:
+        # 文件系统存储实现
+        pass
+
+    async def load_skill(self, skill_id: str) -> Optional[ClaudeSkill]:
+        # 文件系统加载实现
+        pass
+
+class DatabaseSkillStorage(SkillStorage):
+    """数据库存储实现"""
+
+    async def save_skill(self, skill: ClaudeSkill) -> bool:
+        # 数据库存储实现
+        pass
+
+    async def load_skill(self, skill_id: str) -> Optional[ClaudeSkill]:
+        # 数据库加载实现
+        pass
+
+# 新增存储类型无需修改现有代码
+class CloudStorage(SkillStorage):
+    """云存储实现"""
+
+    async def save_skill(self, skill: ClaudeSkill) -> bool:
+        # 云存储实现
+        pass
+
+    async def load_skill(self, skill_id: str) -> Optional[ClaudeSkill]:
+        # 云存储加载实现
+        pass
+                    </div>
+
+                    <h3>L - 里氏替换原则 (Liskov Substitution Principle)</h3>
+                    <div class="code-block">
+class SkillValidator(ABC):
+    """技能验证器基类"""
+
+    @abstractmethod
+    def validate(self, skill: ClaudeSkill) -> List[str]:
+        """验证技能，返回错误列表"""
+        pass
+
+class BasicSkillValidator(SkillValidator):
+    """基础技能验证器"""
+
+    def validate(self, skill: ClaudeSkill) -> List[str]:
+        # 基础验证逻辑
+        errors = []
+        if not skill.name:
+            errors.append("Skill name is required")
+        return errors
+
+class AdvancedSkillValidator(SkillValidator):
+    """高级技能验证器"""
+
+    def validate(self, skill: ClaudeSkill) -> List[str]:
+        # 高级验证逻辑
+        errors = []
+        if not skill.name:
+            errors.append("Skill name is required")
+        if len(skill.description) < 10:
+            errors.append("Description too short")
+        return errors
+
+# 任何SkillValidator的子类都可以替换使用
+def validate_skill(validator: SkillValidator, skill: ClaudeSkill) -> List[str]:
+    """验证技能"""
+    return validator.validate(skill)
+
+basic_validator = BasicSkillValidator()
+advanced_validator = AdvancedSkillValidator()
+
+errors1 = validate_skill(basic_validator, skill)  # ✓ 正确
+errors2 = validate_skill(advanced_validator, skill)  # ✓ 正确
+                    </div>
+
+                    <h3>I - 接口隔离原则 (Interface Segregation Principle)</h3>
+                    <div class="code-block">
+# 将大接口拆分为多个小接口
+class SkillStorer(ABC):
+    @abstractmethod
+    async def save_skill(self, skill: ClaudeSkill) -> bool:
+        pass
+
+class SkillLoader(ABC):
+    @abstractmethod
+    async def load_skill(self, skill_id: str) -> Optional[ClaudeSkill]:
+        pass
+
+class SkillSearcher(ABC):
+    @abstractmethod
+    async def search_skills(self, query: str) -> List[ClaudeSkill]:
+        pass
+
+class SkillDeleter(ABC):
+    @abstractmethod
+    async def delete_skill(self, skill_id: str) -> bool:
+        pass
+
+# 客户端只依赖需要的接口
+class ReadOnlySkillService:
+    """只读技能服务，只需要加载和搜索功能"""
+    def __init__(self, loader: SkillLoader, searcher: SkillSearcher):
+        self.loader = loader
+        self.searcher = searcher
+
+class FullSkillService:
+    """完整技能服务，需要所有功能"""
+    def __init__(self,
+                 storer: SkillStorer,
+                 loader: SkillLoader,
+                 searcher: SkillSearcher,
+                 deleter: SkillDeleter):
+        self.storer = storer
+        self.loader = loader
+        self.searcher = searcher
+        self.deleter = deleter
+                    </div>
+
+                    <h3>D - 依赖倒置原则 (Dependency Inversion Principle)</h3>
+                    <div class="code-block">
+class SkillManagementService:
+    """技能管理服务，依赖抽象而非具体实现"""
+
+    def __init__(self,
+                 storage: SkillStorage,
+                 executor: SkillExecutor,
+                 discovery: SkillDiscovery,
+                 sync: ClaudeSkillsSync):
+        self.storage = storage    # 依赖抽象
+        self.executor = executor  # 依赖抽象
+        self.discovery = discovery  # 依赖抽象
+        self.sync = sync         # 依赖抽象
+
+    async def process_skill_request(self,
+                                   request: SkillRequest) -> SkillResponse:
+        """处理技能请求"""
+        # 发现技能
+        skills = await self.discovery.discover_skills(request.query)
+
+        if not skills:
+            return SkillResponse(success=False, message="No suitable skills found")
+
+        # 执行最佳匹配技能
+        best_skill = skills[0]
+        result = await self.executor.execute_skill(
+            best_skill.skill_id,
+            request.parameters
+        )
+
+        return SkillResponse(
+            success=True,
+            result=result,
+            skill_id=best_skill.skill_id
+        )
+
+# 通过依赖注入提供具体实现
+skill_service = SkillManagementService(
+    storage=DatabaseSkillStorage(),      # 注入数据库存储
+    executor=SandboxSkillExecutor(),     # 注入沙箱执行器
+    discovery=MLBasedDiscovery(),        # 注入机器学习发现器
+    sync=GitBasedSync()                  # 注入Git同步器
+)
+                    </div>
+                </section>
+
+                <section id="tdd-implementation" class="section">
+                    <h2>TDD (测试驱动开发) 实现</h2>
+
+                    <h3>测试先行：技能注册功能</h3>
+                    <div class="test-example">
+                        <h4>Step 1: 写失败的测试</h4>
+                        <div class="code-block">
+import pytest
+from unittest.mock import AsyncMock
+
+class TestSkillRegistry:
+    @pytest.mark.asyncio
+    async def test_register_valid_skill(self):
+        """测试注册有效技能"""
+        registry = SkillRegistry(storage=MockSkillStorage())
+
+        skill = ClaudeSkill(
+            skill_id="test_skill",
+            name="Test Skill",
+            version="1.0.0",
+            description="A test skill for unit testing",
+            author="Test Author",
+            skill_type=SkillType.CODE_GENERATION,
+            status=SkillStatus.ACTIVE,
+            capabilities=[],
+            parameters=[]
+        )
+
+        success = await registry.register_skill(skill)
+
+        assert success is True
+
+        # 验证技能可以被检索
+        retrieved_skill = await registry.get_skill("test_skill")
+        assert retrieved_skill is not None
+        assert retrieved_skill.name == "Test Skill"
+
+    @pytest.mark.asyncio
+    async def test_register_duplicate_skill_updates_existing(self):
+        """测试注册重复技能更新现有技能"""
+        registry = SkillRegistry(storage=MockSkillStorage())
+
+        # 第一次注册
+        skill1 = ClaudeSkill(
+            skill_id="test_skill",
+            name="Test Skill",
+            version="1.0.0",
+            description="First version",
+            author="Test Author",
+            skill_type=SkillType.CODE_GENERATION,
+            status=SkillStatus.ACTIVE,
+            capabilities=[],
+            parameters=[]
+        )
+        await registry.register_skill(skill1)
+
+        # 第二次注册（更新）
+        skill2 = ClaudeSkill(
+            skill_id="test_skill",
+            name="Updated Test Skill",
+            version="1.1.0",
+            description="Updated version",
+            author="Test Author",
+            skill_type=SkillType.CODE_GENERATION,
+            status=SkillStatus.ACTIVE,
+            capabilities=[],
+            parameters=[]
+        )
+        success = await registry.register_skill(skill2)
+
+        assert success is True
+
+        # 验证技能已更新
+        retrieved_skill = await registry.get_skill("test_skill")
+        assert retrieved_skill.name == "Updated Test Skill"
+        assert retrieved_skill.version == "1.1.0"
+
+    @pytest.mark.asyncio
+    async def test_register_invalid_skill_fails(self):
+        """测试注册无效技能失败"""
+        registry = SkillRegistry(storage=MockSkillStorage())
+
+        # 创建无效技能（缺少必需字段）
+        invalid_skill = ClaudeSkill(
+            skill_id="",  # 无效的空ID
+            name="",
+            version="",
+            description="",
+            author="",
+            skill_type=SkillType.CODE_GENERATION,
+            status=SkillStatus.ACTIVE,
+            capabilities=[],
+            parameters=[]
+        )
+
+        success = await registry.register_skill(invalid_skill)
+
+        assert success is False
+
+    @pytest.mark.asyncio
+    async def test_search_skills_by_type(self):
+        """测试按类型搜索技能"""
+        registry = SkillRegistry(storage=MockSkillStorage())
+
+        # 注册不同类型的技能
+        code_skill = ClaudeSkill(
+            skill_id="code_skill",
+            name="Code Generator",
+            version="1.0.0",
+            description="Generates code",
+            author="Test",
+            skill_type=SkillType.CODE_GENERATION,
+            status=SkillStatus.ACTIVE,
+            capabilities=[],
+            parameters=[]
+        )
+        data_skill = ClaudeSkill(
+            skill_id="data_skill",
+            name="Data Analyzer",
+            version="1.0.0",
+            description="Analyzes data",
+            author="Test",
+            skill_type=SkillType.DATA_ANALYSIS,
+            status=SkillStatus.ACTIVE,
+            capabilities=[],
+            parameters=[]
+        )
+
+        await registry.register_skill(code_skill)
+        await registry.register_skill(data_skill)
+
+        # 按类型搜索
+        code_skills = await registry.search_skills(skill_type=SkillType.CODE_GENERATION)
+        data_skills = await registry.search_skills(skill_type=SkillType.DATA_ANALYSIS)
+
+        assert len(code_skills) == 1
+        assert code_skills[0].skill_id == "code_skill"
+        assert len(data_skills) == 1
+        assert data_skills[0].skill_id == "data_skill"
+                        </div>
+
+                        <h4>Step 2: 实现最小代码使测试通过</h4>
+                        <div class="code-block">
+class MockSkillStorage:
+    """模拟技能存储"""
+
+    def __init__(self):
+        self.skills = {}
+
+    async def save_skill(self, skill: ClaudeSkill) -> bool:
+        self.skills[skill.skill_id] = skill
+        return True
+
+    async def load_skill(self, skill_id: str) -> Optional[ClaudeSkill]:
+        return self.skills.get(skill_id)
+
+    async def skill_exists(self, skill_id: str) -> bool:
+        return skill_id in self.skills
+
+    async def search_skills(self, **kwargs) -> List[ClaudeSkill]:
+        # 简化的搜索实现
+        results = []
+        skill_type = kwargs.get("skill_type")
+        status = kwargs.get("status")
+
+        for skill in self.skills.values():
+            if skill_type and skill.skill_type != skill_type:
+                continue
+            if status and skill.status != status:
+                continue
+            results.append(skill)
+
+        return results
+
+class SkillRegistry:
+    """最小实现的技能注册表"""
+
+    def __init__(self, storage: SkillStorage):
+        self.storage = storage
+
+    async def register_skill(self, skill: ClaudeSkill) -> bool:
+        """最小实现，让测试通过"""
+        # 基本验证
+        if not skill.skill_id or not skill.name or not skill.version:
+            return False
+
+        # 保存技能
+        return await self.storage.save_skill(skill)
+
+    async def get_skill(self, skill_id: str) -> Optional[ClaudeSkill]:
+        """最小实现，让测试通过"""
+        return await self.storage.load_skill(skill_id)
+
+    async def search_skills(self, **kwargs) -> List[ClaudeSkill]:
+        """最小实现，让测试通过"""
+        return await self.storage.search_skills(**kwargs)
+                        </div>
+
+                        <h4>Step 3: 重构和扩展</h4>
+                        <div class="code-block">
+class EnhancedSkillRegistry:
+    """重构后的技能注册表"""
+
+    def __init__(self, storage: SkillStorage, validator: SkillValidator = None):
+        self.storage = storage
+        self.validator = validator or BasicSkillValidator()
+        self.skills_cache = {}
+        self.indexes = {
+            "by_type": {},
+            "by_status": {},
+            "by_tag": {}
+        }
+
+    async def register_skill(self, skill: ClaudeSkill) -> bool:
+        """完整的技能注册实现"""
+        try:
+            # 验证技能
+            validation_errors = self.validator.validate(skill)
+            if validation_errors:
+                raise ValueError(f"Validation failed: {validation_errors}")
+
+            # 检查是否为更新
+            existing_skill = await self.get_skill(skill.skill_id)
+            if existing_skill:
+                # 版本兼容性检查
+                if not self._is_version_compatible(existing_skill, skill):
+                    raise ValueError(f"Incompatible version: {skill.version}")
+
+                # 记录更新历史
+                await self._record_version_change(existing_skill, skill)
+
+            # 保存技能
+            success = await self.storage.save_skill(skill)
+            if not success:
+                return False
+
+            # 更新缓存和索引
+            await self._update_cache(skill)
+            await self._update_indexes(skill)
+
+            # 发布注册事件
+            await self._publish_skill_event("skill_registered", skill)
+
+            return True
+
+        except Exception as e:
+            await self._publish_skill_event("skill_registration_failed", {
+                "skill": skill,
+                "error": str(e)
+            })
+            return False
+
+    async def get_skill(self, skill_id: str, use_cache: bool = True) -> Optional[ClaudeSkill]:
+        """获取技能，支持缓存"""
+        # 检查缓存
+        if use_cache and skill_id in self.skills_cache:
+            cached_skill = self.skills_cache[skill_id]
+            # 检查缓存是否过期
+            if not self._is_cache_expired(cached_skill):
+                return cached_skill
+
+        # 从存储加载
+        skill = await self.storage.load_skill(skill_id)
+        if skill:
+            # 更新缓存
+            self.skills_cache[skill_id] = skill
+            await self._update_indexes(skill)
+
+        return skill
+
+    async def search_skills(self,
+                          query: str = "",
+                          skill_type: Optional[SkillType] = None,
+                          tags: List[str] = None,
+                          status: Optional[SkillStatus] = None,
+                          limit: int = 50,
+                          offset: int = 0) -> List[ClaudeSkill]:
+        """高级技能搜索"""
+        candidates = []
+
+        # 使用索引快速过滤
+        if skill_type and skill_type in self.indexes["by_type"]:
+            candidates = await self._get_skills_by_index("by_type", skill_type)
+        elif status and status in self.indexes["by_status"]:
+            candidates = await self._get_skills_by_index("by_status", status)
+        else:
+            # 获取所有技能
+            candidates = await self._get_all_skills()
+
+        # 进一步过滤
+        filtered_skills = []
+        for skill in candidates:
+            # 标签过滤
+            if tags and not any(tag in skill.tags for tag in tags):
+                continue
+
+            # 文本搜索
+            if query:
+                search_text = f"{skill.name} {skill.description} {' '.join(skill.tags)}".lower()
+                if query.lower() not in search_text:
+                    continue
+
+            filtered_skills.append(skill)
+
+        # 排序和分页
+        filtered_skills.sort(key=lambda s: self._calculate_relevance_score(s, query), reverse=True)
+
+        return filtered_skills[offset:offset + limit]
+
+    async def _update_cache(self, skill: ClaudeSkill):
+        """更新缓存"""
+        self.skills_cache[skill.skill_id] = skill
+
+    async def _update_indexes(self, skill: ClaudeSkill):
+        """更新索引"""
+        # 类型索引
+        if skill.skill_type not in self.indexes["by_type"]:
+            self.indexes["by_type"][skill.skill_type] = []
+        if skill.skill_id not in self.indexes["by_type"][skill.skill_type]:
+            self.indexes["by_type"][skill.skill_type].append(skill.skill_id)
+
+        # 状态索引
+        if skill.status not in self.indexes["by_status"]:
+            self.indexes["by_status"][skill.status] = []
+        if skill.skill_id not in self.indexes["by_status"][skill.status]:
+            self.indexes["by_status"][skill.status].append(skill.skill_id)
+
+        # 标签索引
+        for tag in skill.tags:
+            if tag not in self.indexes["by_tag"]:
+                self.indexes["by_tag"][tag] = []
+            if skill.skill_id not in self.indexes["by_tag"][tag]:
+                self.indexes["by_tag"][tag].append(skill.skill_id)
+
+    async def _get_skills_by_index(self, index_type: str, key: str) -> List[ClaudeSkill]:
+        """通过索引获取技能"""
+        if index_type not in self.indexes or key not in self.indexes[index_type]:
+            return []
+
+        skill_ids = self.indexes[index_type][key]
+        skills = []
+
+        for skill_id in skill_ids:
+            skill = await self.get_skill(skill_id)
+            if skill:
+                skills.append(skill)
+
+        return skills
+
+    def _is_version_compatible(self, existing: ClaudeSkill, new: ClaudeSkill) -> bool:
+        """检查版本兼容性"""
+        # 实现语义版本检查
+        try:
+            existing_parts = [int(x) for x in existing.version.split('.')]
+            new_parts = [int(x) for x in new.version.split('.')]
+
+            # 主版本号必须相同
+            return existing_parts[0] == new_parts[0]
+        except:
+            return False
+
+    def _calculate_relevance_score(self, skill: ClaudeSkill, query: str) -> float:
+        """计算相关性分数"""
+        if not query:
+            return 0.5  # 默认分数
+
+        query_lower = query.lower()
+        score = 0.0
+
+        # 名称匹配（权重最高）
+        if query_lower in skill.name.lower():
+            score += 2.0
+
+        # 描述匹配
+        if query_lower in skill.description.lower():
+            score += 1.0
+
+        # 标签匹配
+        for tag in skill.tags:
+            if query_lower in tag.lower():
+                score += 0.5
+
+        return score
+
+    async def _record_version_change(self, old_skill: ClaudeSkill, new_skill: ClaudeSkill):
+        """记录版本变更"""
+        version_record = {
+            "skill_id": new_skill.skill_id,
+            "old_version": old_skill.version,
+            "new_version": new_skill.version,
+            "changed_at": datetime.now().isoformat(),
+            "changes": self._detect_changes(old_skill, new_skill)
+        }
+
+        await self.storage.save_version_record(version_record)
+
+    def _detect_changes(self, old_skill: ClaudeSkill, new_skill: ClaudeSkill) -> Dict[str, Any]:
+        """检测变更内容"""
+        changes = {}
+
+        if old_skill.name != new_skill.name:
+            changes["name"] = {"old": old_skill.name, "new": new_skill.name}
+
+        if old_skill.description != new_skill.description:
+            changes["description"] = {"old": old_skill.description, "new": new_skill.description}
+
+        # 检测参数变化
+        old_params = {p.name: p for p in old_skill.parameters}
+        new_params = {p.name: p for p in new_skill.parameters}
+
+        if old_params != new_params:
+            changes["parameters"] = {
+                "added": [name for name in new_params if name not in old_params],
+                "removed": [name for name in old_params if name not in new_params],
+                "modified": [
+                    name for name in old_params
+                    if name in new_params and old_params[name] != new_params[name]
+                ]
+            }
+
+        return changes
+
+    async def _publish_skill_event(self, event_type: str, data: Any):
+        """发布技能事件"""
+        # 这里应该发布到事件总线
+        print(f"Skill event: {event_type} - {data}")
+
+    def _is_cache_expired(self, skill: ClaudeSkill) -> bool:
+        """检查缓存是否过期"""
+        # 简化实现：缓存5分钟后过期
+        cache_time = getattr(skill, "_cache_time", 0)
+        return (time.time() - cache_time) > 300
+                        </div>
+                    </div>
+
+                    <h3>集成测试：技能执行流程</h3>
+                    <div class="test-example">
+                        <div class="code-block">
+class TestSkillExecution:
+    @pytest.mark.asyncio
+    async def test_complete_skill_execution_flow(self):
+        """测试完整的技能执行流程"""
+        # 设置依赖
+        mock_storage = MockSkillStorage()
+        mock_sandbox = MockSandboxManager()
+        mock_cache = MockSkillCache()
+
+        registry = SkillRegistry(mock_storage)
+        executor = SkillExecutor(registry, mock_sandbox, mock_cache)
+
+        # 注册测试技能
+        test_skill = ClaudeSkill(
+            skill_id="test_echo_skill",
+            name="Echo Skill",
+            version="1.0.0",
+            description="Echoes back the input",
+            author="Test",
+            skill_type=SkillType.TEXT_PROCESSING,
+            status=SkillStatus.ACTIVE,
+            capabilities=[],
+            parameters=[
+                SkillParameter(
+                    name="message",
+                    type="string",
+                    required=True,
+                    description="Message to echo"
+                )
+            ]
+        )
+        await registry.register_skill(test_skill)
+
+        # 执行技能
+        result = await executor.execute_skill(
+            skill_id="test_echo_skill",
+            parameters={"message": "Hello, World!"},
+            user_id="test_user"
+        )
+
+        # 验证结果
+        assert result is not None
+        assert "echoed" in str(result).lower()
+
+    @pytest.mark.asyncio
+    async def test_skill_execution_with_invalid_parameters(self):
+        """测试无效参数的技能执行"""
+        mock_storage = MockSkillStorage()
+        mock_sandbox = MockSandboxManager()
+        mock_cache = MockSkillCache()
+
+        registry = SkillRegistry(mock_storage)
+        executor = SkillExecutor(registry, mock_sandbox, mock_cache)
+
+        # 注册测试技能
+        test_skill = ClaudeSkill(
+            skill_id="test_validation_skill",
+            name="Validation Skill",
+            version="1.0.0",
+            description="Validates parameters",
+            author="Test",
+            skill_type=SkillType.TEXT_PROCESSING,
+            status=SkillStatus.ACTIVE,
+            capabilities=[],
+            parameters=[
+                SkillParameter(
+                    name="required_param",
+                    type="string",
+                    required=True,
+                    description="Required parameter"
+                ),
+                SkillParameter(
+                    name="optional_param",
+                    type="number",
+                    required=False,
+                    default_value=42
+                )
+            ]
+        )
+        await registry.register_skill(test_skill)
+
+        # 测试缺少必需参数
+        with pytest.raises(ValueError, match="required_param"):
+            await executor.execute_skill(
+                skill_id="test_validation_skill",
+                parameters={},
+                user_id="test_user"
+            )
+
+        # 测试无效类型
+        with pytest.raises(ValueError, match="number"):
+            await executor.execute_skill(
+                skill_id="test_validation_skill",
+                parameters={
+                    "required_param": "valid",
+                    "optional_param": "invalid_number"  # 应该是数字
+                },
+                user_id="test_user"
+            )
+
+    @pytest.mark.asyncio
+    async def test_skill_caching_mechanism(self):
+        """测试技能缓存机制"""
+        mock_storage = MockSkillStorage()
+        mock_sandbox = MockSandboxManager()
+        mock_cache = MockSkillCache()  # 使用真实缓存模拟
+
+        registry = SkillRegistry(mock_storage)
+        executor = SkillExecutor(registry, mock_sandbox, mock_cache)
+
+        # 注册测试技能
+        test_skill = ClaudeSkill(
+            skill_id="test_cache_skill",
+            name="Cache Test Skill",
+            version="1.0.0",
+            description="Tests caching",
+            author="Test",
+            skill_type=SkillType.TEXT_PROCESSING,
+            status=SkillStatus.ACTIVE,
+            capabilities=[],
+            parameters=[
+                SkillParameter(
+                    name="input",
+                    type="string",
+                    required=True,
+                    description="Input to process"
+                )
+            ]
+        )
+        await registry.register_skill(test_skill)
+
+        # 第一次执行（应该调用实际技能）
+        result1 = await executor.execute_skill(
+            skill_id="test_cache_skill",
+            parameters={"input": "test"},
+            use_cache=True
+        )
+
+        # 第二次执行相同参数（应该使用缓存）
+        result2 = await executor.execute_skill(
+            skill_id="test_cache_skill",
+            parameters={"input": "test"},
+            use_cache=True
+        )
+
+        # 验证缓存命中
+        assert result1 == result2
+
+        # 验证缓存被使用（通过检查模拟缓存的调用次数）
+        cache_get_calls = mock_cache.get_call_count
+        cache_set_calls = mock_cache.set_call_count
+
+        assert cache_get_calls >= 1  # 至少检查一次缓存
+        assert cache_set_calls >= 1  # 至少设置一次缓存
+
+    @pytest.mark.asyncio
+    async def test_batch_skill_execution(self):
+        """测试批量技能执行"""
+        mock_storage = MockSkillStorage()
+        mock_sandbox = MockSandboxManager()
+        mock_cache = MockSkillCache()
+
+        registry = SkillRegistry(mock_storage)
+        executor = SkillExecutor(registry, mock_sandbox, mock_cache)
+
+        # 注册多个技能
+        for i in range(3):
+            skill = ClaudeSkill(
+                skill_id=f"batch_skill_{i}",
+                name=f"Batch Skill {i}",
+                version="1.0.0",
+                description=f"Batch test skill {i}",
+                author="Test",
+                skill_type=SkillType.TEXT_PROCESSING,
+                status=SkillStatus.ACTIVE,
+                capabilities=[],
+                parameters=[
+                    SkillParameter(
+                        name="input",
+                        type="string",
+                        required=True,
+                        description=f"Input for skill {i}"
+                    )
+                ]
+            )
+            await registry.register_skill(skill)
+
+        # 准备批量请求
+        batch_requests = [
+            {
+                "skill_id": f"batch_skill_{i}",
+                "parameters": {"input": f"Batch input {i}"},
+                "user_id": "test_user"
+            }
+            for i in range(3)
+        ]
+
+        # 执行批量请求
+        results = await executor.execute_skill_batch(batch_requests)
+
+        # 验证结果
+        assert len(results) == 3
+        assert all(not isinstance(result, Exception) for result in results)
+                        </div>
+                    </div>
+
+                    <h3>性能测试：技能发现和推荐</h3>
+                    <div class="test-example">
+                        <div class="code-block">
+class TestSkillDiscoveryPerformance:
+    @pytest.mark.asyncio
+    async def test_skill_discovery_performance(self):
+        """测试技能发现性能"""
+        # 准备大量技能数据
+        mock_storage = MockSkillStorage()
+        registry = SkillRegistry(mock_storage)
+
+        # 注册1000个技能
+        skills = []
+        for i in range(1000):
+            skill = ClaudeSkill(
+                skill_id=f"perf_skill_{i}",
+                name=f"Performance Skill {i}",
+                version="1.0.0",
+                description=f"Performance test skill number {i}",
+                author="Performance Test",
+                skill_type=list(SkillType)[i % len(SkillType)],
+                status=SkillStatus.ACTIVE,
+                capabilities=[],
+                parameters=[
+                    SkillParameter(
+                        name="input",
+                        type="string",
+                        required=True,
+                        description=f"Input for skill {i}"
+                    )
+                ],
+                tags=[f"tag_{i % 10}", f"category_{i % 5}"]
+            )
+            skills.append(skill)
+            await registry.register_skill(skill)
+
+        # 初始化发现引擎
+        discovery_engine = SkillDiscoveryEngine(registry, MockUsageAnalyzer())
+        await discovery_engine.initialize()
+
+        # 测试搜索性能
+        queries = [
+            "performance testing",
+            "skill generation",
+            "data analysis",
+            "code creation",
+            "text processing"
+        ]
+
+        search_times = []
+        for query in queries:
+            start_time = time.time()
+            results = await discovery_engine.discover_skills(query, limit=20)
+            search_time = time.time() - start_time
+            search_times.append(search_time)
+
+            assert len(results) <= 20
+            assert all(result["relevance_score"] > 0 for result in results)
+
+        # 验证性能指标
+        avg_search_time = sum(search_times) / len(search_times)
+        max_search_time = max(search_times)
+
+        print(f"Average search time: {avg_search_time:.3f}s")
+        print(f"Max search time: {max_search_time:.3f}s")
+
+        assert avg_search_time < 0.1  # 平均搜索时间应小于100ms
+        assert max_search_time < 0.2  # 最大搜索时间应小于200ms
+
+    @pytest.mark.asyncio
+    async def test_concurrent_skill_discovery(self):
+        """测试并发技能发现"""
+        mock_storage = MockSkillStorage()
+        registry = SkillRegistry(mock_storage)
+
+        # 注册测试技能
+        for i in range(100):
+            skill = ClaudeSkill(
+                skill_id=f"concurrent_skill_{i}",
+                name=f"Concurrent Skill {i}",
+                version="1.0.0",
+                description=f"Concurrent test skill {i}",
+                author="Concurrent Test",
+                skill_type=SkillType.TEXT_PROCESSING,
+                status=SkillStatus.ACTIVE,
+                capabilities=[],
+                parameters=[],
+                tags=[f"tag_{i % 5}"]
+            )
+            await registry.register_skill(skill)
+
+        discovery_engine = SkillDiscoveryEngine(registry, MockUsageAnalyzer())
+        await discovery_engine.initialize()
+
+        # 创建并发搜索任务
+        concurrent_searches = 50
+        tasks = []
+        for i in range(concurrent_searches):
+            query = f"search query {i}"
+            task = discovery_engine.discover_skills(query, limit=10)
+            tasks.append(task)
+
+        start_time = time.time()
+        results = await asyncio.gather(*tasks)
+        total_time = time.time() - start_time
+
+        # 验证结果
+        assert len(results) == concurrent_searches
+        assert all(len(result) <= 10 for result in results)
+
+        # 验证性能
+        avg_time_per_search = total_time / concurrent_searches
+        print(f"Concurrent searches - Total: {total_time:.2f}s, Avg per search: {avg_time_per_search:.3f}s")
+
+        assert avg_time_per_search < 0.05  # 平均每个搜索应小于50ms
+                        </div>
+                    </div>
+                </section>
+
+                <section id="code-examples" class="section">
+                    <h2>代码示例：规范化实现</h2>
+
+                    <h3>1. 技能缓存管理器</h3>
+                    <div class="code-block">
+import asyncio
+import json
+import time
+from typing import Any, Optional, Dict
+from datetime import datetime, timedelta
+import hashlib
+import aioredis
+import pickle
+
+class SkillCache:
+    """技能缓存管理器"""
+
+    def __init__(self,
+                 redis_url: str = "redis://localhost:6379",
+                 default_ttl: int = 3600,
+                 max_cache_size: int = 10000):
+        self.redis_url = redis_url
+        self.default_ttl = default_ttl
+        self.max_cache_size = max_cache_size
+        self.redis_pool = None
+        self.cache_stats = {
+            "hits": 0,
+            "misses": 0,
+            "sets": 0,
+            "evictions": 0
+        }
+
+    async def initialize(self):
+        """初始化Redis连接池"""
+        self.redis_pool = await aioredis.from_url(self.redis_url)
+
+    async def get(self, key: str) -> Optional[Any]:
+        """获取缓存值"""
+        try:
+            cached_data = await self.redis_pool.get(key)
+
+            if cached_data:
+                # 反序列化数据
+                data = pickle.loads(cached_data)
+                self.cache_stats["hits"] += 1
+                return data
+            else:
+                self.cache_stats["misses"] += 1
+                return None
+
+        except Exception as e:
+            print(f"Cache get error for key {key}: {e}")
+            self.cache_stats["misses"] += 1
+            return None
+
+    async def set(self,
+                  key: str,
+                  value: Any,
+                  ttl: Optional[int] = None,
+                  tags: Optional[List[str]] = None) -> bool:
+        """设置缓存值"""
+        try:
+            # 序列化数据
+            serialized_data = pickle.dumps(value)
+
+            # 设置TTL
+            cache_ttl = ttl or self.default_ttl
+
+            # 存储到Redis
+            await self.redis_pool.setex(key, cache_ttl, serialized_data)
+
+            # 存储标签（如果提供）
+            if tags:
+                await self._store_tags(key, tags, cache_ttl)
+
+            # 存储元数据
+            await self._store_metadata(key, cache_ttl)
+
+            self.cache_stats["sets"] += 1
+            return True
+
+        except Exception as e:
+            print(f"Cache set error for key {key}: {e}")
+            return False
+
+    async def delete(self, key: str) -> bool:
+        """删除缓存值"""
+        try:
+            # 删除主数据
+            await self.redis_pool.delete(key)
+
+            # 删除标签
+            await self._delete_tags(key)
+
+            # 删除元数据
+            await self._delete_metadata(key)
+
+            return True
+
+        except Exception as e:
+            print(f"Cache delete error for key {key}: {e}")
+            return False
+
+    async def clear_by_tag(self, tag: str) -> int:
+        """按标签清除缓存"""
+        try:
+            tag_key = f"tag:{tag}"
+            keys = await self.redis_pool.smembers(tag_key)
+
+            if keys:
+                # 删除所有相关键
+                await self.redis_pool.delete(*keys)
+                await self.redis_pool.delete(tag_key)
+
+                self.cache_stats["evictions"] += len(keys)
+                return len(keys)
+
+            return 0
+
+        except Exception as e:
+            print(f"Cache clear by tag error for tag {tag}: {e}")
+            return 0
+
+    async def get_stats(self) -> Dict[str, Any]:
+        """获取缓存统计信息"""
+        total_requests = self.cache_stats["hits"] + self.cache_stats["misses"]
+        hit_rate = (
+            self.cache_stats["hits"] / total_requests
+            if total_requests > 0 else 0.0
+        )
+
+        redis_info = await self.redis_pool.info()
+
+        return {
+            "hit_rate": hit_rate,
+            "total_requests": total_requests,
+            "hits": self.cache_stats["hits"],
+            "misses": self.cache_stats["misses"],
+            "sets": self.cache_stats["sets"],
+            "evictions": self.cache_stats["evictions"],
+            "redis_memory": redis_info.get("used_memory", 0),
+            "redis_keys": redis_info.get("db0", {}).get("keys", 0)
+        }
+
+    async def _store_tags(self, key: str, tags: List[str], ttl: int):
+        """存储标签关联"""
+        for tag in tags:
+            tag_key = f"tag:{tag}"
+            await self.redis_pool.sadd(tag_key, key)
+            await self.redis_pool.expire(tag_key, ttl)
+
+    async def _delete_tags(self, key: str):
+        """删除标签关联"""
+        # 获取所有包含该键的标签
+        tag_keys = await self.redis_pool.keys("tag:*")
+
+        for tag_key in tag_keys:
+            await self.redis_pool.srem(tag_key, key)
+
+    async def _store_metadata(self, key: str, ttl: int):
+        """存储缓存元数据"""
+        metadata_key = f"meta:{key}"
+        metadata = {
+            "created_at": datetime.now().isoformat(),
+            "ttl": ttl,
+            "access_count": 0
+        }
+
+        await self.redis_pool.setex(metadata_key, ttl + 60, json.dumps(metadata))
+
+    async def _delete_metadata(self, key: str):
+        """删除缓存元数据"""
+        metadata_key = f"meta:{key}"
+        await self.redis_pool.delete(metadata_key)
+
+    async def _update_access_count(self, key: str):
+        """更新访问计数"""
+        metadata_key = f"meta:{key}"
+        metadata_str = await self.redis_pool.get(metadata_key)
+
+        if metadata_str:
+            try:
+                metadata = json.loads(metadata_str)
+                metadata["access_count"] += 1
+                metadata["last_accessed"] = datetime.now().isoformat()
+
+                # 重新设置元数据
+                ttl = metadata.get("ttl", self.default_ttl)
+                await self.redis_pool.setex(metadata_key, ttl + 60, json.dumps(metadata))
+            except:
+                pass  # 忽略元数据更新错误
+
+    def generate_cache_key(self,
+                          skill_id: str,
+                          parameters: Dict[str, Any],
+                          user_id: str = None,
+                          context_hash: str = None) -> str:
+        """生成缓存键"""
+        # 创建规范化参数
+        normalized_params = self._normalize_parameters(parameters)
+
+        # 生成参数哈希
+        if context_hash:
+            params_hash = context_hash
+        else:
+            params_str = json.dumps(normalized_params, sort_keys=True)
+            params_hash = hashlib.md5(params_str.encode()).hexdigest()[:16]
+
+        # 构建缓存键
+        key_parts = [skill_id, params_hash]
+        if user_id:
+            key_parts.append(user_id)
+
+        return "skill_cache:" + ":".join(key_parts)
+
+    def _normalize_parameters(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """规范化参数用于缓存键生成"""
+        normalized = {}
+
+        for key, value in parameters.items():
+            # 排除不应该影响缓存键的参数
+            if key in ["timestamp", "request_id", "session_id"]:
+                continue
+
+            # 规范化值
+            if isinstance(value, (list, dict)):
+                # 对复杂类型进行排序和规范化
+                if isinstance(value, list):
+                    normalized[key] = sorted(value)
+                else:
+                    normalized[key] = dict(sorted(value.items()))
+            else:
+                normalized[key] = value
+
+        return normalized
+
+class CacheWarmer:
+    """缓存预热器"""
+
+    def __init__(self, cache: SkillCache, registry: SkillRegistry):
+        self.cache = cache
+        self.registry = registry
+
+    async def warm_popular_skills(self, limit: int = 100):
+        """预热热门技能"""
+        # 获取热门技能（基于使用频率）
+        popular_skills = await self._get_popular_skills(limit)
+
+        for skill_info in popular_skills:
+            skill_id = skill_info["skill_id"]
+            common_params = skill_info.get("common_parameters", {})
+
+            # 预加载常用参数组合的结果
+            await self._warm_skill_combinations(skill_id, common_params)
+
+    async def _get_popular_skills(self, limit: int) -> List[Dict[str, Any]]:
+        """获取热门技能列表"""
+        # 这里应该从使用统计中获取
+        # 简化实现，返回一些常用技能
+        common_skills = [
+            "text_generator",
+            "code_formatter",
+            "data_analyzer",
+            "image_processor",
+            "api_caller"
+        ]
+
+        return [
+            {
+                "skill_id": skill_id,
+                "common_parameters": self._get_common_parameters(skill_id)
+            }
+            for skill_id in common_skills[:limit]
+        ]
+
+    def _get_common_parameters(self, skill_id: str) -> Dict[str, Any]:
+        """获取技能的常用参数"""
+        # 基于技能类型返回常用参数
+        common_params = {
+            "text_generator": {"input": "Hello World", "style": "formal"},
+            "code_formatter": {"code": "print('hello')", "language": "python"},
+            "data_analyzer": {"data": [1, 2, 3, 4, 5], "operation": "mean"},
+            "image_processor": {"image": "test.jpg", "operation": "resize"},
+            "api_caller": {"url": "https://api.example.com", "method": "GET"}
+        }
+
+        return common_params.get(skill_id, {})
+
+    async def _warm_skill_combinations(self,
+                                     skill_id: str,
+                                     common_params: Dict[str, Any]):
+        """预热技能参数组合"""
+        if not common_params:
+            return
+
+        # 生成参数组合
+        param_combinations = self._generate_parameter_combinations(common_params)
+
+        for params in param_combinations:
+            cache_key = self.cache.generate_cache_key(skill_id, params)
+
+            # 这里可以预执行技能并缓存结果
+            # 或者设置一个占位符以表示已预热
+            await self.cache.set(
+                cache_key,
+                {"warmed": True, "skill_id": skill_id},
+                ttl=1800  # 30分钟
+            )
+
+    def _generate_parameter_combinations(self,
+                                         base_params: Dict[str, Any],
+                                         max_combinations: int = 10) -> List[Dict[str, Any]]:
+        """生成参数组合"""
+        combinations = [base_params]  # 基础组合
+
+        # 为字符串参数生成变体
+        string_params = {
+            key: value for key, value in base_params.items()
+            if isinstance(value, str)
+        }
+
+        for param_name, param_value in string_params.items():
+            if len(combinations) >= max_combinations:
+                break
+
+            # 创建变体
+            variant_params = base_params.copy()
+            if param_value.lower() in ["hello world", "test"]:
+                variant_params[param_name] = "example input"
+
+            if variant_params not in combinations:
+                combinations.append(variant_params)
+
+        return combinations[:max_combinations]
+                    </div>
+
+                    <h3>2. 沙箱管理器</h3>
+                    <div class="code-block">
+import asyncio
+import tempfile
+import shutil
+import subprocess
+import os
+from typing import Dict, Any, List, Optional
+from pathlib import Path
+import docker
+import uuid
+import json
+from datetime import datetime
+
+class SandboxConfig:
+    """沙箱配置"""
+
+    def __init__(self,
+                 memory_limit: str = "512m",
+                 cpu_limit: str = "0.5",
+                 timeout: int = 300,
+                 network_enabled: bool = False,
+                 read_only_filesystem: bool = True):
+        self.memory_limit = memory_limit
+        self.cpu_limit = cpu_limit
+        self.timeout = timeout
+        self.network_enabled = network_enabled
+        self.read_only_filesystem = read_only_filesystem
+
+class DockerSandbox:
+    """Docker沙箱实现"""
+
+    def __init__(self, sandbox_id: str, config: SandboxConfig):
+        self.sandbox_id = sandbox_id
+        self.config = config
+        self.container = None
+        self.work_dir = None
+        self.is_active = False
+
+    async def create(self) -> bool:
+        """创建沙箱环境"""
+        try:
+            # 创建工作目录
+            self.work_dir = Path(tempfile.mkdtemp(prefix=f"sandbox_{self.sandbox_id}_"))
+
+            # Docker客户端
+            client = docker.from_env()
+
+            # 准备容器配置
+            container_config = {
+                "image": "python:3.9-slim",
+                "command": ["tail", "-f", "/dev/null"],  # 保持容器运行
+                "detach": True,
+                "remove": False,
+                "name": f"daip_skill_sandbox_{self.sandbox_id}",
+                "mem_limit": self.config.memory_limit,
+                "cpu_quota": int(float(self.config.cpu_limit) * 100000),
+                "network_mode": "none" if not self.config.network_enabled else "bridge",
+                "read_only": self.config.read_only_filesystem,
+                "tmpfs": {
+                    "/tmp": "rw,size=100m",  # 临时写入目录
+                    self.work_dir_str: "rw,size=200m"  # 工作目录可写
+                },
+                "environment": {
+                    "PYTHONPATH": "/workspace",
+                    "SANDBOX_ID": self.sandbox_id
+                },
+                "working_dir": "/workspace"
+            }
+
+            # 创建容器
+            self.container = client.containers.run(**container_config)
+            self.is_active = True
+
+            # 复制必要文件到容器
+            await self._prepare_container_environment()
+
+            return True
+
+        except Exception as e:
+            print(f"Error creating Docker sandbox: {e}")
+            await self.cleanup()
+            return False
+
+    @property
+    def work_dir_str(self) -> str:
+        """工作目录字符串"""
+        return str(self.work_dir) if self.work_dir else "/workspace"
+
+    async def _prepare_container_environment(self):
+        """准备容器环境"""
+        # 创建Python依赖文件
+        requirements = [
+            "requests>=2.25.0",
+            "numpy>=1.21.0",
+            "pandas>=1.3.0",
+            "beautifulsoup4>=4.9.0"
+        ]
+
+        requirements_file = self.work_dir / "requirements.txt"
+        with open(requirements_file, 'w') as f:
+            f.write('\n'.join(requirements))
+
+        # 复制到容器并安装依赖
+        await self._copy_to_container(str(requirements_file), "/workspace/requirements.txt")
+
+        install_cmd = "pip install -r /workspace/requirements.txt"
+        exit_code, output = await self.execute_command(install_cmd)
+
+        if exit_code != 0:
+            print(f"Warning: Failed to install dependencies: {output}")
+
+    async def execute_command(self, command: str, timeout: int = None) -> tuple[int, str]:
+        """在沙箱中执行命令"""
+        if not self.is_active or not self.container:
+            return -1, "Sandbox not active"
+
+        try:
+            timeout = timeout or self.config.timeout
+
+            # 执行命令
+            result = self.container.exec_run(
+                command,
+                timeout=timeout,
+                workdir="/workspace"
+            )
+
+            return result.exit_code, result.output.decode('utf-8', errors='ignore')
+
+        except subprocess.TimeoutExpired:
+            return -1, "Command timeout"
+        except Exception as e:
+            return -1, f"Command execution error: {str(e)}"
+
+    async def copy_to_container(self, local_path: str, container_path: str):
+        """复制文件到容器"""
+        if not self.is_active or not self.container:
+            raise RuntimeError("Sandbox not active")
+
+        try:
+            with open(local_path, 'rb') as f:
+                self.container.put_archive(
+                    path=os.path.dirname(container_path),
+                    data=self._create_tar_archive(local_path, os.path.basename(container_path))
+                )
+        except Exception as e:
+            raise RuntimeError(f"Failed to copy file to container: {e}")
+
+    async def copy_from_container(self, container_path: str, local_path: str):
+        """从容器复制文件"""
+        if not self.is_active or not self.container:
+            raise RuntimeError("Sandbox not active")
+
+        try:
+            # 获取文件
+            bits, _ = self.container.get_archive(container_path)
+
+            # 解压到本地
+            with open(local_path, 'wb') as f:
+                f.write(bits)
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to copy file from container: {e}")
+
+    def _create_tar_archive(self, file_path: str, arcname: str) -> bytes:
+        """创建单个文件的tar归档"""
+        import tarfile
+        import io
+
+        tar_buffer = io.BytesIO()
+        with tarfile.open(fileobj=tar_buffer, mode='w') as tar:
+            tar.add(file_path, arcname=arcname)
+
+        return tar_buffer.getvalue()
+
+    async def cleanup(self):
+        """清理沙箱资源"""
+        try:
+            # 停止并删除容器
+            if self.container:
+                self.container.stop()
+                self.container.remove()
+                self.container = None
+
+            # 删除工作目录
+            if self.work_dir and self.work_dir.exists():
+                shutil.rmtree(self.work_dir)
+                self.work_dir = None
+
+            self.is_active = False
+
+        except Exception as e:
+            print(f"Error cleaning up sandbox: {e}")
+
+class SandboxManager:
+    """沙箱管理器"""
+
+    def __init__(self, default_config: SandboxConfig = None):
+        self.default_config = default_config or SandboxConfig()
+        self.active_sandboxes: Dict[str, DockerSandbox] = {}
+        self.sandbox_pool_size = 10
+        self.sandbox_semaphore = asyncio.Semaphore(self.sandbox_pool_size)
+
+    async def create_sandbox(self,
+                            sandbox_id: str = None,
+                            config: SandboxConfig = None) -> DockerSandbox:
+        """创建新的沙箱"""
+        async with self.sandbox_semaphore:
+            sandbox_id = sandbox_id or str(uuid.uuid4())
+            config = config or self.default_config
+
+            # 检查是否已存在
+            if sandbox_id in self.active_sandboxes:
+                return self.active_sandboxes[sandbox_id]
+
+            # 创建新沙箱
+            sandbox = DockerSandbox(sandbox_id, config)
+
+            if await sandbox.create():
+                self.active_sandboxes[sandbox_id] = sandbox
+                return sandbox
+            else:
+                raise RuntimeError(f"Failed to create sandbox: {sandbox_id}")
+
+    async def get_sandbox(self, sandbox_id: str) -> Optional[DockerSandbox]:
+        """获取现有沙箱"""
+        return self.active_sandboxes.get(sandbox_id)
+
+    async def cleanup_sandbox(self, sandbox_id: str) -> bool:
+        """清理指定沙箱"""
+        sandbox = self.active_sandboxes.get(sandbox_id)
+        if sandbox:
+            await sandbox.cleanup()
+            del self.active_sandboxes[sandbox_id]
+            return True
+        return False
+
+    async def cleanup_all_sandboxes(self):
+        """清理所有活跃沙箱"""
+        for sandbox_id in list(self.active_sandboxes.keys()):
+            await self.cleanup_sandbox(sandbox_id)
+
+    async def install_dependencies(self,
+                                  sandbox_id: str,
+                                  dependencies: List[str]) -> bool:
+        """为沙箱安装依赖"""
+        sandbox = await self.get_sandbox(sandbox_id)
+        if not sandbox:
+            raise RuntimeError(f"Sandbox not found: {sandbox_id}")
+
+        try:
+            # 创建requirements文件
+            requirements_content = "\n".join(dependencies)
+            requirements_file = sandbox.work_dir / "temp_requirements.txt"
+
+            with open(requirements_file, 'w') as f:
+                f.write(requirements_content)
+
+            # 复制到容器并安装
+            await sandbox.copy_to_container(
+                str(requirements_file),
+                "/temp_requirements.txt"
+            )
+
+            exit_code, output = await sandbox.execute_command(
+                "pip install -r /temp_requirements.txt"
+            )
+
+            return exit_code == 0
+
+        except Exception as e:
+            print(f"Error installing dependencies: {e}")
+            return False
+
+    async def get_sandbox_status(self, sandbox_id: str) -> Optional[Dict[str, Any]]:
+        """获取沙箱状态"""
+        sandbox = await self.get_sandbox(sandbox_id)
+        if not sandbox:
+            return None
+
+        try:
+            if sandbox.container:
+                container_info = sandbox.container.attrs
+                return {
+                    "sandbox_id": sandbox_id,
+                    "is_active": sandbox.is_active,
+                    "container_id": sandbox.container.id,
+                    "status": container_info["State"]["Status"],
+                    "created_at": container_info["Created"],
+                    "memory_usage": container_info.get("Stats", {}).get("usage", {}),
+                    "work_dir": str(sandbox.work_dir) if sandbox.work_dir else None
+                }
+            else:
+                return {
+                    "sandbox_id": sandbox_id,
+                    "is_active": False,
+                    "status": "no_container"
+                }
+
+        except Exception as e:
+            return {
+                "sandbox_id": sandbox_id,
+                "is_active": False,
+                "error": str(e)
+            }
+
+    async def list_active_sandboxes(self) -> List[Dict[str, Any]]:
+        """列出所有活跃沙箱"""
+        active_sandboxes = []
+
+        for sandbox_id, sandbox in self.active_sandboxes.items():
+            status = await self.get_sandbox_status(sandbox_id)
+            if status:
+                active_sandboxes.append(status)
+
+        return active_sandboxes
+
+    async def monitor_sandbox_health(self):
+        """监控沙箱健康状态"""
+        while True:
+            try:
+                for sandbox_id in list(self.active_sandboxes.keys()):
+                    status = await self.get_sandbox_status(sandbox_id)
+
+                    if status and status.get("is_active"):
+                        # 检查容器是否还在运行
+                        if status.get("status") not in ["running", "created"]:
+                            print(f"Sandbox {sandbox_id} is not running, cleaning up...")
+                            await self.cleanup_sandbox(sandbox_id)
+
+                await asyncio.sleep(60)  # 每分钟检查一次
+
+            except Exception as e:
+                print(f"Error monitoring sandbox health: {e}")
+                await asyncio.sleep(60)
+
+# 使用示例
+async def main():
+    # 创建沙箱管理器
+    sandbox_manager = SandboxManager()
+
+    try:
+        # 创建沙箱
+        sandbox = await sandbox_manager.create_sandbox(
+            sandbox_id="test_skill_001",
+            config=SandboxConfig(
+                memory_limit="256m",
+                cpu_limit="0.5",
+                timeout=120
+            )
+        )
+
+        print(f"Created sandbox: {sandbox.sandbox_id}")
+
+        # 执行命令
+        exit_code, output = await sandbox.execute_command("python --version")
+        print(f"Python version: {output.strip()}")
+
+        # 获取状态
+        status = await sandbox_manager.get_sandbox_status(sandbox.sandbox_id)
+        print(f"Sandbox status: {status}")
+
+    finally:
+        # 清理
+        await sandbox_manager.cleanup_all_sandboxes()
+        print("All sandboxes cleaned up")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+                    </div>
+                </section>
+
+                <section id="best-practices" class="section">
+                    <h2>最佳实践与规范</h2>
+
+                    <div class="best-practices">
+                        <h4>KISS原则应用</h4>
+                        <ul>
+                            <li><strong>简单的技能接口</strong>：技能接口保持简洁，参数明确，返回格式统一</li>
+                            <li><strong>直接的执行流程</strong>：技能执行流程直接明了，避免不必要的复杂性</li>
+                            <li><strong>最小化配置</strong>：技能配置简单，有合理的默认值</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-practices">
+                        <h4>DRY原则应用</h4>
+                        <ul>
+                            <li><strong>通用的验证逻辑</strong>：参数验证逻辑在所有技能中复用</li>
+                            <li><strong>共享的执行框架</strong>：技能执行框架统一，避免重复开发</li>
+                            <li><strong>统一的错误处理</strong>：标准化的错误处理和恢复机制</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-practices">
+                        <h4>YAGNI原则应用</h4>
+                        <ul>
+                            <li><strong>按需功能实现</strong>：只实现用户实际需要的技能功能</li>
+                            <li><strong>渐进式扩展</strong>：从基础功能开始，逐步添加高级特性</li>
+                            <li><strong>避免过度抽象</strong>：不需要的复杂设计暂不实现</li>
+                        </ul>
+                    </div>
+
+                    <h3>技能安全最佳实践</h3>
+                    <div class="card">
+                        <h4>沙箱安全隔离</h4>
+                        <div class="code-block">
+class SecurityEnhancedSandbox:
+    """安全增强的沙箱"""
+
+    def __init__(self, sandbox: DockerSandbox):
+        self.sandbox = sandbox
+        self.security_policies = self._load_security_policies()
+
+    def _load_security_policies(self) -> Dict[str, Any]:
+        """加载安全策略"""
+        return {
+            "blocked_commands": [
+                "rm -rf",
+                "sudo",
+                "su",
+                "chmod 777",
+                "mkfs",
+                "fdisk",
+                "iptables"
+            ],
+            "blocked_file_paths": [
+                "/etc/passwd",
+                "/etc/shadow",
+                "/etc/hosts",
+                "/root/",
+                "/var/log/"
+            ],
+            "resource_limits": {
+                "max_file_size": 10485760,  # 10MB
+                "max_memory": 536870912,  # 512MB
+                "max_execution_time": 300  # 5分钟
+            },
+            "network_restrictions": {
+                "allowed_domains": [
+                    "api.openai.com",
+                    "github.com",
+                    "pypi.org"
+                ],
+                "blocked_ports": [22, 23, 25, 53, 80, 443]
+            }
+        }
+
+    async def validate_command(self, command: str) -> bool:
+        """验证命令安全性"""
+        command_lower = command.lower()
+
+        # 检查被阻止的命令
+        for blocked_cmd in self.security_policies["blocked_commands"]:
+            if blocked_cmd in command_lower:
+                raise SecurityError(f"Command blocked: {blocked_cmd}")
+
+        # 检查危险模式
+        dangerous_patterns = [
+            r"&&\s*rm\s+-rf",
+            r";\s*rm\s+-rf",
+            r"\|\s*rm\s+-rf",
+            r"`.*rm\s+-rf.*`",
+            r"\$\s*\(.*rm\s+-rf.*\)"
+        ]
+
+        import re
+        for pattern in dangerous_patterns:
+            if re.search(pattern, command_lower):
+                raise SecurityError(f"Dangerous command pattern detected")
+
+        return True
+
+    async def monitor_execution(self, command: str) -> Dict[str, Any]:
+        """监控执行过程"""
+        start_time = time.time()
+
+        # 执行前检查
+        await self.validate_command(command)
+
+        try:
+            # 执行命令
+            exit_code, output = await self.sandbox.execute_command(command)
+
+            execution_time = time.time() - start_time
+
+            # 记录执行日志
+            log_entry = {
+                "command": command,
+                "exit_code": exit_code,
+                "execution_time": execution_time,
+                "timestamp": datetime.now().isoformat(),
+                "security_violations": []
+            }
+
+            # 检查执行结果的安全性
+            security_violations = await self._check_output_security(output)
+            if security_violations:
+                log_entry["security_violations"] = security_violations
+                await self._handle_security_violations(security_violations)
+
+            return {
+                "success": exit_code == 0,
+                "output": output,
+                "execution_time": execution_time,
+                "log_entry": log_entry
+            }
+
+        except SecurityError as e:
+            # 记录安全违规
+            await self._handle_security_violations([str(e)])
+            raise
+
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "execution_time": time.time() - start_time
+            }
+
+    async def _check_output_security(self, output: str) -> List[str]:
+        """检查输出安全性"""
+        violations = []
+
+        # 检查敏感信息泄露
+        sensitive_patterns = [
+            r"password[=:]\s*\S+",
+            r"token[=:]\s*\S+",
+            r"key[=:]\s*\S+",
+            r"secret[=:]\s*\S+"
+        ]
+
+        import re
+        for pattern in sensitive_patterns:
+            matches = re.findall(pattern, output, re.IGNORECASE)
+            if matches:
+                violations.append(f"Sensitive information detected: {pattern}")
+
+        return violations
+
+    async def _handle_security_violations(self, violations: List[str]):
+        """处理安全违规"""
+        # 记录安全事件
+        security_event = {
+            "timestamp": datetime.now().isoformat(),
+            "sandbox_id": self.sandbox.sandbox_id,
+            "violations": violations,
+            "severity": "medium"
+        }
+
+        await self._log_security_event(security_event)
+
+        # 根据违规严重程度采取行动
+        if len(violations) > 3 or any("token" in v or "password" in v for v in violations):
+            # 严重违规，停止沙箱
+            await self._isolate_sandbox()
+
+    async def _isolate_sandbox(self):
+        """隔离沙箱"""
+        print(f"Isolating sandbox due to security violations: {self.sandbox.sandbox_id}")
+
+        # 断开网络连接
+        await self.sandbox.execute_command("iptables -P OUTPUT DROP")
+
+        # 设置只读文件系统
+        # 这里需要重新挂载为只读
+
+    async def _log_security_event(self, event: Dict[str, Any]):
+        """记录安全事件"""
+        # 这里应该记录到安全日志系统
+        print(f"Security event: {event}")
+
+class SecurityError(Exception):
+    """安全错误"""
+    pass
+                        </div>
+                    </div>
+                </section>
+
+                <section id="related-docs" class="section">
+                    <h2>相关规范文档</h2>
+
+                    <div class="card">
+                        <h4>核心设计文档</h4>
+                        <ul>
+                            <li><strong>Claude Skills Integration Guide</strong> - Claude技能集成指南</li>
+                            <li><strong>Skill Development Standards</strong> - 技能开发标准和规范</li>
+                            <li><strong>Sandbox Security Requirements</strong> - 沙箱安全需求规范</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>实现指南</h4>
+                        <ul>
+                            <li><strong>Skill Package Structure</strong> - 技能包结构定义</li>
+                            <li><strong>Dependency Management</strong> - 依赖管理最佳实践</li>
+                            <li><strong>Version Compatibility</strong> - 版本兼容性管理</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>测试文档</h4>
+                        <ul>
+                            <li><strong>Skill Testing Framework</strong> - 技能测试框架指南</li>
+                            <li><strong>Security Testing Procedures</strong> - 安全测试流程</li>
+                            <li><strong>Performance Benchmarking</strong> - 性能基准测试</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>运维文档</h4>
+                        <ul>
+                            <li><strong>Skills Deployment Guide</strong> - 技能部署指南</li>
+                            <li><strong>Cache Management</strong> - 缓存管理操作手册</li>
+                            <li><strong>Monitoring and Alerting</strong> - 监控和告警配置</li>
+                        </ul>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <footer class="navigation-footer">
+        <h3>模块导航</h3>
+        <div class="nav-links">
+            <a href="P1_PERSISTENCE.html">P1 数据持久化</a>
+            <a href="P2_KNOWLEDGE_MANAGEMENT.html">P2 知识管理</a>
+            <a href="P3_MODEL_PROVIDER.html">P3 模型提供商</a>
+            <a href="P4_ROLE_MANAGER.html">P4 角色管理</a>
+            <a href="P5_AGENT_ENGINE.html">P5 智能体引擎</a>
+            <a href="P6_TERMINAL_INTERFACE.html">P6 终端界面</a>
+            <a href="P7_GUI_INTERFACE.html">P7 图形界面</a>
+            <a href="P8_DEBATE_SYSTEM.html">P8 辩论系统</a>
+            <a href="MODULE_WIKI_KNOWLEDGE.html">Wiki知识管理</a>
+            <a href="MODULE_CLAUDE_SKILLS.html">Claude技能</a>
+            <a href="DOCUMENT_DRIVEN_LEARNING_PLATFORM.html">返回学习平台</a>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>

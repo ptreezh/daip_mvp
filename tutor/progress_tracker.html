@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习进度跟踪 - DAIP-LIVE AI规范化编程实验室</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--gray-600);
+            font-size: 1.125rem;
+        }
+
+        .overview-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .overview-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .overview-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .overview-card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .overview-card .label {
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+
+        .progress-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .principles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .principle-card {
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .principle-card.completed {
+            border-color: var(--success);
+            background: var(--gray-50);
+        }
+
+        .principle-card.in-progress {
+            border-color: var(--warning);
+            background: #fef3c7;
+        }
+
+        .principle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .principle-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .principle-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-in-progress {
+            background: var(--warning);
+            color: white;
+        }
+
+        .status-not-started {
+            background: var(--gray-400);
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--primary));
+            transition: width 0.3s ease;
+        }
+
+        .principle-tasks {
+            list-style: none;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--gray-300);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .task-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .task-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+
+        .task-text {
+            flex: 1;
+            color: var(--gray-700);
+        }
+
+        .task-text.completed {
+            text-decoration: line-through;
+            color: var(--gray-400);
+        }
+
+        .timeline-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gray-300);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.75rem;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--gray-300);
+            border: 2px solid white;
+        }
+
+        .timeline-item.completed::before {
+            background: var(--success);
+        }
+
+        .timeline-item.in-progress::before {
+            background: var(--warning);
+        }
+
+        .timeline-date {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-description {
+            color: var(--gray-600);
+        }
+
+        .actions-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-300);
+        }
+
+        .achievement-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-left: 4px solid var(--success);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .achievement-popup.show {
+            transform: translateX(0);
+        }
+
+        .achievement-title {
+            font-weight: 600;
+            color: var(--success);
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-description {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .overview-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .principles-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🎓 学习进度跟踪</h1>
+            <p>记录你在AI规范化编程学习之旅中的每一步进展</p>
+        </div>
+
+        <!-- 概览卡片 -->
+        <div class="overview-cards">
+            <div class="overview-card">
+                <div class="value" id="overallProgress">0%</div>
+                <div class="label">总体进度</div>
+            </div>
+            <div class="overview-card">
+                <div class="value" id="completedPrinciples">0/6</div>
+                <div class="label">已完成原则</div>
+            </div>
+            <div class="overview-card">
+                <div class="value" id="completedModules">0/21</div>
+                <div class="label">已完成模块</div>
+            </div>
+            <div class="overview-card">
+                <div class="value" id="studyDays">0</div>
+                <div class="label">学习天数</div>
+            </div>
+        </div>
+
+        <!-- 编程原则进度 -->
+        <div class="progress-section">
+            <h2 class="section-title">📋 编程原则掌握进度</h2>
+            <div class="principles-grid" id="principlesGrid">
+                <!-- 动态生成的原则卡片 -->
+            </div>
+        </div>
+
+        <!-- 学习时间线 -->
+        <div class="timeline-section">
+            <h2 class="section-title">📅 学习时间线</h2>
+            <div class="timeline" id="timeline">
+                <!-- 动态生成的时间线项目 -->
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="actions-section">
+            <h3 style="margin-bottom: 1rem;">💾 学习数据管理</h3>
+            <button class="btn btn-primary" onclick="exportProgress()">导出进度报告</button>
+            <button class="btn btn-secondary" onclick="resetProgress()">重置进度</button>
+        </div>
+    </div>
+
+    <!-- 成就弹窗 -->
+    <div class="achievement-popup" id="achievementPopup">
+        <div class="achievement-title">🎉 恭喜达成成就！</div>
+        <div class="achievement-description" id="achievementDescription">你已经完成了一个重要的学习里程碑</div>
+    </div>
+
+    <script>
+        // 学习数据模型
+        const learningData = {
+            principles: [
+                {
+                    id: 'solid',
+                    name: 'SOLID原则',
+                    tasks: [
+                        { id: 's', text: '理解单一职责原则', completed: false },
+                        { id: 'o', text: '实践开闭原则', completed: false },
+                        { id: 'l', text: '应用里氏替换原则', completed: false },
+                        { id: 'i', text: '使用接口隔离原则', completed: false },
+                        { id: 'd', text: '遵循依赖倒置原则', completed: false }
+                    ]
+                },
+                {
+                    id: 'kiss',
+                    name: 'KISS原则',
+                    tasks: [
+                        { id: 'simplicity', text: '简化复杂代码结构', completed: false },
+                        { id: 'avoid-overengineer', text: '避免过度工程化', completed: false },
+                        { id: 'direct-solution', text: '选择直接解决方案', completed: false }
+                    ]
+                },
+                {
+                    id: 'tdd',
+                    name: 'TDD原则',
+                    tasks: [
+                        { id: 'red-phase', text: '编写失败测试', completed: false },
+                        { id: 'green-phase', text: '实现最小功能', completed: false },
+                        { id: 'refactor-phase', text: '重构保持测试通过', completed: false }
+                    ]
+                },
+                {
+                    id: 'yagni',
+                    name: 'YAGNI原则',
+                    tasks: [
+                        { id: 'current-need', text: '专注当前需求', completed: false },
+                        { id: 'avoid-premature', text: '避免过早优化', completed: false },
+                        { id: 'future-extension', text: '预留扩展点但不实现', completed: false }
+                    ]
+                },
+                {
+                    id: 'dry',
+                    name: 'DRY原则',
+                    tasks: [
+                        { id: 'extract-common', text: '提取公共逻辑', completed: false },
+                        { id: 'reuse-components', text: '复用组件和函数', completed: false },
+                        { id: 'single-source', text: '保持单一修改点', completed: false }
+                    ]
+                },
+                {
+                    id: 'clarity',
+                    name: '无歧义原则',
+                    tasks: [
+                        { id: 'clear-naming', text: '使用清晰的命名', completed: false },
+                        { id: 'type-annotations', text: '添加类型注解', completed: false },
+                        { id: 'detailed-docs', text: '编写详细文档', completed: false }
+                    ]
+                }
+            ],
+            modules: 21,
+            milestones: []
+        };
+
+        // 初始化应用
+        function initializeApp() {
+            loadProgress();
+            renderPrinciples();
+            renderTimeline();
+            updateOverview();
+            setupEventListeners();
+        }
+
+        // 加载进度数据
+        function loadProgress() {
+            const saved = localStorage.getItem('learningProgress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                // 合并保存的数据到学习数据中
+                data.principles?.forEach((savedPrinciple, index) => {
+                    if (learningData.principles[index]) {
+                        learningData.principles[index].tasks.forEach((task, taskIndex) => {
+                            if (savedPrinciple.tasks[taskIndex]) {
+                                task.completed = savedPrinciple.tasks[taskIndex].completed;
+                            }
+                        });
+                    }
+                });
+                learningData.modules = data.modules || 0;
+                learningData.milestones = data.milestones || [];
+            }
+        }
+
+        // 保存进度数据
+        function saveProgress() {
+            localStorage.setItem('learningProgress', JSON.stringify(learningData));
+        }
+
+        // 渲染原则卡片
+        function renderPrinciples() {
+            const container = document.getElementById('principlesGrid');
+            container.innerHTML = '';
+
+            learningData.principles.forEach(principle => {
+                const completedTasks = principle.tasks.filter(task => task.completed).length;
+                const totalTasks = principle.tasks.length;
+                const progress = (completedTasks / totalTasks) * 100;
+
+                let statusClass = '';
+                let statusText = '';
+                if (progress === 100) {
+                    statusClass = 'completed';
+                    statusText = '已完成';
+                } else if (progress > 0) {
+                    statusClass = 'in-progress';
+                    statusText = '学习中';
+                } else {
+                    statusClass = 'not-started';
+                    statusText = '未开始';
+                }
+
+                const card = document.createElement('div');
+                card.className = `principle-card ${statusClass}`;
+                card.innerHTML = `
+                    <div class="principle-header">
+                        <div class="principle-name">${principle.name}</div>
+                        <div class="principle-status status-${statusClass}">${statusText}</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                    <ul class="principle-tasks">
+                        ${principle.tasks.map(task => `
+                            <li class="task-item">
+                                <div class="task-checkbox ${task.completed ? 'checked' : ''}"
+                                     onclick="toggleTask('${principle.id}', '${task.id}')"></div>
+                                <div class="task-text ${task.completed ? 'completed' : ''}">${task.text}</div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // 渲染时间线
+        function renderTimeline() {
+            const container = document.getElementById('timeline');
+            container.innerHTML = '';
+
+            if (learningData.milestones.length === 0) {
+                container.innerHTML = '<p style="color: var(--gray-500); text-align: center;">开始学习后，你的成就将在这里显示</p>';
+                return;
+            }
+
+            learningData.milestones.forEach(milestone => {
+                const item = document.createElement('div');
+                item.className = `timeline-item ${milestone.completed ? 'completed' : 'in-progress'}`;
+
+                const date = new Date(milestone.date);
+                const formattedDate = date.toLocaleDateString('zh-CN');
+
+                item.innerHTML = `
+                    <div class="timeline-date">${formattedDate}</div>
+                    <div class="timeline-title">${milestone.title}</div>
+                    <div class="timeline-description">${milestone.description}</div>
+                `;
+
+                container.appendChild(item);
+            });
+        }
+
+        // 更新概览数据
+        function updateOverview() {
+            // 计算总体进度
+            let totalTasks = 0;
+            let completedTasks = 0;
+
+            learningData.principles.forEach(principle => {
+                totalTasks += principle.tasks.length;
+                completedTasks += principle.tasks.filter(task => task.completed).length;
+            });
+
+            const overallProgress = Math.round((completedTasks / totalTasks) * 100);
+            document.getElementById('overallProgress').textContent = `${overallProgress}%`;
+
+            // 已完成原则数
+            const completedPrinciples = learningData.principles.filter(principle =>
+                principle.tasks.every(task => task.completed)
+            ).length;
+            document.getElementById('completedPrinciples').textContent = `${completedPrinciples}/6`;
+
+            // 已完成模块数（这里简化处理，实际应该从其他数据源获取）
+            document.getElementById('completedModules').textContent = `${learningData.modules}/21`;
+
+            // 学习天数
+            const startDate = localStorage.getItem('learningStartDate');
+            if (startDate) {
+                const start = new Date(startDate);
+                const now = new Date();
+                const days = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+                document.getElementById('studyDays').textContent = days;
+            } else {
+                document.getElementById('studyDays').textContent = '0';
+            }
+        }
+
+        // 切换任务状态
+        function toggleTask(principleId, taskId) {
+            const principle = learningData.principles.find(p => p.id === principleId);
+            if (principle) {
+                const task = principle.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.completed = !task.completed;
+
+                    // 添加里程碑
+                    if (task.completed) {
+                        addMilestone(`完成${principle.name}任务`, task.text);
+                    }
+
+                    // 检查是否完成了原则
+                    const allCompleted = principle.tasks.every(t => t.completed);
+                    if (allCompleted) {
+                        addMilestone(`掌握${principle.name}`, `成功掌握了${principle.name}的所有要点`);
+                        showAchievement(`🎉 掌握${principle.name}`, `恭喜！你已经成功掌握了${principle.name}的所有核心要点`);
+                    }
+
+                    saveProgress();
+                    renderPrinciples();
+                    updateOverview();
+                }
+            }
+        }
+
+        // 添加里程碑
+        function addMilestone(title, description) {
+            learningData.milestones.push({
+                title,
+                description,
+                date: new Date().toISOString(),
+                completed: true
+            });
+
+            // 限制里程碑数量
+            if (learningData.milestones.length > 20) {
+                learningData.milestones.shift();
+            }
+
+            renderTimeline();
+        }
+
+        // 显示成就弹窗
+        function showAchievement(title, description) {
+            const popup = document.getElementById('achievementPopup');
+            const titleElement = popup.querySelector('.achievement-title');
+            const descriptionElement = document.getElementById('achievementDescription');
+
+            titleElement.textContent = title;
+            descriptionElement.textContent = description;
+
+            popup.classList.add('show');
+
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 5000);
+        }
+
+        // 导出进度
+        function exportProgress() {
+            const progressData = {
+                exportDate: new Date().toISOString(),
+                overallProgress: document.getElementById('overallProgress').textContent,
+                completedPrinciples: document.getElementById('completedPrinciples').textContent,
+                completedModules: document.getElementById('completedModules').textContent,
+                studyDays: document.getElementById('studyDays').textContent,
+                principles: learningData.principles,
+                milestones: learningData.milestones
+            };
+
+            const dataStr = JSON.stringify(progressData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `learning-progress-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        // 重置进度
+        function resetProgress() {
+            if (confirm('确定要重置所有学习进度吗？此操作不可撤销。')) {
+                localStorage.removeItem('learningProgress');
+                localStorage.removeItem('learningStartDate');
+
+                // 重置数据
+                learningData.principles.forEach(principle => {
+                    principle.tasks.forEach(task => {
+                        task.completed = false;
+                    });
+                });
+                learningData.modules = 0;
+                learningData.milestones = [];
+
+                saveProgress();
+                renderPrinciples();
+                renderTimeline();
+                updateOverview();
+            }
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 记录学习开始日期
+            if (!localStorage.getItem('learningStartDate')) {
+                localStorage.setItem('learningStartDate', new Date().toISOString());
+                addMilestone('开始学习之旅', '开始学习AI规范化编程的核心原则');
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>

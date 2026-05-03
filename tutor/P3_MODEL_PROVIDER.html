@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P3 模型提供商 - 0代码AI规范化编程实践教学</title>
+    <meta name="description" content="DAIP-LIVE模型提供商模块：多模型支持、智能路由和性能优化">
+    
+    <!-- 统一样式表 -->
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    
+    <!-- 字体和图标 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">加载模型提供商模块...</div>
+        </div>
+    </div>
+    
+    <!-- 滚动指示器 -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+    
+    <!-- 统一导航栏 -->
+    <nav class="unified-navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span class="navbar-logo">🤖</span>
+                <span>0代码AI规范化编程</span>
+            </a>
+            
+            <button class="navbar-toggle" id="navbarToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="index.html#learning" class="nav-link">学习</a></li>
+                <li><a href="index.html#teaching" class="nav-link">教学内容</a></li>
+                <li><a href="index.html#modules" class="nav-link">模块</a></li>
+                <li><a href="index.html#projects" class="nav-link">项目</a></li>
+                <li><a href="index.html#resources" class="nav-link">资源</a></li>
+            </ul>
+            
+            <div class="navbar-actions">
+                <a href="#start-learning" class="unified-btn unified-btn-primary">
+                    开始学习
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主容器 -->
+    <main class="main-container">
+        <!-- Hero 区域 -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            <span class="hero-icon">🧠</span>
+                            P3 模型提供商模块
+                        </h1>
+                        <p class="hero-description">
+                            DAIP-LIVE模型提供商模块：多模型支持、智能路由和性能优化
+                        </p>
+                        <div class="hero-features">
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-microchip"></i>
+                                多模型支持
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-route"></i>
+                                智能路由
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-bolt"></i>
+                                性能优化
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="unified-card">
+                            <div class="stats-icon text-center mb-4">
+                                <i class="fas fa-server text-4xl text-primary"></i>
+                            </div>
+                            <div class="stats-info text-center">
+                                <div class="text-3xl font-bold text-primary mb-2">5</div>
+                                <div class="text-secondary">支持的模型</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 模块概述 -->
+        <section class="content-section py-16">
+            <div class="container">
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <h2 class="card-title">模块概述</h2>
+                    </div>
+                    <p class="card-description">
+                        模型提供商模块是DAIP-LIVE系统的核心组件，负责管理多种AI模型的接入、调度和优化。
+                        通过统一的接口抽象，实现对不同模型提供商的无缝集成。
+                    </p>
+                    
+                    <div class="grid md:grid-cols-3 gap-6 mt-8">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary mb-2">OpenAI</div>
+                            <div class="text-secondary">GPT系列模型</div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary mb-2">Anthropic</div>
+                            <div class="text-secondary">Claude系列模型</div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary mb-2">Local</div>
+                            <div class="text-secondary">本地部署模型</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 核心功能 -->
+                <div class="grid md:grid-cols-2 gap-8 mb-12">
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-plug"></i>
+                            </div>
+                            <h3 class="card-title">多模型集成</h3>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-description">
+                                支持多种主流AI模型提供商，包括OpenAI、Anthropic、Google等，
+                                通过统一的抽象接口实现模型的无缝切换。
+                            </p>
+                            
+                            <div class="mt-6">
+                                <h4 class="font-semibold mb-3">支持的模型类型：</h4>
+                                <ul class="space-y-2">
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>文本生成模型</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>代码生成模型</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>图像生成模型</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>语音识别模型</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-route"></i>
+                            </div>
+                            <h3 class="card-title">智能路由</h3>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-description">
+                                基于任务类型、性能要求和成本考虑，智能选择最优的模型提供商，
+                                实现负载均衡和故障转移。
+                            </p>
+                            
+                            <div class="mt-6">
+                                <h4 class="font-semibold mb-3">路由策略：</h4>
+                                <ul class="space-y-2">
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>基于任务复杂度的模型选择</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>基于成本的优化路由</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>基于性能的负载均衡</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>故障自动切换机制</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 技术架构 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <h2 class="card-title">技术架构</h2>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="expandable-content">
+                            <div class="expandable-header">
+                                <h3 class="expandable-title font-semibold">架构概览</h3>
+                                <i class="fas fa-chevron-down expandable-icon"></i>
+                            </div>
+                            <div class="expandable-body">
+                                <p class="mb-4">
+                                    模型提供商模块采用分层架构设计，包括抽象层、实现层和服务层，
+                                    通过依赖注入实现松耦合，支持热插拔和动态扩展。
+                                </p>
+                                
+                                <div class="bg-secondary rounded-lg p-6 mb-6">
+                                    <h4 class="font-semibold mb-3">核心组件：</h4>
+                                    <ol class="list-decimal list-inside space-y-2">
+                                        <li><strong>ModelProvider接口</strong> - 定义模型提供商的统一接口</li>
+                                        <li><strong>ConcreteProviders</strong> - 具体的模型提供商实现</li>
+                                        <li><strong>RoutingEngine</strong> - 智能路由引擎</li>
+                                        <li><strong>CacheLayer</strong> - 缓存层优化性能</li>
+                                        <li><strong>Monitoring</strong> - 性能监控和日志记录</li>
+                                    </ol>
+                                </div>
+                                
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">ModelProvider接口定义</span>
+                                        <button class="code-copy-btn">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import Dict, Any
+
+class ModelProvider(ABC):
+    """模型提供商抽象基类"""
+    
+    @abstractmethod
+    def generate_text(self, prompt: str, **kwargs) -> str:
+        """生成文本"""
+        pass
+    
+    @abstractmethod
+    def generate_code(self, prompt: str, **kwargs) -> str:
+        """生成代码"""
+        pass
+    
+    @abstractmethod
+    def get_model_info(self) -> Dict[str, Any]:
+        """获取模型信息"""
+        pass
+    
+    @abstractmethod
+    def validate_config(self, config: Dict[str, Any]) -> bool:
+        """验证配置"""
+        pass</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 最佳实践 -->
+                <div class="unified-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h2 class="card-title">最佳实践</h2>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-semibold text-lg mb-3">配置管理</h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-start gap-3">
+                                    <div class="unified-tag unified-tag-sm">1</div>
+                                    <div>
+                                        <h4 class="font-medium">环境变量配置</h4>
+                                        <p class="text-sm text-secondary mt-1">
+                                            使用环境变量管理敏感信息，如API密钥和访问凭证
+                                        </p>
+                                    </div>
+                                </li>
+                                
+                                <li class="flex items-start gap-3">
+                                    <div class="unified-tag unified-tag-sm">2</div>
+                                    <div>
+                                        <h4 class="font-medium">配置文件分离</h4>
+                                        <p class="text-sm text-secondary mt-1">
+                                            将不同环境的配置文件分离，便于管理和维护
+                                        </p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold text-lg mb-3">性能优化</h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-start gap-3">
+                                    <div class="unified-tag unified-tag-sm">3</div>
+                                    <div>
+                                        <h4 class="font-medium">缓存策略</h4>
+                                        <p class="text-sm text-secondary mt-1">
+                                            实现智能缓存机制，减少重复请求，提升响应速度
+                                        </p>
+                                    </div>
+                                </li>
+                                
+                                <li class="flex items-start gap-3">
+                                    <div class="unified-tag unified-tag-sm">4</div>
+                                    <div>
+                                        <h4 class="font-medium">批量处理</h4>
+                                        <p class="text-sm text-secondary mt-1">
+                                            支持批量请求处理，提高吞吐量和资源利用率
+                                        </p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 统一页脚 -->
+    <footer class="unified-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">
+                        <span class="navbar-logo">🤖</span>
+                        <span>0代码AI规范化编程</span>
+                    </div>
+                    <p class="footer-description">
+                        通过AI驱动的学习平台，帮助开发者掌握规范化编程技能。
+                        我们的使命是让每个人都能轻松掌握先进的编程技术。
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>学习资源</h4>
+                        <ul>
+                            <li><a href="document_library.html">文档中心</a></li>
+                            <li><a href="MODULE_WIKI_KNOWLEDGE.html">知识库</a></li>
+                            <li><a href="P3_MODEL_PROVIDER.html">模块文档</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>支持服务</h4>
+                        <ul>
+                            <li><a href="#">帮助中心</a></li>
+                            <li><a href="#">技术支持</a></li>
+                            <li><a href="#">联系我们</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 0代码AI规范化编程. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 统一JavaScript -->
+    <script src="assets/js/unified-scripts.js"></script>
+</body>
+</html>

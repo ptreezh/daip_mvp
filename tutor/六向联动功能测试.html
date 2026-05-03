@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六向联动功能测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2rem; background: #f8fafc; }
+        .test-container { max-width: 1000px; margin: 0 auto; }
+        .test-header { text-align: center; margin-bottom: 2rem; }
+        .test-step { background: white; border-radius: 8px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .step-number { background: #667eea; color: white; width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; margin-right: 1rem; }
+        .success { background: #dcfce7; border-left: 4px solid #16a34a; }
+        .warning { background: #fef3c7; border-left: 4px solid #d97706; }
+        .demo-button { background: #667eea; color: white; padding: 1rem 2rem; border: none; border-radius: 8px; font-size: 1.125rem; cursor: pointer; text-decoration: none; display: inline-block; margin: 0.5rem; }
+        .feature-check { display: flex; align-items: center; margin: 0.5rem 0; }
+        .check-yes { color: #16a34a; margin-right: 0.5rem; }
+        .check-no { color: #dc2626; margin-right: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🔧 六向联动功能测试</h1>
+            <p>验证六向联动学习系统是否真正实现</p>
+        </div>
+
+        <div class="test-step success">
+            <h3><span class="step-number">1</span>测试准备</h3>
+            <p>请访问主系统文件进行测试：</p>
+            <a href="P1_SIX_DIMENSION_LEARNING.html" class="demo-button">🚀 开始六向联动测试</a>
+        </div>
+
+        <div class="test-step warning">
+            <h3><span class="step-number">2</span>功能验证清单</h3>
+            <p>请按以下步骤验证六向联动功能：</p>
+            
+            <h4>基础功能测试：</h4>
+            <div class="feature-check">
+                <span class="check-yes">✅</span> 选择一个需求（FR-001、FR-002、NFR-001、DP-002）
+            </div>
+            <div class="feature-check">
+                <span class="check-yes">✅</span> 验证是否显示六个维度的内容
+            </div>
+            
+            <h4>六向联动核心测试：</h4>
+            <div class="feature-check">
+                <span class="check-yes">✅</span> 点击"🤖 规范化提示词"维度，验证其他五个维度内容是否变化
+            </div>
+            <div class="feature-check">
+                <span class="check-yes">✅</span> 点击"📄 规范文档"维度，验证其他五个维度内容是否变化
+            </div>
+            <div class="feature-check">
+                <span class="check-yes">✅</span> 点击"💻 代码实现"维度，验证其他五个维度内容是否变化
+            </div>
+            <div class="feature-check">
+                <span class="check-yes">✅</span> 点击任意维度卡片，验证联动效果
+            </div>
+            
+            <h4>内容质量测试：</h4>
+            <div class="feature-check">
+                <span class="check-yes">✅</span> 验证每个维度都有具体的内容（不是空白或占位符）
+            </div>
+            <div class="feature-check">
+                <span class="check-yes">✅</span> 验证实施计划步骤与代码实现有对应关系
+            </div>
+            <div class="feature-check">
+                <span class="check-yes">✅</span> 验证交叉引用链接可以正常跳转
+            </div>
+        </div>
+
+        <div class="test-step success">
+            <h3><span class="step-number">3</span>期望的联动效果</h3>
+            <p>当您点击任意维度时，应该看到：</p>
+            <ul>
+                <li><strong>视觉反馈：</strong>当前维度高亮显示，其他维度保持正常</li>
+                <li><strong>内容联动：</strong>所有六个维度的内容都应该重新加载对应需求的内容</li>
+                <li><strong>导航更新：</strong>底部导航栏的激活状态相应更新</li>
+                <li><strong>平滑动画：</strong>滚动到对应维度并有缩放动画效果</li>
+                <li><strong>切换按钮：</strong>每个维度底部显示切换到其他维度的按钮</li>
+            </ul>
+        </div>
+
+        <div class="test-step warning">
+            <h3><span class="step-number">4</span>如果发现问题</h3>
+            <p>如果测试过程中发现任何问题：</p>
+            <ul>
+                <li>点击任意维度时内容没有变化</li>
+                <li>某些维度显示空白或占位符</li>
+                <li>交叉引用链接无法正常跳转</li>
+                <li>视觉反馈不明显</li>
+            </ul>
+            <p>请报告具体的问题现象，我会立即修复。</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="P1_SIX_DIMENSION_LEARNING.html" class="demo-button">🚀 立即测试六向联动</a>
+            <a href="六向联动系统演示.html" class="demo-button" style="background: #764ba2;">📖 查看系统介绍</a>
+        </div>
+    </div>
+
+    <script>
+        // 添加一些交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为复选框添加点击效果
+            document.querySelectorAll('.feature-check').forEach(check => {
+                check.addEventListener('click', function() {
+                    const icon = this.querySelector('.check-yes, .check-no');
+                    if (icon.classList.contains('check-yes')) {
+                        icon.classList.remove('check-yes');
+                        icon.classList.add('check-no');
+                        icon.textContent = '❌';
+                    } else {
+                        icon.classList.remove('check-no');
+                        icon.classList.add('check-yes');
+                        icon.textContent = '✅';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

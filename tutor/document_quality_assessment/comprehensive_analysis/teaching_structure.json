@@ -1,0 +1,1433 @@
+{
+  "learning_tracks": {
+    "foundational": {
+      "title": "基础学习路径",
+      "description": "学习DAIP-LIVE的基础架构和核心概念",
+      "duration": "4-6周",
+      "modules": [
+        "p1",
+        "p6"
+      ],
+      "prerequisites": [],
+      "learning_outcomes": [
+        "掌握数据持久化基础",
+        "理解TUI界面开发",
+        "学会基础的模块化设计"
+      ]
+    },
+    "core_development": {
+      "title": "核心开发路径",
+      "description": "深入学习AI系统开发和模块协作",
+      "duration": "6-8周",
+      "modules": [
+        "p2",
+        "p3",
+        "p5"
+      ],
+      "prerequisites": [
+        "foundational"
+      ],
+      "learning_outcomes": [
+        "掌握知识管理和向量搜索",
+        "理解多模型集成",
+        "学会智能执行引擎"
+      ]
+    },
+    "advanced_features": {
+      "title": "高级特性路径",
+      "description": "掌握高级功能和系统优化",
+      "duration": "4-6周",
+      "modules": [
+        "p4",
+        "p8",
+        "p7"
+      ],
+      "prerequisites": [
+        "core_development"
+      ],
+      "learning_outcomes": [
+        "掌握角色管理和权限",
+        "理解多模型辩论系统",
+        "学会Web界面集成"
+      ]
+    },
+    "refactoring_mastery": {
+      "title": "重构精通路径",
+      "description": "学习系统重构和架构优化",
+      "duration": "3-4周",
+      "modules": [
+        "newP5",
+        "newP6",
+        "newP7"
+      ],
+      "prerequisites": [
+        "advanced_features"
+      ],
+      "learning_outcomes": [
+        "理解重构原理和方法",
+        "掌握架构优化技巧",
+        "学会系统迁移和升级"
+      ]
+    }
+  },
+  "module_labs": {
+    "p5": {
+      "module_id": "p5",
+      "module_name": "Agent Engine",
+      "module_type": "original",
+      "status": "active",
+      "document_count": 3,
+      "sub_modules": [],
+      "learning_sequence": [
+        {
+          "phase": 1,
+          "title": "理论学习",
+          "documents": [
+            {
+              "file_name": "SPEC.md",
+              "relative_path": "p5_agent_engine\\SPEC.md",
+              "file_size": 3395,
+              "file_type": "specification"
+            }
+          ],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "phase": 2,
+          "title": "设计理解",
+          "documents": [],
+          "activities": [
+            "分析架构设计",
+            "理解接口定义",
+            "学习最佳实践"
+          ]
+        },
+        {
+          "phase": 3,
+          "title": "代码实践",
+          "documents": [],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "phase": 4,
+          "title": "测试验证",
+          "documents": [],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "phase": 5,
+          "title": "综合实践",
+          "documents": [],
+          "activities": [
+            "完成合规检查",
+            "实施最佳实践",
+            "编写学习总结"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Agent Engine基础理解",
+          "objectives": [
+            "理解Agent Engine的核心概念",
+            "掌握Agent Engine的基本使用",
+            "完成Agent Engine的配置和运行"
+          ],
+          "tasks": [
+            "阅读相关规格文档",
+            "运行基础示例代码",
+            "完成配置练习",
+            "编写学习笔记"
+          ],
+          "estimated_time": "2-3小时"
+        },
+        {
+          "level": "intermediate",
+          "title": "Agent Engine功能扩展",
+          "objectives": [
+            "掌握Agent Engine的扩展方法",
+            "理解Agent Engine的接口设计",
+            "能够进行Agent Engine的功能定制"
+          ],
+          "tasks": [
+            "分析源代码实现",
+            "实现功能扩展",
+            "编写单元测试",
+            "优化性能表现"
+          ],
+          "estimated_time": "4-6小时"
+        },
+        {
+          "level": "advanced",
+          "title": "Agent Engine高级应用",
+          "objectives": [
+            "掌握Agent Engine的高级特性",
+            "能够进行Agent Engine的架构优化",
+            "具备Agent Engine的问题排查能力"
+          ],
+          "tasks": [
+            "设计新的功能模块",
+            "性能优化和调优",
+            "编写技术文档",
+            "贡献开源项目"
+          ],
+          "estimated_time": "6-8小时"
+        }
+      ]
+    },
+    "p6": {
+      "module_id": "p6",
+      "module_name": "CLI TUI",
+      "module_type": "original",
+      "status": "active",
+      "document_count": 1,
+      "sub_modules": [],
+      "learning_sequence": [
+        {
+          "phase": 1,
+          "title": "理论学习",
+          "documents": [],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "phase": 2,
+          "title": "设计理解",
+          "documents": [],
+          "activities": [
+            "分析架构设计",
+            "理解接口定义",
+            "学习最佳实践"
+          ]
+        },
+        {
+          "phase": 3,
+          "title": "代码实践",
+          "documents": [],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "phase": 4,
+          "title": "测试验证",
+          "documents": [],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "phase": 5,
+          "title": "综合实践",
+          "documents": [],
+          "activities": [
+            "完成合规检查",
+            "实施最佳实践",
+            "编写学习总结"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "CLI TUI基础理解",
+          "objectives": [
+            "理解CLI TUI的核心概念",
+            "掌握CLI TUI的基本使用",
+            "完成CLI TUI的配置和运行"
+          ],
+          "tasks": [
+            "阅读相关规格文档",
+            "运行基础示例代码",
+            "完成配置练习",
+            "编写学习笔记"
+          ],
+          "estimated_time": "2-3小时"
+        },
+        {
+          "level": "intermediate",
+          "title": "CLI TUI功能扩展",
+          "objectives": [
+            "掌握CLI TUI的扩展方法",
+            "理解CLI TUI的接口设计",
+            "能够进行CLI TUI的功能定制"
+          ],
+          "tasks": [
+            "分析源代码实现",
+            "实现功能扩展",
+            "编写单元测试",
+            "优化性能表现"
+          ],
+          "estimated_time": "4-6小时"
+        },
+        {
+          "level": "advanced",
+          "title": "CLI TUI高级应用",
+          "objectives": [
+            "掌握CLI TUI的高级特性",
+            "能够进行CLI TUI的架构优化",
+            "具备CLI TUI的问题排查能力"
+          ],
+          "tasks": [
+            "设计新的功能模块",
+            "性能优化和调优",
+            "编写技术文档",
+            "贡献开源项目"
+          ],
+          "estimated_time": "6-8小时"
+        }
+      ]
+    },
+    "p7": {
+      "module_id": "p7",
+      "module_name": "GUI",
+      "module_type": "original",
+      "status": "active",
+      "document_count": 1,
+      "sub_modules": [],
+      "learning_sequence": [
+        {
+          "phase": 1,
+          "title": "理论学习",
+          "documents": [],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "phase": 2,
+          "title": "设计理解",
+          "documents": [],
+          "activities": [
+            "分析架构设计",
+            "理解接口定义",
+            "学习最佳实践"
+          ]
+        },
+        {
+          "phase": 3,
+          "title": "代码实践",
+          "documents": [],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "phase": 4,
+          "title": "测试验证",
+          "documents": [],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "phase": 5,
+          "title": "综合实践",
+          "documents": [],
+          "activities": [
+            "完成合规检查",
+            "实施最佳实践",
+            "编写学习总结"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "GUI基础理解",
+          "objectives": [
+            "理解GUI的核心概念",
+            "掌握GUI的基本使用",
+            "完成GUI的配置和运行"
+          ],
+          "tasks": [
+            "阅读相关规格文档",
+            "运行基础示例代码",
+            "完成配置练习",
+            "编写学习笔记"
+          ],
+          "estimated_time": "2-3小时"
+        },
+        {
+          "level": "intermediate",
+          "title": "GUI功能扩展",
+          "objectives": [
+            "掌握GUI的扩展方法",
+            "理解GUI的接口设计",
+            "能够进行GUI的功能定制"
+          ],
+          "tasks": [
+            "分析源代码实现",
+            "实现功能扩展",
+            "编写单元测试",
+            "优化性能表现"
+          ],
+          "estimated_time": "4-6小时"
+        },
+        {
+          "level": "advanced",
+          "title": "GUI高级应用",
+          "objectives": [
+            "掌握GUI的高级特性",
+            "能够进行GUI的架构优化",
+            "具备GUI的问题排查能力"
+          ],
+          "tasks": [
+            "设计新的功能模块",
+            "性能优化和调优",
+            "编写技术文档",
+            "贡献开源项目"
+          ],
+          "estimated_time": "6-8小时"
+        }
+      ]
+    },
+    "p0": {
+      "module_id": "p0",
+      "module_name": "Core Interfaces",
+      "module_type": "original",
+      "status": "active",
+      "document_count": 1,
+      "sub_modules": [],
+      "learning_sequence": [
+        {
+          "phase": 1,
+          "title": "理论学习",
+          "documents": [],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "phase": 2,
+          "title": "设计理解",
+          "documents": [],
+          "activities": [
+            "分析架构设计",
+            "理解接口定义",
+            "学习最佳实践"
+          ]
+        },
+        {
+          "phase": 3,
+          "title": "代码实践",
+          "documents": [],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "phase": 4,
+          "title": "测试验证",
+          "documents": [],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "phase": 5,
+          "title": "综合实践",
+          "documents": [],
+          "activities": [
+            "完成合规检查",
+            "实施最佳实践",
+            "编写学习总结"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Core Interfaces基础理解",
+          "objectives": [
+            "理解Core Interfaces的核心概念",
+            "掌握Core Interfaces的基本使用",
+            "完成Core Interfaces的配置和运行"
+          ],
+          "tasks": [
+            "阅读相关规格文档",
+            "运行基础示例代码",
+            "完成配置练习",
+            "编写学习笔记"
+          ],
+          "estimated_time": "2-3小时"
+        },
+        {
+          "level": "intermediate",
+          "title": "Core Interfaces功能扩展",
+          "objectives": [
+            "掌握Core Interfaces的扩展方法",
+            "理解Core Interfaces的接口设计",
+            "能够进行Core Interfaces的功能定制"
+          ],
+          "tasks": [
+            "分析源代码实现",
+            "实现功能扩展",
+            "编写单元测试",
+            "优化性能表现"
+          ],
+          "estimated_time": "4-6小时"
+        },
+        {
+          "level": "advanced",
+          "title": "Core Interfaces高级应用",
+          "objectives": [
+            "掌握Core Interfaces的高级特性",
+            "能够进行Core Interfaces的架构优化",
+            "具备Core Interfaces的问题排查能力"
+          ],
+          "tasks": [
+            "设计新的功能模块",
+            "性能优化和调优",
+            "编写技术文档",
+            "贡献开源项目"
+          ],
+          "estimated_time": "6-8小时"
+        }
+      ]
+    },
+    "p1": {
+      "module_id": "p1",
+      "module_name": "Data Persistence",
+      "module_type": "original",
+      "status": "active",
+      "document_count": 1,
+      "sub_modules": [],
+      "learning_sequence": [
+        {
+          "phase": 1,
+          "title": "理论学习",
+          "documents": [],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "phase": 2,
+          "title": "设计理解",
+          "documents": [],
+          "activities": [
+            "分析架构设计",
+            "理解接口定义",
+            "学习最佳实践"
+          ]
+        },
+        {
+          "phase": 3,
+          "title": "代码实践",
+          "documents": [],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "phase": 4,
+          "title": "测试验证",
+          "documents": [],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "phase": 5,
+          "title": "综合实践",
+          "documents": [],
+          "activities": [
+            "完成合规检查",
+            "实施最佳实践",
+            "编写学习总结"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Data Persistence基础理解",
+          "objectives": [
+            "理解Data Persistence的核心概念",
+            "掌握Data Persistence的基本使用",
+            "完成Data Persistence的配置和运行"
+          ],
+          "tasks": [
+            "阅读相关规格文档",
+            "运行基础示例代码",
+            "完成配置练习",
+            "编写学习笔记"
+          ],
+          "estimated_time": "2-3小时"
+        },
+        {
+          "level": "intermediate",
+          "title": "Data Persistence功能扩展",
+          "objectives": [
+            "掌握Data Persistence的扩展方法",
+            "理解Data Persistence的接口设计",
+            "能够进行Data Persistence的功能定制"
+          ],
+          "tasks": [
+            "分析源代码实现",
+            "实现功能扩展",
+            "编写单元测试",
+            "优化性能表现"
+          ],
+          "estimated_time": "4-6小时"
+        },
+        {
+          "level": "advanced",
+          "title": "Data Persistence高级应用",
+          "objectives": [
+            "掌握Data Persistence的高级特性",
+            "能够进行Data Persistence的架构优化",
+            "具备Data Persistence的问题排查能力"
+          ],
+          "tasks": [
+            "设计新的功能模块",
+            "性能优化和调优",
+            "编写技术文档",
+            "贡献开源项目"
+          ],
+          "estimated_time": "6-8小时"
+        }
+      ]
+    },
+    "p2": {
+      "module_id": "p2",
+      "module_name": "Knowledge Manager",
+      "module_type": "original",
+      "status": "active",
+      "document_count": 1,
+      "sub_modules": [],
+      "learning_sequence": [
+        {
+          "phase": 1,
+          "title": "理论学习",
+          "documents": [],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "phase": 2,
+          "title": "设计理解",
+          "documents": [],
+          "activities": [
+            "分析架构设计",
+            "理解接口定义",
+            "学习最佳实践"
+          ]
+        },
+        {
+          "phase": 3,
+          "title": "代码实践",
+          "documents": [],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "phase": 4,
+          "title": "测试验证",
+          "documents": [],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "phase": 5,
+          "title": "综合实践",
+          "documents": [],
+          "activities": [
+            "完成合规检查",
+            "实施最佳实践",
+            "编写学习总结"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Knowledge Manager基础理解",
+          "objectives": [
+            "理解Knowledge Manager的核心概念",
+            "掌握Knowledge Manager的基本使用",
+            "完成Knowledge Manager的配置和运行"
+          ],
+          "tasks": [
+            "阅读相关规格文档",
+            "运行基础示例代码",
+            "完成配置练习",
+            "编写学习笔记"
+          ],
+          "estimated_time": "2-3小时"
+        },
+        {
+          "level": "intermediate",
+          "title": "Knowledge Manager功能扩展",
+          "objectives": [
+            "掌握Knowledge Manager的扩展方法",
+            "理解Knowledge Manager的接口设计",
+            "能够进行Knowledge Manager的功能定制"
+          ],
+          "tasks": [
+            "分析源代码实现",
+            "实现功能扩展",
+            "编写单元测试",
+            "优化性能表现"
+          ],
+          "estimated_time": "4-6小时"
+        },
+        {
+          "level": "advanced",
+          "title": "Knowledge Manager高级应用",
+          "objectives": [
+            "掌握Knowledge Manager的高级特性",
+            "能够进行Knowledge Manager的架构优化",
+            "具备Knowledge Manager的问题排查能力"
+          ],
+          "tasks": [
+            "设计新的功能模块",
+            "性能优化和调优",
+            "编写技术文档",
+            "贡献开源项目"
+          ],
+          "estimated_time": "6-8小时"
+        }
+      ]
+    },
+    "p3": {
+      "module_id": "p3",
+      "module_name": "Model Provider",
+      "module_type": "original",
+      "status": "active",
+      "document_count": 1,
+      "sub_modules": [],
+      "learning_sequence": [
+        {
+          "phase": 1,
+          "title": "理论学习",
+          "documents": [],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "phase": 2,
+          "title": "设计理解",
+          "documents": [],
+          "activities": [
+            "分析架构设计",
+            "理解接口定义",
+            "学习最佳实践"
+          ]
+        },
+        {
+          "phase": 3,
+          "title": "代码实践",
+          "documents": [],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "phase": 4,
+          "title": "测试验证",
+          "documents": [],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "phase": 5,
+          "title": "综合实践",
+          "documents": [],
+          "activities": [
+            "完成合规检查",
+            "实施最佳实践",
+            "编写学习总结"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Model Provider基础理解",
+          "objectives": [
+            "理解Model Provider的核心概念",
+            "掌握Model Provider的基本使用",
+            "完成Model Provider的配置和运行"
+          ],
+          "tasks": [
+            "阅读相关规格文档",
+            "运行基础示例代码",
+            "完成配置练习",
+            "编写学习笔记"
+          ],
+          "estimated_time": "2-3小时"
+        },
+        {
+          "level": "intermediate",
+          "title": "Model Provider功能扩展",
+          "objectives": [
+            "掌握Model Provider的扩展方法",
+            "理解Model Provider的接口设计",
+            "能够进行Model Provider的功能定制"
+          ],
+          "tasks": [
+            "分析源代码实现",
+            "实现功能扩展",
+            "编写单元测试",
+            "优化性能表现"
+          ],
+          "estimated_time": "4-6小时"
+        },
+        {
+          "level": "advanced",
+          "title": "Model Provider高级应用",
+          "objectives": [
+            "掌握Model Provider的高级特性",
+            "能够进行Model Provider的架构优化",
+            "具备Model Provider的问题排查能力"
+          ],
+          "tasks": [
+            "设计新的功能模块",
+            "性能优化和调优",
+            "编写技术文档",
+            "贡献开源项目"
+          ],
+          "estimated_time": "6-8小时"
+        }
+      ]
+    },
+    "p4": {
+      "module_id": "p4",
+      "module_name": "Role Manager Tools",
+      "module_type": "original",
+      "status": "active",
+      "document_count": 5,
+      "sub_modules": [],
+      "learning_sequence": [
+        {
+          "phase": 1,
+          "title": "理论学习",
+          "documents": [
+            {
+              "file_name": "SPEC-Roles-From-Directory.md",
+              "relative_path": "p4_role_manager_tools\\SPEC-Roles-From-Directory.md",
+              "file_size": 2142,
+              "file_type": "specification"
+            },
+            {
+              "file_name": "SPEC-Roles-From-File.md",
+              "relative_path": "p4_role_manager_tools\\SPEC-Roles-From-File.md",
+              "file_size": 2371,
+              "file_type": "specification"
+            }
+          ],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "phase": 2,
+          "title": "设计理解",
+          "documents": [],
+          "activities": [
+            "分析架构设计",
+            "理解接口定义",
+            "学习最佳实践"
+          ]
+        },
+        {
+          "phase": 3,
+          "title": "代码实践",
+          "documents": [],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "phase": 4,
+          "title": "测试验证",
+          "documents": [],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "phase": 5,
+          "title": "综合实践",
+          "documents": [],
+          "activities": [
+            "完成合规检查",
+            "实施最佳实践",
+            "编写学习总结"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Role Manager Tools基础理解",
+          "objectives": [
+            "理解Role Manager Tools的核心概念",
+            "掌握Role Manager Tools的基本使用",
+            "完成Role Manager Tools的配置和运行"
+          ],
+          "tasks": [
+            "阅读相关规格文档",
+            "运行基础示例代码",
+            "完成配置练习",
+            "编写学习笔记"
+          ],
+          "estimated_time": "2-3小时"
+        },
+        {
+          "level": "intermediate",
+          "title": "Role Manager Tools功能扩展",
+          "objectives": [
+            "掌握Role Manager Tools的扩展方法",
+            "理解Role Manager Tools的接口设计",
+            "能够进行Role Manager Tools的功能定制"
+          ],
+          "tasks": [
+            "分析源代码实现",
+            "实现功能扩展",
+            "编写单元测试",
+            "优化性能表现"
+          ],
+          "estimated_time": "4-6小时"
+        },
+        {
+          "level": "advanced",
+          "title": "Role Manager Tools高级应用",
+          "objectives": [
+            "掌握Role Manager Tools的高级特性",
+            "能够进行Role Manager Tools的架构优化",
+            "具备Role Manager Tools的问题排查能力"
+          ],
+          "tasks": [
+            "设计新的功能模块",
+            "性能优化和调优",
+            "编写技术文档",
+            "贡献开源项目"
+          ],
+          "estimated_time": "6-8小时"
+        }
+      ]
+    },
+    "p8_debate_system": {
+      "module_id": "p8_debate_system",
+      "module_name": "Debate System Core",
+      "module_type": "original",
+      "status": "active",
+      "document_count": 3,
+      "sub_modules": [],
+      "learning_sequence": [
+        {
+          "phase": 1,
+          "title": "理论学习",
+          "documents": [
+            {
+              "file_name": "IMPROVEMENT_SAVE_TRANSCRIPT_SPEC.md",
+              "relative_path": "p8_debate_system\\IMPROVEMENT_SAVE_TRANSCRIPT_SPEC.md",
+              "file_size": 2578,
+              "file_type": "specification"
+            },
+            {
+              "file_name": "SPEC.md",
+              "relative_path": "p8_debate_system\\SPEC.md",
+              "file_size": 3045,
+              "file_type": "specification"
+            }
+          ],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "phase": 2,
+          "title": "设计理解",
+          "documents": [],
+          "activities": [
+            "分析架构设计",
+            "理解接口定义",
+            "学习最佳实践"
+          ]
+        },
+        {
+          "phase": 3,
+          "title": "代码实践",
+          "documents": [],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "phase": 4,
+          "title": "测试验证",
+          "documents": [],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "phase": 5,
+          "title": "综合实践",
+          "documents": [],
+          "activities": [
+            "完成合规检查",
+            "实施最佳实践",
+            "编写学习总结"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Debate System Core基础理解",
+          "objectives": [
+            "理解Debate System Core的核心概念",
+            "掌握Debate System Core的基本使用",
+            "完成Debate System Core的配置和运行"
+          ],
+          "tasks": [
+            "阅读相关规格文档",
+            "运行基础示例代码",
+            "完成配置练习",
+            "编写学习笔记"
+          ],
+          "estimated_time": "2-3小时"
+        },
+        {
+          "level": "intermediate",
+          "title": "Debate System Core功能扩展",
+          "objectives": [
+            "掌握Debate System Core的扩展方法",
+            "理解Debate System Core的接口设计",
+            "能够进行Debate System Core的功能定制"
+          ],
+          "tasks": [
+            "分析源代码实现",
+            "实现功能扩展",
+            "编写单元测试",
+            "优化性能表现"
+          ],
+          "estimated_time": "4-6小时"
+        },
+        {
+          "level": "advanced",
+          "title": "Debate System Core高级应用",
+          "objectives": [
+            "掌握Debate System Core的高级特性",
+            "能够进行Debate System Core的架构优化",
+            "具备Debate System Core的问题排查能力"
+          ],
+          "tasks": [
+            "设计新的功能模块",
+            "性能优化和调优",
+            "编写技术文档",
+            "贡献开源项目"
+          ],
+          "estimated_time": "6-8小时"
+        }
+      ]
+    },
+    "p8_human_assistant": {
+      "module_id": "p8_human_assistant",
+      "module_name": "Human Assistant",
+      "module_type": "original",
+      "status": "active",
+      "document_count": 1,
+      "sub_modules": [],
+      "learning_sequence": [
+        {
+          "phase": 1,
+          "title": "理论学习",
+          "documents": [],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "phase": 2,
+          "title": "设计理解",
+          "documents": [],
+          "activities": [
+            "分析架构设计",
+            "理解接口定义",
+            "学习最佳实践"
+          ]
+        },
+        {
+          "phase": 3,
+          "title": "代码实践",
+          "documents": [],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "phase": 4,
+          "title": "测试验证",
+          "documents": [],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "phase": 5,
+          "title": "综合实践",
+          "documents": [],
+          "activities": [
+            "完成合规检查",
+            "实施最佳实践",
+            "编写学习总结"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Human Assistant基础理解",
+          "objectives": [
+            "理解Human Assistant的核心概念",
+            "掌握Human Assistant的基本使用",
+            "完成Human Assistant的配置和运行"
+          ],
+          "tasks": [
+            "阅读相关规格文档",
+            "运行基础示例代码",
+            "完成配置练习",
+            "编写学习笔记"
+          ],
+          "estimated_time": "2-3小时"
+        },
+        {
+          "level": "intermediate",
+          "title": "Human Assistant功能扩展",
+          "objectives": [
+            "掌握Human Assistant的扩展方法",
+            "理解Human Assistant的接口设计",
+            "能够进行Human Assistant的功能定制"
+          ],
+          "tasks": [
+            "分析源代码实现",
+            "实现功能扩展",
+            "编写单元测试",
+            "优化性能表现"
+          ],
+          "estimated_time": "4-6小时"
+        },
+        {
+          "level": "advanced",
+          "title": "Human Assistant高级应用",
+          "objectives": [
+            "掌握Human Assistant的高级特性",
+            "能够进行Human Assistant的架构优化",
+            "具备Human Assistant的问题排查能力"
+          ],
+          "tasks": [
+            "设计新的功能模块",
+            "性能优化和调优",
+            "编写技术文档",
+            "贡献开源项目"
+          ],
+          "estimated_time": "6-8小时"
+        }
+      ]
+    },
+    "p8_wiki_system": {
+      "module_id": "p8_wiki_system",
+      "module_name": "Wiki System",
+      "module_type": "original",
+      "status": "active",
+      "document_count": 2,
+      "sub_modules": [],
+      "learning_sequence": [
+        {
+          "phase": 1,
+          "title": "理论学习",
+          "documents": [
+            {
+              "file_name": "SPEC.md",
+              "relative_path": "p8_wiki_system\\SPEC.md",
+              "file_size": 2481,
+              "file_type": "specification"
+            }
+          ],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "phase": 2,
+          "title": "设计理解",
+          "documents": [],
+          "activities": [
+            "分析架构设计",
+            "理解接口定义",
+            "学习最佳实践"
+          ]
+        },
+        {
+          "phase": 3,
+          "title": "代码实践",
+          "documents": [],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "phase": 4,
+          "title": "测试验证",
+          "documents": [],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "phase": 5,
+          "title": "综合实践",
+          "documents": [],
+          "activities": [
+            "完成合规检查",
+            "实施最佳实践",
+            "编写学习总结"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Wiki System基础理解",
+          "objectives": [
+            "理解Wiki System的核心概念",
+            "掌握Wiki System的基本使用",
+            "完成Wiki System的配置和运行"
+          ],
+          "tasks": [
+            "阅读相关规格文档",
+            "运行基础示例代码",
+            "完成配置练习",
+            "编写学习笔记"
+          ],
+          "estimated_time": "2-3小时"
+        },
+        {
+          "level": "intermediate",
+          "title": "Wiki System功能扩展",
+          "objectives": [
+            "掌握Wiki System的扩展方法",
+            "理解Wiki System的接口设计",
+            "能够进行Wiki System的功能定制"
+          ],
+          "tasks": [
+            "分析源代码实现",
+            "实现功能扩展",
+            "编写单元测试",
+            "优化性能表现"
+          ],
+          "estimated_time": "4-6小时"
+        },
+        {
+          "level": "advanced",
+          "title": "Wiki System高级应用",
+          "objectives": [
+            "掌握Wiki System的高级特性",
+            "能够进行Wiki System的架构优化",
+            "具备Wiki System的问题排查能力"
+          ],
+          "tasks": [
+            "设计新的功能模块",
+            "性能优化和调优",
+            "编写技术文档",
+            "贡献开源项目"
+          ],
+          "estimated_time": "6-8小时"
+        }
+      ]
+    }
+  },
+  "practice_projects": {
+    "personal_assistant": {
+      "title": "个人助理应用",
+      "difficulty": "intermediate",
+      "duration": "3-4周",
+      "modules": [
+        "p1",
+        "p3",
+        "p5",
+        "p6"
+      ],
+      "description": "开发一个功能完整的个人助理应用",
+      "skills": [
+        "数据持久化",
+        "AI集成",
+        "TUI开发"
+      ]
+    },
+    "knowledge_system": {
+      "title": "知识管理系统",
+      "difficulty": "advanced",
+      "duration": "4-5周",
+      "modules": [
+        "p1",
+        "p2",
+        "p3",
+        "p7"
+      ],
+      "description": "构建一个企业级的知识管理系统",
+      "skills": [
+        "向量搜索",
+        "Web界面",
+        "多用户协作"
+      ]
+    },
+    "debate_platform": {
+      "title": "智能辩论平台",
+      "difficulty": "expert",
+      "duration": "5-6周",
+      "modules": [
+        "p1",
+        "p3",
+        "p4",
+        "p5",
+        "p6",
+        "p8"
+      ],
+      "description": "开发多模型协作的智能辩论系统",
+      "skills": [
+        "多模型协作",
+        "角色管理",
+        "系统集成"
+      ]
+    },
+    "system_refactor": {
+      "title": "系统重构项目",
+      "difficulty": "expert",
+      "duration": "4-5周",
+      "modules": [
+        "newP5",
+        "newP6",
+        "newP7"
+      ],
+      "description": "参与DAIP-LIVE系统的重构工作",
+      "skills": [
+        "系统重构",
+        "架构优化",
+        "迁移管理"
+      ]
+    }
+  },
+  "assessment_criteria": {
+    "module_mastery": {
+      "theory_understanding": 30,
+      "practical_implementation": 40,
+      "documentation_quality": 20,
+      "integration_ability": 10
+    },
+    "project_delivery": {
+      "requirement_analysis": 20,
+      "design_quality": 25,
+      "implementation": 30,
+      "testing": 15,
+      "documentation": 10
+    }
+  }
+}

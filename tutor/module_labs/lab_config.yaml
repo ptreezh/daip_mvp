@@ -1,0 +1,14 @@
+assessment_settings:
+  allow_retakes: true
+  passing_score: 70
+  show_feedback: true
+lab_settings:
+  auto_save_progress: true
+  difficulty_progression: true
+  enable_solutions: true
+  show_hints: true
+ui_settings:
+  code_editor: monokai
+  font_size: 14
+  show_line_numbers: true
+  theme: light

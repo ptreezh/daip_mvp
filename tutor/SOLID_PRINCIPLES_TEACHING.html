@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOLID原则教学 - 0代码AI规范化编程实践教学</title>
+    <meta name="description" content="学习面向对象设计的SOLID原则，提高代码质量、可维护性和可扩展性">
+    
+    <!-- 统一样式表 -->
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    
+    <!-- 字体和图标 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">加载SOLID原则教学内容...</div>
+        </div>
+    </div>
+    
+    <!-- 滚动指示器 -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+    
+    <!-- 统一导航栏 -->
+    <nav class="unified-navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span class="navbar-logo">🤖</span>
+                <span>0代码AI规范化编程</span>
+            </a>
+            
+            <button class="navbar-toggle" id="navbarToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="index.html#learning" class="nav-link">学习</a></li>
+                <li><a href="index.html#modules" class="nav-link">模块</a></li>
+                <li><a href="index.html#projects" class="nav-link">项目</a></li>
+                <li><a href="index.html#resources" class="nav-link">资源</a></li>
+            </ul>
+            
+            <div class="navbar-actions">
+                <a href="#start-learning" class="unified-btn unified-btn-primary">
+                    开始学习
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主容器 -->
+    <main class="main-container">
+        <!-- Hero 区域 -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            <span class="hero-icon">🧱</span>
+                            SOLID原则教学
+                        </h1>
+                        <p class="hero-description">
+                            学习面向对象设计的SOLID原则，提高代码质量、可维护性和可扩展性，
+                            创建更加健壮和灵活的软件系统
+                        </p>
+                        <div class="hero-features">
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-cube"></i>
+                                单一职责
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-door-open"></i>
+                                开闭原则
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-exchange-alt"></i>
+                                里氏替换
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="unified-card">
+                            <div class="stats-icon text-center mb-4">
+                                <i class="fas fa-cubes text-4xl text-primary"></i>
+                            </div>
+                            <div class="stats-info text-center">
+                                <div class="text-3xl font-bold text-primary mb-2">5</div>
+                                <div class="text-secondary">设计原则</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 教学内容 -->
+        <section class="content-section py-16">
+            <div class="container">
+                <!-- SOLID原则概述 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <h2 class="card-title">SOLID原则概述</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            SOLID是面向对象设计的五个基本原则的首字母缩写，由Robert C. Martin提出，
+                            旨在创建更易理解、更灵活、更可维护的软件设计。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-5 gap-4 mt-8 text-center">
+                            <div class="p-4 bg-secondary rounded-lg">
+                                <div class="text-2xl font-bold text-primary">S</div>
+                                <div class="text-sm font-semibold mt-2">单一职责</div>
+                            </div>
+                            
+                            <div class="p-4 bg-secondary rounded-lg">
+                                <div class="text-2xl font-bold text-primary">O</div>
+                                <div class="text-sm font-semibold mt-2">开闭原则</div>
+                            </div>
+                            
+                            <div class="p-4 bg-secondary rounded-lg">
+                                <div class="text-2xl font-bold text-primary">L</div>
+                                <div class="text-sm font-semibold mt-2">里氏替换</div>
+                            </div>
+                            
+                            <div class="p-4 bg-secondary rounded-lg">
+                                <div class="text-2xl font-bold text-primary">I</div>
+                                <div class="text-sm font-semibold mt-2">接口隔离</div>
+                            </div>
+                            
+                            <div class="p-4 bg-secondary rounded-lg">
+                                <div class="text-2xl font-bold text-primary">D</div>
+                                <div class="text-sm font-semibold mt-2">依赖倒置</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- S - 单一职责原则 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h2 class="card-title">S - 单一职责原则 (Single Responsibility Principle)</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            <strong>定义：</strong>一个类或模块应该只有一个引起变化的原因。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mt-6">
+                            <div>
+                                <h3 class="font-semibold text-lg mb-3">❌ 违反单一职责原则</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">问题代码示例</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-python"># 违反单一职责原则
+class User:
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
+        self.db_connection = None
+        self.logger = None
+    
+    # 用户数据管理职责
+    def save_to_database(self):
+        # 数据库操作
+        pass
+    
+    def load_from_database(self, user_id):
+        # 数据库查询
+        pass
+    
+    # 日志记录职责
+    def log_action(self, action):
+        # 日志记录
+        pass
+    
+    # 邮件发送职责
+    def send_email(self, subject, message):
+        # 邮件发送
+        pass
+    
+    # 用户认证职责
+    def authenticate(self, password):
+        # 用户认证
+        pass</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="font-semibold text-lg mb-3">✅ 遵循单一职责原则</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">改进代码示例</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-python"># 遵循单一职责原则
+class User:
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
+
+class UserRepository:
+    def save(self, user):
+        # 专门负责数据持久化
+        pass
+    
+    def find_by_id(self, user_id):
+        # 专门负责数据查询
+        pass
+
+class Logger:
+    def log(self, message):
+        # 专门负责日志记录
+        pass
+
+class EmailService:
+    def send(self, to, subject, message):
+        # 专门负责邮件发送
+        pass
+
+class AuthenticationService:
+    def authenticate(self, user, password):
+        # 专门负责用户认证
+        pass</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-secondary rounded-lg p-6 mt-6">
+                            <h3 class="font-semibold mb-3">实践要点：</h3>
+                            <ul class="space-y-2">
+                                <li class="flex items-start gap-2">
+                                    <i class="fas fa-check text-success mt-1"></i>
+                                    <span>每个模块专注单一功能领域</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fas fa-check text-success mt-1"></i>
+                                    <span>避免混合业务逻辑和技术实现</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fas fa-check text-success mt-1"></i>
+                                    <span>便于测试和维护</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fas fa-check text-success mt-1"></i>
+                                    <span>降低模块间耦合度</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- O - 开闭原则 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                        <h2 class="card-title">O - 开闭原则 (Open-Closed Principle)</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            <strong>定义：</strong>软件实体应该对扩展开放，对修改关闭。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mt-6">
+                            <div>
+                                <h3 class="font-semibold text-lg mb-3">❌ 违反开闭原则</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">问题代码示例</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-python"># 违反开闭原则
+class PaymentProcessor:
+    def process_payment(self, amount, payment_type):
+        if payment_type == "credit_card":
+            # 处理信用卡支付
+            return self.process_credit_card(amount)
+        elif payment_type == "paypal":
+            # 处理PayPal支付
+            return self.process_paypal(amount)
+        elif payment_type == "alipay":
+            # 处理支付宝支付 - 新增功能需要修改原有代码
+            return self.process_alipay(amount)
+        else:
+            raise ValueError("Unsupported payment type")
+    
+    def process_credit_card(self, amount):
+        return f"Processed credit card payment: ${amount}"
+    
+    def process_paypal(self, amount):
+        return f"Processed PayPal payment: ${amount}"
+    
+    def process_alipay(self, amount):
+        return f"Processed Alipay payment: ${amount}"</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="font-semibold text-lg mb-3">✅ 遵循开闭原则</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">改进代码示例</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-python"># 遵循开闭原则
+from abc import ABC, abstractmethod
+
+class PaymentProcessor(ABC):
+    @abstractmethod
+    def process(self, amount):
+        pass
+
+class CreditCardProcessor(PaymentProcessor):
+    def process(self, amount):
+        return f"Processed credit card payment: ${amount}"
+
+class PayPalProcessor(PaymentProcessor):
+    def process(self, amount):
+        return f"Processed PayPal payment: ${amount}"
+
+class AlipayProcessor(PaymentProcessor):
+    def process(self, amount):
+        return f"Processed Alipay payment: ${amount}"
+
+# 扩展新的支付方式无需修改现有代码
+class WeChatPayProcessor(PaymentProcessor):
+    def process(self, amount):
+        return f"Processed WeChat Pay payment: ${amount}"
+
+class PaymentService:
+    def __init__(self):
+        self.processors = {}
+    
+    def register_processor(self, payment_type, processor):
+        self.processors[payment_type] = processor
+    
+    def process_payment(self, amount, payment_type):
+        if payment_type in self.processors:
+            return self.processors[payment_type].process(amount)
+        else:
+            raise ValueError("Unsupported payment type")</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-secondary rounded-lg p-6 mt-6">
+                            <h3 class="font-semibold mb-3">实践要点：</h3>
+                            <ul class="space-y-2">
+                                <li class="flex items-start gap-2">
+                                    <i class="fas fa-check text-success mt-1"></i>
+                                    <span>使用抽象和接口定义扩展点</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fas fa-check text-success mt-1"></i>
+                                    <span>通过组合而非继承实现功能扩展</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fas fa-check text-success mt-1"></i>
+                                    <span>预留配置化的扩展机制</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fas fa-check text-success mt-1"></i>
+                                    <span>保持核心逻辑稳定</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 实践练习 -->
+                <div class="unified-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <h2 class="card-title">实践练习：应用SOLID原则重构代码</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            通过实际案例练习，掌握SOLID原则的应用方法。
+                        </p>
+                        
+                        <div class="expandable-content mt-6">
+                            <div class="expandable-header">
+                                <h3 class="expandable-title font-semibold">练习案例：报告生成系统</h3>
+                                <i class="fas fa-chevron-down expandable-icon"></i>
+                            </div>
+                            <div class="expandable-body">
+                                <div class="bg-secondary rounded-lg p-6 mb-6">
+                                    <h4 class="font-semibold mb-3">案例背景：</h4>
+                                    <p class="mb-4">
+                                        现有一个报告生成系统，可以根据不同格式（PDF、Excel、CSV）生成销售报告。
+                                        目前代码违反了多个SOLID原则，请对其进行重构。
+                                    </p>
+                                    
+                                    <div class="code-container mb-6">
+                                        <div class="code-header">
+                                            <span class="code-title">原始问题代码</span>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code class="language-python">class ReportGenerator:
+    def __init__(self):
+        self.data = []
+    
+    def load_data(self):
+        # 从数据库加载数据
+        pass
+    
+    def generate_report(self, format_type):
+        if format_type == "pdf":
+            return self.generate_pdf()
+        elif format_type == "excel":
+            return self.generate_excel()
+        elif format_type == "csv":
+            return self.generate_csv()
+        else:
+            raise ValueError("Unsupported format")
+    
+    def generate_pdf(self):
+        # 生成PDF报告的复杂逻辑
+        return "PDF Report Content"
+    
+    def generate_excel(self):
+        # 生成Excel报告的复杂逻辑
+        return "Excel Report Content"
+    
+    def generate_csv(self):
+        # 生成CSV报告的复杂逻辑
+        return "CSV Report Content"
+    
+    def save_to_file(self, content, filename):
+        # 保存到文件系统
+        pass
+    
+    def send_email(self, recipient, content):
+        # 发送邮件
+        pass</code></pre>
+                                        </div>
+                                    </div>
+                                    
+                                    <h4 class="font-semibold mb-3">练习任务：</h4>
+                                    <ol class="list-decimal list-inside space-y-2 mb-4">
+                                        <li>分析原始代码违反了哪些SOLID原则</li>
+                                        <li>应用相应的SOLID原则进行重构</li>
+                                        <li>确保重构后的代码符合所有SOLID原则</li>
+                                    </ol>
+                                    
+                                    <div class="solution-area">
+                                        <h4 class="font-semibold mb-3">参考答案：</h4>
+                                        <details class="bg-white rounded-lg p-4">
+                                            <summary class="cursor-pointer font-medium">点击查看参考答案</summary>
+                                            <div class="mt-4">
+                                                <div class="code-container mb-4">
+                                                    <div class="code-header">
+                                                        <span class="code-title">重构后的代码</span>
+                                                    </div>
+                                                    <div class="code-content">
+                                                        <pre><code class="language-python">from abc import ABC, abstractmethod
+
+# S - 单一职责原则：分离不同职责
+class DataProvider:
+    def load_data(self):
+        # 专门负责数据加载
+        return []
+
+class ReportFormatter(ABC):
+    @abstractmethod
+    def format(self, data):
+        pass
+
+class PDFFormatter(ReportFormatter):
+    def format(self, data):
+        return "PDF Report Content"
+
+class ExcelFormatter(ReportFormatter):
+    def format(self, data):
+        return "Excel Report Content"
+
+class CSVFormatter(ReportFormatter):
+    def format(self, data):
+        return "CSV Report Content"
+
+class FileStorage:
+    def save(self, content, filename):
+        # 专门负责文件存储
+        pass
+
+class EmailService:
+    def send(self, recipient, content):
+        # 专门负责邮件发送
+        pass
+
+# O - 开闭原则：易于扩展新的格式
+class ReportGenerator:
+    def __init__(self, data_provider, formatter, storage, email_service):
+        self.data_provider = data_provider
+        self.formatter = formatter
+        self.storage = storage
+        self.email_service = email_service
+    
+    def generate(self):
+        data = self.data_provider.load_data()
+        content = self.formatter.format(data)
+        return content
+    
+    def save_report(self, content, filename):
+        self.storage.save(content, filename)
+    
+    def send_report(self, content, recipient):
+        self.email_service.send(recipient, content)
+
+# L - 里氏替换原则：子类可以替换父类
+# I - 接口隔离原则：每个类只依赖需要的接口
+# D - 依赖倒置原则：依赖抽象而非具体实现</code></pre>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mt-4">
+                                                    <h5 class="font-semibold mb-2">违反的SOLID原则分析：</h5>
+                                                    <ul class="space-y-2 text-sm">
+                                                        <li><strong>S - 单一职责原则：</strong>ReportGenerator类承担了太多职责（数据加载、格式化、文件保存、邮件发送）</li>
+                                                        <li><strong>O - 开闭原则：</strong>添加新的报告格式需要修改现有代码</li>
+                                                        <li><strong>D - 依赖倒置原则：</strong>直接依赖具体实现而非抽象</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </details>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 统一页脚 -->
+    <footer class="unified-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">
+                        <span class="navbar-logo">🤖</span>
+                        <span>0代码AI规范化编程</span>
+                    </div>
+                    <p class="footer-description">
+                        通过AI驱动的学习平台，帮助开发者掌握规范化编程技能。
+                        我们的使命是让每个人都能轻松掌握先进的编程技术。
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>学习资源</h4>
+                        <ul>
+                            <li><a href="document_library.html">文档中心</a></li>
+                            <li><a href="MODULE_WIKI_KNOWLEDGE.html">知识库</a></li>
+                            <li><a href="P3_MODEL_PROVIDER.html">模块文档</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>支持服务</h4>
+                        <ul>
+                            <li><a href="#">帮助中心</a></li>
+                            <li><a href="#">技术支持</a></li>
+                            <li><a href="#">联系我们</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 0代码AI规范化编程. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 统一JavaScript -->
+    <script src="assets/js/unified-scripts.js"></script>
+</body>
+</html>

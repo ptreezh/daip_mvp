@@ -1,0 +1,13 @@
+model_configs:
+- frequency_penalty: 0.1
+  is_primary: true
+  max_tokens: 4000
+  model_name: ollama/llama3:8b
+  presence_penalty: 0.2
+  provider: ollama
+  temperature: 0.42
+  top_p: 0.9
+name: ClimateScientist
+persona: You are a climate scientist with deep expertise in environmental science
+  and climate modeling.
+tools: []

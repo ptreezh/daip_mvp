@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能文档库 - 0代码AI规范化编程实践教学</title>
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        /* 智能文档库特有样式 */
+        .unified-doc-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 280px;
+            gap: 24px;
+            min-height: calc(100vh - 140px);
+        }
+
+        .unified-doc-sidebar {
+            background: var(--unified-surface);
+            border: 1px solid var(--unified-border);
+            border-radius: var(--unified-radius-lg);
+            padding: 24px;
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .unified-doc-content {
+            background: var(--unified-background);
+            border: 1px solid var(--unified-border);
+            border-radius: var(--unified-radius-lg);
+            padding: 32px;
+        }
+
+        .unified-doc-preview {
+            background: var(--unified-surface);
+            border: 1px solid var(--unified-border);
+            border-radius: var(--unified-radius-lg);
+            padding: 24px;
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .unified-doc-category {
+            margin-bottom: 32px;
+        }
+
+        .unified-doc-category:last-child {
+            margin-bottom: 0;
+        }
+
+        .unified-doc-category-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--unified-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .unified-doc-list {
+            list-style: none;
+        }
+
+        .unified-doc-item {
+            margin-bottom: 4px;
+        }
+
+        .unified-doc-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--unified-text-secondary);
+            text-decoration: none;
+            border-radius: var(--unified-radius);
+            font-size: 14px;
+            transition: var(--unified-transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .unified-doc-link:hover,
+        .unified-doc-link.active {
+            background: var(--unified-gradient-light);
+            color: var(--unified-accent);
+            transform: translateX(4px);
+        }
+
+        .unified-doc-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--unified-accent);
+        }
+
+        .unified-doc-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--unified-accent-light);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .unified-doc-count {
+            margin-left: auto;
+            background: var(--unified-surface-alt);
+            color: var(--unified-text-tertiary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .unified-doc-search {
+            position: relative;
+            margin-bottom: 32px;
+        }
+
+        .unified-doc-search-input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid var(--unified-border);
+            border-radius: var(--unified-radius-lg);
+            font-size: 16px;
+            background: var(--unified-surface);
+            color: var(--unified-text-primary);
+            transition: var(--unified-transition);
+        }
+
+        .unified-doc-search-input:focus {
+            outline: none;
+            border-color: var(--unified-accent);
+            box-shadow: 0 0 0 4px var(--unified-accent-light);
+        }
+
+        .unified-doc-search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--unified-text-tertiary);
+            font-size: 18px;
+        }
+
+        .unified-doc-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .unified-doc-filter {
+            padding: 8px 16px;
+            background: var(--unified-surface);
+            border: 1px solid var(--unified-border);
+            border-radius: var(--unified-radius);
+            color: var(--unified-text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--unified-transition);
+        }
+
+        .unified-doc-filter:hover,
+        .unified-doc-filter.active {
+            background: var(--unified-accent);
+            color: white;
+            border-color: var(--unified-accent);
+        }
+
+        .unified-doc-list-view {
+            display: grid;
+            gap: 16px;
+        }
+
+        .unified-doc-card {
+            background: var(--unified-surface);
+            border: 1px solid var(--unified-border);
+            border-radius: var(--unified-radius-lg);
+            padding: 24px;
+            transition: var(--unified-transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .unified-doc-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--unified-gradient);
+            opacity: 0;
+            transition: var(--unified-transition);
+        }
+
+        .unified-doc-card:hover {
+            border-color: var(--unified-accent-light);
+            box-shadow: var(--unified-shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .unified-doc-card:hover::before {
+            opacity: 1;
+        }
+
+        .unified-doc-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .unified-doc-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--unified-text-primary);
+            margin-bottom: 8px;
+        }
+
+        .unified-doc-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--unified-text-tertiary);
+            margin-bottom: 12px;
+        }
+
+        .unified-doc-card-description {
+            color: var(--unified-text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .unified-doc-card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .unified-doc-tag {
+            padding: 4px 12px;
+            border-radius: var(--unified-radius);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .unified-doc-tag-primary {
+            background: var(--unified-accent-light);
+            color: var(--unified-accent);
+        }
+
+        .unified-doc-tag-secondary {
+            background: var(--unified-success-light);
+            color: var(--unified-success);
+        }
+
+        .unified-doc-tag-accent {
+            background: var(--unified-warning-light);
+            color: var(--unified-warning);
+        }
+
+        .unified-doc-preview-header {
+            margin-bottom: 20px;
+        }
+
+        .unified-doc-preview-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--unified-text-primary);
+            margin-bottom: 8px;
+        }
+
+        .unified-doc-preview-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .unified-doc-preview-stat {
+            background: var(--unified-surface-alt);
+            padding: 16px;
+            border-radius: var(--unified-radius);
+            text-align: center;
+        }
+
+        .unified-doc-preview-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--unified-accent);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .unified-doc-preview-label {
+            font-size: 12px;
+            color: var(--unified-text-secondary);
+            font-weight: 500;
+        }
+
+        .unified-doc-recent {
+            margin-bottom: 24px;
+        }
+
+        .unified-doc-recent-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--unified-text-primary);
+            margin-bottom: 12px;
+        }
+
+        .unified-doc-recent-list {
+            list-style: none;
+        }
+
+        .unified-doc-recent-item {
+            padding: 8px 12px;
+            border-radius: var(--unified-radius);
+            font-size: 13px;
+            color: var(--unified-text-secondary);
+            cursor: pointer;
+            transition: var(--unified-transition);
+            margin-bottom: 4px;
+        }
+
+        .unified-doc-recent-item:hover {
+            background: var(--unified-surface-alt);
+            color: var(--unified-accent);
+        }
+
+        .unified-doc-featured {
+            margin-bottom: 24px;
+        }
+
+        .unified-doc-featured-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--unified-text-primary);
+            margin-bottom: 12px;
+        }
+
+        .unified-doc-featured-item {
+            padding: 12px;
+            background: var(--unified-gradient-light);
+            border-radius: var(--unified-radius);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: var(--unified-transition);
+        }
+
+        .unified-doc-featured-item:hover {
+            background: var(--unified-accent-light);
+            transform: translateX(4px);
+        }
+
+        .unified-doc-featured-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--unified-text-primary);
+            margin-bottom: 4px;
+        }
+
+        .unified-doc-featured-desc {
+            font-size: 12px;
+            color: var(--unified-text-secondary);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .unified-doc-grid {
+                grid-template-columns: 280px 1fr;
+                grid-template-areas: "sidebar content" "sidebar preview";
+            }
+
+            .unified-doc-sidebar {
+                grid-area: sidebar;
+            }
+
+            .unified-doc-content {
+                grid-area: content;
+            }
+
+            .unified-doc-preview {
+                grid-area: preview;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .unified-doc-grid {
+                grid-template-columns: 1fr;
+                grid-template-areas: "content" "sidebar" "preview";
+            }
+
+            .unified-doc-sidebar {
+                position: static;
+                margin-bottom: 24px;
+            }
+
+            .unified-doc-preview {
+                position: static;
+                margin-top: 24px;
+            }
+
+            .unified-doc-filters {
+                flex-direction: column;
+            }
+
+            .unified-doc-filter {
+                text-align: center;
+            }
+        }
+
+        /* 动画效果 */
+        .unified-doc-card {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .unified-doc-card:nth-child(1) { animation-delay: 0.1s; }
+        .unified-doc-card:nth-child(2) { animation-delay: 0.2s; }
+        .unified-doc-card:nth-child(3) { animation-delay: 0.3s; }
+        .unified-doc-card:nth-child(4) { animation-delay: 0.4s; }
+        .unified-doc-card:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 代码显示优化 */
+        .unified-doc-content pre {
+            background: var(--unified-code-bg) !important;
+            border: 1px solid var(--unified-border) !important;
+            border-radius: var(--unified-radius) !important;
+            margin: 20px 0 !important;
+        }
+
+        .unified-doc-content code {
+            background: var(--unified-surface-alt) !important;
+            color: var(--unified-accent) !important;
+            padding: 2px 6px !important;
+            border-radius: var(--unified-radius) !important;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace !important;
+            font-size: 14px !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="unified-header">
+        <div class="unified-container">
+            <div class="unified-nav">
+                <div class="unified-logo">
+                    <span class="unified-logo-icon">📚</span>
+                    <span class="unified-logo-text">0代码AI规范化编程实践教学</span>
+                </div>
+                <nav class="unified-nav-menu">
+                    <a href="index.html" class="unified-nav-link">首页</a>
+                    <a href="modern_platform_new.html" class="unified-nav-link">学习平台</a>
+                    <a href="document_library_new.html" class="unified-nav-link active">文档库</a>
+                    <a href="enhanced_learning_platform_new.html" class="unified-nav-link">实验室</a>
+                    <a href="premium_learning_platform_new.html" class="unified-nav-link">高级课程</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="unified-hero">
+        <div class="unified-container">
+            <div class="unified-hero-content">
+                <div class="unified-badge">
+                    <span class="unified-badge-icon">🔍</span>
+                    <span class="unified-badge-text">智能文档搜索与管理</span>
+                </div>
+                
+                <h1 class="unified-hero-title">
+                    文档知识库<br>
+                    发现与管理
+                </h1>
+                
+                <p class="unified-hero-subtitle">
+                    通过智能搜索、分类筛选和内容预览，快速找到您需要的编程规范、架构文档和最佳实践指南
+                </p>
+
+                <div class="unified-hero-stats">
+                    <div class="unified-stat">
+                        <span class="unified-stat-number">246</span>
+                        <span class="unified-stat-label">规范文档</span>
+                    </div>
+                    <div class="unified-stat">
+                        <span class="unified-stat-number">42</span>
+                        <span class="unified-stat-label">架构图解</span>
+                    </div>
+                    <div class="unified-stat">
+                        <span class="unified-stat-number">89</span>
+                        <span class="unified-stat-label">最佳实践</span>
+                    </div>
+                    <div class="unified-stat">
+                        <span class="unified-stat-number">15</span>
+                        <span class="unified-stat-label">学习路径</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 主要内容区域 -->
+    <section class="unified-section">
+        <div class="unified-container">
+            <div class="unified-doc-grid">
+                <!-- 侧边栏 -->
+                <aside class="unified-doc-sidebar">
+                    <div class="unified-doc-category">
+                        <h3 class="unified-doc-category-title">
+                            <span>📂</span>
+                            文档分类
+                        </h3>
+                        <ul class="unified-doc-list">
+                            <li class="unified-doc-item">
+                                <a href="#" class="unified-doc-link active" data-category="all">
+                                    <span class="unified-doc-icon">📄</span>
+                                    <span>全部文档</span>
+                                    <span class="unified-doc-count">246</span>
+                                </a>
+                            </li>
+                            <li class="unified-doc-item">
+                                <a href="#" class="unified-doc-link" data-category="specs">
+                                    <span class="unified-doc-icon">📋</span>
+                                    <span>规格文档</span>
+                                    <span class="unified-doc-count">68</span>
+                                </a>
+                            </li>
+                            <li class="unified-doc-item">
+                                <a href="#" class="unified-doc-link" data-category="architecture">
+                                    <span class="unified-doc-icon">🏗️</span>
+                                    <span>架构设计</span>
+                                    <span class="unified-doc-count">42</span>
+                                </a>
+                            </li>
+                            <li class="unified-doc-item">
+                                <a href="#" class="unified-doc-link" data-category="implementation">
+                                    <span class="unified-doc-icon">⚙️</span>
+                                    <span>实现指南</span>
+                                    <span class="unified-doc-count">56</span>
+                                </a>
+                            </li>
+                            <li class="unified-doc-item">
+                                <a href="#" class="unified-doc-link" data-category="testing">
+                                    <span class="unified-doc-icon">🧪</span>
+                                    <span>测试规范</span>
+                                    <span class="unified-doc-count">34</span>
+                                </a>
+                            </li>
+                            <li class="unified-doc-item">
+                                <a href="#" class="unified-doc-link" data-category="compliance">
+                                    <span class="unified-doc-icon">✅</span>
+                                    <span>合规检查</span>
+                                    <span class="unified-doc-count">46</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="unified-doc-category">
+                        <h3 class="unified-doc-category-title">
+                            <span>🎯</span>
+                            快速访问
+                        </h3>
+                        <ul class="unified-doc-list">
+                            <li class="unified-doc-item">
+                                <a href="#" class="unified-doc-link" onclick="loadDocument('P3_MODEL_PROVIDER.html')">
+                                    <span class="unified-doc-icon">🤖</span>
+                                    <span>P3 模型提供商</span>
+                                </a>
+                            </li>
+                            <li class="unified-doc-item">
+                                <a href="#" class="unified-doc-link" onclick="loadDocument('P5_AGENT_ENGINE.html')">
+                                    <span class="unified-doc-icon">⚡</span>
+                                    <span>P5 智能引擎</span>
+                                </a>
+                            </li>
+                            <li class="unified-doc-item">
+                                <a href="#" class="unified-doc-link" onclick="loadDocument('P8_DEBATE_SYSTEM.html')">
+                                    <span class="unified-doc-icon">⚖️</span>
+                                    <span>P8 辩论系统</span>
+                                </a>
+                            </li>
+                            <li class="unified-doc-item">
+                                <a href="#" class="unified-doc-link" onclick="loadDocument('modules/P1_PERSISTENCE.html')">
+                                    <span class="unified-doc-icon">💾</span>
+                                    <span>P1 数据持久化</span>
+                                </a>
+                            </li>
+                            <li class="unified-doc-item">
+                                <a href="#" class="unified-doc-link" onclick="loadDocument('modules/P2_KNOWLEDGE_MANAGEMENT.html')">
+                                    <span class="unified-doc-icon">🧠</span>
+                                    <span>P2 知识管理</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </aside>
+
+                <!-- 内容区域 -->
+                <main class="unified-doc-content">
+                    <!-- 搜索和筛选 -->
+                    <div class="unified-doc-search">
+                        <input 
+                            type="text" 
+                            class="unified-doc-search-input" 
+                            id="searchInput"
+                            placeholder="🔍 搜索文档内容、标题或标签..."
+                        >
+                        <div class="unified-doc-search-icon">🔍</div>
+                    </div>
+
+                    <div class="unified-doc-filters">
+                        <button class="unified-doc-filter active" data-filter="all">全部文档</button>
+                        <button class="unified-doc-filter" data-filter="recent">最近更新</button>
+                        <button class="unified-doc-filter" data-filter="popular">热门文档</button>
+                        <button class="unified-doc-filter" data-filter="featured">精选推荐</button>
+                    </div>
+
+                    <!-- 文档列表 -->
+                    <div class="unified-doc-list-view" id="documentList">
+                        <!-- 文档卡片将在这里动态生成 -->
+                    </div>
+                </main>
+
+                <!-- 预览侧边栏 -->
+                <aside class="unified-doc-preview">
+                    <div class="unified-doc-preview-header">
+                        <h3 class="unified-doc-preview-title">📊 文档统计</h3>
+                    </div>
+
+                    <div class="unified-doc-preview-stats">
+                        <div class="unified-doc-preview-stat">
+                            <span class="unified-doc-preview-number" id="totalCount">246</span>
+                            <span class="unified-doc-preview-label">总文档</span>
+                        </div>
+                        <div class="unified-doc-preview-stat">
+                            <span class="unified-doc-preview-number" id="todayCount">12</span>
+                            <span class="unified-doc-preview-label">今日新增</span>
+                        </div>
+                    </div>
+
+                    <div class="unified-doc-recent">
+                        <h4 class="unified-doc-recent-title">🕒 最近浏览</h4>
+                        <ul class="unified-doc-recent-list">
+                            <li class="unified-doc-recent-item" onclick="loadDocument('P3_MODEL_PROVIDER.html')">
+                                P3 模型提供商
+                            </li>
+                            <li class="unified-doc-recent-item" onclick="loadDocument('principles_guide.md')">
+                                编程原则指南
+                            </li>
+                            <li class="unified-doc-recent-item" onclick="loadDocument('modules/P1_PERSISTENCE.html')">
+                                P1 数据持久化
+                            </li>
+                            <li class="unified-doc-recent-item" onclick="loadDocument('DESIGN_SYSTEM.md')">
+                                设计系统文档
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="unified-doc-featured">
+                        <h4 class="unified-doc-featured-title">⭐ 精选推荐</h4>
+                        <div class="unified-doc-featured-item" onclick="loadDocument('P5_AGENT_ENGINE.html')">
+                            <div class="unified-doc-featured-name">P5 智能执行引擎</div>
+                            <div class="unified-doc-featured-desc">SOLID原则实现的完整示例</div>
+                        </div>
+                        <div class="unified-doc-featured-item" onclick="loadDocument('P6_TERMINAL_INTERFACE.html')">
+                            <div class="unified-doc-featured-name">P6 终端界面</div>
+                            <div class="unified-doc-featured-desc">TDD开发流程最佳实践</div>
+                        </div>
+                        <div class="unified-doc-featured-item" onclick="loadDocument('TDD_DEVELOPMENT_PROCESS.md')">
+                            <div class="unified-doc-featured-name">TDD开发流程</div>
+                            <div class="unified-doc-featured-desc">测试驱动开发完整指南</div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <!-- 动画脚本 -->
+    <script src="animations.js"></script>
+    
+    <!-- 文档库脚本 -->
+    <script>
+        // 文档数据
+        const documents = [
+            {
+                id: 1,
+                title: "P3 模型提供商 - 多模型集成架构",
+                path: "P3_MODEL_PROVIDER.html",
+                category: "specs",
+                description: "基于litellm框架的多模型提供商管理系统，实现统一的模型调用接口和智能路由功能。包含完整的管理器类设计、错误处理和性能监控。",
+                tags: ["specs", "ai", "multi-model", "litellm"],
+                lastModified: "2025-12-09",
+                size: "15.2 KB",
+                views: 342,
+                downloads: 89,
+                featured: true
+            },
+            {
+                id: 2,
+                title: "P5 智能执行引擎 - SOLID原则实现",
+                path: "P5_AGENT_ENGINE.html",
+                category: "implementation",
+                description: "基于SOLID原则设计的智能执行引擎，包含SimplifiedTUI类实现、依赖注入、接口隔离等设计模式。展示面向对象设计的最佳实践。",
+                tags: ["implementation", "solid", "tui", "design-patterns"],
+                lastModified: "2025-12-08",
+                size: "18.7 KB",
+                views: 456,
+                downloads: 134,
+                featured: true
+            },
+            {
+                id: 3,
+                title: "P6 终端界面 - TDD开发流程",
+                path: "P6_TERMINAL_INTERFACE.html",
+                category: "testing",
+                description: "使用Textual框架构建的终端用户界面，采用TDD（测试驱动开发）流程开发。包含完整的测试用例、依赖倒置原则实现和SOLID原则应用。",
+                tags: ["testing", "tdd", "textual", "terminal"],
+                lastModified: "2025-12-07",
+                size: "21.3 KB",
+                views: 289,
+                downloads: 76,
+                featured: true
+            },
+            {
+                id: 4,
+                title: "P8 辩论系统 - 多智能体协作",
+                path: "P8_DEBATE_SYSTEM.html",
+                category: "implementation",
+                description: "多智能体辩论系统的技术实现，包含接口隔离原则、依赖倒置原则的应用，展示复杂的AI协作场景和消息传递机制。",
+                tags: ["implementation", "multi-agent", "debate", "interface-segregation"],
+                lastModified: "2025-12-06",
+                size: "16.8 KB",
+                views: 198,
+                downloads: 54,
+                featured: false
+            },
+            {
+                id: 5,
+                title: "P1 数据持久化 - SQLAlchemy实践",
+                path: "modules/P1_PERSISTENCE.html",
+                category: "implementation",
+                description: "使用SQLAlchemy进行数据持久化的完整实现，包含模型设计、会话管理、事务处理和数据库迁移的最佳实践。",
+                tags: ["implementation", "sqlalchemy", "database", "persistence"],
+                lastModified: "2025-12-05",
+                size: "19.4 KB",
+                views: 267,
+                downloads: 98,
+                featured: true
+            },
+            {
+                id: 6,
+                title: "P2 知识管理 - 语义搜索引擎",
+                path: "modules/P2_KNOWLEDGE_MANAGEMENT.html",
+                category: "specs",
+                description: "基于向量数据库的语义搜索引擎设计，包含嵌入模型接口、相似度计算和知识图谱构建的技术规范。",
+                tags: ["specs", "vector-db", "search", "knowledge-graph"],
+                lastModified: "2025-12-04",
+                size: "14.6 KB",
+                views: 189,
+                downloads: 67,
+                featured: false
+            },
+            {
+                id: 7,
+                title: "编程原则指南 - 核心概念",
+                path: "principles_guide.md",
+                category: "compliance",
+                description: "AI规范化编程的核心原则详解，包含SOLID、KISS、YAGNI、TDD、DRY等原则的详细说明和实际应用示例。",
+                tags: ["compliance", "principles", "solid", "tdd"],
+                lastModified: "2025-12-03",
+                size: "28.5 KB",
+                views: 512,
+                downloads: 201,
+                featured: true
+            },
+            {
+                id: 8,
+                title: "设计系统文档 - 统一视觉规范",
+                path: "DESIGN_SYSTEM.md",
+                category: "specs",
+                description: "完整的UI/UX设计系统文档，包含设计令牌、组件规范、颜色系统和布局指南。",
+                tags: ["specs", "design-system", "ui", "ux"],
+                lastModified: "2025-12-02",
+                size: "22.1 KB",
+                views: 334,
+                downloads: 112,
+                featured: false
+            }
+        ];
+
+        // 当前选中文档
+        let currentDocument = null;
+        let currentFilter = 'all';
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDocumentLibrary();
+            setupEventListeners();
+            loadDocumentList();
+        });
+
+        // 初始化文档库
+        function initializeDocumentLibrary() {
+            updateStatistics();
+            loadDocumentList();
+            
+            // 默认加载第一个文档
+            if (documents.length > 0) {
+                loadDocument(documents[0].path);
+            }
+        }
+
+        // 更新统计信息
+        function updateStatistics() {
+            const totalDocs = documents.length;
+            const todayDocs = documents.filter(doc => doc.lastModified === '2025-12-09').length;
+            
+            document.getElementById('totalCount').textContent = totalDocs;
+            document.getElementById('todayCount').textContent = todayDocs;
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 搜索功能
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.toLowerCase();
+                filterDocuments(query);
+            });
+
+            // 分类筛选
+            const categoryLinks = document.querySelectorAll('.unified-doc-link[data-category]');
+            categoryLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const category = this.dataset.category;
+                    
+                    // 更新激活状态
+                    categoryLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 筛选文档
+                    filterByCategory(category);
+                });
+            });
+
+            // 类型筛选
+            const filterButtons = document.querySelectorAll('.unified-doc-filter');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.dataset.filter;
+                    
+                    // 更新激活状态
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 应用筛选
+                    currentFilter = filter;
+                    loadDocumentList();
+                });
+            });
+
+            // 键盘快捷键
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+K 或 Cmd+K 聚焦搜索
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+                
+                // ESC 清空搜索
+                if (e.key === 'Escape') {
+                    searchInput.value = '';
+                    searchInput.dispatchEvent(new Event('input'));
+                }
+            });
+        }
+
+        // 加载文档列表
+        function loadDocumentList() {
+            let filteredDocs = documents;
+
+            // 应用类型筛选
+            if (currentFilter === 'recent') {
+                filteredDocs = documents.slice().sort((a, b) => 
+                    new Date(b.lastModified) - new Date(a.lastModified)
+                ).slice(0, 6);
+            } else if (currentFilter === 'popular') {
+                filteredDocs = documents.slice().sort((a, b) => b.views - a.views).slice(0, 6);
+            } else if (currentFilter === 'featured') {
+                filteredDocs = documents.filter(doc => doc.featured);
+            }
+
+            renderDocumentList(filteredDocs);
+        }
+
+        // 渲染文档列表
+        function renderDocumentList(docs) {
+            const container = document.getElementById('documentList');
+            
+            if (docs.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: var(--unified-text-secondary);">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📄</div>
+                        <h3 style="margin-bottom: 8px;">未找到匹配的文档</h3>
+                        <p>请尝试调整搜索关键词或筛选条件</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = docs.map((doc, index) => `
+                <div class="unified-doc-card" onclick="loadDocument('${doc.path}')" style="animation-delay: ${index * 0.1}s">
+                    <div class="unified-doc-card-header">
+                        <div>
+                            <h3 class="unified-doc-card-title">${doc.title}</h3>
+                            <div class="unified-doc-card-meta">
+                                <span>📅 ${doc.lastModified}</span>
+                                <span>📊 ${doc.size}</span>
+                                <span>👁️ ${doc.views} 次查看</span>
+                                <span>⬇️ ${doc.downloads} 次下载</span>
+                            </div>
+                        </div>
+                        ${doc.featured ? '<span style="color: var(--unified-warning); font-size: 18px;">⭐</span>' : ''}
+                    </div>
+                    <p class="unified-doc-card-description">${doc.description}</p>
+                    <div class="unified-doc-card-tags">
+                        ${doc.tags.map(tag => `
+                            <span class="unified-doc-tag unified-doc-tag-${getTagStyle(tag)}">${tag}</span>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        // 获取标签样式
+        function getTagStyle(tag) {
+            const styles = {
+                'specs': 'primary',
+                'implementation': 'secondary', 
+                'testing': 'accent',
+                'compliance': 'primary',
+                'architecture': 'secondary'
+            };
+            return styles[tag] || 'accent';
+        }
+
+        // 搜索文档
+        function filterDocuments(query) {
+            if (!query) {
+                loadDocumentList();
+                return;
+            }
+
+            const filtered = documents.filter(doc =>
+                doc.title.toLowerCase().includes(query) ||
+                doc.description.toLowerCase().includes(query) ||
+                doc.tags.some(tag => tag.toLowerCase().includes(query))
+            );
+
+            renderDocumentList(filtered);
+        }
+
+        // 按分类筛选
+        function filterByCategory(category) {
+            if (category === 'all') {
+                loadDocumentList();
+                return;
+            }
+
+            const filtered = documents.filter(doc => doc.category === category);
+            renderDocumentList(filtered);
+        }
+
+        // 加载文档内容
+        function loadDocument(path) {
+            const doc = documents.find(d => d.path === path);
+            if (!doc) return;
+
+            currentDocument = doc;
+            
+            // 更新最近浏览
+            updateRecentViews(doc);
+
+            // 显示加载状态
+            showLoadingState();
+
+            // 模拟加载文档内容
+            setTimeout(() => {
+                showDocumentContent(doc);
+            }, 500);
+        }
+
+        // 显示加载状态
+        function showLoadingState() {
+            const contentArea = document.querySelector('.unified-doc-content');
+            const originalContent = contentArea.innerHTML;
+            
+            contentArea.innerHTML = `
+                <div style="text-align: center; padding: 80px 20px;">
+                    <div style="width: 40px; height: 40px; border: 4px solid var(--unified-border); border-top-color: var(--unified-accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                    <p style="color: var(--unified-text-secondary);">正在加载文档内容...</p>
+                </div>
+            `;
+        }
+
+        // 显示文档内容
+        function showDocumentContent(doc) {
+            const contentArea = document.querySelector('.unified-doc-content');
+            
+            contentArea.innerHTML = `
+                <div class="unified-demo-section">
+                    <div class="unified-demo-header">
+                        <h3 class="unified-demo-title">📖 ${doc.title}</h3>
+                        <div class="unified-demo-meta">
+                            <span class="unified-demo-info">
+                                <span class="unified-demo-icon">📅</span>
+                                <span>${doc.lastModified}</span>
+                            </span>
+                            <span class="unified-demo-info">
+                                <span class="unified-demo-icon">📊</span>
+                                <span>${doc.size}</span>
+                            </span>
+                            <span class="unified-demo-info">
+                                <span class="unified-demo-icon">👁️</span>
+                                <span>${doc.views} 次查看</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-title">${doc.path}</span>
+                            <div class="code-actions">
+                                <button class="code-copy-btn" onclick="copyCode(this)">
+                                    <span class="copy-icon">📋</span>
+                                    复制代码
+                                </button>
+                            </div>
+                        </div>
+                        <pre><code class="language-${getLanguageFromPath(doc.path)}">${generateDocumentContent(doc)}</code></pre>
+                    </div>
+
+                    <div style="margin-top: 32px;">
+                        <h4 style="margin-bottom: 16px; color: var(--unified-text-primary);">📝 文档描述</h4>
+                        <p style="color: var(--unified-text-secondary); line-height: 1.7;">${doc.description}</p>
+                    </div>
+
+                    <div style="margin-top: 24px;">
+                        <h4 style="margin-bottom: 16px; color: var(--unified-text-primary);">🏷️ 相关标签</h4>
+                        <div class="unified-doc-card-tags">
+                            ${doc.tags.map(tag => `
+                                <span class="unified-doc-tag unified-doc-tag-${getTagStyle(tag)}">${tag}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 应用代码高亮
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        }
+
+        // 根据文件路径获取语言
+        function getLanguageFromPath(path) {
+            const ext = path.split('.').pop().toLowerCase();
+            const langMap = {
+                'html': 'html',
+                'js': 'javascript',
+                'ts': 'typescript',
+                'py': 'python',
+                'md': 'markdown',
+                'css': 'css',
+                'json': 'json',
+                'yaml': 'yaml',
+                'yml': 'yaml'
+            };
+            return langMap[ext] || 'text';
+        }
+
+        // 生成文档内容（示例）
+        function generateDocumentContent(doc) {
+            const contentMap = {
+                'P3_MODEL_PROVIDER.html': generateP3Content(),
+                'P5_AGENT_ENGINE.html': generateP5Content(),
+                'P6_TERMINAL_INTERFACE.html': generateP6Content(),
+                'P8_DEBATE_SYSTEM.html': generateP8Content(),
+                'modules/P1_PERSISTENCE.html': generateP1Content(),
+                'modules/P2_KNOWLEDGE_MANAGEMENT.html': generateP2Content()
+            };
+
+            return contentMap[doc.path] || generateDefaultContent(doc);
+        }
+
+        // P3 文档内容
+        function generateP3Content() {
+            return `# P3 模型提供商 - 多模型集成架构
+
+## 概述
+基于litellm框架的模型提供商管理系统，实现统一的模型调用接口和智能路由功能。
+
+## 核心特性
+- 支持多种AI模型提供商
+- 智能负载均衡
+- 错误处理和重试机制
+- 性能监控和日志记录
+
+## 使用示例
+\`\`\`python
+from litellm import completion
+
+response = completion(
+    model="gpt-3.5-turbo",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+print(response.choices[0].message.content)
+\`\`\`
+
+## 配置管理
+\`\`\`python
+import os
+from litellm import batch_completion
+
+# 设置API密钥
+os.environ["OPENAI_API_KEY"] = "your-api-key"
+
+# 批量处理请求
+responses = batch_completion(
+    model="gpt-3.5-turbo",
+    messages=[
+        [{"role": "user", "content": "Hello!"}],
+        [{"role": "user", "content": "How are you?"}]
+    ]
+)
+\`\`\``;
+        }
+
+        // P5 文档内容
+        function generateP5Content() {
+            return `# P5 智能执行引擎 - SOLID原则实现
+
+## 设计原则
+本模块严格按照SOLID原则设计，确保代码的可维护性和可扩展性。
+
+## 单一职责原则 (SRP)
+\`\`\`python
+class TaskProcessor:
+    """只负责任务处理逻辑"""
+    def __init__(self, validator: TaskValidator, executor: TaskExecutor):
+        self.validator = validator
+        self.executor = executor
+    
+    def process(self, task: Task) -> TaskResult:
+        if not self.validator.validate(task):
+            raise ValidationError("Task validation failed")
+        
+        return self.executor.execute(task)
+\`\`\`
+
+## 开闭原则 (OCP)
+\`\`\`python
+from abc import ABC, abstractmethod
+
+class TaskExecutor(ABC):
+    """抽象的执行器接口"""
+    @abstractmethod
+    def execute(self, task: Task) -> TaskResult:
+        pass
+
+class PythonTaskExecutor(TaskExecutor):
+    """Python任务执行器"""
+    def execute(self, task: Task) -> TaskResult:
+        # 实现Python代码执行逻辑
+        return TaskResult(success=True, output="Executed")
+
+class JavaScriptTaskExecutor(TaskExecutor):
+    """JavaScript任务执行器"""
+    def execute(self, task: Task) -> TaskResult:
+        # 实现JavaScript代码执行逻辑
+        return TaskResult(success=True, output="Executed")
+\`\`\``;
+        }
+
+        // 默认内容生成
+        function generateDefaultContent(doc) {
+            return `# ${doc.title}
+
+## 文档概述
+${doc.description}
+
+## 主要内容
+这里是文档的主要内容部分，包含了详细的技术说明、实现指南和最佳实践。
+
+## 代码示例
+\`\`\`python
+# 示例代码
+def example_function():
+    """示例函数"""
+    return "Hello, World!"
+\`\`\`
+
+## 最佳实践
+1. 遵循编码规范
+2. 编写单元测试
+3. 进行代码审查
+4. 持续集成部署
+
+## 相关资源
+- [相关文档链接1](#)
+- [相关文档链接2](#)
+- [相关文档链接3](#)`;
+        }
+
+        // 更新最近浏览
+        function updateRecentViews(doc) {
+            // 这里可以添加更新最近浏览历史的逻辑
+            console.log(`已查看文档: ${doc.title}`);
+        }
+
+        // 复制代码功能
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-container').querySelector('code');
+            const text = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<span class="copy-icon">✅</span> 已复制';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+
+        // 初始化样式
+        const style = document.createElement('style');
+        style.textContent = \`
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        \`;
+        document.head.appendChild(style);
+
+        console.log('📚 智能文档库已加载');
+        console.log('🔍 快捷键: Ctrl+K 搜索, ESC 清空搜索');
+    </script>
+</body>
+</html>

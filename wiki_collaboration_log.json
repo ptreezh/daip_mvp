@@ -1,0 +1,45 @@
+{
+  "session_start": 1765597485.603997,
+  "events": [
+    {
+      "timestamp": "2025-12-13T11:44:45.608084",
+      "event_type": "role_contribution",
+      "role_name": "Domain Expert",
+      "section": "理论基础",
+      "content": "正在添加量子计算的理论基础内容...",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2025-12-13T11:44:45.612002",
+      "event_type": "role_contribution",
+      "role_name": "Historian",
+      "section": "发展历程",
+      "content": "正在添加量子计算的发展历程...",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2025-12-13T11:44:45.616743",
+      "event_type": "role_contribution",
+      "role_name": "Application Expert",
+      "section": "实际应用",
+      "content": "正在添加量子计算的实际应用...",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2025-12-13T11:44:45.620456",
+      "event_type": "role_contribution",
+      "role_name": "Critic",
+      "section": "挑战与前景",
+      "content": "正在添加量子计算面临的挑战与前景...",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2025-12-13T11:44:45.624470",
+      "event_type": "role_contribution",
+      "role_name": "Researcher",
+      "section": "最新研究进展",
+      "content": "正在添加量子计算的最新研究进展...",
+      "metadata": {}
+    }
+  ]
+}

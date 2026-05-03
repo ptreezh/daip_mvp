@@ -1,0 +1,59 @@
+{
+  "timestamp": 1765420092.7010858,
+  "validation_type": "html_basic_syntax",
+  "results": [
+    {
+      "filename": "javascript验证.html",
+      "has_doctype": true,
+      "has_html_tag": true,
+      "has_head": true,
+      "has_body": true,
+      "has_charset": true,
+      "has_title": true,
+      "has_css": true,
+      "has_javascript": true,
+      "syntax_errors": []
+    },
+    {
+      "filename": "简单交互测试.html",
+      "has_doctype": true,
+      "has_html_tag": true,
+      "has_head": true,
+      "has_body": true,
+      "has_charset": true,
+      "has_title": true,
+      "has_css": true,
+      "has_javascript": true,
+      "syntax_errors": []
+    },
+    {
+      "filename": "P1_SIX_DIMENSION_LEARNING_FIXED.html",
+      "has_doctype": true,
+      "has_html_tag": true,
+      "has_head": true,
+      "has_body": true,
+      "has_charset": true,
+      "has_title": true,
+      "has_css": true,
+      "has_javascript": true,
+      "syntax_errors": []
+    },
+    {
+      "filename": "六向联动系统交互修复报告.html",
+      "has_doctype": true,
+      "has_html_tag": true,
+      "has_head": true,
+      "has_body": true,
+      "has_charset": true,
+      "has_title": true,
+      "has_css": true,
+      "has_javascript": true,
+      "syntax_errors": []
+    }
+  ],
+  "summary": {
+    "total_files": 4,
+    "passed": 4,
+    "failed": 0
+  }
+}

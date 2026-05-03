@@ -1,0 +1,2214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P6 终端界面 - 0代码AI规范化编程实践教学</title>
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #16a085 0%, #27ae60 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            height: fit-content;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h3 {
+            color: #16a085;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-bottom: 12px;
+        }
+
+        .nav-menu a {
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        .nav-menu a:hover {
+            background: #e8f8f5;
+            color: #16a085;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            border-bottom: 3px solid #16a085;
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            color: #34495e;
+            margin: 30px 0 15px;
+            font-size: 1.4rem;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 4px solid #16a085;
+        }
+
+        .card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .principle-tag {
+            display: inline-block;
+            background: #16a085;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 5px;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .interface-diagram {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .interface-component {
+            display: inline-block;
+            background: white;
+            border: 2px solid #16a085;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .interface-arrow {
+            font-size: 1.5rem;
+            color: #16a085;
+            margin: 0 10px;
+        }
+
+        .best-practices {
+            background: linear-gradient(135deg, #81c784 0%, #4caf50 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .best-practices h4 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .best-practices ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .best-practices li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .best-practices li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: white;
+            font-weight: bold;
+        }
+
+        .test-example {
+            background: #fef5e7;
+            border: 1px solid #f9e79f;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .navigation-footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 60px;
+        }
+
+        .navigation-footer h3 {
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            background: #16a085;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* 动画控制脚本 */
+        <script src="animations.js"></script>
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>P6 终端界面</h1>
+        <p class="subtitle">DAIP-LIVE CLI和TUI系统的模块化交互设计</p>
+    </header>
+
+    <div class="container">
+        <div class="content-grid">
+            <nav class="sidebar">
+                <h3>导航目录</h3>
+                <ul class="nav-menu">
+                    <li><a href="#overview">模块概述</a></li>
+                    <li><a href="#architecture">架构设计</a></li>
+                    <li><a href="#cli-system">CLI命令系统</a></li>
+                    <li><a href="#tui-system">TUI界面系统</a></li>
+                    <li><a href="#solid-principles">SOLID原则体现</a></li>
+                    <li><a href="#tdd-implementation">TDD实现</a></li>
+                    <li><a href="#code-examples">代码示例</a></li>
+                    <li><a href="#best-practices">最佳实践</a></li>
+                    <li><a href="#related-docs">相关规范文档</a></li>
+                </ul>
+            </nav>
+
+            <main class="main-content">
+                <section id="overview" class="section">
+                    <h2>模块概述</h2>
+                    <div class="card">
+                        <h4>模块职责</h4>
+                        <p>P6终端界面模块为DAIP-LIVE系统提供用户交互界面，包括CLI（命令行界面）和TUI（文本用户界面）两种交互模式。它负责用户输入解析、命令路由、状态展示和交互反馈，为用户提供高效、直观的操作体验。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>核心功能</h4>
+                        <ul>
+                            <li><strong>CLI命令系统</strong>：基于Typer的命令行工具，支持脚本化操作</li>
+                            <li><strong>TUI交互界面</strong>：基于Textual的现代化终端UI，提供丰富的交互体验</li>
+                            <li><strong>命令路由</strong>：智能命令解析和路由分发</li>
+                            <li><strong>状态管理</strong>：界面状态和会话状态的统一管理</li>
+                            <li><strong>实时反馈</strong>：异步操作进度显示和实时状态更新</li>
+                            <li><strong>模块化设计</strong>：界面组件的模块化设计和复用</li>
+                        </ul>
+                    </div>
+
+                    <div class="interface-diagram">
+                        <h4>P6终端界面架构</h4>
+                        <div style="margin: 30px 0;">
+                            <div class="interface-component">
+                                <strong>CLI Commands</strong><br>
+                                命令行接口<br>
+                                Typer框架
+                            </div>
+                            <div class="interface-arrow">↔</div>
+                            <div class="interface-component">
+                                <strong>TUI Framework</strong><br>
+                                文本用户界面<br>
+                                Textual框架
+                            </div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div style="font-size: 2rem; color: #16a085;">↓</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div class="interface-component">
+                                <strong>Command Router</strong><br>
+                                命令路由器<br>
+                                参数解析
+                            </div>
+                            <div class="interface-component">
+                                <strong>State Manager</strong><br>
+                                状态管理器<br>
+                                会话控制
+                            </div>
+                            <div class="interface-component">
+                                <strong>Component Factory</strong><br>
+                                组件工厂<br>
+                                UI组件生成
+                            </div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div style="font-size: 2rem; color: #16a085;">↓</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div class="interface-component">
+                                <strong>Core System</strong><br>
+                                核心系统<br>
+                                业务逻辑处理
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="architecture" class="section">
+                    <h2>架构设计</h2>
+
+                    <h3>核心组件</h3>
+                    <div class="card">
+                        <h4>1. CLICommands</h4>
+                        <p>CLI命令定义器，使用Typer框架定义所有命令行指令，支持参数验证、帮助文档和错误处理。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>2. ModularTUI</h4>
+                        <p>模块化TUI框架，基于Textual实现，提供可复用的UI组件和灵活的布局管理。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>3. CommandRouter</h4>
+                        <p>命令路由器，负责解析用户输入并路由到相应的处理器，支持命令别名和快捷操作。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>4. StateManager</h4>
+                        <p>状态管理器，维护界面状态、会话信息和用户配置，支持状态持久化和恢复。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>5. ComponentFactory</h4>
+                        <p>UI组件工厂，负责创建和管理TUI组件，支持组件复用和动态生成。</p>
+                    </div>
+
+                    <h3>设计原则应用</h3>
+                    <div class="principle-tag">命令模式</div>
+                    <div class="principle-tag">工厂模式</div>
+                    <div class="principle-tag">观察者模式</div>
+                    <div class="principle-tag">模块化设计</div>
+                    <div class="principle-tag">事件驱动</div>
+                </section>
+
+                <section id="cli-system" class="section">
+                    <h2>CLI命令系统</h2>
+
+                    <h3>命令结构设计</h3>
+                    <div class="code-block">
+import typer
+from typing import Optional, List
+from rich.console import Console
+
+app = typer.Typer(
+    name="daip",
+    help="DAIP-LIVE - Dynamic AI-driven Project-execution LIVE System",
+    rich_markup_mode="rich",
+    no_args_is_help=True
+)
+
+# 子命令组
+debate_app = typer.Typer(help="Debate system commands")
+wiki_app = typer.Typer(help="Wiki system commands")
+scaffold_app = typer.Typer(help="Project scaffolding commands")
+
+app.add_typer(debate_app, name="debate")
+app.add_typer(wiki_app, name="wiki")
+app.add_typer(scaffold_app, name="scaffold")
+
+@app.command()
+def run(
+    interactive: bool = typer.Option(
+        True, "--interactive", "-i", help="Start interactive mode"
+    ),
+    model: Optional[str] = typer.Option(
+        None, "--model", "-m", help="Specify AI model to use"
+    )
+):
+    """Start DAIP-LIVE in interactive mode"""
+    console = Console()
+    console.print("[bold green]Starting DAIP-LIVE...[/bold green]")
+
+@debate_app.command("start")
+def start_debate(
+    topic: str = typer.Argument(..., help="Debate topic"),
+    roles: Optional[List[str]] = typer.Option(
+        None, "--role", "-r", help="Debate roles"
+    ),
+    rounds: int = typer.Option(3, "--rounds", help="Number of debate rounds")
+):
+    """Start a new debate session"""
+    console = Console()
+    console.print(f"[bold blue]Starting debate on:[/bold blue] {topic}")
+                    </div>
+
+                    <h3>命令验证和错误处理</h3>
+                    <div class="code-block">
+import typer
+from typing import Optional
+
+class ValidationError(Exception):
+    """命令验证错误"""
+    pass
+
+def validate_topic(topic: str) -> str:
+    """验证辩论主题"""
+    if len(topic.strip()) < 10:
+        raise ValidationError("Topic must be at least 10 characters long")
+    if len(topic.strip()) > 200:
+        raise ValidationError("Topic must be less than 200 characters")
+    return topic.strip()
+
+def validate_model_name(model: Optional[str]) -> Optional[str]:
+    """验证模型名称"""
+    if model is None:
+        return None
+
+    available_models = ["gpt-4", "claude-3", "llama-2", "gpt-3.5-turbo"]
+    if model not in available_models:
+        raise typer.BadParameter(
+            f"Model '{model}' not available. Choose from: {', '.join(available_models)}"
+        )
+    return model
+
+@debate_app.command("start")
+def start_debate(
+    topic: str = typer.Argument(
+        ...,
+        help="Debate topic",
+        callback=validate_topic
+    ),
+    model: Optional[str] = typer.Option(
+        None,
+        "--model",
+        "-m",
+        help="AI model to use",
+        callback=validate_model_name
+    )
+):
+    """Start a debate with validated inputs"""
+    try:
+        # 实际的辩论启动逻辑
+        pass
+    except ValidationError as e:
+        typer.echo(f"Validation error: {e}", err=True)
+        raise typer.Exit(1)
+                    </div>
+
+                    <h3>丰富的命令行帮助</h3>
+                    <div class="code-block">
+@app.command()
+def search(
+    query: str = typer.Argument(
+        ...,
+        help="Search query string",
+        rich_help_panel="Search Parameters"
+    ),
+    source: str = typer.Option(
+        "wiki",
+        "--source",
+        "-s",
+        help="Search source: wiki, web, or local",
+        rich_help_panel="Search Parameters"
+    ),
+    limit: int = typer.Option(
+        10,
+        "--limit",
+        "-l",
+        help="Maximum number of results to return",
+        rich_help_panel="Output Options"
+    ),
+    format: str = typer.Option(
+        "table",
+        "--format",
+        "-f",
+        help="Output format: table, json, or csv",
+        rich_help_panel="Output Options"
+    )
+):
+    """
+    Search for information across different sources.
+
+    [bold green]Examples:[/bold green]
+
+    daip search "machine learning" --source web --limit 5
+
+    daip search "Python programming" --format json
+    """
+    # 搜索实现
+    pass
+
+# 自定义帮助主题
+typer.rich_utils.STYLE_HELPTEXT = ""
+typer.rich_utils.STYLE_OPTION_TEXT = "cyan"
+typer.rich_utils.STYLE_OPTION_DEFAULT = "dim"
+typer.rich_utils.STYLE_METAVAR = "bold yellow"
+typer.rich_utils.STYLE_METAVAR_SEPARATOR = "dim"
+typer.rich_utils.STYLE_REQUIRED_SHORT = "red"
+typer.rich_utils.STYLE_REQUIRED_LONG = "red"
+                    </div>
+                </section>
+
+                <section id="tui-system" class="section">
+                    <h2>TUI界面系统</h2>
+
+                    <h3>模块化TUI架构</h3>
+                    <div class="code-block">
+from textual.app import App, ComposeResult
+from textual.containers import Container, Horizontal, Vertical
+from textual.widgets import Header, Footer, Static, Button, Input, ListView
+from textual.reactive import reactive
+
+class ModularTUI(App):
+    """模块化TUI应用"""
+
+    CSS_PATH = "tui_styles.css"
+    TITLE = "DAIP-LIVE Terminal Interface"
+
+    current_view: reactive[str] = reactive("home")
+
+    def compose(self) -> ComposeResult:
+        """组合UI组件"""
+        yield Header()
+        yield Container(
+            NavigationView(id="nav"),
+            MainContentView(id="content"),
+            id="main-container"
+        )
+        yield StatusPanel(id="status")
+        yield Footer()
+
+class NavigationView(Static):
+    """导航视图组件"""
+
+    def compose(self) -> ComposeResult:
+        yield Button("Debate", id="nav-debate", variant="primary")
+        yield Button("Wiki", id="nav-wiki", variant="primary")
+        yield Button("Scaffold", id="nav-scaffold", variant="primary")
+        yield Button("Chat", id="nav-chat", variant="primary")
+
+class MainContentView(Static):
+    """主内容视图组件"""
+
+    current_content: reactive[Widget] = reactive(None)
+
+    def watch_current_content(self, content: Widget) -> None:
+        """监听内容变化"""
+        if self.current_content:
+            self.current_content.remove()
+        if content:
+            self.mount(content)
+
+class StatusPanel(Static):
+    """状态面板组件"""
+
+    status_text: reactive[str] = reactive("Ready")
+
+    def render(self) -> str:
+        return f"[bold]Status:[/bold] {self.status_text}"
+                    </div>
+
+                    <h3>动态组件加载</h3>
+                    <div class="code-block">
+from typing import Dict, Type, Any
+from textual.widgets import Widget
+
+class ComponentFactory:
+    """UI组件工厂"""
+
+    _components: Dict[str, Type[Widget]] = {}
+
+    @classmethod
+    def register(cls, name: str, component_class: Type[Widget]):
+        """注册组件"""
+        cls._components[name] = component_class
+
+    @classmethod
+    def create(cls, component_type: str, **kwargs) -> Widget:
+        """创建组件实例"""
+        if component_type not in cls._components:
+            raise ValueError(f"Unknown component type: {component_type}")
+
+        return cls._components[component_type](**kwargs)
+
+    @classmethod
+    def get_available_components(cls) -> list:
+        """获取可用组件列表"""
+        return list(cls._components.keys())
+
+# 注册各种视图组件
+ComponentFactory.register("debate_view", DebateView)
+ComponentFactory.register("wiki_view", WikiView)
+ComponentFactory.register("chat_view", ChatView)
+ComponentFactory.register("scaffold_view", ScaffoldView)
+
+class ViewManager:
+    """视图管理器"""
+
+    def __init__(self, content_container: Container):
+        self.content_container = content_container
+        self.current_view = None
+
+    async def switch_view(self, view_name: str, **kwargs):
+        """切换视图"""
+        try:
+            # 创建新视图
+            new_view = ComponentFactory.create(view_name, **kwargs)
+
+            # 移除当前视图
+            if self.current_view:
+                await self.content_container.remove_child(self.current_view)
+
+            # 添加新视图
+            await self.content_container.mount(new_view)
+            self.current_view = new_view
+
+            # 设置焦点
+            new_view.focus()
+
+        except Exception as e:
+            # 错误处理
+            error_view = ErrorView(f"Failed to load view: {str(e)}")
+            await self.content_container.mount(error_view)
+                    </div>
+
+                    <h3>异步状态更新</h3>
+                    <div class="code-block">
+from textual import events
+from textual.reactive import reactive
+import asyncio
+
+class AsyncStatusWidget(Static):
+    """异步状态更新组件"""
+
+    status_text: reactive[str] = reactive("Initializing...")
+    progress: reactive[float] = reactive(0.0)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._update_task = None
+
+    def on_mount(self) -> None:
+        """组件挂载时启动更新任务"""
+        self._update_task = asyncio.create_task(self._update_status_loop())
+
+    def on_unmount(self) -> None:
+        """组件卸载时清理任务"""
+        if self._update_task:
+            self._update_task.cancel()
+
+    async def _update_status_loop(self):
+        """状态更新循环"""
+        while True:
+            try:
+                # 获取系统状态
+                status_info = await self._get_system_status()
+
+                # 更新响应式属性
+                self.status_text = status_info["message"]
+                self.progress = status_info["progress"]
+
+                # 刷新显示
+                self.refresh()
+
+                # 等待下次更新
+                await asyncio.sleep(1)
+
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                self.status_text = f"Error: {str(e)}"
+                self.refresh()
+                await asyncio.sleep(5)
+
+    async def _get_system_status(self) -> Dict[str, Any]:
+        """获取系统状态信息"""
+        # 这里可以调用实际的系统状态接口
+        return {
+            "message": "System running normally",
+            "progress": 0.75
+        }
+
+    def render(self) -> str:
+        """渲染组件内容"""
+        return f"""
+[b]Status:[/b] {self.status_text}
+[b]Progress:[/b] {self.progress:.1%}
+{'█' * int(self.progress * 20)}{'░' * (20 - int(self.progress * 20))}
+        """
+                    </div>
+                </section>
+
+                <section id="solid-principles" class="section">
+                    <h2>SOLID原则的具体体现</h2>
+
+                    <h3>S - 单一职责原则 (Single Responsibility Principle)</h3>
+                    <div class="code-block">
+class CommandParser:
+    """只负责命令解析"""
+
+    def parse(self, input_text: str) -> ParsedCommand:
+        """专门处理命令解析逻辑"""
+        pass
+
+class CommandValidator:
+    """只负责命令验证"""
+
+    def validate(self, command: ParsedCommand) -> ValidationResult:
+        """专门处理命令验证逻辑"""
+        pass
+
+class CommandExecutor:
+    """只负责命令执行"""
+
+    async def execute(self, command: ParsedCommand) -> ExecutionResult:
+        """专门处理命令执行逻辑"""
+        pass
+
+class UIComponent:
+    """只负责UI组件管理"""
+
+    def render(self) -> str:
+        """专门处理UI渲染逻辑"""
+        pass
+
+    def handle_event(self, event: UIEvent) -> None:
+        """专门处理UI事件逻辑"""
+        pass
+                    </div>
+
+                    <h3>O - 开放封闭原则 (Open-Closed Principle)</h3>
+                    <div class="code-block">
+from abc import ABC, abstractmethod
+
+class CommandHandler(ABC):
+    """命令处理器基类"""
+
+    @abstractmethod
+    async def handle(self, args: List[str]) -> CommandResult:
+        pass
+
+    @abstractmethod
+    def get_help(self) -> str:
+        pass
+
+# 新增命令处理器无需修改现有代码
+class DebateCommandHandler(CommandHandler):
+    """辩论命令处理器"""
+
+    async def handle(self, args: List[str]) -> CommandResult:
+        # 实现辩论命令逻辑
+        pass
+
+    def get_help(self) -> str:
+        return "Start and manage AI debates"
+
+class WikiCommandHandler(CommandHandler):
+    """Wiki命令处理器"""
+
+    async def handle(self, args: List[str]) -> CommandResult:
+        # 实现Wiki命令逻辑
+        pass
+
+    def get_help(self) -> str:
+        return "Manage wiki pages and knowledge base"
+
+class CommandRouter:
+    def __init__(self):
+        self.handlers: Dict[str, CommandHandler] = {}
+
+    def register_handler(self, command: str, handler: CommandHandler):
+        """注册新的命令处理器，无需修改现有代码"""
+        self.handlers[command] = handler
+
+    async def route_command(self, command: str, args: List[str]) -> CommandResult:
+        if command in self.handlers:
+            return await self.handlers[command].handle(args)
+        else:
+            raise CommandNotFoundError(f"Unknown command: {command}")
+                    </div>
+
+                    <h3>L - 里氏替换原则 (Liskov Substitution Principle)</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-title">里氏替换原则实现示例</span>
+                            <span class="code-language">Python</span>
+                            <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                        </div>
+                        <div class="code-content code-highlight">
+                            <pre><code>class UIWidget(ABC):
+    """UI组件基类"""
+
+    @abstractmethod
+    def render(self) -> str:
+        pass
+
+    @abstractmethod
+    def handle_input(self, input_event: InputEvent) -> None:
+        pass
+
+    @abstractmethod
+    def get_size(self) -> Size:
+        pass
+
+class ButtonWidget(UIWidget):
+    """按钮组件"""
+
+    def render(self) -> str:
+        return "[Button]"
+
+    def handle_input(self, input_event: InputEvent) -> None:
+        if input_event.type == "click":
+            self.on_click()
+
+    def get_size(self) -> Size:
+        return Size(width=10, height=1)
+
+class TextInputWidget(UIWidget):
+    """文本输入组件"""
+
+    def render(self) -> str:
+        return f"[Input: {self.text}]"
+
+    def handle_input(self, input_event: InputEvent) -> None:
+        if input_event.type == "key_press":
+            self.update_text(input_event.key)
+
+    def get_size(self) -> Size:
+        return Size(width=20, height=1)
+
+# 任何UIWidget的子类都可以替换使用
+widget1 = ButtonWidget()
+widget2 = TextInputWidget()
+
+ui_container.add_widget(widget1)  # ✓ 正确
+ui_container.add_widget(widget2)  # ✓ 正确</code></pre>
+                        </div>
+                    </div>
+
+                    <h3>I - 接口隔离原则 (Interface Segregation Principle)</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-title">接口隔离原则实现示例</span>
+                            <span class="code-language">Python</span>
+                            <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                        </div>
+                        <div class="code-content code-highlight">
+                            <pre><code># 将大接口拆分为多个小接口
+class InputHandler(ABC):
+    @abstractmethod
+    def handle_key_press(self, key: str) -> None:
+        pass
+
+    @abstractmethod
+    def handle_mouse_click(self, x: int, y: int) -> None:
+        pass
+
+class Renderable(ABC):
+    @abstractmethod
+    def render(self) -> str:
+        pass
+
+    @abstractmethod
+    def refresh(self) -> None:
+        pass
+
+class Focusable(ABC):
+    @abstractmethod
+    def focus(self) -> None:
+        pass
+
+    @abstractmethod
+    def blur(self) -> None:
+        pass
+
+    @abstractmethod
+    def is_focused(self) -> bool:
+        pass
+
+# 客户端只依赖需要的接口
+class StaticLabel:
+    """静态标签，只需要渲染功能"""
+    def __init__(self, renderable: Renderable):
+        self.renderable = renderable
+
+class InteractiveButton:
+    """交互按钮，需要输入处理、渲染和焦点管理"""
+    def __init__(self,
+                 input_handler: InputHandler,
+                 renderable: Renderable,
+                 focusable: Focusable):
+        self.input_handler = input_handler
+        self.renderable = renderable
+        self.focusable = focusable</code></pre>
+                        </div>
+                    </div>
+                    </div>
+
+                    <h3>D - 依赖倒置原则 (Dependency Inversion Principle)</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-title">依赖倒置原则实现示例</span>
+                            <span class="code-language">Python</span>
+                            <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                        </div>
+                        <div class="code-content code-highlight">
+                            <pre><code>class TerminalInterface:
+    """高层模块依赖抽象，不依赖具体实现"""
+
+    def __init__(self,
+                 command_parser: CommandParser,
+                 ui_renderer: UIRenderer,
+                 event_handler: EventHandler):
+        self.command_parser = command_parser    # 依赖抽象
+        self.ui_renderer = ui_renderer          # 依赖抽象
+        self.event_handler = event_handler      # 依赖抽象
+
+    async def run_interactive_session(self):
+        """运行交互式会话"""
+        while True:
+            # 获取用户输入
+            user_input = await self.get_user_input()
+
+            # 解析命令
+            command = await self.command_parser.parse(user_input)
+
+            # 处理事件
+            await self.event_handler.handle_command(command)
+
+            # 更新界面
+            await self.ui_renderer.update_display()
+
+# 通过依赖注入提供具体实现
+terminal = TerminalInterface(
+    command_parser=TyperCommandParser(),    # 注入Typer解析器
+    ui_renderer=TextualUIRenderer(),        # 注入Textual渲染器
+    event_handler=AsyncEventHandler()        # 注入异步事件处理器
+)</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tdd-implementation" class="section">
+                    <h2>TDD (测试驱动开发) 实现</h2>
+
+                    <h3>测试先行：命令解析功能</h3>
+                    <div class="test-example">
+                        <h4>Step 1: 写失败的测试</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-title">TDD测试代码示例</span>
+                                <span class="code-language">Python</span>
+                                <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                            </div>
+                            <div class="code-content code-highlight">
+                                <pre><code>import pytest
+from unittest.mock import AsyncMock
+
+class TestCommandParser:
+    def test_parse_simple_command(self):
+        """测试简单命令解析"""
+        parser = CommandParser()
+
+        command = parser.parse("debate start AI ethics")
+
+        assert command.action == "start"
+        assert command.subcommand == "debate"
+        assert "AI ethics" in command.arguments
+
+    def test_parse_command_with_options(self):
+        """测试带选项的命令解析"""
+        parser = CommandParser()</code></pre>
+                            </div>
+                        </div>
+
+        command = parser.parse("search --source web --limit 5 Python")
+
+        assert command.action == "search"
+        assert command.options["source"] == "web"
+        assert command.options["limit"] == 5
+        assert "Python" in command.arguments
+
+    def test_invalid_command_raises_error(self):
+        """测试无效命令抛出错误"""
+        parser = CommandParser()
+
+        with pytest.raises(CommandParseError):
+            parser.parse("invalid_command_with_no_handler")
+
+    def test_help_command_returns_help_text(self):
+        """测试帮助命令返回帮助文本"""
+        parser = CommandParser()
+
+        result = parser.parse("help debate")
+
+        assert result.action == "help"
+        assert "debate" in result.arguments
+                        </div>
+
+                        <h4>Step 2: 实现最小代码使测试通过</h4>
+                        <div class="code-block">
+import re
+from typing import Dict, List, Optional
+
+@dataclass
+class ParsedCommand:
+    action: str
+    subcommand: Optional[str] = None
+    arguments: List[str] = None
+    options: Dict[str, Any] = None
+
+class CommandParser:
+    """最小实现，让测试通过"""
+
+    def __init__(self):
+        self.command_patterns = {
+            "debate": r"debate\s+(\w+)(?:\s+(.+))?",
+            "search": r"search(?:\s+--(\w+)\s+(\w+))?(?:\s+(.+))?",
+            "help": r"help\s*(\w+)?"
+        }
+
+    def parse(self, input_text: str) -> ParsedCommand:
+        """最小实现，让测试通过"""
+        input_text = input_text.strip()
+
+        # 测试debate命令
+        debate_match = re.match(self.command_patterns["debate"], input_text)
+        if debate_match:
+            return ParsedCommand(
+                action="start",
+                subcommand="debate",
+                arguments=[debate_match.group(2)] if debate_match.group(2) else []
+            )
+
+        # 测试search命令
+        search_match = re.match(self.command_patterns["search"], input_text)
+        if search_match:
+            options = {}
+            if search_match.group(1) and search_match.group(2):
+                options[search_match.group(1)] = search_match.group(2)
+
+            return ParsedCommand(
+                action="search",
+                options=options,
+                arguments=[search_match.group(3)] if search_match.group(3) else []
+            )
+
+        # 测试help命令
+        help_match = re.match(self.command_patterns["help"], input_text)
+        if help_match:
+            return ParsedCommand(
+                action="help",
+                arguments=[help_match.group(1)] if help_match.group(1) else []
+            )
+
+        raise CommandParseError(f"Unknown command: {input_text}")
+                        </div>
+
+                        <h4>Step 3: 重构和扩展</h4>
+                        <div class="code-block">
+class CommandParser:
+    """重构后的命令解析器"""
+
+    def __init__(self):
+        self.command_handlers = {
+            "debate": DebateCommandHandler(),
+            "search": SearchCommandHandler(),
+            "help": HelpCommandHandler(),
+            "wiki": WikiCommandHandler(),
+            "scaffold": ScaffoldCommandHandler()
+        }
+        self.option_parser = OptionParser()
+
+    def parse(self, input_text: str) -> ParsedCommand:
+        """完整的命令解析实现"""
+        tokens = self._tokenize(input_text)
+
+        if not tokens:
+            raise CommandParseError("Empty command")
+
+        # 识别主命令
+        main_command = tokens[0].lower()
+
+        if main_command not in self.command_handlers:
+            raise CommandParseError(f"Unknown command: {main_command}")
+
+        # 获取对应的处理器
+        handler = self.command_handlers[main_command]
+
+        # 解析选项和参数
+        options, arguments = self.option_parser.parse(tokens[1:])
+
+        # 使用处理器解析具体命令
+        return handler.parse_command(arguments, options)
+
+    def _tokenize(self, input_text: str) -> List[str]:
+        """命令分词"""
+        # 处理引号包围的参数
+        import shlex
+        return shlex.split(input_text)
+
+    def register_command(self, command_name: str, handler: CommandHandler):
+        """注册新的命令处理器"""
+        self.command_handlers[command_name] = handler
+
+class OptionParser:
+    """选项解析器"""
+
+    def parse(self, tokens: List[str]) -> Tuple[Dict[str, Any], List[str]]:
+        """解析命令行选项和参数"""
+        options = {}
+        arguments = []
+        i = 0
+
+        while i < len(tokens):
+            token = tokens[i]
+
+            if token.startswith("--"):
+                # 长选项
+                if "=" in token:
+                    key, value = token[2:].split("=", 1)
+                    options[key] = value
+                elif i + 1 < len(tokens) and not tokens[i + 1].startswith("--"):
+                    key = token[2:]
+                    value = tokens[i + 1]
+                    options[key] = value
+                    i += 1
+                else:
+                    options[token[2:]] = True
+            elif token.startswith("-"):
+                # 短选项
+                options[token[1:]] = True
+            else:
+                # 参数
+                arguments.append(token)
+
+            i += 1
+
+        return options, arguments
+                    </div>
+                    </div>
+
+                    <h3>集成测试：CLI命令执行</h3>
+                    <div class="test-example">
+                        <div class="code-block">
+class TestCLIIntegration:
+    @pytest.mark.asyncio
+    async def test_complete_debate_command_flow(self):
+        """测试完整的辩论命令流程"""
+        # 模拟所有依赖
+        mock_debate_manager = AsyncMock()
+        mock_debate_manager.start_debate.return_value = DebateSession(
+            session_id="test-session",
+            topic="AI ethics"
+        )
+
+        # 创建CLI应用
+        cli_app = CLIApp(debate_manager=mock_debate_manager)
+
+        # 执行命令
+        result = await cli_app.execute_command([
+            "debate", "start", "AI ethics", "--model", "gpt-4"
+        ])
+
+        # 验证结果
+        assert result.success is True
+        assert "Debate started" in result.message
+
+        # 验证调用参数
+        mock_debate_manager.start_debate.assert_called_once_with(
+            topic="AI ethics",
+            model="gpt-4",
+            rounds=3  # 默认值
+        )
+
+    @pytest.mark.asyncio
+    async def test_error_handling_in_commands(self):
+        """测试命令中的错误处理"""
+        # 模拟错误情况
+        mock_debate_manager = AsyncMock()
+        mock_debate_manager.start_debate.side_effect = ValidationError(
+            "Topic too short"
+        )
+
+        cli_app = CLIApp(debate_manager=mock_debate_manager)
+
+        # 执行命令
+        result = await cli_app.execute_command([
+            "debate", "start", "AI"  # 主题太短
+        ])
+
+        # 验证错误处理
+        assert result.success is False
+        assert "Topic too short" in result.message
+        assert result.error_code == "VALIDATION_ERROR"
+                        </div>
+                    </div>
+
+                    <h3>性能测试：TUI响应性</h3>
+                    <div class="test-example">
+                        <div class="code-block">
+class TestTUIPerformance:
+    @pytest.mark.asyncio
+    async def test_tui_response_time(self):
+        """测试TUI界面响应时间"""
+        tui_app = TestTUIApp()
+
+        # 模拟大量UI更新
+        start_time = time.time()
+
+        for i in range(100):
+            await tui_app.simulate_user_input(f"command_{i}")
+            # 等待界面更新
+            await tui_app.wait_for_render()
+
+        end_time = time.time()
+
+        # 验证性能指标
+        total_time = end_time - start_time
+        avg_response_time = total_time / 100
+
+        assert avg_response_time < 0.1  # 平均响应时间小于100ms
+
+    @pytest.mark.asyncio
+    async def test_concurrent_ui_events(self):
+        """测试并发UI事件处理"""
+        tui_app = TestTUIApp()
+
+        # 创建多个并发事件
+        events = [
+            tui_app.simulate_user_input("search python"),
+            tui_app.simulate_user_input("debate start topic"),
+            tui_app.simulate_user_input("wiki create page"),
+            tui_app.simulate_key_press("ctrl+c"),
+            tui_app.simulate_resize_event(80, 24)
+        ]
+
+        start_time = time.time()
+
+        # 并发处理所有事件
+        results = await asyncio.gather(*events, return_exceptions=True)
+
+        end_time = time.time()
+
+        # 验证所有事件都被正确处理
+        assert len(results) == 5
+        assert not any(isinstance(r, Exception) for r in results)
+
+        # 验证处理时间
+        total_time = end_time - start_time
+        assert total_time < 1.0  # 总处理时间小于1秒
+                        </div>
+                    </div>
+                </section>
+
+                <section id="code-examples" class="section">
+                    <h2>代码示例：规范化实现</h2>
+
+                    <h3>1. 模块化CLI命令系统</h3>
+                    <div class="code-block">
+import typer
+from typing import Dict, List, Any, Optional
+from dataclasses import dataclass
+from enum import Enum
+import asyncio
+
+class CommandResult(Enum):
+    SUCCESS = "success"
+    ERROR = "error"
+    VALIDATION_ERROR = "validation_error"
+    PERMISSION_DENIED = "permission_denied"
+
+@dataclass
+class CLIResponse:
+    success: bool
+    message: str
+    data: Any = None
+    error_code: Optional[str] = None
+
+class BaseCLICommand:
+    """CLI命令基类"""
+
+    def __init__(self, name: str, description: str):
+        self.name = name
+        self.description = description
+
+    async def execute(self, *args, **kwargs) -> CLIResponse:
+        """执行命令的模板方法"""
+        try:
+            # 前置验证
+            await self.validate(*args, **kwargs)
+
+            # 权限检查
+            await self.check_permissions(*args, **kwargs)
+
+            # 执行具体逻辑
+            result = await self.run(*args, **kwargs)
+
+            return CLIResponse(
+                success=True,
+                message=f"Command {self.name} completed successfully",
+                data=result
+            )
+
+        except ValidationError as e:
+            return CLIResponse(
+                success=False,
+                message=str(e),
+                error_code="VALIDATION_ERROR"
+            )
+        except PermissionError as e:
+            return CLIResponse(
+                success=False,
+                message=str(e),
+                error_code="PERMISSION_DENIED"
+            )
+        except Exception as e:
+            return CLIResponse(
+                success=False,
+                message=f"Error executing {self.name}: {str(e)}",
+                error_code="EXECUTION_ERROR"
+            )
+
+    async def validate(self, *args, **kwargs):
+        """验证命令参数"""
+        pass
+
+    async def check_permissions(self, *args, **kwargs):
+        """检查执行权限"""
+        pass
+
+    async def run(self, *args, **kwargs) -> Any:
+        """执行具体命令逻辑"""
+        raise NotImplementedError
+
+class DebateCommand(BaseCLICommand):
+    """辩论命令实现"""
+
+    def __init__(self, debate_manager):
+        super().__init__("debate", "Manage AI debate sessions")
+        self.debate_manager = debate_manager
+
+    async def validate(self, *args, **kwargs):
+        """验证辩论参数"""
+        topic = kwargs.get('topic')
+        if not topic or len(topic.strip()) < 10:
+            raise ValidationError("Topic must be at least 10 characters long")
+
+    async def run(self, *args, **kwargs) -> Dict[str, Any]:
+        """执行辩论启动逻辑"""
+        topic = kwargs['topic']
+        model = kwargs.get('model', 'gpt-3.5-turbo')
+        rounds = kwargs.get('rounds', 3)
+        roles = kwargs.get('roles', ['proponent', 'opponent'])
+
+        # 启动辩论会话
+        session = await self.debate_manager.start_debate(
+            topic=topic,
+            model=model,
+            rounds=rounds,
+            roles=roles
+        )
+
+        return {
+            'session_id': session.session_id,
+            'topic': session.topic,
+            'status': session.status.value
+        }
+
+# CLI应用主类
+class DAIPCLI:
+    """DAIP-LIVE CLI应用"""
+
+    def __init__(self):
+        self.commands: Dict[str, BaseCLICommand] = {}
+        self._register_default_commands()
+
+    def _register_default_commands(self):
+        """注册默认命令"""
+        # 这里需要注入实际的依赖
+        self.register_command("debate", DebateCommand(debate_manager=None))
+        # 注册其他命令...
+
+    def register_command(self, name: str, command: BaseCLICommand):
+        """注册新命令"""
+        self.commands[name] = command
+
+    async def execute_command(self, command_name: str, **kwargs) -> CLIResponse:
+        """执行命令"""
+        if command_name not in self.commands:
+            return CLIResponse(
+                success=False,
+                message=f"Unknown command: {command_name}",
+                error_code="UNKNOWN_COMMAND"
+            )
+
+        command = self.commands[command_name]
+        return await command.execute(**kwargs)
+
+    def get_command_help(self, command_name: str) -> Optional[str]:
+        """获取命令帮助信息"""
+        if command_name in self.commands:
+            return self.commands[command_name].description
+        return None
+
+    def list_commands(self) -> List[str]:
+        """列出所有可用命令"""
+        return list(self.commands.keys())
+
+# Typer集成
+app = typer.Typer()
+
+# 全局CLI实例
+daip_cli = DAIPCLI()
+
+@app.command()
+def debate(
+    topic: str = typer.Argument(..., help="Debate topic"),
+    model: Optional[str] = typer.Option(None, "--model", "-m", help="AI model"),
+    rounds: int = typer.Option(3, "--rounds", "-r", help="Number of rounds")
+):
+    """Start an AI debate session"""
+    import asyncio
+
+    async def run_debate():
+        result = await daip_cli.execute_command(
+            "debate",
+            topic=topic,
+            model=model,
+            rounds=rounds
+        )
+
+        if result.success:
+            typer.echo(f"✓ {result.message}")
+            if result.data:
+                typer.echo(f"Session ID: {result.data['session_id']}")
+        else:
+            typer.echo(f"✗ {result.message}", err=True)
+            raise typer.Exit(1)
+
+    asyncio.run(run_debate())
+
+if __name__ == "__main__":
+    app()
+                    </div>
+
+                    <h3>2. 响应式TUI组件系统</h3>
+                    <div class="code-block">
+from textual import events
+from textual.reactive import reactive
+from textual.widgets import Static, Button, Input
+from textual.containers import Container, Horizontal, Vertical
+from textual.app import ComposeResult
+import asyncio
+from typing import Any, Callable, Optional
+
+class ReactiveWidget(Static):
+    """响应式UI组件基类"""
+
+    data: reactive[Any] = reactive(None)
+    loading: reactive[bool] = reactive(False)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._update_callbacks = []
+
+    def watch_data(self, data: Any) -> None:
+        """数据变化监听器"""
+        self.refresh()
+
+    def watch_loading(self, loading: bool) -> None:
+        """加载状态变化监听器"""
+        self.refresh()
+
+    def add_update_callback(self, callback: Callable[[Any], None]):
+        """添加数据更新回调"""
+        self._update_callbacks.append(callback)
+
+    async def update_data(self, new_data: Any):
+        """更新数据并触发回调"""
+        self.data = new_data
+
+        # 执行所有回调
+        for callback in self._update_callbacks:
+            if asyncio.iscoroutinefunction(callback):
+                await callback(new_data)
+            else:
+                callback(new_data)
+
+class StatusBar(ReactiveWidget):
+    """状态栏组件"""
+
+    status_text: reactive[str] = reactive("Ready")
+    progress: reactive[float] = reactive(0.0)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._start_time = None
+
+    def render(self) -> str:
+        """渲染状态栏"""
+        if self.loading:
+            elapsed = self._get_elapsed_time()
+            return f"[bold]Status:[/bold] {self.status_text} ({elapsed:.1f}s) [{self.progress:.0%}]"
+        else:
+            return f"[bold]Status:[/bold] {self.status_text}"
+
+    def start_operation(self, message: str):
+        """开始操作"""
+        self.loading = True
+        self.status_text = message
+        self.progress = 0.0
+        self._start_time = asyncio.get_event_loop().time()
+
+    def update_progress(self, progress: float, message: str = None):
+        """更新进度"""
+        self.progress = progress
+        if message:
+            self.status_text = message
+
+    def finish_operation(self, message: str = "Operation completed"):
+        """完成操作"""
+        self.loading = False
+        self.status_text = message
+        self.progress = 1.0
+        self._start_time = None
+
+    def _get_elapsed_time(self) -> float:
+        """获取已用时间"""
+        if self._start_time:
+            return asyncio.get_event_loop().time() - self._start_time
+        return 0.0
+
+class CommandInput(ReactiveWidget):
+    """命令输入组件"""
+
+    current_input: reactive[str] = reactive("")
+    command_history: reactive[list] = reactive([])
+    history_index: reactive[int] = reactive(-1)
+
+    def compose(self) -> ComposeResult:
+        """组合子组件"""
+        yield Input(placeholder="Enter command...", id="command_input")
+
+    def on_mount(self) -> None:
+        """组件挂载时设置焦点"""
+        self.query_one(Input).focus()
+
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        """处理输入提交"""
+        command = event.value.strip()
+        if command:
+            # 添加到历史
+            self.command_history = self.command_history + [command]
+            self.history_index = -1
+
+            # 触发命令执行事件
+            self.post_message(events.CommandEvent(command=command))
+
+            # 清空输入
+            self.current_input = ""
+            event.input.value = ""
+
+class MainContentArea(ReactiveWidget):
+    """主内容区域组件"""
+
+    current_view: reactive[Optional[str]] = reactive(None)
+    view_data: reactive[Dict[str, Any]] = reactive({})
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._views = {}
+        self._register_views()
+
+    def _register_views(self):
+        """注册视图"""
+        self._views = {
+            "chat": ChatView(),
+            "debate": DebateView(),
+            "wiki": WikiView(),
+            "help": HelpView()
+        }
+
+    def switch_view(self, view_name: str, data: Dict[str, Any] = None):
+        """切换视图"""
+        if view_name not in self._views:
+            raise ValueError(f"Unknown view: {view_name}")
+
+        # 移除当前视图
+        if self.current_view:
+            current_widget = self._views[self.current_view]
+            if current_widget in self.children:
+                self.remove_child(current_widget)
+
+        # 设置新视图
+        self.current_view = view_name
+        self.view_data = data or {}
+
+        # 添加新视图
+        new_widget = self._views[view_name]
+        self.mount(new_widget)
+
+    def render(self) -> str:
+        """渲染内容区域"""
+        if not self.current_view:
+            return "[dim]No view selected[/dim]"
+
+        return f"Current view: {self.current_view}"
+
+class ModularTUIApp:
+    """模块化TUI应用"""
+
+    def __init__(self):
+        self.command_handlers = {}
+        self.ui_components = {}
+        self._setup_ui()
+
+    def _setup_ui(self):
+        """设置UI组件"""
+        self.status_bar = StatusBar()
+        self.command_input = CommandInput()
+        self.content_area = MainContentArea()
+
+        # 注册命令处理器
+        self.register_command_handler("chat", self._handle_chat_command)
+        self.register_command_handler("debate", self._handle_debate_command)
+        self.register_command_handler("wiki", self._handle_wiki_command)
+        self.register_command_handler("help", self._handle_help_command)
+
+    def register_command_handler(self, command: str, handler: Callable):
+        """注册命令处理器"""
+        self.command_handlers[command] = handler
+
+    async def handle_command(self, command: str, args: List[str] = None):
+        """处理命令"""
+        args = args or []
+        parts = command.split()
+        main_command = parts[0].lower()
+
+        if main_command in self.command_handlers:
+            try:
+                self.status_bar.start_operation(f"Executing {main_command}...")
+
+                # 执行命令
+                result = await self.command_handlers[main_command](parts[1:])
+
+                # 更新状态
+                self.status_bar.finish_operation(f"{main_command} completed")
+
+                # 更新内容区域
+                if result and "view" in result:
+                    self.content_area.switch_view(result["view"], result.get("data"))
+
+            except Exception as e:
+                self.status_bar.finish_operation(f"Error: {str(e)}")
+        else:
+            self.status_bar.finish_operation(f"Unknown command: {main_command}")
+
+    async def _handle_chat_command(self, args: List[str]) -> Dict[str, Any]:
+        """处理聊天命令"""
+        return {"view": "chat", "data": {"mode": "interactive"}}
+
+    async def _handle_debate_command(self, args: List[str]) -> Dict[str, Any]:
+        """处理辩论命令"""
+        return {"view": "debate", "data": {"topic": " ".join(args)}}
+
+    async def _handle_wiki_command(self, args: List[str]) -> Dict[str, Any]:
+        """处理Wiki命令"""
+        return {"view": "wiki", "data": {"query": " ".join(args)}}
+
+    async def _handle_help_command(self, args: List[str]) -> Dict[str, Any]:
+        """处理帮助命令"""
+        return {"view": "help", "data": {"command": args[0] if args else None}}
+                    </div>
+
+                    <h3>3. 异步事件处理系统</h3>
+                    <div class="code-block">
+from typing import Dict, List, Callable, Any
+from enum import Enum
+import asyncio
+from dataclasses import dataclass
+
+class EventType(Enum):
+    """事件类型枚举"""
+    COMMAND_EXECUTED = "command_executed"
+    VIEW_CHANGED = "view_changed"
+    STATUS_UPDATED = "status_updated"
+    ERROR_OCCURRED = "error_occurred"
+    DATA_LOADED = "data_loaded"
+    USER_INPUT = "user_input"
+
+@dataclass
+class UIEvent:
+    """UI事件"""
+    type: EventType
+    data: Any = None
+    source: str = None
+    timestamp: float = None
+
+class EventBus:
+    """事件总线"""
+
+    def __init__(self):
+        self._subscribers: Dict[EventType, List[Callable]] = {}
+        self._event_history: List[UIEvent] = []
+        self._max_history = 100
+
+    def subscribe(self, event_type: EventType, callback: Callable[[UIEvent], None]):
+        """订阅事件"""
+        if event_type not in self._subscribers:
+            self._subscribers[event_type] = []
+        self._subscribers[event_type].append(callback)
+
+    def unsubscribe(self, event_type: EventType, callback: Callable[[UIEvent], None]):
+        """取消订阅事件"""
+        if event_type in self._subscribers:
+            try:
+                self._subscribers[event_type].remove(callback)
+            except ValueError:
+                pass  # 回调不存在
+
+    async def publish(self, event: UIEvent):
+        """发布事件"""
+        if event.timestamp is None:
+            import time
+            event.timestamp = time.time()
+
+        # 添加到历史记录
+        self._event_history.append(event)
+        if len(self._event_history) > self._max_history:
+            self._event_history.pop(0)
+
+        # 通知订阅者
+        if event.type in self._subscribers:
+            tasks = []
+            for callback in self._subscribers[event.type]:
+                if asyncio.iscoroutinefunction(callback):
+                    tasks.append(callback(event))
+                else:
+                    # 同步回调转换为异步
+                    tasks.append(self._run_sync_callback(callback, event))
+
+            if tasks:
+                await asyncio.gather(*tasks, return_exceptions=True)
+
+    async def _run_sync_callback(self, callback: Callable, event: UIEvent):
+        """运行同步回调"""
+        try:
+            callback(event)
+        except Exception as e:
+            print(f"Error in event callback: {e}")
+
+    def get_recent_events(self, count: int = 10) -> List[UIEvent]:
+        """获取最近的事件"""
+        return self._event_history[-count:]
+
+class AsyncEventHandler:
+    """异步事件处理器"""
+
+    def __init__(self, event_bus: EventBus):
+        self.event_bus = event_bus
+        self._setup_handlers()
+
+    def _setup_handlers(self):
+        """设置事件处理器"""
+        self.event_bus.subscribe(EventType.COMMAND_EXECUTED, self._on_command_executed)
+        self.event_bus.subscribe(EventType.VIEW_CHANGED, self._on_view_changed)
+        self.event_bus.subscribe(EventType.ERROR_OCCURRED, self._on_error_occurred)
+        self.event_bus.subscribe(EventType.DATA_LOADED, self._on_data_loaded)
+
+    async def _on_command_executed(self, event: UIEvent):
+        """处理命令执行事件"""
+        command_data = event.data
+        print(f"Command executed: {command_data}")
+
+        # 可以在这里添加日志记录、统计等逻辑
+
+        # 发布状态更新事件
+        await self.event_bus.publish(UIEvent(
+            type=EventType.STATUS_UPDATED,
+            data={"message": f"Command {command_data.get('command')} completed"},
+            source="command_handler"
+        ))
+
+    async def _on_view_changed(self, event: UIEvent):
+        """处理视图变化事件"""
+        view_data = event.data
+        print(f"View changed to: {view_data.get('view')}")
+
+        # 可以在这里添加视图切换动画、状态保存等逻辑
+
+    async def _on_error_occurred(self, event: UIEvent):
+        """处理错误事件"""
+        error_data = event.data
+        print(f"Error occurred: {error_data.get('message')}")
+
+        # 可以在这里添加错误日志、用户通知等逻辑
+
+        # 发布状态更新事件
+        await self.event_bus.publish(UIEvent(
+            type=EventType.STATUS_UPDATED,
+            data={"message": f"Error: {error_data.get('message')}", "error": True},
+            source="error_handler"
+        ))
+
+    async def _on_data_loaded(self, event: UIEvent):
+        """处理数据加载事件"""
+        data_info = event.data
+        print(f"Data loaded: {data_info}")
+
+        # 可以在这里添加数据缓存、UI更新等逻辑
+
+class KeyboardManager:
+    """键盘输入管理器"""
+
+    def __init__(self, event_bus: EventBus):
+        self.event_bus = event_bus
+        self._key_bindings = {}
+
+    def bind_key(self, key: str, action: str, description: str = ""):
+        """绑定键盘快捷键"""
+        self._key_bindings[key] = {
+            "action": action,
+            "description": description
+        }
+
+    async def handle_key_press(self, key: str):
+        """处理按键事件"""
+        if key in self._key_bindings:
+            binding = self._key_bindings[key]
+
+            # 发布用户输入事件
+            await self.event_bus.publish(UIEvent(
+                type=EventType.USER_INPUT,
+                data={
+                    "type": "key_press",
+                    "key": key,
+                    "action": binding["action"]
+                },
+                source="keyboard_manager"
+            ))
+
+    def get_key_bindings(self) -> Dict[str, Dict[str, str]]:
+        """获取所有键绑定"""
+        return self._key_bindings
+
+# 使用示例
+async def setup_tui_event_system():
+    """设置TUI事件系统"""
+    # 创建事件总线
+    event_bus = EventBus()
+
+    # 创建事件处理器
+    event_handler = AsyncEventHandler(event_bus)
+
+    # 创建键盘管理器
+    keyboard_manager = KeyboardManager(event_bus)
+
+    # 绑定快捷键
+    keyboard_manager.bind_key("ctrl+c", "quit", "Exit application")
+    keyboard_manager.bind_key("ctrl+h", "help", "Show help")
+    keyboard_manager.bind_key("ctrl+l", "clear", "Clear screen")
+
+    # 模拟事件发布
+    await event_bus.publish(UIEvent(
+        type=EventType.COMMAND_EXECUTED,
+        data={"command": "debate start AI ethics", "success": True},
+        source="cli"
+    ))
+
+    await event_bus.publish(UIEvent(
+        type=EventType.VIEW_CHANGED,
+        data={"view": "debate", "topic": "AI ethics"},
+        source="ui_manager"
+    ))
+
+    return event_bus, keyboard_manager
+                    </div>
+                </section>
+
+                <section id="best-practices" class="section">
+                    <h2>最佳实践与规范</h2>
+
+                    <div class="best-practices">
+                        <h4>KISS原则应用</h4>
+                        <ul>
+                            <li><strong>简洁的命令接口</strong>：CLI命令保持简洁直观，避免复杂的参数组合</li>
+                            <li><strong>清晰的TUI布局</strong>：界面布局清晰，功能区域明确分离</li>
+                            <li><strong>最小化配置</strong>：合理的默认配置，减少用户配置负担</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-practices">
+                        <h4>DRY原则应用</h4>
+                        <ul>
+                            <li><strong>公共UI组件</strong>：创建可复用的UI组件库，避免重复开发</li>
+                            <li><strong>统一的命令模式</strong>：所有命令遵循统一的参数解析和验证模式</li>
+                            <li><strong>共享的事件处理</strong>：事件系统和状态管理在CLI和TUI间共享</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-practices">
+                        <h4>YAGNI原则应用</h4>
+                        <ul>
+                            <li><strong>按需功能实现</strong>：只实现用户实际需要的功能</li>
+                            <li><strong>渐进式增强</strong>：从基础功能开始，逐步添加高级特性</li>
+                            <li><strong>避免过度设计</strong>：不需要的复杂功能暂不实现</li>
+                        </ul>
+                    </div>
+
+                    <h3>用户界面设计最佳实践</h3>
+                    <div class="card">
+                        <h4>CLI用户体验优化</h4>
+                        <div class="code-block">
+class UserFriendlyCLI:
+    """用户友好的CLI设计"""
+
+    @staticmethod
+    def format_help_text(command: str, description: str, examples: List[str]) -> str:
+        """格式化帮助文本"""
+        help_text = f"[bold]{command}[/bold]\n"
+        help_text += f"    {description}\n\n"
+        help_text += "[bold]Examples:[/bold]\n"
+
+        for example in examples:
+            help_text += f"    $ daip {example}\n"
+
+        return help_text
+
+    @staticmethod
+    def create_progress_bar(current: int, total: int, width: int = 50) -> str:
+        """创建进度条"""
+        progress = current / total
+        filled = int(width * progress)
+        bar = "█" * filled + "░" * (width - filled)
+        percentage = progress * 100
+
+        return f"[{bar}] {percentage:.1f}% ({current}/{total})"
+
+    @staticmethod
+    def format_table(headers: List[str], rows: List[List[str]]) -> str:
+        """格式化表格输出"""
+        from rich.console import Console
+        from rich.table import Table
+
+        console = Console()
+        table = Table(show_header=True, header_style="bold magenta")
+
+        # 添加列
+        for header in headers:
+            table.add_column(header)
+
+        # 添加行
+        for row in rows:
+            table.add_row(*row)
+
+        # 捕获输出
+        with console.capture() as capture:
+            console.print(table)
+
+        return capture.get()
+
+# 使用示例
+cli = UserFriendlyCLI()
+
+help_text = cli.format_help_text(
+    "debate start",
+    "Start an AI-powered debate session",
+    [
+        "debate start \"AI ethics\" --model gpt-4",
+        "debate start \"Climate change\" --rounds 5 --roles proponent,opponent,moderator"
+    ]
+)
+
+progress = cli.create_progress_bar(75, 100)  # 75%进度
+
+table_data = cli.format_table(
+    ["Session ID", "Topic", "Status"],
+    [
+        ["debate_001", "AI Ethics", "In Progress"],
+        ["debate_002", "Climate Change", "Completed"],
+        ["debate_003", "Free Will", "Waiting"]
+    ]
+)
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>TUI响应性设计</h4>
+                        <div class="code-block">
+class ResponsiveTUI:
+    """响应式TUI设计"""
+
+    def __init__(self):
+        self.screen_size = (80, 24)  # 默认尺寸
+        self.responsive_layouts = {
+            "small": self._create_small_layout,
+            "medium": self._create_medium_layout,
+            "large": self._create_large_layout
+        }
+
+    def detect_screen_size(self, width: int, height: int) -> str:
+        """检测屏幕尺寸类型"""
+        if width < 100:
+            return "small"
+        elif width < 150:
+            return "medium"
+        else:
+            return "large"
+
+    def create_responsive_layout(self, width: int, height: int):
+        """创建响应式布局"""
+        size_type = self.detect_screen_size(width, height)
+        layout_creator = self.responsive_layouts[size_type]
+        return layout_creator(width, height)
+
+    def _create_small_layout(self, width: int, height: int):
+        """创建小屏幕布局"""
+        return {
+            "show_sidebar": False,
+            "compact_mode": True,
+            "max_content_lines": height - 10,
+            "status_position": "bottom"
+        }
+
+    def _create_medium_layout(self, width: int, height: int):
+        """创建中等屏幕布局"""
+        return {
+            "show_sidebar": True,
+            "sidebar_width": 20,
+            "compact_mode": False,
+            "max_content_lines": height - 8,
+            "status_position": "bottom"
+        }
+
+    def _create_large_layout(self, width: int, height: int):
+        """创建大屏幕布局"""
+        return {
+            "show_sidebar": True,
+            "sidebar_width": 30,
+            "compact_mode": False,
+            "max_content_lines": height - 8,
+            "status_position": "bottom",
+            "show_help_panel": True
+        }
+
+    def optimize_for_performance(self):
+        """性能优化设置"""
+        return {
+            "enable_lazy_loading": True,
+            "cache_rendered_content": True,
+            "batch_ui_updates": True,
+            "minimize_redraws": True,
+            "use_async_operations": True
+        }
+                        </div>
+                    </div>
+                </section>
+
+                <section id="related-docs" class="section">
+                    <h2>相关规范文档</h2>
+
+                    <div class="card">
+                        <h4>核心设计文档</h4>
+                        <ul>
+                            <li><strong>CLI/TUI Interface Specification</strong> - 命令行和文本界面接口规范</li>
+                            <li><strong>Modular UI Architecture Guide</strong> - 模块化UI架构设计指南</li>
+                            <li><strong>Command Design Patterns</strong> - 命令设计模式和最佳实践</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>实现指南</h4>
+                        <ul>
+                            <li><strong>Typer Framework Integration</strong> - Typer框架集成指南</li>
+                            <li><strong>Textual TUI Development</strong> - Textual TUI开发指南</li>
+                            <li><strong>Async UI Programming Patterns</strong> - 异步UI编程模式</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>测试文档</h4>
+                        <ul>
+                            <li><strong>CLI Testing Strategies</strong> - CLI测试策略和工具</li>
+                            <li><strong>TUI Component Testing</strong> - TUI组件测试方法</li>
+                            <li><strong>User Experience Testing</strong> - 用户体验测试指南</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>运维文档</h4>
+                        <ul>
+                            <li><strong>Interface Customization Guide</strong> - 界面自定义指南</li>
+                            <li><strong>Keyboard Shortcuts Reference</strong> - 键盘快捷键参考</li>
+                            <li><strong>Troubleshooting Common Issues</strong> - 常见问题故障排除</li>
+                        </ul>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <footer class="navigation-footer">
+        <h3>模块导航</h3>
+        <div class="nav-links">
+            <a href="modules/P1_PERSISTENCE.html">P1 数据持久化</a>
+            <a href="modules/P2_KNOWLEDGE_MANAGEMENT.html">P2 知识管理</a>
+            <a href="P3_MODEL_PROVIDER.html">P3 模型提供商</a>
+            <a href="P5_AGENT_ENGINE.html">P5 智能体引擎</a>
+            <a href="P6_TERMINAL_INTERFACE.html">P6 终端界面</a>
+            <a href="P8_DEBATE_SYSTEM.html">P8 辩论系统</a>
+            <a href="DOCUMENT_DRIVEN_LEARNING_PLATFORM.html">返回学习平台</a>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    
+    <script>
+        // 复制代码功能
+        function copyCode(button) {
+            const codeContainer = button.closest('.code-container');
+            const codeBlock = codeContainer.querySelector('pre');
+            
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '已复制';
+                button.style.background = '#10b981';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                button.textContent = '复制失败';
+                button.style.background = '#ef4444';
+                
+                setTimeout(() => {
+                    button.textContent = '📋 复制';
+                    button.style.background = '';
+                }, 2000);
+            });
+        }
+
+        // 初始化代码高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化语法高亮
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        });
+    </script>
+</body>
+</html>

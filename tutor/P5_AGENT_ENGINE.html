@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P5 智能体引擎 - 0代码AI规范化编程实践教学</title>
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            height: fit-content;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h3 {
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-bottom: 12px;
+        }
+
+        .nav-menu a {
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        .nav-menu a:hover {
+            background: #fdecea;
+            color: #e74c3c;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            color: #34495e;
+            margin: 30px 0 15px;
+            font-size: 1.4rem;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .principle-tag {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 5px;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .workflow-diagram {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .workflow-step {
+            display: inline-block;
+            background: white;
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            min-width: 120px;
+            text-align: center;
+            position: relative;
+        }
+
+        .workflow-arrow {
+            font-size: 1.5rem;
+            color: #e74c3c;
+            margin: 0 10px;
+        }
+
+        .best-practices {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #2d3748;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .best-practices h4 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .best-practices ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .best-practices li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .best-practices li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .test-example {
+            background: #fef5e7;
+            border: 1px solid #f9e79f;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .navigation-footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 60px;
+        }
+
+        .navigation-footer h3 {
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            background: #e74c3c;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>P5 智能体引擎</h1>
+        <p class="subtitle">DAIP-LIVE 核心执行引擎的事件驱动架构实现</p>
+    </header>
+
+    <div class="container">
+        <div class="content-grid">
+            <nav class="sidebar">
+                <h3>导航目录</h3>
+                <ul class="nav-menu">
+                    <li><a href="#overview">模块概述</a></li>
+                    <li><a href="#architecture">架构设计</a></li>
+                    <li><a href="#execution-flow">执行流程</a></li>
+                    <li><a href="#solid-principles">SOLID原则体现</a></li>
+                    <li><a href="#tdd-implementation">TDD实现</a></li>
+                    <li><a href="#code-examples">代码示例</a></li>
+                    <li><a href="#best-practices">最佳实践</a></li>
+                    <li><a href="#related-docs">相关规范文档</a></li>
+                </ul>
+            </nav>
+
+            <main class="main-content">
+                <section id="overview" class="section">
+                    <h2>模块概述</h2>
+                    <div class="card">
+                        <h4>模块职责</h4>
+                        <p>P5智能体引擎是DAIP-LIVE系统的核心执行引擎，负责意图识别、任务规划、步骤执行和结果整合。它采用事件驱动的异步架构，支持多层次的任务分解和实时用户交互控制。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>核心功能</h4>
+                        <ul>
+                            <li><strong>意图识别</strong>：理解用户输入，识别执行意图和所需技能</li>
+                            <li><strong>任务规划</strong>：将复杂任务分解为可执行的步骤序列</li>
+                            <li><strong>步骤执行</strong>：逐步执行任务，支持实时监控和干预</li>
+                            <li><strong>上下文管理</strong>：维护对话上下文和执行状态</li>
+                            <li><strong>事件驱动</strong>：基于事件的异步执行机制</li>
+                            <li><strong>技能调度</strong>：动态调用和管理各种技能工具</li>
+                        </ul>
+                    </div>
+
+                    <div class="workflow-diagram">
+                        <h4>P5智能体引擎执行流程</h4>
+                        <div style="margin: 30px 0;">
+                            <div class="workflow-step">用户输入</div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-step">意图识别</div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-step">任务规划</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div class="workflow-arrow">↓</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div class="workflow-step">步骤执行</div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-step">技能调度</div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-step">结果整合</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div class="workflow-arrow">↓</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div class="workflow-step">用户反馈</div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-step">迭代优化</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="architecture" class="section">
+                    <h2>架构设计</h2>
+
+                    <h3>核心组件</h3>
+                    <div class="card">
+                        <h4>1. EnhancedChatExecutor</h4>
+                        <p>主要的聊天执行器，负责协调整个对话和任务执行流程，管理执行状态和用户交互。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>2. IntentRecognizer</h4>
+                        <p>意图识别器，分析用户输入，识别用户的意图、需求和期望的操作类型。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>3. StepExecutor</h4>
+                        <p>步骤执行器，负责执行具体任务步骤，支持异步执行和实时状态更新。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>4. ContextManager</h4>
+                        <p>上下文管理器，维护对话历史、任务状态和执行上下文信息。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>5. EventSystem</h4>
+                        <p>事件系统，实现组件间的松耦合通信，支持事件的发布和订阅机制。</p>
+                    </div>
+
+                    <h3>设计原则应用</h3>
+                    <div class="principle-tag">事件驱动架构</div>
+                    <div class="principle-tag">责任链模式</div>
+                    <div class="principle-tag">观察者模式</div>
+                    <div class="principle-tag">策略模式</div>
+                    <div class="principle-tag">异步编程</div>
+                </section>
+
+                <section id="execution-flow" class="section">
+                    <h2>执行流程详解</h2>
+
+                    <h3>双层执行循环</h3>
+                    <div class="code-block">
+class EnhancedChatExecutor:
+    """
+    智能体引擎的核心执行器
+    实现双层执行循环：战略规划 + 战术执行
+    """
+
+    async def execute_conversation(self, user_input: str) -> AsyncIterator[str]:
+        """
+        双层执行循环的主入口
+        """
+        # 第一层：战略规划循环
+        strategy = await self.strategic_planning(user_input)
+
+        # 第二层：战术执行循环
+        async for result in self.tactical_execution(strategy):
+            yield result
+                    </div>
+
+                    <h3>事件驱动的执行机制</h3>
+                    <div class="code-block">
+class EventDrivenExecutor:
+    """基于事件驱动的执行器"""
+
+    async def execute_with_events(self, task: Task) -> ExecutionResult:
+        # 发布任务开始事件
+        await self.event_bus.publish(EventType.TASK_STARTED, task)
+
+        try:
+            # 执行任务步骤
+            for step in task.steps:
+                await self.event_bus.publish(EventType.STEP_STARTED, step)
+
+                result = await self.execute_step(step)
+
+                await self.event_bus.publish(EventType.STEP_COMPLETED, {
+                    'step': step,
+                    'result': result
+                })
+
+            # 发布任务完成事件
+            await self.event_bus.publish(EventType.TASK_COMPLETED, task)
+
+        except Exception as e:
+            await self.event_bus.publish(EventType.TASK_FAILED, {
+                'task': task,
+                'error': str(e)
+            })
+            raise
+                    </div>
+                </section>
+
+                <section id="solid-principles" class="section">
+                    <h2>SOLID原则的具体体现</h2>
+
+                    <h3>S - 单一职责原则 (Single Responsibility Principle)</h3>
+                    <div class="code-block">
+class IntentRecognizer:
+    """只负责意图识别"""
+
+    async def recognize_intent(self, user_input: str) -> Intent:
+        """专门处理意图识别逻辑"""
+        pass
+
+class StepExecutor:
+    """只负责步骤执行"""
+
+    async def execute_step(self, step: Step) -> StepResult:
+        """专门处理步骤执行逻辑"""
+        pass
+
+class ContextManager:
+    """只负责上下文管理"""
+
+    def update_context(self, new_data: Dict) -> None:
+        """专门处理上下文更新"""
+        pass
+
+class EventSystem:
+    """只负责事件管理"""
+
+    async def publish(self, event_type: str, data: Any) -> None:
+        """专门处理事件发布"""
+        pass
+                    </div>
+
+                    <h3>O - 开放封闭原则 (Open-Closed Principle)</h3>
+                    <div class="code-block">
+from abc import ABC, abstractmethod
+
+class StepHandler(ABC):
+    """步骤处理器基类"""
+
+    @abstractmethod
+    async def handle(self, step: Step) -> StepResult:
+        pass
+
+# 新增步骤处理器无需修改现有代码
+class FileOperationHandler(StepHandler):
+    """文件操作处理器"""
+
+    async def handle(self, step: Step) -> StepResult:
+        # 实现文件操作逻辑
+        pass
+
+class WebSearchHandler(StepHandler):
+    """网络搜索处理器"""
+
+    async def handle(self, step: Step) -> StepResult:
+        # 实现网络搜索逻辑
+        pass
+
+class StepExecutor:
+    def __init__(self):
+        self.handlers = {}  # 处理器注册表
+
+    def register_handler(self, step_type: str, handler: StepHandler):
+        """注册新的处理器，无需修改现有代码"""
+        self.handlers[step_type] = handler
+
+    async def execute_step(self, step: Step) -> StepResult:
+        handler = self.handlers.get(step.type)
+        if handler:
+            return await handler.handle(step)
+        raise ValueError(f"No handler for step type: {step.type}")
+                    </div>
+
+                    <h3>L - 里氏替换原则 (Liskov Substitution Principle)</h3>
+                    <div class="code-block">
+class BaseContextManager(ABC):
+    """上下文管理器基类"""
+
+    @abstractmethod
+    async def get_context(self) -> Dict[str, Any]:
+        pass
+
+    @abstractmethod
+    async def update_context(self, updates: Dict[str, Any]) -> None:
+        pass
+
+class MemoryContextManager(BaseContextManager):
+    """内存上下文管理器"""
+
+    async def get_context(self) -> Dict[str, Any]:
+        return self._memory_context
+
+    async def update_context(self, updates: Dict[str, Any]) -> None:
+        self._memory_context.update(updates)
+
+class DatabaseContextManager(BaseContextManager):
+    """数据库上下文管理器"""
+
+    async def get_context(self) -> Dict[str, Any]:
+        return await self._db.load_context()
+
+    async def update_context(self, updates: Dict[str, Any]) -> None:
+        await self._db.save_context(updates)
+
+# 任何BaseContextManager的子类都可以替换使用
+executor = ChatExecutor(MemoryContextManager())  # ✓ 正确
+executor = ChatExecutor(DatabaseContextManager())  # ✓ 正确
+                    </div>
+
+                    <h3>I - 接口隔离原则 (Interface Segregation Principle)</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-title">接口拆分示例</span>
+                            <span class="code-language">Python</span>
+                            <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                        </div>
+                        <div class="code-content code-highlight">
+                            <pre><code># 将大接口拆分为多个小接口
+class IntentHandler(ABC):
+    @abstractmethod
+    async def handle_intent(self, intent: Intent) -> None:
+        pass
+
+class TaskPlanner(ABC):
+    @abstractmethod
+    async def plan_task(self, intent: Intent) -> Task:
+        pass
+
+class StepExecutor(ABC):
+    @abstractmethod
+    async def execute_step(self, step: Step) -> StepResult:
+        pass
+
+class ProgressReporter(ABC):
+    @abstractmethod
+    async def report_progress(self, progress: float) -> None:
+        pass
+
+# 客户端只依赖需要的接口
+class SimpleExecutor:
+    """简单执行器，只需要执行功能"""
+    def __init__(self, step_executor: StepExecutor):
+        self.step_executor = step_executor
+
+class InteractiveExecutor:
+    """交互式执行器，需要进度报告"""
+    def __init__(self,
+                 step_executor: StepExecutor,
+                 progress_reporter: ProgressReporter):
+        self.step_executor = step_executor
+        self.progress_reporter = progress_reporter</code></pre>
+                        </div>
+                    </div>
+
+                    <h3>D - 依赖倒置原则 (Dependency Inversion Principle)</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-title">DAIP-LIVE 智能体引擎核心实现</span>
+                            <span class="code-language">Python</span>
+                            <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                        </div>
+                        <div class="code-content code-highlight">
+                            <pre><code>#!/usr/bin/env python3
+"""
+DAIP-LIVE 智能体引擎核心实现
+基于 Textual 框架的异步 TUI 架构
+"""
+
+import asyncio
+import sys
+import os
+from typing import Dict, Any, List, Optional
+from dataclasses import dataclass, field</code></pre>
+                        </div>
+                    </div>
+from enum import Enum
+import logging
+
+# 添加项目路径
+sys.path.insert(0, os.path.dirname(__file__))
+
+try:
+    from textual.app import App, ComposeResult
+    from textual.widgets import Header, Footer, Static, Input, Button, Label
+    from textual.containers import Container, Horizontal, Vertical
+    from textual.reactive import reactive
+    from textual.message import Message
+except ImportError:
+    # 如果没有 textual，显示错误信息
+    print("❌ 需要安装 Textual 框架: pip install textual")
+    sys.exit(1)
+
+
+class AgentStatus(Enum):
+    """智能体状态"""
+    IDLE = "idle"
+    THINKING = "thinking"
+    RESPONDING = "responding"
+    ERROR = "error"
+
+
+@dataclass
+class ChatMessage:
+    """聊天消息"""
+    role: str  # "user" or "assistant"
+    content: str
+    timestamp: float = field(default_factory=lambda: __import__('time').time())
+
+
+@dataclass
+class Intent:
+    """用户意图"""
+    type: str
+    action: str
+    parameters: Dict[str, Any] = field(default_factory=dict)
+    confidence: float = 1.0
+
+
+class SimplifiedTUI(App):
+    """DAIP-LIVE 简化的 TUI 界面"""
+    
+    CSS = """
+    .main-container {
+        height: 100%;
+        background: $surface;
+    }
+    
+    .chat-area {
+        height: 1fr;
+        border: solid $primary;
+        padding: 1;
+    }
+    
+    .input-area {
+        height: 5;
+        border: solid $secondary;
+        padding: 1;
+    }
+    
+    .message {
+        margin-bottom: 1;
+        padding: 1;
+        border-radius: 1;
+    }
+    
+    .user-message {
+        background: $primary;
+        color: $text;
+    }
+    
+    .assistant-message {
+        background: $surface;
+        color: $text;
+        border: solid $accent;
+    }
+    
+    .status-bar {
+        height: 3;
+        background: $panel;
+        border: solid $surface;
+        padding: 1;
+    }
+    """
+    
+    def __init__(self):
+        super().__init__()
+        self.chat_messages: List[ChatMessage] = []
+        self._log_text_buffer: List[str] = []
+        self._available_commands = [
+            ("/copy", "复制对话内容到剪贴板"),
+            ("/help", "显示帮助信息"),
+            ("/wiki", "搜索Wiki知识库"),
+            ("/clear", "清空对话历史"),
+            ("/status", "显示系统状态"),
+            ("/exit", "退出程序")
+        ]
+        self.agent_status = AgentStatus.IDLE
+    
+    def compose(self) -> ComposeResult:
+        """构建 TUI 界面"""
+        yield Header()
+        
+        with Container(classes="main-container"):
+            # 聊天显示区域
+            with Container(classes="chat-area", id="chat-display"):
+                yield Static("🎓 DAIP-LIVE 智能助手\n\n输入消息开始对话...", id="messages")
+            
+            # 输入区域
+            with Container(classes="input-area"):
+                with Horizontal():
+                    yield Input(placeholder="输入消息... (使用 /help 查看命令)", id="user-input")
+                    yield Button("发送", variant="primary", id="send-button")
+            
+            # 状态栏
+            with Container(classes="status-bar"):
+                yield Label("🤖 智能体状态: 空闲 | 模型: Ollama Llama2", id="status-label")
+        
+        yield Footer()
+    
+    def on_mount(self) -> None:
+        """界面挂载时的初始化"""
+        # 添加欢迎消息
+        welcome_message = ChatMessage(
+            role="assistant",
+            content="👋 欢迎使用DAIP-LIVE智能助手！\n\n"
+                   "🤖 这是一个基于Textual框架的AI应用系统。\n"
+                   "📚 您可以使用 /copy 命令复制对话内容。\n"
+                   "🔧 支持多种AI模型和自然语言交互。\n"
+                   "✨ 让我们一起探索AI应用开发的最佳实践！"
+        )
+        self.chat_messages.append(welcome_message)
+        self._update_messages_display()
+    
+    async def action_copy_text(self):
+        """复制文本到剪贴板"""
+        try:
+            import pyperclip
+            
+            # 合并所有对话内容
+            all_text = "\n".join([
+                f"{msg.role.upper()}: {msg.content}"
+                for msg in self.chat_messages
+            ])
+            
+            # 复制到剪贴板
+            pyperclip.copy(all_text)
+            
+            # 添加系统提示
+            self.chat_messages.append(ChatMessage(
+                role="assistant",
+                content="✅ 对话内容已复制到剪贴板！"
+            ))
+            self._update_messages_display()
+            
+        except ImportError:
+            self.chat_messages.append(ChatMessage(
+                role="assistant",
+                content="⚠️ 需要安装 pyperclip 库: pip install pyperclip"
+            ))
+            self._update_messages_display()
+    
+    def copy_recent_content(self, lines: int = 5):
+        """复制最近的 N 行内容"""
+        recent_messages = self.chat_messages[-lines:]
+        content = "\n".join([
+            f"{msg.role}: {msg.content}" for msg in recent_messages
+        ])
+        
+        try:
+            import pyperclip
+            pyperclip.copy(content)
+            return True
+        except ImportError:
+            return False
+    
+    def _update_messages_display(self):
+        """更新消息显示"""
+        messages_widget = self.query_one("#messages", Static)
+        
+        # 构建消息显示文本
+        display_text = ""
+        for msg in self.chat_messages:
+            role_prefix = "👤 用户" if msg.role == "user" else "🤖 助手"
+            display_text += f"\n[{role_prefix}]\n{msg.content}\n"
+        
+        messages_widget.update(display_text or "暂无消息")
+    
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        """处理按钮点击事件"""
+        if event.button.id == "send-button":
+            await self._send_message()
+    
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        """处理输入提交事件"""
+        await self._send_message()
+    
+    async def _send_message(self):
+        """发送消息"""
+        input_widget = self.query_one("#user-input", Input)
+        user_input = input_widget.value.strip()
+        
+        if not user_input:
+            return
+        
+        # 清空输入框
+        input_widget.value = ""
+        
+        # 添加用户消息
+        user_message = ChatMessage(role="user", content=user_input)
+        self.chat_messages.append(user_message)
+        self._update_messages_display()
+        
+        # 处理命令或AI响应
+        if user_input.startswith("/"):
+            await self._handle_command(user_input)
+        else:
+            await self._process_ai_request(user_input)
+    
+    async def _handle_command(self, command: str):
+        """处理命令行"""
+        command_parts = command.split()
+        cmd = command_parts[0].lower()
+        
+        if cmd == "/help":
+            help_text = "📋 可用命令:\n"
+            for cmd_name, description in self._available_commands:
+                help_text += f"  {cmd_name:<12} - {description}\n"
+            
+            self.chat_messages.append(ChatMessage(
+                role="assistant",
+                content=help_text
+            ))
+        
+        elif cmd == "/copy":
+            await self.action_copy_text()
+        
+        elif cmd == "/clear":
+            self.chat_messages.clear()
+            self.chat_messages.append(ChatMessage(
+                role="assistant",
+                content="🧹 对话历史已清空"
+            ))
+        
+        elif cmd == "/status":
+            status_text = f"🤖 智能体状态: {self.agent_status.value}\n"
+            status_text += f"📊 对话数量: {len(self.chat_messages)}\n"
+            status_text += f"💾 消息缓存: {len(self._log_text_buffer)}\n"
+            status_text += f"🔧 可用命令: {len(self._available_commands)}"
+            
+            self.chat_messages.append(ChatMessage(
+                role="assistant",
+                content=status_text
+            ))
+        
+        elif cmd == "/exit":
+            self.exit()
+        
+        else:
+            self.chat_messages.append(ChatMessage(
+                role="assistant",
+                content=f"❓ 未知命令: {cmd}\n使用 /help 查看可用命令"
+            ))
+        
+        self._update_messages_display()
+    
+    async def _process_ai_request(self, user_input: str):
+        """处理AI请求"""
+        try:
+            # 设置智能体状态为思考中
+            self.agent_status = AgentStatus.THINKING
+            self._update_status_display()
+            
+            # 模拟AI处理过程
+            await asyncio.sleep(1)
+            
+            # 简单的意图识别和处理
+            intent = await self._recognize_intent(user_input)
+            response = await self._generate_response(intent, user_input)
+            
+            # 添加助手响应
+            assistant_message = ChatMessage(role="assistant", content=response)
+            self.chat_messages.append(assistant_message)
+            
+            # 重置状态
+            self.agent_status = AgentStatus.IDLE
+            self._update_status_display()
+            self._update_messages_display()
+            
+        except Exception as e:
+            self.agent_status = AgentStatus.ERROR
+            self.chat_messages.append(ChatMessage(
+                role="assistant",
+                content=f"❌ 处理请求时出错: {e}"
+            ))
+            self._update_status_display()
+            self._update_messages_display()
+    
+    async def _recognize_intent(self, user_input: str) -> Intent:
+        """简单的意图识别"""
+        user_lower = user_input.lower()
+        
+        if "你好" in user_lower or "hello" in user_lower:
+            return Intent(type="greeting", action="greet")
+        elif "什么是" in user_lower or "what is" in user_lower:
+            return Intent(type="question", action="explain")
+        elif "创建" in user_lower or "create" in user_lower:
+            return Intent(type="creation", action="create")
+        else:
+            return Intent(type="general", action="respond")
+    
+    async def _generate_response(self, intent: Intent, user_input: str) -> str:
+        """生成AI响应"""
+        responses = {
+            "greeting": "👋 你好！我是DAIP-LIVE智能助手，很高兴为您服务！",
+            "question": "🤔 这是一个很好的问题。DAIP-LIVE是一个基于AI的项目执行系统，支持多智能体协作和自然语言交互。",
+            "creation": "✨ 好的！我来帮您创建相关内容。请告诉我您想要创建什么？",
+            "general": f"💬 我理解您说的是：'{user_input}'。这是一个有趣的话题，请告诉我更多详细信息。"
+        }
+        
+        return responses.get(intent.type, "🤔 我正在学习如何更好地理解您的问题。")
+    
+    def _update_status_display(self):
+        """更新状态显示"""
+        status_widget = self.query_one("#status-label", Label)
+        status_text = f"🤖 智能体状态: {self.agent_status.value} | 模型: Ollama Llama2"
+        status_widget.update(status_text)
+
+
+# 命令行入口函数
+async def main():
+    """主函数"""
+    app = SimplifiedTUI()
+    await app.run_async()
+
+
+if __name__ == "__main__":
+    print("🚀 启动 DAIP-LIVE TUI 界面...")
+    print("📖 支持的命令:")
+    print("  /help - 显示帮助")
+    print("  /copy - 复制对话")
+    print("  /clear - 清空历史")
+    print("  /status - 显示状态")
+    print("  /exit - 退出程序")
+    print("-" * 40)
+    
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\n👋 感谢使用 DAIP-LIVE！")
+
+                    </div>
+                </section>
+
+                <section id="tdd-implementation" class="section">
+                    <!-- 动画控制脚本 -->
+                    <script src="animations.js"></script>
+                    <h2>TDD (测试驱动开发) 实现</h2>
+
+                    <h3>测试先行：意图识别功能</h3>
+                    <div class="test-example">
+                        <h4>Step 1: 写失败的测试</h4>
+                        <div class="code-block">
+import pytest
+
+class TestIntentRecognizer:
+    @pytest.mark.asyncio
+    async def test_recognize_file_creation_intent(self):
+        """测试文件创建意图识别"""
+        recognizer = IntentRecognizer()
+
+        intent = await recognizer.recognize_intent("创建一个新文件")
+
+        assert intent.type == "file_operation"
+        assert intent.action == "create"
+        assert "file" in intent.entities
+
+    @pytest.mark.asyncio
+    async def test_recognize_web_search_intent(self):
+        """测试网络搜索意图识别"""
+        recognizer = IntentRecognizer()
+
+        intent = await recognizer.recognize_intent("搜索人工智能相关信息")
+
+        assert intent.type == "web_search"
+        assert "人工智能" in intent.query
+                        </div>
+
+                        <h4>Step 2: 实现最小代码使测试通过</h4>
+                        <div class="code-block">
+class IntentRecognizer:
+    async def recognize_intent(self, user_input: str) -> Intent:
+        """最小实现，让测试通过"""
+        if "创建" in user_input and "文件" in user_input:
+            return Intent(
+                type="file_operation",
+                action="create",
+                entities={"file": True}
+            )
+        elif "搜索" in user_input:
+            return Intent(
+                type="web_search",
+                query=user_input.replace("搜索", "").strip()
+            )
+
+        return Intent(type="unknown")
+                        </div>
+
+                        <h4>Step 3: 重构和扩展</h4>
+                        <div class="code-block">
+class IntentRecognizer:
+    def __init__(self):
+        self.patterns = {
+            "file_operation": [
+                (r"创建.*文件", "create"),
+                (r"删除.*文件", "delete"),
+                (r"编辑.*文件", "edit")
+            ],
+            "web_search": [
+                (r"搜索(.*)", "search")
+            ]
+        }
+
+    async def recognize_intent(self, user_input: str) -> Intent:
+        """基于模式匹配的意图识别"""
+        for intent_type, patterns in self.patterns.items():
+            for pattern, action in patterns:
+                match = re.search(pattern, user_input)
+                if match:
+                    return self._create_intent(intent_type, action, match, user_input)
+
+        return Intent(type="unknown")
+
+    def _create_intent(self, type: str, action: str, match, input: str) -> Intent:
+        """创建意图对象"""
+        if type == "file_operation":
+            return Intent(
+                type=type,
+                action=action,
+                entities={"file": True}
+            )
+        elif type == "web_search":
+            query = match.group(1) if match.groups() else input
+            return Intent(
+                type=type,
+                query=query.strip()
+            )
+                        </div>
+                    </div>
+
+                    <h3>集成测试：完整执行流程</h3>
+                    <div class="test-example">
+                        <div class="code-block">
+class TestChatExecutorIntegration:
+    @pytest.mark.asyncio
+    async def test_complete_task_execution_flow(self):
+        """测试完整的任务执行流程"""
+        # 模拟所有依赖
+        mock_intent_recognizer = MockIntentRecognizer(
+            Intent(type="file_operation", action="create")
+        )
+        mock_task_planner = MockTaskPlanner(
+            Task(steps=[Step(type="file_create", path="test.txt")])
+        )
+        mock_step_executor = MockStepExecutor(
+            StepResult(success=True, message="文件创建成功")
+        )
+
+        executor = ChatExecutor(
+            intent_recognizer=mock_intent_recognizer,
+            task_planner=mock_task_planner,
+            step_executor=mock_step_executor
+        )
+
+        # 执行并验证结果
+        results = []
+        async for result in executor.process_input("创建新文件"):
+            results.append(result)
+
+        assert len(results) > 0
+        assert "文件创建成功" in str(results)
+                        </div>
+                    </div>
+
+                    <h3>性能测试：并发处理</h3>
+                    <div class="test-example">
+                        <div class="code-block">
+class TestExecutorPerformance:
+    @pytest.mark.asyncio
+    async def test_concurrent_task_execution(self):
+        """测试并发任务执行性能"""
+        executor = ChatExecutor(
+            intent_recognizer=FastIntentRecognizer(),
+            task_planner=FastTaskPlanner(),
+            step_executor=AsyncStepExecutor()
+        )
+
+        # 创建多个并发任务
+        tasks = [
+            executor.process_input(f"创建文件{i}.txt")
+            for i in range(10)
+        ]
+
+        start_time = time.time()
+        results = await asyncio.gather(*tasks)
+        end_time = time.time()
+
+        # 验证所有任务都成功完成
+        assert len(results) == 10
+        assert all(len(result) > 0 for result in results)
+
+        # 验证性能指标
+        total_time = end_time - start_time
+        avg_time_per_task = total_time / 10
+        assert avg_time_per_task < 2.0  # 平均每任务小于2秒
+                        </div>
+                    </div>
+                </section>
+
+                <section id="code-examples" class="section">
+                    <h2>代码示例：规范化实现</h2>
+
+                    <h3>1. 增强型聊天执行器</h3>
+                    <div class="code-block">
+import asyncio
+from typing import AsyncIterator, Dict, Any, List
+from dataclasses import dataclass
+from enum import Enum
+
+class ExecutionState(Enum):
+    IDLE = "idle"
+    PLANNING = "planning"
+    EXECUTING = "executing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+@dataclass
+class ExecutionContext:
+    user_input: str
+    intent: 'Intent' = None
+    task: 'Task' = None
+    steps_completed: List['StepResult'] = None
+    current_step: int = 0
+    state: ExecutionState = ExecutionState.IDLE
+    metadata: Dict[str, Any] = None
+
+class EnhancedChatExecutor:
+    """增强型聊天执行器"""
+
+    def __init__(self,
+                 intent_recognizer: IntentRecognizer,
+                 task_planner: TaskPlanner,
+                 step_executor: StepExecutor,
+                 context_manager: ContextManager):
+        self.intent_recognizer = intent_recognizer
+        self.task_planner = task_planner
+        self.step_executor = step_executor
+        self.context_manager = context_manager
+        self.execution_context: Optional[ExecutionContext] = None
+
+    async def process_input(self, user_input: str) -> AsyncIterator[str]:
+        """处理用户输入的主要入口点"""
+        try:
+            # 创建执行上下文
+            self.execution_context = ExecutionContext(user_input=user_input)
+
+            # 阶段1：意图识别
+            yield "正在理解您的需求..."
+            await self._recognize_intent()
+
+            # 阶段2：任务规划
+            yield "正在制定执行计划..."
+            await self._plan_task()
+
+            # 阶段3：执行任务
+            async for progress in self._execute_task():
+                yield progress
+
+        except Exception as e:
+            yield f"执行过程中发生错误：{str(e)}"
+            self.execution_context.state = ExecutionState.FAILED
+
+    async def _recognize_intent(self) -> None:
+        """识别用户意图"""
+        self.execution_context.state = ExecutionState.PLANNING
+
+        # 结合上下文进行意图识别
+        context = await self.context_manager.get_context()
+        self.execution_context.intent = await self.intent_recognizer.recognize_intent(
+            self.execution_context.user_input,
+            context
+        )
+
+    async def _plan_task(self) -> None:
+        """制定任务计划"""
+        self.execution_context.task = await self.task_planner.plan_task(
+            self.execution_context.intent,
+            await self.context_manager.get_context()
+        )
+
+    async def _execute_task(self) -> AsyncIterator[str]:
+        """执行任务步骤"""
+        self.execution_context.state = ExecutionState.EXECUTING
+
+        for i, step in enumerate(self.execution_context.task.steps):
+            self.execution_context.current_step = i
+
+            # 执行步骤
+            yield f"正在执行步骤 {i+1}/{len(self.execution_context.task.steps)}: {step.description}"
+
+            try:
+                result = await self.step_executor.execute_step(step)
+                self.execution_context.steps_completed.append(result)
+
+                # 更新上下文
+                await self.context_manager.update_context({
+                    'last_step_result': result,
+                    'execution_progress': (i + 1) / len(self.execution_context.task.steps)
+                })
+
+                yield f"✓ {step.description} - {result.message}"
+
+            except Exception as e:
+                yield f"✗ {step.description} - 错误: {str(e)}"
+                raise
+
+        self.execution_context.state = ExecutionState.COMPLETED
+        yield "任务执行完成！"
+
+    async def get_execution_status(self) -> Dict[str, Any]:
+        """获取执行状态"""
+        if not self.execution_context:
+            return {'state': 'idle'}
+
+        return {
+            'state': self.execution_context.state.value,
+            'progress': (self.execution_context.current_step /
+                        len(self.execution_context.task.steps)
+                        if self.execution_context.task else 0),
+            'current_step': self.execution_context.current_step,
+            'total_steps': len(self.execution_context.task.steps) if self.execution_context.task else 0
+        }
+                    </div>
+
+                    <h3>2. 事件驱动的步骤执行器</h3>
+                    <div class="code-block">
+from typing import Dict, Callable
+import asyncio
+
+class EventType:
+    STEP_STARTED = "step_started"
+    STEP_COMPLETED = "step_completed"
+    STEP_FAILED = "step_failed"
+    PROGRESS_UPDATED = "progress_updated"
+
+class EventSystem:
+    """事件系统"""
+
+    def __init__(self):
+        self._subscribers: Dict[str, List[Callable]] = {}
+
+    def subscribe(self, event_type: str, callback: Callable):
+        """订阅事件"""
+        if event_type not in self._subscribers:
+            self._subscribers[event_type] = []
+        self._subscribers[event_type].append(callback)
+
+    async def publish(self, event_type: str, data: Any):
+        """发布事件"""
+        if event_type in self._subscribers:
+            tasks = [callback(data) for callback in self._subscribers[event_type]]
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+class EventDrivenStepExecutor:
+    """基于事件的步骤执行器"""
+
+    def __init__(self, event_system: EventSystem):
+        self.event_system = event_system
+        self._running_tasks: Dict[str, asyncio.Task] = {}
+
+    async def execute_step(self, step: Step) -> StepResult:
+        """执行步骤并发布事件"""
+        step_id = f"step_{step.id}_{time.time()}"
+
+        try:
+            # 发布步骤开始事件
+            await self.event_system.publish(EventType.STEP_STARTED, {
+                'step_id': step_id,
+                'step': step,
+                'timestamp': time.time()
+            })
+
+            # 执行步骤
+            result = await self._execute_step_logic(step)
+
+            # 发布步骤完成事件
+            await self.event_system.publish(EventType.STEP_COMPLETED, {
+                'step_id': step_id,
+                'step': step,
+                'result': result,
+                'timestamp': time.time()
+            })
+
+            return result
+
+        except Exception as e:
+            # 发布步骤失败事件
+            await self.event_system.publish(EventType.STEP_FAILED, {
+                'step_id': step_id,
+                'step': step,
+                'error': str(e),
+                'timestamp': time.time()
+            })
+            raise
+
+    async def _execute_step_logic(self, step: Step) -> StepResult:
+        """具体的步骤执行逻辑"""
+        if step.type == "file_operation":
+            return await self._handle_file_operation(step)
+        elif step.type == "web_search":
+            return await self._handle_web_search(step)
+        elif step.type == "api_call":
+            return await self._handle_api_call(step)
+        else:
+            raise ValueError(f"Unknown step type: {step.type}")
+
+    async def _handle_file_operation(self, step: Step) -> StepResult:
+        """处理文件操作"""
+        operation = step.parameters.get('operation')
+        file_path = step.parameters.get('path')
+
+        if operation == 'create':
+            # 创建文件逻辑
+            with open(file_path, 'w') as f:
+                f.write(step.parameters.get('content', ''))
+            return StepResult(
+                success=True,
+                message=f"文件 {file_path} 创建成功",
+                data={'file_path': file_path}
+            )
+        elif operation == 'read':
+            # 读取文件逻辑
+            with open(file_path, 'r') as f:
+                content = f.read()
+            return StepResult(
+                success=True,
+                message=f"文件 {file_path} 读取成功",
+                data={'content': content}
+            )
+        # 其他文件操作...
+
+    async def _handle_web_search(self, step: Step) -> StepResult:
+        """处理网络搜索"""
+        query = step.parameters.get('query')
+        # 实现网络搜索逻辑
+        # 这里可以调用搜索引擎API
+        return StepResult(
+            success=True,
+            message=f"搜索完成: {query}",
+            data={'search_results': []}
+        )
+
+    async def _handle_api_call(self, step: Step) -> StepResult:
+        """处理API调用"""
+        api_url = step.parameters.get('url')
+        method = step.parameters.get('method', 'GET')
+        # 实现API调用逻辑
+        return StepResult(
+            success=True,
+            message=f"API调用完成: {method} {api_url}",
+            data={'response': {}}
+        )
+                    </div>
+
+                    <h3>3. 上下文感知的意图识别器</h3>
+                    <div class="code-block">
+from typing import Optional, List
+import re
+
+@dataclass
+class Intent:
+    type: str
+    action: Optional[str] = None
+    entities: Dict[str, Any] = None
+    confidence: float = 0.0
+    metadata: Dict[str, Any] = None
+
+class ContextAwareIntentRecognizer:
+    """上下文感知的意图识别器"""
+
+    def __init__(self):
+        self.intent_patterns = self._load_intent_patterns()
+        self.context_weights = {
+            'recent_history': 0.3,
+            'session_context': 0.2,
+            'user_preferences': 0.1
+        }
+
+    async def recognize_intent(self, user_input: str, context: Dict[str, Any] = None) -> Intent:
+        """识别用户意图，考虑上下文信息"""
+        context = context or {}
+
+        # 基础模式匹配
+        base_intent = self._pattern_matching(user_input)
+
+        # 上下文增强
+        enhanced_intent = await self._enhance_with_context(base_intent, context)
+
+        # 置信度计算
+        enhanced_intent.confidence = self._calculate_confidence(enhanced_intent, user_input, context)
+
+        return enhanced_intent
+
+    def _pattern_matching(self, user_input: str) -> Intent:
+        """基于模式的意图识别"""
+        normalized_input = user_input.lower().strip()
+
+        for intent_type, patterns in self.intent_patterns.items():
+            for pattern, action in patterns:
+                match = re.search(pattern, normalized_input, re.IGNORECASE)
+                if match:
+                    return self._create_intent_from_match(intent_type, action, match, user_input)
+
+        return Intent(type="unknown", confidence=0.0)
+
+    async def _enhance_with_context(self, base_intent: Intent, context: Dict[str, Any]) -> Intent:
+        """使用上下文信息增强意图识别"""
+        # 检查最近的对话历史
+        recent_history = context.get('recent_history', [])
+        if recent_history:
+            last_intent = recent_history[-1].get('intent')
+            if self._is_follow_up_intent(base_intent, last_intent):
+                base_intent.type = last_intent.type
+                base_intent.action = 'follow_up'
+
+        # 检查会话上下文
+        session_context = context.get('session_context', {})
+        if 'current_project' in session_context:
+            base_intent.entities = base_intent.entities or {}
+            base_intent.entities['project_context'] = session_context['current_project']
+
+        # 检查用户偏好
+        user_preferences = context.get('user_preferences', {})
+        if 'default_action' in user_preferences and base_intent.type == "unknown":
+            base_intent.type = "default_action"
+            base_intent.action = user_preferences['default_action']
+
+        return base_intent
+
+    def _is_follow_up_intent(self, current_intent: Intent, previous_intent: Optional[Intent]) -> bool:
+        """判断是否为后续意图"""
+        follow_up_indicators = ['继续', '然后', '接下来', '还有', '再']
+        current_text = current_intent.metadata.get('original_text', '').lower() if current_intent.metadata else ''
+
+        return (previous_intent and
+                any(indicator in current_text for indicator in follow_up_indicators))
+
+    def _calculate_confidence(self, intent: Intent, user_input: str, context: Dict[str, Any]) -> float:
+        """计算意图识别的置信度"""
+        confidence = 0.5  # 基础置信度
+
+        # 模式匹配置信度
+        if intent.type != "unknown":
+            confidence += 0.3
+
+        # 上下文一致性
+        recent_history = context.get('recent_history', [])
+        if recent_history and intent.type == recent_history[-1].get('intent', {}).get('type'):
+            confidence += 0.2
+
+        # 用户输入的明确性
+        if len(user_input.split()) > 3:  # 输入较详细
+            confidence += 0.1
+
+        return min(confidence, 1.0)
+
+    def _create_intent_from_match(self, intent_type: str, action: str, match, original_text: str) -> Intent:
+        """从正则匹配创建意图对象"""
+        entities = {}
+
+        if intent_type == "file_operation":
+            entities['file'] = True
+            if match.groups():
+                entities['filename'] = match.groups()[0]
+
+        elif intent_type == "web_search":
+            if match.groups():
+                entities['search_query'] = match.groups()[0]
+
+        return Intent(
+            type=intent_type,
+            action=action,
+            entities=entities,
+            metadata={'original_text': original_text}
+        )
+
+    def _load_intent_patterns(self) -> Dict[str, List]:
+        """加载意图模式"""
+        return {
+            "file_operation": [
+                (r"创建.*文件[：:]\s*(.+)", "create"),
+                (r"删除.*文件[：:]\s*(.+)", "delete"),
+                (r"编辑.*文件[：:]\s*(.+)", "edit"),
+                (r"读取.*文件[：:]\s*(.+)", "read")
+            ],
+            "web_search": [
+                (r"搜索\s*(.+)", "search"),
+                (r"查找\s*(.+)", "search"),
+                (r"搜索关于(.+)的信息", "search")
+            ],
+            "code_execution": [
+                (r"运行\s*(.+)", "run"),
+                (r"执行\s*(.+)", "execute"),
+                (r"编译\s*(.+)", "compile")
+            ],
+            "system_command": [
+                (r"安装\s*(.+)", "install"),
+                (r"配置\s*(.+)", "configure"),
+                (r"设置\s*(.+)", "setup")
+            ]
+        }
+                    </div>
+                </section>
+
+                <section id="best-practices" class="section">
+                    <h2>最佳实践与规范</h2>
+
+                    <div class="best-practices">
+                        <h4>KISS原则应用</h4>
+                        <ul>
+                            <li><strong>简洁的接口设计</strong>：核心接口只包含必要的方法，避免过度复杂</li>
+                            <li><strong>清晰的执行流程</strong>：线性化的执行步骤，易于理解和调试</li>
+                            <li><strong>最小化状态管理</strong>：只在必要的地方维护状态，避免状态复杂性</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-practices">
+                        <h4>DRY原则应用</h4>
+                        <ul>
+                            <li><strong>公共执行器基类</strong>：提取所有执行器的公共逻辑</li>
+                            <li><strong>可复用的步骤处理器</strong>：步骤处理器可以在不同执行器中复用</li>
+                            <li><strong>统一的错误处理</strong>：统一的异常处理和错误恢复机制</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-practices">
+                        <h4>YAGNI原则应用</h4>
+                        <ul>
+                            <li><strong>按需功能实现</strong>：只实现当前需要的功能特性</li>
+                            <li><strong>渐进式复杂度</strong>：从简单的执行器开始，逐步增加复杂功能</li>
+                            <li><strong>避免过度抽象</strong>：不需要的抽象层会带来不必要的复杂性</li>
+                        </ul>
+                    </div>
+
+                    <h3>异步编程最佳实践</h3>
+                    <div class="card">
+                        <h4>正确使用async/await</h4>
+                        <div class="code-block">
+async def execute_task_with_timeout(self, task: Task, timeout: float = 30.0) -> StepResult:
+    """带超时的任务执行"""
+    try:
+        return await asyncio.wait_for(
+            self.execute_task(task),
+            timeout=timeout
+        )
+    except asyncio.TimeoutError:
+        raise ExecutionError(f"Task execution timed out after {timeout} seconds")
+
+async def execute_with_retry(self, step: Step, max_retries: int = 3) -> StepResult:
+    """带重试的步骤执行"""
+    for attempt in range(max_retries + 1):
+        try:
+            return await self.execute_step(step)
+        except Exception as e:
+            if attempt == max_retries:
+                raise
+            await asyncio.sleep(2 ** attempt)  # 指数退避
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>事件驱动架构最佳实践</h4>
+                        <div class="code-block">
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-title">事件发射器基类</span>
+                                <span class="code-language">Python</span>
+                                <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                            </div>
+                            <div class="code-content code-highlight">
+                                <pre><code>class EventEmitter:
+    """事件发射器基类"""
+
+    def __init__(self):
+        self._event_handlers = defaultdict(list)
+        self._loop = asyncio.get_event_loop()
+
+    def on(self, event: str, handler: Callable):
+        """注册事件处理器"""
+        self._event_handlers[event].append(handler)
+
+    def emit(self, event: str, data: Any = None):
+        """异步发射事件"""
+        if event in self._event_handlers:
+            for handler in self._event_handlers[event]:
+                asyncio.create_task(handler(data))
+
+    async def emit_sync(self, event: str, data: Any = None):
+        """同步发射事件，等待所有处理器完成"""
+        if event in self._event_handlers:
+            tasks = [handler(data) for handler in self._event_handlers[event]]
+            await asyncio.gather(*tasks, return_exceptions=True)</code></pre>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>错误处理和恢复</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-title">错误处理和恢复策略</span>
+                                <span class="code-language">Python</span>
+                                <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                            </div>
+                            <div class="code-content code-highlight">
+                                <pre><code>class ExecutionError(Exception):
+    """执行错误基类"""
+    def __init__(self, message: str, step: Step = None, cause: Exception = None):
+        self.message = message
+        self.step = step
+        self.cause = cause
+        super().__init__(message)
+
+class ErrorRecoveryStrategy:
+    """错误恢复策略"""
+
+    @staticmethod
+    async def retry_step(step: Step, max_retries: int = 3) -> StepResult:
+        """重试策略"""
+        for attempt in range(max_retries + 1):
+            try:
+                return await execute_step(step)
+            except Exception as e:
+                if attempt == max_retries:
+                    raise ExecutionError(f"Step failed after {max_retries} retries", step, e)
+                await asyncio.sleep(1)
+
+    @staticmethod
+    async def skip_step(step: Step) -> StepResult:
+        """跳过策略"""
+        return StepResult(
+            success=True,
+            message=f"Step skipped: {step.description}",
+            skipped=True
+        )
+
+    @staticmethod</code></pre>
+                            </div>
+                        </div>
+    async def alternative_step(original_step: Step, alternative: Step) -> StepResult:
+        """替代步骤策略"""
+        try:
+            return await execute_step(alternative)
+        except Exception as e:
+            raise ExecutionError(f"Alternative step also failed", alternative, e)</code></pre>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="related-docs" class="section">
+                    <h2>相关规范文档</h2>
+
+                    <div class="card">
+                        <h4>核心设计文档</h4>
+                        <ul>
+                            <li><strong>Agent Engine Architecture Specification</strong> - 智能体引擎的架构设计规范</li>
+                            <li><strong>Event-Driven Execution Model</strong> - 事件驱动执行模型的设计文档</li>
+                            <li><strong>Intent Recognition Strategy</strong> - 意图识别策略和算法文档</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>实现指南</h4>
+                        <ul>
+                            <li><strong>Async Programming Best Practices</strong> - 异步编程最佳实践指南</li>
+                            <li><strong>Context Management Patterns</strong> - 上下文管理模式和实现方案</li>
+                            <li><strong>Step Execution Framework</strong> - 步骤执行框架的详细实现指南</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>测试文档</h4>
+                        <ul>
+                            <li><strong>Executor Testing Strategy</strong> - 执行器测试策略和工具</li>
+                            <li><strong>Async Test Patterns</strong> - 异步代码测试模式和最佳实践</li>
+                            <li><strong>Integration Testing Guide</strong> - 集成测试指南和示例</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>运维文档</h4>
+                        <ul>
+                            <li><strong>Performance Monitoring Setup</strong> - 性能监控配置和指标定义</li>
+                            <li><strong>Error Handling Procedures</strong> - 错误处理流程和恢复策略</li>
+                            <li><strong>Debugging Guide</strong> - 调试指南和常见问题解决方案</li>
+                        </ul>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <footer class="navigation-footer">
+        <h3>模块导航</h3>
+        <div class="nav-links">
+            <a href="modules/P1_PERSISTENCE.html">P1 数据持久化</a>
+            <a href="modules/P2_KNOWLEDGE_MANAGEMENT.html">P2 知识管理</a>
+            <a href="P3_MODEL_PROVIDER.html">P3 模型提供商</a>
+            <a href="P5_AGENT_ENGINE.html">P5 智能体引擎</a>
+            <a href="P6_TERMINAL_INTERFACE.html">P6 终端界面</a>
+            <a href="P8_DEBATE_SYSTEM.html">P8 辩论系统</a>
+            <a href="DOCUMENT_DRIVEN_LEARNING_PLATFORM.html">返回学习平台</a>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    
+    <script>
+        // 复制代码功能
+        function copyCode(button) {
+            const codeContainer = button.closest('.code-container');
+            const codeBlock = codeContainer.querySelector('pre');
+            
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '已复制';
+                button.style.background = '#10b981';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                button.textContent = '复制失败';
+                button.style.background = '#ef4444';
+                
+                setTimeout(() => {
+                    button.textContent = '📋 复制';
+                    button.style.background = '';
+                }, 2000);
+            });
+        }
+
+        // 初始化代码高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化语法高亮
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        });
+    </script>
+</body>
+</html>

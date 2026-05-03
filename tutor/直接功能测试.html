@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直接功能测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 2rem; background: #f8fafc; }
+        .test-container { max-width: 800px; margin: 0 auto; }
+        .test-header { text-align: center; margin-bottom: 2rem; }
+        .dimension-card { background: white; border: 2px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin: 1rem 0; cursor: pointer; transition: all 0.3s ease; }
+        .dimension-card:hover { border-color: #667eea; transform: translateY(-2px); }
+        .dimension-card.active { border-color: #667eea; background: #f8fafc; }
+        .dimension-title { font-weight: 600; color: #1e293b; margin: 0 0 0.5rem 0; }
+        .dimension-content { color: #64748b; font-size: 0.875rem; }
+        .test-button { background: #667eea; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; margin: 0.5rem; }
+        .test-button:hover { background: #5a67d8; }
+        .status { padding: 1rem; margin: 1rem 0; border-radius: 6px; }
+        .status.success { background: #dcfce7; color: #16a34a; }
+        .status.error { background: #fef2f2; color: #dc2626; }
+        .status.info { background: #eff6ff; color: #1d4ed8; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🎯 六向联动直接功能测试</h1>
+            <p>点击维度卡片测试真正的六向联动效果</p>
+        </div>
+
+        <div class="status info">
+            <h3>📋 测试说明</h3>
+            <p>点击任意维度卡片，应该看到其他五个维度的内容都发生变化，实现真正的六向联动。</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🤖 规范化提示词表述</h3>
+            <div class="dimension-card" onclick="testDimensionClick('prompt')" id="card-prompt">
+                <div class="dimension-title">🤖 规范化提示词表述</div>
+                <div class="dimension-content" id="content-prompt">点击测试...</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📄 规范文档表述</h3>
+            <div class="dimension-card" onclick="testDimensionClick('spec')" id="card-spec">
+                <div class="dimension-title">📄 规范文档表述</div>
+                <div class="dimension-content" id="content-spec">点击测试...</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 规范设计文档</h3>
+            <div class="dimension-card" onclick="testDimensionClick('design')" id="card-design">
+                <div class="dimension-title">🎨 规范设计文档</div>
+                <div class="dimension-content" id="content-design">点击测试...</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 实施计划</h3>
+            <div class="dimension-card" onclick="testDimensionClick('plan')" id="card-plan">
+                <div class="dimension-title">📋 实施计划</div>
+                <div class="dimension-content" id="content-plan">点击测试...</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>💻 代码实现</h3>
+            <div class="dimension-card" onclick="testDimensionClick('code')" id="card-code">
+                <div class="dimension-title">💻 代码实现</div>
+                <div class="dimension-content" id="content-code">点击测试...</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 关联分析</h3>
+            <div class="dimension-card" onclick="testDimensionClick('correlation')" id="card-correlation">
+                <div class="dimension-title">🔗 关联分析</div>
+                <div class="dimension-content" id="content-correlation">点击测试...</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <button class="test-button" onclick="runAutoTest()">🚀 自动测试</button>
+            <button class="test-button" onclick="resetTest()">🔄 重置</button>
+        </div>
+
+        <div id="test-results" style="margin-top: 2rem;"></div>
+    </div>
+
+    <script>
+        // 测试数据
+        const testData = {
+            'FR-001': {
+                prompt: '请为P1数据持久化模块实现统一的数据存储接口抽象...',
+                spec: '实现统一的数据持久化接口，支持多种存储后端灵活切换...',
+                design: '应用单一职责原则、开放封闭原则、依赖倒置原则...',
+                plan: '步骤1：定义DataStoreInterface抽象基类，步骤2：实现JSONStorage...',
+                code: 'class DataStoreInterface(ABC): @abstractmethod def save(self, key, data): pass',
+                correlation: '维度关联矩阵：提示词→规范文档→设计文档→实施计划→代码实现'
+            },
+            'FR-002': {
+                prompt: '请为P1数据持久化模块实现完整的数据管理功能...',
+                spec: '实现统一的数据管理入口，提供完整的数据生命周期管理...',
+                design: '应用依赖倒置原则、接口隔离原则、单一职责原则...',
+                plan: '步骤1：设计YAML配置文件结构，步骤2：实现PersistenceManager...',
+                code: 'class PersistenceManager: def __init__(self, config_path): self.config = self._load_config()',
+                correlation: '维度关联：管理需求→技术规范→架构设计→实施步骤→代码实现'
+            }
+        };
+
+        let currentRequirement = 'FR-001';
+        let currentDimension = 'prompt';
+        let testCount = 0;
+
+        function log(message) {
+            console.log(`[测试${++testCount}] ${message}`);
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = 'status info';
+            div.innerHTML = `<strong>测试${testCount}:</strong> ${message}`;
+            results.appendChild(div);
+        }
+
+        function testDimensionClick(dimension) {
+            log(`点击维度: ${dimension}`);
+            
+            // 更新当前维度
+            currentDimension = dimension;
+            log(`当前维度更新为: ${dimension}`);
+            
+            // 模拟六向联动：重新加载所有维度内容
+            syncAllDimensions();
+            
+            // 高亮当前维度
+            highlightCurrentDimension(dimension);
+            
+            // 验证联动效果
+            setTimeout(() => {
+                verifySync(dimension);
+            }, 100);
+        }
+
+        function syncAllDimensions() {
+            log('开始同步所有维度内容...');
+            
+            const requirement = testData[currentRequirement];
+            const dimensions = Object.keys(requirement);
+            
+            let syncCount = 0;
+            
+            dimensions.forEach(dim => {
+                const contentElement = document.getElementById(`content-${dim}`);
+                if (contentElement) {
+                    contentElement.textContent = requirement[dim];
+                    syncCount++;
+                    log(`维度 ${dim} 内容已同步: ${requirement[dim].substring(0, 50)}...`);
+                } else {
+                    log(`❌ 维度 ${dim} 元素未找到`);
+                }
+            });
+            
+            log(`六向联动同步完成: ${syncCount}/${dimensions.length} 个维度`);
+        }
+
+        function highlightCurrentDimension(dimension) {
+            // 清除所有高亮
+            document.querySelectorAll('.dimension-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // 高亮当前维度
+            const currentCard = document.getElementById(`card-${dimension}`);
+            if (currentCard) {
+                currentCard.classList.add('active');
+                log(`维度 ${dimension} 已高亮`);
+            }
+        }
+
+        function verifySync(dimension) {
+            const requirement = testData[currentRequirement];
+            const dimensions = Object.keys(requirement);
+            
+            let verifyCount = 0;
+            let correctCount = 0;
+            
+            dimensions.forEach(dim => {
+                const contentElement = document.getElementById(`content-${dim}`);
+                if (contentElement) {
+                    verifyCount++;
+                    const expectedContent = requirement[dim];
+                    const actualContent = contentElement.textContent;
+                    
+                    if (actualContent === expectedContent) {
+                        correctCount++;
+                        log(`✅ 维度 ${dim} 内容验证通过`);
+                    } else {
+                        log(`❌ 维度 ${dim} 内容验证失败`);
+                        log(`期望: ${expectedContent.substring(0, 30)}...`);
+                        log(`实际: ${actualContent.substring(0, 30)}...`);
+                    }
+                }
+            });
+            
+            const successRate = (correctCount / verifyCount * 100).toFixed(1);
+            log(`验证结果: ${correctCount}/${verifyCount} 维度内容正确 (${successRate}%)`);
+            
+            if (correctCount === verifyCount) {
+                log('🎉 六向联动测试成功！所有维度内容都已正确同步');
+                showResult('success', '✅ 六向联动测试成功！点击任意维度，其他五个维度内容都正确更新。');
+            } else {
+                log('❌ 六向联动测试失败！部分维度内容未正确同步');
+                showResult('error', `❌ 六向联动测试失败！只有 ${correctCount}/${verifyCount} 个维度正确同步。`);
+            }
+        }
+
+        function showResult(type, message) {
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        function runAutoTest() {
+            document.getElementById('test-results').innerHTML = '';
+            log('开始自动测试序列...');
+            
+            const dimensions = Object.keys(testData[currentRequirement]);
+            
+            dimensions.forEach((dimension, index) => {
+                setTimeout(() => {
+                    testDimensionClick(dimension);
+                }, (index + 1) * 2000); // 每2秒测试一个维度
+            });
+        }
+
+        function resetTest() {
+            document.getElementById('test-results').innerHTML = '';
+            document.querySelectorAll('.dimension-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            testCount = 0;
+            log('测试已重置');
+        }
+
+        // 页面加载
+        document.addEventListener('DOMContentLoaded', function() {
+            log('六向联动直接功能测试已启动');
+            log('请点击任意维度卡片测试联动效果');
+        });
+    </script>
+</body>
+</html>

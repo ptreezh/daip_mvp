@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAIP-LIVE AI规范化编程学院 - 企业级学习平台</title>
+    <style>
+        :root {
+            /* 企业级配色系统 - 更为庄重和专业 */
+            --primary-dark: #0A1929;
+            --primary: #1A2332;
+            --primary-light: #2D3748;
+            --secondary: #4A5568;
+            --accent: #2563EB;
+            --accent-light: #3B82F6;
+            --success: #059669;
+            --background: #FFFFFF;
+            --surface: #F8FAFC;
+            --surface-alt: #F1F5F9;
+            --border: #E2E8F0;
+            --text-primary: #0A1929;
+            --text-secondary: #475569;
+            --text-tertiary: #64748B;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --gradient: linear-gradient(135deg, #1A2332 0%, #2563EB 100%);
+            --border-radius: 12px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-scale: 1.125;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: var(--background);
+            font-size: 17px;
+            font-weight: 400;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            letter-spacing: -0.01em;
+        }
+
+        /* 布局系统 - 更加严谨的间距 */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .container-wide {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .section {
+            padding: 96px 0;
+        }
+
+        .section-sm {
+            padding: 64px 0;
+        }
+
+        /* 头部导航 - 更为简洁庄重 */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            height: 80px;
+            transition: var(--transition);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+            padding: 0 32px;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 48px;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            padding: 8px 0;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .nav-link.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* 英雄区域 - 更为庄重的设计 */
+        .hero {
+            background: var(--gradient);
+            color: white;
+            padding: 160px 0 120px;
+            margin-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 64px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: 32px;
+        }
+
+        .hero-subtitle {
+            font-size: 22px;
+            font-weight: 400;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto 56px;
+            line-height: 1.6;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-value {
+            font-size: 42px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .hero-stat-label {
+            font-size: 15px;
+            opacity: 0.9;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* 网格系统 */
+        .grid {
+            display: grid;
+            gap: 32px;
+        }
+
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+        /* 卡片组件 - 更为精致的设计 */
+        .card {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            border-color: var(--accent-light);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-8px);
+        }
+
+        .card-header {
+            margin-bottom: 24px;
+        }
+
+        .card-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--gradient);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        /* 核心原则区域 */
+        .principles {
+            background: var(--surface);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+            margin-bottom: 24px;
+        }
+
+        .section-subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .principle-list {
+            list-style: none;
+        }
+
+        .principle-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px 0;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--surface);
+        }
+
+        .principle-item:last-child {
+            border-bottom: none;
+        }
+
+        .principle-item::before {
+            content: '';
+            min-width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            margin-top: 10px;
+        }
+
+        .principle-item strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* 学习路径 */
+        .learning-path {
+            background: var(--background);
+        }
+
+        .timeline {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 32px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 64px;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .timeline-number {
+            width: 64px;
+            height: 64px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .timeline-title {
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .timeline-duration {
+            color: var(--accent);
+            font-weight: 500;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .timeline-description {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.7;
+        }
+
+        .timeline-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            background: var(--surface);
+            color: var(--text-secondary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--border);
+        }
+
+        /* 实验室模块 */
+        .labs {
+            background: var(--surface);
+        }
+
+        .lab-card {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .lab-card:hover {
+            border-color: var(--accent-light);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-8px);
+        }
+
+        .lab-header {
+            background: var(--gradient);
+            color: white;
+            padding: 40px;
+        }
+
+        .lab-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .lab-subtitle {
+            opacity: 0.9;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .lab-content {
+            padding: 40px;
+        }
+
+        .lab-features {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+
+        .lab-feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px 0;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--surface);
+        }
+
+        .lab-feature:last-child {
+            border-bottom: none;
+        }
+
+        .lab-feature::before {
+            content: '';
+            min-width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            margin-top: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 32px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--background);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* 规范指南 */
+        .spec-guide {
+            background: var(--background);
+        }
+
+        /* 快速开始 */
+        .quickstart {
+            background: var(--gradient);
+            color: white;
+            text-align: center;
+        }
+
+        .quickstart-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .quickstart-title {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .quickstart-description {
+            font-size: 20px;
+            opacity: 0.9;
+            margin-bottom: 56px;
+        }
+
+        .quickstart-steps {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 48px;
+            margin: 40px 0;
+            backdrop-filter: blur(10px);
+            text-align: left;
+        }
+
+        .quickstep {
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .quickstep:last-child {
+            margin-bottom: 0;
+        }
+
+        .quickstep-number {
+            width: 48px;
+            height: 48px;
+            background: white;
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .quickstep-content {
+            flex: 1;
+        }
+
+        .quickstep-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .quickstep-description {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 48px;
+            background: white;
+            color: var(--primary);
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            font-size: 18px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .container, .container-wide {
+                padding: 0 24px;
+            }
+
+            .grid-3, .grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .hero-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container, .container-wide {
+                padding: 0 20px;
+            }
+
+            .section {
+                padding: 64px 0;
+            }
+
+            .hero-title {
+                font-size: 42px;
+            }
+
+            .section-title {
+                font-size: 36px;
+            }
+
+            .nav {
+                display: none;
+            }
+
+            .hero-stats {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .timeline-item,
+            .timeline-item:nth-child(even) {
+                flex-direction: column;
+                padding-left: 0;
+            }
+
+            .timeline::before {
+                display: none;
+            }
+
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 滚动行为 */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* 焦点样式 */
+        *:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* 选择文本样式 */
+        ::selection {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* 打印样式 */
+        @media print {
+            .header,
+            .hero,
+            .quickstart {
+                display: none;
+            }
+
+            body {
+                background: white;
+                color: black;
+                font-size: 12pt;
+            }
+
+            .card,
+            .lab-card,
+            .timeline-content {
+                break-inside: avoid;
+                border: 1px solid #ccc;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">DAIP-LIVE Academy</div>
+            <nav>
+                <ul class="nav">
+                    <li><a href="#principles" class="nav-link">核心原则</a></li>
+                    <li><a href="#learning-path" class="nav-link">学习路径</a></li>
+                    <li><a href="#labs" class="nav-link">核心模块</a></li>
+                    <li><a href="#documents" class="nav-link">规范文档</a></li>
+                    <li><a href="#quickstart" class="nav-link">快速开始</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="hero">
+        <div class="container-wide">
+            <div class="hero-content">
+                <h1 class="hero-title">AI规范化编程学院</h1>
+                <p class="hero-subtitle">
+                    基于DAIP-LIVE独创AI应用系统，掌握企业级AI应用开发的核心原则与实践方法
+                </p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-value">6</span>
+                        <span class="hero-stat-label">核心编程原则</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-value">4</span>
+                        <span class="hero-stat-label">系统化学习路径</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-value">21</span>
+                        <span class="hero-stat-label">核心实践模块</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-value">988</span>
+                        <span class="hero-stat-label">规范文档</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心编程原则 -->
+    <section class="principles section" id="principles">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">核心编程原则</h2>
+                <p class="section-subtitle">
+                    掌握这些基本原则，培养专业的AI应用开发思维，建立系统化的代码质量标准
+                </p>
+            </div>
+            <div class="grid grid-3">
+                <!-- SOLID原则 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">S</div>
+                        <h3 class="card-title">SOLID原则</h3>
+                    </div>
+                    <p class="card-description">
+                        面向对象设计的五个基本原则，创建可维护、可扩展的代码结构
+                    </p>
+                    <ul class="principle-list">
+                        <li class="principle-item"><strong>S</strong> 单一职责原则 - 一个类只负责一个功能</li>
+                        <li class="principle-item"><strong>O</strong> 开闭原则 - 对扩展开放，对修改关闭</li>
+                        <li class="principle-item"><strong>L</strong> 里氏替换原则 - 子类可以替换父类</li>
+                        <li class="principle-item"><strong>I</strong> 接口隔离原则 - 客户端不应依赖不需要的接口</li>
+                        <li class="principle-item"><strong>D</strong> 依赖倒置原则 - 依赖抽象而非具体实现</li>
+                    </ul>
+                </div>
+
+                <!-- KISS原则 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">K</div>
+                        <h3 class="card-title">KISS原则</h3>
+                    </div>
+                    <p class="card-description">
+                        保持简单、直接，用最简单的方式解决问题，避免不必要的复杂性
+                    </p>
+                    <ul class="principle-list">
+                        <li class="principle-item">优先选择简单直接的解决方案</li>
+                        <li class="principle-item">避免过度工程化</li>
+                        <li class="principle-item">代码应该易于理解和维护</li>
+                        <li class="principle-item">单用户场景不需要微服务</li>
+                        <li class="principle-item">模块化单体优于复杂分布式</li>
+                    </ul>
+                </div>
+
+                <!-- TDD原则 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">T</div>
+                        <h3 class="card-title">TDD原则</h3>
+                    </div>
+                    <p class="card-description">
+                        测试驱动开发，先写测试再写代码，确保代码质量和功能正确性
+                    </p>
+                    <ul class="principle-list">
+                        <li class="principle-item"><strong>Red</strong> - 编写失败的测试用例</li>
+                        <li class="principle-item"><strong>Green</strong> - 编写最少的代码让测试通过</li>
+                        <li class="principle-item"><strong>Refactor</strong> - 重构代码保持测试通过</li>
+                        <li class="principle-item">测试覆盖率应达到90%以上</li>
+                        <li class="principle-item">使用Green/Red模式验证改进</li>
+                    </ul>
+                </div>
+
+                <!-- YAGNI原则 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">Y</div>
+                        <h3 class="card-title">YAGNI原则</h3>
+                    </div>
+                    <p class="card-description">
+                        You Aren't Gonna Need It，只实现当前需要的功能
+                    </p>
+                    <ul class="principle-list">
+                        <li class="principle-item">不要为未来的需求编写代码</li>
+                        <li class="principle-item">避免过早优化</li>
+                        <li class="principle-item">专注于当前业务需求</li>
+                        <li class="principle-item">保持代码的简洁性</li>
+                        <li class="principle-item">按需重构，预留扩展点</li>
+                    </ul>
+                </div>
+
+                <!-- DRY原则 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">D</div>
+                        <h3 class="card-title">DRY原则</h3>
+                    </div>
+                    <p class="card-description">
+                        Don't Repeat Yourself，避免代码重复，提高代码复用性
+                    </p>
+                    <ul class="principle-list">
+                        <li class="principle-item">提取公共逻辑到函数或类</li>
+                        <li class="principle-item">使用配置文件管理重复数据</li>
+                        <li class="principle-item">创建可复用的组件和模板</li>
+                        <li class="principle-item">避免复制粘贴代码</li>
+                        <li class="principle-item">保持代码修改的单点性</li>
+                    </ul>
+                </div>
+
+                <!-- 清晰原则 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">C</div>
+                        <h3 class="card-title">清晰原则</h3>
+                    </div>
+                    <p class="card-description">
+                        确保代码、文档和需求清晰无歧义，避免理解偏差
+                    </p>
+                    <ul class="principle-list">
+                        <li class="principle-item">变量和函数命名要清晰明确</li>
+                        <li class="principle-item">编写详细的注释和文档</li>
+                        <li class="principle-item">使用类型注解减少歧义</li>
+                        <li class="principle-item">避免魔术数字和隐式约定</li>
+                        <li class="principle-item">建立统一的编码规范</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 学习路径 -->
+    <section class="learning-path section" id="learning-path">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">系统化学习路径</h2>
+                <p class="section-subtitle">
+                    循序渐进的学习路径，从基础到精通，每一步都有明确的学习目标和实践要求
+                </p>
+            </div>
+            <div class="timeline">
+                <!-- 阶段1 -->
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">阶段1: 编程思维与基础架构</h3>
+                        <p class="timeline-duration">4-6周</p>
+                        <p class="timeline-description">
+                            建立规范的编程思维，掌握基础架构设计原则，理解SPEC驱动开发的核心概念
+                        </p>
+                        <div class="timeline-tags">
+                            <span class="tag">P1 数据持久化</span>
+                            <span class="tag">P6 终端界面</span>
+                            <span class="tag">SOLID原则</span>
+                            <span class="tag">TDD实践</span>
+                        </div>
+                    </div>
+                    <div class="timeline-number">1</div>
+                </div>
+
+                <!-- 阶段2 -->
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">阶段2: AI集成与智能系统</h3>
+                        <p class="timeline-duration">6-8周</p>
+                        <p class="timeline-description">
+                            掌握多模型集成技术，学习智能执行引擎设计，理解AI应用的架构模式
+                        </p>
+                        <div class="timeline-tags">
+                            <span class="tag">P2 知识管理</span>
+                            <span class="tag">P3 模型提供者</span>
+                            <span class="tag">P5 智能引擎</span>
+                            <span class="tag">事件驱动架构</span>
+                        </div>
+                    </div>
+                    <div class="timeline-number">2</div>
+                </div>
+
+                <!-- 阶段3 -->
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">阶段3: 高级特性与系统优化</h3>
+                        <p class="timeline-duration">4-6周</p>
+                        <p class="timeline-description">
+                            实现高级AI功能，学习系统优化技巧，掌握多模型协作和用户界面设计
+                        </p>
+                        <div class="timeline-tags">
+                            <span class="tag">P4 角色管理</span>
+                            <span class="tag">P7 图形界面</span>
+                            <span class="tag">P8 辩论系统</span>
+                            <span class="tag">性能优化</span>
+                        </div>
+                    </div>
+                    <div class="timeline-number">3</div>
+                </div>
+
+                <!-- 阶段4 -->
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">阶段4: 重构实践与架构精通</h3>
+                        <p class="timeline-duration">3-4周</p>
+                        <p class="timeline-description">
+                            参与系统重构实践，掌握架构优化技巧，理解设计模式和最佳实践
+                        </p>
+                        <div class="timeline-tags">
+                            <span class="tag">newP5 重构引擎</span>
+                            <span class="tag">newP6 模块化TUI</span>
+                            <span class="tag">newP7 MVVM架构</span>
+                            <span class="tag">设计模式</span>
+                        </div>
+                    </div>
+                    <div class="timeline-number">4</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心模块实验室 -->
+    <section class="labs section" id="labs">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">核心模块实验室</h2>
+                <p class="section-subtitle">
+                    基于真实项目模块的交互式学习环境，深度掌握AI应用开发技术
+                </p>
+            </div>
+            <div class="grid grid-3">
+                <!-- P1实验室 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <h3 class="lab-title">P1 数据持久化实验室</h3>
+                        <p class="lab-subtitle">SQLite + SQLAlchemy + 会话管理</p>
+                    </div>
+                    <div class="lab-content">
+                        <ul class="lab-features">
+                            <li class="lab-feature">关系型数据库设计与实现</li>
+                            <li class="lab-feature">SQLAlchemy ORM最佳实践</li>
+                            <li class="lab-feature">数据库迁移和版本管理</li>
+                            <li class="lab-feature">连接池和性能优化</li>
+                            <li class="lab-feature">事务管理和错误处理</li>
+                        </ul>
+                        <a href="document_library.html#search=P1" class="btn">学习P1模块</a>
+                    </div>
+                </div>
+
+                <!-- P2实验室 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <h3 class="lab-title">P2 知识管理实验室</h3>
+                        <p class="lab-subtitle">向量搜索 + Wiki协作 + FAISS</p>
+                    </div>
+                    <div class="lab-content">
+                        <ul class="lab-features">
+                            <li class="lab-feature">向量搜索算法实现</li>
+                            <li class="lab-feature">FAISS向量索引优化</li>
+                            <li class="lab-feature">Wiki协作系统设计</li>
+                            <li class="lab-feature">文本向量化处理</li>
+                            <li class="lab-feature">语义搜索和推荐</li>
+                        </ul>
+                        <a href="document_library.html#search=P2" class="btn">学习P2模块</a>
+                    </div>
+                </div>
+
+                <!-- P3实验室 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <h3 class="lab-title">P3 模型提供者实验室</h3>
+                        <p class="lab-subtitle">LiteLLM + 多模型集成 + Ollama</p>
+                    </div>
+                    <div class="lab-content">
+                        <ul class="lab-features">
+                            <li class="lab-feature">多模型统一接口设计</li>
+                            <li class="lab-feature">本地模型服务管理</li>
+                            <li class="lab-feature">API限流和错误处理</li>
+                            <li class="lab-feature">模型切换和负载均衡</li>
+                            <li class="lab-feature">成本控制和监控</li>
+                        </ul>
+                        <a href="document_library.html#search=P3" class="btn">学习P3模块</a>
+                    </div>
+                </div>
+
+                <!-- P5实验室 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <h3 class="lab-title">P5 智能引擎实验室</h3>
+                        <p class="lab-subtitle">事件驱动 + 意图识别 + 任务执行</p>
+                    </div>
+                    <div class="lab-content">
+                        <ul class="lab-features">
+                            <li class="lab-feature">事件驱动架构设计</li>
+                            <li class="lab-feature">自然语言意图识别</li>
+                            <li class="lab-feature">任务分解和执行引擎</li>
+                            <li class="lab-feature">上下文管理和记忆系统</li>
+                            <li class="lab-feature">实时干预和控制机制</li>
+                        </ul>
+                        <a href="document_library.html#search=P5" class="btn">学习P5模块</a>
+                    </div>
+                </div>
+
+                <!-- P8实验室 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <h3 class="lab-title">P8 辩论系统实验室</h3>
+                        <p class="lab-subtitle">多模型协作 + 角色分配 + 辩论管理</p>
+                    </div>
+                    <div class="lab-content">
+                        <ul class="lab-features">
+                            <li class="lab-feature">多模型协作机制</li>
+                            <li class="lab-feature">角色智能选择算法</li>
+                            <li class="lab-feature">辩论流程管理</li>
+                            <li class="lab-feature">观点生成和评估</li>
+                            <li class="lab-feature">协作推理和共识达成</li>
+                        </ul>
+                        <a href="document_library.html#search=P8" class="btn">学习P8模块</a>
+                    </div>
+                </div>
+
+                <!-- 文档实验室 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <h3 class="lab-title">规范文档库</h3>
+                        <p class="lab-subtitle">988份文档 + 智能搜索 + 分类管理</p>
+                    </div>
+                    <div class="lab-content">
+                        <ul class="lab-features">
+                            <li class="lab-feature">完整的项目文档索引</li>
+                            <li class="lab-feature">智能搜索和分类筛选</li>
+                            <li class="lab-feature">Markdown在线渲染</li>
+                            <li class="lab-feature">文档下载和收藏</li>
+                            <li class="lab-feature">学习进度跟踪</li>
+                        </ul>
+                        <a href="document_library.html" class="btn">进入文档库</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 文档规范指南 -->
+    <section class="spec-guide section" id="documents">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">规范文档指南</h2>
+                <p class="section-subtitle">
+                    基于逻辑一致性原则和无歧义原则，建立完善的规范文档体系
+                </p>
+            </div>
+            <div class="grid grid-2">
+                <!-- 规格文档指南 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">DOC</div>
+                        <h3 class="card-title">规格文档规范</h3>
+                    </div>
+                    <p class="card-description">
+                        确保规格文档的完整性和一致性，为开发团队提供清晰的技术指导
+                    </p>
+                    <ul class="principle-list">
+                        <li class="principle-item">功能需求描述清晰无歧义</li>
+                        <li class="principle-item">接口定义完整准确</li>
+                        <li class="principle-item">性能指标量化明确</li>
+                        <li class="principle-item">边界条件和异常处理</li>
+                        <li class="principle-item">跨模块接口对齐</li>
+                        <li class="principle-item">术语使用统一</li>
+                    </ul>
+                    <a href="document_library.html#search=规格" class="btn btn-secondary">查看规格文档</a>
+                </div>
+
+                <!-- 代码规范指南 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">CODE</div>
+                        <h3 class="card-title">代码规范指南</h3>
+                    </div>
+                    <p class="card-description">
+                        建立统一的编码标准，提高代码质量和团队协作效率
+                    </p>
+                    <ul class="principle-list">
+                        <li class="principle-item">变量名：snake_case</li>
+                        <li class="principle-item">类名：PascalCase</li>
+                        <li class="principle-item">常量：UPPER_SNAKE_CASE</li>
+                        <li class="principle-item">私有成员：前缀_</li>
+                        <li class="principle-item">函数长度不超过50行</li>
+                        <li class="principle-item">注释解释原因而非内容</li>
+                    </ul>
+                    <a href="document_library.html#search=代码" class="btn btn-secondary">查看代码规范</a>
+                </div>
+
+                <!-- 测试规范指南 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">TEST</div>
+                        <h3 class="card-title">测试规范指南</h3>
+                    </div>
+                    <p class="card-description">
+                        完善的测试体系，确保代码质量和系统稳定性
+                    </p>
+                    <ul class="principle-list">
+                        <li class="principle-item">单元测试：功能正确性</li>
+                        <li class="principle-item">集成测试：模块协作</li>
+                        <li class="principle-item">端到端测试：完整流程</li>
+                        <li class="principle-item">性能测试：响应时间</li>
+                        <li class="principle-item">覆盖率≥90%</li>
+                        <li class="principle-item">边界条件测试</li>
+                    </ul>
+                    <a href="document_library.html#search=测试" class="btn btn-secondary">查看测试规范</a>
+                </div>
+
+                <!-- 架构规范指南 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">ARCH</div>
+                        <h3 class="card-title">架构规范指南</h3>
+                    </div>
+                    <p class="card-description">
+                        系统架构设计标准，确保系统的可扩展性和可维护性
+                    </p>
+                    <ul class="principle-list">
+                        <li class="principle-item">系统架构图标准化</li>
+                        <li class="principle-item">模块依赖关系清晰</li>
+                        <li class="principle-item">接口设计规范</li>
+                        <li class="principle-item">数据流程图标准</li>
+                        <li class="principle-item">部署指南模板</li>
+                        <li class="principle-item">性能基准要求</li>
+                    </ul>
+                    <a href="document_library.html#search=架构" class="btn btn-secondary">查看架构规范</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 快速开始 -->
+    <section class="quickstart section" id="quickstart">
+        <div class="container">
+            <div class="quickstart-content">
+                <h2 class="quickstart-title">开始你的学习之旅</h2>
+                <p class="quickstart-description">按照以下步骤，系统化掌握AI规范化编程的核心技能</p>
+
+                <div class="quickstart-steps">
+                    <div class="quickstep">
+                        <div class="quickstep-number">1</div>
+                        <div class="quickstep-content">
+                            <div class="quickstep-title">环境准备</div>
+                            <div class="quickstep-description">
+                                安装Python 3.9+、Poetry依赖管理器，配置VS Code开发环境
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quickstep">
+                        <div class="quickstep-number">2</div>
+                        <div class="quickstep-content">
+                            <div class="quickstep-title">学习核心原则</div>
+                            <div class="quickstep-description">
+                                深入理解SOLID、KISS、TDD等核心编程原则，建立规范化思维
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quickstep">
+                        <div class="quickstep-number">3</div>
+                        <div class="quickstep-content">
+                            <div class="quickstep-title">选择学习路径</div>
+                            <div class="quickstep-description">
+                                根据你的经验水平选择合适的学习路径，循序渐进地掌握技能
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quickstep">
+                        <div class="quickstep-number">4</div>
+                        <div class="quickstep-content">
+                            <div class="quickstep-title">实践项目模块</div>
+                            <div class="quickstep-description">
+                                在真实项目环境中实践每个模块，完成规范文档指导的开发任务
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="document_library.html" class="btn-primary">立即开始学习</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // 导航栏激活状态
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            function updateActiveNav() {
+                const scrollPosition = window.scrollY + 100;
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.offsetHeight;
+                    const sectionId = section.getAttribute('id');
+
+                    if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${sectionId}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', updateActiveNav);
+            updateActiveNav();
+
+            // 卡片入场动画
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '0';
+                        entry.target.style.transform = 'translateY(40px)';
+                        entry.target.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, 100);
+
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            // 观察需要动画的元素
+            const animatedElements = document.querySelectorAll('.card, .timeline-item, .lab-card');
+            animatedElements.forEach(el => observer.observe(el));
+
+            // 统计数据动画
+            function animateValue(element, start, end, duration) {
+                const startTimestamp = Date.now();
+                const step = () => {
+                    const timestamp = Date.now();
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    element.textContent = Math.floor(progress * (end - start) + start);
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+
+            // 统计数字动画
+            const stats = document.querySelectorAll('.hero-stat-value');
+            const statsObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const finalValue = parseInt(entry.target.textContent);
+                        animateValue(entry.target, 0, finalValue, 2000);
+                        statsObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            stats.forEach(stat => statsObserver.observe(stat));
+
+            // 键盘导航
+            document.addEventListener('keydown', function(e) {
+                // Alt + 数字键快速导航
+                if (e.altKey && e.key >= '1' && e.key <= '5') {
+                    const sections = ['#principles', '#learning-path', '#labs', '#documents', '#quickstart'];
+                    const index = parseInt(e.key) - 1;
+                    if (sections[index]) {
+                        document.querySelector(sections[index]).scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+
+            console.log('DAIP-LIVE AI规范化编程学院已加载完成');
+            console.log('快捷键：Alt + 1-5 快速导航到各个主要区域');
+        });
+
+        // 性能监控
+        if ('performance' in window) {
+            window.addEventListener('load', function() {
+                setTimeout(() => {
+                    const perfData = performance.getEntriesByType('navigation')[0];
+                    console.log(`页面加载时间：${Math.round(perfData.loadEventEnd - perfData.loadEventStart)}ms`);
+                }, 0);
+            });
+        }
+    </script>
+</body>
+</html>

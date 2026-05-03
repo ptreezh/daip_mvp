@@ -1,0 +1,1379 @@
+{
+  "teaching_modules": {
+    "P1": {
+      "module_id": "P1",
+      "module_name": "Data Persistence",
+      "learning_objectives": [
+        "理解数据持久化的设计原理",
+        "掌握SQLite数据库的使用",
+        "学会会话管理和状态持久化",
+        "能够设计高效的数据模型"
+      ],
+      "core_documents": {
+        "specification": "D:\\daip\\refactdoc\\docs\\specs\\PROJECT_SPEC.md",
+        "implementation": [
+          "D:\\daip\\refactdoc\\IMPLEMENTATION_PLAN.md",
+          "D:\\daip\\refactdoc\\.spec-kit\\templates\\final-implementation-guide.md",
+          "D:\\daip\\refactdoc\\.spec-kit\\templates\\optimized-cli-implementation-plan.md",
+          "D:\\daip\\refactdoc\\.spec-kit\\templates\\cli-implementation-plan.md",
+          "D:\\daip\\refactdoc\\agent_memory_learning_implementation_plan.md",
+          "D:\\daip\\refactdoc\\solid_principles_implementation_guide.md",
+          "D:\\daip\\refactdoc\\docs\\newP5\\IMPLEMENTATION_PLAN.md",
+          "D:\\daip\\refactdoc\\docs\\specs\\P5_P6_P7_IMPLEMENTATION_PLAN.md"
+        ],
+        "tests": [
+          "D:\\daip\\refactdoc\\docs\\procedure\\INTEGRATION_TEST_PLAN.md",
+          "D:\\daip\\refactdoc\\docs\\specs\\TESTING_STRATEGY_AND_TEST_CASES.md"
+        ]
+      },
+      "prerequisites": [],
+      "learning_sequence": [
+        {
+          "step": 1,
+          "title": "理论学习和规格理解",
+          "documents": [
+            "D:\\daip\\refactdoc\\docs\\specs\\PROJECT_SPEC.md"
+          ],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "step": 2,
+          "title": "代码实现和实践",
+          "documents": [
+            "D:\\daip\\refactdoc\\IMPLEMENTATION_PLAN.md",
+            "D:\\daip\\refactdoc\\.spec-kit\\templates\\final-implementation-guide.md",
+            "D:\\daip\\refactdoc\\.spec-kit\\templates\\optimized-cli-implementation-plan.md",
+            "D:\\daip\\refactdoc\\.spec-kit\\templates\\cli-implementation-plan.md",
+            "D:\\daip\\refactdoc\\agent_memory_learning_implementation_plan.md",
+            "D:\\daip\\refactdoc\\solid_principles_implementation_guide.md",
+            "D:\\daip\\refactdoc\\docs\\newP5\\IMPLEMENTATION_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\P5_P6_P7_IMPLEMENTATION_PLAN.md"
+          ],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "step": 3,
+          "title": "测试和质量验证",
+          "documents": [
+            "D:\\daip\\refactdoc\\docs\\procedure\\INTEGRATION_TEST_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\TESTING_STRATEGY_AND_TEST_CASES.md"
+          ],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "step": 4,
+          "title": "综合项目和集成",
+          "documents": [
+            "D:\\daip\\refactdoc\\docs\\specs\\PROJECT_SPEC.md",
+            "D:\\daip\\refactdoc\\CLAUDE.md",
+            "D:\\daip\\refactdoc\\IMPLEMENTATION_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\CONTEXTUAL_INTENT_SPECS.md",
+            "D:\\daip\\refactdoc\\PROVIDER_CONFIG_SOLUTION.md",
+            "D:\\daip\\refactdoc\\src\\daip_live\\scaffolding\\docs\\QUICK_REFERENCE.md",
+            "D:\\daip\\refactdoc\\task_context_and_persistence_explained.md",
+            "D:\\daip\\refactdoc\\task_context_organization_explained.md",
+            "D:\\daip\\refactdoc\\task_system_design.md",
+            "D:\\daip\\refactdoc\\specs\\skill_integration_enhancement\\plan.md",
+            "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\plan.md",
+            "D:\\daip\\refactdoc\\docs\\quality_assurance.md",
+            "D:\\daip\\refactdoc\\AGENTS.md",
+            "D:\\daip\\refactdoc\\docs\\cli-enhancement\\TASK_BREAKDOWN.md",
+            "D:\\daip\\refactdoc\\docs\\cli-enhancement\\PROJECT_PLAN.md",
+            "D:\\daip\\refactdoc\\.spec-kit\\templates\\final-implementation-guide.md",
+            "D:\\daip\\refactdoc\\.spec-kit\\templates\\cli-optimization-standards.md",
+            "D:\\daip\\refactdoc\\.spec-kit\\templates\\optimized-cli-implementation-plan.md",
+            "D:\\daip\\refactdoc\\.spec-kit\\templates\\cli-implementation-plan.md",
+            "D:\\daip\\refactdoc\\.spec-kit\\templates\\cli-command-specification.md",
+            "D:\\daip\\refactdoc\\agent_memory_learning_implementation_plan.md",
+            "D:\\daip\\refactdoc\\agent_memory_learning_technical_spec.md",
+            "D:\\daip\\refactdoc\\agent_memory_learning_analysis.md",
+            "D:\\daip\\refactdoc\\p7_gui_system_completion_final_report.md",
+            "D:\\daip\\refactdoc\\system_module_maturity_analysis.md",
+            "D:\\daip\\refactdoc\\specification_modularization_plan_kit.md",
+            "D:\\daip\\refactdoc\\specification_modularization_analysis.md",
+            "D:\\daip\\refactdoc\\solid_principles_implementation_guide.md",
+            "D:\\daip\\refactdoc\\modules_remaining_task_breakdown.md",
+            "D:\\daip\\refactdoc\\.specify\\templates\\agent-file-template.md",
+            "D:\\daip\\refactdoc\\docs\\production_wiki_system_summary.md",
+            "D:\\daip\\refactdoc\\docs\\newP7\\COMPLIANCE_CHECKLIST.md",
+            "D:\\daip\\refactdoc\\docs\\newP7\\REFACTORING_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\docs\\newP5\\IMPLEMENTATION_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\newP5\\REFACTORING_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\docs\\newP5\\REFACTORING_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\compliance\\P7_GUI_COMPLIANCE_CHECKLIST.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\P5_P6_P7_IMPLEMENTATION_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\P5_P6_P7_REFACTORING_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\P5_P6_P7_REFACTORING_PLAN.md",
+            "D:\\daip\\refactdoc\\module_compilation_plan.md",
+            "D:\\daip\\refactdoc\\log\\USER_INSTRUCTIONS.md",
+            "D:\\daip\\refactdoc\\tests\\interactive\\ISSUES_ANALYSIS_AND_FIXES.md",
+            "D:\\daip\\refactdoc\\log\\PROJECT_STATUS_COMPREHENSIVE_2025-10-11.md",
+            "D:\\daip\\refactdoc\\log\\worklog-2025-10-11.md",
+            "D:\\daip\\refactdoc\\log\\worklog-2025-09-19-integration.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\permission_integration_spec.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\DEBATE_SYSTEM_OPTIMIZATION_SPEC.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\TUI_NEW_FEATURES_SPEC.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\P_AUX_DEPENDENCY_INJECTION.md",
+            "D:\\daip\\refactdoc\\docs\\procedure\\DAIP_LIVE_系统评审报告.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\MEMORY_SERVICE_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\docs\\p_aux_memory\\SPEC.md",
+            "D:\\daip\\refactdoc\\log\\worklog-2025-09-04.md",
+            "D:\\daip\\refactdoc\\docs\\procedure\\INTEGRATION_TEST_PLAN.md",
+            "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\proxy\\prod.md",
+            "D:\\daip\\refactdoc\\litellm\\GEMINI.md",
+            "D:\\daip\\refactdoc\\litellm\\CLAUDE.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\TESTING_STRATEGY_AND_TEST_CASES.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\KNOWLEDGE_MANAGEMENT_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\DEBATE_SYSTEM_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\IFLOW.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\AGENT_EXECUTION_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\REQUIREMENTS_SPECIFICATION.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\DATABASE_DESIGN_SPECIFICATION.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\DETAILED_SYSTEM_ARCHITECTURE.md"
+          ],
+          "activities": [
+            "完成项目实践",
+            "模块集成",
+            "文档编写",
+            "成果展示"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Data Persistence基础练习",
+          "description": "理解Data Persistence的基本概念和使用方法",
+          "tasks": [
+            "阅读相关文档并总结核心概念",
+            "运行基础示例代码",
+            "完成简单的修改实验",
+            "编写学习笔记和心得"
+          ]
+        },
+        {
+          "level": "intermediate",
+          "title": "Data Persistence进阶实践",
+          "description": "深入理解Data Persistence的实现原理和扩展方法",
+          "tasks": [
+            "分析源代码实现",
+            "完成功能扩展任务",
+            "编写单元测试",
+            "优化性能和用户体验"
+          ]
+        },
+        {
+          "level": "advanced",
+          "title": "Data Persistence高级应用",
+          "description": "掌握Data Persistence的高级特性和最佳实践",
+          "tasks": [
+            "设计新的功能模块",
+            "集成第三方服务",
+            "编写完整的技术文档",
+            "参与开源项目贡献"
+          ]
+        }
+      ],
+      "assessment_criteria": {
+        "theory_understanding": {
+          "weight": 30,
+          "criteria": [
+            "能够准确描述模块的核心概念",
+            "理解模块在整个系统中的作用",
+            "掌握模块的设计原理和技术选型",
+            "能够分析模块的优缺点"
+          ]
+        },
+        "practical_skills": {
+          "weight": 40,
+          "criteria": [
+            "能够独立完成模块的配置和使用",
+            "掌握模块的API和接口调用",
+            "能够进行功能扩展和定制开发",
+            "具备问题排查和调试能力"
+          ]
+        },
+        "integration_ability": {
+          "weight": 20,
+          "criteria": [
+            "能够将模块与其他系统组件集成",
+            "理解模块间的接口和依赖关系",
+            "能够设计合理的系统集成方案",
+            "具备系统级的思维和架构能力"
+          ]
+        },
+        "documentation_quality": {
+          "weight": 10,
+          "criteria": [
+            "能够编写清晰的技术文档",
+            "掌握规格文档的编写规范",
+            "能够进行有效的知识分享",
+            "具备良好的表达能力"
+          ]
+        }
+      }
+    },
+    "P2": {
+      "module_id": "P2",
+      "module_name": "Knowledge Management",
+      "learning_objectives": [
+        "掌握向量搜索和知识管理",
+        "理解FAISS索引的原理和应用",
+        "学会Wiki系统的设计和实现",
+        "能够构建协作知识库"
+      ],
+      "core_documents": {
+        "specification": "D:\\daip\\refactdoc\\docs\\process\\SPEC_DRIVEN_DEVELOPMENT.md",
+        "implementation": [
+          "D:\\daip\\refactdoc\\src\\daip_live\\tui\\backend_session_manager_implementation.md",
+          "D:\\daip\\refactdoc\\docs\\newP6\\IMPLEMENTATION_PLAN.md"
+        ],
+        "tests": []
+      },
+      "prerequisites": [
+        "P1"
+      ],
+      "learning_sequence": [
+        {
+          "step": 1,
+          "title": "理论学习和规格理解",
+          "documents": [
+            "D:\\daip\\refactdoc\\docs\\process\\SPEC_DRIVEN_DEVELOPMENT.md"
+          ],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "step": 2,
+          "title": "代码实现和实践",
+          "documents": [
+            "D:\\daip\\refactdoc\\src\\daip_live\\tui\\backend_session_manager_implementation.md",
+            "D:\\daip\\refactdoc\\docs\\newP6\\IMPLEMENTATION_PLAN.md"
+          ],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "step": 4,
+          "title": "综合项目和集成",
+          "documents": [
+            "D:\\daip\\refactdoc\\docs\\process\\SPEC_DRIVEN_DEVELOPMENT.md",
+            "D:\\daip\\refactdoc\\PROJECT_STRUCTURE.md",
+            "D:\\daip\\refactdoc\\knowledge\\wiki\\区块链技术详解.md",
+            "D:\\daip\\refactdoc\\docs\\architecture\\ConfigurationBridge_Solution.md",
+            "D:\\daip\\refactdoc\\src\\daip_live\\tui\\command_integration_report.md",
+            "D:\\daip\\refactdoc\\src\\daip_live\\tui\\backend_session_manager_implementation.md",
+            "D:\\daip\\refactdoc\\workout\\debate_的主题_20251123-201209.md",
+            "D:\\daip\\refactdoc\\workout\\debate_wiki比共识算法好_20251123-200512.md",
+            "D:\\daip\\refactdoc\\FINAL_COMPLETE_FEATURE_DOCUMENT.md",
+            "D:\\daip\\refactdoc\\MASTER_FEATURE_DOCUMENT.md",
+            "D:\\daip\\refactdoc\\FEATURE_INTEGRATION_MASTER_DOC.md",
+            "D:\\daip\\refactdoc\\specs\\complete_system_integration\\spec.md",
+            "D:\\daip\\refactdoc\\REFERENCE_ALL_FEATURES.md",
+            "D:\\daip\\refactdoc\\specs\\enhanced_doc_knowledge_tools\\spec.md",
+            "D:\\daip\\refactdoc\\specs\\comprehensive_intent_recognition\\spec.md",
+            "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\quickstart.md",
+            "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\tasks.md",
+            "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\data_model.md",
+            "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\research.md",
+            "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\spec.md",
+            "D:\\daip\\refactdoc\\constitution_compliance_check.md",
+            "D:\\daip\\refactdoc\\specs\\enhanced_doc_knowledge_tools\\tasks.md",
+            "D:\\daip\\refactdoc\\specs\\enhanced_doc_knowledge_tools\\plan.md",
+            "D:\\daip\\refactdoc\\docs\\newP6\\IMPLEMENTATION_PLAN.md",
+            "D:\\daip\\refactdoc\\TUI交互测试全面测评报告.md",
+            "D:\\daip\\refactdoc\\log\\ALL_USER_INTERACTIONS.md",
+            "D:\\daip\\refactdoc\\docs\\TUI_V2_RELEASE_NOTES.md",
+            "D:\\daip\\refactdoc\\docs\\index.md",
+            "D:\\daip\\refactdoc\\docs\\TUI_COMMANDS_QUICK_REFERENCE.md",
+            "D:\\daip\\refactdoc\\docs\\tasks\\FUNCTIONALITY_RECOVERY_TASKS.md",
+            "D:\\daip\\refactdoc\\docs\\design\\FUNCTIONALITY_RECOVERY_DESIGN.md",
+            "D:\\daip\\refactdoc\\MEMORY.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\KISS_YAGNI_SOLID_TASK_LIST.md",
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_REQUIREMENTS_SPEC.md",
+            "D:\\daip\\refactdoc\\docs\\procedure\\task0.md",
+            "D:\\daip\\refactdoc\\log\\需求对齐和差距.md",
+            "D:\\daip\\refactdoc\\docs\\MAIN_CONTROL_DOCUMENT.md"
+          ],
+          "activities": [
+            "完成项目实践",
+            "模块集成",
+            "文档编写",
+            "成果展示"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Knowledge Management基础练习",
+          "description": "理解Knowledge Management的基本概念和使用方法",
+          "tasks": [
+            "阅读相关文档并总结核心概念",
+            "运行基础示例代码",
+            "完成简单的修改实验",
+            "编写学习笔记和心得"
+          ]
+        },
+        {
+          "level": "intermediate",
+          "title": "Knowledge Management进阶实践",
+          "description": "深入理解Knowledge Management的实现原理和扩展方法",
+          "tasks": [
+            "分析源代码实现",
+            "完成功能扩展任务",
+            "编写单元测试",
+            "优化性能和用户体验"
+          ]
+        },
+        {
+          "level": "advanced",
+          "title": "Knowledge Management高级应用",
+          "description": "掌握Knowledge Management的高级特性和最佳实践",
+          "tasks": [
+            "设计新的功能模块",
+            "集成第三方服务",
+            "编写完整的技术文档",
+            "参与开源项目贡献"
+          ]
+        }
+      ],
+      "assessment_criteria": {
+        "theory_understanding": {
+          "weight": 30,
+          "criteria": [
+            "能够准确描述模块的核心概念",
+            "理解模块在整个系统中的作用",
+            "掌握模块的设计原理和技术选型",
+            "能够分析模块的优缺点"
+          ]
+        },
+        "practical_skills": {
+          "weight": 40,
+          "criteria": [
+            "能够独立完成模块的配置和使用",
+            "掌握模块的API和接口调用",
+            "能够进行功能扩展和定制开发",
+            "具备问题排查和调试能力"
+          ]
+        },
+        "integration_ability": {
+          "weight": 20,
+          "criteria": [
+            "能够将模块与其他系统组件集成",
+            "理解模块间的接口和依赖关系",
+            "能够设计合理的系统集成方案",
+            "具备系统级的思维和架构能力"
+          ]
+        },
+        "documentation_quality": {
+          "weight": 10,
+          "criteria": [
+            "能够编写清晰的技术文档",
+            "掌握规格文档的编写规范",
+            "能够进行有效的知识分享",
+            "具备良好的表达能力"
+          ]
+        }
+      }
+    },
+    "P4": {
+      "module_id": "P4",
+      "module_name": "Role & Tool Management",
+      "learning_objectives": [
+        "理解角色和工具管理系统",
+        "掌握动态角色分配机制",
+        "学会工具系统的扩展方法",
+        "能够设计灵活的权限管理"
+      ],
+      "core_documents": {
+        "specification": "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\spec.md",
+        "implementation": [
+          "D:\\daip\\refactdoc\\docs\\development_process.md",
+          "D:\\daip\\refactdoc\\p7_gui_implementation_completion_certificate.md",
+          "D:\\daip\\refactdoc\\p7_gui_implementation_complete.md",
+          "D:\\daip\\refactdoc\\p7_gui_tdd_implementation_plan.md",
+          "D:\\daip\\refactdoc\\docs\\newP7\\IMPLEMENTATION_PLAN.md",
+          "D:\\daip\\refactdoc\\docs\\specs\\TDD_IMPLEMENTATION_PLAN.md",
+          "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_IMPLEMENTATION_GAP_ANALYSIS.md"
+        ],
+        "tests": [
+          "D:\\daip\\refactdoc\\comprehensive_testing_experience_guide.md",
+          "D:\\daip\\refactdoc\\docs\\tui_archive\\COMPREHENSIVE_TUI_TEST_PLAN.md",
+          "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_TEST_PLAN.md",
+          "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_TEST_PLAN_DETAILED.md"
+        ]
+      },
+      "prerequisites": [
+        "P1"
+      ],
+      "learning_sequence": [
+        {
+          "step": 1,
+          "title": "理论学习和规格理解",
+          "documents": [
+            "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\spec.md"
+          ],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "step": 2,
+          "title": "代码实现和实践",
+          "documents": [
+            "D:\\daip\\refactdoc\\docs\\development_process.md",
+            "D:\\daip\\refactdoc\\p7_gui_implementation_completion_certificate.md",
+            "D:\\daip\\refactdoc\\p7_gui_implementation_complete.md",
+            "D:\\daip\\refactdoc\\p7_gui_tdd_implementation_plan.md",
+            "D:\\daip\\refactdoc\\docs\\newP7\\IMPLEMENTATION_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\TDD_IMPLEMENTATION_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_IMPLEMENTATION_GAP_ANALYSIS.md"
+          ],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "step": 3,
+          "title": "测试和质量验证",
+          "documents": [
+            "D:\\daip\\refactdoc\\comprehensive_testing_experience_guide.md",
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\COMPREHENSIVE_TUI_TEST_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_TEST_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_TEST_PLAN_DETAILED.md"
+          ],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "step": 4,
+          "title": "综合项目和集成",
+          "documents": [
+            "D:\\daip\\refactdoc\\src\\daip_live\\tui\\debate_model_switching_enhancement.md",
+            "D:\\daip\\refactdoc\\src\\daip_live\\tui\\final_completion_report.md",
+            "D:\\daip\\refactdoc\\src\\daip_live\\tui\\integration_summary.md",
+            "D:\\daip\\refactdoc\\src\\daip_live\\tui\\interactive_role_creation_summary.md",
+            "D:\\daip\\refactdoc\\src\\daip_live\\scaffolding\\docs\\USER_SCENARIOS.md",
+            "D:\\daip\\refactdoc\\workout\\debate_上下文指令越明晰越好还是越结构化越好_20251123-192729.md",
+            "D:\\daip\\refactdoc\\workout\\debate_生物信息比ai智能更有前景_20251123-162857.md",
+            "D:\\daip\\refactdoc\\workout\\debate_下 意图识别比问题解决更重要_20251123-124122.md",
+            "D:\\daip\\refactdoc\\workout\\debate_敏捷开发与规范ai开发谁更重要_20251123-120536.md",
+            "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\tdd_checklist_completed_final.md",
+            "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\spec.md",
+            "D:\\daip\\refactdoc\\HIERARCHICAL_ARCHITECTURE_PLAN.md",
+            "D:\\daip\\refactdoc\\DESIGN.md",
+            "D:\\daip\\refactdoc\\docs\\development_process.md",
+            "D:\\daip\\refactdoc\\p7_gui_implementation_completion_certificate.md",
+            "D:\\daip\\refactdoc\\current_system_status_and_gradual_enhancement_plan.md",
+            "D:\\daip\\refactdoc\\advanced_agent_memory_brainstorming.md",
+            "D:\\daip\\refactdoc\\experience_guide.md",
+            "D:\\daip\\refactdoc\\p7_gui_system_completion_certificate_final.md",
+            "D:\\daip\\refactdoc\\comprehensive_testing_experience_guide.md",
+            "D:\\daip\\refactdoc\\tasks.md",
+            "D:\\daip\\refactdoc\\p7_gui_system_completion_certificate.md",
+            "D:\\daip\\refactdoc\\p7_gui_implementation_complete.md",
+            "D:\\daip\\refactdoc\\p7_gui_experience_guide.md",
+            "D:\\daip\\refactdoc\\plan.md",
+            "D:\\daip\\refactdoc\\p7_gui_tdd_implementation_plan.md",
+            "D:\\daip\\refactdoc\\atomic_task_breakdown_p7_gui.md",
+            "D:\\daip\\refactdoc\\specification_modularization_plan_kit_updated.md",
+            "D:\\daip\\refactdoc\\specs\\comprehensive_intent_recognition\\tasks.md",
+            "D:\\daip\\refactdoc\\specs\\enhanced_doc_tools\\tasks.md",
+            "D:\\daip\\refactdoc\\specs\\enhanced_doc_tools\\plan.md",
+            "D:\\daip\\refactdoc\\specs\\enhanced_doc_tools\\spec.md",
+            "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\tasks.md",
+            "D:\\daip\\refactdoc\\.specify\\templates\\tasks-template.md",
+            "D:\\daip\\refactdoc\\CRITICAL_ISSUES_SOLUTION_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\newP7\\IMPLEMENTATION_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\newP5\\COMPLIANCE_CHECKLIST.md",
+            "D:\\daip\\refactdoc\\docs\\compliance\\P5_AGENT_ENGINE_COMPLIANCE_CHECKLIST.md",
+            "D:\\daip\\refactdoc\\workout\\debate_人定胜天_20251024-231459.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\PROJECT_EXECUTION_STANDARDS.md",
+            "D:\\daip\\refactdoc\\workout\\debate_意图识别比智力更重要_20251020_195957.md",
+            "D:\\daip\\refactdoc\\workout\\debate_AI商和情商哪个重要_20251012_191212.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\TDD_IMPLEMENTATION_PLAN.md",
+            "D:\\daip\\refactdoc\\analysis\\KISS_YAGNI_SOLID_analysis.md",
+            "D:\\daip\\refactdoc\\docs\\TUI_COMMAND_INTERFACE_ENHANCEMENT_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\tui_permission_command_spec.md",
+            "D:\\daip\\refactdoc\\docs\\permission_rule_configuration_spec.md",
+            "D:\\daip\\refactdoc\\docs\\permission_integration_test_spec.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\PERSONAL_PERMISSION_POLICY_MIN.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\end_to_end_permission_integration_spec.md",
+            "D:\\daip\\refactdoc\\log\\worklog-2025-09-19-actual-integration.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\agent_executor_permission_integration_spec.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\permission_user_response_spec.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\permission_tui_interface_spec.md",
+            "D:\\daip\\refactdoc\\log\\worklog-2025-09-18-robust-completion.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\permission_ask_mode_robust_design.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\permission_ask_mode_tdd_spec.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\permission_ask_mode_design.md",
+            "D:\\daip\\refactdoc\\log\\worklog-2025-09-18-completion.md",
+            "D:\\daip\\refactdoc\\log\\worklog-2025-09-18.md",
+            "D:\\daip\\refactdoc\\docs\\procedure\\RAG_Tools_Spec.md",
+            "D:\\daip\\refactdoc\\log\\worklog-2025-09-16-fixes.md",
+            "D:\\daip\\refactdoc\\log\\worklog-2025-09-16.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\INTELLIGENT_ROLE_SELECTION_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\TUI_AUTOCOMPLETION_IMPLEMENTATION_SPEC.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\TUI_COMPONENT_SPEC.md",
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\COMPREHENSIVE_TUI_TEST_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_IMPLEMENTATION_GAP_ANALYSIS.md",
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_TASK_LIST_TDD.md",
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_TDD_TASK_LIST.md",
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_TEST_PLAN.md",
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_TEST_PLAN_DETAILED.md",
+            "D:\\daip\\refactdoc\\docs\\tui_cli_enhancement_design.md",
+            "D:\\daip\\refactdoc\\docs\\shortcut_commands_design.md",
+            "D:\\daip\\refactdoc\\docs\\p8_debate_system\\SPEC.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\SYSTEM_ARCHITECTURE.md"
+          ],
+          "activities": [
+            "完成项目实践",
+            "模块集成",
+            "文档编写",
+            "成果展示"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Role & Tool Management基础练习",
+          "description": "理解Role & Tool Management的基本概念和使用方法",
+          "tasks": [
+            "阅读相关文档并总结核心概念",
+            "运行基础示例代码",
+            "完成简单的修改实验",
+            "编写学习笔记和心得"
+          ]
+        },
+        {
+          "level": "intermediate",
+          "title": "Role & Tool Management进阶实践",
+          "description": "深入理解Role & Tool Management的实现原理和扩展方法",
+          "tasks": [
+            "分析源代码实现",
+            "完成功能扩展任务",
+            "编写单元测试",
+            "优化性能和用户体验"
+          ]
+        },
+        {
+          "level": "advanced",
+          "title": "Role & Tool Management高级应用",
+          "description": "掌握Role & Tool Management的高级特性和最佳实践",
+          "tasks": [
+            "设计新的功能模块",
+            "集成第三方服务",
+            "编写完整的技术文档",
+            "参与开源项目贡献"
+          ]
+        }
+      ],
+      "assessment_criteria": {
+        "theory_understanding": {
+          "weight": 30,
+          "criteria": [
+            "能够准确描述模块的核心概念",
+            "理解模块在整个系统中的作用",
+            "掌握模块的设计原理和技术选型",
+            "能够分析模块的优缺点"
+          ]
+        },
+        "practical_skills": {
+          "weight": 40,
+          "criteria": [
+            "能够独立完成模块的配置和使用",
+            "掌握模块的API和接口调用",
+            "能够进行功能扩展和定制开发",
+            "具备问题排查和调试能力"
+          ]
+        },
+        "integration_ability": {
+          "weight": 20,
+          "criteria": [
+            "能够将模块与其他系统组件集成",
+            "理解模块间的接口和依赖关系",
+            "能够设计合理的系统集成方案",
+            "具备系统级的思维和架构能力"
+          ]
+        },
+        "documentation_quality": {
+          "weight": 10,
+          "criteria": [
+            "能够编写清晰的技术文档",
+            "掌握规格文档的编写规范",
+            "能够进行有效的知识分享",
+            "具备良好的表达能力"
+          ]
+        }
+      }
+    },
+    "P3": {
+      "module_id": "P3",
+      "module_name": "Model Provider",
+      "learning_objectives": [
+        "理解多模型提供者架构",
+        "掌握LiteLLM的使用",
+        "学会模型抽象和切换机制",
+        "能够集成不同的AI服务"
+      ],
+      "core_documents": {
+        "specification": "D:\\daip\\refactdoc\\docs\\specs\\SCAFFOLD_REQUIREMENTS_SPEC.md",
+        "implementation": [
+          "D:\\daip\\refactdoc\\src\\daip_live\\tui\\final_implementation_summary.md"
+        ],
+        "tests": []
+      },
+      "prerequisites": [
+        "P1"
+      ],
+      "learning_sequence": [
+        {
+          "step": 1,
+          "title": "理论学习和规格理解",
+          "documents": [
+            "D:\\daip\\refactdoc\\docs\\specs\\SCAFFOLD_REQUIREMENTS_SPEC.md"
+          ],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "step": 2,
+          "title": "代码实现和实践",
+          "documents": [
+            "D:\\daip\\refactdoc\\src\\daip_live\\tui\\final_implementation_summary.md"
+          ],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "step": 4,
+          "title": "综合项目和集成",
+          "documents": [
+            "D:\\daip\\refactdoc\\PROJECT_RECORD.md",
+            "D:\\daip\\refactdoc\\src\\daip_live\\tui\\final_implementation_summary.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\SCAFFOLD_DEIGN_DOCUMENT.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\SCAFFOLD_REQUIREMENTS_SPEC.md",
+            "D:\\daip\\refactdoc\\workout\\debate_上下文工程在大模型之外比内部更重要_20251123-170906.md",
+            "D:\\daip\\refactdoc\\specs\\full_claude_skills_implementation\\spec.md",
+            "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\quickstart.md",
+            "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\tasks.md",
+            "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\data-model.md",
+            "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\spec.md",
+            "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\plan.md",
+            "D:\\daip\\refactdoc\\workout\\debate_AI和智能体不重要重要的是具身智能_20251115-145312.md",
+            "D:\\daip\\refactdoc\\workout\\debate_多模型辩论_20251106-210312.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\command_cleanup_and_status_sync_spec.md",
+            "D:\\daip\\refactdoc\\docs\\procedure\\辩论系统架构分析报告.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\TOKEN_MANAGEMENT_COMPRESSION_SPEC.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\ROLE_MODEL_CONFIGURATION_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\BASIC_TOOLS_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\docs\\p5_agent_engine\\SPEC.md",
+            "D:\\daip\\refactdoc\\docs\\tui_cli_specification.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\ROLE_MANAGEMENT_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\litellm\\litellm\\proxy\\management_endpoints\\scim\\README_SCIM.md",
+            "D:\\daip\\refactdoc\\litellm\\litellm\\google_genai\\Readme.md",
+            "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\release_notes\\v1.75.8\\index.md",
+            "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\release_notes\\v1.73.0-stable\\index.md",
+            "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\release_notes\\v1.65.4-stable\\index.md",
+            "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\proxy\\users.md",
+            "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\proxy\\logging.md",
+            "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\proxy\\docker_quick_start.md",
+            "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\proxy\\control_plane_and_data_plane.md",
+            "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\providers\\bedrock.md",
+            "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\mcp.md",
+            "D:\\daip\\refactdoc\\litellm\\AGENTS.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\LLM_SCHEDULER_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\CLI_INTERFACE_REQUIREMENTS.md"
+          ],
+          "activities": [
+            "完成项目实践",
+            "模块集成",
+            "文档编写",
+            "成果展示"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Model Provider基础练习",
+          "description": "理解Model Provider的基本概念和使用方法",
+          "tasks": [
+            "阅读相关文档并总结核心概念",
+            "运行基础示例代码",
+            "完成简单的修改实验",
+            "编写学习笔记和心得"
+          ]
+        },
+        {
+          "level": "intermediate",
+          "title": "Model Provider进阶实践",
+          "description": "深入理解Model Provider的实现原理和扩展方法",
+          "tasks": [
+            "分析源代码实现",
+            "完成功能扩展任务",
+            "编写单元测试",
+            "优化性能和用户体验"
+          ]
+        },
+        {
+          "level": "advanced",
+          "title": "Model Provider高级应用",
+          "description": "掌握Model Provider的高级特性和最佳实践",
+          "tasks": [
+            "设计新的功能模块",
+            "集成第三方服务",
+            "编写完整的技术文档",
+            "参与开源项目贡献"
+          ]
+        }
+      ],
+      "assessment_criteria": {
+        "theory_understanding": {
+          "weight": 30,
+          "criteria": [
+            "能够准确描述模块的核心概念",
+            "理解模块在整个系统中的作用",
+            "掌握模块的设计原理和技术选型",
+            "能够分析模块的优缺点"
+          ]
+        },
+        "practical_skills": {
+          "weight": 40,
+          "criteria": [
+            "能够独立完成模块的配置和使用",
+            "掌握模块的API和接口调用",
+            "能够进行功能扩展和定制开发",
+            "具备问题排查和调试能力"
+          ]
+        },
+        "integration_ability": {
+          "weight": 20,
+          "criteria": [
+            "能够将模块与其他系统组件集成",
+            "理解模块间的接口和依赖关系",
+            "能够设计合理的系统集成方案",
+            "具备系统级的思维和架构能力"
+          ]
+        },
+        "documentation_quality": {
+          "weight": 10,
+          "criteria": [
+            "能够编写清晰的技术文档",
+            "掌握规格文档的编写规范",
+            "能够进行有效的知识分享",
+            "具备良好的表达能力"
+          ]
+        }
+      }
+    },
+    "P6": {
+      "module_id": "P6",
+      "module_name": "Terminal Interface",
+      "learning_objectives": [
+        "掌握TUI界面的设计和开发",
+        "理解Textual框架的使用",
+        "学会命令驱动的交互设计",
+        "能够构建现代化的终端应用"
+      ],
+      "core_documents": {
+        "specification": "D:\\daip\\refactdoc\\specs\\context_aware_intent_clarification\\spec.md",
+        "implementation": [
+          "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_IMPLEMENTATION_CONDITIONS.md"
+        ],
+        "tests": [
+          "D:\\daip\\refactdoc\\docs\\tui_test_maintenance_guidelines.md"
+        ]
+      },
+      "prerequisites": [
+        "P1"
+      ],
+      "learning_sequence": [
+        {
+          "step": 1,
+          "title": "理论学习和规格理解",
+          "documents": [
+            "D:\\daip\\refactdoc\\specs\\context_aware_intent_clarification\\spec.md"
+          ],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "step": 2,
+          "title": "代码实现和实践",
+          "documents": [
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_IMPLEMENTATION_CONDITIONS.md"
+          ],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "step": 3,
+          "title": "测试和质量验证",
+          "documents": [
+            "D:\\daip\\refactdoc\\docs\\tui_test_maintenance_guidelines.md"
+          ],
+          "activities": [
+            "运行测试",
+            "编写测试用例",
+            "性能测试",
+            "质量检查"
+          ]
+        },
+        {
+          "step": 4,
+          "title": "综合项目和集成",
+          "documents": [
+            "D:\\daip\\refactdoc\\src\\daip_live\\tui\\command_integration_final_validation.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\SCAFFOLD_TDD_TASK_BREAKDOWN.md",
+            "D:\\daip\\refactdoc\\specs\\FEATURES_OVERVIEW.md",
+            "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\tdd_checklist_completed.md",
+            "D:\\daip\\refactdoc\\specs\\context_aware_intent_clarification\\spec.md",
+            "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\tdd_checklist.md",
+            "D:\\daip\\refactdoc\\docs\\issues_resolution_summary.md",
+            "D:\\daip\\refactdoc\\docs\\tui_quit_tasks.md",
+            "D:\\daip\\refactdoc\\docs\\tui_quit_specification.md",
+            "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\requirements.md",
+            "D:\\daip\\refactdoc\\.specify\\templates\\checklist-template.md",
+            "D:\\daip\\refactdoc\\.specify\\templates\\spec-template.md",
+            "D:\\daip\\refactdoc\\.specify\\templates\\plan-template.md",
+            "D:\\daip\\refactdoc\\docs\\newP6\\COMPLIANCE_CHECKLIST.md",
+            "D:\\daip\\refactdoc\\docs\\newP6\\REFACTORING_REQUIREMENTS.md",
+            "D:\\daip\\refactdoc\\docs\\compliance\\P6_TUI_COMPLIANCE_CHECKLIST.md",
+            "D:\\daip\\refactdoc\\TUI全路径全流程测试综合报告.md",
+            "D:\\daip\\refactdoc\\tui_detailed_interaction_report.md",
+            "D:\\daip\\refactdoc\\docs\\tui_test_maintenance_guidelines.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\command_system_optimization_spec.md",
+            "D:\\daip\\refactdoc\\log\\worklog-2025-09-17.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\TUI_SCAFFOLD_INTEGRATION_SPEC.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\TDD_IMPLEMENTATION_SPEC.md",
+            "D:\\daip\\refactdoc\\docs\\TUI_FOCUS_SYSTEM_DESIGN.md",
+            "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_IMPLEMENTATION_CONDITIONS.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\WEB_API_REQUIREMENTS.md"
+          ],
+          "activities": [
+            "完成项目实践",
+            "模块集成",
+            "文档编写",
+            "成果展示"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Terminal Interface基础练习",
+          "description": "理解Terminal Interface的基本概念和使用方法",
+          "tasks": [
+            "阅读相关文档并总结核心概念",
+            "运行基础示例代码",
+            "完成简单的修改实验",
+            "编写学习笔记和心得"
+          ]
+        },
+        {
+          "level": "intermediate",
+          "title": "Terminal Interface进阶实践",
+          "description": "深入理解Terminal Interface的实现原理和扩展方法",
+          "tasks": [
+            "分析源代码实现",
+            "完成功能扩展任务",
+            "编写单元测试",
+            "优化性能和用户体验"
+          ]
+        },
+        {
+          "level": "advanced",
+          "title": "Terminal Interface高级应用",
+          "description": "掌握Terminal Interface的高级特性和最佳实践",
+          "tasks": [
+            "设计新的功能模块",
+            "集成第三方服务",
+            "编写完整的技术文档",
+            "参与开源项目贡献"
+          ]
+        }
+      ],
+      "assessment_criteria": {
+        "theory_understanding": {
+          "weight": 30,
+          "criteria": [
+            "能够准确描述模块的核心概念",
+            "理解模块在整个系统中的作用",
+            "掌握模块的设计原理和技术选型",
+            "能够分析模块的优缺点"
+          ]
+        },
+        "practical_skills": {
+          "weight": 40,
+          "criteria": [
+            "能够独立完成模块的配置和使用",
+            "掌握模块的API和接口调用",
+            "能够进行功能扩展和定制开发",
+            "具备问题排查和调试能力"
+          ]
+        },
+        "integration_ability": {
+          "weight": 20,
+          "criteria": [
+            "能够将模块与其他系统组件集成",
+            "理解模块间的接口和依赖关系",
+            "能够设计合理的系统集成方案",
+            "具备系统级的思维和架构能力"
+          ]
+        },
+        "documentation_quality": {
+          "weight": 10,
+          "criteria": [
+            "能够编写清晰的技术文档",
+            "掌握规格文档的编写规范",
+            "能够进行有效的知识分享",
+            "具备良好的表达能力"
+          ]
+        }
+      }
+    },
+    "P5": {
+      "module_id": "P5",
+      "module_name": "Agent Engine",
+      "learning_objectives": [
+        "理解Agent引擎的执行机制",
+        "掌握意图识别和步骤分解",
+        "学会事件驱动的架构设计",
+        "能够构建智能执行引擎"
+      ],
+      "core_documents": {
+        "specification": "D:\\daip\\refactdoc\\specs\\skill_integration_enhancement\\spec.md",
+        "implementation": [
+          "D:\\daip\\refactdoc\\task_decomposition_implementation_summary.md"
+        ],
+        "tests": []
+      },
+      "prerequisites": [
+        "P3",
+        "P4"
+      ],
+      "learning_sequence": [
+        {
+          "step": 1,
+          "title": "理论学习和规格理解",
+          "documents": [
+            "D:\\daip\\refactdoc\\specs\\skill_integration_enhancement\\spec.md"
+          ],
+          "activities": [
+            "阅读规格文档",
+            "理解设计原理",
+            "分析需求规格"
+          ]
+        },
+        {
+          "step": 2,
+          "title": "代码实现和实践",
+          "documents": [
+            "D:\\daip\\refactdoc\\task_decomposition_implementation_summary.md"
+          ],
+          "activities": [
+            "阅读源代码",
+            "运行示例",
+            "修改功能",
+            "扩展特性"
+          ]
+        },
+        {
+          "step": 4,
+          "title": "综合项目和集成",
+          "documents": [
+            "D:\\daip\\refactdoc\\complex_task_system_summary.md",
+            "D:\\daip\\refactdoc\\task_decomposition_implementation_summary.md",
+            "D:\\daip\\refactdoc\\specs\\skill_integration_enhancement\\spec.md",
+            "D:\\daip\\refactdoc\\specs\\skills_extension_system\\quickstart.md",
+            "D:\\daip\\refactdoc\\specs\\skills_extension_system\\data-model.md",
+            "D:\\daip\\refactdoc\\specs\\skills_extension_system\\tasks.md",
+            "D:\\daip\\refactdoc\\specs\\skills_extension_system\\research.md",
+            "D:\\daip\\refactdoc\\specs\\skills_extension_system\\plan.md",
+            "D:\\daip\\refactdoc\\specs\\skills_extension_system\\spec.md",
+            "D:\\daip\\refactdoc\\specs\\context_aware_intent_clarification\\tasks.md",
+            "D:\\daip\\refactdoc\\specs\\context_aware_intent_clarification\\plan.md",
+            "D:\\daip\\refactdoc\\TDD_CHECKLIST.md",
+            "D:\\daip\\refactdoc\\SPECIFICATION.md",
+            "D:\\daip\\refactdoc\\specs\\comprehensive_intent_recognition\\plan.md",
+            "D:\\daip\\refactdoc\\specs\\intent_recognition_debate_history\\tasks.md",
+            "D:\\daip\\refactdoc\\specs\\intent_recognition_debate_history\\plan.md",
+            "D:\\daip\\refactdoc\\specs\\intent_recognition_debate_history\\spec.md",
+            "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\plan.md",
+            "D:\\daip\\refactdoc\\.specify\\memory\\constitution.md",
+            "D:\\daip\\refactdoc\\docs\\specs\\AGENT_EXECUTOR_REFACTOR_PLAN.md",
+            "D:\\daip\\refactdoc\\log\\worklog-2025-09-12.md"
+          ],
+          "activities": [
+            "完成项目实践",
+            "模块集成",
+            "文档编写",
+            "成果展示"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Agent Engine基础练习",
+          "description": "理解Agent Engine的基本概念和使用方法",
+          "tasks": [
+            "阅读相关文档并总结核心概念",
+            "运行基础示例代码",
+            "完成简单的修改实验",
+            "编写学习笔记和心得"
+          ]
+        },
+        {
+          "level": "intermediate",
+          "title": "Agent Engine进阶实践",
+          "description": "深入理解Agent Engine的实现原理和扩展方法",
+          "tasks": [
+            "分析源代码实现",
+            "完成功能扩展任务",
+            "编写单元测试",
+            "优化性能和用户体验"
+          ]
+        },
+        {
+          "level": "advanced",
+          "title": "Agent Engine高级应用",
+          "description": "掌握Agent Engine的高级特性和最佳实践",
+          "tasks": [
+            "设计新的功能模块",
+            "集成第三方服务",
+            "编写完整的技术文档",
+            "参与开源项目贡献"
+          ]
+        }
+      ],
+      "assessment_criteria": {
+        "theory_understanding": {
+          "weight": 30,
+          "criteria": [
+            "能够准确描述模块的核心概念",
+            "理解模块在整个系统中的作用",
+            "掌握模块的设计原理和技术选型",
+            "能够分析模块的优缺点"
+          ]
+        },
+        "practical_skills": {
+          "weight": 40,
+          "criteria": [
+            "能够独立完成模块的配置和使用",
+            "掌握模块的API和接口调用",
+            "能够进行功能扩展和定制开发",
+            "具备问题排查和调试能力"
+          ]
+        },
+        "integration_ability": {
+          "weight": 20,
+          "criteria": [
+            "能够将模块与其他系统组件集成",
+            "理解模块间的接口和依赖关系",
+            "能够设计合理的系统集成方案",
+            "具备系统级的思维和架构能力"
+          ]
+        },
+        "documentation_quality": {
+          "weight": 10,
+          "criteria": [
+            "能够编写清晰的技术文档",
+            "掌握规格文档的编写规范",
+            "能够进行有效的知识分享",
+            "具备良好的表达能力"
+          ]
+        }
+      }
+    },
+    "P8": {
+      "module_id": "P8",
+      "module_name": "Debate System",
+      "learning_objectives": [
+        "理解多模型辩论系统",
+        "掌握角色分配和模型选择",
+        "学会协作推理机制",
+        "能够构建智能辩论系统"
+      ],
+      "core_documents": {
+        "specification": "",
+        "implementation": [],
+        "tests": []
+      },
+      "prerequisites": [
+        "P3",
+        "P5"
+      ],
+      "learning_sequence": [
+        {
+          "step": 4,
+          "title": "综合项目和集成",
+          "documents": [
+            "D:\\daip\\refactdoc\\debate_modularization_analysis_goals.md"
+          ],
+          "activities": [
+            "完成项目实践",
+            "模块集成",
+            "文档编写",
+            "成果展示"
+          ]
+        }
+      ],
+      "exercises": [
+        {
+          "level": "beginner",
+          "title": "Debate System基础练习",
+          "description": "理解Debate System的基本概念和使用方法",
+          "tasks": [
+            "阅读相关文档并总结核心概念",
+            "运行基础示例代码",
+            "完成简单的修改实验",
+            "编写学习笔记和心得"
+          ]
+        },
+        {
+          "level": "intermediate",
+          "title": "Debate System进阶实践",
+          "description": "深入理解Debate System的实现原理和扩展方法",
+          "tasks": [
+            "分析源代码实现",
+            "完成功能扩展任务",
+            "编写单元测试",
+            "优化性能和用户体验"
+          ]
+        },
+        {
+          "level": "advanced",
+          "title": "Debate System高级应用",
+          "description": "掌握Debate System的高级特性和最佳实践",
+          "tasks": [
+            "设计新的功能模块",
+            "集成第三方服务",
+            "编写完整的技术文档",
+            "参与开源项目贡献"
+          ]
+        }
+      ],
+      "assessment_criteria": {
+        "theory_understanding": {
+          "weight": 30,
+          "criteria": [
+            "能够准确描述模块的核心概念",
+            "理解模块在整个系统中的作用",
+            "掌握模块的设计原理和技术选型",
+            "能够分析模块的优缺点"
+          ]
+        },
+        "practical_skills": {
+          "weight": 40,
+          "criteria": [
+            "能够独立完成模块的配置和使用",
+            "掌握模块的API和接口调用",
+            "能够进行功能扩展和定制开发",
+            "具备问题排查和调试能力"
+          ]
+        },
+        "integration_ability": {
+          "weight": 20,
+          "criteria": [
+            "能够将模块与其他系统组件集成",
+            "理解模块间的接口和依赖关系",
+            "能够设计合理的系统集成方案",
+            "具备系统级的思维和架构能力"
+          ]
+        },
+        "documentation_quality": {
+          "weight": 10,
+          "criteria": [
+            "能够编写清晰的技术文档",
+            "掌握规格文档的编写规范",
+            "能够进行有效的知识分享",
+            "具备良好的表达能力"
+          ]
+        }
+      }
+    }
+  },
+  "learning_path": [
+    {
+      "phase": 1,
+      "title": "基础入门阶段",
+      "duration": "2-3周",
+      "modules": [
+        "P1",
+        "P6"
+      ],
+      "objectives": "掌握数据持久化和基础界面开发",
+      "deliverables": [
+        "完成环境配置",
+        "理解P1-P6架构",
+        "运行基础示例"
+      ]
+    },
+    {
+      "phase": 2,
+      "title": "核心能力培养",
+      "duration": "4-5周",
+      "modules": [
+        "P2",
+        "P3",
+        "P5"
+      ],
+      "objectives": "掌握知识管理、模型集成和智能执行",
+      "deliverables": [
+        "完成P2-P3学习",
+        "理解Agent引擎",
+        "实现基础AI功能"
+      ]
+    },
+    {
+      "phase": 3,
+      "title": "高级特性掌握",
+      "duration": "3-4周",
+      "modules": [
+        "P4",
+        "P8"
+      ],
+      "objectives": "掌握角色管理和多模型协作",
+      "deliverables": [
+        "完成P4-P8学习",
+        "实现辩论系统",
+        "集成完整功能"
+      ]
+    },
+    {
+      "phase": 4,
+      "title": "系统集成实践",
+      "duration": "2-3周",
+      "modules": [
+        "P7"
+      ],
+      "objectives": "掌握界面集成和系统部署",
+      "deliverables": [
+        "完成P7学习",
+        "系统集成测试",
+        "项目部署上线"
+      ]
+    }
+  ],
+  "collaboration_map": {
+    "total_references": 0,
+    "collaboration_network": {},
+    "module_collaboration": {},
+    "reference_types": {},
+    "dependency_graph": {},
+    "collaboration_metrics": {
+      "total_documents": 271,
+      "documents_with_references": 0,
+      "documents_referenced": 0,
+      "collaboration_density": 0.0,
+      "average_references_per_doc": 0.0
+    }
+  },
+  "cross_module_projects": [
+    {
+      "title": "个人助理应用开发",
+      "modules": [
+        "P1",
+        "P3",
+        "P5",
+        "P6"
+      ],
+      "difficulty": "intermediate",
+      "duration": "2-3周",
+      "description": "开发一个基于TUI的个人助理应用，集成对话、记忆和任务管理功能",
+      "learning_points": [
+        "模块间协作机制",
+        "数据持久化和会话管理",
+        "AI模型集成",
+        "用户界面设计"
+      ]
+    },
+    {
+      "title": "协作知识管理系统",
+      "modules": [
+        "P1",
+        "P2",
+        "P3",
+        "P6",
+        "P7"
+      ],
+      "difficulty": "advanced",
+      "duration": "3-4周",
+      "description": "开发一个支持多用户的协作知识管理系统，包含Wiki、搜索和版本控制功能",
+      "learning_points": [
+        "向量搜索和知识管理",
+        "多用户协作机制",
+        "Web界面集成",
+        "权限管理系统"
+      ]
+    },
+    {
+      "title": "多模型智能辩论平台",
+      "modules": [
+        "P1",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P8"
+      ],
+      "difficulty": "expert",
+      "duration": "4-5周",
+      "description": "开发一个支持多模型协作的智能辩论平台，集成完整的P1-P8模块",
+      "learning_points": [
+        "多模型协作机制",
+        "角色管理和权限控制",
+        "复杂系统集成",
+        "性能优化和扩展性"
+      ]
+    }
+  ]
+}

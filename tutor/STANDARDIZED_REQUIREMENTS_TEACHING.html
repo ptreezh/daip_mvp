@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>规范化需求教学 - 0代码AI规范化编程实践教学</title>
+    <meta name="description" content="学习如何创建和管理规范化需求，确保需求明确、可测量、可追溯">
+    
+    <!-- 统一样式表 -->
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    
+    <!-- 字体和图标 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">加载规范化需求教学内容...</div>
+        </div>
+    </div>
+    
+    <!-- 滚动指示器 -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+    
+    <!-- 统一导航栏 -->
+    <nav class="unified-navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span class="navbar-logo">🤖</span>
+                <span>0代码AI规范化编程</span>
+            </a>
+            
+            <button class="navbar-toggle" id="navbarToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="index.html#learning" class="nav-link">学习</a></li>
+                <li><a href="index.html#modules" class="nav-link">模块</a></li>
+                <li><a href="index.html#projects" class="nav-link">项目</a></li>
+                <li><a href="index.html#resources" class="nav-link">资源</a></li>
+            </ul>
+            
+            <div class="navbar-actions">
+                <a href="#start-learning" class="unified-btn unified-btn-primary">
+                    开始学习
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主容器 -->
+    <main class="main-container">
+        <!-- Hero 区域 -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            <span class="hero-icon">📋</span>
+                            规范化需求教学
+                        </h1>
+                        <p class="hero-description">
+                            学习如何创建和管理规范化需求，确保需求明确、可测量、可追溯，避免需求不明确导致的开发偏差
+                        </p>
+                        <div class="hero-features">
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-check-circle"></i>
+                                明确性
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-balance-scale"></i>
+                                可测量性
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-link"></i>
+                                可追溯性
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="unified-card">
+                            <div class="stats-icon text-center mb-4">
+                                <i class="fas fa-tasks text-4xl text-primary"></i>
+                            </div>
+                            <div class="stats-info text-center">
+                                <div class="text-3xl font-bold text-primary mb-2">5</div>
+                                <div class="text-secondary">核心原则</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 教学内容 -->
+        <section class="content-section py-16">
+            <div class="container">
+                <!-- 什么是规范化需求 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <h2 class="card-title">什么是规范化需求？</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            规范化需求是指通过标准化的格式、术语和结构来表达的用户需求或业务需求，
+                            具有明确性、可测量性、可追溯性、一致性和完整性等特征。
+                        </p>
+                        
+                        <div class="expandable-content mt-6">
+                            <div class="expandable-header">
+                                <h3 class="expandable-title font-semibold">规范化需求的五大特征</h3>
+                                <i class="fas fa-chevron-down expandable-icon"></i>
+                            </div>
+                            <div class="expandable-body">
+                                <div class="grid md:grid-cols-2 gap-6 mt-4">
+                                    <div class="p-4 bg-secondary rounded-lg">
+                                        <h4 class="font-semibold text-primary mb-2">
+                                            <i class="fas fa-bullseye mr-2"></i>明确性
+                                        </h4>
+                                        <p class="text-sm">
+                                            需求表述清晰，无歧义，所有人都能理解同一个意思
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="p-4 bg-secondary rounded-lg">
+                                        <h4 class="font-semibold text-primary mb-2">
+                                            <i class="fas fa-ruler mr-2"></i>可测量性
+                                        </h4>
+                                        <p class="text-sm">
+                                            需求可以通过具体指标进行验证，有明确的成功标准
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="p-4 bg-secondary rounded-lg">
+                                        <h4 class="font-semibold text-primary mb-2">
+                                            <i class="fas fa-project-diagram mr-2"></i>可追溯性
+                                        </h4>
+                                        <p class="text-sm">
+                                            需求可以追踪到具体的实现和测试，形成完整链条
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="p-4 bg-secondary rounded-lg">
+                                        <h4 class="font-semibold text-primary mb-2">
+                                            <i class="fas fa-sync-alt mr-2"></i>一致性
+                                        </h4>
+                                        <p class="text-sm">
+                                            需求之间不存在冲突，形成协调统一的整体
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="p-4 bg-secondary rounded-lg md:col-span-2">
+                                        <h4 class="font-semibold text-primary mb-2">
+                                            <i class="fas fa-clipboard-list mr-2"></i>完整性
+                                        </h4>
+                                        <p class="text-sm">
+                                            覆盖所有必要的功能和非功能需求，无遗漏
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 为什么需要规范化需求 -->
+                <div class="grid md:grid-cols-2 gap-8 mb-12">
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <h3 class="card-title">为什么需要规范化需求？</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-receipt text-success mt-1"></i>
+                                    <div>
+                                        <h4 class="font-semibold">减少沟通成本</h4>
+                                        <p class="text-sm text-secondary mt-1">
+                                            统一的表达方式减少误解，明确的责任分工，高效的评审过程
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-code text-success mt-1"></i>
+                                    <div>
+                                        <h4 class="font-semibold">提高开发质量</h4>
+                                        <p class="text-sm text-secondary mt-1">
+                                            清晰的需求边界，完整的测试覆盖，便于回归测试
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-chart-line text-success mt-1"></i>
+                                    <div>
+                                        <h4 class="font-semibold">便于项目管理</h4>
+                                        <p class="text-sm text-secondary mt-1">
+                                            准确的估算工作量，有效的进度跟踪，合理的风险控制
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h3 class="card-title">不规范化需求的问题</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-comment-slash text-warning mt-1"></i>
+                                    <div>
+                                        <h4 class="font-semibold">沟通障碍</h4>
+                                        <p class="text-sm text-secondary mt-1">
+                                            需求描述模糊，团队成员理解不一致，频繁返工
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-bug text-warning mt-1"></i>
+                                    <div>
+                                        <h4 class="font-semibold">质量隐患</h4>
+                                        <p class="text-sm text-secondary mt-1">
+                                            需求边界不清，测试覆盖不全，上线后发现问题
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-clock text-warning mt-1"></i>
+                                    <div>
+                                        <h4 class="font-semibold">进度延误</h4>
+                                        <p class="text-sm text-secondary mt-1">
+                                            需求变更频繁，开发方向偏离，项目延期交付
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 规范化需求结构 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </div>
+                        <h2 class="card-title">规范化需求的结构</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            一个良好的规范化需求应该包含以下核心要素，确保需求的完整性和可执行性。
+                        </p>
+                        
+                        <div class="code-container mt-6">
+                            <div class="code-header">
+                                <span class="code-title">规范化需求模板</span>
+                                <button class="code-copy-btn">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <div class="code-content">
+                                <pre><code class="language-markdown">## 需求ID: REQ-001
+### 需求标题: 用户登录功能
+### 需求类型: 功能需求
+### 优先级: 高
+### 描述: 
+用户应能够通过输入用户名和密码登录系统
+### 验收标准:
+- 用户输入有效的用户名和密码后能够成功登录
+- 输入无效凭据时显示相应的错误信息
+- 密码字段应隐藏显示
+### 相关模块:
+- 用户认证模块
+- 安全模块
+### 设计约束:
+- 必须使用HTTPS协议传输凭据
+- 密码必须加密存储
+### 影响分析:
+- 影响现有访客用户功能
+- 需要更新用户界面
+- 需要添加安全测试用例</code></pre>
+                            </div>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mt-8">
+                            <div class="p-4 border border-primary rounded-lg">
+                                <h4 class="font-semibold text-primary mb-2">基础信息</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>• 需求ID</li>
+                                    <li>• 需求标题</li>
+                                    <li>• 需求类型</li>
+                                    <li>• 优先级</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="p-4 border border-primary rounded-lg">
+                                <h4 class="font-semibold text-primary mb-2">核心内容</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>• 详细描述</li>
+                                    <li>• 验收标准</li>
+                                    <li>• 相关模块</li>
+                                    <li>• 设计约束</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="p-4 border border-primary rounded-lg">
+                                <h4 class="font-semibold text-primary mb-2">扩展信息</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>• 影响分析</li>
+                                    <li>• 依赖关系</li>
+                                    <li>• 风险评估</li>
+                                    <li>• 测试策略</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 实践练习 -->
+                <div class="unified-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <h2 class="card-title">实践练习：创建规范化需求</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            通过实际案例练习，掌握规范化需求的编写方法。
+                        </p>
+                        
+                        <div class="expandable-content mt-6">
+                            <div class="expandable-header">
+                                <h3 class="expandable-title font-semibold">练习案例：用户搜索功能</h3>
+                                <i class="fas fa-chevron-down expandable-icon"></i>
+                            </div>
+                            <div class="expandable-body">
+                                <div class="bg-secondary rounded-lg p-6 mb-6">
+                                    <h4 class="font-semibold mb-3">案例背景：</h4>
+                                    <p class="mb-4">
+                                        电商平台需要实现商品搜索功能，用户可以通过关键词搜索商品，
+                                        支持模糊匹配、分类筛选、价格区间筛选等功能。
+                                    </p>
+                                    
+                                    <h4 class="font-semibold mb-3">练习任务：</h4>
+                                    <ol class="list-decimal list-inside space-y-2 mb-4">
+                                        <li>根据案例背景，编写完整的规范化需求</li>
+                                        <li>确保包含所有必要要素</li>
+                                        <li>定义清晰的验收标准</li>
+                                        <li>识别相关模块和设计约束</li>
+                                    </ol>
+                                    
+                                    <div class="solution-area">
+                                        <h4 class="font-semibold mb-3">参考答案：</h4>
+                                        <details class="bg-white rounded-lg p-4">
+                                            <summary class="cursor-pointer font-medium">点击查看参考答案</summary>
+                                            <div class="mt-4">
+                                                <pre><code class="language-markdown">## 需求ID: REQ-002
+### 需求标题: 商品搜索功能
+### 需求类型: 功能需求
+### 优先级: 高
+### 描述: 
+用户应能够在电商平台中通过关键词搜索商品，支持模糊匹配、分类筛选、价格区间筛选等功能，
+搜索结果应按相关性排序，并支持分页显示。
+
+### 验收标准:
+- 用户输入关键词后能显示相关商品列表
+- 支持模糊匹配，即使拼写略有错误也能找到相关商品
+- 支持按商品分类进行筛选
+- 支持按价格区间（最低价-最高价）进行筛选
+- 搜索结果按相关性降序排列
+- 支持分页显示，每页显示20个商品
+- 搜索响应时间不超过2秒
+
+### 相关模块:
+- 商品管理模块
+- 搜索引擎模块
+- 用户界面模块
+- 性能监控模块
+
+### 设计约束:
+- 必须使用Elasticsearch作为搜索引擎
+- 搜索关键词长度限制为1-100字符
+- 必须支持中文分词
+- 需要实现搜索缓存机制
+
+### 影响分析:
+- 需要新增搜索页面UI
+- 需要优化商品数据结构以支持搜索
+- 需要添加搜索性能监控
+- 需要编写搜索相关测试用例</code></pre>
+                                            </div>
+                                        </details>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 统一页脚 -->
+    <footer class="unified-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">
+                        <span class="navbar-logo">🤖</span>
+                        <span>0代码AI规范化编程</span>
+                    </div>
+                    <p class="footer-description">
+                        通过AI驱动的学习平台，帮助开发者掌握规范化编程技能。
+                        我们的使命是让每个人都能轻松掌握先进的编程技术。
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>学习资源</h4>
+                        <ul>
+                            <li><a href="document_library.html">文档中心</a></li>
+                            <li><a href="MODULE_WIKI_KNOWLEDGE.html">知识库</a></li>
+                            <li><a href="P3_MODEL_PROVIDER.html">模块文档</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>支持服务</h4>
+                        <ul>
+                            <li><a href="#">帮助中心</a></li>
+                            <li><a href="#">技术支持</a></li>
+                            <li><a href="#">联系我们</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 0代码AI规范化编程. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 统一JavaScript -->
+    <script src="assets/js/unified-scripts.js"></script>
+</body>
+</html>

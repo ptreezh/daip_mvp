@@ -1,0 +1,1348 @@
+{
+  "timestamp": 1765424826.7968879,
+  "test_name": "六向联动内容展示专项测试",
+  "requirements_tested": [
+    "FR-001",
+    "FR-002",
+    "NFR-001",
+    "DP-002"
+  ],
+  "dimensions_tested": [
+    "prompt",
+    "spec",
+    "design",
+    "plan",
+    "code",
+    "correlation",
+    "prompt",
+    "spec",
+    "design",
+    "plan",
+    "code",
+    "correlation",
+    "prompt",
+    "spec",
+    "design",
+    "plan",
+    "code",
+    "correlation",
+    "prompt",
+    "spec",
+    "design",
+    "plan",
+    "code",
+    "correlation"
+  ],
+  "content_validation": {
+    "prompt": {
+      "total_tests": 4,
+      "passed_tests": 4,
+      "failed_tests": 0,
+      "details": [
+        {
+          "requirement": "FR-001",
+          "status": "PASSED",
+          "content_length": 1535,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "FR-002",
+          "status": "PASSED",
+          "content_length": 1496,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "NFR-001",
+          "status": "PASSED",
+          "content_length": 1503,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "DP-002",
+          "status": "PASSED",
+          "content_length": 1491,
+          "has_title": true,
+          "has_content": true
+        }
+      ]
+    },
+    "spec": {
+      "total_tests": 4,
+      "passed_tests": 4,
+      "failed_tests": 0,
+      "details": [
+        {
+          "requirement": "FR-001",
+          "status": "PASSED",
+          "content_length": 1683,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "FR-002",
+          "status": "PASSED",
+          "content_length": 1631,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "NFR-001",
+          "status": "PASSED",
+          "content_length": 1619,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "DP-002",
+          "status": "PASSED",
+          "content_length": 1614,
+          "has_title": true,
+          "has_content": true
+        }
+      ]
+    },
+    "design": {
+      "total_tests": 4,
+      "passed_tests": 4,
+      "failed_tests": 0,
+      "details": [
+        {
+          "requirement": "FR-001",
+          "status": "PASSED",
+          "content_length": 1760,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "FR-002",
+          "status": "PASSED",
+          "content_length": 1710,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "NFR-001",
+          "status": "PASSED",
+          "content_length": 1705,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "DP-002",
+          "status": "PASSED",
+          "content_length": 1698,
+          "has_title": true,
+          "has_content": true
+        }
+      ]
+    },
+    "plan": {
+      "total_tests": 4,
+      "passed_tests": 4,
+      "failed_tests": 0,
+      "details": [
+        {
+          "requirement": "FR-001",
+          "status": "PASSED",
+          "content_length": 1632,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "FR-002",
+          "status": "PASSED",
+          "content_length": 1591,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "NFR-001",
+          "status": "PASSED",
+          "content_length": 1567,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "DP-002",
+          "status": "PASSED",
+          "content_length": 1610,
+          "has_title": true,
+          "has_content": true
+        }
+      ]
+    },
+    "code": {
+      "total_tests": 4,
+      "passed_tests": 4,
+      "failed_tests": 0,
+      "details": [
+        {
+          "requirement": "FR-001",
+          "status": "PASSED",
+          "content_length": 1653,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "FR-002",
+          "status": "PASSED",
+          "content_length": 1907,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "NFR-001",
+          "status": "PASSED",
+          "content_length": 1969,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "DP-002",
+          "status": "PASSED",
+          "content_length": 1772,
+          "has_title": true,
+          "has_content": true
+        }
+      ]
+    },
+    "correlation": {
+      "total_tests": 4,
+      "passed_tests": 4,
+      "failed_tests": 0,
+      "details": [
+        {
+          "requirement": "FR-001",
+          "status": "PASSED",
+          "content_length": 1724,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "FR-002",
+          "status": "PASSED",
+          "content_length": 1713,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "NFR-001",
+          "status": "PASSED",
+          "content_length": 1717,
+          "has_title": true,
+          "has_content": true
+        },
+        {
+          "requirement": "DP-002",
+          "status": "PASSED",
+          "content_length": 1717,
+          "has_title": true,
+          "has_content": true
+        }
+      ]
+    }
+  },
+  "issues_found": [],
+  "summary": {
+    "total_requirements_tested": 4,
+    "total_dimensions_tested": 24,
+    "total_content_tests": 24,
+    "passed_content_tests": 24,
+    "failed_content_tests": 0,
+    "pass_rate": 100.0,
+    "issues_found_count": 0
+  },
+  "console_messages": [
+    {
+      "type": "log",
+      "text": "[DEBUG] 页面初始化"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 绑定事件监听器"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 事件绑定完成"
+    },
+    {
+      "type": "log",
+      "text": "🎯 P1数据持久化 - 六向联动学习系统已加载"
+    },
+    {
+      "type": "log",
+      "text": "💡 点击任意需求开始学习"
+    },
+    {
+      "type": "log",
+      "text": "🔗 点击任意维度，其他五个自动对齐"
+    },
+    {
+      "type": "log",
+      "text": "📊 当前系统状态:  {currentRequirement: FR-001, currentDimension: prompt}"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 页面初始化完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 选择需求: FR-001"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 加载所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 需求选择成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: prompt"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: prompt"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: prompt"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: plan"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: plan"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: plan"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: correlation"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: correlation"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: correlation"
+    },
+    {
+      "type": "log",
+      "text": "视图已重置"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 选择需求: FR-002"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 加载所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 需求选择成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: prompt"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: prompt"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: prompt"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: plan"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: plan"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: plan"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: correlation"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: correlation"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: correlation"
+    },
+    {
+      "type": "log",
+      "text": "视图已重置"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 选择需求: NFR-001"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 加载所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 需求选择成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: prompt"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: prompt"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: prompt"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: plan"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: plan"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: plan"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: correlation"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: correlation"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: correlation"
+    },
+    {
+      "type": "log",
+      "text": "视图已重置"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 选择需求: DP-002"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 加载所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 需求选择成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: prompt"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: prompt"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: prompt"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: plan"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: plan"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: plan"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: correlation"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度内容同步完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: correlation"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: correlation"
+    },
+    {
+      "type": "log",
+      "text": "视图已重置"
+    }
+  ]
+}

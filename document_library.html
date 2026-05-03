@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAIP-LIVE 文档库 - 完整索引</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: var(--background);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Search and Filter Section */
+        .search-section {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 40px 12px 20px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .filter-btn:hover {
+            background: var(--background);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .filter-count {
+            background: var(--secondary-color);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        .filter-btn.active .filter-count {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Category Navigation */
+        .category-nav {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .category-card {
+            background: var(--background);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .category-card.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .category-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .category-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .category-count {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Document Grid */
+        .documents-section {
+            margin-bottom: 30px;
+        }
+
+        .documents-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-count {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .sort-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .sort-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+        }
+
+        .view-btn {
+            padding: 8px 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            border-radius: 6px 0 0 6px;
+        }
+
+        .view-btn:last-child {
+            border-radius: 0 6px 6px 0;
+        }
+
+        .view-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Document List View */
+        .document-list {
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .document-item {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .document-item:hover {
+            background: var(--background);
+        }
+
+        .document-item:last-child {
+            border-bottom: none;
+        }
+
+        .document-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .document-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .document-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .document-path {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-family: monospace;
+        }
+
+        .document-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .document-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .meta-item {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .document-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 2px 8px;
+            background: var(--background);
+            color: var(--text-secondary);
+            border-radius: 12px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+        }
+
+        /* Document Grid View */
+        .document-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .document-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .document-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .document-card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .document-card-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .document-card-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .document-card-path {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+
+        .document-card-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 15px;
+            flex: 1;
+        }
+
+        .document-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: var(--background);
+        }
+
+        .page-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 50px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-secondary);
+        }
+
+        .no-results-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .header-stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+
+            .document-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .documents-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+
+            .sort-controls {
+                justify-content: space-between;
+            }
+
+            .document-meta {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+
+        /* Category Colors */
+        .category-architecture { --category-color: #ef4444; }
+        .category-specs { --category-color: #f59e0b; }
+        .category-process { --category-color: #10b981; }
+        .category-compliance { --category-color: #8b5cf6; }
+        .category-guide { --category-color: #06b6d4; }
+        .category-reports { --category-color: #ec4899; }
+        .category-tests { --category-color: #84cc16; }
+        .category-config { --category-color: #6366f1; }
+        .category-api { --category-color: #0ea5e9; }
+        .category-docs { --category-color: #64748b; }
+        .category-other { --category-color: #94a3b8; }
+
+        .category-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div>
+                    <h1>📚 DAIP-LIVE 文档库</h1>
+                    <p style="color: var(--text-secondary); margin-top: 5px;">完整文档索引系统 - 所有文档在线可访问</p>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalDocs">0</div>
+                        <div class="stat-label">总文档数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalSize">0</div>
+                        <div class="stat-label">总大小</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalCategories">0</div>
+                        <div class="stat-label">分类数</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="搜索文档标题、内容或路径...">
+                <span class="search-icon">🔍</span>
+            </div>
+            <div class="filters" id="quickFilters">
+                <button class="filter-btn active" data-filter="all">
+                    全部
+                    <span class="filter-count" id="count-all">0</span>
+                </button>
+                <button class="filter-btn" data-filter="recent">
+                    最近更新
+                    <span class="filter-count">-</span>
+                </button>
+                <button class="filter-btn" data-filter="large">
+                    大文件 (>50KB)
+                    <span class="filter-count">-</span>
+                </button>
+                <button class="filter-btn" data-filter="favorite">
+                    收藏
+                    <span class="filter-count">-</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Category Navigation -->
+        <section class="category-nav">
+            <h2>文档分类</h2>
+            <div class="category-grid" id="categoryGrid">
+                <!-- Categories will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Documents Section -->
+        <section class="documents-section">
+            <div class="documents-header">
+                <div class="results-count">
+                    显示 <span id="showingFrom">0</span>-<span id="showingTo">0</span> 项，共 <span id="totalResults">0</span> 项
+                </div>
+                <div class="sort-controls">
+                    <select class="sort-select" id="sortSelect">
+                        <option value="relevance">相关性</option>
+                        <option value="name">名称 (A-Z)</option>
+                        <option value="modified">修改时间</option>
+                        <option value="size">文件大小</option>
+                    </select>
+                    <div class="view-toggle">
+                        <button class="view-btn active" id="listViewBtn">📋</button>
+                        <button class="view-btn" id="gridViewBtn">📱</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading" id="loadingState">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- No Results -->
+            <div class="no-results" id="noResults" style="display: none;">
+                <div class="no-results-icon">📭</div>
+                <h3>没有找到匹配的文档</h3>
+                <p>请尝试调整搜索条件或选择其他分类</p>
+            </div>
+
+            <!-- Document List View -->
+            <div class="document-list" id="documentList" style="display: none;">
+                <!-- Documents will be loaded here -->
+            </div>
+
+            <!-- Document Grid View -->
+            <div class="document-grid" id="documentGrid" style="display: none;">
+                <!-- Documents will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination">
+            <!-- Pagination will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allDocuments = [];
+        let filteredDocuments = [];
+        let currentPage = 1;
+        let itemsPerPage = 20;
+        let currentView = 'list';
+        let currentCategory = 'all';
+        let currentSort = 'relevance';
+
+        // Category icons and colors
+        const categoryIcons = {
+            architecture: '🏗️',
+            specs: '📋',
+            process: '⚙️',
+            compliance: '✅',
+            guide: '📖',
+            reports: '📊',
+            tests: '🧪',
+            config: '⚡',
+            api: '🔌',
+            docs: '📄',
+            other: '📁'
+        };
+
+        // Load document data
+        async function loadDocumentData() {
+            try {
+                const response = await fetch('./document_index.json');
+                const data = await response.json();
+
+                allDocuments = data.documents;
+
+                // Update statistics
+                document.getElementById('totalDocs').textContent = data.statistics.total_documents.toLocaleString();
+                document.getElementById('totalSize').textContent = data.statistics.total_size_formatted;
+                document.getElementById('totalCategories').textContent = Object.keys(data.categories).length;
+
+                // Load categories
+                loadCategories(data.categories);
+
+                // Update filter counts
+                updateFilterCounts();
+
+                // Initial render
+                filterAndRenderDocuments();
+
+            } catch (error) {
+                console.error('Error loading document data:', error);
+                showError('无法加载文档数据');
+            }
+        }
+
+        // Load categories
+        function loadCategories(categories) {
+            const categoryGrid = document.getElementById('categoryGrid');
+            categoryGrid.innerHTML = '';
+
+            // Add "All" category
+            const allCard = createCategoryCard('all', '全部', '📚',
+                allDocuments.length, true);
+            categoryGrid.appendChild(allCard);
+
+            // Add other categories
+            for (const [key, category] of Object.entries(categories)) {
+                if (key !== 'other' || category.count > 0) {
+                    const card = createCategoryCard(key, category.display_name,
+                        categoryIcons[key] || '📁', category.count);
+                    categoryGrid.appendChild(card);
+                }
+            }
+        }
+
+        // Create category card
+        function createCategoryCard(key, name, icon, count, isActive = false) {
+            const card = document.createElement('div');
+            card.className = `category-card ${isActive ? 'active' : ''}`;
+            card.dataset.category = key;
+
+            card.innerHTML = `
+                <div class="category-icon">${icon}</div>
+                <div class="category-name">${name}</div>
+                <div class="category-count">${count} 个文档</div>
+            `;
+
+            card.addEventListener('click', () => selectCategory(key));
+
+            return card;
+        }
+
+        // Select category
+        function selectCategory(category) {
+            currentCategory = category;
+            currentPage = 1;
+
+            // Update UI
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.classList.remove('active');
+                if (card.dataset.category === category) {
+                    card.classList.add('active');
+                }
+            });
+
+            filterAndRenderDocuments();
+        }
+
+        // Filter and render documents
+        function filterAndRenderDocuments() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            // Filter documents
+            filteredDocuments = allDocuments.filter(doc => {
+                // Category filter
+                if (currentCategory !== 'all' && doc.category !== currentCategory) {
+                    return false;
+                }
+
+                // Search filter
+                if (searchTerm) {
+                    return doc.title.toLowerCase().includes(searchTerm) ||
+                           doc.description.toLowerCase().includes(searchTerm) ||
+                           doc.path.toLowerCase().includes(searchTerm) ||
+                           doc.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                }
+
+                return true;
+            });
+
+            // Sort documents
+            sortDocuments();
+
+            // Render
+            renderDocuments();
+            renderPagination();
+        }
+
+        // Sort documents
+        function sortDocuments() {
+            filteredDocuments.sort((a, b) => {
+                switch (currentSort) {
+                    case 'name':
+                        return a.title.localeCompare(b.title);
+                    case 'modified':
+                        return new Date(b.modified) - new Date(a.modified);
+                    case 'size':
+                        return b.size - a.size;
+                    case 'relevance':
+                    default:
+                        // For now, just sort by title
+                        return a.title.localeCompare(b.title);
+                }
+            });
+        }
+
+        // Render documents
+        function renderDocuments() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const documentsToShow = filteredDocuments.slice(startIndex, endIndex);
+
+            // Update results count
+            document.getElementById('showingFrom').textContent =
+                filteredDocuments.length > 0 ? startIndex + 1 : 0;
+            document.getElementById('showingTo').textContent =
+                Math.min(endIndex, filteredDocuments.length);
+            document.getElementById('totalResults').textContent =
+                filteredDocuments.length.toLocaleString();
+
+            // Show/hide loading and no results
+            document.getElementById('loadingState').style.display = 'none';
+
+            if (documentsToShow.length === 0) {
+                document.getElementById('noResults').style.display = 'block';
+                document.getElementById('documentList').style.display = 'none';
+                document.getElementById('documentGrid').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('noResults').style.display = 'none';
+
+            // Render based on view
+            if (currentView === 'list') {
+                renderListView(documentsToShow);
+                document.getElementById('documentList').style.display = 'block';
+                document.getElementById('documentGrid').style.display = 'none';
+            } else {
+                renderGridView(documentsToShow);
+                document.getElementById('documentList').style.display = 'none';
+                document.getElementById('documentGrid').style.display = 'block';
+            }
+        }
+
+        // Render list view
+        function renderListView(documents) {
+            const listContainer = document.getElementById('documentList');
+            listContainer.innerHTML = '';
+
+            documents.forEach(doc => {
+                const item = document.createElement('div');
+                item.className = 'document-item';
+                item.innerHTML = `
+                    <div class="document-icon">${categoryIcons[doc.category] || '📄'}</div>
+                    <div class="document-content">
+                        <div class="document-title">
+                            ${doc.title}
+                            <span class="category-badge category-${doc.category}">
+                                ${getCategoryDisplayName(doc.category)}
+                            </span>
+                        </div>
+                        <div class="document-path">${doc.path}</div>
+                        <div class="document-description">${doc.description}</div>
+                        <div class="document-meta">
+                            <div class="meta-item">📅 ${formatDate(doc.modified)}</div>
+                            <div class="meta-item">📊 ${doc.size_formatted}</div>
+                            <div class="meta-item">📝 ${doc.word_count} 词</div>
+                            <div class="meta-item">📄 ${doc.line_count} 行</div>
+                        </div>
+                        ${doc.tags.length > 0 ? `
+                            <div class="document-tags">
+                                ${doc.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                item.addEventListener('click', () => openDocument(doc));
+                listContainer.appendChild(item);
+            });
+        }
+
+        // Render grid view
+        function renderGridView(documents) {
+            const gridContainer = document.getElementById('documentGrid');
+            gridContainer.innerHTML = '';
+
+            documents.forEach(doc => {
+                const card = document.createElement('div');
+                card.className = 'document-card';
+                card.innerHTML = `
+                    <div class="document-card-header">
+                        <div class="document-card-icon">${categoryIcons[doc.category] || '📄'}</div>
+                        <div class="document-card-title">${doc.title}</div>
+                    </div>
+                    <div class="document-card-path">${doc.path}</div>
+                    <div class="document-card-description">${doc.description}</div>
+                    <div class="document-card-footer">
+                        <div class="document-meta">
+                            <div class="meta-item">📊 ${doc.size_formatted}</div>
+                            <div class="meta-item">📅 ${formatDate(doc.modified)}</div>
+                        </div>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => openDocument(doc));
+                gridContainer.appendChild(card);
+            });
+        }
+
+        // Open document
+        function openDocument(doc) {
+            // Convert Windows path to web path
+            let webPath = doc.path.replace(/\\/g, '/');
+
+            // Try to open the document
+            window.open(`./${webPath}`, '_blank');
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'page-btn';
+            prevBtn.textContent = '上一页';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderDocuments();
+                    renderPagination();
+                }
+            });
+            pagination.appendChild(prevBtn);
+
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => {
+                    currentPage = i;
+                    renderDocuments();
+                    renderPagination();
+                });
+                pagination.appendChild(pageBtn);
+            }
+
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.textContent = '下一页';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderDocuments();
+                    renderPagination();
+                }
+            });
+            pagination.appendChild(nextBtn);
+
+            // Page info
+            if (totalPages > 0) {
+                const pageInfo = document.createElement('span');
+                pageInfo.className = 'page-info';
+                pageInfo.textContent = `第 ${currentPage} / ${totalPages} 页`;
+                pagination.appendChild(pageInfo);
+            }
+        }
+
+        // Update filter counts
+        function updateFilterCounts() {
+            document.getElementById('count-all').textContent = allDocuments.length;
+
+            // Count recent documents (modified in last 7 days)
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            const recentCount = allDocuments.filter(doc =>
+                new Date(doc.modified) > weekAgo
+            ).length;
+
+            // Count large documents (> 50KB)
+            const largeCount = allDocuments.filter(doc => doc.size > 51200).length;
+
+            // Update counts in UI
+            const recentBtn = document.querySelector('[data-filter="recent"]');
+            if (recentBtn) {
+                recentBtn.querySelector('.filter-count').textContent = recentCount;
+            }
+
+            const largeBtn = document.querySelector('[data-filter="large"]');
+            if (largeBtn) {
+                largeBtn.querySelector('.filter-count').textContent = largeCount;
+            }
+        }
+
+        // Helper functions
+        function getCategoryDisplayName(category) {
+            const names = {
+                architecture: '架构',
+                specs: '规格',
+                process: '流程',
+                compliance: '合规',
+                guide: '指南',
+                reports: '报告',
+                tests: '测试',
+                config: '配置',
+                api: 'API',
+                docs: '文档',
+                other: '其他'
+            };
+            return names[category] || category;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '未知';
+
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+            if (days === 0) {
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                if (hours === 0) {
+                    const minutes = Math.floor(diff / (1000 * 60));
+                    return minutes <= 1 ? '刚刚' : `${minutes}分钟前`;
+                }
+                return `${hours}小时前`;
+            } else if (days === 1) {
+                return '昨天';
+            } else if (days < 7) {
+                return `${days}天前`;
+            } else if (days < 30) {
+                const weeks = Math.floor(days / 7);
+                return `${weeks}周前`;
+            } else if (days < 365) {
+                const months = Math.floor(days / 30);
+                return `${months}个月前`;
+            } else {
+                const years = Math.floor(days / 365);
+                return `${years}年前`;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #ef4444;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+            `;
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', debounce(() => {
+            currentPage = 1;
+            filterAndRenderDocuments();
+        }, 300));
+
+        document.getElementById('sortSelect').addEventListener('change', (e) => {
+            currentSort = e.target.value;
+            filterAndRenderDocuments();
+        });
+
+        document.getElementById('listViewBtn').addEventListener('click', () => {
+            currentView = 'list';
+            document.getElementById('listViewBtn').classList.add('active');
+            document.getElementById('gridViewBtn').classList.remove('active');
+            renderDocuments();
+        });
+
+        document.getElementById('gridViewBtn').addEventListener('click', () => {
+            currentView = 'grid';
+            document.getElementById('gridViewBtn').classList.add('active');
+            document.getElementById('listViewBtn').classList.remove('active');
+            renderDocuments();
+        });
+
+        // Quick filter buttons
+        document.querySelectorAll('[data-filter]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-filter]').forEach(b =>
+                    b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const filter = btn.dataset.filter;
+
+                if (filter === 'all') {
+                    selectCategory('all');
+                } else if (filter === 'recent') {
+                    // Filter recent documents
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    filteredDocuments = allDocuments.filter(doc =>
+                        new Date(doc.modified) > weekAgo
+                    );
+                    currentPage = 1;
+                    currentCategory = 'all';
+                    renderDocuments();
+                    renderPagination();
+                } else if (filter === 'large') {
+                    // Filter large documents
+                    filteredDocuments = allDocuments.filter(doc => doc.size > 51200);
+                    currentPage = 1;
+                    currentCategory = 'all';
+                    renderDocuments();
+                    renderPagination();
+                }
+            });
+        });
+
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Show loading state
+            document.getElementById('loadingState').style.display = 'flex';
+
+            // Load document data
+            loadDocumentData();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + K for search focus
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+
+            // Escape to clear search
+            if (e.key === 'Escape') {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput.value) {
+                    searchInput.value = '';
+                    filterAndRenderDocuments();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

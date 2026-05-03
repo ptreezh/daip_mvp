@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P3 模型提供商 - 0代码AI规范化编程实践教学</title>
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <!-- 统一导航栏 -->
+    <nav class="unified-navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span>🤖</span>
+                0代码AI规范化编程
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="#learning" class="nav-link active">学习</a></li>
+                <li><a href="#modules" class="nav-link">模块</a></li>
+                <li><a href="#projects" class="nav-link">项目</a></li>
+                <li><a href="#resources" class="nav-link">资源</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <a href="#start-learning" class="unified-btn unified-btn-primary">开始学习</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 面包屑导航 -->
+    <div class="container py-6">
+        <nav class="flex items-center gap-2 text-sm text-tertiary mb-8">
+            <a href="index.html" class="text-secondary hover:text-primary">首页</a>
+            <span>›</span>
+            <a href="#modules" class="text-secondary hover:text-primary">模块实验室</a>
+            <span>›</span>
+            <span class="text-primary font-medium">P3 模型提供商</span>
+        </nav>
+    </div>
+
+    <!-- 页面标题区域 -->
+    <section class="bg-primary py-20 text-center">
+        <div class="container">
+            <div class="mb-6">
+                <span class="unified-tag unified-tag-info mb-4">基础模块</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">
+                P3 模型提供商
+            </h1>
+            <p class="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
+                大模型上下文工程的核心组件，统一管理多种AI模型接入，智能调度和负载均衡
+            </p>
+            <div class="flex gap-4 justify-center">
+                <a href="#implementation" class="unified-btn unified-btn-secondary">
+                    查看实现
+                </a>
+                <a href="#examples" class="unified-btn unified-btn-outline-light">
+                    代码示例
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 概览层 - 核心概念介绍 -->
+    <section id="overview" class="py-16 bg-surface">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-primary mb-4">什么是模型提供商？</h2>
+                <p class="text-lg text-tertiary max-w-4xl mx-auto">
+                    模型提供商是AI系统的核心基础设施，负责统一管理、调度和优化各种AI模型的访问，
+                    为上层应用提供稳定、高效的AI服务。
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="unified-card text-center">
+                    <div class="unified-icon-card unified-icon-primary mb-4">
+                        <span class="text-2xl">🔌</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary mb-3">统一接口</h3>
+                    <p class="text-tertiary">
+                        屏蔽不同AI提供商的差异，提供标准化的API接口
+                    </p>
+                </div>
+
+                <div class="unified-card text-center">
+                    <div class="unified-icon-card unified-icon-warning mb-4">
+                        <span class="text-2xl">⚡</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary mb-3">智能调度</h3>
+                    <p class="text-tertiary">
+                        根据任务类型、性能要求和成本优化，智能选择最适合的模型
+                    </p>
+                </div>
+
+                <div class="unified-card text-center">
+                    <div class="unified-icon-card unified-icon-success mb-4">
+                        <span class="text-2xl">🔄</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary mb-3">负载均衡</h3>
+                    <p class="text-tertiary">
+                        智能分配请求负载，确保系统稳定性和响应性能
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 探索层 - 技术实现 -->
+    <section id="implementation" class="py-16">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-primary mb-4">技术架构</h2>
+                <p class="text-lg text-tertiary max-w-3xl mx-auto">
+                    基于插件化设计的模型提供商系统，支持热插拔、动态配置和智能路由
+                </p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-12">
+                <!-- 架构图 -->
+                <div class="unified-card">
+                    <h3 class="text-xl font-semibold text-primary mb-4">核心架构</h3>
+                    <div class="bg-gray-900 rounded-lg p-6 text-white font-mono text-sm overflow-x-auto">
+                        <pre><code>┌─────────────────┐
+│   应用层         │  ← 上层应用接口
+├─────────────────┤
+│   调度层         │  ← 智能路由和负载均衡
+├─────────────────┤
+│   提供商适配层   │  ← 统一接口适配
+├─────────────────┤
+│   实际提供商     │  ← OpenAI, Claude, Gemini等
+└─────────────────┘</code></pre>
+                    </div>
+                </div>
+
+                <!-- 关键特性 -->
+                <div class="unified-card">
+                    <h3 class="text-xl font-semibold text-primary mb-4">关键特性</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="unified-tag unified-tag-success">热插拔</div>
+                            <div>
+                                <h4 class="font-medium text-primary">动态模型切换</h4>
+                                <p class="text-sm text-tertiary">无需重启即可切换或添加新的AI模型</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="unified-tag unified-tag-info">配置化</div>
+                            <div>
+                                <h4 class="font-medium text-primary">灵活配置</h4>
+                                <p class="text-sm text-tertiary">通过配置文件轻松管理多个模型参数</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="unified-tag unified-tag-warning">监控</div>
+                            <div>
+                                <h4 class="font-medium text-primary">实时监控</h4>
+                                <p class="text-sm text-tertiary">全面的性能指标和健康状态监控</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 深化层 - 代码实现 -->
+    <section id="code-implementation" class="py-16 bg-surface">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-primary mb-4">代码实现</h2>
+                <p class="text-lg text-tertiary max-w-3xl mx-auto">
+                    基于TypeScript实现的模型提供商核心代码示例
+                </p>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-title">DAIP-LIVE 模型提供商核心实现</span>
+                    <span class="code-language">Python</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                </div>
+                <div class="code-content code-highlight">
+                    <pre><code>#!/usr/bin/env python3
+"""
+DAIP-LIVE 模型提供商核心实现
+基于 litellm 的统一 LLM 接口
+"""
+
+import asyncio
+import json
+from typing import Dict, Any, List, Optional
+from dataclasses import dataclass
+from enum import Enum
+
+# DAIP-LIVE 依赖
+from litellm import completion
+from pydantic import BaseModel
+
+
+class ModelProvider(Enum):
+    """支持的模型提供商"""
+    OLLAMA = "ollama"
+    OPENAI = "openai"
+    ANTHROPIC = "anthropic"
+    GEMINI = "gemini"
+
+
+@dataclass
+class ModelConfig:
+    """模型配置"""
+    provider: ModelProvider
+    model_name: str
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
+    max_tokens: int = 4096
+    temperature: float = 0.7
+
+
+@dataclass
+class ChatRequest:
+    """聊天请求"""
+    messages: List[Dict[str, str]]
+    model: str
+    max_tokens: Optional[int] = None
+    temperature: Optional[float] = None
+    stream: bool = False
+
+
+@dataclass
+class ChatResponse:
+    """聊天响应"""
+    content: str
+    model: str
+    usage: Dict[str, int]
+    provider: ModelProvider
+
+
+class ModelProviderManager:
+    """DAIP-LIVE 模型提供商管理器"""
+    
+    def __init__(self):
+        self.configs: Dict[str, ModelConfig] = {}
+        self._load_default_configs()
+    
+    def _load_default_configs(self):
+        """加载默认配置"""
+        # Ollama 本地模型配置
+        self.configs["ollama_llama2"] = ModelConfig(
+            provider=ModelProvider.OLLAMA,
+            model_name="llama2",
+            base_url="http://localhost:11434",
+            max_tokens=4096,
+            temperature=0.7
+        )
+        
+        # OpenAI 云端模型配置
+        self.configs["openai_gpt4"] = ModelConfig(
+            provider=ModelProvider.OPENAI,
+            model_name="gpt-4",
+            max_tokens=8192,
+            temperature=0.7
+        )
+    
+    async def chat(self, request: ChatRequest) -> ChatResponse:
+        """统一聊天接口"""
+        config = self._get_model_config(request.model)
+        
+        # 构建 litellm 参数
+        litellm_params = {
+            "model": config.model_name,
+            "messages": request.messages,
+            "max_tokens": request.max_tokens or config.max_tokens,
+            "temperature": request.temperature or config.temperature,
+            "stream": request.stream
+        }
+        
+        # 根据提供商设置不同的参数
+        if config.provider == ModelProvider.OLLAMA:
+            litellm_params["api_base"] = config.base_url
+        
+        try:
+            # 调用 litellm
+            response = completion(**litellm_params)
+            
+            return ChatResponse(
+                content=response.choices[0].message.content,
+                model=config.model_name,
+                usage={
+                    "prompt_tokens": response.usage.prompt_tokens,
+                    "completion_tokens": response.usage.completion_tokens,
+                    "total_tokens": response.usage.total_tokens
+                },
+                provider=config.provider
+            )
+            
+        except Exception as e:
+            raise Exception(f"模型调用失败: {e}")
+    
+    def _get_model_config(self, model_id: str) -> ModelConfig:
+        """获取模型配置"""
+        if model_id not in self.configs:
+            raise ValueError(f"未知的模型ID: {model_id}")
+        return self.configs[model_id]
+    
+    def add_model(self, model_id: str, config: ModelConfig):
+        """添加新模型"""
+        self.configs[model_id] = config
+    
+    def list_models(self) -> List[Dict[str, Any]]:
+        """列出所有可用模型"""
+        return [
+            {
+                "id": model_id,
+                "provider": config.provider.value,
+                "model_name": config.model_name,
+                "max_tokens": config.max_tokens,
+                "temperature": config.temperature
+            }
+            for model_id, config in self.configs.items()
+        ]
+
+
+# 使用示例
+async def main():
+    """使用示例"""
+    manager = ModelProviderManager()
+    
+    # 列出可用模型
+    print("可用模型:")
+    for model in manager.list_models():
+        print(f"  {model['id']}: {model['provider']} - {model['model_name']}")
+    
+    # 发送聊天请求
+    request = ChatRequest(
+        messages=[
+            {"role": "user", "content": "你好，请介绍一下DAIP-LIVE系统"}
+        ],
+        model="ollama_llama2"
+    )
+    
+    response = await manager.chat(request)
+    print(f"\n回答: {response.content}")
+    print(f"模型: {response.model}")
+    print(f"令牌使用: {response.usage}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 深化层 - 智能调度 -->
+    <section id="routing" class="py-16">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-primary mb-4">智能调度策略</h2>
+                <p class="text-lg text-tertiary max-w-3xl mx-auto">
+                    基于任务类型、性能需求和成本效益的智能路由算法
+                </p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="unified-card">
+                    <h3 class="text-lg font-semibold text-primary mb-3">成本优化</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-tertiary">高价值任务</span>
+                            <span class="unified-tag unified-tag-success">gpt-4</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-tertiary">标准任务</span>
+                            <span class="unified-tag unified-tag-info">gpt-3.5</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-tertiary">批量处理</span>
+                            <span class="unified-tag unified-tag-warning">claude-3-haiku</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="unified-card">
+                    <h3 class="text-lg font-semibold text-primary mb-3">性能优先</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-tertiary">实时响应</span>
+                            <span class="unified-tag unified-tag-success">claude-3.5-sonnet</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-tertiary">长文本处理</span>
+                            <span class="unified-tag unified-tag-info">claude-3-opus</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-tertiary">创意生成</span>
+                            <span class="unified-tag unified-tag-warning">gpt-4</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="unified-card">
+                    <h3 class="text-lg font-semibold text-primary mb-3">负载均衡</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-tertiary">请求分布</span>
+                            <span class="text-sm text-success">自动分配</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-tertiary">故障转移</span>
+                            <span class="text-sm text-success">毫秒级切换</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-tertiary">性能监控</span>
+                            <span class="text-sm text-success">实时追踪</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 专家层 - 高级配置 -->
+    <section id="advanced-config" class="py-16 bg-surface">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-primary mb-4">高级配置</h2>
+                <p class="text-lg text-tertiary max-w-3xl mx-auto">
+                    生产环境中的模型提供商配置最佳实践
+                </p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="unified-card">
+                    <h3 class="text-xl font-semibold text-primary mb-4">配置文件示例</h3>
+                    <div class="bg-gray-900 rounded-lg p-6 overflow-x-auto">
+                        <pre><code class="language-yaml"># model-providers.yml
+providers:
+  openai:
+    type: "openai"
+    api_key: "${OPENAI_API_KEY}"
+    models:
+      - name: "gpt-4"
+        cost_per_token: 0.00003
+        max_context: 8192
+        priority: "high"
+      - name: "gpt-3.5-turbo"
+        cost_per_token: 0.000002
+        max_context: 4096
+        priority: "standard"
+
+  claude:
+    type: "anthropic"
+    api_key: "${ANTHROPIC_API_KEY}"
+    models:
+      - name: "claude-3.5-sonnet"
+        cost_per_token: 0.000003
+        max_context: 200000
+        priority: "premium"
+
+routing:
+  strategy: "cost_optimized"
+  fallbacks:
+    - provider: "claude"
+      model: "claude-3-haiku"
+  health_check_interval: 30s</code></pre>
+                    </div>
+                </div>
+
+                <div class="unified-card">
+                    <h3 class="text-xl font-semibold text-primary mb-4">监控指标</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span class="text-sm font-medium">平均响应时间</span>
+                            <span class="unified-badge unified-badge-success">1.2s</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span class="text-sm font-medium">成功率</span>
+                            <span class="unified-badge unified-badge-success">99.8%</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span class="text-sm font-medium">日请求量</span>
+                            <span class="unified-badge unified-badge-info">12.5M</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span class="text-sm font-medium">成本节约</span>
+                            <span class="unified-badge unified-badge-warning">-32%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 相关链接和下一步 -->
+    <section id="next-steps" class="py-16">
+        <div class="container">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-primary mb-8">深入学习</h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <a href="modules/P1_PERSISTENCE.html" class="unified-card hover:scale-105 transition-transform">
+                        <h3 class="text-lg font-semibold text-primary mb-2">P1 数据持久化</h3>
+                        <p class="text-tertiary text-sm">学习数据存储和管理基础</p>
+                    </a>
+                    <a href="modules/P2_KNOWLEDGE_MANAGEMENT.html" class="unified-card hover:scale-105 transition-transform">
+                        <h3 class="text-lg font-semibold text-primary mb-2">P2 知识管理</h3>
+                        <p class="text-tertiary text-sm">掌握向量搜索和语义理解</p>
+                    </a>
+                    <a href="P5_AGENT_ENGINE.html" class="unified-card hover:scale-105 transition-transform">
+                        <h3 class="text-lg font-semibold text-primary mb-2">P5 智能体引擎</h3>
+                        <p class="text-tertiary text-sm">了解如何使用模型提供商构建智能体</p>
+                    </a>
+                    <a href="P6_TERMINAL_INTERFACE.html" class="unified-card hover:scale-105 transition-transform">
+                        <h3 class="text-lg font-semibold text-primary mb-2">P6 终端接口</h3>
+                        <p class="text-tertiary text-sm">学习模型提供商的命令行接口</p>
+                    </a>
+                    <a href="P8_DEBATE_SYSTEM.html" class="unified-card hover:scale-105 transition-transform">
+                        <h3 class="text-lg font-semibold text-primary mb-2">P8 辩论系统</h3>
+                        <p class="text-tertiary text-sm">了解多模型辩论中的提供商协同</p>
+                    </a>
+                    <a href="DOCUMENT_DRIVEN_LEARNING_PLATFORM.html" class="unified-card hover:scale-105 transition-transform">
+                        <h3 class="text-lg font-semibold text-primary mb-2">学习平台</h3>
+                        <p class="text-tertiary text-sm">返回文档驱动学习平台</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 统一页脚 -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">0代码AI规范化编程</h3>
+                    <p class="text-gray-400 text-sm">
+                        通过多模型辩论和协同生成可信知识的平台
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-md font-semibold mb-4">核心模块</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="modules/P1_PERSISTENCE.html" class="hover:text-white">P1 数据持久化</a></li>
+                        <li><a href="modules/P2_KNOWLEDGE_MANAGEMENT.html" class="hover:text-white">P2 知识管理</a></li>
+                        <li><a href="P3_MODEL_PROVIDER.html" class="hover:text-white">P3 模型提供商</a></li>
+                        <li><a href="P5_AGENT_ENGINE.html" class="hover:text-white">P5 智能体引擎</a></li>
+                        <li><a href="P6_TERMINAL_INTERFACE.html" class="hover:text-white">P6 终端接口</a></li>
+                        <li><a href="P8_DEBATE_SYSTEM.html" class="hover:text-white">P8 辩论系统</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-md font-semibold mb-4">实践项目</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white">实战案例</a></li>
+                        <li><a href="#" class="hover:text-white">项目模板</a></li>
+                        <li><a href="#" class="hover:text-white">最佳实践</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-md font-semibold mb-4">社区资源</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white">技术文档</a></li>
+                        <li><a href="#" class="hover:text-white">API参考</a></li>
+                        <li><a href="#" class="hover:text-white">支持论坛</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p>&copy; 2025 0代码AI规范化编程实践教学平台. 强大0代码10万行代码AI知识生成平台.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Prism.js 语法高亮 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <!-- 动画控制脚本 -->
+    <script src="animations.js"></script>
+    
+    <!-- 自定义脚本 -->
+    <script>
+        // 页面交互脚本
+        document.addEventListener('DOMContentLoaded', function() {
+            // 导航栏滚动效果
+            const navbar = document.getElementById('navbar');
+            let lastScrollY = window.scrollY;
+
+            window.addEventListener('scroll', () => {
+                const currentScrollY = window.scrollY;
+                
+                if (currentScrollY > 100) {
+                    navbar.classList.add('navbar-scrolled');
+                } else {
+                    navbar.classList.remove('navbar-scrolled');
+                }
+
+                lastScrollY = currentScrollY;
+            });
+
+            // 平滑滚动到锚点
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // 代码复制功能已集成到统一的代码容器系统中
+            // 移除旧的复制按钮创建逻辑，避免与新的统一系统冲突
+        });
+    </script>
+</body>
+</html>

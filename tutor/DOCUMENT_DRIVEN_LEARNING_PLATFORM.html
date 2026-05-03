@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文档驱动学习平台 - 0代码AI规范化编程实践教学</title>
+    <meta name="description" content="基于文档驱动的学习平台，通过结构化文档和实践指导帮助开发者掌握AI编程技能">
+    
+    <!-- 统一样式表 -->
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    
+    <!-- 字体和图标 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">加载文档驱动学习平台...</div>
+        </div>
+    </div>
+    
+    <!-- 滚动指示器 -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+    
+    <!-- 统一导航栏 -->
+    <nav class="unified-navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span class="navbar-logo">🤖</span>
+                <span>0代码AI规范化编程</span>
+            </a>
+            
+            <button class="navbar-toggle" id="navbarToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="index.html#learning" class="nav-link">学习</a></li>
+                <li><a href="index.html#teaching" class="nav-link">教学内容</a></li>
+                <li><a href="index.html#modules" class="nav-link">模块</a></li>
+                <li><a href="index.html#projects" class="nav-link">项目</a></li>
+                <li><a href="index.html#resources" class="nav-link">资源</a></li>
+            </ul>
+            
+            <div class="navbar-actions">
+                <a href="#start-learning" class="unified-btn unified-btn-primary">
+                    开始学习
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主容器 -->
+    <main class="main-container">
+        <!-- Hero 区域 -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            <span class="hero-icon">📚</span>
+                            文档驱动学习平台
+                        </h1>
+                        <p class="hero-description">
+                            基于结构化文档和实践指导的学习平台，帮助开发者系统掌握AI编程技能
+                        </p>
+                        <div class="hero-features">
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-file-alt"></i>
+                                结构化文档
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-laptop-code"></i>
+                                实践指导
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-graduation-cap"></i>
+                                渐进式学习
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="unified-card">
+                            <div class="stats-icon text-center mb-4">
+                                <i class="fas fa-book-open text-4xl text-primary"></i>
+                            </div>
+                            <div class="stats-info text-center">
+                                <div class="text-3xl font-bold text-primary mb-2">100+</div>
+                                <div class="text-secondary">学习文档</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 平台概述 -->
+        <section class="content-section py-16">
+            <div class="container">
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <h2 class="card-title">平台概述</h2>
+                    </div>
+                    <p class="card-description">
+                        文档驱动学习平台基于"学习认知科学"理论，通过结构化的文档和循序渐进的学习路径，
+                        帮助开发者系统掌握AI编程的核心概念和实践技能。
+                    </p>
+                    
+                    <div class="grid md:grid-cols-3 gap-6 mt-8">
+                        <div class="text-center p-6 bg-secondary rounded-xl">
+                            <div class="text-3xl font-bold text-primary mb-2">认知科学</div>
+                            <div class="text-secondary">学习理论基础</div>
+                        </div>
+                        
+                        <div class="text-center p-6 bg-secondary rounded-xl">
+                            <div class="text-3xl font-bold text-primary mb-2">结构化</div>
+                            <div class="text-secondary">知识组织</div>
+                        </div>
+                        
+                        <div class="text-center p-6 bg-secondary rounded-xl">
+                            <div class="text-3xl font-bold text-primary mb-2">实践导向</div>
+                            <div class="text-secondary">技能培养</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 核心理念 -->
+                <div class="grid md:grid-cols-2 gap-8 mb-12">
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <h3 class="card-title">核心理念</h3>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-description">
+                                基于"学习认知科学"理论，通过结构化的文档和循序渐进的学习路径，
+                                帮助开发者系统掌握AI编程的核心概念和实践技能。
+                            </p>
+                            
+                            <div class="mt-6">
+                                <h4 class="font-semibold mb-3">设计理念：</h4>
+                                <ul class="space-y-3">
+                                    <li class="flex items-start gap-3">
+                                        <i class="fas fa-check-circle text-success mt-1"></i>
+                                        <div>
+                                            <strong>渐进式披露</strong>
+                                            <p class="text-sm text-secondary mt-1">
+                                                从基础概念到高级应用，逐步深入
+                                            </p>
+                                        </div>
+                                    </li>
+                                    
+                                    <li class="flex items-start gap-3">
+                                        <i class="fas fa-check-circle text-success mt-1"></i>
+                                        <div>
+                                            <strong>认知负荷管理</strong>
+                                            <p class="text-sm text-secondary mt-1">
+                                                合理分配信息密度，避免认知过载
+                                            </p>
+                                        </div>
+                                    </li>
+                                    
+                                    <li class="flex items-start gap-3">
+                                        <i class="fas fa-check-circle text-success mt-1"></i>
+                                        <div>
+                                            <strong>实践结合理论</strong>
+                                            <p class="text-sm text-secondary mt-1">
+                                                每个概念都配有实际代码示例
+                                            </p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <h3 class="card-title">四层学习架构</h3>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-description">
+                                采用四层学习架构，确保学习者能够按照认知规律逐步深入学习，
+                                最大化学习效果和用户体验。
+                            </p>
+                            
+                            <div class="mt-6 space-y-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="unified-tag unified-tag-sm">1</div>
+                                    <div>
+                                        <strong>概览层</strong>
+                                        <span class="text-sm text-secondary ml-2">整体认知框架</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-3">
+                                    <div class="unified-tag unified-tag-sm">2</div>
+                                    <div>
+                                        <strong>探索层</strong>
+                                        <span class="text-sm text-secondary ml-2">核心概念理解</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-3">
+                                    <div class="unified-tag unified-tag-sm">3</div>
+                                    <div>
+                                        <strong>深化层</strong>
+                                        <span class="text-sm text-secondary ml-2">技术细节掌握</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-3">
+                                    <div class="unified-tag unified-tag-sm">4</div>
+                                    <div>
+                                        <strong>专家层</strong>
+                                        <span class="text-sm text-secondary ml-2">高级技术洞察</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 学习路径 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-road"></i>
+                        </div>
+                        <h2 class="card-title">学习路径</h2>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="timeline">
+                            <div class="relative pl-8 pb-8 border-l-2 border-primary">
+                                <!-- 第一阶段 -->
+                                <div class="mb-8">
+                                    <div class="absolute -left-3 top-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                                        <i class="fas fa-1 text-white text-xs"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="font-semibold text-lg mb-2">入门阶段</h3>
+                                        <p class="text-secondary mb-3">
+                                            了解AI编程基础概念，熟悉开发环境
+                                        </p>
+                                        <div class="flex flex-wrap gap-2">
+                                            <span class="unified-tag unified-tag-outline unified-tag-sm">环境搭建</span>
+                                            <span class="unified-tag unified-tag-outline unified-tag-sm">基础概念</span>
+                                            <span class="unified-tag unified-tag-outline unified-tag-sm">第一个项目</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 第二阶段 -->
+                                <div class="mb-8">
+                                    <div class="absolute -left-3 top-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                                        <i class="fas fa-2 text-white text-xs"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="font-semibold text-lg mb-2">进阶阶段</h3>
+                                        <p class="text-secondary mb-3">
+                                            掌握核心模块，深入理解架构设计
+                                        </p>
+                                        <div class="flex flex-wrap gap-2">
+                                            <span class="unified-tag unified-tag-outline unified-tag-sm">P1-P8模块</span>
+                                            <span class="unified-tag unified-tag-outline unified-tag-sm">架构设计</span>
+                                            <span class="unified-tag unified-tag-outline unified-tag-sm">最佳实践</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 第三阶段 -->
+                                <div class="mb-8">
+                                    <div class="absolute -left-3 top-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                                        <i class="fas fa-3 text-white text-xs"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="font-semibold text-lg mb-2">专家阶段</h3>
+                                        <p class="text-secondary mb-3">
+                                            掌握高级技术，具备独立开发能力
+                                        </p>
+                                        <div class="flex flex-wrap gap-2">
+                                            <span class="unified-tag unified-tag-outline unified-tag-sm">性能优化</span>
+                                            <span class="unified-tag unified-tag-outline unified-tag-sm">系统设计</span>
+                                            <span class="unified-tag unified-tag-outline unified-tag-sm">技术创新</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 第四阶段 -->
+                                <div>
+                                    <div class="absolute -left-3 top-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                                        <i class="fas fa-4 text-white text-xs"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="font-semibold text-lg mb-2">大师阶段</h3>
+                                        <p class="text-secondary mb-3">
+                                            具备架构师能力，能够指导他人学习
+                                        </p>
+                                        <div class="flex flex-wrap gap-2">
+                                            <span class="unified-tag unified-tag-outline unified-tag-sm">技术领导力</span>
+                                            <span class="unified-tag unified-tag-outline unified-tag-sm">知识传播</span>
+                                            <span class="unified-tag unified-tag-outline unified-tag-sm">前沿探索</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 平台特色 -->
+                <div class="unified-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h2 class="card-title">平台特色</h2>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="text-center p-6 hover:bg-secondary rounded-xl transition-all">
+                            <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-search text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg mb-2">智能搜索</h3>
+                            <p class="text-secondary text-sm">
+                                基于语义理解的智能搜索，快速定位所需知识点
+                            </p>
+                        </div>
+                        
+                        <div class="text-center p-6 hover:bg-secondary rounded-xl transition-all">
+                            <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-sync-alt text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg mb-2">动态更新</h3>
+                            <p class="text-secondary text-sm">
+                                实时更新最新技术动态，保持知识时效性
+                            </p>
+                        </div>
+                        
+                        <div class="text-center p-6 hover:bg-secondary rounded-xl transition-all">
+                            <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-users text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg mb-2">社区互动</h3>
+                            <p class="text-secondary text-sm">
+                                与全球开发者交流学习心得，共同进步
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 统一页脚 -->
+    <footer class="unified-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">
+                        <span class="navbar-logo">🤖</span>
+                        <span>0代码AI规范化编程</span>
+                    </div>
+                    <p class="footer-description">
+                        通过AI驱动的学习平台，帮助开发者掌握规范化编程技能。
+                        我们的使命是让每个人都能轻松掌握先进的编程技术。
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>学习资源</h4>
+                        <ul>
+                            <li><a href="document_library.html">文档中心</a></li>
+                            <li><a href="MODULE_WIKI_KNOWLEDGE.html">知识库</a></li>
+                            <li><a href="P3_MODEL_PROVIDER.html">模块文档</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>支持服务</h4>
+                        <ul>
+                            <li><a href="#">帮助中心</a></li>
+                            <li><a href="#">技术支持</a></li>
+                            <li><a href="#">联系我们</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 0代码AI规范化编程. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 统一JavaScript -->
+    <script src="assets/js/unified-scripts.js"></script>
+</body>
+</html>

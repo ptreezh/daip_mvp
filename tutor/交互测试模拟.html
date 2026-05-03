@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六向联动交互测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 1rem; background: #f8fafc; }
+        .test-container { max-width: 1200px; margin: 0 auto; }
+        .test-header { text-align: center; margin-bottom: 2rem; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .test-results { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+        .test-section { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .log-output { background: #1e293b; color: #f8fafc; padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.875rem; max-height: 400px; overflow-y: auto; }
+        .interactive-demo { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .demo-button { background: #667eea; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; margin: 0.25rem; font-size: 0.875rem; }
+        .demo-button:hover { background: #5a67d8; }
+        .demo-button.active { background: #10b981; }
+        .dimension-demo { border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin: 0.5rem 0; }
+        .dimension-demo.active { border-color: #667eea; background: #f8fafc; }
+        .status { padding: 0.5rem 1rem; border-radius: 6px; margin: 0.5rem 0; }
+        .status.success { background: #dcfce7; color: #16a34a; }
+        .status.error { background: #fef2f2; color: #dc2626; }
+        .status.warning { background: #fef3c7; color: #d97706; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🔧 六向联动交互测试模拟</h1>
+            <p>模拟用户点击交互，验证六向联动功能</p>
+        </div>
+
+        <div class="test-results">
+            <div class="test-section">
+                <h3>📋 测试日志</h3>
+                <div class="log-output" id="test-log"></div>
+            </div>
+            
+            <div class="test-section">
+                <h3>🎯 测试结果</h3>
+                <div id="test-results"></div>
+            </div>
+        </div>
+
+        <div class="interactive-demo">
+            <h3>🎮 交互模拟</h3>
+            <div id="interactive-demo"></div>
+        </div>
+    </div>
+
+    <script>
+        // 测试日志
+        function addLog(message) {
+            const log = document.getElementById('test-log');
+            const time = new Date().toLocaleTimeString();
+            log.innerHTML += `[${time}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // 测试结果
+        function addResult(status, message) {
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `status ${status}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        // 清空结果
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = '';
+            document.getElementById('test-log').innerHTML = '';
+        }
+
+        // 模拟数据
+        const requirementData = {
+            'FR-001': {
+                title: '数据存储功能',
+                data: {
+                    prompt: {
+                        content: '<p>FR-001的规范化提示词表述内容</p>',
+                        crossRefs: ['spec', 'design', 'plan', 'code', 'correlation']
+                    },
+                    spec: {
+                        content: '<p>FR-001的规范文档表述内容</p>',
+                        crossRefs: ['prompt', 'design', 'plan', 'code', 'correlation']
+                    },
+                    design: {
+                        content: '<p>FR-001的设计文档内容</p>',
+                        crossRefs: ['prompt', 'spec', 'plan', 'code', 'correlation']
+                    },
+                    plan: {
+                        content: '<p>FR-001的实施计划内容</p>',
+                        crossRefs: ['prompt', 'spec', 'design', 'code', 'correlation']
+                    },
+                    code: {
+                        content: '<p>FR-001的代码实现内容</p>',
+                        crossRefs: ['prompt', 'spec', 'design', 'plan', 'correlation']
+                    },
+                    correlation: {
+                        content: '<p>FR-001的关联分析内容</p>',
+                        crossRefs: ['prompt', 'spec', 'design', 'plan', 'code']
+                    }
+                }
+            }
+        };
+
+        let currentRequirement = 'FR-001';
+        let currentDimension = 'prompt';
+
+        function getDimensionName(dimension) {
+            const names = {
+                'prompt': '🤖 规范化提示词',
+                'spec': '📄 规范文档',
+                'design': '🎨 设计文档',
+                'plan': '📋 实施计划',
+                'code': '💻 代码实现',
+                'correlation': '🔗 关联分析'
+            };
+            return names[dimension] || dimension;
+        }
+
+        // 模拟六向联动
+        function simulateSixDimensionSync(dimension) {
+            addLog(`🎯 开始模拟点击维度: ${dimension}`);
+            
+            // 记录点击前的状态
+            const beforeState = {
+                currentRequirement,
+                currentDimension,
+                dimensions: Object.keys(requirementData[currentRequirement].data)
+            };
+            
+            addLog(`📊 点击前状态: 需求=${currentRequirement}, 当前维度=${currentDimension}`);
+            addLog(`📦 准备同步维度: ${beforeState.dimensions.join(', ')}`);
+            
+            // 更新当前维度
+            currentDimension = dimension;
+            addLog(`🔄 维度已更新: ${dimension}`);
+            
+            // 模拟同步过程
+            const requirement = requirementData[currentRequirement];
+            const data = requirement.data;
+            
+            let successCount = 0;
+            let totalCount = Object.keys(data).length;
+            
+            Object.keys(data).forEach((dim, index) => {
+                setTimeout(() => {
+                    const contentElement = document.getElementById(`demo-${dim}`);
+                    if (contentElement) {
+                        contentElement.innerHTML = data[dim].content;
+                        contentElement.classList.add('active');
+                        successCount++;
+                        
+                        addLog(`✅ 维度 ${dim} 内容已同步 (${successCount}/${totalCount})`);
+                        
+                        // 如果所有维度都同步完成
+                        if (successCount === totalCount) {
+                            addLog('🎉 六向联动同步完成！');
+                            addResult('success', `✅ 六向联动成功: 点击${dimension}维度，其他${totalCount-1}个维度已同步更新`);
+                            
+                            // 2秒后重置状态
+                            setTimeout(() => {
+                                Object.keys(data).forEach(d => {
+                                    const el = document.getElementById(`demo-${d}`);
+                                    if (el) el.classList.remove('active');
+                                });
+                            }, 2000);
+                        }
+                    } else {
+                        addLog(`❌ 维度 ${dim} 元素未找到`);
+                        addResult('error', `❌ 维度 ${dim} 同步失败: 元素不存在`);
+                    }
+                }, index * 300); // 每个维度间隔300ms
+            });
+        }
+
+        // 创建交互演示
+        function createInteractiveDemo() {
+            const container = document.getElementById('interactive-demo');
+            const requirement = requirementData[currentRequirement];
+            
+            // 维度控制按钮
+            const controls = document.createElement('div');
+            controls.innerHTML = '<h4>🎮 模拟用户点击</h4>';
+            
+            Object.keys(requirement.data).forEach(dimension => {
+                const button = document.createElement('button');
+                button.className = 'demo-button';
+                button.textContent = getDimensionName(dimension);
+                button.onclick = () => simulateSixDimensionSync(dimension);
+                controls.appendChild(button);
+            });
+            
+            container.appendChild(controls);
+            
+            // 维度显示区域
+            const display = document.createElement('div');
+            display.innerHTML = '<h4>📊 六维内容显示</h4>';
+            
+            Object.keys(requirement.data).forEach(dimension => {
+                const div = document.createElement('div');
+                div.className = 'dimension-demo';
+                div.id = `demo-${dimension}`;
+                div.innerHTML = `<strong>${getDimensionName(dimension)}:</strong> 点击上方按钮开始测试`;
+                display.appendChild(div);
+            });
+            
+            container.appendChild(display);
+        }
+
+        // 运行测试
+        function runTest() {
+            clearResults();
+            addLog('🚀 开始六向联动交互测试');
+            
+            createInteractiveDemo();
+            addResult('success', '✅ 交互界面已创建');
+            addLog('📱 交互界面加载完成，等待用户点击');
+            
+            // 模拟自动测试
+            setTimeout(() => {
+                addLog('🎯 开始自动测试序列');
+                const dimensions = Object.keys(requirementData[currentRequirement].data);
+                
+                dimensions.forEach((dimension, index) => {
+                    setTimeout(() => {
+                        simulateSixDimensionSync(dimension);
+                    }, (index + 1) * 4000); // 每4秒测试一个维度
+                });
+            }, 2000);
+        }
+
+        // 页面加载
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('🔧 六向联动交互测试系统已启动');
+            runTest();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P1数据持久化 - 六向联动学习系统（修复版）</title>
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <style>
+        /* 六向联动系统样式 */
+        .six-dimension-system {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        .system-header {
+            background: white;
+            padding: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .system-header h1 {
+            color: #1e293b;
+            margin: 0 0 1rem 0;
+            font-size: 2rem;
+        }
+        
+        .system-header p {
+            color: #64748b;
+            margin: 0;
+            font-size: 1.125rem;
+        }
+        
+        /* 需求选择器 */
+        .requirement-selector {
+            background: white;
+            padding: 2rem;
+            margin: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .req-option {
+            display: inline-block;
+            margin: 0.5rem;
+            padding: 1rem 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 150px;
+            background: white;
+        }
+        
+        .req-option:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .req-option.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .req-option h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.125rem;
+        }
+        
+        .req-option p {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+        
+        .complexity-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #e2e8f0;
+            color: #64748b;
+        }
+        
+        .req-option.active .complexity-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        /* 六向联动展示 */
+        .six-dimension-view {
+            padding: 2rem;
+            display: none;
+        }
+        
+        .six-dimension-view.active {
+            display: block;
+        }
+        
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+        
+        .dimension-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .dimension-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+        
+        .dimension-card.active {
+            border-color: #667eea;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        
+        .dimension-card::before {
+            content: '👆 点击联动';
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.625rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+        
+        .dimension-card:hover::before {
+            opacity: 1;
+        }
+        
+        .dimension-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .dimension-header h3 {
+            margin: 0;
+            color: #1e293b;
+            font-size: 1.25rem;
+        }
+        
+        .complexity-indicator {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .complexity-indicator.simple {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .complexity-indicator.medium {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .complexity-indicator.complex {
+            background: #ddd6fe;
+            color: #7c3aed;
+        }
+        
+        .complexity-indicator.very-complex {
+            background: #fecaca;
+            color: #dc2626;
+        }
+        
+        .dimension-content {
+            line-height: 1.6;
+        }
+        
+        .content-section {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        
+        .section-prompt { border-left-color: #3b82f6; background: #eff6ff; }
+        .section-spec { border-left-color: #10b981; background: #f0fdf4; }
+        .section-design { border-left-color: #8b5cf6; background: #f3e8ff; }
+        .section-plan { border-left-color: #f59e0b; background: #fffbeb; }
+        .section-code { border-left-color: #ef4444; background: #fef2f2; }
+        
+        .section-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            color: #1e293b;
+        }
+        
+        .section-content {
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin: 0;
+            color: #475569;
+        }
+        
+        .cross-reference {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .cross-reference-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .cross-reference-links {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .ref-link {
+            padding: 0.25rem 0.5rem;
+            background: #e2e8f0;
+            color: #475569;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .ref-link:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .ref-link.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* 导航栏 */
+        .cross-navigation {
+            background: white;
+            padding: 1rem 2rem;
+            border-top: 1px solid #e2e8f0;
+            position: sticky;
+            bottom: 0;
+            z-index: 20;
+        }
+        
+        .nav-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .nav-section {
+            padding: 0.5rem 1rem;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .nav-section:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+        
+        .nav-section.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .nav-arrow {
+            color: #667eea;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        /* 调试信息 */
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            max-width: 300px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .debug-info.show {
+            display: block;
+        }
+        
+        .debug-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1001;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .dimension-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-flow {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .nav-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 调试信息面板 -->
+    <div class="debug-toggle" onclick="toggleDebug()">🔧</div>
+    <div class="debug-info" id="debugInfo">
+        <strong>调试信息</strong><br>
+        当前需求: <span id="debug-req">-</span><br>
+        当前维度: <span id="debug-dim">-</span><br>
+        事件监听: <span id="debug-events">-</span><br>
+        最后操作: <span id="debug-action">-</span>
+    </div>
+
+    <div class="six-dimension-system">
+        <header class="system-header">
+            <h1>🎯 P1数据持久化 - 六向联动学习系统</h1>
+            <p>从简单到复杂，六向联动 • 任意点击，其他五个自动对齐调整</p>
+        </header>
+
+        <!-- 需求选择器 -->
+        <div class="requirement-selector" id="requirement-selector">
+            <h2 style="text-align: center; margin-bottom: 1.5rem; color: #1e293b;">选择要分析的需求</h2>
+            <div style="text-align: center;">
+                <div class="req-option active" data-requirement="FR-001">
+                    <h3>FR-001</h3>
+                    <p>数据存储功能</p>
+                    <span class="complexity-badge">简单</span>
+                </div>
+                <div class="req-option" data-requirement="FR-002">
+                    <h3>FR-002</h3>
+                    <p>数据管理功能</p>
+                    <span class="complexity-badge">简单</span>
+                </div>
+                <div class="req-option" data-requirement="NFR-001">
+                    <h3>NFR-001</h3>
+                    <p>性能要求</p>
+                    <span class="complexity-badge">中等</span>
+                </div>
+                <div class="req-option" data-requirement="DP-002">
+                    <h3>DP-002</h3>
+                    <p>接口抽象设计</p>
+                    <span class="complexity-badge">复杂</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 六向联动展示 -->
+        <div class="six-dimension-view" id="dimension-content">
+            <div class="dimension-grid">
+                <!-- 维度1: 规范化提示词 -->
+                <div class="dimension-card" data-dimension="prompt">
+                    <div class="dimension-header">
+                        <h3>🤖 规范化提示词表述</h3>
+                        <span class="complexity-indicator simple">最简练</span>
+                    </div>
+                    <div class="dimension-content" id="prompt-content">
+                        <!-- 内容将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+
+                <!-- 维度2: 规范文档表述 -->
+                <div class="dimension-card" data-dimension="spec">
+                    <div class="dimension-header">
+                        <h3>📄 规范文档表述</h3>
+                        <span class="complexity-indicator simple">简练</span>
+                    </div>
+                    <div class="dimension-content" id="spec-content">
+                        <!-- 内容将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+
+                <!-- 维度3: 规范设计文档 -->
+                <div class="dimension-card" data-dimension="design">
+                    <div class="dimension-header">
+                        <h3>🎨 规范设计文档</h3>
+                        <span class="complexity-indicator medium">中等</span>
+                    </div>
+                    <div class="dimension-content" id="design-content">
+                        <!-- 内容将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+
+                <!-- 维度4: 实施计划 -->
+                <div class="dimension-card" data-dimension="plan">
+                    <div class="dimension-header">
+                        <h3>📋 实施计划</h3>
+                        <span class="complexity-indicator complex">复杂</span>
+                    </div>
+                    <div class="dimension-content" id="plan-content">
+                        <!-- 内容将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+
+                <!-- 维度5: 代码实现 -->
+                <div class="dimension-card" data-dimension="code">
+                    <div class="dimension-header">
+                        <h3>💻 代码实现</h3>
+                        <span class="complexity-indicator very-complex">最复杂</span>
+                    </div>
+                    <div class="dimension-content" id="code-content">
+                        <!-- 内容将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+
+                <!-- 维度6: 关联分析 -->
+                <div class="dimension-card" data-dimension="correlation">
+                    <div class="dimension-header">
+                        <h3>🔗 关联分析</h3>
+                        <span class="complexity-indicator medium">中等</span>
+                    </div>
+                    <div class="dimension-content" id="correlation-content">
+                        <!-- 内容将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 跨维度导航 -->
+        <div class="cross-navigation">
+            <div class="nav-flow">
+                <div class="nav-section active" data-dimension="prompt">
+                    <div>🤖 规范化提示词</div>
+                    <small style="opacity: 0.7;">最简练</small>
+                </div>
+                <div class="nav-arrow">→</div>
+                <div class="nav-section" data-dimension="spec">
+                    <div>📄 规范文档</div>
+                    <small style="opacity: 0.7;">简练</small>
+                </div>
+                <div class="nav-arrow">→</div>
+                <div class="nav-section" data-dimension="design">
+                    <div>🎨 设计文档</div>
+                    <small style="opacity: 0.7;">中等</small>
+                </div>
+                <div class="nav-arrow">→</div>
+                <div class="nav-section" data-dimension="plan">
+                    <div>📋 实施计划</div>
+                    <small style="opacity: 0.7;">复杂</small>
+                </div>
+                <div class="nav-arrow">→</div>
+                <div class="nav-section" data-dimension="code">
+                    <div>💻 代码实现</div>
+                    <small style="opacity: 0.7;">最复杂</small>
+                </div>
+                <div class="nav-arrow">→</div>
+                <div class="nav-section" data-dimension="correlation">
+                    <div>🔗 关联分析</div>
+                    <small style="opacity: 0.7;">中等</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局状态管理
+        let currentRequirement = 'FR-001';
+        let currentDimension = 'prompt';
+        let activeRefs = new Set();
+        let debugMode = false;
+
+        // 需求数据定义
+        const requirementData = {
+            'FR-001': {
+                title: '数据存储功能',
+                complexity: 'simple',
+                data: {
+                    prompt: {
+                        content: `
+                            <div class="content-section section-prompt">
+                                <h4 class="section-title">📝 规范化提示词表述</h4>
+                                <p class="section-content">请为P1数据持久化模块实现统一的数据存储接口抽象。具体要求：</p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>定义DataStoreInterface抽象基类</li>
+                                    <li>支持JSON、SQLite、文件三种存储后端</li>
+                                    <li>实现save、load、delete、list_keys核心方法</li>
+                                    <li>确保线程安全和异常处理</li>
+                                    <li>满足性能要求：响应时间&lt;100ms</li>
+                                </ul>
+                            </div>
+                        `,
+                        crossRefs: ['spec', 'design', 'plan', 'code', 'correlation']
+                    },
+                    spec: {
+                        content: `
+                            <div class="content-section section-spec">
+                                <h4 class="section-title">📋 规范文档表述</h4>
+                                <p class="section-content"><strong>功能描述：</strong>实现统一的数据持久化接口，支持多种存储后端灵活切换。</p>
+                                <p class="section-content"><strong>技术规范：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>接口定义：DataStoreInterface抽象基类</li>
+                                    <li>存储类型：JSON、SQLite、文件系统</li>
+                                    <li>核心方法：save(key, data)、load(key)、delete(key)、list_keys()</li>
+                                    <li>线程安全：使用threading.Lock保证并发安全</li>
+                                    <li>异常处理：完整的try-catch错误处理机制</li>
+                                </ul>
+                                <p class="section-content"><strong>质量要求：</strong>响应时间&lt;100ms，支持并发访问，数据一致性保证</p>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'design', 'plan', 'code', 'correlation']
+                    },
+                    design: {
+                        content: `
+                            <div class="content-section section-design">
+                                <h4 class="section-title">🎨 规范设计文档</h4>
+                                <p class="section-content"><strong>设计原则：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li><strong>单一职责原则：</strong>每个存储类只负责一种存储方式</li>
+                                    <li><strong>开放封闭原则：</strong>通过接口抽象支持扩展</li>
+                                    <li><strong>依赖倒置原则：</strong>高层模块依赖抽象而非具体实现</li>
+                                </ul>
+                                <p class="section-content"><strong>架构设计：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>抽象层：DataStoreInterface定义标准接口</li>
+                                    <li>实现层：JSONStorage、SQLiteStorage、FileStorage</li>
+                                    <li>工厂层：StorageFactory负责实例创建</li>
+                                    <li>管理层：PersistenceManager统一管理</li>
+                                </ul>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'plan', 'code', 'correlation']
+                    },
+                    plan: {
+                        content: `
+                            <div class="content-section section-plan">
+                                <h4 class="section-title">📋 实施计划</h4>
+                                <p class="section-content"><strong>实施步骤：</strong></p>
+                                <ol style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li><strong>步骤1：</strong>定义DataStoreInterface抽象基类</li>
+                                    <li><strong>步骤2：</strong>实现JSONStorage具体存储类</li>
+                                    <li><strong>步骤3：</strong>实现SQLiteStorage存储类</li>
+                                    <li><strong>步骤4：</strong>实现FileStorage存储类</li>
+                                    <li><strong>步骤5：</strong>实现StorageFactory工厂模式</li>
+                                    <li><strong>步骤6：</strong>实现PersistenceManager管理器</li>
+                                    <li><strong>步骤7：</strong>集成测试和性能优化</li>
+                                </ol>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'design', 'code', 'correlation']
+                    },
+                    code: {
+                        content: `
+                            <div class="content-section section-code">
+                                <h4 class="section-title">💻 代码实现</h4>
+                                <p class="section-content"><strong>核心接口定义：</strong></p>
+                                <div class="code-snippet">
+from abc import ABC, abstractmethod
+from typing import Dict, List, Any, Optional
+
+class DataStoreInterface(ABC):
+    @abstractmethod
+    def save(self, key: str, data: Any) -> bool:
+        pass
+    
+    @abstractmethod
+    def load(self, key: str) -> Optional[Any]:
+        pass
+    
+    @abstractmethod
+    def delete(self, key: str) -> bool:
+        pass
+    
+    @abstractmethod
+    def list_keys(self) -> List[str]:
+        pass
+                                </div>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'design', 'plan', 'correlation']
+                    },
+                    correlation: {
+                        content: `
+                            <div class="content-section section-code">
+                                <h4 class="section-title">🔗 关联分析</h4>
+                                <p class="section-content"><strong>维度关联矩阵：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li><strong>提示词 → 规范文档：</strong>从抽象要求到具体技术规范</li>
+                                    <li><strong>规范文档 → 设计文档：</strong>从技术规范到设计原则和架构</li>
+                                    <li><strong>设计文档 → 实施计划：</strong>从设计架构到具体实施步骤</li>
+                                    <li><strong>实施计划 → 代码实现：</strong>从步骤清单到具体代码实现</li>
+                                </ul>
+                                <p class="section-content"><strong>关键决策点：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>为什么选择抽象接口而非直接实现？</li>
+                                    <li>如何保证不同存储后端的一致性？</li>
+                                    <li>性能优化与代码复杂度的平衡？</li>
+                                </ul>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'design', 'plan', 'code']
+                    }
+                }
+            },
+            'FR-002': {
+                title: '数据管理功能',
+                complexity: 'simple',
+                data: {
+                    prompt: {
+                        content: `
+                            <div class="content-section section-prompt">
+                                <h4 class="section-title">📝 规范化提示词表述</h4>
+                                <p class="section-content">请为P1数据持久化模块实现完整的数据管理功能：</p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>实现PersistenceManager统一管理器</li>
+                                    <li>支持配置驱动的存储策略切换</li>
+                                    <li>提供完整CRUD操作接口</li>
+                                    <li>实现数据完整性和一致性保证</li>
+                                    <li>支持优雅降级和错误恢复</li>
+                                </ul>
+                            </div>
+                        `,
+                        crossRefs: ['spec', 'design', 'plan', 'code', 'correlation']
+                    },
+                    spec: {
+                        content: `
+                            <div class="content-section section-spec">
+                                <h4 class="section-title">📋 规范文档表述</h4>
+                                <p class="section-content"><strong>功能描述：</strong>实现统一的数据管理入口，提供完整的数据生命周期管理。</p>
+                                <p class="section-content"><strong>技术规范：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>管理器类：PersistenceManager统一管理</li>
+                                    <li>配置驱动：通过配置文件控制存储策略</li>
+                                    <li>CRUD接口：create、read、update、delete操作</li>
+                                    <li>一致性保证：事务管理和数据验证</li>
+                                    <li>错误恢复：优雅降级和重试机制</li>
+                                </ul>
+                                <p class="section-content"><strong>质量要求：</strong>配置热更新，数据完整性检查，异常恢复</p>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'design', 'plan', 'code', 'correlation']
+                    },
+                    design: {
+                        content: `
+                            <div class="content-section section-design">
+                                <h4 class="section-title">🎨 规范设计文档</h4>
+                                <p class="section-content"><strong>设计原则：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li><strong>依赖倒置原则：</strong>高层业务逻辑不依赖具体存储实现</li>
+                                    <li><strong>接口隔离原则：</strong>提供最小化的接口，避免耦合</li>
+                                    <li><strong>单一职责原则：</strong>管理器只负责协调，不负责具体存储</li>
+                                </ul>
+                                <p class="section-content"><strong>架构设计：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>配置层：YAML配置文件驱动</li>
+                                    <li>管理层：PersistenceManager统一协调</li>
+                                    <li>存储层：多种存储后端实现</li>
+                                    <li>监控层：性能和错误监控</li>
+                                </ul>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'plan', 'code', 'correlation']
+                    },
+                    plan: {
+                        content: `
+                            <div class="content-section section-plan">
+                                <h4 class="section-title">📋 实施计划</h4>
+                                <p class="section-content"><strong>实施步骤：</strong></p>
+                                <ol style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li><strong>步骤1：</strong>设计YAML配置文件结构</li>
+                                    <li><strong>步骤2：</strong>实现PersistenceManager核心类</li>
+                                    <li><strong>步骤3：</strong>实现配置加载和热更新机制</li>
+                                    <li><strong>步骤4：</strong>实现CRUD操作接口</li>
+                                    <li><strong>步骤5：</strong>实现数据验证和一致性检查</li>
+                                    <li><strong>步骤6：</strong>实现错误处理和重试机制</li>
+                                    <li><strong>步骤7：</strong>性能测试和优化</li>
+                                </ol>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'design', 'code', 'correlation']
+                    },
+                    code: {
+                        content: `
+                            <div class="content-section section-code">
+                                <h4 class="section-title">💻 代码实现</h4>
+                                <p class="section-content"><strong>管理器实现：</strong></p>
+                                <div class="code-snippet">
+import yaml
+from typing import Dict, Any
+
+class PersistenceManager:
+    def __init__(self, config_path: str = "storage_config.yaml"):
+        self.config = self._load_config(config_path)
+        self.storage = None
+    
+    def _load_config(self, config_path: str) -> Dict[str, Any]:
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                return yaml.safe_load(f)
+        except FileNotFoundError:
+            return {
+                'storage_type': 'json',
+                'storage_path': './data'
+            }
+    
+    def save_data(self, key: str, data: Any) -> bool:
+        storage = self._init_storage()
+        return storage.save(key, data)
+                                </div>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'design', 'plan', 'correlation']
+                    },
+                    correlation: {
+                        content: `
+                            <div class="content-section section-code">
+                                <h4 class="section-title">🔗 关联分析</h4>
+                                <p class="section-content"><strong>维度关联矩阵：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li><strong>提示词 → 规范文档：</strong>从管理需求到具体技术规范</li>
+                                    <li><strong>规范文档 → 设计文档：</strong>从技术规范到架构设计原则</li>
+                                    <li><strong>设计文档 → 实施计划：</strong>从设计架构到实施步骤分解</li>
+                                    <li><strong>实施计划 → 代码实现：</strong>从步骤到具体代码实现</li>
+                                </ul>
+                                <p class="section-content"><strong>关键决策点：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>为什么选择配置驱动而非硬编码？</li>
+                                    <li>如何保证数据一致性？</li>
+                                    <li>错误恢复机制的设计权衡？</li>
+                                </ul>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'design', 'plan', 'code']
+                    }
+                }
+            },
+            'NFR-001': {
+                title: '性能要求',
+                complexity: 'medium',
+                data: {
+                    prompt: {
+                        content: `
+                            <div class="content-section section-prompt">
+                                <h4 class="section-title">📝 规范化提示词表述</h4>
+                                <p class="section-content">请为P1数据持久化模块实现性能优化：</p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>实现LRU缓存机制，减少重复I/O操作</li>
+                                    <li>添加性能监控装饰器，实时跟踪执行时间</li>
+                                    <li>使用线程锁确保并发访问安全</li>
+                                    <li>确保所有操作响应时间&lt;100ms</li>
+                                    <li>支持并发吞吐量&gt;1000 ops/sec</li>
+                                </ul>
+                            </div>
+                        `,
+                        crossRefs: ['spec', 'design', 'plan', 'code', 'correlation']
+                    },
+                    spec: {
+                        content: `
+                            <div class="content-section section-spec">
+                                <h4 class="section-title">📋 规范文档表述</h4>
+                                <p class="section-content"><strong>性能目标：</strong>确保数据持久化模块在高并发场景下保持优异性能。</p>
+                                <p class="section-content"><strong>技术规范：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>缓存策略：LRU算法，缓存大小100条记录</li>
+                                    <li>性能监控：装饰器模式，时间戳记录</li>
+                                    <li>并发控制：threading.RLock可重入锁</li>
+                                    <li>响应时间：单次操作&lt;100ms</li>
+                                    <li>吞吐量：并发处理&gt;1000 ops/sec</li>
+                                </ul>
+                                <p class="section-content"><strong>监控指标：</strong>执行时间、缓存命中率、内存使用、并发数</p>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'design', 'plan', 'code', 'correlation']
+                    },
+                    design: {
+                        content: `
+                            <div class="content-section section-design">
+                                <h4 class="section-title">🎨 规范设计文档</h4>
+                                <p class="section-content"><strong>性能设计原则：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li><strong>缓存优先：</strong>减少重复I/O操作，提升读取性能</li>
+                                    <li><strong>监控驱动：</strong>实时性能监控，及时发现问题</li>
+                                    <li><strong>并发安全：</strong>使用适当的锁机制保证数据一致性</li>
+                                </ul>
+                                <p class="section-content"><strong>性能架构：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>缓存层：OrderedDict实现LRU策略</li>
+                                    <li>监控层：装饰器模式性能统计</li>
+                                    <li>锁机制：可重入锁支持嵌套调用</li>
+                                    <li>统计层：性能指标收集和分析</li>
+                                </ul>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'plan', 'code', 'correlation']
+                    },
+                    plan: {
+                        content: `
+                            <div class="content-section section-plan">
+                                <h4 class="section-title">📋 实施计划</h4>
+                                <p class="section-content"><strong>实施步骤：</strong></p>
+                                <ol style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li><strong>步骤1：</strong>实现LRU缓存装饰器类</li>
+                                    <li><strong>步骤2：</strong>实现性能监控装饰器</li>
+                                    <li><strong>步骤3：</strong>集成缓存和监控到存储类</li>
+                                    <li><strong>步骤4：</strong>实现线程安全机制</li>
+                                    <li><strong>步骤5：</strong>添加性能统计接口</li>
+                                    <li><strong>步骤6：</strong>性能测试和调优</li>
+                                    <li><strong>步骤7：</strong>生产环境部署和监控</li>
+                                </ol>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'design', 'code', 'correlation']
+                    },
+                    code: {
+                        content: `
+                            <div class="content-section section-code">
+                                <h4 class="section-title">💻 代码实现</h4>
+                                <p class="section-content"><strong>LRU缓存实现：</strong></p>
+                                <div class="code-snippet">
+from collections import OrderedDict
+from functools import wraps
+import threading
+import time
+
+class LRUCache:
+    def __init__(self, capacity: int = 100):
+        self.cache = OrderedDict()
+        self.capacity = capacity
+        self.lock = threading.RLock()
+    
+    def get(self, key):
+        with self.lock:
+            if key in self.cache:
+                value = self.cache.pop(key)
+                self.cache[key] = value
+                return value
+            return None
+    
+    def put(self, key, value):
+        with self.lock:
+            if key in self.cache:
+                self.cache.pop(key)
+            elif len(self.cache) >= self.capacity:
+                self.cache.popitem(last=False)
+            self.cache[key] = value
+                                </div>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'design', 'plan', 'correlation']
+                    },
+                    correlation: {
+                        content: `
+                            <div class="content-section section-code">
+                                <h4 class="section-title">🔗 关联分析</h4>
+                                <p class="section-content"><strong>维度关联矩阵：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li><strong>提示词 → 规范文档：</strong>从性能要求到具体技术指标</li>
+                                    <li><strong>规范文档 → 设计文档：</strong>从技术指标到设计架构</li>
+                                    <li><strong>设计文档 → 实施计划：</strong>从架构到具体实现步骤</li>
+                                    <li><strong>实施计划 → 代码实现：</strong>从步骤到具体代码实现</li>
+                                </ul>
+                                <p class="section-content"><strong>性能优化权衡：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>缓存大小 vs 内存使用的平衡</li>
+                                    <li>锁粒度 vs 并发性能的权衡</li>
+                                    <li>监控开销 vs 性能收益的考量</li>
+                                </ul>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'design', 'plan', 'code']
+                    }
+                }
+            },
+            'DP-002': {
+                title: '接口抽象设计',
+                complexity: 'complex',
+                data: {
+                    prompt: {
+                        content: `
+                            <div class="content-section section-prompt">
+                                <h4 class="section-title">📝 规范化提示词表述</h4>
+                                <p class="section-content">请为P1数据持久化模块实现接口抽象设计：</p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>实现存储工厂模式，支持动态存储切换</li>
+                                    <li>应用策略模式封装不同存储算法</li>
+                                    <li>确保高层模块不依赖低层模块</li>
+                                    <li>支持运行时配置驱动的存储策略</li>
+                                    <li>保持代码的可扩展性和可维护性</li>
+                                </ul>
+                            </div>
+                        `,
+                        crossRefs: ['spec', 'design', 'plan', 'code', 'correlation']
+                    },
+                    spec: {
+                        content: `
+                            <div class="content-section section-spec">
+                                <h4 class="section-title">📋 规范文档表述</h4>
+                                <p class="section-content"><strong>功能描述：</strong>通过接口抽象实现存储策略的灵活切换和扩展。</p>
+                                <p class="section-content"><strong>技术规范：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>抽象接口：DataStoreInterface定义标准契约</li>
+                                    <li>工厂模式：StorageFactory统一创建实例</li>
+                                    <li>策略封装：不同存储算法独立实现</li>
+                                    <li>配置驱动：运行时动态选择存储策略</li>
+                                    <li>扩展机制：支持新增存储类型</li>
+                                </ul>
+                                <p class="section-content"><strong>质量要求：</strong>松耦合设计，易于测试，可配置化</p>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'design', 'plan', 'code', 'correlation']
+                    },
+                    design: {
+                        content: `
+                            <div class="content-section section-design">
+                                <h4 class="section-title">🎨 规范设计文档</h4>
+                                <p class="section-content"><strong>设计模式应用：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li><strong>工厂模式：</strong>封装对象创建逻辑，隔离具体实现</li>
+                                    <li><strong>策略模式：</strong>定义算法族，运行时可切换</li>
+                                    <li><strong>依赖注入：</strong>通过构造函数注入依赖关系</li>
+                                </ul>
+                                <p class="section-content"><strong>架构分层：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>接口层：标准化抽象接口定义</li>
+                                    <li>工厂层：StorageFactory统一创建</li>
+                                    <li>策略层：多种存储策略实现</li>
+                                    <li>配置层：运行时配置驱动选择</li>
+                                </ul>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'plan', 'code', 'correlation']
+                    },
+                    plan: {
+                        content: `
+                            <div class="content-section section-plan">
+                                <h4 class="section-title">📋 实施计划</h4>
+                                <p class="section-content"><strong>实施步骤：</strong></p>
+                                <ol style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li><strong>步骤1：</strong>定义DataStoreInterface抽象接口</li>
+                                    <li><strong>步骤2：</strong>实现各种存储策略类</li>
+                                    <li><strong>步骤3：</strong>实现StorageFactory工厂类</li>
+                                    <li><strong>步骤4：</strong>实现配置解析和策略映射</li>
+                                    <li><strong>步骤5：</strong>集成到PersistenceManager管理器</li>
+                                    <li><strong>步骤6：</strong>实现动态存储切换机制</li>
+                                    <li><strong>步骤7：</strong>单元测试和集成测试</li>
+                                </ol>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'design', 'code', 'correlation']
+                    },
+                    code: {
+                        content: `
+                            <div class="content-section section-code">
+                                <h4 class="section-title">💻 代码实现</h4>
+                                <p class="section-content"><strong>工厂模式实现：</strong></p>
+                                <div class="code-snippet">
+from abc import ABC, abstractmethod
+from typing import Type
+import importlib
+
+class DataStoreInterface(ABC):
+    @abstractmethod
+    def save(self, key: str, data: Any) -> bool:
+        pass
+
+class StorageFactory:
+    @staticmethod
+    def create_storage(storage_type: str, **kwargs):
+        module_name = f"storage.{storage_type.lower()}_storage"
+        class_name = f"{storage_type.capitalize()}Storage"
+        module = importlib.import_module(module_name)
+        storage_class = getattr(module, class_name)
+        return storage_class(**kwargs)
+                                </div>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'design', 'plan', 'correlation']
+                    },
+                    correlation: {
+                        content: `
+                            <div class="content-section section-code">
+                                <h4 class="section-title">🔗 关联分析</h4>
+                                <p class="section-content"><strong>维度关联矩阵：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li><strong>提示词 → 规范文档：</strong>从抽象设计到具体技术规范</li>
+                                    <li><strong>规范文档 → 设计文档：</strong>从技术规范到设计模式应用</li>
+                                    <li><strong>设计文档 → 实施计划：</strong>从设计架构到实施步骤</li>
+                                    <li><strong>实施计划 → 代码实现：</strong>从步骤到具体代码实现</li>
+                                </ul>
+                                <p class="section-content"><strong>设计决策权衡：</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1rem; font-size: 0.875rem;">
+                                    <li>性能 vs 可维护性的平衡</li>
+                                    <li>配置化 vs 硬编码的选择</li>
+                                    <li>抽象层次 vs 实现复杂度的考量</li>
+                                </ul>
+                            </div>
+                        `,
+                        crossRefs: ['prompt', 'spec', 'design', 'plan', 'code']
+                    }
+                }
+            }
+        };
+
+        // 调试功能
+        function toggleDebug() {
+            debugMode = !debugMode;
+            const debugInfo = document.getElementById('debugInfo');
+            if (debugMode) {
+                debugInfo.classList.add('show');
+                updateDebugInfo();
+            } else {
+                debugInfo.classList.remove('show');
+            }
+        }
+
+        function updateDebugInfo(action = '') {
+            if (!debugMode) return;
+            
+            document.getElementById('debug-req').textContent = currentRequirement;
+            document.getElementById('debug-dim').textContent = currentDimension;
+            document.getElementById('debug-events').textContent = '✓ 已绑定';
+            document.getElementById('debug-action').textContent = action || '等待操作';
+        }
+
+        // 工具函数
+        function logDebug(message) {
+            console.log(`[DEBUG] ${message}`);
+            if (debugMode) {
+                updateDebugInfo(message);
+            }
+        }
+
+        // 加载MD文件并转换为HTML
+        async function loadMarkdownFile(filePath) {
+            try {
+                // 在实际应用中，这里应该使用fetch API从服务器加载文件
+                // 由于这是一个本地HTML文件，我们可以使用XMLHttpRequest或者模拟数据
+                // 在生产环境中，应该将MD文件放在服务器上并通过HTTP请求加载
+                
+                // 模拟加载过程
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // 这里应该返回实际的MD文件内容
+                // 为了演示，我们返回一个占位符
+                return `# 加载中...\n\n正在从 \`${filePath}\` 加载内容`;
+            } catch (error) {
+                console.error('加载MD文件时出错:', error);
+                return `# 错误\n\n无法加载文件: ${filePath}\n\n错误信息: ${error.message}`;
+            }
+        }
+
+        // 将MD内容转换为HTML
+        function convertMarkdownToHtml(mdContent, dimension) {
+            // 简单的MD到HTML转换
+            let html = mdContent
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^\- (.*$)/gim, '<li>$1</li>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/\n/g, '<br>');
+            
+            // 包装在适当的容器中
+            return `
+                <div class="content-section section-${dimension}">
+                    ${html}
+                </div>
+            `;
+        }
+
+        // 获取维度内容
+        async function getDimensionContent(requirementId, dimension) {
+            const filePath = `data/requirements/${requirementId}/${dimension}.md`;
+            logDebug(`加载维度内容: ${filePath}`);
+            
+            try {
+                const mdContent = await loadMarkdownFile(filePath);
+                return convertMarkdownToHtml(mdContent, dimension);
+            } catch (error) {
+                console.error('获取维度内容时出错:', error);
+                return `<div class="content-section section-${dimension}"><h3>错误</h3><p>无法加载${dimension}维度内容</p></div>`;
+            }
+        }
+
+        // 选择需求
+        async function selectRequirement(reqId) {
+            logDebug(`选择需求: ${reqId}`);
+            
+            currentRequirement = reqId;
+            
+            try {
+                // 更新UI状态
+                document.querySelectorAll('.req-option').forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                const selectedElement = document.querySelector(`[data-requirement="${reqId}"]`);
+                if (selectedElement) {
+                    selectedElement.classList.add('active');
+                } else {
+                    console.error(`找不到需求元素: ${reqId}`);
+                    return;
+                }
+                
+                // 显示六向联动视图
+                const selector = document.getElementById('requirement-selector');
+                const content = document.getElementById('dimension-content');
+                
+                if (selector && content) {
+                    selector.style.display = 'none';
+                    content.classList.add('active');
+                } else {
+                    console.error('找不到DOM元素');
+                    return;
+                }
+                
+                // 加载对应内容
+                await loadAllDimensions();
+                
+                logDebug('需求选择成功');
+                
+            } catch (error) {
+                console.error('选择需求时出错:', error);
+                logDebug(`错误: ${error.message}`);
+            }
+        }
+
+        // 加载所有维度内容
+        async function loadAllDimensions() {
+            logDebug('加载所有维度内容');
+            try {
+                await syncAllDimensions();
+                highlightCurrentDimension('prompt');
+            } catch (error) {
+                console.error('加载维度内容时出错:', error);
+                logDebug(`加载错误: ${error.message}`);
+            }
+        }
+
+        // 添加交叉引用
+        function addCrossReferences(container, crossRefs) {
+            try {
+                const crossRefDiv = document.createElement('div');
+                crossRefDiv.className = 'cross-reference';
+                crossRefDiv.innerHTML = `
+                    <div class="cross-reference-title">🔗 关联维度</div>
+                    <div class="cross-reference-links">
+                        ${crossRefs.map(ref => `<span class="ref-link" onclick="navigateToDimension('${ref}')">${getDimensionName(ref)}</span>`).join('')}
+                    </div>
+                `;
+                container.appendChild(crossRefDiv);
+            } catch (error) {
+                console.error('添加交叉引用时出错:', error);
+            }
+        }
+
+        // 获取维度名称
+        function getDimensionName(dimension) {
+            const names = {
+                'prompt': '🤖 规范化提示词',
+                'spec': '📄 规范文档',
+                'design': '🎨 设计文档',
+                'plan': '📋 实施计划',
+                'code': '💻 代码实现',
+                'correlation': '🔗 关联分析'
+            };
+            return names[dimension] || dimension;
+        }
+
+        // 导航到指定维度 - 真正的六向联动
+        async function navigateDimension(dimension) {
+            logDebug(`导航到维度: ${dimension}`);
+            
+            try {
+                currentDimension = dimension;
+                
+                // 实现真正的六向联动：点击任意维度，其他五个维度都重新加载内容
+                await syncAllDimensions();
+                
+                // 高亮当前维度（不操作导航栏）
+                highlightCurrentDimension(dimension);
+                
+                // 更新导航栏状态（使用setTimeout确保在所有DOM操作完成后执行）
+                setTimeout(() => {
+                    updateNavigationBar(dimension);
+                }, 300);
+                
+                // 滚动到对应维度
+                setTimeout(() => {
+                    const dimensionCard = document.querySelector(`[data-dimension="${dimension}"]`);
+                    if (dimensionCard) {
+                        dimensionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        dimensionCard.style.transform = 'scale(1.02)';
+                        setTimeout(() => {
+                            dimensionCard.style.transform = '';
+                        }, 500);
+                    }
+                }, 400);
+                
+                logDebug('维度导航成功');
+            } catch (error) {
+                console.error('维度导航时出错:', error);
+                logDebug(`导航错误: ${error.message}`);
+            }
+        }
+        
+        // 更新导航栏状态
+        function updateNavigationBar(dimension) {
+            try {
+                logDebug(`更新导航栏状态到: ${dimension}`);
+                
+                // 移除所有导航项的active类
+                document.querySelectorAll('.nav-section').forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                // 为指定维度的导航项添加active类
+                const targetNav = document.querySelector(`.nav-section[data-dimension="${dimension}"]`);
+                logDebug(`找到目标导航元素: ${!!targetNav}`);
+                if (targetNav) {
+                    targetNav.classList.add('active');
+                    logDebug(`已为目标导航添加active类`);
+                    
+                    // 验证
+                    setTimeout(() => {
+                        const isActive = targetNav.classList.contains('active');
+                        logDebug(`验证目标导航active状态: ${isActive}`);
+                        
+                        const activeNavs = document.querySelectorAll('.nav-section.active');
+                        logDebug(`当前active的导航元素数量: ${activeNavs.length}`);
+                        activeNavs.forEach(nav => {
+                            logDebug(`Active导航维度: ${nav.getAttribute('data-dimension')}`);
+                        });
+                    }, 50);
+                }
+            } catch (error) {
+                console.error('更新导航栏时出错:', error);
+                logDebug(`导航栏更新错误: ${error.message}`);
+            }
+        }
+        
+        // 同步所有维度内容 - 实现六向联动
+        async function syncAllDimensions() {
+            logDebug('同步所有维度内容');
+            try {
+                const requirement = requirementData[currentRequirement];
+                if (!requirement) {
+                    console.error(`找不到需求数据: ${currentRequirement}`);
+                    return;
+                }
+                
+                const data = requirement.data;
+                
+                // 定义六个维度
+                const dimensions = ['prompt', 'spec', 'design', 'plan', 'code', 'correlation'];
+                const crossRefs = {
+                    'prompt': ['spec', 'design', 'plan', 'code', 'correlation'],
+                    'spec': ['prompt', 'design', 'plan', 'code', 'correlation'],
+                    'design': ['prompt', 'spec', 'plan', 'code', 'correlation'],
+                    'plan': ['prompt', 'spec', 'design', 'code', 'correlation'],
+                    'code': ['prompt', 'spec', 'design', 'plan', 'correlation'],
+                    'correlation': ['prompt', 'spec', 'design', 'plan', 'code']
+                };
+                
+                // 重新加载所有维度的内容
+                for (const dim of dimensions) {
+                    const contentElement = document.getElementById(`${dim}-content`);
+                    if (contentElement) {
+                        // 清除现有内容
+                        contentElement.innerHTML = '';
+                        
+                        // 加载对应维度的内容
+                        if (data[dim] && data[dim].content) {
+                            contentElement.innerHTML = data[dim].content;
+                        } else {
+                            contentElement.innerHTML = `<div class="content-section section-${dim}"><h4 class="section-title">内容暂未加载</h4><p>请稍候...</p></div>`;
+                        }
+                        
+                        // 添加交叉引用
+                        addCrossReferences(contentElement, crossRefs[dim]);
+                        
+                        // 添加维度切换按钮
+                        addDimensionSwitcher(contentElement, dim);
+                    } else {
+                        console.error(`找不到内容元素: ${dim}-content`);
+                    }
+                }
+                
+                logDebug('维度内容同步完成');
+                
+            } catch (error) {
+                console.error('同步维度内容时出错:', error);
+                logDebug(`同步错误: ${error.message}`);
+            }
+        }
+        
+        // 添加维度切换器
+        function addDimensionSwitcher(container, currentDim) {
+            try {
+                const switcherDiv = document.createElement('div');
+                switcherDiv.style.cssText = 'margin-top: 1rem; padding: 0.75rem; background: #f1f5f9; border-radius: 6px; border: 1px solid #cbd5e1;';
+                switcherDiv.innerHTML = `
+                    <div style="font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">🔄 切换到其他维度</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        ${Object.keys(requirementData[currentRequirement].data).map(dim => `
+                            <button onclick="navigateDimension('${dim}')" 
+                                    style="padding: 0.25rem 0.5rem; border: 1px solid ${dim === currentDim ? '#667eea' : '#cbd5e1'}; 
+                                           background: ${dim === currentDim ? '#667eea' : 'white'}; 
+                                           color: ${dim === currentDim ? 'white' : '#475569'}; 
+                                           border-radius: 4px; font-size: 0.75rem; cursor: pointer;">
+                                ${getDimensionName(dim)}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(switcherDiv);
+            } catch (error) {
+                console.error('添加维度切换器时出错:', error);
+            }
+        }
+
+        // 高亮当前维度
+        function highlightCurrentDimension(dimension) {
+            try {
+                // 先找出所有维度卡片元素
+                const dimensionCards = document.querySelectorAll('.dimension-card');
+                
+                // 过滤掉同时是导航栏的元素
+                const pureDimensionCards = Array.from(dimensionCards).filter(card => 
+                    !card.classList.contains('nav-section')
+                );
+                
+                // 只移除纯粹维度卡片的active类
+                pureDimensionCards.forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                // 为指定维度的纯粹卡片添加active类
+                const targetCards = Array.from(dimensionCards).filter(card => 
+                    card.getAttribute('data-dimension') === dimension && 
+                    !card.classList.contains('nav-section')
+                );
+                
+                targetCards.forEach(card => {
+                    card.classList.add('active');
+                });
+            } catch (error) {
+                console.error('高亮维度时出错:', error);
+            }
+        }
+
+        // 导航到维度（从交叉引用）
+        function navigateToDimension(dimension) {
+            logDebug(`从交叉引用导航到: ${dimension}`);
+            navigateDimension(dimension);
+            
+            // 添加高亮动画
+            activeRefs.add(dimension);
+            setTimeout(() => {
+                activeRefs.delete(dimension);
+            }, 2000);
+        }
+
+        // 绑定所有事件
+        function bindEvents() {
+            logDebug('绑定事件监听器');
+            
+            try {
+                // 需求选择事件
+                document.querySelectorAll('.req-option').forEach(element => {
+                    element.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const reqId = this.getAttribute('data-requirement');
+                        if (reqId) {
+                            selectRequirement(reqId);
+                        }
+                    });
+                });
+                
+                // 维度卡片点击事件
+                document.querySelectorAll('.dimension-card').forEach(card => {
+                    card.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const dim = this.getAttribute('data-dimension');
+                        if (dim) {
+                            navigateDimension(dim);
+                        }
+                    });
+                });
+                
+                // 导航栏点击事件
+                document.querySelectorAll('.nav-section').forEach(nav => {
+                    nav.addEventListener('click', async function(e) {
+                        e.preventDefault();
+                        const dim = this.getAttribute('data-dimension');
+                        if (dim) {
+                            await navigateDimension(dim);
+                        }
+                    });
+                });
+                
+                logDebug('事件绑定完成');
+                
+            } catch (error) {
+                console.error('绑定事件时出错:', error);
+                logDebug(`事件绑定错误: ${error.message}`);
+            }
+        }
+
+        // 页面初始化
+        async function initializePage() {
+            logDebug('页面初始化');
+            
+            try {
+                // 绑定所有事件
+                bindEvents();
+                
+                // 显示初始化成功信息
+                console.log('🎯 P1数据持久化 - 六向联动学习系统已加载');
+                console.log('💡 点击任意需求开始学习');
+                console.log('🔗 点击任意维度，其他五个自动对齐');
+                console.log('📊 当前系统状态: ', { currentRequirement, currentDimension });
+                
+                logDebug('页面初始化完成');
+                
+            } catch (error) {
+                console.error('页面初始化时出错:', error);
+                logDebug(`初始化错误: ${error.message}`);
+            }
+        }
+
+        // 重置视图函数（供测试使用）
+        function resetView() {
+            // 显示需求选择器
+            const selector = document.getElementById('requirement-selector');
+            const content = document.getElementById('dimension-content');
+            
+            if (selector && content) {
+                selector.style.display = 'block';
+                content.classList.remove('active');
+            }
+            
+            // 重置状态
+            currentRequirement = 'FR-001';
+            currentDimension = 'prompt';
+            
+            // 重置UI
+            document.querySelectorAll('.req-option').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector('[data-requirement="FR-001"]').classList.add('active');
+            
+            document.querySelectorAll('.nav-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector('[data-dimension="prompt"]').classList.add('active');
+            
+            console.log('视图已重置');
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializePage();
+        });
+
+        // 全局错误处理
+        window.addEventListener('error', function(event) {
+            console.error('全局错误:', event.error);
+            logDebug(`全局错误: ${event.message}`);
+        });
+
+        // 确保全局函数可访问
+        window.selectRequirement = selectRequirement;
+        window.navigateDimension = navigateDimension;
+        window.navigateToDimension = navigateToDimension;
+        window.toggleDebug = toggleDebug;
+    </script>
+</body>
+</html>

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>需求一致性检测教学 - 0代码AI规范化编程实践教学</title>
+    <meta name="description" content="学习如何进行需求一致性检测，确保需求文档内部逻辑正确、无冲突">
+    
+    <!-- 统一样式表 -->
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    
+    <!-- 字体和图标 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">加载需求一致性检测教学内容...</div>
+        </div>
+    </div>
+    
+    <!-- 滚动指示器 -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+    
+    <!-- 统一导航栏 -->
+    <nav class="unified-navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span class="navbar-logo">🤖</span>
+                <span>0代码AI规范化编程</span>
+            </a>
+            
+            <button class="navbar-toggle" id="navbarToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="index.html#learning" class="nav-link">学习</a></li>
+                <li><a href="index.html#modules" class="nav-link">模块</a></li>
+                <li><a href="index.html#projects" class="nav-link">项目</a></li>
+                <li><a href="index.html#resources" class="nav-link">资源</a></li>
+            </ul>
+            
+            <div class="navbar-actions">
+                <a href="#start-learning" class="unified-btn unified-btn-primary">
+                    开始学习
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主容器 -->
+    <main class="main-container">
+        <!-- Hero 区域 -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            <span class="hero-icon">🔍</span>
+                            需求一致性检测教学
+                        </h1>
+                        <p class="hero-description">
+                            学习如何进行需求一致性检测，确保需求文档内部逻辑正确、无冲突，
+                            并能够有效指导设计和开发工作
+                        </p>
+                        <div class="hero-features">
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-check-circle"></i>
+                                逻辑一致性
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-link"></i>
+                                需求关联性
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-balance-scale"></i>
+                                冲突检测
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="unified-card">
+                            <div class="stats-icon text-center mb-4">
+                                <i class="fas fa-tasks text-4xl text-primary"></i>
+                            </div>
+                            <div class="stats-info text-center">
+                                <div class="text-3xl font-bold text-primary mb-2">3</div>
+                                <div class="text-secondary">检测维度</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 教学内容 -->
+        <section class="content-section py-16">
+            <div class="container">
+                <!-- 检测目标 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h2 class="card-title">需求一致性检测目标</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            需求一致性检测旨在确保需求文档的质量，避免因需求不一致导致的开发问题。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mt-8">
+                            <div class="p-6 bg-secondary rounded-lg">
+                                <h3 class="font-semibold text-primary mb-3">
+                                    <i class="fas fa-file-alt mr-2"></i>需求内部一致性
+                                </h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>需求描述前后一致</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>验收标准与需求描述匹配</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>功能边界清晰</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="p-6 bg-secondary rounded-lg">
+                                <h3 class="font-semibold text-primary mb-3">
+                                    <i class="fas fa-project-diagram mr-2"></i>需求间一致性
+                                </h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>需求之间无冲突</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>依赖关系明确</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>优先级合理</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="p-6 bg-secondary rounded-lg">
+                                <h3 class="font-semibold text-primary mb-3">
+                                    <i class="fas fa-code mr-2"></i>需求与设计一致性
+                                </h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>设计能够满足需求</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>实现与需求描述一致</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>测试覆盖所有需求</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 检测机制设计 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h2 class="card-title">检测机制设计</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            建立系统化的检测机制，确保需求一致性的全面覆盖。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mt-6">
+                            <div>
+                                <h3 class="font-semibold text-lg mb-4">1. 需求模板标准化</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">规范化需求模板</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-markdown">## 需求ID: [REQ-XXX]
+### 需求标题: [简明扼要的需求标题]
+### 需求类型: [功能需求|非功能需求|约束需求]
+### 优先级: [高|中|低]
+### 状态: [草稿|评审中|已批准|实现中|已完成|已废弃]
+
+### 需求背景:
+[描述为什么需要这个需求，解决什么问题]
+
+### 需求描述:
+[详细描述需求的具体内容，使用"系统应该..."的格式]
+
+### 验收标准:
+- [具体、可验证的验收条件1]
+- [具体、可验证的验收条件2]
+- [具体、可验证的验收条件3]
+
+### 依赖关系:
+- [依赖的其他需求ID]
+- [前置条件]
+- [相关模块]
+
+### 设计约束:
+- [技术限制]
+- [性能要求]
+- [安全要求]
+
+### 影响分析:
+- [对现有功能的影响]
+- [对用户体验的影响]
+- [对系统架构的影响]</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="font-semibold text-lg mb-4">2. 自动化检查规则</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">JavaScript检测规则示例</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-javascript">// 需求ID唯一性检查
+function checkUniqueRequirementIds(requirements) {
+  const ids = requirements.map(req => req.id);
+  const duplicates = ids.filter((id, index) => 
+    ids.indexOf(id) !== index
+  );
+  
+  if (duplicates.length > 0) {
+    return {
+      valid: false,
+      errors: [`发现重复的需求ID: ${duplicates.join(', ')}`]
+    };
+  }
+  
+  return { valid: true };
+}
+
+// 验收标准完整性检查
+function checkAcceptanceCriteriaCompleteness(requirement) {
+  const errors = [];
+  
+  if (!requirement.acceptanceCriteria || 
+      requirement.acceptanceCriteria.length === 0) {
+    errors.push('缺少验收标准');
+  } else {
+    requirement.acceptanceCriteria.forEach((criteria, index) => {
+      if (!criteria || criteria.trim().length === 0) {
+        errors.push(`验收标准第${index + 1}项为空`);
+      } else if (criteria.length < 10) {
+        errors.push(`验收标准第${index + 1}项过于简单`);
+      }
+    });
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
+// 依赖关系有效性检查
+function checkDependencyValidity(requirement, allRequirements) {
+  const errors = [];
+  const existingIds = allRequirements.map(req => req.id);
+  
+  if (requirement.dependencies) {
+    requirement.dependencies.forEach(depId => {
+      if (!existingIds.includes(depId)) {
+        errors.push(`依赖的需求ID "${depId}" 不存在`);
+      }
+    });
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 检测流程 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </div>
+                        <h2 class="card-title">一致性检测流程</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            建立分阶段的检测流程，确保需求质量的全面把控。
+                        </p>
+                        
+                        <div class="mt-8">
+                            <div class="relative">
+                                <!-- 流程图 -->
+                                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                                    <div class="unified-card text-center mb-6 md:mb-0 md:mb-0 w-48">
+                                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-file-alt text-white"></i>
+                                        </div>
+                                        <h3 class="font-semibold">静态检查</h3>
+                                        <p class="text-sm text-secondary mt-1">格式验证</p>
+                                    </div>
+                                    
+                                    <div class="hidden md:block">
+                                        <i class="fas fa-arrow-right text-primary text-2xl"></i>
+                                    </div>
+                                    
+                                    <div class="unified-card text-center mb-6 md:mb-0 w-48">
+                                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-project-diagram text-white"></i>
+                                        </div>
+                                        <h3 class="font-semibold">逻辑检查</h3>
+                                        <p class="text-sm text-secondary mt-1">关系验证</p>
+                                    </div>
+                                    
+                                    <div class="hidden md:block">
+                                        <i class="fas fa-arrow-right text-primary text-2xl"></i>
+                                    </div>
+                                    
+                                    <div class="unified-card text-center w-48">
+                                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-crosshairs text-white"></i>
+                                        </div>
+                                        <h3 class="font-semibold">可追溯性</h3>
+                                        <p class="text-sm text-secondary mt-1">关联验证</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-3 gap-6 mt-8">
+                                <div class="p-6 bg-secondary rounded-lg">
+                                    <h3 class="font-semibold text-primary mb-3">
+                                        <i class="fas fa-check-square mr-2"></i>阶段一: 静态检查
+                                    </h3>
+                                    <ul class="space-y-2 text-sm">
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>格式验证</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>必填字段检查</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>内容完整性验证</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="p-6 bg-secondary rounded-lg">
+                                    <h3 class="font-semibold text-primary mb-3">
+                                        <i class="fas fa-brain mr-2"></i>阶段二: 逻辑关系检查
+                                    </h3>
+                                    <ul class="space-y-2 text-sm">
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>冲突检测</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>依赖合理性检查</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>交叉引用验证</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="p-6 bg-secondary rounded-lg">
+                                    <h3 class="font-semibold text-primary mb-3">
+                                        <i class="fas fa-link mr-2"></i>阶段三: 可追溯性检查
+                                    </h3>
+                                    <ul class="space-y-2 text-sm">
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>需求覆盖检查</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>设计关联验证</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>测试用例匹配</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 实践练习 -->
+                <div class="unified-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <h2 class="card-title">实践练习：实现需求一致性检测工具</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            通过实际编程练习，掌握需求一致性检测的实现方法。
+                        </p>
+                        
+                        <div class="expandable-content mt-6">
+                            <div class="expandable-header">
+                                <h3 class="expandable-title font-semibold">练习案例：需求检测工具开发</h3>
+                                <i class="fas fa-chevron-down expandable-icon"></i>
+                            </div>
+                            <div class="expandable-body">
+                                <div class="bg-secondary rounded-lg p-6 mb-6">
+                                    <h4 class="font-semibold mb-3">案例背景：</h4>
+                                    <p class="mb-4">
+                                        开发一个简单的需求一致性检测工具，能够检查需求文档的基本一致性问题。
+                                    </p>
+                                    
+                                    <h4 class="font-semibold mb-3">练习任务：</h4>
+                                    <ol class="list-decimal list-inside space-y-2 mb-4">
+                                        <li>实现需求ID唯一性检查功能</li>
+                                        <li>实现验收标准完整性检查功能</li>
+                                        <li>实现依赖关系有效性检查功能</li>
+                                        <li>整合所有检查功能，生成检测报告</li>
+                                    </ol>
+                                    
+                                    <div class="solution-area">
+                                        <h4 class="font-semibold mb-3">参考实现：</h4>
+                                        <details class="bg-white rounded-lg p-4">
+                                            <summary class="cursor-pointer font-medium">点击查看参考实现</summary>
+                                            <div class="mt-4">
+                                                <div class="code-container mb-4">
+                                                    <div class="code-header">
+                                                        <span class="code-title">需求一致性检测工具</span>
+                                                    </div>
+                                                    <div class="code-content">
+                                                        <pre><code class="language-javascript">class RequirementConsistencyChecker {
+  constructor() {
+    this.checkRules = [
+      this.checkUniqueId,
+      this.checkAcceptanceCriteria,
+      this.checkDependencies,
+      this.checkContentCompleteness
+    ];
+  }
+  
+  // 检查需求ID唯一性
+  checkUniqueId(requirements) {
+    const ids = requirements.map(req => req.id);
+    const duplicates = ids.filter((id, index) => 
+      ids.indexOf(id) !== index
+    );
+    
+    if (duplicates.length > 0) {
+      return {
+        rule: '唯一性检查',
+        passed: false,
+        message: `发现重复的需求ID: ${duplicates.join(', ')}`
+      };
+    }
+    
+    return {
+      rule: '唯一性检查',
+      passed: true,
+      message: '所有需求ID唯一'
+    };
+  }
+  
+  // 检查验收标准完整性
+  checkAcceptanceCriteria(requirement) {
+    if (!requirement.acceptanceCriteria || 
+        requirement.acceptanceCriteria.length === 0) {
+      return {
+        rule: '验收标准检查',
+        passed: false,
+        message: '缺少验收标准'
+      };
+    }
+    
+    for (let i = 0; i < requirement.acceptanceCriteria.length; i++) {
+      const criteria = requirement.acceptanceCriteria[i];
+      if (!criteria || criteria.trim().length === 0) {
+        return {
+          rule: '验收标准检查',
+          passed: false,
+          message: `验收标准第${i + 1}项为空`
+        };
+      }
+      if (criteria.length < 10) {
+        return {
+          rule: '验收标准检查',
+          passed: false,
+          message: `验收标准第${i + 1}项过于简单`
+        };
+      }
+    }
+    
+    return {
+      rule: '验收标准检查',
+      passed: true,
+      message: '验收标准完整'
+    };
+  }
+  
+  // 检查依赖关系有效性
+  checkDependencies(requirement, allRequirements) {
+    if (!requirement.dependencies || 
+        requirement.dependencies.length === 0) {
+      return {
+        rule: '依赖关系检查',
+        passed: true,
+        message: '无依赖关系'
+      };
+    }
+    
+    const existingIds = allRequirements.map(req => req.id);
+    for (const depId of requirement.dependencies) {
+      if (!existingIds.includes(depId)) {
+        return {
+          rule: '依赖关系检查',
+          passed: false,
+          message: `依赖的需求ID "${depId}" 不存在`
+        };
+      }
+    }
+    
+    return {
+      rule: '依赖关系检查',
+      passed: true,
+      message: '依赖关系有效'
+    };
+  }
+  
+  // 检查内容完整性
+  checkContentCompleteness(requirement) {
+    const issues = [];
+    
+    if (!requirement.title || requirement.title.trim().length < 5) {
+      issues.push('需求标题过短');
+    }
+    
+    if (!requirement.description || requirement.description.trim().length < 20) {
+      issues.push('需求描述过于简短');
+    }
+    
+    // 检查是否有模糊词汇
+    const fuzzyWords = ['大概', '可能', '差不多', '左右', '等等'];
+    for (const word of fuzzyWords) {
+      if (requirement.description && requirement.description.includes(word)) {
+        issues.push(`需求描述中包含模糊词汇: "${word}"`);
+      }
+    }
+    
+    if (issues.length > 0) {
+      return {
+        rule: '内容完整性检查',
+        passed: false,
+        message: issues.join('; ')
+      };
+    }
+    
+    return {
+      rule: '内容完整性检查',
+      passed: true,
+      message: '内容完整'
+    };
+  }
+  
+  // 执行单项检查
+  checkRequirement(requirement, allRequirements) {
+    const results = [];
+    
+    for (const rule of this.checkRules) {
+      try {
+        const result = rule.call(this, requirement, allRequirements);
+        results.push(result);
+      } catch (error) {
+        results.push({
+          rule: rule.name,
+          passed: false,
+          message: `检查出错: ${error.message}`
+        });
+      }
+    }
+    
+    return results;
+  }
+  
+  // 执行全套检查
+  checkAllRequirements(requirements) {
+    const report = {
+      total: requirements.length,
+      passed: 0,
+      failed: 0,
+      details: []
+    };
+    
+    for (const requirement of requirements) {
+      const checkResults = this.checkRequirement(requirement, requirements);
+      const requirementPassed = checkResults.every(result => result.passed);
+      
+      if (requirementPassed) {
+        report.passed++;
+      } else {
+        report.failed++;
+      }
+      
+      report.details.push({
+        requirementId: requirement.id,
+        requirementTitle: requirement.title,
+        passed: requirementPassed,
+        checks: checkResults
+      });
+    }
+    
+    return report;
+  }
+  
+  // 生成检测报告
+  generateReport(report) {
+    let reportText = `需求一致性检测报告\n`;
+    reportText += `==================\n\n`;
+    reportText += `检测时间: ${new Date().toLocaleString()}\n`;
+    reportText += `总需求数量: ${report.total}\n`;
+    reportText += `通过检测: ${report.passed}\n`;
+    reportText += `存在问题: ${report.failed}\n\n`;
+    
+    if (report.failed > 0) {
+      reportText += `❌ 发现问题的需求数量: ${report.failed}\n\n`;
+      reportText += `详细问题列表:\n`;
+      
+      for (const detail of report.details) {
+        if (!detail.passed) {
+          reportText += `\n需求ID: ${detail.requirementId}\n`;
+          reportText += `需求标题: ${detail.requirementTitle}\n`;
+          
+          for (const check of detail.checks) {
+            if (!check.passed) {
+              reportText += `  - ${check.rule}: ${check.message}\n`;
+            }
+          }
+        }
+      }
+    } else {
+      reportText += `✅ 所有需求均通过一致性检测\n`;
+    }
+    
+    return reportText;
+  }
+}
+
+// 使用示例
+const checker = new RequirementConsistencyChecker();
+
+// 示例需求数据
+const sampleRequirements = [
+  {
+    id: 'REQ-001',
+    title: '用户登录功能',
+    description: '用户应能够通过输入用户名和密码登录系统',
+    acceptanceCriteria: [
+      '用户输入有效的用户名和密码后能够成功登录',
+      '输入无效凭据时显示相应的错误信息',
+      '密码字段应隐藏显示'
+    ],
+    dependencies: []
+  },
+  {
+    id: 'REQ-002',
+    title: '用户注册功能',
+    description: '新用户应能够注册账户',
+    acceptanceCriteria: [
+      '用户填写必要信息后能够成功注册',
+      '重复用户名应提示已存在',
+      '注册成功后自动登录'
+    ],
+    dependencies: ['REQ-001']
+  },
+  {
+    id: 'REQ-001', // 重复ID
+    title: '商品搜索功能',
+    description: '用户应能够搜索商品',
+    acceptanceCriteria: [], // 缺少验收标准
+    dependencies: ['REQ-999'] // 不存在的依赖
+  }
+];
+
+// 执行检测
+const report = checker.checkAllRequirements(sampleRequirements);
+const reportText = checker.generateReport(report);
+console.log(reportText);</code></pre>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </details>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 统一页脚 -->
+    <footer class="unified-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">
+                        <span class="navbar-logo">🤖</span>
+                        <span>0代码AI规范化编程</span>
+                    </div>
+                    <p class="footer-description">
+                        通过AI驱动的学习平台，帮助开发者掌握规范化编程技能。
+                        我们的使命是让每个人都能轻松掌握先进的编程技术。
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>学习资源</h4>
+                        <ul>
+                            <li><a href="document_library.html">文档中心</a></li>
+                            <li><a href="MODULE_WIKI_KNOWLEDGE.html">知识库</a></li>
+                            <li><a href="P3_MODEL_PROVIDER.html">模块文档</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>支持服务</h4>
+                        <ul>
+                            <li><a href="#">帮助中心</a></li>
+                            <li><a href="#">技术支持</a></li>
+                            <li><a href="#">联系我们</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 0代码AI规范化编程. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 统一JavaScript -->
+    <script src="assets/js/unified-scripts.js"></script>
+</body>
+</html>

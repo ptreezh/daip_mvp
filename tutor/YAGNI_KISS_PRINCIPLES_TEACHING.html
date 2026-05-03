@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YAGNI和KISS原则教学 - 0代码AI规范化编程实践教学</title>
+    <meta name="description" content="学习YAGNI（你不会需要它）和KISS（保持简单愚蠢）原则，避免过度工程化，提高开发效率">
+    
+    <!-- 统一样式表 -->
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    
+    <!-- 字体和图标 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">加载YAGNI和KISS原则教学内容...</div>
+        </div>
+    </div>
+    
+    <!-- 滚动指示器 -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+    
+    <!-- 统一导航栏 -->
+    <nav class="unified-navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span class="navbar-logo">🤖</span>
+                <span>0代码AI规范化编程</span>
+            </a>
+            
+            <button class="navbar-toggle" id="navbarToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="index.html#learning" class="nav-link">学习</a></li>
+                <li><a href="index.html#modules" class="nav-link">模块</a></li>
+                <li><a href="index.html#projects" class="nav-link">项目</a></li>
+                <li><a href="index.html#resources" class="nav-link">资源</a></li>
+            </ul>
+            
+            <div class="navbar-actions">
+                <a href="#start-learning" class="unified-btn unified-btn-primary">
+                    开始学习
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主容器 -->
+    <main class="main-container">
+        <!-- Hero 区域 -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            <span class="hero-icon">🎯</span>
+                            YAGNI & KISS原则教学
+                        </h1>
+                        <p class="hero-description">
+                            学习YAGNI（你不会需要它）和KISS（保持简单愚蠢）原则，
+                            避免过度工程化，提高开发效率和产品质量
+                        </p>
+                        <div class="hero-features">
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-ban"></i>
+                                避免过度建设
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-simplify"></i>
+                                保持简单
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-tachometer-alt"></i>
+                                提高效率
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="unified-card">
+                            <div class="stats-icon text-center mb-4">
+                                <i class="fas fa-lightbulb text-4xl text-primary"></i>
+                            </div>
+                            <div class="stats-info text-center">
+                                <div class="text-3xl font-bold text-primary mb-2">2</div>
+                                <div class="text-secondary">核心原则</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 教学内容 -->
+        <section class="content-section py-16">
+            <div class="container">
+                <!-- YAGNI原则 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <h2 class="card-title">YAGNI原则 - 你不会需要它 (You Aren't Gonna Need It)</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            <strong>核心理念：</strong>除非确实需要，否则不要添加功能。这有助于避免浪费时间和资源在永远不会使用的功能上。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mt-6">
+                            <div>
+                                <h3 class="font-semibold text-lg mb-3">❌ 违反YAGNI原则</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">过度工程化示例</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-javascript">// 违反YAGNI原则 - 过早添加复杂功能
+class UserDashboard {
+  constructor() {
+    this.widgets = [];
+    // 用户还没要求这么多布局
+    this.layouts = ['grid', 'list', 'kanban', 'calendar', 'timeline']; 
+    // 复杂主题系统
+    this.themes = ['light', 'dark', 'blue', 'green', 'purple', 'pink', 'orange'];
+    // 多种动画效果
+    this.animations = ['fade', 'slide', 'zoom', 'flip', 'bounce'];
+    // 多种导出格式
+    this.exportFormats = ['pdf', 'excel', 'csv', 'json', 'xml', 'html'];
+    // 国际化支持（用户只在中国使用）
+    this.languages = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR'];
+  }
+  
+  // 当前只需要基本的网格布局
+  renderGrid() { /* ... */ }
+  
+  // 其他布局暂时用不到
+  renderList() { /* ... */ }
+  renderKanban() { /* ... */ }
+  renderCalendar() { /* ... */ }
+  renderTimeline() { /* ... */ }
+  
+  // 多种主题切换
+  switchTheme(theme) { /* ... */ }
+  
+  // 多种动画效果
+  setAnimation(animation) { /* ... */ }
+  
+  // 多种导出功能
+  exportData(format) { /* ... */ }
+  
+  // 多语言支持
+  setLanguage(lang) { /* ... */ }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="font-semibold text-lg mb-3">✅ 遵循YAGNI原则</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">简约实现示例</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-javascript">// 遵循YAGNI原则 - 只实现当前需要的功能
+class UserDashboard {
+  constructor() {
+    this.widgets = [];
+    this.currentLayout = 'grid'; // 当前只需要网格布局
+    this.theme = 'light'; // 默认主题
+  }
+  
+  render() {
+    this.renderGrid(); // 只实现当前需要的渲染方法
+  }
+  
+  renderGrid() {
+    // 实现基本网格布局
+    console.log('Rendering grid layout');
+  }
+  
+  addWidget(widget) {
+    this.widgets.push(widget);
+    this.render();
+  }
+  
+  // 当用户真正需要其他功能时再添加
+  // renderList() { /* 待实现 */ }
+  // switchTheme() { /* 待实现 */ }
+}
+
+// 使用示例
+const dashboard = new UserDashboard();
+dashboard.addWidget({ title: '用户统计', type: 'chart' });</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-secondary rounded-lg p-6 mt-6">
+                            <h3 class="font-semibold mb-3">YAGNI实施策略：</h3>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-semibold mb-2">需求验证清单</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-question-circle text-primary mt-1"></i>
+                                            <span>用户是否明确要求这个功能？</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-question-circle text-primary mt-1"></i>
+                                            <span>是否有数据证明这个功能会被使用？</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-question-circle text-primary mt-1"></i>
+                                            <span>如果不实现会有什么后果？</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-semibold mb-2">渐进式开发</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-arrow-up text-primary mt-1"></i>
+                                            <span>第一版：实现最基本功能</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-arrow-up text-primary mt-1"></i>
+                                            <span>第二版：根据用户反馈添加功能</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-arrow-up text-primary mt-1"></i>
+                                            <span>持续迭代：不断完善功能</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- KISS原则 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-simplify"></i>
+                        </div>
+                        <h2 class="card-title">KISS原则 - 保持简单愚蠢 (Keep It Simple, Stupid)</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            <strong>核心理念：</strong>保持简单愚蠢。越简单越好，在其他条件相同的情况下，简单的解决方案优于复杂的解决方案。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mt-6">
+                            <div>
+                                <h3 class="font-semibold text-lg mb-3">❌ 违反KISS原则</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">复杂难懂的代码</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-javascript">// 违反KISS原则 - 复杂难懂的代码
+const processData = (data) => data.filter(x => x.active).map(x => ({...x, processed: true, timestamp: Date.now()})).sort((a, b) => a.priority - b.priority);
+
+// 复杂的选择器
+.container > .row:first-child .col-md-6:nth-child(2) .card .card-body ul li:nth-child(odd):hover {
+  background-color: #f0f0f0;
+  transform: translateX(5px);
+  transition: all 0.3s ease-in-out;
+}
+
+// 复杂的组件
+<div class="complex-component" data-config='{"theme":"dark","size":"large","animation":"fade","layout":"grid","features":["search","filter","sort","export"],"permissions":{"read":true,"write":false,"delete":false}}'>
+  <!-- 大量嵌套和复杂配置 -->
+</div></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="font-semibold text-lg mb-3">✅ 遵循KISS原则</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">简单清晰的代码</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-javascript">// 遵循KISS原则 - 简单清晰的代码
+function processActiveItems(items) {
+  // 1. 过滤出活跃项
+  const activeItems = items.filter(item => item.active);
+  
+  // 2. 添加处理标记和时间戳
+  const processedItems = activeItems.map(item => ({
+    ...item,
+    processed: true,
+    timestamp: Date.now()
+  }));
+  
+  // 3. 按优先级排序
+  const sortedItems = processedItems.sort((a, b) => a.priority - b.priority);
+  
+  return sortedItems;
+}
+
+// 简单明确的选择器
+.list-item--odd:hover {
+  background-color: #f0f0f0;
+  transform: translateX(5px);
+}
+
+// 简单的组件
+<div class="user-card" data-user-id="123">
+  <img src="avatar.jpg" alt="用户头像" class="user-avatar">
+  <h3 class="user-name">张三</h3>
+  <p class="user-email">zhangsan@example.com</p>
+</div></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-secondary rounded-lg p-6 mt-6">
+                            <h3 class="font-semibold mb-3">KISS实施策略：</h3>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-semibold mb-2">设计原则</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>一次只做一件事</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>使用有意义的命名</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>避免不必要的抽象</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-semibold mb-2">代码审查检查清单</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-search text-primary mt-1"></i>
+                                            <span>函数是否过长（>50行）？</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-search text-primary mt-1"></i>
+                                            <span>参数是否过多（>3个）？</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-search text-primary mt-1"></i>
+                                            <span>嵌套层级是否过深（>3层）？</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- YAGNI与KISS的协同作用 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <h2 class="card-title">YAGNI 与 KISS 的协同作用</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            YAGNI和KISS原则相互补充，共同帮助我们创建高质量的软件系统。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mt-6">
+                            <div class="p-6 bg-secondary rounded-lg">
+                                <h3 class="font-semibold text-lg mb-3">
+                                    <i class="fas fa-link mr-2 text-primary"></i>互补关系
+                                </h3>
+                                <ul class="space-y-3">
+                                    <li class="flex items-start gap-3">
+                                        <i class="fas fa-shield-alt text-success mt-1"></i>
+                                        <div>
+                                            <strong>YAGNI防止过度建设</strong>
+                                            <p class="text-sm text-secondary mt-1">
+                                                不要实现不需要的功能
+                                            </p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <i class="fas fa-shield-alt text-success mt-1"></i>
+                                        <div>
+                                            <strong>KISS确保实现简单</strong>
+                                            <p class="text-sm text-secondary mt-1">
+                                                用最简单的方式实现需要的功能
+                                            </p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="p-6 bg-secondary rounded-lg">
+                                <h3 class="font-semibold text-lg mb-3">
+                                    <i class="fas fa-lightbulb mr-2 text-primary"></i>实践示例
+                                </h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">需求：实现一个用户列表页面</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-javascript">// ❌ 违反YAGNI和KISS - 过度工程化
+class OverEngineeredUserList { /* 复杂实现 */ }
+
+// ✅ 遵循YAGNI和KISS - 简单实用
+class SimpleUserList {
+  constructor() {
+    this.users = [];
+  }
+  
+  async loadUsers() {
+    const response = await fetch('/api/users');
+    this.users = await response.json();
+    this.render();
+  }
+  
+  render() {
+    // 简单的渲染逻辑
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 实践练习 -->
+                <div class="unified-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <h2 class="card-title">实践练习：应用YAGNI和KISS原则重构代码</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            通过实际案例练习，掌握YAGNI和KISS原则的应用方法。
+                        </p>
+                        
+                        <div class="expandable-content mt-6">
+                            <div class="expandable-header">
+                                <h3 class="expandable-title font-semibold">练习案例：电商购物车功能</h3>
+                                <i class="fas fa-chevron-down expandable-icon"></i>
+                            </div>
+                            <div class="expandable-body">
+                                <div class="bg-secondary rounded-lg p-6 mb-6">
+                                    <h4 class="font-semibold mb-3">案例背景：</h4>
+                                    <p class="mb-4">
+                                        现有一个电商购物车功能，包含了大量可能用不到的复杂功能。
+                                        请应用YAGNI和KISS原则对其进行重构。
+                                    </p>
+                                    
+                                    <div class="code-container mb-6">
+                                        <div class="code-header">
+                                            <span class="code-title">原始问题代码</span>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code class="language-javascript">class ShoppingCart {
+  constructor() {
+    this.items = [];
+    // 复杂的购物车状态管理
+    this.states = ['empty', 'adding', 'updating', 'removing', 'checkout-ready', 'checkout-processing', 'checkout-complete'];
+    this.currentState = 'empty';
+    
+    // 多种折扣策略（用户目前只需要满减）
+    this.discountStrategies = {
+      percentage: null,
+      fixedAmount: null,
+      buyXGetYFree: null,
+      tiered: null,
+      seasonal: null,
+      coupon: null
+    };
+    
+    // 多种货币支持（目前只支持人民币）
+    this.currencies = ['CNY', 'USD', 'EUR', 'JPY', 'GBP'];
+    this.currentCurrency = 'CNY';
+    
+    // 复杂的UI主题系统
+    this.themes = ['default', 'dark', 'light', 'colorful', 'minimal'];
+    
+    // 多种动画效果
+    this.animations = ['slide', 'fade', 'zoom', 'flip'];
+    
+    // 复杂的数据持久化策略
+    this.storageStrategies = ['localStorage', 'sessionStorage', 'cookie', 'server'];
+    
+    // 国际化支持
+    this.languages = ['zh-CN', 'en-US', 'ja-JP'];
+  }
+  
+  addItem(product, quantity = 1) {
+    // 复杂的添加逻辑
+    const existingItem = this.items.find(item => item.id === product.id);
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      this.items.push({ ...product, quantity });
+    }
+    
+    // 复杂的状态管理
+    this.updateState();
+    
+    // 复杂的UI更新
+    this.updateUI();
+    
+    // 复杂的数据持久化
+    this.saveToStorage();
+  }
+  
+  // 大量可能用不到的方法
+  applyPercentageDiscount(percentage) { /* ... */ }
+  applyFixedDiscount(amount) { /* ... */ }
+  applyBuyXGetYFree(x, y) { /* ... */ }
+  applyTieredDiscount(tiers) { /* ... */ }
+  applySeasonalDiscount(season) { /* ... */ }
+  applyCoupon(couponCode) { /* ... */ }
+  
+  switchCurrency(currency) { /* ... */ }
+  switchTheme(theme) { /* ... */ }
+  setAnimation(animation) { /* ... */ }
+  switchLanguage(language) { /* ... */ }
+  
+  // 复杂的状态管理
+  updateState() { /* ... */ }
+  updateUI() { /* ... */ }
+  saveToStorage() { /* ... */ }
+  loadFromStorage() { /* ... */ }
+  syncWithServer() { /* ... */ }
+}</code></pre>
+                                        </div>
+                                    </div>
+                                    
+                                    <h4 class="font-semibold mb-3">练习任务：</h4>
+                                    <ol class="list-decimal list-inside space-y-2 mb-4">
+                                        <li>分析原始代码违反了哪些YAGNI和KISS原则</li>
+                                        <li>应用YAGNI原则移除不必要的功能</li>
+                                        <li>应用KISS原则简化复杂实现</li>
+                                        <li>确保重构后的代码简洁实用</li>
+                                    </ol>
+                                    
+                                    <div class="solution-area">
+                                        <h4 class="font-semibold mb-3">参考答案：</h4>
+                                        <details class="bg-white rounded-lg p-4">
+                                            <summary class="cursor-pointer font-medium">点击查看参考答案</summary>
+                                            <div class="mt-4">
+                                                <div class="code-container mb-4">
+                                                    <div class="code-header">
+                                                        <span class="code-title">重构后的代码</span>
+                                                    </div>
+                                                    <div class="code-content">
+                                                        <pre><code class="language-javascript">class ShoppingCart {
+  constructor() {
+    this.items = [];
+    // 只保留当前需要的基本功能
+  }
+  
+  addItem(product, quantity = 1) {
+    const existingItem = this.items.find(item => item.id === product.id);
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      this.items.push({ ...product, quantity });
+    }
+    
+    // 简单的通知机制
+    this.onCartUpdated();
+  }
+  
+  removeItem(productId) {
+    this.items = this.items.filter(item => item.id !== productId);
+    this.onCartUpdated();
+  }
+  
+  updateQuantity(productId, quantity) {
+    const item = this.items.find(item => item.id === productId);
+    if (item) {
+      if (quantity <= 0) {
+        this.removeItem(productId);
+      } else {
+        item.quantity = quantity;
+        this.onCartUpdated();
+      }
+    }
+  }
+  
+  getTotalPrice() {
+    return this.items.reduce((total, item) => 
+      total + (item.price * item.quantity), 0
+    );
+  }
+  
+  getItemCount() {
+    return this.items.reduce((count, item) => count + item.quantity, 0);
+  }
+  
+  // 简单的事件回调机制
+  onCartUpdated() {
+    // 可以在这里添加简单的UI更新逻辑
+    console.log('Cart updated');
+  }
+  
+  // 当需要折扣功能时再添加
+  /*
+  applyDiscount(discountFunction) {
+    // 简单的折扣应用机制
+    return discountFunction(this.getTotalPrice());
+  }
+  */
+  
+  // 当需要数据持久化时再添加
+  /*
+  save() {
+    localStorage.setItem('cart', JSON.stringify(this.items));
+  }
+  
+  load() {
+    const saved = localStorage.getItem('cart');
+    if (saved) {
+      this.items = JSON.parse(saved);
+      this.onCartUpdated();
+    }
+  }
+  */
+}
+
+// 使用示例
+const cart = new ShoppingCart();
+cart.addItem({ id: 1, name: '商品A', price: 100 }, 2);
+console.log('总价:', cart.getTotalPrice());
+console.log('商品数量:', cart.getItemCount());</code></pre>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mt-4">
+                                                    <h5 class="font-semibold mb-2">违反的原则分析：</h5>
+                                                    <ul class="space-y-2 text-sm">
+                                                        <li><strong>YAGNI原则：</strong>实现了大量用户当前不需要的功能（多种折扣策略、多货币支持、多主题等）</li>
+                                                        <li><strong>KISS原则：</strong>代码过于复杂，嵌套层级深，功能耦合度高</li>
+                                                    </ul>
+                                                    
+                                                    <h5 class="font-semibold mb-2 mt-4">改进要点：</h5>
+                                                    <ul class="space-y-2 text-sm">
+                                                        <li>移除了当前不需要的复杂功能</li>
+                                                        <li>简化了核心方法的实现</li>
+                                                        <li>保留了未来扩展的可能性（注释说明）</li>
+                                                        <li>保持了代码的可读性和可维护性</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </details>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 统一页脚 -->
+    <footer class="unified-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">
+                        <span class="navbar-logo">🤖</span>
+                        <span>0代码AI规范化编程</span>
+                    </div>
+                    <p class="footer-description">
+                        通过AI驱动的学习平台，帮助开发者掌握规范化编程技能。
+                        我们的使命是让每个人都能轻松掌握先进的编程技术。
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>学习资源</h4>
+                        <ul>
+                            <li><a href="document_library.html">文档中心</a></li>
+                            <li><a href="MODULE_WIKI_KNOWLEDGE.html">知识库</a></li>
+                            <li><a href="P3_MODEL_PROVIDER.html">模块文档</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>支持服务</h4>
+                        <ul>
+                            <li><a href="#">帮助中心</a></li>
+                            <li><a href="#">技术支持</a></li>
+                            <li><a href="#">联系我们</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 0代码AI规范化编程. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 统一JavaScript -->
+    <script src="assets/js/unified-scripts.js"></script>
+</body>
+</html>

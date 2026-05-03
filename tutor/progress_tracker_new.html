@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习进度跟踪 - DAIP-LIVE AI规范化编程实验室 | 0代码AI规范化编程实践教学</title>
+    <meta name="description" content="记录你在AI规范化编程学习之旅中的每一步进展">
+    
+    <!-- 引入统一设计系统 -->
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="loading">
+    <!-- 加载动画 -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">加载学习进度系统...</div>
+        </div>
+    </div>
+
+    <!-- 滚动指示器 -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <main class="main-container">
+        <!-- Hero 区域 -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        <span class="hero-icon">🎓</span>
+                        学习进度跟踪
+                    </h1>
+                    <p class="hero-description">
+                        记录你在AI规范化编程学习之旅中的每一步进展
+                    </p>
+                    <div class="hero-features">
+                        <div class="feature-tag">
+                            <i class="fas fa-chart-line"></i>
+                            实时追踪
+                        </div>
+                        <div class="feature-tag">
+                            <i class="fas fa-trophy"></i>
+                            成就系统
+                        </div>
+                        <div class="feature-tag">
+                            <i class="fas fa-calendar-alt"></i>
+                            学习时间线
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="stats-card">
+                        <div class="stats-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="stats-info">
+                            <div class="stats-number" id="overallProgress">0%</div>
+                            <div class="stats-label">总体进度</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 概览统计 -->
+        <section class="stats-section">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="overallProgress">0%</div>
+                            <div class="stat-label">总体进度</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card stat-implemented">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="completedPrinciples">0/6</div>
+                            <div class="stat-label">已完成原则</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card stat-partial">
+                        <div class="stat-icon">
+                            <i class="fas fa-cube"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="completedModules">0/21</div>
+                            <div class="stat-label">已完成模块</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card stat-planned">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="studyDays">0</div>
+                            <div class="stat-label">学习天数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 编程原则进度 -->
+        <section class="content-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-clipboard-list"></i>
+                        编程原则掌握进度
+                    </h2>
+                    <p class="section-description">
+                        通过完成各项任务来掌握AI规范化编程的核心原则
+                    </p>
+                </div>
+                
+                <div class="principles-grid" id="principlesGrid">
+                    <!-- 动态生成的原则卡片 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 学习时间线 -->
+        <section class="content-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-timeline"></i>
+                        学习时间线
+                    </h2>
+                    <p class="section-description">
+                        查看你的学习历程和重要里程碑
+                    </p>
+                </div>
+                
+                <div class="timeline-container">
+                    <div class="timeline" id="timeline">
+                        <!-- 动态生成的时间线项目 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 操作按钮区域 -->
+        <section class="actions-section">
+            <div class="container">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-cogs"></i>
+                        学习数据管理
+                    </h3>
+                    <p class="section-description">
+                        导出你的学习成果或重置进度开始新的学习旅程
+                    </p>
+                </div>
+                
+                <div class="actions-buttons">
+                    <button class="btn btn-primary" onclick="exportProgress()">
+                        <i class="fas fa-download"></i>
+                        导出进度报告
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetProgress()">
+                        <i class="fas fa-refresh"></i>
+                        重置进度
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 成就弹窗 -->
+    <div class="achievement-popup" id="achievementPopup">
+        <div class="achievement-content">
+            <div class="achievement-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <div class="achievement-text">
+                <div class="achievement-title">🎉 恭喜达成成就！</div>
+                <div class="achievement-description" id="achievementDescription">你已经完成了一个重要的学习里程碑</div>
+            </div>
+            <button class="achievement-close" onclick="closeAchievement()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="main-nav">
+        <div class="nav-content">
+            <div class="nav-brand">
+                <i class="fas fa-code"></i>
+                <span>0代码AI规范化编程</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">首页</a>
+                <a href="document_library_new.html" class="nav-link">文档库</a>
+                <a href="enhanced_learning_platform_new.html" class="nav-link">学习平台</a>
+                <a href="INTERACTIVE_LEARNING_PLATFORM_new.html" class="nav-link">交互实验室</a>
+                <a href="modern_platform.html" class="nav-link">现代平台</a>
+                <a href="enterprise_learning_platform_new.html" class="nav-link">企业版</a>
+                <a href="premium_learning_platform_new.html" class="nav-link">高级版</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 动画控制脚本 -->
+    <script src="animations.js"></script>
+
+    <script>
+        // 学习数据模型
+        const learningData = {
+            principles: [
+                {
+                    id: 'solid',
+                    name: 'SOLID原则',
+                    tasks: [
+                        { id: 's', text: '理解单一职责原则', completed: false },
+                        { id: 'o', text: '实践开闭原则', completed: false },
+                        { id: 'l', text: '应用里氏替换原则', completed: false },
+                        { id: 'i', text: '使用接口隔离原则', completed: false },
+                        { id: 'd', text: '遵循依赖倒置原则', completed: false }
+                    ]
+                },
+                {
+                    id: 'kiss',
+                    name: 'KISS原则',
+                    tasks: [
+                        { id: 'simplicity', text: '简化复杂代码结构', completed: false },
+                        { id: 'avoid-overengineer', text: '避免过度工程化', completed: false },
+                        { id: 'direct-solution', text: '选择直接解决方案', completed: false }
+                    ]
+                },
+                {
+                    id: 'tdd',
+                    name: 'TDD原则',
+                    tasks: [
+                        { id: 'red-phase', text: '编写失败测试', completed: false },
+                        { id: 'green-phase', text: '实现最小功能', completed: false },
+                        { id: 'refactor-phase', text: '重构保持测试通过', completed: false }
+                    ]
+                },
+                {
+                    id: 'yagni',
+                    name: 'YAGNI原则',
+                    tasks: [
+                        { id: 'current-need', text: '专注当前需求', completed: false },
+                        { id: 'avoid-premature', text: '避免过早优化', completed: false },
+                        { id: 'future-extension', text: '预留扩展点但不实现', completed: false }
+                    ]
+                },
+                {
+                    id: 'dry',
+                    name: 'DRY原则',
+                    tasks: [
+                        { id: 'extract-common', text: '提取公共逻辑', completed: false },
+                        { id: 'reuse-components', text: '复用组件和函数', completed: false },
+                        { id: 'single-source', text: '保持单一修改点', completed: false }
+                    ]
+                },
+                {
+                    id: 'clarity',
+                    name: '无歧义原则',
+                    tasks: [
+                        { id: 'clear-naming', text: '使用清晰的命名', completed: false },
+                        { id: 'type-annotations', text: '添加类型注解', completed: false },
+                        { id: 'detailed-docs', text: '编写详细文档', completed: false }
+                    ]
+                }
+            ],
+            modules: 21,
+            milestones: []
+        };
+
+        // 初始化应用
+        function initializeApp() {
+            loadProgress();
+            renderPrinciples();
+            renderTimeline();
+            updateOverview();
+            setupEventListeners();
+        }
+
+        // 加载进度数据
+        function loadProgress() {
+            const saved = localStorage.getItem('learningProgress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                // 合并保存的数据到学习数据中
+                data.principles?.forEach((savedPrinciple, index) => {
+                    if (learningData.principles[index]) {
+                        learningData.principles[index].tasks.forEach((task, taskIndex) => {
+                            if (savedPrinciple.tasks[taskIndex]) {
+                                task.completed = savedPrinciple.tasks[taskIndex].completed;
+                            }
+                        });
+                    }
+                });
+                learningData.modules = data.modules || 0;
+                learningData.milestones = data.milestones || [];
+            }
+        }
+
+        // 保存进度数据
+        function saveProgress() {
+            localStorage.setItem('learningProgress', JSON.stringify(learningData));
+        }
+
+        // 渲染原则卡片
+        function renderPrinciples() {
+            const container = document.getElementById('principlesGrid');
+            container.innerHTML = '';
+
+            learningData.principles.forEach(principle => {
+                const completedTasks = principle.tasks.filter(task => task.completed).length;
+                const totalTasks = principle.tasks.length;
+                const progress = (completedTasks / totalTasks) * 100;
+
+                let statusClass = '';
+                let statusText = '';
+                if (progress === 100) {
+                    statusClass = 'completed';
+                    statusText = '已完成';
+                } else if (progress > 0) {
+                    statusClass = 'in-progress';
+                    statusText = '学习中';
+                } else {
+                    statusClass = 'not-started';
+                    statusText = '未开始';
+                }
+
+                const card = document.createElement('div');
+                card.className = `principle-card animate-on-scroll ${statusClass}`;
+                card.innerHTML = `
+                    <div class="principle-header">
+                        <div class="principle-name">
+                            <h3>${principle.name}</h3>
+                            <div class="principle-status status-${statusClass}">
+                                <i class="fas ${getStatusIcon(statusClass)}"></i>
+                                ${statusText}
+                            </div>
+                        </div>
+                        <div class="principle-progress">
+                            <div class="progress-circle">
+                                <span class="progress-text">${Math.round(progress)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                    <ul class="principle-tasks">
+                        ${principle.tasks.map(task => `
+                            <li class="task-item">
+                                <div class="task-checkbox ${task.completed ? 'checked' : ''}"
+                                     onclick="toggleTask('${principle.id}', '${task.id}')">
+                                    ${task.completed ? '<i class="fas fa-check"></i>' : ''}
+                                </div>
+                                <div class="task-text ${task.completed ? 'completed' : ''}">
+                                    ${task.text}
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+
+                container.appendChild(card);
+            });
+
+            // 触发滚动动画
+            setTimeout(() => {
+                if (window.animateOnScroll) {
+                    window.animateOnScroll();
+                }
+            }, 100);
+        }
+
+        // 获取状态图标
+        function getStatusIcon(statusClass) {
+            const icons = {
+                'completed': 'fa-check-circle',
+                'in-progress': 'fa-clock',
+                'not-started': 'fa-circle'
+            };
+            return icons[statusClass] || 'fa-circle';
+        }
+
+        // 渲染时间线
+        function renderTimeline() {
+            const container = document.getElementById('timeline');
+            container.innerHTML = '';
+
+            if (learningData.milestones.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3 class="empty-title">开始你的学习之旅</h3>
+                        <p class="empty-description">完成学习任务后，你的成就将在这里显示</p>
+                    </div>
+                `;
+                return;
+            }
+
+            learningData.milestones.forEach((milestone, index) => {
+                const item = document.createElement('div');
+                item.className = `timeline-item animate-on-scroll ${milestone.completed ? 'completed' : 'in-progress'}`;
+
+                const date = new Date(milestone.date);
+                const formattedDate = date.toLocaleDateString('zh-CN');
+
+                item.innerHTML = `
+                    <div class="timeline-marker">
+                        <i class="fas ${milestone.completed ? 'fa-check-circle' : 'fa-circle'}"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <div class="timeline-date">${formattedDate}</div>
+                        </div>
+                        <div class="timeline-body">
+                            <h4 class="timeline-title">${milestone.title}</h4>
+                            <p class="timeline-description">${milestone.description}</p>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(item);
+            });
+
+            // 触发滚动动画
+            setTimeout(() => {
+                if (window.animateOnScroll) {
+                    window.animateOnScroll();
+                }
+            }, 200);
+        }
+
+        // 更新概览数据
+        function updateOverview() {
+            // 计算总体进度
+            let totalTasks = 0;
+            let completedTasks = 0;
+
+            learningData.principles.forEach(principle => {
+                totalTasks += principle.tasks.length;
+                completedTasks += principle.tasks.filter(task => task.completed).length;
+            });
+
+            const overallProgress = Math.round((completedTasks / totalTasks) * 100);
+            
+            // 更新所有显示总体进度的元素
+            document.querySelectorAll('#overallProgress').forEach(element => {
+                animateNumber(element, overallProgress);
+            });
+
+            // 已完成原则数
+            const completedPrinciples = learningData.principles.filter(principle =>
+                principle.tasks.every(task => task.completed)
+            ).length;
+            
+            const completedPrinciplesElement = document.getElementById('completedPrinciples');
+            if (completedPrinciplesElement) {
+                animateNumber(completedPrinciplesElement, completedPrinciples, { suffix: '/6' });
+            }
+
+            // 已完成模块数
+            const completedModulesElement = document.getElementById('completedModules');
+            if (completedModulesElement) {
+                animateNumber(completedModulesElement, learningData.modules, { suffix: '/21' });
+            }
+
+            // 学习天数
+            const startDate = localStorage.getItem('learningStartDate');
+            const studyDaysElement = document.getElementById('studyDays');
+            if (studyDaysElement) {
+                if (startDate) {
+                    const start = new Date(startDate);
+                    const now = new Date();
+                    const days = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+                    animateNumber(studyDaysElement, days);
+                } else {
+                    animateNumber(studyDaysElement, 0);
+                }
+            }
+        }
+
+        // 数字动画效果
+        function animateNumber(element, targetNumber, options = {}) {
+            const startNumber = 0;
+            const duration = 1000;
+            const startTime = performance.now();
+            const suffix = options.suffix || '';
+            
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const currentNumber = Math.floor(startNumber + (targetNumber - startNumber) * easeOutQuart(progress));
+                element.textContent = currentNumber + suffix;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                }
+            }
+            
+            requestAnimationFrame(updateNumber);
+        }
+
+        // 缓动函数
+        function easeOutQuart(t) {
+            return 1 - Math.pow(1 - t, 4);
+        }
+
+        // 切换任务状态
+        function toggleTask(principleId, taskId) {
+            const principle = learningData.principles.find(p => p.id === principleId);
+            if (principle) {
+                const task = principle.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.completed = !task.completed;
+
+                    // 添加里程碑
+                    if (task.completed) {
+                        addMilestone(`完成${principle.name}任务`, task.text);
+                    }
+
+                    // 检查是否完成了原则
+                    const allCompleted = principle.tasks.every(t => t.completed);
+                    if (allCompleted) {
+                        addMilestone(`掌握${principle.name}`, `成功掌握了${principle.name}的所有要点`);
+                        showAchievement(`🎉 掌握${principle.name}`, `恭喜！你已经成功掌握了${principle.name}的所有核心要点`);
+                    }
+
+                    saveProgress();
+                    renderPrinciples();
+                    updateOverview();
+                }
+            }
+        }
+
+        // 添加里程碑
+        function addMilestone(title, description) {
+            learningData.milestones.push({
+                title,
+                description,
+                date: new Date().toISOString(),
+                completed: true
+            });
+
+            // 限制里程碑数量
+            if (learningData.milestones.length > 20) {
+                learningData.milestones.shift();
+            }
+
+            renderTimeline();
+        }
+
+        // 显示成就弹窗
+        function showAchievement(title, description) {
+            const popup = document.getElementById('achievementPopup');
+            const descriptionElement = document.getElementById('achievementDescription');
+
+            popup.querySelector('.achievement-title').textContent = title;
+            descriptionElement.textContent = description;
+
+            popup.classList.add('show');
+
+            // 自动隐藏
+            setTimeout(() => {
+                closeAchievement();
+            }, 5000);
+        }
+
+        // 关闭成就弹窗
+        function closeAchievement() {
+            const popup = document.getElementById('achievementPopup');
+            popup.classList.remove('show');
+        }
+
+        // 导出进度
+        function exportProgress() {
+            const progressData = {
+                exportDate: new Date().toISOString(),
+                overallProgress: document.getElementById('overallProgress')?.textContent || '0%',
+                completedPrinciples: document.getElementById('completedPrinciples')?.textContent || '0/6',
+                completedModules: document.getElementById('completedModules')?.textContent || '0/21',
+                studyDays: document.getElementById('studyDays')?.textContent || '0',
+                principles: learningData.principles,
+                milestones: learningData.milestones
+            };
+
+            const dataStr = JSON.stringify(progressData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `learning-progress-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+
+            URL.revokeObjectURL(url);
+
+            showAchievement('📥 导出成功', '学习进度报告已成功导出');
+        }
+
+        // 重置进度
+        function resetProgress() {
+            if (confirm('确定要重置所有学习进度吗？此操作不可撤销。')) {
+                localStorage.removeItem('learningProgress');
+                localStorage.removeItem('learningStartDate');
+
+                // 重置数据
+                learningData.principles.forEach(principle => {
+                    principle.tasks.forEach(task => {
+                        task.completed = false;
+                    });
+                });
+                learningData.modules = 0;
+                learningData.milestones = [];
+
+                saveProgress();
+                renderPrinciples();
+                renderTimeline();
+                updateOverview();
+
+                showAchievement('🔄 重置完成', '学习进度已重置，你可以开始新的学习之旅');
+            }
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 记录学习开始日期
+            if (!localStorage.getItem('learningStartDate')) {
+                localStorage.setItem('learningStartDate', new Date().toISOString());
+                addMilestone('开始学习之旅', '开始学习AI规范化编程的核心原则');
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 等待页面完全加载
+            setTimeout(initializeApp, 500);
+        });
+
+        // 处理页面可见性变化
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // 页面变为可见时重新计算动画
+                setTimeout(() => {
+                    if (window.animateOnScroll) {
+                        window.animateOnScroll();
+                    }
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>

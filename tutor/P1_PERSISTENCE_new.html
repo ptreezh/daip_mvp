@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P1 数据持久化模块 | 0代码AI规范化编程实践教学</title>
+    <meta name="description" content="DAIP-LIVE数据持久化模块：SQLite数据库集成、会话管理和数据访问策略">
+    
+    <!-- 引入统一设计系统 -->
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="loading">
+    <!-- 加载动画 -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">加载数据持久化模块...</div>
+        </div>
+    </div>
+
+    <!-- 滚动指示器 -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <main class="main-container">
+        <!-- Hero 区域 -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        <span class="hero-icon">💾</span>
+                        P1 数据持久化模块
+                    </h1>
+                    <p class="hero-description">
+                        DAIP-LIVE数据持久化模块：SQLite数据库集成、会话管理和数据访问策略
+                    </p>
+                    <div class="hero-features">
+                        <div class="feature-tag">
+                            <i class="fas fa-database"></i>
+                            SQLite集成
+                        </div>
+                        <div class="feature-tag">
+                            <i class="fas fa-sync-alt"></i>
+                            会话管理
+                        </div>
+                        <div class="feature-tag">
+                            <i class="fas fa-shield-alt"></i>
+                            数据安全
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="stats-card">
+                        <div class="stats-icon">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="stats-info">
+                            <div class="stats-number">3</div>
+                            <div class="stats-label">核心文件</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 模块概述 -->
+        <section class="content-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        模块概述
+                    </h2>
+                    <p class="section-description">
+                        数据持久化模块是DAIP-LIVE系统的核心组件，负责数据的存储、检索和管理
+                    </p>
+                </div>
+                
+                <div class="overview-grid">
+                    <div class="overview-card">
+                        <div class="overview-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h3>SQLite数据库</h3>
+                        <p>轻量级嵌入式数据库，支持完整的SQL功能和事务处理</p>
+                    </div>
+                    
+                    <div class="overview-card">
+                        <div class="overview-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <h3>会话管理</h3>
+                        <p>智能会话持久化，支持多用户并发访问和数据一致性</p>
+                    </div>
+                    
+                    <div class="overview-card">
+                        <div class="overview-icon">
+                            <i class="fas fa-table"></i>
+                        </div>
+                        <h3>表结构设计</h3>
+                        <p>规范化的表结构设计，支持扩展性和性能优化</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 实现文件 -->
+        <section class="content-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-code"></i>
+                        核心实现文件
+                    </h2>
+                    <p class="section-description">
+                        查看数据持久化模块的具体实现代码
+                    </p>
+                </div>
+                
+                <div class="implementation-grid">
+                    <div class="implementation-card animate-on-scroll">
+                        <div class="implementation-header">
+                            <div class="implementation-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="implementation-title">
+                                <h3>database.py</h3>
+                                <span class="implementation-path">src/daip_live/persistence/database.py</span>
+                            </div>
+                        </div>
+                        <div class="implementation-description">
+                            <p>核心数据库管理类，提供SQLite连接、会话管理和事务控制功能</p>
+                        </div>
+                        <div class="implementation-features">
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>SQLite连接池管理</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>事务管理</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>数据库初始化</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="implementation-card animate-on-scroll">
+                        <div class="implementation-header">
+                            <div class="implementation-icon">
+                                <i class="fas fa-table"></i>
+                            </div>
+                            <div class="implementation-title">
+                                <h3>tables.py</h3>
+                                <span class="implementation-path">src/daip_live/persistence/tables.py</span>
+                            </div>
+                        </div>
+                        <div class="implementation-description">
+                            <p>数据表结构定义和模型类，包含所有业务实体的数据映射</p>
+                        </div>
+                        <div class="implementation-features">
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>SQLAlchemy模型</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>关系定义</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>索引优化</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="implementation-card animate-on-scroll">
+                        <div class="implementation-header">
+                            <div class="implementation-icon">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="implementation-title">
+                                <h3>session_manager.py</h3>
+                                <span class="implementation-path">src/daip_live/memory/session_manager.py</span>
+                            </div>
+                        </div>
+                        <div class="implementation-description">
+                            <p>用户会话管理，负责会话创建、维护和清理</p>
+                        </div>
+                        <div class="implementation-features">
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>会话生命周期</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>会话持久化</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>并发控制</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 代码示例 -->
+        <section class="content-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-code"></i>
+                        代码示例
+                    </h2>
+                    <p class="section-description">
+                        数据持久化模块的核心代码实现
+                    </p>
+                </div>
+                
+                <div class="code-examples">
+                    <!-- 数据库管理类示例 -->
+                    <div class="code-example animate-on-scroll">
+                        <div class="code-header">
+                            <h3 class="code-title">数据库管理类</h3>
+                            <div class="code-language">Python</div>
+                        </div>
+                        <div class="code-container">
+                            <button class="code-copy-btn" onclick="copyCode(this)">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <pre class="code-content"><code class="language-python">from sqlalchemy import create_engine, MetaData
+from sqlalchemy.orm import sessionmaker, declarative_base
+import sqlite3
+from typing import Optional
+
+class DatabaseManager:
+    """数据库管理器类"""
+    
+    def __init__(self, db_path: str = "daip_live.db"):
+        self.db_path = db_path
+        self.engine = None
+        self.SessionLocal = None
+        self.Base = declarative_base()
+    
+    def init_database(self):
+        """初始化数据库连接"""
+        self.engine = create_engine(
+            f"sqlite:///{self.db_path}",
+            echo=False,
+            pool_pre_ping=True,
+            connect_args={
+                "check_same_thread": False,
+                "timeout": 30
+            }
+        )
+        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        
+    def get_session(self):
+        """获取数据库会话"""
+        if not self.SessionLocal:
+            self.init_database()
+        return self.SessionLocal()
+    
+    def create_tables(self):
+        """创建所有表"""
+        if not self.engine:
+            self.init_database()
+        self.Base.metadata.create_all(bind=self.engine)
+    
+    def close_connection(self):
+        """关闭数据库连接"""
+        if self.engine:
+            self.engine.dispose()</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- 会话管理示例 -->
+                    <div class="code-example animate-on-scroll">
+                        <div class="code-header">
+                            <h3 class="code-title">会话管理器</h3>
+                            <div class="code-language">Python</div>
+                        </div>
+                        <div class="code-container">
+                            <button class="code-copy-btn" onclick="copyCode(this)">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <pre class="code-content"><code class="language-python">import uuid
+import time
+from datetime import datetime, timedelta
+from typing import Dict, Any, Optional
+
+class SessionManager:
+    """用户会话管理器"""
+    
+    def __init__(self, db_manager: DatabaseManager):
+        self.db_manager = db_manager
+        self.active_sessions: Dict[str, Dict[str, Any]] = {}
+        self.session_timeout = 3600  # 1小时
+    
+    def create_session(self, user_id: str, session_data: Dict[str, Any]) -> str:
+        """创建新的用户会话"""
+        session_id = str(uuid.uuid4())
+        
+        session_info = {
+            "session_id": session_id,
+            "user_id": user_id,
+            "created_at": datetime.now(),
+            "last_accessed": datetime.now(),
+            "data": session_data,
+            "status": "active"
+        }
+        
+        # 保存到内存和数据库
+        self.active_sessions[session_id] = session_info
+        self._persist_session(session_info)
+        
+        return session_id
+    
+    def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """获取会话信息"""
+        session_info = self.active_sessions.get(session_id)
+        
+        if session_info:
+            # 检查会话是否超时
+            if self._is_session_expired(session_info):
+                self.delete_session(session_id)
+                return None
+            
+            # 更新最后访问时间
+            session_info["last_accessed"] = datetime.now()
+            return session_info
+        
+        return None
+    
+    def delete_session(self, session_id: str):
+        """删除会话"""
+        if session_id in self.active_sessions:
+            del self.active_sessions[session_id]
+            self._remove_session_from_db(session_id)
+    
+    def _is_session_expired(self, session_info: Dict[str, Any]) -> bool:
+        """检查会话是否过期"""
+        last_access = session_info["last_accessed"]
+        return datetime.now() - last_access > timedelta(seconds=self.session_timeout)</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- 数据模型示例 -->
+                    <div class="code-example animate-on-scroll">
+                        <div class="code-header">
+                            <h3 class="code-title">SQLAlchemy数据模型</h3>
+                            <div class="code-language">Python</div>
+                        </div>
+                        <div class="code-container">
+                            <button class="code-copy-btn" onclick="copyCode(this)">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <pre class="code-content"><code class="language-python">from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+class User(Base):
+    """用户模型"""
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    email = Column(String(100), unique=True, index=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    last_login = Column(DateTime, nullable=True)
+    is_active = Column(Boolean, default=True)
+    
+    # 关联关系
+    sessions = relationship("Session", back_populates="user")
+
+class Session(Base):
+    """会话模型"""
+    __tablename__ = "sessions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(36), unique=True, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    last_accessed = Column(DateTime, default=datetime.utcnow)
+    data = Column(Text)  # JSON格式存储会话数据
+    is_active = Column(Boolean, default=True)
+    
+    # 关联关系
+    user = relationship("User", back_populates="sessions")
+
+class ChatHistory(Base):
+    """聊天历史模型"""
+    __tablename__ = "chat_history"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(36), index=True, nullable=False)
+    message_type = Column(String(10), nullable=False)  # "user" or "assistant"
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    metadata = Column(Text)  # JSON格式存储额外信息</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 最佳实践 -->
+        <section class="content-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-lightbulb"></i>
+                        最佳实践
+                    </h2>
+                    <p class="section-description">
+                        使用数据持久化模块的最佳实践和注意事项
+                    </p>
+                </div>
+                
+                <div class="best-practices-grid">
+                    <div class="practice-card animate-on-scroll">
+                        <div class="practice-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h3>数据安全</h3>
+                        <ul class="practice-list">
+                            <li>使用参数化查询防止SQL注入</li>
+                            <li>定期备份数据库文件</li>
+                            <li>敏感数据加密存储</li>
+                            <li>合理的权限控制</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="practice-card animate-on-scroll">
+                        <div class="practice-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <h3>性能优化</h3>
+                        <ul class="practice-list">
+                            <li>合理设计数据库索引</li>
+                            <li>使用连接池管理连接</li>
+                            <li>定期清理过期会话</li>
+                            <li>批量操作优于单条操作</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="practice-card animate-on-scroll">
+                        <div class="practice-icon">
+                            <i class="fas fa-sync"></i>
+                        </div>
+                        <h3>并发处理</h3>
+                        <ul class="practice-list">
+                            <li>使用数据库事务保证一致性</li>
+                            <li>合理处理并发冲突</li>
+                            <li>实现会话锁定机制</li>
+                            <li>监控数据库连接状态</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="practice-card animate-on-scroll">
+                        <div class="practice-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <h3>维护管理</h3>
+                        <ul class="practice-list">
+                            <li>定期检查数据库完整性</li>
+                            <li>监控数据库文件大小</li>
+                            <li>实现数据库迁移机制</li>
+                            <li>设置适当的日志级别</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 相关资源 -->
+        <section class="content-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-link"></i>
+                        相关资源
+                    </h2>
+                </div>
+                
+                <div class="resources-grid">
+                    <a href="enhanced_learning_platform_new.html" class="resource-card animate-on-scroll">
+                        <div class="resource-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>学习平台</h3>
+                        <p>探索更多学习资源</p>
+                    </a>
+                    
+                    <a href="P2_KNOWLEDGE_MANAGEMENT.html" class="resource-card animate-on-scroll">
+                        <div class="resource-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3>P2 知识管理</h3>
+                        <p>了解知识管理模块</p>
+                    </a>
+                    
+                    <a href="complete_specs_tracker_new.html" class="resource-card animate-on-scroll">
+                        <div class="resource-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>规格追踪</h3>
+                        <p>查看系统架构详情</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 导航栏 -->
+    <nav class="main-nav">
+        <div class="nav-content">
+            <div class="nav-brand">
+                <i class="fas fa-code"></i>
+                <span>0代码AI规范化编程</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">首页</a>
+                <a href="document_library_new.html" class="nav-link">文档库</a>
+                <a href="enhanced_learning_platform_new.html" class="nav-link">学习平台</a>
+                <a href="INTERACTIVE_LEARNING_PLATFORM_new.html" class="nav-link">交互实验室</a>
+                <a href="modern_platform.html" class="nav-link">现代平台</a>
+                <a href="enterprise_learning_platform_new.html" class="nav-link">企业版</a>
+                <a href="premium_learning_platform_new.html" class="nav-link">高级版</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 动画控制脚本 -->
+    <script src="animations.js"></script>
+
+    <script>
+        // 代码复制功能
+        function copyCode(button) {
+            const codeContainer = button.nextElementSibling;
+            const code = codeContainer.textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                // 显示复制成功提示
+                const originalIcon = button.querySelector('i');
+                originalIcon.className = 'fas fa-check';
+                button.style.background = 'var(--success-color)';
+                
+                setTimeout(() => {
+                    originalIcon.className = 'fas fa-copy';
+                    button.style.background = 'var(--accent-color)';
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+            });
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 触发滚动动画
+            setTimeout(() => {
+                if (window.animateOnScroll) {
+                    window.animateOnScroll();
+                }
+            }, 500);
+        });
+
+        // 处理页面可见性变化
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                setTimeout(() => {
+                    if (window.animateOnScroll) {
+                        window.animateOnScroll();
+                    }
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>

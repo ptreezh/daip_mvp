@@ -1,0 +1,2175 @@
+{
+  "total_documents": 271,
+  "assessment_date": "2025-12-08T20:43:14.419117",
+  "average_score": 79.34040590405904,
+  "rankings": [
+    {
+      "rank": 1,
+      "file_name": "P5_AGENT_ENGINE_COMPLIANCE_CHECKLIST.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\compliance\\P5_AGENT_ENGINE_COMPLIANCE_CHECKLIST.md",
+      "overall_score": 92.85,
+      "quality_level": "excellent",
+      "document_type": "component"
+    },
+    {
+      "rank": 2,
+      "file_name": "DEVELOPMENT_RULES.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\procedure\\DEVELOPMENT_RULES.md",
+      "overall_score": 91.6,
+      "quality_level": "excellent",
+      "document_type": "feature"
+    },
+    {
+      "rank": 3,
+      "file_name": "permission_ask_mode_design.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\permission_ask_mode_design.md",
+      "overall_score": 91.5,
+      "quality_level": "excellent",
+      "document_type": "feature"
+    },
+    {
+      "rank": 4,
+      "file_name": "TESTING_STRATEGY_AND_TEST_CASES.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\TESTING_STRATEGY_AND_TEST_CASES.md",
+      "overall_score": 90.45,
+      "quality_level": "excellent",
+      "document_type": "feature"
+    },
+    {
+      "rank": 5,
+      "file_name": "COMPLIANCE_CHECKLIST.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\newP5\\COMPLIANCE_CHECKLIST.md",
+      "overall_score": 89.85,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 6,
+      "file_name": "interactive_role_creation_summary.md",
+      "file_path": "D:\\daip\\refactdoc\\src\\daip_live\\tui\\interactive_role_creation_summary.md",
+      "overall_score": 89.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 7,
+      "file_name": "modules_remaining_task_breakdown.md",
+      "file_path": "D:\\daip\\refactdoc\\modules_remaining_task_breakdown.md",
+      "overall_score": 88.8,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 8,
+      "file_name": "worklog-2025-09-19-end-to-end-testing.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-19-end-to-end-testing.md",
+      "overall_score": 88.4,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 9,
+      "file_name": "agent_executor_permission_integration_spec.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\agent_executor_permission_integration_spec.md",
+      "overall_score": 88.0,
+      "quality_level": "good",
+      "document_type": "integration"
+    },
+    {
+      "rank": 10,
+      "file_name": "USER_INSTRUCTIONS.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\USER_INSTRUCTIONS.md",
+      "overall_score": 87.5,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 11,
+      "file_name": "worklog-2025-09-19.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-19.md",
+      "overall_score": 87.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 12,
+      "file_name": "TOKEN_MANAGEMENT_COMPRESSION_SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\TOKEN_MANAGEMENT_COMPRESSION_SPEC.md",
+      "overall_score": 87.1,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 13,
+      "file_name": "worklog-2025-09-19-end-to-end-testing-completion.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-19-end-to-end-testing-completion.md",
+      "overall_score": 86.8,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 14,
+      "file_name": "end_to_end_permission_integration_spec.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\end_to_end_permission_integration_spec.md",
+      "overall_score": 86.7,
+      "quality_level": "good",
+      "document_type": "integration"
+    },
+    {
+      "rank": 15,
+      "file_name": "tui_permission_command_spec.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_permission_command_spec.md",
+      "overall_score": 86.4,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 16,
+      "file_name": "permission_rule_configuration_spec.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\permission_rule_configuration_spec.md",
+      "overall_score": 86.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 17,
+      "file_name": "TUI_NEW_FEATURES_SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\TUI_NEW_FEATURES_SPEC.md",
+      "overall_score": 85.75,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 18,
+      "file_name": "PROJECT_EXECUTION_STANDARDS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\PROJECT_EXECUTION_STANDARDS.md",
+      "overall_score": 85.7,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 19,
+      "file_name": "task_decomposition_implementation_summary.md",
+      "file_path": "D:\\daip\\refactdoc\\task_decomposition_implementation_summary.md",
+      "overall_score": 85.6,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 20,
+      "file_name": "system_module_maturity_analysis.md",
+      "file_path": "D:\\daip\\refactdoc\\system_module_maturity_analysis.md",
+      "overall_score": 85.3,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 21,
+      "file_name": "ISSUES_ANALYSIS_AND_FIXES.md",
+      "file_path": "D:\\daip\\refactdoc\\tests\\interactive\\ISSUES_ANALYSIS_AND_FIXES.md",
+      "overall_score": 85.15,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 22,
+      "file_name": "worklog-2025-09-17.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-17.md",
+      "overall_score": 85.15,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 23,
+      "file_name": "COMPLIANCE_CHECKLIST.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\newP6\\COMPLIANCE_CHECKLIST.md",
+      "overall_score": 85.05,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 24,
+      "file_name": "PROJECT_STRUCTURE.md",
+      "file_path": "D:\\daip\\refactdoc\\PROJECT_STRUCTURE.md",
+      "overall_score": 84.75,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 25,
+      "file_name": "TUI_SCAFFOLD_INTEGRATION_SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\TUI_SCAFFOLD_INTEGRATION_SPEC.md",
+      "overall_score": 84.75,
+      "quality_level": "good",
+      "document_type": "integration"
+    },
+    {
+      "rank": 26,
+      "file_name": "TDD_CHECKLIST.md",
+      "file_path": "D:\\daip\\refactdoc\\TDD_CHECKLIST.md",
+      "overall_score": 84.7,
+      "quality_level": "good",
+      "document_type": "process"
+    },
+    {
+      "rank": 27,
+      "file_name": "P7_GUI_COMPLIANCE_CHECKLIST.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\compliance\\P7_GUI_COMPLIANCE_CHECKLIST.md",
+      "overall_score": 84.65,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 28,
+      "file_name": "ROLE_MANAGEMENT_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\ROLE_MANAGEMENT_REQUIREMENTS.md",
+      "overall_score": 84.65,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 29,
+      "file_name": "debate_wiki比共识算法好_20251123-200512.md",
+      "file_path": "D:\\daip\\refactdoc\\workout\\debate_wiki比共识算法好_20251123-200512.md",
+      "overall_score": 84.55,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 30,
+      "file_name": "ALL_USER_INTERACTIONS.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\ALL_USER_INTERACTIONS.md",
+      "overall_score": 84.5,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 31,
+      "file_name": "DEBATE_SYSTEM_OPTIMIZATION_SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\DEBATE_SYSTEM_OPTIMIZATION_SPEC.md",
+      "overall_score": 84.5,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 32,
+      "file_name": "solid_principles_implementation_guide.md",
+      "file_path": "D:\\daip\\refactdoc\\solid_principles_implementation_guide.md",
+      "overall_score": 84.45,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 33,
+      "file_name": "debate_model_switching_enhancement.md",
+      "file_path": "D:\\daip\\refactdoc\\src\\daip_live\\tui\\debate_model_switching_enhancement.md",
+      "overall_score": 84.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 34,
+      "file_name": "MEMORY_SERVICE_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\MEMORY_SERVICE_REQUIREMENTS.md",
+      "overall_score": 84.05,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 35,
+      "file_name": "TUI_TEST_PLAN_DETAILED.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_TEST_PLAN_DETAILED.md",
+      "overall_score": 84.05,
+      "quality_level": "good",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 36,
+      "file_name": "complex_task_system_summary.md",
+      "file_path": "D:\\daip\\refactdoc\\complex_task_system_summary.md",
+      "overall_score": 83.85,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 37,
+      "file_name": "permission_integration_spec.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\permission_integration_spec.md",
+      "overall_score": 83.8,
+      "quality_level": "good",
+      "document_type": "integration"
+    },
+    {
+      "rank": 38,
+      "file_name": "BASIC_TOOLS_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\BASIC_TOOLS_REQUIREMENTS.md",
+      "overall_score": 83.7,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 39,
+      "file_name": "command_integration_report.md",
+      "file_path": "D:\\daip\\refactdoc\\src\\daip_live\\tui\\command_integration_report.md",
+      "overall_score": 83.65,
+      "quality_level": "good",
+      "document_type": "integration"
+    },
+    {
+      "rank": 40,
+      "file_name": "cli-command-specification.md",
+      "file_path": "D:\\daip\\refactdoc\\.spec-kit\\templates\\cli-command-specification.md",
+      "overall_score": 83.6,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 41,
+      "file_name": "specification_modularization_analysis.md",
+      "file_path": "D:\\daip\\refactdoc\\specification_modularization_analysis.md",
+      "overall_score": 83.6,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 42,
+      "file_name": "P6_TUI_COMPLIANCE_CHECKLIST.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\compliance\\P6_TUI_COMPLIANCE_CHECKLIST.md",
+      "overall_score": 83.55,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 43,
+      "file_name": "ROLE_MODEL_CONFIGURATION_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\ROLE_MODEL_CONFIGURATION_REQUIREMENTS.md",
+      "overall_score": 83.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 44,
+      "file_name": "TUI_TEST_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_TEST_PLAN.md",
+      "overall_score": 83.3,
+      "quality_level": "good",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 45,
+      "file_name": "permission_ask_mode_robust_design.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\permission_ask_mode_robust_design.md",
+      "overall_score": 83.25,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 46,
+      "file_name": "HIERARCHICAL_ARCHITECTURE_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\HIERARCHICAL_ARCHITECTURE_PLAN.md",
+      "overall_score": 83.2,
+      "quality_level": "good",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 47,
+      "file_name": "COMPLIANCE_CHECKLIST.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\newP7\\COMPLIANCE_CHECKLIST.md",
+      "overall_score": 83.15,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 48,
+      "file_name": "INTELLIGENT_ROLE_SELECTION_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\INTELLIGENT_ROLE_SELECTION_REQUIREMENTS.md",
+      "overall_score": 83.15,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 49,
+      "file_name": "debate_人定胜天_20251024-231459.md",
+      "file_path": "D:\\daip\\refactdoc\\workout\\debate_人定胜天_20251024-231459.md",
+      "overall_score": 83.0,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 50,
+      "file_name": "REFACTORING_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\newP5\\REFACTORING_REQUIREMENTS.md",
+      "overall_score": 82.9,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 51,
+      "file_name": "P5_P6_P7_REFACTORING_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\P5_P6_P7_REFACTORING_PLAN.md",
+      "overall_score": 82.9,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 52,
+      "file_name": "REFACTORING_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\newP5\\REFACTORING_PLAN.md",
+      "overall_score": 82.85,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 53,
+      "file_name": "TUI_REQUIREMENTS_SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_REQUIREMENTS_SPEC.md",
+      "overall_score": 82.8,
+      "quality_level": "good",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 54,
+      "file_name": "plan.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\skills_extension_system\\plan.md",
+      "overall_score": 82.7,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 55,
+      "file_name": "IMPLEMENTATION_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\newP6\\IMPLEMENTATION_PLAN.md",
+      "overall_score": 82.7,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 56,
+      "file_name": "command_system_optimization_spec.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\command_system_optimization_spec.md",
+      "overall_score": 82.6,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 57,
+      "file_name": "REFACTORING_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\newP6\\REFACTORING_REQUIREMENTS.md",
+      "overall_score": 82.45,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 58,
+      "file_name": "final_implementation_summary.md",
+      "file_path": "D:\\daip\\refactdoc\\src\\daip_live\\tui\\final_implementation_summary.md",
+      "overall_score": 82.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 59,
+      "file_name": "worklog-2025-09-18-robust-completion.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-18-robust-completion.md",
+      "overall_score": 82.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 60,
+      "file_name": "MASTER_FEATURE_DOCUMENT.md",
+      "file_path": "D:\\daip\\refactdoc\\MASTER_FEATURE_DOCUMENT.md",
+      "overall_score": 82.3,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 61,
+      "file_name": "plan.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\skill_integration_enhancement\\plan.md",
+      "overall_score": 82.25,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 62,
+      "file_name": "plan.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\plan.md",
+      "overall_score": 82.25,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 63,
+      "file_name": "tui_cli_specification.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_cli_specification.md",
+      "overall_score": 82.15,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 64,
+      "file_name": "IMPLEMENTATION_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\IMPLEMENTATION_PLAN.md",
+      "overall_score": 82.1,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 65,
+      "file_name": "TUI_IMPLEMENTATION_CONDITIONS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_IMPLEMENTATION_CONDITIONS.md",
+      "overall_score": 82.05,
+      "quality_level": "good",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 66,
+      "file_name": "tui_test_maintenance_guidelines.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_test_maintenance_guidelines.md",
+      "overall_score": 82.0,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 67,
+      "file_name": "research.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\skills_extension_system\\research.md",
+      "overall_score": 81.95,
+      "quality_level": "good",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 68,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\skill_integration_enhancement\\spec.md",
+      "overall_score": 81.9,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 69,
+      "file_name": "constitution_compliance_check.md",
+      "file_path": "D:\\daip\\refactdoc\\constitution_compliance_check.md",
+      "overall_score": 81.9,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 70,
+      "file_name": "task_system_design.md",
+      "file_path": "D:\\daip\\refactdoc\\task_system_design.md",
+      "overall_score": 81.85,
+      "quality_level": "good",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 71,
+      "file_name": "worklog-2025-09-12.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-12.md",
+      "overall_score": 81.85,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 72,
+      "file_name": "USER_SCENARIOS.md",
+      "file_path": "D:\\daip\\refactdoc\\src\\daip_live\\scaffolding\\docs\\USER_SCENARIOS.md",
+      "overall_score": 81.8,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 73,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\skills_extension_system\\spec.md",
+      "overall_score": 81.8,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 74,
+      "file_name": "plan.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\plan.md",
+      "overall_score": 81.8,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 75,
+      "file_name": "COMPREHENSIVE_TUI_TEST_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_archive\\COMPREHENSIVE_TUI_TEST_PLAN.md",
+      "overall_score": 81.8,
+      "quality_level": "good",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 76,
+      "file_name": "AGENT_EXECUTOR_REFACTOR_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\AGENT_EXECUTOR_REFACTOR_PLAN.md",
+      "overall_score": 81.75,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 77,
+      "file_name": "AGENT_EXECUTION_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\AGENT_EXECUTION_REQUIREMENTS.md",
+      "overall_score": 81.75,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 78,
+      "file_name": "CLI_INTERFACE_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\CLI_INTERFACE_REQUIREMENTS.md",
+      "overall_score": 81.5,
+      "quality_level": "good",
+      "document_type": "integration"
+    },
+    {
+      "rank": 79,
+      "file_name": "module_compilation_plan.md",
+      "file_path": "D:\\daip\\refactdoc\\module_compilation_plan.md",
+      "overall_score": 81.45,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 80,
+      "file_name": "PRODUCTION_DEPLOYMENT.md",
+      "file_path": "D:\\daip\\refactdoc\\PRODUCTION_DEPLOYMENT.md",
+      "overall_score": 81.4,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 81,
+      "file_name": "plan.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\plan.md",
+      "overall_score": 81.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 82,
+      "file_name": "tdd_checklist_completed.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\tdd_checklist_completed.md",
+      "overall_score": 81.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 83,
+      "file_name": "tdd_checklist.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\tdd_checklist.md",
+      "overall_score": 81.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 84,
+      "file_name": "plan.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\comprehensive_intent_recognition\\plan.md",
+      "overall_score": 81.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 85,
+      "file_name": "plan.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\intent_recognition_debate_history\\plan.md",
+      "overall_score": 81.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 86,
+      "file_name": "TDD_IMPLEMENTATION_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\TDD_IMPLEMENTATION_PLAN.md",
+      "overall_score": 81.35,
+      "quality_level": "good",
+      "document_type": "process"
+    },
+    {
+      "rank": 87,
+      "file_name": "tui_quit_tasks.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_quit_tasks.md",
+      "overall_score": 81.25,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 88,
+      "file_name": "command_cleanup_and_status_sync_spec.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\command_cleanup_and_status_sync_spec.md",
+      "overall_score": 81.25,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 89,
+      "file_name": "debate_敏捷开发与规范ai开发谁更重要_20251123-120536.md",
+      "file_path": "D:\\daip\\refactdoc\\workout\\debate_敏捷开发与规范ai开发谁更重要_20251123-120536.md",
+      "overall_score": 81.2,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 90,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\spec.md",
+      "overall_score": 81.15,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 91,
+      "file_name": "experience_guide.md",
+      "file_path": "D:\\daip\\refactdoc\\experience_guide.md",
+      "overall_score": 81.15,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 92,
+      "file_name": "TUI_V2_RELEASE_NOTES.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\TUI_V2_RELEASE_NOTES.md",
+      "overall_score": 81.05,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 93,
+      "file_name": "FUNCTIONALITY_RECOVERY_TASKS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tasks\\FUNCTIONALITY_RECOVERY_TASKS.md",
+      "overall_score": 81.05,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 94,
+      "file_name": "debate_AI商和情商哪个重要_20251012_191212.md",
+      "file_path": "D:\\daip\\refactdoc\\workout\\debate_AI商和情商哪个重要_20251012_191212.md",
+      "overall_score": 81.0,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 95,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\context_aware_intent_clarification\\spec.md",
+      "overall_score": 80.95,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 96,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\full_claude_skills_implementation\\spec.md",
+      "overall_score": 80.9,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 97,
+      "file_name": "plan.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\enhanced_doc_knowledge_tools\\plan.md",
+      "overall_score": 80.9,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 98,
+      "file_name": "requirements.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\requirements.md",
+      "overall_score": 80.9,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 99,
+      "file_name": "constitution.md",
+      "file_path": "D:\\daip\\refactdoc\\.specify\\memory\\constitution.md",
+      "overall_score": 80.9,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 100,
+      "file_name": "checklist-template.md",
+      "file_path": "D:\\daip\\refactdoc\\.specify\\templates\\checklist-template.md",
+      "overall_score": 80.9,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 101,
+      "file_name": "TUI_COMPONENT_SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\TUI_COMPONENT_SPEC.md",
+      "overall_score": 80.9,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 102,
+      "file_name": "DETAILED_SYSTEM_ARCHITECTURE.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\DETAILED_SYSTEM_ARCHITECTURE.md",
+      "overall_score": 80.9,
+      "quality_level": "good",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 103,
+      "file_name": "PROJECT_RECORD.md",
+      "file_path": "D:\\daip\\refactdoc\\PROJECT_RECORD.md",
+      "overall_score": 80.85,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 104,
+      "file_name": "SPEC_DRIVEN_DEVELOPMENT.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\process\\SPEC_DRIVEN_DEVELOPMENT.md",
+      "overall_score": 80.65,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 105,
+      "file_name": "tdd_checklist_completed_final.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\tdd_checklist_completed_final.md",
+      "overall_score": 80.45,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 106,
+      "file_name": "tasks.md",
+      "file_path": "D:\\daip\\refactdoc\\tasks.md",
+      "overall_score": 80.45,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 107,
+      "file_name": "plan.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\enhanced_doc_tools\\plan.md",
+      "overall_score": 80.45,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 108,
+      "file_name": "QUICK_REFERENCE.md",
+      "file_path": "D:\\daip\\refactdoc\\src\\daip_live\\scaffolding\\docs\\QUICK_REFERENCE.md",
+      "overall_score": 80.4,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 109,
+      "file_name": "debate_的主题_20251123-201209.md",
+      "file_path": "D:\\daip\\refactdoc\\workout\\debate_的主题_20251123-201209.md",
+      "overall_score": 80.4,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 110,
+      "file_name": "PROVIDER_CONFIG_SOLUTION.md",
+      "file_path": "D:\\daip\\refactdoc\\PROVIDER_CONFIG_SOLUTION.md",
+      "overall_score": 80.35,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 111,
+      "file_name": "development_process.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\development_process.md",
+      "overall_score": 80.3,
+      "quality_level": "good",
+      "document_type": "process"
+    },
+    {
+      "rank": 112,
+      "file_name": "TUI_TDD_TASK_LIST.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_TDD_TASK_LIST.md",
+      "overall_score": 80.3,
+      "quality_level": "good",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 113,
+      "file_name": "IMPLEMENTATION_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\newP7\\IMPLEMENTATION_PLAN.md",
+      "overall_score": 80.2,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 114,
+      "file_name": "optimized-cli-implementation-plan.md",
+      "file_path": "D:\\daip\\refactdoc\\.spec-kit\\templates\\optimized-cli-implementation-plan.md",
+      "overall_score": 80.15,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 115,
+      "file_name": "P5_P6_P7_IMPLEMENTATION_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\P5_P6_P7_IMPLEMENTATION_PLAN.md",
+      "overall_score": 80.15,
+      "quality_level": "good",
+      "document_type": "component"
+    },
+    {
+      "rank": 116,
+      "file_name": "FEATURE_INTEGRATION_MASTER_DOC.md",
+      "file_path": "D:\\daip\\refactdoc\\FEATURE_INTEGRATION_MASTER_DOC.md",
+      "overall_score": 80.1,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 117,
+      "file_name": "SYSTEM_ARCHITECTURE.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\SYSTEM_ARCHITECTURE.md",
+      "overall_score": 80.1,
+      "quality_level": "good",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 118,
+      "file_name": "IFLOW.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\IFLOW.md",
+      "overall_score": 80.1,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 119,
+      "file_name": "plan.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\context_aware_intent_clarification\\plan.md",
+      "overall_score": 80.0,
+      "quality_level": "good",
+      "document_type": "feature"
+    },
+    {
+      "rank": 120,
+      "file_name": "task_context_and_persistence_explained.md",
+      "file_path": "D:\\daip\\refactdoc\\task_context_and_persistence_explained.md",
+      "overall_score": 79.95,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 121,
+      "file_name": "INTEGRATION_TEST_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\procedure\\INTEGRATION_TEST_PLAN.md",
+      "overall_score": 79.95,
+      "quality_level": "average",
+      "document_type": "integration"
+    },
+    {
+      "rank": 122,
+      "file_name": "quality_assurance.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\quality_assurance.md",
+      "overall_score": 79.85,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 123,
+      "file_name": "cli-implementation-plan.md",
+      "file_path": "D:\\daip\\refactdoc\\.spec-kit\\templates\\cli-implementation-plan.md",
+      "overall_score": 79.75,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 124,
+      "file_name": "debate_AI和智能体不重要重要的是具身智能_20251115-145312.md",
+      "file_path": "D:\\daip\\refactdoc\\workout\\debate_AI和智能体不重要重要的是具身智能_20251115-145312.md",
+      "overall_score": 79.65,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 125,
+      "file_name": "shortcut_commands_design.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\shortcut_commands_design.md",
+      "overall_score": 79.65,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 126,
+      "file_name": "atomic_task_breakdown_p7_gui.md",
+      "file_path": "D:\\daip\\refactdoc\\atomic_task_breakdown_p7_gui.md",
+      "overall_score": 79.6,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 127,
+      "file_name": "quickstart.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\skills_extension_system\\quickstart.md",
+      "overall_score": 79.55,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 128,
+      "file_name": "P5_P6_P7_REFACTORING_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\P5_P6_P7_REFACTORING_REQUIREMENTS.md",
+      "overall_score": 79.55,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 129,
+      "file_name": "REFERENCE_ALL_FEATURES.md",
+      "file_path": "D:\\daip\\refactdoc\\REFERENCE_ALL_FEATURES.md",
+      "overall_score": 79.4,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 130,
+      "file_name": "specification_modularization_plan_kit_updated.md",
+      "file_path": "D:\\daip\\refactdoc\\specification_modularization_plan_kit_updated.md",
+      "overall_score": 79.4,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 131,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\intent_recognition_debate_history\\spec.md",
+      "overall_score": 79.4,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 132,
+      "file_name": "production_wiki_system_summary.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\production_wiki_system_summary.md",
+      "overall_score": 79.4,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 133,
+      "file_name": "specification_modularization_plan_kit.md",
+      "file_path": "D:\\daip\\refactdoc\\specification_modularization_plan_kit.md",
+      "overall_score": 79.35,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 134,
+      "file_name": "CRITICAL_ISSUES_SOLUTION_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\CRITICAL_ISSUES_SOLUTION_PLAN.md",
+      "overall_score": 79.3,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 135,
+      "file_name": "SCAFFOLD_DEIGN_DOCUMENT.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\SCAFFOLD_DEIGN_DOCUMENT.md",
+      "overall_score": 79.25,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 136,
+      "file_name": "worklog-2025-09-16.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-16.md",
+      "overall_score": 79.25,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 137,
+      "file_name": "backend_session_manager_implementation.md",
+      "file_path": "D:\\daip\\refactdoc\\src\\daip_live\\tui\\backend_session_manager_implementation.md",
+      "overall_score": 79.15,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 138,
+      "file_name": "KNOWLEDGE_MANAGEMENT_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\KNOWLEDGE_MANAGEMENT_REQUIREMENTS.md",
+      "overall_score": 79.15,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 139,
+      "file_name": "SPECIFICATION.md",
+      "file_path": "D:\\daip\\refactdoc\\SPECIFICATION.md",
+      "overall_score": 79.05,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 140,
+      "file_name": "需求对齐和差距.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\需求对齐和差距.md",
+      "overall_score": 79.05,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 141,
+      "file_name": "MAIN_CONTROL_DOCUMENT.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\MAIN_CONTROL_DOCUMENT.md",
+      "overall_score": 79.05,
+      "quality_level": "average",
+      "document_type": "strategic"
+    },
+    {
+      "rank": 142,
+      "file_name": "DOCUMENT_COMPLETENESS_AND_UX_OPTIMIZATION_SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\DOCUMENT_COMPLETENESS_AND_UX_OPTIMIZATION_SPEC.md",
+      "overall_score": 79.0,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 143,
+      "file_name": "plan.md",
+      "file_path": "D:\\daip\\refactdoc\\plan.md",
+      "overall_score": 78.95,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 144,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\enhanced_doc_tools\\spec.md",
+      "overall_score": 78.95,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 145,
+      "file_name": "task_context_organization_explained.md",
+      "file_path": "D:\\daip\\refactdoc\\task_context_organization_explained.md",
+      "overall_score": 78.85,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 146,
+      "file_name": "worklog-2025-09-18-completion.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-18-completion.md",
+      "overall_score": 78.8,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 147,
+      "file_name": "TUI_IMPLEMENTATION_GAP_ANALYSIS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_IMPLEMENTATION_GAP_ANALYSIS.md",
+      "overall_score": 78.8,
+      "quality_level": "average",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 148,
+      "file_name": "debate_modularization_analysis_goals.md",
+      "file_path": "D:\\daip\\refactdoc\\debate_modularization_analysis_goals.md",
+      "overall_score": 78.75,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 149,
+      "file_name": "DEBATE_SYSTEM_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\DEBATE_SYSTEM_REQUIREMENTS.md",
+      "overall_score": 78.75,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 150,
+      "file_name": "LLM_SCHEDULER_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\LLM_SCHEDULER_REQUIREMENTS.md",
+      "overall_score": 78.75,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 151,
+      "file_name": "TUI交互测试全面测评报告.md",
+      "file_path": "D:\\daip\\refactdoc\\TUI交互测试全面测评报告.md",
+      "overall_score": 78.7,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 152,
+      "file_name": "TUI_TASK_LIST_TDD.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_archive\\TUI_TASK_LIST_TDD.md",
+      "overall_score": 78.7,
+      "quality_level": "average",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 153,
+      "file_name": "quickstart.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\quickstart.md",
+      "overall_score": 78.65,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 154,
+      "file_name": "plan-template.md",
+      "file_path": "D:\\daip\\refactdoc\\.specify\\templates\\plan-template.md",
+      "overall_score": 78.65,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 155,
+      "file_name": "research.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\research.md",
+      "overall_score": 78.55,
+      "quality_level": "average",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 156,
+      "file_name": "p7_gui_tdd_implementation_plan.md",
+      "file_path": "D:\\daip\\refactdoc\\p7_gui_tdd_implementation_plan.md",
+      "overall_score": 78.5,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 157,
+      "file_name": "GEMINI.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\GEMINI.md",
+      "overall_score": 78.5,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 158,
+      "file_name": "CLAUDE.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\CLAUDE.md",
+      "overall_score": 78.5,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 159,
+      "file_name": "debate_上下文指令越明晰越好还是越结构化越好_20251123-192729.md",
+      "file_path": "D:\\daip\\refactdoc\\workout\\debate_上下文指令越明晰越好还是越结构化越好_20251123-192729.md",
+      "overall_score": 78.4,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 160,
+      "file_name": "debate_生物信息比ai智能更有前景_20251123-162857.md",
+      "file_path": "D:\\daip\\refactdoc\\workout\\debate_生物信息比ai智能更有前景_20251123-162857.md",
+      "overall_score": 78.3,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 161,
+      "file_name": "permission_tui_interface_spec.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\permission_tui_interface_spec.md",
+      "overall_score": 78.3,
+      "quality_level": "average",
+      "document_type": "integration"
+    },
+    {
+      "rank": 162,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\complete_system_integration\\spec.md",
+      "overall_score": 78.2,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 163,
+      "file_name": "tasks.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\context_aware_intent_clarification\\tasks.md",
+      "overall_score": 78.2,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 164,
+      "file_name": "tasks.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\comprehensive_intent_recognition\\tasks.md",
+      "overall_score": 78.2,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 165,
+      "file_name": "TUI全路径全流程测试综合报告.md",
+      "file_path": "D:\\daip\\refactdoc\\TUI全路径全流程测试综合报告.md",
+      "overall_score": 78.15,
+      "quality_level": "average",
+      "document_type": "process"
+    },
+    {
+      "rank": 166,
+      "file_name": "agent-file-template.md",
+      "file_path": "D:\\daip\\refactdoc\\.specify\\templates\\agent-file-template.md",
+      "overall_score": 78.05,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 167,
+      "file_name": "DAIP_LIVE_系统评审报告.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\procedure\\DAIP_LIVE_系统评审报告.md",
+      "overall_score": 77.95,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 168,
+      "file_name": "FEATURES_OVERVIEW.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\FEATURES_OVERVIEW.md",
+      "overall_score": 77.9,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 169,
+      "file_name": "debate_上下文工程在大模型之外比内部更重要_20251123-170906.md",
+      "file_path": "D:\\daip\\refactdoc\\workout\\debate_上下文工程在大模型之外比内部更重要_20251123-170906.md",
+      "overall_score": 77.85,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 170,
+      "file_name": "DATABASE_DESIGN_SPECIFICATION.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\DATABASE_DESIGN_SPECIFICATION.md",
+      "overall_score": 77.85,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 171,
+      "file_name": "worklog-2025-09-18.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-18.md",
+      "overall_score": 77.75,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 172,
+      "file_name": "P_AUX_DEPENDENCY_INJECTION.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\P_AUX_DEPENDENCY_INJECTION.md",
+      "overall_score": 77.75,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 173,
+      "file_name": "Readme.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\litellm\\google_genai\\Readme.md",
+      "overall_score": 77.75,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 174,
+      "file_name": "permission_user_response_spec.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\permission_user_response_spec.md",
+      "overall_score": 77.65,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 175,
+      "file_name": "integration_summary.md",
+      "file_path": "D:\\daip\\refactdoc\\src\\daip_live\\tui\\integration_summary.md",
+      "overall_score": 77.55,
+      "quality_level": "average",
+      "document_type": "integration"
+    },
+    {
+      "rank": 176,
+      "file_name": "final_completion_report.md",
+      "file_path": "D:\\daip\\refactdoc\\src\\daip_live\\tui\\final_completion_report.md",
+      "overall_score": 77.45,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 177,
+      "file_name": "data_model.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\data_model.md",
+      "overall_score": 77.45,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 178,
+      "file_name": "DESIGN.md",
+      "file_path": "D:\\daip\\refactdoc\\DESIGN.md",
+      "overall_score": 77.45,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 179,
+      "file_name": "agent_memory_learning_technical_spec.md",
+      "file_path": "D:\\daip\\refactdoc\\agent_memory_learning_technical_spec.md",
+      "overall_score": 77.45,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 180,
+      "file_name": "IMPLEMENTATION_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\newP5\\IMPLEMENTATION_PLAN.md",
+      "overall_score": 77.45,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 181,
+      "file_name": "permission_integration_test_spec.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\permission_integration_test_spec.md",
+      "overall_score": 77.45,
+      "quality_level": "average",
+      "document_type": "integration"
+    },
+    {
+      "rank": 182,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\comprehensive_intent_recognition\\spec.md",
+      "overall_score": 77.4,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 183,
+      "file_name": "tasks.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\tasks.md",
+      "overall_score": 77.3,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 184,
+      "file_name": "tasks.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\skills_extension_system\\tasks.md",
+      "overall_score": 77.3,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 185,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\.claude\\commands\\spec.md",
+      "overall_score": 77.3,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 186,
+      "file_name": "debate_意图识别比智力更重要_20251020_195957.md",
+      "file_path": "D:\\daip\\refactdoc\\workout\\debate_意图识别比智力更重要_20251020_195957.md",
+      "overall_score": 77.25,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 187,
+      "file_name": "PROJECT_SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\PROJECT_SPEC.md",
+      "overall_score": 77.15,
+      "quality_level": "average",
+      "document_type": "strategic"
+    },
+    {
+      "rank": 188,
+      "file_name": "区块链技术详解.md",
+      "file_path": "D:\\daip\\refactdoc\\knowledge\\wiki\\区块链技术详解.md",
+      "overall_score": 77.15,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 189,
+      "file_name": "debate_下 意图识别比问题解决更重要_20251123-124122.md",
+      "file_path": "D:\\daip\\refactdoc\\workout\\debate_下 意图识别比问题解决更重要_20251123-124122.md",
+      "overall_score": 77.0,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 190,
+      "file_name": "data-model.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\skills_extension_system\\data-model.md",
+      "overall_score": 77.0,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 191,
+      "file_name": "SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\p_aux_memory\\SPEC.md",
+      "overall_score": 77.0,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 192,
+      "file_name": "command_integration_final_validation.md",
+      "file_path": "D:\\daip\\refactdoc\\src\\daip_live\\tui\\command_integration_final_validation.md",
+      "overall_score": 76.9,
+      "quality_level": "average",
+      "document_type": "integration"
+    },
+    {
+      "rank": 193,
+      "file_name": "PROJECT_STATUS_COMPREHENSIVE_2025-10-11.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\PROJECT_STATUS_COMPREHENSIVE_2025-10-11.md",
+      "overall_score": 76.9,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 194,
+      "file_name": "tasks.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\intent_recognition_debate_history\\tasks.md",
+      "overall_score": 76.85,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 195,
+      "file_name": "task0.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\procedure\\task0.md",
+      "overall_score": 76.85,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 196,
+      "file_name": "index.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\release_notes\\v1.65.4-stable\\index.md",
+      "overall_score": 76.85,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 197,
+      "file_name": "worklog-2025-09-16-fixes.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-16-fixes.md",
+      "overall_score": 76.8,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 198,
+      "file_name": "TDD_IMPLEMENTATION_SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\TDD_IMPLEMENTATION_SPEC.md",
+      "overall_score": 76.65,
+      "quality_level": "average",
+      "document_type": "process"
+    },
+    {
+      "rank": 199,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\enhanced_doc_knowledge_tools\\spec.md",
+      "overall_score": 76.6,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 200,
+      "file_name": "辩论系统架构分析报告.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\procedure\\辩论系统架构分析报告.md",
+      "overall_score": 76.6,
+      "quality_level": "average",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 201,
+      "file_name": "advanced_agent_memory_brainstorming.md",
+      "file_path": "D:\\daip\\refactdoc\\advanced_agent_memory_brainstorming.md",
+      "overall_score": 76.55,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 202,
+      "file_name": "SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\p5_agent_engine\\SPEC.md",
+      "overall_score": 76.55,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 203,
+      "file_name": "worklog-2025-10-11.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-10-11.md",
+      "overall_score": 76.5,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 204,
+      "file_name": "tasks.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\tasks.md",
+      "overall_score": 76.4,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 205,
+      "file_name": "p7_gui_experience_guide.md",
+      "file_path": "D:\\daip\\refactdoc\\p7_gui_experience_guide.md",
+      "overall_score": 76.4,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 206,
+      "file_name": "tasks.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\tasks.md",
+      "overall_score": 76.4,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 207,
+      "file_name": "AGENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\AGENTS.md",
+      "overall_score": 76.4,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 208,
+      "file_name": "CONTEXTUAL_INTENT_SPECS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\CONTEXTUAL_INTENT_SPECS.md",
+      "overall_score": 76.35,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 209,
+      "file_name": "issues_resolution_summary.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\issues_resolution_summary.md",
+      "overall_score": 76.25,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 210,
+      "file_name": "spec-template.md",
+      "file_path": "D:\\daip\\refactdoc\\.specify\\templates\\spec-template.md",
+      "overall_score": 76.25,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 211,
+      "file_name": "TASK_BREAKDOWN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\cli-enhancement\\TASK_BREAKDOWN.md",
+      "overall_score": 76.2,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 212,
+      "file_name": "PROJECT_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\cli-enhancement\\PROJECT_PLAN.md",
+      "overall_score": 76.15,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 213,
+      "file_name": "data-model.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\data-model.md",
+      "overall_score": 76.1,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 214,
+      "file_name": "MEMORY.md",
+      "file_path": "D:\\daip\\refactdoc\\MEMORY.md",
+      "overall_score": 76.0,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 215,
+      "file_name": "p7_gui_system_completion_certificate_final.md",
+      "file_path": "D:\\daip\\refactdoc\\p7_gui_system_completion_certificate_final.md",
+      "overall_score": 75.95,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 216,
+      "file_name": "p7_gui_implementation_complete.md",
+      "file_path": "D:\\daip\\refactdoc\\p7_gui_implementation_complete.md",
+      "overall_score": 75.95,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 217,
+      "file_name": "users.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\proxy\\users.md",
+      "overall_score": 75.95,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 218,
+      "file_name": "permission_ask_mode_tdd_spec.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\permission_ask_mode_tdd_spec.md",
+      "overall_score": 75.9,
+      "quality_level": "average",
+      "document_type": "process"
+    },
+    {
+      "rank": 219,
+      "file_name": "index.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\index.md",
+      "overall_score": 75.8,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 220,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\spec.md",
+      "overall_score": 75.7,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 221,
+      "file_name": "TUI_AUTOCOMPLETION_IMPLEMENTATION_SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\TUI_AUTOCOMPLETION_IMPLEMENTATION_SPEC.md",
+      "overall_score": 75.6,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 222,
+      "file_name": "TUI_COMMAND_INTERFACE_ENHANCEMENT_PLAN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\TUI_COMMAND_INTERFACE_ENHANCEMENT_PLAN.md",
+      "overall_score": 75.55,
+      "quality_level": "average",
+      "document_type": "integration"
+    },
+    {
+      "rank": 223,
+      "file_name": "SCAFFOLD_TDD_TASK_BREAKDOWN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\SCAFFOLD_TDD_TASK_BREAKDOWN.md",
+      "overall_score": 75.5,
+      "quality_level": "average",
+      "document_type": "process"
+    },
+    {
+      "rank": 224,
+      "file_name": "AGENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\AGENTS.md",
+      "overall_score": 75.5,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 225,
+      "file_name": "SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\p8_debate_system\\SPEC.md",
+      "overall_score": 75.5,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 226,
+      "file_name": "final-implementation-guide.md",
+      "file_path": "D:\\daip\\refactdoc\\.spec-kit\\templates\\final-implementation-guide.md",
+      "overall_score": 75.45,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 227,
+      "file_name": "p7_gui_system_completion_certificate.md",
+      "file_path": "D:\\daip\\refactdoc\\p7_gui_system_completion_certificate.md",
+      "overall_score": 75.35,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 228,
+      "file_name": "tasks.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\enhanced_doc_knowledge_tools\\tasks.md",
+      "overall_score": 75.35,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 229,
+      "file_name": "REFACTORING_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\newP7\\REFACTORING_REQUIREMENTS.md",
+      "overall_score": 75.25,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 230,
+      "file_name": "agent_memory_learning_analysis.md",
+      "file_path": "D:\\daip\\refactdoc\\agent_memory_learning_analysis.md",
+      "overall_score": 75.2,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 231,
+      "file_name": "tui_detailed_interaction_report.md",
+      "file_path": "D:\\daip\\refactdoc\\tui_detailed_interaction_report.md",
+      "overall_score": 75.2,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 232,
+      "file_name": "TUI_COMMANDS_QUICK_REFERENCE.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\TUI_COMMANDS_QUICK_REFERENCE.md",
+      "overall_score": 75.2,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 233,
+      "file_name": "cli-optimization-standards.md",
+      "file_path": "D:\\daip\\refactdoc\\.spec-kit\\templates\\cli-optimization-standards.md",
+      "overall_score": 75.1,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 234,
+      "file_name": "RAG_Tools_Spec.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\procedure\\RAG_Tools_Spec.md",
+      "overall_score": 75.05,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 235,
+      "file_name": "spec.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\spec.md",
+      "overall_score": 74.9,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 236,
+      "file_name": "tasks-template.md",
+      "file_path": "D:\\daip\\refactdoc\\.specify\\templates\\tasks-template.md",
+      "overall_score": 74.9,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 237,
+      "file_name": "worklog-2025-09-19-integration.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-19-integration.md",
+      "overall_score": 74.9,
+      "quality_level": "average",
+      "document_type": "integration"
+    },
+    {
+      "rank": 238,
+      "file_name": "REQUIREMENTS_SPECIFICATION.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\REQUIREMENTS_SPECIFICATION.md",
+      "overall_score": 74.5,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 239,
+      "file_name": "FINAL_COMPLETE_FEATURE_DOCUMENT.md",
+      "file_path": "D:\\daip\\refactdoc\\FINAL_COMPLETE_FEATURE_DOCUMENT.md",
+      "overall_score": 74.45,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 240,
+      "file_name": "tasks.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\enhanced_doc_tools\\tasks.md",
+      "overall_score": 74.45,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 241,
+      "file_name": "comprehensive_testing_experience_guide.md",
+      "file_path": "D:\\daip\\refactdoc\\comprehensive_testing_experience_guide.md",
+      "overall_score": 74.15,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 242,
+      "file_name": "worklog-2025-09-19-actual-integration.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-19-actual-integration.md",
+      "overall_score": 74.05,
+      "quality_level": "average",
+      "document_type": "integration"
+    },
+    {
+      "rank": 243,
+      "file_name": "TUI_FOCUS_SYSTEM_DESIGN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\TUI_FOCUS_SYSTEM_DESIGN.md",
+      "overall_score": 74.05,
+      "quality_level": "average",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 244,
+      "file_name": "prod.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\proxy\\prod.md",
+      "overall_score": 74.0,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 245,
+      "file_name": "worklog-2025-09-04.md",
+      "file_path": "D:\\daip\\refactdoc\\log\\worklog-2025-09-04.md",
+      "overall_score": 73.9,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 246,
+      "file_name": "README_SCIM.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\litellm\\proxy\\management_endpoints\\scim\\README_SCIM.md",
+      "overall_score": 73.85,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 247,
+      "file_name": "FUNCTIONALITY_RECOVERY_DESIGN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\design\\FUNCTIONALITY_RECOVERY_DESIGN.md",
+      "overall_score": 73.75,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 248,
+      "file_name": "CLAUDE.md",
+      "file_path": "D:\\daip\\refactdoc\\CLAUDE.md",
+      "overall_score": 73.55,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 249,
+      "file_name": "WEB_API_REQUIREMENTS.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\WEB_API_REQUIREMENTS.md",
+      "overall_score": 73.5,
+      "quality_level": "average",
+      "document_type": "integration"
+    },
+    {
+      "rank": 250,
+      "file_name": "tui_cli_enhancement_design.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_cli_enhancement_design.md",
+      "overall_score": 73.45,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 251,
+      "file_name": "index.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\release_notes\\v1.75.8\\index.md",
+      "overall_score": 73.25,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 252,
+      "file_name": "SCAFFOLD_REQUIREMENTS_SPEC.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\SCAFFOLD_REQUIREMENTS_SPEC.md",
+      "overall_score": 73.2,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 253,
+      "file_name": "p7_gui_system_completion_final_report.md",
+      "file_path": "D:\\daip\\refactdoc\\p7_gui_system_completion_final_report.md",
+      "overall_score": 73.1,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 254,
+      "file_name": "quickstart.md",
+      "file_path": "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\quickstart.md",
+      "overall_score": 72.95,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 255,
+      "file_name": "control_plane_and_data_plane.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\proxy\\control_plane_and_data_plane.md",
+      "overall_score": 72.95,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 256,
+      "file_name": "agent_memory_learning_implementation_plan.md",
+      "file_path": "D:\\daip\\refactdoc\\agent_memory_learning_implementation_plan.md",
+      "overall_score": 72.8,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 257,
+      "file_name": "index.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\release_notes\\v1.73.0-stable\\index.md",
+      "overall_score": 72.8,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 258,
+      "file_name": "docker_quick_start.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\proxy\\docker_quick_start.md",
+      "overall_score": 72.35,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 259,
+      "file_name": "p7_gui_implementation_completion_certificate.md",
+      "file_path": "D:\\daip\\refactdoc\\p7_gui_implementation_completion_certificate.md",
+      "overall_score": 72.2,
+      "quality_level": "average",
+      "document_type": "component"
+    },
+    {
+      "rank": 260,
+      "file_name": "PERSONAL_PERMISSION_POLICY_MIN.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\PERSONAL_PERMISSION_POLICY_MIN.md",
+      "overall_score": 72.2,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 261,
+      "file_name": "tui_quit_specification.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\tui_quit_specification.md",
+      "overall_score": 72.15,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 262,
+      "file_name": "current_system_status_and_gradual_enhancement_plan.md",
+      "file_path": "D:\\daip\\refactdoc\\current_system_status_and_gradual_enhancement_plan.md",
+      "overall_score": 71.75,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 263,
+      "file_name": "KISS_YAGNI_SOLID_analysis.md",
+      "file_path": "D:\\daip\\refactdoc\\analysis\\KISS_YAGNI_SOLID_analysis.md",
+      "overall_score": 71.7,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 264,
+      "file_name": "KISS_YAGNI_SOLID_TASK_LIST.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\specs\\KISS_YAGNI_SOLID_TASK_LIST.md",
+      "overall_score": 71.15,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 265,
+      "file_name": "mcp.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\mcp.md",
+      "overall_score": 70.85,
+      "quality_level": "average",
+      "document_type": "feature"
+    },
+    {
+      "rank": 266,
+      "file_name": "ConfigurationBridge_Solution.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\architecture\\ConfigurationBridge_Solution.md",
+      "overall_score": 70.45,
+      "quality_level": "average",
+      "document_type": "architectural"
+    },
+    {
+      "rank": 267,
+      "file_name": "debate_多模型辩论_20251106-210312.md",
+      "file_path": "D:\\daip\\refactdoc\\workout\\debate_多模型辩论_20251106-210312.md",
+      "overall_score": 69.95,
+      "quality_level": "poor",
+      "document_type": "feature"
+    },
+    {
+      "rank": 268,
+      "file_name": "advanced_features_necessity_analysis.md",
+      "file_path": "D:\\daip\\refactdoc\\docs\\analysis\\advanced_features_necessity_analysis.md",
+      "overall_score": 69.85,
+      "quality_level": "poor",
+      "document_type": "feature"
+    },
+    {
+      "rank": 269,
+      "file_name": "logging.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\proxy\\logging.md",
+      "overall_score": 69.65,
+      "quality_level": "poor",
+      "document_type": "feature"
+    },
+    {
+      "rank": 270,
+      "file_name": "bedrock.md",
+      "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\docs\\providers\\bedrock.md",
+      "overall_score": 68.9,
+      "quality_level": "poor",
+      "document_type": "feature"
+    },
+    {
+      "rank": 271,
+      "file_name": "final_complex_task_system_implementation.md",
+      "file_path": "D:\\daip\\refactdoc\\final_complex_task_system_implementation.md",
+      "overall_score": 67.9,
+      "quality_level": "poor",
+      "document_type": "feature"
+    }
+  ]
+}

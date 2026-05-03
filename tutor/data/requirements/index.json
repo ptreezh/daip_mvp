@@ -1,0 +1,10 @@
+{
+  "FR-001": {
+    "title": "数据存储功能",
+    "complexity": "simple"
+  },
+  "FR-002": {
+    "title": "数据管理功能",
+    "complexity": "medium"
+  }
+}

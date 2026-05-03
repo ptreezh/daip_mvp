@@ -59,7 +59,8 @@
       "Bash(git push:*)",
       "Bash(git stash *)",
       "Bash(grep -E \"^\\(\\\\+\\\\+\\\\+|\\\\-\\\\-\\\\-|\\\\+.*src/|\\\\\\\\-.*src/\\)\")",
-      "Bash(grep -E \"\\\\.py$|\\\\.md$\")"
+      "Bash(grep -E \"\\\\.py$|\\\\.md$\")",
+      "Bash(awk '{print $2}')"
     ],
     "deny": [],
     "ask": []

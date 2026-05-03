@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAIP-LIVE 规范文档与功能实现对应关系 | 0代码AI规范化编程实践教学</title>
+    <meta name="description" content="展示SPEC驱动开发中技术规格与实现模块的完整映射关系">
+    
+    <!-- 引入统一设计系统 -->
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="loading">
+    <!-- 加载动画 -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">加载规格映射系统...</div>
+        </div>
+    </div>
+
+    <!-- 滚动指示器 -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <main class="main-container">
+        <!-- Hero 区域 -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        <span class="hero-icon">📋</span>
+                        DAIP-LIVE 规范文档与功能实现对应关系
+                    </h1>
+                    <p class="hero-description">
+                        展示SPEC驱动开发中技术规格与实现模块的完整映射关系
+                    </p>
+                    <div class="hero-features">
+                        <div class="feature-tag">
+                            <i class="fas fa-sitemap"></i>
+                            模块化架构
+                        </div>
+                        <div class="feature-tag">
+                            <i class="fas fa-code-branch"></i>
+                            版本追踪
+                        </div>
+                        <div class="feature-tag">
+                            <i class="fas fa-search"></i>
+                            智能搜索
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="stats-card">
+                        <div class="stats-icon">
+                            <i class="fas fa-map-signs"></i>
+                        </div>
+                        <div class="stats-info">
+                            <div class="stats-number">P1-P8</div>
+                            <div class="stats-label">核心模块</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 搜索控制面板 -->
+        <section class="controls-section">
+            <div class="container">
+                <div class="controls-panel">
+                    <div class="search-controls">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="searchInput" class="search-input" placeholder="搜索规范文档、功能模块或文件路径...">
+                            <button class="search-clear" id="searchClear">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 内容区域 -->
+        <section class="content-section">
+            <div class="container">
+                <!-- P1: 数据持久化模块 -->
+                <div class="module-section animate-on-scroll">
+                    <div class="module-header">
+                        <div class="module-number">P1</div>
+                        <div class="module-info">
+                            <h2 class="module-title">数据持久化模块</h2>
+                            <p class="module-description">persistence/</p>
+                        </div>
+                    </div>
+                    <div class="specs-list">
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>DATABASE_DESIGN_SPECIFICATION.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-implemented">
+                                            <i class="fas fa-check-circle"></i> 已实现
+                                        </span>
+                                        <span class="status-badge status-documentation">
+                                            <i class="fas fa-file-alt"></i> 文档
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>定义了DAIP-LIVE系统的数据库架构设计，包括表结构、关系模型和数据访问策略。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/persistence/database.py</span></li>
+                                        <li><span class="file-path">src/daip_live/persistence/tables.py</span></li>
+                                        <li><span class="file-path">src/daip_live/memory/session_manager.py</span></li>
+                                    </ul>
+                                </div>
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-cogs"></i> 核心功能</h4>
+                                    <ul>
+                                        <li>SQLite数据库集成</li>
+                                        <li>会话持久化存储</li>
+                                        <li>数据迁移和版本控制</li>
+                                        <li>查询优化和索引策略</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="notes-section">
+                                <h4><i class="fas fa-exclamation-triangle"></i> 注意事项</h4>
+                                <ul>
+                                    <li>数据库文件路径通过配置文件指定</li>
+                                    <li>支持多并发访问，需要适当的锁机制</li>
+                                    <li>定期清理过期会话数据</li>
+                                    <li>备份策略：建议定期导出数据库</li>
+                                </ul>
+                            </div>
+                            <div class="version-history">
+                                <h4><i class="fas fa-history"></i> 版本演化</h4>
+                                <div class="version-item">
+                                    <span>v2.0.0 - 完整的ORM映射和会话管理</span>
+                                    <span class="version-date">2024-11-15</span>
+                                </div>
+                                <div class="version-item">
+                                    <span>v1.5.0 - 基础表结构定义</span>
+                                    <span class="version-date">2024-10-20</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- P2: 知识管理模块 -->
+                <div class="module-section animate-on-scroll">
+                    <div class="module-header">
+                        <div class="module-number">P2</div>
+                        <div class="module-info">
+                            <h2 class="module-title">知识管理模块</h2>
+                            <p class="module-description">wiki/, knowledge/</p>
+                        </div>
+                    </div>
+                    <div class="specs-list">
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>KNOWLEDGE_MANAGEMENT_REQUIREMENTS.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-implemented">
+                                            <i class="fas fa-check-circle"></i> 已实现
+                                        </span>
+                                        <span class="status-badge status-ai">
+                                            <i class="fas fa-robot"></i> AI集成
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>知识管理系统规格，包括Wiki协作功能、向量搜索、智能分类和版本控制等核心需求。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/wiki/manager.py</span></li>
+                                        <li><span class="file-path">src/daip_live/wiki/collaborative_wiki.py</span></li>
+                                        <li><span class="file-path">src/daip_live/wiki/models.py</span></li>
+                                        <li><span class="file-path">src/daip_live/wiki/auto_progress_display.py</span></li>
+                                    </ul>
+                                </div>
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-cogs"></i> 核心功能</h4>
+                                    <ul>
+                                        <li>多角色协作Wiki编辑</li>
+                                        <li>FAISS向量搜索集成</li>
+                                        <li>智能分类和标签系统</li>
+                                        <li>版本控制和历史追踪</li>
+                                        <li>Markdown富文本支持</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="notes-section">
+                                <h4><i class="fas fa-exclamation-triangle"></i> 注意事项</h4>
+                                <ul>
+                                    <li>FAISS索引需要定期重建以保持搜索准确性</li>
+                                    <li>大文件上传可能影响性能，建议设置大小限制</li>
+                                    <li>并发编辑时需要处理冲突解决</li>
+                                    <li>Wiki页面的权限控制基于角色系统</li>
+                                </ul>
+                            </div>
+                            <div class="version-history">
+                                <h4><i class="fas fa-history"></i> 版本演化</h4>
+                                <div class="version-item">
+                                    <span>v2.1.0 - 多角色协作和AI增强搜索</span>
+                                    <span class="version-date">2024-12-01</span>
+                                </div>
+                                <div class="version-item">
+                                    <span>v2.0.0 - 基础Wiki功能和向量搜索</span>
+                                    <span class="version-date">2024-11-10</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>WIKI_MIN_SPEC.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-implemented">
+                                            <i class="fas fa-check-circle"></i> 已实现
+                                        </span>
+                                        <span class="status-badge status-partial">
+                                            <i class="fas fa-cog"></i> 优化中
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>Wiki系统的最小化规格，定义核心功能需求和技术实现标准。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/wiki/simple_collaboration_engine.py</span></li>
+                                        <li><span class="file-path">src/daip_live/tui/wiki_collaboration_display.py</span></li>
+                                    </ul>
+                                </div>
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-cogs"></i> 核心功能</h4>
+                                    <ul>
+                                        <li>基础页面创建和编辑</li>
+                                        <li>简单的协作机制</li>
+                                        <li>TUI界面集成</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- P3: 模型提供者模块 -->
+                <div class="module-section animate-on-scroll">
+                    <div class="module-header">
+                        <div class="module-number">P3</div>
+                        <div class="module-info">
+                            <h2 class="module-title">模型提供者模块</h2>
+                            <p class="module-description">model_provider/</p>
+                        </div>
+                    </div>
+                    <div class="specs-list">
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>LLM_SCHEDULER_REQUIREMENTS.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-implemented">
+                                            <i class="fas fa-check-circle"></i> 已实现
+                                        </span>
+                                        <span class="status-badge status-partial">
+                                            <i class="fas fa-wrench"></i> 配置
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>大语言模型调度器需求规格，定义多模型支持、负载均衡、故障转移和性能优化机制。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/model_provider/provider.py</span></li>
+                                        <li><span class="file-path">src/daip_live/model_provider/provider_fixed.py</span></li>
+                                        <li><span class="file-path">src/daip_live/core/universal_model_manager.py</span></li>
+                                    </ul>
+                                </div>
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-cogs"></i> 核心功能</h4>
+                                    <ul>
+                                        <li>多模型统一接口</li>
+                                        <li>动态模型切换</li>
+                                        <li>负载均衡和故障转移</li>
+                                        <li>模型性能监控</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="notes-section">
+                                <h4><i class="fas fa-exclamation-triangle"></i> 注意事项</h4>
+                                <ul>
+                                    <li>模型API密钥需要安全存储</li>
+                                    <li>注意API调用频率限制和成本控制</li>
+                                    <li>本地模型需要足够的硬件资源</li>
+                                    <li>模型切换可能影响对话连续性</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>TOKEN_MANAGEMENT_COMPRESSION_SPEC.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-partial">
+                                            <i class="fas fa-clock"></i> 部分实现
+                                        </span>
+                                        <span class="status-badge status-planned">
+                                            <i class="fas fa-calendar"></i> 计划中
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>Token管理和压缩策略，优化API使用成本和响应性能。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/model_provider/token_manager.py</span> (计划中)</li>
+                                    </ul>
+                                </div>
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-cogs"></i> 核心功能</h4>
+                                    <ul>
+                                        <li>对话历史压缩</li>
+                                        <li>智能Token使用统计</li>
+                                        <li>上下文窗口优化</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- P5: AI代理引擎模块 -->
+                <div class="module-section animate-on-scroll">
+                    <div class="module-header">
+                        <div class="module-number">P5</div>
+                        <div class="module-info">
+                            <h2 class="module-title">AI代理引擎模块</h2>
+                            <p class="module-description">agent_engine/</p>
+                        </div>
+                    </div>
+                    <div class="specs-list">
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>AGENT_EXECUTION_REQUIREMENTS.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-implemented">
+                                            <i class="fas fa-check-circle"></i> 已实现
+                                        </span>
+                                        <span class="status-badge status-core">
+                                            <i class="fas fa-bullseye"></i> 核心
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>AI代理执行引擎需求规格，定义智能代理的执行流程、状态管理和事件处理机制。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/agent_engine/enhanced_intent_recognizer.py</span></li>
+                                        <li><span class="file-path">src/daip_live/agent_engine/chat_executor.py</span></li>
+                                        <li><span class="file-path">src/daip_live/agent_engine/step_executor.py</span></li>
+                                        <li><span class="file-path">src/daip_live/agent_engine/services/clarification_service.py</span></li>
+                                    </ul>
+                                </div>
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-cogs"></i> 核心功能</h4>
+                                    <ul>
+                                        <li>混合意图识别系统</li>
+                                        <li>多步骤执行流程</li>
+                                        <li>事件驱动架构</li>
+                                        <li>智能对话管理</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="notes-section">
+                                <h4><i class="fas fa-exclamation-triangle"></i> 注意事项</h4>
+                                <ul>
+                                    <li>意图识别需要足够上下文信息</li>
+                                    <li>执行状态需要持久化存储</li>
+                                    <li>事件处理可能影响系统性能</li>
+                                    <li>需要合理的超时和重试机制</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>AGENT_EXECUTOR_REFACTOR_PLAN.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-partial">
+                                            <i class="fas fa-cog"></i> 重构中
+                                        </span>
+                                        <span class="status-badge status-partial">
+                                            <i class="fas fa-building"></i> 架构
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>AI代理执行器的重构计划，优化性能和可扩展性。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/agent_engine_v1/</span> (重构中)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- P6: 终端界面模块 -->
+                <div class="module-section animate-on-scroll">
+                    <div class="module-header">
+                        <div class="module-number">P6</div>
+                        <div class="module-info">
+                            <h2 class="module-title">终端界面模块</h2>
+                            <p class="module-description">cli/, tui/</p>
+                        </div>
+                    </div>
+                    <div class="specs-list">
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>TUI_AUTOCOMPLETION_IMPLEMENTATION_SPEC.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-implemented">
+                                            <i class="fas fa-check-circle"></i> 已实现
+                                        </span>
+                                        <span class="status-badge status-smart">
+                                            <i class="fas fa-lightbulb"></i> 智能
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>TUI自动补全系统规格，实现智能命令补全、参数提示和历史记录功能。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/tui/autocomplete.py</span></li>
+                                        <li><span class="file-path">src/daip_live/tui/utils.py</span></li>
+                                        <li><span class="file-path">src/daip_live/cli/main.py</span></li>
+                                    </ul>
+                                </div>
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-cogs"></i> 核心功能</h4>
+                                    <ul>
+                                        <li>智能命令补全</li>
+                                        <li>历史命令记录</li>
+                                        <li>参数类型提示</li>
+                                        <li>Tab键快捷操作</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>TUI_COMPONENT_SPEC.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-implemented">
+                                            <i class="fas fa-check-circle"></i> 已实现
+                                        </span>
+                                        <span class="status-badge status-partial">
+                                            <i class="fas fa-palette"></i> UI/UX
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>TUI组件系统规格，定义界面组件、交互设计和用户体验标准。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/tui/simplified_main.py</span></li>
+                                        <li><span class="file-path">src/daip_live/tui/screens.py</span></li>
+                                        <li><span class="file-path">src/daip_live/tui/widgets/</span></li>
+                                    </ul>
+                                </div>
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-cogs"></i> 核心功能</h4>
+                                    <ul>
+                                        <li>模块化TUI架构</li>
+                                        <li>响应式布局设计</li>
+                                        <li>键盘快捷键支持</li>
+                                        <li>实时内容复制功能</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="notes-section">
+                                <h4><i class="fas fa-exclamation-triangle"></i> 注意事项</h4>
+                                <ul>
+                                    <li>复制功能依赖pyperclip库</li>
+                                    <li>终端兼容性可能影响显示效果</li>
+                                    <li>大文本内容可能影响性能</li>
+                                    <li>需要处理Unicode字符显示</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>CLI_INTERFACE_REQUIREMENTS.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-implemented">
+                                            <i class="fas fa-check-circle"></i> 已实现
+                                        </span>
+                                        <span class="status-badge status-core">
+                                            <i class="fas fa-terminal"></i> 命令
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>命令行界面需求规格，定义CLI命令结构和参数处理机制。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/cli/main.py</span></li>
+                                        <li><span class="file-path">src/daip_live/cli/commands/</span></li>
+                                    </ul>
+                                </div>
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-cogs"></i> 核心功能</h4>
+                                    <ul>
+                                        <li>Typer命令框架集成</li>
+                                        <li>智能默认参数处理</li>
+                                        <li>子命令自动补全</li>
+                                        <li>帮助文档生成</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- P8: 辩论系统模块 -->
+                <div class="module-section animate-on-scroll">
+                    <div class="module-header">
+                        <div class="module-number">P8</div>
+                        <div class="module-info">
+                            <h2 class="module-title">辩论系统模块</h2>
+                            <p class="module-description">p8_debate_system/</p>
+                        </div>
+                    </div>
+                    <div class="specs-list">
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>DEBATE_SYSTEM_REQUIREMENTS.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-implemented">
+                                            <i class="fas fa-check-circle"></i> 已实现
+                                        </span>
+                                        <span class="status-badge status-role">
+                                            <i class="fas fa-masks-theater"></i> 角色
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>多模型辩论系统需求规格，定义角色扮演、辩论流程和协作机制。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/p8_debate_system/enhanced_debate_manager.py</span></li>
+                                        <li><span class="file-path">src/daip_live/p8_debate_system/real_debate_manager.py</span></li>
+                                        <li><span class="file-path">src/daip_live/p8_debate_system/ollama_instance_manager.py</span></li>
+                                        <li><span class="file-path">src/daip_live/p8_debate_system/role_selector.py</span></li>
+                                    </ul>
+                                </div>
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-cogs"></i> 核心功能</h4>
+                                    <ul>
+                                        <li>多AI模型角色扮演</li>
+                                        <li>智能角色分配算法</li>
+                                        <li>辩论流程管理</li>
+                                        <li>结果总结和评估</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="notes-section">
+                                <h4><i class="fas fa-exclamation-triangle"></i> 注意事项</h4>
+                                <ul>
+                                    <li>不同模型可能有不同的响应时间</li>
+                                    <li>角色分配需要考虑模型特长</li>
+                                    <li>辩论过程需要合理的超时控制</li>
+                                    <li>结果质量取决于模型能力</li>
+                                </ul>
+                            </div>
+                            <div class="version-history">
+                                <h4><i class="fas fa-history"></i> 版本演化</h4>
+                                <div class="version-item">
+                                    <span>v2.1.0 - 增强角色管理和模型选择</span>
+                                    <span class="version-date">2024-12-01</span>
+                                </div>
+                                <div class="version-item">
+                                    <span>v2.0.0 - 基础辩论系统和角色扮演</span>
+                                    <span class="version-date">2024-11-05</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>DEBATE_SYSTEM_OPTIMIZATION_SPEC.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-partial">
+                                            <i class="fas fa-cog"></i> 优化中
+                                        </span>
+                                        <span class="status-badge status-partial">
+                                            <i class="fas fa-bolt"></i> 性能
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>辩论系统优化规格，包括性能改进、资源管理和并发处理策略。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/p8_debate_system/model_availability_checker.py</span></li>
+                                        <li><span class="file-path">src/daip_live/p8_debate_system/unified_debate_manager.py</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 项目脚手架模块 -->
+                <div class="module-section animate-on-scroll">
+                    <div class="module-header">
+                        <div class="module-number">SCAFFOLD</div>
+                        <div class="module-info">
+                            <h2 class="module-title">项目脚手架模块</h2>
+                            <p class="module-description">scaffolding/</p>
+                        </div>
+                    </div>
+                    <div class="specs-list">
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>SCAFFOLD_REQUIREMENTS_SPEC.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-implemented">
+                                            <i class="fas fa-check-circle"></i> 已实现
+                                        </span>
+                                        <span class="status-badge status-generator">
+                                            <i class="fas fa-hammer"></i> 生成
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>项目脚手架需求规格，定义AI驱动的项目结构生成和模板管理功能。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/scaffolding/scaffold_engine.py</span></li>
+                                        <li><span class="file-path">src/daip_live/scaffolding/structure_generator.py</span></li>
+                                        <li><span class="file-path">src/daip_live/scaffolding/llm_service.py</span></li>
+                                        <li><span class="file-path">src/daip_live/scaffolding/config_manager.py</span></li>
+                                    </ul>
+                                </div>
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-cogs"></i> 核心功能</h4>
+                                    <ul>
+                                        <li>AI驱动的项目生成</li>
+                                        <li>多语言模板支持</li>
+                                        <li>交互式配置向导</li>
+                                        <li>最佳实践集成</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="notes-section">
+                                <h4><i class="fas fa-exclamation-triangle"></i> 注意事项</h4>
+                                <ul>
+                                    <li>生成的代码需要人工审查</li>
+                                    <li>模板可能需要定期更新</li>
+                                    <li>复杂项目可能需要多轮生成</li>
+                                    <li>注意版权和许可证兼容性</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="spec-item">
+                            <div class="spec-header">
+                                <div class="spec-title">
+                                    <h3>SCAFFOLD_DESIGN_DOCUMENT.md</h3>
+                                    <div class="spec-badges">
+                                        <span class="status-badge status-implemented">
+                                            <i class="fas fa-check-circle"></i> 已实现
+                                        </span>
+                                        <span class="status-badge status-design">
+                                            <i class="fas fa-drafting-compass"></i> 设计
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spec-description">
+                                <i class="fas fa-info-circle"></i>
+                                <p>脚手架设计文档，详细说明架构设计和技术实现方案。</p>
+                            </div>
+                            <div class="implementation-details">
+                                <div class="detail-card">
+                                    <h4><i class="fas fa-code"></i> 实现文件</h4>
+                                    <ul>
+                                        <li><span class="file-path">src/daip_live/scaffolding/docs/</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 底部信息 -->
+        <footer class="footer-section">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-legend">
+                        <div class="legend-item">
+                            <div class="legend-box legend-implemented"></div>
+                            <span>已实现</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box legend-partial"></div>
+                            <span>部分实现/优化中</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box legend-planned"></div>
+                            <span>计划中/未开始</span>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-info">
+                        <p class="footer-text">
+                            <i class="fas fa-map-signs"></i>
+                            DAIP-LIVE SPEC驱动开发示范项目
+                        </p>
+                        <p class="footer-text">
+                            最后更新: 2025年12月
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- 导航栏 -->
+    <nav class="main-nav">
+        <div class="nav-content">
+            <div class="nav-brand">
+                <i class="fas fa-code"></i>
+                <span>0代码AI规范化编程</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">首页</a>
+                <a href="document_library_new.html" class="nav-link">文档库</a>
+                <a href="enhanced_learning_platform_new.html" class="nav-link">学习平台</a>
+                <a href="INTERACTIVE_LEARNING_PLATFORM_new.html" class="nav-link">交互实验室</a>
+                <a href="modern_platform.html" class="nav-link">现代平台</a>
+                <a href="enterprise_learning_platform_new.html" class="nav-link">企业版</a>
+                <a href="premium_learning_platform_new.html" class="nav-link">高级版</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 动画控制脚本 -->
+    <script src="animations.js"></script>
+
+    <script>
+        // 搜索功能增强
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const specItems = document.querySelectorAll('.spec-item');
+            const moduleSections = document.querySelectorAll('.module-section');
+            const searchClear = document.getElementById('searchClear');
+
+            // 显示/隐藏清除按钮
+            if (searchClear) {
+                searchClear.style.display = searchTerm ? 'block' : 'none';
+            }
+
+            if (searchTerm === '') {
+                specItems.forEach(item => item.style.display = 'block');
+                moduleSections.forEach(section => section.style.display = 'block');
+                return;
+            }
+
+            specItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                const isMatch = text.includes(searchTerm);
+                item.style.display = isMatch ? 'block' : 'none';
+            });
+
+            // 隐藏空的模块
+            moduleSections.forEach(section => {
+                const visibleSpecs = section.querySelectorAll('.spec-item[style*="display: block"], .spec-item:not([style*="display: none"])');
+                section.style.display = visibleSpecs.length > 0 ? 'block' : 'none';
+            });
+        });
+
+        // 清除搜索
+        document.getElementById('searchClear').addEventListener('click', function() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            this.style.display = 'none';
+            
+            // 触发搜索事件以重置显示
+            searchInput.dispatchEvent(new Event('input'));
+        });
+
+        // 添加悬停效果
+        document.querySelectorAll('.file-path').forEach(path => {
+            path.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05)';
+                this.style.transition = 'transform 0.2s';
+            });
+            path.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 触发滚动动画
+            setTimeout(() => {
+                if (window.animateOnScroll) {
+                    window.animateOnScroll();
+                }
+            }, 500);
+        });
+
+        // 处理页面可见性变化
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // 页面变为可见时重新计算动画
+                setTimeout(() => {
+                    if (window.animateOnScroll) {
+                        window.animateOnScroll();
+                    }
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>

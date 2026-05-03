@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAIP-LIVE 完整规格文档追踪系统 | 0代码AI规范化编程实践教学</title>
+    <meta name="description" content="实时追踪55个技术规格文档的实现状态、变更记录和版本演化">
+    
+    <!-- 引入统一设计系统 -->
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="loading">
+    <!-- 加载动画 -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">加载规格追踪系统...</div>
+        </div>
+    </div>
+
+    <!-- 滚动指示器 -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <main class="main-container">
+        <!-- Hero 区域 -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        <span class="hero-icon">📋</span>
+                        DAIP-LIVE 完整规格文档追踪系统
+                    </h1>
+                    <p class="hero-description">
+                        实时追踪55个技术规格文档的实现状态、变更记录和版本演化
+                    </p>
+                    <div class="hero-features">
+                        <div class="feature-tag">
+                            <i class="fas fa-tachometer-alt"></i>
+                            实时追踪
+                        </div>
+                        <div class="feature-tag">
+                            <i class="fas fa-code-branch"></i>
+                            版本控制
+                        </div>
+                        <div class="feature-tag">
+                            <i class="fas fa-chart-line"></i>
+                            状态监控
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="stats-card">
+                        <div class="stats-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div class="stats-info">
+                            <div class="stats-number">55</div>
+                            <div class="stats-label">规格文档</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 控制面板 -->
+        <section class="controls-section">
+            <div class="container">
+                <div class="controls-panel">
+                    <div class="search-controls">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="searchInput" class="search-input" placeholder="搜索规格文档、文件路径或关键词...">
+                            <button class="search-clear" id="searchClear">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <button class="filter-btn active" data-filter="all">
+                                <i class="fas fa-list"></i>
+                                全部
+                            </button>
+                            <button class="filter-btn" data-filter="implemented">
+                                <i class="fas fa-check-circle"></i>
+                                已实现
+                            </button>
+                            <button class="filter-btn" data-filter="partial">
+                                <i class="fas fa-clock"></i>
+                                部分实现
+                            </button>
+                            <button class="filter-btn" data-filter="planned">
+                                <i class="fas fa-calendar"></i>
+                                计划中
+                            </button>
+                            <button class="filter-btn" data-filter="archived">
+                                <i class="fas fa-archive"></i>
+                                已归档
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 统计面板 -->
+        <section class="stats-section">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="totalSpecs">55</div>
+                            <div class="stat-label">总规格数</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card stat-implemented">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="implementedCount">0</div>
+                            <div class="stat-label">已实现</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card stat-partial">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="partialCount">0</div>
+                            <div class="stat-label">部分实现</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card stat-planned">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="plannedCount">0</div>
+                            <div class="stat-label">计划中</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 规格文档网格 -->
+        <section class="content-section">
+            <div class="container">
+                <div class="loading-state" id="loadingState">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">正在加载规格数据...</div>
+                </div>
+                
+                <div class="specs-grid" id="specsGrid" style="display: none;">
+                    <!-- 规格文档将通过JavaScript动态加载 -->
+                </div>
+                
+                <!-- 暂无数据状态 -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="empty-title">未找到匹配的规格文档</h3>
+                    <p class="empty-description">尝试调整搜索条件或过滤器</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 底部信息 -->
+        <footer class="footer-section">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-legend">
+                        <div class="legend-item">
+                            <div class="legend-box legend-implemented"></div>
+                            <span>已实现</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box legend-partial"></div>
+                            <span>部分实现</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box legend-planned"></div>
+                            <span>计划中</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box legend-archived"></div>
+                            <span>已归档</span>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-info">
+                        <p class="footer-text">
+                            <i class="fas fa-clipboard-list"></i>
+                            DAIP-LIVE SPEC驱动开发示范项目
+                        </p>
+                        <p class="footer-text">
+                            最后更新: <span id="lastUpdate">加载中...</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- 导航栏 -->
+    <nav class="main-nav">
+        <div class="nav-content">
+            <div class="nav-brand">
+                <i class="fas fa-code"></i>
+                <span>0代码AI规范化编程</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">首页</a>
+                <a href="document_library_new.html" class="nav-link">文档库</a>
+                <a href="enhanced_learning_platform_new.html" class="nav-link">学习平台</a>
+                <a href="INTERACTIVE_LEARNING_PLATFORM_new.html" class="nav-link">交互实验室</a>
+                <a href="modern_platform.html" class="nav-link">现代平台</a>
+                <a href="enterprise_learning_platform_new.html" class="nav-link">企业版</a>
+                <a href="premium_learning_platform_new.html" class="nav-link">高级版</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 动画控制脚本 -->
+    <script src="animations.js"></script>
+
+    <script>
+        // 规格文档数据
+        const specsData = [
+            {
+                title: "AGENT_EXECUTION_REQUIREMENTS.md",
+                category: "Agent Engine",
+                description: "AI代理执行引擎需求规格，定义智能代理的执行流程、状态管理和事件处理机制。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/agent_engine/enhanced_intent_recognizer.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/agent_engine/chat_executor.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/agent_engine/step_executor.py", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.1.0", date: "2024-12-01", content: "增强意图识别和事件处理"},
+                    {version: "v2.0.0", date: "2024-11-15", content: "基础执行引擎实现"},
+                    {version: "v1.5.0", date: "2024-10-20", content: "初步Agent框架"}
+                ],
+                notes: [
+                    "需要关注性能优化和内存使用",
+                    "异步操作需要适当的错误处理",
+                    "状态机设计需要考虑所有边界情况"
+                ]
+            },
+            {
+                title: "DATABASE_DESIGN_SPECIFICATION.md",
+                category: "Persistence",
+                description: "数据库设计规格，包括表结构、关系模型、数据访问策略和性能优化方案。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/persistence/database.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/persistence/tables.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/memory/session_manager.py", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.0.0", date: "2024-11-15", content: "完整的ORM映射和会话管理"},
+                    {version: "v1.8.0", date: "2024-11-01", content: "添加数据库迁移支持"},
+                    {version: "v1.5.0", date: "2024-10-20", content: "基础表结构定义"}
+                ]
+            },
+            {
+                title: "KNOWLEDGE_MANAGEMENT_REQUIREMENTS.md",
+                category: "Knowledge",
+                description: "知识管理系统规格，包括Wiki协作功能、向量搜索、智能分类和版本控制等核心需求。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/wiki/manager.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/wiki/collaborative_wiki.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/wiki/models.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/wiki/auto_progress_display.py", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.1.0", date: "2024-12-01", content: "多角色协作和AI增强搜索"},
+                    {version: "v2.0.0", date: "2024-11-10", content: "基础Wiki功能和向量搜索"},
+                    {version: "v1.5.0", date: "2024-10-15", content: "简单Wiki功能"}
+                ]
+            },
+            {
+                title: "LLM_SCHEDULER_REQUIREMENTS.md",
+                category: "Model Provider",
+                description: "大语言模型调度器需求规格，定义多模型支持、负载均衡、故障转移和性能优化机制。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/model_provider/provider.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/model_provider/provider_fixed.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/core/universal_model_manager.py", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.0.0", date: "2024-11-10", content: "统一模型接口和调度机制"},
+                    {version: "v1.8.0", date: "2024-10-25", content: "添加故障转移支持"},
+                    {version: "v1.5.0", date: "2024-10-15", content: "基础模型管理"}
+                ]
+            },
+            {
+                title: "TUI_AUTOCOMPLETION_IMPLEMENTATION_SPEC.md",
+                category: "TUI",
+                description: "TUI自动补全系统规格，实现智能命令补全、参数提示和历史记录功能。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/tui/autocomplete.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/tui/utils.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/cli/main.py", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.1.0", date: "2024-12-01", content: "增强智能补全和上下文感知"},
+                    {version: "v2.0.0", date: "2024-11-20", content: "完整的自动补全系统"},
+                    {version: "v1.5.0", date: "2024-10-10", content: "基础补全功能"}
+                ]
+            },
+            {
+                title: "DEBATE_SYSTEM_REQUIREMENTS.md",
+                category: "Debate System",
+                description: "多模型辩论系统需求规格，定义角色扮演、辩论流程和协作机制。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/p8_debate_system/enhanced_debate_manager.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/p8_debate_system/real_debate_manager.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/p8_debate_system/role_selector.py", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.1.0", date: "2024-12-01", content: "增强角色管理和模型选择"},
+                    {version: "v2.0.0", date: "2024-11-05", content: "基础辩论系统和角色扮演"},
+                    {version: "v1.5.0", date: "2024-10-15", content: "简单辩论功能"}
+                ]
+            },
+            {
+                title: "SCAFFOLD_REQUIREMENTS_SPEC.md",
+                category: "Scaffolding",
+                description: "项目脚手架需求规格，定义AI驱动的项目结构生成和模板管理功能。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/scaffolding/scaffold_engine.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/scaffolding/structure_generator.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/scaffolding/config_manager.py", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.0.0", date: "2024-11-25", content: "AI驱动的项目生成和模板系统"},
+                    {version: "v1.8.0", date: "2024-10-20", content: "基础脚手架功能"},
+                    {version: "v1.5.0", date: "2024-10-10", content: "项目模板生成"}
+                ]
+            },
+            {
+                title: "TUI_COMPONENT_SPEC.md",
+                category: "TUI",
+                description: "TUI组件系统规格，定义界面组件、交互设计和用户体验标准。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/tui/simplified_main.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/tui/screens.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/tui/widgets/", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.1.0", date: "2024-12-08", content: "真实复制功能和用户体验优化"},
+                    {version: "v2.0.0", date: "2024-11-20", content: "模块化TUI架构"},
+                    {version: "v1.5.0", date: "2024-10-10", content: "基础TUI组件"}
+                ]
+            },
+            {
+                title: "CLI_INTERFACE_REQUIREMENTS.md",
+                category: "CLI",
+                description: "命令行界面需求规格，定义CLI命令结构和参数处理机制。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/cli/main.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/cli/commands/", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.0.0", date: "2024-11-15", content: "Typer框架集成和智能默认"},
+                    {version: "v1.8.0", date: "2024-10-20", content: "命令结构重构"},
+                    {version: "v1.5.0", date: "2024-10-05", content: "基础CLI命令"}
+                ]
+            },
+            {
+                title: "TOKEN_MANAGEMENT_COMPRESSION_SPEC.md",
+                category: "Model Provider",
+                description: "Token管理和压缩策略，优化API使用成本和响应性能。",
+                status: "partial",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/model_provider/token_manager.py", status: "🔄 计划中"},
+                        {path: "src/daip_live/model_provider/context_compressor.py", status: "🔄 计划中"}
+                    ]
+                },
+                changelog: [
+                    {version: "v1.0.0", date: "计划中", content: "Token管理系统的设计和实现"}
+                ]
+            },
+            {
+                title: "DEBATE_SYSTEM_OPTIMIZATION_SPEC.md",
+                category: "Debate System",
+                description: "辩论系统优化规格，包括性能改进、资源管理和并发处理策略。",
+                status: "partial",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/p8_debate_system/model_availability_checker.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/p8_debate_system/unified_debate_manager.py", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v1.5.0", date: "2024-11-25", content: "性能优化和资源管理"},
+                    {version: "v1.0.0", date: "2024-11-05", content: "基础优化功能"}
+                ]
+            },
+            {
+                title: "CONTEXTUAL_INTENT_SPECS.md",
+                category: "Intent Recognition",
+                description: "上下文意图识别规格，定义混合意图识别系统和自然语言理解机制。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/intent_recognition/contextual_intent_recognizer.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/intent_recognition/enhanced_context_manager.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/multi_agent_collab/hybrid_intent_collaboration_engine.py", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.0.0", date: "2024-11-20", content: "混合意图识别系统"},
+                    {version: "v1.8.0", date: "2024-10-25", content: "上下文感知优化"},
+                    {version: "v1.5.0", date: "2024-10-15", content: "基础意图识别"}
+                ]
+            },
+            {
+                title: "SYSTEM_ARCHITECTURE.md",
+                category: "Architecture",
+                description: "系统总体架构设计，定义模块化架构、组件关系和技术栈选择。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/container.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/config.py", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.1.0", date: "2024-12-01", content: "P1-P8模块化架构完善"},
+                    {version: "v2.0.0", date: "2024-11-15", content: "模块化架构重构"},
+                    {version: "1.5.0", date: "2024-10-10", content: "基础架构设计"}
+                ]
+            },
+            {
+                title: "PROJECT_SPEC.md",
+                category: "Architecture",
+                description: "项目总体规格说明书，包含项目概述、功能需求、技术栈和路线图。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "README.md", status: "✅ 已实现"},
+                        {path: "PROJECT_STRUCTURE.md", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.1.0", date: "2024-12-08", content: "规范化整理和教学资源完善"},
+                    {version: "v2.0.0", date: "2024-12-01", content: "SPEC驱动开发示范化"},
+                    {version: "1.8.0", date: "2024-11-15", content: "功能模块完善"}
+                ]
+            },
+            {
+                title: "AGENT_EXECUTOR_REFACTOR_PLAN.md",
+                category: "Agent Engine",
+                description: "AI代理执行器重构计划，优化性能和可扩展性。",
+                status: "partial",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/agent_engine_v1/", status: "🔄 重构中"}
+                    ]
+                },
+                changelog: [
+                    {version: "v1.0.0", date: "计划中", content: "代理执行器重构设计和实现"}
+                ]
+            },
+            {
+                title: "MEMORY_SERVICE_REQUIREMENTS.md",
+                category: "Persistence",
+                description: "内存服务需求规格，定义会话管理、上下文保持和数据缓存机制。",
+                status: "implemented",
+                implementation: {
+                    files: [
+                        {path: "src/daip_live/memory/service.py", status: "✅ 已实现"},
+                        {path: "src/daip_live/memory/session_manager.py", status: "✅ 已实现"}
+                    ]
+                },
+                changelog: [
+                    {version: "v2.0.0", date: "2024-11-10", content: "统一的内存管理架构"},
+                    {version: "v1.8.0", date: "2024-10-20", content: "改进会话状态持久化"},
+                    {version: "v1.5.0", date: "2024-10-10", content: "初步内存服务实现"}
+                ]
+            }
+            // ... 其他规格文档可以继续添加
+        ];
+
+        // 分类映射
+        const categoryMap = {
+            "Agent Engine": "代理引擎",
+            "Persistence": "数据持久化",
+            "Knowledge": "知识管理",
+            "Model Provider": "模型提供者",
+            "TUI": "用户界面",
+            "CLI": "命令行界面",
+            "Debate System": "辩论系统",
+            "Scaffolding": "项目脚手架",
+            "Intent Recognition": "意图识别",
+            "Architecture": "系统架构",
+            "Testing": "测试验证",
+            "Performance": "性能优化",
+            "Security": "安全控制",
+            "Documentation": "文档管理",
+            "Deployment": "部署运维"
+        };
+
+        // 获取状态徽章
+        function getStatusBadge(status) {
+            const badges = {
+                implemented: '<span class="status-badge status-implemented"><i class="fas fa-check-circle"></i> 已实现</span>',
+                partial: '<span class="status-badge status-partial"><i class="fas fa-clock"></i> 部分实现</span>',
+                planned: '<span class="status-badge status-planned"><i class="fas fa-calendar"></i> 计划中</span>',
+                archived: '<span class="status-badge status-archived"><i class="fas fa-archive"></i> 已归档</span>'
+            };
+            return badges[status] || badges.planned;
+        }
+
+        // 获取状态样式类
+        function getStatusClass(status) {
+            const classes = {
+                implemented: 'status-implemented',
+                partial: 'status-partial',
+                planned: 'status-planned',
+                archived: 'status-archived'
+            };
+            return classes[status] || 'status-planned';
+        }
+
+        // 获取状态图标
+        function getStatusIcon(status) {
+            const icons = {
+                implemented: 'fa-check-circle',
+                partial: 'fa-clock',
+                planned: 'fa-calendar',
+                archived: 'fa-archive'
+            };
+            return icons[status] || 'fa-calendar';
+        }
+
+        // 创建规格卡片
+        function createSpecCard(spec) {
+            const card = document.createElement('div');
+            card.className = 'spec-card animate-on-scroll';
+            card.dataset.status = spec.status;
+
+            const category = categoryMap[spec.category] || spec.category;
+            const statusIcon = getStatusIcon(spec.status);
+            const statusClass = getStatusClass(spec.status);
+
+            card.innerHTML = `
+                <div class="spec-card-header">
+                    <div class="spec-card-title">
+                        <h3 class="spec-title">${spec.title}</h3>
+                        <div class="spec-badges">
+                            ${getStatusBadge(spec.status)}
+                            <span class="category-badge">
+                                <i class="fas fa-folder"></i>
+                                ${category}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="spec-status-indicator">
+                        <i class="fas ${statusIcon} ${statusClass}"></i>
+                    </div>
+                </div>
+
+                <div class="spec-card-content">
+                    <div class="spec-description">
+                        <i class="fas fa-info-circle"></i>
+                        <p>${spec.description}</p>
+                    </div>
+
+                    <div class="implementation-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-code"></i>
+                            实现文件
+                        </h4>
+                        <div class="file-list">
+                            ${spec.implementation.files.map(file => `
+                                <div class="file-item">
+                                    <div class="file-path">
+                                        <i class="fas fa-file-code"></i>
+                                        ${file.path}
+                                    </div>
+                                    <div class="file-status">
+                                        <i class="fas ${getStatusIcon(spec.status)}"></i>
+                                        ${file.status}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    ${spec.notes ? `
+                        <div class="notes-section">
+                            <h4 class="section-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                注意事项
+                            </h4>
+                            <ul class="notes-list">
+                                ${spec.notes.map(note => `<li>${note}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
+                    ${spec.changelog && spec.changelog.length > 0 ? `
+                        <div class="changelog-section">
+                            <div class="changelog-header">
+                                <h4 class="section-title">
+                                    <i class="fas fa-history"></i>
+                                    变更记录
+                                </h4>
+                                <button class="changelog-toggle" onclick="toggleChangelog(this)">
+                                    <i class="fas fa-chevron-down"></i>
+                                    展开
+                                </button>
+                            </div>
+                            <div class="changelog-list">
+                                ${spec.changelog.map(item => `
+                                    <div class="changelog-item">
+                                        <div class="changelog-content">
+                                            <div class="changelog-text">${item.content}</div>
+                                        </div>
+                                        <div class="changelog-meta">
+                                            <span class="changelog-version">${item.version}</span>
+                                            <span class="changelog-date">${item.date}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            return card;
+        }
+
+        // 切换变更记录显示
+        function toggleChangelog(button) {
+            const changelogList = button.parentElement.nextElementSibling;
+            const icon = button.querySelector('i');
+            
+            changelogList.classList.toggle('expanded');
+            
+            if (changelogList.classList.contains('expanded')) {
+                button.innerHTML = '<i class="fas fa-chevron-up"></i> 收起';
+                changelogList.style.display = 'block';
+            } else {
+                button.innerHTML = '<i class="fas fa-chevron-down"></i> 展开';
+                changelogList.style.display = 'none';
+            }
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const stats = {
+                total: specsData.length,
+                implemented: specsData.filter(s => s.status === 'implemented').length,
+                partial: specsData.filter(s => s.status === 'partial').length,
+                planned: specsData.filter(s => s.status === 'planned').length
+            };
+
+            // 动画计数效果
+            animateNumber('totalSpecs', stats.total);
+            animateNumber('implementedCount', stats.implemented);
+            animateNumber('partialCount', stats.partial);
+            animateNumber('plannedCount', stats.planned);
+        }
+
+        // 数字动画效果
+        function animateNumber(elementId, targetNumber) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const startNumber = 0;
+            const duration = 1000;
+            const startTime = performance.now();
+            
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const currentNumber = Math.floor(startNumber + (targetNumber - startNumber) * easeOutQuart(progress));
+                element.textContent = currentNumber;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                }
+            }
+            
+            requestAnimationFrame(updateNumber);
+        }
+
+        // 缓动函数
+        function easeOutQuart(t) {
+            return 1 - Math.pow(1 - t, 4);
+        }
+
+        // 渲染规格文档
+        function renderSpecs(specs) {
+            const grid = document.getElementById('specsGrid');
+            const loadingState = document.getElementById('loadingState');
+            const emptyState = document.getElementById('emptyState');
+
+            // 隐藏加载状态
+            if (loadingState) {
+                loadingState.style.display = 'none';
+            }
+
+            // 清空网格
+            grid.innerHTML = '';
+
+            if (specs.length === 0) {
+                // 显示空状态
+                grid.style.display = 'none';
+                if (emptyState) {
+                    emptyState.style.display = 'block';
+                }
+                return;
+            }
+
+            // 隐藏空状态
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+
+            // 显示网格
+            grid.style.display = 'grid';
+
+            // 逐个添加卡片以支持动画
+            specs.forEach((spec, index) => {
+                setTimeout(() => {
+                    const card = createSpecCard(spec);
+                    grid.appendChild(card);
+                    
+                    // 触发滚动动画
+                    if (window.animateOnScroll) {
+                        window.animateOnScroll();
+                    }
+                }, index * 100);
+            });
+        }
+
+        // 过滤规格
+        function filterSpecs(filter) {
+            const cards = document.querySelectorAll('.spec-card');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const matchesFilter = filter === 'all' || card.dataset.status === filter;
+                const matchesSearch = searchTerm === '' ||
+                    card.textContent.toLowerCase().includes(searchTerm);
+
+                const shouldShow = matchesFilter && matchesSearch;
+                card.style.display = shouldShow ? 'block' : 'none';
+                
+                if (shouldShow) {
+                    visibleCount++;
+                }
+            });
+
+            // 更新空状态显示
+            const emptyState = document.getElementById('emptyState');
+            if (emptyState) {
+                emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+            }
+        }
+
+        // 更新最后更新时间
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            const lastUpdateElement = document.getElementById('lastUpdate');
+            if (lastUpdateElement) {
+                lastUpdateElement.textContent = formattedDate;
+            }
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 搜索功能
+            const searchInput = document.getElementById('searchInput');
+            const searchClear = document.getElementById('searchClear');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    filterSpecs(getCurrentFilter());
+                    
+                    // 显示/隐藏清除按钮
+                    if (searchClear) {
+                        searchClear.style.display = searchInput.value ? 'block' : 'none';
+                    }
+                });
+            }
+
+            // 清除搜索
+            if (searchClear) {
+                searchClear.addEventListener('click', () => {
+                    if (searchInput) {
+                        searchInput.value = '';
+                        filterSpecs(getCurrentFilter());
+                    }
+                    searchClear.style.display = 'none';
+                });
+            }
+
+            // 过滤按钮
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 更新活动状态
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // 执行过滤
+                    const filter = this.dataset.filter;
+                    filterSpecs(filter);
+                });
+            });
+        }
+
+        // 获取当前过滤器
+        function getCurrentFilter() {
+            const activeFilter = document.querySelector('.filter-btn.active');
+            return activeFilter ? activeFilter.dataset.filter : 'all';
+        }
+
+        // 初始化页面
+        function initializePage() {
+            renderSpecs(specsData);
+            updateStats();
+            setupEventListeners();
+            updateLastUpdateTime();
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 等待页面完全加载
+            setTimeout(initializePage, 500);
+        });
+
+        // 处理页面可见性变化
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // 页面变为可见时重新计算动画
+                if (window.animateOnScroll) {
+                    setTimeout(window.animateOnScroll, 100);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

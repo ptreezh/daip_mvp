@@ -1,0 +1,251 @@
+{
+  "timestamp": 1765422679.4754698,
+  "status": "success",
+  "tests": {
+    "basic_elements": true,
+    "requirement_selection": true,
+    "dimension_click": true,
+    "six_dimension_sync": true,
+    "navigation_bar": true,
+    "cross_references": true,
+    "debug_function": true,
+    "error_handling": true
+  },
+  "console_errors": [
+    "找不到需求元素: INVALID"
+  ],
+  "console_messages": [
+    {
+      "type": "log",
+      "text": "[DEBUG] 页面初始化"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 绑定事件监听器"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 事件绑定完成"
+    },
+    {
+      "type": "log",
+      "text": "🎯 P1数据持久化 - 六向联动学习系统已加载"
+    },
+    {
+      "type": "log",
+      "text": "💡 点击任意需求开始学习"
+    },
+    {
+      "type": "log",
+      "text": "🔗 点击任意维度，其他五个自动对齐"
+    },
+    {
+      "type": "log",
+      "text": "📊 当前系统状态:  {currentRequirement: FR-001, currentDimension: prompt}"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 页面初始化完成"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 选择需求: FR-002"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 加载所有维度内容"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "error",
+      "text": "Access to fetch at 'file:///D:/daip/refactdoc/tutor/data/requirements/index.json' from origin 'null' has been blocked by CORS policy: Cross origin requests are only supported for protocol schemes: chrome, chrome-extension, chrome-untrusted, data, http, https, isolated-app."
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "同步维度内容时出错: TypeError: Failed to fetch\n    at syncAllDimensions (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:772:40)\n    at loadAllDimensions (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:657:23)\n    at selectRequirement (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:643:23)\n    at HTMLDivElement.<anonymous> (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:899:29)"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步错误: Failed to fetch"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 需求选择成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "error",
+      "text": "Access to fetch at 'file:///D:/daip/refactdoc/tutor/data/requirements/index.json' from origin 'null' has been blocked by CORS policy: Cross origin requests are only supported for protocol schemes: chrome, chrome-extension, chrome-untrusted, data, http, https, isolated-app."
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "同步维度内容时出错: TypeError: Failed to fetch\n    at syncAllDimensions (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:772:40)\n    at navigateDimension (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:703:23)\n    at HTMLDivElement.<anonymous> (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:910:29)"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步错误: Failed to fetch"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: design"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "error",
+      "text": "Access to fetch at 'file:///D:/daip/refactdoc/tutor/data/requirements/index.json' from origin 'null' has been blocked by CORS policy: Cross origin requests are only supported for protocol schemes: chrome, chrome-extension, chrome-untrusted, data, http, https, isolated-app."
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "同步维度内容时出错: TypeError: Failed to fetch\n    at syncAllDimensions (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:772:40)\n    at navigateDimension (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:703:23)\n    at HTMLDivElement.<anonymous> (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:910:29)"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步错误: Failed to fetch"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: code"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 导航到维度: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步所有维度内容"
+    },
+    {
+      "type": "error",
+      "text": "Access to fetch at 'file:///D:/daip/refactdoc/tutor/data/requirements/index.json' from origin 'null' has been blocked by CORS policy: Cross origin requests are only supported for protocol schemes: chrome, chrome-extension, chrome-untrusted, data, http, https, isolated-app."
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "同步维度内容时出错: TypeError: Failed to fetch\n    at syncAllDimensions (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:772:40)\n    at navigateDimension (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:703:23)\n    at HTMLDivElement.<anonymous> (file:///D:/daip/refactdoc/tutor/P1_SIX_DIMENSION_LEARNING_FIXED.html:921:35)"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 同步错误: Failed to fetch"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 维度导航成功"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 更新导航栏状态到: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 找到目标导航元素: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 已为目标导航添加active类"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 验证目标导航active状态: true"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 当前active的导航元素数量: 1"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] Active导航维度: spec"
+    },
+    {
+      "type": "log",
+      "text": "[DEBUG] 选择需求: INVALID"
+    },
+    {
+      "type": "error",
+      "text": "找不到需求元素: INVALID"
+    }
+  ],
+  "final_state": {
+    "current_requirement": null,
+    "current_dimension": "spec"
+  }
+}

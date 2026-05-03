@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务分解上下文清晰性教学 - 0代码AI规范化编程实践教学</title>
+    <meta name="description" content="学习如何确保任务分解的上下文清晰性，避免因上下文不明确导致的开发偏差">
+    
+    <!-- 统一样式表 -->
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    
+    <!-- 字体和图标 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">加载任务分解上下文清晰性教学内容...</div>
+        </div>
+    </div>
+    
+    <!-- 滚动指示器 -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+    
+    <!-- 统一导航栏 -->
+    <nav class="unified-navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span class="navbar-logo">🤖</span>
+                <span>0代码AI规范化编程</span>
+            </a>
+            
+            <button class="navbar-toggle" id="navbarToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="index.html#learning" class="nav-link">学习</a></li>
+                <li><a href="index.html#modules" class="nav-link">模块</a></li>
+                <li><a href="index.html#projects" class="nav-link">项目</a></li>
+                <li><a href="index.html#resources" class="nav-link">资源</a></li>
+            </ul>
+            
+            <div class="navbar-actions">
+                <a href="#start-learning" class="unified-btn unified-btn-primary">
+                    开始学习
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主容器 -->
+    <main class="main-container">
+        <!-- Hero 区域 -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            <span class="hero-icon">🧭</span>
+                            任务分解上下文清晰性教学
+                        </h1>
+                        <p class="hero-description">
+                            学习如何确保任务分解的上下文清晰性，避免因上下文不明确导致的开发偏差和返工
+                        </p>
+                        <div class="hero-features">
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-info-circle"></i>
+                                上下文完整性
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-bullseye"></i>
+                                目标明确性
+                            </div>
+                            <div class="unified-tag unified-tag-outline">
+                                <i class="fas fa-road"></i>
+                                执行路径清晰
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="unified-card">
+                            <div class="stats-icon text-center mb-4">
+                                <i class="fas fa-tasks text-4xl text-primary"></i>
+                            </div>
+                            <div class="stats-info text-center">
+                                <div class="text-3xl font-bold text-primary mb-2">3</div>
+                                <div class="text-secondary">清晰性维度</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 教学内容 -->
+        <section class="content-section py-16">
+            <div class="container">
+                <!-- 检测目标 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h2 class="card-title">上下文清晰性检测目标</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            确保每个任务都有清晰的背景、目标和执行路径，避免开发过程中的理解偏差。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mt-8">
+                            <div class="p-6 bg-secondary rounded-lg">
+                                <h3 class="font-semibold text-primary mb-3">
+                                    <i class="fas fa-book mr-2"></i>上下文完整性
+                                </h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>任务背景清晰</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>相关依赖明确</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>影响范围确定</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="p-6 bg-secondary rounded-lg">
+                                <h3 class="font-semibold text-primary mb-3">
+                                    <i class="fas fa-bullseye mr-2"></i>目标明确性
+                                </h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>任务目标具体可衡量</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>验收标准清晰</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>成功指标量化</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="p-6 bg-secondary rounded-lg">
+                                <h3 class="font-semibold text-primary mb-3">
+                                    <i class="fas fa-route mr-2"></i>执行路径清晰
+                                </h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>实施步骤明确</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>资源需求清楚</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-success mt-1"></i>
+                                        <span>风险识别充分</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 检测机制设计 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <h2 class="card-title">任务描述模板标准化</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            建立标准化的任务描述模板，确保任务信息的完整性和一致性。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mt-6">
+                            <div>
+                                <h3 class="font-semibold text-lg mb-4">完整任务模板</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">任务描述模板</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-markdown">## 任务ID: [TASK-XXX]
+### 任务标题: [简明扼要的任务标题]
+### 任务类型: [功能开发|缺陷修复|技术优化|文档编写|测试实施]
+### 优先级: [紧急|高|中|低]
+### 状态: [待办|进行中|代码审查|测试中|已完成]
+
+### 背景信息:
+[描述为什么要执行这个任务，解决什么问题，相关的业务场景]
+
+### 相关需求:
+- [关联的需求ID和简要说明]
+- [上游任务ID]
+- [并行任务ID]
+
+### 任务目标:
+[明确描述任务要达成的具体目标，使用SMART原则]
+
+### 验收标准:
+- [具体、可验证的验收条件1]
+- [具体、可验证的验收条件2]
+- [具体、可验证的验收条件3]
+
+### 实施步骤:
+1. [第一步详细说明]
+2. [第二步详细说明]
+3. [第三步详细说明]
+
+### 资源需求:
+- [人力需求：开发人员、测试人员等]
+- [技术资源：服务器、数据库、第三方服务等]
+- [时间预算：预计工时]
+
+### 风险评估:
+- [技术风险及应对措施]
+- [时间风险及缓冲方案]
+- [质量风险及保障措施]
+
+### 交付物:
+- [代码实现]
+- [测试用例]
+- [文档更新]
+- [部署脚本]</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="font-semibold text-lg mb-4">自动化检查规则</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title">JavaScript检查规则示例</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-javascript">// 上下文完整性检查
+function checkContextCompleteness(task) {
+  const errors = [];
+  const warnings = [];
+  
+  // 检查背景信息
+  if (!task.background || task.background.trim().length < 20) {
+    errors.push('背景信息过于简短或缺失');
+  }
+  
+  // 检查相关需求
+  if (!task.relatedRequirements || task.relatedRequirements.length === 0) {
+    warnings.push('未关联相关需求，可能导致开发偏离目标');
+  }
+  
+  // 检查依赖关系
+  if (task.dependencies && task.dependencies.length > 0) {
+    task.dependencies.forEach(dep => {
+      if (!dep.id || !dep.description) {
+        warnings.push('依赖关系描述不完整');
+      }
+    });
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings
+  };
+}
+
+// 目标明确性检查
+function checkGoalClarity(task) {
+  const errors = [];
+  
+  // 检查任务目标
+  if (!task.goal || task.goal.trim().length < 15) {
+    errors.push('任务目标描述不清晰');
+  } else {
+    // 检查是否符合SMART原则
+    const smartChecks = {
+      Specific: /[具体|明确|详细]/i.test(task.goal),
+      Measurable: /[数量|指标|百分比|时间]/i.test(task.goal),
+      Achievable: !/[不可能|很难|或许]/i.test(task.goal),
+      Relevant: /[业务|用户|系统]/i.test(task.goal),
+      Timebound: /[天|周|月|完成|截止]/i.test(task.goal)
+    };
+    
+    const missingSmart = Object.keys(smartChecks).filter(key => 
+      !smartChecks[key]
+    );
+    if (missingSmart.length > 2) {
+      errors.push(`任务目标缺少SMART要素: ${missingSmart.join(', ')}`);
+    }
+  }
+  
+  // 检查验收标准
+  if (!task.acceptanceCriteria || task.acceptanceCriteria.length === 0) {
+    errors.push('缺少验收标准');
+  } else {
+    task.acceptanceCriteria.forEach((criteria, index) => {
+      if (!criteria || criteria.trim().length === 0) {
+        errors.push(`验收标准第${index + 1}项为空`);
+      } else if (!/[应该|必须|能够|可以]/.test(criteria)) {
+        errors.push(`验收标准第${index + 1}项缺少行为动词`);
+      }
+    });
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
+// 执行路径清晰度检查
+function checkExecutionPathClarity(task) {
+  const errors = [];
+  const warnings = [];
+  
+  // 检查实施步骤
+  if (!task.steps || task.steps.length === 0) {
+    errors.push('缺少实施步骤');
+  } else {
+    if (task.steps.length < 2) {
+      warnings.push('实施步骤过少，可能不够详细');
+    }
+    
+    task.steps.forEach((step, index) => {
+      if (!step || step.trim().length === 0) {
+        errors.push(`实施步骤第${index + 1}项为空`);
+      } else if (step.length < 10) {
+        warnings.push(`实施步骤第${index + 1}项描述过于简单`);
+      }
+    });
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings
+  };
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 检测流程 -->
+                <div class="unified-card mb-12">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </div>
+                        <h2 class="card-title">清晰性检测流程</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            建立分阶段的检测流程，确保任务上下文清晰性的全面把控。
+                        </p>
+                        
+                        <div class="mt-8">
+                            <div class="relative">
+                                <!-- 流程图 -->
+                                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                                    <div class="unified-card text-center mb-6 md:mb-0 w-48">
+                                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-file-alt text-white"></i>
+                                        </div>
+                                        <h3 class="font-semibold">静态分析</h3>
+                                        <p class="text-sm text-secondary mt-1">结构完整性</p>
+                                    </div>
+                                    
+                                    <div class="hidden md:block">
+                                        <i class="fas fa-arrow-right text-primary text-2xl"></i>
+                                    </div>
+                                    
+                                    <div class="unified-card text-center mb-6 md:mb-0 w-48">
+                                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-project-diagram text-white"></i>
+                                        </div>
+                                        <h3 class="font-semibold">关联检查</h3>
+                                        <p class="text-sm text-secondary mt-1">上下文关联</p>
+                                    </div>
+                                    
+                                    <div class="hidden md:block">
+                                        <i class="fas fa-arrow-right text-primary text-2xl"></i>
+                                    </div>
+                                    
+                                    <div class="unified-card text-center w-48">
+                                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-walking text-white"></i>
+                                        </div>
+                                        <h3 class="font-semibold">可执行性</h3>
+                                        <p class="text-sm text-secondary mt-1">执行路径</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-3 gap-6 mt-8">
+                                <div class="p-6 bg-secondary rounded-lg">
+                                    <h3 class="font-semibold text-primary mb-3">
+                                        <i class="fas fa-check-square mr-2"></i>阶段一: 静态分析
+                                    </h3>
+                                    <ul class="space-y-2 text-sm">
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>结构完整性检查</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>内容质量检查</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>格式规范验证</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="p-6 bg-secondary rounded-lg">
+                                    <h3 class="font-semibold text-primary mb-3">
+                                        <i class="fas fa-link mr-2"></i>阶段二: 上下文关联检查
+                                    </h3>
+                                    <ul class="space-y-2 text-sm">
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>依赖关系合理性</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>影响范围分析</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>关联需求验证</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="p-6 bg-secondary rounded-lg">
+                                    <h3 class="font-semibold text-primary mb-3">
+                                        <i class="fas fa-running mr-2"></i>阶段三: 可执行性检查
+                                    </h3>
+                                    <ul class="space-y-2 text-sm">
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>步骤可行性评估</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>资源匹配度检查</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fas fa-check-circle text-success mt-1"></i>
+                                            <span>风险识别验证</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 实践练习 -->
+                <div class="unified-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <h2 class="card-title">实践练习：实现任务清晰性检测工具</h2>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">
+                            通过实际编程练习，掌握任务上下文清晰性检测的实现方法。
+                        </p>
+                        
+                        <div class="expandable-content mt-6">
+                            <div class="expandable-header">
+                                <h3 class="expandable-title font-semibold">练习案例：任务清晰性检测工具开发</h3>
+                                <i class="fas fa-chevron-down expandable-icon"></i>
+                            </div>
+                            <div class="expandable-body">
+                                <div class="bg-secondary rounded-lg p-6 mb-6">
+                                    <h4 class="font-semibold mb-3">案例背景：</h4>
+                                    <p class="mb-4">
+                                        开发一个简单的任务清晰性检测工具，能够检查任务描述的上下文清晰性。
+                                    </p>
+                                    
+                                    <h4 class="font-semibold mb-3">练习任务：</h4>
+                                    <ol class="list-decimal list-inside space-y-2 mb-4">
+                                        <li>实现任务结构完整性检查功能</li>
+                                        <li>实现上下文完整性检查功能</li>
+                                        <li>实现目标明确性检查功能</li>
+                                        <li>整合所有检查功能，生成检测报告</li>
+                                    </ol>
+                                    
+                                    <div class="solution-area">
+                                        <h4 class="font-semibold mb-3">参考实现：</h4>
+                                        <details class="bg-white rounded-lg p-4">
+                                            <summary class="cursor-pointer font-medium">点击查看参考实现</summary>
+                                            <div class="mt-4">
+                                                <div class="code-container mb-4">
+                                                    <div class="code-header">
+                                                        <span class="code-title">任务清晰性检测工具</span>
+                                                    </div>
+                                                    <div class="code-content">
+                                                        <pre><code class="language-javascript">class TaskClarityChecker {
+  constructor() {
+    this.checkRules = [
+      this.checkStructure,
+      this.checkContext,
+      this.checkGoal,
+      this.checkExecutionPath
+    ];
+  }
+  
+  // 检查任务结构完整性
+  checkStructure(task) {
+    const requiredFields = [
+      'id', 'title', 'type', 'priority', 'background', 
+      'goal', 'acceptanceCriteria', 'steps'
+    ];
+    
+    const missingFields = requiredFields.filter(field => 
+      !task[field] || 
+      (Array.isArray(task[field]) && task[field].length === 0) ||
+      (typeof task[field] === 'string' && task[field].trim().length === 0)
+    );
+    
+    if (missingFields.length > 0) {
+      return {
+        rule: '结构完整性检查',
+        passed: false,
+        message: `缺少必要字段: ${missingFields.join(', ')}`
+      };
+    }
+    
+    return {
+      rule: '结构完整性检查',
+      passed: true,
+      message: '任务结构完整'
+    };
+  }
+  
+  // 检查上下文完整性
+  checkContext(task) {
+    const errors = [];
+    const warnings = [];
+    
+    // 检查背景信息
+    if (!task.background || task.background.trim().length < 20) {
+      errors.push('背景信息过于简短或缺失');
+    }
+    
+    // 检查相关需求
+    if (!task.relatedRequirements || task.relatedRequirements.length === 0) {
+      warnings.push('未关联相关需求');
+    }
+    
+    // 检查依赖关系
+    if (task.dependencies && task.dependencies.length > 5) {
+      warnings.push(`依赖过多 (${task.dependencies.length}个)，建议拆分任务`);
+    }
+    
+    if (errors.length > 0) {
+      return {
+        rule: '上下文完整性检查',
+        passed: false,
+        message: errors.join('; '),
+        warnings: warnings
+      };
+    }
+    
+    const message = warnings.length > 0 
+      ? `存在警告: ${warnings.join('; ')}` 
+      : '上下文信息完整';
+    
+    return {
+      rule: '上下文完整性检查',
+      passed: true,
+      message: message,
+      warnings: warnings
+    };
+  }
+  
+  // 检查目标明确性
+  checkGoal(task) {
+    const errors = [];
+    
+    // 检查任务目标
+    if (!task.goal || task.goal.trim().length < 15) {
+      errors.push('任务目标描述不清晰');
+    } else {
+      // 检查是否符合SMART原则
+      const hasSpecific = /[具体|明确|详细]/i.test(task.goal);
+      const hasMeasurable = /[数量|指标|百分比|时间]/i.test(task.goal);
+      const hasAchievable = !/[不可能|很难|或许]/i.test(task.goal);
+      const hasRelevant = /[业务|用户|系统]/i.test(task.goal);
+      const hasTimebound = /[天|周|月|完成|截止]/i.test(task.goal);
+      
+      const missingElements = [];
+      if (!hasSpecific) missingElements.push('具体性');
+      if (!hasMeasurable) missingElements.push('可衡量性');
+      if (!hasAchievable) missingElements.push('可达成性');
+      if (!hasRelevant) missingElements.push('相关性');
+      if (!hasTimebound) missingElements.push('时限性');
+      
+      if (missingElements.length > 2) {
+        errors.push(`任务目标缺少SMART要素: ${missingElements.join(', ')}`);
+      }
+    }
+    
+    // 检查验收标准
+    if (!task.acceptanceCriteria || task.acceptanceCriteria.length === 0) {
+      errors.push('缺少验收标准');
+    } else {
+      task.acceptanceCriteria.forEach((criteria, index) => {
+        if (!criteria || criteria.trim().length === 0) {
+          errors.push(`验收标准第${index + 1}项为空`);
+        } else if (!/[应该|必须|能够|可以]/.test(criteria)) {
+          errors.push(`验收标准第${index + 1}项缺少行为动词`);
+        }
+      });
+    }
+    
+    if (errors.length > 0) {
+      return {
+        rule: '目标明确性检查',
+        passed: false,
+        message: errors.join('; ')
+      };
+    }
+    
+    return {
+      rule: '目标明确性检查',
+      passed: true,
+      message: '任务目标明确'
+    };
+  }
+  
+  // 检查执行路径清晰度
+  checkExecutionPath(task) {
+    const errors = [];
+    const warnings = [];
+    
+    // 检查实施步骤
+    if (!task.steps || task.steps.length === 0) {
+      errors.push('缺少实施步骤');
+    } else {
+      if (task.steps.length < 2) {
+        warnings.push('实施步骤过少，可能不够详细');
+      }
+      
+      task.steps.forEach((step, index) => {
+        if (!step || step.trim().length === 0) {
+          errors.push(`实施步骤第${index + 1}项为空`);
+        } else if (step.length < 10) {
+          warnings.push(`实施步骤第${index + 1}项描述过于简单`);
+        }
+        
+        // 检查步骤是否过于宽泛
+        const broadKeywords = ['实现', '开发', '完成', '处理'];
+        const isBroad = broadKeywords.some(keyword => 
+          new RegExp(`^${keyword}|${keyword}$`).test(step.trim())
+        );
+        
+        if (isBroad) {
+          warnings.push(`步骤${index + 1}过于宽泛: "${step}"`);
+        }
+      });
+    }
+    
+    if (errors.length > 0) {
+      return {
+        rule: '执行路径清晰度检查',
+        passed: false,
+        message: errors.join('; '),
+        warnings: warnings
+      };
+    }
+    
+    const message = warnings.length > 0 
+      ? `存在警告: ${warnings.join('; ')}` 
+      : '执行路径清晰';
+    
+    return {
+      rule: '执行路径清晰度检查',
+      passed: true,
+      message: message,
+      warnings: warnings
+    };
+  }
+  
+  // 执行单项检查
+  checkTask(task) {
+    const results = [];
+    
+    for (const rule of this.checkRules) {
+      try {
+        const result = rule.call(this, task);
+        results.push(result);
+      } catch (error) {
+        results.push({
+          rule: rule.name,
+          passed: false,
+          message: `检查出错: ${error.message}`
+        });
+      }
+    }
+    
+    return results;
+  }
+  
+  // 执行全套检查
+  checkAllTasks(tasks) {
+    const report = {
+      total: tasks.length,
+      passed: 0,
+      failed: 0,
+      warnings: 0,
+      details: []
+    };
+    
+    for (const task of tasks) {
+      const checkResults = this.checkTask(task);
+      const taskPassed = checkResults.every(result => result.passed);
+      const hasWarnings = checkResults.some(result => result.warnings && result.warnings.length > 0);
+      
+      if (taskPassed) {
+        report.passed++;
+      } else {
+        report.failed++;
+      }
+      
+      if (hasWarnings) {
+        report.warnings++;
+      }
+      
+      report.details.push({
+        taskId: task.id,
+        taskTitle: task.title,
+        passed: taskPassed,
+        hasWarnings: hasWarnings,
+        checks: checkResults
+      });
+    }
+    
+    return report;
+  }
+  
+  // 生成检测报告
+  generateReport(report) {
+    let reportText = `任务分解上下文清晰性检测报告\n`;
+    reportText += `================================\n\n`;
+    reportText += `检测时间: ${new Date().toLocaleString()}\n`;
+    reportText += `总任务数量: ${report.total}\n`;
+    reportText += `通过检测: ${report.passed}\n`;
+    reportText += `存在问题: ${report.failed}\n`;
+    reportText += `存在警告: ${report.warnings}\n\n`;
+    
+    if (report.failed > 0) {
+      reportText += `❌ 存在问题的任务数量: ${report.failed}\n\n`;
+      reportText += `详细问题列表:\n`;
+      
+      for (const detail of report.details) {
+        if (!detail.passed) {
+          reportText += `\n任务ID: ${detail.taskId}\n`;
+          reportText += `任务标题: ${detail.taskTitle}\n`;
+          
+          for (const check of detail.checks) {
+            if (!check.passed) {
+              reportText += `  - ${check.rule}: ${check.message}\n`;
+            }
+          }
+        }
+      }
+    }
+    
+    if (report.warnings > 0) {
+      reportText += `\n⚠️ 存在警告的任务数量: ${report.warnings}\n\n`;
+      reportText += `警告详情:\n`;
+      
+      for (const detail of report.details) {
+        if (detail.hasWarnings) {
+          reportText += `\n任务ID: ${detail.taskId}\n`;
+          reportText += `任务标题: ${detail.taskTitle}\n`;
+          
+          for (const check of detail.checks) {
+            if (check.warnings && check.warnings.length > 0) {
+              reportText += `  - ${check.rule}警告: ${check.warnings.join('; ')}\n`;
+            }
+          }
+        }
+      }
+    }
+    
+    if (report.failed === 0 && report.warnings === 0) {
+      reportText += `✅ 所有任务均通过清晰性检测\n`;
+    }
+    
+    return reportText;
+  }
+}
+
+// 使用示例
+const checker = new TaskClarityChecker();
+
+// 示例任务数据
+const sampleTasks = [
+  {
+    id: 'TASK-001',
+    title: '实现用户登录功能',
+    type: '功能开发',
+    priority: '高',
+    background: '用户需要能够登录系统以访问个人数据和功能',
+    relatedRequirements: ['REQ-001'],
+    goal: '用户输入有效的用户名和密码后能够成功登录系统，并跳转到个人主页',
+    acceptanceCriteria: [
+      '用户输入有效的凭据后能够成功登录',
+      '输入无效凭据时显示错误信息',
+      '密码字段应该隐藏显示'
+    ],
+    steps: [
+      '创建登录页面UI组件',
+      '实现表单验证逻辑',
+      '调用后端认证API',
+      '处理认证结果并跳转页面'
+    ],
+    dependencies: []
+  },
+  {
+    id: 'TASK-002',
+    title: '优化数据库查询',
+    type: '技术优化',
+    priority: '中',
+    background: '', // 背景信息缺失
+    relatedRequirements: [],
+    goal: '提高查询速度', // 目标不够具体
+    acceptanceCriteria: [], // 缺少验收标准
+    steps: [
+      '优化查询',
+      '测试性能'
+    ], // 步骤过于简单
+    dependencies: ['TASK-001', 'TASK-003', 'TASK-004', 'TASK-005', 'TASK-006', 'TASK-007'] // 依赖过多
+  }
+];
+
+// 执行检测
+const report = checker.checkAllTasks(sampleTasks);
+const reportText = checker.generateReport(report);
+console.log(reportText);</code></pre>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </details>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 统一页脚 -->
+    <footer class="unified-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">
+                        <span class="navbar-logo">🤖</span>
+                        <span>0代码AI规范化编程</span>
+                    </div>
+                    <p class="footer-description">
+                        通过AI驱动的学习平台，帮助开发者掌握规范化编程技能。
+                        我们的使命是让每个人都能轻松掌握先进的编程技术。
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>学习资源</h4>
+                        <ul>
+                            <li><a href="document_library.html">文档中心</a></li>
+                            <li><a href="MODULE_WIKI_KNOWLEDGE.html">知识库</a></li>
+                            <li><a href="P3_MODEL_PROVIDER.html">模块文档</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>支持服务</h4>
+                        <ul>
+                            <li><a href="#">帮助中心</a></li>
+                            <li><a href="#">技术支持</a></li>
+                            <li><a href="#">联系我们</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 0代码AI规范化编程. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 统一JavaScript -->
+    <script src="assets/js/unified-scripts.js"></script>
+</body>
+</html>

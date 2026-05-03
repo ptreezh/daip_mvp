@@ -1,0 +1,3318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiki知识管理模块 - DAIP-LIVE 规范化编程模块解析</title>
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            height: fit-content;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h3 {
+            color: #f39c12;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-bottom: 12px;
+        }
+
+        .nav-menu a {
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        .nav-menu a:hover {
+            background: #fef5e7;
+            color: #f39c12;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            border-bottom: 3px solid #f39c12;
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            color: #34495e;
+            margin: 30px 0 15px;
+            font-size: 1.4rem;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 4px solid #f39c12;
+        }
+
+        .card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .principle-tag {
+            display: inline-block;
+            background: #f39c12;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 5px;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .architecture-diagram {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .component-box {
+            display: inline-block;
+            background: white;
+            border: 2px solid #f39c12;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .arrow {
+            font-size: 1.5rem;
+            color: #f39c12;
+            margin: 0 10px;
+        }
+
+        .best-practices {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            color: #2d3748;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .best-practices h4 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .best-practices ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .best-practices li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .best-practices li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .test-example {
+            background: #fef5e7;
+            border: 1px solid #f9e79f;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .navigation-footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 60px;
+        }
+
+        .navigation-footer h3 {
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            background: #f39c12;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Wiki知识管理模块</h1>
+        <p class="subtitle">DAIP-LIVE 协作式知识库与向量搜索系统的规范化实现</p>
+    </header>
+
+    <div class="container">
+        <div class="content-grid">
+            <nav class="sidebar">
+                <h3>导航目录</h3>
+                <ul class="nav-menu">
+                    <li><a href="#overview">模块概述</a></li>
+                    <li><a href="#architecture">架构设计</a></li>
+                    <li><a href="#wiki-system">Wiki系统</a></li>
+                    <li><a href="#knowledge-search">知识搜索</a></li>
+                    <li><a href="#collaborative-editing">协作编辑</a></li>
+                    <li><a href="#solid-principles">SOLID原则体现</a></li>
+                    <li><a href="#tdd-implementation">TDD实现</a></li>
+                    <li><a href="#code-examples">代码示例</a></li>
+                    <li><a href="#best-practices">最佳实践</a></li>
+                    <li><a href="#related-docs">相关规范文档</a></li>
+                </ul>
+            </nav>
+
+            <main class="main-content">
+                <section id="overview" class="section">
+                    <h2>模块概述</h2>
+                    <div class="card">
+                        <h4>模块职责</h4>
+                        <p>Wiki知识管理模块是DAIP-LIVE中的核心知识管理系统，提供协作式文档编辑、智能内容检索、知识图谱构建等功能。它结合了传统Wiki的协作特性和现代AI驱动的知识发现能力，为用户和AI智能体提供统一的知识服务平台。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>核心功能</h4>
+                        <ul>
+                            <li><strong>协作式Wiki编辑</strong>：支持多用户同时编辑、版本控制、冲突解决</li>
+                            <li><strong>智能知识检索</strong>：基于FAISS向量搜索的语义检索和全文搜索</li>
+                            <li><strong>知识图谱构建</strong>：自动识别文档间的关联关系，构建知识网络</li>
+                            <li><strong>内容自动分类</strong>：AI驱动的内容自动分类和标签生成</li>
+                            <li><strong>实时协作</strong>：WebSocket支持的实时多用户协作</li>
+                            <li><strong>版本管理</strong>：完整的文档版本历史和回滚功能</li>
+                        </ul>
+                    </div>
+
+                    <div class="architecture-diagram">
+                        <h4>Wiki知识管理架构</h4>
+                        <div style="margin: 30px 0;">
+                            <div class="component-box">
+                                <strong>Wiki Editor</strong><br>
+                                协作编辑器<br>
+                                实时同步
+                            </div>
+                            <div class="arrow">↔</div>
+                            <div class="component-box">
+                                <strong>Content Manager</strong><br>
+                                内容管理器<br>
+                                版本控制
+                            </div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div style="font-size: 2rem; color: #f39c12;">↓</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div class="component-box">
+                                <strong>Vector Search</strong><br>
+                                向量搜索引擎<br>
+                                FAISS
+                            </div>
+                            <div class="component-box">
+                                <strong>Knowledge Graph</strong><br>
+                                知识图谱<br>
+                                关系映射
+                            </div>
+                            <div class="component-box">
+                                <strong>Full Text Search</strong><br>
+                                全文搜索<br>
+                                索引管理
+                            </div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div style="font-size: 2rem; color: #f39c12;">↓</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div class="component-box">
+                                <strong>Database Layer</strong><br>
+                                数据库层<br>
+                                PostgreSQL
+                            </div>
+                            <div class="component-box">
+                                <strong>File Storage</strong><br>
+                                文件存储<br>
+                                文档资产
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="architecture" class="section">
+                    <h2>架构设计</h2>
+
+                    <h3>核心组件</h3>
+                    <div class="card">
+                        <h4>1. CollaborativeWiki</h4>
+                        <p>协作式Wiki系统，支持多用户实时编辑、冲突检测和自动解决、版本历史管理等功能。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>2. VectorSearchEngine</h4>
+                        <p>基于FAISS的向量搜索引擎，提供语义相似度搜索、嵌入向量管理、索引优化等功能。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>3. KnowledgeGraphBuilder</h4>
+                        <p>知识图谱构建器，自动分析文档内容，识别实体关系，构建动态知识网络。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>4. ContentClassifier</h4>
+                        <p>内容分类器，使用AI模型自动对文档进行分类、标签生成和主题识别。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>5. WikiIndexManager</h4>
+                        <p>Wiki索引管理器，维护全文搜索索引、反向链接表、元数据索引等。</p>
+                    </div>
+
+                    <h3>设计原则应用</h3>
+                    <div class="principle-tag">观察者模式</div>
+                    <div class="principle-tag">策略模式</div>
+                    <div class="principle-tag">命令模式</div>
+                    <div class="principle-tag">仓库模式</div>
+                    <div class="principle-tag">实时协作</div>
+                </section>
+
+                <section id="wiki-system" class="section">
+                    <h2>Wiki系统实现</h2>
+
+                    <h3>协作编辑器</h3>
+                    <div class="code-block">
+import asyncio
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass, field
+from datetime import datetime
+import json
+from enum import Enum
+
+class OperationType(Enum):
+    INSERT = "insert"
+    DELETE = "delete"
+    RETAIN = "retain"
+    FORMAT = "format"
+
+@dataclass
+class TextOperation:
+    """文本操作"""
+    type: OperationType
+    position: int
+    content: str = ""
+    attributes: Dict[str, Any] = field(default_factory=dict)
+    author_id: str = ""
+    timestamp: datetime = field(default_factory=datetime.now)
+
+class OperationalTransform:
+    """操作变换算法"""
+
+    @staticmethod
+    def transform(op1: TextOperation, op2: TextOperation) -> tuple[TextOperation, TextOperation]:
+        """变换两个并发操作"""
+        if op1.type == OperationType.INSERT and op2.type == OperationType.INSERT:
+            if op1.position <= op2.position:
+                return op1, TextOperation(
+                    type=op2.type,
+                    position=op2.position + len(op1.content),
+                    content=op2.content,
+                    author_id=op2.author_id,
+                    timestamp=op2.timestamp
+                )
+            else:
+                return TextOperation(
+                    type=op1.type,
+                    position=op1.position + len(op2.content),
+                    content=op1.content,
+                    author_id=op1.author_id,
+                    timestamp=op1.timestamp
+                ), op2
+
+        elif op1.type == OperationType.DELETE and op2.type == OperationType.DELETE:
+            if op1.position + len(op1.content) <= op2.position:
+                return op1, TextOperation(
+                    type=op2.type,
+                    position=op2.position - len(op1.content),
+                    content=op2.content,
+                    author_id=op2.author_id,
+                    timestamp=op2.timestamp
+                )
+            elif op2.position + len(op2.content) <= op1.position:
+                return TextOperation(
+                    type=op1.type,
+                    position=op1.position - len(op2.content),
+                    content=op1.content,
+                    author_id=op1.author_id,
+                    timestamp=op1.timestamp
+                ), op2
+            else:
+                # 处理重叠删除
+                return op1, TextOperation(
+                    type=OperationType.RETAIN,
+                    position=op2.position,
+                    content="",
+                    author_id=op2.author_id,
+                    timestamp=op2.timestamp
+                )
+
+        return op1, op2
+
+class CollaborativeDocument:
+    """协作文档"""
+
+    def __init__(self, document_id: str, initial_content: str = ""):
+        self.document_id = document_id
+        self.content = initial_content
+        self.operations: List[TextOperation] = []
+        self.active_editors: Dict[str, str] = {}  # user_id -> cursor_position
+        self.version = 0
+
+    async def apply_operation(self, operation: TextOperation) -> bool:
+        """应用操作到文档"""
+        try:
+            # 验证操作
+            if not self._validate_operation(operation):
+                return False
+
+            # 与其他并发操作进行变换
+            transformed_op = operation
+            for other_op in self.operations:
+                transformed_op, _ = OperationalTransform.transform(
+                    transformed_op, other_op
+                )
+
+            # 应用操作
+            if transformed_op.type == OperationType.INSERT:
+                self.content = (
+                    self.content[:transformed_op.position] +
+                    transformed_op.content +
+                    self.content[transformed_op.position:]
+                )
+            elif transformed_op.type == OperationType.DELETE:
+                end_pos = transformed_op.position + len(transformed_op.content)
+                self.content = (
+                    self.content[:transformed_op.position] +
+                    self.content[end_pos:]
+                )
+
+            # 记录操作
+            self.operations.append(transformed_op)
+            self.version += 1
+
+            return True
+
+        except Exception as e:
+            print(f"Error applying operation: {e}")
+            return False
+
+    def _validate_operation(self, operation: TextOperation) -> bool:
+        """验证操作的有效性"""
+        if operation.position < 0 or operation.position > len(self.content):
+            return False
+
+        if operation.type == OperationType.DELETE:
+            end_pos = operation.position + len(operation.content)
+            if end_pos > len(self.content):
+                return False
+
+        return True
+
+    def get_content(self) -> str:
+        """获取文档内容"""
+        return self.content
+
+    def get_active_editors(self) -> List[Dict[str, Any]]:
+        """获取活跃编辑者列表"""
+        return [
+            {
+                "user_id": user_id,
+                "cursor_position": cursor_pos,
+                "last_seen": datetime.now().isoformat()
+            }
+            for user_id, cursor_pos in self.active_editors.items()
+        ]
+
+class WikiEditor:
+    """Wiki编辑器"""
+
+    def __init__(self, document_manager: 'DocumentManager'):
+        self.document_manager = document_manager
+        self.active_documents: Dict[str, CollaborativeDocument] = {}
+        self.websocket_connections: Dict[str, Any] = {}
+
+    async def open_document(self, document_id: str, user_id: str) -> CollaborativeDocument:
+        """打开文档进行编辑"""
+        if document_id not in self.active_documents:
+            # 从数据库加载文档
+            doc_data = await self.document_manager.load_document(document_id)
+            self.active_documents[document_id] = CollaborativeDocument(
+                document_id=document_id,
+                initial_content=doc_data.get("content", "")
+            )
+
+        document = self.active_documents[document_id]
+        document.active_editors[user_id] = 0  # 初始光标位置
+
+        return document
+
+    async def apply_edit_operation(self,
+                                 document_id: str,
+                                 user_id: str,
+                                 operation: TextOperation) -> bool:
+        """应用编辑操作"""
+        if document_id not in self.active_documents:
+            return False
+
+        document = self.active_documents[document_id]
+        operation.author_id = user_id
+
+        success = await document.apply_operation(operation)
+
+        if success:
+            # 广播操作给其他编辑者
+            await self._broadcast_operation(document_id, operation, user_id)
+
+            # 定期自动保存
+            if len(document.operations) % 10 == 0:
+                await self._auto_save_document(document_id)
+
+        return success
+
+    async def _broadcast_operation(self,
+                                  document_id: str,
+                                  operation: TextOperation,
+                                  exclude_user: str):
+        """广播操作给其他编辑者"""
+        if document_id in self.websocket_connections:
+            message = {
+                "type": "operation",
+                "operation": {
+                    "type": operation.type.value,
+                    "position": operation.position,
+                    "content": operation.content,
+                    "author_id": operation.author_id
+                }
+            }
+
+            for user_id, websocket in self.websocket_connections[document_id].items():
+                if user_id != exclude_user:
+                    try:
+                        await websocket.send_json(message)
+                    except Exception as e:
+                        print(f"Error broadcasting to user {user_id}: {e}")
+
+    async def _auto_save_document(self, document_id: str):
+        """自动保存文档"""
+        document = self.active_documents[document_id]
+        await self.document_manager.save_document(
+            document_id=document_id,
+            content=document.content,
+            version=document.version
+        )
+                    </div>
+
+                    <h3>版本控制系统</h3>
+                    <div class="code-block">
+from typing import List, Optional
+from dataclasses import dataclass
+from datetime import datetime
+import difflib
+
+@dataclass
+class DocumentVersion:
+    """文档版本"""
+    version_id: str
+    document_id: str
+    content: str
+    author_id: str
+    timestamp: datetime
+    message: str = ""
+    parent_version: Optional[str] = None
+    changes_summary: Dict[str, Any] = None
+
+class VersionControlSystem:
+    """版本控制系统"""
+
+    def __init__(self, storage: 'VersionStorage'):
+        self.storage = storage
+
+    async def create_version(self,
+                           document_id: str,
+                           content: str,
+                           author_id: str,
+                           message: str = "") -> DocumentVersion:
+        """创建新版本"""
+        # 获取当前最新版本
+        latest_version = await self.storage.get_latest_version(document_id)
+
+        # 生成版本ID
+        version_id = await self._generate_version_id(document_id)
+
+        # 分析变更
+        changes_summary = {}
+        if latest_version:
+            changes_summary = self._analyze_changes(
+                latest_version.content, content
+            )
+
+        # 创建版本对象
+        new_version = DocumentVersion(
+            version_id=version_id,
+            document_id=document_id,
+            content=content,
+            author_id=author_id,
+            timestamp=datetime.now(),
+            message=message,
+            parent_version=latest_version.version_id if latest_version else None,
+            changes_summary=changes_summary
+        )
+
+        # 保存版本
+        await self.storage.save_version(new_version)
+
+        return new_version
+
+    async def get_version_history(self,
+                                document_id: str,
+                                limit: int = 50) -> List[DocumentVersion]:
+        """获取版本历史"""
+        return await self.storage.get_version_history(document_id, limit)
+
+    async def revert_to_version(self,
+                              document_id: str,
+                              version_id: str,
+                              author_id: str) -> DocumentVersion:
+        """回滚到指定版本"""
+        target_version = await self.storage.get_version(version_id)
+        if not target_version or target_version.document_id != document_id:
+            raise ValueError(f"Version {version_id} not found for document {document_id}")
+
+        # 创建新版本（回滚操作）
+        return await self.create_version(
+            document_id=document_id,
+            content=target_version.content,
+            author_id=author_id,
+            message=f"Revert to version {version_id}"
+        )
+
+    async def compare_versions(self,
+                             version_id1: str,
+                             version_id2: str) -> Dict[str, Any]:
+        """比较两个版本"""
+        version1 = await self.storage.get_version(version_id1)
+        version2 = await self.storage.get_version(version_id2)
+
+        if not version1 or not version2:
+            raise ValueError("One or both versions not found")
+
+        diff = difflib.unified_diff(
+            version1.content.splitlines(keepends=True),
+            version2.content.splitlines(keepends=True),
+            fromfile=f"Version {version1.version_id}",
+            tofile=f"Version {version2.version_id}",
+            lineterm=""
+        )
+
+        return {
+            "version1": version1,
+            "version2": version2,
+            "diff": "".join(diff),
+            "stats": self._calculate_diff_stats(version1.content, version2.content)
+        }
+
+    def _analyze_changes(self, old_content: str, new_content: str) -> Dict[str, Any]:
+        """分析变更内容"""
+        old_lines = old_content.splitlines()
+        new_lines = new_content.splitlines()
+
+        diff = list(difflib.unified_diff(old_lines, new_lines))
+
+        additions = 0
+        deletions = 0
+        modifications = 0
+
+        for line in diff:
+            if line.startswith('+') and not line.startswith('+++'):
+                additions += 1
+            elif line.startswith('-') and not line.startswith('---'):
+                deletions += 1
+
+        modifications = min(additions, deletions)
+        additions -= modifications
+        deletions -= modifications
+
+        return {
+            "lines_added": additions,
+            "lines_deleted": deletions,
+            "lines_modified": modifications,
+            "total_changes": additions + deletions + modifications,
+            "old_length": len(old_content),
+            "new_length": len(new_content)
+        }
+
+    def _calculate_diff_stats(self, old_content: str, new_content: str) -> Dict[str, Any]:
+        """计算差异统计"""
+        import difflib
+
+        matcher = difflib.SequenceMatcher(None, old_content, new_content)
+
+        return {
+            "similarity_ratio": matcher.ratio(),
+            "matching_blocks": len(matcher.get_matching_blocks()),
+            "total_old_length": len(old_content),
+            "total_new_length": len(new_content)
+        }
+
+    async def _generate_version_id(self, document_id: str) -> str:
+        """生成版本ID"""
+        import uuid
+        import time
+
+        timestamp = int(time.time())
+        unique_id = str(uuid.uuid4())[:8]
+        return f"{document_id}_v{timestamp}_{unique_id}"
+
+class ConflictResolver:
+    """冲突解决器"""
+
+    async def resolve_merge_conflict(self,
+                                    base_content: str,
+                                    content1: str,
+                                    content2: str,
+                                    strategy: str = "auto") -> str:
+        """解决合并冲突"""
+        if strategy == "auto":
+            return await self._auto_resolve(base_content, content1, content2)
+        elif strategy == "manual":
+            return await self._manual_resolve(base_content, content1, content2)
+        else:
+            raise ValueError(f"Unknown conflict resolution strategy: {strategy}")
+
+    async def _auto_resolve(self,
+                           base_content: str,
+                           content1: str,
+                           content2: str) -> str:
+        """自动解决冲突"""
+        # 使用三方合并算法
+        import difflib
+
+        base_lines = base_content.splitlines()
+        lines1 = content1.splitlines()
+        lines2 = content2.splitlines()
+
+        # 创建差异对象
+        diff1 = list(difflib.unified_diff(base_lines, lines1, lineterm=""))
+        diff2 = list(difflib.unified_diff(base_lines, lines2, lineterm=""))
+
+        # 简单的冲突解决策略：优先选择非冲突的变更
+        merged_lines = base_lines[:]
+
+        # 应用第一个版本的变更
+        for line in diff1:
+            if line.startswith('+') and not line.startswith('+++'):
+                merged_lines.append(line[1:])
+
+        # 应用第二个版本的变更（跳过已存在的行）
+        for line in diff2:
+            if line.startswith('+') and not line.startswith('+++'):
+                new_line = line[1:]
+                if new_line not in merged_lines:
+                    merged_lines.append(new_line)
+
+        return '\n'.join(merged_lines)
+
+    async def _manual_resolve(self,
+                            base_content: str,
+                            content1: str,
+                            content2: str) -> str:
+        """手动解决冲突"""
+        # 创建冲突标记
+        conflict_content = f"""<<<<<<< CONTENT_1
+{content1}
+=======
+{content2}
+>>>>>>> CONTENT_2"""
+
+        # 在实际应用中，这里应该返回给用户手动编辑
+        return conflict_content
+                    </div>
+                </section>
+
+                <section id="knowledge-search" class="section">
+                    <h2>知识搜索系统</h2>
+
+                    <h3>FAISS向量搜索</h3>
+                    <div class="code-block">
+import faiss
+import numpy as np
+from typing import List, Dict, Any, Tuple
+import pickle
+from dataclasses import dataclass
+import asyncio
+
+@dataclass
+class SearchIndex:
+    """搜索索引"""
+    index_id: str
+    dimension: int
+    faiss_index: faiss.Index
+    metadata: List[Dict[str, Any]]
+    created_at: str
+    updated_at: str
+
+class VectorSearchEngine:
+    """向量搜索引擎"""
+
+    def __init__(self, embedding_model: 'EmbeddingModel', storage: 'IndexStorage'):
+        self.embedding_model = embedding_model
+        self.storage = storage
+        self.indexes: Dict[str, SearchIndex] = {}
+
+    async def create_index(self,
+                          index_id: str,
+                          dimension: int = 768,
+                          index_type: str = "IVF") -> SearchIndex:
+        """创建新的搜索索引"""
+        if index_type == "IVF":
+            # 倒排索引，适合大规模数据
+            nlist = 100  # 聚类中心数量
+            quantizer = faiss.IndexFlatL2(dimension)
+            faiss_index = faiss.IndexIVFFlat(quantizer, dimension, nlist)
+        elif index_type == "Flat":
+            # 平坦索引，适合小规模数据
+            faiss_index = faiss.IndexFlatL2(dimension)
+        else:
+            raise ValueError(f"Unsupported index type: {index_type}")
+
+        # 训练索引（如果是IVF）
+        if index_type == "IVF":
+            # 需要一些训练数据
+            training_data = np.random.random((1000, dimension)).astype('float32')
+            faiss_index.train(training_data)
+
+        search_index = SearchIndex(
+            index_id=index_id,
+            dimension=dimension,
+            faiss_index=faiss_index,
+            metadata=[],
+            created_at=datetime.now().isoformat(),
+            updated_at=datetime.now().isoformat()
+        )
+
+        # 保存到存储
+        await self.storage.save_index(search_index)
+        self.indexes[index_id] = search_index
+
+        return search_index
+
+    async def add_documents(self,
+                           index_id: str,
+                           documents: List[Dict[str, Any]]) -> List[int]:
+        """添加文档到索引"""
+        if index_id not in self.indexes:
+            raise ValueError(f"Index {index_id} not found")
+
+        search_index = self.indexes[index_id]
+
+        # 生成文档嵌入
+        texts = [doc["content"] for doc in documents]
+        embeddings = await self.embedding_model.embed_batch(texts)
+
+        # 转换为numpy数组
+        embeddings_array = np.array(embeddings).astype('float32')
+
+        # 添加到FAISS索引
+        ids = search_index.faiss_index.ntotal + np.arange(len(embeddings))
+        search_index.faiss_index.add_with_ids(embeddings_array, ids)
+
+        # 更新元数据
+        for i, doc in enumerate(documents):
+            doc_metadata = {
+                "id": int(ids[i]),
+                "document_id": doc.get("document_id"),
+                "title": doc.get("title", ""),
+                "content": doc["content"],
+                "tags": doc.get("tags", []),
+                "created_at": datetime.now().isoformat()
+            }
+            search_index.metadata.append(doc_metadata)
+
+        # 保存更新
+        search_index.updated_at = datetime.now().isoformat()
+        await self.storage.save_index(search_index)
+
+        return ids.tolist()
+
+    async def search(self,
+                    index_id: str,
+                    query: str,
+                    top_k: int = 10,
+                    threshold: float = 0.7) -> List[Dict[str, Any]]:
+        """搜索相似文档"""
+        if index_id not in self.indexes:
+            raise ValueError(f"Index {index_id} not found")
+
+        search_index = self.indexes[index_id]
+
+        # 生成查询嵌入
+        query_embedding = await self.embedding_model.embed(query)
+        query_array = np.array([query_embedding]).astype('float32')
+
+        # 搜索最相似的向量
+        distances, indices = search_index.faiss_index.search(
+            query_array, min(top_k, search_index.faiss_index.ntotal)
+        )
+
+        results = []
+        for i, (distance, idx) in enumerate(zip(distances[0], indices[0])):
+            if idx == -1:  # 无效索引
+                continue
+
+            # 计算相似度分数（距离越小，相似度越高）
+            similarity = 1 / (1 + distance)
+
+            if similarity < threshold:
+                continue
+
+            # 获取文档元数据
+            metadata = search_index.metadata[idx]
+
+            result = {
+                "rank": i + 1,
+                "similarity": similarity,
+                "distance": float(distance),
+                "document_id": metadata["document_id"],
+                "title": metadata["title"],
+                "content_snippet": metadata["content"][:200] + "...",
+                "tags": metadata["tags"],
+                "metadata": metadata
+            }
+
+            results.append(result)
+
+        return results
+
+    async def delete_documents(self,
+                              index_id: str,
+                              document_ids: List[str]) -> bool:
+        """从索引中删除文档"""
+        if index_id not in self.indexes:
+            return False
+
+        search_index = self.indexes[index_id]
+
+        # 找到要删除的文档索引
+        ids_to_remove = []
+        for i, metadata in enumerate(search_index.metadata):
+            if metadata["document_id"] in document_ids:
+                ids_to_remove.append(i)
+
+        if not ids_to_remove:
+            return True
+
+        # FAISS不支持直接删除，需要重建索引
+        await self._rebuild_index_without_documents(index_id, ids_to_remove)
+
+        return True
+
+    async def _rebuild_index_without_documents(self,
+                                             index_id: str,
+                                             indices_to_remove: List[int]):
+        """重建索引排除指定文档"""
+        search_index = self.indexes[index_id]
+
+        # 获取要保留的文档
+        remaining_metadata = [
+            meta for i, meta in enumerate(search_index.metadata)
+            if i not in indices_to_remove
+        ]
+
+        # 重新生成嵌入
+        remaining_texts = [meta["content"] for meta in remaining_metadata]
+        remaining_embeddings = await self.embedding_model.embed_batch(remaining_texts)
+
+        # 重建FAISS索引
+        dimension = search_index.dimension
+        new_faiss_index = faiss.IndexFlatL2(dimension)
+
+        if remaining_embeddings:
+            embeddings_array = np.array(remaining_embeddings).astype('float32')
+            new_faiss_index.add(embeddings_array)
+
+        # 更新索引
+        search_index.faiss_index = new_faiss_index
+        search_index.metadata = remaining_metadata
+        search_index.updated_at = datetime.now().isoformat()
+
+        # 保存更新
+        await self.storage.save_index(search_index)
+
+    async def optimize_index(self, index_id: str):
+        """优化索引性能"""
+        if index_id not in self.indexes:
+            raise ValueError(f"Index {index_id} not found")
+
+        search_index = self.indexes[index_id]
+
+        # 对于IVF索引，可以重新训练
+        if isinstance(search_index.faiss_index, faiss.IndexIVFFlat):
+            # 收集所有向量用于重新训练
+            all_vectors = []
+            for i in range(search_index.faiss_index.ntotal):
+                vector = search_index.faiss_index.reconstruct(i)
+                all_vectors.append(vector)
+
+            if all_vectors:
+                all_vectors = np.array(all_vectors).astype('float32')
+
+                # 重新训练
+                search_index.faiss_index.train(all_vectors)
+                search_index.faiss_index.reset()
+                search_index.faiss_index.add(all_vectors)
+
+        search_index.updated_at = datetime.now().isoformat()
+        await self.storage.save_index(search_index)
+
+class HybridSearchEngine:
+    """混合搜索引擎（向量搜索 + 全文搜索）"""
+
+    def __init__(self,
+                 vector_engine: VectorSearchEngine,
+                 fulltext_engine: 'FullTextSearchEngine'):
+        self.vector_engine = vector_engine
+        self.fulltext_engine = fulltext_engine
+
+    async def search(self,
+                    query: str,
+                    index_id: str,
+                    vector_weight: float = 0.7,
+                    fulltext_weight: float = 0.3,
+                    top_k: int = 10) -> List[Dict[str, Any]]:
+        """混合搜索"""
+        # 并发执行两种搜索
+        vector_task = asyncio.create_task(
+            self.vector_engine.search(index_id, query, top_k * 2)
+        )
+        fulltext_task = asyncio.create_task(
+            self.fulltext_engine.search(query, top_k * 2)
+        )
+
+        # 等待结果
+        vector_results, fulltext_results = await asyncio.gather(
+            vector_task, fulltext_task
+        )
+
+        # 合并结果
+        merged_results = self._merge_search_results(
+            vector_results,
+            fulltext_results,
+            vector_weight,
+            fulltext_weight
+        )
+
+        # 按综合分数排序
+        merged_results.sort(key=lambda x: x["combined_score"], reverse=True)
+
+        return merged_results[:top_k]
+
+    def _merge_search_results(self,
+                            vector_results: List[Dict[str, Any]],
+                            fulltext_results: List[Dict[str, Any]],
+                            vector_weight: float,
+                            fulltext_weight: float) -> List[Dict[str, Any]]:
+        """合并搜索结果"""
+        result_map = {}
+
+        # 处理向量搜索结果
+        for result in vector_results:
+            doc_id = result["document_id"]
+            result_map[doc_id] = {
+                "document_id": doc_id,
+                "title": result["title"],
+                "content_snippet": result["content_snippet"],
+                "vector_score": result["similarity"],
+                "fulltext_score": 0.0,
+                "combined_score": result["similarity"] * vector_weight,
+                "sources": ["vector"]
+            }
+
+        # 处理全文搜索结果
+        for result in fulltext_results:
+            doc_id = result["document_id"]
+            if doc_id in result_map:
+                # 文档已存在，合并分数
+                result_map[doc_id]["fulltext_score"] = result["score"]
+                result_map[doc_id]["combined_score"] = (
+                    result_map[doc_id]["vector_score"] * vector_weight +
+                    result["score"] * fulltext_weight
+                )
+                result_map[doc_id]["sources"].append("fulltext")
+            else:
+                # 新文档
+                result_map[doc_id] = {
+                    "document_id": doc_id,
+                    "title": result["title"],
+                    "content_snippet": result.get("snippet", ""),
+                    "vector_score": 0.0,
+                    "fulltext_score": result["score"],
+                    "combined_score": result["score"] * fulltext_weight,
+                    "sources": ["fulltext"]
+                }
+
+        return list(result_map.values())
+                    </div>
+
+                    <h3>全文搜索引擎</h3>
+                    <div class="code-block">
+from whoosh import fields, index
+from whoosh.analysis import StandardAnalyzer
+from whoosh.qparser import QueryParser
+from whoosh.query import And, Or
+import os
+from typing import List, Dict, Any, Optional
+
+class FullTextSearchEngine:
+    """全文搜索引擎"""
+
+    def __init__(self, index_dir: str):
+        self.index_dir = index_dir
+        self.schema = self._create_schema()
+        self._ensure_index_directory()
+
+    def _create_schema(self):
+        """创建搜索模式"""
+        analyzer = StandardAnalyzer()
+
+        return fields.Schema(
+            document_id=fields.ID(unique=True, stored=True),
+            title=fields.TEXT(analyzer=analyzer, stored=True),
+            content=fields.TEXT(analyzer=analyzer, stored=True),
+            tags=fields.KEYWORD(stored=True, commas=True),
+            created_at=fields.DATETIME(stored=True),
+            updated_at=fields.DATETIME(stored=True)
+        )
+
+    def _ensure_index_directory(self):
+        """确保索引目录存在"""
+        if not os.path.exists(self.index_dir):
+            os.makedirs(self.index_dir)
+
+    async def add_documents(self, documents: List[Dict[str, Any]]) -> bool:
+        """添加文档到全文索引"""
+        try:
+            # 打开或创建索引
+            if index.exists_in(self.index_dir):
+                ix = index.open_dir(self.index_dir)
+            else:
+                ix = index.create_in(self.index_dir, self.schema)
+
+            writer = ix.writer()
+
+            for doc in documents:
+                writer.add_document(
+                    document_id=doc["document_id"],
+                    title=doc.get("title", ""),
+                    content=doc["content"],
+                    tags=",".join(doc.get("tags", [])),
+                    created_at=doc.get("created_at", datetime.now()),
+                    updated_at=doc.get("updated_at", datetime.now())
+                )
+
+            writer.commit()
+            return True
+
+        except Exception as e:
+            print(f"Error adding documents to fulltext index: {e}")
+            return False
+
+    async def search(self,
+                    query: str,
+                    limit: int = 10,
+                    filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        """全文搜索"""
+        try:
+            if not index.exists_in(self.index_dir):
+                return []
+
+            ix = index.open_dir(self.index_dir)
+
+            with ix.searcher() as searcher:
+                # 解析查询
+                parser = QueryParser("content", ix.schema)
+                query_obj = parser.parse(query)
+
+                # 应用过滤器
+                if filters:
+                    filter_queries = []
+                    if "tags" in filters:
+                        tag_query = Or([parser.parse(f"tags:{tag}") for tag in filters["tags"]])
+                        filter_queries.append(tag_query)
+
+                    if filter_queries:
+                        query_obj = And([query_obj] + filter_queries)
+
+                # 执行搜索
+                results = searcher.search(query_obj, limit=limit)
+
+                # 转换结果
+                search_results = []
+                for hit in results:
+                    search_results.append({
+                        "document_id": hit["document_id"],
+                        "title": hit["title"],
+                        "score": hit.score,
+                        "snippet": hit.highlights("content"),
+                        "metadata": {
+                            "tags": hit["tags"].split(",") if hit["tags"] else [],
+                            "created_at": hit["created_at"],
+                            "updated_at": hit["updated_at"]
+                        }
+                    })
+
+                return search_results
+
+        except Exception as e:
+            print(f"Error in fulltext search: {e}")
+            return []
+
+    async def update_document(self, document: Dict[str, Any]) -> bool:
+        """更新文档"""
+        try:
+            ix = index.open_dir(self.index_dir)
+            writer = ix.writer()
+
+            # 删除旧版本
+            writer.delete_by_term("document_id", document["document_id"])
+
+            # 添加新版本
+            writer.add_document(
+                document_id=document["document_id"],
+                title=document.get("title", ""),
+                content=document["content"],
+                tags=",".join(document.get("tags", [])),
+                created_at=document.get("created_at", datetime.now()),
+                updated_at=document.get("updated_at", datetime.now())
+            )
+
+            writer.commit()
+            return True
+
+        except Exception as e:
+            print(f"Error updating document in fulltext index: {e}")
+            return False
+
+    async def delete_document(self, document_id: str) -> bool:
+        """删除文档"""
+        try:
+            ix = index.open_dir(self.index_dir)
+            writer = ix.writer()
+
+            writer.delete_by_term("document_id", document_id)
+            writer.commit()
+            return True
+
+        except Exception as e:
+            print(f"Error deleting document from fulltext index: {e}")
+            return False
+
+    async def get_suggestions(self, query: str, field: str = "title") -> List[str]:
+        """获取搜索建议"""
+        try:
+            if not index.exists_in(self.index_dir):
+                return []
+
+            ix = index.open_dir(self.index_dir)
+
+            with ix.searcher() as searcher:
+                # 使用正确的语法来获取字段中的词汇
+                from whoosh.analysis import StandardAnalyzer
+                analyzer = StandardAnalyzer()
+
+                # 获取字段中的所有词汇
+                if searcher.reader().has_field(field):
+                    field_reader = searcher.reader().field(field)
+                    terms = field_reader.terms()
+                    suggestions = []
+
+                    query_lower = query.lower()
+                    for term in terms:
+                        if query_lower in term.decode('utf-8').lower():
+                            suggestions.append(term.decode('utf-8'))
+
+                    return sorted(set(suggestions))[:10]
+
+                return []
+
+        except Exception as e:
+            print(f"Error getting suggestions: {e}")
+            return []
+                    </div>
+                </section>
+
+                <section id="collaborative-editing" class="section">
+                    <h2>实时协作编辑</h2>
+
+                    <h3>WebSocket协作服务器</h3>
+                    <div class="code-block">
+import asyncio
+import websockets
+import json
+from typing import Dict, Set, Any
+import uuid
+from datetime import datetime
+
+class CollaborationServer:
+    """协作服务器"""
+
+    def __init__(self, wiki_editor: WikiEditor):
+        self.wiki_editor = wiki_editor
+        self.connections: Dict[str, Dict[str, Any]] = {}  # user_id -> connection info
+        self.document_sessions: Dict[str, Set[str]] = {}  # document_id -> set of user_ids
+
+    async def handle_connection(self, websocket, path):
+        """处理WebSocket连接"""
+        user_id = None
+        document_id = None
+
+        try:
+            # 接收认证消息
+            auth_message = await websocket.recv()
+            auth_data = json.loads(auth_message)
+
+            user_id = auth_data.get("user_id")
+            document_id = auth_data.get("document_id")
+            token = auth_data.get("token")
+
+            if not user_id or not document_id:
+                await websocket.send(json.dumps({
+                    "type": "error",
+                    "message": "Missing user_id or document_id"
+                }))
+                return
+
+            # 验证用户权限（在实际应用中）
+            if not await self._authenticate_user(user_id, token):
+                await websocket.send(json.dumps({
+                    "type": "error",
+                    "message": "Authentication failed"
+                }))
+                return
+
+            # 注册连接
+            await self._register_connection(user_id, document_id, websocket)
+
+            # 发送当前文档状态
+            await self._send_document_state(document_id, websocket)
+
+            # 处理消息
+            async for message in websocket:
+                try:
+                    data = json.loads(message)
+                    await self._handle_message(user_id, document_id, data, websocket)
+                except json.JSONDecodeError:
+                    await websocket.send(json.dumps({
+                        "type": "error",
+                        "message": "Invalid JSON message"
+                    }))
+
+        except websockets.exceptions.ConnectionClosed:
+            pass
+        finally:
+            # 清理连接
+            if user_id and document_id:
+                await self._unregister_connection(user_id, document_id)
+
+    async def _register_connection(self, user_id: str, document_id: str, websocket):
+        """注册连接"""
+        self.connections[user_id] = {
+            "websocket": websocket,
+            "document_id": document_id,
+            "connected_at": datetime.now(),
+            "last_ping": datetime.now()
+        }
+
+        if document_id not in self.document_sessions:
+            self.document_sessions[document_id] = set()
+        self.document_sessions[document_id].add(user_id)
+
+        # 打开文档进行编辑
+        await self.wiki_editor.open_document(document_id, user_id)
+
+        # 通知其他用户
+        await self._broadcast_user_joined(document_id, user_id)
+
+    async def _unregister_connection(self, user_id: str, document_id: str):
+        """注销连接"""
+        if user_id in self.connections:
+            del self.connections[user_id]
+
+        if document_id in self.document_sessions:
+            self.document_sessions[document_id].discard(user_id)
+            if not self.document_sessions[document_id]:
+                del self.document_sessions[document_id]
+
+        # 通知其他用户
+        await self._broadcast_user_left(document_id, user_id)
+
+    async def _handle_message(self,
+                             user_id: str,
+                             document_id: str,
+                             data: Dict[str, Any],
+                             websocket):
+        """处理消息"""
+        message_type = data.get("type")
+
+        if message_type == "operation":
+            # 处理编辑操作
+            await self._handle_edit_operation(user_id, document_id, data)
+        elif message_type == "cursor_move":
+            # 处理光标移动
+            await self._handle_cursor_move(user_id, document_id, data)
+        elif message_type == "ping":
+            # 处理心跳
+            await self._handle_ping(user_id)
+        elif message_type == "chat":
+            # 处理聊天消息
+            await self._handle_chat_message(user_id, document_id, data)
+        else:
+            await websocket.send(json.dumps({
+                "type": "error",
+                "message": f"Unknown message type: {message_type}"
+            }))
+
+    async def _handle_edit_operation(self, user_id: str, document_id: str, data: Dict[str, Any]):
+        """处理编辑操作"""
+        try:
+            operation_data = data.get("operation")
+            if not operation_data:
+                return
+
+            # 创建操作对象
+            operation = TextOperation(
+                type=OperationType(operation_data["type"]),
+                position=operation_data["position"],
+                content=operation_data.get("content", ""),
+                attributes=operation_data.get("attributes", {}),
+                author_id=user_id
+            )
+
+            # 应用操作
+            success = await self.wiki_editor.apply_edit_operation(
+                document_id, user_id, operation
+            )
+
+            if not success:
+                # 通知操作失败
+                user_websocket = self.connections.get(user_id, {}).get("websocket")
+                if user_websocket:
+                    await user_websocket.send(json.dumps({
+                        "type": "operation_failed",
+                        "operation": operation_data,
+                        "message": "Failed to apply operation"
+                    }))
+
+        except Exception as e:
+            print(f"Error handling edit operation: {e}")
+
+    async def _handle_cursor_move(self, user_id: str, document_id: str, data: Dict[str, Any]):
+        """处理光标移动"""
+        position = data.get("position")
+        if position is None:
+            return
+
+        # 更新光标位置
+        document = await self.wiki_editor.open_document(document_id, user_id)
+        document.active_editors[user_id] = position
+
+        # 广播光标位置给其他用户
+        await self._broadcast_cursor_position(document_id, user_id, position)
+
+    async def _handle_ping(self, user_id: str):
+        """处理心跳"""
+        if user_id in self.connections:
+            self.connections[user_id]["last_ping"] = datetime.now()
+            websocket = self.connections[user_id]["websocket"]
+            await websocket.send(json.dumps({"type": "pong"}))
+
+    async def _handle_chat_message(self, user_id: str, document_id: str, data: Dict[str, Any]):
+        """处理聊天消息"""
+        message = data.get("message", "")
+        if not message:
+            return
+
+        chat_data = {
+            "type": "chat_message",
+            "user_id": user_id,
+            "message": message,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        # 广播聊天消息给文档中的所有用户
+        await self._broadcast_to_document(document_id, chat_data)
+
+    async def _send_document_state(self, document_id: str, websocket):
+        """发送文档状态"""
+        document = await self.wiki_editor.open_document("temp_user", document_id)
+
+        state_data = {
+            "type": "document_state",
+            "content": document.get_content(),
+            "version": document.version,
+            "active_editors": document.get_active_editors()
+        }
+
+        await websocket.send(json.dumps(state_data))
+
+    async def _broadcast_operation(self,
+                                  document_id: str,
+                                  operation: TextOperation,
+                                  exclude_user: str):
+        """广播操作给文档中的其他用户"""
+        message = {
+            "type": "operation",
+            "operation": {
+                "type": operation.type.value,
+                "position": operation.position,
+                "content": operation.content,
+                "author_id": operation.author_id,
+                "timestamp": operation.timestamp.isoformat()
+            }
+        }
+
+        await self._broadcast_to_document(document_id, message, exclude_user)
+
+    async def _broadcast_cursor_position(self,
+                                        document_id: str,
+                                        user_id: str,
+                                        position: int):
+        """广播光标位置"""
+        message = {
+            "type": "cursor_position",
+            "user_id": user_id,
+            "position": position
+        }
+
+        await self._broadcast_to_document(document_id, message, user_id)
+
+    async def _broadcast_user_joined(self, document_id: str, user_id: str):
+        """广播用户加入消息"""
+        message = {
+            "type": "user_joined",
+            "user_id": user_id,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        await self._broadcast_to_document(document_id, message, user_id)
+
+    async def _broadcast_user_left(self, document_id: str, user_id: str):
+        """广播用户离开消息"""
+        message = {
+            "type": "user_left",
+            "user_id": user_id,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        await self._broadcast_to_document(document_id, message, user_id)
+
+    async def _broadcast_to_document(self,
+                                    document_id: str,
+                                    message: Dict[str, Any],
+                                    exclude_user: str = None):
+        """向文档中的所有用户广播消息"""
+        if document_id not in self.document_sessions:
+            return
+
+        message_str = json.dumps(message)
+
+        for user_id in self.document_sessions[document_id]:
+            if user_id == exclude_user:
+                continue
+
+            if user_id in self.connections:
+                websocket = self.connections[user_id]["websocket"]
+                try:
+                    await websocket.send(message_str)
+                except Exception as e:
+                    print(f"Error broadcasting to user {user_id}: {e}")
+
+    async def _authenticate_user(self, user_id: str, token: str) -> bool:
+        """验证用户身份"""
+        # 在实际应用中，这里应该验证token的有效性
+        # 现在简化为总是返回True
+        return True
+
+    async def start_health_check(self):
+        """启动健康检查"""
+        while True:
+            try:
+                current_time = datetime.now()
+                timeout = 300  # 5分钟超时
+
+                # 检查超时的连接
+                timed_out_users = []
+                for user_id, conn_info in self.connections.items():
+                    if (current_time - conn_info["last_ping"]).seconds > timeout:
+                        timed_out_users.append(user_id)
+
+                # 清理超时的连接
+                for user_id in timed_out_users:
+                    document_id = self.connections[user_id]["document_id"]
+                    await self._unregister_connection(user_id, document_id)
+
+                await asyncio.sleep(60)  # 每分钟检查一次
+
+            except Exception as e:
+                print(f"Health check error: {e}")
+                await asyncio.sleep(60)
+
+# 启动协作服务器
+async def start_collaboration_server(port: int = 8765):
+    """启动协作服务器"""
+    wiki_editor = WikiEditor(document_manager=None)  # 需要实际的document_manager
+    server = CollaborationServer(wiki_editor)
+
+    # 启动健康检查任务
+    asyncio.create_task(server.start_health_check())
+
+    # 启动WebSocket服务器
+    async with websockets.serve(server.handle_connection, "localhost", port):
+        print(f"Collaboration server started on port {port}")
+        await asyncio.Future()  # 保持服务器运行
+
+# 使用示例
+if __name__ == "__main__":
+    asyncio.run(start_collaboration_server())
+                    </div>
+                </section>
+
+                <section id="solid-principles" class="section">
+                    <h2>SOLID原则的具体体现</h2>
+
+                    <h3>S - 单一职责原则 (Single Responsibility Principle)</h3>
+                    <div class="code-block">
+class DocumentStorage:
+    """只负责文档存储"""
+
+    async def save_document(self, document_id: str, content: str) -> bool:
+        """专门处理文档保存"""
+        pass
+
+    async def load_document(self, document_id: str) -> Optional[Dict]:
+        """专门处理文档加载"""
+        pass
+
+class VersionControl:
+    """只负责版本控制"""
+
+    async def create_version(self, document_id: str, content: str) -> str:
+        """专门处理版本创建"""
+        pass
+
+    async def get_version_history(self, document_id: str) -> List[Dict]:
+        """专门处理版本历史"""
+        pass
+
+class SearchIndexer:
+    """只负责搜索索引"""
+
+    async def index_document(self, document: Dict) -> bool:
+        """专门处理文档索引"""
+        pass
+
+    async def search(self, query: str) -> List[Dict]:
+        """专门处理搜索查询"""
+        pass
+
+class CollaborationManager:
+    """只负责协作管理"""
+
+    async def handle_operation(self, operation: TextOperation) -> bool:
+        """专门处理操作协作"""
+        pass
+
+    async def broadcast_change(self, change: Dict) -> None:
+        """专门处理变更广播"""
+        pass
+                    </div>
+
+                    <h3>O - 开放封闭原则 (Open-Closed Principle)</h3>
+                    <div class="code-block">
+from abc import ABC, abstractmethod
+
+class SearchStrategy(ABC):
+    """搜索策略基类"""
+
+    @abstractmethod
+    async def search(self, query: str, index_id: str) -> List[Dict]:
+        pass
+
+class VectorSearchStrategy(SearchStrategy):
+    """向量搜索策略"""
+
+    async def search(self, query: str, index_id: str) -> List[Dict]:
+        # 向量搜索实现
+        pass
+
+class FullTextSearchStrategy(SearchStrategy):
+    """全文搜索策略"""
+
+    async def search(self, query: str, index_id: str) -> List[Dict]:
+        # 全文搜索实现
+        pass
+
+# 新增搜索策略无需修改现有代码
+class HybridSearchStrategy(SearchStrategy):
+    """混合搜索策略"""
+
+    def __init__(self, vector_strategy: VectorSearchStrategy, fulltext_strategy: FullTextSearchStrategy):
+        self.vector_strategy = vector_strategy
+        self.fulltext_strategy = fulltext_strategy
+
+    async def search(self, query: str, index_id: str) -> List[Dict]:
+        # 混合搜索实现
+        vector_results = await self.vector_strategy.search(query, index_id)
+        fulltext_results = await self.fulltext_strategy.search(query, index_id)
+        return self._merge_results(vector_results, fulltext_results)
+
+class SearchEngine:
+    def __init__(self, strategy: SearchStrategy):
+        self.strategy = strategy
+
+    async def search(self, query: str, index_id: str) -> List[Dict]:
+        return await self.strategy.search(query, index_id)
+
+    def set_strategy(self, strategy: SearchStrategy):
+        """运行时更换搜索策略"""
+        self.strategy = strategy
+                    </div>
+
+                    <h3>L - 里氏替换原则 (Liskov Substitution Principle)</h3>
+                    <div class="code-block">
+class DocumentFormatter(ABC):
+    """文档格式化器基类"""
+
+    @abstractmethod
+    def format(self, content: str) -> str:
+        pass
+
+    @abstractmethod
+    def get_mime_type(self) -> str:
+        pass
+
+class MarkdownFormatter(DocumentFormatter):
+    """Markdown格式化器"""
+
+    def format(self, content: str) -> str:
+        # Markdown格式化逻辑
+        return self._apply_markdown_formatting(content)
+
+    def get_mime_type(self) -> str:
+        return "text/markdown"
+
+class HTMLFormatter(DocumentFormatter):
+    """HTML格式化器"""
+
+    def format(self, content: str) -> str:
+        # HTML格式化逻辑
+        return self._apply_html_formatting(content)
+
+    def get_mime_type(self) -> str:
+        return "text/html"
+
+class PlainTextFormatter(DocumentFormatter):
+    """纯文本格式化器"""
+
+    def format(self, content: str) -> str:
+        # 纯文本格式化逻辑
+        return content.strip()
+
+    def get_mime_type(self) -> str:
+        return "text/plain"
+
+# 任何DocumentFormatter的子类都可以替换使用
+def render_document(formatter: DocumentFormatter, content: str) -> str:
+    """渲染文档"""
+    return formatter.format(content)
+
+# 使用示例
+markdown_formatter = MarkdownFormatter()
+html_formatter = HTMLFormatter()
+
+rendered1 = render_document(markdown_formatter, "# Hello")  # ✓ 正确
+rendered2 = render_document(html_formatter, "<h1>Hello</h1>")  # ✓ 正确
+                    </div>
+
+                    <h3>I - 接口隔离原则 (Interface Segregation Principle)</h3>
+                    <div class="code-block">
+# 将大接口拆分为多个小接口
+class DocumentReader(ABC):
+    @abstractmethod
+    async def read(self, document_id: str) -> Optional[str]:
+        pass
+
+class DocumentWriter(ABC):
+    @abstractmethod
+    async def write(self, document_id: str, content: str) -> bool:
+        pass
+
+class DocumentDeleter(ABC):
+    @abstractmethod
+    async def delete(self, document_id: str) -> bool:
+        pass
+
+class DocumentIndexer(ABC):
+    @abstractmethod
+    async def index(self, document: Dict) -> bool:
+        pass
+
+class DocumentSearcher(ABC):
+    @abstractmethod
+    async def search(self, query: str) -> List[Dict]:
+        pass
+
+# 客户端只依赖需要的接口
+class ReadOnlyDocumentView:
+    """只读文档视图，只需要读取功能"""
+    def __init__(self, reader: DocumentReader):
+        self.reader = reader
+
+    async def display_document(self, document_id: str):
+        content = await self.reader.read(document_id)
+        return content
+
+class EditableDocumentView:
+    """可编辑文档视图，需要读写功能"""
+    def __init__(self, reader: DocumentReader, writer: DocumentWriter):
+        self.reader = reader
+        self.writer = writer
+
+    async def load_document(self, document_id: str):
+        return await self.reader.read(document_id)
+
+    async def save_document(self, document_id: str, content: str):
+        return await self.writer.write(document_id, content)
+                    </div>
+
+                    <h3>D - 依赖倒置原则 (Dependency Inversion Principle)</h3>
+                    <div class="code-block">
+class WikiService:
+    """Wiki服务类，依赖抽象而非具体实现"""
+
+    def __init__(self,
+                 document_storage: DocumentStorage,
+                 version_control: VersionControl,
+                 search_engine: SearchEngine,
+                 collaboration_manager: CollaborationManager):
+        self.document_storage = document_storage    # 依赖抽象
+        self.version_control = version_control      # 依赖抽象
+        self.search_engine = search_engine          # 依赖抽象
+        self.collaboration_manager = collaboration_manager  # 依赖抽象
+
+    async def create_document(self,
+                            title: str,
+                            content: str,
+                            author_id: str) -> str:
+        """创建新文档"""
+        document_id = await self.document_storage.save_document(title, content)
+
+        await self.version_control.create_version(
+            document_id, content, author_id, "Initial version"
+        )
+
+        await self.search_engine.index_document({
+            "document_id": document_id,
+            "title": title,
+            "content": content,
+            "author_id": author_id
+        })
+
+        return document_id
+
+    async def search_documents(self, query: str) -> List[Dict]:
+        """搜索文档"""
+        return await self.search_engine.search(query)
+
+    async def edit_document(self,
+                           document_id: str,
+                           operation: TextOperation,
+                           author_id: str) -> bool:
+        """编辑文档"""
+        # 应用操作
+        current_content = await self.document_storage.load_document(document_id)
+        new_content = self._apply_operation(current_content, operation)
+
+        # 保存文档
+        success = await self.document_storage.save_document(document_id, new_content)
+
+        if success:
+            # 创建版本
+            await self.version_control.create_version(
+                document_id, new_content, author_id, operation.content[:50]
+            )
+
+            # 更新搜索索引
+            await self.search_engine.update_document_index(document_id, new_content)
+
+        return success
+
+# 通过依赖注入提供具体实现
+wiki_service = WikiService(
+    document_storage=PostgreSQLDocumentStorage(),      # 注入PostgreSQL存储
+    version_control=GitVersionControl(),               # 注入Git版本控制
+    search_engine=ElasticsearchSearchEngine(),         # 注入Elasticsearch搜索
+    collaboration_manager=WebSocketCollaborationManager()  # 注入WebSocket协作
+)
+                    </div>
+                </section>
+
+                <section id="tdd-implementation" class="section">
+                    <h2>TDD (测试驱动开发) 实现</h2>
+
+                    <h3>测试先行：文档存储功能</h3>
+                    <div class="test-example">
+                        <h4>Step 1: 写失败的测试</h4>
+                        <div class="code-block">
+import pytest
+import asyncio
+
+class TestDocumentStorage:
+    @pytest.mark.asyncio
+    async def test_save_and_load_document(self):
+        """测试文档保存和加载"""
+        storage = DocumentStorage()
+
+        # 保存文档
+        document_id = await storage.save_document(
+            title="Test Document",
+            content="This is a test document content."
+        )
+
+        assert document_id is not None
+        assert isinstance(document_id, str)
+
+        # 加载文档
+        loaded_doc = await storage.load_document(document_id)
+
+        assert loaded_doc is not None
+        assert loaded_doc["title"] == "Test Document"
+        assert loaded_doc["content"] == "This is a test document content."
+
+    @pytest.mark.asyncio
+    async def test_load_nonexistent_document(self):
+        """测试加载不存在的文档"""
+        storage = DocumentStorage()
+
+        loaded_doc = await storage.load_document("nonexistent_id")
+
+        assert loaded_doc is None
+
+    @pytest.mark.asyncio
+    async def test_update_document(self):
+        """测试文档更新"""
+        storage = DocumentStorage()
+
+        # 创建文档
+        document_id = await storage.save_document(
+            title="Original Title",
+            content="Original content."
+        )
+
+        # 更新文档
+        success = await storage.update_document(
+            document_id=document_id,
+            title="Updated Title",
+            content="Updated content."
+        )
+
+        assert success is True
+
+        # 验证更新
+        updated_doc = await storage.load_document(document_id)
+        assert updated_doc["title"] == "Updated Title"
+        assert updated_doc["content"] == "Updated content."
+
+    @pytest.mark.asyncio
+    async def test_delete_document(self):
+        """测试文档删除"""
+        storage = DocumentStorage()
+
+        # 创建文档
+        document_id = await storage.save_document(
+            title="To Delete",
+            content="This will be deleted."
+        )
+
+        # 删除文档
+        success = await storage.delete_document(document_id)
+        assert success is True
+
+        # 验证删除
+        deleted_doc = await storage.load_document(document_id)
+        assert deleted_doc is None
+                        </div>
+
+                        <h4>Step 2: 实现最小代码使测试通过</h4>
+                        <div class="code-block">
+import uuid
+from typing import Dict, Optional
+
+class DocumentStorage:
+    """最小实现，让测试通过"""
+
+    def __init__(self):
+        self.documents: Dict[str, Dict] = {}
+
+    async def save_document(self, title: str, content: str) -> str:
+        """最小实现，让测试通过"""
+        document_id = str(uuid.uuid4())
+
+        self.documents[document_id] = {
+            "document_id": document_id,
+            "title": title,
+            "content": content,
+            "created_at": datetime.now(),
+            "updated_at": datetime.now()
+        }
+
+        return document_id
+
+    async def load_document(self, document_id: str) -> Optional[Dict]:
+        """最小实现，让测试通过"""
+        return self.documents.get(document_id)
+
+    async def update_document(self, document_id: str, title: str, content: str) -> bool:
+        """最小实现，让测试通过"""
+        if document_id not in self.documents:
+            return False
+
+        self.documents[document_id].update({
+            "title": title,
+            "content": content,
+            "updated_at": datetime.now()
+        })
+
+        return True
+
+    async def delete_document(self, document_id: str) -> bool:
+        """最小实现，让测试通过"""
+        if document_id not in self.documents:
+            return False
+
+        del self.documents[document_id]
+        return True
+                        </div>
+
+                        <h4>Step 3: 重构和扩展</h4>
+                        <div class="code-block">
+import asyncio
+import aiosqlite
+from typing import Dict, Optional, List
+
+class PostgreSQLDocumentStorage:
+    """重构后的PostgreSQL文档存储实现"""
+
+    def __init__(self, connection_string: str):
+        self.connection_string = connection_string
+        self.connection_pool = None
+
+    async def initialize(self):
+        """初始化数据库连接池"""
+        self.connection_pool = await self._create_connection_pool()
+        await self._create_tables()
+
+    async def _create_connection_pool(self):
+        """创建连接池"""
+        # 这里应该使用实际的PostgreSQL异步驱动
+        # 例如 asyncpg
+        pass
+
+    async def _create_tables(self):
+        """创建数据库表"""
+        create_table_sql = """
+        CREATE TABLE IF NOT EXISTS documents (
+            document_id UUID PRIMARY KEY,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL,
+            author_id TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS document_tags (
+            document_id UUID REFERENCES documents(document_id),
+            tag TEXT NOT NULL,
+            PRIMARY KEY (document_id, tag)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_documents_title ON documents USING gin(to_tsvector('english', title));
+        CREATE INDEX IF NOT EXISTS idx_documents_content ON documents USING gin(to_tsvector('english', content));
+        """
+
+        await self.connection_pool.execute(create_table_sql)
+
+    async def save_document(self,
+                           title: str,
+                           content: str,
+                           author_id: str,
+                           tags: List[str] = None) -> str:
+        """保存文档到PostgreSQL"""
+        import uuid
+        document_id = str(uuid.uuid4())
+
+        async with self.connection_pool.acquire() as conn:
+            # 插入文档
+            await conn.execute(
+                """
+                INSERT INTO documents (document_id, title, content, author_id)
+                VALUES ($1, $2, $3, $4)
+                """,
+                document_id, title, content, author_id
+            )
+
+            # 插入标签
+            if tags:
+                tag_values = [(document_id, tag) for tag in tags]
+                await conn.executemany(
+                    "INSERT INTO document_tags (document_id, tag) VALUES ($1, $2)",
+                    tag_values
+                )
+
+        return document_id
+
+    async def load_document(self, document_id: str) -> Optional[Dict]:
+        """从PostgreSQL加载文档"""
+        async with self.connection_pool.acquire() as conn:
+            # 加载文档基本信息
+            doc_row = await conn.fetchrow(
+                "SELECT * FROM documents WHERE document_id = $1",
+                document_id
+            )
+
+            if not doc_row:
+                return None
+
+            # 加载标签
+            tag_rows = await conn.fetch(
+                "SELECT tag FROM document_tags WHERE document_id = $1",
+                document_id
+            )
+            tags = [row["tag"] for row in tag_rows]
+
+            return {
+                "document_id": doc_row["document_id"],
+                "title": doc_row["title"],
+                "content": doc_row["content"],
+                "author_id": doc_row["author_id"],
+                "tags": tags,
+                "created_at": doc_row["created_at"],
+                "updated_at": doc_row["updated_at"]
+            }
+
+    async def update_document(self,
+                            document_id: str,
+                            title: str = None,
+                            content: str = None,
+                            tags: List[str] = None) -> bool:
+        """更新文档"""
+        async with self.connection_pool.acquire() as conn:
+            # 检查文档是否存在
+            exists = await conn.fetchval(
+                "SELECT 1 FROM documents WHERE document_id = $1",
+                document_id
+            )
+
+            if not exists:
+                return False
+
+            # 构建更新语句
+            updates = []
+            params = []
+            param_index = 1
+
+            if title is not None:
+                updates.append(f"title = ${param_index}")
+                params.append(title)
+                param_index += 1
+
+            if content is not None:
+                updates.append(f"content = ${param_index}")
+                params.append(content)
+                param_index += 1
+
+            updates.append("updated_at = CURRENT_TIMESTAMP")
+
+            if updates:
+                params.append(document_id)
+                await conn.execute(
+                    f"UPDATE documents SET {', '.join(updates)} WHERE document_id = ${param_index}",
+                    *params
+                )
+
+            # 更新标签
+            if tags is not None:
+                await conn.execute(
+                    "DELETE FROM document_tags WHERE document_id = $1",
+                    document_id
+                )
+
+                if tags:
+                    tag_values = [(document_id, tag) for tag in tags]
+                    await conn.executemany(
+                        "INSERT INTO document_tags (document_id, tag) VALUES ($1, $2)",
+                        tag_values
+                    )
+
+            return True
+
+    async def delete_document(self, document_id: str) -> bool:
+        """删除文档"""
+        async with self.connection_pool.acquire() as conn:
+            # 删除标签
+            await conn.execute(
+                "DELETE FROM document_tags WHERE document_id = $1",
+                document_id
+            )
+
+            # 删除文档
+            result = await conn.execute(
+                "DELETE FROM documents WHERE document_id = $1",
+                document_id
+            )
+
+            return result == "DELETE 1"
+
+    async def search_documents(self,
+                             query: str,
+                             limit: int = 10,
+                             offset: int = 0) -> List[Dict]:
+        """全文搜索文档"""
+        async with self.connection_pool.acquire() as conn:
+            # 使用PostgreSQL的全文搜索
+            rows = await conn.fetch(
+                """
+                SELECT
+                    documents.*,
+                    ts_rank(to_tsvector('english', title || ' ' || content), plainto_tsquery('english', $1)) as rank
+                FROM documents
+                WHERE to_tsvector('english', title || ' ' || content) @@ plainto_tsquery('english', $1)
+                ORDER BY rank DESC
+                LIMIT $2 OFFSET $3
+                """,
+                query, limit, offset
+            )
+
+            results = []
+            for row in rows:
+                # 加载标签
+                tag_rows = await conn.fetch(
+                    "SELECT tag FROM document_tags WHERE document_id = $1",
+                    row["document_id"]
+                )
+                tags = [tag_row["tag"] for tag_row in tag_rows]
+
+                results.append({
+                    "document_id": row["document_id"],
+                    "title": row["title"],
+                    "content": row["content"][:200] + "...",  # 摘要
+                    "author_id": row["author_id"],
+                    "tags": tags,
+                    "rank": row["rank"],
+                    "created_at": row["created_at"],
+                    "updated_at": row["updated_at"]
+                })
+
+            return results
+                        </div>
+                    </div>
+
+                    <h3>集成测试：Wiki系统完整流程</h3>
+                    <div class="test-example">
+                        <div class="code-block">
+class TestWikiIntegration:
+    @pytest.mark.asyncio
+    async def test_complete_document_workflow(self):
+        """测试完整的文档工作流程"""
+        # 设置依赖
+        document_storage = PostgreSQLDocumentStorage("postgresql://test")
+        await document_storage.initialize()
+
+        version_control = GitVersionControl()
+        search_engine = VectorSearchEngine(embedding_model=MockEmbeddingModel())
+        collaboration_manager = MockCollaborationManager()
+
+        wiki_service = WikiService(
+            document_storage=document_storage,
+            version_control=version_control,
+            search_engine=search_engine,
+            collaboration_manager=collaboration_manager
+        )
+
+        # 创建文档
+        document_id = await wiki_service.create_document(
+            title="Integration Test Document",
+            content="This is an integration test.",
+            author_id="test_user"
+        )
+
+        assert document_id is not None
+
+        # 编辑文档
+        edit_operation = TextOperation(
+            type=OperationType.INSERT,
+            position=len("This is an integration test."),
+            content=" More content added."
+        )
+
+        success = await wiki_service.edit_document(
+            document_id, edit_operation, "test_user"
+        )
+
+        assert success is True
+
+        # 搜索文档
+        search_results = await wiki_service.search_documents("integration test")
+
+        assert len(search_results) > 0
+        assert any(
+            result["document_id"] == document_id
+            for result in search_results
+        )
+
+        # 检查版本历史
+        versions = await version_control.get_version_history(document_id)
+        assert len(versions) >= 2  # 初始版本 + 编辑版本
+
+    @pytest.mark.asyncio
+    async def test_collaborative_editing(self):
+        """测试协作编辑功能"""
+        collaboration_server = CollaborationServer(wiki_editor=MockWikiEditor())
+
+        # 模拟两个用户连接
+        user1_connection = MockWebSocket()
+        user2_connection = MockWebSocket()
+
+        # 用户1连接
+        await collaboration_server._register_connection(
+            "user1", "doc1", user1_connection
+        )
+
+        # 用户2连接
+        await collaboration_server._register_connection(
+            "user2", "doc1", user2_connection
+        )
+
+        # 用户1编辑
+        operation1 = TextOperation(
+            type=OperationType.INSERT,
+            position=0,
+            content="User1 content",
+            author_id="user1"
+        )
+
+        await collaboration_server._handle_edit_operation(
+            "user1", "doc1", {"operation": {
+                "type": "insert",
+                "position": 0,
+                "content": "User1 content"
+            }}
+        )
+
+        # 验证用户2收到了操作通知
+        messages = user2_connection.get_sent_messages()
+
+        assert len(messages) > 0
+        operation_message = next(
+            (msg for msg in messages if msg.get("type") == "operation"),
+            None
+        )
+
+        assert operation_message is not None
+        assert operation_message["operation"]["author_id"] == "user1"
+        assert operation_message["operation"]["content"] == "User1 content"
+                        </div>
+                    </div>
+
+                    <h3>性能测试：搜索和索引</h3>
+                    <div class="test-example">
+                        <div class="code-block">
+class TestSearchPerformance:
+    @pytest.mark.asyncio
+    async def test_vector_search_performance(self):
+        """测试向量搜索性能"""
+        embedding_model = MockEmbeddingModel()
+        search_engine = VectorSearchEngine(embedding_model, MockIndexStorage())
+
+        # 创建索引
+        await search_engine.create_index("test_index", dimension=768)
+
+        # 添加大量文档
+        documents = [
+            {
+                "document_id": f"doc_{i}",
+                "title": f"Document {i}",
+                "content": f"This is the content of document {i}. " * 50,  # 长文本
+                "tags": ["test", "performance", f"tag_{i % 10}"]
+            }
+            for i in range(1000)
+        ]
+
+        start_time = time.time()
+        await search_engine.add_documents("test_index", documents)
+        indexing_time = time.time() - start_time
+
+        print(f"Indexing 1000 documents took: {indexing_time:.2f} seconds")
+        assert indexing_time < 30  # 索引应该在30秒内完成
+
+        # 测试搜索性能
+        queries = [
+            "test document content",
+            "performance testing",
+            "random query words",
+            "specific tag information"
+        ]
+
+        search_times = []
+        for query in queries:
+            start_time = time.time()
+            results = await search_engine.search("test_index", query, top_k=10)
+            search_time = time.time() - start_time
+            search_times.append(search_time)
+
+            assert len(results) <= 10
+            assert all(result["similarity"] > 0 for result in results)
+
+        avg_search_time = sum(search_times) / len(search_times)
+        print(f"Average search time: {avg_search_time:.3f} seconds")
+        assert avg_search_time < 1.0  # 平均搜索时间应该小于1秒
+
+    @pytest.mark.asyncio
+    async def test_concurrent_searches(self):
+        """测试并发搜索性能"""
+        embedding_model = MockEmbeddingModel()
+        search_engine = VectorSearchEngine(embedding_model, MockIndexStorage())
+
+        # 准备测试数据
+        await search_engine.create_index("concurrent_test_index", dimension=768)
+        documents = [
+            {
+                "document_id": f"doc_{i}",
+                "title": f"Concurrent Test Document {i}",
+                "content": f"Content for concurrent test {i}",
+                "tags": ["concurrent", "test"]
+            }
+            for i in range(100)
+        ]
+        await search_engine.add_documents("concurrent_test_index", documents)
+
+        # 创建并发搜索任务
+        concurrent_queries = 50
+        tasks = [
+            search_engine.search("concurrent_test_index", f"query {i}", top_k=5)
+            for i in range(concurrent_queries)
+        ]
+
+        start_time = time.time()
+        results = await asyncio.gather(*tasks)
+        total_time = time.time() - start_time
+
+        # 验证结果
+        assert len(results) == concurrent_queries
+        assert all(len(result) <= 5 for result in results)
+
+        # 性能验证
+        avg_time_per_query = total_time / concurrent_queries
+        print(f"Concurrent search - Total time: {total_time:.2f}s, Avg per query: {avg_time_per_query:.3f}s")
+        assert avg_time_per_query < 0.5  # 平均每个查询应该小于500ms
+                        </div>
+                    </div>
+                </section>
+
+                <section id="code-examples" class="section">
+                    <h2>代码示例：规范化实现</h2>
+
+                    <h3>1. 知识图谱构建器</h3>
+                    <div class="code-block">
+import networkx as nx
+from typing import Dict, List, Set, Tuple, Any
+from dataclasses import dataclass
+import asyncio
+import re
+from collections import defaultdict
+
+@dataclass
+class KnowledgeEntity:
+    """知识实体"""
+    id: str
+    type: str  # person, concept, location, etc.
+    name: str
+    description: str = ""
+    properties: Dict[str, Any] = None
+    source_document: str = ""
+
+@dataclass
+class KnowledgeRelation:
+    """知识关系"""
+    id: str
+    subject: str  # entity id
+    predicate: str  # relationship type
+    object: str  # entity id
+    confidence: float = 1.0
+    source_document: str = ""
+    properties: Dict[str, Any] = None
+
+class KnowledgeGraphBuilder:
+    """知识图谱构建器"""
+
+    def __init__(self, nlp_model: 'NLPModel'):
+        self.nlp_model = nlp_model
+        self.graph = nx.DiGraph()
+        self.entities: Dict[str, KnowledgeEntity] = {}
+        self.relations: Dict[str, KnowledgeRelation] = {}
+
+    async def build_from_documents(self, documents: List[Dict[str, Any]]) -> None:
+        """从文档构建知识图谱"""
+        for document in documents:
+            await self._process_document(document)
+
+    async def _process_document(self, document: Dict[str, Any]) -> None:
+        """处理单个文档"""
+        content = document["content"]
+        document_id = document["document_id"]
+
+        # 使用NLP模型提取实体和关系
+        nlp_result = await self.nlp_model.extract_entities_and_relations(content)
+
+        # 处理实体
+        for entity_data in nlp_result["entities"]:
+            entity = KnowledgeEntity(
+                id=f"{document_id}_{entity_data['text']}_{entity_data['start']}",
+                type=entity_data["label"],
+                name=entity_data["text"],
+                description=entity_data.get("description", ""),
+                source_document=document_id
+            )
+
+            self.entities[entity.id] = entity
+            self.graph.add_node(entity.id, **entity.__dict__)
+
+        # 处理关系
+        for relation_data in nlp_result["relations"]:
+            subject_id = self._find_entity_id(document_id, relation_data["subject"])
+            object_id = self._find_entity_id(document_id, relation_data["object"])
+
+            if subject_id and object_id:
+                relation = KnowledgeRelation(
+                    id=f"{document_id}_{subject_id}_{relation_data['relation']}_{object_id}",
+                    subject=subject_id,
+                    predicate=relation_data["relation"],
+                    object=object_id,
+                    confidence=relation_data.get("confidence", 1.0),
+                    source_document=document_id
+                )
+
+                self.relations[relation.id] = relation
+                self.graph.add_edge(
+                    subject_id,
+                    object_id,
+                    relation=relation.predicate,
+                    confidence=relation.confidence,
+                    source=document_id
+                )
+
+    def _find_entity_id(self, document_id: str, entity_text: str) -> Optional[str]:
+        """查找实体ID"""
+        for entity_id, entity in self.entities.items():
+            if (entity.source_document == document_id and
+                entity.name.lower() == entity_text.lower()):
+                return entity_id
+        return None
+
+    async def find_related_entities(self, entity_id: str, max_depth: int = 2) -> List[Dict[str, Any]]:
+        """查找相关实体"""
+        if entity_id not in self.entities:
+            return []
+
+        related_entities = []
+        visited = set()
+
+        async def _dfs(current_entity_id: str, current_depth: int, path: List[str]):
+            if current_depth > max_depth or current_entity_id in visited:
+                return
+
+            visited.add(current_entity_id)
+
+            # 查找所有相连的实体
+            for neighbor in self.graph.neighbors(current_entity_id):
+                edge_data = self.graph.get_edge_data(current_entity_id, neighbor)
+                if neighbor in self.entities:
+                    related_entities.append({
+                        "entity": self.entities[neighbor].__dict__,
+                        "relation": edge_data.get("relation"),
+                        "confidence": edge_data.get("confidence", 1.0),
+                        "path": path + [neighbor],
+                        "depth": current_depth
+                    })
+
+                    # 递归搜索
+                    await _dfs(neighbor, current_depth + 1, path + [neighbor])
+
+        await _dfs(entity_id, 0, [entity_id])
+
+        return related_entities
+
+    async def find_shortest_path(self, entity_id1: str, entity_id2: str) -> Optional[List[Dict[str, Any]]]:
+        """查找两个实体间的最短路径"""
+        if entity_id1 not in self.entities or entity_id2 not in self.entities:
+            return None
+
+        try:
+            path = nx.shortest_path(self.graph, entity_id1, entity_id2)
+            return [self.entities[node_id].__dict__ for node_id in path]
+        except nx.NetworkXNoPath:
+            return None
+
+    def get_entity_statistics(self) -> Dict[str, Any]:
+        """获取实体统计信息"""
+        entity_types = defaultdict(int)
+        relation_types = defaultdict(int)
+
+        for entity in self.entities.values():
+            entity_types[entity.type] += 1
+
+        for relation in self.relations.values():
+            relation_types[relation.predicate] += 1
+
+        return {
+            "total_entities": len(self.entities),
+            "total_relations": len(self.relations),
+            "entity_types": dict(entity_types),
+            "relation_types": dict(relation_types),
+            "graph_density": nx.density(self.graph),
+            "connected_components": nx.number_weakly_connected_components(self.graph)
+        }
+
+    async def export_graph(self, format: str = "json") -> str:
+        """导出知识图谱"""
+        if format == "json":
+            return self._export_json()
+        elif format == "graphml":
+            return self._export_graphml()
+        elif format == "gexf":
+            return self._export_gexf()
+        else:
+            raise ValueError(f"Unsupported export format: {format}")
+
+    def _export_json(self) -> str:
+        """导出为JSON格式"""
+        import json
+
+        graph_data = {
+            "entities": [entity.__dict__ for entity in self.entities.values()],
+            "relations": [relation.__dict__ for relation in self.relations.values()],
+            "metadata": self.get_entity_statistics()
+        }
+
+        return json.dumps(graph_data, indent=2, ensure_ascii=False)
+
+    def _export_graphml(self) -> str:
+        """导出为GraphML格式"""
+        import io
+
+        output = io.StringIO()
+        nx.write_graphml(self.graph, output)
+        return output.getvalue()
+
+    def _export_gexf(self) -> str:
+        """导出为GEXF格式"""
+        import io
+
+        output = io.StringIO()
+        nx.write_gexf(self.graph, output)
+        return output.getvalue()
+
+class EntityResolution:
+    """实体解析和链接"""
+
+    def __init__(self, similarity_threshold: float = 0.8):
+        self.similarity_threshold = similarity_threshold
+
+    async def resolve_duplicate_entities(self, entities: List[KnowledgeEntity]) -> List[KnowledgeEntity]:
+        """解析重复实体"""
+        if not entities:
+            return []
+
+        resolved_entities = []
+        processed_indices = set()
+
+        for i, entity1 in enumerate(entities):
+            if i in processed_indices:
+                continue
+
+            # 查找相似的实体
+            similar_entities = [entity1]
+            for j, entity2 in enumerate(entities[i+1:], i+1):
+                if j not in processed_indices:
+                    similarity = await self._calculate_entity_similarity(entity1, entity2)
+                    if similarity >= self.similarity_threshold:
+                        similar_entities.append(entity2)
+                        processed_indices.add(j)
+
+            # 合并相似实体
+            if len(similar_entities) > 1:
+                merged_entity = await self._merge_entities(similar_entities)
+                resolved_entities.append(merged_entity)
+            else:
+                resolved_entities.append(entity1)
+
+            processed_indices.add(i)
+
+        return resolved_entities
+
+    async def _calculate_entity_similarity(self, entity1: KnowledgeEntity, entity2: KnowledgeEntity) -> float:
+        """计算实体相似度"""
+        # 名称相似度
+        name_similarity = self._calculate_text_similarity(entity1.name, entity2.name)
+
+        # 类型匹配度
+        type_similarity = 1.0 if entity1.type == entity2.type else 0.0
+
+        # 描述相似度
+        desc_similarity = self._calculate_text_similarity(entity1.description, entity2.description)
+
+        # 加权平均
+        overall_similarity = (
+            name_similarity * 0.5 +
+            type_similarity * 0.3 +
+            desc_similarity * 0.2
+        )
+
+        return overall_similarity
+
+    def _calculate_text_similarity(self, text1: str, text2: str) -> float:
+        """计算文本相似度"""
+        from difflib import SequenceMatcher
+
+        if not text1 or not text2:
+            return 0.0
+
+        return SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
+
+    async def _merge_entities(self, entities: List[KnowledgeEntity]) -> KnowledgeEntity:
+        """合并实体"""
+        # 选择名称最短、最清晰的实体作为主实体
+        main_entity = min(entities, key=lambda e: len(e.name))
+
+        # 合并属性
+        all_descriptions = [e.description for e in entities if e.description]
+        merged_description = " ".join(all_descriptions) if all_descriptions else main_entity.description
+
+        all_properties = {}
+        for entity in entities:
+            if entity.properties:
+                all_properties.update(entity.properties)
+
+        # 合并来源文档
+        source_documents = list(set(e.source_document for e in entities if e.source_document))
+
+        return KnowledgeEntity(
+            id=main_entity.id,
+            type=main_entity.type,
+            name=main_entity.name,
+            description=merged_description,
+            properties=all_properties,
+            source_document=", ".join(source_documents)
+        )
+                    </div>
+
+                    <h3>2. 内容自动分类器</h3>
+                    <div class="code-block">
+from typing import Dict, List, Tuple, Optional
+from dataclasses import dataclass
+import asyncio
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
+import pickle
+import joblib
+
+@dataclass
+class CategoryInfo:
+    """分类信息"""
+    category_id: str
+    name: str
+    description: str
+    parent_id: Optional[str] = None
+    keywords: List[str] = None
+    color: str = "#007bff"
+
+class AutoContentClassifier:
+    """自动内容分类器"""
+
+    def __init__(self, model_path: str = None):
+        self.model_path = model_path
+        self.categories: Dict[str, CategoryInfo] = {}
+        self.classification_pipeline = None
+        self.is_trained = False
+
+    def add_category(self, category_info: CategoryInfo) -> None:
+        """添加分类"""
+        self.categories[category_info.category_id] = category_info
+
+    async def train(self, training_data: List[Dict[str, Any]]) -> None:
+        """训练分类模型"""
+        if not training_data:
+            raise ValueError("Training data is required")
+
+        # 准备训练数据
+        texts = [item["content"] for item in training_data]
+        labels = [item["category_id"] for item in training_data]
+
+        # 构建分类管道
+        self.classification_pipeline = Pipeline([
+            ('tfidf', TfidfVectorizer(
+                max_features=5000,
+                stop_words='english',
+                ngram_range=(1, 2),
+                min_df=2,
+                max_df=0.8
+            )),
+            ('classifier', MultinomialNB(alpha=0.1))
+        ])
+
+        # 训练模型
+        self.classification_pipeline.fit(texts, labels)
+        self.is_trained = True
+
+        # 保存模型
+        if self.model_path:
+            await self._save_model()
+
+    async def classify(self, content: str, top_k: int = 3) -> List[Tuple[str, float]]:
+        """分类内容"""
+        if not self.is_trained:
+            raise ValueError("Model is not trained yet")
+
+        # 预测概率
+        probabilities = self.classification_pipeline.predict_proba([content])[0]
+        categories = self.classification_pipeline.classes_
+
+        # 创建结果列表
+        results = []
+        for category_id, prob in zip(categories, probabilities):
+            results.append((category_id, prob))
+
+        # 按概率排序并返回前k个
+        results.sort(key=lambda x: x[1], reverse=True)
+        return results[:top_k]
+
+    async def classify_batch(self, contents: List[str], top_k: int = 3) -> List[List[Tuple[str, float]]]:
+        """批量分类"""
+        if not self.is_trained:
+            raise ValueError("Model is not trained yet")
+
+        probabilities = self.classification_pipeline.predict_proba(contents)
+        categories = self.classification_pipeline.classes_
+
+        batch_results = []
+        for i, content_probs in enumerate(probabilities):
+            results = []
+            for category_id, prob in zip(categories, content_probs):
+                results.append((category_id, prob))
+
+            results.sort(key=lambda x: x[1], reverse=True)
+            batch_results.append(results[:top_k])
+
+        return batch_results
+
+    async def extract_keywords(self, content: str, max_keywords: int = 10) -> List[str]:
+        """提取关键词"""
+        if not self.is_trained:
+            # 如果模型未训练，使用简单的TF-IDF提取
+            return await self._extract_keywords_simple(content, max_keywords)
+
+        # 使用训练好的TF-IDF向量化器提取关键词
+        tfidf_matrix = self.classification_pipeline.named_steps['tfidf'].transform([content])
+        feature_names = self.classification_pipeline.named_steps['tfidf'].get_feature_names_out()
+        tfidf_scores = tfidf_matrix.toarray()[0]
+
+        # 获取TF-IDF分数最高的关键词
+        keyword_scores = list(zip(feature_names, tfidf_scores))
+        keyword_scores.sort(key=lambda x: x[1], reverse=True)
+
+        return [keyword for keyword, score in keyword_scores[:max_keywords] if score > 0]
+
+    async def _extract_keywords_simple(self, content: str, max_keywords: int) -> List[str]:
+        """简单的关键词提取"""
+        import re
+        from collections import Counter
+
+        # 清理文本
+        words = re.findall(r'\b[a-zA-Z]{3,}\b', content.lower())
+
+        # 过滤停用词
+        stop_words = {'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'had', 'her', 'was', 'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his', 'how', 'its', 'may', 'old', 'see', 'now', 'way', 'who', 'boy', 'did', 'two', 'use', 'why', 'ask', 'did', 'its', 'she', 'too', 'when'}
+        words = [word for word in words if word not in stop_words]
+
+        # 计算词频
+        word_freq = Counter(words)
+
+        # 返回最高频的关键词
+        return [word for word, freq in word_freq.most_common(max_keywords)]
+
+    async def get_category_statistics(self) -> Dict[str, Any]:
+        """获取分类统计信息"""
+        if not self.is_trained:
+            return {}
+
+        # 获取各类别的特征重要性
+        classifier = self.classification_pipeline.named_steps['classifier']
+        feature_names = self.classification_pipeline.named_steps['tfidf'].get_feature_names_out()
+
+        category_stats = {}
+        for i, category_id in enumerate(classifier.classes_):
+            if category_id in self.categories:
+                # 获取该类别的重要特征
+                feature_importance = classifier.feature_log_prob_[i]
+                top_features_idx = feature_importance.argsort()[-10:][::-1]
+                top_features = [feature_names[idx] for idx in top_features_idx]
+
+                category_stats[category_id] = {
+                    "name": self.categories[category_id].name,
+                    "description": self.categories[category_id].description,
+                    "top_features": top_features,
+                    "keywords": self.categories[category_id].keywords or []
+                }
+
+        return category_stats
+
+    async def _save_model(self) -> None:
+        """保存模型"""
+        model_data = {
+            'pipeline': self.classification_pipeline,
+            'categories': self.categories
+        }
+        joblib.dump(model_data, self.model_path)
+
+    async def load_model(self) -> bool:
+        """加载模型"""
+        if not self.model_path:
+            return False
+
+        try:
+            model_data = joblib.load(self.model_path)
+            self.classification_pipeline = model_data['pipeline']
+            self.categories = model_data['categories']
+            self.is_trained = True
+            return True
+        except Exception as e:
+            print(f"Error loading model: {e}")
+            return False
+
+    async def update_model(self, new_training_data: List[Dict[str, Any]]) -> None:
+        """更新模型（增量学习）"""
+        if not self.is_trained:
+            await self.train(new_training_data)
+            return
+
+        # 合并新旧数据
+        # 这里简化实现，实际应用中可能需要更复杂的增量学习逻辑
+        await self.train(new_training_data)
+
+class ContentSuggestionEngine:
+    """内容建议引擎"""
+
+    def __init__(self, classifier: AutoContentClassifier):
+        self.classifier = classifier
+
+    async def suggest_related_content(self, content: str, limit: int = 5) -> List[Dict[str, Any]]:
+        """建议相关内容"""
+        # 分类当前内容
+        classification = await self.classifier.classify(content, top_k=1)
+        if not classification:
+            return []
+
+        primary_category = classification[0][0]
+        confidence = classification[0][1]
+
+        # 这里应该从数据库或索引中查找相关内容
+        # 简化实现，返回模拟数据
+        return [
+            {
+                "title": f"Related content in {primary_category}",
+                "snippet": "This is a related article...",
+                "relevance_score": confidence,
+                "category": primary_category
+            }
+            for _ in range(limit)
+        ]
+
+    async def suggest_tags(self, content: str, max_tags: int = 5) -> List[str]:
+        """建议标签"""
+        # 提取关键词
+        keywords = await self.classifier.extract_keywords(content, max_tags * 2)
+
+        # 分类内容
+        classification = await self.classifier.classify(content, top_k=2)
+        category_tags = []
+
+        for category_id, confidence in classification:
+            if confidence > 0.5 and category_id in self.classifier.categories:
+                category_info = self.classifier.categories[category_id]
+                category_tags.extend(category_info.keywords or [])
+
+        # 合并并去重
+        all_tags = keywords + category_tags
+        unique_tags = list(dict.fromkeys(all_tags))  # 保持顺序的去重
+
+        return unique_tags[:max_tags]
+
+    async def suggest_categories(self, content: str, min_confidence: float = 0.3) -> List[Dict[str, Any]]:
+        """建议分类"""
+        classifications = await self.classifier.classify(content, top_k=5)
+
+        suggestions = []
+        for category_id, confidence in classifications:
+            if confidence >= min_confidence and category_id in self.classifier.categories:
+                category_info = self.classifier.categories[category_id]
+                suggestions.append({
+                    "category_id": category_id,
+                    "name": category_info.name,
+                    "description": category_info.description,
+                    "confidence": confidence,
+                    "keywords": category_info.keywords or []
+                })
+
+        return suggestions
+                    </div>
+                </section>
+
+                <section id="best-practices" class="section">
+                    <h2>最佳实践与规范</h2>
+
+                    <div class="best-practices">
+                        <h4>KISS原则应用</h4>
+                        <ul>
+                            <li><strong>简洁的数据模型</strong>：文档、版本、用户等实体结构清晰，关系明确</li>
+                            <li><strong>直观的API设计</strong>：Wiki操作接口简洁易懂，参数明确</li>
+                            <li><strong>最小化复杂性</strong>：避免过度复杂的搜索算法和索引结构</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-practices">
+                        <h4>DRY原则应用</h4>
+                        <ul>
+                            <li><strong>统一的存储接口</strong>：文档存储、版本存储、索引存储使用统一接口</li>
+                            <li><strong>共享的搜索逻辑</strong>：向量搜索和全文搜索共享通用的搜索接口</li>
+                            <li><strong>通用的操作变换</strong>：协作编辑的操作变换算法可复用</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-practices">
+                        <h4>YAGNI原则应用</h4>
+                        <ul>
+                            <li><strong>按需功能实现</strong>：只实现当前需要的Wiki功能特性</li>
+                            <li><strong>渐进式功能扩展</strong>：从基础Wiki开始，逐步添加高级功能</li>
+                            <li><strong>避免过度优化</strong>：不需要的复杂搜索算法暂不实现</li>
+                        </ul>
+                    </div>
+
+                    <h3>协作编辑最佳实践</h3>
+                    <div class="card">
+                        <h4>操作变换算法</h4>
+                        <div class="code-block">
+class OptimizedOperationalTransform:
+    """优化的操作变换算法"""
+
+    def __init__(self):
+        self.operation_cache = {}
+        self.transform_cache = {}
+
+    async def transform_concurrent_operations(self,
+                                            operations: List[TextOperation]) -> List[TextOperation]:
+        """变换并发操作"""
+        if len(operations) <= 1:
+            return operations
+
+        # 使用缓存提高性能
+        cache_key = self._generate_cache_key(operations)
+        if cache_key in self.transform_cache:
+            return self.transform_cache[cache_key]
+
+        # 按时间戳排序
+        sorted_ops = sorted(operations, key=lambda op: op.timestamp)
+
+        # 依次变换操作
+        transformed_ops = [sorted_ops[0]]
+        for i in range(1, len(sorted_ops)):
+            current_op = sorted_ops[i]
+
+            # 与之前的所有操作进行变换
+            for prev_op in transformed_ops:
+                current_op, _ = OperationalTransform.transform(current_op, prev_op)
+
+            transformed_ops.append(current_op)
+
+        # 缓存结果
+        self.transform_cache[cache_key] = transformed_ops
+
+        return transformed_ops
+
+    def _generate_cache_key(self, operations: List[TextOperation]) -> str:
+        """生成缓存键"""
+        op_signatures = [
+            f"{op.type.value}_{op.position}_{len(op.content)}_{op.timestamp.timestamp()}"
+            for op in operations
+        ]
+        return "_".join(sorted(op_signatures))
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>实时协作性能优化</h4>
+                        <div class="code-block">
+class CollaborationOptimizer:
+    """协作性能优化器"""
+
+    def __init__(self):
+        self.batch_size = 10
+        self.batch_timeout = 0.1  # 100ms
+        self.pending_operations = []
+
+    async def batch_operations(self, operation: TextOperation) -> None:
+        """批量处理操作"""
+        self.pending_operations.append(operation)
+
+        if len(self.pending_operations) >= self.batch_size:
+            await self._process_batch()
+        else:
+            # 设置超时处理
+            asyncio.create_task(self._timeout_process())
+
+    async def _timeout_process(self):
+        """超时批量处理"""
+        await asyncio.sleep(self.batch_timeout)
+        if self.pending_operations:
+            await self._process_batch()
+
+    async def _process_batch(self):
+        """处理操作批次"""
+        if not self.pending_operations:
+            return
+
+        batch = self.pending_operations.copy()
+        self.pending_operations.clear()
+
+        # 批量应用操作
+        try:
+            transformed_ops = await self._transform_batch(batch)
+            await self._apply_operations(transformed_ops)
+        except Exception as e:
+            print(f"Error processing batch: {e}")
+            # 重新添加待处理操作
+            self.pending_operations.extend(batch)
+
+    async def _transform_batch(self, operations: List[TextOperation]) -> List[TextOperation]:
+        """变换操作批次"""
+        # 使用优化的批量变换算法
+        return await self._optimized_transform(operations)
+
+    async def _apply_operations(self, operations: List[TextOperation]):
+        """批量应用操作"""
+        # 批量应用到文档
+        pass
+                        </div>
+                    </div>
+                </section>
+
+                <section id="related-docs" class="section">
+                    <h2>相关规范文档</h2>
+
+                    <div class="card">
+                        <h4>核心设计文档</h4>
+                        <ul>
+                            <li><strong>Collaborative Wiki Architecture</strong> - 协作式Wiki架构设计文档</li>
+                            <li><strong>Vector Search Implementation Guide</strong> - 向量搜索实现指南</li>
+                            <li><strong>Knowledge Graph Construction</strong> - 知识图谱构建规范</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>实现指南</h4>
+                        <ul>
+                            <li><strong>Operational Transform Algorithms</strong> - 操作变换算法详解</li>
+                            <li><strong>Real-time Collaboration Patterns</strong> - 实时协作模式实现</li>
+                            <li><strong>Search Index Optimization</strong> - 搜索索引优化策略</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>测试文档</h4>
+                        <ul>
+                            <li><strong>Wiki System Testing Strategy</strong> - Wiki系统测试策略</li>
+                            <li><strong>Collaboration Testing Framework</strong> - 协作功能测试框架</li>
+                            <li><strong>Search Performance Benchmarks</strong> - 搜索性能基准测试</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>运维文档</h4>
+                        <ul>
+                            <li><strong>Wiki System Deployment Guide</strong> - Wiki系统部署指南</li>
+                            <li><strong>Search Index Maintenance</strong> - 搜索索引维护流程</li>
+                            <li><strong>Collaboration Server Scaling</strong> - 协作服务器扩展方案</li>
+                        </ul>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <footer class="navigation-footer">
+        <h3>模块导航</h3>
+        <div class="nav-links">
+            <a href="P1_PERSISTENCE.html">P1 数据持久化</a>
+            <a href="P2_KNOWLEDGE_MANAGEMENT.html">P2 知识管理</a>
+            <a href="P3_MODEL_PROVIDER.html">P3 模型提供商</a>
+            <a href="P4_ROLE_MANAGER.html">P4 角色管理</a>
+            <a href="P5_AGENT_ENGINE.html">P5 智能体引擎</a>
+            <a href="P6_TERMINAL_INTERFACE.html">P6 终端界面</a>
+            <a href="P7_GUI_INTERFACE.html">P7 图形界面</a>
+            <a href="P8_DEBATE_SYSTEM.html">P8 辩论系统</a>
+            <a href="MODULE_WIKI_KNOWLEDGE.html">Wiki知识管理</a>
+            <a href="MODULE_CLAUDE_SKILLS.html">Claude技能</a>
+            <a href="DOCUMENT_DRIVEN_LEARNING_PLATFORM.html">返回学习平台</a>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>

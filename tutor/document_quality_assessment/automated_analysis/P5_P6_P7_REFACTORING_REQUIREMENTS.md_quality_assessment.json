@@ -1,0 +1,114 @@
+{
+  "document_metadata": {
+    "file_path": "D:\\daip\\refactdoc\\docs\\specs\\P5_P6_P7_REFACTORING_REQUIREMENTS.md",
+    "file_name": "P5_P6_P7_REFACTORING_REQUIREMENTS.md",
+    "file_size": 16107,
+    "creation_date": "2025-10-31T21:20:11.207541",
+    "modification_date": "2025-10-31T21:20:11.208540",
+    "document_hash": "924f44986c601bfdd094e059d0a69738",
+    "encoding": "utf-8"
+  },
+  "document_type": "component",
+  "overall_score": 79.55,
+  "quality_level": "average",
+  "dimensions": {
+    "清晰度与精确性": {
+      "name": "清晰度与精确性",
+      "weight": 0.25,
+      "score": 50.0,
+      "max_score": 100.0,
+      "issues": [
+        "发现 7 处模糊表达: 优化|改进|完善|增强",
+        "发现 33 处模糊表达: 支持|包括|包含等",
+        "发现 2 个长句（超过100字符），影响可读性"
+      ],
+      "suggestions": [
+        "拆分长句，提高文档可读性"
+      ]
+    },
+    "逻辑一致性": {
+      "name": "逻辑一致性",
+      "weight": 0.2,
+      "score": 100.0,
+      "max_score": 100.0,
+      "issues": [],
+      "suggestions": [
+        "文档逻辑一致性良好，未发现明显矛盾"
+      ]
+    },
+    "完整性": {
+      "name": "完整性",
+      "weight": 0.2,
+      "score": 100.0,
+      "max_score": 100.0,
+      "issues": [],
+      "suggestions": [
+        "文档结构完整，覆盖了关键要素"
+      ]
+    },
+    "标准化": {
+      "name": "标准化",
+      "weight": 0.15,
+      "score": 55.0,
+      "max_score": 100.0,
+      "issues": [
+        "列表格式不一致，建议统一使用同一种列表格式",
+        "发现术语大小写不一致：tui, gui, api, arch, compat, abc, mvvm, iso, risk",
+        "文档元数据不完整，缺少：作者, version, date等"
+      ],
+      "suggestions": [
+        "统一列表格式，使用一致的符号或编号",
+        "统一术语的大小写使用规范",
+        "完善文档元信息，包括版本、日期、作者、状态等"
+      ]
+    },
+    "可维护性": {
+      "name": "可维护性",
+      "weight": 0.1,
+      "score": 88.0,
+      "max_score": 100.0,
+      "issues": [
+        "缺少变更记录或更新历史"
+      ],
+      "suggestions": [
+        "添加变更记录章节，跟踪文档演化历史"
+      ]
+    },
+    "实用性": {
+      "name": "实用性",
+      "weight": 0.1,
+      "score": 100.0,
+      "max_score": 100.0,
+      "issues": [],
+      "suggestions": [
+        "技术术语较多，建议增加技术可行性分析",
+        "文档实用性考虑较为全面"
+      ]
+    }
+  },
+  "critical_issues": [
+    "发现 7 处模糊表达: 优化|改进|完善|增强",
+    "发现 33 处模糊表达: 支持|包括|包含等",
+    "发现 2 个长句（超过100字符），影响可读性",
+    "列表格式不一致，建议统一使用同一种列表格式",
+    "发现术语大小写不一致：tui, gui, api, arch, compat, abc, mvvm, iso, risk",
+    "文档元数据不完整，缺少：作者, version, date等",
+    "缺少变更记录或更新历史"
+  ],
+  "improvement_suggestions": [
+    "拆分长句，提高文档可读性",
+    "文档逻辑一致性良好，未发现明显矛盾",
+    "文档结构完整，覆盖了关键要素",
+    "统一列表格式，使用一致的符号或编号",
+    "统一术语的大小写使用规范",
+    "完善文档元信息，包括版本、日期、作者、状态等",
+    "添加变更记录章节，跟踪文档演化历史",
+    "技术术语较多，建议增加技术可行性分析",
+    "文档实用性考虑较为全面"
+  ],
+  "assessment_date": "2025-12-08T20:43:14.787166",
+  "version_info": {
+    "version": "1.0",
+    "date": "2025-10-31"
+  }
+}

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单交互测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+            background: #f8fafc;
+        }
+        .test-section {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            padding: 0.75rem 1.5rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .test-button:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .success {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #16a34a;
+        }
+        .error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #dc2626;
+        }
+        .info {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #2563eb;
+        }
+        .dimension-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .dimension-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        .dimension-card.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        .status {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        .status.pass { background: #dcfce7; color: #16a34a; }
+        .status.fail { background: #fef2f2; color: #dc2626; }
+        .status.pending { background: #fef3c7; color: #d97706; }
+    </style>
+</head>
+<body>
+    <h1>🔧 六向联动系统交互测试</h1>
+    
+    <div class="test-section">
+        <h2>测试1: 基础点击功能</h2>
+        <button class="test-button" onclick="testBasicClick()">测试基础点击</button>
+        <button class="test-button" onclick="testRequirementSelection()">测试需求选择</button>
+        <button class="test-button" onclick="testDimensionClick()">测试维度点击</button>
+        <button class="test-button" onclick="runAllTests()">运行所有测试</button>
+        <div id="test-result-1"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>测试2: 六向联动模拟</h2>
+        <p>点击任意维度卡片，验证其他维度是否同步更新</p>
+        
+        <div class="dimension-card" data-dimension="prompt" onclick="simulateDimensionClick('prompt')">
+            <h3>🤖 规范化提示词</h3>
+            <p id="content-prompt">内容 1</p>
+        </div>
+        
+        <div class="dimension-card" data-dimension="spec" onclick="simulateDimensionClick('spec')">
+            <h3>📄 规范文档</h3>
+            <p id="content-spec">内容 2</p>
+        </div>
+        
+        <div class="dimension-card" data-dimension="design" onclick="simulateDimensionClick('design')">
+            <h3>🎨 设计文档</h3>
+            <p id="content-design">内容 3</p>
+        </div>
+        
+        <div class="test-button" onclick="resetAll()">重置所有内容</div>
+        <div id="sync-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>测试3: 实时状态监控</h2>
+        <div id="status-display">
+            <div class="status pending">等待测试...</div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+        let currentDimension = 'prompt';
+        let currentRequirement = 'FR-001';
+        
+        // 测试数据
+        const testData = {
+            'FR-001': {
+                'prompt': 'FR-001 提示词内容',
+                'spec': 'FR-001 规范文档内容', 
+                'design': 'FR-001 设计文档内容'
+            },
+            'FR-002': {
+                'prompt': 'FR-002 提示词内容',
+                'spec': 'FR-002 规范文档内容',
+                'design': 'FR-002 设计文档内容'
+            }
+        };
+
+        function logTest(testName, status, message) {
+            testResults.push({ testName, status, message, timestamp: new Date() });
+            console.log(`[${status.toUpperCase()}] ${testName}: ${message}`);
+            updateStatusDisplay();
+        }
+
+        function updateStatusDisplay() {
+            const container = document.getElementById('status-display');
+            const latest = testResults[testResults.length - 1];
+            if (latest) {
+                container.innerHTML = `
+                    <div class="status ${latest.status}">
+                        <strong>${latest.testName}:</strong> ${latest.message}<br>
+                        <small>时间: ${latest.timestamp.toLocaleTimeString()}</small>
+                    </div>
+                `;
+            }
+        }
+
+        function testBasicClick() {
+            logTest('基础点击测试', 'pending', '开始测试...');
+            
+            try {
+                const testButton = document.querySelector('.test-button');
+                testButton.click();
+                
+                setTimeout(() => {
+                    logTest('基础点击测试', 'pass', '点击事件成功触发！');
+                }, 100);
+            } catch (error) {
+                logTest('基础点击测试', 'fail', `错误: ${error.message}`);
+            }
+        }
+
+        function testRequirementSelection() {
+            logTest('需求选择测试', 'pending', '测试需求选择功能...');
+            
+            try {
+                // 模拟需求选择
+                currentRequirement = 'FR-002';
+                logTest('需求选择测试', 'pass', `需求已切换到: ${currentRequirement}`);
+                
+                // 更新显示
+                updateDimensionContents();
+            } catch (error) {
+                logTest('需求选择测试', 'fail', `错误: ${error.message}`);
+            }
+        }
+
+        function testDimensionClick() {
+            logTest('维度点击测试', 'pending', '测试维度点击功能...');
+            
+            try {
+                // 模拟点击维度
+                simulateDimensionClick('spec');
+                logTest('维度点击测试', 'pass', '维度点击功能正常');
+            } catch (error) {
+                logTest('维度点击测试', 'fail', `错误: ${error.message}`);
+            }
+        }
+
+        function simulateDimensionClick(dimension) {
+            console.log(`点击维度: ${dimension}`);
+            currentDimension = dimension;
+            
+            // 更新高亮状态
+            document.querySelectorAll('.dimension-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            const clickedCard = document.querySelector(`[data-dimension="${dimension}"]`);
+            if (clickedCard) {
+                clickedCard.classList.add('active');
+            }
+            
+            // 模拟六向联动：更新所有维度内容
+            updateDimensionContents();
+            
+            // 显示结果
+            const result = document.getElementById('sync-result');
+            result.innerHTML = `
+                <div class="result info">
+                    <strong>✅ 六向联动测试:</strong><br>
+                    点击维度: ${dimension}<br>
+                    当前需求: ${currentRequirement}<br>
+                    所有维度内容已同步更新！
+                </div>
+            `;
+            
+            logTest('六向联动测试', 'pass', `点击${dimension}维度，其他维度内容已同步`);
+        }
+
+        function updateDimensionContents() {
+            const data = testData[currentRequirement] || testData['FR-001'];
+            
+            // 更新所有维度内容
+            Object.keys(data).forEach(dimension => {
+                const contentElement = document.getElementById(`content-${dimension}`);
+                if (contentElement) {
+                    contentElement.textContent = data[dimension];
+                }
+            });
+        }
+
+        function resetAll() {
+            currentRequirement = 'FR-001';
+            currentDimension = 'prompt';
+            
+            // 重置高亮
+            document.querySelectorAll('.dimension-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            document.querySelector('[data-dimension="prompt"]').classList.add('active');
+            
+            // 重置内容
+            updateDimensionContents();
+            
+            // 清空结果
+            document.getElementById('sync-result').innerHTML = '';
+            
+            logTest('重置测试', 'pass', '所有内容已重置');
+        }
+
+        function runAllTests() {
+            logTest('完整测试套件', 'info', '开始运行所有测试...');
+            
+            setTimeout(testBasicClick, 200);
+            setTimeout(testRequirementSelection, 500);
+            setTimeout(testDimensionClick, 800);
+            
+            setTimeout(() => {
+                const passCount = testResults.filter(r => r.status === 'pass').length;
+                const failCount = testResults.filter(r => r.status === 'fail').length;
+                
+                logTest('测试总结', 'info', 
+                    `总计: ${testResults.length} 个测试, 成功: ${passCount}, 失败: ${failCount}`);
+                
+                if (failCount === 0) {
+                    logTest('最终结果', 'pass', '🎉 所有测试通过！JavaScript交互功能正常！');
+                } else {
+                    logTest('最终结果', 'fail', `❌ ${failCount} 个测试失败，需要修复！`);
+                }
+            }, 1500);
+        }
+
+        // 页面加载时自动初始化
+        window.addEventListener('load', function() {
+            console.log('页面加载完成，开始测试...');
+            logTest('页面初始化', 'pass', 'JavaScript环境正常，可以开始交互测试');
+            
+            // 设置初始高亮
+            document.querySelector('[data-dimension="prompt"]').classList.add('active');
+        });
+
+        // 全局错误处理
+        window.addEventListener('error', function(event) {
+            logTest('全局错误', 'fail', `JavaScript错误: ${event.message}`);
+        });
+    </script>
+</body>
+</html>

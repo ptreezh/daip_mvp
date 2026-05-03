@@ -1,0 +1,14 @@
+{
+  "total_references": 0,
+  "collaboration_network": {},
+  "module_collaboration": {},
+  "reference_types": {},
+  "dependency_graph": {},
+  "collaboration_metrics": {
+    "total_documents": 271,
+    "documents_with_references": 0,
+    "documents_referenced": 0,
+    "collaboration_density": 0.0,
+    "average_references_per_doc": 0.0
+  }
+}

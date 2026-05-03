@@ -16,7 +16,127 @@
       ],
       "word_count": 2490,
       "reading_time": 12
+    },
+    {
+      "title": "测试页面",
+      "content": "这是一个测试页面",
+      "file_path": "wiki\\测试页面.md",
+      "created_at": "2025-12-09T18:33:36.533346",
+      "modified_at": "2025-12-09T18:33:36.533346",
+      "tags": [],
+      "word_count": 1,
+      "reading_time": 1
+    },
+    {
+      "title": "AI伦理问题探讨",
+      "content": "# AI伦理问题探讨\\n\\n这个页面探讨人工智能的伦理问题。",
+      "file_path": "wiki\\ai伦理问题探讨.md",
+      "created_at": "2025-12-09T18:34:34.551544",
+      "modified_at": "2025-12-09T18:34:34.551544",
+      "tags": [],
+      "word_count": 2,
+      "reading_time": 1
+    },
+    {
+      "title": "测试验证页面",
+      "content": "这是验证修复的测试页面",
+      "file_path": "wiki\\测试验证页面.md",
+      "created_at": "2025-12-09T18:38:55.156289",
+      "modified_at": "2025-12-09T18:38:55.156289",
+      "tags": [],
+      "word_count": 1,
+      "reading_time": 1
+    },
+    {
+      "title": "端到端测试页面-1765279126",
+      "content": "# 端到端测试页面\n\n这是通过端到端测试创建的维基页面。\n\n## 测试内容\n- Wiki功能完整\n- 内容保存正确\n- 标签功能正常\n- 搜索功能可用\n\n创建时间: 2025-12-09T19:18:46.790434\n",
+      "file_path": "wiki\\端到端测试页面_1765279126.md",
+      "created_at": "2025-12-09T19:18:50.386861",
+      "modified_at": "2025-12-09T19:18:50.386861",
+      "tags": [
+        "e2e-test",
+        "automation"
+      ],
+      "word_count": 15,
+      "reading_time": 1
+    },
+    {
+      "title": "e2e-test-page-1765279167",
+      "content": "This is an end-to-end test page created at 2025-12-09T19:19:27.045564.",
+      "file_path": "wiki\\e2e_test_page_1765279167.md",
+      "created_at": "2025-12-09T19:19:42.827029",
+      "modified_at": "2025-12-09T19:19:42.827029",
+      "tags": [
+        "e2e-test",
+        "automation"
+      ],
+      "word_count": 9,
+      "reading_time": 1
+    },
+    {
+      "title": "测试体验新系统",
+      "content": "这是一个测试新系统的页面",
+      "file_path": "wiki\\测试体验新系统.md",
+      "created_at": "2025-12-09T21:07:34.299166",
+      "modified_at": "2025-12-09T21:07:34.299166",
+      "tags": [],
+      "word_count": 1,
+      "reading_time": 1
+    },
+    {
+      "title": "端到端测试页面",
+      "content": "# 端到端测试\\n\\n这是一个用于测试系统功能的页面。",
+      "file_path": "wiki\\端到端测试页面.md",
+      "created_at": "2025-12-09T21:42:34.272697",
+      "modified_at": "2025-12-09T21:42:34.272697",
+      "tags": [
+        "e2e",
+        "test",
+        "integration"
+      ],
+      "word_count": 2,
+      "reading_time": 1
+    },
+    {
+      "title": "验证修复",
+      "content": "验证CLI输出修复",
+      "file_path": "wiki\\验证修复.md",
+      "created_at": "2025-12-09T22:37:18.154084",
+      "modified_at": "2025-12-09T22:37:18.154084",
+      "tags": [],
+      "word_count": 1,
+      "reading_time": 1
+    },
+    {
+      "title": "测试直接创建",
+      "content": "# 自由意志与决定论\n\n这是一个关于自由意志与决定论的维基页面。",
+      "file_path": "wiki\\测试直接创建.md",
+      "created_at": "2025-12-12T22:26:56.919956",
+      "modified_at": "2025-12-12T22:26:56.919956",
+      "tags": [],
+      "word_count": 3,
+      "reading_time": 1
+    },
+    {
+      "title": "显示修复测试",
+      "content": "# 显示修复测试\n\n这应该在创建时被修复。",
+      "file_path": "wiki\\显示修复测试.md",
+      "created_at": "2025-12-12T22:28:37.130411",
+      "modified_at": "2025-12-12T22:28:37.130411",
+      "tags": [],
+      "word_count": 3,
+      "reading_time": 1
+    },
+    {
+      "title": "自由意志与决定论",
+      "content": "# 自由意志与决定论\n\n自由意志与决定论是哲学中的一个经典问题，探讨人类行为是否真正自由，还是受到因果关系的决定。",
+      "file_path": "wiki\\自由意志与决定论.md",
+      "created_at": "2025-12-12T22:29:28.366354",
+      "modified_at": "2025-12-12T22:29:28.366354",
+      "tags": [],
+      "word_count": 3,
+      "reading_time": 1
     }
   ],
-  "last_updated": "2025-11-24T09:34:09.358339"
+  "last_updated": "2025-12-12T22:29:28.367267"
 }

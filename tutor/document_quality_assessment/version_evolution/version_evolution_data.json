@@ -1,0 +1,621 @@
+{
+  "document_families": {
+    "CLAUDE.md": {
+      "base_name": "CLAUDE.md",
+      "versions": [
+        {
+          "version": "unknown",
+          "file_name": "CLAUDE.md",
+          "file_path": "D:\\daip\\refactdoc\\litellm\\CLAUDE.md",
+          "modification_date": "2025-09-01T15:50:40.708860",
+          "file_size": 3685,
+          "version_source": "unknown"
+        },
+        {
+          "version": "23.870",
+          "file_name": "CLAUDE.md",
+          "file_path": "D:\\daip\\refactdoc\\CLAUDE.md",
+          "modification_date": "2025-12-04T16:32:30.829386",
+          "file_size": 7805,
+          "version_source": "content"
+        }
+      ],
+      "version_count": 2,
+      "time_span_days": 94,
+      "evolution_pattern": "minor_updates"
+    },
+    "IMPLEMENTATION_PLAN.md": {
+      "base_name": "IMPLEMENTATION_PLAN.md",
+      "versions": [
+        {
+          "version": "1.0",
+          "file_name": "IMPLEMENTATION_PLAN.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\newP5\\IMPLEMENTATION_PLAN.md",
+          "modification_date": "2025-10-31T21:31:07.079355",
+          "file_size": 14077,
+          "version_source": "content"
+        },
+        {
+          "version": "1.0",
+          "file_name": "IMPLEMENTATION_PLAN.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\newP7\\IMPLEMENTATION_PLAN.md",
+          "modification_date": "2025-10-31T21:34:24.058746",
+          "file_size": 17726,
+          "version_source": "content"
+        },
+        {
+          "version": "1.1",
+          "file_name": "IMPLEMENTATION_PLAN.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\newP6\\IMPLEMENTATION_PLAN.md",
+          "modification_date": "2025-11-02T10:10:11.919168",
+          "file_size": 14943,
+          "version_source": "content"
+        },
+        {
+          "version": "3.9",
+          "file_name": "IMPLEMENTATION_PLAN.md",
+          "file_path": "D:\\daip\\refactdoc\\IMPLEMENTATION_PLAN.md",
+          "modification_date": "2025-11-30T12:20:17.801129",
+          "file_size": 8869,
+          "version_source": "content"
+        }
+      ],
+      "version_count": 4,
+      "time_span_days": 29,
+      "evolution_pattern": "major_updates"
+    },
+    "spec.md": {
+      "base_name": "spec.md",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\.claude\\commands\\spec.md",
+          "modification_date": "2025-10-31T22:03:56.946539",
+          "file_size": 2038,
+          "version_source": "content"
+        },
+        {
+          "version": "unknown",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\enhanced_doc_tools\\spec.md",
+          "modification_date": "2025-11-07T10:24:33.157043",
+          "file_size": 5894,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\intent_recognition_debate_history\\spec.md",
+          "modification_date": "2025-11-07T14:38:31.560795",
+          "file_size": 4117,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\context_aware_intent_clarification\\spec.md",
+          "modification_date": "2025-11-19T20:10:39.807313",
+          "file_size": 5407,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\spec.md",
+          "modification_date": "2025-11-20T09:36:11.786368",
+          "file_size": 8139,
+          "version_source": "unknown"
+        },
+        {
+          "version": "0.7",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\comprehensive_intent_recognition\\spec.md",
+          "modification_date": "2025-11-20T09:46:48.120463",
+          "file_size": 9633,
+          "version_source": "content"
+        },
+        {
+          "version": "unknown",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\enhanced_doc_knowledge_tools\\spec.md",
+          "modification_date": "2025-11-20T09:46:48.123466",
+          "file_size": 7592,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\spec.md",
+          "modification_date": "2025-11-20T09:46:48.125462",
+          "file_size": 5851,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\skills_extension_system\\spec.md",
+          "modification_date": "2025-11-20T09:59:09.402868",
+          "file_size": 7597,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\skill_integration_enhancement\\spec.md",
+          "modification_date": "2025-11-20T17:12:21.494509",
+          "file_size": 7647,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\complete_system_integration\\spec.md",
+          "modification_date": "2025-11-20T20:19:50.968406",
+          "file_size": 10944,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\spec.md",
+          "modification_date": "2025-11-20T21:14:03.177379",
+          "file_size": 12368,
+          "version_source": "unknown"
+        },
+        {
+          "version": "3.5",
+          "file_name": "spec.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\full_claude_skills_implementation\\spec.md",
+          "modification_date": "2025-11-20T23:18:10.866980",
+          "file_size": 11234,
+          "version_source": "content"
+        }
+      ],
+      "version_count": 13,
+      "time_span_days": 20,
+      "evolution_pattern": "major_updates"
+    },
+    "quickstart.md": {
+      "base_name": "quickstart.md",
+      "versions": [
+        {
+          "version": "unknown",
+          "file_name": "quickstart.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\quickstart.md",
+          "modification_date": "2025-11-20T09:44:50.625617",
+          "file_size": 5513,
+          "version_source": "unknown"
+        },
+        {
+          "version": "1.0",
+          "file_name": "quickstart.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\skills_extension_system\\quickstart.md",
+          "modification_date": "2025-11-20T10:08:43.263339",
+          "file_size": 6535,
+          "version_source": "content"
+        },
+        {
+          "version": "unknown",
+          "file_name": "quickstart.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\quickstart.md",
+          "modification_date": "2025-11-20T21:24:54.758573",
+          "file_size": 6378,
+          "version_source": "unknown"
+        }
+      ],
+      "version_count": 3,
+      "time_span_days": 0,
+      "evolution_pattern": "minor_updates"
+    },
+    "tasks.md": {
+      "base_name": "tasks.md",
+      "versions": [
+        {
+          "version": "unknown",
+          "file_name": "tasks.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\tasks.md",
+          "modification_date": "2025-11-06T13:54:53.500524",
+          "file_size": 10704,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "tasks.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\enhanced_doc_tools\\tasks.md",
+          "modification_date": "2025-11-07T10:28:57.387556",
+          "file_size": 15618,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "tasks.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\intent_recognition_debate_history\\tasks.md",
+          "modification_date": "2025-11-07T14:43:10.583123",
+          "file_size": 12328,
+          "version_source": "unknown"
+        },
+        {
+          "version": "0.7",
+          "file_name": "tasks.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\comprehensive_intent_recognition\\tasks.md",
+          "modification_date": "2025-11-07T14:54:22.272837",
+          "file_size": 20144,
+          "version_source": "content"
+        },
+        {
+          "version": "unknown",
+          "file_name": "tasks.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\enhanced_doc_knowledge_tools\\tasks.md",
+          "modification_date": "2025-11-07T18:20:10.301103",
+          "file_size": 15520,
+          "version_source": "unknown"
+        },
+        {
+          "version": "1.1",
+          "file_name": "tasks.md",
+          "file_path": "D:\\daip\\refactdoc\\tasks.md",
+          "modification_date": "2025-11-09T11:40:14.359767",
+          "file_size": 5471,
+          "version_source": "content"
+        },
+        {
+          "version": "unknown",
+          "file_name": "tasks.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\context_aware_intent_clarification\\tasks.md",
+          "modification_date": "2025-11-19T20:12:23.758795",
+          "file_size": 9590,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "tasks.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\tasks.md",
+          "modification_date": "2025-11-20T09:43:18.743665",
+          "file_size": 14266,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "tasks.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\skills_extension_system\\tasks.md",
+          "modification_date": "2025-11-20T10:04:51.249029",
+          "file_size": 13327,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "tasks.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\tasks.md",
+          "modification_date": "2025-11-20T21:22:56.512381",
+          "file_size": 15783,
+          "version_source": "unknown"
+        }
+      ],
+      "version_count": 10,
+      "time_span_days": 14,
+      "evolution_pattern": "major_updates"
+    },
+    "data-model.md": {
+      "base_name": "data-model.md",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "file_name": "data-model.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\skills_extension_system\\data-model.md",
+          "modification_date": "2025-11-20T10:07:08.008395",
+          "file_size": 11671,
+          "version_source": "content"
+        },
+        {
+          "version": "1.0.0",
+          "file_name": "data-model.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\data-model.md",
+          "modification_date": "2025-11-20T21:19:15.116194",
+          "file_size": 13663,
+          "version_source": "content"
+        }
+      ],
+      "version_count": 2,
+      "time_span_days": 0,
+      "evolution_pattern": "minor_updates"
+    },
+    "plan.md": {
+      "base_name": "plan.md",
+      "versions": [
+        {
+          "version": "3.9",
+          "file_name": "plan.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\improve_tui_debate_features\\plan.md",
+          "modification_date": "2025-11-06T13:24:33.986493",
+          "file_size": 3228,
+          "version_source": "content"
+        },
+        {
+          "version": "3.9",
+          "file_name": "plan.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\enhanced_doc_tools\\plan.md",
+          "modification_date": "2025-11-07T10:25:50.885123",
+          "file_size": 3978,
+          "version_source": "content"
+        },
+        {
+          "version": "3.9",
+          "file_name": "plan.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\intent_recognition_debate_history\\plan.md",
+          "modification_date": "2025-11-07T14:40:11.754601",
+          "file_size": 3936,
+          "version_source": "content"
+        },
+        {
+          "version": "3.9",
+          "file_name": "plan.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\comprehensive_intent_recognition\\plan.md",
+          "modification_date": "2025-11-07T14:50:56.103745",
+          "file_size": 4129,
+          "version_source": "content"
+        },
+        {
+          "version": "3.9",
+          "file_name": "plan.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\enhanced_doc_knowledge_tools\\plan.md",
+          "modification_date": "2025-11-07T18:15:57.278786",
+          "file_size": 4712,
+          "version_source": "content"
+        },
+        {
+          "version": "3.8",
+          "file_name": "plan.md",
+          "file_path": "D:\\daip\\refactdoc\\plan.md",
+          "modification_date": "2025-11-08T14:44:00.222331",
+          "file_size": 5836,
+          "version_source": "content"
+        },
+        {
+          "version": "3.9",
+          "file_name": "plan.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\context_aware_intent_clarification\\plan.md",
+          "modification_date": "2025-11-19T20:11:19.713726",
+          "file_size": 3526,
+          "version_source": "content"
+        },
+        {
+          "version": "3.9",
+          "file_name": "plan.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\plan.md",
+          "modification_date": "2025-11-20T09:37:32.885334",
+          "file_size": 4732,
+          "version_source": "content"
+        },
+        {
+          "version": "3.9",
+          "file_name": "plan.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\skills_extension_system\\plan.md",
+          "modification_date": "2025-11-20T10:00:30.105589",
+          "file_size": 4404,
+          "version_source": "content"
+        },
+        {
+          "version": "3.9",
+          "file_name": "plan.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\skill_integration_enhancement\\plan.md",
+          "modification_date": "2025-11-20T17:13:51.656237",
+          "file_size": 4477,
+          "version_source": "content"
+        },
+        {
+          "version": "3.9",
+          "file_name": "plan.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\claude_skills_compatibility\\plan.md",
+          "modification_date": "2025-11-20T20:54:09.209394",
+          "file_size": 4452,
+          "version_source": "content"
+        }
+      ],
+      "version_count": 11,
+      "time_span_days": 14,
+      "evolution_pattern": "minor_updates"
+    },
+    "research.md": {
+      "base_name": "research.md",
+      "versions": [
+        {
+          "version": "unknown",
+          "file_name": "research.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\personal_assistant_knowledge_enhancement\\research.md",
+          "modification_date": "2025-11-20T09:38:55.734765",
+          "file_size": 7267,
+          "version_source": "unknown"
+        },
+        {
+          "version": "unknown",
+          "file_name": "research.md",
+          "file_path": "D:\\daip\\refactdoc\\specs\\skills_extension_system\\research.md",
+          "modification_date": "2025-11-20T10:02:03.172265",
+          "file_size": 6962,
+          "version_source": "unknown"
+        }
+      ],
+      "version_count": 2,
+      "time_span_days": 0,
+      "evolution_pattern": "unversioned"
+    },
+    "AGENTS.md": {
+      "base_name": "AGENTS.md",
+      "versions": [
+        {
+          "version": "unknown",
+          "file_name": "AGENTS.md",
+          "file_path": "D:\\daip\\refactdoc\\litellm\\AGENTS.md",
+          "modification_date": "2025-09-01T15:50:40.707781",
+          "file_size": 5311,
+          "version_source": "unknown"
+        },
+        {
+          "version": "3.9",
+          "file_name": "AGENTS.md",
+          "file_path": "D:\\daip\\refactdoc\\AGENTS.md",
+          "modification_date": "2025-11-15T09:25:23.720119",
+          "file_size": 5362,
+          "version_source": "content"
+        }
+      ],
+      "version_count": 2,
+      "time_span_days": 74,
+      "evolution_pattern": "minor_updates"
+    },
+    "COMPLIANCE_CHECKLIST.md": {
+      "base_name": "COMPLIANCE_CHECKLIST.md",
+      "versions": [
+        {
+          "version": "1.0",
+          "file_name": "COMPLIANCE_CHECKLIST.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\newP5\\COMPLIANCE_CHECKLIST.md",
+          "modification_date": "2025-10-31T21:29:49.170192",
+          "file_size": 9702,
+          "version_source": "content"
+        },
+        {
+          "version": "1.0",
+          "file_name": "COMPLIANCE_CHECKLIST.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\newP6\\COMPLIANCE_CHECKLIST.md",
+          "modification_date": "2025-10-31T21:35:03.839686",
+          "file_size": 9199,
+          "version_source": "content"
+        },
+        {
+          "version": "1.0",
+          "file_name": "COMPLIANCE_CHECKLIST.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\newP7\\COMPLIANCE_CHECKLIST.md",
+          "modification_date": "2025-10-31T21:35:26.400990",
+          "file_size": 9756,
+          "version_source": "content"
+        }
+      ],
+      "version_count": 3,
+      "time_span_days": 0,
+      "evolution_pattern": "minor_updates"
+    },
+    "REFACTORING_REQUIREMENTS.md": {
+      "base_name": "REFACTORING_REQUIREMENTS.md",
+      "versions": [
+        {
+          "version": "1.0",
+          "file_name": "REFACTORING_REQUIREMENTS.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\newP5\\REFACTORING_REQUIREMENTS.md",
+          "modification_date": "2025-10-31T21:30:35.911209",
+          "file_size": 11056,
+          "version_source": "content"
+        },
+        {
+          "version": "1.0",
+          "file_name": "REFACTORING_REQUIREMENTS.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\newP6\\REFACTORING_REQUIREMENTS.md",
+          "modification_date": "2025-10-31T21:31:43.331286",
+          "file_size": 11576,
+          "version_source": "content"
+        },
+        {
+          "version": "1.0",
+          "file_name": "REFACTORING_REQUIREMENTS.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\newP7\\REFACTORING_REQUIREMENTS.md",
+          "modification_date": "2025-10-31T21:33:50.343366",
+          "file_size": 14564,
+          "version_source": "content"
+        }
+      ],
+      "version_count": 3,
+      "time_span_days": 0,
+      "evolution_pattern": "minor_updates"
+    },
+    "index.md": {
+      "base_name": "index.md",
+      "versions": [
+        {
+          "version": "1.65.4",
+          "file_name": "index.md",
+          "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\release_notes\\v1.65.4-stable\\index.md",
+          "modification_date": "2025-09-01T15:50:43.746365",
+          "file_size": 10511,
+          "version_source": "content"
+        },
+        {
+          "version": "1.73.0",
+          "file_name": "index.md",
+          "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\release_notes\\v1.73.0-stable\\index.md",
+          "modification_date": "2025-09-01T15:50:43.767443",
+          "file_size": 17947,
+          "version_source": "content"
+        },
+        {
+          "version": "1.75.8",
+          "file_name": "index.md",
+          "file_path": "D:\\daip\\refactdoc\\litellm\\docs\\my-website\\release_notes\\v1.75.8\\index.md",
+          "modification_date": "2025-09-01T15:50:43.782466",
+          "file_size": 11835,
+          "version_source": "content"
+        },
+        {
+          "version": "2.0",
+          "file_name": "index.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\index.md",
+          "modification_date": "2025-10-12T15:49:28.463971",
+          "file_size": 3110,
+          "version_source": "content"
+        }
+      ],
+      "version_count": 4,
+      "time_span_days": 40,
+      "evolution_pattern": "major_updates"
+    },
+    "SPEC.md": {
+      "base_name": "SPEC.md",
+      "versions": [
+        {
+          "version": "2.1",
+          "file_name": "SPEC.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\p8_debate_system\\SPEC.md",
+          "modification_date": "2025-09-03T16:54:02.233536",
+          "file_size": 3045,
+          "version_source": "content"
+        },
+        {
+          "version": "3.1",
+          "file_name": "SPEC.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\p_aux_memory\\SPEC.md",
+          "modification_date": "2025-09-04T21:33:59.091032",
+          "file_size": 4322,
+          "version_source": "content"
+        },
+        {
+          "version": "2.1",
+          "file_name": "SPEC.md",
+          "file_path": "D:\\daip\\refactdoc\\docs\\p5_agent_engine\\SPEC.md",
+          "modification_date": "2025-09-13T09:34:25.084230",
+          "file_size": 3395,
+          "version_source": "content"
+        }
+      ],
+      "version_count": 3,
+      "time_span_days": 9,
+      "evolution_pattern": "major_updates"
+    }
+  },
+  "version_statistics": {
+    "total_families": 13,
+    "total_versions": 62,
+    "average_versions_per_family": 4.769230769230769,
+    "evolution_patterns": {
+      "minor_updates": 7,
+      "major_updates": 5,
+      "unversioned": 1
+    },
+    "time_span_distribution": {
+      "short_term": 5,
+      "medium_term": 5,
+      "long_term": 3
+    }
+  },
+  "quality_evolution": {},
+  "timeline_analysis": {}
+}

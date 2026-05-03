@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P8 辩论系统 - 0代码AI规范化编程实践教学</title>
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            height: fit-content;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h3 {
+            color: #9b59b6;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-bottom: 12px;
+        }
+
+        .nav-menu a {
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        .nav-menu a:hover {
+            background: #f4ecf7;
+            color: #9b59b6;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            border-bottom: 3px solid #9b59b6;
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            color: #34495e;
+            margin: 30px 0 15px;
+            font-size: 1.4rem;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 4px solid #9b59b6;
+        }
+
+        .card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .principle-tag {
+            display: inline-block;
+            background: #9b59b6;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 5px;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .debate-diagram {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .participant-box {
+            display: inline-block;
+            background: white;
+            border: 2px solid #9b59b6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .moderator-box {
+            background: #9b59b6;
+            color: white;
+        }
+
+        .best-practices {
+            background: linear-gradient(135deg, #a8e6cf 0%, #dcedc8 100%);
+            color: #2d3748;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .best-practices h4 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .best-practices ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .best-practices li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .best-practices li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #9b59b6;
+            font-weight: bold;
+        }
+
+        .test-example {
+            background: #fef5e7;
+            border: 1px solid #f9e79f;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .navigation-footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 60px;
+        }
+
+        .navigation-footer h3 {
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            background: #9b59b6;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #8e44ad;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 动画控制脚本 -->
+    <script src="animations.js"></script>
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>P8 辩论系统</h1>
+        <p class="subtitle">DAIP-LIVE 多角色智能体辩论协作系统</p>
+    </header>
+
+    <div class="container">
+        <div class="content-grid">
+            <nav class="sidebar">
+                <h3>导航目录</h3>
+                <ul class="nav-menu">
+                    <li><a href="#overview">模块概述</a></li>
+                    <li><a href="#architecture">架构设计</a></li>
+                    <li><a href="#debate-flow">辩论流程</a></li>
+                    <li><a href="#solid-principles">SOLID原则体现</a></li>
+                    <li><a href="#tdd-implementation">TDD实现</a></li>
+                    <li><a href="#code-examples">代码示例</a></li>
+                    <li><a href="#best-practices">最佳实践</a></li>
+                    <li><a href="#related-docs">相关规范文档</a></li>
+                </ul>
+            </nav>
+
+            <main class="main-content">
+                <section id="overview" class="section">
+                    <h2>模块概述</h2>
+                    <div class="card">
+                        <h4>模块职责</h4>
+                        <p>P8辩论系统是DAIP-LIVE中支持多角色智能体进行结构化辩论和协作讨论的核心模块。它允许不同观点的AI智能体就特定议题进行辩论，通过角色分配、观点对立、逻辑推理和最终总结，为用户提供多角度的思考和分析。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>核心功能</h4>
+                        <ul>
+                            <li><strong>多角色辩论</strong>：支持正反方角色的智能体参与辩论</li>
+                            <li><strong>模型分配</strong>：为不同角色分配不同的AI模型和参数</li>
+                            <li><strong>辩论流程控制</strong>：管理辩论的发言顺序和时间控制</li>
+                            <li><strong>观点聚合</strong>：收集和整理各方的观点和论据</li>
+                            <li><strong>辩论记录</strong>：完整记录辩论过程和结果</li>
+                            <li><strong>质量评估</strong>：对辩论质量和逻辑性进行评估</li>
+                        </ul>
+                    </div>
+
+                    <div class="debate-diagram">
+                        <h4>P8辩论系统架构</h4>
+                        <div style="margin: 30px 0;">
+                            <div class="participant-box moderator-box">
+                                <strong>辩论主持人</strong><br>
+                                Moderating Agent<br>
+                                控制流程
+                            </div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div style="font-size: 2rem; color: #9b59b6;">↓</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div class="participant-box">
+                                <strong>正方辩手</strong><br>
+                                Proponent<br>
+                                GPT-4
+                            </div>
+                            <div class="participant-box">
+                                <strong>反方辩手</strong><br>
+                                Opponent<br>
+                                Claude
+                            </div>
+                            <div class="participant-box">
+                                <strong>观察者</strong><br>
+                                Observer<br>
+                                Llama
+                            </div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div style="font-size: 2rem; color: #9b59b6;">↓</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <div class="participant-box">
+                                <strong>辩论结果</strong><br>
+                                Summary<br>
+                                结论汇总
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="architecture" class="section">
+                    <h2>架构设计</h2>
+
+                    <h3>核心组件</h3>
+                    <div class="card">
+                        <h4>1. EnhancedDebateManager</h4>
+                        <p>增强型辩论管理器，负责协调整个辩论流程，管理参与者、控制发言顺序、记录辩论过程。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>2. DebateParticipant</h4>
+                        <p>辩论参与者基类，定义了参与者的基本行为接口，支持正方、反方、观察者等不同角色。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>3. DebateSession</h4>
+                        <p>辩论会话管理，维护辩论的状态、历史记录和参与者信息。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>4. RoleBasedModelAssigner</h4>
+                        <p>基于角色的模型分配器，为不同的辩论角色分配最适合的AI模型和参数。</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>5. DebateEvaluator</h4>
+                        <p>辩论质量评估器，对辩论的逻辑性、论据质量进行评估和打分。</p>
+                    </div>
+
+                    <h3>设计原则应用</h3>
+                    <div class="principle-tag">策略模式</div>
+                    <div class="principle-tag">观察者模式</div>
+                    <div class="principle-tag">状态机模式</div>
+                    <div class="principle-tag">工厂模式</div>
+                    <div class="principle-tag">异步协作</div>
+                </section>
+
+                <section id="debate-flow" class="section">
+                    <h2>辩论流程详解</h2>
+
+                    <h3>结构化辩论流程</h3>
+                    <div class="code-block">
+class DebateFlow(Enum):
+    """辩论流程状态"""
+    INITIALIZING = "initializing"
+    OPENING_STATEMENTS = "opening_statements"
+    REBUTTAL_PHASE = "rebuttal_phase"
+    CROSS_EXAMINATION = "cross_examination"
+    CLOSING_ARGUMENTS = "closing_arguments"
+    DELIBERATION = "deliberation"
+    CONCLUDED = "concluded"
+
+class StructuredDebateFlow:
+    """结构化辩论流程控制器"""
+
+    async def conduct_debate(self, topic: str, participants: List[DebateParticipant]) -> DebateResult:
+        """
+        执行完整的结构化辩论流程
+        """
+        session = DebateSession(topic=topic, participants=participants)
+
+        # 阶段1：开场陈述
+        await self._phase_opening_statements(session)
+
+        # 阶段2：反驳阶段
+        await self._phase_rebuttal(session)
+
+        # 阶段3：交叉质询
+        await self._phase_cross_examination(session)
+
+        # 阶段4：总结陈词
+        await self._phase_closing_arguments(session)
+
+        # 阶段5：审议阶段
+        result = await self._phase_deliberation(session)
+
+        return result
+                    </div>
+
+                    <h3>角色和模型分配策略</h3>
+                    <div class="code-block">
+class RoleBasedModelAssigner:
+    """基于角色的模型分配器"""
+
+    def __init__(self):
+        self.model_assignments = {
+            "proponent": {
+                "preferred_models": ["gpt-4", "claude-3"],
+                "parameters": {"temperature": 0.7, "creativity": "high"},
+                "personality": "analytical, supportive, structured"
+            },
+            "opponent": {
+                "preferred_models": ["claude-3", "gpt-4"],
+                "parameters": {"temperature": 0.8, "creativity": "high"},
+                "personality": "critical, challenging, skeptical"
+            },
+            "moderator": {
+                "preferred_models": ["gpt-3.5-turbo"],
+                "parameters": {"temperature": 0.3, "creativity": "low"},
+                "personality": "neutral, balanced, facilitative"
+            },
+            "observer": {
+                "preferred_models": ["llama-2", "local-model"],
+                "parameters": {"temperature": 0.5, "creativity": "medium"},
+                "personality": "analytical, observational, objective"
+            }
+        }
+
+    async def assign_model(self, role: str, available_models: List[str]) -> ModelAssignment:
+        """为角色分配最适合的模型"""
+        role_config = self.model_assignments.get(role, self.model_assignments["observer"])
+
+        # 选择可用模型
+        for preferred_model in role_config["preferred_models"]:
+            if preferred_model in available_models:
+                return ModelAssignment(
+                    model=preferred_model,
+                    parameters=role_config["parameters"],
+                    personality=role_config["personality"],
+                    role=role
+                )
+
+        # 回退到默认模型
+        return ModelAssignment(
+            model=available_models[0],
+            parameters=role_config["parameters"],
+            personality=role_config["personality"],
+            role=role
+        )
+                    </div>
+                </section>
+
+                <section id="solid-principles" class="section">
+                    <h2>SOLID原则的具体体现</h2>
+
+                    <h3>S - 单一职责原则 (Single Responsibility Principle)</h3>
+                    <div class="code-block">
+class DebateManager:
+    """只负责辩论流程管理"""
+
+    async def start_debate(self, topic: str) -> DebateSession:
+        """专门处理辩论开始逻辑"""
+        pass
+
+    async def next_speaker(self, session: DebateSession) -> DebateParticipant:
+        """专门处理发言者轮换逻辑"""
+        pass
+
+class DebateRecorder:
+    """只负责辩论记录"""
+
+    async def record_statement(self, participant: str, statement: str) -> None:
+        """专门处理发言记录"""
+        pass
+
+    async def generate_transcript(self, session: DebateSession) -> str:
+        """专门处理辩论文稿生成"""
+        pass
+
+class DebateEvaluator:
+    """只负责辩论质量评估"""
+
+    async def evaluate_argument(self, argument: str) -> ArgumentScore:
+        """专门处理论据评估"""
+        pass
+
+    async def calculate_speaker_score(self, participant: DebateParticipant) -> float:
+        """专门处理参与者评分"""
+        pass
+                    </div>
+
+                    <h3>O - 开放封闭原则 (Open-Closed Principle)</h3>
+                    <div class="code-block">
+from abc import ABC, abstractmethod
+
+class DebateStrategy(ABC):
+    """辩论策略基类"""
+
+    @abstractmethod
+    async def generate_argument(self, topic: str, context: DebateContext) -> str:
+        pass
+
+class ProponentStrategy(DebateStrategy):
+    """正方策略"""
+
+    async def generate_argument(self, topic: str, context: DebateContext) -> str:
+        # 支持性论证策略
+        pass
+
+class OpponentStrategy(DebateStrategy):
+    """反方策略"""
+
+    async def generate_argument(self, topic: str, context: DebateContext) -> str:
+        # 反驳性论证策略
+        pass
+
+# 新增策略无需修改现有代码
+class DevilAdvocateStrategy(DebateStrategy):
+    """魔鬼代言人策略"""
+
+    async def generate_argument(self, topic: str, context: DebateContext) -> str:
+        # 挑战主流观点的策略
+        pass
+
+class DebateParticipant:
+    def __init__(self, role: str, strategy: DebateStrategy):
+        self.role = role
+        self.strategy = strategy
+
+    async def make_argument(self, topic: str, context: DebateContext) -> str:
+        return await self.strategy.generate_argument(topic, context)
+                    </div>
+
+                    <h3>L - 里氏替换原则 (Liskov Substitution Principle)</h3>
+                    <div class="code-block">
+class BaseDebater(ABC):
+    """辩论者基类"""
+
+    @abstractmethod
+    async def participate(self, session: DebateSession) -> DebateContribution:
+        pass
+
+    @abstractmethod
+    def get_role(self) -> str:
+        pass
+
+class HumanDebater(BaseDebater):
+    """人类辩论者"""
+
+    async def participate(self, session: DebateSession) -> DebateContribution:
+        # 等待人类输入
+        user_input = await self.get_user_input()
+        return DebateContribution(content=user_input, speaker=self.get_role())
+
+    def get_role(self) -> str:
+        return "human_participant"
+
+class AIDebater(BaseDebater):
+    """AI辩论者"""
+
+    async def participate(self, session: DebateSession) -> DebateContribution:
+        # AI生成回应
+        ai_response = await self.model.generate_response(session.context)
+        return DebateContribution(content=ai_response, speaker=self.get_role())
+
+    def get_role(self) -> str:
+        return "ai_participant"
+
+# 任何BaseDebater的子类都可以替换使用
+debater1 = HumanDebater()
+debater2 = AIDebater()
+
+await session.add_participant(debater1)  # ✓ 正确
+await session.add_participant(debater2)  # ✓ 正确
+                    </div>
+
+                    <h3>I - 接口隔离原则 (Interface Segregation Principle)</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-title">接口隔离原则实现示例</span>
+                            <span class="code-language">Python</span>
+                            <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                        </div>
+                        <div class="code-content code-highlight">
+                            <pre><code># 将大接口拆分为多个小接口
+class DebateSpeaker(ABC):
+    @abstractmethod
+    async def speak(self, topic: str, context: DebateContext) -> str:
+        pass
+
+class DebateListener(ABC):
+    @abstractmethod
+    async def listen(self, statements: List[str]) -> None:
+        pass
+
+class DebateEvaluator(ABC):
+    @abstractmethod
+    async def evaluate(self, argument: str) -> float:
+        pass
+
+class DebateModerator(ABC):
+    @abstractmethod
+    async def moderate(self, session: DebateSession) -> None:
+        pass
+
+# 客户端只依赖需要的接口
+class PassiveObserver:
+    """被动观察者，只需要听和评估"""
+    def __init__(self, listener: DebateListener, evaluator: DebateEvaluator):
+        self.listener = listener
+        self.evaluator = evaluator
+
+class ActiveParticipant:
+    """活跃参与者，需要说和听"""
+    def __init__(self, speaker: DebateSpeaker, listener: DebateListener):
+        self.speaker = speaker
+        self.listener = listener</code></pre>
+                        </div>
+                    </div>
+                    </div>
+
+                    <h3>D - 依赖倒置原则 (Dependency Inversion Principle)</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-title">依赖倒置原则实现示例</span>
+                            <span class="code-language">Python</span>
+                            <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                        </div>
+                        <div class="code-content code-highlight">
+                            <pre><code>class DebateManager:
+    """高层模块依赖抽象，不依赖具体实现"""
+
+    def __init__(self,
+                 moderator: DebateModerator,
+                 recorder: DebateRecorder,
+                 evaluator: DebateEvaluator):
+        self.moderator = moderator  # 依赖抽象
+        self.recorder = recorder    # 依赖抽象
+        self.evaluator = evaluator  # 依赖抽象
+
+    async def conduct_debate(self, topic: str, participants: List[DebateSpeaker]) -> DebateResult:
+        # 主持人管理流程
+        await self.moderator.moderate_session(topic, participants)
+
+        # 记录器记录过程
+        for participant in participants:
+            statement = await participant.speak(topic, self.get_context())
+            await self.recorder.record_statement(participant.get_role(), statement)
+
+        # 评估器评估质量
+        scores = await self.evaluator.evaluate_session(self.recorder.get_transcript())
+
+        return DebateResult(transcript=self.recorder.get_transcript(), scores=scores)
+
+# 通过依赖注入提供具体实现
+debate_manager = DebateManager(
+    moderator=AIModerator(model="gpt-3.5"),      # 注入AI主持人
+    recorder=DatabaseRecorder(db_connection),    # 注入数据库记录器
+    evaluator=MLBasedEvaluator(model="gpt-4")    # 注入机器学习评估器
+)</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tdd-implementation" class="section">
+                    <h2>TDD (测试驱动开发) 实现</h2>
+
+                    <h3>测试先行：辩论管理器功能</h3>
+                    <div class="test-example">
+                        <h4>Step 1: 写失败的测试</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-title">TDD测试代码示例</span>
+                                <span class="code-language">Python</span>
+                                <button class="code-copy-btn" onclick="copyCode(this)">📋 复制</button>
+                            </div>
+                            <div class="code-content code-highlight">
+                                <pre><code>import pytest
+from unittest.mock import AsyncMock
+
+class TestDebateManager:
+    @pytest.mark.asyncio
+    async def test_start_debate_creates_session(self):
+        """测试开始辩论创建会话"""
+        manager = DebateManager()</code></pre>
+                            </div>
+                        </div>
+
+        topic = "人工智能是否威胁人类就业"
+        participants = [MockDebater(role="proponent"), MockDebater(role="opponent")]
+
+        session = await manager.start_debate(topic, participants)
+
+        assert session.topic == topic
+        assert len(session.participants) == 2
+        assert session.status == DebateStatus.IN_PROGRESS
+
+    @pytest.mark.asyncio
+    async def test_next_speaker_cycles_correctly(self):
+        """测试发言者轮换逻辑"""
+        manager = DebateManager()
+        participants = [MockDebater(role="A"), MockDebater(role="B"), MockDebater(role="C")]
+        session = DebateSession(participants=participants)
+
+        # 测试轮换顺序
+        first_speaker = await manager.next_speaker(session)
+        second_speaker = await manager.next_speaker(session)
+        third_speaker = await manager.next_speaker(session)
+
+        assert first_speaker.role == "A"
+        assert second_speaker.role == "B"
+        assert third_speaker.role == "C"
+
+        # 测试循环回到开始
+        fourth_speaker = await manager.next_speaker(session)
+        assert fourth_speaker.role == "A"
+                        </div>
+
+                        <h4>Step 2: 实现最小代码使测试通过</h4>
+                        <div class="code-block">
+class DebateManager:
+    def __init__(self):
+        self.current_session = None
+
+    async def start_debate(self, topic: str, participants: List[Debater]) -> DebateSession:
+        """最小实现，让测试通过"""
+        session = DebateSession(
+            topic=topic,
+            participants=participants,
+            status=DebateStatus.IN_PROGRESS
+        )
+        self.current_session = session
+        return session
+
+    async def next_speaker(self, session: DebateSession) -> Debater:
+        """最小实现，让测试通过"""
+        if not hasattr(session, 'current_speaker_index'):
+            session.current_speaker_index = 0
+
+        speaker = session.participants[session.current_speaker_index]
+        session.current_speaker_index = (session.current_speaker_index + 1) % len(session.participants)
+        return speaker
+                        </div>
+
+                        <h4>Step 3: 重构和扩展</h4>
+                        <div class="code-block">
+class DebateManager:
+    def __init__(self, moderator: DebateModerator = None, recorder: DebateRecorder = None):
+        self.moderator = moderator
+        self.recorder = recorder
+        self.active_sessions: Dict[str, DebateSession] = {}
+
+    async def start_debate(self, topic: str, participants: List[Debater]) -> DebateSession:
+        """创建新的辩论会话"""
+        session_id = self._generate_session_id()
+
+        session = DebateSession(
+            session_id=session_id,
+            topic=topic,
+            participants=participants,
+            status=DebateStatus.IN_PROGRESS,
+            created_at=datetime.now()
+        )
+
+        self.active_sessions[session_id] = session
+
+        if self.recorder:
+            await self.recorder.record_session_start(session)
+
+        return session
+
+    async def next_speaker(self, session: DebateSession) -> Optional[Debater]:
+        """确定下一个发言者"""
+        if session.status != DebateStatus.IN_PROGRESS:
+            return None
+
+        # 检查是否有参与者达到发言限制
+        available_speakers = [
+            p for p in session.participants
+            if p.can_speak()
+        ]
+
+        if not available_speakers:
+            return None
+
+        # 选择下一个发言者
+        if session.current_speaker is None:
+            next_speaker = available_speakers[0]
+        else:
+            current_index = session.participants.index(session.current_speaker)
+            next_index = (current_index + 1) % len(session.participants)
+            next_speaker = session.participants[next_index]
+
+            if not next_speaker.can_speak():
+                # 寻找下一个可以发言的参与者
+                for participant in session.participants[next_index:] + session.participants[:next_index]:
+                    if participant.can_speak():
+                        next_speaker = participant
+                        break
+                else:
+                    return None
+
+        session.current_speaker = next_speaker
+        next_speaker.increment_speech_count()
+
+        return next_speaker
+                    </div>
+                    </div>
+
+                    <h3>集成测试：完整辩论流程</h3>
+                    <div class="test-example">
+                        <div class="code-block">
+class TestDebateIntegration:
+    @pytest.mark.asyncio
+    async def test_complete_debate_flow(self):
+        """测试完整的辩论流程"""
+        # 模拟参与者
+        mock_proponent = MockDebater(
+            role="proponent",
+            responses=["我支持这个观点，因为...", "反驳：..."]
+        )
+        mock_opponent = MockDebater(
+            role="opponent",
+            responses=["我反对这个观点，因为...", "再反驳：..."]
+        )
+        mock_moderator = MockModerator()
+
+        # 创建辩论管理器
+        manager = DebateManager(moderator=mock_moderator)
+        session = await manager.start_debate(
+            topic="人工智能是否威胁人类就业",
+            participants=[mock_proponent, mock_opponent]
+        )
+
+        # 执行3轮辩论
+        for round_num in range(3):
+            for _ in range(len(session.participants)):
+                speaker = await manager.next_speaker(session)
+                if speaker:
+                    contribution = await speaker.speak(session.topic, session.get_context())
+                    session.add_contribution(contribution)
+
+        # 验证辩论结果
+        assert len(session.contributions) == 6  # 2个参与者 * 3轮
+        assert session.status == DebateStatus.IN_PROGRESS
+
+        # 结束辩论
+        result = await manager.conclude_debate(session)
+        assert result.transcript is not None
+        assert result.scores is not None
+                        </div>
+                    </div>
+
+                    <h3>性能测试：多会话并发</h3>
+                    <div class="test-example">
+                        <div class="code-block">
+class TestDebatePerformance:
+    @pytest.mark.asyncio
+    async def test_concurrent_debate_sessions(self):
+        """测试并发辩论会话性能"""
+        manager = DebateManager()
+
+        # 创建多个并发辩论会话
+        topics = [f"辩论主题{i}" for i in range(5)]
+        participants_per_debate = [
+            [MockDebater(role=f"participant{j}") for j in range(2)]
+            for _ in range(5)
+        ]
+
+        start_time = time.time()
+
+        # 并发启动辩论会话
+        tasks = [
+            manager.start_debate(topic, participants)
+            for topic, participants in zip(topics, participants_per_debate)
+        ]
+
+        sessions = await asyncio.gather(*tasks)
+
+        end_time = time.time()
+
+        # 验证所有会话都成功创建
+        assert len(sessions) == 5
+        assert all(session.status == DebateStatus.IN_PROGRESS for session in sessions)
+
+        # 验证性能指标
+        total_time = end_time - start_time
+        avg_time_per_session = total_time / 5
+        assert avg_time_per_session < 1.0  # 平均每个会话创建时间小于1秒
+                        </div>
+                    </div>
+                </section>
+
+                <section id="code-examples" class="section">
+                    <h2>代码示例：规范化实现</h2>
+
+                    <h3>1. 增强型辩论管理器</h3>
+                    <div class="code-block">
+import asyncio
+from typing import List, Dict, Any, Optional, AsyncIterator
+from dataclasses import dataclass, field
+from enum import Enum
+from datetime import datetime
+import uuid
+
+class DebateStatus(Enum):
+    PREPARING = "preparing"
+    IN_PROGRESS = "in_progress"
+    PAUSED = "paused"
+    CONCLUDED = "concluded"
+    CANCELLED = "cancelled"
+
+class DebateRole(Enum):
+    MODERATOR = "moderator"
+    PROPONENT = "proponent"
+    OPPONENT = "opponent"
+    OBSERVER = "observer"
+
+@dataclass
+class DebateContribution:
+    """辩论贡献记录"""
+    speaker_id: str
+    speaker_role: DebateRole
+    content: str
+    timestamp: datetime = field(default_factory=datetime.now)
+    round_number: int = 0
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+@dataclass
+class DebateSession:
+    """辩论会话"""
+    session_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    topic: str = ""
+    participants: List['DebateParticipant'] = field(default_factory=list)
+    contributions: List[DebateContribution] = field(default_factory=list)
+    status: DebateStatus = DebateStatus.PREPARING
+    current_speaker: Optional['DebateParticipant'] = None
+    current_round: int = 0
+    max_rounds: int = 3
+    created_at: datetime = field(default_factory=datetime.now)
+    started_at: Optional[datetime] = None
+    concluded_at: Optional[datetime] = None
+
+    def add_contribution(self, contribution: DebateContribution):
+        """添加辩论贡献"""
+        self.contributions.append(contribution)
+
+    def get_context_for_speaker(self, speaker_role: DebateRole) -> Dict[str, Any]:
+        """为发言者获取上下文信息"""
+        return {
+            'topic': self.topic,
+            'current_round': self.current_round,
+            'total_contributions': len(self.contributions),
+            'recent_contributions': self.contributions[-5:],
+            'speaker_role': speaker_role.value,
+            'other_speakers': [p for p in self.participants if p.role != speaker_role]
+        }
+
+class EnhancedDebateManager:
+    """增强型辩论管理器"""
+
+    def __init__(self,
+                 model_assigner: 'RoleBasedModelAssigner',
+                 session_manager: 'SessionManager',
+                 evaluator: 'DebateEvaluator'):
+        self.model_assigner = model_assigner
+        self.session_manager = session_manager
+        self.evaluator = evaluator
+        self.active_sessions: Dict[str, DebateSession] = {}
+
+    async def create_debate(self,
+                           topic: str,
+                           roles: List[DebateRole],
+                           debate_config: Dict[str, Any] = None) -> DebateSession:
+        """创建新的辩论会话"""
+        session = DebateSession(
+            topic=topic,
+            status=DebateStatus.PREPARING,
+            max_rounds=debate_config.get('max_rounds', 3)
+        )
+
+        # 为每个角色创建参与者
+        for role in roles:
+            participant = await self._create_participant(role, debate_config)
+            session.participants.append(participant)
+
+        self.active_sessions[session.session_id] = session
+
+        # 保存会话
+        await self.session_manager.save_session(session)
+
+        return session
+
+    async def start_debate(self, session_id: str) -> AsyncIterator[DebateEvent]:
+        """开始辩论，返回事件流"""
+        session = self.active_sessions.get(session_id)
+        if not session:
+            raise ValueError(f"Session {session_id} not found")
+
+        session.status = DebateStatus.IN_PROGRESS
+        session.started_at = datetime.now()
+
+        yield DebateEvent(type="debate_started", session_id=session_id)
+
+        try:
+            # 执行辩论轮次
+            for round_num in range(session.max_rounds):
+                session.current_round = round_num + 1
+
+                yield DebateEvent(
+                    type="round_started",
+                    session_id=session_id,
+                    data={"round": round_num + 1}
+                )
+
+                # 每轮中每个参与者发言
+                for participant in session.participants:
+                    if participant.role != DebateRole.OBSERVER:  # 观察者不发言
+                        await self._process_participant_turn(session, participant)
+
+                        yield DebateEvent(
+                            type="contribution_added",
+                            session_id=session_id,
+                            data={
+                                "speaker": participant.role.value,
+                                "contributions_count": len(session.contributions)
+                            }
+                        )
+
+            # 结束辩论
+            result = await self._conclude_debate(session)
+            yield DebateEvent(
+                type="debate_concluded",
+                session_id=session_id,
+                data={"result": result}
+            )
+
+        except Exception as e:
+            session.status = DebateStatus.CANCELLED
+            yield DebateEvent(
+                type="debate_error",
+                session_id=session_id,
+                data={"error": str(e)}
+            )
+
+    async def _create_participant(self,
+                                 role: DebateRole,
+                                 config: Dict[str, Any]) -> 'DebateParticipant':
+        """创建辩论参与者"""
+        # 分配模型
+        model_assignment = await self.model_assigner.assign_model(role)
+
+        # 创建参与者
+        participant = DebateParticipant(
+            role=role,
+            model_assignment=model_assignment,
+            max_speeches=config.get('max_speeches_per_participant', 10)
+        )
+
+        return participant
+
+    async def _process_participant_turn(self,
+                                      session: DebateSession,
+                                      participant: 'DebateParticipant') -> None:
+        """处理参与者的发言回合"""
+        if not participant.can_speak():
+            return
+
+        # 获取发言上下文
+        context = session.get_context_for_speaker(participant.role)
+
+        # 生成发言内容
+        content = await participant.generate_statement(session.topic, context)
+
+        # 创建贡献记录
+        contribution = DebateContribution(
+            speaker_id=participant.participant_id,
+            speaker_role=participant.role,
+            content=content,
+            round_number=session.current_round
+        )
+
+        # 添加到会话
+        session.add_contribution(contribution)
+        participant.increment_speech_count()
+
+        # 记录到数据库
+        await self.session_manager.save_contribution(session.session_id, contribution)
+
+    async def _conclude_debate(self, session: DebateSession) -> DebateResult:
+        """结束辩论并生成结果"""
+        session.status = DebateStatus.CONCLUDED
+        session.concluded_at = datetime.now()
+
+        # 评估辩论质量
+        scores = await self.evaluator.evaluate_session(session)
+
+        # 生成总结
+        summary = await self._generate_debate_summary(session)
+
+        result = DebateResult(
+            session_id=session.session_id,
+            topic=session.topic,
+            transcript=session.contributions,
+            scores=scores,
+            summary=summary,
+            duration=session.concluded_at - session.started_at
+        )
+
+        # 保存结果
+        await self.session_manager.save_debate_result(result)
+
+        return result
+
+    async def _generate_debate_summary(self, session: DebateSession) -> str:
+        """生成辩论总结"""
+        # 这里可以使用AI模型生成智能总结
+        contributions_text = "\n".join([
+            f"{c.speaker_role.value}: {c.content}"
+            for c in session.contributions
+        ])
+
+        summary_prompt = f"""
+        请为以下辩论生成简洁的总结：
+        主题：{session.topic}
+        辩论内容：
+        {contributions_text}
+
+        总结应包括：
+        1. 主要观点对比
+        2. 关键论据
+        3. 共识点
+        4. 分歧点
+        """
+
+        # 调用AI模型生成总结
+        summary = await self.model_assigner.generate_summary(summary_prompt)
+        return summary
+                    </div>
+
+                    <h3>2. 基于角色的模型分配器</h3>
+                    <div class="code-block">
+from typing import Dict, List, Any
+import random
+
+class ModelCapability:
+    """模型能力描述"""
+
+    def __init__(self,
+                 creativity: float,
+                 analytical_skill: float,
+                 critical_thinking: float,
+                 language_style: str):
+        self.creativity = creativity
+        self.analytical_skill = analytical_skill
+        self.critical_thinking = critical_thinking
+        self.language_style = language_style
+
+class RoleBasedModelAssigner:
+    """基于角色的模型分配器"""
+
+    def __init__(self):
+        # 模型能力映射
+        self.model_capabilities = {
+            "gpt-4": ModelCapability(
+                creativity=0.9,
+                analytical_skill=0.8,
+                critical_thinking=0.8,
+                language_style="professional, detailed"
+            ),
+            "claude-3": ModelCapability(
+                creativity=0.8,
+                analytical_skill=0.9,
+                critical_thinking=0.9,
+                language_style="thoughtful, nuanced"
+            ),
+            "gpt-3.5-turbo": ModelCapability(
+                creativity=0.7,
+                analytical_skill=0.6,
+                critical_thinking=0.6,
+                language_style="concise, direct"
+            ),
+            "llama-2": ModelCapability(
+                creativity=0.6,
+                analytical_skill=0.7,
+                critical_thinking=0.7,
+                language_style="balanced, objective"
+            )
+        }
+
+        # 角色需求定义
+        self.role_requirements = {
+            DebateRole.MODERATOR: {
+                "required_capabilities": {
+                    "analytical_skill": 0.7,
+                    "critical_thinking": 0.6,
+                    "creativity": 0.4
+                },
+                "preferred_style": "neutral, balanced, facilitative",
+                "temperature": 0.3
+            },
+            DebateRole.PROPONENT: {
+                "required_capabilities": {
+                    "analytical_skill": 0.7,
+                    "critical_thinking": 0.6,
+                    "creativity": 0.8
+                },
+                "preferred_style": "supportive, constructive, persuasive",
+                "temperature": 0.7
+            },
+            DebateRole.OPPONENT: {
+                "required_capabilities": {
+                    "analytical_skill": 0.8,
+                    "critical_thinking": 0.9,
+                    "creativity": 0.7
+                },
+                "preferred_style": "critical, challenging, skeptical",
+                "temperature": 0.8
+            },
+            DebateRole.OBSERVER: {
+                "required_capabilities": {
+                    "analytical_skill": 0.8,
+                    "critical_thinking": 0.7,
+                    "creativity": 0.5
+                },
+                "preferred_style": "objective, analytical, observational",
+                "temperature": 0.5
+            }
+        }
+
+    async def assign_model(self,
+                          role: DebateRole,
+                          available_models: List[str] = None,
+                          custom_requirements: Dict[str, Any] = None) -> ModelAssignment:
+        """为角色分配最适合的模型"""
+        available_models = available_models or list(self.model_capabilities.keys())
+        requirements = self.role_requirements.get(role, self.role_requirements[DebateRole.OBSERVER])
+
+        # 合并自定义需求
+        if custom_requirements:
+            requirements = {**requirements, **custom_requirements}
+
+        # 评估每个模型的适合度
+        model_scores = []
+        for model_name in available_models:
+            if model_name in self.model_capabilities:
+                score = self._calculate_model_suitability(
+                    model_name,
+                    role,
+                    requirements
+                )
+                model_scores.append((model_name, score))
+
+        # 按适合度排序
+        model_scores.sort(key=lambda x: x[1], reverse=True)
+
+        # 选择最适合的模型
+        best_model = model_scores[0][0] if model_scores else available_models[0]
+        capability = self.model_capabilities[best_model]
+
+        return ModelAssignment(
+            model=best_model,
+            role=role,
+            temperature=requirements.get("temperature", 0.7),
+            system_prompt=self._generate_system_prompt(role, requirements),
+            capability=capability
+        )
+
+    def _calculate_model_suitability(self,
+                                   model_name: str,
+                                   role: DebateRole,
+                                   requirements: Dict[str, Any]) -> float:
+        """计算模型对角色的适合度分数"""
+        capability = self.model_capabilities[model_name]
+        required_caps = requirements["required_capabilities"]
+
+        # 计算能力匹配度
+        capability_score = 0
+        for cap_name, required_value in required_caps.items():
+            actual_value = getattr(capability, cap_name, 0)
+            # 如果实际能力满足要求，得满分；否则按比例得分
+            if actual_value >= required_value:
+                capability_score += 1.0
+            else:
+                capability_score += actual_value / required_value
+
+        capability_score /= len(required_caps)
+
+        # 添加风格匹配度（简化版）
+        style_score = 0.8  # 默认风格匹配度
+
+        # 添加随机因素，避免总是选择同一模型
+        random_factor = random.uniform(0.9, 1.0)
+
+        total_score = capability_score * 0.6 + style_score * 0.2 + random_factor * 0.2
+
+        return total_score
+
+    def _generate_system_prompt(self, role: DebateRole, requirements: Dict[str, Any]) -> str:
+        """为角色生成系统提示"""
+        base_prompts = {
+            DebateRole.MODERATOR: """
+            你是这场辩论的主持人。你的职责是：
+            1. 保持辩论的秩序和公平性
+            2. 确保讨论紧扣主题
+            3. 在必要时引导讨论方向
+            4. 总结关键观点
+            5. 保持中立和客观
+            """,
+            DebateRole.PROPONENT: """
+            你是正方辩手。你的任务是：
+            1. 支持并捍卫指定的观点
+            2. 提供有说服力的论据和证据
+            3. 逻辑清晰地阐述你的立场
+            4. 回应对方的质疑和挑战
+            5. 建设性地推进讨论
+            """,
+            DebateRole.OPPONENT: """
+            你是反方辩手。你的任务是：
+            1. 挑战和质疑正方观点
+            2. 提出有力的反驳论据
+            3. 发现对方论证中的漏洞
+            4. 提供替代性观点
+            5. 保持批判性思维
+            """,
+            DebateRole.OBSERVER: """
+            你是观察者。你的职责是：
+            1. 客观分析双方的观点
+            2. 识别关键的争论点
+            3. 寻找共同点和分歧点
+            4. 提供平衡的观察
+            5. 协助总结讨论结果
+            """
+        }
+
+        base_prompt = base_prompts.get(role, "")
+        style_instruction = f"请以{requirements.get('preferred_style', '专业、清晰')}的风格进行表达。"
+
+        return f"{base_prompt}\n\n{style_instruction}"
+
+    async def get_model_performance_stats(self, model_name: str) -> Dict[str, Any]:
+        """获取模型性能统计"""
+        # 这里可以从数据库获取历史性能数据
+        return {
+            "model": model_name,
+            "total_debates": 0,  # 从数据库查询
+            "average_satisfaction": 0.0,
+            "strengths": [],
+            "weaknesses": []
+        }
+                    </div>
+
+                    <h3>3. 辩论质量评估器</h3>
+                    <div class="code-block">
+from typing import List, Dict, Any
+import re
+from collections import Counter
+
+class DebateMetrics:
+    """辩论质量指标"""
+
+    def __init__(self):
+        self.metrics = {
+            "logical_consistency": 0.0,
+            "argument_quality": 0.0,
+            "evidence_support": 0.0,
+            "relevance": 0.0,
+            "clarity": 0.0,
+            "originality": 0.0
+        }
+
+class DebateEvaluator:
+    """辩论质量评估器"""
+
+    def __init__(self, model_provider: 'ModelProvider'):
+        self.model_provider = model_provider
+        self.evaluation_criteria = self._load_evaluation_criteria()
+
+    async def evaluate_session(self, session: DebateSession) -> Dict[str, Any]:
+        """评估整个辩论会话"""
+        evaluation_results = {}
+
+        # 按参与者评估
+        for participant in session.participants:
+            participant_score = await self._evaluate_participant(session, participant)
+            evaluation_results[participant.role.value] = participant_score
+
+        # 整体辩论质量评估
+        overall_score = await self._evaluate_overall_quality(session)
+        evaluation_results["overall"] = overall_score
+
+        # 计算辩论胜者（基于得分）
+        winner = self._determine_winner(evaluation_results)
+        evaluation_results["winner"] = winner
+
+        return evaluation_results
+
+    async def _evaluate_participant(self,
+                                   session: DebateSession,
+                                   participant: 'DebateParticipant') -> Dict[str, Any]:
+        """评估单个参与者的表现"""
+        participant_contributions = [
+            c for c in session.contributions
+            if c.speaker_role == participant.role
+        ]
+
+        if not participant_contributions:
+            return {"total_score": 0.0, "metrics": DebateMetrics().metrics}
+
+        # 评估各项指标
+        metrics = DebateMetrics()
+
+        # 1. 逻辑一致性
+        metrics.metrics["logical_consistency"] = await self._evaluate_logical_consistency(
+            participant_contributions
+        )
+
+        # 2. 论据质量
+        metrics.metrics["argument_quality"] = await self._evaluate_argument_quality(
+            participant_contributions
+        )
+
+        # 3. 证据支持
+        metrics.metrics["evidence_support"] = await self._evaluate_evidence_support(
+            participant_contributions
+        )
+
+        # 4. 相关性
+        metrics.metrics["relevance"] = await self._evaluate_relevance(
+            session.topic, participant_contributions
+        )
+
+        # 5. 清晰度
+        metrics.metrics["clarity"] = await self._evaluate_clarity(
+            participant_contributions
+        )
+
+        # 6. 原创性
+        metrics.metrics["originality"] = await self._evaluate_originality(
+            participant_contributions
+        )
+
+        # 计算总分
+        total_score = sum(metrics.metrics.values()) / len(metrics.metrics)
+
+        return {
+            "total_score": total_score,
+            "metrics": metrics.metrics,
+            "contribution_count": len(participant_contributions),
+            "average_length": self._calculate_average_length(participant_contributions)
+        }
+
+    async def _evaluate_logical_consistency(self,
+                                           contributions: List[DebateContribution]) -> float:
+        """评估逻辑一致性"""
+        if len(contributions) < 2:
+            return 0.8  # 默认分数
+
+        consistency_scores = []
+
+        # 使用AI模型评估贡献之间的逻辑一致性
+        for i in range(len(contributions) - 1):
+            current = contributions[i]
+            next_contrib = contributions[i + 1]
+
+            prompt = f"""
+            请评估以下两个陈述之间的逻辑一致性（0-1分）：
+            陈述1：{current.content}
+            陈述2：{next_contrib.content}
+
+            评分标准：
+            1.0 = 完全一致，逻辑连贯
+            0.8 = 基本一致，有轻微矛盾
+            0.6 = 部分一致，存在明显矛盾
+            0.4 = 不一致，逻辑混乱
+            0.0 = 完全不一致
+
+            请只返回一个数字分数：
+            """
+
+            try:
+                response = await self.model_provider.generate_response(prompt)
+                score = float(response.strip())
+                consistency_scores.append(score)
+            except:
+                consistency_scores.append(0.5)  # 默认分数
+
+        return sum(consistency_scores) / len(consistency_scores)
+
+    async def _evaluate_argument_quality(self,
+                                        contributions: List[DebateContribution]) -> float:
+        """评估论据质量"""
+        quality_scores = []
+
+        for contribution in contributions:
+            # 分析论据结构的完整性
+            has_claim = self._has_claim_statement(contribution.content)
+            has_reasoning = self._has_reasoning(contribution.content)
+            has_evidence = self._has_evidence_reference(contribution.content)
+
+            # 计算结构完整性分数
+            structure_score = (has_claim + has_reasoning + has_evidence) / 3.0
+
+            # 分析论证深度
+            depth_score = self._analyze_argument_depth(contribution.content)
+
+            # 综合分数
+            quality_score = (structure_score * 0.6 + depth_score * 0.4)
+            quality_scores.append(quality_score)
+
+        return sum(quality_scores) / len(quality_scores)
+
+    def _has_claim_statement(self, text: str) -> float:
+        """检测是否包含明确的论点陈述"""
+        claim_indicators = ["我认为", "我的观点是", "显然", "毫无疑问", "事实证明"]
+        return any(indicator in text for indicator in claim_indicators)
+
+    def _has_reasoning(self, text: str) -> float:
+        """检测是否包含推理过程"""
+        reasoning_indicators = ["因为", "所以", "因此", "由于", "这意味着"]
+        return any(indicator in text for indicator in reasoning_indicators)
+
+    def _has_evidence_reference(self, text: str) -> float:
+        """检测是否引用证据"""
+        evidence_indicators = ["数据表明", "研究显示", "根据", "举例来说", "比如"]
+        return any(indicator in text for indicator in evidence_indicators)
+
+    def _analyze_argument_depth(self, text: str) -> float:
+        """分析论证深度"""
+        # 基于文本长度和复杂度的简单评估
+        word_count = len(text.split())
+        sentence_count = len(re.split(r'[。！？]', text))
+
+        if sentence_count == 0:
+            return 0.0
+
+        avg_words_per_sentence = word_count / sentence_count
+
+        # 深度评分
+        if word_count > 200 and avg_words_per_sentence > 15:
+            return 1.0
+        elif word_count > 100 and avg_words_per_sentence > 10:
+            return 0.8
+        elif word_count > 50:
+            return 0.6
+        else:
+            return 0.4
+
+    async def _evaluate_evidence_support(self,
+                                        contributions: List[DebateContribution]) -> float:
+        """评估证据支持强度"""
+        evidence_scores = []
+
+        for contribution in contributions:
+            # 检测证据类型
+            has_statistical = bool(re.search(r'\d+%', contribution.content))
+            has_expert_opinion = any(term in contribution.content for term in ["专家", "学者", "研究"])
+            has_case_study = any(term in contribution.content for term in ["案例", "实例", "例子"])
+            has_source_reference = bool(re.search(r'[文中引用].*?[文尾引用]', contribution.content))
+
+            # 计算证据强度分数
+            evidence_strength = (
+                (has_statistical * 0.3) +
+                (has_expert_opinion * 0.3) +
+                (has_case_study * 0.2) +
+                (has_source_reference * 0.2)
+            )
+
+            evidence_scores.append(evidence_strength)
+
+        return sum(evidence_scores) / len(evidence_scores)
+
+    async def _evaluate_relevance(self,
+                                 topic: str,
+                                 contributions: List[DebateContribution]) -> float:
+        """评估内容与主题的相关性"""
+        relevance_scores = []
+
+        for contribution in contributions:
+            # 使用AI模型评估相关性
+            prompt = f"""
+            请评估以下内容与主题的相关性（0-1分）：
+            主题：{topic}
+            内容：{contribution.content}
+
+            评分标准：
+            1.0 = 高度相关，直接讨论主题
+            0.8 = 相关，围绕主题展开
+            0.6 = 部分相关，有所偏离
+            0.4 = 不太相关，偏离主题
+            0.0 = 完全无关
+
+            请只返回一个数字分数：
+            """
+
+            try:
+                response = await self.model_provider.generate_response(prompt)
+                score = float(response.strip())
+                relevance_scores.append(score)
+            except:
+                relevance_scores.append(0.5)  # 默认分数
+
+        return sum(relevance_scores) / len(relevance_scores)
+
+    def _determine_winner(self, evaluation_results: Dict[str, Any]) -> Optional[str]:
+        """确定辩论胜者"""
+        participant_scores = {
+            role: data["total_score"]
+            for role, data in evaluation_results.items()
+            if role not in ["overall", "winner"]
+        }
+
+        if not participant_scores:
+            return None
+
+        # 如果分差很小，认为是平局
+        scores = list(participant_scores.values())
+        max_score = max(scores)
+        min_score = min(scores)
+
+        if max_score - min_score < 0.1:  # 分差小于0.1视为平局
+            return "draw"
+
+        # 找出最高分者
+        winners = [role for role, score in participant_scores.items() if score == max_score]
+
+        if len(winners) == 1:
+            return winners[0]
+        else:
+            return "draw"  # 多个同分也是平局
+                    </div>
+                </section>
+
+                <section id="best-practices" class="section">
+                    <h2>最佳实践与规范</h2>
+
+                    <div class="best-practices">
+                        <h4>KISS原则应用</h4>
+                        <ul>
+                            <li><strong>简单的辩论流程</strong>：核心辩论流程保持线性化，易于理解和跟踪</li>
+                            <li><strong>清晰的角色定义</strong>：每个辩论角色的职责和边界清晰明确</li>
+                            <li><strong>最小化的状态管理</strong>：只在必要的地方维护状态信息</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-practices">
+                        <h4>DRY原则应用</h4>
+                        <ul>
+                            <li><strong>公共评估逻辑</strong>：辩论质量评估的公共逻辑提取为独立组件</li>
+                            <li><strong>可复用的参与者基类</strong>：所有参与者继承自统一的基础类</li>
+                            <li><strong>统一的会话管理</strong>：辩论会话的管理逻辑统一处理</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-practices">
+                        <h4>YAGNI原则应用</h4>
+                        <ul>
+                            <li><strong>按需角色实现</strong>：只实现当前需要的辩论角色</li>
+                            <li><strong>渐进式功能扩展</strong>：从基础辩论功能开始，逐步添加高级特性</li>
+                            <li><strong>避免过度复杂化</strong>：不需要的功能暂不实现</li>
+                        </ul>
+                    </div>
+
+                    <h3>异步协作最佳实践</h3>
+                    <div class="card">
+                        <h4>并发辩论处理</h4>
+                        <div class="code-block">
+class ConcurrentDebateManager:
+    """并发辩论管理器"""
+
+    def __init__(self, max_concurrent_debates: int = 10):
+        self.max_concurrent_debates = max_concurrent_debates
+        self.semaphore = asyncio.Semaphore(max_concurrent_debates)
+
+    async def start_debate_with_limit(self, topic: str, participants: List[DebateRole]) -> DebateSession:
+        """带并发限制的辩论启动"""
+        async with self.semaphore:
+            return await self.start_debate(topic, participants)
+
+    async def monitor_debate_health(self):
+        """监控辩论会话健康状态"""
+        while True:
+            try:
+                # 检查所有活跃会话
+                for session_id, session in self.active_sessions.items():
+                    if self._is_session_stalled(session):
+                        await self._handle_stalled_session(session)
+
+                await asyncio.sleep(60)  # 每分钟检查一次
+
+            except Exception as e:
+                print(f"Health monitoring error: {e}")
+                await asyncio.sleep(60)
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>事件驱动架构</h4>
+                        <div class="code-block">
+class DebateEventBus:
+    """辩论事件总线"""
+
+    def __init__(self):
+        self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
+
+    def subscribe(self, event_type: str, handler: Callable):
+        """订阅辩论事件"""
+        self._subscribers[event_type].append(handler)
+
+    async def publish(self, event: DebateEvent):
+        """发布辩论事件"""
+        if event.type in self._subscribers:
+            tasks = [
+                handler(event) for handler in self._subscribers[event.type]
+            ]
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+# 使用示例
+event_bus = DebateEventBus()
+
+# 订阅事件
+event_bus.subscribe("debate_started", handle_debate_started)
+event_bus.subscribe("contribution_added", handle_new_contribution)
+
+# 发布事件
+await event_bus.publish(DebateEvent(
+    type="debate_started",
+    session_id=session_id,
+    data={"topic": topic}
+))
+                        </div>
+                    </div>
+                </section>
+
+                <section id="related-docs" class="section">
+                    <h2>相关规范文档</h2>
+
+                    <div class="card">
+                        <h4>核心设计文档</h4>
+                        <ul>
+                            <li><strong>Debate System Architecture Specification</strong> - 辩论系统的架构设计规范</li>
+                            <li><strong>Multi-Agent Collaboration Framework</strong> - 多智能体协作框架设计</li>
+                            <li><strong>Role-Based Model Assignment Strategy</strong> - 基于角色的模型分配策略</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>实现指南</h4>
+                        <ul>
+                            <li><strong>Debate Flow Implementation Guide</strong> - 辩论流程实现的详细指南</li>
+                            <li><strong>Quality Evaluation Metrics</strong> - 辩论质量评估指标和方法</li>
+                            <li><strong>Session State Management</strong> - 会话状态管理的最佳实践</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>测试文档</h4>
+                        <ul>
+                            <li><strong>Debate System Testing Strategy</strong> - 辩论系统测试策略和工具</li>
+                            <li><strong>Multi-Model Integration Testing</strong> - 多模型集成测试方案</li>
+                            <li><strong>Performance Benchmarking Guide</strong> - 性能基准测试指南</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>运维文档</h4>
+                        <ul>
+                            <li><strong>Debate Session Monitoring</strong> - 辩论会话监控配置</li>
+                            <li><strong>Model Load Balancing</strong> - 模型负载均衡策略</li>
+                            <li><strong>Quality Assurance Procedures</strong> - 质量保证流程和标准</li>
+                        </ul>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <footer class="navigation-footer">
+        <h3>模块导航</h3>
+        <div class="nav-links">
+            <a href="modules/P1_PERSISTENCE.html">P1 数据持久化</a>
+            <a href="modules/P2_KNOWLEDGE_MANAGEMENT.html">P2 知识管理</a>
+            <a href="P3_MODEL_PROVIDER.html">P3 模型提供商</a>
+            <a href="P5_AGENT_ENGINE.html">P5 智能体引擎</a>
+            <a href="P6_TERMINAL_INTERFACE.html">P6 终端界面</a>
+            <a href="P8_DEBATE_SYSTEM.html">P8 辩论系统</a>
+            <a href="DOCUMENT_DRIVEN_LEARNING_PLATFORM.html">返回学习平台</a>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    
+    <script>
+        // 复制代码功能
+        function copyCode(button) {
+            const codeContainer = button.closest('.code-container');
+            const codeBlock = codeContainer.querySelector('pre');
+            
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '已复制';
+                button.style.background = '#10b981';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                button.textContent = '复制失败';
+                button.style.background = '#ef4444';
+                
+                setTimeout(() => {
+                    button.textContent = '📋 复制';
+                    button.style.background = '';
+                }, 2000);
+            });
+        }
+
+        // 初始化代码高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化语法高亮
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        });
+    </script>
+</body>
+</html>

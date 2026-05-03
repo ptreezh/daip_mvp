@@ -1,0 +1,306 @@
+{
+  "module_hierarchy": {
+    "core_p_modules": {
+      "p5": {
+        "name": "Agent Engine",
+        "status": "active",
+        "doc_count": 3
+      },
+      "p6": {
+        "name": "CLI TUI",
+        "status": "active",
+        "doc_count": 1
+      },
+      "p7": {
+        "name": "GUI",
+        "status": "active",
+        "doc_count": 1
+      },
+      "p0": {
+        "name": "Core Interfaces",
+        "status": "active",
+        "doc_count": 1
+      },
+      "p1": {
+        "name": "Data Persistence",
+        "status": "active",
+        "doc_count": 1
+      },
+      "p2": {
+        "name": "Knowledge Manager",
+        "status": "active",
+        "doc_count": 1
+      },
+      "p3": {
+        "name": "Model Provider",
+        "status": "active",
+        "doc_count": 1
+      },
+      "p4": {
+        "name": "Role Manager Tools",
+        "status": "active",
+        "doc_count": 5
+      }
+    },
+    "new_p_modules": {},
+    "auxiliary_modules": {
+      "p_aux_config": {
+        "name": "Configuration Management",
+        "status": "active",
+        "doc_count": 3
+      },
+      "p_aux_memory": {
+        "name": "Memory Management",
+        "status": "active",
+        "doc_count": 3
+      }
+    },
+    "support_modules": {
+      "architecture": {
+        "name": "Architecture Solutions",
+        "type": "support",
+        "doc_count": 1
+      },
+      "cli-enhancement": {
+        "name": "CLI Enhancement Projects",
+        "type": "project",
+        "doc_count": 3
+      },
+      "compliance": {
+        "name": "Compliance Checklists",
+        "type": "support",
+        "doc_count": 3
+      },
+      "procedure": {
+        "name": "Procedures & Guidelines",
+        "type": "support",
+        "doc_count": 10
+      },
+      "process": {
+        "name": "Process Management",
+        "type": "support",
+        "doc_count": 26
+      },
+      "specifications": {
+        "name": "Specification Documents",
+        "type": "support",
+        "doc_count": 0
+      },
+      "specs": {
+        "name": "Specification Specs",
+        "type": "support",
+        "doc_count": 55
+      }
+    }
+  },
+  "dependency_graph": {
+    "architecture": {
+      "name": "Architecture Solutions",
+      "dependencies": [],
+      "dependents": [
+        "p5",
+        "p6",
+        "p7",
+        "p0",
+        "p1",
+        "p2",
+        "p3",
+        "p4",
+        "p8_human_assistant",
+        "process",
+        "specs"
+      ]
+    },
+    "cli-enhancement": {
+      "name": "CLI Enhancement Projects",
+      "dependencies": [],
+      "dependents": []
+    },
+    "compliance": {
+      "name": "Compliance Checklists",
+      "dependencies": [],
+      "dependents": [
+        "specs"
+      ]
+    },
+    "p5": {
+      "name": "Agent Engine",
+      "dependencies": [
+        "architecture",
+        "process"
+      ],
+      "dependents": [
+        "specs"
+      ]
+    },
+    "p6": {
+      "name": "CLI TUI",
+      "dependencies": [
+        "architecture",
+        "process"
+      ],
+      "dependents": []
+    },
+    "p7": {
+      "name": "GUI",
+      "dependencies": [
+        "architecture"
+      ],
+      "dependents": [
+        "process",
+        "p_aux_config",
+        "specs"
+      ]
+    },
+    "p0": {
+      "name": "Core Interfaces",
+      "dependencies": [
+        "architecture"
+      ],
+      "dependents": [
+        "p_aux_memory"
+      ]
+    },
+    "p1": {
+      "name": "Data Persistence",
+      "dependencies": [
+        "architecture"
+      ],
+      "dependents": []
+    },
+    "p2": {
+      "name": "Knowledge Manager",
+      "dependencies": [
+        "architecture",
+        "process"
+      ],
+      "dependents": []
+    },
+    "p3": {
+      "name": "Model Provider",
+      "dependencies": [
+        "architecture"
+      ],
+      "dependents": []
+    },
+    "p4": {
+      "name": "Role Manager Tools",
+      "dependencies": [
+        "architecture",
+        "p4"
+      ],
+      "dependents": [
+        "p4",
+        "process",
+        "specs"
+      ]
+    },
+    "p8_debate_system": {
+      "name": "Debate System Core",
+      "dependencies": [
+        "process",
+        "p8_debate_system",
+        "p8",
+        "specifications"
+      ],
+      "dependents": [
+        "p8_debate_system",
+        "process",
+        "specs"
+      ]
+    },
+    "p8_human_assistant": {
+      "name": "Human Assistant",
+      "dependencies": [
+        "architecture"
+      ],
+      "dependents": []
+    },
+    "p8_wiki_system": {
+      "name": "Wiki System",
+      "dependencies": [],
+      "dependents": []
+    },
+    "p9": {
+      "name": "Scaffolding",
+      "dependencies": [
+        "process"
+      ],
+      "dependents": []
+    },
+    "procedure": {
+      "name": "Procedures & Guidelines",
+      "dependencies": [],
+      "dependents": [
+        "specs"
+      ]
+    },
+    "process": {
+      "name": "Process Management",
+      "dependencies": [
+        "p7",
+        "architecture",
+        "p4",
+        "newP6",
+        "specifications",
+        "process",
+        "p8_debate_system",
+        "p8"
+      ],
+      "dependents": [
+        "p5",
+        "p6",
+        "p2",
+        "p8_debate_system",
+        "p9",
+        "process",
+        "p_aux_config",
+        "specs"
+      ]
+    },
+    "p_aux_config": {
+      "name": "Configuration Management",
+      "dependencies": [
+        "p7",
+        "process"
+      ],
+      "dependents": []
+    },
+    "p_aux_memory": {
+      "name": "Memory Management",
+      "dependencies": [
+        "p0",
+        "specifications"
+      ],
+      "dependents": []
+    },
+    "specifications": {
+      "name": "Specification Documents",
+      "dependencies": [],
+      "dependents": [
+        "p8_debate_system",
+        "process",
+        "p_aux_memory",
+        "specs"
+      ]
+    },
+    "specs": {
+      "name": "Specification Specs",
+      "dependencies": [
+        "p5",
+        "architecture",
+        "p7",
+        "compliance",
+        "p4",
+        "procedure",
+        "specifications",
+        "process",
+        "p8_debate_system",
+        "p8"
+      ],
+      "dependents": []
+    }
+  },
+  "evolution_paths": {},
+  "module_clusters": {}
+}

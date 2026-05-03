@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0代码AI规范化编程实践教学 - AI知识生成平台</title>
+    <meta name="description" content="通过AI驱动的学习平台，帮助开发者掌握规范化编程技能">
+    
+    <!-- 统一样式表 -->
+    <link rel="stylesheet" href="assets/css/unified-styles.css">
+    
+    <!-- 字体和图标 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">加载中...</div>
+        </div>
+    </div>
+    
+    <!-- 滚动指示器 -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+    
+    <!-- 统一导航栏 -->
+    <nav class="unified-navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span class="navbar-logo">🤖</span>
+                <span>0代码AI规范化编程</span>
+            </a>
+            
+            <button class="navbar-toggle" id="navbarToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link active">首页</a></li>
+                <li><a href="#learning" class="nav-link">学习</a></li>
+                <li><a href="#teaching" class="nav-link">教学内容</a></li>
+                <li><a href="#modules" class="nav-link">模块</a></li>
+                <li><a href="#projects" class="nav-link">项目</a></li>
+                <li><a href="#resources" class="nav-link">资源</a></li>
+            </ul>
+            
+            <div class="navbar-actions">
+                <a href="#start-learning" class="unified-btn unified-btn-primary">
+                    开始学习
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主要内容 -->
+    <main class="main-container">
+        <!-- 英雄区域 -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-content text-center py-16">
+                    <div class="mb-6">
+                        <span class="unified-tag unified-tag-success">
+                            <i class="fas fa-sparkles"></i>
+                            全新升级
+                        </span>
+                    </div>
+                    
+                    <h1 class="visual-hierarchy-level-1 mb-6">
+                        0代码AI规范化编程实践教学
+                    </h1>
+                    
+                    <p class="text-xl text-secondary max-w-3xl mx-auto mb-10 leading-relaxed">
+                        通过多模型辩论和协同生成，构建可信知识的AI驱动学习平台。
+                        革命性的学习体验，让开发者通过实际项目掌握AI规范化编程的精髓。
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="#start-learning" class="unified-btn unified-btn-primary unified-btn-lg">
+                            <i class="fas fa-rocket"></i>
+                            立即开始学习
+                        </a>
+                        <a href="#learn-more" class="unified-btn unified-btn-outline unified-btn-lg">
+                            <i class="fas fa-book"></i>
+                            了解更多
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 统计数据 -->
+        <section class="stats-section bg-secondary py-16">
+            <div class="container">
+                <div class="stats-container grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="unified-card text-center">
+                        <div class="text-3xl font-bold text-primary mb-2">17</div>
+                        <div class="text-secondary">核心模块</div>
+                    </div>
+                    
+                    <div class="unified-card text-center">
+                        <div class="text-3xl font-bold text-primary mb-2">100+</div>
+                        <div class="text-secondary">学习资源</div>
+                    </div>
+                    
+                    <div class="unified-card text-center">
+                        <div class="text-3xl font-bold text-primary mb-2">5000+</div>
+                        <div class="text-secondary">学习者</div>
+                    </div>
+                    
+                    <div class="unified-card text-center">
+                        <div class="text-3xl font-bold text-primary mb-2">98%</div>
+                        <div class="text-secondary">满意度</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 核心特性 -->
+        <section class="features-section py-16">
+            <div class="container">
+                <div class="text-center mb-16">
+                    <h2 class="visual-hierarchy-level-2 mb-4">核心特性</h2>
+                    <p class="text-secondary max-w-2xl mx-auto">
+                        基于先进的AI技术和学习科学理论，提供全方位的编程学习体验
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h3 class="card-title">AI智能辅导</h3>
+                        </div>
+                        <p class="card-description">
+                            基于多模型辩论系统，提供个性化的学习路径和实时反馈
+                        </p>
+                        <div class="card-footer">
+                            <span class="unified-tag unified-tag-outline">智能</span>
+                        </div>
+                    </div>
+                    
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-project-diagram"></i>
+                            </div>
+                            <h3 class="card-title">项目实战</h3>
+                        </div>
+                        <p class="card-description">
+                            通过真实的项目案例，掌握从需求分析到部署上线的完整流程
+                        </p>
+                        <div class="card-footer">
+                            <span class="unified-tag unified-tag-outline">实践</span>
+                        </div>
+                    </div>
+                    
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <h3 class="card-title">规范认证</h3>
+                        </div>
+                        <p class="card-description">
+                            建立标准化的编程规范和质量标准，提升代码质量和团队协作效率
+                        </p>
+                        <div class="card-footer">
+                            <span class="unified-tag unified-tag-outline">标准</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 学习路径 -->
+        <section class="learning-path-section bg-secondary py-16">
+            <div class="container">
+                <div class="text-center mb-16">
+                    <h2 class="visual-hierarchy-level-2 mb-4">学习路径</h2>
+                    <p class="text-secondary max-w-2xl mx-auto">
+                        循序渐进的学习体系，从基础到精通全面提升编程技能
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="unified-card text-center">
+                        <div class="text-4xl font-bold text-primary mb-4">1</div>
+                        <h3 class="card-title mb-3">基础入门</h3>
+                        <p class="card-description text-sm">
+                            掌握AI编程基础概念和工具使用
+                        </p>
+                    </div>
+                    
+                    <div class="unified-card text-center">
+                        <div class="text-4xl font-bold text-primary mb-4">2</div>
+                        <h3 class="card-title mb-3">核心模块</h3>
+                        <p class="card-description text-sm">
+                            深入学习P1-P8核心功能模块
+                        </p>
+                    </div>
+                    
+                    <div class="unified-card text-center">
+                        <div class="text-4xl font-bold text-primary mb-4">3</div>
+                        <h3 class="card-title mb-3">项目实践</h3>
+                        <p class="card-description text-sm">
+                            通过真实项目巩固所学知识
+                        </p>
+                    </div>
+                    
+                    <div class="unified-card text-center">
+                        <div class="text-4xl font-bold text-primary mb-4">4</div>
+                        <h3 class="card-title mb-3">专家提升</h3>
+                        <p class="card-description text-sm">
+                            掌握高级技巧和架构设计
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 教学内容 -->
+        <section class="teaching-content-section py-16">
+            <div class="container">
+                <div class="text-center mb-16">
+                    <h2 class="visual-hierarchy-level-2 mb-4">核心教学内容</h2>
+                    <p class="text-secondary max-w-2xl mx-auto">
+                        基于软件工程最佳实践的教学内容，帮助开发者掌握规范化编程技能
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <h3 class="card-title">规范化需求教学</h3>
+                        </div>
+                        <p class="card-description">
+                            学习如何创建和管理规范化需求，确保需求明确、可测量、可追溯
+                        </p>
+                        <div class="card-footer">
+                            <a href="STANDARDIZED_REQUIREMENTS_TEACHING.html" class="unified-btn unified-btn-primary">
+                                <i class="fas fa-book-reader"></i>
+                                开始学习
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-cubes"></i>
+                            </div>
+                            <h3 class="card-title">SOLID原则教学</h3>
+                        </div>
+                        <p class="card-description">
+                            学习面向对象设计的SOLID原则，提高代码质量、可维护性和可扩展性
+                        </p>
+                        <div class="card-footer">
+                            <a href="SOLID_PRINCIPLES_TEACHING.html" class="unified-btn unified-btn-primary">
+                                <i class="fas fa-book-reader"></i>
+                                开始学习
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <h3 class="card-title">YAGNI & KISS原则</h3>
+                        </div>
+                        <p class="card-description">
+                            学习YAGNI和KISS原则，避免过度工程化，提高开发效率和产品质量
+                        </p>
+                        <div class="card-footer">
+                            <a href="YAGNI_KISS_PRINCIPLES_TEACHING.html" class="unified-btn unified-btn-primary">
+                                <i class="fas fa-book-reader"></i>
+                                开始学习
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3 class="card-title">需求一致性检测</h3>
+                        </div>
+                        <p class="card-description">
+                            学习如何进行需求一致性检测，确保需求文档内部逻辑正确、无冲突
+                        </p>
+                        <div class="card-footer">
+                            <a href="REQUIREMENT_CONSISTENCY_TEACHING.html" class="unified-btn unified-btn-primary">
+                                <i class="fas fa-book-reader"></i>
+                                开始学习
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-compass"></i>
+                            </div>
+                            <h3 class="card-title">任务上下文清晰性</h3>
+                        </div>
+                        <p class="card-description">
+                            学习如何确保任务分解的上下文清晰性，避免开发偏差和返工
+                        </p>
+                        <div class="card-footer">
+                            <a href="CONTEXTUAL_CLARITY_TEACHING.html" class="unified-btn unified-btn-primary">
+                                <i class="fas fa-book-reader"></i>
+                                开始学习
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="unified-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h3 class="card-title">避免开发陷阱</h3>
+                        </div>
+                        <p class="card-description">
+                            学习如何识别和避免开发过程中的常见陷阱，提高开发质量和效率
+                        </p>
+                        <div class="card-footer">
+                            <a href="AVOIDING_PITFALLS_TEACHING.html" class="unified-btn unified-btn-primary">
+                                <i class="fas fa-book-reader"></i>
+                                开始学习
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- CTA 区域 -->
+        <section class="cta-section py-16">
+            <div class="container">
+                <div class="unified-card text-center">
+                    <h2 class="visual-hierarchy-level-2 mb-4">准备好开始你的AI编程之旅了吗？</h2>
+                    <p class="text-secondary mb-8 max-w-2xl mx-auto">
+                        加入 thousands of 开发者，通过我们的平台掌握AI规范化编程技能
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="#start-learning" class="unified-btn unified-btn-primary unified-btn-lg">
+                            <i class="fas fa-user-graduate"></i>
+                            免费试学
+                        </a>
+                        <a href="#contact" class="unified-btn unified-btn-secondary unified-btn-lg">
+                            <i class="fas fa-envelope"></i>
+                            联系我们
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 统一页脚 -->
+    <footer class="unified-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">
+                        <span class="navbar-logo">🤖</span>
+                        <span>0代码AI规范化编程</span>
+                    </div>
+                    <p class="footer-description">
+                        通过AI驱动的学习平台，帮助开发者掌握规范化编程技能。
+                        我们的使命是让每个人都能轻松掌握先进的编程技术。
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>学习资源</h4>
+                        <ul>
+                            <li><a href="document_library.html">文档中心</a></li>
+                            <li><a href="MODULE_WIKI_KNOWLEDGE.html">知识库</a></li>
+                            <li><a href="P3_MODEL_PROVIDER.html">模块文档</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>支持服务</h4>
+                        <ul>
+                            <li><a href="#">帮助中心</a></li>
+                            <li><a href="#">技术支持</a></li>
+                            <li><a href="#">联系我们</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 0代码AI规范化编程. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 统一JavaScript -->
+    <script src="assets/js/unified-scripts.js"></script>
+</body>
+</html>
