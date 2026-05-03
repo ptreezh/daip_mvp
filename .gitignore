@@ -176,6 +176,9 @@ oh-my-opencode/
 opencode-source/
 opencode/
 
+# Pip package checkouts (installed via pyproject.toml)
+litellm/
+
 # Report and documentation files (keep in git only if needed)
 # *.md
 # tutor/
