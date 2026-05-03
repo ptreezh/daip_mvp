@@ -57,7 +57,9 @@
       "Bash(git config:*)",
       "Bash(git remote add:*)",
       "Bash(git push:*)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(grep -E \"^\\(\\\\+\\\\+\\\\+|\\\\-\\\\-\\\\-|\\\\+.*src/|\\\\\\\\-.*src/\\)\")",
+      "Bash(grep -E \"\\\\.py$|\\\\.md$\")"
     ],
     "deny": [],
     "ask": []

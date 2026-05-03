@@ -157,3 +157,51 @@ __pycache__/
 debug.log
 *.tmp
 *.temp
+# Claude Code session files
+.resumesession
+.claude/hooks/
+.gemini/
+
+# Test output and logs
+test_output.log
+*.test.log
+
+# Temporary code and backups
+src/daip_live/tui.py.bak
+
+# OpenCode plugins and external tools
+daip-live-opencode-plugin/sisyphus-debatewiki-plugin/
+daip-live-opencode-plugin/debatewiki-opencode-plugin/
+oh-my-opencode/
+opencode-source/
+opencode/
+
+# Report and documentation files (keep in git only if needed)
+# *.md
+# tutor/
+
+# Temporary test scripts
+analyze_non_integration_reasons.py
+check_page.py
+test_args.py
+test_*.py
+*_test.py
+e2e_*.py
+integration_test*.py
+functional_*.py
+verify_*.py
+validate_*.py
+demo_*.py
+comprehensive_*.py
+minimal_*.py
+final_*.py
+system_*.py
+tdd_*.py
+role_test.py
+session_test.py
+model_test.py
+permission_test.py
+skills_test.py
+knowledge_test.py
+doc_test.py
+debate_test.py
