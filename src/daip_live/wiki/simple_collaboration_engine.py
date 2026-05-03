@@ -215,20 +215,51 @@ class SimpleCollaborationEngine:
 
 请直接提供内容，不需要包含角色说明或格式标记。"""
 
-        # 生成内容
-        try:
-            content, _ = await self.model_provider.generate(
-                prompt,
-                model=model_name,
-                temperature=temperature,
-                max_tokens=max_tokens
-            )
-            return content.strip()
-        except Exception as e:
-            # 如果模型调用失败，返回模拟内容
-            print(f"⚠️ 模型调用失败，使用模拟内容: {e}")
-            fallback_content = f"作为{role}，我认为{topic}是一个重要的话题。基于专业知识分析，这个主题涉及多个关键方面，需要深入研究和讨论。"
-            return fallback_content
+        # 生成内容 - 实现智能模型回退机制
+        from daip_live.utils.model_availability import find_working_model, PREFERRED_MODELS
+
+        # 如果原模型不可用，尝试查找可用模型
+        if model_name not in PREFERRED_MODELS:
+            # 将当前模型加入首选列表的开始
+            all_models_to_try = [model_name] + PREFERRED_MODELS
+        else:
+            # 当前模型已经在首选列表中，直接使用
+            all_models_to_try = [model_name] + [m for m in PREFERRED_MODELS if m != model_name]
+
+        print(f"🔍 尝试模型列表: {all_models_to_try[:3]}...")  # 只显示前3个，避免输出过多
+
+        for idx, attempt_model in enumerate(all_models_to_try):
+            try:
+                content, _ = await self.model_provider.generate(
+                    prompt,
+                    model=attempt_model,
+                    temperature=temperature,
+                    max_tokens=max_tokens
+                )
+                if idx > 0:  # 如果不是首选模型，记录回退信息
+                    print(f"✅ 模型调用成功（已切换到: {attempt_model}）")
+                else:
+                    print(f"✅ 模型调用成功: {attempt_model}")
+                return content.strip()
+            except Exception as e:
+                if idx < len(all_models_to_try) - 1:  # 不是最后一个模型
+                    print(f"⚠️ 模型调用失败: {attempt_model}, 尝试下一个...")
+                    continue
+                else:
+                    # 所有模型都失败，使用模拟内容
+                    print(f"❌ 所有模型调用失败，使用智能模拟内容: {e}")
+                    # 使用更智能的回退内容，基于角色和主题
+                    role_specific_prefix = {
+                        "domain_expert": "作为领域专家，我认为",
+                        "researcher": "作为研究员，我发现",
+                        "editor": "作为编辑，我建议",
+                        "critic": "作为批评家，我认为需要注意",
+                        "analyst": "作为分析师，我评估",
+                        "teacher": "作为教师，我解释"
+                    }
+                    prefix = role_specific_prefix.get(role, f"作为{role}，我认为")
+                    fallback_content = f"{prefix}{topic}是一个重要的话题。基于专业知识分析，这个主题涉及多个关键方面，值得深入研究和讨论。"
+                    return fallback_content
 
     def _synthesize_collaborative_content(
         self,

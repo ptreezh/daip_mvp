@@ -514,6 +514,8 @@ class WikiCommands:
 
         if subcommand == "add":
             self._handle_wiki_add(remaining_args)
+        elif subcommand == "create":
+            self._handle_wiki_create(remaining_args)
         elif subcommand == "search":
             self._handle_wiki_search(remaining_args)
         elif subcommand == "list":
@@ -531,12 +533,14 @@ class WikiCommands:
 
 [dim]可用命令：[/dim]
 [yellow]/wiki add <title> <content>[/yellow]     [dim]添加Wiki页面[/dim]
+[yellow]/wiki create <title>[/yellow]           [dim]创建Wiki页面（多角色协作）[/dim]
 [yellow]/wiki search <keywords>[/yellow]       [dim]搜索Wiki内容[/dim]
 [yellow]/wiki list[/yellow]                   [dim]列出所有Wiki页面[/dim]
 [yellow]/wiki delete <title>[/yellow]          [dim]删除Wiki页面[/dim]
 
 [dim]示例：[/dim]
 [cyan]/wiki add "Python技巧" "Python的最佳实践和技巧"[/cyan]
+[cyan]/wiki create "人工智能基础"[/cyan]
 [cyan]/wiki search "机器学习"[/cyan]
         """
         if hasattr(self.tui, '_update_log_view'):
@@ -561,3 +565,26 @@ class WikiCommands:
         """处理Wiki删除命令"""
         if hasattr(self.tui, '_update_log_view'):
             self.tui._update_log_view(f"[red]🗑️ 删除Wiki页面: {args}[/red]")
+
+    def _handle_wiki_create(self, title: str) -> None:
+        """处理Wiki创建命令"""
+        # 调用TUI主类的异步Wiki创建方法
+        if hasattr(self.tui, '_handle_wiki_create'):
+            # 在Textual应用中，使用call_later来调度异步方法
+            import asyncio
+            if hasattr(self.tui, 'call_later'):
+                # 使用TUI的call_later方法来调度异步操作
+                async def call_create():
+                    await self.tui._handle_wiki_create(title)
+                self.tui.call_later(call_create)
+            else:
+                # 直接使用异步任务
+                try:
+                    asyncio.create_task(self.tui._handle_wiki_create(title))
+                except RuntimeError:
+                    # 如果没有运行事件循环，直接显示错误
+                    if hasattr(self.tui, '_update_log_view'):
+                        self.tui._update_log_view(f"[yellow]⚠️ 无法启动Wiki创建任务: {title}[/yellow]")
+        else:
+            if hasattr(self.tui, '_update_log_view'):
+                self.tui._update_log_view(f"[yellow]⚠️ Wiki创建功能未找到: {title}[/yellow]")

@@ -21,6 +21,8 @@ from .tui_role_integration import TUIRoleCommandHandler
 from .interactive_role_creation import InteractiveRoleCreationService
 from .screens import CommandHelpDialog, ExitConfirmationDialog
 from .utils import FocusMode, HistoryManager, PerformanceMonitor, ConfigManager, Logger
+from .copyable_widgets import CopyableLogWidget
+from .clipboard_helper import copy_content
 
 # 导入意图识别和Agent执行器
 from daip_live.agent_engine.executor import AgentExecutor
@@ -111,6 +113,10 @@ class SimplifiedTUI(App):
     def __init__(self, executor: Optional[AgentExecutor] = None, *args, **kwargs):
         super().__init__()
 
+        # 优先初始化日志缓冲区，以便在初始化过程中可以调用日志方法
+        self._log_text_buffer = []
+        self._max_log_entries = 1000  # Limit to prevent excessive memory usage
+
         # 初始化依赖注入容器（延迟导入以避免循环依赖）
         try:
             self.container = get_container()
@@ -145,6 +151,14 @@ class SimplifiedTUI(App):
         except Exception as e:
             print(f"⚠️ 混合意图识别器初始化失败，回退到基础版本: {e}")
             self._intent_recognizer = EnhancedIntentRecognizer()
+
+        # 检查并更新模型可用性
+        try:
+            from daip_live.config import check_and_update_model_availability
+            available_model = check_and_update_model_availability()
+            print(f"✅ Using model: {available_model}")
+        except Exception as e:
+            print(f"⚠️ Model availability check failed: {e}")
 
         # 初始化TUI模块
         self._initialize_tui_modules()
@@ -205,8 +219,8 @@ class SimplifiedTUI(App):
         # 初始化专门的命令处理器
         self.search_commands = SearchCommands(self)
         self.debate_commands = DebateCommands(self)
-        # from .commands import WikiCommands  # 暂时禁用，类不存在
-        # self.wiki_commands = WikiCommands(self)  # 暂时禁用，类不存在
+        from .commands import WikiCommands  # WikiCommands类存在，启用导入
+        self.wiki_commands = WikiCommands(self)  # 初始化Wiki命令处理器
         # self.utility_commands = UtilityCommands(self)  # 暂时禁用，类不存在
 
         # 初始化工具和配置管理
@@ -231,6 +245,10 @@ class SimplifiedTUI(App):
         # System log tracking
         self._system_log_buffer = []
         self._max_system_log_entries = 50
+
+        # Main log text buffer for copy functionality
+        self._log_text_buffer = []
+        self._max_log_entries = 1000  # Limit to prevent excessive memory usage
 
         # Available commands
         self._available_commands = [
@@ -458,22 +476,51 @@ class SimplifiedTUI(App):
             if hasattr(self, 'container') and self.container:
                 try:
                     self._role_manager = self.container.role_manager()
-                    print("✅ 角色管理器初始化成功")
+                    print("✅ 智能角色管理器初始化成功")
                 except Exception as e:
                     print(f"Warning: 从container获取role_manager失败: {e}")
-                    # 创建一个基本的RoleManager实例
-                    from daip_live.p4_role_manager_tools.role_manager import RoleManager
-                    self._role_manager = RoleManager()
-                    print("✅ 角色管理器（降级模式）初始化成功")
+                    # 创建一个IntelligentRoleManagerWrapper实例
+                    from daip_live.p4_role_manager_tools.intelligent_role_manager_wrapper import IntelligentRoleManagerWrapper
+                    self._role_manager = IntelligentRoleManagerWrapper(
+                        roles_dir_path="roles",
+                        model_provider=getattr(self, '_model_provider', None)
+                    )
+                    print("✅ 智能角色管理器（降级模式）初始化成功")
             else:
-                # 如果container不可用，创建一个基本实例
-                from daip_live.p4_role_manager_tools.role_manager import RoleManager
-                self._role_manager = RoleManager()
-                print("✅ 角色管理器（独立模式）初始化成功")
+                # 如果container不可用，创建一个智能包装器实例
+                from daip_live.p4_role_manager_tools.intelligent_role_manager_wrapper import IntelligentRoleManagerWrapper
+                from daip_live.model_provider.provider import LiteLLMProvider
+                from daip_live.core.models import ProviderConfig
+
+                # 获取或创建模型提供者
+                model_provider = getattr(self, '_model_provider', None)
+                if model_provider is None:
+                    try:
+                        # 从配置中获取默认模型
+                        from daip_live.config import config_manager
+                        config = config_manager.get_config()
+                        default_model = config.llm_provider.default_model
+
+                        provider_config = ProviderConfig(model=default_model)
+                        model_provider = LiteLLMProvider(config=provider_config)
+                    except Exception:
+                        # 如果无法创建模型提供者，降级到标准RoleManager
+                        from daip_live.p4_role_manager_tools.role_manager import RoleManager
+                        self._role_manager = RoleManager()
+                        print("⚠️ 模型提供者不可用，降级到标准角色管理器")
+                        return
+
+                self._role_manager = IntelligentRoleManagerWrapper(
+                    roles_dir_path="roles",
+                    model_provider=model_provider
+                )
+                print("✅ 智能角色管理器（独立模式）初始化成功")
         except Exception as e:
-            print(f"Error: 初始化role_manager失败: {e}")
-            # 抛出异常以明确指示问题，而不是使用模拟实现
-            raise RuntimeError(f"RoleManager初始化失败: {e}")
+            print(f"Warning: 智能角色管理器初始化失败，降级到标准角色管理器: {e}")
+            # 降级到标准RoleManager
+            from daip_live.p4_role_manager_tools.role_manager import RoleManager
+            self._role_manager = RoleManager()
+            print("✅ 标准角色管理器初始化成功")
 
     def _initialize_knowledge_manager(self):
         """初始化知识管理器（使用真实实现）"""
@@ -802,12 +849,12 @@ class SimplifiedTUI(App):
             # Conversation area - takes most of the space
             with Vertical():
                 yield Static("💬 对话区域", classes="panel-header")
-                yield RichLog(id="main_log", classes="output-mode", highlight=True, markup=True, wrap=True)
+                yield CopyableLogWidget(id="main_log", classes="output-mode", highlight=True, markup=True, wrap=True)
 
             # System activity panel - narrow sidebar for system messages
             with Vertical(classes="system-panel"):
                 yield Static("🔧 系统状态", classes="panel-header")
-                yield RichLog(id="system_log", classes="system-log", highlight=True, markup=True, wrap=True)
+                yield CopyableLogWidget(id="system_log", classes="system-log", highlight=True, markup=True, wrap=True)
 
         yield Input(placeholder="Enter command or message...", id="user_input")
         yield Static("DAIP-LIVE Modular TUI | Status: Ready | Focus: Input", id="status_bar")
@@ -836,9 +883,19 @@ class SimplifiedTUI(App):
     def _update_log_view(self, text: str) -> None:
         """更新主对话视图"""
         try:
+            # Add text to the buffer for copy functionality
+            self._log_text_buffer.append(text)
+            # Limit buffer size to prevent excessive memory usage
+            if len(self._log_text_buffer) > self._max_log_entries:
+                self._log_text_buffer.pop(0)  # Remove oldest entries
+
+            # Write to the RichLog widget
             self.query_one("#main_log", RichLog).write(text)
         except Exception:
-            pass
+            # Even if RichLog fails, ensure text is stored in buffer for copying
+            self._log_text_buffer.append(text)
+            if len(self._log_text_buffer) > self._max_log_entries:
+                self._log_text_buffer.pop(0)
 
     def _update_system_log(self, text: str) -> None:
         """更新系统状态面板"""
@@ -1091,8 +1148,57 @@ class SimplifiedTUI(App):
         # Record command usage
         self.performance_monitor.record_command(cmd)
 
-        # Handle command using the modular command handler
-        await self.command_handler.handle_command(cmd, args)
+        # Handle command using direct dispatch to appropriate handler methods
+        await self._dispatch_command(cmd, args)
+
+    async def _dispatch_command(self, cmd: str, args: str) -> None:
+        """分发命令到适当的处理方法"""
+        # 映射命令到处理方法
+        command_handlers = {
+            'search': self._handle_search_command,
+            'debate': self._handle_debate_command,
+            'help': self._handle_help_command,
+            'claude_skills_info': self._handle_claude_skills_info_command,
+            'claude_skills_list': self._handle_claude_skills_list_command,
+            'claude_skills_run': self._handle_claude_skills_run_command,
+            'claude_skills_search': self._handle_claude_skills_search_command,
+            'claude_skills_sync': self._handle_claude_skills_sync_command,
+            'clear': self._handle_clear_command,
+            'compact': self._handle_compact_command,
+            'debate_history': self._handle_debate_history_command,
+            'doc': self._handle_doc_command,
+            'init': self._handle_init_command,
+            'intention': self._handle_intention_command,
+            'knowledge': self._handle_knowledge_command,
+            'model': self._handle_model_command,
+            'pa': self._handle_pa_command,
+            'permission': self._handle_permission_command,
+            'project': self._handle_project_command,
+            'quit': self._handle_quit_command,
+            'role': self._handle_role_command,
+            'run': self._handle_run_command,
+            'scaffold': self._handle_scaffold_command,
+            'session': self._handle_session_command,
+            'shortcut': self._handle_shortcut_command,
+            'skill': self._handle_skill_command,
+            'copy': self._handle_copy_command,
+            'copy_recent': self._handle_copy_recent_command,
+            'todo': self._handle_todo_command,
+            'wiki': self._handle_wiki_command,
+        }
+
+        handler = command_handlers.get(cmd.lower())
+        if handler:
+            # 检查处理器是否是异步的，以决定是否使用await
+            if asyncio.iscoroutinefunction(handler):
+                await handler(args)
+            else:
+                # 同步处理器，直接调用
+                handler(args)
+        else:
+            # 对于不明确支持的命令，尝试通用处理
+            self._update_log_view(f"[yellow]⚠️  未支持的命令: /{cmd}[/yellow]")
+            self._update_log_view("[dim]提示: 使用 /help 查看支持的命令列表[/dim]")
 
     def _apply_smart_defaults(self, cmd: str, args: str) -> tuple[str, str]:
         """为单一子命令的命令应用智能默认值"""
@@ -1145,17 +1251,7 @@ class SimplifiedTUI(App):
     async def _handle_chat_input(self, user_input: str) -> None:
         """处理聊天输入"""
         try:
-            # Check for conversation search request
-            if self._is_conversation_search_request(user_input):
-                query = self._extract_search_query(user_input)
-                if query:
-                    self._update_log_view(f"[bold cyan]🔍 检测到历史对话搜索请求...[/bold cyan]")
-                    self.search_commands.search_conversation_history(query)
-                else:
-                    self._update_log_view("[bold yellow]💡 请提供更具体的搜索关键词[/bold yellow]")
-                return
-
-            # Use intent recognition for natural language input
+            # 首先尝试意图识别，以确保特定命令优先于搜索
             self._update_system_log(f"[dim]🧠 Intent recognition started for: {user_input[:50]}...[/dim]")
 
             try:
@@ -1178,16 +1274,26 @@ class SimplifiedTUI(App):
 
                     # Execute the intent using the executor
                     await self._execute_intent(intent, user_input, session_id)
-                else:
-                    # No intent recognized, handle as regular chat
-                    self._update_system_log(f"[dim]💬 No specific intent, handling as chat message[/dim]")
-                    await self._handle_regular_chat(user_input, session_id)
+                    return  # 成功识别意图后直接返回，不再尝试搜索
 
             except Exception as intent_error:
                 self._update_log_view(f"[bold yellow]⚠️ Intent recognition failed: {intent_error}[/bold yellow]")
                 self._update_system_log(f"[dim]⚠️ Intent recognition error: {intent_error}[/dim]")
-                # Fallback to regular chat handling
-                await self._handle_regular_chat(user_input, getattr(self, '_current_session_id', 'default'))
+                # 继续执行搜索逻辑，以防意图识别失败但用户确实想要搜索
+
+            # 如果意图识别失败或没有识别到意图，检查是否是普通对话搜索请求
+            if self._is_conversation_search_request(user_input):
+                query = self._extract_search_query(user_input)
+                if query:
+                    self._update_log_view(f"[bold cyan]🔍 检测到历史对话搜索请求...[/bold cyan]")
+                    self.search_commands.search_conversation_history(query)
+                else:
+                    self._update_log_view("[bold yellow]💡 请提供更具体的搜索关键词[/bold yellow]")
+                return
+
+            # 如果意图识别和搜索都没有匹配，处理为普通聊天
+            self._update_system_log(f"[dim]💬 No specific intent, handling as chat message[/dim]")
+            await self._handle_regular_chat(user_input, session_id)
 
         except Exception as e:
             self._update_log_view(f"[bold red]Error in chat processing: {e}[/bold red]")
@@ -1226,13 +1332,29 @@ class SimplifiedTUI(App):
 
             # Execute the intent using the executor
             if hasattr(self._executor, 'execute_intent'):
-                result = await self._executor.execute_intent(
-                    intent=intent,
-                    user_input=user_input,
-                    session_id=session_id,
-                    execution_context=execution_context,
-                    callback=self._safe_log_callback
-                )
+                # 安全检查execute_intent方法是否返回可等待对象
+                method = getattr(self._executor, 'execute_intent')
+                if asyncio.iscoroutinefunction(method):
+                    # 方法是一个协程函数，可以await
+                    result = await self._executor.execute_intent(
+                        intent=intent,
+                        user_input=user_input,
+                        session_id=session_id,
+                        execution_context=execution_context,
+                        callback=self._safe_log_callback
+                    )
+                else:
+                    # 方法不是协程函数，直接调用后处理结果
+                    result = self._executor.execute_intent(
+                        intent=intent,
+                        user_input=user_input,
+                        session_id=session_id,
+                        execution_context=execution_context,
+                        callback=self._safe_log_callback
+                    )
+                    # 如果返回的是协程对象，才await它
+                    if asyncio.iscoroutine(result):
+                        result = await result
             else:
                 # Fallback execution method - Handle intents directly
                 self._update_system_log(f"[dim]🔧 执行意图: {intent.name}[/dim]")
@@ -1261,26 +1383,38 @@ class SimplifiedTUI(App):
 
             # 根据意图类型处理
             if intent_name == "search_papers":
-                query = parameters.get("query", "").strip()
+                query = parameters.get("query")
+                if query is not None:
+                    query = str(query).strip()
                 if query:
                     self._update_system_log(f"[dim]🔍 搜索论文: {query}[/dim]")
-                    # 调用论文搜索功能
-                    await self._handle_paper_search(query)
+                    # 调用论文搜索功能 - 现在是同步方法
+                    self._handle_paper_search(query)
                 else:
                     self._update_log_view("[yellow]⚠️ 搜索论文需要提供关键词[/yellow]")
 
             elif intent_name == "download_paper":
-                paper_id = parameters.get("paper_id", "").strip()
-                search_query = parameters.get("search_query", "").strip()
-                if paper_id or search_query:
+                paper_id = parameters.get("paper_id")
+                search_query = parameters.get("search_query")
+
+                # 安全处理可能为None的参数
+                if paper_id is not None:
+                    paper_id = str(paper_id).strip()
+                if search_query is not None:
+                    search_query = str(search_query).strip()
+
+                # 检查是否提供了有效参数
+                if paper_id or (search_query and search_query.strip()):
                     self._update_log_view(f"[dim]📥 下载论文: {paper_id or search_query}[/dim]")
-                    # 调用论文下载功能
-                    await self._handle_paper_download(paper_id or search_query)
+                    # 调用论文下载功能 - 现在是同步方法
+                    self._handle_paper_download(paper_id or search_query)
                 else:
                     self._update_log_view("[yellow]⚠️ 下载论文需要提供论文ID或搜索词[/yellow]")
 
             elif intent_name == "start_debate":
-                topic = parameters.get("topic", "").strip()
+                topic = parameters.get("topic")
+                if topic is not None:
+                    topic = str(topic).strip()
                 if topic:
                     self._update_system_log(f"[dim]🗣️ 开始辩论: {topic}[/dim]")
                     # 调用辩论功能
@@ -1289,16 +1423,32 @@ class SimplifiedTUI(App):
                     self._update_log_view("[yellow]⚠️ 开始辩论需要提供主题[/yellow]")
 
             elif intent_name == "create_wiki":
-                title = parameters.get("title", "").strip()
+                title = parameters.get("title")
+                if title is not None:
+                    title = str(title).strip()
                 if title:
                     self._update_log_view(f"[dim]📝 创建Wiki: {title}[/dim]")
-                    # 调用Wiki创建功能
-                    self.wiki_commands.handle_wiki_command(f"create {title}")
+                    # 调用Wiki创建功能 - 现在会显示详细的协作过程
+                    if hasattr(self, 'wiki_commands') and self.wiki_commands:
+                        # 直接调用内部处理函数以确保显示协作详情
+                        await self._handle_wiki_create(title)
+                    else:
+                        self._update_log_view("[red]❌ Wiki命令处理器未初始化[/red]")
+                        # 退回到常规聊天处理
+                        await self._handle_regular_chat(user_input, session_id)
                 else:
                     self._update_log_view("[yellow]⚠️ 创建Wiki需要提供标题[/yellow]")
 
+            elif intent_name == "view_debate_history":
+                session_id_param = parameters.get("session_id")
+                self._update_log_view(f"[dim]📜 查看辩论历史{' (特定会话: ' + str(session_id_param) + ')' if session_id_param else ''}[/dim]")
+                # 调用辩论历史查看功能 - 现在已正确处理参数
+                await self._handle_debate_history_command(str(session_id_param) if session_id_param else "")
+
             elif intent_name == "knowledge_search":
-                query = parameters.get("query", "").strip()
+                query = parameters.get("query")
+                if query is not None:
+                    query = str(query).strip()
                 if query:
                     self._update_log_view(f"[dim]🔍 知识库搜索: {query}[/dim]")
                     # 调用知识库搜索功能
@@ -1307,7 +1457,9 @@ class SimplifiedTUI(App):
                     self._update_log_view("[yellow]⚠️ 知识库搜索需要提供关键词[/yellow]")
 
             elif intent_name == "execute_skill":
-                content = parameters.get("content", "").strip()
+                content = parameters.get("content")
+                if content is not None:
+                    content = str(content).strip()
                 if content:
                     self._update_log_view(f"[dim]⚡ 执行技能: {content[:50]}...[/dim]")
                     # 调用技能执行功能
@@ -1327,10 +1479,40 @@ class SimplifiedTUI(App):
 
         except Exception as e:
             self._update_log_view(f"[red]❌ 意图处理失败: {str(e)}[/red]")
-            # 回退到常规聊天
-            await self._handle_regular_chat(user_input, session_id)
+            # 回退到安全的聊天处理，避免再次触发意图识别导致循环
+            await self._handle_safe_fallback_chat(user_input, session_id, intent_name)
 
-    async def _handle_paper_search(self, query: str) -> None:
+    async def _handle_safe_fallback_chat(self, user_input: str, session_id: str, failed_intent_name: str = "unknown") -> None:
+        """安全的回退聊天处理，避免意图识别循环"""
+        try:
+            self._update_log_view(f"[yellow]⚠️ 意图 '{failed_intent_name}' 处理失败，提供安全回退响应[/yellow]")
+            self._update_log_view(f"[dim]原始输入: {user_input}[/dim]")
+
+            # 提供具体的操作建议，而不是再次调用执行器
+            if failed_intent_name == "view_debate_history":
+                self._update_log_view("[cyan]💡 建议操作:[/cyan]")
+                self._update_log_view("  • 使用命令: /debate history")
+                self._update_log_view("  • 或尝试: /debate list")
+            elif failed_intent_name == "start_debate":
+                self._update_log_view("[cyan]💡 建议操作:[/cyan]")
+                self._update_log_view("  • 使用命令: /debate <主题>")
+                self._update_log_view("  • 或尝试: /debate start <主题>")
+            elif failed_intent_name == "create_wiki":
+                self._update_log_view("[cyan]💡 建议操作:[/cyan]")
+                self._update_log_view("  • 使用命令: /wiki create <标题>")
+                self._update_log_view("  • 或尝试: /wiki <标题>")
+            else:
+                self._update_log_view("[green]🤖 已收到您的请求，但处理过程中出现了一些问题。您可以尝试使用具体的命令格式。[/green]")
+
+            # 不调用执行器，避免循环
+            self._update_log_view("[green]✅ 已安全处理您的请求[/green]")
+
+        except Exception as e:
+            # 如果安全回退也失败，至少记录错误
+            self._update_log_view(f"[bold red]❌ 安全回退处理也失败: {e}[/bold red]")
+            self._update_log_view("[green]💡 请尝试使用命令行格式，如: /help 查看可用命令[/green]")
+
+    def _handle_paper_search(self, query: str) -> None:
         """处理论文搜索 - 使用真实系统"""
         try:
             self._update_log_view("[dim]🔍 正在搜索论文...[/dim]")
@@ -1343,8 +1525,8 @@ class SimplifiedTUI(App):
                     from daip_live.doc.tools.paper_downloader import PaperDownloader
                     from daip_live.doc.models.document_models import PaperSource
 
-                    # 使用真实搜索功能
-                    results = await search_academic_papers(query=query, max_results=5)
+                    # 使用真实搜索功能 - 该函数是同步的，不需要await
+                    results = search_academic_papers(query=query, max_results=5)
 
                     if "No papers found" in results or len(results) == 0:
                         self._update_log_view("[yellow]⚠️ 未找到相关论文[/yellow]")
@@ -1368,7 +1550,7 @@ class SimplifiedTUI(App):
                 # 如果container不可用，尝试直接调用
                 try:
                     from daip_live.basic_tools.core import search_academic_papers
-                    results = await search_academic_papers(query=query, max_results=5)
+                    results = search_academic_papers(query=query, max_results=5)
 
                     if "No papers found" in results or len(results) == 0:
                         self._update_log_view("[yellow]⚠️ 未找到相关论文[/yellow]")
@@ -1385,7 +1567,7 @@ class SimplifiedTUI(App):
         except Exception as e:
             self._update_log_view(f"[red]❌ 论文搜索失败: {str(e)}[/red]")
 
-    async def _handle_paper_download(self, identifier: str) -> None:
+    def _handle_paper_download(self, identifier: str) -> None:
         """处理论文下载 - 使用真实系统"""
         try:
             self._update_log_view(f"[dim]📥 正在下载论文: {identifier}[/dim]")
@@ -1396,8 +1578,8 @@ class SimplifiedTUI(App):
                     # 尝试从container获取论文下载工具
                     from daip_live.basic_tools.core import download_paper
 
-                    # 使用真实下载功能
-                    result = await download_paper(paper_id=identifier)
+                    # 使用真实下载功能 - 该函数是同步的，不需要await
+                    result = download_paper(paper_id=identifier)
 
                     self._update_log_view("[green]✅ 论文下载完成[/green]")
                     result_lines = result.split('\n')
@@ -1415,7 +1597,7 @@ class SimplifiedTUI(App):
                 # 如果container不可用，尝试直接调用
                 try:
                     from daip_live.basic_tools.core import download_paper
-                    result = await download_paper(paper_id=identifier)
+                    result = download_paper(paper_id=identifier)
 
                     self._update_log_view("[green]✅ 论文下载完成[/green]")
                     result_lines = result.split('\n')
@@ -1483,8 +1665,73 @@ class SimplifiedTUI(App):
             self._update_system_log(f"[dim]💬 Processing as regular chat message[/dim]")
             self._update_log_view(f"[bold blue]💬 收到消息: {user_input}[/bold blue]")
             self._update_log_view("[cyan]> 🤔 思考中...[/cyan]")
+
+            timeout = 30  # 30秒超时
+
+            # 这里应该有具体的聊天处理逻辑，使用executor或大模型
+            if hasattr(self, '_executor') and self._executor:
+                # 检查executor是否具有可用的执行方法
+                if hasattr(self._executor, 'chat_run'):
+                    try:
+                        # 使用asyncio.wait_for处理超时
+                        chat_task = self._executor.chat_run(user_input).__aiter__()
+                        while True:
+                            try:
+                                event = await asyncio.wait_for(chat_task.__anext__(), timeout=timeout)
+                                if hasattr(event, 'content'):
+                                    # 移除"思考中"消息，显示实际响应
+                                    self._update_log_view(f"[green]🤖 {event.content}[/green]")
+                                elif hasattr(event, 'message'):
+                                    self._update_log_view(f"[green]🤖 {event.message}[/green]")
+                                else:
+                                    # 如果event有其他属性，也可以处理
+                                    self._update_log_view(f"[green]🤖 收到响应事件: {str(event)}[/green]")
+                            except StopAsyncIteration:
+                                break  # Chat run completed successfully
+                            except asyncio.TimeoutError:
+                                self._update_log_view("[red]❌ 聊天处理超时，请稍后重试或使用具体命令。[/red]")
+                                self._update_system_log(f"[dim]⚠️ Chat processing timed out after {timeout}s[/dim]")
+                                break
+                    except Exception as exec_error:
+                        self._update_log_view(f"[red]❌ 聊天处理出错: {exec_error}[/red]")
+                        self._update_system_log(f"[dim]⚠️ Chat execution error: {exec_error}[/dim]")
+                elif hasattr(self._executor, 'run'):
+                    # 如果有run方法，但需要不同的参数，可以根据需要调整
+                    try:
+                        # 运行run方法并等待结果
+                        run_task = self._executor.run(user_input).__aiter__()
+                        while True:
+                            try:
+                                event = await asyncio.wait_for(run_task.__anext__(), timeout=timeout)
+                                if hasattr(event, 'content'):
+                                    # 移除"思考中"消息，显示实际响应
+                                    self._update_log_view(f"[green]🤖 {event.content}[/green]")
+                                elif hasattr(event, 'message'):
+                                    self._update_log_view(f"[green]🤖 {event.message}[/green]")
+                                else:
+                                    # 如果event有其他属性，也可以处理
+                                    self._update_log_view(f"[green]🤖 收到响应事件: {str(event)}[/green]")
+                            except StopAsyncIteration:
+                                break  # Run completed successfully
+                            except asyncio.TimeoutError:
+                                self._update_log_view("[red]❌ 聊天处理超时，请稍后重试或使用具体命令。[/red]")
+                                self._update_system_log(f"[dim]⚠️ Chat processing timed out after {timeout}s[/dim]")
+                                break
+                    except Exception as exec_error:
+                        self._update_log_view(f"[red]❌ 聊天处理出错: {exec_error}[/red]")
+                        self._update_system_log(f"[dim]⚠️ Chat execution error: {exec_error}[/dim]")
+                else:
+                    # 如果executor没有可用的聊天方法，使用默认响应
+                    self._update_log_view("[yellow]⚠️ 聊天执行器不支持聊天方法，使用默认响应[/yellow]")
+                    self._update_log_view("[green]🤖 这是DAIP-LIVE默认响应：我已收到您的消息。如需复杂处理，请使用具体命令。[/green]")
+            else:
+                # 如果executor不存在，使用默认响应
+                self._update_log_view("[yellow]⚠️ 聊天执行器不可用，使用默认响应[/yellow]")
+                self._update_log_view("[green]🤖 这是DAIP-LIVE默认响应：我已收到您的消息。如需复杂处理，请使用具体命令。[/green]")
+
         except Exception as e:
             self._update_log_view(f"[bold red]Error in chat processing: {e}[/bold red]")
+            self._update_system_log(f"[dim]❌ Chat processing error: {e}[/dim]")
             self.logger.error(f"Regular chat error: {e}")
 
     def _safe_log_callback(self, message_func, message_type: str = "info", context: str = ""):
@@ -1967,36 +2214,106 @@ class SimplifiedTUI(App):
         self._update_log_view("[dim]下载最新技能定义...[/dim]")
         self._update_log_view("[green]✅ Claude Skills 同步完成[/green]")
 
-    def _handle_clear_command(self, args: str) -> None:
+    async def _handle_clear_command(self, args: str) -> None:
         """处理清屏命令"""
-        # 清空主日志
-        self._log_text_buffer.clear()
-        main_log = self.query_one("#main_log", RichLog)
-        main_log.clear()
-        self._update_log_view("[bold green]✅ 屏幕已清空[/bold green]")
+        try:
+            # 清空主日志
+            self._log_text_buffer.clear()
+            main_log = self.query_one("#main_log", RichLog)
+            main_log.clear()
+            self._update_log_view("[bold green]✅ 屏幕已清空[/bold green]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 清屏命令执行失败: {e}[/bold red]")
 
-    def _handle_compact_command(self, args: str) -> None:
+    async def _handle_compact_command(self, args: str) -> None:
         """处理压缩命令"""
-        self._update_log_view("[bold cyan]🗜️ 压缩会话...[/bold cyan]")
-        if self._current_session_id:
-            self._update_log_view("[dim]正在压缩当前会话数据...[/dim]")
-            # 模拟压缩过程
-            self._update_log_view("[green]✅ 会话压缩完成[/green]")
-        else:
-            self._update_log_view("[yellow]⚠️ 没有活动会话可以压缩[/yellow]")
+        try:
+            self._update_log_view("[bold cyan]🗜️ 压缩会话...[/bold cyan]")
+            if self._current_session_id:
+                self._update_log_view("[dim]正在压缩当前会话数据...[/dim]")
+                # 模拟压缩过程
+                self._update_log_view("[green]✅ 会话压缩完成[/green]")
+            else:
+                self._update_log_view("[yellow]⚠️ 没有活动会话可以压缩[/yellow]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 压缩命令执行失败: {e}[/bold red]")
 
-    def _handle_debate_history_command(self, args: str) -> None:
+    async def _handle_debate_history_command(self, args: str) -> None:
         """处理辩论历史命令"""
-        self._update_log_view("[bold cyan]📚 辩论历史记录[/bold cyan]")
-        # 模拟获取辩论历史
-        debates = [
-            "AI伦理辩论 - 2024-01-15",
-            "技术发展趋势讨论 - 2024-01-10",
-            "未来教育模式辩论 - 2024-01-05"
-        ]
-        for debate in debates:
-            self._update_log_view(f"[dim]  • {debate}[/dim]")
-        self._update_log_view("[dim]使用 /debate view <ID> 查看详细信息[/dim]")
+        try:
+            self._update_log_view("[bold cyan]📚 辩论历史记录[/bold cyan]")
+
+            # 尝试从container获取辩论历史跟踪器
+            debate_history_tracker = None
+            if hasattr(self, 'container') and self.container:
+                try:
+                    debate_history_tracker = self.container.debate_history_tracker()
+                except Exception:
+                    pass
+
+            if debate_history_tracker:
+                # 尝试获取实际辩论历史
+                if args.strip():  # 如果提供了特定会话ID
+                    try:
+                        history = await debate_history_tracker.get_history(args.strip())
+                        if history:
+                            self._update_log_view(f"[bold green]辩论会话: {history.session_id}[/bold green]")
+                            self._update_log_view(f"[dim]主题: {history.topic}[/dim]")
+                            self._update_log_view(f"[dim]状态: {history.status}[/dim]")
+                            self._update_log_view(f"[dim]总轮次: {history.total_rounds}[/dim]")
+
+                            self._update_log_view("[bold blue]--- 辩论记录 ---[/bold blue]")
+                            # 显示辩论记录
+                            for turn in history.turns[:10]:  # 显示前10条记录
+                                self._update_log_view(f"[blue]{turn.participant}:[/blue] {turn.content[:100]}{'...' if len(turn.content) > 100 else ''}")
+                            if len(history.turns) > 10:
+                                self._update_log_view(f"[dim]... 还有 {len(history.turns) - 10} 条记录[/dim]")
+                        else:
+                            self._update_log_view(f"[yellow]⚠️ 未找到会话ID为 '{args.strip()}' 的辩论历史[/yellow]")
+                    except Exception as e:
+                        self._update_log_view(f"[red]❌ 获取特定辩论历史失败: {e}[/red]")
+                        # 回退到显示所有历史
+                        await self._show_all_debate_history(debate_history_tracker)
+                else:  # 显示所有辩论历史
+                    await self._show_all_debate_history(debate_history_tracker)
+            else:
+                # 如果没有辩论历史跟踪器，使用模拟数据
+                self._update_log_view("[yellow]⚠️ 辩论历史跟踪器不可用，显示示例数据[/yellow]")
+                debates = [
+                    "AI伦理辩论 - 2024-01-15",
+                    "技术发展趋势讨论 - 2024-01-10",
+                    "未来教育模式辩论 - 2024-01-05"
+                ]
+                for debate in debates:
+                    self._update_log_view(f"[dim]  • {debate}[/dim]")
+                self._update_log_view("[dim]使用 /debate view <ID> 查看详细信息[/dim]")
+
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 辩论历史命令执行失败: {e}[/bold red]")
+
+    async def _show_all_debate_history(self, debate_history_tracker):
+        """显示所有辩论历史"""
+        try:
+            all_histories = await debate_history_tracker.get_all_histories()
+            if all_histories:
+                self._update_log_view(f"[green]找到 {len(all_histories)} 个辩论历史会话:[/green]")
+                # 显示最近的辩论历史
+                for history in all_histories[-10:]:  # 显示最近10个
+                    self._update_log_view(f"[dim]  • {history.session_id[:8]}... - {history.topic[:30]}{'...' if len(history.topic) > 30 else ''} ({history.status})[/dim]")
+                if len(all_histories) > 10:
+                    self._update_log_view(f"[dim]... 还有 {len(all_histories) - 10} 个较早的辩论记录[/dim]")
+            else:
+                self._update_log_view("[dim]没有找到辩论历史记录[/dim]")
+        except Exception as e:
+            self._update_log_view(f"[red]❌ 获取辩论历史列表失败: {e}[/red]")
+            # 显示示例数据
+            debates = [
+                "AI伦理辩论 - 2024-01-15",
+                "技术发展趋势讨论 - 2024-01-10",
+                "未来教育模式辩论 - 2024-01-05"
+            ]
+            for debate in debates:
+                self._update_log_view(f"[dim]  • {debate}[/dim]")
 
     async def _handle_doc_command(self, args: str) -> None:
         """处理文档命令"""
@@ -2009,9 +2326,9 @@ class SimplifiedTUI(App):
         sub_args = parts[1] if len(parts) > 1 else ""
 
         if subcommand == "search":
-            await self._handle_paper_search(sub_args)
+            self._handle_paper_search(sub_args)
         elif subcommand == "download":
-            await self._handle_paper_download(sub_args)
+            self._handle_paper_download(sub_args)
         elif subcommand == "convert":
             self._update_log_view(f"[dim]🔄 转换文档: {sub_args}[/dim]")
             # 检查是否可以使用文档转换服务
@@ -2169,17 +2486,23 @@ class SimplifiedTUI(App):
         else:
             self._update_log_view(f"[yellow]⚠️ 未知子命令: {subcommand}[/yellow]")
 
-    def _handle_quit_command(self, args: str) -> None:
+    async def _handle_quit_command(self, args: str) -> None:
         """处理退出命令"""
-        self._update_log_view("[bold yellow]👋 正在退出...[/bold yellow]")
-        self.action_quit()
+        try:
+            self._update_log_view("[bold yellow]👋 正在退出...[/bold yellow]")
+            self.action_quit()
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 退出命令执行失败: {e}[/bold red]")
 
-    def _handle_role_command(self, args: str) -> None:
+    async def _handle_role_command(self, args: str) -> None:
         """处理角色命令"""
-        if self._tui_role_handler:
-            self._tui_role_handler.handle_role_command(args)
-        else:
-            self._update_log_view("[bold yellow]⚠️ 角色管理功能未完全初始化[/bold yellow]")
+        try:
+            if self._tui_role_handler:
+                self._tui_role_handler.handle_role_command(args)
+            else:
+                self._update_log_view("[bold yellow]⚠️ 角色管理功能未完全初始化[/bold yellow]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 角色命令执行失败: {e}[/bold red]")
             self._update_log_view("[dim]基础角色列表:[/dim]")
             roles = [
                 "assistant - 智能助理",
@@ -2281,19 +2604,34 @@ class SimplifiedTUI(App):
         else:
             raise RuntimeError("Claude技能适配器未正确初始化")
 
-    def _handle_copy_command(self, args: str) -> None:
+    async def _handle_copy_command(self, args: str) -> None:
         """处理复制命令"""
-        import asyncio
-        # 使用异步方式调用复制功能
-        asyncio.create_task(self.action_copy_text())
+        # 检查是否有参数传入
+        if args.strip():
+            # 如果参数是数字，自动执行复制最近内容的操作
+            if args.strip().isdigit():
+                lines = int(args.strip())
+                # 使用线程池运行同步操作
+                import asyncio
+                await asyncio.to_thread(self.copy_recent_content, lines)
+                return
+            else:
+                self._update_log_view(f"[yellow]⚠️ /copy 命令不接受参数 '{args.strip()}'。[/yellow]")
+                self._update_log_view(f"[yellow]💡 提示: 使用 /copy 来复制全部内容，或 /copy_recent <行数> 来复制最近的行。[/yellow]")
+                return
 
-    def _handle_copy_recent_command(self, args: str) -> None:
+        # 无参数时，直接异步调用复制全部内容功能
+        await self.action_copy_text()
+
+    async def _handle_copy_recent_command(self, args: str) -> None:
         """处理复制最近内容命令"""
         try:
             # 解析行数参数，默认为20行
             lines = int(args.strip()) if args.strip().isdigit() else 20
             lines = min(max(lines, 1), 100)  # 限制在1-100行之间
-            self.copy_recent_content(lines)
+            # 使用线程池运行同步操作
+            import asyncio
+            await asyncio.to_thread(self.copy_recent_content, lines)
         except ValueError:
             self._update_log_view("[yellow]⚠️ 用法: /copy_recent <行数> (例如: /copy_recent 10)[/yellow]")
 
@@ -2434,23 +2772,73 @@ class SimplifiedTUI(App):
                 self._update_log_view(f"[bold blue]🔄 开始多角色协作创建Wiki页面: {title}[/bold blue]")
 
                 # 检查是否有collaborator（EnhancedWikiManager）
-                if hasattr(self._wiki_manager, 'collaborator') and self._wiki_manager.collaborator:
-                    self._update_log_view("[dim]📋 参与角色: 领域专家, 研究员, 编辑, 批评家[/dim]")
+                if hasattr(self._wiki_manager, 'simple_collaboration_engine') and self._wiki_manager.simple_collaboration_engine:
+                    # 使用带自动显示功能的增强协作引擎
+                    from daip_live.wiki.auto_progress_display import create_enhanced_engine_with_auto_display
+                    enhanced_engine = create_enhanced_engine_with_auto_display(self._wiki_manager.simple_collaboration_engine)
 
-                    # 实时显示协作过程
-                    self._update_log_view("[cyan]🔄 初始化协作环境...[/cyan]")
+                    # 创建带TUI显示的协作引擎
+                    from daip_live.wiki.visual_collaboration_display import EnhancedMultiRoleWikiCollaborator
+                    # 创建一个自定义的显示回调函数，将协作过程输出到TUI
+                    def tui_display_callback(progress):
+                        """将协作进度显示到TUI"""
+                        # 显示当前状态
+                        if progress.current_role and progress.current_role not in ['系统', 'system']:
+                            self._update_log_view(f"[cyan]👤 {progress.current_role}[/cyan] [dim]{progress.current_action}[/dim]")
+                        else:
+                            self._update_log_view(f"[blue]🔄 系统[/blue] [dim]{progress.current_action}[/dim]")
 
-                    # 调用多角色协作创建功能
-                    self._update_log_view("[cyan]👤 领域专家[/cyan] [dim]提供专业知识中...[/dim]")
-                    self._update_log_view("[cyan]🔍 研究员[/cyan] [dim]搜集研究资料中...[/dim]")
-                    self._update_log_view("[cyan]📝 编辑[/cyan] [dim]构建页面结构中...[/dim]")
-                    self._update_log_view("[cyan]🤔 批评家[/cyan] [dim]审视和完善内容中...[/dim]")
+                        # 记录最后的状态
+                        self._last_role = getattr(progress, 'current_role', None)
+                        self._last_action = getattr(progress, 'current_action', None)
+                        self._last_progress_state = progress
+
+                    # 设置显示回调
+                    enhanced_engine.auto_display.setup_callback(tui_display_callback)
 
                     # 执行协作创建
                     wiki_page = await self._wiki_manager.create_collaborative_wiki(
                         title=title,
                         topic=title,
-                        rounds=3
+                        rounds=2,
+                        show_progress=False  # 我们使用自定义的显示机制
+                    )
+
+                    # 显示协作结果
+                    self._update_log_view(f"[bold green]✅ 多角色协作完成！页面已创建: {wiki_page.title}[/bold green]")
+                    self._update_log_view(f"[green]📄 页面保存至: {wiki_page.file_path}[/green]")
+
+                    # 显示每个角色的具体贡献（如果可用）
+                    self._update_log_view(f"[bold blue]📋 协作详情:[/bold blue]")
+                    if hasattr(self._wiki_manager, 'simple_collaboration_engine'):
+                        if hasattr(self._wiki_manager.simple_collaboration_engine, 'current_progress'):
+                            progress = self._wiki_manager.simple_collaboration_engine.current_progress
+                            if hasattr(progress, 'generated_content') and progress.generated_content:
+                                for item in progress.generated_content:
+                                    role = item.get('role', 'Unknown')
+                                    content_preview = item.get('content', '')[:200] + "..." if len(item.get('content', '')) > 200 else item.get('content', '')
+                                    self._update_log_view(f"[magenta]🔸 {role}贡献:[/magenta] [dim]{content_preview}[/dim]")
+
+                    # 显示创建的页面内容摘要（结果反馈）
+                    try:
+                        content_preview = wiki_page.content[:500] + "..." if len(wiki_page.content) > 500 else wiki_page.content
+                        self._update_log_view(f"[bold blue]📋 最终内容预览:[/bold blue]")
+                        self._update_log_view(f"[dim]{content_preview}[/dim]")
+                    except:
+                        # 如果无法获取内容，仍然显示成功消息
+                        pass
+
+                elif hasattr(self._wiki_manager, 'collaborator') and self._wiki_manager.collaborator:
+                    self._update_log_view("[dim]📋 参与角色: 领域专家, 研究员, 编辑, 批评家[/dim]")
+
+                    # 实时显示协作过程 - 通过创建自定义的显示机制来捕捉实际工作输出
+                    self._update_log_view("[cyan]🔄 初始化协作环境...[/cyan]")
+
+                    # 执行协作创建
+                    wiki_page = await self._wiki_manager.create_collaborative_wiki(
+                        title=title,
+                        topic=title,
+                        rounds=2
                     )
 
                     self._update_log_view(f"[bold green]✅ 多角色协作完成！页面已创建: {wiki_page.title}[/bold green]")

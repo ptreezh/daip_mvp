@@ -663,6 +663,171 @@ class WikiManager:
         # 其他情况认为有内容
         return False
 
+    def update_page_incremental(self, title: str, section_title: str, new_content: str,
+                               action: str = 'replace', tags: Optional[List[str]] = None) -> WikiPage:
+        """基于wiki原则的增量编辑功能
+
+        Args:
+            title: 页面标题
+            section_title: 章节标题
+            new_content: 新的内容
+            action: 编辑动作 ('replace', 'append', 'prepend', 'merge')
+            tags: 新的标签列表
+
+        Returns:
+            WikiPage: 更新后的页面对象
+
+        Raises:
+            ValueError: 如果页面不存在
+        """
+        if title not in self._pages:
+            raise ValueError(f"Page with title '{title}' not found")
+
+        page = self._pages[title]
+
+        # 解析现有内容为章节
+        sections = self._parse_content_into_sections(page.content)
+
+        # 根据操作类型处理内容
+        if section_title in sections:
+            # 章节存在，根据action处理
+            existing_content = sections[section_title]
+
+            if action == 'replace':
+                sections[section_title] = new_content
+            elif action == 'append':
+                sections[section_title] = existing_content + "\n\n" + new_content
+            elif action == 'prepend':
+                sections[section_title] = new_content + "\n\n" + existing_content
+            elif action == 'merge':
+                sections[section_title] = self._merge_content(existing_content, new_content)
+            else:
+                raise ValueError(f"Unsupported action: {action}")
+        else:
+            # 章节不存在，创建新章节
+            if action in ['replace', 'merge']:
+                sections[section_title] = new_content
+            elif action == 'append':
+                # 如果章节不存在，则追加到整个页面末尾
+                page.content += f"\n\n## {section_title}\n{new_content}"
+                # 重新解析章节
+                sections = self._parse_content_into_sections(page.content)
+            else:
+                raise ValueError(f"Cannot '{action}' to non-existent section without creating it first")
+
+        # 重组完整内容
+        updated_content = self._reconstruct_content_from_sections(sections)
+
+        # 更新页面
+        page.update_content(updated_content)
+
+        # 更新标签
+        if tags is not None:
+            page.tags = [tag for tag in tags if tag]  # 清理空标签
+            page.modified_at = datetime.now()
+
+        # 保存到文件
+        with open(page.file_path, 'w', encoding='utf-8') as f:
+            f.write(updated_content)
+
+        # 更新索引
+        self._save_index()
+
+        return page
+
+    def _parse_content_into_sections(self, content: str) -> Dict[str, str]:
+        """将内容解析为章节字典"""
+        sections = {}
+        lines = content.split('\n')
+        current_section = "概述"  # 默认章节
+        current_content = []
+
+        for line in lines:
+            # 检查是否是标题行（## 或 #）
+            if line.strip().startswith('#'):
+                # 保存上一个章节
+                if current_section:
+                    sections[current_section] = '\n'.join(current_content).strip()
+
+                # 提取新的章节标题
+                # 处理不同级别的标题
+                if line.strip().startswith('###'):
+                    current_section = line.strip()[3:].strip()  # 移除 '###' 并去除空格
+                elif line.strip().startswith('##'):
+                    current_section = line.strip()[2:].strip()  # 移除 '##' 并去除空格
+                elif line.strip().startswith('#'):
+                    current_section = line.strip()[1:].strip()  # 移除 '#' 并去除空格
+
+                current_content = []
+            else:
+                current_content.append(line)
+
+        # 保存最后一个章节
+        if current_section:
+            sections[current_section] = '\n'.join(current_content).strip()
+
+        return sections
+
+    def _reconstruct_content_from_sections(self, sections: Dict[str, str]) -> str:
+        """从章节字典重构完整内容"""
+        content_parts = []
+
+        # 按顺序重建内容（通常概述部分在前）
+        if "概述" in sections:
+            content_parts.append(f"# 概述\n{sections['概述']}")
+            del sections["概述"]
+
+        # 添加其他章节
+        for section_title, section_content in sections.items():
+            content_parts.append(f"\n## {section_title}\n{section_content}")
+
+        return '\n'.join(content_parts)
+
+    def _merge_content(self, existing_content: str, new_content: str) -> str:
+        """智能合并两个内容块"""
+        # 简单的合并策略：保留现有内容，追加新内容，并尝试去重
+        combined_content = existing_content + "\n\n" + new_content
+
+        # 去除重复段落
+        paragraphs = combined_content.split('\n\n')
+        unique_paragraphs = []
+
+        for para in paragraphs:
+            para_stripped = para.strip()
+            if para_stripped and para_stripped not in unique_paragraphs:
+                unique_paragraphs.append(para_stripped)
+
+        return '\n\n'.join(unique_paragraphs)
+
+    def collaborative_edit_page(self, title: str, editor_role: str, edit_instruction: str,
+                               section_title: Optional[str] = None) -> WikiPage:
+        """协同编辑页面 - 基于wiki原则的多人协作编辑
+
+        Args:
+            title: 页面标题
+            editor_role: 编辑者角色
+            edit_instruction: 编辑指令
+            section_title: 目标章节标题，如果为None则编辑整个页面
+
+        Returns:
+            WikiPage: 更新后的页面对象
+        """
+        if title not in self._pages:
+            raise ValueError(f"Page with title '{title}' not found")
+
+        page = self._pages[title]
+
+        # 如果指定了章节，则只对章节进行编辑
+        if section_title:
+            # 这里可以集成AI模型来生成基于指令的编辑内容
+            # 暂时用一个模拟的编辑过程
+            edit_result = f"[{editor_role}的编辑贡献] {edit_instruction}"
+            return self.update_page_incremental(title, section_title, edit_result, 'append')
+        else:
+            # 对整个页面进行编辑
+            updated_content = page.content + f"\n\n<!-- {editor_role}编辑 -->\n{edit_instruction}"
+            return self.update_page(title, updated_content, page.tags)
+
     def _update_existing_page(self, page: WikiPage, new_content: str, new_tags: Optional[List[str]] = None) -> None:
         """更新已存在的页面（用于空文档的情况）
 
