@@ -18,14 +18,25 @@ from enum import Enum
 # 导入现有组件
 from daip_live.agent_engine.enhanced_intent_recognizer import Intent, IntentType, EnhancedIntentRecognizer
 try:
-    from daip_live.intent_recognition.context_manager import ContextManager
-    from daip_live.intent_recognition.session_state import SessionState
-    from daip_live.intent_recognition.task_context import TaskContext
+    from .context_manager import ContextManager
+    from .session_state import SessionState
+    from .task_context import TaskContext
 except ImportError:
-    # 使用备用导入路径
-    from src.daip_live.intent_recognition.context_manager import ContextManager
-    from src.daip_live.intent_recognition.session_state import SessionState
-    from src.daip_live.intent_recognition.task_context import TaskContext
+    try:
+        from daip_live.intent_recognition.context_manager import ContextManager
+        from daip_live.intent_recognition.session_state import SessionState
+        from daip_live.intent_recognition.task_context import TaskContext
+    except ImportError:
+        try:
+            # 使用备用导入路径
+            from src.daip_live.intent_recognition.context_manager import ContextManager
+            from src.daip_live.intent_recognition.session_state import SessionState
+            from src.daip_live.intent_recognition.task_context import TaskContext
+        except ImportError:
+            # 最后的备用路径
+            from ..intent_recognition.context_manager import ContextManager
+            from ..intent_recognition.session_state import SessionState
+            from ..intent_recognition.task_context import TaskContext
 
 
 class DialogueStrategy(Enum):
@@ -61,6 +72,41 @@ class ContextualIntent:
     clarification_message: str = ""
     next_step: str = ""  # 下一步行动建议
     confidence_boost: float = 0.0  # 基于上下文的置信度提升
+
+    @property
+    def name(self):
+        """通过属性访问intent的name"""
+        return self.intent.name if self.intent else "unknown"
+
+    @property
+    def confidence(self):
+        """通过属性访问intent的confidence"""
+        return self.intent.confidence if self.intent else 0.0
+
+    @property
+    def parameters(self):
+        """通过属性访问intent的parameters"""
+        return self.intent.parameters if self.intent else {}
+
+    @property
+    def tool_name(self):
+        """通过属性访问intent的tool_name"""
+        return self.intent.tool_name if self.intent else None
+
+    @property
+    def description(self):
+        """通过属性访问intent的description"""
+        return self.intent.description if self.intent else ""
+
+    @property
+    def intent_type(self):
+        """通过属性访问intent的intent_type"""
+        return self.intent.intent_type if self.intent else None
+
+    @property
+    def requires_confidence_check(self):
+        """通过属性访问intent的requires_confidence_check"""
+        return self.intent.requires_confidence_check if self.intent else False
 
 
 class ContextualIntentRecognizer:
@@ -472,6 +518,15 @@ class ContextualIntentRecognizer:
     def _update_conversation_history(self, session_id: str, user_input: str,
                                   contextual_intent: ContextualIntent):
         """更新对话历史"""
+        # 修复timedelta对象不能JSON序列化的问题
+        import datetime
+        safe_context = {}
+        for key, value in contextual_intent.conversation_context.items():
+            if isinstance(value, datetime.timedelta):
+                safe_context[key] = str(value)
+            else:
+                safe_context[key] = value
+
         turn = ConversationTurn(
             user_input=user_input,
             intent=contextual_intent.intent,
@@ -479,11 +534,11 @@ class ContextualIntentRecognizer:
             missing_params=contextual_intent.missing_slots,
             filled_params={**contextual_intent.filled_slots, **contextual_intent.inferred_params},
             strategy_used=self._determine_strategy(contextual_intent),
-            context_summary=json.dumps(contextual_intent.conversation_context, ensure_ascii=False)
+            context_summary=json.dumps(safe_context, ensure_ascii=False, default=str)
         )
 
         self.conversation_sessions[session_id].append(turn)
-        self.session_last_activity[session_id] = datetime.now()
+        self.session_last_activity[session_id] = datetime.datetime.now()
 
     def _update_context_manager(self, session_id: str, contextual_intent: ContextualIntent):
         """更新上下文管理器"""
