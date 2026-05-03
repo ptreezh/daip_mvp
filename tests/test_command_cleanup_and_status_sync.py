@@ -211,16 +211,12 @@ class TestModelSpecificTokenLimits:
     
     @pytest.fixture
     def mock_model_manager(self):
-        """创建模型管理器mock"""
-        from daip_live.model_manager import ModelManager
-        manager = ModelManager()
-        
-        # Mock模型配置
+        """Create model manager mock without importing removed module."""
+        manager = Mock()
         manager.get_model_config = Mock(return_value={
             'max_tokens': 4096,
             'context_window': 8192
         })
-        
         return manager
 
     def test_model_token_limits_detection(self, mock_model_manager):
