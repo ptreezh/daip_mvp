@@ -25,12 +25,9 @@ from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentReco
 # 延迟导入TUI以避免初始化副作用
 def get_daip_tui():
     try:
-        from daip_live.tui.tui_modular import DAIP_TUI
+        from daip_live.tui import DAIP_TUI
     except ImportError:
-        try:
-            from daip_live.tui_modular import DAIP_TUI
-        except ImportError:
-            return None
+        from daip_live.tui_modular import DAIP_TUI
     return DAIP_TUI
 from daip_live.skills.manager import SkillManager
 # Note: Context managers moved to different locations - using available alternatives
