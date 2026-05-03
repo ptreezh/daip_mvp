@@ -1,8 +1,0 @@
-setup.py
-daip_live_permissions.egg-info/PKG-INFO
-daip_live_permissions.egg-info/SOURCES.txt
-daip_live_permissions.egg-info/dependency_links.txt
-daip_live_permissions.egg-info/requires.txt
-daip_live_permissions.egg-info/top_level.txt
-permissions/__init__.py
-permissions/manager.py
