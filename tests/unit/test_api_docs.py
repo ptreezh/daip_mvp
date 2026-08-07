@@ -129,7 +129,7 @@ class TestRequestSchemas:
     def test_session_create_request_examples(self):
         """SessionCreateRequest should have JSON schema examples."""
         schema = SessionCreateRequest.model_json_schema()
-        assert "examples" in schema.get("$defs", {})
+        assert "examples" in schema
 
 
 @pytest.mark.unit
