@@ -18,20 +18,18 @@ dependencies = [
     "sqlalchemy>=2.0.30,<3.0.0",
     "faiss-cpu>=1.8.0,<2.0.0",
     "langchain>=0.2.5,<1.0.0",
-    "python-docx>=1.1.2,<2.0.0",
-    "arxiv>=2.1.0,<3.0.0",
     "litellm>=1.76.1,<2.0.0",
     "rich>=14.1.0,<15.0.0",
     "uvicorn[standard]>=0.35.0,<1.0.0",
     "pyperclip>=1.8.2,<2.0.0",
     "fastapi>=0.116.1,<1.0.0",
     "dependency-injector>=4.41.0,<5.0.0",
-    "scholarly>=1.7.11,<2.0.0",
     "pytest-asyncio>=1.2.0,<2.0.0",
     "psutil>=7.1.3,<8.0.0",
     "aiofiles>=25.1.0,<26.0.0",
     "toml>=0.10.2,<0.11.0"
 ]
+# Removed: arxiv, scholarly, python-docx (were only used by deleted basic_tools)
 
 [project.scripts]
 daip = "daip_live.cli.main:app"
