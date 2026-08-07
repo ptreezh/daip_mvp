@@ -21,6 +21,7 @@ __all__ = [
     "AgentExecutorInterface", "MemoryInterface",
 
     # Exceptions
-    "DAIPLiveException", "ConfigurationError",
-    "PermissionDenied", "ModelProviderError"
+    "DAIPError", "ModelError", "ConfigurationError",
+    "PermissionDenied", "ValidationError", "ToolError",
+    "ErrorHandler", "ErrorContext", "get_error_handler", "handle_error"
 ]
