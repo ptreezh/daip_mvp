@@ -1,7 +1,65 @@
 # src/daip_live/container.py
 
 import asyncio
+import logging
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
 from dependency_injector import containers, providers
+
+
+def setup_logging(config_dict: dict = None) -> None:
+    """Configure logging system with rotating file handler.
+
+    Args:
+        config_dict: Configuration dictionary containing logging settings.
+                     If None, uses default settings.
+    """
+    if config_dict is None:
+        config_dict = {}
+
+    log_config = config_dict.get("logging", {})
+
+    # Log directory
+    log_dir = Path(log_config.get("dir", "data/logs"))
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    # Log level
+    level_str = log_config.get("level", "INFO")
+    level = getattr(logging, level_str.upper(), logging.INFO)
+
+    # Log format
+    format_str = log_config.get(
+        "format",
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+
+    # File handler with rotation
+    max_bytes = log_config.get("max_bytes", 10 * 1024 * 1024)  # 10MB
+    backup_count = log_config.get("backup_count", 5)
+
+    file_handler = RotatingFileHandler(
+        log_dir / "daip_live.log",
+        maxBytes=max_bytes,
+        backupCount=backup_count,
+        encoding="utf-8"
+    )
+    file_handler.setFormatter(logging.Formatter(format_str))
+    file_handler.setLevel(level)
+
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter(format_str))
+    console_handler.setLevel(level)
+
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
+
+    # Remove existing handlers to avoid duplicates
+    root_logger.handlers.clear()
+
+    root_logger.addHandler(file_handler)
+    root_logger.addHandler(console_handler)
 
 from daip_live.config import ConfigManager
 from daip_live.config_bridge import config_bridge
@@ -25,12 +83,9 @@ from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentReco
 # 延迟导入TUI以避免初始化副作用
 def get_daip_tui():
     try:
-        from daip_live.tui.tui_modular import DAIP_TUI
+        from daip_live.tui import DAIP_TUI
     except ImportError:
-        try:
-            from daip_live.tui_modular import DAIP_TUI
-        except ImportError:
-            return None
+        from daip_live.tui_modular import DAIP_TUI
     return DAIP_TUI
 from daip_live.skills.manager import SkillManager
 # Note: Context managers moved to different locations - using available alternatives
@@ -182,3 +237,23 @@ class Container(containers.DeclarativeContainer):
     paper_download_directory = providers.Callable(
         lambda cm=config_manager: cm().get_config().model_dump()['paper']['download_directory']
     )
+
+
+# Initialize logging on module import
+# This ensures logging is configured before any application code runs
+_logging_initialized = False
+def _ensure_logging():
+    global _logging_initialized
+    if not _logging_initialized:
+        try:
+            cfg = ConfigManager()
+            setup_logging(cfg.get_config().model_dump())
+            _logging_initialized = True
+        except Exception:
+            # If config loading fails, use defaults
+            setup_logging()
+            _logging_initialized = True
+
+
+# Auto-initialize on import
+_ensure_logging()

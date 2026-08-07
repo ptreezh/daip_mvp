@@ -1,9 +1,0 @@
-setup.py
-daip_live_doc.egg-info/PKG-INFO
-daip_live_doc.egg-info/SOURCES.txt
-daip_live_doc.egg-info/dependency_links.txt
-daip_live_doc.egg-info/requires.txt
-daip_live_doc.egg-info/top_level.txt
-doc/__init__.py
-doc/paper_downloader.py
-doc/tools.py

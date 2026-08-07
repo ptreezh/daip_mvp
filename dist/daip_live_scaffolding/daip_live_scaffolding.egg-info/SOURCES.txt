@@ -1,9 +1,0 @@
-setup.py
-daip_live_scaffolding.egg-info/PKG-INFO
-daip_live_scaffolding.egg-info/SOURCES.txt
-daip_live_scaffolding.egg-info/dependency_links.txt
-daip_live_scaffolding.egg-info/requires.txt
-daip_live_scaffolding.egg-info/top_level.txt
-scaffolding/__init__.py
-scaffolding/manager.py
-scaffolding/scaffolder.py

@@ -1,9 +1,0 @@
-setup.py
-daip_live_memory.egg-info/PKG-INFO
-daip_live_memory.egg-info/SOURCES.txt
-daip_live_memory.egg-info/dependency_links.txt
-daip_live_memory.egg-info/requires.txt
-daip_live_memory.egg-info/top_level.txt
-memory/__init__.py
-memory/service.py
-memory/session_manager.py

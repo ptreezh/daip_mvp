@@ -465,6 +465,7 @@ class LLMProviderConfig(BaseModel):
 class KnowledgeBaseConfig(BaseModel):
     """Pydantic model for knowledge base configuration."""
     directory: str = Field(..., description="Path to the root directory for knowledge documents.")
+    embedding_dimension: int = Field(default=768, description="Dimension of embedding vectors for the knowledge base.")
 
 class RoleManagerConfig(BaseModel):
     """Pydantic model for role manager configuration."""
