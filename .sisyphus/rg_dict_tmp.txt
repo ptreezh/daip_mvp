@@ -1,0 +1,3 @@
+D:\DAIP\refactdoc\src\daip_live\config_bridge.py:70:            return config.dict()
+D:\DAIP\refactdoc\src\daip_live\p7_gui\main.py:190:            await websocket.send_json(event.dict())
+D:\DAIP\refactdoc\src\daip_live\persistence\database.py:39:        session_dict = session.dict()

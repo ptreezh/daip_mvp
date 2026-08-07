@@ -569,21 +569,16 @@ class EnhancedDebateManager:
 
         # 使用单一Ollama实例生成回复
         role_mapping = role_model_map[role_name]
-        try:
-            response_content, usage = await self.ollama_manager.generate_with_model(
-                model_name=role_mapping.role_model_config.model_name,
-                prompt=prompt,
-                temperature=role_mapping.role_model_config.temperature,
-                max_tokens=role_mapping.role_model_config.max_tokens,
-                top_p=role_mapping.role_model_config.top_p,
-                frequency_penalty=role_mapping.role_model_config.frequency_penalty,
-                presence_penalty=role_mapping.role_model_config.presence_penalty
-            )
-        except ModelError as me:
-            # 如果模型调用失败，返回错误信息而不是抛出异常，
-            # 因为这个函数的返回类型是 tuple[str, Optional[dict]] 而不是 async generator
-            response_content = f"错误：无法调用模型生成回复 ({str(me)})"
-            usage = None
+        response_content, usage = await self.ollama_manager.generate_with_model(
+            model_name=role_mapping.role_model_config.model_name,
+            prompt=prompt,
+            temperature=role_mapping.role_model_config.temperature,
+            max_tokens=role_mapping.role_model_config.max_tokens,
+            top_p=role_mapping.role_model_config.top_p,
+            frequency_penalty=role_mapping.role_model_config.frequency_penalty,
+            presence_penalty=role_mapping.role_model_config.presence_penalty
+        )
+        # ModelError now propagates to UI layer for user-visible error handling
 
         # 转换usage格式以保持兼容性
         token_info = None
@@ -626,19 +621,14 @@ class EnhancedDebateManager:
 总结:"""
 
         # 使用单一Ollama实例生成总结
-        try:
-            summary_content, usage = await self.ollama_manager.generate_with_model(
-                model_name=best_mapping.role_model_config.model_name,
-                prompt=summary_prompt,
-                temperature=0.3,  # 降低温度以获得更一致的总结
-                max_tokens=best_mapping.role_model_config.max_tokens,
-                top_p=best_mapping.role_model_config.top_p
-            )
-        except ModelError as me:
-            # 如果模型调用失败，提供友好的错误信息和默认摘要
-            yield ThoughtEvent(content=f"模型调用失败: {str(me)}。生成默认摘要。")
-            summary_content = f"辩论摘要生成失败: {str(me)}\n\n辩论主题: {topic}\n\n由于模型服务不可用，无法生成详细摘要。"
-            usage = None
+        summary_content, usage = await self.ollama_manager.generate_with_model(
+            model_name=best_mapping.role_model_config.model_name,
+            prompt=summary_prompt,
+            temperature=0.3,  # 降低温度以获得更一致的总结
+            max_tokens=best_mapping.role_model_config.max_tokens,
+            top_p=best_mapping.role_model_config.top_p
+        )
+        # ModelError now propagates to UI layer for user-visible error handling
 
         session.summary = summary_content
 
