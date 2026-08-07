@@ -60,7 +60,13 @@
       "Bash(git stash *)",
       "Bash(grep -E \"^\\(\\\\+\\\\+\\\\+|\\\\-\\\\-\\\\-|\\\\+.*src/|\\\\\\\\-.*src/\\)\")",
       "Bash(grep -E \"\\\\.py$|\\\\.md$\")",
-      "Bash(awk '{print $2}')"
+      "Bash(awk '{print $2}')",
+      "Bash(pytest tests/unit/test_hybrid_sanitization.py -v)",
+      "Bash(python3 -m pytest tests/unit/test_hybrid_sanitization.py -v)",
+      "Bash(py -m pytest tests/unit/test_hybrid_sanitization.py -v)",
+      "Bash(py *)",
+      "Bash(git merge *)",
+      "Bash(python3 -m pytest tests/unit/test_api_docs.py -v --tb=short)"
     ],
     "deny": [],
     "ask": []

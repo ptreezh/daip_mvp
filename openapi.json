@@ -1,0 +1,281 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DAIP-LIVE API",
+    "version": "1.0.0",
+    "description": "Dynamic AI-driven Project-execution LIVE System - REST API and WebSocket endpoints",
+    "contact": {
+      "name": "DAIP-LIVE Team"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "sessions",
+      "description": "Session management operations"
+    },
+    {
+      "name": "health",
+      "description": "System health and status monitoring"
+    },
+    {
+      "name": "roles",
+      "description": "Role management operations"
+    },
+    {
+      "name": "knowledge",
+      "description": "Knowledge base operations"
+    },
+    {
+      "name": "websocket",
+      "description": "WebSocket endpoints for real-time communication"
+    }
+  ],
+  "paths": {
+    "/api/sessions": {
+      "post": {
+        "tags": ["sessions"],
+        "summary": "Create a new session",
+        "description": "Creates a new session with the specified goal and configuration",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "goal": {
+                    "type": "string",
+                    "description": "The primary objective for this session"
+                  },
+                  "session_type": {
+                    "type": "string",
+                    "default": "workflow",
+                    "enum": ["chat", "workflow", "debate"]
+                  },
+                  "participant_ids": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "default": ["agent", "user"]
+                  }
+                },
+                "required": ["goal"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session created successfully",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Session"}
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["sessions"],
+        "summary": "List all sessions",
+        "responses": {
+          "200": {
+            "description": "List of sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/Session"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{session_id}": {
+      "get": {
+        "tags": ["sessions"],
+        "summary": "Get a specific session",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session details",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Session"}
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["sessions"],
+        "summary": "Delete a session",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session deleted successfully"
+          },
+          "404": {
+            "description": "Session not found"
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "System health status",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/HealthCheck"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/roles": {
+      "get": {
+        "tags": ["roles"],
+        "summary": "List available roles",
+        "responses": {
+          "200": {
+            "description": "List of roles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/RoleInfo"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/knowledge/status": {
+      "get": {
+        "tags": ["knowledge"],
+        "summary": "Get knowledge base status",
+        "responses": {
+          "200": {
+            "description": "Knowledge base status",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/KnowledgeStatus"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ws/sessions/{session_id}": {
+      "get": {
+        "tags": ["websocket"],
+        "summary": "WebSocket endpoint for session",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "description": "Real-time WebSocket connection for agent communication"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Session": {
+        "type": "object",
+        "properties": {
+          "session_id": {"type": "string"},
+          "session_type": {"type": "string"},
+          "goal": {"type": "string"},
+          "participant_ids": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "created_at": {"type": "string", "format": "date-time"},
+          "updated_at": {"type": "string", "format": "date-time"},
+          "status": {"type": "string"}
+        }
+      },
+      "HealthCheck": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"},
+          "version": {"type": "string"},
+          "uptime_seconds": {"type": "number"},
+          "components": {
+            "type": "object",
+            "additionalProperties": {"type": "string"}
+          }
+        }
+      },
+      "RoleInfo": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "description": {"type": "string"},
+          "system_prompt": {"type": "string"},
+          "model": {"type": "string"},
+          "capabilities": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      },
+      "KnowledgeStatus": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "string"},
+          "last_sync": {"type": "string", "format": "date-time"},
+          "total_documents": {"type": "integer"},
+          "index_size": {"type": "integer"},
+          "embedding_dimension": {"type": "integer"}
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {"type": "string"},
+          "message": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"}
+        }
+      }
+    }
+  }
+}
