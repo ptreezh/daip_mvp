@@ -36,7 +36,7 @@ class DatabaseManager:
 
     def save_session(self, session: Session):
         """Saves or updates a session and its dialogue turns in a transaction."""
-        session_dict = session.dict()
+        session_dict = session.model_dump()  # Pydantic v2 compatibility
         session_history = session_dict.pop("history", [])
 
         # Convert AgentState enum to its string value for storage

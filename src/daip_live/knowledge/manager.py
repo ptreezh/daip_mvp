@@ -30,8 +30,8 @@ class KnowledgeManager(IKnowledgeManager):
         self.index_path = self.knowledge_dir / "index.faiss"
         self._logger = logging.getLogger(__name__)
 
-        # Dimension for the embedding model, e.g., all-MiniLM-L6-v2 has 384
-        embedding_dim = 384 # TODO: Make this configurable
+        # Dimension for the embedding model - read from config
+        embedding_dim = config.embedding_dimension
 
         if self.index_path.exists():
             self.faiss_index = faiss.read_index(str(self.index_path))
