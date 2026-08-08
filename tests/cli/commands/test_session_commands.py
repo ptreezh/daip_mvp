@@ -17,6 +17,19 @@ from daip_live.core.models import Session, DialogueTurn, AgentState
 # from daip_live.cli.commands.session import app as session_app
 
 
+@pytest.fixture(autouse=True)
+def _isolate_config_manager(monkeypatch):
+    """会话命令的 _get_db_manager 会读根目录 config.yaml（session.py:23-30），
+    前置测试可能删除/修改该文件导致全量顺序敏感失败；统一 patch 为有效配置"""
+    from daip_live.cli.commands import session as session_module
+
+    mock_config = Mock()
+    mock_config.model_dump.return_value = {"database": {"path": ":memory:"}}
+    mock_config_manager = Mock()
+    mock_config_manager.get_config.return_value = mock_config
+    monkeypatch.setattr(session_module, "ConfigManager", lambda: mock_config_manager)
+
+
 class TestSessionListCommand:
     """测试会话列表命令"""
 

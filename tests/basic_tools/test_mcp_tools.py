@@ -9,26 +9,26 @@ def tm():
     return ToolManager()
 
 def test_markdown_to_md_url_validation(tm, monkeypatch, tmp_path):
-    os.chdir(tmp_path)
+    monkeypatch.chdir(tmp_path)  # 自动恢复 CWD，避免污染后续测试的相对路径
     from daip_live.basic_tools.core import markdown_to_md
     with pytest.raises(Exception):
         markdown_to_md("ftp://example.com")
 
 def test_markdown_to_md_domain_permission(tm, monkeypatch, tmp_path):
-    os.chdir(tmp_path)
+    monkeypatch.chdir(tmp_path)  # 自动恢复 CWD，避免污染后续测试的相对路径
     from daip_live.basic_tools.core import markdown_to_md
     os.environ["MCP_ALLOWED_DOMAINS"] = "arxiv.org,doi.org"
     with pytest.raises(Exception):
         markdown_to_md("https://notallowed.com/page")
 
-def test_fetch_paper_accepts_arxiv_id(tmp_path):
-    os.chdir(tmp_path)
+def test_fetch_paper_accepts_arxiv_id(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)  # 自动恢复 CWD，避免污染后续测试的相对路径
     from daip_live.basic_tools.core import fetch_paper
     with pytest.raises(Exception):
         fetch_paper("")
 
 def test_fetch_paper_saves_pdf(tmp_path, monkeypatch):
-    os.chdir(tmp_path)
+    monkeypatch.chdir(tmp_path)  # 自动恢复 CWD，避免污染后续测试的相对路径
     from daip_live.basic_tools.core import fetch_paper
     def fake_call(identifier, save_dir):
         d = Path("docs")/"papers"
