@@ -14,6 +14,7 @@ from daip_live.core.models import (
 from daip_live.p8_debate_system.history_tracker import DebateHistoryTracker
 from daip_live.tui_v1.models.debate_view import EnhancedDebateView, DebateParticipantView
 from daip_live.container import Container
+from daip_live.config import ConfigManager
 
 
 class TestEnhancedDebateEndToEnd:
@@ -21,7 +22,7 @@ class TestEnhancedDebateEndToEnd:
     
     def test_complete_debate_workflow_end_to_end(self):
         """Test complete debate workflow from start to finish."""
-        tracker = DebateHistoryTracker()
+        tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "debate_history.db"))
         
         # 1. Start debate
         start_event = DebateStartEvent(
@@ -101,10 +102,11 @@ class TestEnhancedDebateEndToEnd:
         """Test complete container integration for enhanced debate features."""
         
         # Create a temporary config file for testing
+        db_path = os.path.join(tempfile.mkdtemp(), "debate.db")
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
-            f.write("""
+            f.write(f"""
 database:
-  path: ":memory:"
+  path: '{db_path}'
 llm_provider:
   default_model: "mock-model"
   embedding_model: "mock-embedding"
@@ -112,13 +114,15 @@ knowledge_base:
   directory: "./test_knowledge"
 role_manager:
   roles_dir: "./test_roles"
+wiki:
+  pages_directory: "./test_wiki"
 """)
             config_path = f.name
-        
+
         try:
             # 1. Initialize container with config
             container = Container()
-            container.config.from_yaml(config_path)
+            container.config_manager.override(ConfigManager(config_path=config_path))
             
             # 2. Get all required services
             debate_history_tracker = container.debate_history_tracker()
@@ -185,7 +189,7 @@ role_manager:
         # This test simulates the integration between CLI commands, TUI display,
         # and the underlying debate management system
         
-        tracker = DebateHistoryTracker()
+        tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "debate_history.db"))
         
         # Simulate a debate as it would occur through the system
         session_id = "cli_tui_e2e_003"
@@ -250,7 +254,7 @@ role_manager:
     
     def test_multi_model_debate_end_to_end(self):
         """Test multi-model debate functionality end-to-end."""
-        tracker = DebateHistoryTracker()
+        tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "debate_history.db"))
         
         # Simulate a multi-model debate scenario
         session_id = "multi_model_e2e_004"
@@ -303,7 +307,7 @@ role_manager:
     
     def test_history_navigation_end_to_end(self):
         """Test complete history navigation workflow from creation to retrieval."""
-        tracker = DebateHistoryTracker()
+        tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "debate_history.db"))
         
         # Create multiple debates to test navigation
         debates_data = [
@@ -438,7 +442,7 @@ role_manager:
     
     def test_error_recovery_end_to_end(self):
         """Test end-to-end error recovery scenarios."""
-        tracker = DebateHistoryTracker()
+        tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "debate_history.db"))
         
         # Test graceful handling of incomplete debates
         session_id = "error_recovery_007"

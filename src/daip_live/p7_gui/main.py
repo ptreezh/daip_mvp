@@ -25,7 +25,7 @@ from pydantic import BaseModel, Field
 from daip_live.agent_engine.executor import AgentExecutor
 from daip_live.config import create_config_yaml_if_not_exists
 from daip_live.config_bridge import config_bridge
-from daip_live.core.models import ProviderConfig, Session
+from daip_live.core.models import KnowledgeBaseConfig, ProviderConfig, Session
 from daip_live.knowledge.manager import KnowledgeManager
 from daip_live.memory.service import MemoryService
 from daip_live.memory.session_manager import SessionManager
@@ -80,7 +80,7 @@ def get_session_manager(db_manager=Depends(get_db_manager)) -> SessionManager:
 def get_agent_executor(session_id: str, cfg=Depends(get_config), db_manager=Depends(get_db_manager), session_manager=Depends(get_session_manager)) -> AgentExecutor:
     model_provider = LiteLLMProvider(ProviderConfig(model=cfg.get('llm_provider', {}).get('default_model', 'gpt-3.5-turbo')))
     tool_manager = ToolManager()
-    knowledge_manager = KnowledgeManager(db_manager=db_manager, model_provider=model_provider, config=cfg.get('knowledge_base', {}))
+    knowledge_manager = KnowledgeManager(db_manager=db_manager, model_provider=model_provider, config=KnowledgeBaseConfig(**cfg.get('knowledge_base') or {}))
     memory_service = MemoryService(model_provider)  # Pass model_provider to MemoryService
     user_input_queue = asyncio.Queue()
 
@@ -100,7 +100,7 @@ def get_role_manager(cfg=Depends(get_config)) -> RoleManager:
 def get_knowledge_manager(cfg=Depends(get_config), db_manager=Depends(get_db_manager)) -> KnowledgeManager:
     """Dependency injection for KnowledgeManager."""
     model_provider = LiteLLMProvider(ProviderConfig(model=cfg.get('llm_provider', {}).get('default_model', 'gpt-3.5-turbo')))
-    return KnowledgeManager(db_manager=db_manager, model_provider=model_provider, config=cfg.get('knowledge_base', {}))
+    return KnowledgeManager(db_manager=db_manager, model_provider=model_provider, config=KnowledgeBaseConfig(**cfg.get('knowledge_base') or {}))
 
 # ============================================================================
 # API Endpoint Definitions
@@ -191,7 +191,7 @@ def get_session(
                 error="SESSION_NOT_FOUND",
                 message=f"Session '{session_id}' does not exist",
                 timestamp=datetime.now(timezone.utc)
-            ).model_dump()
+            ).model_dump(mode='json')
         )
     return session
 
@@ -229,7 +229,7 @@ def delete_session(
                 error="SESSION_NOT_FOUND",
                 message=f"Session '{session_id}' does not exist",
                 timestamp=datetime.now(timezone.utc)
-            ).model_dump()
+            ).model_dump(mode='json')
         )
 
     session_manager.delete_session(session_id)

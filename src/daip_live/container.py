@@ -184,7 +184,8 @@ class Container(containers.DeclarativeContainer):
     debate_history_tracker = providers.Singleton(
         DebateHistoryTracker,
         db_path=providers.Callable(
-            lambda cm=config_manager: cm().get_config().model_dump()['database']['path']
+            lambda cm: cm.get_config().model_dump()['database']['path'],
+            cm=config_manager,
         )
     )
 
