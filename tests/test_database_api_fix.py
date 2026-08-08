@@ -30,7 +30,9 @@ class TestDatabaseManagerAPI:
     def db_manager(self, temp_db):
         """Create DatabaseManager instance with temp database"""
         from daip_live.persistence.database import DatabaseManager
-        return DatabaseManager(temp_db)
+        db = DatabaseManager(temp_db)
+        yield db
+        db.engine.dispose()  # 释放文件锁，避免 teardown unlink 失败（WinError 32）
 
     def test_get_session_without_parameters_should_work(self, db_manager):
         """

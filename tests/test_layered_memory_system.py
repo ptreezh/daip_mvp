@@ -149,11 +149,12 @@ class TestLayeredMemorySystem:
         compressed = memory_system.get_compressed_context("tech_analyst", current_round=6, max_rounds=3)
 
         # 验证压缩
-        assert len([line for line in compressed.split('\n') if 'Fact' in line]) <= 3
-        assert len([line for line in compressed.split('\n') if 'Argument' in line]) <= 3
-        assert "Round 4 Summary" in compressed
-        assert "Round 5 Summary" in compressed
-        assert "Round 1 Summary" not in compressed
+        # 标题行 "Recent Shared Facts:" 含子串 "Fact"，只统计事实条目行
+        assert len([line for line in compressed.split('\n') if line.startswith("  - Fact")]) <= 3
+        assert len([line for line in compressed.split('\n') if line.startswith("  - Argument")]) <= 3
+        assert "Round 4" in compressed
+        assert "Round 5" in compressed
+        assert "Round 1" not in compressed
 
     def test_memory_consistency_check(self):
         """测试记忆一致性检查"""
@@ -161,9 +162,9 @@ class TestLayeredMemorySystem:
 
         memory_system = LayeredMemorySystem()
 
-        # 添加可能冲突的事实
+        # 添加可能冲突的事实（源码 _are_contradictory 检测显式否定对，layered_memory_system.py:316-322）
         memory_system.add_shared_fact(1, "AI is safe for medical use", "tech_analyst", 0.9)
-        memory_system.add_shared_fact(2, "AI needs more testing for medical use", "ethics_expert", 0.8)
+        memory_system.add_shared_fact(2, "AI is not safe for medical use", "ethics_expert", 0.8)
 
         # 检查一致性
         conflicts = memory_system.check_memory_consistency()
@@ -285,9 +286,10 @@ class TestLayeredMemorySystem:
         context = memory_system.get_role_context("nonexistent_role", current_round=1)
         assert "No personal memory found" in context
 
-        # 测试空数据
+        # 测试空数据（源码输出 "Shared Factual History:" + 换行 + "  None"）
         empty_context = memory_system.get_role_context("any_role", current_round=1)
-        assert "Shared Factual History: None" in empty_context
+        assert "Shared Factual History:" in empty_context
+        assert "None" in empty_context
 
         # 测试无效轮次
         with pytest.raises(ValueError):

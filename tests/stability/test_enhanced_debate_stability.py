@@ -11,6 +11,7 @@ import os
 from unittest.mock import Mock, patch
 
 from daip_live.container import Container
+from daip_live.config import ConfigManager
 from daip_live.p8_debate_system.history_tracker import DebateHistoryTracker
 from daip_live.core.models import DebateStartEvent, DebateTurnCompleteEvent, DebateCompleteEvent
 
@@ -257,6 +258,12 @@ knowledge_base:
   directory: "./test_knowledge"
 role_manager:
   roles_dir: "./test_roles"
+wiki:
+  pages_directory: "./test_wiki"
+debate:
+  logs_directory: "./test_debate_logs"
+paper:
+  download_directory: "./test_paper"
 """)
             config_path = f.name
         
@@ -264,7 +271,9 @@ role_manager:
             # Test multiple container instantiations
             for i in range(3):
                 container = Container()
-                container.config.from_yaml(config_path)
+                # 源码权威: Container 无 config 属性，用 config_manager provider 覆盖
+                # （dependency-injector override 机制）
+                container.config_manager.override(ConfigManager(config_path))
                 
                 # Get components multiple times
                 debate_history_tracker = container.debate_history_tracker()
@@ -299,7 +308,7 @@ role_manager:
             
             # Test that the same container can be reused
             container = Container()
-            container.config.from_yaml(config_path)
+            container.config_manager.override(ConfigManager(config_path))
             
             reuse_tracker = container.debate_history_tracker()
             reuse_session_id = "container_reuse_test"
