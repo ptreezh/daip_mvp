@@ -24,7 +24,9 @@ class TestLiteLLMProvider:
     @pytest.mark.asyncio
     async def test_generate_success(self, mocker):
         """Tests the generate method for a successful API call."""
-        config = ProviderConfig(model="test-model")
+        # 源码权威: generate(prompt, params) 是 async generator（provider.py:276）；
+        # "test-model" 是 local model 走 mock 分支不调 litellm，须用非本地模型名测 litellm 路径
+        config = ProviderConfig(model="gpt-3.5-turbo")
         provider = LiteLLMProvider(config=config)
 
         mock_choice = mocker.Mock()
@@ -37,7 +39,9 @@ class TestLiteLLMProvider:
             return_value=mock_response
         )
 
-        result = await provider.generate(prompt="Say hi")
+        result = None
+        async for chunk in provider.generate(prompt="Say hi", params={}):
+            result = chunk
 
         assert result == "Hello, world!"
         mock_litellm_completion.assert_called_once()
@@ -45,7 +49,7 @@ class TestLiteLLMProvider:
     @pytest.mark.asyncio
     async def test_generate_authentication_error(self, mocker):
         """Tests that an auth error from litellm is correctly wrapped."""
-        config = ProviderConfig(model="test-model")
+        config = ProviderConfig(model="gpt-3.5-turbo")
         provider = LiteLLMProvider(config=config)
 
         mocker.patch(
@@ -58,7 +62,8 @@ class TestLiteLLMProvider:
         )
 
         with pytest.raises(ModelAuthenticationError) as excinfo:
-            await provider.generate(prompt="Anything")
+            async for _ in provider.generate(prompt="Anything", params={}):
+                pass
 
         assert "Invalid API Key" in str(excinfo.value)
 
@@ -80,11 +85,11 @@ class TestLiteLLMProvider:
         result = await provider.embed(text="Embed this")
 
         assert result == expected_vector
+        # 源码权威: _try_embedding 仅传 model/input（provider.py:125-132），
+        # config 未设 api_key/base_url 时不传这两个参数
         mock_aembedding.assert_called_once_with(
             model=config.model,
             input=["Embed this"],
-            api_key=config.api_key,
-            base_url=config.base_url,
         )
 
     @pytest.mark.asyncio

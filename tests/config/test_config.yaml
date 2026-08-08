@@ -7,3 +7,11 @@ llm_provider:
 
 knowledge_base:
   directory: "test_docs/"
+role_manager:
+  roles_dir: "test_roles/"
+wiki:
+  pages_directory: "test_wiki/"
+debate:
+  logs_directory: "test_debate_logs/"
+paper:
+  download_directory: "test_paper/"

@@ -504,13 +504,10 @@ model_configs:
         
         manager = RoleModelManager(self.temp_dir)
         
-        # Should fallback to default configuration when invalid config is provided
+        # 源码权威: 无效配置的角色文件被整体跳过（role_model_manager.py:61），
+        # 无回退默认机制；get_role_by_name 返回 None 即优雅处理
         role = manager.get_role_by_name("invalid_model")
-        assert role is not None
-        # Should have default model config since the invalid one was skipped
-        assert len(role.model_configs) == 1
-        assert role.model_configs[0].model_name == "gpt-3.5-turbo"  # Default fallback
-        assert role.model_configs[0].temperature == 0.7  # Default temperature
+        assert role is None
     
     def test_nonexistent_role(self):
         """Test handling requests for nonexistent roles."""

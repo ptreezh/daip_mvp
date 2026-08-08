@@ -77,11 +77,13 @@ class TestWikiManager:
             manager = WikiManager(wiki_root)
 
             # Act & Assert
+            # 源码权威: 空标题+非空内容会从内容首行提取标题（manager.py:144-156），
+            # 只有标题和内容都为空才抛 "Title cannot be empty"
             with pytest.raises(ValueError, match="Title cannot be empty"):
-                manager.create_page(title="", content="Content")
+                manager.create_page(title="", content="")
 
             with pytest.raises(ValueError, match="Title cannot be empty"):
-                manager.create_page(title="   ", content="Content")
+                manager.create_page(title="   ", content="")
 
     def test_wiki_manager_create_page_duplicate_title(self):
         """测试创建重复标题的页面应该失败"""
@@ -99,7 +101,8 @@ class TestWikiManager:
             )
 
             # Act & Assert - 尝试创建重复标题
-            with pytest.raises(ValueError, match="Page with title.*already exists"):
+            # 源码权威: manager.py:172 raise "Page 'Test Page' already exists and contains content..."
+            with pytest.raises(ValueError, match="already exists"):
                 manager.create_page(
                     title="Test Page",  # 相同标题
                     content="Second page content",

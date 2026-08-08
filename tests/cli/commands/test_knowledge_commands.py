@@ -162,10 +162,10 @@ class TestKnowledgeSyncCommand:
             mock_manager = Mock()
             mock_manager_class.return_value = mock_manager
 
-            # Mock scan method for dry run
+            # Mock scan method for dry run（源码对 updated 做 [:5] 切片，须为 list）
             changes = Mock()
             changes.added = ['file1.txt', 'file2.txt']
-            changes.updated = {}
+            changes.updated = []
             changes.deleted = []
             changes.unchanged = ['file3.txt']
 

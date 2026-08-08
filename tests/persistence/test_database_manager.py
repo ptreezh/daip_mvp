@@ -1,7 +1,9 @@
 import pytest
 
-from src.daip_live.core.models import AgentState, DialogueTurn, KnowledgeSource, Session
-from src.daip_live.persistence.database import DatabaseManager
+# 统一 daip_live 前缀：src.daip_live 与 daip_live 双路径会产生两个 AgentState 枚举类，
+# 导致 == 比较失败（源码内部用 daip_live 前缀）
+from daip_live.core.models import AgentState, DialogueTurn, KnowledgeSource, Session
+from daip_live.persistence.database import DatabaseManager
 
 
 @pytest.fixture
@@ -101,7 +103,9 @@ async def test_get_knowledge_sources_by_ids(db_manager: DatabaseManager):
 
     # 2. Act: Retrieve a subset of the sources by their new IDs
     ids_to_fetch = [s1_saved.id, s3_saved.id]
-    retrieved_sources = await db_manager.get_knowledge_sources_by_ids(ids_to_fetch)
+    # 源码权威: get_knowledge_sources_by_ids 是同步方法（database.py），调用方经
+    # asyncio.to_thread 包装；此处直接同步调用
+    retrieved_sources = db_manager.get_knowledge_sources_by_ids(ids_to_fetch)
 
     # 3. Assert
     assert len(retrieved_sources) == 2
