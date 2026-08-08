@@ -47,19 +47,17 @@ class TestKnowledgeBaseE2E:
         """Create mock model provider."""
         provider = Mock(spec=LiteLLMProvider)
         # Mock embedding generation
-        provider.embed = Mock(return_value=[
-            [0.1, 0.2, 0.3, 0.4, 0.5] * 100  # 500-dimensional vector
-        ])
+        provider.embed = AsyncMock(return_value=[0.1, 0.2, 0.3, 0.4, 0.5] * 100)  # 500-dimensional vector
         provider.generate = AsyncMock(return_value="Summary of document content")
         return provider
 
     @pytest.fixture
     def knowledge_manager(self, temp_db, mock_model_provider, knowledge_dir):
         """Create knowledge manager with test dependencies."""
-        config = {
-            "directory": knowledge_dir,
-            "embedding_dimension": 500
-        }
+        config = KnowledgeBaseConfig(
+            directory=knowledge_dir,
+            embedding_dimension=500
+        )
         return KnowledgeManager(
             db_manager=temp_db,
             model_provider=mock_model_provider,
@@ -96,14 +94,11 @@ building systems that learn from data.
 4. Support Vector Machines
         """)
 
-        # Add document to knowledge base
-        result = asyncio.run(knowledge_manager.add_document(
-            file_path=str(test_doc_path),
-            metadata={"category": "ml", "difficulty": "beginner"}
-        ))
+        # 同步文档到知识库（真实 API：文件驱动扫描 + 向量索引）
+        result = asyncio.run(knowledge_manager.sync_knowledge_base())
 
-        assert result is not None
-        # Result would contain document ID and status
+        assert result["added"] == 1
+        assert result["unchanged"] == 0
 
     def test_document_search_workflow_e2e(self, knowledge_manager):
         """Test complete document search workflow."""
@@ -137,33 +132,21 @@ building systems that learn from data.
         doc_path = Path(knowledge_dir) / "update_test.md"
         doc_path.write_text("# Original Content\n\nThis is the original content.")
 
-        # Add initial version
-        initial_add = asyncio.run(knowledge_manager.add_document(
-            file_path=str(doc_path),
-            metadata={"version": "1.0"}
-        ))
+        # 初始同步（文件驱动）
+        initial_sync = asyncio.run(knowledge_manager.sync_knowledge_base())
+        assert initial_sync["added"] == 1
 
         # Update document
         doc_path.write_text("# Updated Content\n\nThis is the updated content with new information.")
 
-        # Add updated version
-        updated_add = asyncio.run(knowledge_manager.add_document(
-            file_path=str(doc_path),
-            metadata={"version": "2.0", "updated": True}
-        ))
+        # 再次同步，应检测到更新
+        updated_sync = asyncio.run(knowledge_manager.sync_knowledge_base())
+        assert updated_sync["updated"] == 1
 
-        # Search should return updated version
-        knowledge_manager.search = AsyncMock(return_value=[
-            {
-                "content": "Updated Content",
-                "metadata": {"version": "2.0", "updated": True},
-                "score": 0.95
-            }
-        ])
-
+        # 搜索应命中已更新的索引
         results = asyncio.run(knowledge_manager.search("updated content"))
         assert len(results) == 1
-        assert results[0]["metadata"]["version"] == "2.0"
+        assert "update_test" in results[0]["file_path"]
 
     def test_knowledge_deletion_workflow_e2e(self, knowledge_manager, knowledge_dir):
         """Test document deletion workflow."""
@@ -171,15 +154,15 @@ building systems that learn from data.
         doc_path = Path(knowledge_dir) / "delete_test.md"
         doc_path.write_text("# To Be Deleted\n\nThis document will be deleted.")
 
-        # Add document
-        asyncio.run(knowledge_manager.add_document(str(doc_path)))
+        # 添加文档（文件驱动同步）
+        asyncio.run(knowledge_manager.sync_knowledge_base())
 
-        # Delete document (if method exists)
-        if hasattr(knowledge_manager, 'delete_document'):
-            asyncio.run(knowledge_manager.delete_document(str(doc_path)))
+        # 删除文档：删除文件后同步
+        doc_path.unlink()
+        deletion_result = asyncio.run(knowledge_manager.sync_knowledge_base())
+        assert deletion_result["removed"] == 1
 
-        # Search should not return deleted document
-        knowledge_manager.search = AsyncMock(return_value=[])
+        # 搜索不应返回已删除文档
         results = asyncio.run(knowledge_manager.search("deleted document"))
         assert len(results) == 0
 
@@ -198,16 +181,10 @@ building systems that learn from data.
             doc_path = Path(knowledge_dir) / filename
             doc_path.write_text(f"# {filename}\n\n{content}")
 
-        # Import all documents
-        import_results = []
-        for filename, _ in docs_to_create:
-            result = asyncio.run(knowledge_manager.add_document(
-                file_path=str(Path(knowledge_dir) / filename),
-                metadata={"batch": "test_batch"}
-            ))
-            import_results.append(result)
+        # 批量导入（文件驱动：一次同步处理全部文档）
+        import_results = asyncio.run(knowledge_manager.sync_knowledge_base())
 
-        assert len(import_results) == 5
+        assert import_results["added"] == 5
 
     def test_knowledge_categorization_e2e(self, knowledge_manager):
         """Test document categorization and tagging."""
@@ -305,17 +282,36 @@ class TestWikiCollaborationE2E:
 
     @pytest.fixture
     def wiki_manager(self, temp_db):
-        """Create wiki manager (mock if not implemented)."""
-        # This would be the actual WikiManager if implemented
-        from unittest.mock import MagicMock
-        wiki = MagicMock()
-        wiki.create_page = Mock(return_value="page_001")
-        wiki.update_page = Mock(return_value=True)
-        wiki.get_page = Mock(return_value={
-            "title": "Test Page",
-            "content": "# Test Content",
-            "version": 1
-        })
+        """Create wiki manager (in-memory fake with state for editing flows)."""
+        # 有状态的假 Wiki：create/update 维护内容状态，get_page 反映最新版本
+        pages = {}
+
+        def _create_page(title, content=None, author=None, tags=None):
+            pages[title] = {
+                "title": title,
+                "content": content or "",
+                "version": 1,
+                "author": author
+            }
+            return f"page_{len(pages)}"
+
+        def _update_page(page_id=None, content=None, author=None, comment=None):
+            for page in pages.values():
+                page["content"] = content
+                page["version"] += 1
+                page["author"] = author
+            return True
+
+        def _get_page(page_id):
+            if not pages:
+                return {"title": "Test Page", "content": "# Test Content", "version": 1}
+            page = next(iter(pages.values()))
+            return {"title": page["title"], "content": page["content"], "version": page["version"]}
+
+        wiki = Mock()
+        wiki.create_page = Mock(side_effect=_create_page)
+        wiki.update_page = Mock(side_effect=_update_page)
+        wiki.get_page = Mock(side_effect=_get_page)
         wiki.list_pages = Mock(return_value=[
             {"title": "Page 1", "modified": "2024-01-01"},
             {"title": "Page 2", "modified": "2024-01-02"}

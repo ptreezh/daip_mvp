@@ -20,27 +20,29 @@ from daip_live.knowledge.manager import KnowledgeManager
 from daip_live.memory.service import MemoryService
 
 
+@pytest.fixture
+def temp_db():
+    """Create temporary database for testing."""
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
+    temp_path = Path(temp_file.name)
+    temp_file.close()
+    db = DatabaseManager(db_path=str(temp_path))
+    yield db
+    try:
+        temp_path.unlink()
+    except (PermissionError, OSError):
+        pass
+
+
+@pytest.fixture
+def session_manager(temp_db):
+    """Create session manager."""
+    return SessionManager(db_manager=temp_db)
+
+
 @pytest.mark.e2e
 class TestTUIInteractionE2E:
     """End-to-end tests for TUI user interaction."""
-
-    @pytest.fixture
-    def temp_db(self):
-        """Create temporary database for testing."""
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
-        temp_path = Path(temp_file.name)
-        temp_file.close()
-        db = DatabaseManager(db_path=str(temp_path))
-        yield db
-        try:
-            temp_path.unlink()
-        except (PermissionError, OSError):
-            pass
-
-    @pytest.fixture
-    def session_manager(self, temp_db):
-        """Create session manager."""
-        return SessionManager(db_manager=temp_db)
 
     @pytest.fixture
     def mock_model_provider(self):
@@ -86,7 +88,7 @@ class TestTUIInteractionE2E:
         session_manager.save_session(session)
 
         assert session.session_id is not None
-        assert session.status == AgentState.RUNNING
+        assert session.status == AgentState.INIT  # 创建即初始化；RUNNING 由 agent 循环在处理中设置
 
         # 2. User sends first message
         user_message = "What are the key trends in AI adoption for 2024?"
@@ -115,7 +117,11 @@ class TestTUIInteractionE2E:
         assert follow_up_response is not None
 
         # 7. Complete session
-        session_manager.update_session_status(session.session_id, AgentState.COMPLETED)
+        session_manager.end_session(
+            session.session_id,
+            AgentState.COMPLETED,
+            "Market trends conversation completed"
+        )
 
         final_session = session_manager.get_session(session.session_id)
         assert final_session.status == AgentState.COMPLETED
@@ -287,7 +293,7 @@ class TestTUIDisplayE2E:
                 "id": session.session_id[:8],  # Shortened for display
                 "goal": session.goal[:30],     # Truncated for display
                 "status": session.status.value if hasattr(session.status, 'value') else str(session.status),
-                "created": session.created_at.strftime("%Y-%m-%d %H:%M")
+                "created": session.start_time.strftime("%Y-%m-%d %H:%M")
             })
 
         assert len(display_data) >= 5
@@ -315,8 +321,8 @@ class TestTUIDisplayE2E:
             "Type": loaded.session_type,
             "Participants": ", ".join(loaded.participant_ids),
             "Status": loaded.status.value if hasattr(loaded.status, 'value') else str(loaded.status),
-            "Created": loaded.created_at.isoformat(),
-            "Updated": loaded.updated_at.isoformat()
+            "Created": loaded.start_time.isoformat(),
+            "Updated": loaded.end_time.isoformat() if loaded.end_time else "N/A"
         }
 
         assert detail_view["Goal"] == "Detail display test"
