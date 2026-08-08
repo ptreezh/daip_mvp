@@ -83,11 +83,18 @@ addopts = [
     "--tb=short",
     "--strict-markers"
 ]
+pythonpath = ["."]
+norecursedirs = ["litellm"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "e2e: marks tests as end-to-end tests",
-    "unit: marks tests as unit tests"
+    "unit: marks tests as unit tests",
+    "performance: marks tests as performance benchmarks",
+    "load: marks tests as load tests",
+    "security: marks tests as security tests"
 ]
 
 [tool.coverage.run]
