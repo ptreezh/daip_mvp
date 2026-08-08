@@ -507,7 +507,9 @@ class PDFProcessor(DocumentProcessor):
             )
 
             chunks.append(chunk)
-            start = max(0, end - 300)  # Less overlap for PDF
+            # 修复死循环：内容短于 overlap(300) 时 max(0, end-300) 不前进；
+            # 与基类 L450 一致，末尾处直接推进到 content_length 终止循环
+            start = end - 300 if end < content_length else end
             chunk_index += 1
 
         return chunks
@@ -899,27 +901,28 @@ class ProductionWikiKnowledgeSystem:
             if not processor:
                 raise ValueError(f"No processor found for file: {file_path}")
 
-            # Process document
+            # Process document and generate embeddings in the same event loop
+            # 修复：原实现处理完文档即 loop.close()，后续 embeddings 复用已关闭 loop 抛
+            # "Event loop is closed"；统一在 finally 中关闭
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
                 document_id, chunks = loop.run_until_complete(processor.process(file_path, metadata))
+
+                # 归一化文档 ID：add_document 已生成并返回 task.document_id，
+                # 处理器自生成的随机 ID 不能作为最终键（否则调用方持有的 ID 在
+                # 处理完成后失效，delete/status 查询均找不到文档）
+                document_id = task.document_id
+                for chunk in chunks:
+                    chunk.document_id = document_id
+
+                # Generate embeddings for chunks
+                chunk_texts = [chunk.content for chunk in chunks]
+                embeddings = loop.run_until_complete(
+                    self.embedding_service.encode(chunk_texts)
+                )
             finally:
                 loop.close()
-
-            # Update document ID
-            if document_id != task.document_id:
-                # Update documents dict with new ID
-                doc_info = self.documents.pop(task.document_id, None)
-                if doc_info:
-                    doc_info["id"] = document_id
-                    self.documents[document_id] = doc_info
-
-            # Generate embeddings for chunks
-            chunk_texts = [chunk.content for chunk in chunks]
-            embeddings = loop.run_until_complete(
-                self.embedding_service.encode(chunk_texts)
-            )
 
             # Add chunks and vectors to system
             for chunk, embedding in zip(chunks, embeddings):

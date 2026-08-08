@@ -16,7 +16,7 @@ import asyncio
 from daip_live.core.models import (
     AgentEvent, AgentState, DebateCompleteEvent, DebateRoundStartEvent,
     DebateStartEvent, DebateTurnCompleteEvent, DebateTurnStartEvent,
-    DialogueTurn, Role, Session, ThoughtEvent, TokenUsageEvent
+    DialogueTurn, ProviderConfig, Role, Session, ThoughtEvent, TokenUsageEvent
 )
 from daip_live.core.exceptions import ModelError
 from daip_live.memory.session_manager import SessionManager
@@ -627,17 +627,21 @@ Based on the history, your role persona, and your assigned model configuration, 
         model_provider = self._get_model_provider_for_config(role_mapping.model_config)
 
         # Generate response with model-specific settings
-        response_content, token_info = await model_provider.generate(
-            prompt,
-            model=role_mapping.model_config.model_name,
-            temperature=role_mapping.model_config.temperature,
-            max_tokens=role_mapping.model_config.max_tokens,
-            top_p=role_mapping.model_config.top_p,
-            frequency_penalty=role_mapping.model_config.frequency_penalty,
-            presence_penalty=role_mapping.model_config.presence_penalty
-        )
+        # 源码契约: LiteLLMProvider.generate(prompt, params) 是 async generator（provider.py:276），
+        # 不支持 model=/temperature= 等 kwargs，参数放入 params dict
+        params = {
+            "temperature": role_mapping.model_config.temperature,
+            "max_tokens": role_mapping.model_config.max_tokens,
+            "top_p": role_mapping.model_config.top_p,
+            "frequency_penalty": role_mapping.model_config.frequency_penalty,
+            "presence_penalty": role_mapping.model_config.presence_penalty,
+        }
+        response_content = None
+        async for chunk in model_provider.generate(prompt, params=params):
+            response_content = chunk
+            break
 
-        return response_content, token_info
+        return response_content, None
 
     async def _generate_summary_with_model(
         self,
@@ -662,15 +666,18 @@ Summary:"""
         model_provider = self._get_model_provider_for_config(best_mapping.model_config)
 
         # Generate summary with slightly different settings for better summarization
-        response_content, token_info = await model_provider.generate(
-            summary_prompt,
-            model=best_mapping.model_config.model_name,
-            temperature=0.3,  # Lower temperature for more consistent summaries
-            max_tokens=best_mapping.model_config.max_tokens,
-            top_p=best_mapping.model_config.top_p
-        )
+        # 源码契约: LiteLLMProvider.generate(prompt, params) 是 async generator（provider.py:276）
+        params = {
+            "temperature": 0.3,  # Lower temperature for more consistent summaries
+            "max_tokens": best_mapping.model_config.max_tokens,
+            "top_p": best_mapping.model_config.top_p,
+        }
+        summary_content = None
+        async for chunk in model_provider.generate(summary_prompt, params=params):
+            summary_content = chunk
+            break
 
-        return response_content, token_info
+        return summary_content, None
 
     def _get_model_provider_for_config(self, model_config) -> LiteLLMProvider:
         """Get or create a model provider instance for the given configuration (legacy method)."""
@@ -678,18 +685,18 @@ Summary:"""
 
         if cache_key not in self.model_cache:
             # Create a new provider instance for this model
-            provider_config = {
-                "model": model_config.model_name,
-                "api_base": None,  # Use default
-                "api_key": None,   # Use default from config
-                "max_tokens": model_config.max_tokens,
-                "temperature": model_config.temperature,
-            }
+            # 源码契约: LiteLLMProvider.__init__(config: ProviderConfig)（provider.py:17），
+            # 不能传 dict
+            provider_config = ProviderConfig(
+                model=model_config.model_name,
+                api_key=None,
+                base_url=None,
+                temperature=model_config.temperature,
+                max_tokens=model_config.max_tokens,
+            )
 
             # Create a temporary LiteLLMProvider for this specific model
-            self.model_cache[cache_key] = LiteLLMProvider(
-                config={"provider_configs": {model_config.provider: provider_config}}
-            )
+            self.model_cache[cache_key] = LiteLLMProvider(provider_config)
 
         return self.model_cache[cache_key]
 
