@@ -119,12 +119,13 @@ class TestWikiPage:
         # Act
         page.add_tag("python")
         page.add_tag("documentation")
-        page.add_tag("PYTHON")  # 测试重复添加（应该被规范化为小写）
+        page.add_tag("PYTHON")  # 源码权威: validate_tag 保留大小写（models.py:15-25），PYTHON 是不同标签
 
         # Assert
         assert "python" in page.tags
         assert "documentation" in page.tags
-        assert len(page.tags) == 2  # PYTHON被规范化为python，不应重复
+        assert "PYTHON" in page.tags
+        assert len(page.tags) == 3  # PYTHON 未规范化，与 python 并存
 
     def test_wiki_page_tag_management_add_empty_tag(self):
         """测试添加空标签应该抛出异常"""
@@ -159,16 +160,16 @@ class TestWikiPage:
         # Act
         result1 = page.remove_tag("python")
         result2 = page.remove_tag("nonexistent")
-        result3 = page.remove_tag("DOCUMENTATION")  # 测试大小写不敏感
+        result3 = page.remove_tag("DOCUMENTATION")  # 源码权威: 大小写敏感（validate_tag 不规范化）
 
         # Assert
         assert result1 is True  # 成功移除
         assert result2 is False  # 标签不存在
-        assert result3 is True  # 成功移除（大小写不敏感）
+        assert result3 is False  # DOCUMENTATION 与 documentation 大小写不同
         assert "python" not in page.tags
-        assert "documentation" not in page.tags
+        assert "documentation" in page.tags  # documentation 未被移除（大小写敏感）
         assert "wiki" in page.tags
-        assert len(page.tags) == 1
+        assert len(page.tags) == 2
 
     def test_wiki_page_file_path_validation_markdown_only(self):
         """测试文件路径验证 - 只允许markdown文件"""

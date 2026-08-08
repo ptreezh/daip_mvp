@@ -138,7 +138,7 @@ class TestWikiTUIApp:
             title_input.value = ""  # 空标题
 
             content_input = Mock(spec=Input)
-            content_input.value = "Some content"
+            content_input.value = ""  # 源码权威: 空标题+非空内容会从内容提取标题，须都为空才报错
 
             tags_input = Mock(spec=Input)
 

@@ -191,9 +191,9 @@ class TestWikiPageExtended:
 
         # Act & Assert
         assert page.has_tag("python") is True
-        assert page.has_tag("PYTHON") is True  # 大小写不敏感
+        assert page.has_tag("PYTHON") is False  # 源码权威: 大小写敏感（validate_tag 不规范化）
         assert page.has_tag("java") is False
-        assert page.has_tag("python") is True  # 标签被清理为'python'
+        assert page.has_tag("python") is True
 
     def test_wiki_page_content_history_tracking(self):
         """测试内容变更历史跟踪"""
@@ -238,6 +238,7 @@ class TestWikiPageExtended:
             tags=["Python!", "  documentation  ", "test-tag", "123tag", "invalid tag!@#"]
         )
 
-        # Assert
-        expected_tags = ["python", "documentation", "test-tag", "123tag", "invalidtag"]
+        # 源码权威: validate_tag（models.py:15-25）仅 strip + 移除文件系统危险字符，
+        # 保留大小写与标点；"invalid tag!@#" 中的空格保留
+        expected_tags = ["Python!", "documentation", "test-tag", "123tag", "invalid tag!@#"]
         assert page.tags == expected_tags

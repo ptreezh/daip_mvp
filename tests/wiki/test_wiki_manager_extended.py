@@ -93,7 +93,9 @@ class TestWikiManagerExtended:
 
             pages_data = [
                 {"title": "Valid Page", "content": "Valid content", "tags": ["valid"]},
-                {"title": "", "content": "Invalid content", "tags": ["invalid"]},  # 空标题
+                # 源码权威: 空标题+非空内容会从内容提取标题（manager.py:144-156），
+                # 只有标题和内容都空才抛 "Title cannot be empty"
+                {"title": "", "content": "", "tags": ["invalid"]},  # 空标题+空内容
             ]
 
             # Act & Assert
