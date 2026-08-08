@@ -421,78 +421,76 @@ def process_natural_language(
 
 def _handle_debate_intent(intent: Intent):
     """Handle debate start intent"""
-    try:
-        topic = intent.parameters.get("topic", "General Discussion")
-        roles = intent.parameters.get("roles")
-        rounds = intent.parameters.get("rounds", 3)
-        
-        print(f"🗣️ Starting debate on topic: {topic}")
-        print(f"🎭 Roles: {roles or 'default'}")
-        print(f"🔄 Rounds: {rounds}")
-        
-        # For now, just print what would be done
-        print(f"Would start debate with topic='{topic}', roles='{roles or 'pro_arguer,con_arguer'}', rounds={rounds}")
-        
-    except Exception as e:
-        print(f"❌ Error starting debate: {e}")
+    topic = intent.parameters.get("topic", "General Discussion")
+    roles = intent.parameters.get("roles")
+    rounds = intent.parameters.get("rounds", 3)
+
+    roles_str = "pro_arguer,con_arguer"
+    if isinstance(roles, (list, tuple)):
+        roles_str = ",".join(str(r) for r in roles)
+    elif roles:
+        roles_str = str(roles)
+
+    # 复用真实 debate start 命令（容器装配的 EnhancedDebateManager + 真实 Ollama 生成）
+    debate_start(topic=topic, roles=roles_str, rounds=int(rounds))
 
 
 def _handle_search_papers_intent(intent: Intent):
     """Handle paper search intent"""
-    try:
-        query = intent.parameters.get("query", "")
-        source = intent.parameters.get("source", "arxiv")
-        max_results = intent.parameters.get("max_results", 5)  # Default to 5 to match CLI
-        
-        if not query:
-            print("❌ No search query provided")
-            return
-            
-        print(f"📚 Searching for papers about: {query}")
-        print(f"🌐 Source: {source}")
-        print(f"🔢 Max results: {max_results}")
-        
-        # For now, just print what would be done
-        print(f"Would search for papers with query='{query}', source='{source}', max_results={max_results}")
-        
-    except Exception as e:
-        print(f"❌ Error searching papers: {e}")
+    query = intent.parameters.get("query", "")
+    source = intent.parameters.get("source", "arxiv")
+    max_results = intent.parameters.get("max_results", 5)
+
+    if not query:
+        print("❌ No search query provided")
+        return
+
+    # 复用真实 doc search 命令（PaperDownloader.search_papers）
+    doc_search(query=query, source=source, max_results=int(max_results))
 
 
 def _handle_download_paper_intent(intent: Intent):
     """Handle paper download intent"""
-    try:
-        paper_id = intent.parameters.get("paper_id")
-        if not paper_id:
-            print("❌ No paper ID provided for download")
-            return
-            
-        print(f"📥 Downloading paper with ID: {paper_id}")
-        
-        # For now, just print what would be done
-        print(f"Would download paper with ID='{paper_id}'")
-        
-    except Exception as e:
-        print(f"❌ Error downloading paper: {e}")
+    paper_id = intent.parameters.get("paper_id")
+    source = intent.parameters.get("source", "arxiv")
+    if not paper_id:
+        print("❌ No paper ID provided for download")
+        return
+
+    # 复用真实 doc download 命令（PaperDownloader 内部智能识别 arxiv ID / 主题）
+    doc_download(topic=str(paper_id), source=source)
 
 
 def _handle_conversation_intent(intent: Intent):
     """Handle conversation intents"""
-    try:
-        question = intent.parameters.get("question", "")
-        chat_content = intent.parameters.get("chat_content", "")
-        
-        if question:
-            print(f"💬 Question: {question}")
-        elif chat_content:
-            print(f"💬 Chat: {chat_content}")
-        else:
-            print(f"💬 General conversation request")
-            
-        print("Would process conversation with AI assistant")
-        
-    except Exception as e:
-        print(f"❌ Error handling conversation: {e}")
+    question = intent.parameters.get("question", "")
+    chat_content = intent.parameters.get("chat_content", "")
+
+    prompt = question or chat_content
+    if not prompt:
+        print("💬 General conversation request")
+        return
+
+    # 复用真实聊天执行器（EnhancedChatExecutor + AgentExecutor 步骤执行）
+    from daip_live.agent_engine.enhanced_chat_executor import EnhancedChatExecutor
+
+    async def run_chat_async():
+        chat_executor = EnhancedChatExecutor(
+            session_manager=container.session_manager(),
+            memory_service=container.memory_service(),
+            user_input_queue=container.user_input_queue(),
+        )
+        # ask 是单轮命令：chat_run 处理完初始目标后会等待 TUI 队列输入，
+        # 预置 None 终止信号让循环优雅退出并保存会话
+        await chat_executor.user_input_queue.put(None)
+        step_executor = container.agent_executor()
+        async for event in chat_executor.chat_run(prompt, step_executor):
+            if isinstance(event, ThoughtEvent):
+                print(f"💭 {event.content}")
+            elif hasattr(event, "content") and event.content:
+                print(f"💬 {event.content}")
+
+    asyncio.run(run_chat_async())
 
 
 # Import commands

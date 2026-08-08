@@ -129,7 +129,12 @@ class StepExecutor:
                     current_task.description, self.last_tool_result, self.llm_response, session
                 )
                 start_time = time.time()
-                self.llm_response, usage = await self.model_provider.generate(prompt)
+                async for chunk in self.model_provider.generate(
+                    prompt, params={"max_tokens": 1024, "temperature": 0.7}
+                ):
+                    self.llm_response = chunk
+                    break
+                usage = None  # 真实模型不返回 usage（调用方有 None 保护）
                 latency = time.time() - start_time
                 
                 # Send token usage event

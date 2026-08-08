@@ -19,7 +19,7 @@ from daip_live.core.models import (
 )
 from daip_live.memory.service import MemoryService
 from daip_live.memory.session_manager import SessionManager as BaseSessionManager
-from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer, WorkflowType
+from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer, IntentType
 
 logger = logging.getLogger(__name__)
 
@@ -112,27 +112,20 @@ class EnhancedChatExecutor:
             # 显示意图识别结果
             yield ThoughtEvent(content=f"识别到意图: {intent.description} (置信度: {intent.confidence:.2f})")
             
-            # 根据工作流类型处理
-            if intent.workflow_type == WorkflowType.QUESTION:
+            # 根据意图类型处理（识别器枚举：QUESTION/CHAT/WORKFLOW + intent.name 细分）
+            if intent.intent_type == IntentType.QUESTION:
                 # 问题需要置信度循环
                 async for event in self._handle_question_with_confidence_loop(intent, step_executor, session):
                     yield event
                     
-            elif intent.workflow_type == WorkflowType.CHAT:
+            elif intent.intent_type == IntentType.CHAT:
                 # 普通闲聊直接回答
                 yield ThoughtEvent(content="普通闲聊模式，直接响应")
                 current_task = TodoItem(id=0, description=turn_description, status="pending", priority=1)
                 async for event in step_executor.execute_step(current_task, session):
                     yield event
                     
-            elif intent.workflow_type in [
-                WorkflowType.DEBATE, 
-                WorkflowType.PAPER_SEARCH, 
-                WorkflowType.PAPER_DOWNLOAD, 
-                WorkflowType.WIKI_CREATE, 
-                WorkflowType.CONTEXT_COMPRESS, 
-                WorkflowType.PROJECT_SCAFFOLD
-            ]:
+            elif intent.intent_type == IntentType.WORKFLOW:
                 # 工作流类型，转换为相应命令
                 modified_task = self._convert_intent_to_command(intent, turn_description)
                 yield ThoughtEvent(content=f"转换为工作流命令: {modified_task}")
@@ -266,7 +259,11 @@ class EnhancedChatExecutor:
     async def _execute_reasoning_with_confidence(self, prompt: str) -> tuple[str, float]:
         """执行推理并返回置信度评估"""
         try:
-            response = await self.memory_service.model_provider.generate(prompt)
+            async for chunk in self.memory_service.model_provider.generate(
+                prompt, params={"max_tokens": 1024, "temperature": 0.7}
+            ):
+                response = chunk
+                break
             
             # 简单的置信度评估（基于回答的完整性和结构）
             confidence = self._calculate_confidence(response)
@@ -301,23 +298,18 @@ class EnhancedChatExecutor:
     
     def _convert_intent_to_command(self, intent: Any, original_text: str) -> str:
         """将意图转换为相应的命令"""
-        if intent.workflow_type == WorkflowType.DEBATE:
+        if intent.name == "start_debate":
             topic = intent.parameters.get("topic", original_text)
             return f"/debate start {topic}"
-        elif intent.workflow_type == WorkflowType.PAPER_SEARCH:
+        elif intent.name == "search_papers":
             query = intent.parameters.get("query", original_text)
             return f"/doc search {query}"
-        elif intent.workflow_type == WorkflowType.PAPER_DOWNLOAD:
+        elif intent.name == "download_paper":
             paper_id = intent.parameters.get("paper_id")
             return f"/doc download {paper_id}"
-        elif intent.workflow_type == WorkflowType.WIKI_CREATE:
+        elif intent.name == "wiki_create":
             title = intent.parameters.get("title", original_text)
             return f"/wiki create {title}"
-        elif intent.workflow_type == WorkflowType.CONTEXT_COMPRESS:
-            return "/session clear"
-        elif intent.workflow_type == WorkflowType.PROJECT_SCAFFOLD:
-            description = intent.parameters.get("description", original_text)
-            return f"/project scaffold {description}"
         else:
             return original_text
     
