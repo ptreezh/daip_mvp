@@ -313,7 +313,7 @@ class TestTUIDisplayE2E:
             "Session ID": loaded.session_id,
             "Goal": loaded.goal,
             "Type": loaded.session_type,
-            "Participants", ", ".join(loaded.participant_ids),
+            "Participants": ", ".join(loaded.participant_ids),
             "Status": loaded.status.value if hasattr(loaded.status, 'value') else str(loaded.status),
             "Created": loaded.created_at.isoformat(),
             "Updated": loaded.updated_at.isoformat()

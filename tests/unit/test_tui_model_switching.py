@@ -1,101 +1,85 @@
-"""
-Unit tests for TUI model switching functionality.
-"""
+"""TUI 模型管理单元测试 - 对齐 SimplifiedTUI 真实 API"""
+
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from src.daip_live.tui import DAIP_TUI
+
+from daip_live.tui.simplified_main import SimplifiedTUI
 
 
-class TestTUIModelSwitching:
-    """Test cases for TUI model switching functionality."""
+@pytest.fixture
+def tui_app():
+    container = Mock()
+    container.config_manager.get.return_value = 100
+    with patch("daip_live.container.Container", return_value=container):
+        return SimplifiedTUI()
 
-    @pytest.fixture
-    def tui_app(self):
-        """Create a TUI app instance for testing."""
-        with patch('src.daip_live.tui.Container'):
-            app = DAIP_TUI()
-            return app
 
-    def test_update_current_model_updates_attributes(self, tui_app):
-        """Test that updating current model updates both model attributes."""
-        # Setup
-        new_model_name = "gpt-4"
-        
-        # Execute
-        tui_app._update_current_model(new_model_name)
-        
-        # Assert
-        assert tui_app._current_model == new_model_name
-        assert tui_app._model_name == new_model_name
+def _join_logs(app):
+    return "".join(app._log_text_buffer)
 
-    def test_update_current_model_updates_status_bar(self, tui_app):
-        """Test that updating current model triggers status bar update."""
-        # Setup
-        new_model_name = "gpt-4"
-        
-        # Mock the status bar update method
-        with patch.object(tui_app, '_update_status_bar'):
-            # Execute
-            tui_app._update_current_model(new_model_name)
-            
-            # Assert that status bar update was called
-            tui_app._update_status_bar.assert_called_once()
 
-    def test_update_current_model_handles_debate_participant(self, tui_app):
-        """Test that updating current model handles debate participant context."""
-        # Setup
-        new_model_name = "gpt-4"
-        tui_app._current_debate['is_active'] = True
-        tui_app._current_debate['current_participant'] = "Alice"
-        
-        # Mock the status bar update and log view update methods
-        with patch.object(tui_app, '_update_status_bar'):
-            with patch.object(tui_app, '_update_log_view'):
-                # Execute
-                tui_app._update_current_model(new_model_name)
-                
-                # The method should complete without error
-                assert True
+def test_handle_model_command_no_args_lists_models(tui_app):
+    """无参数时默认列出可用模型"""
+    tui_app._handle_model_command("")
+    logs = _join_logs(tui_app)
+    assert "🤖 可用模型列表" in logs
+    assert "gpt-4 - OpenAI GPT-4" in logs
+    assert "mistral - Mistral AI" in logs
 
-    def test_handle_model_list_switches_model(self, tui_app):
-        """Test that model list handling switches to selected model."""
-        # Setup
-        mock_model = {'name': 'llama3', 'provider': 'ollama'}
-        
-        # Mock the model manager and provider
-        with patch.object(tui_app, '_model_manager') as mock_manager:
-            with patch.object(tui_app, '_model_provider'):
-                # Setup mock manager to return success
-                mock_manager.switch_model.return_value = True
-                
-                # Mock the safe log callback
-                with patch.object(tui_app, '_safe_log_callback'):
-                    # Execute
-                    # We need to mock the ModelSelectionDialog since it's a UI component
-                    with patch('src.daip_live.tui.ModelSelectionDialog'):
-                        tui_app._handle_model_list()
-                        
-                        # The method should complete without error
-                        assert True
 
-    def test_handle_model_switch_updates_model(self, tui_app):
-        """Test that direct model switching updates the model."""
-        # Setup
-        model_name = "llama3"
-        
-        # Mock the model manager and provider
-        with patch.object(tui_app, '_model_manager') as mock_manager:
-            with patch.object(tui_app, '_model_provider'):
-                # Setup mock manager to return the model in the list
-                mock_manager.get_available_models.return_value = [
-                    {'name': 'llama3', 'provider': 'ollama'}
-                ]
-                mock_manager.switch_model.return_value = True
-                
-                # Mock the log view update
-                with patch.object(tui_app, '_update_log_view'):
-                    # Execute
-                    tui_app._handle_model_switch(model_name)
-                    
-                    # The method should complete without error
-                    assert True
+def test_handle_model_command_list(tui_app):
+    """list 子命令列出可用模型"""
+    tui_app._handle_model_command("list")
+    logs = _join_logs(tui_app)
+    assert "🤖 可用模型列表" in logs
+    assert "claude-3 - Anthropic Claude 3" in logs
+    assert "llama2 - Meta LLaMA 2" in logs
+
+
+def test_handle_model_command_switch(tui_app):
+    """switch 子命令切换模型"""
+    tui_app._handle_model_command("switch gpt-4")
+    logs = _join_logs(tui_app)
+    assert "🔄 切换到模型: gpt-4" in logs
+    assert "✅ 模型切换完成" in logs
+
+
+def test_handle_model_command_switch_no_name(tui_app):
+    """switch 未指定模型名时提示"""
+    tui_app._handle_model_command("switch")
+    logs = _join_logs(tui_app)
+    assert "⚠️ 请指定模型名称" in logs
+
+
+def test_handle_model_command_status(tui_app):
+    """status 子命令显示当前模型状态"""
+    tui_app._handle_model_command("status")
+    logs = _join_logs(tui_app)
+    assert "🤖 当前模型状态" in logs
+    assert "活动模型: gpt-4" in logs
+    assert "状态: ✅ 正常" in logs
+
+
+def test_handle_model_command_unknown_subcommand(tui_app):
+    """未知子命令提示"""
+    tui_app._handle_model_command("foo")
+    logs = _join_logs(tui_app)
+    assert "⚠️ 未知子命令: foo" in logs
+
+
+def test_handle_model_list_output(tui_app):
+    """可用模型列表包含全部 5 个模型"""
+    tui_app._handle_model_list()
+    logs = _join_logs(tui_app)
+    assert "🤖 可用模型列表" in logs
+    for model in ("gpt-4", "gpt-3.5-turbo", "claude-3", "llama2", "mistral"):
+        assert model in logs
+
+
+def test_handle_model_switch_direct(tui_app):
+    """直接调用模型切换"""
+    tui_app._handle_model_switch("llama2")
+    logs = _join_logs(tui_app)
+    assert "🔄 切换到模型: llama2" in logs
+    assert "✅ 模型切换完成" in logs

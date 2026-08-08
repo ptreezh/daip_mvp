@@ -2907,12 +2907,12 @@ class SimplifiedTUI(App):
         if event.key == "ctrl+c":
             # 简化的复制功能，使用Textual内置机制
             event.prevent_default()
-            self.action_copy_text()
+            asyncio.create_task(self.action_copy_text())
             return
         elif event.key == "ctrl+a":
             # 简化全选功能，直接复制所有内容
             event.prevent_default()
-            self.action_copy_text()
+            asyncio.create_task(self.action_copy_text())
             return
 
     def on_unmount(self) -> None:

@@ -1,113 +1,112 @@
-"""
-Unit tests for TUI input handling functionality.
-"""
+"""TUI 输入处理单元测试 - 对齐 SimplifiedTUI 真实 API"""
+
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from textual.widgets import Input
-from src.daip_live.tui import DAIP_TUI
+
+from daip_live.tui.simplified_main import SimplifiedTUI
+from daip_live.tui.utils import HistoryManager
 
 
-class TestTUIInputHandling:
-    """Test cases for TUI input handling functionality."""
+@pytest.fixture
+def tui_app(tmp_path):
+    container = Mock()
+    container.config_manager.get.return_value = 100
+    with patch("daip_live.container.Container", return_value=container):
+        app = SimplifiedTUI()
+    app.history_manager = HistoryManager(100, history_file=str(tmp_path / "history.json"))
+    return app
 
-    @pytest.fixture
-    def tui_app(self):
-        """Create a TUI app instance for testing."""
-        with patch('src.daip_live.tui.Container'):
-            app = DAIP_TUI()
-            return app
 
-    def test_input_changed_resets_history_navigation(self, tui_app):
-        """Test that input changes reset history navigation."""
-        # Setup
-        tui_app._history_index = 5
-        tui_app._current_input_before_history = "previous input"
-        
-        # Mock the message
-        message = Mock()
-        message.value = "new input"
-        
-        # Mock query method to avoid NoMatches exception
-        with patch.object(tui_app, 'query', return_value=[]):
-            # Execute
-            tui_app.on_input_changed(message)
-            
-            # Assert
-            assert tui_app._history_index == -1
-            assert tui_app._current_input_before_history == ""
+@pytest.mark.asyncio
+async def test_on_input_submitted_processes_input(tui_app):
+    """提交非空输入: 记录历史、显示回显、分发处理、清空输入框"""
+    input_widget = Input()
+    with (
+        patch.object(tui_app, "query_one", return_value=input_widget),
+        patch.object(tui_app, "_process_user_input", new=AsyncMock()) as mock_process,
+    ):
+        await tui_app.on_input_submitted(Mock(value="hello"))
 
-    def test_input_changed_handles_autocomplete_suggestions(self, tui_app):
-        """Test that input changes trigger autocomplete suggestions."""
-        # Setup
-        message = Mock()
-        message.value = "/help"
-        
-        # Mock the autocomplete suggestions method
-        with patch.object(tui_app, '_get_autocomplete_suggestions', return_value=["/help", "/history"]):
-            with patch.object(tui_app, 'query', return_value=[]):
-                # Mock the mount method to avoid screen mounting issues
-                with patch.object(tui_app, 'mount'):
-                    with patch.object(tui_app, 'query_one'):
-                        # Execute
-                        tui_app.on_input_changed(message)
-                        
-                        # The method should complete without error
-                        assert True
+    assert tui_app.history_manager.history == ["hello"]
+    mock_process.assert_awaited_once_with("hello")
+    assert input_widget.value == ""
+    assert "[bold cyan]> hello[/bold cyan]" in tui_app._log_text_buffer
 
-    def test_input_changed_handles_empty_suggestions(self, tui_app):
-        """Test that input changes handle empty autocomplete suggestions."""
-        # Setup
-        message = Mock()
-        message.value = "random text"
-        
-        # Mock the autocomplete suggestions method to return empty list
-        with patch.object(tui_app, '_get_autocomplete_suggestions', return_value=[]):
-            with patch.object(tui_app, 'query', return_value=[]):
-                # Execute
-                tui_app.on_input_changed(message)
-                
-                # The method should complete without error
-                assert True
 
-    def test_command_selected_updates_input(self, tui_app):
-        """Test that command selection updates the input field."""
-        # Setup
-        message = Mock()
-        message.command = "/help users"
-        
-        # Mock the query_one method to return a mock input widget
-        mock_input = Mock(spec=Input)
-        mock_input.value = "/help "
-        with patch.object(tui_app, 'query_one', return_value=mock_input):
-            # Execute
-            tui_app.on_command_selected(message)
-            
-            # Assert
-            assert mock_input.value == "/help users"
+@pytest.mark.asyncio
+async def test_on_input_submitted_blank_input_skips(tui_app):
+    """空白输入不记录历史也不分发处理"""
+    input_widget = Input()
+    with (
+        patch.object(tui_app, "query_one", return_value=input_widget),
+        patch.object(tui_app, "_process_user_input", new=AsyncMock()) as mock_process,
+    ):
+        await tui_app.on_input_submitted(Mock(value="   "))
 
-    def test_suggest_similar_commands_handles_unknown_command(self, tui_app):
-        """Test that unknown commands trigger suggestions."""
-        # Setup
-        unknown_cmd = "hlp"
-        
-        # Mock the update_log_view method
-        with patch.object(tui_app, '_update_log_view'):
-            # Execute
-            tui_app._suggest_similar_commands(unknown_cmd)
-            
-            # The method should complete without error
-            assert True
+    mock_process.assert_not_awaited()
+    assert tui_app.history_manager.history == []
+    assert input_widget.value == ""
 
-    def test_suggest_similar_commands_with_matches(self, tui_app):
-        """Test that similar commands are suggested when matches are found."""
-        # Setup
-        unknown_cmd = "hlp"
-        tui_app._available_commands = [("/help", "Show help"), ("/history", "Show history")]
-        
-        # Mock the update_log_view method
-        with patch.object(tui_app, '_update_log_view'):
-            # Execute
-            tui_app._suggest_similar_commands(unknown_cmd)
-            
-            # The method should complete without error
-            assert True
+
+@pytest.mark.asyncio
+async def test_process_user_input_dispatches_command(tui_app):
+    """斜杠开头的输入走命令处理分支"""
+    with (
+        patch.object(tui_app, "_handle_command_input", new=AsyncMock()) as mock_cmd,
+        patch.object(tui_app, "_handle_chat_input", new=AsyncMock()) as mock_chat,
+    ):
+        await tui_app._process_user_input("/help")
+
+    mock_cmd.assert_awaited_once_with("/help")
+    mock_chat.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_process_user_input_dispatches_chat(tui_app):
+    """普通文本走聊天处理分支"""
+    with (
+        patch.object(tui_app, "_handle_command_input", new=AsyncMock()) as mock_cmd,
+        patch.object(tui_app, "_handle_chat_input", new=AsyncMock()) as mock_chat,
+    ):
+        await tui_app._process_user_input("你好")
+
+    mock_chat.assert_awaited_once_with("你好")
+    mock_cmd.assert_not_awaited()
+
+
+def test_get_command_suggestions_empty(tui_app):
+    """空输入不产生补全建议"""
+    assert tui_app.get_command_suggestions([]) == []
+
+
+def test_get_command_suggestions_main_prefix(tui_app):
+    """主命令前缀匹配（返回带斜杠的完整命令）"""
+    suggestions = tui_app.get_command_suggestions(["/comp"])
+    assert "/compact" in suggestions
+
+
+def test_get_command_suggestions_subcommand(tui_app):
+    """子命令渐进式补全"""
+    suggestions = tui_app.get_command_suggestions(["/debate", ""])
+    assert "/debate start" in suggestions
+    assert "/debate history" in suggestions
+    assert "/debate search" in suggestions
+
+
+def test_suggest_similar_commands_with_match(tui_app):
+    """近似命令给出建议"""
+    tui_app._suggest_similar_commands("hlp")
+    calls = "".join(tui_app._log_text_buffer)
+    assert "> Unknown command: /hlp" in calls
+    assert "Did you mean:" in calls
+    assert "   /help" in calls
+
+
+def test_suggest_similar_commands_no_match(tui_app):
+    """无近似命令时提示查看帮助"""
+    tui_app._suggest_similar_commands("zzzz")
+    calls = "".join(tui_app._log_text_buffer)
+    assert "> Unknown command: /zzzz" in calls
+    assert "Type /help to see available commands" in calls

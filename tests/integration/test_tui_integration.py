@@ -14,7 +14,7 @@ class TestTUIIntegration:
     @pytest.fixture
     def tui_app(self):
         """Create a TUI app instance for testing."""
-        with patch('src.daip_live.tui.Container'):
+        with patch('daip_live.container.Container'):
             app = DAIP_TUI()
             return app
 

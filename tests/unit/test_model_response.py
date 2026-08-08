@@ -1,134 +1,79 @@
-"""
-Unit tests for model response functionality to verify models are working correctly.
-"""
+"""模型响应单元测试 - 对齐 LiteLLMProvider / EnhancedDebateManager 真实 API"""
+
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
-import asyncio
-from src.daip_live.tui import DAIP_TUI
-from daip_live.core.models import (
-    DebateStartEvent, DebateRoundStartEvent, DebateTurnStartEvent, 
-    DebateTurnCompleteEvent, DebateCompleteEvent
-)
-from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
+
+from daip_live.core.exceptions import ModelError
 from daip_live.model_provider.provider import LiteLLMProvider
+from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
 
 
-class TestModelResponse:
-    """Test cases for model response functionality."""
+def _build_manager() -> EnhancedDebateManager:
+    return EnhancedDebateManager(
+        session_manager=Mock(),
+        role_manager=Mock(),
+        role_model_manager=Mock(),
+        model_provider=Mock(),
+        use_optimized_architecture=False,
+    )
 
-    @pytest.fixture
-    def tui_app(self):
-        """Create a TUI app instance for testing."""
-        with patch('src.daip_live.tui.Container'):
-            app = DAIP_TUI()
-            return app
 
-    @pytest.mark.asyncio
-    async def test_model_can_generate_response(self):
-        """Test that the model can generate a response."""
-        # Setup
-        provider = LiteLLMProvider(config={})
-        
-        # Test with a simple prompt
-        prompt = "What is 2+2?"
-        
-        try:
-            # Execute
-            response_content, token_info = await provider.generate(prompt)
-            
-            # Assert that we got a response
-            assert response_content is not None
-            assert isinstance(response_content, str)
-            assert len(response_content) > 0
-            
-            # Assert that we got token information
-            assert token_info is not None
-            
-            print(f"Model response: {response_content}")
-            print(f"Token info: {token_info}")
-            
-        except Exception as e:
-            # If there's an error, it might be because the model is not accessible
-            print(f"Model error: {e}")
-            # This is expected in test environment, so we'll pass
-            assert True
+@pytest.mark.asyncio
+async def test_litellm_provider_generate_contract():
+    """generate 是 async 且返回 (content, usage) 二元组"""
+    provider = LiteLLMProvider(config=Mock())
+    with patch.object(
+        LiteLLMProvider, "generate", new=AsyncMock(return_value=("ok", {"total_tokens": 5}))
+    ) as mock_generate:
+        content, usage = await provider.generate("prompt", params={"model": "gpt-4"})
 
-    def test_tui_can_handle_model_response_events(self, tui_app):
-        """Test that TUI can handle model response events correctly."""
-        # Setup a complete debate turn event with model response
-        event = DebateTurnCompleteEvent(
-            participant="test_model",
-            round_number=1,
-            content_preview="The answer to 2+2 is 4.",
-            session_id="test_session"
+    assert content == "ok"
+    assert usage == {"total_tokens": 5}
+    mock_generate.assert_awaited_once_with("prompt", params={"model": "gpt-4"})
+
+
+@pytest.mark.asyncio
+async def test_generate_response_with_model_uses_role_provider():
+    """legacy 方法通过角色模型配置的 provider 生成回复"""
+    manager = _build_manager()
+    mock_provider = Mock()
+    mock_provider.generate = AsyncMock(return_value=("Test response", {"total_tokens": 10}))
+    with patch.object(manager, "_get_model_provider_for_config", return_value=mock_provider) as mock_get:
+        response_content, token_info = await manager._generate_response_with_model(
+            topic="Should AI be regulated?",
+            role=Mock(persona="你是一个乐观主义者"),
+            role_mapping=Mock(model_config=Mock(
+                model_name="gpt-4", temperature=0.7, max_tokens=512,
+                top_p=0.9, frequency_penalty=0.0, presence_penalty=0.0,
+            )),
+            history=[],
         )
-        
-        # Initialize debate tracking
-        tui_app._current_debate.update({
-            'is_active': True,
-            'participant_colors': {'test_model': 'blue'}
-        })
-        
-        # Mock the log view update method
-        with patch.object(tui_app, '_update_log_view') as mock_update_log:
-            # Execute
-            tui_app._post_event(event)
-            
-            # Assert that output was displayed
-            mock_update_log.assert_called()
-            
-            # Check that the call contains the model response
-            call_args = mock_update_log.call_args_list
-            assert any("The answer to 2+2 is 4." in str(call) for call in call_args)
-            assert any("test_model finished" in str(call) for call in call_args)
 
-    @pytest.mark.asyncio
-    async def test_debate_manager_can_generate_turn_response(self):
-        """Test that debate manager can generate turn responses."""
-        # Setup
-        with patch('src.daip_live.p8_debate_system.enhanced_debate_manager.RoleManager') as mock_role_manager, \
-             patch('src.daip_live.p8_debate_system.enhanced_debate_manager.SessionManager') as mock_session_manager, \
-             patch('src.daip_live.p8_debate_system.enhanced_debate_manager.LiteLLMProvider') as mock_model_provider:
-            
-            # Mock role manager
-            mock_role = Mock()
-            mock_role.name = "test_role"
-            mock_role.persona = "You are a helpful assistant."
-            mock_role_manager.get_role_by_name.return_value = mock_role
-            
-            # Mock session manager
-            mock_session = Mock()
-            mock_session.history = []
-            mock_session_manager.create_session.return_value = mock_session
-            
-            # Mock model provider
-            mock_model_provider_instance = Mock()
-            mock_model_provider_instance.generate = AsyncMock(return_value=("Test response", {"total_tokens": 10}))
-            mock_model_provider.return_value = mock_model_provider_instance
-            
-            # Create debate manager
-            debate_manager = EnhancedDebateManager(
-                session_manager=mock_session_manager,
-                role_manager=mock_role_manager,
-                role_model_manager=Mock(),
-                model_provider=mock_model_provider_instance
+    assert response_content == "Test response"
+    assert token_info == {"total_tokens": 10}
+    mock_get.assert_called_once()
+    mock_provider.generate.assert_awaited_once()
+    call_kwargs = mock_provider.generate.await_args.kwargs
+    assert call_kwargs["model"] == "gpt-4"
+    assert call_kwargs["temperature"] == 0.7
+    assert "Should AI be regulated?" in mock_provider.generate.await_args.args[0]
+
+
+@pytest.mark.asyncio
+async def test_generate_response_with_model_propagates_model_error():
+    """模型错误沿调用链向上传播"""
+    manager = _build_manager()
+    mock_provider = Mock()
+    mock_provider.generate = AsyncMock(side_effect=ModelError("model error"))
+    with patch.object(manager, "_get_model_provider_for_config", return_value=mock_provider):
+        with pytest.raises(ModelError, match="model error"):
+            await manager._generate_response_with_model(
+                topic="t",
+                role=Mock(persona="p"),
+                role_mapping=Mock(model_config=Mock(
+                    model_name="gpt-4", temperature=0.7, max_tokens=512,
+                    top_p=0.9, frequency_penalty=0.0, presence_penalty=0.0,
+                )),
+                history=[],
             )
-            
-            # Execute - test that the method can be called without error
-            try:
-                result = await debate_manager._generate_response_with_model(
-                    topic="Test topic",
-                    role=mock_role,
-                    role_mapping=Mock(),
-                    history=[]
-                )
-                
-                # Assert
-                assert result is not None
-                mock_model_provider_instance.generate.assert_called()
-                
-            except Exception as e:
-                # This might fail due to missing dependencies in test environment
-                print(f"Debate manager test error: {e}")
-                # Still pass the test as we're verifying the method structure
-                assert True

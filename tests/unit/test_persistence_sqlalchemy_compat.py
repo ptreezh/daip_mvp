@@ -1,4 +1,4 @@
-"""SQLAlchemy 2.0 compatibility test for Phase 0-1."""
+"""SQLAlchemy 2.0 compatibility test for the real Session/DialogueTurn API."""
 import pytest
 from daip_live.persistence.database import DatabaseManager
 from daip_live.core.models import Session, AgentState
@@ -10,8 +10,9 @@ def test_session_save_with_pydantic_v2():
 
     session = Session(
         session_id="test-session-1",
-        user_id="test-user",
-        agent_type="chat",
+        session_type="chat",
+        goal="Test goal",
+        participant_ids=["user_human"],
         status=AgentState.IDLE,
         history=[]
     )
@@ -24,14 +25,17 @@ def test_session_save_with_pydantic_v2():
     assert loaded is not None
     assert loaded.session_id == "test-session-1"
     assert loaded.status == AgentState.IDLE
+    assert loaded.goal == "Test goal"
+    assert loaded.participant_ids == ["user_human"]
 
 
 def test_session_model_dump_compatibility():
     """Test Session.model_dump() works with Pydantic v2."""
     session = Session(
         session_id="test-session-2",
-        user_id="test-user",
-        agent_type="debate",
+        session_type="debate",
+        goal="AI future debate",
+        participant_ids=["role_pro_01", "role_con_02"],
         status=AgentState.RUNNING,
         history=[]
     )
@@ -40,26 +44,27 @@ def test_session_model_dump_compatibility():
     session_dict = session.model_dump()
     assert isinstance(session_dict, dict)
     assert session_dict["session_id"] == "test-session-2"
+    assert session_dict["session_type"] == "debate"
     assert session_dict["status"] == AgentState.RUNNING
+    assert session_dict["participant_ids"] == ["role_pro_01", "role_con_02"]
 
 
 def test_session_with_history():
     """Test session save/load with dialogue history."""
     from daip_live.core.models import DialogueTurn
-    from datetime import datetime
 
     db = DatabaseManager("sqlite:///:memory:")
 
     session = Session(
         session_id="test-session-3",
-        user_id="test-user",
-        agent_type="chat",
+        session_type="chat",
+        goal="Test goal",
+        participant_ids=["user_human"],
         status=AgentState.RUNNING,
         history=[
             DialogueTurn(
-                role="user",
-                content="Hello",
-                timestamp=datetime.now()
+                participant_id="user_human",
+                content="Hello"
             )
         ]
     )
@@ -69,5 +74,5 @@ def test_session_with_history():
     loaded = db.get_session("test-session-3")
     assert loaded is not None
     assert len(loaded.history) == 1
-    assert loaded.history[0].role == "user"
+    assert loaded.history[0].participant_id == "user_human"
     assert loaded.history[0].content == "Hello"

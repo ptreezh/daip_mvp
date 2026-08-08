@@ -95,97 +95,40 @@ class EnhancedDebateManager:
             session_id=f"debate_{int(asyncio.get_event_loop().time())}"
         )
 
-        # 临时绕过模型可用性检查（调试用）
-        log.info("Skipping model availability check for debugging...")
-        is_model_ok = True
-        check_message = "Model check skipped for debugging"
-        log.info(f"Model check result: {is_model_ok}, message: {check_message}")
+        # 执行真实模型可用性检查（Phase 1 Wave 0：移除调试绕过）
+        is_model_ok, check_message = await perform_model_check()
+        if not is_model_ok:
+            log.error(f"Model check failed: {check_message}")
+            raise ModelError(f"模型可用性检查未通过: {check_message}")
+        log.info(f"Model check passed: {check_message}")
 
         # 获取角色模型映射
         log.info("Getting role model mappings...")
         role_mappings = self.role_model_manager.get_debate_model_mappings(roles_names)
         log.info(f"Got role mappings: {role_mappings}")
 
-        # 验证角色映射存在性
+        # 验证角色映射存在性：缺失/不完整必须报错，绝不静默创建默认映射
         if not role_mappings or len(role_mappings) != len(roles_names):
-            log.error(f"Role mappings are invalid or incomplete. Expected {len(roles_names)}, got {len(role_mappings) if role_mappings else 0}.")
-            # Instead of raising an error, we'll create default mappings for missing roles
-            log.info("Creating default role mappings for missing roles...")
+            error_msg = (
+                f"Role mappings are invalid or incomplete. Expected {len(roles_names)}, "
+                f"got {len(role_mappings) if role_mappings else 0}."
+            )
+            log.error(error_msg)
+            raise ValueError(error_msg)
 
-        # 初始化valid_mappings early
+        # 校验并收集映射：任何 None/无效映射都必须报错，绝不静默创建默认映射
         valid_mappings = []
-        missing_indices = []
-
-        # 过滤掉None值并验证类型
         for i, mapping in enumerate(role_mappings or []):
+            role_name = roles_names[i] if i < len(roles_names) else f"role_{i}"
             if mapping is None:
-                # Create a default mapping for missing roles
-                from daip_live.p4_role_manager_tools.role_model_manager import RoleModelMapping, RoleModelConfig
-                default_config = RoleModelConfig(
-                    model_name="ollama/llama3:instruct",
-                    provider="ollama",
-                    max_tokens=2048,
-                    temperature=0.7,
-                    top_p=0.9,
-                    frequency_penalty=0.1,
-                    presence_penalty=0.2,
-                    is_primary=True
-                )
+                log.error(f"Missing role mapping for role: {role_name}")
+                raise ValueError(f"Missing role mapping for role: {role_name}")
+            if not hasattr(mapping, 'role_name') or not hasattr(mapping, 'role_model_config'):
+                log.error(f"Invalid mapping structure for role at index {i}: {role_name}")
+                raise ValueError(f"Invalid role mapping structure for role: {role_name}")
+            valid_mappings.append(mapping)
 
-                role_name = roles_names[i] if i < len(roles_names) else f"role_{i}"
-                default_mapping = RoleModelMapping(
-                    role_name=role_name,
-                    role_model_config=default_config
-                )
-                valid_mappings.append(default_mapping)
-                log.info(f"Created default mapping for role: {role_name}")
-            elif not hasattr(mapping, 'role_name') or not hasattr(mapping, 'role_model_config'):
-                log.warning(f"Invalid mapping structure for role at index {i}")
-                role_name = roles_names[i] if i < len(roles_names) else f"role_{i}"
-                # Create default mapping for invalid entry
-                from daip_live.p4_role_manager_tools.role_model_manager import RoleModelMapping, RoleModelConfig
-                default_config = RoleModelConfig(
-                    model_name="ollama/llama3:instruct",
-                    provider="ollama",
-                    max_tokens=2048,
-                    temperature=0.7,
-                    top_p=0.9,
-                    frequency_penalty=0.1,
-                    presence_penalty=0.2,
-                    is_primary=True
-                )
-
-                default_mapping = RoleModelMapping(
-                    role_name=roles_names[i] if i < len(roles_names) else f"role_{i}",
-                    role_model_config=default_config
-                )
-                valid_mappings.append(default_mapping)
-            else:
-                valid_mappings.append(mapping)
-
-        # If we have fewer valid mappings than required roles, create defaults for missing ones
-        if len(valid_mappings) < len(roles_names):
-            from daip_live.p4_role_manager_tools.role_model_manager import RoleModelMapping, RoleModelConfig
-            for i in range(len(valid_mappings), len(roles_names)):
-                default_config = RoleModelConfig(
-                    model_name="ollama/llama3:instruct",
-                    provider="ollama",
-                    max_tokens=2048,
-                    temperature=0.7,
-                    top_p=0.9,
-                    frequency_penalty=0.1,
-                    presence_penalty=0.2,
-                    is_primary=True
-                )
-
-                default_mapping = RoleModelMapping(
-                    role_name=roles_names[i],
-                    role_model_config=default_config
-                )
-                valid_mappings.append(default_mapping)
-                log.info(f"Created additional default mapping for role: {roles_names[i]}")
-
-        if not valid_mappings or len(valid_mappings) != len(roles_names):
+        if len(valid_mappings) != len(roles_names):
             log.error(f"Failed to create proper role mappings. Expected {len(roles_names)}, created {len(valid_mappings)}.")
             raise ValueError(f"Could not create proper role mappings for all requested roles.")
 

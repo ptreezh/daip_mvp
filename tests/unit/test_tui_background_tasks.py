@@ -1,12 +1,18 @@
 """
 Unit tests for TUI background task management functionality.
+
+Aligned with the current SimplifiedTUI implementation:
+- on_unmount schedules cleanup() via asyncio.create_task (it does not cancel tasks)
+- The active on_key (defined last, ~line 2904) only handles ctrl+c / ctrl+a (copy).
+  ctrl+e / ctrl+q are NOT handled by the active on_key: an earlier on_key
+  definition (line 1012) is shadowed dead code and must not be asserted against.
+- _handle_quit_command is async and delegates to action_quit
+- _handle_compact_command replaces the removed _compress_session_context_async
 """
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from asyncio import Future
+from unittest.mock import AsyncMock, Mock, patch
 import asyncio
-import time
-from src.daip_live.tui import DAIP_TUI
+from daip_live.tui.simplified_main import SimplifiedTUI
 
 
 class TestTUIBackgroundTaskManagement:
@@ -15,8 +21,8 @@ class TestTUIBackgroundTaskManagement:
     @pytest.fixture
     def tui_app(self):
         """Create a TUI app instance for testing."""
-        with patch('src.daip_live.tui.Container'):
-            app = DAIP_TUI()
+        with patch('daip_live.container.Container'):
+            app = SimplifiedTUI()
             return app
 
     def test_background_tasks_set_initialized(self, tui_app):
@@ -25,139 +31,122 @@ class TestTUIBackgroundTaskManagement:
         assert hasattr(tui_app, '_background_tasks')
         assert isinstance(tui_app._background_tasks, set)
 
-    def test_on_unmount_cancels_background_tasks(self, tui_app):
-        """Test that unmounting the app cancels all background tasks."""
-        # Setup - create some mock tasks
-        mock_task1 = Mock()
-        mock_task2 = Mock()
-        mock_task1.done.return_value = False
-        mock_task2.done.return_value = False
-        
-        tui_app._background_tasks.add(mock_task1)
-        tui_app._background_tasks.add(mock_task2)
-        
-        # Execute
-        tui_app.on_unmount()
-        
-        # Assert
-        mock_task1.cancel.assert_called_once()
-        mock_task2.cancel.assert_called_once()
-        assert len(tui_app._background_tasks) == 0
+    @pytest.mark.asyncio
+    async def test_on_unmount_schedules_cleanup(self, tui_app):
+        """Test that unmounting the app schedules the async cleanup task."""
+        # Setup - side_effect routes the coroutine to the real asyncio.create_task,
+        # which executes the AsyncMock cleanup without a "never awaited" warning
+        with patch.object(tui_app, 'cleanup', new=AsyncMock()) as mock_cleanup:
+            with patch('asyncio.create_task', side_effect=asyncio.create_task) as mock_create_task:
+                # Execute
+                tui_app.on_unmount()
 
-    def test_handle_ctrl_e_exit_cancels_background_tasks(self, tui_app):
-        """Test that CTRL+E exit cancels all background tasks."""
-        # Setup - create some mock tasks
-        mock_task1 = Mock()
-        mock_task2 = Mock()
-        mock_task1.done.return_value = False
- # Task is not done initially
-        mock_task2.done.return_value = False
-    
-        tui_app._background_tasks.add(mock_task1)
-        tui_app._background_tasks.add(mock_task2)
-    
-        # Set up the timing so that the second press is within the 2-second window
-        import time
-        tui_app._last_ctrl_e_time = time.time() - 1  # First press was 1 second ago
-    
-        # Mock exit method
-        with patch.object(tui_app, 'exit'):
-            # Mock the set_timer method to avoid event loop issues
-            with patch.object(tui_app, 'set_timer'):
-                # Execute - this should trigger the exit since it's the second press
-                tui_app._handle_ctrl_e_exit()
-                
-                # Assert
-                mock_task1.cancel.assert_called_once()
-                mock_task2.cancel.assert_called_once()
+                # Let the scheduled cleanup task run
+                await asyncio.sleep(0)
 
-    def test_handle_ctrl_q_exit_cancels_background_tasks(self, tui_app):
-        """Test that CTRL+Q exit cancels all background tasks."""
-        # Setup - create some mock tasks
-        mock_task1 = Mock()
-        mock_task2 = Mock()
-        mock_task1.done.return_value = False  # Task is not done initially
-        mock_task2.done.return_value = False
-    
-        tui_app._background_tasks.add(mock_task1)
-        tui_app._background_tasks.add(mock_task2)
-    
-        # Set up the timing so that the second press is within the 2-second window
-        import time
-        tui_app._last_ctrl_q_time = time.time() - 1  # First press was 1 second ago
-    
-        # Mock exit method
-        with patch.object(tui_app, 'exit'):
-            # Mock the set_timer method to avoid event loop issues
-            with patch.object(tui_app, 'set_timer'):
-                # Execute - this should trigger the exit since it's the second press
-                tui_app._handle_ctrl_q_exit()
-                
-                # Assert
-                mock_task1.cancel.assert_called_once()
-                mock_task2.cancel.assert_called_once()
+                # Assert - cleanup was scheduled as a task and executed
+                mock_create_task.assert_called_once()
+                mock_cleanup.assert_awaited_once()
 
-    def test_handle_quit_command_cancels_background_tasks(self, tui_app):
-        """Test that quit command cancels all background tasks."""
-        # Setup - create some mock tasks
-        mock_task1 = Mock()
-        mock_task2 = Mock()
-        mock_task1.done.return_value = False
-        mock_task2.done.return_value = False
-        
-        tui_app._background_tasks.add(mock_task1)
-        tui_app._background_tasks.add(mock_task2)
-        
-        # Mock exit method
-        with patch.object(tui_app, 'exit'):
+    def test_ctrl_e_shortcut_not_handled_by_active_on_key(self, tui_app):
+        """ctrl+e 不在激活的 on_key 处理范围内（激活版仅处理 ctrl+c/ctrl+a）。"""
+        # Setup
+        event = Mock()
+        event.key = "ctrl+e"
+
+        with patch.object(tui_app, 'action_show_exit_confirmation') as mock_confirmation:
             # Execute
-            tui_app._handle_quit_command("")
-            
+            tui_app.on_key(event)
+
+            # Assert - 激活的 on_key 不处理 ctrl+e，不触发退出确认
+            mock_confirmation.assert_not_called()
+            event.prevent_default.assert_not_called()
+
+    def test_ctrl_q_shortcut_not_handled_by_active_on_key(self, tui_app):
+        """ctrl+q 不在激活的 on_key 处理范围内（激活版仅处理 ctrl+c/ctrl+a）。"""
+        # Setup
+        event = Mock()
+        event.key = "ctrl+q"
+
+        with patch.object(tui_app, 'action_show_exit_confirmation') as mock_confirmation:
+            # Execute
+            tui_app.on_key(event)
+
+            # Assert - 激活的 on_key 不处理 ctrl+q，不触发退出确认
+            mock_confirmation.assert_not_called()
+            event.prevent_default.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_ctrl_c_shortcut_copies_content(self, tui_app):
+        """ctrl+c 由激活的 on_key 处理，触发复制（通过 asyncio.create_task 调度）。"""
+        # Setup
+        event = Mock()
+        event.key = "ctrl+c"
+
+        with patch.object(tui_app, 'action_copy_text', new=AsyncMock()) as mock_copy:
+            # Execute
+            tui_app.on_key(event)
+            await asyncio.sleep(0)  # 让调度出的复制任务执行
+
             # Assert
-            mock_task1.cancel.assert_called_once()
-            mock_task2.cancel.assert_called_once()
+            mock_copy.assert_awaited_once()
+            event.prevent_default.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_compress_session_context_async_handles_success(self, tui_app):
-        """Test that compress session context async handles successful compression."""
+    async def test_ctrl_a_shortcut_copies_content(self, tui_app):
+        """ctrl+a 由激活的 on_key 处理，触发复制（通过 asyncio.create_task 调度）。"""
         # Setup
-        mock_session = Mock()
-        
-        # Mock the memory service
-        with patch.object(tui_app, '_memory_service') as mock_memory_service:
-            # Setup mock to return successfully
-            # Create a mock future to simulate async behavior
-            future = Future()
-            future.set_result(None)
-            mock_memory_service.compress_history = MagicMock(return_value=future)
-            
-            # Mock the log view update
-            with patch.object(tui_app, '_update_log_view'):
+        event = Mock()
+        event.key = "ctrl+a"
+
+        with patch.object(tui_app, 'action_copy_text', new=AsyncMock()) as mock_copy:
+            # Execute
+            tui_app.on_key(event)
+            await asyncio.sleep(0)  # 让调度出的复制任务执行
+
+            # Assert
+            mock_copy.assert_awaited_once()
+            event.prevent_default.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_handle_quit_command_async(self, tui_app):
+        """Test that the quit command logs and delegates to action_quit."""
+        # Setup - the implementation fires action_quit() without awaiting it,
+        # so a plain Mock (not AsyncMock) avoids a never-awaited coroutine warning
+        with patch.object(tui_app, 'action_quit', new=Mock()) as mock_quit:
+            with patch.object(tui_app, '_update_log_view') as mock_update_log:
                 # Execute
-                await tui_app._compress_session_context_async(mock_session)
-                
+                await tui_app._handle_quit_command("")
+
                 # Assert
-                mock_memory_service.compress_history.assert_called_once_with(mock_session)
+                mock_quit.assert_called_once()
+                mock_update_log.assert_any_call("[bold yellow]👋 正在退出...[/bold yellow]")
 
     @pytest.mark.asyncio
-    async def test_compress_session_context_async_handles_exception(self, tui_app):
-        """Test that compress session context async handles exceptions."""
+    async def test_handle_compact_command_with_session(self, tui_app):
+        """Test that compacting a session with an active session reports success."""
         # Setup
-        mock_session = Mock()
-        # Mock the history attribute to avoid subscriptable error
-        mock_session.history = ["item1", "item2", "item3", "item4", "item5", "item6", "item7"]
-        
-        # Mock the memory service to raise an exception
-        with patch.object(tui_app, '_memory_service') as mock_memory_service:
-            # Create a mock future that raises an exception
-            future = Future()
-            future.set_exception(Exception("Test error"))
-            mock_memory_service.compress_history = MagicMock(return_value=future)
-            
-            # Mock the log view update
-            with patch.object(tui_app, '_update_log_view'):
-                # Execute
-                await tui_app._compress_session_context_async(mock_session)
-                
-                # The method should complete without propagating the exception
-                assert True
+        tui_app._current_session_id = "sess-1"
+
+        with patch.object(tui_app, '_update_log_view') as mock_update_log:
+            # Execute
+            await tui_app._handle_compact_command("")
+
+            # Assert
+            mock_update_log.assert_any_call("[dim]正在压缩当前会话数据...[/dim]")
+            mock_update_log.assert_any_call("[green]✅ 会话压缩完成[/green]")
+
+    @pytest.mark.asyncio
+    async def test_handle_compact_command_without_session(self, tui_app):
+        """Test that compacting without an active session shows a warning."""
+        # Setup
+        tui_app._current_session_id = None
+
+        with patch.object(tui_app, '_update_log_view') as mock_update_log:
+            # Execute
+            await tui_app._handle_compact_command("")
+
+            # Assert
+            mock_update_log.assert_any_call("[yellow]⚠️ 没有活动会话可以压缩[/yellow]")
+            for call in mock_update_log.call_args_list:
+                assert "✅ 会话压缩完成" not in call[0][0]

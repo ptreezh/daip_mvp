@@ -166,6 +166,9 @@ debug.log
 test_output.log
 *.test.log
 
+# Data backups (db + knowledge snapshots)
+backups/
+
 # Temporary code and backups
 src/daip_live/tui.py.bak
 

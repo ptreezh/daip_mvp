@@ -1,300 +1,303 @@
 #!/usr/bin/env python3
 """
-TDD RED阶段测试 - 多模型Wiki协作功能
-目标：证明当前多模型协作功能存在的问题，为修复提供目标
+TDD RED阶段测试（重写）- 多模型Wiki协作
+
+按真实生产契约对齐（与 green 同源，覆盖不同角度）：
+- 不再用 Mock 臆想接口（旧版 MultiRoleWikiCollaborator + Mock 走
+  EnhancedDebateManager 真实校验，生产代码对 Mock 返回值 len() 抛
+  TypeError —— 断言的是假象而非契约）
+- 重定 3 个 RED 断言：
+  1. 多角色协作使用不同模型 -> 真实 RoleModelManager + YAML 的角色->模型映射差异
+     （get_role_model_mapping / get_debate_model_mappings 契约）
+  2. EnhancedWikiManager 协作方法 -> 真实依赖组装（真实 RoleModelManager +
+     真实 LiteLLMProvider 实例，仅替换实例 generate 为确定性 async 实现）
+  3. 内容合成质量 -> EnhancedWikiManager 高层路径的章节/贡献/协作标识断言
+- 新增：CollaborationProgress 时间戳契约、WikiManager 真实异常路径
+
+契约来源（实测于源码）：
+- RoleModelMapping.role_name / role_model_config（role_model_config.py:113-114）
+- get_debate_model_mappings 保持 1:1，未知角色返回 None 占位
+  （role_model_manager.py:87-93）
+- WikiManager: 非 Path 根 TypeError("wiki_root must be a Path object")；
+  create_page 重复非空 ValueError("...already exists and contains content...")；
+  空标题 ValueError("Title cannot be empty")；
+  update_page 不存在 ValueError("Page with title '...' not found")
+- EnhancedWikiManager 硬性校验 isinstance(LiteLLMProvider)
+  /isinstance(RoleModelManager)，依赖齐备时组装 SimpleCollaborationEngine
+  （collaborative_wiki.py:221-260）
 """
+import asyncio
+import textwrap
+from datetime import datetime
+from unittest.mock import Mock
 
 import pytest
-import asyncio
-from unittest.mock import Mock, AsyncMock, MagicMock, patch
-from pathlib import Path
-import tempfile
-import shutil
-import sys
-import os
 
-# 添加项目路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from daip_live.core.models import ProviderConfig
+from daip_live.model_provider.provider import LiteLLMProvider
+from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
+from daip_live.wiki.collaborative_wiki import EnhancedWikiManager
+from daip_live.wiki.manager import WikiManager
+from daip_live.wiki.simple_collaboration_engine import CollaborationProgress
 
-class TestMultiModelWikiCollaborationRED:
-    """RED阶段：测试多模型协作功能的缺失和问题"""
+ROLE_YAML = textwrap.dedent(
+    """\
+    persona: 领域专家
+    tools: []
+    model_configs:
+      - model_name: ollama/llama3:instruct
+        provider: ollama
+        max_tokens: 1024
+        temperature: 0.7
+        top_p: 0.9
+        frequency_penalty: 0.0
+        presence_penalty: 0.0
+        is_primary: true
+    """
+)
 
-    @pytest.fixture
-    def temp_wiki_dir(self):
-        """创建临时wiki目录"""
-        temp_dir = tempfile.mkdtemp()
-        yield Path(temp_dir)
-        shutil.rmtree(temp_dir)
+FAKE_RESPONSE = "这是EnhancedWikiManager协作路径的确定性响应内容。"
 
-    @pytest.fixture
-    def mock_dependencies(self):
-        """创建所有必需的依赖项的模拟对象"""
-        # 模拟SessionManager
-        mock_session_manager = Mock()
-        mock_session_manager.create_session.return_value = Mock()
-        mock_session_manager.get_session.return_value = Mock()
-        mock_session_manager.get_session_id.return_value = "test_session_123"
 
-        # 模拟RoleManager
-        mock_role_manager = Mock()
-        mock_role_manager.list_roles.return_value = [
-            Mock(name="domain_expert", description="领域专家"),
-            Mock(name="researcher", description="研究员"),
-            Mock(name="editor", description="编辑"),
-            Mock(name="critic", description="批评家")
+async def fake_provider_generate(
+    prompt, model=None, temperature=None, max_tokens=None, **kwargs
+):
+    """EnhancedWikiManager 边界模拟：真实 LiteLLMProvider 实例的方法替换。
+
+    无 self 参数的普通 async 函数，赋给实例属性后
+    `instance.generate(prompt, model=...)` 直接命中，无需联网。
+    """
+    return FAKE_RESPONSE, {"usage": {"total_tokens": len(FAKE_RESPONSE)}}
+
+
+@pytest.fixture
+def roles_dir(tmp_path):
+    """真实 RoleModelManager 使用的角色 YAML 目录"""
+    dir_path = tmp_path / "roles"
+    dir_path.mkdir()
+    (dir_path / "domain_expert.yaml").write_text(ROLE_YAML, encoding="utf-8")
+    (dir_path / "researcher.yaml").write_text(
+        ROLE_YAML
+        .replace("llama3:instruct", "mistral:latest")
+        .replace("领域专家", "研究员"),
+        encoding="utf-8",
+    )
+    (dir_path / "editor.yaml").write_text(
+        ROLE_YAML
+        .replace("llama3:instruct", "gemma:latest")
+        .replace("领域专家", "编辑"),
+        encoding="utf-8",
+    )
+    return dir_path
+
+
+@pytest.fixture
+def real_role_model_manager(roles_dir):
+    """真实 RoleModelManager，从临时 YAML 加载 3 个角色"""
+    return RoleModelManager(roles_dir_path=str(roles_dir))
+
+
+class TestRoleModelMappingContract:
+    """RED 重定 #1：不同角色映射到不同模型 + debate 映射 1:1 契约"""
+
+    def test_different_roles_map_to_different_models(self, real_role_model_manager):
+        roles = ["domain_expert", "researcher", "editor"]
+        mappings = [
+            real_role_model_manager.get_role_model_mapping(role) for role in roles
         ]
-
-        # 模拟RoleModelManager
-        mock_role_model_manager = Mock()
-
-        # 为不同角色配置不同模型
-        def mock_get_role_model_mapping(role_name, use_debate_config=False):
-            if role_name == "domain_expert":
-                mock_config = Mock()
-                mock_config.model_name = "ollama/llama3.1:70b"
-                mock_config.temperature = 0.7
-                mock_config.max_tokens = 1000
-                mock_mapping = Mock()
-                mock_mapping.role_model_config = mock_config
-                return mock_mapping
-            elif role_name == "researcher":
-                mock_config = Mock()
-                mock_config.model_name = "ollama/qwen2.5:32b"
-                mock_config.temperature = 0.5
-                mock_config.max_tokens = 1200
-                mock_mapping = Mock()
-                mock_mapping.role_model_config = mock_config
-                return mock_mapping
-            elif role_name == "editor":
-                mock_config = Mock()
-                mock_config.model_name = "claude-3-haiku-20240307"
-                mock_config.temperature = 0.3
-                mock_config.max_tokens = 800
-                mock_mapping = Mock()
-                mock_mapping.role_model_config = mock_config
-                return mock_mapping
-            elif role_name == "critic":
-                mock_config = Mock()
-                mock_config.model_name = "gpt-4o-mini"
-                mock_config.temperature = 0.8
-                mock_config.max_tokens = 600
-                mock_mapping = Mock()
-                mock_mapping.role_model_config = mock_config
-                return mock_mapping
-            return None
-
-        mock_role_model_manager.get_role_model_mapping.side_effect = mock_get_role_model_mapping
-
-        # 模拟LiteLLMProvider
-        mock_model_provider = Mock()
-        mock_model_provider.generate = AsyncMock()
-
-        # 为不同模型返回不同的生成内容
-        def mock_generate(prompt, model=None, temperature=0.7, max_tokens=1000):
-            if "domain_expert" in prompt:
-                return ("作为领域专家，我认为人工智能的核心技术包括机器学习、深度学习、神经网络等。这些技术在图像识别、自然语言处理等领域取得了突破性进展。", {})
-            elif "researcher" in prompt:
-                return ("根据最新研究，斯坦福大学2024年AI指数报告显示，全球AI投资同比增长35%。Nature期刊发表的论文表明，大型语言模型的参数规模每6个月翻一番。", {})
-            elif "editor" in prompt:
-                return ("人工智能概述\n\n人工智能是计算机科学的一个分支，致力于创建能够执行通常需要人类智能的任务的系统。", {})
-            elif "critic" in prompt:
-                return ("当前AI技术仍存在局限性：数据偏见、能耗问题、可解释性不足、以及对就业市场的潜在冲击需要认真对待。", {})
-            else:
-                return ("通用AI内容生成", {})
-
-        mock_model_provider.generate.side_effect = mock_generate
-
-        return {
-            'session_manager': mock_session_manager,
-            'role_manager': mock_role_manager,
-            'role_model_manager': mock_role_model_manager,
-            'model_provider': mock_model_provider
+        assert all(mapping is not None for mapping in mappings)
+        models = {mapping.role_model_config.model_name for mapping in mappings}
+        assert len(models) == 3
+        assert models == {
+            "ollama/llama3:instruct",
+            "ollama/mistral:latest",
+            "ollama/gemma:latest",
         }
 
-    @pytest.mark.asyncio
-    async def test_multi_model_collaboration_uses_different_models(self, temp_wiki_dir, mock_dependencies):
-        """RED测试：验证多模型协作是否真的使用不同模型"""
-        from src.daip_live.wiki.collaborative_wiki import MultiRoleWikiCollaborator
-        from src.daip_live.wiki.manager import WikiManager
+    def test_get_debate_model_mappings_keeps_1to1_with_none_for_unknown(
+        self, real_role_model_manager
+    ):
+        roles = ["domain_expert", "ghost_role", "editor"]
+        mappings = real_role_model_manager.get_debate_model_mappings(roles)
+        # 1:1 对应请求角色（含 None 占位，EnhancedDebateManager 校验会拒绝不完整映射）
+        assert len(mappings) == len(roles)
+        assert mappings[0] is not None
+        assert mappings[0].role_name == "domain_expert"
+        assert mappings[0].role_model_config.model_name == "ollama/llama3:instruct"
+        assert mappings[1] is None
+        assert mappings[2] is not None
+        assert mappings[2].role_model_config.model_name == "ollama/gemma:latest"
 
-        # 创建基础组件
-        wiki_manager = WikiManager(temp_wiki_dir)
 
-        # 创建协作器
-        collaborator = MultiRoleWikiCollaborator(
-            session_manager=mock_dependencies['session_manager'],
-            role_manager=mock_dependencies['role_manager'],
-            role_model_manager=mock_dependencies['role_model_manager'],
-            model_provider=mock_dependencies['model_provider'],
-            wiki_manager=wiki_manager
+class TestEnhancedWikiManagerCollaboration:
+    """RED 重定 #2/#3：EnhancedWikiManager 真实依赖组装 + 协作方法与合成质量"""
+
+    def make_enhanced_wiki(self, tmp_path, real_role_model_manager):
+        provider = LiteLLMProvider(config=ProviderConfig(model="test-model"))
+        provider.generate = fake_provider_generate
+        return EnhancedWikiManager(
+            wiki_root=tmp_path / "wiki",
+            role_model_manager=real_role_model_manager,
+            model_provider=provider,
         )
 
-        # 执行协作创建
-        wiki_page, content = await collaborator.create_collaborative_wiki(
-            title="人工智能测试",
-            initial_topic="人工智能的发展现状和未来趋势",
-            roles=["domain_expert", "researcher", "editor", "critic"],
-            rounds=1
+    def test_enhanced_wiki_manager_collaboration_method(
+        self, tmp_path, real_role_model_manager
+    ):
+        enhanced = self.make_enhanced_wiki(tmp_path, real_role_model_manager)
+        # 真实依赖齐备 -> 组装简化协作引擎；未提供 session/role manager -> 无原协作器
+        assert enhanced.simple_collaboration_engine is not None
+        assert enhanced.collaborator is None
+
+        wiki_page = asyncio.run(
+            enhanced.create_collaborative_wiki(
+                title="机器学习测试",
+                topic="机器学习算法原理与应用",
+                roles=["domain_expert", "researcher"],
+                rounds=1,
+                show_progress=False,
+            )
         )
 
-        # RED阶段验证：这里应该失败，因为我们需要证明当前实现存在问题
-        # 检查是否真的为不同角色使用了不同模型
-        calls = mock_dependencies['model_provider'].generate.call_args_list
-        models_used = []
-
-        for call in calls:
-            kwargs = call.kwargs
-            if 'model' in kwargs:
-                models_used.append(kwargs['model'])
-
-        print(f"调用的模型列表: {models_used}")
-
-        # 验证是否使用了不同的模型
-        unique_models = set(models_used)
-
-        # RED阶段：我们期望这个断言失败，证明当前实现没有使用不同模型
-        # 但如果已经实现，这个断言应该通过
-        assert len(unique_models) > 1, f"应该使用多个不同模型，但只使用了: {unique_models}"
-
-        # 验证内容包含不同角色的贡献
-        assert "领域专家" in content or "domain_expert" in content
-        assert "研究" in content or "researcher" in content
-        assert "编辑" in content or "editor" in content
-        assert "批评" in content or "critic" in content
-
-    @pytest.mark.asyncio
-    async def test_enhanced_wiki_manager_collaboration_method(self, temp_wiki_dir, mock_dependencies):
-        """RED测试：验证EnhancedWikiManager的协作方法"""
-        from src.daip_live.wiki.collaborative_wiki import EnhancedWikiManager
-
-        # 创建增强wiki管理器
-        enhanced_wiki = EnhancedWikiManager(
-            wiki_root=temp_wiki_dir,
-            role_model_manager=mock_dependencies['role_model_manager'],
-            model_provider=mock_dependencies['model_provider'],
-            session_manager=mock_dependencies['session_manager'],
-            role_manager=mock_dependencies['role_manager']
-        )
-
-        # 验证协作创建方法存在且可调用
-        assert hasattr(enhanced_wiki, 'create_collaborative_wiki')
-        assert callable(getattr(enhanced_wiki, 'create_collaborative_wiki'))
-
-        # 执行协作创建
-        wiki_page = await enhanced_wiki.create_collaborative_wiki(
-            title="机器学习测试",
-            topic="机器学习算法原理与应用",
-            roles=["domain_expert", "researcher"],
-            rounds=2
-        )
-
-        # 验证返回的WikiPage对象
         assert wiki_page is not None
         assert wiki_page.title == "机器学习测试"
         assert len(wiki_page.content) > 0
-
-        # 验证文件被正确创建
         assert wiki_page.file_path.exists()
 
-        # 验证内容包含协作信息
-        file_content = wiki_page.file_path.read_text(encoding='utf-8')
+        file_content = wiki_page.file_path.read_text(encoding="utf-8")
         assert "协作" in file_content or "collaboration" in file_content.lower()
 
-    @pytest.mark.asyncio
-    async def test_role_intelligence_selector_integration(self, mock_dependencies):
-        """RED测试：验证角色智能选择器"""
-        from src.daip_live.wiki.collaborative_wiki import MultiRoleWikiCollaborator
+    def test_content_synthesis_quality(self, tmp_path, real_role_model_manager):
+        enhanced = self.make_enhanced_wiki(tmp_path, real_role_model_manager)
+        wiki_page = asyncio.run(
+            enhanced.create_collaborative_wiki(
+                title="区块链技术",
+                topic="区块链技术的原理和应用",
+                roles=["domain_expert", "researcher", "editor"],
+                rounds=1,
+                show_progress=False,
+            )
+        )
+        content = wiki_page.content
 
-        # 这个测试可能失败，因为角色智能选择器可能没有完全实现
-        try:
-            # 尝试导入角色智能选择器
-            from src.daip_live.intent_recognition.role_intelligence_selector import RoleIntelligenceSelector
+        content_structure_checks = [
+            ("标题", "# 区块链技术" in content),
+            ("章节划分", "## " in content),
+            ("角色贡献", content.count(FAKE_RESPONSE) >= 3),
+            ("结构化内容", len(content.strip()) > 100),
+            ("协作标识", "协作" in content or "collaboration" in content.lower()),
+        ]
+        for check_name, check_result in content_structure_checks:
+            assert check_result, f"内容质量检查失败: {check_name}"
 
-            # 创建选择器
-            selector = RoleIntelligenceSelector(mock_dependencies['role_manager'])
+        sections = content.split("##")
+        assert len(sections) >= 3, (
+            f"内容应该包含至少3个章节，但只有{len(sections)}个"
+        )
 
-            # 测试智能选择
-            roles = selector.analyze_topic_for_roles("量子计算在密码学中的应用", max_roles=4)
 
-            # 验证返回的角色列表
-            assert isinstance(roles, list)
-            assert len(roles) > 0
+class TestCollaborationProgressContract:
+    """CollaborationProgress 时间戳契约（generated_content/errors/to_dict）"""
 
-        except ImportError:
-            # 如果模块不存在，这是RED阶段期望的
-            pytest.fail("角色智能选择器模块未找到，需要实现")
-        except Exception as e:
-            # 其他异常也表明功能不完善
-            pytest.fail(f"角色智能选择器功能不完善: {e}")
+    def test_generated_content_entries_have_role_content_timestamp(self):
+        progress = CollaborationProgress(total_steps=2)
+        progress.update("domain_expert", "贡献内容", content="内容A")
+        progress.update("researcher", "贡献内容", content="内容B")
+
+        assert progress.current_step == 2
+        assert len(progress.generated_content) == 2
+        for entry in progress.generated_content:
+            assert set(entry.keys()) == {"role", "content", "timestamp"}
+            datetime.fromisoformat(entry["timestamp"])
+
+    def test_error_entries_have_error_and_timestamp(self):
+        progress = CollaborationProgress(total_steps=1)
+        progress.add_error("模型调用失败")
+
+        assert len(progress.errors) == 1
+        assert progress.errors[0]["error"] == "模型调用失败"
+        datetime.fromisoformat(progress.errors[0]["timestamp"])
+
+    def test_to_dict_includes_start_time_elapsed_and_percentage(self):
+        progress = CollaborationProgress(total_steps=4)
+        progress.update("editor", "贡献内容", content="内容")
+
+        data = progress.to_dict()
+        assert data["total_steps"] == 4
+        assert data["current_step"] == 1
+        assert data["progress_percentage"] == pytest.approx(25.0)
+        datetime.fromisoformat(data["start_time"])
+        assert data["elapsed_seconds"] >= 0
+        assert data["is_complete"] is False
+
+
+class TestWikiManagerExceptionPaths:
+    """WikiManager 真实异常路径（实测生产行为）"""
+
+    def test_rejects_non_path_root(self):
+        with pytest.raises(TypeError, match="wiki_root must be a Path object"):
+            WikiManager(wiki_root="not_a_path")
+
+    def test_create_page_duplicate_nonempty_raises(self, tmp_path):
+        wiki = WikiManager(wiki_root=tmp_path / "wiki")
+        content = (
+            "机器学习是人工智能的核心分支，研究如何让计算机从数据中学习规律。"
+            + "内容内容内容" * 20
+        )
+        wiki.create_page("机器学习", content)
+
+        with pytest.raises(ValueError, match="already exists and contains content"):
+            wiki.create_page("机器学习", "另一份非空内容。" + "填充" * 40)
+
+    def test_create_page_empty_title_raises(self, tmp_path):
+        wiki = WikiManager(wiki_root=tmp_path / "wiki")
+        with pytest.raises(ValueError, match="Title cannot be empty"):
+            wiki.create_page("", "")
+
+    def test_update_page_not_found_raises(self, tmp_path):
+        wiki = WikiManager(wiki_root=tmp_path / "wiki")
+        with pytest.raises(ValueError, match="not found"):
+            wiki.update_page("不存在的页面", "新内容")
+
+
+class TestIntegrationGuards:
+    """集成守卫：辩论管理器可达、依赖注入缺口显式报错、角色智能选择可用"""
 
     def test_debate_manager_integration_exists(self):
-        """RED测试：验证辩论管理器集成"""
-        try:
-            from src.daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
-            assert EnhancedDebateManager is not None
-        except ImportError:
-            pytest.fail("EnhancedDebateManager模块未找到")
+        from daip_live.p8_debate_system.enhanced_debate_manager import (
+            EnhancedDebateManager,
+        )
+        assert EnhancedDebateManager is not None
 
-    @pytest.mark.asyncio
-    async def test_dependency_injection_completeness(self, temp_wiki_dir):
-        """RED测试：验证依赖注入的完整性"""
-        from src.daip_live.wiki.collaborative_wiki import EnhancedWikiManager
-
-        # 测试缺少依赖时的行为
-        incomplete_wiki = EnhancedWikiManager(wiki_root=temp_wiki_dir)
-
-        # 验证缺少依赖时的错误处理
+    def test_dependency_injection_completeness(self, tmp_path):
+        incomplete_wiki = EnhancedWikiManager(wiki_root=tmp_path / "wiki")
         assert incomplete_wiki.collaborator is None
+        assert incomplete_wiki.simple_collaboration_engine is None
 
-        # 尝试创建协作wiki应该失败
         with pytest.raises(RuntimeError, match="Cannot create collaborative wiki"):
-            await incomplete_wiki.create_collaborative_wiki(
-                title="测试页面",
-                topic="测试主题"
+            asyncio.run(
+                incomplete_wiki.create_collaborative_wiki(
+                    title="测试页面", topic="测试主题"
+                )
             )
 
-    @pytest.mark.asyncio
-    async def test_content_synthesis_quality(self, temp_wiki_dir, mock_dependencies):
-        """RED测试：验证内容合成质量"""
-        from src.daip_live.wiki.collaborative_wiki import MultiRoleWikiCollaborator
-        from src.daip_live.wiki.manager import WikiManager
-
-        wiki_manager = WikiManager(temp_wiki_dir)
-        collaborator = MultiRoleWikiCollaborator(
-            session_manager=mock_dependencies['session_manager'],
-            role_manager=mock_dependencies['role_manager'],
-            role_model_manager=mock_dependencies['role_model_manager'],
-            model_provider=mock_dependencies['model_provider'],
-            wiki_manager=wiki_manager
+    def test_role_intelligence_selector_integration(self):
+        from daip_live.wiki.role_intelligence_selector import (
+            RoleIntelligenceSelector,
         )
-
-        # 创建协作内容
-        wiki_page, content = await collaborator.create_collaborative_wiki(
-            title="区块链技术",
-            initial_topic="区块链技术的原理和应用",
-            roles=["domain_expert", "researcher", "editor"],
-            rounds=1
-        )
-
-        # RED阶段：验证内容质量问题
-        content_structure_checks = [
-            ("标题", "# " in content or "##" in content),
-            ("章节划分", "##" in content),
-            ("角色贡献", any(role in content for role in ["领域专家", "研究员", "编辑"])),
-            ("结构化内容", len(content.strip()) > 100),
-            ("协作标识", "协作" in content or "collaboration" in content.lower())
+        mock_role_manager = Mock()
+        mock_role_manager.list_roles.return_value = [
+            Mock(name="domain_expert"),
+            Mock(name="researcher"),
+            Mock(name="editor"),
         ]
-
-        for check_name, check_result in content_structure_checks:
-            print(f"内容检查 - {check_name}: {'✅' if check_result else '❌'}")
-            if not check_result:
-                pytest.fail(f"内容质量检查失败: {check_name}")
-
-        # 验证内容的结构化程度
-        sections = content.split("##")
-        assert len(sections) >= 3, f"内容应该包含至少3个章节，但只有{len(sections)}个"
+        selector = RoleIntelligenceSelector(role_manager=mock_role_manager)
+        roles = selector.analyze_topic_for_roles(
+            "量子计算在密码学中的应用", max_roles=4
+        )
+        assert isinstance(roles, list)
+        assert len(roles) > 0
 
 
 if __name__ == "__main__":
-    # 直接运行此测试套件
     pytest.main([__file__, "-v", "-s"])

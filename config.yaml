@@ -4,8 +4,9 @@ debate:
   logs_directory: knowledge/debate/
 knowledge_base:
   directory: knowledge/
+  embedding_dimension: 768
 llm_provider:
-  default_model: ollama/llama3  # Using llama3 as default since it's more commonly available
+  default_model: ollama/llama3:latest
   embedding_model: ollama/nomic-embed-text
 mcp:
   markdownify:

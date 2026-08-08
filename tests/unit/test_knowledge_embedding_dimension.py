@@ -29,3 +29,23 @@ def test_embedding_dimension_default():
     config = KnowledgeBaseConfig(directory="test_knowledge")
     # Should have default dimension
     assert hasattr(config, 'embedding_dimension')
+
+
+def test_config_yaml_explicit_embedding_dimension():
+    """config.yaml 必须显式声明 embedding_dimension（Wave 0 显式化要求）。
+
+    对齐 src/daip_live/knowledge/manager.py:34 的读取路径；
+    默认值 768 已兜底，补键为显式化配置。
+    """
+    import yaml
+    from pathlib import Path
+
+    config_path = Path(__file__).resolve().parents[2] / "config.yaml"
+    assert config_path.exists(), f"config.yaml not found at {config_path}"
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+
+    kb = cfg.get("knowledge_base", {})
+    assert "embedding_dimension" in kb, "config.yaml knowledge_base 缺少 embedding_dimension 键"
+    assert kb["embedding_dimension"] == 768

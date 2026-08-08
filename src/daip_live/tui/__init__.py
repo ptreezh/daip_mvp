@@ -25,9 +25,19 @@ from .utils import (
     ConfigManager, ThemeManager, Logger
 )
 
+# Container 延迟导出（真实定义在 daip_live.container）
+# 恢复导出以兼容测试 mock 目标 `src.daip_live.tui.Container` 及外部引用
+try:
+    from ..container import Container
+except ImportError:
+    Container = None
+
 __all__ = [
     # 主要TUI类（来自上级目录）
     'DAIP_TUI',
+
+    # 依赖注入容器（真实定义在 daip_live.container）
+    'Container',
 
     # 自动补全
     'TUIAutocomplete',
