@@ -280,9 +280,9 @@ class ProjectReplicationGuide:
                         "数据流转正确",
                         "配置管理有效"
                     ],
-                    hints["使用依赖注入", "保持松耦合设计"],
-                    common_pitfalls["循环依赖", "接口设计不当", "配置管理混乱"],
-                    success_indicators["系统集成成功", "功能正常工作"]
+                    hints=["使用依赖注入", "保持松耦合设计"],
+                    common_pitfalls=["循环依赖", "接口设计不当", "配置管理混乱"],
+                    success_indicators=["系统集成成功", "功能正常工作"]
                 )
             ],
             dependencies=["phase2-core"],
