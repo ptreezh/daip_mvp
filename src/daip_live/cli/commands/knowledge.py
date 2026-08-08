@@ -253,7 +253,8 @@ def sync(
                     from daip_live.core.models import ProviderConfig
                     provider_config = ProviderConfig(
                         model="mock-embedding",
-                        provider="mock"
+                        provider="mock",
+                        embedding_model="mock-embedding"
                     )
                     model_provider = LiteLLMProvider(provider_config)
 

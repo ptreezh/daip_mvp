@@ -82,7 +82,7 @@ class LiteLLMProvider(IModelProvider):
 
     async def embed(self, text: str) -> List[float]:
         """Creates an embedding vector for the given text using litellm."""
-        config_model = getattr(self.config, 'embedding_model', 'text-embedding-ada-002')
+        config_model = getattr(self.config, 'embedding_model', None) or 'text-embedding-ada-002'
         config_api_key = getattr(self.config, 'api_key', None)
         config_base_url = getattr(self.config, 'base_url', None)
 

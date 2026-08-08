@@ -30,15 +30,14 @@ poetry shell
 poetry run daip run
 
 # Sync knowledge base manually
-poetry run daip sync
+poetry run daip knowledge sync
 
-# Manage sessions
+# Manage sessions (list/clear only; no show subcommand exists)
 poetry run daip session list
-poetry run daip session show <session_id>
 
 # Run debates
 poetry run daip debate start <topic>
-poetry run daip debate list
+poetry run daip debate history
 
 # Manage AI roles
 poetry run daip role list
@@ -47,10 +46,8 @@ poetry run daip role show <role_name>
 # Manage models
 poetry run daip model list
 poetry run daip model status
-
-# Project scaffolding
-poetry run daip project create <name>
 ```
+(Note: no `project` subcommand exists in the current CLI; scaffolding commands are not available.)
 
 ### Testing
 ```bash

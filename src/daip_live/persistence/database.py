@@ -5,6 +5,7 @@ from typing import List, Optional
 from sqlalchemy import create_engine, delete, insert, select
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.engine import Engine
+from sqlalchemy.pool import StaticPool
 
 from daip_live.core.models import AgentState, DialogueTurn, KnowledgeSource, Session
 from daip_live.persistence.tables import (
@@ -22,7 +23,13 @@ class DatabaseManager:
         if db_path is None:
             db_path = ":memory:"
         if db_path == ":memory:":
-            self.engine: Engine = create_engine("sqlite:///:memory:")
+            # StaticPool shares a single connection across threads so that
+            # asyncio.to_thread calls see the same in-memory database.
+            self.engine: Engine = create_engine(
+                "sqlite:///:memory:",
+                poolclass=StaticPool,
+                connect_args={"check_same_thread": False},
+            )
         elif db_path.startswith("sqlite:///"):
             self.engine: Engine = create_engine(db_path)
         else:
