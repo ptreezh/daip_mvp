@@ -24,13 +24,17 @@ knowledge_base:
   directory: "./test_knowledge"
 role_manager:
   roles_dir: "./test_roles"
+wiki:
+  pages_directory: "./test_wiki"
 """)
         config_path = f.name
     
     try:
         # Create container and verify all components can be resolved
         container = Container()
-        container.config.from_yaml(config_path)
+        # 源码权威: Container 无 config 属性，用 config_manager provider 覆盖
+        from daip_live.config import ConfigManager
+        container.config_manager.override(ConfigManager(config_path))
         
         # Test that all expected components can be created
         db_manager = container.db_manager()

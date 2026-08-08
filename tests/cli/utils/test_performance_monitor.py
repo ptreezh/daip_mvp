@@ -102,9 +102,11 @@ class TestPerformanceMonitorBasics:
         actual_duration = end_time - start_time
 
         # Verify duration is recorded
+        # Windows time.time() 粒度 ~15.6ms，全量负载下可能略短于 sleep 时长；
+        # 加 25ms 容差避免偶发失败（时钟粒度而非逻辑错误）
         assert 'duration' in metrics
-        assert metrics['duration'] >= delay
-        assert actual_duration >= delay
+        assert metrics['duration'] >= delay - 0.025
+        assert actual_duration >= delay - 0.025
 
     @pytest.mark.asyncio
     async def test_measure_command_with_exception(self):

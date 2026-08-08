@@ -474,7 +474,11 @@ class TestDocumentProcessors:
                 assert len(chunk.content) <= processor.chunk_size + processor.overlap
 
         finally:
-            os.unlink(temp_path)
+            # 后台处理线程可能仍持有文件句柄（负载下竞态），unlink 失败可忽略
+            try:
+                os.unlink(temp_path)
+            except (PermissionError, OSError):
+                pass
 
     @pytest.mark.asyncio
     async def test_pdf_processor(self):
@@ -584,7 +588,11 @@ class TestProductionWikiKnowledgeSystem:
                 assert status in [DocumentStatus.PENDING, DocumentStatus.PROCESSING, DocumentStatus.COMPLETED]
 
             finally:
-                os.unlink(temp_path)
+                # 后台处理线程可能仍持有文件句柄（负载下竞态），unlink 失败可忽略
+                try:
+                    os.unlink(temp_path)
+                except (PermissionError, OSError):
+                    pass
 
     @pytest.mark.asyncio
     async def test_search_functionality(self):
@@ -618,7 +626,11 @@ class TestProductionWikiKnowledgeSystem:
                 # Note: May be empty if processing hasn't completed
 
             finally:
-                os.unlink(temp_path)
+                # 后台处理线程可能仍持有文件句柄（负载下竞态），unlink 失败可忽略
+                try:
+                    os.unlink(temp_path)
+                except (PermissionError, OSError):
+                    pass
 
     @pytest.mark.asyncio
     async def test_different_search_types(self):
@@ -708,7 +720,11 @@ class TestProductionWikiKnowledgeSystem:
                 assert status is None
 
             finally:
-                os.unlink(temp_path)
+                # 后台处理线程可能仍持有文件句柄（负载下竞态），unlink 失败可忽略
+                try:
+                    os.unlink(temp_path)
+                except (PermissionError, OSError):
+                    pass
 
     def test_backup_system(self):
         """Test system backup functionality"""
@@ -853,7 +869,11 @@ class TestIntegrationScenarios:
                 assert metrics["chunks_count"] >= 1
 
             finally:
-                os.unlink(temp_path)
+                # 后台处理线程可能仍持有文件句柄（负载下竞态），unlink 失败可忽略
+                try:
+                    os.unlink(temp_path)
+                except (PermissionError, OSError):
+                    pass
 
     @pytest.mark.asyncio
     async def test_concurrent_document_processing(self):

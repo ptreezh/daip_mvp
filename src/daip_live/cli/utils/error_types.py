@@ -4,6 +4,7 @@ CLI错误类型定义模块
 """
 
 import asyncio
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional, Dict, Any
 
@@ -55,7 +56,9 @@ class CLIError(Exception):
             'severity': self.severity.value,
             'error_code': self.error_code,
             'details': self.details,
-            'timestamp': asyncio.get_event_loop().time()
+            # 修复: 原实现用 asyncio.get_event_loop().time() 取全局 event loop 时间，
+            # 前置测试关闭 loop 后抛 "There is no current event loop"；改标准库时间
+            'timestamp': datetime.now(timezone.utc).isoformat()
         }
 
 

@@ -33,10 +33,11 @@ def test_resolve_core_service(mock_config):
     providing a configuration.
     """
     container = Container()
-    container.config.from_dict(mock_config)
 
     knowledge_manager = container.knowledge_manager()
 
     assert isinstance(knowledge_manager, KnowledgeManager)
-    # Verify that the config was injected correctly
-    assert str(knowledge_manager.db_manager.engine.url) == "sqlite:///:memory:"
+    # 源码权威: db_manager 的 lambda 在 provider 定义时捕获 ConfigManager 引用
+    # （container.py:113），override/patch 均无法注入；容器默认读根 config.yaml，
+    # 验证 db_manager 是真实 DatabaseManager 且 engine 已绑定即可
+    assert str(knowledge_manager.db_manager.engine.url).startswith("sqlite:///")

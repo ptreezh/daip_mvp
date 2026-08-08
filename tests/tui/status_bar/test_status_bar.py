@@ -485,7 +485,10 @@ class TestSystemResourceWidget:
     @pytest.mark.asyncio
     async def test_resource_widget_no_psutil(self, resource_widget):
         """Test resource widget without psutil"""
-        with patch('daip_live.tui_v1.status_bar.resource_widget.psutil', None):
+        # 源码权威: 分支判断用模块级 PSUTIL_AVAILABLE（resource_widget.py:31），
+        # 仅 patch psutil 变量不够，须同时 patch 该常量
+        with patch('daip_live.tui_v1.status_bar.resource_widget.psutil', None), \
+             patch('daip_live.tui_v1.status_bar.resource_widget.PSUTIL_AVAILABLE', False):
             await resource_widget.refresh()
 
             content = resource_widget.get_content()
