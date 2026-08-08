@@ -39,12 +39,13 @@ class ModelAvailabilityChecker:
         try:
             provider = self._get_provider(model_name)
             # 尝试生成一个简单的响应来测试模型可用性
-            response, usage = await provider.generate(
+            # LiteLLMProvider.generate 是 async generator（模型名由 ProviderConfig 持有），
+            # 参数需放入 params dict；成功产出首个响应块即认为模型可用
+            async for chunk in provider.generate(
                 prompt=test_prompt,
-                model=model_name,
-                temperature=0.1,
-                max_tokens=20
-            )
+                params={"temperature": 0.1, "max_tokens": 20}
+            ):
+                break
             return True, ""
         except Exception as e:
             error_msg = str(e)

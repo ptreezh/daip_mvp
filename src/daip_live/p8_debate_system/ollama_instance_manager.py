@@ -49,44 +49,46 @@ class OllamaInstanceManager:
         if self._current_model is None:
             raise ModelError("No model is currently selected")
 
+        # 规范化模型名称（确保 ollama/ 前缀，litellm 需要 provider 前缀）
+        model_name = self._current_model
+        if not model_name.startswith("ollama/"):
+            if model_name.startswith("ollama:"):  # 如果是 ollama:llama3:instruct 格式
+                model_name = "ollama/" + model_name[7:]  # 替换为 ollama/llama3:instruct
+            else:
+                model_name = f"ollama/{model_name}"
+
         # 初始化或获取模型提供者
         if self._provider is None:
             from daip_live.model_provider.provider import LiteLLMProvider
             from daip_live.core.models import ProviderConfig
-            # 创建Ollama配置的LiteLLMProvider
+            # 创建Ollama配置的LiteLLMProvider（使用规范化后的模型名）
             config = ProviderConfig(
-                model=self._current_model,
+                model=model_name,
                 base_url="http://localhost:11434"  # Ollama默认端口
             )
             self._provider = LiteLLMProvider(config)
 
         # 为Ollama模型调用实际的模型提供者
         try:
-            # 确保模型名称以"ollama/"开头，否则添加前缀
-            model_name = self._current_model
-            if not model_name.startswith("ollama/"):
-                if model_name.startswith("ollama:"):  # 如果是 ollama:llama3:instruct 格式
-                    model_name = "ollama/" + model_name[7:]  # 替换为 ollama/llama3:instruct
-                else:
-                    model_name = f"ollama/{model_name}"
-
             # 过滤掉Ollama不支持的参数
             filtered_kwargs = {}
             for key, value in kwargs.items():
-                if key in ['frequency_penalty', 'presence_penalty'] and model_name.startswith("ollama/"):
+                if key in ['frequency_penalty', 'presence_penalty']:
                     # Ollama不支持这些参数
                     continue
                 else:
                     filtered_kwargs[key] = value
 
-            # 生成响应
-            response, usage = await self._provider.generate(
+            # 生成响应（LiteLLMProvider.generate 为 async generator，模型名由 ProviderConfig 持有）
+            async for chunk in self._provider.generate(
                 prompt=prompt,
-                model=model_name,
-                **filtered_kwargs
-            )
+                params=filtered_kwargs
+            ):
+                response = chunk
+                break
 
-            return response, usage
+            # 真实模型不返回 usage（调用方有 None 保护）
+            return response, None
         except Exception as e:
             # 捕获并处理特定的Ollama相关异常，提供更友好的错误信息
             error_msg = str(e)

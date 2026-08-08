@@ -8,7 +8,7 @@ import asyncio
 import time
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 # Patch click.termui before typer imports it (fix for click 8.x compatibility)
 try:
@@ -27,18 +27,10 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from daip_live.container import Container
 from daip_live.core.models import (
-    DebateStartEvent, DebateRoundStartEvent, DebateTurnCompleteEvent, 
-    DebateCompleteEvent, TokenUsageEvent, ThoughtEvent, AgentEvent
+    DebateStartEvent, DebateRoundStartEvent, DebateTurnCompleteEvent,
+    DebateCompleteEvent, TokenUsageEvent, ThoughtEvent
 )
 from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
-from daip_live.debate_module.simple_debate import SimpleDebateEngine
-from daip_live.p8_debate_system.simple_debate_manager import SimpleDebateManager
-from daip_live.p8_debate_system.history_tracker import DebateHistoryTracker
-from daip_live.memory.session_manager import SessionManager
-from daip_live.p4_role_manager_tools.role_manager import RoleManager
-from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
-from daip_live.model_provider.provider import LiteLLMProvider  # Fixed import
-from daip_live.persistence.database import DatabaseManager
 from daip_live.tui_modular import DAIP_TUI
 from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer, Intent
 from rich.console import Console
@@ -75,73 +67,17 @@ def debate_start(
 ):
     """开始辩论"""
     async def run_debate_async():
-        # Get components from container
-        session_manager = container.session_manager()
-        role_manager = container.role_manager()
-        role_model_manager = container.role_model_manager()
-        model_provider = container.model_provider()  # This should return LiteLLMProvider
-        debate_history_tracker = container.debate_history_tracker()
-        
-        # Use modular debate system for production
-        try:
-            # Try the enhanced debate manager first
-            debate_manager = container.enhanced_debate_manager(
-                session_manager=session_manager,
-                role_manager=role_manager,
-                model_provider=model_provider
-            )
-            print("🔧 使用增强辩论管理器...")
-            for event in debate_manager.run_debate(topic, roles, rounds):
-                event_type = event.get("type", "unknown")
-                print(f"  📦 事件: {event_type.__name__}")
-
-        except Exception as e:
-            print(f"❌ 增强辩论管理器失败: {e}")
-
-        try:
-            # Fall back to simple debate manager
-            debate_manager = SimpleDebateManager.create_simple_debate(
-                session_manager=session_manager,
-                role_manager=role_manager,
-                model_provider=model_provider
-            )
-            print("✅ 回退到简化辩论管理器...")
-            for event in debate_manager.run_debate(topic, roles, rounds):
-                event_type = event.get("type", "unknown")
-                print(f"  ✅ 简化辩论管理器成功")
-                print(f"  📦 事件: {event_type.__name__}")
-                print(f"  🔢 轮次: {rounds}")
-                print(f"  ✅ 模块化辩论系统完成！")
-                break
-
-        except Exception as e:
-            print(f"❌ 简化辩论管理器失败: {e}")
-
-        # Test simple debate manager directly
-        print("=== 测试模块化辩论系统 ===")
-        try:
-            # Import simple debate manager directly
-            from daip_live.debate_module.simple_debate import SimpleDebateEngine
-            print("✅ 简化辩论管理器导入成功")
-            print("🎮 开始辩论: 测试模块化")
-            print(f"👥 角色: {', '.join(['支持者', '反对者'])}")
-            print(f"🔢 辩论轮次: {1}")
-            print(f"💬 支持者第1轮发言: 简化的观点...")
-            print(f"💬 反对者第1轮发言: 反对的观点...")
-            print(f"✅ 模块化辩论系统演示完成！")
-
-        except Exception as e:
-            print(f"❌ 模块化辩论系统失败: {e}")
-
-        # Test simple debate manager functionality
-        
         console = Console()
-        role_list = roles.split(",")
+        role_list = [r.strip() for r in roles.split(",") if r.strip()]
+
+        # 真实辩论管理器（容器装配：角色模型映射 + 模型可用性检查）
+        debate_manager = container.enhanced_debate_manager()
+        debate_history_tracker = container.debate_history_tracker()
+
         console.print(f"[bold]Starting debate on topic:[/bold] {topic}")
         console.print(f"[bold]Roles:[/bold] {roles}")
         console.print(f"[bold]Rounds:[/bold] {rounds}")
-        console.print("🤖 Debate started!")
-        
+
         # Generate session ID for debate tracking
         session_id = f"debate_{int(time.time())}"
 
@@ -169,43 +105,20 @@ def debate_start(
                 console.print(f"\n🔄 [bold]Round {event.round_number}[/bold] started")
             elif isinstance(event, DebateTurnCompleteEvent):
                 console.print(f"🗣️ [bold]{event.participant}[/bold] speaking...")
-                console.print(f"💬 Response from {event.content_preview}")
-                if hasattr(event, 'token_usage'):
-                    console.print(f"📊 Tokens: {event.token_usage.get('total_tokens', 'N/A')}")
+                console.print(f"💬 {event.content_preview}")
             elif isinstance(event, TokenUsageEvent):
                 console.print(f"📈 Tokens: {event.usage_info.get('total_tokens', 'N/A')}")
             elif isinstance(event, ThoughtEvent):
                 console.print(f"💭 {event.content}")
             elif isinstance(event, DebateCompleteEvent):
                 console.print("✅ Debate completed!")
-        
-        return "session_created"  # Return session ID for tracking
-    
-    # 简化事件循环处理 - 检查是否已有事件循环
+                if event.summary:
+                    console.print(f"📝 {event.summary}")
+
     try:
-        # 检查是否已经在事件循环中
-        try:
-            loop = asyncio.get_running_loop()
-            # 已在事件循环中，创建任务
-            task = loop.create_task(run_debate_async())
-            print("🎮 Debate started as background task!")
-            # 简单处理：等待一下获取结果
-            session_id = f"debate_{int(loop.time())}"
-        except RuntimeError:
-            # 没有运行的事件循环，可以使用asyncio.run
-            session_id = asyncio.run(run_debate_async())
-        print(f"Session ID: {session_id}")
+        asyncio.run(run_debate_async())
     except Exception as e:
         print(f"Error starting debate: {e}")
-        # 如果还是在事件循环中，创建任务但不等待
-        try:
-            loop = asyncio.get_running_loop()
-            task = loop.create_task(run_debate_async())
-            print("🎮 Debate started as background task...")
-            session_id = f"debate_{int(loop.time())}"
-        except Exception as e2:
-            print(f"Could not start debate: {e2}")
-            return
 
 
 @debate_app.command("multimodel")
