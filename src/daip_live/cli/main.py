@@ -584,6 +584,9 @@ def _handle_conversation_intent(intent: Intent):
 
 # Import commands
 from .commands import knowledge, wiki
+from .commands import model as model_commands
+from .commands import session as session_commands
+from .commands import role as role_commands
 
 # Import intelligent role management commands
 try:
@@ -595,6 +598,11 @@ except ImportError:
 # Register the commands directly
 app.add_typer(knowledge.app, name="knowledge", help="Knowledge management commands")
 app.add_typer(wiki.app, name="wiki", help="Wiki management commands")
+
+# Register the model/session/role command groups (full implementations that were never mounted)
+app.add_typer(model_commands.app, name="model", help="Model provider management commands")
+app.add_typer(session_commands.app, name="session", help="Session management commands")
+app.add_typer(role_commands.app, name="role", help="Role management commands")
 
 
 if __name__ == "__main__":

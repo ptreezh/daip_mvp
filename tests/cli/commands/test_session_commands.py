@@ -11,6 +11,8 @@ from typer.testing import CliRunner
 from rich.console import Console
 from datetime import datetime, timezone
 
+from daip_live.core.models import Session, DialogueTurn, AgentState
+
 # We'll import the actual command module once we create it
 # from daip_live.cli.commands.session import app as session_app
 
@@ -55,26 +57,22 @@ class TestSessionListCommand:
             mock_manager = Mock()
             mock_manager_class.return_value = mock_manager
 
-            # Mock return data
+            # Mock return data (real contract: list of pydantic Session models)
             mock_sessions = [
-                {
-                    'id': 'session-1',
-                    'goal': 'Discuss AI ethics',
-                    'session_type': 'debate',
-                    'participant_ids': ['agent1', 'agent2'],
-                    'created_at': datetime.now(timezone.utc),
-                    'status': 'active',
-                    'turn_count': 5
-                },
-                {
-                    'id': 'session-2',
-                    'goal': 'Plan project architecture',
-                    'session_type': 'workflow',
-                    'participant_ids': ['agent3'],
-                    'created_at': datetime.now(timezone.utc),
-                    'status': 'completed',
-                    'turn_count': 12
-                }
+                Session(
+                    session_id='session-1',
+                    goal='Discuss AI ethics',
+                    session_type='debate',
+                    participant_ids=['agent1', 'agent2'],
+                    status=AgentState.RUNNING,
+                ),
+                Session(
+                    session_id='session-2',
+                    goal='Plan project architecture',
+                    session_type='workflow',
+                    participant_ids=['agent3'],
+                    status=AgentState.COMPLETED,
+                )
             ]
             mock_manager.list_sessions.return_value = mock_sessions
 
@@ -122,12 +120,13 @@ class TestSessionListCommand:
             mock_manager_class.return_value = mock_manager
 
             mock_sessions = [
-                {
-                    'id': 'session-1',
-                    'goal': 'Test session',
-                    'session_type': 'chat',
-                    'status': 'active'
-                }
+                Session(
+                    session_id='session-1',
+                    goal='Test session',
+                    session_type='chat',
+                    participant_ids=[],
+                    status=AgentState.RUNNING,
+                )
             ]
             mock_manager.list_sessions.return_value = mock_sessions
 
@@ -156,9 +155,9 @@ class TestSessionListCommand:
             mock_manager_class.return_value = mock_manager
 
             mock_sessions = [
-                {'id': 'session-1', 'session_type': 'debate'},
-                {'id': 'session-2', 'session_type': 'workflow'},
-                {'id': 'session-3', 'session_type': 'debate'}
+                Session(session_id='session-1', session_type='debate', goal='g1', participant_ids=[]),
+                Session(session_id='session-2', session_type='workflow', goal='g2', participant_ids=[]),
+                Session(session_id='session-3', session_type='debate', goal='g3', participant_ids=[])
             ]
             mock_manager.list_sessions.return_value = mock_sessions
 
@@ -185,13 +184,13 @@ class TestSessionListCommand:
             mock_manager_class.return_value = mock_manager
 
             mock_sessions = [
-                {'id': 'session-1', 'status': 'active'},
-                {'id': 'session-2', 'status': 'completed'},
-                {'id': 'session-3', 'status': 'paused'}
+                Session(session_id='session-1', status=AgentState.RUNNING, session_type='chat', goal='g1', participant_ids=[]),
+                Session(session_id='session-2', status=AgentState.COMPLETED, session_type='chat', goal='g2', participant_ids=[]),
+                Session(session_id='session-3', status=AgentState.IDLE, session_type='chat', goal='g3', participant_ids=[])
             ]
             mock_manager.list_sessions.return_value = mock_sessions
 
-            result = runner.invoke(session_app, ['list', '--status', 'active'])
+            result = runner.invoke(session_app, ['list', '--status', 'running'])
 
             assert result.exit_code == 0
             assert 'session-1' in result.stdout
@@ -214,7 +213,7 @@ class TestSessionListCommand:
             mock_manager_class.return_value = mock_manager
 
             mock_sessions = [
-                {'id': f'session-{i}', 'goal': f'Session {i}'}
+                Session(session_id=f'session-{i}', goal=f'Session {i}', session_type='chat', participant_ids=[])
                 for i in range(10)
             ]
             mock_manager.list_sessions.return_value = mock_sessions
@@ -243,16 +242,18 @@ class TestSessionListCommand:
             created_time = datetime.now(timezone.utc)
 
             mock_sessions = [
-                {
-                    'id': 'session-1',
-                    'goal': 'Detailed session',
-                    'session_type': 'debate',
-                    'participant_ids': ['agent1', 'agent2', 'agent3'],
-                    'created_at': created_time,
-                    'status': 'active',
-                    'turn_count': 15,
-                    'summary': 'A comprehensive debate on AI topics'
-                }
+                Session(
+                    session_id='session-1',
+                    goal='Detailed session',
+                    session_type='debate',
+                    participant_ids=['agent1', 'agent2', 'agent3'],
+                    status=AgentState.RUNNING,
+                    history=[
+                        DialogueTurn(participant_id='agent1', content=f'turn {i}')
+                        for i in range(15)
+                    ],
+                    summary='A comprehensive debate on AI topics'
+                )
             ]
             mock_manager.list_sessions.return_value = mock_sessions
 

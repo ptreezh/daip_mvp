@@ -16,6 +16,18 @@ from ..utils.error_handler import ErrorHandler
 from ..utils.performance_monitor import PerformanceMonitor
 from ...memory.session_manager import SessionManager
 from ...persistence.database import DatabaseManager
+from ...config import ConfigManager
+from ...core.models import AgentState, Session
+
+
+def _get_db_manager() -> DatabaseManager:
+    """Build a DatabaseManager bound to the configured database path.
+
+    Mirrors Container's wiring: read the path from ConfigManager instead of
+    falling back to DatabaseManager's default in-memory database.
+    """
+    config = ConfigManager().get_config().model_dump()
+    return DatabaseManager(db_path=config["database"]["path"])
 
 
 # Create the session command app
@@ -58,7 +70,7 @@ def list(
                 console.print("[bold blue]📋 Fetching conversation sessions...[/bold blue]")
 
             # Get database and session manager
-            db_manager = DatabaseManager()
+            db_manager = _get_db_manager()
             session_manager = SessionManager(db_manager)
 
             try:
@@ -79,12 +91,16 @@ def list(
                     # Get sessions without progress for JSON output
                     sessions = session_manager.list_sessions()
 
-                # Apply filters
+                # Apply filters (sessions are pydantic Session models)
                 if session_type:
-                    sessions = [s for s in sessions if s.get('session_type') == session_type]
+                    sessions = [s for s in sessions if s.session_type == session_type]
 
                 if status:
-                    sessions = [s for s in sessions if s.get('status') == status]
+                    try:
+                        status_enum = AgentState[status.upper()]
+                    except KeyError:
+                        status_enum = None
+                    sessions = [s for s in sessions if status_enum is not None and s.status == status_enum]
 
                 if limit:
                     sessions = sessions[:limit]
@@ -117,13 +133,8 @@ def list(
 
                 if json_output:
                     # JSON output
-                    # Convert datetime objects to strings for JSON serialization
-                    json_sessions = []
-                    for session in sessions:
-                        json_session = session.copy()
-                        if 'created_at' in json_session:
-                            json_session['created_at'] = json_session['created_at'].isoformat()
-                        json_sessions.append(json_session)
+                    # Convert pydantic Session models (incl. datetime/Enum) to JSON-safe dicts
+                    json_sessions = [s.model_dump(mode="json") for s in sessions]
 
                     output_data = {
                         "sessions": json_sessions,
@@ -156,7 +167,7 @@ def list(
     asyncio.run(_list_sessions())
 
 
-def _display_sessions_table(sessions: List[Dict[str, Any]], verbose: bool = False):
+def _display_sessions_table(sessions: List[Session], verbose: bool = False):
     """Display sessions in a formatted table"""
 
     table = Table(title="Conversation Sessions")
@@ -175,23 +186,21 @@ def _display_sessions_table(sessions: List[Dict[str, Any]], verbose: bool = Fals
         table.add_column("Updated", style="white")
 
     for session in sessions:
-        # Basic info
+        # Basic info (sessions are pydantic Session models)
         row = [
-            session.get('id', 'Unknown')[:12],  # Truncate long IDs
-            session.get('session_type', 'Unknown'),
-            session.get('goal', 'Unknown')[:30],  # Truncate long goals
-            _get_status_indicator(session.get('status', 'Unknown')),
-            str(session.get('turn_count', 0)),
-            _format_datetime(session.get('created_at'))
+            session.session_id[:12],  # Truncate long IDs
+            session.session_type,
+            session.goal[:30],  # Truncate long goals
+            _get_status_indicator(session.status.name.lower()),
+            str(len(session.history)),
+            _format_datetime(session.start_time)
         ]
 
         # Verbose info
         if verbose:
-            participants = session.get('participant_ids', [])
-            participant_count = len(participants) if isinstance(participants, builtins.list) else 0
             row.extend([
-                f"{participant_count} participants",
-                _format_datetime(session.get('updated_at'))
+                f"{len(session.participant_ids)} participants",
+                _format_datetime(session.end_time)
             ])
 
         table.add_row(*row)
@@ -199,7 +208,7 @@ def _display_sessions_table(sessions: List[Dict[str, Any]], verbose: bool = Fals
     console.print(table)
 
     # Show summary
-    active_count = len([s for s in sessions if s.get('status') == 'active'])
+    active_count = len([s for s in sessions if s.status == AgentState.RUNNING])
     console.print(f"\n[dim]Total: {len(sessions)} session(s)")
     if active_count > 0:
         console.print(f"[dim]Active: {active_count}[/dim]")
@@ -208,7 +217,7 @@ def _display_sessions_table(sessions: List[Dict[str, Any]], verbose: bool = Fals
 def _get_status_indicator(status: str) -> str:
     """Get status indicator with color"""
     status_colors = {
-        'active': '🟢',
+        'running': '🟢',
         'completed': '🔵',
         'paused': '⏸️',
         'error': '🔴',
@@ -249,7 +258,7 @@ def clear(
             console.print("[bold red]🗑️  Clearing all conversation sessions...[/bold red]")
 
             # Get database and session manager
-            db_manager = DatabaseManager()
+            db_manager = _get_db_manager()
             session_manager = SessionManager(db_manager)
 
             try:
