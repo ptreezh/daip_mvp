@@ -5,6 +5,7 @@ import asyncio
 import json
 import sqlite3
 import threading
+import uuid
 from datetime import datetime
 from typing import List, Optional
 
@@ -29,10 +30,13 @@ class DebateHistoryTracker:
         import tempfile
         import os
         
-        # Handle case where db_path is None (happens when config is not loaded)
+        # 修复: ":memory:" 语义下此前使用固定临时文件 daip_debate_history.db，
+        # 导致多实例/多次运行共享同一持久 DB，turns 跨会话累积（INSERT OR REPLACE 只覆盖
+        # session 行、不清理旧 turns）。改为每实例唯一临时文件，避免跨实例污染。
         if db_path is None or db_path == ":memory:":
-            # Use a temporary file for persistence across thread calls
-            self.db_path = os.path.join(tempfile.gettempdir(), "daip_debate_history.db")
+            self.db_path = os.path.join(
+                tempfile.gettempdir(), f"daip_debate_history_{uuid.uuid4().hex}.db"
+            )
         else:
             self.db_path = db_path
         

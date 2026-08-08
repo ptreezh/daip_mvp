@@ -96,7 +96,10 @@ class LayeredMemorySystem:
         # 角色个人记忆
         context_parts.append(f"\nPersonal Arguments:")
         if role_name in self.role_personal_memories:
-            arguments = self.role_personal_memories[role_name].get("arguments", [])
+            # 修复: update_role_memory 以 memory_type（如 "argument" 单数）为 key，
+            # 此处需兼容单复数两种 key
+            arguments = (self.role_personal_memories[role_name].get("arguments")
+                         or self.role_personal_memories[role_name].get("argument", []))
             relevant_args = [arg for arg in arguments if arg["round"] < current_round]
             if relevant_args:
                 for arg in relevant_args[-3:]:  # 最近3个论点
@@ -132,7 +135,8 @@ class LayeredMemorySystem:
 
         # 角色论点 - 只保留最近的
         if role_name in self.role_personal_memories:
-            arguments = self.role_personal_memories[role_name].get("arguments", [])
+            arguments = (self.role_personal_memories[role_name].get("arguments")
+                         or self.role_personal_memories[role_name].get("argument", []))
             recent_args = [arg for arg in arguments if arg["round"] >= current_round - max_rounds]
             if recent_args:
                 context_parts.append("\nRecent Arguments:")
