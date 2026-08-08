@@ -198,6 +198,25 @@ class WikiManager:
 
         return page
 
+    def _extract_tags_from_content(self, title: str, content: str) -> List[str]:
+        """从内容中提取标签"""
+        # 提取关键词作为标签
+        tags = [title.lower().replace(" ", "_")]
+
+        # 从内容中提取可能的关键词
+        # 简单提取包含大写字母的单词或技术术语
+        potential_tags = re.findall(r'\b[A-Z][a-z]+\b|\b[A-Z]{2,}\b', content)
+        potential_tags = [tag.lower() for tag in potential_tags if len(tag) > 2]
+        tags.extend(potential_tags[:5])  # 只取前5个
+
+        # 去重
+        unique_tags = []
+        for tag in tags:
+            if tag not in unique_tags:
+                unique_tags.append(tag)
+
+        return unique_tags[:10]  # 最多10个标签
+
     def get_page_by_title(self, title: str) -> Optional[WikiPage]:
         """根据标题获取页面
 
@@ -643,7 +662,7 @@ class WikiManager:
         content_stripped = content.strip()
 
         # 10字以下都视为空文件，直接覆盖
-        if len(content_stripped) <= 10:
+        if len(content_stripped) < 10:
             return True
 
         # 定义常见的空文档或默认模板模式

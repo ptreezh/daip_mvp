@@ -47,43 +47,16 @@ class TestWikiMultiModelIntegration:
             Mock(name="critic", description="批评家")
         ]
 
-        # RoleModelManager
-        mock_role_model_manager = Mock()
+        # RoleModelManager（真实实例：EnhancedWikiManager 构造时校验真实类型）
+        # 本文件无测试调用其方法，仅作构造参数与身份断言；roles/ 目录不存在仅 warning 不抛错
+        from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
+        mock_role_model_manager = RoleModelManager()
 
-        def get_role_mapping(role_name, use_debate_config=False):
-            configs = {
-                "domain_expert": Mock(model_name="ollama/llama3.1:70b", temperature=0.7, max_tokens=1000),
-                "researcher": Mock(model_name="ollama/qwen2.5:32b", temperature=0.5, max_tokens=1200),
-                "editor": Mock(model_name="claude-3-haiku-20240307", temperature=0.3, max_tokens=800),
-                "critic": Mock(model_name="gpt-4o-mini", temperature=0.8, max_tokens=600)
-            }
-            mock_config = configs.get(role_name, Mock(model_name="default", temperature=0.7, max_tokens=1000))
-            mock_mapping = Mock()
-            mock_mapping.role_model_config = mock_config
-            return mock_mapping
-
-        mock_role_model_manager.get_role_model_mapping.side_effect = get_role_mapping
-        mock_role_model_manager.get_debate_model_mappings = lambda roles: [get_role_mapping(role) for role in roles]
-
-        # ModelProvider
-        mock_model_provider = Mock()
-        mock_model_provider.generate = AsyncMock()
-
-        def generate_content(prompt, model=None, temperature=0.7, max_tokens=1000):
-            content_map = {
-                "domain_expert": "作为领域专家，这是一个复杂的技术主题，需要深入的专业知识来分析。",
-                "researcher": "研究表明，这个主题在学术界有广泛的关注，相关论文数量逐年增长。",
-                "editor": "本文将系统性地介绍这个主题，确保内容结构清晰、逻辑严密。",
-                "critic": "需要注意的是，这个主题仍存在一些争议和未解决的问题。"
-            }
-            role_content = "通用内容生成"
-            for role, content in content_map.items():
-                if role in prompt:
-                    role_content = content
-                    break
-            return (role_content, {"model": model or "default"})
-
-        mock_model_provider.generate.side_effect = generate_content
+        # ModelProvider（真实实例：EnhancedWikiManager 构造时校验真实类型）
+        # 本文件无测试直接调用 generate；mock-llm 本地模型走 mock 响应，无需外部依赖
+        from daip_live.core.models import ProviderConfig
+        from daip_live.model_provider.provider import LiteLLMProvider
+        mock_model_provider = LiteLLMProvider(ProviderConfig(model="mock-llm"))
 
         return {
             'session_manager': mock_session_manager,
@@ -152,7 +125,8 @@ class TestWikiMultiModelIntegration:
 
         # 模拟辩论管理器
         mock_debate_manager = Mock()
-        mock_debate_manager.run_debate = AsyncMock()
+        # 产品契约：run_debate 是 async generator（产品端 :110 async for 直接消费）；
+        # 不能赋 AsyncMock——调用返回 coroutine 而非 async iterable，async for 会 TypeError
 
         # 模拟辩论事件
         from src.daip_live.core.models import DebateTurnCompleteEvent
@@ -172,7 +146,8 @@ class TestWikiMultiModelIntegration:
                 yield DebateTurnCompleteEvent(
                     participant=role,
                     content_preview=f"{role}的贡献内容",
-                    round_number=1
+                    round_number=1,
+                    session_id="test_session"
                 )
 
             # 生成结束事件
@@ -180,10 +155,11 @@ class TestWikiMultiModelIntegration:
             yield DebateCompleteEvent(
                 topic=topic,
                 total_rounds=rounds,
-                final_summary="协作完成"
+                summary="协作完成",
+                session_id="test_session"
             )
 
-        mock_debate_manager.run_debate.side_effect = mock_debate_generator
+        mock_debate_manager.run_debate = mock_debate_generator
         mock_debate_manager_class.return_value = mock_debate_manager
 
         # 创建组件
@@ -232,7 +208,7 @@ class TestWikiMultiModelIntegration:
                     round_number=1
                 )
 
-            yield DebateCompleteEvent(topic=topic, total_rounds=rounds, final_summary="协作完成")
+            yield DebateCompleteEvent(topic=topic, total_rounds=rounds, summary="协作完成", session_id="integration_test")
 
         mock_debate_manager.run_debate.side_effect = mock_simple_debate
         mock_debate_manager_class.return_value = mock_debate_manager
@@ -371,7 +347,8 @@ class TestWikiMultiModelIntegration:
         # 验证页面持久化
         assert page1.file_path.exists()
         file_content = page1.file_path.read_text(encoding='utf-8')
-        assert "持久化测试页面" in file_content
+        # wiki 文件正文只存 content（title 存数据库/文件名），断言内容已持久化
+        assert "这是用于测试持久化功能的页面" in file_content
 
         # 创建新的增强Wiki管理器实例
         enhanced_wiki2 = EnhancedWikiManager(

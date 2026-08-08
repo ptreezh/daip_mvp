@@ -148,18 +148,26 @@ class MultiRoleWikiCollaborator:
             "## 参考资料": []
         }
         
+        role_display_names = {
+            "domain_expert": "领域专家",
+            "researcher": "研究员",
+            "editor": "编辑",
+            "critic": "批评家",
+        }
+
         for role_name, role_contributions in contributions.items():
             combined_content = "\n\n".join(role_contributions)
-            
+            display_name = role_display_names.get(role_name, role_name)
+
             # 根据角色类型将贡献分配到相应部分
             if role_name == "domain_expert":
-                sections["## 定义与背景"].append(f"### {role_name.title()}观点\n{combined_content}")
-                sections["## 关键特点"].append(f"### {role_name.title()}提供的技术细节\n{combined_content}")
+                sections["## 定义与背景"].append(f"### {display_name}观点\n{combined_content}")
+                sections["## 关键特点"].append(f"### {display_name}提供的技术细节\n{combined_content}")
             elif role_name == "researcher":
                 sections["## 发展现状"].append(f"### 研究数据支撑\n{combined_content}")
                 sections["## 参考资料"].append(f"### {combined_content}")
             elif role_name == "editor":
-                sections["## 概述"].append(f"### 结构化概述\n{combined_content}")
+                sections["## 概述"].append(f"### {display_name}的结构化概述\n{combined_content}")
             elif role_name == "critic":
                 sections["## 优缺点分析"].append(f"### 批评与改进意见\n{combined_content}")
             else:

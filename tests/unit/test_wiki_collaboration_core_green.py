@@ -42,19 +42,19 @@ class TestWikiCollaborationCoreGREEN:
         mock_role_manager = Mock()
         mock_role_manager.list_roles.return_value = ["domain_expert", "researcher", "editor", "critic"]
 
-        # 模拟RoleModelManager
-        mock_role_model_manager = Mock()
-        mock_role_model_manager.get_role_model_mapping.return_value = Mock(
-            role_model_config=Mock(
-                model_name="test_model",
-                temperature=0.7,
-                max_tokens=1000
-            )
-        )
+        # 使用真实的RoleModelManager（EnhancedWikiManager 构造时校验真实类型）
+        # 必须用 daip_live 前缀：产品校验用 daip_live.p4_role_manager_tools.role_model_manager 导入，
+        # src.daip_live 前缀会得到另一个模块实例导致 isinstance 失败
+        from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
+        mock_role_model_manager = RoleModelManager()
 
-        # 模拟LiteLLMProvider
-        mock_model_provider = Mock()
-        mock_model_provider.generate = AsyncMock(return_value=("测试生成内容", {}))
+        # 使用真实的LiteLLMProvider（mock-llm 本地模型走 mock 响应，无需外部依赖）
+        # 必须用 daip_live 前缀：产品校验用 daip_live.model_provider.provider 导入，
+        # src.daip_live 前缀会得到另一个模块实例导致 isinstance 失败
+        from daip_live.core.models import ProviderConfig
+        from daip_live.model_provider.provider import LiteLLMProvider
+
+        mock_model_provider = LiteLLMProvider(ProviderConfig(model="mock-llm"))
 
         return {
             'session_manager': mock_session_manager,
@@ -242,11 +242,11 @@ class TestWikiCollaborationCoreGREEN:
         wiki_manager = WikiManager(temp_wiki_dir)
 
         # 测试重复页面创建
-        page1 = wiki_manager.create_page("重复测试", "内容1", ["标签1"])
+        page1 = wiki_manager.create_page("重复测试", "这是用于测试重复创建的第一个页面内容", ["标签1"])
 
         # 尝试创建重复页面应该抛出异常
         with pytest.raises(ValueError, match="already exists"):
-            wiki_manager.create_page("重复测试", "内容2", ["标签2"])
+            wiki_manager.create_page("重复测试", "这是用于测试重复创建的第二个页面内容", ["标签2"])
 
         # 测试更新不存在的页面
         with pytest.raises(ValueError, match="not found"):

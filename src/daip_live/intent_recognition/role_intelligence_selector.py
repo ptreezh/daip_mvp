@@ -135,17 +135,17 @@ class RoleIntelligenceSelector:
         # 教育类主题关键词
         educational_keywords = ["教学", "学习", "教程", "入门", "基础", "概念", "解释"]
         # 评审类主题关键词
-        review_keywords = ["评价", "评估", "审查", "批评", "优缺点", "对比"]
+        review_keywords = ["评审", "评价", "评估", "审查", "批评", "优缺点", "对比"]
         # 开发类主题关键词
         development_keywords = ["开发", "建设", "实施", "部署", "项目", "产品"]
 
         # 计算各类别的匹配分数
         category_scores = {
+            "review": sum(1 for kw in review_keywords if kw in topic_lower),
             "technical": sum(1 for kw in technical_keywords if kw in topic_lower),
             "research": sum(1 for kw in research_keywords if kw in topic_lower),
             "analysis": sum(1 for kw in analysis_keywords if kw in topic_lower),
             "educational": sum(1 for kw in educational_keywords if kw in topic_lower),
-            "review": sum(1 for kw in review_keywords if kw in topic_lower),
             "development": sum(1 for kw in development_keywords if kw in topic_lower)
         }
 

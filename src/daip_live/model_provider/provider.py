@@ -309,6 +309,52 @@ class LiteLLMProvider(IModelProvider):
             # Catch any other litellm or unexpected error
             raise ModelError(f"LiteLLM generic error: {e}") from e
 
+    async def agenerate(
+        self,
+        prompt: str,
+        model: str = None,
+        temperature: float = 0.7,
+        max_tokens: int = 1000
+    ) -> Tuple[str, Dict[str, Any]]:
+        """生成完整响应，返回 (content, metadata) 二元组。
+
+        与 ``generate``（async generator 流式）不同，``agenerate`` 收集完整响应后
+        一次性返回，便于调用方直接 ``await`` 使用。
+        """
+        config_model = model or getattr(self.config, 'model', 'test-model')
+
+        # 与 generate 保持一致：本地模型返回模拟响应
+        if is_local_model(config_model):
+            return self._generate_mock_response(prompt, config_model)
+
+        # 检查模型是否可用，如果不可用则使用回退模型
+        effective_model = self._get_fallback_model(config_model)
+        litellm_params = self._build_litellm_params(
+            prompt,
+            model=effective_model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+
+        try:
+            response = await litellm.acompletion(**litellm_params)
+            content = response.choices[0].message.content
+
+            if content is None:
+                raise ModelError("Received null content from model.")
+
+            usage = getattr(response, 'usage', None)
+            metadata: Dict[str, Any] = {
+                "model": effective_model,
+                "usage": usage.model_dump() if usage else None,
+            }
+            return content, metadata
+        except litellm.exceptions.AuthenticationError as e:
+            raise ModelAuthenticationError(f"LiteLLM auth error: {e}") from e
+        except Exception as e:
+            # Catch any other litellm or unexpected error
+            raise ModelError(f"LiteLLM generic error: {e}") from e
+
     def get_default_model(self) -> str:
         """Get the default model for this provider."""
         config_model = getattr(self.config, 'model', 'test-model')
