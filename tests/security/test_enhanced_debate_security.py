@@ -16,7 +16,7 @@ class TestEnhancedDebateSecurity:
     
     def test_input_validation_for_special_characters(self):
         """Test that special characters in debate input are handled safely."""
-        tracker = DebateHistoryTracker()
+        tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "security_debate_history.db"))
         
         # Test special characters that might be problematic
         dangerous_topics = [
@@ -73,7 +73,7 @@ class TestEnhancedDebateSecurity:
     
     def test_session_id_validation(self):
         """Test that session IDs are validated and sanitized."""
-        tracker = DebateHistoryTracker()
+        tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "security_debate_history.db"))
         
         # Test various potentially malicious session IDs
         malicious_session_ids = [
@@ -121,7 +121,7 @@ class TestEnhancedDebateSecurity:
         """Test that concurrent access does not create security vulnerabilities."""
         
         async def run_concurrent_security_test():
-            tracker = DebateHistoryTracker()
+            tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "security_debate_history.db"))
             
             # Simulate concurrent access to the same debate
             session_id = "concurrent_security_001"
@@ -171,7 +171,7 @@ class TestEnhancedDebateSecurity:
     
     def test_history_retrieval_authorization(self):
         """Test that history retrieval is properly authorized."""
-        tracker = DebateHistoryTracker()
+        tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "security_debate_history.db"))
         
         # Create multiple debates with different session IDs
         for i in range(5):
@@ -214,7 +214,7 @@ class TestEnhancedDebateSecurity:
     
     def test_data_integrity_after_malformed_input(self):
         """Test that malformed input doesn't corrupt the data."""
-        tracker = DebateHistoryTracker()
+        tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "security_debate_history.db"))
         
         # Test with potentially malformed data
         malformed_inputs = [
@@ -280,7 +280,7 @@ class TestEnhancedDebateSecurity:
     
     def test_regex_injection_prevention(self):
         """Test that regex patterns used internally are safe from injection."""
-        tracker = DebateHistoryTracker()
+        tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "security_debate_history.db"))
         
         # Test inputs that could potentially exploit regex patterns
         regex_attack_inputs = [
@@ -330,7 +330,7 @@ class TestEnhancedDebateSecurity:
     
     def test_resource_limit_enforcement(self):
         """Test that resource limits prevent abuse."""
-        tracker = DebateHistoryTracker()
+        tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "security_debate_history.db"))
         
         # Test creating many debates rapidly to check resource limits
         num_debates = 20  # Reasonable number to test resource management
@@ -375,7 +375,7 @@ class TestEnhancedDebateSecurity:
     
     def test_safe_output_encoding(self):
         """Test that output is properly encoded and safe for display."""
-        tracker = DebateHistoryTracker()
+        tracker = DebateHistoryTracker(db_path=os.path.join(tempfile.mkdtemp(), "security_debate_history.db"))
         
         # Test with various potentially unsafe content
         unsafe_outputs = [
