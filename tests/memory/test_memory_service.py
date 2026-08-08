@@ -20,10 +20,10 @@ class TestMemoryService:
     @pytest.fixture
     def memory_service(self, mock_model_provider):
         """Fixture to create a MemoryService instance."""
-        with patch("src.daip_live.memory.service.config_manager") as mock_config_manager:
-            mock_config = Mock()
-            mock_config.database.path = "daip_live.db"
-            mock_config_manager.get_config.return_value = mock_config
+        # 源码权威: MemoryService 从 config_bridge.get_config_data() 读配置（service.py:14），
+        # 无 config_manager 模块属性
+        with patch("daip_live.config_bridge.config_bridge.get_config_data",
+                   return_value={"database": {"path": "daip_live.db"}}):
             service = MemoryService(model_provider=mock_model_provider)
             service.long_term_memory_file = "project_context.md"
             with open("project_context.md", "w", encoding="utf-8") as f:
@@ -198,14 +198,9 @@ class TestMemoryService:
 
     @pytest.mark.asyncio
     async def test_construct_prompt_includes_rag_snippets_when_enabled(self, memory_service, mock_session):
-        with patch("src.daip_live.memory.service.config_manager") as mock_cfg:
-            cfg = Mock()
-            cfg.database.path = "daip_live.db"
-            cfg.rag = Mock()
-            cfg.rag.enabled = True
-            cfg.rag.top_k = 5
-            cfg.rag.min_score = 0.6
-            mock_cfg.get_config.return_value = cfg
+        with patch("daip_live.config_bridge.config_bridge.get_config_data",
+                   return_value={"database": {"path": "daip_live.db"},
+                                 "rag": {"enabled": True, "top_k": 5, "min_score": 0.6}}):
             mock_km = Mock()
             mock_km.search = AsyncMock(return_value=[{"file_path": "docs/a.md", "distance": 0.1}])
             memory_service.knowledge_manager = mock_km
@@ -215,14 +210,9 @@ class TestMemoryService:
 
     @pytest.mark.asyncio
     async def test_construct_prompt_omits_rag_when_no_hits(self, memory_service, mock_session):
-        with patch("src.daip_live.memory.service.config_manager") as mock_cfg:
-            cfg = Mock()
-            cfg.database.path = "daip_live.db"
-            cfg.rag = Mock()
-            cfg.rag.enabled = True
-            cfg.rag.top_k = 5
-            cfg.rag.min_score = 0.6
-            mock_cfg.get_config.return_value = cfg
+        with patch("daip_live.config_bridge.config_bridge.get_config_data",
+                   return_value={"database": {"path": "daip_live.db"},
+                                 "rag": {"enabled": True, "top_k": 5, "min_score": 0.6}}):
             mock_km = Mock()
             mock_km.search = AsyncMock(return_value=[])
             memory_service.knowledge_manager = mock_km

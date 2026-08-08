@@ -4,7 +4,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from daip_live.core.models import KnowledgeBaseChanges, KnowledgeSource
+from daip_live.core.models import (
+    KnowledgeBaseChanges,
+    KnowledgeBaseConfig,
+    KnowledgeSource,
+)
 from daip_live.knowledge.manager import KnowledgeManager
 
 
@@ -18,10 +22,7 @@ class TestKnowledgeManager:
         """Tests that the KnowledgeManager can be initialized successfully."""
         mock_db_manager = mocker.Mock()
         mock_model_provider = mocker.Mock()
-        config = {
-            "knowledge_dir": "/fake/knowledge",
-            "vector_store_path": "/fake/vector_store"
-        }
+        config = KnowledgeBaseConfig(directory="/fake/knowledge")
         manager = KnowledgeManager(db_manager=mock_db_manager, model_provider=mock_model_provider, config=config)
         assert manager.db_manager == mock_db_manager
         assert manager.model_provider == mock_model_provider
@@ -39,7 +40,7 @@ class TestKnowledgeManager:
         deleted_source = KnowledgeSource(file_path=str(knowledge_dir / "deleted.txt"), file_hash="some_hash", status="indexed")
         mock_db_manager = mocker.Mock()
         mock_db_manager.get_all_knowledge_sources.return_value = [unchanged_source, updated_source_from_db, deleted_source]
-        manager = KnowledgeManager(db_manager=mock_db_manager, model_provider=mocker.Mock(), config={"knowledge_dir": str(knowledge_dir)})
+        manager = KnowledgeManager(db_manager=mock_db_manager, model_provider=mocker.Mock(), config=KnowledgeBaseConfig(directory=str(knowledge_dir)))
         changes = manager._scan_and_detect_changes()
         assert isinstance(changes, KnowledgeBaseChanges)
         assert len(changes.added) == 1
@@ -53,10 +54,12 @@ class TestKnowledgeManager:
         knowledge_dir.mkdir()
         added_file = knowledge_dir / "new_doc.txt"
         added_file.write_text("This is a new document.")
-        mock_db_manager = mocker.AsyncMock()
+        mock_db_manager = mocker.Mock()
+        mock_db_manager.upsert_knowledge_source.side_effect = lambda s: s
         mock_model_provider = mocker.AsyncMock()
         mock_model_provider.embed.return_value = [0.1, 0.2, 0.3]
-        manager = KnowledgeManager(db_manager=mock_db_manager, model_provider=mock_model_provider, config={"knowledge_dir": str(knowledge_dir)})
+        mocker.patch("daip_live.knowledge.manager.faiss.write_index")
+        manager = KnowledgeManager(db_manager=mock_db_manager, model_provider=mock_model_provider, config=KnowledgeBaseConfig(directory=str(knowledge_dir)))
         mock_changes = KnowledgeBaseChanges(added=[str(added_file)])
         mocker.patch.object(manager, '_scan_and_detect_changes', return_value=mock_changes)
         manager.faiss_index = mocker.Mock()
@@ -68,8 +71,9 @@ class TestKnowledgeManager:
     @pytest.mark.asyncio
     async def test_sync_knowledge_base_handles_deleted_files(self, mocker, tmp_path: Path):
         deleted_source = KnowledgeSource(id=42, file_path="/path/to/deleted.txt", file_hash="abc", status="indexed")
-        mock_db_manager = mocker.AsyncMock()
-        manager = KnowledgeManager(db_manager=mock_db_manager, model_provider=mocker.AsyncMock(), config={})
+        mock_db_manager = mocker.Mock()
+        mocker.patch("daip_live.knowledge.manager.faiss.write_index")
+        manager = KnowledgeManager(db_manager=mock_db_manager, model_provider=mocker.AsyncMock(), config=KnowledgeBaseConfig(directory=str(tmp_path)))
         mock_changes = KnowledgeBaseChanges(deleted=[deleted_source])
         mocker.patch.object(manager, '_scan_and_detect_changes', return_value=mock_changes)
         manager.faiss_index = mocker.Mock()
@@ -91,25 +95,27 @@ class TestKnowledgeManager:
 
         old_source = KnowledgeSource(id=101, file_path=str(updated_file), file_hash="old_hash", status="indexed")
 
-        mock_db_manager = mocker.AsyncMock()
+        mock_db_manager = mocker.Mock()
+        mock_db_manager.upsert_knowledge_source.side_effect = lambda s: s
         mock_model_provider = mocker.AsyncMock()
         mock_model_provider.embed.return_value = [0.4, 0.5, 0.6]
+        mocker.patch("daip_live.knowledge.manager.faiss.write_index")
 
-        manager = KnowledgeManager(db_manager=mock_db_manager, model_provider=mock_model_provider, config={"knowledge_dir": str(knowledge_dir)})
+        manager = KnowledgeManager(db_manager=mock_db_manager, model_provider=mock_model_provider, config=KnowledgeBaseConfig(directory=str(knowledge_dir)))
 
         mock_changes = KnowledgeBaseChanges(updated=[(str(updated_file), old_source)])
         mocker.patch.object(manager, '_scan_and_detect_changes', return_value=mock_changes)
 
         manager.faiss_index = mocker.Mock()
         manager.faiss_index.remove_ids = mocker.Mock()
-        manager.faiss_index.add = mocker.Mock()
+        manager.faiss_index.add_with_ids = mocker.Mock()
 
         result = await manager.sync_knowledge_base()
 
         manager.faiss_index.remove_ids.assert_called_once()
         assert np.array_equal(manager.faiss_index.remove_ids.call_args[0][0], np.array([101]))
         mock_model_provider.embed.assert_called_once_with("new version of the document")
-        manager.faiss_index.add.assert_called_once()
+        manager.faiss_index.add_with_ids.assert_called_once()
         mock_db_manager.upsert_knowledge_source.assert_called_once()
         upserted_call_args = mock_db_manager.upsert_knowledge_source.call_args[0][0]
         assert upserted_call_args.file_hash != "old_hash"
@@ -117,12 +123,12 @@ class TestKnowledgeManager:
         assert result == {"added": 0, "updated": 1, "removed": 0, "unchanged": 0}
 
     @pytest.mark.asyncio
-    async def test_search_e2e(self, mocker):
+    async def test_search_e2e(self, mocker, tmp_path: Path):
         """Tests the search method from query embedding to final result formatting."""
         # 1. Setup
-        mock_db_manager = mocker.AsyncMock()
+        mock_db_manager = mocker.Mock()
         mock_model_provider = mocker.AsyncMock()
-        manager = KnowledgeManager(db_manager=mock_db_manager, model_provider=mock_model_provider, config={})
+        manager = KnowledgeManager(db_manager=mock_db_manager, model_provider=mock_model_provider, config=KnowledgeBaseConfig(directory=str(tmp_path)))
 
         # 2. Mock dependencies
         # Mock the model provider's embed method
@@ -162,6 +168,6 @@ class TestKnowledgeManager:
         # Assert the final formatted result
         assert len(results) == 2
         assert results[0]["file_path"] == "/path/one.txt"
-        assert results[0]["distance"] == 0.1
+        assert results[0]["distance"] == pytest.approx(0.1)
         assert results[1]["file_path"] == "/path/two.txt"
-        assert results[1]["distance"] == 0.2
+        assert results[1]["distance"] == pytest.approx(0.2)

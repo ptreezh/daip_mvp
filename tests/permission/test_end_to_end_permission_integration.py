@@ -63,8 +63,8 @@ def end_to_end_test_environment():
     
     # 创建权限管理器
     permission_manager = PermissionManager(user_input_queue, MagicMock())
-    
-    # 创建简化的AgentExecutor with PermissionManager
+    # 载具工具 read_file 默认 allow，避免各场景测试因未设规则触发 ask 等待用户输入
+    permission_manager.set_permission_rule("read_file", "allow")
     agent_executor = _create_test_agent_executor(
         session_manager, memory_service, permission_manager, user_input_queue
     )
@@ -86,14 +86,19 @@ def _create_test_agent_executor(session_manager, memory_service, permission_mana
     tool_manager = MagicMock()
     
     # 设置模型提供者行为
-    model_provider.generate = AsyncMock(return_value=("Use Tool: read_file(path='test.txt')", {"total_tokens": 50}))
+    # 源码权威: provider.generate 是 async generator（provider.py:276），
+    # StepExecutor 用 async for 取首个 chunk（step_executor.py:132-136），须 yield 而非返回元组
+    async def _fake_generate(prompt, params=None):
+        yield "Use Tool: read_file(path='test.txt')"
+    model_provider.generate = _fake_generate
     model_provider.config = MagicMock(model="test-model")
     
     # 设置工具管理器行为
     tool_manager._registry = {
         "read_file": MagicMock(),
         "write_file": MagicMock(),
-        "execute_command": MagicMock()
+        "execute_command": MagicMock(),
+        "delete_file": MagicMock()
     }
     
     # 模拟工具执行（带权限检查）
@@ -170,10 +175,9 @@ class TestEndToEndPermissionIntegration:
         
         # 创建模型提供者（模拟LLM响应）
         model_provider = MagicMock()
-        model_provider.generate = AsyncMock(return_value=(
- "Use Tool: read_file(path='README.md') Confidence: 0.95",
-            {"total_tokens": 50}
-        ))
+        async def _fake_generate(prompt, params=None):
+            yield "Use Tool: read_file(path='README.md') Confidence: 0.95"
+        model_provider.generate = _fake_generate
         model_provider.config = MagicMock(model="test-model")
         
         # 创建工具管理器
@@ -254,6 +258,10 @@ class TestEndToEndPermissionIntegration:
         # Given: 设置工具权限为deny
         env = end_to_end_test_environment
         env['permission_manager'].set_permission_rule("delete_file", "deny")
+        # 模型须按场景输出 delete_file，否则固定 read_file 响应无法触发拒绝路径
+        async def _denied_generate(prompt, params=None):
+            yield "Use Tool: delete_file(path='config.yaml')"
+        env['agent_executor'].model_provider.generate = _denied_generate
         
         # 设置用户目标
         user_goal = "请删除系统中的重要配置文件"

@@ -174,6 +174,10 @@ class TestPermissionResponseValidation:
     
     def test_case_insensitive_response(self):
         """验证大小写不敏感响应 - 红"""
+        # TDD红阶段：先跳过，避免在断言实现前因引用未导入的
+        # PermissionResponse（models.py:12 已注释导入）触发 NameError
+        pytest.skip("大小写不敏感待实现 - TDD红阶段")
+
         # Given: 大小写不同的输入
         test_cases = [
             ("y", "Y", PermissionResponse.GRANT),
@@ -188,8 +192,6 @@ class TestPermissionResponseValidation:
             # assert PermissionResponse.from_string(lower) == expected
             # assert PermissionResponse.from_string(upper) == expected
             pass
-        
-        pytest.skip("大小写不敏感待实现 - TDD红阶段")
 
 
 class TestPermissionInteractionEdgeCases:

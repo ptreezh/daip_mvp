@@ -54,11 +54,15 @@ class TestDebateRegression:
         mock_role_model_manager.get_debate_model_mappings.return_value = [mapping]
 
         # 设置模型提供者
-        mock_model_provider.generate = AsyncMock(return_value=("Test response", {
-            "prompt_tokens": 50,
-            "completion_tokens": 50,
-            "total_tokens": 100
-        }))
+        # 源码权威: provider.generate 是 async generator（provider.py:276），
+        # 调用方用 async for 迭代（ollama_instance_manager.py:83）；AsyncMock 无法产生
+        # async generator（side_effect 会被 await），故用普通 async gen + 计数器
+        _provider_calls = {"count": 0}
+        async def _fake_generate(prompt, params=None):
+            _provider_calls["count"] += 1
+            yield "Test response"
+        mock_model_provider.generate = _fake_generate
+        mock_model_provider.generate_calls = _provider_calls  # 供调用计数断言使用
 
         return {
             'session_manager': mock_session_manager,
@@ -233,7 +237,7 @@ class TestDebateRegression:
 
         # 验证模型调用 - 包括摘要生成 (角色轮次 + 摘要)
         expected_calls = len(roles) * num_rounds + 1  # +1 for summary
-        assert mock_dependencies['model_provider'].generate.call_count == expected_calls
+        assert mock_dependencies['model_provider'].generate_calls['count'] == expected_calls
 
     def test_token_usage_events(self, debate_manager, mock_dependencies):
         """测试Token使用事件 - 回归测试"""
@@ -403,7 +407,9 @@ class TestDebateRegression:
         """测试空角色处理 - 回归测试"""
         mock_dependencies['role_model_manager'].get_debate_model_mappings.return_value = []
 
-        debate_manager = EnhancedDebateManager(**mock_dependencies)
+        # 源码权威: 默认 use_optimized_architecture=True 走优化路径（enhanced_debate_manager.py:72），
+        # 该 ValueError 只在 legacy 路径抛出（L225），须显式指定 legacy 模式
+        debate_manager = EnhancedDebateManager(**mock_dependencies, use_optimized_architecture=False)
 
         topic = "Empty Roles Test"
         roles = ["nonexistent_role"]
@@ -464,11 +470,11 @@ class TestDebateCompatibility:
         mock_role_model_manager.get_debate_model_mappings.return_value = [mapping]
 
         # Setup model provider
-        mock_model_provider.generate = AsyncMock(return_value=("Test response", {
-            "prompt_tokens": 50,
-            "completion_tokens": 50,
-            "total_tokens": 100
-        }))
+        # 源码权威: provider.generate 是 async generator（provider.py:276），
+        # 调用方用 async for 迭代；普通 async gen 函数
+        async def _fake_generate(prompt, params=None):
+            yield "Test response"
+        mock_model_provider.generate = _fake_generate
 
         return {
             'session_manager': mock_session_manager,

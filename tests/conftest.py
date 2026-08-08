@@ -1,6 +1,9 @@
 import sys
 import os
 
+# 测试环境禁用 litellm 远程成本表拉取（无外网时 read timeout 会挂起测试）
+os.environ.setdefault("LITELLM_LOCAL_MODEL_COST_MAP", "True")
+
 # Add the src directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 print("sys.path in conftest.py:", sys.path)

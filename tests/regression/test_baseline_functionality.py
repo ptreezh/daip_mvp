@@ -38,22 +38,27 @@ def test_database_manager_creation():
     """测试数据库管理器创建"""
     from daip_live.persistence.database import DatabaseManager
 
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp:
-        try:
-            db_manager = DatabaseManager(tmp.name)
-            assert db_manager is not None
-        except Exception as e:
-            pytest.fail(f"Database manager creation failed: {e}")
-        finally:
+    tmp = tempfile.NamedTemporaryFile(suffix='.db', delete=False)
+    tmp.close()
+    try:
+        db_manager = DatabaseManager(tmp.name)
+        assert db_manager is not None
+    except Exception as e:
+        pytest.fail(f"Database manager creation failed: {e}")
+    finally:
+        db_manager.engine.dispose()
+        if os.path.exists(tmp.name):
             os.unlink(tmp.name)
 
 def test_session_manager_basic():
     """测试会话管理器基本功能"""
     from daip_live.core.models import Session
     from daip_live.memory.session_manager import SessionManager
+    from daip_live.persistence.database import DatabaseManager
 
     try:
-        session_manager = SessionManager()
+        db_manager = DatabaseManager()
+        session_manager = SessionManager(db_manager)
         # 测试创建会话
         session = Session(
             session_type="chat",
@@ -85,42 +90,46 @@ def test_tool_manager_basic():
         tool_manager = ToolManager()
         # 测试工具管理器创建成功
         assert tool_manager is not None
-        # 测试工具注册表存在
-        assert hasattr(tool_manager, '_tools')
+        # 测试工具注册表存在（当前实现使用 _registry）
+        assert hasattr(tool_manager, '_registry')
     except Exception as e:
         pytest.fail(f"Tool manager basic test failed: {e}")
 
 def test_knowledge_manager_creation():
     """测试知识管理器创建"""
-    from daip_live.core.models import ProviderConfig
+    from daip_live.core.models import KnowledgeBaseConfig, ProviderConfig
     from daip_live.knowledge.manager import KnowledgeManager
     from daip_live.model_provider.provider import LiteLLMProvider
     from daip_live.persistence.database import DatabaseManager
 
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp:
-        try:
-            db_manager = DatabaseManager(tmp.name)
-            provider_config = ProviderConfig(model="test-model")
-            model_provider = LiteLLMProvider(provider_config)
+    tmp = tempfile.NamedTemporaryFile(suffix='.db', delete=False)
+    tmp.close()
+    try:
+        db_manager = DatabaseManager(tmp.name)
+        provider_config = ProviderConfig(model="test-model")
+        model_provider = LiteLLMProvider(provider_config)
 
-            # 创建临时知识目录
-            with tempfile.TemporaryDirectory() as temp_dir:
-                config = {"knowledge_dir": temp_dir}
-                knowledge_manager = KnowledgeManager(
-                    db_manager=db_manager,
-                    model_provider=model_provider,
-                    config=config
-                )
-                assert knowledge_manager is not None
-        except Exception as e:
-            pytest.fail(f"Knowledge manager creation failed: {e}")
-        finally:
-            if os.path.exists(tmp.name):
-                os.unlink(tmp.name)
+        # 创建临时知识目录
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config = KnowledgeBaseConfig(directory=temp_dir)
+            knowledge_manager = KnowledgeManager(
+                db_manager=db_manager,
+                model_provider=model_provider,
+                config=config
+            )
+            assert knowledge_manager is not None
+    except Exception as e:
+        pytest.fail(f"Knowledge manager creation failed: {e}")
+    finally:
+        db_manager.engine.dispose()
+        if os.path.exists(tmp.name):
+            os.unlink(tmp.name)
 
 @patch('litellm.completion')
 def test_model_provider_basic(mock_completion):
     """测试模型提供商基本功能"""
+    import asyncio
+
     from daip_live.core.models import ProviderConfig
     from daip_live.model_provider.provider import LiteLLMProvider
 
@@ -133,8 +142,12 @@ def test_model_provider_basic(mock_completion):
         config = ProviderConfig(model="test-model")
         provider = LiteLLMProvider(config)
 
-        # 测试基本生成功能
-        response = provider.generate("test prompt")
+        # 测试基本生成功能（generate 为异步生成器，需收集输出）
+        async def _collect():
+            chunks = [chunk async for chunk in provider.generate("test prompt", params={})]
+            return "".join(chunks)
+
+        response = asyncio.run(_collect())
         assert response is not None
     except Exception as e:
         pytest.fail(f"Model provider basic test failed: {e}")
@@ -144,7 +157,7 @@ def test_agent_executor_creation():
     import asyncio
 
     from daip_live.agent_engine.executor import AgentExecutor
-    from daip_live.core.models import ProviderConfig
+    from daip_live.core.models import KnowledgeBaseConfig, ProviderConfig
     from daip_live.knowledge.manager import KnowledgeManager
     from daip_live.memory.service import MemoryService
     from daip_live.memory.session_manager import SessionManager
@@ -152,57 +165,61 @@ def test_agent_executor_creation():
     from daip_live.p4_role_manager_tools.tool_manager import ToolManager
     from daip_live.persistence.database import DatabaseManager
 
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp:
-        try:
-            # 创建所需组件
-            session_manager = SessionManager()
+    tmp = tempfile.NamedTemporaryFile(suffix='.db', delete=False)
+    tmp.close()
+    try:
+        # 创建所需组件
+        db_manager = DatabaseManager(tmp.name)
+        session_manager = SessionManager(db_manager)
 
-            db_manager = DatabaseManager(tmp.name)
-            provider_config = ProviderConfig(model="test-model")
-            model_provider = LiteLLMProvider(provider_config)
-            memory_service = MemoryService(model_provider)
+        provider_config = ProviderConfig(model="test-model")
+        model_provider = LiteLLMProvider(provider_config)
+        memory_service = MemoryService(model_provider)
 
-            with tempfile.TemporaryDirectory() as temp_dir:
-                config = {"knowledge_dir": temp_dir}
-                knowledge_manager = KnowledgeManager(
-                    db_manager=db_manager,
-                    model_provider=model_provider,
-                    config=config
-                )
-
-            tool_manager = ToolManager()
-            user_input_queue = asyncio.Queue()
-
-            # 创建智能体执行器
-            executor = AgentExecutor(
-                session_manager=session_manager,
-                memory_service=memory_service,
-                knowledge_manager=knowledge_manager,
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config = KnowledgeBaseConfig(directory=temp_dir)
+            knowledge_manager = KnowledgeManager(
+                db_manager=db_manager,
                 model_provider=model_provider,
-                tool_manager=tool_manager,
-                user_input_queue=user_input_queue
+                config=config
             )
-            assert executor is not None
-            
-            # 测试新增的工作流相关属性
-            assert hasattr(executor, 'workflow_definition')
-            assert hasattr(executor, 'current_element_id')
-            assert hasattr(executor, 'element_outputs')
-            assert hasattr(executor, 'loop_counters')
-            assert hasattr(executor, 'execution_history')
-        except Exception as e:
-            pytest.fail(f"Agent executor creation failed: {e}")
-        finally:
-            if os.path.exists(tmp.name):
-                os.unlink(tmp.name)
+
+        tool_manager = ToolManager()
+        user_input_queue = asyncio.Queue()
+
+        # 创建智能体执行器
+        executor = AgentExecutor(
+            session_manager=session_manager,
+            memory_service=memory_service,
+            knowledge_manager=knowledge_manager,
+            model_provider=model_provider,
+            tool_manager=tool_manager,
+            user_input_queue=user_input_queue
+        )
+        assert executor is not None
+        
+        # 测试工作流相关属性（源码权威：executor.py:85 仅 workflow_definition，
+        # current_element_id/element_outputs/loop_counters/execution_history
+        # 已重构为 workflow_executor.execute_workflow 局部变量，见 workflow_executor.py:50-54）
+        assert hasattr(executor, 'workflow_definition')
+        assert hasattr(executor, 'workflow_executor')
+        assert hasattr(executor, 'state_manager')
+        assert hasattr(executor, 'step_executor')
+        assert hasattr(executor, 'chat_executor')
+    except Exception as e:
+        pytest.fail(f"Agent executor creation failed: {e}")
+    finally:
+        db_manager.engine.dispose()
+        if os.path.exists(tmp.name):
+            os.unlink(tmp.name)
 
 def test_cli_module_import():
     """测试CLI模块导入（不执行CLI命令）"""
     try:
         from daip_live.cli import app
         assert app is not None
-        # 测试CLI应用对象创建成功
-        assert hasattr(app, 'commands')
+        # 测试CLI应用对象创建成功（typer 使用 registered_commands）
+        assert hasattr(app, 'registered_commands')
     except Exception as e:
         pytest.fail(f"CLI module import failed: {e}")
 
@@ -246,7 +263,7 @@ class TestSystemIntegration:
         """测试完整组件集成（模拟CLI run命令的组件初始化）"""
 
         from daip_live.config import config_manager
-        from daip_live.core.models import ProviderConfig
+        from daip_live.core.models import KnowledgeBaseConfig, ProviderConfig
         from daip_live.knowledge.manager import KnowledgeManager
         from daip_live.memory.service import MemoryService
         from daip_live.memory.session_manager import SessionManager
@@ -256,58 +273,60 @@ class TestSystemIntegration:
         from daip_live.p8_debate_system.manager import DebateManager
         from daip_live.persistence.database import DatabaseManager
 
-        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp:
-            try:
-                # 模拟完整的组件初始化流程
-                cfg = config_manager.get_config()
+        tmp = tempfile.NamedTemporaryFile(suffix='.db', delete=False)
+        tmp.close()
+        try:
+            # 模拟完整的组件初始化流程
+            cfg = config_manager.get_config()
 
-                # 使用临时数据库
-                db_manager = DatabaseManager(tmp.name)
+            # 使用临时数据库
+            db_manager = DatabaseManager(tmp.name)
 
-                # 创建嵌入模型提供商
-                embed_provider_config = ProviderConfig(model=cfg.llm_provider.embedding_model)
-                embed_provider = LiteLLMProvider(embed_provider_config)
+            # 创建嵌入模型提供商
+            embed_provider_config = ProviderConfig(model=cfg.llm_provider.embedding_model)
+            embed_provider = LiteLLMProvider(embed_provider_config)
 
-                # 创建知识管理器
-                with tempfile.TemporaryDirectory() as temp_dir:
-                    knowledge_config = {"knowledge_dir": temp_dir}
-                    knowledge_manager = KnowledgeManager(
-                        db_manager=db_manager,
-                        model_provider=embed_provider,
-                        config=knowledge_config
-                    )
-
-                # 创建主模型提供商
-                model_provider = LiteLLMProvider(config=cfg.llm_provider)
-
-                # 创建其他组件
-                tool_manager = ToolManager()
-                session_manager = SessionManager()
-                memory_service = MemoryService(model_provider)
-                role_manager = RoleManager()
-
-                # 创建辩论管理器
-                debate_manager = DebateManager(
-                    session_manager=session_manager,
-                    role_manager=role_manager,
-                    model_provider=model_provider
+            # 创建知识管理器
+            with tempfile.TemporaryDirectory() as temp_dir:
+                knowledge_config = KnowledgeBaseConfig(directory=temp_dir)
+                knowledge_manager = KnowledgeManager(
+                    db_manager=db_manager,
+                    model_provider=embed_provider,
+                    config=knowledge_config
                 )
 
-                # 验证所有组件都创建成功
-                assert db_manager is not None
-                assert knowledge_manager is not None
-                assert model_provider is not None
-                assert tool_manager is not None
-                assert session_manager is not None
-                assert memory_service is not None
-                assert role_manager is not None
-                assert debate_manager is not None
+            # 创建主模型提供商
+            model_provider = LiteLLMProvider(config=cfg.llm_provider)
 
-            except Exception as e:
-                pytest.fail(f"Full component integration failed: {e}")
-            finally:
-                if os.path.exists(tmp.name):
-                    os.unlink(tmp.name)
+            # 创建其他组件
+            tool_manager = ToolManager()
+            session_manager = SessionManager(db_manager)
+            memory_service = MemoryService(model_provider)
+            role_manager = RoleManager()
+
+            # 创建辩论管理器
+            debate_manager = DebateManager(
+                session_manager=session_manager,
+                role_manager=role_manager,
+                model_provider=model_provider
+            )
+
+            # 验证所有组件都创建成功
+            assert db_manager is not None
+            assert knowledge_manager is not None
+            assert model_provider is not None
+            assert tool_manager is not None
+            assert session_manager is not None
+            assert memory_service is not None
+            assert role_manager is not None
+            assert debate_manager is not None
+
+        except Exception as e:
+            pytest.fail(f"Full component integration failed: {e}")
+        finally:
+            db_manager.engine.dispose()
+            if os.path.exists(tmp.name):
+                os.unlink(tmp.name)
 
     def test_agent_executor_with_workflow_components(self):
         """测试包含工作流组件的智能体执行器集成"""
@@ -315,7 +334,7 @@ class TestSystemIntegration:
 
         from daip_live.agent_engine.executor import AgentExecutor
         from daip_live.config import config_manager
-        from daip_live.core.models import ProviderConfig
+        from daip_live.core.models import KnowledgeBaseConfig, ProviderConfig
         from daip_live.knowledge.manager import KnowledgeManager
         from daip_live.memory.service import MemoryService
         from daip_live.memory.session_manager import SessionManager
@@ -324,60 +343,62 @@ class TestSystemIntegration:
         from daip_live.persistence.database import DatabaseManager
         from daip_live.workflow.parser import WorkflowParser
 
-        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp:
-            try:
-                # 创建所需组件
-                session_manager = SessionManager()
+        tmp = tempfile.NamedTemporaryFile(suffix='.db', delete=False)
+        tmp.close()
+        try:
+            # 创建所需组件
+            db_manager = DatabaseManager(tmp.name)
+            session_manager = SessionManager(db_manager)
 
-                db_manager = DatabaseManager(tmp.name)
-                provider_config = ProviderConfig(model="test-model")
-                model_provider = LiteLLMProvider(provider_config)
-                memory_service = MemoryService(model_provider)
+            provider_config = ProviderConfig(model="test-model")
+            model_provider = LiteLLMProvider(provider_config)
+            memory_service = MemoryService(model_provider)
 
-                with tempfile.TemporaryDirectory() as temp_dir:
-                    config = {"knowledge_dir": temp_dir}
-                    knowledge_manager = KnowledgeManager(
-                        db_manager=db_manager,
-                        model_provider=model_provider,
-                        config=config
-                    )
-
-                tool_manager = ToolManager()
-                user_input_queue = asyncio.Queue()
-
-                # 创建智能体执行器
-                executor = AgentExecutor(
-                    session_manager=session_manager,
-                    memory_service=memory_service,
-                    knowledge_manager=knowledge_manager,
+            with tempfile.TemporaryDirectory() as temp_dir:
+                config = KnowledgeBaseConfig(directory=temp_dir)
+                knowledge_manager = KnowledgeManager(
+                    db_manager=db_manager,
                     model_provider=model_provider,
-                    tool_manager=tool_manager,
-                    user_input_queue=user_input_queue
+                    config=config
                 )
 
-                # 测试工作流解析器功能
-                workflow_yaml = """
-                name: integration_test_workflow
-                elements:
-                  task1:
-                    type: task
-                    name: "集成测试任务"
-                start: task1
-                """
-                
-                workflow_definition = WorkflowParser.parse(workflow_yaml)
-                assert workflow_definition.name == "integration_test_workflow"
-                assert len(workflow_definition.elements) == 1
-                
-                # 验证执行器可以接受工作流定义
-                executor.workflow_definition = workflow_definition
-                assert executor.workflow_definition is not None
+            tool_manager = ToolManager()
+            user_input_queue = asyncio.Queue()
 
-            except Exception as e:
-                pytest.fail(f"Agent executor with workflow components failed: {e}")
-            finally:
-                if os.path.exists(tmp.name):
-                    os.unlink(tmp.name)
+            # 创建智能体执行器
+            executor = AgentExecutor(
+                session_manager=session_manager,
+                memory_service=memory_service,
+                knowledge_manager=knowledge_manager,
+                model_provider=model_provider,
+                tool_manager=tool_manager,
+                user_input_queue=user_input_queue
+            )
+
+            # 测试工作流解析器功能
+            workflow_yaml = """
+            name: integration_test_workflow
+            elements:
+              task1:
+                type: task
+                name: "集成测试任务"
+            start: task1
+            """
+            
+            workflow_definition = WorkflowParser.parse(workflow_yaml)
+            assert workflow_definition.name == "integration_test_workflow"
+            assert len(workflow_definition.elements) == 1
+            
+            # 验证执行器可以接受工作流定义
+            executor.workflow_definition = workflow_definition
+            assert executor.workflow_definition is not None
+
+        except Exception as e:
+            pytest.fail(f"Agent executor with workflow components failed: {e}")
+        finally:
+            db_manager.engine.dispose()
+            if os.path.exists(tmp.name):
+                os.unlink(tmp.name)
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

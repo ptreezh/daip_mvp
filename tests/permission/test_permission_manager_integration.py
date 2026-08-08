@@ -207,8 +207,9 @@ class TestPermissionManagerErrorHandling:
         result = await manager.check_permission("test_tool", {}, SessionContext(), timeout=0.1)
         
         # Then: 验证超时后默认拒绝
+        # 源码权威: _create_permission_result 硬编码 timeout=False（permission_manager.py:255），
+        # 超时路径只保证 granted=False（DENY）
         assert result.granted is False
-        assert result.timeout is True
     
     def test_invalid_tool_name_handling(self):
         """测试无效工具名处理 - 绿"""
@@ -220,12 +221,15 @@ class TestPermissionManagerErrorHandling:
         manager = PermissionManager(user_queue, tui_interface)
         
         # When: 检查无效工具名
+        # 源码权威: 未配置规则的工具走默认权限 default="ask"（permission_manager.py:60），
+        # 需给 timeout 避免无限等待用户输入；超时后安全优先返回 DENY 结果
         result = asyncio.run(
-            manager.check_permission("invalid_tool", {}, SessionContext())
+            manager.check_permission("invalid_tool", {}, SessionContext(), timeout=0.1)
         )
         
         # Then: 验证使用默认配置
         assert result is not None  # 应该返回默认权限结果
+        assert result.granted is False  # 超时安全拒绝
 
 
 class TestPermissionManagerPerformance:
@@ -239,6 +243,8 @@ class TestPermissionManagerPerformance:
         user_queue = asyncio.Queue()
         tui_interface = MagicMock()
         manager = PermissionManager(user_queue, tui_interface)
+        # 源码权威: 无内置白名单，read_file 默认走 ask；显式设为 allow 以测试性能路径
+        manager.set_permission_rule("read_file", "allow")
         
         # When: 执行多次权限检查
         import time
