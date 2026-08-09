@@ -8,6 +8,8 @@ from unittest.mock import Mock, patch
 import pytest
 from typer.testing import CliRunner
 
+from daip_live.core.models import Role
+
 # We'll import the actual command module once we create it
 # from daip_live.cli.commands.role import app as role_app
 
@@ -349,13 +351,9 @@ class TestRoleCreateCommand:
         with patch("daip_live.cli.commands.role.RoleManager") as mock_manager_class:
             mock_manager = Mock()
             mock_manager_class.return_value = mock_manager
-            mock_manager.create_role.return_value = {
-                "name": "newrole",
-                "persona": "A newly created role",
-                "tools": [],
-                "model": "gpt-3.5-turbo",
-                "status": "active",
-            }
+            mock_manager.create_role.return_value = Role(
+                name="newrole", persona="A newly created role", tools=[]
+            )
 
             result = runner.invoke(
                 role_app, ["create", "newrole", "--persona", "A newly created role"]
@@ -374,13 +372,11 @@ class TestRoleCreateCommand:
         with patch("daip_live.cli.commands.role.RoleManager") as mock_manager_class:
             mock_manager = Mock()
             mock_manager_class.return_value = mock_manager
-            mock_manager.create_role.return_value = {
-                "name": "fullrole",
-                "persona": "Complete role definition",
-                "tools": ["code", "test"],
-                "model": "gpt-4",
-                "status": "active",
-            }
+            mock_manager.create_role.return_value = Role(
+                name="fullrole",
+                persona="Complete role definition",
+                tools=["code", "test"],
+            )
 
             result = runner.invoke(
                 role_app,
@@ -397,7 +393,6 @@ class TestRoleCreateCommand:
             )
 
             assert result.exit_code == 0
-            # 源码权威: create 是 stub（role.py:329），不调用 manager.create_role
             assert "fullrole" in result.stdout
             assert "created" in result.stdout.lower()
 
@@ -430,9 +425,8 @@ class TestRoleDeleteCommand:
 
                 assert result.exit_code == 0
                 mock_confirm.assert_called_once()
-                # 源码权威: delete 是 stub（role.py:372），不调用 manager.delete_role
-                # 但需 get_role_by_name 命中角色
-                mock_manager.get_role_by_name.assert_called_once_with("oldrole")
+                # 真实实现：直接调用 manager.delete_role（非 stub）
+                mock_manager.delete_role.assert_called_once_with("oldrole")
 
     def test_role_delete_cancelled(self):
         """测试取消删除角色"""

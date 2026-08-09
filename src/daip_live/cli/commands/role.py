@@ -313,31 +313,24 @@ def create(
                 f"[bold blue]🎭 Creating new role: {role_name}...[/bold blue]"
             )
 
-            RoleManager()
+            role_manager = RoleManager()
 
             # Parse tools
             tools_list = []
             if tools:
                 tools_list = [tool.strip() for tool in tools.split(",") if tool.strip()]
 
-            # Create role data
-            role_data = {
-                "name": role_name,
-                "persona": persona,
-                "tools": tools_list,
-                "model": model,
-                "status": "active",
-            }
-
-            # Note: This is a stub implementation since RoleManager doesn't have create_role yet  # noqa: E501
-            # In a full implementation, this would save the role to the roles directory
-            console.print(f"[green]✅ Role '{role_name}' created successfully[/green]")
+            # 真实持久化：写入 roles/ 目录 yaml 文件（生产交付要求，非 stub）
+            created = role_manager.create_role(
+                name=role_name, persona=persona, tools=tools_list
+            )
+            console.print(f"[green]✅ Role '{created.name}' created successfully[/green]")
             console.print(f"[dim]Persona: {persona}[/dim]")
             if tools_list:
                 console.print(f"[dim]Tools: {', '.join(tools_list)}[/dim]")
             console.print(f"[dim]Model: {model}[/dim]")
 
-            return role_data
+            return created
 
     import asyncio
 
@@ -368,14 +361,12 @@ def delete(
 
             role_manager = RoleManager()
 
-            # Check if role exists
-            role = role_manager.get_role_by_name(role_name)
-            if not role:
+            # 真实删除：移除 roles/ 目录 yaml 文件（生产交付要求，非 stub）
+            deleted = role_manager.delete_role(role_name)
+            if not deleted:
                 console.print(f"[red]❌ Role '{role_name}' not found[/red]")
                 raise typer.Exit(1)
 
-            # Note: This is a stub implementation since RoleManager doesn't have delete_role yet  # noqa: E501
-            # In a full implementation, this would remove the role file from the roles directory  # noqa: E501
             console.print(f"[green]✅ Role '{role_name}' deleted successfully[/green]")
 
     import asyncio

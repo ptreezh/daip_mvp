@@ -115,16 +115,13 @@ class RoleManager:
 
     def get_role_by_name(self, name: str) -> Optional[Role]:
         """Retrieves a role by its unique name."""
-        # 如果直接找不到角色，先尝试加载一次
+        # 如果直接找不到角色，尝试从文件加载一次
         if name not in self._roles:
-            # 尝试重新加载角色
             try:
-                # 确保使用绝对路径或相对于当前工作目录的路径
                 role_file_path = os.path.join(
                     self._get_roles_dir_path(), f"{name}.yaml"
                 )
                 if os.path.exists(role_file_path):
-                    # 从文件加载缺失的角色
                     with open(role_file_path, encoding="utf-8") as f:
                         role_data = yaml.safe_load(f)
                         if isinstance(role_data, dict):
@@ -135,31 +132,75 @@ class RoleManager:
             except Exception as e:
                 log.warning(f"Failed to load role {name} from file: {e}")
 
-            # 如果文件不存在或加载失败，创建一个默认角色
-            log.warning(
-                f"Role '{name}' not found, creating a temporary role with default configuration."  # noqa: E501
-            )
-            default_role = Role(
-                name=name,
-                persona=f"Default persona for {name}. You are an AI assistant playing this role.",  # noqa: E501
-                tools=[],
-                model_configs=[
-                    {
-                        "model_name": "gpt-3.5-turbo",
-                        "provider": "openai",
-                        "max_tokens": 2048,
-                        "temperature": 0.7,
-                        "top_p": 0.9,
-                        "frequency_penalty": 0.1,
-                        "presence_penalty": 0.2,
-                        "is_primary": True,
-                    }
-                ],
-            )
-            self._roles[name] = default_role
-            return default_role
+            # 文件不存在：返回 None，绝不静默创建默认角色（生产交付要求：
+            # 假角色会掩盖 role delete 等命令的真实行为）
+            return None
 
         return self._roles.get(name)
+
+    def create_role(self, name: str, persona: str, tools: list[str] | None = None) -> Role:
+        """创建角色并写入 roles 目录 yaml 文件（真实持久化）。
+
+        Args:
+            name: 角色名（作为文件名，需为合法文件名）
+            persona: 角色人格描述
+            tools: 角色可用工具列表
+
+        Returns:
+            Role: 创建的角色对象
+
+        Raises:
+            ValueError: 角色已存在或参数非法
+        """
+        import re
+
+        tools = tools or []
+        if not name or not name.strip():
+            raise ValueError("Role name cannot be empty")
+        if not re.match(r"^[\w\-]+$", name):
+            raise ValueError(
+                f"Invalid role name '{name}': only letters, digits, underscore, dash allowed"  # noqa: E501
+            )
+
+        roles_dir = self._get_roles_dir_path()
+        os.makedirs(roles_dir, exist_ok=True)
+
+        role_file = os.path.join(roles_dir, f"{name}.yaml")
+        if os.path.exists(role_file):
+            raise ValueError(f"Role '{name}' already exists")
+
+        role = Role(name=name, persona=persona, tools=tools)
+        role_data = {"persona": persona, "tools": tools}
+        with open(role_file, "w", encoding="utf-8") as f:
+            yaml.safe_dump(role_data, f, allow_unicode=True, sort_keys=False)
+
+        self._roles[name] = role
+        log.info(f"Role '{name}' created at {role_file}")
+        return role
+
+    def delete_role(self, name: str) -> bool:
+        """删除角色及其 yaml 文件。
+
+        Args:
+            name: 角色名
+
+        Returns:
+            bool: 是否成功删除（角色不存在返回 False）
+        """
+        roles_dir = self._get_roles_dir_path()
+        role_file = os.path.join(roles_dir, f"{name}.yaml")
+        if not os.path.exists(role_file):
+            log.warning(f"Role '{name}' file not found at {role_file}")
+            return False
+
+        try:
+            os.remove(role_file)
+            self._roles.pop(name, None)
+            log.info(f"Role '{name}' deleted")
+            return True
+        except OSError as e:
+            log.error(f"Failed to delete role '{name}': {e}")
+            return False
 
     def _get_roles_dir_path(self):
         """获取角色目录路径，处理相对路径"""
