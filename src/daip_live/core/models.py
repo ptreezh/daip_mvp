@@ -370,7 +370,7 @@ class PermissionInteraction(BaseModel):
         if self.state != PermissionState.PENDING and self.response is None:
             raise ValueError("Non-pending interaction must have response")
 
-    model_config = ConfigDict(validate_assignment=True, use_enum_values=True)
+    model_config = ConfigDict(validate_assignment=True)
 
 
 class FinalResponseEvent(BaseModel):
