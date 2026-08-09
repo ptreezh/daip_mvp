@@ -29,19 +29,29 @@ jobs:
         run: poetry run pip install types-PyYAML types-aiofiles types-Markdown types-requests types-toml
 
       - name: Check formatting (ruff format)
-        run: poetry run ruff format --check src/
+        run: poetry run ruff format --check src/ tests/
 
       - name: Run ruff
-        run: poetry run ruff check src/
+        run: poetry run ruff check src/ tests/
 
       - name: Check Python 3.9 syntax compatibility
         run: poetry run python scripts/check_py39_syntax.py
 
-      # mypy: 全库类型化是已记录的 Backlog（1251 项，见 .planning/real_state_assessment_2026-08-09.md）。
+      # mypy: 全库类型化是已记录的 Backlog（917 项，见 .planning/real_state_assessment_2026-08-09.md）。
       # 软门禁：不阻塞 CI，错误数已知且记录在案，Backlog 完成后改回硬门禁。
       - name: Run mypy (soft gate - typing backlog)
         run: poetry run mypy src/daip_live
         continue-on-error: true
+
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama --version
+
+      - name: Pull models for real-model tests
+        run: |
+          ollama pull llama3:latest
+          ollama pull nomic-embed-text
 
       - name: Run full test suite (unit + integration + e2e + security)
         run: poetry run pytest tests/ -q --tb=line

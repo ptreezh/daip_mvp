@@ -41,7 +41,10 @@ from daip_live.core.models import (
     DebateRoundStartEvent,
     DebateStartEvent,
     DebateTurnCompleteEvent,
+    ErrorEvent,
+    FinalResponseEvent,
     ThoughtEvent,
+    TodoItem,
     TokenUsageEvent,
 )
 from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
@@ -437,12 +440,15 @@ def process_natural_language(
         elif intent.name == "download_paper":
             _handle_download_paper_intent(intent)
         elif intent.name in ["chat", "question"]:
-            _handle_conversation_intent(intent)
+            asyncio.run(_handle_conversation_intent(intent))
         else:
             pass
 
-    except Exception:
-        pass
+    except Exception as e:
+        # 不再静默吞错：向用户展示错误信息
+        from rich.console import Console
+
+        Console().print(f"[red]处理请求失败: {e}[/red]")
 
 
 def _handle_debate_intent(intent: Intent):
@@ -485,7 +491,7 @@ def _handle_download_paper_intent(intent: Intent):
     doc_download(topic=str(paper_id), source=source)
 
 
-def _handle_conversation_intent(intent: Intent):
+async def _handle_conversation_intent(intent: Intent):
     """Handle conversation intents"""
     question = intent.parameters.get("question", "")
     chat_content = intent.parameters.get("chat_content", "")
@@ -494,26 +500,27 @@ def _handle_conversation_intent(intent: Intent):
     if not prompt:
         return
 
-    # 复用真实聊天执行器（EnhancedChatExecutor + AgentExecutor 步骤执行）
-    from daip_live.agent_engine.enhanced_chat_executor import EnhancedChatExecutor
+    from rich.console import Console
 
-    async def run_chat_async():
-        chat_executor = EnhancedChatExecutor(
-            session_manager=container.session_manager(),
-            memory_service=container.memory_service(),
-            user_input_queue=container.user_input_queue(),
-        )
-        # ask 是单轮命令：chat_run 处理完初始目标后会等待 TUI 队列输入，
-        # 预置 None 终止信号让循环优雅退出并保存会话
-        await chat_executor.user_input_queue.put(None)
-        step_executor = container.agent_executor()
-        async for event in chat_executor.chat_run(prompt, step_executor):
-            if isinstance(event, ThoughtEvent):
-                pass
-            elif hasattr(event, "content") and event.content:
-                pass
-
-    asyncio.run(run_chat_async())
+    console = Console()
+    agent = container.agent_executor()
+    step_executor = agent.step_executor
+    session = agent.session_manager.create_session(
+        goal=prompt, session_type="chat", participant_ids=["agent", "user"]
+    )
+    current_task = TodoItem(
+        id=0, description=prompt, status="pending", priority=1
+    )
+    answered = False
+    async for event in step_executor.execute_step(current_task, session):
+        if isinstance(event, FinalResponseEvent) and event.content:
+            console.print(event.content)
+            answered = True
+        elif isinstance(event, ErrorEvent) and event.message:
+            console.print(f"[red]错误: {event.message}[/red]")
+            answered = True
+    if not answered:
+        console.print("[yellow]未能生成回答，请检查模型服务状态（Ollama 是否运行）。[/yellow]")  # noqa: E501
 
 
 # Import commands
