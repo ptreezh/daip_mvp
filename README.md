@@ -63,15 +63,33 @@ daip run
 # 启动TUI界面
 daip run
 
-# 启动辩论
-daip debate start "人工智能的未来发展" --roles 乐观主义者,悲观主义者
+# 启动辩论（真实 Ollama 辩论）
+daip debate start "人工智能的未来发展" --roles pro_arguer,con_arguer --rounds 1
+
+# 自然语言入口（复用真实命令/执行器）
+daip ask "开始一场关于AI伦理的辩论"
+daip ask "搜索关于量子计算的论文"
+
+# 知识库同步与搜索（S4 接通后真实可用）
+daip knowledge sync                 # 摄取 knowledge/ 到向量库（元数据持久化）
+daip knowledge search "量子计算"     # 语义搜索（返回真实相关文档）
+daip knowledge status               # 查看索引统计
 
 # 创建Wiki页面
 daip wiki create "机器学习基础概念"
 
-# 查看帮助
+# 模型/会话/角色管理（S1-2 挂载）
+daip model status
+daip session list
+daip role list
+
+# 查看帮助（共 10 个命令组）
 daip --help
 ```
+
+### **全部命令**
+
+`run` / `ask` / `debate` / `doc` / `role-intel` / `knowledge` / `wiki` / `model` / `session` / `role`
 
 ## 🎯 **核心功能**
 

@@ -48,6 +48,8 @@ def _build_knowledge_manager() -> tuple[KnowledgeManager, str]:
     修复：此前 CLI 层用 :memory: DB + MockModelProvider，导致元数据永不落盘
     （knowledge_sources 恒为 0）且 sync 每次全量重摄入、搜索恒为空壳。
     """
+    import os
+
     import yaml
 
     config_path = Path("config.yaml")
@@ -63,6 +65,10 @@ def _build_knowledge_manager() -> tuple[KnowledgeManager, str]:
         knowledge_dir = "docs/"
         embedding_model = "ollama/nomic-embed-text"
         db_path = "daip_live.db"
+
+    # 测试隔离环境变量（S4-1/Phase2）：与 p7_gui 的 DAIP_DB_PATH 机制一致
+    db_path = os.environ.get("DAIP_DB_PATH") or db_path
+    knowledge_dir = os.environ.get("DAIP_KNOWLEDGE_DIR") or knowledge_dir
 
     knowledge_config = KnowledgeBaseConfig(directory=knowledge_dir)
     db_manager = DatabaseManager(db_path=db_path)

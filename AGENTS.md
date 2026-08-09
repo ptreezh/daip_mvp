@@ -25,10 +25,10 @@ poetry shell
 ```
 
 ### Running the Application
+> 本机无 poetry 时用 `py -m daip_live.cli.main` 等价调用（如 `py -m daip_live.cli.main run`）。
 ```bash
 # Start interactive TUI session
 poetry run daip run
-
 # Sync knowledge base manually
 poetry run daip knowledge sync
 
