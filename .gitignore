@@ -111,8 +111,8 @@ yarn-error.log*
 .env.test
 .env.local
 
-# CI/CD
-.github/
+# CI/CD (S2-2: .github/ 必须入库，CI 文件是发布门禁 G5 的一部分)
+# .github/
 .circleci/
 .jit/
 .semaphore/

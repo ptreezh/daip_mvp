@@ -141,7 +141,10 @@ class LiteLLMProvider(IModelProvider):
             params["base_url"] = base_url
 
         response = await litellm.aembedding(**params)
-        return response.data[0].embedding
+        data = response.data[0]
+        if isinstance(data, dict):
+            return data["embedding"]
+        return data.embedding
 
     async def _handle_embedding_failure(
         self, error: Exception, text: str, api_key: str, base_url: str

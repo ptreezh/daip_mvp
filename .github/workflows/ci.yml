@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main, gnhf/*]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: |
+          curl -fsSL https://install.python-poetry.org | python3 -
+          poetry --version
+
+      - name: Install dependencies
+        run: poetry install --with dev
+
+      - name: Install type stubs
+        run: poetry run pip install types-PyYAML types-aiofiles types-Markdown types-requests types-toml
+
+      - name: Check formatting (ruff format)
+        run: poetry run ruff format --check src/
+
+      - name: Run ruff
+        run: poetry run ruff check src/
+
+      - name: Check Python 3.9 syntax compatibility
+        run: poetry run python scripts/check_py39_syntax.py
+
+      # mypy: 全库类型化是已记录的 Backlog（1251 项，见 .planning/real_state_assessment_2026-08-09.md）。
+      # 软门禁：不阻塞 CI，错误数已知且记录在案，Backlog 完成后改回硬门禁。
+      - name: Run mypy (soft gate - typing backlog)
+        run: poetry run mypy src/daip_live
+        continue-on-error: true
+
+      - name: Run full test suite (unit + integration + e2e + security)
+        run: poetry run pytest tests/ -q --tb=line
+        env:
+          OLLAMA_HOST: http://localhost:11434

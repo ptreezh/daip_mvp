@@ -8,7 +8,6 @@ os.environ.setdefault("LITELLM_LOCAL_MODEL_COST_MAP", "True")
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
 )
-print("sys.path in conftest.py:", sys.path)
 
 
 import pytest

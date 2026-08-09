@@ -42,12 +42,62 @@ def _execute_default_behavior(
         asyncio.run(_sync_knowledge_default())
 
 
+def _build_knowledge_manager() -> tuple[KnowledgeManager, str]:
+    """从 config.yaml 构造持久化 DB + 真实 embedding 的 KnowledgeManager（S4-1）。
+
+    修复：此前 CLI 层用 :memory: DB + MockModelProvider，导致元数据永不落盘
+    （knowledge_sources 恒为 0）且 sync 每次全量重摄入、搜索恒为空壳。
+    """
+    import yaml
+
+    config_path = Path("config.yaml")
+    if config_path.exists():
+        with open(config_path, encoding="utf-8") as f:
+            config_data = yaml.safe_load(f)
+        knowledge_dir = config_data.get("knowledge_base", {}).get("directory", "docs/")
+        embedding_model = config_data.get("llm_provider", {}).get(
+            "embedding_model", "ollama/nomic-embed-text"
+        )
+        db_path = config_data.get("database", {}).get("path", "daip_live.db")
+    else:
+        knowledge_dir = "docs/"
+        embedding_model = "ollama/nomic-embed-text"
+        db_path = "daip_live.db"
+
+    knowledge_config = KnowledgeBaseConfig(directory=knowledge_dir)
+    db_manager = DatabaseManager(db_path=db_path)
+    provider_config = ProviderConfig(
+        model=embedding_model,
+        provider="ollama",
+        embedding_model=embedding_model,
+        base_url="http://localhost:11434",
+    )
+    model_provider = LiteLLMProvider(provider_config)
+    return (
+        KnowledgeManager(
+            db_manager=db_manager,
+            model_provider=model_provider,
+            config=knowledge_config,
+        ),
+        db_path,
+    )
+
+
 # Create the knowledge command app
 app = typer.Typer(
     name="knowledge",
     help="Manage knowledge base and document search in the DAIP-LIVE system",
     rich_markup_mode="rich",
 )
+
+
+@app.callback(invoke_without_command=True)
+def _knowledge_root_callback(ctx: typer.Context):
+    """默认入口（S4-2）：`daip knowledge <query>` 视为搜索查询。"""
+    if ctx.invoked_subcommand is None and ctx.args:
+        import asyncio
+
+        asyncio.run(_search_knowledge_default(ctx.args[0]))
 
 
 # Define a default command that can be called explicitly
@@ -106,50 +156,12 @@ async def _sync_knowledge_default():
         console.print("[bold blue]📚 Synchronizing knowledge base...[/bold blue]")
 
         try:
-            # Load config from YAML or use defaults
-            import yaml
-
-            config_path = Path("config.yaml")
-            if config_path.exists():
-                with open(config_path, encoding="utf-8") as f:
-                    config_data = yaml.safe_load(f)
-
-                knowledge_dir = config_data.get("knowledge_base", {}).get(
-                    "directory", "docs/"
-                )
-                config_data.get("llm_provider", {}).get(
-                    "embedding_model", "mock-embedding"
-                )
-            else:
-                knowledge_dir = "docs/"
-
-            # Create configuration
-            knowledge_config = KnowledgeBaseConfig(directory=knowledge_dir)
-
-            # Initialize database manager
-            db_manager = DatabaseManager(":memory:")  # Using in-memory for CLI
-
-            # Use mock provider to avoid embedding issues during CLI sync
-            try:
-                from ...model_provider.mock_provider import MockModelProvider
-
-                model_provider = MockModelProvider()
-            except ImportError:
-                # Fallback to LiteLLMProvider with mock configuration
-                provider_config = ProviderConfig(
-                    model="mock-embedding", provider="mock"
-                )
-                model_provider = LiteLLMProvider(provider_config)
-
-            knowledge_manager = KnowledgeManager(
-                db_manager=db_manager,
-                model_provider=model_provider,
-                config=knowledge_config,
-            )
+            # 持久 DB + 真实 embedding（S4-1）
+            knowledge_manager, _ = _build_knowledge_manager()
 
             # Actual sync (without dry_run or verbose for default)
             console.print(
-                f"[dim]Scanning knowledge directory for changes: {knowledge_dir}[/dim]"
+                f"[dim]Scanning knowledge directory for changes: {knowledge_manager.config.directory}[/dim]"  # noqa: E501
             )
 
             # Run the actual sync
@@ -172,23 +184,9 @@ async def _search_knowledge_default(query: str):
         )
 
         try:
-            # Create default configuration
-            knowledge_config = KnowledgeBaseConfig(directory="knowledge")
-            provider_config = ProviderConfig(
-                model="text-embedding-3-small", provider="openai"
-            )
-
-            # Initialize dependencies
-            db_manager = DatabaseManager()
-            model_provider = LiteLLMProvider(provider_config)
-            KnowledgeManager(
-                db_manager=db_manager,
-                model_provider=model_provider,
-                config=knowledge_config,
-            )
-
-            # Mock search results
-            search_results = []
+            # 真实检索（S4-2：删除空壳，接 KnowledgeManager.search）
+            knowledge_manager, _ = _build_knowledge_manager()
+            search_results = await knowledge_manager.search(query, top_k=10)
 
             # Display formatted search results
             _display_search_results(query, search_results, 10)
@@ -225,55 +223,8 @@ def sync(
                 )
 
             try:
-                # Load config from YAML or use defaults
-                import yaml
-
-                config_path = Path("config.yaml")
-                if config_path.exists():
-                    with open(config_path, encoding="utf-8") as f:
-                        config_data = yaml.safe_load(f)
-
-                    knowledge_dir = config_data.get("knowledge_base", {}).get(
-                        "directory", "docs/"
-                    )
-                    config_data.get("llm_provider", {}).get(
-                        "embedding_model", "mock-embedding"
-                    )
-                else:
-                    knowledge_dir = "docs/"
-
-                # Create configuration
-                from daip_live.core.models import KnowledgeBaseConfig
-
-                knowledge_config = KnowledgeBaseConfig(directory=knowledge_dir)
-
-                # Initialize database manager
-                from daip_live.persistence.database import DatabaseManager
-
-                db_manager = DatabaseManager(":memory:")  # Using in-memory for CLI
-
-                # Use mock provider to avoid embedding issues during CLI sync
-                try:
-                    from daip_live.model_provider.mock_provider import MockModelProvider
-
-                    model_provider = MockModelProvider()
-                except ImportError:
-                    # Fallback to LiteLLMProvider with mock configuration
-                    from daip_live.core.models import ProviderConfig
-                    from daip_live.model_provider.provider import LiteLLMProvider
-
-                    provider_config = ProviderConfig(
-                        model="mock-embedding",
-                        provider="mock",
-                        embedding_model="mock-embedding",
-                    )
-                    model_provider = LiteLLMProvider(provider_config)
-
-                knowledge_manager = KnowledgeManager(
-                    db_manager=db_manager,
-                    model_provider=model_provider,
-                    config=knowledge_config,
-                )
+                # 持久 DB + 真实 embedding（S4-1）
+                knowledge_manager, _ = _build_knowledge_manager()
 
                 if dry_run:
                     # Dry run mode - only show what would change
@@ -343,7 +294,7 @@ def sync(
                 # Actual sync
                 if not json_output and verbose:
                     console.print(
-                        f"[dim]Scanning knowledge directory for changes: {knowledge_dir}[/dim]"  # noqa: E501
+                        f"[dim]Scanning knowledge directory for changes: {knowledge_manager.config.directory}[/dim]"  # noqa: E501
                     )
 
                 # Run the actual sync
@@ -427,31 +378,26 @@ def status(
                 )
 
             try:
-                # Create default configuration
-                knowledge_config = KnowledgeBaseConfig(directory="knowledge")
-                provider_config = ProviderConfig(
-                    model="text-embedding-3-small", provider="openai"
+                # 真实状态（S4-2：从持久 DB 与索引读取，替换 mock 硬编码）
+                knowledge_manager, _ = _build_knowledge_manager()
+                sources = knowledge_manager.db_manager.get_all_knowledge_sources()
+                total_documents = len(sources)
+                indexed_documents = (
+                    knowledge_manager.faiss_index.ntotal
+                    if knowledge_manager.faiss_index
+                    else 0
                 )
-
-                # Initialize dependencies
-                db_manager = DatabaseManager()
-                model_provider = LiteLLMProvider(provider_config)
-                KnowledgeManager(
-                    db_manager=db_manager,
-                    model_provider=model_provider,
-                    config=knowledge_config,
-                )
-
-                # Mock status data
-                total_documents = 0
-                indexed_documents = 0
-                pending_documents = 0
-                total_size_mb = 0.0
+                pending_documents = max(0, total_documents - indexed_documents)
+                total_size_mb = sum(
+                    Path(s.file_path).stat().st_size
+                    for s in sources
+                    if Path(s.file_path).exists()
+                ) / (1024 * 1024)
 
                 if json_output:
                     status_data = {
                         "knowledge_base": {
-                            "directory": knowledge_config.directory,
+                            "directory": knowledge_manager.config.directory,
                             "total_documents": total_documents,
                             "indexed_documents": indexed_documents,
                             "pending_documents": pending_documents,
@@ -463,7 +409,7 @@ def status(
                 else:
                     # Display formatted status
                     _display_knowledge_status(
-                        directory=knowledge_config.directory,
+                        directory=knowledge_manager.config.directory,
                         total_documents=total_documents,
                         indexed_documents=indexed_documents,
                         pending_documents=pending_documents,
@@ -536,23 +482,9 @@ def search(
                 )
 
             try:
-                # Create default configuration
-                knowledge_config = KnowledgeBaseConfig(directory="knowledge")
-                provider_config = ProviderConfig(
-                    model="text-embedding-3-small", provider="openai"
-                )
-
-                # Initialize dependencies
-                db_manager = DatabaseManager()
-                model_provider = LiteLLMProvider(provider_config)
-                KnowledgeManager(
-                    db_manager=db_manager,
-                    model_provider=model_provider,
-                    config=knowledge_config,
-                )
-
-                # Mock search results
-                search_results = []
+                # 真实检索（S4-2）
+                knowledge_manager, _ = _build_knowledge_manager()
+                search_results = await knowledge_manager.search(query, top_k=limit)
 
                 if json_output:
                     search_data = {

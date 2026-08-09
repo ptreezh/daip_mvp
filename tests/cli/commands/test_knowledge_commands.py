@@ -299,6 +299,8 @@ class TestKnowledgeStatusCommand:
             ]
             mock_manager.db_manager = mock_db
             mock_db.get_all_knowledge_sources.return_value = sources
+            mock_manager.faiss_index = Mock(ntotal=2)
+            mock_manager.config = Mock(directory="knowledge")
 
             result = runner.invoke(knowledge_app, ['status'])
 
@@ -330,6 +332,8 @@ class TestKnowledgeStatusCommand:
             ]
             mock_manager.db_manager = mock_db
             mock_db.get_all_knowledge_sources.return_value = sources
+            mock_manager.faiss_index = Mock(ntotal=1)
+            mock_manager.config = Mock(directory="knowledge")
 
             result = runner.invoke(knowledge_app, ['status', '--json'])
 
