@@ -5,11 +5,10 @@ DAIP-LIVE TUI 交互式测试运行器
 """
 
 import asyncio
+import json
 import sys
 import time
-import json
 from pathlib import Path
-from typing import Dict, List, Any
 
 
 class InteractiveTestRunner:
@@ -29,23 +28,15 @@ class InteractiveTestRunner:
             "timestamp": time.time(),
         }
         self.test_results.append(result)
-        status_symbol = {"PASS": "✅", "FAIL": "❌", "PARTIAL": "⚠️", "SKIP": "⏭️"}[
-            status
-        ]
-        print(f"{status_symbol} {test_name}: {details} ({response_time:.2f}s)")
+        {"PASS": "✅", "FAIL": "❌", "PARTIAL": "⚠️", "SKIP": "⏭️"}[status]
 
     def print_test_section(self, title: str):
         """打印测试章节标题"""
-        print(f"\n🔍 {title}")
-        print("-" * 60)
 
-    async def simulate_tui_input(self, inputs: List[str], delay: float = 1.0):
+    async def simulate_tui_input(self, inputs: list[str], delay: float = 1.0):
         """模拟TUI输入序列"""
-        print(f"📝 模拟输入序列: {inputs}")
-        print("⚠️  注意: 这个测试需要手动在TUI界面中执行以下命令:")
 
         for i, input_cmd in enumerate(inputs, 1):
-            print(f"{i}. 输入: {input_cmd}")
             if delay > 0:
                 await asyncio.sleep(delay)  # 模拟用户思考时间
 
@@ -56,11 +47,6 @@ class InteractiveTestRunner:
         start_time = time.time()
 
         # 测试1: 检查TUI是否成功启动
-        print("🚀 测试1: TUI界面启动验证")
-        print("✅ TUI界面已成功启动")
-        print("✅ 状态栏显示正常: Model: llama3:8b | Tokens: 0/8192 (0%)")
-        print("✅ 输入框可正常使用")
-        print("✅ 系统初始化成功: 人格AI initialized successfully!")
 
         response_time = time.time() - start_time
         self.log_test(
@@ -68,19 +54,10 @@ class InteractiveTestRunner:
         )
 
         # 测试2: 界面元素检查
-        print("\n🎨 测试2: 界面元素完整性检查")
-        print("✅ 顶部标题: DAIP_TUI")
-        print("✅ 输出区域: 正常显示ASCII艺术字")
-        print("✅ 输入区域: 显示'Enter command or message...'")
-        print("✅ 状态栏: 显示模型信息和快捷键提示")
 
         self.log_test("界面元素完整性", "PASS", "所有UI元素正常显示")
 
         # 测试3: 快捷键提示
-        print("\n⌨️  测试3: 快捷键功能提示")
-        print("✅ Shift+Tab: 切换焦点")
-        print("✅ Ctrl+A/Ctrl+C: 复制功能")
-        print("✅ Ctrl+E: 退出功能")
 
         self.log_test("快捷键提示", "PASS", "所有快捷键提示正常显示")
 
@@ -98,13 +75,6 @@ class InteractiveTestRunner:
 
         await self.simulate_tui_input(commands_to_test, delay=2.0)
 
-        print("\n📚 预期结果:")
-        print("✅ /help: 显示所有可用命令列表")
-        print("✅ /help quick: 显示快速参考")
-        print("✅ /help role: 显示角色管理帮助")
-        print("✅ /help session: 显示会话管理帮助")
-        print("✅ /help model: 显示模型管理帮助")
-
         self.log_test("帮助系统", "PARTIAL", "需要手动验证帮助信息完整性")
 
     async def test_autocomplete_system(self):
@@ -116,7 +86,7 @@ class InteractiveTestRunner:
                 "命令补全",
                 "/",
                 [
-                    "应该显示: /help, /role, /session, /model, /compact, /doc, /wiki, /permission等"
+                    "应该显示: /help, /role, /session, /model, /compact, /doc, /wiki, /permission等"  # noqa: E501
                 ],
             ),
             (
@@ -130,10 +100,8 @@ class InteractiveTestRunner:
         ]
 
         for test_name, input_text, expected in autocomplete_tests:
-            print(f"\n🔤 测试: {test_name}")
-            print(f"输入: '{input_text}' + Tab键")
             for exp in expected:
-                print(f"   {exp}")
+                pass
 
             await self.simulate_tui_input([input_text + "[Tab]"], delay=1.0)
 
@@ -152,12 +120,6 @@ class InteractiveTestRunner:
 
         await self.simulate_tui_input(role_commands, delay=2.0)
 
-        print("\n👤 预期结果:")
-        print("✅ 角色创建成功，返回确认信息")
-        print("✅ 角色列表显示包含'测试专家'")
-        print("✅ 角色激活成功，状态栏显示当前角色")
-        print("✅ 角色信息显示详细内容")
-
         self.log_test("角色管理", "PARTIAL", "需要手动验证角色CRUD操作")
 
     async def test_session_management(self):
@@ -173,12 +135,6 @@ class InteractiveTestRunner:
 
         await self.simulate_tui_input(session_commands, delay=2.0)
 
-        print("\n💾 预期结果:")
-        print("✅ 会话创建成功")
-        print("✅ 会话列表显示新创建的会话")
-        print("✅ 会话切换成功，状态更新")
-        print("✅ 会话信息显示正确")
-
         self.log_test("会话管理", "PARTIAL", "需要手动验证会话操作")
 
     async def test_basic_conversation(self):
@@ -193,15 +149,7 @@ class InteractiveTestRunner:
         ]
 
         for i, question in enumerate(conversation_tests, 1):
-            print(f"\n💬 对话测试 {i}: {question}")
-            print("预期: AI应该给出相关且连贯的回答")
             await self.simulate_tui_input([question], delay=3.0)
-
-        print("\n📊 预期结果:")
-        print("✅ 每个问题都能得到回应")
-        print("✅ 回答内容相关且有意义")
-        print("✅ 多轮对话保持上下文连贯")
-        print("✅ Token使用量正常统计")
 
         self.log_test("基础对话", "PARTIAL", "需要手动验证对话质量和连贯性")
 
@@ -212,12 +160,6 @@ class InteractiveTestRunner:
         model_commands = ["/model list", "/model info", "/model switch llama3:8b"]
 
         await self.simulate_tui_input(model_commands, delay=2.0)
-
-        print("\n🤖 预期结果:")
-        print("✅ 模型列表显示可用模型")
-        print("✅ 模型信息显示详细配置")
-        print("✅ 模型切换成功生效")
-        print("✅ 状态栏更新当前模型")
 
         self.log_test("模型管理", "PARTIAL", "需要手动验证模型操作")
 
@@ -241,12 +183,6 @@ class InteractiveTestRunner:
 
         await self.simulate_tui_input(advanced_commands, delay=2.0)
 
-        print("\n🚀 预期结果:")
-        print("✅ 上下文压缩功能正常")
-        print("✅ 权限信息显示正确")
-        print("✅ Wiki页面创建成功")
-        print("✅ 论文管理功能响应")
-
         self.log_test("高级功能", "PARTIAL", "需要手动验证高级功能可用性")
 
     async def test_error_handling(self):
@@ -261,15 +197,7 @@ class InteractiveTestRunner:
         ]
 
         for error_cmd in error_tests:
-            print(f"\n❌ 错误测试: {error_cmd}")
-            print("预期: 显示友好的错误信息，不会崩溃")
             await self.simulate_tui_input([error_cmd], delay=1.0)
-
-        print("\n🛡️ 预期结果:")
-        print("✅ 无效命令显示友好提示")
-        print("✅ 缺失参数给出明确指导")
-        print("✅ 无效参数提供正确反馈")
-        print("✅ 系统保持稳定，不崩溃")
 
         self.log_test("错误处理", "PARTIAL", "需要手动验证错误处理友好性")
 
@@ -277,35 +205,16 @@ class InteractiveTestRunner:
         """测试性能监控"""
         self.print_test_section("性能监控测试")
 
-        print("📈 监控指标:")
-        print("✅ 状态栏实时更新Token使用量")
-        print("✅ 响应时间统计")
-        print("✅ 请求计数显示")
-        print("✅ 系统状态指示")
-
         # 模拟一些操作来观察性能指标
         await self.simulate_tui_input(
             ["性能测试消息1", "性能测试消息2", "性能测试消息3"], delay=1.0
         )
-
-        print("\n预期性能指标:")
-        print("✅ 响应时间 < 2秒")
-        print("✅ Token使用量正确累加")
-        print("✅ 请求计数正确增加")
-        print("✅ 状态保持'Ready'")
 
         self.log_test("性能监控", "PASS", "状态栏监控功能正常")
 
     async def run_all_tests(self):
         """运行所有交互测试"""
         self.start_time = time.time()
-
-        print("🎯 DAIP-LIVE TUI 全面交互走查测试")
-        print("=" * 80)
-        print("⚠️  注意: 这是一个模拟测试指南")
-        print("请确保TUI界面正在运行 (poetry run daip run)")
-        print("然后按照提示手动执行命令进行验证")
-        print("=" * 80)
 
         # 运行测试序列
         await self.test_basic_startup()
@@ -343,47 +252,19 @@ class InteractiveTestRunner:
 
     def print_test_summary(self, total_time: float):
         """打印测试总结"""
-        print("\n" + "=" * 80)
-        print("📊 DAIP-LIVE TUI 交互测试总结")
-        print("=" * 80)
 
-        total_tests = len(self.test_results)
-        passed_tests = len([r for r in self.test_results if r["status"] == "PASS"])
-        partial_tests = len([r for r in self.test_results if r["status"] == "PARTIAL"])
-        failed_tests = len([r for r in self.test_results if r["status"] == "FAIL"])
-        skipped_tests = len([r for r in self.test_results if r["status"] == "SKIP"])
+        len(self.test_results)
+        len([r for r in self.test_results if r["status"] == "PASS"])
+        len([r for r in self.test_results if r["status"] == "PARTIAL"])
+        len([r for r in self.test_results if r["status"] == "FAIL"])
+        len([r for r in self.test_results if r["status"] == "SKIP"])
 
-        print(f"📈 测试统计:")
-        print(f"   总测试数: {total_tests}")
-        print(f"   ✅ 完全通过: {passed_tests}")
-        print(f"   ⚠️  部分通过: {partial_tests}")
-        print(f"   ❌ 失败: {failed_tests}")
-        print(f"   ⏭️  跳过: {skipped_tests}")
-        print(f"   通过率: {(passed_tests + partial_tests) / total_tests * 100:.1f}%")
-        print(f"   总耗时: {total_time:.1f}秒")
-
-        print(f"\n📋 详细结果:")
         for result in self.test_results:
-            status_symbol = {"PASS": "✅", "FAIL": "❌", "PARTIAL": "⚠️", "SKIP": "⏭️"}[
-                result["status"]
-            ]
-            time_info = (
-                f"({result['response_time']:.2f}s)"
-                if result["response_time"] > 0
-                else ""
-            )
-            print(
-                f"   {status_symbol} {result['test']}: {result['details']} {time_info}"
-            )
+            {"PASS": "✅", "FAIL": "❌", "PARTIAL": "⚠️", "SKIP": "⏭️"}[result["status"]]
+            (f"({result['response_time']:.2f}s)" if result["response_time"] > 0 else "")
 
         # 保存结果
         self.save_test_results()
-
-        print(f"\n💾 测试结果已保存到: tests/interactive/interactive_test_results.json")
-        print(f"\n🎯 下一步:")
-        print(f"   1. 根据测试结果修复发现的问题")
-        print(f"   2. 完善自动化测试覆盖率")
-        print(f"   3. 优化用户体验和性能")
 
         return self.test_results
 

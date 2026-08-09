@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 # 测试环境禁用 litellm 远程成本表拉取（无外网时 read timeout 会挂起测试）
 os.environ.setdefault("LITELLM_LOCAL_MODEL_COST_MAP", "True")

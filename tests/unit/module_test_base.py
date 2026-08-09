@@ -4,20 +4,21 @@
 提供标准化的模块测试框架，减少重复代码和提高测试一致性。
 """
 
-import pytest
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
-from unittest.mock import Mock, AsyncMock, MagicMock
-import tempfile
 import os
+import tempfile
+from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Any
+from unittest.mock import AsyncMock, Mock
+
+import pytest
 
 
 class ModuleTestBase(ABC):
     """模块测试基类"""
 
     @pytest.fixture
-    def mock_dependencies(self) -> Dict[str, Any]:
+    def mock_dependencies(self) -> dict[str, Any]:
         """模拟依赖项"""
         return {
             "container": Mock(),
@@ -32,7 +33,7 @@ class ModuleTestBase(ABC):
         }
 
     @pytest.fixture
-    def module_instance(self, mock_dependencies: Dict[str, Any]):
+    def module_instance(self, mock_dependencies: dict[str, Any]):
         """模块实例 - 子类必须实现"""
         raise NotImplementedError("子类必须实现 module_instance fixture")
 
@@ -141,7 +142,7 @@ class ModuleTestBase(ABC):
             assert not module_instance.validate_config(invalid_config)
 
     # 集成测试辅助
-    async def setup_test_data(self, temp_dir: Path) -> Dict[str, Any]:
+    async def setup_test_data(self, temp_dir: Path) -> dict[str, Any]:
         """设置测试数据"""
         test_data = {
             "test_file": temp_dir / "test.txt",
@@ -185,13 +186,13 @@ class PersistentModuleTestBase(ModuleTestBase):
         return mock_db
 
     @pytest.fixture
-    def module_instance(self, mock_dependencies: Dict[str, Any], mock_database):
+    def module_instance(self, mock_dependencies: dict[str, Any], mock_database):
         """持久化模块实例"""
         mock_dependencies["database"] = mock_database
         return self.create_module_instance(mock_dependencies)
 
     @abstractmethod
-    def create_module_instance(self, dependencies: Dict[str, Any]):
+    def create_module_instance(self, dependencies: dict[str, Any]):
         """创建模块实例 - 子类实现"""
         pass
 
@@ -231,7 +232,7 @@ class KnowledgeModuleTestBase(ModuleTestBase):
 
     @pytest.fixture
     def module_instance(
-        self, mock_dependencies: Dict[str, Any], mock_vector_store, mock_embedding_model
+        self, mock_dependencies: dict[str, Any], mock_vector_store, mock_embedding_model
     ):
         """知识管理模块实例"""
         mock_dependencies["vector_store"] = mock_vector_store
@@ -239,7 +240,7 @@ class KnowledgeModuleTestBase(ModuleTestBase):
         return self.create_module_instance(mock_dependencies)
 
     @abstractmethod
-    def create_module_instance(self, dependencies: Dict[str, Any]):
+    def create_module_instance(self, dependencies: dict[str, Any]):
         """创建模块实例 - 子类实现"""
         pass
 
@@ -270,13 +271,13 @@ class AgentModuleTestBase(ModuleTestBase):
         return mock_executor
 
     @pytest.fixture
-    def module_instance(self, mock_dependencies: Dict[str, Any], mock_tool_executor):
+    def module_instance(self, mock_dependencies: dict[str, Any], mock_tool_executor):
         """Agent模块实例"""
         mock_dependencies["tool_executor"] = mock_tool_executor
         return self.create_module_instance(mock_dependencies)
 
     @abstractmethod
-    def create_module_instance(self, dependencies: Dict[str, Any]):
+    def create_module_instance(self, dependencies: dict[str, Any]):
         """创建模块实例 - 子类实现"""
         pass
 

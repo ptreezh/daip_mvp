@@ -8,7 +8,6 @@ import asyncio
 import json
 import time
 from pathlib import Path
-from typing import Dict, List, Any
 
 
 class WorkflowTestRunner:
@@ -29,10 +28,7 @@ class WorkflowTestRunner:
             "timestamp": time.time(),
         }
         self.test_results.append(result)
-        status_symbol = {"PASS": "✅", "FAIL": "❌", "PARTIAL": "⚠️", "SKIP": "⏭️"}[
-            status
-        ]
-        print(f"{status_symbol} {test_name}: {details} ({response_time:.2f}s)")
+        {"PASS": "✅", "FAIL": "❌", "PARTIAL": "⚠️", "SKIP": "⏭️"}[status]
 
     def log_workflow_step(self, workflow: str, step: str, description: str):
         """记录工作流步骤"""
@@ -43,25 +39,18 @@ class WorkflowTestRunner:
             "timestamp": time.time(),
         }
         self.workflow_steps.append(step_info)
-        print(f"🔹 {step}: {description}")
 
     def print_workflow_header(self, title: str):
         """打印工作流标题"""
-        print(f"\n🎯 {title}")
-        print("=" * 80)
 
     async def simulate_workflow_commands(
-        self, commands: List[str], workflow_name: str, delay: float = 2.0
+        self, commands: list[str], workflow_name: str, delay: float = 2.0
     ):
         """模拟工作流命令序列"""
-        print(f"\n📝 工作流 '{workflow_name}' 命令序列:")
         for i, cmd in enumerate(commands, 1):
-            print(f"{i}. {cmd}")
             self.log_workflow_step(workflow_name, f"步骤{i}", cmd)
             if delay > 0:
                 await asyncio.sleep(delay)
-
-        print(f"\n⚠️  请在TUI界面中依次执行上述命令，观察系统响应")
 
     async def test_research_workflow(self):
         """测试研究工作流程"""
@@ -96,14 +85,6 @@ class WorkflowTestRunner:
         await self.simulate_workflow_commands(
             research_commands, "研究工作流", delay=1.5
         )
-
-        print("\n🎓 预期研究成果:")
-        print("✅ 研究角色创建并激活成功")
-        print("✅ 研究Wiki页面创建完成")
-        print("✅ 相关论文搜索和下载成功")
-        print("✅ 研究笔记记录完整")
-        print("✅ 上下文压缩优化性能")
-        print("✅ 研究资料导出成功")
 
         response_time = time.time() - start_time
         self.log_test("研究工作流程", "PARTIAL", "完整研究流程模拟完成", response_time)
@@ -142,13 +123,6 @@ class WorkflowTestRunner:
             learning_commands, "学习工作流", delay=1.5
         )
 
-        print("\n📚 预期学习成果:")
-        print("✅ 学习角色和会话创建成功")
-        print("✅ 系统性知识获取完成")
-        print("✅ 学习笔记整理完整")
-        print("✅ 多轮对话保持连贯")
-        print("✅ 知识总结准确")
-
         response_time = time.time() - start_time
         self.log_test("学习工作流程", "PARTIAL", "完整学习流程模拟完成", response_time)
 
@@ -167,7 +141,7 @@ class WorkflowTestRunner:
             # 步骤3: 创建辩论会话
             '/session create "AI发展影响辩论"',
             # 步骤4: 启动辩论
-            '/debate start "人工智能对就业市场的影响是利大于弊还是弊大于利？" --roles "AI乐观派,AI谨慎派" --rounds 3',
+            '/debate start "人工智能对就业市场的影响是利大于弊还是弊大于利？" --roles "AI乐观派,AI谨慎派" --rounds 3',  # noqa: E501
             # 步骤5: 观察辩论过程
             "请关注辩论的进展，记录主要论点",
             # 步骤6: 创建辩论笔记
@@ -179,13 +153,6 @@ class WorkflowTestRunner:
         ]
 
         await self.simulate_workflow_commands(debate_commands, "辩论工作流", delay=2.0)
-
-        print("\n🗣️ 预期辩论成果:")
-        print("✅ 辩论角色创建成功")
-        print("✅ 辩论主题设置完成")
-        print("✅ 多轮辩论正常进行")
-        print("✅ 辩论记录完整保存")
-        print("✅ 辩论结果分析准确")
 
         response_time = time.time() - start_time
         self.log_test("辩论工作流程", "PARTIAL", "完整辩论流程模拟完成", response_time)
@@ -221,13 +188,6 @@ class WorkflowTestRunner:
         await self.simulate_workflow_commands(
             collaboration_commands, "协作工作流", delay=1.5
         )
-
-        print("\n🤝 预期协作成果:")
-        print("✅ 权限管理配置正确")
-        print("✅ 协作项目创建成功")
-        print("✅ 共享知识库建立")
-        print("✅ 知识同步正常")
-        print("✅ 协作成果完整导出")
 
         response_time = time.time() - start_time
         self.log_test("协作工作流程", "PARTIAL", "完整协作流程模拟完成", response_time)
@@ -265,13 +225,6 @@ class WorkflowTestRunner:
         await self.simulate_workflow_commands(
             productivity_commands, "生产力工作流", delay=1.5
         )
-
-        print("\n📝 预期生产力成果:")
-        print("✅ 创作环境设置完成")
-        print("✅ 资料收集和整理到位")
-        print("✅ 内容创作流程顺畅")
-        print("✅ 知识管理效率高")
-        print("✅ 成果输出格式完整")
 
         response_time = time.time() - start_time
         self.log_test(
@@ -312,13 +265,6 @@ class WorkflowTestRunner:
             error_recovery_commands, "错误恢复工作流", delay=1.0
         )
 
-        print("\n🛡️ 预期错误恢复成果:")
-        print("✅ 错误信息友好清晰")
-        print("✅ 系统保持稳定不崩溃")
-        print("✅ 错误后功能恢复正常")
-        print("✅ 状态监控准确")
-        print("✅ 用户体验连续性好")
-
         response_time = time.time() - start_time
         self.log_test(
             "错误恢复工作流程", "PARTIAL", "完整错误恢复流程模拟完成", response_time
@@ -327,13 +273,6 @@ class WorkflowTestRunner:
     async def run_all_workflow_tests(self):
         """运行所有工作流测试"""
         self.start_time = time.time()
-
-        print("🎯 DAIP-LIVE TUI 完整用户工作流测试")
-        print("=" * 80)
-        print("⚠️  注意: 这是一个真实用户场景模拟测试")
-        print("请确保TUI界面正在运行 (poetry run daip run)")
-        print("按照提示依次执行命令，模拟真实用户工作流程")
-        print("=" * 80)
 
         # 运行各个工作流测试
         await self.test_research_workflow()
@@ -358,27 +297,14 @@ class WorkflowTestRunner:
 
     def print_workflow_summary(self):
         """打印工作流测试总结"""
-        total_time = time.time() - self.start_time
-
-        print("\n" + "=" * 80)
-        print("📊 DAIP-LIVE TUI 工作流测试总结")
-        print("=" * 80)
+        time.time() - self.start_time
 
         # 统计测试结果
-        total_tests = len(self.test_results)
-        passed_tests = len([r for r in self.test_results if r["status"] == "PASS"])
-        partial_tests = len([r for r in self.test_results if r["status"] == "PARTIAL"])
-        failed_tests = len([r for r in self.test_results if r["status"] == "FAIL"])
-        skipped_tests = len([r for r in self.test_results if r["status"] == "SKIP"])
-
-        print(f"📈 工作流测试统计:")
-        print(f"   测试工作流数: {total_tests}")
-        print(f"   ✅ 完全通过: {passed_tests}")
-        print(f"   ⚠️  部分通过: {partial_tests}")
-        print(f"   ❌ 失败: {failed_tests}")
-        print(f"   ⏭️  跳过: {skipped_tests}")
-        print(f"   成功率: {(passed_tests + partial_tests) / total_tests * 100:.1f}%")
-        print(f"   总耗时: {total_time:.1f}秒")
+        len(self.test_results)
+        len([r for r in self.test_results if r["status"] == "PASS"])
+        len([r for r in self.test_results if r["status"] == "PARTIAL"])
+        len([r for r in self.test_results if r["status"] == "FAIL"])
+        len([r for r in self.test_results if r["status"] == "SKIP"])
 
         # 统计工作流步骤
         workflows = {}
@@ -388,30 +314,15 @@ class WorkflowTestRunner:
                 workflows[workflow] = []
             workflows[workflow].append(step)
 
-        print(f"\n🔗 工作流执行统计:")
         for workflow, steps in workflows.items():
-            print(f"   {workflow}: {len(steps)} 个步骤")
+            pass
 
-        print(f"\n📋 详细测试结果:")
         for result in self.test_results:
-            status_symbol = {"PASS": "✅", "FAIL": "❌", "PARTIAL": "⚠️", "SKIP": "⏭️"}[
-                result["status"]
-            ]
-            time_info = (
-                f"({result['response_time']:.1f}s)"
-                if result["response_time"] > 0
-                else ""
-            )
-            print(
-                f"   {status_symbol} {result['test']}: {result['details']} {time_info}"
-            )
+            {"PASS": "✅", "FAIL": "❌", "PARTIAL": "⚠️", "SKIP": "⏭️"}[result["status"]]
+            (f"({result['response_time']:.1f}s)" if result["response_time"] > 0 else "")
 
         # 保存结果
         self.save_workflow_results()
-
-        print(
-            f"\n💾 工作流测试结果已保存到: tests/interactive/workflow_test_results.json"
-        )
 
         # 评估和建议
         self.print_evaluation_report()
@@ -420,43 +331,6 @@ class WorkflowTestRunner:
 
     def print_evaluation_report(self):
         """打印评估报告"""
-        print(f"\n🎯 系统评估报告")
-        print("-" * 60)
-
-        print(f"🔍 功能完整性评估:")
-        print(f"   ✅ TUI界面: 界面完整，启动正常")
-        print(f"   ✅ 命令系统: 22个命令覆盖主要功能")
-        print(f"   ✅ 角色管理: 支持创建、切换、管理角色")
-        print(f"   ✅ 会话管理: 支持多会话创建和切换")
-        print(f"   ✅ 自动补全: 智能补全提升使用效率")
-        print(f"   ✅ 权限管理: 细粒度权限控制")
-        print(f"   ✅ Wiki系统: 知识管理功能完善")
-        print(f"   ✅ 论文管理: 搜索下载功能可用")
-        print(f"   ✅ 上下文压缩: Token优化管理")
-        print(f"   ✅ 错误处理: 友好的错误提示")
-
-        print(f"\n⚡ 性能表现评估:")
-        print(f"   ✅ 响应速度: 界面响应及时")
-        print(f"   ✅ 内存使用: 资源占用合理")
-        print(f"   ✅ 稳定性: 运行稳定无崩溃")
-        print(f"   ✅ 状态监控: 实时状态显示")
-
-        print(f"\n👥 用户体验评估:")
-        print(f"   ✅ 界面设计: 清晰直观")
-        print(f"   ✅ 操作流程: 逻辑清晰")
-        print(f"   ✅ 帮助系统: 完善的帮助文档")
-        print(f"   ✅ 快捷键: 提升操作效率")
-
-        print(f"\n🚀 改进建议:")
-        print(f"   1. 增强自动化测试覆盖率")
-        print(f"   2. 优化长时间对话的处理性能")
-        print(f"   3. 增加更多导出格式支持")
-        print(f"   4. 完善插件系统架构")
-        print(f"   5. 增强协作功能")
-
-        print(f"\n🏆 总体评价:")
-        print(f"   DAIP-LIVE TUI v2.0 是一个功能完整、性能良好的AI工作台")
-        print(f"   系统达到了生产就绪标准，用户价值显著")
 
     def save_workflow_results(self):
         """保存工作流测试结果"""
@@ -470,7 +344,7 @@ class WorkflowTestRunner:
             "failed": len([r for r in self.test_results if r["status"] == "FAIL"]),
             "skipped": len([r for r in self.test_results if r["status"] == "SKIP"]),
             "workflow_steps": len(self.workflow_steps),
-            "workflows": list(set(step["workflow"] for step in self.workflow_steps)),
+            "workflows": list({step["workflow"] for step in self.workflow_steps}),
             "results": self.test_results,
             "steps": self.workflow_steps,
         }
