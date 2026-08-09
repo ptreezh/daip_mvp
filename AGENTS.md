@@ -154,22 +154,25 @@ poetry run ruff check --select E,F,W src/
 
 ## Data Storage Structure
 
+> 注（2026-08-09 实测修正）：实际数据均在项目根目录（`daip_live.db` 1.7MB、`config.yaml`、`knowledge/`、`roles/`、`backups/`），不在 `data/` 下；`data/` 仅存日志。`daip_live.db`/`knowledge/index.faiss` 已移出 git 跟踪（S3-1），备份由每日计划任务 `DAIP-Live Backup` 写入 `backups/`。
+
 ```
-data/
-├── daip_live.db              # SQLite database
-├── knowledge/                # User documents
-├── vector_store/            # FAISS/ChromaDB indexes
-├── roles/                   # AI role configurations
-├── config.yaml             # Main configuration
-└── logs/                   # Application logs
+项目根/
+├── daip_live.db              # SQLite database（不跟踪 git，每日备份）
+├── knowledge/                # 用户文档 + wiki 页 + index.faiss（索引不跟踪 git）
+├── roles/                   # AI role configurations (yaml)
+├── config.yaml             # Main configuration（embedding_dimension=768）
+├── backups/                # 每日自动备份 zip（含 db + config + knowledge）
+├── data/                   # 仅日志
+└── log/                    # 日志
 ```
 
 ## Configuration
 
-- Main config: `data/config.yaml`
-- Model provider settings (local vs cloud)
-- API keys and endpoints
-- Role definitions stored as JSON/YAML in `data/roles/`
+- Main config: `config.yaml`（项目根）
+- Model provider settings (local vs cloud)（当前仅本地 Ollama；云端混合路由为已确认硬需求、暂缓实施）
+- API keys and endpoints（`.env`，已 gitignore）
+- Role definitions stored as JSON/YAML in `roles/`
 
 ## Testing Strategy
 

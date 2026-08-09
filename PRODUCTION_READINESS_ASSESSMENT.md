@@ -1,5 +1,7 @@
 # DAIP-LIVE Production-Readiness Assessment
 
+> ⚠️ **状态声明（2026-08-09）**: 本文档为 2026-08-06 历史基线（35/100 为当时实测）。最新实测状态见 [`.planning/real_state_assessment_2026-08-09.md`](.planning/real_state_assessment_2026-08-09.md)（2026-08-09 修复后：ruff 0、测试 1738P、knowledge_sources 13 落盘、门禁 §6.1）。保留本文档作为历史审计轨迹。
+
 **Date**: 2026-08-06  
 **Project**: DAIP-LIVE (Dynamic AI-driven Project-execution LIVE system)  
 **Path**: D:\DAIP\refactdoc  

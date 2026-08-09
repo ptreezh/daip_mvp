@@ -1,5 +1,7 @@
 # DAIP-LIVE Production Readiness - Final Assessment
 
+> ⚠️ **状态声明（2026-08-09）**: 本文档为 2026-08-07 历史快照，其声称的"READY FOR MERGE / 65+/100 / CI/CD 85"与实测不符（实测 CI 因 ruff/mypy 必红、hybrid 零接线、测试曾 26F）。最新实测状态见 [`.planning/real_state_assessment_2026-08-09.md`](.planning/real_state_assessment_2026-08-09.md)（2026-08-09 修复后：ruff 0、测试 1738P、门禁 G1-G10 状态见 §6.1）。保留本文档作为历史审计轨迹，不修改历史数字。
+
 **Date**: 2026-08-07
 **Branch**: gnhf/-055e31
 **Status**: ✅ READY FOR MERGE

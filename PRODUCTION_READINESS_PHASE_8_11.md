@@ -1,5 +1,7 @@
 # DAIP-LIVE Production Readiness - Phase 8-11 Complete
 
+> ⚠️ **状态声明（2026-08-09）**: 本文档为 2026-08-07 历史快照，声称的 "85+/100" 与实测不符（实测加权 ≈4.1/10，2026-08-08）。2026-08-09 修复后（ruff 0、测试 1738P、knowledge 管线接通）最新门禁状态见 [`.planning/real_state_assessment_2026-08-09.md`](.planning/real_state_assessment_2026-08-09.md) §6.1。保留本文档作为历史审计轨迹，不修改历史数字。
+
 **Date**: 2026-08-07
 **Branch**: main
 **Status**: ✅ PHASE 8-11 COMPLETE

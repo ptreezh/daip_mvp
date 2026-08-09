@@ -3,7 +3,6 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Code Quality](https://img.shields.io/badge/code_quality-A-brightgreen.svg)](docs/process/validation_reports/)
 
 > 🎓 **展示SPEC驱动开发方法的完整AI应用示范项目**
 
