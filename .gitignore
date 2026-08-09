@@ -62,6 +62,15 @@ docs/_build/
 *.db
 *.db-journal
 
+# Runtime vector indexes (untracked with S3-1, 2026-08-09)
+*.faiss
+
+# Test run artifacts (S3-1)
+test_output/
+
+# Config backup snapshots (created by agents per global backup rule)
+AGENTS.md.backup-*
+
 # OS
 .DS_Store
 Thumbs.db
