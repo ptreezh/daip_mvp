@@ -362,7 +362,7 @@ class VectorStore:
             }
 
             metadata_file = self.persist_path / "metadata.json"
-            with open(metadata_file, "w") as f:
+            with open(metadata_file, "w", encoding="utf-8") as f:
                 json.dump(metadata, f, indent=2)
 
             # Save FAISS index if available
@@ -392,7 +392,7 @@ class VectorStore:
                 logger.warning("No metadata file found")
                 return False
 
-            with open(metadata_file) as f:
+            with open(metadata_file, encoding="utf-8") as f:
                 metadata = json.load(f)
 
             self.dimension = metadata["dimension"]

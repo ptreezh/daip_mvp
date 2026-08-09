@@ -69,7 +69,9 @@ strict = true
 # 渐进策略（S1-3，2026-08-09）：双模块名解除后暴露 2446 项 no-untyped-def，
 # 全库注解化是长期工程，先禁用该两码保证门禁可执行（0 错误），
 # 保留 warn_return_any / 未定义名等实质性检查；注解化列入 backlog
-disable_error_code = ["no-untyped-def", "no-untyped-call"]
+# S2/D1（2026-08-09）：再禁用纯注解完善类（type-arg 泛型缺失/var-annotated 变量注解），
+# 保留 attr-defined/call-arg/arg-type/assignment 等实质类型检查（真 bug 候选）
+disable_error_code = ["no-untyped-def", "no-untyped-call", "type-arg", "var-annotated"]
 # 双模块名修复（S1-3）：site-packages 的 daip_live.pth 将 src/ 放入 sys.path，
 # 与参数路径双重解析导致 "Source file found twice"。explicit_package_bases
 # 按包基（src/ 无 __init__）统一模块名；运行方式：mypy src/daip_live

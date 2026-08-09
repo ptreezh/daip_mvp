@@ -1,27 +1,35 @@
-
+import httpx
 import pytest
 import pytest_asyncio
-import httpx
-from httpx import AsyncClient
 from fastapi import FastAPI
+from httpx import AsyncClient
+
 
 # Placeholder for the app factory which we will create later
 def create_app() -> FastAPI:
     # This will eventually import and return our main FastAPI app
     # For now, return a dummy app to allow tests to be written
-    from src.daip_live.p7_gui.main import app
+    from daip_live.p7_gui.main import app
+
     return app
 
-import pytest_asyncio
 
 @pytest_asyncio.fixture
-async def client() -> AsyncClient:
-    """Create an async test client for the FastAPI app."""
+async def client(tmp_path) -> AsyncClient:
+    """Create an async test client for the FastAPI app.
+
+    使用临时 DB（DAIP_DB_PATH 覆盖），禁止测试写入项目根 daip_live.db（S3-2 数据隔离）。
+    """
+    import os
+
+    os.environ["DAIP_DB_PATH"] = str(tmp_path / "test_api.db")
     app = create_app()
     # Use ASGITransport for compatibility with the project's httpx version
     transport = httpx.ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
+    os.environ.pop("DAIP_DB_PATH", None)
+
 
 @pytest.mark.asyncio
 async def test_create_session_success(client: AsyncClient):
@@ -37,6 +45,7 @@ async def test_create_session_success(client: AsyncClient):
     assert "session_id" in response_data
     assert isinstance(response_data["session_id"], str)
 
+
 @pytest.mark.asyncio
 async def test_get_session_success(client: AsyncClient):
     """
@@ -44,7 +53,9 @@ async def test_get_session_success(client: AsyncClient):
     RED phase: This test should fail because the endpoint doesn't exist yet.
     """
     # First create a session
-    create_response = await client.post("/api/sessions", json={"goal": "Test session for get"})
+    create_response = await client.post(
+        "/api/sessions", json={"goal": "Test session for get"}
+    )
     assert create_response.status_code == 200
     session_data = create_response.json()
     session_id = session_data["session_id"]
@@ -58,6 +69,7 @@ async def test_get_session_success(client: AsyncClient):
     assert retrieved_data["session_id"] == session_id
     assert retrieved_data["goal"] == "Test session for get"
 
+
 @pytest.mark.asyncio
 async def test_get_nonexistent_session(client: AsyncClient):
     """
@@ -69,6 +81,7 @@ async def test_get_nonexistent_session(client: AsyncClient):
 
     # Should return 404 once we implement proper error handling
     assert response.status_code == 404
+
 
 @pytest.mark.asyncio
 async def test_list_sessions_success(client: AsyncClient):
@@ -87,6 +100,7 @@ async def test_list_sessions_success(client: AsyncClient):
     assert isinstance(sessions, list)
     assert len(sessions) >= 2  # At least the two we created
 
+
 @pytest.mark.asyncio
 async def test_health_check(client: AsyncClient):
     """
@@ -100,6 +114,7 @@ async def test_health_check(client: AsyncClient):
     health_data = response.json()
     assert "status" in health_data
     assert "timestamp" in health_data
+
 
 @pytest.mark.asyncio
 async def test_list_roles(client: AsyncClient):
@@ -116,6 +131,7 @@ async def test_list_roles(client: AsyncClient):
     # Should have at least some default roles
     assert len(roles_data) >= 0
 
+
 @pytest.mark.asyncio
 async def test_get_knowledge_status(client: AsyncClient):
     """
@@ -130,14 +146,17 @@ async def test_get_knowledge_status(client: AsyncClient):
     assert "status" in knowledge_data
     assert "last_sync" in knowledge_data
 
+
 @pytest.mark.asyncio
 async def test_delete_session_success(client: AsyncClient):
     """
     Test case for successfully deleting a session.
-    RED phase: This test should fail because we need to verify the delete endpoint works properly.
+    RED phase: verify the delete endpoint works properly.
     """
     # First create a session
-    create_response = await client.post("/api/sessions", json={"goal": "Test session for deletion"})
+    create_response = await client.post(
+        "/api/sessions", json={"goal": "Test session for deletion"}
+    )
     assert create_response.status_code == 200
     session_data = create_response.json()
     session_id = session_data["session_id"]

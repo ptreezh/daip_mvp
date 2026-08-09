@@ -15,6 +15,7 @@ open http://localhost:8000/docs
 """
 
 import asyncio
+import os
 import time
 from datetime import datetime, timezone
 
@@ -77,7 +78,11 @@ def get_config():
 
 
 def get_db_manager(cfg=Depends(get_config)) -> DatabaseManager:
-    return DatabaseManager(db_path=cfg.get("database", {}).get("path", "daip_live.db"))
+    # DAIP_DB_PATH 环境变量覆盖（测试隔离，S3-2）：测试用临时 DB，避免污染项目根
+    db_path = os.environ.get("DAIP_DB_PATH") or cfg.get("database", {}).get(
+        "path", "daip_live.db"
+    )
+    return DatabaseManager(db_path=db_path)
 
 
 def get_session_manager(db_manager=Depends(get_db_manager)) -> SessionManager:

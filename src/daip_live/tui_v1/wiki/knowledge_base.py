@@ -528,7 +528,7 @@ class KnowledgeBase:
         """Load categories from file"""
         try:
             if self.categories_file.exists():
-                with open(self.categories_file) as f:
+                with open(self.categories_file, encoding="utf-8") as f:
                     return json.load(f)
         except Exception as e:
             logger.error(f"Error loading categories: {e}")
@@ -538,7 +538,7 @@ class KnowledgeBase:
     def _save_categories(self) -> None:
         """Save categories to file"""
         try:
-            with open(self.categories_file, "w") as f:
+            with open(self.categories_file, "w", encoding="utf-8") as f:
                 json.dump(self.categories, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving categories: {e}")
@@ -547,7 +547,7 @@ class KnowledgeBase:
         """Load tags from file"""
         try:
             if self.tags_file.exists():
-                with open(self.tags_file) as f:
+                with open(self.tags_file, encoding="utf-8") as f:
                     return json.load(f)
         except Exception as e:
             logger.error(f"Error loading tags: {e}")
@@ -557,7 +557,7 @@ class KnowledgeBase:
     def _save_tags(self) -> None:
         """Save tags to file"""
         try:
-            with open(self.tags_file, "w") as f:
+            with open(self.tags_file, "w", encoding="utf-8") as f:
                 json.dump(self.tags, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving tags: {e}")
@@ -566,7 +566,7 @@ class KnowledgeBase:
         """Load analytics from file"""
         try:
             if self.analytics_file.exists():
-                with open(self.analytics_file) as f:
+                with open(self.analytics_file, encoding="utf-8") as f:
                     return json.load(f)
         except Exception as e:
             logger.error(f"Error loading analytics: {e}")
@@ -581,7 +581,7 @@ class KnowledgeBase:
     def _save_analytics(self) -> None:
         """Save analytics to file"""
         try:
-            with open(self.analytics_file, "w") as f:
+            with open(self.analytics_file, "w", encoding="utf-8") as f:
                 json.dump(self.analytics, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving analytics: {e}")

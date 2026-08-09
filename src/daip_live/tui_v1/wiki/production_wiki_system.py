@@ -1117,7 +1117,7 @@ class ProductionWikiKnowledgeSystem:
                 "saved_at": datetime.now().isoformat(),
             }
 
-            with open(state_file, "w") as f:
+            with open(state_file, "w", encoding="utf-8") as f:
                 json.dump(state_data, f, indent=2, default=str)
 
         except Exception as e:
@@ -1128,7 +1128,7 @@ class ProductionWikiKnowledgeSystem:
         try:
             state_file = self.storage_path / "system_state.json"
             if state_file.exists():
-                with open(state_file) as f:
+                with open(state_file, encoding="utf-8") as f:
                     state_data = json.load(f)
 
                 self.documents = state_data.get("documents", {})

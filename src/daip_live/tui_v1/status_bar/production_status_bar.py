@@ -407,7 +407,7 @@ class NetworkStatusWidget(StatusWidget):
             # Get DNS servers
             try:
                 dns_servers = []
-                with open("/etc/resolv.conf") as f:
+                with open("/etc/resolv.conf", encoding="utf-8") as f:
                     for line in f:
                         if line.startswith("nameserver"):
                             dns_servers.append(line.split()[1])

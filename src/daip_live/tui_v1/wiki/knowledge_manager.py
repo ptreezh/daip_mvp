@@ -439,7 +439,7 @@ class KnowledgeManager:
 
             # Save statistics
             stats = self.get_statistics()
-            with open(self.stats_file, "w") as f:
+            with open(self.stats_file, "w", encoding="utf-8") as f:
                 json.dump(stats, f, indent=2)
 
             # Save configuration
@@ -450,7 +450,7 @@ class KnowledgeManager:
                 "created_at": self.created_at.isoformat(),
                 "updated_at": self.updated_at.isoformat(),
             }
-            with open(self.config_file, "w") as f:
+            with open(self.config_file, "w", encoding="utf-8") as f:
                 json.dump(config, f, indent=2)
 
             logger.info("Saved knowledge base")
@@ -468,7 +468,7 @@ class KnowledgeManager:
 
             # Load configuration
             if self.config_file.exists():
-                with open(self.config_file) as f:
+                with open(self.config_file, encoding="utf-8") as f:
                     config = json.load(f)
                     self.embedding_dimension = config.get("embedding_dimension", 768)
                     self.auto_save = config.get("auto_save", True)

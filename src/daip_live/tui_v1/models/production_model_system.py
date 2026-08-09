@@ -873,7 +873,7 @@ class ProductionModelSystem:
                     return obj.isoformat()
                 raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
-            with open(config_path, "w") as f:
+            with open(config_path, "w", encoding="utf-8") as f:
                 json.dump(config, f, indent=2, default=json_serializer)
 
         except Exception as e:
@@ -886,7 +886,7 @@ class ProductionModelSystem:
             if not config_path.exists():
                 return
 
-            with open(config_path) as f:
+            with open(config_path, encoding="utf-8") as f:
                 config = json.load(f)
 
             self.current_model = config.get("current_model")
