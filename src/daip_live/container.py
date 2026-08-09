@@ -2,10 +2,19 @@
 
 import asyncio
 import logging
+import os
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 from dependency_injector import containers, providers
+
+
+def _resolve_db_path(cm) -> str:
+    """解析数据库路径：DAIP_DB_PATH 环境变量优先（测试隔离，S3-2 同款机制）。"""
+    return (
+        os.environ.get("DAIP_DB_PATH")
+        or cm.get_config().model_dump()["database"]["path"]
+    )
 
 
 def setup_logging(config_dict: dict = None) -> None:
@@ -121,11 +130,11 @@ class Container(containers.DeclarativeContainer):
     )
 
     # 数据库管理器 - 使用安全配置访问
+    # DAIP_DB_PATH 环境变量覆盖（测试隔离，S3-2 同款机制）：测试用临时 DB，
+    # 避免测试写入项目根 daip_live.db
     db_manager = providers.Singleton(
         DatabaseManager,
-        db_path=providers.Callable(
-            lambda cm=config_manager: cm().get_config().model_dump()["database"]["path"]
-        ),
+        db_path=providers.Callable(lambda cm=config_manager: _resolve_db_path(cm())),
     )
 
     # 模型提供者 - 使用延迟工厂确保配置已加载
@@ -204,7 +213,7 @@ class Container(containers.DeclarativeContainer):
     debate_history_tracker = providers.Singleton(
         DebateHistoryTracker,
         db_path=providers.Callable(
-            lambda cm: cm.get_config().model_dump()["database"]["path"],
+            lambda cm: _resolve_db_path(cm),
             cm=config_manager,
         ),
     )

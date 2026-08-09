@@ -31,6 +31,22 @@ def _stub_model_availability_check(monkeypatch):
     )
 
 
+@pytest.fixture(autouse=True)
+def _isolate_root_db(tmp_path):
+    """测试隔离（S3-2 延伸，2026-08-09 CI 实抓）。
+
+    CI 上任何测试经 container 默认 config 写入项目根 daip_live.db（如
+    test_enhanced_debate_e2e.py 的容器集成测试），导致保护断言触发。
+    本 fixture 在每个测试前设置 DAIP_DB_PATH 指向独立临时 DB（per-test，
+    避免共享 DB 导致 turns 跨测试累积），container 的
+    db_manager/debate_history_tracker 均读取该环境变量，从根源杜绝
+    测试写入项目根数据库。
+    """
+    isolated_db = str(tmp_path / "daip_test_isolated.db")
+    os.environ["DAIP_DB_PATH"] = isolated_db
+    yield isolated_db
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _protect_root_db():
     """数据隔离保护（S3-2，2026-08-09）。

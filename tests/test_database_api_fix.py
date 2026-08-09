@@ -158,7 +158,11 @@ class TestDebateManagerAPI:
         config_manager = ConfigManager()
         config = config_manager.get_config()
 
-        db_manager = DatabaseManager(config.database.path)
+        # 测试隔离：优先用 DAIP_DB_PATH（conftest 提供临时 DB），避免写项目根 daip_live.db
+        import os
+
+        db_path = os.environ.get("DAIP_DB_PATH") or config.database.path
+        db_manager = DatabaseManager(db_path)
         session_manager = SessionManager(db_manager)
         role_manager = RoleManager()
         role_model_manager = RoleModelManager()

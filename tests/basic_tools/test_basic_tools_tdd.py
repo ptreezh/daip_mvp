@@ -191,18 +191,14 @@ class TestDirectoryTools(TestBasicToolsTDD):
 class TestAcademicTools(TestBasicToolsTDD):
     """学术工具的TDD测试"""
 
-    @patch("arxiv.Search")
+    @patch("daip_live.doc.tools.paper_downloader.PaperDownloader.search_papers")
     def test_search_papers_with_mock(self, mock_search):
         """测试16: 使用Mock测试论文搜索"""
-        # 模拟arxiv API响应
-        mock_results = Mock()
-        mock_results.results.return_value = [
-            Mock(title="Test Paper", summary="Test summary")
-        ]
-        mock_search.return_value = mock_results
+        # 模拟学术论文搜索响应（arxiv 已从依赖移除，改用真实服务模块 mock）
+        mock_search.return_value = [{"title": "Test Paper", "summary": "Test summary"}]
 
         # 这个测试会在search_academic_papers工具实现后使用
-        # 验证工具正确调用arxiv API并处理结果
+        # 验证工具正确调用论文搜索并处理结果
 
         assert mock_search is not None  # 确保mock工作正常
 
