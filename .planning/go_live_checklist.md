@@ -10,11 +10,11 @@
 
 | # | 门禁 | 状态 | 证据 |
 |---|------|------|------|
-| G1 | 全量测试 0F/0E | ✅ | `py -m pytest -q` → 1754P/433S/0F/0E（+12：合并重复类恢复 8 个被吞测试 + 模型检查器 4 个） |
+| G1 | 全量测试 0F/0E | ✅ | `py -m pytest -q` → 1757P/433S/0F/0E（本地与 CI 一致；+2：ask 防回归 3 + 恢复被吞测试等） |
 | G2 | ruff = 0（src + tests） | ✅ | `py -m ruff check src/ tests/` → **0（首次真实全量覆盖）**；此前 .gitignore `test_*.py` 无锚定规则使 ruff 跳过全部测试文件，G2 曾为假绿；已修复 + 200+ 文件治理 |
 | G3 | mypy = 0 | ⚠️ Backlog | 917 项（1247→917 分级收敛），全为类型注解完善类（抽样确认无运行时 bug）；CI 软门禁，**不作为上线阻塞** |
 | G4 | Python 3.9 语法全过 | ✅ | `py -m python scripts/check_py39_syntax.py` → 0（曾 6 处 invalid-syntax） |
-| G5 | CI 全绿 | ⚠️ | 已硬化并入库（ci.yml 此前从未跟踪）；仅 mypy 软门禁（记录在案的 Backlog） |
+| G5 | CI 全绿 | ✅ | **2026-08-09 首次真实跑绿**（run 31326913217，16 步全 success）：ruff format+check（src+tests）、py39、mypy 软门禁、Ollama 安装+模型拉取、全量测试 **1757P/433S/0F/0E**（148s）。此前从未成功（2025-08 历史全 failure，且 ci.yml 未真正生效） |
 | G6 | knowledge 端到端真实 | ✅ | `knowledge_sources` 13 落盘；`knowledge search "量子计算"` 返回真实结果 |
 | G7 | 数据隔离 | ✅ | DB/faiss 移出 git；保护断言曾抓到 p7_gui 违规者并已修复；测试后 git 干净 |
 | G8 | 备份可恢复 | ✅ | 演练完成（备份含 406 会话/611 轮）；每日计划任务已注册 |

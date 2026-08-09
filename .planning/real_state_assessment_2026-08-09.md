@@ -249,6 +249,12 @@
 - **治理**：`ruff format` 218+41 文件 + `--fix --unsafe-fixes` + E501/E402/F401/F821 noqa（F821 全部在 TDD 红 skip 死代码内，确认无运行时风险）→ **`ruff check src/ tests/` 首次真实全绿 0**；`ruff format --check` 0。
 - **全量回归终态（实测）**：`py -m pytest -q --tb=no` → **1754 passed / 433 skipped / 0 failed / 0 error**（483s）；py39 语法 306 文件全过。提交链：`b676318`（gitignore 锚定 + 20 文件入库 + 模型检查器修复）→ `f2a23b7`（枚举核心修复）→ `6f450fb`（221 文件 lint 治理）。
 
+### 第六轮（2026-08-09：ask 修复 + CI 首次真绿）
+- **ask 命令修复（grill-down 实抓）**：`daip ask` 此前零输出——`_handle_conversation_intent` 消费事件后丢弃（pass），且 `chat_run` 的 while-True 循环会吃掉预置的 None 终止信号（`execute_step` 内 `get_nowait()` 消费）导致挂死。修复：单轮直接调 `step_executor.execute_step` 输出 FinalResponseEvent；`process_natural_language` 顶层 `except` 改为向用户展示错误而非静默。3 个防回归测试。**实测 `ask "你好"` 正常输出回答**。
+- **CI 首次真实跑绿（里程碑）**：此前 G5 假绿（无成功 CI 记录，2025-08 历史全 failure）。修复链：① pyproject requires-python 3.9→3.10（streamlit 需 >=3.10，旧 lock 过时含已删依赖）→ 重新生成 poetry.lock（2.1.4）；② ruff ^0.4.4→^0.12.0（CI 0.4.10 与本机 0.12.10 格式规则不一致致 format --check 失败）；③ CI 安装并启动 Ollama（2 个真实模型测试需要）；④ CI 实抓 4 个问题：container db_manager 不认 DAIP_DB_PATH 写 root DB、conftest 无主动隔离（新增 per-test DAIP_DB_PATH fixture）、test_database_api_fix 用 config 默认路径建 root DB、test_basic_tools_tdd 仍 patch 已删依赖 arxiv；⑤ 跨平台测试修复（test_wiki_export_error_handling 用 Windows-only 路径，Linux CI 上不失败——改 NUL 字符路径）；⑥ 脆弱性能断言 1s→5s。
+- **CI 终态（实测）**：run 31326913217，16 步全 success——ruff format+check、py39、mypy 软门禁、Ollama 安装+模型拉取、**全量测试 1757P/433S/0F/0E（148s）**，与本地完全一致。本地 CI 场景模拟（无 root DB 干净环境）亦 1757P/0E 且无 root DB 污染。
+- 提交链：`68aac24`（ask 修复 + CI 配置）→ `449a7d7`（requires-python + lock）→ `a53346e`（ruff 版本）→ `1e18ab8`（CI 实抓 5 修复）→ `c8e99cd`（跨平台路径）。
+
 ### Stage 5: 混合路由落地（4-6 天，08-08 计划 H1-H6 续）——【Backlog：硬需求，暂缓实施】
 
 **决策记录（2026-08-09 用户确认）**: 混合路由是**硬需求**（对应需求映射矩阵全部条目：本地预审/脱敏/云端委托/最小披露/人工确认），但**当前暂不实现**。实施降级为 Backlog，不进入当前上线时间线，不影响发布门禁 G1-G10。恢复实施时沿用 08-08 蓝图：
