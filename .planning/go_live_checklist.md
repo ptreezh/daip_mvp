@@ -29,7 +29,7 @@
 
 | # | 项 | 说明 | 操作 |
 |---|----|------|------|
-| H1 | **DB 数据恢复决策** | 当前 root `daip_live.db` 为 S2 测试污染态（64 个 Test session、dialogue_turns 0）；备份含真实数据（406 会话/611 轮） | 若需恢复：`pwsh .planning/scripts/restore.ps1 -Zip backups/daip-20260808-082131.zip`（自动备份当前态 + 校验 + 覆盖） |
+| H1 | **DB 数据恢复决策** | ✅ 2026-08-09 已决策：**不恢复，保持当前库**（knowledge_sources 13 条活的；406 会话备份在 zip 可随时手动查阅） | 如需回溯旧会话：`pwsh .planning/scripts/restore.ps1 -Zip backups/daip-20260808-082131.zip`（自动备份当前态 + 校验 + 覆盖） |
 | H2 | TUI 完整交互体验 | run_test 冒烟已过，完整人工体验一次 | `py -m daip_live.cli.main run`（Ctrl+Q 退出） |
 | H3 | 真实辩论冒烟 | ✅ 2026-08-09 复测通过（修复嵌入模型检查 bug 后重跑：正反论点/Consensus/DebateCompleteEvent 齐全） | `py -m daip_live.cli.main debate start "上线验收" --roles pro_arguer,con_arguer --rounds 1` |
 | H4 | 备份任务确认 | ✅ 已注册启用，下次 2026/8/10 02:00；⚠️ Logon Mode = Interactive only（仅登录时运行，注销不备份——单用户本机可接受，注意勿长期注销运行） | `schtasks /query /tn "DAIP-Live Backup" /fo LIST /v` |
