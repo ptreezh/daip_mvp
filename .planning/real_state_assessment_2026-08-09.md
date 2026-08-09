@@ -224,7 +224,14 @@
 - **G10 TUI 冒烟通过**：`daip run` 启动后 6 秒存活、stderr 空（Textual 应用正常启动）；完整交互冒烟保留人工项。
 - **mypy 分级收敛 1247 → 917**：禁用纯注解完善类（type-arg 泛型缺失 / var-annotated 变量注解——非 bug 类）；保留 attr-defined/call-arg/arg-type/assignment 等实质检查。抽样确认 attr-defined 均为类型推断问题（any/object 缺注解），**非运行时 bug**。917 项全归"类型注解完善 Backlog"。
 - **Phase E skip 治理结论**：433 项 skip 分类审计完成（TUI 旧 API spec 保留合理 / wiki real 系列**保持 skip**——测试用自定义 mock provider 与产品 `_validate_real_model_provider`（collaborative_wiki.py:385 明确拒绝非 LiteLLMProvider）根本冲突，强行"修绿"只能改用真实 Ollama 生成 → 引入 CI 不可复现的脆弱测试，违背 truth-in-execution；保持 skip + 文档化是更诚实做法 / 刻意 TDD RED 1 项为真实功能缺口需 README 标注）。
-- **观察项**：tests/ 目录 54 个 pre-existing ruff 错误（门禁仅定义 src/，测试风格宽松为既有实践）；mypy 917 项类型注解 Backlog；`daip knowledge <query>` 裸参数入口 Typer 架构限制（主入口 `knowledge search <query>`）。
+- **观察项**：mypy 917 项类型注解 Backlog；`daip knowledge <query>` 裸参数入口 Typer 架构限制（主入口 `knowledge search <query>`）。
+
+### 第三轮（2026-08-09：tests/ ruff 清零 + 备份验证 + 恢复脚本 + 冷启动评估）
+- **tests/ ruff 269 → 0**：`--fix --unsafe-fixes`（280 项，含 UP006/UP035/F541 等）+ 2 处 E501 noqa；全量回归 1738P/0E 确认无破坏——**`ruff check src/ tests/` 双双全绿**（此前门禁仅定义 src/，现测试代码质量同步达标）。
+- **备份自动化触发验证通过**：手动执行 `backup.ps1` 生成 `daip-20260809-134336.zip`（19 项、db 1.7MB + knowledge 2.1MB）——每日计划任务将运行同一脚本。
+- **正式恢复脚本就绪**：`.planning/scripts/restore.ps1`（恢复前自动备份当前状态 + zip 完整性校验 + db 可读性验证 + 覆盖）——**未执行**（覆盖当前 DB 为破坏性操作，需用户批准；当前 DB 为测试污染态，备份含 406 会话真实数据）。
+- **CLI 冷启动评估（7.8s）**：`py -X importtime` 定位根因 = **litellm 全链路 import ~9.2s**（litellm + numpy/sqlalchemy/aiohttp/jinja2 依赖树）。优化方案 = 入口命令级懒加载 litellm（中等重构风险）；**本轮不动**（已绿门禁优先，方案记入 Backlog）。
+- **门禁终态**：G1/G2/G4/G6/G7/G8/G9/G10 全绿；G3（mypy 917）Backlog + CI 软门禁；G5 除 mypy 软门禁外全部硬化。
 
 ### Stage 5: 混合路由落地（4-6 天，08-08 计划 H1-H6 续）——【Backlog：硬需求，暂缓实施】
 
