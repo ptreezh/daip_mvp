@@ -83,10 +83,9 @@ follow_imports = "skip"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
+# S2-1 (2026-08-09): 默认 pytest 必须收集全量测试（此前仅 3 个子目录 → 364 个）
 testpaths = [
-    "tests/unit",
-    "tests/integration", 
-    "tests/e2e"
+    "tests"
 ]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*", "*Test"]
