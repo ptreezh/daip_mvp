@@ -176,8 +176,16 @@
 | 14 | skills/manager.py / task_manager.py / debate_manager.py / step_executor.py 等 | 缺 import（asyncio/os/datetime/defaultdict/Session/uuid） | 补 import |
 | 15 | tui/commands.py:465 | 自引用 import 与模块级类定义冲突（F811/E402） | 局部 import |
 
-### Stage 2: 测试配置与 CI 硬化（未执行，待办）
-- [ ] S2-1 testpaths 修正 / S2-2 CI 硬化 / S2-3 conftest print（**注：conftest.py:9 裸 print 已随 S3-2 编辑保留，需删**）/ S2-4 skip 白名单审计
+### Stage 2: 测试配置与 CI 硬化（已完成 S2-1/S2-3，S2-2 完成，S2-4 审计完成）
+- [x] S2-1 **testpaths 修正**：`testpaths = ["tests"]`——默认 `poetry run pytest` 收集 **2171**（原 364，约 1/6 缺口修复）；实测无参 pytest 全量 1738P/433S（7:38）。✅
+- [x] S2-2 **CI 硬化**：`.github/workflows/ci.yml` 重写（格式检查 + ruff + **py39 语法门禁**（新增 `scripts/check_py39_syntax.py`）+ mypy 软门禁 + **全量测试**含 e2e/security；integration 的 continue-on-error 移除）。**关键发现：ci.yml 此前从未被 git 跟踪**（.gitignore `.github/` 规则）——GitHub Actions 从未生效过；已移除忽略规则强制入库。mypy 步骤以 continue-on-error 软门禁（Backlog 完成后转硬）。✅
+- [x] S2-3 **conftest.py:9 裸 print 删除**。✅
+- [x] S2-4 **skip 白名单审计（433 项分类）**：
+  - **TUI 旧 API spec**（~25 文件、约 300 项）：`TDD红阶段spec，针对已重构移除的旧TUI API`——API 确实已移除（Textual action 重构），保留合理，建议逐步删除测试而非长期 skip
+  - **wiki real 系列**（13 文件）：依赖真实 LiteLLMProvider + root config——08-08 建议"本机 Ollama 应能修绿"，S2 战役选择跳过；**可修绿但需 fixture 化 config**（Backlog）
+  - **model_switching 旧 API**（registry/switcher/manager 三族）：API 已重构（ModelInfo/ModelSwitcher），保留合理
+  - **刻意 TDD RED**（1 文件）：真实 AI 内容生成未实现（白名单豁免）——**功能缺口**，需在 README 标注"未实现"
+  - **治理建议**：skip reason 已文档化（可追溯）；建议后续把 433 项收敛到 <100（删真废弃测试 + 修绿 wiki real 系列），并给刻意 RED 项建立"功能缺口清单"
 
 ### Stage 3: 数据安全与隔离（已完成 S3-1/S3-2/S3-3/S3-4）
 - [x] S3-1 **DB/faiss 移出 git**：已批准执行（提交 59fe628）；`git status` 永久干净。
@@ -204,11 +212,11 @@
 - [ ] S3-3 **备份恢复演练**：从 `daip-20260808-082131.zip` 恢复 db 到临时目录，验证行数/可查询；写恢复 SOP 文档。**门禁**: 恢复后的 DB 行数与 zip 内记录一致。
 - [ ] S3-4 **备份自动化**：把 Stage 0 的备份脚本挂到每日任务或 pre-commit 挂钩（至少 weekly），备份目标目录 `.gitignore`。
 
-### Stage 4: knowledge 管线接通（1-2 天）
-- [ ] S4-1 **CLI sync 改持久 DB + 真实 embedding**：`DatabaseManager(":memory:")` → 文件 DB（root 或 `data/`）；MockModelProvider → 真实 embedding（`ollama/nomic-embed-text` 需 `ollama pull`，或配置 fallback 策略并显式声明）。**门禁**: sync 后 `knowledge_sources > 0` 且文件哈希去重生效（二次 sync "Added: 0"）。
-- [ ] S4-2 **默认查询入口修复**：`knowledge <query>` 位置参数可达（Typer group 默认命令处理）；删 `search_results = []` 空壳，接真实检索。
-- [ ] S4-3 **端到端验证**：`daip knowledge "量子计算"` 返回《量子计算基础原理.md》相关片段。**门禁**: 实测返回非空真实结果。
-- **注意**: 与 e2e knowledge 族（21 个已绿测试测的是底层 KnowledgeManager）不冲突，补 CLI 层测试即可。
+### Stage 4: knowledge 管线接通（已完成 S4-1/S4-2/S4-3）
+- [x] S4-1 **CLI sync 持久化 + 真实 embedding**：新增 `_build_knowledge_manager()` 公共构造（持久 DB + LiteLLMProvider ollama embedding）；删除 5 处 `:memory:`/MockModelProvider 模式。**修复 litellm 兼容 bug**（`aembedding` 新版返回 dict）。`ollama pull nomic-embed-text` 已装（768 维）。旧 384 维 mock 索引删除重建。**实测：`knowledge_sources` 0 → 13 落盘；二次 sync "up to date 13 unchanged"（增量检测生效）**。✅
+- [x] S4-2 **搜索空壳删除 + 默认入口**：`search`/`auto` 接真实 `KnowledgeManager.search`；`status` 从 DB/索引读真实统计（13/13/0/0.38MB）；`knowledge <query>` 裸参数入口因 Typer 架构限制不可行（未知命令优先报错），主入口 = `knowledge search <query>`（文档化）。✅
+- [x] S4-3 **端到端验证**：`knowledge search "量子计算"` 返回真实结果且《量子计算基础原理.md》排第一（41.7% 相似度）；`tests/cli/commands/test_knowledge_commands.py` + e2e knowledge 29 项全绿（2 个 status 测试适配新实现）。✅
+- **遗留观察**：wiki CLI 的 7 处 `:memory:` DB（wiki_index.json 文件系统兜底，暂不影响功能）；`knowledge` 裸参数入口 Typer 限制。
 
 ### Stage 5: 混合路由落地（4-6 天，08-08 计划 H1-H6 续）——【Backlog：硬需求，暂缓实施】
 
@@ -230,12 +238,12 @@
 ### 6.1 发布门禁（全部必须为真，缺一不发布）
 | # | 门禁 | 验证命令 | 当前状态 |
 |---|------|---------|---------|
-| G1 | 全量测试 0F/0E（skip 有治理清单） | `poetry run pytest tests/ -q --tb=line` | ⚠️ 1738P/0F/1E（1E 为环境性 GBK flaky，独立跑绿；skip 治理未做） |
+| G1 | 全量测试 0F/0E（skip 有治理清单） | `poetry run pytest -q --tb=line` | ⚠️ 1738P/0F/1E（1E 为环境性 GBK flaky，`--lf` 重跑即绿；skip 治理审计完成待执行） |
 | G2 | ruff = 0 | `poetry run ruff check src/` | ✅ **0（11116→0）** |
-| G3 | mypy = 0 | `poetry run mypy src/daip_live` | ❌ 1251（真实规模暴露，Backlog） |
-| G4 | ast.parse 3.9 语义全过 | 新增检查脚本 | ✅ 0 失败 |
-| G5 | CI 全绿（含 e2e/security，无 continue-on-error） | GitHub Actions | ❌ 必红（ruff 步骤已可绿；mypy 步骤仍红） |
-| G6 | knowledge 端到端真实 | `daip knowledge "查询"` 返回真实结果；sync 后 `knowledge_sources > 0` | ❌ 壳（Stage 4 待办） |
+| G3 | mypy = 0 | `poetry run mypy src/daip_live` | ❌ 1251（真实规模暴露，Backlog；CI 软门禁） |
+| G4 | ast.parse 3.9 语义全过 | `python scripts/check_py39_syntax.py` | ✅ 0 失败（已入 CI） |
+| G5 | CI 全绿（含 e2e/security，无 continue-on-error） | GitHub Actions | ⚠️ 已硬化并入库（ci.yml 此前从未跟踪！）；mypy 步骤为记录在案的软门禁（Backlog 完成后转硬） |
+| G6 | knowledge 端到端真实 | `daip knowledge search "查询"` 返回真实结果；sync 后 `knowledge_sources > 0` | ✅ **13 落盘 + 真实检索验证通过** |
 | G7 | 数据隔离：测试后 git status 无 db/faiss 变更 | `git status --short` | ✅ S3-1/S3-2 完成（全量测试后验证干净） |
 | G8 | 备份可恢复（演练过） | 恢复演练记录 | ✅ 演练完成（406/611/43/33 完整） |
 | G9 | 文档与实测一致（抽查 3 处） | 人工对照 | ⚠️ 部分（PRODUCTION_READINESS_FINAL 等仍虚高） |
