@@ -508,9 +508,7 @@ async def _handle_conversation_intent(intent: Intent):
     session = agent.session_manager.create_session(
         goal=prompt, session_type="chat", participant_ids=["agent", "user"]
     )
-    current_task = TodoItem(
-        id=0, description=prompt, status="pending", priority=1
-    )
+    current_task = TodoItem(id=0, description=prompt, status="pending", priority=1)
     answered = False
     async for event in step_executor.execute_step(current_task, session):
         if isinstance(event, FinalResponseEvent) and event.content:
@@ -520,7 +518,9 @@ async def _handle_conversation_intent(intent: Intent):
             console.print(f"[red]错误: {event.message}[/red]")
             answered = True
     if not answered:
-        console.print("[yellow]未能生成回答，请检查模型服务状态（Ollama 是否运行）。[/yellow]")  # noqa: E501
+        console.print(
+            "[yellow]未能生成回答，请检查模型服务状态（Ollama 是否运行）。[/yellow]"
+        )  # noqa: E501
 
 
 # Import commands
