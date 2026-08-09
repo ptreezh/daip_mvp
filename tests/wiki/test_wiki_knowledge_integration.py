@@ -413,7 +413,8 @@ class TestWikiKnowledgeIntegration:
         # Arrange
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
-            invalid_export_dir = Path("C:/invalid|path/that/does/not/exist")
+            # 跨平台无效路径：含 NUL 字符（Windows 和 Linux 均无法创建）
+            invalid_export_dir = Path(temp_dir) / "\x00invalid"
             manager = WikiManager(wiki_root)
 
             manager.create_page("Test Page", "Content", ["test"])
