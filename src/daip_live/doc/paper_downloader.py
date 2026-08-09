@@ -84,8 +84,8 @@ class PaperDownloader:
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"  # noqa: E501
             }
         )
-        self.arxiv_api_base = "http://export.arxiv.org/api/query"
-        self.arxiv_pdf_base = "http://arxiv.org/pdf/"
+        self.arxiv_api_base = "https://export.arxiv.org/api/query"
+        self.arxiv_pdf_base = "https://arxiv.org/pdf/"
 
         # 设置日志
         self.logger = logging.getLogger(__name__)
@@ -586,11 +586,11 @@ class PaperDownloader:
 
     def _is_valid_arxiv_id(self, arxiv_id: str) -> bool:
         """验证arXiv ID格式"""
-        # 简化的arXiv ID验证
+        # 简化的arXiv ID验证（支持可选版本号后缀 v1/v2...）
         patterns = [
-            r"^\d{4}\.\d{4,5}$",  # 新格式: 2301.07041
-            r"^[a-z\.\-]+/\d{4}\.\d{4,5}$",  # 旧格式: cs.AI/2301.07041
-            r"^[a-z\.\-]+/\d{7}$",  # 最旧格式: hep-th/9901001
+            r"^\d{4}\.\d{4,5}(v\d+)?$",  # 新格式: 2301.07041 / 2301.07041v2
+            r"^[a-z\.\-]+/\d{4}\.\d{4,5}(v\d+)?$",  # 旧格式: cs.AI/2301.07041
+            r"^[a-z\.\-]+/\d{7}(v\d+)?$",  # 最旧格式: hep-th/9901001
         ]
 
         for pattern in patterns:
@@ -680,12 +680,14 @@ class PaperDownloader:
             }
 
             for entry in root.findall("atom:entry", namespaces):
-                # 提取基本信息
-                arxiv_id = entry.find("arxiv:id", namespaces)
-                if arxiv_id is None:
+                # 提取基本信息（ID 可能在 arxiv:id 或 atom:id）
+                arxiv_id_elem = entry.find("arxiv:id", namespaces)
+                if arxiv_id_elem is None:
+                    arxiv_id_elem = entry.find("atom:id", namespaces)
+                if arxiv_id_elem is None:
                     continue
 
-                id_text = arxiv_id.text
+                id_text = arxiv_id_elem.text
                 # 提取arXiv ID，格式可能是 http://arxiv.org/abs/2301.00001
                 if "arxiv.org/abs/" in id_text:
                     arxiv_id = id_text.split("arxiv.org/abs/")[-1]
@@ -824,115 +826,3 @@ class PaperDownloader:
         self.logger.info(f"清理了 {count} 个缓存文件")
         return count
 
-    def _make_request_with_retry(
-        self, url: str, params: Optional[dict] = None
-    ) -> requests.Response:
-        """带重试机制的HTTP请求"""
-        for attempt in range(self.max_retries):
-            try:
-                self.logger.debug(f"尝试请求 {url} (第 {attempt + 1} 次)")
-                response = self.session.get(url, params=params, timeout=self.timeout)
-                response.raise_for_status()
-                return response
-            except requests.exceptions.RequestException as e:
-                self.logger.warning(f"请求失败 (第 {attempt + 1} 次): {str(e)}")
-                if attempt == self.max_retries - 1:
-                    raise
-                time.sleep(2**attempt)  # 指数退避
-
-        raise requests.exceptions.RequestException(
-            f"请求失败，已重试 {self.max_retries} 次"
-        )
-
-    def _parse_arxiv_response(self, xml_text: str) -> list[PaperMetadata]:
-        """解析arXiv API响应"""
-        try:
-            root = ET.fromstring(xml_text)
-
-            # 注册命名空间
-            namespaces = {
-                "atom": "http://www.w3.org/2005/Atom",
-                "arxiv": "http://arxiv.org/schemas/atom",
-                "opensearch": "http://a9.com/-/spec/opensearch/1.1/",
-            }
-
-            entries = []
-            for entry in root.findall("atom:entry", namespaces):
-                # 提取基本信息
-                id_elem = entry.find(
-                    "atom:id", namespaces
-                )  # 修改：使用atom:id而不是arxiv:id
-                if id_elem is None:
-                    continue
-
-                id_text = id_elem.text
-                # 提取arXiv ID，格式可能是 http://arxiv.org/abs/2301.00001
-                if "arxiv.org/abs/" in id_text:
-                    arxiv_id = id_text.split("arxiv.org/abs/")[-1]
-                else:
-                    arxiv_id = id_text.split("/")[-1]
-
-                title = entry.find("atom:title", namespaces)
-                title = title.text.strip() if title is not None else "Unknown Title"
-
-                abstract = entry.find("atom:summary", namespaces)
-                abstract = (
-                    abstract.text.strip()
-                    if abstract is not None
-                    else "Abstract not available"
-                )
-
-                # 提取作者
-                authors = []
-                for author in entry.findall("atom:author", namespaces):
-                    name = author.find("atom:name", namespaces)
-                    if name is not None:
-                        authors.append(name.text)
-
-                # 提取发布日期
-                published = entry.find("atom:published", namespaces)
-                if published is not None:
-                    published_date = datetime.fromisoformat(
-                        published.text.replace("Z", "+00:00")
-                    )
-                else:
-                    published_date = datetime.now()
-
-                # 提取分类
-                categories = []
-                for category in entry.findall("atom:category", namespaces):
-                    if category.get("term"):
-                        categories.append(category.get("term"))
-
-                # 提取PDF链接
-                pdf_url = ""
-                for link in entry.findall("atom:link", namespaces):
-                    if link.get("title") == "pdf":
-                        pdf_url = link.get("href", "")
-                        break
-
-                # 提取DOI和其他信息
-                doi = None
-
-                # 创建元数据对象
-                metadata = PaperMetadata(
-                    arxiv_id=arxiv_id,
-                    title=title,
-                    authors=authors,
-                    abstract=abstract,
-                    published_date=published_date,
-                    categories=categories,
-                    pdf_url=pdf_url,
-                    doi=doi,
-                )
-
-                entries.append(metadata)
-
-            return entries
-
-        except Exception as e:
-            self.logger.error(f"解析arXiv响应失败: {str(e)}")
-            import traceback
-
-            self.logger.debug(traceback.format_exc())
-            return []

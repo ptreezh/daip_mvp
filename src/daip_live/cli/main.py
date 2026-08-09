@@ -337,29 +337,48 @@ def doc_download(
     """下载学术论文"""
 
     async def run_download_async():
-        from daip_live.doc.models.document_models import PaperSource
-        from daip_live.doc.tools.paper_downloader import PaperDownloader
+        from daip_live.doc.paper_downloader import PaperDownloader
 
         console = Console()
         console.print(f"[bold]Downloading paper on topic:[/bold] {topic}")
         console.print(f"[bold]Source:[/bold] {source}")
 
-        # Map string to enum
-        source_enum = PaperSource.ARXIV
-        if source.lower() == "pubmed":
-            source_enum = PaperSource.PUBMED
-        elif source.lower() == "web":
-            source_enum = PaperSource.WEB
+        downloader = PaperDownloader(download_dir=Path("./papers"))
 
-        downloader = PaperDownloader()
-        result = await downloader.download_paper_by_topic(topic, source_enum)
+        if source.lower() in ("pubmed", "web"):
+            console.print(
+                "[yellow]Source 'pubmed'/'web' 暂不支持，"
+                "arxiv 为当前可用来源。[/yellow]"
+            )
+            return
+
+        # 下载：优先按 arxiv ID，否则按主题搜索后下载第一篇
+        result = await asyncio.to_thread(downloader.download_arxiv_paper, topic)
+        if not result.success:
+            console.print("[yellow]未直接匹配 arXiv ID，尝试主题搜索...[/yellow]")
+            papers = await asyncio.to_thread(
+                downloader.search_arxiv, topic, 1
+            )
+            if not papers or not papers[0].arxiv_id:
+                console.print(
+                    f"[red]❌ 未找到主题 '{topic}' 的论文"
+                    "（网络或 arXiv 服务问题）[/red]"
+                )
+                return
+            result = await asyncio.to_thread(
+                downloader.download_arxiv_paper, papers[0].arxiv_id
+            )
 
         if result.success:
             console.print("✅ Paper downloaded successfully!")
-            console.print(f"📁 File: {result.file_path}")
-            if result.metadata:
-                console.print(f"📑 Title: {result.metadata.title}")
-                console.print(f"👥 Authors: {', '.join(result.metadata.authors)}")
+            console.print(f"📁 File: {result.pdf_path}")
+            # 元数据存在 metadata_path（JSON），尝试读取标题/作者
+            try:
+                meta = downloader.load_metadata(result.metadata_path)
+                console.print(f"📑 Title: {meta.title}")
+                console.print(f"👥 Authors: {', '.join(meta.authors)}")
+            except Exception:
+                pass
         else:
             console.print(f"❌ Download failed: {result.error_message}")
 
@@ -375,23 +394,23 @@ def doc_search(
     """搜索学术论文"""
 
     async def run_search_async():
-        from daip_live.doc.models.document_models import PaperSource
-        from daip_live.doc.tools.paper_downloader import PaperDownloader
+        from daip_live.doc.paper_downloader import PaperDownloader
 
         console = Console()
         console.print(f"[bold]Searching papers for:[/bold] {query}")
         console.print(f"[bold]Source:[/bold] {source}")
         console.print(f"[bold]Max results:[/bold] {max_results}")
 
-        # Map string to enum
-        source_enum = PaperSource.ARXIV
-        if source.lower() == "pubmed":
-            source_enum = PaperSource.PUBMED
-        elif source.lower() == "web":
-            source_enum = PaperSource.WEB
+        if source.lower() in ("pubmed", "web"):
+            console.print(
+                f"[yellow]Source '{source}' 暂不支持，arxiv 为当前可用来源。[/yellow]"
+            )
+            return
 
-        downloader = PaperDownloader()
-        results = await downloader.search_papers(query, source_enum, max_results)
+        downloader = PaperDownloader(download_dir=Path("./papers"))
+        results = await asyncio.to_thread(
+            downloader.search_arxiv, query, max_results
+        )
 
         if results:
             console.print(f"🔍 Found {len(results)} papers:")
@@ -401,7 +420,10 @@ def doc_search(
             table.add_column("Year", justify="right")
 
             for paper in results:
-                year = paper.publication_date.year if paper.publication_date else "N/A"
+                pub_date = getattr(paper, "published_date", None) or getattr(
+                    paper, "publication_date", None
+                )
+                year = pub_date.year if pub_date else "N/A"
                 authors = ", ".join(paper.authors[:2])  # Show first 2 authors
                 if len(paper.authors) > 2:
                     authors += " et al."
