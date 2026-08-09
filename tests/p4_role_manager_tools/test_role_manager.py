@@ -110,7 +110,7 @@ class TestRoleManagerCreateDelete(unittest.TestCase):
 
     def test_create_role_writes_file_and_reloads(self):
         manager = RoleManager(roles_dir_path=self.test_dir)
-        role = manager.create_role(
+        manager.create_role(
             name="new_role", persona="New role persona", tools=["search"]
         )
 

@@ -324,7 +324,9 @@ def create(
             created = role_manager.create_role(
                 name=role_name, persona=persona, tools=tools_list
             )
-            console.print(f"[green]✅ Role '{created.name}' created successfully[/green]")
+            console.print(
+                f"[green]✅ Role '{created.name}' created successfully[/green]"
+            )
             console.print(f"[dim]Persona: {persona}[/dim]")
             if tools_list:
                 console.print(f"[dim]Tools: {', '.join(tools_list)}[/dim]")

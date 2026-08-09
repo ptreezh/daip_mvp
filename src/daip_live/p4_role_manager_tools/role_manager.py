@@ -138,7 +138,9 @@ class RoleManager:
 
         return self._roles.get(name)
 
-    def create_role(self, name: str, persona: str, tools: list[str] | None = None) -> Role:
+    def create_role(
+        self, name: str, persona: str, tools: list[str] | None = None
+    ) -> Role:
         """创建角色并写入 roles 目录 yaml 文件（真实持久化）。
 
         Args:
