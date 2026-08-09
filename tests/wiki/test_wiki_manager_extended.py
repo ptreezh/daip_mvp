@@ -3,11 +3,12 @@ WikiManager扩展功能的测试用例
 验证REFACTOR阶段新增的高级功能
 """
 
-import pytest
+import json
+import tempfile
 from datetime import datetime
 from pathlib import Path
-import tempfile
-import json
+
+import pytest
 
 from daip_live.wiki.manager import WikiManager, WikiStatistics
 
@@ -40,9 +41,19 @@ class TestWikiManagerExtended:
             manager = WikiManager(wiki_root)
 
             # 创建多个页面
-            manager.create_page("Python Guide", "Python is a programming language", ["python", "programming"])
-            manager.create_page("Java Tutorial", "Java is also a programming language", ["java", "programming"])
-            manager.create_page("Python Tips", "Python tips and tricks", ["python", "tips"])
+            manager.create_page(
+                "Python Guide",
+                "Python is a programming language",
+                ["python", "programming"],
+            )
+            manager.create_page(
+                "Java Tutorial",
+                "Java is also a programming language",
+                ["java", "programming"],
+            )
+            manager.create_page(
+                "Python Tips", "Python tips and tricks", ["python", "tips"]
+            )
             manager.create_page("Short Note", "Brief content", ["notes"])
 
             # Act
@@ -81,8 +92,8 @@ class TestWikiManagerExtended:
             assert len(created_pages) == 3
             assert manager.get_page_count() == 3
             for i, page in enumerate(created_pages):
-                assert page.title == f"Page {i+1}"
-                assert page.content == f"Content {i+1}"
+                assert page.title == f"Page {i + 1}"
+                assert page.content == f"Content {i + 1}"
 
     def test_wiki_manager_batch_create_pages_with_invalid_title(self):
         """测试批量创建页面时包含无效标题"""
@@ -117,7 +128,11 @@ class TestWikiManagerExtended:
 
             pages_data = [
                 {"title": "New Page", "content": "New content", "tags": ["new"]},
-                {"title": "Existing Page", "content": "Duplicate content", "tags": ["duplicate"]},
+                {
+                    "title": "Existing Page",
+                    "content": "Duplicate content",
+                    "tags": ["duplicate"],
+                },
             ]
 
             # Act & Assert
@@ -142,7 +157,9 @@ class TestWikiManagerExtended:
             manager.create_page("Page 3", "Content 3", ["tag3"])
 
             # Act
-            results = manager.batch_delete_pages(["Page 1", "Page 3", "Nonexistent Page"])
+            results = manager.batch_delete_pages(
+                ["Page 1", "Page 3", "Nonexistent Page"]
+            )
 
             # Assert
             assert results["Page 1"] is True
@@ -160,17 +177,19 @@ class TestWikiManagerExtended:
             export_dir = Path(temp_dir) / "export"
 
             # 创建测试页面
-            manager.create_page("Test Page", "# Test Content\n\nThis is a test.", ["test"])
+            manager.create_page(
+                "Test Page", "# Test Content\n\nThis is a test.", ["test"]
+            )
 
             # Act
-            manager.export_pages(export_dir, format='markdown')
+            manager.export_pages(export_dir, format="markdown")
 
             # Assert
             assert export_dir.exists()
             exported_file = export_dir / "test_page.md"
             assert exported_file.exists()
 
-            with open(exported_file, 'r', encoding='utf-8') as f:
+            with open(exported_file, encoding="utf-8") as f:
                 content = f.read()
             assert "# Test Content" in content
             assert "This is a test." in content
@@ -187,20 +206,20 @@ class TestWikiManagerExtended:
             manager.create_page("Test Page", "Test content", ["test"])
 
             # Act
-            manager.export_pages(export_dir, format='json')
+            manager.export_pages(export_dir, format="json")
 
             # Assert
             assert export_dir.exists()
             exported_file = export_dir / "wiki_export.json"
             assert exported_file.exists()
 
-            with open(exported_file, 'r', encoding='utf-8') as f:
+            with open(exported_file, encoding="utf-8") as f:
                 export_data = json.load(f)
 
-            assert export_data['total_pages'] == 1
-            assert 'export_date' in export_data
-            assert len(export_data['pages']) == 1
-            assert export_data['pages'][0]['title'] == "Test Page"
+            assert export_data["total_pages"] == 1
+            assert "export_date" in export_data
+            assert len(export_data["pages"]) == 1
+            assert export_data["pages"][0]["title"] == "Test Page"
 
     def test_wiki_manager_export_pages_unsupported_format(self):
         """测试导出不支持的格式"""
@@ -212,7 +231,7 @@ class TestWikiManagerExtended:
 
             # Act & Assert
             with pytest.raises(ValueError, match="Unsupported export format"):
-                manager.export_pages(export_dir, format='unsupported')
+                manager.export_pages(export_dir, format="unsupported")
 
     def test_wiki_manager_advanced_search_content_only(self):
         """测试高级搜索 - 仅内容"""
@@ -221,11 +240,15 @@ class TestWikiManagerExtended:
             wiki_root = Path(temp_dir)
             manager = WikiManager(wiki_root)
 
-            manager.create_page("Python Guide", "Content about Python programming", ["python"])
-            manager.create_page("Java Tutorial", "Content about Java programming", ["java"])
+            manager.create_page(
+                "Python Guide", "Content about Python programming", ["python"]
+            )
+            manager.create_page(
+                "Java Tutorial", "Content about Java programming", ["java"]
+            )
 
             # Act
-            results = manager.search_advanced("python", search_type='content')
+            results = manager.search_advanced("python", search_type="content")
 
             # Assert
             assert len(results) == 1
@@ -238,11 +261,15 @@ class TestWikiManagerExtended:
             wiki_root = Path(temp_dir)
             manager = WikiManager(wiki_root)
 
-            manager.create_page("Python Guide", "Content about Python programming", ["python"])
-            manager.create_page("Learning Python", "Content for beginners", ["python", "beginner"])
+            manager.create_page(
+                "Python Guide", "Content about Python programming", ["python"]
+            )
+            manager.create_page(
+                "Learning Python", "Content for beginners", ["python", "beginner"]
+            )
 
             # Act
-            results = manager.search_advanced("python", search_type='title')
+            results = manager.search_advanced("python", search_type="title")
 
             # Assert
             assert len(results) == 2
@@ -257,12 +284,14 @@ class TestWikiManagerExtended:
             wiki_root = Path(temp_dir)
             manager = WikiManager(wiki_root)
 
-            manager.create_page("Programming Guide", "Content about programming", ["guide"])
+            manager.create_page(
+                "Programming Guide", "Content about programming", ["guide"]
+            )
             manager.create_page("Tips", "Programming tips for beginners", ["tips"])
             manager.create_page("Learning", "General learning content", ["learning"])
 
             # Act
-            results = manager.search_advanced("programming", search_type='both')
+            results = manager.search_advanced("programming", search_type="both")
 
             # Assert
             assert len(results) == 2  # 标题匹配一个，内容匹配一个
@@ -277,12 +306,20 @@ class TestWikiManagerExtended:
             wiki_root = Path(temp_dir)
             manager = WikiManager(wiki_root)
 
-            manager.create_page("Python Basics", "Python programming basics", ["python", "basics"])
-            manager.create_page("Python Advanced", "Advanced Python topics", ["python", "advanced"])
-            manager.create_page("Java Basics", "Java programming basics", ["java", "basics"])
+            manager.create_page(
+                "Python Basics", "Python programming basics", ["python", "basics"]
+            )
+            manager.create_page(
+                "Python Advanced", "Advanced Python topics", ["python", "advanced"]
+            )
+            manager.create_page(
+                "Java Basics", "Java programming basics", ["java", "basics"]
+            )
 
             # Act
-            results = manager.search_advanced("basics", search_type='content', tags=["python"])
+            results = manager.search_advanced(
+                "basics", search_type="content", tags=["python"]
+            )
 
             # Assert
             assert len(results) == 1
@@ -297,7 +334,7 @@ class TestWikiManagerExtended:
 
             # Act & Assert
             with pytest.raises(ValueError, match="Invalid search type: invalid"):
-                manager.search_advanced("query", search_type='invalid')
+                manager.search_advanced("query", search_type="invalid")
 
     def test_wiki_manager_get_recent_pages(self):
         """测试获取最近修改的页面"""
@@ -307,12 +344,13 @@ class TestWikiManagerExtended:
             manager = WikiManager(wiki_root)
 
             # 创建页面（会有不同的时间戳）
-            page1 = manager.create_page("Page 1", "Content 1", ["test"])
-            page2 = manager.create_page("Page 2", "Content 2", ["test"])
-            page3 = manager.create_page("Page 3", "Content 3", ["test"])
+            manager.create_page("Page 1", "Content 1", ["test"])
+            manager.create_page("Page 2", "Content 2", ["test"])
+            manager.create_page("Page 3", "Content 3", ["test"])
 
             # 更新第一个页面使其成为最新
             import time
+
             time.sleep(0.1)  # 确保时间差
             manager.update_page("Page 1", "Updated content 1")
 
@@ -333,7 +371,7 @@ class TestWikiManagerExtended:
 
             # 创建5个页面
             for i in range(5):
-                manager.create_page(f"Page {i+1}", f"Content {i+1}", ["test"])
+                manager.create_page(f"Page {i + 1}", f"Content {i + 1}", ["test"])
 
             # Act
             recent_pages = manager.get_recent_pages(limit=3)

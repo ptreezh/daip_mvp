@@ -211,8 +211,7 @@ class TUIFunctionalTester:
                 "test": "会话管理",
                 "success": success,
                 "details": (
-                    f"会话创建: {session_exists}, "
-                    f"会话检索: {session_retrievable}"
+                    f"会话创建: {session_exists}, 会话检索: {session_retrievable}"
                 ),
             }
         )
@@ -256,7 +255,7 @@ class TUIFunctionalTester:
             {
                 "test": "角色管理",
                 "success": success,
-                "details": (f"列表: {role_found}, " f"详情: {details_found}"),
+                "details": (f"列表: {role_found}, 详情: {details_found}"),
             }
         )
         return success

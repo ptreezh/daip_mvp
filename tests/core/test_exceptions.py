@@ -32,5 +32,5 @@ def test_catch_specific_exception():
     with pytest.raises(DAIPError):  # Catching the base error
         raise ToolInputError("Invalid input provided.")
 
-    with pytest.raises(ModelError): # Catching the intermediate error
+    with pytest.raises(ModelError):  # Catching the intermediate error
         raise ModelConnectionError("Could not connect.")

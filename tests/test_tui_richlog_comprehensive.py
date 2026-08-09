@@ -33,16 +33,26 @@ def tui_app():
     mock_model_provider.embed = AsyncMock(return_value=[0.1] * 384)
 
     session_manager = SessionManager()
-    memory_service = MemoryService(mock_model_provider)
+    MemoryService(mock_model_provider)
     mock_knowledge_manager = MagicMock(spec=KnowledgeManager)
-    mock_knowledge_manager.sync_knowledge_base = AsyncMock(return_value={'added': 5, 'updated': 2, 'deleted': 1})
-    mock_knowledge_manager.search = AsyncMock(return_value=[{'file_path': 'test.md', 'distance': 0.1, 'content': 'Test Content'}])
+    mock_knowledge_manager.sync_knowledge_base = AsyncMock(
+        return_value={"added": 5, "updated": 2, "deleted": 1}
+    )
+    mock_knowledge_manager.search = AsyncMock(
+        return_value=[
+            {"file_path": "test.md", "distance": 0.1, "content": "Test Content"}
+        ]
+    )
 
     mock_role_manager = MagicMock(spec=RoleManager)
-    mock_role_manager.list_roles.return_value = [Role(name='test_role', persona='Test Role', tools=['search'])]
-    mock_role_manager.get_role_by_name.return_value = Role(name='test_role', persona='Test Role Details', tools=['search', 'write'])
+    mock_role_manager.list_roles.return_value = [
+        Role(name="test_role", persona="Test Role", tools=["search"])
+    ]
+    mock_role_manager.get_role_by_name.return_value = Role(
+        name="test_role", persona="Test Role Details", tools=["search", "write"]
+    )
 
-    tool_manager = ToolManager()
+    ToolManager()
     mock_executor = MagicMock(spec=AgentExecutor)
     mock_executor.user_input_queue = asyncio.Queue()
     mock_executor.permission_queue = asyncio.Queue()
@@ -58,7 +68,7 @@ def tui_app():
         debate_manager=mock_debate_manager,
         model_provider=mock_model_provider,
         db_manager=db_manager,
-        config_manager=mock_config_manager
+        config_manager=mock_config_manager,
     )
 
     yield {
@@ -66,11 +76,13 @@ def tui_app():
         "mock_role_manager": mock_role_manager,
         "mock_knowledge_manager": mock_knowledge_manager,
         "session_manager": session_manager,
-        "db_manager": db_manager
+        "db_manager": db_manager,
     }
 
 
-pytestmark = pytest.mark.skip(reason="TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准")
+pytestmark = pytest.mark.skip(
+    reason="TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准"
+)
 
 
 @pytest.mark.asyncio
@@ -86,7 +98,7 @@ async def test_richlog_basic_output(tui_app):
         assert "Test message" in "\n".join(tui._log_text_buffer)
 
         # Check that the RichLog widget exists (we're not changing the component type)
-        rich_log = tui.query_one("#main_log")
+        tui.query_one("#main_log")
         # Since RichLog doesn't expose its content directly, we check the buffer
         # which is used for copying text
 
@@ -116,7 +128,7 @@ async def test_richlog_clear_functionality(tui_app):
         # Verify content is cleared
         assert len(tui._log_text_buffer) == 0
         # Check that the RichLog widget is cleared
-        rich_log = tui.query_one("#main_log", RichLog)
+        tui.query_one("#main_log", RichLog)
         # We can't directly check RichLog content, but we can check our buffer
         # which should be empty after clear_log()
 
@@ -146,7 +158,7 @@ async def test_richlog_scroll_behavior(tui_app):
     """Tests RichLog scroll behavior."""
     tui = tui_app["app"]
     async with tui.run_test() as pilot:
-        rich_log = tui.query_one("#main_log", RichLog)
+        tui.query_one("#main_log", RichLog)
 
         # Clear initial content if any
         tui.clear_log()
@@ -178,7 +190,7 @@ async def test_richlog_copy_functionality(tui_app):
         await pilot.pause()
 
         # Mock pyperclip.copy
-        with patch('pyperclip.copy') as mock_copy:
+        with patch("pyperclip.copy") as mock_copy:
             # Set focus to output mode
             tui.focus_mode = FocusMode.OUTPUT
             # Trigger copy action
@@ -194,12 +206,13 @@ async def test_richlog_copy_functionality(tui_app):
 async def test_richlog_highlighting(tui_app):
     """Tests RichLog content highlighting."""
     tui = tui_app["app"]
-    async with tui.run_test() as pilot:
+    async with tui.run_test():
         # Test code highlighting
         code_block = "def test():\n    return True"
         highlighted = tui._highlight_code_and_json(code_block)
         # Should return a Syntax object for code
         from rich.syntax import Syntax
+
         assert isinstance(highlighted, Syntax)
 
         # Test YAML highlighting

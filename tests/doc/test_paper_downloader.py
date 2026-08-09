@@ -10,16 +10,19 @@
 - 错误处理和重试机制
 """
 
-import pytest
-import json
 import tempfile
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime
-from typing import Dict, Any, List
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
 import requests
 
-from daip_live.doc.paper_downloader import PaperDownloader, PaperMetadata, DownloadResult
+from daip_live.doc.paper_downloader import (
+    DownloadResult,
+    PaperDownloader,
+    PaperMetadata,
+)
 
 
 class TestPaperDownloader:
@@ -31,9 +34,9 @@ class TestPaperDownloader:
         downloader = PaperDownloader(download_dir=Path("/tmp/papers"))
 
         assert downloader.download_dir == Path("/tmp/papers")
-        assert hasattr(downloader, 'session')
-        assert hasattr(downloader, 'max_retries')
-        assert hasattr(downloader, 'timeout')
+        assert hasattr(downloader, "session")
+        assert hasattr(downloader, "max_retries")
+        assert hasattr(downloader, "timeout")
 
     def test_search_arxiv_by_query(self):
         """测试通过查询搜索arXiv论文"""
@@ -119,7 +122,7 @@ class TestPaperDownloader:
                 abstract="This is a test abstract",
                 published_date=datetime(2023, 1, 17),
                 categories=["cs.AI", "cs.LG"],
-                pdf_url="http://arxiv.org/pdf/2301.07041.pdf"
+                pdf_url="http://arxiv.org/pdf/2301.07041.pdf",
             )
 
             # Act & Assert - 在实现之前会失败
@@ -156,15 +159,20 @@ class TestPaperDownloader:
             arxiv_id = "2301.07041"
 
             # Mock网络请求失败
-            with patch.object(downloader.session, 'get') as mock_get:
-                mock_get.side_effect = requests.exceptions.RequestException("Network error")
+            with patch.object(downloader.session, "get") as mock_get:
+                mock_get.side_effect = requests.exceptions.RequestException(
+                    "Network error"
+                )
 
                 # Act & Assert - 在实现之前会失败
                 result = downloader.download_arxiv_paper(arxiv_id)
 
                 assert isinstance(result, DownloadResult)
                 assert result.success is False
-                assert "Network error" in result.error_message or "PDF下载失败" in result.error_message
+                assert (
+                    "Network error" in result.error_message
+                    or "PDF下载失败" in result.error_message
+                )
                 assert mock_get.call_count >= 1  # 至少调用了一次
 
     def test_search_with_category_filter(self):
@@ -175,9 +183,7 @@ class TestPaperDownloader:
 
             # Act & Assert - 在实现之前会失败
             results = downloader.search_arxiv(
-                "neural networks",
-                max_results=10,
-                categories=["cs.AI", "cs.LG"]
+                "neural networks", max_results=10, categories=["cs.AI", "cs.LG"]
             )
 
             assert isinstance(results, list)
@@ -201,8 +207,7 @@ class TestPaperDownloader:
 
             # Act & Assert - 在实现之前会失败
             result = downloader.download_arxiv_paper(
-                arxiv_id,
-                progress_callback=progress_callback
+                arxiv_id, progress_callback=progress_callback
             )
 
             assert isinstance(result, DownloadResult)
@@ -229,7 +234,9 @@ class TestPaperDownloader:
             assert isinstance(result2, DownloadResult)
             assert result2.success is True
             assert result2.pdf_path == result1.pdf_path
-            assert "exists" in result2.message.lower() or "跳过" in result2.message.lower()
+            assert (
+                "exists" in result2.message.lower() or "跳过" in result2.message.lower()
+            )
 
     def test_generate_download_report(self):
         """测试生成下载报告"""
@@ -248,7 +255,9 @@ class TestPaperDownloader:
             assert "failed_downloads" in report
             assert "download_time" in report
             assert report["total_papers"] == len(arxiv_ids)
-            assert report["successful_downloads"] + report["failed_downloads"] == len(arxiv_ids)
+            assert report["successful_downloads"] + report["failed_downloads"] == len(
+                arxiv_ids
+            )
 
     def test_papers_directory_creation(self):
         """测试论文目录自动创建"""
@@ -261,7 +270,7 @@ class TestPaperDownloader:
             downloader = PaperDownloader(download_dir=papers_dir)
 
             # 下载操作应该自动创建目录
-            result = downloader.download_arxiv_paper("2301.07041")
+            downloader.download_arxiv_paper("2301.07041")
 
             assert papers_dir.exists()
             assert papers_dir.is_dir()
@@ -273,8 +282,8 @@ class TestPaperDownloader:
             downloader = PaperDownloader(download_dir=Path(temp_dir))
 
             # Mock部分下载然后失败
-            with patch.object(downloader, '_download_pdf_stream') as mock_download:
-                mock_download.side_effect = IOError("Download failed")
+            with patch.object(downloader, "_download_pdf_stream") as mock_download:
+                mock_download.side_effect = OSError("Download failed")
 
                 # Act & Assert - 在实现之前会失败
                 result = downloader.download_arxiv_paper("2301.07041")
@@ -292,22 +301,13 @@ class TestPaperDownloader:
 
             # Act & Assert - 在实现之前会失败
             # 有效的arXiv ID格式
-            valid_ids = [
-                "2301.07041",
-                "cs.AI/2301.07041",
-                "hep-th/9901001"
-            ]
+            valid_ids = ["2301.07041", "cs.AI/2301.07041", "hep-th/9901001"]
 
             for arxiv_id in valid_ids:
                 assert downloader._is_valid_arxiv_id(arxiv_id) is True
 
             # 无效的arXiv ID格式
-            invalid_ids = [
-                "invalid",
-                "123",
-                "abc.def.ghi",
-                ""
-            ]
+            invalid_ids = ["invalid", "123", "abc.def.ghi", ""]
 
             for arxiv_id in invalid_ids:
                 assert downloader._is_valid_arxiv_id(arxiv_id) is False
@@ -321,14 +321,14 @@ class TestPaperDownloader:
 
             # Act & Assert - 在实现之前会失败
             import time
-            start_time = time.time()
+
+            time.time()
 
             results = downloader.download_multiple_papers_concurrent(
-                arxiv_ids,
-                max_workers=2
+                arxiv_ids, max_workers=2
             )
 
-            end_time = time.time()
+            time.time()
 
             assert isinstance(results, list)
             assert len(results) == len(arxiv_ids)

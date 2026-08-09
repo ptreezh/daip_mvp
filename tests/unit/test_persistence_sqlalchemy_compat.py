@@ -1,7 +1,7 @@
 """SQLAlchemy 2.0 compatibility test for the real Session/DialogueTurn API."""
-import pytest
+
+from daip_live.core.models import AgentState, Session
 from daip_live.persistence.database import DatabaseManager
-from daip_live.core.models import Session, AgentState
 
 
 def test_session_save_with_pydantic_v2():
@@ -14,7 +14,7 @@ def test_session_save_with_pydantic_v2():
         goal="Test goal",
         participant_ids=["user_human"],
         status=AgentState.IDLE,
-        history=[]
+        history=[],
     )
 
     # Should succeed without AttributeError
@@ -37,7 +37,7 @@ def test_session_model_dump_compatibility():
         goal="AI future debate",
         participant_ids=["role_pro_01", "role_con_02"],
         status=AgentState.RUNNING,
-        history=[]
+        history=[],
     )
 
     # Pydantic v2's model_dump() returns dict
@@ -61,12 +61,7 @@ def test_session_with_history():
         goal="Test goal",
         participant_ids=["user_human"],
         status=AgentState.RUNNING,
-        history=[
-            DialogueTurn(
-                participant_id="user_human",
-                content="Hello"
-            )
-        ]
+        history=[DialogueTurn(participant_id="user_human", content="Hello")],
     )
 
     db.save_session(session)

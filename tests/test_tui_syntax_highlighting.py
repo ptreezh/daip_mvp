@@ -7,12 +7,15 @@ from unittest.mock import Mock
 import pytest
 
 # Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from daip_live.tui import DAIP_TUI
 
+pytestmark = pytest.mark.skip(
+    reason="旧spec：TUI/CLI 内部实现已重构（_highlight_code_and_json/_handle_shortcut_command/_get_autocomplete_suggestions/_model_manager 已移除，CLI 帮助文本/命令集已变）；当前源码为准"  # noqa: E501
+)
 
-pytestmark = pytest.mark.skip(reason="旧spec：TUI/CLI 内部实现已重构（_highlight_code_and_json/_handle_shortcut_command/_get_autocomplete_suggestions/_model_manager 已移除，CLI 帮助文本/命令集已变）；当前源码为准")
+
 class TestTUISyntaxHighlighting(unittest.TestCase):
     """Test cases for TUI syntax highlighting features."""
 
@@ -36,13 +39,9 @@ class TestTUISyntaxHighlighting(unittest.TestCase):
         test_json = {
             "users": [
                 {"id": 1, "name": "Alice", "active": True},
-                {"id": 2, "name": "Bob", "active": False}
+                {"id": 2, "name": "Bob", "active": False},
             ],
-            "metadata": {
-                "total": 2,
-                "page": 1,
-                "null_value": None
-            }
+            "metadata": {"total": 2, "page": 1, "null_value": None},
         }
 
         json_string = json.dumps(test_json, ensure_ascii=False)
@@ -76,5 +75,5 @@ class TestTUISyntaxHighlighting(unittest.TestCase):
         self.assertEqual(highlighted, malformed_json)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

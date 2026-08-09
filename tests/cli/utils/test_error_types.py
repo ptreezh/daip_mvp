@@ -3,10 +3,6 @@
 遵循TDD原则 - 先写测试，后写实现
 """
 
-import pytest
-from enum import Enum
-from typing import Optional, Dict, Any
-
 
 class TestErrorClassification:
     """测试错误分类系统"""
@@ -17,10 +13,10 @@ class TestErrorClassification:
         from daip_live.cli.utils.error_types import ErrorSeverity
 
         # Verify enum values exist
-        assert hasattr(ErrorSeverity, 'LOW')
-        assert hasattr(ErrorSeverity, 'MEDIUM')
-        assert hasattr(ErrorSeverity, 'HIGH')
-        assert hasattr(ErrorSeverity, 'CRITICAL')
+        assert hasattr(ErrorSeverity, "LOW")
+        assert hasattr(ErrorSeverity, "MEDIUM")
+        assert hasattr(ErrorSeverity, "HIGH")
+        assert hasattr(ErrorSeverity, "CRITICAL")
 
         # Verify enum values
         assert ErrorSeverity.LOW.value == "low"
@@ -33,12 +29,12 @@ class TestErrorClassification:
         from daip_live.cli.utils.error_types import ErrorCategory
 
         # Verify enum values exist
-        assert hasattr(ErrorCategory, 'NETWORK')
-        assert hasattr(ErrorCategory, 'DATABASE')
-        assert hasattr(ErrorCategory, 'VALIDATION')
-        assert hasattr(ErrorCategory, 'BUSINESS')
-        assert hasattr(ErrorCategory, 'SYSTEM')
-        assert hasattr(ErrorCategory, 'USER_INPUT')
+        assert hasattr(ErrorCategory, "NETWORK")
+        assert hasattr(ErrorCategory, "DATABASE")
+        assert hasattr(ErrorCategory, "VALIDATION")
+        assert hasattr(ErrorCategory, "BUSINESS")
+        assert hasattr(ErrorCategory, "SYSTEM")
+        assert hasattr(ErrorCategory, "USER_INPUT")
 
     def test_cli_error_base_class_exists(self):
         """测试CLI错误基类是否存在"""
@@ -57,7 +53,11 @@ class TestErrorClassification:
 
     def test_cli_error_with_all_parameters(self):
         """测试CLI错误完整参数构造"""
-        from daip_live.cli.utils.error_types import CLIError, ErrorCategory, ErrorSeverity
+        from daip_live.cli.utils.error_types import (
+            CLIError,
+            ErrorCategory,
+            ErrorSeverity,
+        )
 
         original_error = ValueError("Original error")
         error = CLIError(
@@ -66,7 +66,7 @@ class TestErrorClassification:
             severity=ErrorSeverity.HIGH,
             error_code="NET_001",
             details={"url": "http://example.com", "timeout": 30},
-            original_exception=original_error
+            original_exception=original_error,
         )
 
         assert error.message == "Test error message"
@@ -79,14 +79,18 @@ class TestErrorClassification:
 
     def test_cli_error_to_dict_conversion(self):
         """测试CLI错误转换为字典格式"""
-        from daip_live.cli.utils.error_types import CLIError, ErrorCategory, ErrorSeverity
+        from daip_live.cli.utils.error_types import (
+            CLIError,
+            ErrorCategory,
+            ErrorSeverity,
+        )
 
         error = CLIError(
             message="Test error",
             category=ErrorCategory.DATABASE,
             severity=ErrorSeverity.MEDIUM,
             error_code="DB_001",
-            details={"table": "users", "operation": "select"}
+            details={"table": "users", "operation": "select"},
         )
 
         error_dict = error.to_dict()
@@ -103,8 +107,12 @@ class TestErrorClassification:
     def test_specific_error_types_exist(self):
         """测试特定错误类型是否存在"""
         from daip_live.cli.utils.error_types import (
-            NetworkError, DatabaseError, ValidationError,
-            BusinessError, SystemError, UserInputError
+            BusinessError,
+            DatabaseError,
+            NetworkError,
+            SystemError,
+            UserInputError,
+            ValidationError,
         )
 
         # Test NetworkError
@@ -150,7 +158,11 @@ class TestErrorClassification:
 
     def test_error_defaults(self):
         """测试错误默认值"""
-        from daip_live.cli.utils.error_types import ValidationError, ErrorCategory, ErrorSeverity
+        from daip_live.cli.utils.error_types import (
+            ErrorCategory,
+            ErrorSeverity,
+            ValidationError,
+        )
 
         error = ValidationError("Test validation")
 
@@ -179,9 +191,9 @@ class TestErrorExamples:
                 details={
                     "url": "https://api.example.com/models",
                     "timeout": 30,
-                    "attempt": 1
+                    "attempt": 1,
                 },
-                original_exception=e
+                original_exception=e,
             )
 
             assert error.category.value == "network"
@@ -201,8 +213,8 @@ class TestErrorExamples:
                 "parameter": "type",
                 "invalid_value": "invalid_type",
                 "valid_values": ["all", "local", "cloud"],
-                "command": "daip model list"
-            }
+                "command": "daip model list",
+            },
         )
 
         assert error.category.value == "validation"
@@ -222,9 +234,9 @@ class TestErrorExamples:
                 error_code="DB_CONNECTION",
                 details={
                     "database_path": "data/daip_live.db",
-                    "connection_timeout": 10
+                    "connection_timeout": 10,
                 },
-                original_exception=e
+                original_exception=e,
             )
 
             assert error.category.value == "database"

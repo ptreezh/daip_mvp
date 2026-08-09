@@ -3,13 +3,15 @@
 These tests use the real knowledge manager with real components.
 """
 
-import pytest
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock
+
+import pytest
+
+from daip_live.core.models import KnowledgeBaseConfig
 from daip_live.knowledge.manager import KnowledgeManager
 from daip_live.persistence.database import DatabaseManager
-from daip_live.core.models import KnowledgeBaseConfig
 
 
 @pytest.fixture
@@ -19,6 +21,7 @@ def temp_knowledge_dir():
     yield Path(temp_dir)
     # Cleanup
     import shutil
+
     shutil.rmtree(temp_dir)
 
 
@@ -48,13 +51,11 @@ def knowledge_manager(temp_knowledge_dir, temp_db, mock_model_provider):
     """Create a knowledge manager with real components."""
     config = KnowledgeBaseConfig(
         directory=str(temp_knowledge_dir),
-        embedding_dimension=384  # Standard embedding dimension
+        embedding_dimension=384,  # Standard embedding dimension
     )
 
     manager = KnowledgeManager(
-        db_manager=temp_db,
-        model_provider=mock_model_provider,
-        config=config
+        db_manager=temp_db, model_provider=mock_model_provider, config=config
     )
     return manager
 
@@ -88,8 +89,7 @@ class TestRealKnowledgeIntegration:
 
         # Test with valid config
         config = KnowledgeBaseConfig(
-            directory=str(temp_knowledge_dir),
-            embedding_dimension=768
+            directory=str(temp_knowledge_dir), embedding_dimension=768
         )
         assert config.embedding_dimension == 768
         assert config.directory == str(temp_knowledge_dir)

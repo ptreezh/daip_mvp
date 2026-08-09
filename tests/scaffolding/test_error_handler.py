@@ -3,26 +3,28 @@
 遵循TDD原则：先写测试，再实现功能
 """
 
-import pytest
 import asyncio
 from datetime import datetime
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import patch
+
+import pytest
+
 from daip_live.scaffolding.error_handler import (
-    ErrorHandler,
-    ErrorSeverity,
     ErrorCategory,
     ErrorContext,
+    ErrorHandler,
+    ErrorRecoveryResult,
     ErrorReport,
+    ErrorSeverity,
     RetryStrategy,
-    ErrorRecoveryResult
 )
 from daip_live.scaffolding.models import (
-    ValidationError,
-    GenerationError,
+    ConfigurationError,
     FileOperationError,
+    GenerationError,
     NetworkError,
     TimeoutError,
-    ConfigurationError
+    ValidationError,
 )
 
 
@@ -47,10 +49,20 @@ class TestErrorSeverity:
     def test_error_severity_ordering(self):
         """测试错误严重程度排序"""
         # TC-1.5.3: 严重程度排序测试
-        severities = [ErrorSeverity.HIGH, ErrorSeverity.LOW, ErrorSeverity.CRITICAL, ErrorSeverity.MEDIUM]
+        severities = [
+            ErrorSeverity.HIGH,
+            ErrorSeverity.LOW,
+            ErrorSeverity.CRITICAL,
+            ErrorSeverity.MEDIUM,
+        ]
         sorted_severities = sorted(severities)
 
-        expected = [ErrorSeverity.LOW, ErrorSeverity.MEDIUM, ErrorSeverity.HIGH, ErrorSeverity.CRITICAL]
+        expected = [
+            ErrorSeverity.LOW,
+            ErrorSeverity.MEDIUM,
+            ErrorSeverity.HIGH,
+            ErrorSeverity.CRITICAL,
+        ]
         assert sorted_severities == expected
 
 
@@ -72,12 +84,24 @@ class TestErrorCategory:
     def test_error_category_from_exception(self):
         """测试从异常类型获取错误类别"""
         # TC-1.5.5: 异常类型映射测试
-        assert ErrorCategory.from_exception(ValidationError("")) == ErrorCategory.VALIDATION
-        assert ErrorCategory.from_exception(GenerationError("")) == ErrorCategory.GENERATION
-        assert ErrorCategory.from_exception(FileOperationError("", "")) == ErrorCategory.FILE_OPERATION
+        assert (
+            ErrorCategory.from_exception(ValidationError(""))
+            == ErrorCategory.VALIDATION
+        )
+        assert (
+            ErrorCategory.from_exception(GenerationError(""))
+            == ErrorCategory.GENERATION
+        )
+        assert (
+            ErrorCategory.from_exception(FileOperationError("", ""))
+            == ErrorCategory.FILE_OPERATION
+        )
         assert ErrorCategory.from_exception(NetworkError("")) == ErrorCategory.NETWORK
         assert ErrorCategory.from_exception(TimeoutError("")) == ErrorCategory.TIMEOUT
-        assert ErrorCategory.from_exception(ConfigurationError("")) == ErrorCategory.CONFIGURATION
+        assert (
+            ErrorCategory.from_exception(ConfigurationError(""))
+            == ErrorCategory.CONFIGURATION
+        )
 
     def test_error_category_from_unknown_exception(self):
         """测试未知异常类型的处理"""
@@ -97,7 +121,7 @@ class TestErrorContext:
             component="test_component",
             user_id="test_user",
             session_id="test_session",
-            additional_data={"key": "value"}
+            additional_data={"key": "value"},
         )
 
         assert context.operation == "test_operation"
@@ -111,9 +135,7 @@ class TestErrorContext:
         """测试错误上下文转换为字典"""
         # TC-1.5.8: 上下文序列化测试
         context = ErrorContext(
-            operation="test_op",
-            component="test_comp",
-            additional_data={"test": "data"}
+            operation="test_op", component="test_comp", additional_data={"test": "data"}
         )
 
         context_dict = context.to_dict()
@@ -138,7 +160,7 @@ class TestErrorReport:
             severity=ErrorSeverity.HIGH,
             category=ErrorCategory.SYSTEM,
             context=context,
-            message="Custom error message"
+            message="Custom error message",
         )
 
         assert report.error == error
@@ -186,14 +208,14 @@ class TestRetryStrategy:
             base_delay=1.0,
             max_delay=30.0,
             backoff_factor=2.0,
-            jitter=True
+            jitter=True,
         )
 
         assert strategy.max_attempts == 5
         assert strategy.base_delay == 1.0
         assert strategy.max_delay == 30.0
         assert strategy.backoff_factor == 2.0
-        assert strategy.jitter == True
+        assert strategy.jitter
 
     def test_retry_strategy_default_values(self):
         """测试重试策略默认值"""
@@ -204,16 +226,13 @@ class TestRetryStrategy:
         assert strategy.base_delay == 1.0
         assert strategy.max_delay == 60.0
         assert strategy.backoff_factor == 2.0
-        assert strategy.jitter == True
+        assert strategy.jitter
 
     def test_retry_strategy_delay_calculation(self):
         """测试延迟时间计算"""
         # TC-1.5.14: 延迟计算测试
         strategy = RetryStrategy(
-            base_delay=1.0,
-            backoff_factor=2.0,
-            max_delay=10.0,
-            jitter=False
+            base_delay=1.0, backoff_factor=2.0, max_delay=10.0, jitter=False
         )
 
         # 测试指数退避
@@ -228,19 +247,15 @@ class TestRetryStrategy:
         # TC-1.5.15: 重试条件测试
         strategy = RetryStrategy(max_attempts=3)
 
-        assert strategy.should_retry(1) == True
-        assert strategy.should_retry(2) == True
-        assert strategy.should_retry(3) == True
-        assert strategy.should_retry(4) == False
+        assert strategy.should_retry(1)
+        assert strategy.should_retry(2)
+        assert strategy.should_retry(3)
+        assert not strategy.should_retry(4)
 
     def test_retry_strategy_with_jitter(self):
         """测试带抖动的延迟计算"""
         # TC-1.5.16: 抖动延迟测试
-        strategy = RetryStrategy(
-            base_delay=1.0,
-            backoff_factor=2.0,
-            jitter=True
-        )
+        strategy = RetryStrategy(base_delay=1.0, backoff_factor=2.0, jitter=True)
 
         delay1 = strategy.get_delay(1)
         delay2 = strategy.get_delay(1)
@@ -274,9 +289,7 @@ class TestErrorHandler:
         context = ErrorContext(operation="test", component="test_comp")
 
         report = self.error_handler.handle_error(
-            error=error,
-            context=context,
-            severity=ErrorSeverity.MEDIUM
+            error=error, context=context, severity=ErrorSeverity.MEDIUM
         )
 
         assert report.error == error
@@ -297,10 +310,9 @@ class TestErrorHandler:
         """测试自定义严重程度映射"""
         # TC-1.5.20: 自定义严重程度测试
         # 配置自定义映射
-        self.error_handler.configure_severity_mapping({
-            ValueError: ErrorSeverity.LOW,
-            RuntimeError: ErrorSeverity.HIGH
-        })
+        self.error_handler.configure_severity_mapping(
+            {ValueError: ErrorSeverity.LOW, RuntimeError: ErrorSeverity.HIGH}
+        )
 
         error1 = ValueError("Low error")
         error2 = RuntimeError("High error")
@@ -329,9 +341,15 @@ class TestErrorHandler:
         """测试按严重程度获取错误"""
         # TC-1.5.22: 按严重程度过滤测试
         # 添加不同严重程度的错误
-        self.error_handler.handle_error(ValueError("Low error"), severity=ErrorSeverity.LOW)
-        self.error_handler.handle_error(ValueError("High error"), severity=ErrorSeverity.HIGH)
-        self.error_handler.handle_error(ValueError("Medium error"), severity=ErrorSeverity.MEDIUM)
+        self.error_handler.handle_error(
+            ValueError("Low error"), severity=ErrorSeverity.LOW
+        )
+        self.error_handler.handle_error(
+            ValueError("High error"), severity=ErrorSeverity.HIGH
+        )
+        self.error_handler.handle_error(
+            ValueError("Medium error"), severity=ErrorSeverity.MEDIUM
+        )
 
         high_errors = self.error_handler.get_errors_by_severity(ErrorSeverity.HIGH)
         medium_errors = self.error_handler.get_errors_by_severity(ErrorSeverity.MEDIUM)
@@ -350,9 +368,15 @@ class TestErrorHandler:
         self.error_handler.handle_error(FileOperationError("File error", ""))
         self.error_handler.handle_error(NetworkError("Network error"))
 
-        validation_errors = self.error_handler.get_errors_by_category(ErrorCategory.VALIDATION)
-        file_errors = self.error_handler.get_errors_by_category(ErrorCategory.FILE_OPERATION)
-        network_errors = self.error_handler.get_errors_by_category(ErrorCategory.NETWORK)
+        validation_errors = self.error_handler.get_errors_by_category(
+            ErrorCategory.VALIDATION
+        )
+        file_errors = self.error_handler.get_errors_by_category(
+            ErrorCategory.FILE_OPERATION
+        )
+        network_errors = self.error_handler.get_errors_by_category(
+            ErrorCategory.NETWORK
+        )
 
         assert len(validation_errors) == 1
         assert len(file_errors) == 1
@@ -376,8 +400,12 @@ class TestErrorHandler:
         """测试错误统计"""
         # TC-1.5.25: 错误统计测试
         # 添加不同类型和严重程度的错误
-        self.error_handler.handle_error(ValidationError("Error 1"), severity=ErrorSeverity.LOW)
-        self.error_handler.handle_error(ValidationError("Error 2"), severity=ErrorSeverity.HIGH)
+        self.error_handler.handle_error(
+            ValidationError("Error 1"), severity=ErrorSeverity.LOW
+        )
+        self.error_handler.handle_error(
+            ValidationError("Error 2"), severity=ErrorSeverity.HIGH
+        )
         self.error_handler.handle_error(FileOperationError("Error 3", ""))
 
         stats = self.error_handler.get_statistics()
@@ -402,8 +430,7 @@ class TestErrorHandler:
             return "success"
 
         result = await self.error_handler.retry_with_backoff(
-            failing_function,
-            RetryStrategy(max_attempts=3)
+            failing_function, RetryStrategy(max_attempts=3)
         )
 
         assert result == "success"
@@ -422,8 +449,7 @@ class TestErrorHandler:
 
         with pytest.raises(ValueError) as exc_info:
             await self.error_handler.retry_with_backoff(
-                always_failing_function,
-                RetryStrategy(max_attempts=3)
+                always_failing_function, RetryStrategy(max_attempts=3)
             )
 
         assert call_count == 3
@@ -445,21 +471,18 @@ class TestErrorHandler:
 
         # Mock asyncio.sleep to capture delays
         original_sleep = asyncio.sleep
+
         async def mock_sleep(delay):
             delays.append(delay)
             await original_sleep(0.01)  # 使用很短的延迟
 
         strategy = RetryStrategy(
-            max_attempts=3,
-            base_delay=0.1,
-            backoff_factor=2.0,
-            jitter=False
+            max_attempts=3, base_delay=0.1, backoff_factor=2.0, jitter=False
         )
 
-        with patch('asyncio.sleep', side_effect=mock_sleep):
+        with patch("asyncio.sleep", side_effect=mock_sleep):
             result = await self.error_handler.retry_with_backoff(
-                failing_function,
-                strategy
+                failing_function, strategy
             )
 
         assert result == "success"
@@ -488,7 +511,7 @@ class TestErrorHandler:
             await self.error_handler.retry_with_backoff(
                 sometimes_failing_function,
                 RetryStrategy(max_attempts=3),
-                retry_condition=should_retry
+                retry_condition=should_retry,
             )
 
         assert call_count == 2  # 重试一次然后失败
@@ -502,10 +525,10 @@ class TestErrorHandler:
             recovery_action="retry_with_backoff",
             attempts=3,
             total_delay=5.0,
-            final_result="success"
+            final_result="success",
         )
 
-        assert result.success == True
+        assert result.success
         assert isinstance(result.original_error, ValueError)
         assert result.recovery_action == "retry_with_backoff"
         assert result.attempts == 3
@@ -519,7 +542,7 @@ class TestErrorHandler:
         self.error_handler.configure_recovery_strategy(
             ErrorCategory.NETWORK,
             retry_strategy=RetryStrategy(max_attempts=5),
-            fallback_actions=["use_cache", "offline_mode"]
+            fallback_actions=["use_cache", "offline_mode"],
         )
 
         # 验证策略已配置
@@ -533,8 +556,7 @@ class TestErrorHandler:
         # TC-1.5.32: 获取恢复策略测试
         # 为网络错误配置策略
         self.error_handler.configure_recovery_strategy(
-            ErrorCategory.NETWORK,
-            retry_strategy=RetryStrategy(max_attempts=5)
+            ErrorCategory.NETWORK, retry_strategy=RetryStrategy(max_attempts=5)
         )
 
         # 获取网络错误的策略

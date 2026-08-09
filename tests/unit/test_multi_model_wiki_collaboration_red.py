@@ -26,6 +26,7 @@ TDD RED阶段测试（重写）- 多模型Wiki协作
   /isinstance(RoleModelManager)，依赖齐备时组装 SimpleCollaborationEngine
   （collaborative_wiki.py:221-260）
 """
+
 import asyncio
 import textwrap
 from datetime import datetime
@@ -77,15 +78,15 @@ def roles_dir(tmp_path):
     dir_path.mkdir()
     (dir_path / "domain_expert.yaml").write_text(ROLE_YAML, encoding="utf-8")
     (dir_path / "researcher.yaml").write_text(
-        ROLE_YAML
-        .replace("llama3:instruct", "mistral:latest")
-        .replace("领域专家", "研究员"),
+        ROLE_YAML.replace("llama3:instruct", "mistral:latest").replace(
+            "领域专家", "研究员"
+        ),
         encoding="utf-8",
     )
     (dir_path / "editor.yaml").write_text(
-        ROLE_YAML
-        .replace("llama3:instruct", "gemma:latest")
-        .replace("领域专家", "编辑"),
+        ROLE_YAML.replace("llama3:instruct", "gemma:latest").replace(
+            "领域专家", "编辑"
+        ),
         encoding="utf-8",
     )
     return dir_path
@@ -191,9 +192,7 @@ class TestEnhancedWikiManagerCollaboration:
             assert check_result, f"内容质量检查失败: {check_name}"
 
         sections = content.split("##")
-        assert len(sections) >= 3, (
-            f"内容应该包含至少3个章节，但只有{len(sections)}个"
-        )
+        assert len(sections) >= 3, f"内容应该包含至少3个章节，但只有{len(sections)}个"
 
 
 class TestCollaborationProgressContract:
@@ -267,6 +266,7 @@ class TestIntegrationGuards:
         from daip_live.p8_debate_system.enhanced_debate_manager import (
             EnhancedDebateManager,
         )
+
         assert EnhancedDebateManager is not None
 
     def test_dependency_injection_completeness(self, tmp_path):
@@ -285,6 +285,7 @@ class TestIntegrationGuards:
         from daip_live.wiki.role_intelligence_selector import (
             RoleIntelligenceSelector,
         )
+
         mock_role_manager = Mock()
         mock_role_manager.list_roles.return_value = [
             Mock(name="domain_expert"),

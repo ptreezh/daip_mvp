@@ -1,16 +1,19 @@
-
-import unittest
 import os
 import shutil
+import unittest
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from daip_live.tui import DAIP_TUI
-from daip_live.core.models import DebateCompleteEvent, Session, DialogueTurn, AgentState
-
 import pytest
 
-pytestmark = pytest.mark.skip(reason="旧spec：引用不存在的 TUI/doc.tools 内部方法（_save_debate_results/_has_pandoc/daip_live.tui.LiteLLMProvider 等）；当前源码为准")
+from daip_live.core.models import AgentState, DebateCompleteEvent, DialogueTurn, Session
+from daip_live.tui import DAIP_TUI
+
+pytestmark = pytest.mark.skip(
+    reason="旧spec：引用不存在的 TUI/doc.tools 内部方法（_save_debate_results/_has_pandoc/daip_live.tui.LiteLLMProvider 等）；当前源码为准"  # noqa: E501
+)
+
+
 class TestDebateReportSaving(unittest.TestCase):
     """
     Test suite for the debate report saving functionality.
@@ -24,7 +27,7 @@ class TestDebateReportSaving(unittest.TestCase):
         self.test_dir.mkdir()
 
         self.mock_session_manager = MagicMock()
-        
+
         self.tui = DAIP_TUI(
             executor=MagicMock(),
             session_manager=self.mock_session_manager,
@@ -53,7 +56,7 @@ class TestDebateReportSaving(unittest.TestCase):
         topic = "AI Ethics"
         summary_text = "This was a great debate about AI ethics."
         output_dir = self.test_dir / "workout"
-        
+
         mock_session = Session(
             session_id=session_id,
             session_type="debate",
@@ -63,18 +66,20 @@ class TestDebateReportSaving(unittest.TestCase):
             summary=summary_text,
             history=[
                 DialogueTurn(participant_id="pro", content="AI will bring prosperity."),
-                DialogueTurn(participant_id="con", content="AI poses significant risks."),
-            ]
+                DialogueTurn(
+                    participant_id="con", content="AI poses significant risks."
+                ),
+            ],
         )
-        
+
         self.mock_session_manager.get_session.return_value = mock_session
 
         self.tui._current_debate = {
-            'topic': topic,
-            'roles': ["pro", "con"],
-            'total_rounds': 1,
-            'session_id': session_id,
-            'is_active': False
+            "topic": topic,
+            "roles": ["pro", "con"],
+            "total_rounds": 1,
+            "session_id": session_id,
+            "is_active": False,
         }
 
         event = DebateCompleteEvent(session_id=session_id, summary=summary_text)
@@ -84,21 +89,34 @@ class TestDebateReportSaving(unittest.TestCase):
         self.tui._save_debate_results(event, output_dir=output_dir)
 
         # --- Assert ---
-        self.assertTrue(output_dir.exists(), "The 'workout' directory should have been created.")
+        self.assertTrue(
+            output_dir.exists(), "The 'workout' directory should have been created."
+        )
 
         saved_files = os.listdir(output_dir)
-        self.assertEqual(len(saved_files), 1, "Expected exactly one report file to be created.")
+        self.assertEqual(
+            len(saved_files), 1, "Expected exactly one report file to be created."
+        )
         report_path = output_dir / saved_files[0]
 
-        with open(report_path, 'r', encoding='utf-8') as f:
+        with open(report_path, encoding="utf-8") as f:
             report_content = f.read()
 
-        self.assertIn("AI will bring prosperity.", report_content, 
-                        "The debate transcript content is missing from the report.")
-        self.assertIn("AI poses significant risks.", report_content, 
-                        "The debate transcript content is missing from the report.")
+        self.assertIn(
+            "AI will bring prosperity.",
+            report_content,
+            "The debate transcript content is missing from the report.",
+        )
+        self.assertIn(
+            "AI poses significant risks.",
+            report_content,
+            "The debate transcript content is missing from the report.",
+        )
         self.assertIn(topic, report_content, "The topic is missing from the report.")
-        self.assertIn(summary_text, report_content, "The summary is missing from the report.")
+        self.assertIn(
+            summary_text, report_content, "The summary is missing from the report."
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -1,10 +1,15 @@
 """
 Integration tests for TUI intent recognition functionality.
 """
+
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
-import asyncio
-from src.daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer, Intent, IntentType
+
+from src.daip_live.agent_engine.enhanced_intent_recognizer import (
+    EnhancedIntentRecognizer,
+    IntentType,
+)
 from src.daip_live.tui import DAIP_TUI
 
 
@@ -19,7 +24,7 @@ class TestTUIIntentRecognitionIntegration:
     @pytest.fixture
     def mock_tui(self):
         """Create a mock TUI instance for testing."""
-        with patch('src.daip_live.tui.DAIP_TUI.__init__', return_value=None):
+        with patch("src.daip_live.tui.DAIP_TUI.__init__", return_value=None):
             tui = DAIP_TUI()
             # Mock required attributes
             tui._executor = None
@@ -40,7 +45,9 @@ class TestTUIIntentRecognitionIntegration:
             return tui
 
     def test_natural_language_command_recognition(self, intent_recognizer):
-        pytest.skip("旧spec：源码意图识别器模式映射已变（识别结果/置信度阈值与测试期望不同）；当前源码为准")
+        pytest.skip(
+            "旧spec：源码意图识别器模式映射已变（识别结果/置信度阈值与测试期望不同）；当前源码为准"
+        )
         # Test debate command recognition with patterns that work
         intent = intent_recognizer.recognize_intent("我们来辩论人工智能伦理")
         assert intent is not None
@@ -93,7 +100,7 @@ class TestTUIIntentRecognitionIntegration:
             ("发起辩论", "start_debate", IntentType.WORKFLOW),
             ("创建wiki", "create_wiki", IntentType.WORKFLOW),
             ("初始化项目", "initialize_project", IntentType.WORKFLOW),
-            ("搜索论文", "search_papers", IntentType.WORKFLOW)
+            ("搜索论文", "search_papers", IntentType.WORKFLOW),
         ]
 
         for input_text, expected_name, expected_type in workflow_intents:
@@ -118,11 +125,13 @@ class TestTUIIntentRecognitionIntegration:
         assert chat_intent.requires_confidence_check is False
 
     def test_unrecognized_intent_feedback(self, intent_recognizer):
-        pytest.skip("旧spec：源码意图识别器模式映射已变（识别结果/置信度阈值与测试期望不同）；当前源码为准")
+        pytest.skip(
+            "旧spec：源码意图识别器模式映射已变（识别结果/置信度阈值与测试期望不同）；当前源码为准"
+        )
         # Test completely unrelated text
         intent = intent_recognizer.recognize_intent("今天天气很好")
         # This might be classified as chat or remain None depending on implementation
-        
+
         # Test text below confidence threshold
         intent = intent_recognizer.recognize_intent("xyz")
         assert intent is None, "Should not recognize random text with low confidence"
@@ -156,13 +165,13 @@ class TestTUIIntentRecognitionIntegration:
         """Test TUI integration with intent recognition."""
         # Mock the intent recognizer
         mock_tui._intent_recognizer = EnhancedIntentRecognizer()
-        
+
         # Mock the command handlers
         mock_tui._handle_debate_command = AsyncMock()
         mock_tui._handle_wiki_command = AsyncMock()
         mock_tui._handle_project_command = AsyncMock()
-        
+
         # Test that natural language input is processed through intent recognition
-        with patch.object(mock_tui, '_update_log_view') as mock_update_log:
+        with patch.object(mock_tui, "_update_log_view"):
             # This would require more extensive mocking of the TUI's internal methods
             pass

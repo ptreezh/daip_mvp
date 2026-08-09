@@ -3,18 +3,13 @@ Wiki TUI界面的TDD测试用例
 遵循RED-GREEN-REFACTOR循环
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
-from pathlib import Path
 import tempfile
-import asyncio
+from pathlib import Path
+from unittest.mock import Mock, patch
 
-from textual.app import App
-from textual.widgets import Input, DataTable, Static
-from textual.containers import Container
+import pytest
+from textual.widgets import Input
 
-from daip_live.wiki.models import WikiPage
 from daip_live.wiki.manager import WikiManager
 
 
@@ -29,6 +24,7 @@ class TestWikiTUIApp:
 
             # Act & Assert - 这个测试在WikiTUIApp实现之前会失败
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             assert app.wiki_root == wiki_root
@@ -47,6 +43,7 @@ class TestWikiTUIApp:
 
             # Act
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Assert
@@ -62,10 +59,11 @@ class TestWikiTUIApp:
             manager.create_page("Page 2", "Content 2", ["tag2"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
-            with patch.object(app, 'query_one') as mock_query:
+            with patch.object(app, "query_one") as mock_query:
                 mock_table = Mock()
                 mock_query.return_value = mock_table
 
@@ -81,10 +79,11 @@ class TestWikiTUIApp:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
-            with patch.object(app, 'push_screen') as mock_push:
+            with patch.object(app, "push_screen") as mock_push:
                 app.action_new_page()
 
             # Assert
@@ -97,6 +96,7 @@ class TestWikiTUIApp:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # 模拟用户输入
@@ -111,9 +111,7 @@ class TestWikiTUIApp:
 
             # Act
             result = app.create_page_from_dialog(
-                title=title_input,
-                content=content_input,
-                tags=tags_input
+                title=title_input, content=content_input, tags=tags_input
             )
 
             # Assert
@@ -132,22 +130,23 @@ class TestWikiTUIApp:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             title_input = Mock(spec=Input)
             title_input.value = ""  # 空标题
 
             content_input = Mock(spec=Input)
-            content_input.value = ""  # 源码权威: 空标题+非空内容会从内容提取标题，须都为空才报错
+            content_input.value = (
+                ""  # 源码权威: 空标题+非空内容会从内容提取标题，须都为空才报错
+            )
 
             tags_input = Mock(spec=Input)
 
             # Act & Assert
             with pytest.raises(ValueError, match="Title cannot be empty"):
                 app.create_page_from_dialog(
-                    title=title_input,
-                    content=content_input,
-                    tags=tags_input
+                    title=title_input, content=content_input, tags=tags_input
                 )
 
     def test_wiki_tui_create_page_duplicate_title_error(self):
@@ -159,6 +158,7 @@ class TestWikiTUIApp:
             manager.create_page("Existing Page", "Existing content")
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             title_input = Mock(spec=Input)
@@ -172,9 +172,7 @@ class TestWikiTUIApp:
             # Act & Assert
             with pytest.raises(ValueError, match="already exists"):
                 app.create_page_from_dialog(
-                    title=title_input,
-                    content=content_input,
-                    tags=tags_input
+                    title=title_input, content=content_input, tags=tags_input
                 )
 
     def test_wiki_tui_open_page_viewer(self):
@@ -186,10 +184,11 @@ class TestWikiTUIApp:
             page = manager.create_page("Test Page", "# Test\n\nContent", ["test"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
-            with patch.object(app, 'push_screen') as mock_push:
+            with patch.object(app, "push_screen") as mock_push:
                 app.open_page_viewer(page)
 
             # Assert
@@ -205,6 +204,7 @@ class TestWikiTUIApp:
             page = manager.create_page("Test Page", "Original content", ["test"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # 模拟编辑对话框
@@ -219,10 +219,7 @@ class TestWikiTUIApp:
 
             # Act
             result = app.update_page_from_dialog(
-                page=page,
-                title=title_input,
-                content=content_input,
-                tags=tags_input
+                page=page, title=title_input, content=content_input, tags=tags_input
             )
 
             # Assert
@@ -241,10 +238,11 @@ class TestWikiTUIApp:
             page = manager.create_page("Test Page", "Content", ["test"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
-            with patch.object(app, 'push_screen') as mock_push:
+            with patch.object(app, "push_screen") as mock_push:
                 app.show_delete_confirmation(page)
 
             # Assert
@@ -260,6 +258,7 @@ class TestWikiTUIApp:
             page = manager.create_page("Test Page", "Content", ["test"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
@@ -281,13 +280,14 @@ class TestWikiTUIApp:
             manager.create_page("Python Tips", "Python tips and tricks", ["python"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             search_input = Mock(spec=Input)
             search_input.value = "python"
 
             # Act
-            with patch.object(app, 'update_search_results') as mock_update:
+            with patch.object(app, "update_search_results") as mock_update:
                 app.perform_search(search_input)
 
             # Assert
@@ -305,6 +305,7 @@ class TestWikiTUIApp:
             manager.create_page("Python Tips", "Python tips", ["python", "tips"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
@@ -324,10 +325,11 @@ class TestWikiTUIApp:
             manager.create_page("Page 2", "Content 2", ["tag2"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
-            with patch.object(app, 'push_screen') as mock_push:
+            with patch.object(app, "push_screen") as mock_push:
                 app.show_statistics()
 
             # Assert
@@ -344,6 +346,7 @@ class TestWikiTUIApp:
             manager.create_page("Test Page", "Test content", ["test"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
@@ -360,12 +363,13 @@ class TestWikiTUIApp:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act & Assert - 验证快捷键绑定
-            assert hasattr(app, 'action_new_page')  # Ctrl+N
-            assert hasattr(app, 'action_search')   # Ctrl+F
-            assert hasattr(app, 'action_quit')     # Ctrl+Q
+            assert hasattr(app, "action_new_page")  # Ctrl+N
+            assert hasattr(app, "action_search")  # Ctrl+F
+            assert hasattr(app, "action_quit")  # Ctrl+Q
 
     def test_wiki_tui_error_handling_display(self):
         """测试错误处理和显示"""
@@ -373,10 +377,11 @@ class TestWikiTUIApp:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
-            with patch.object(app, 'notify') as mock_notify:
+            with patch.object(app, "notify") as mock_notify:
                 app.show_error("Test error message")
 
             # Assert
@@ -388,11 +393,14 @@ class TestWikiTUIApp:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
-            with patch.object(app, 'notify') as mock_notify:
+            with patch.object(app, "notify") as mock_notify:
                 app.show_success("Operation completed successfully")
 
             # Assert
-            mock_notify.assert_called_once_with("Operation completed successfully", severity="success")
+            mock_notify.assert_called_once_with(
+                "Operation completed successfully", severity="success"
+            )

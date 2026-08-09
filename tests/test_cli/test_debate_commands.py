@@ -1,18 +1,21 @@
-import unittest
-from unittest.mock import MagicMock, patch
+import unittest  # noqa: E402
+from unittest.mock import MagicMock, patch  # noqa: E402
 
-from typer.testing import CliRunner
+from typer.testing import CliRunner  # noqa: E402
 
-from src.daip_live.cli import app
-from src.daip_live.core.models import AgentState, Session
+from src.daip_live.cli import app  # noqa: E402
+from src.daip_live.core.models import AgentState, Session  # noqa: E402
 
 runner = CliRunner()
 
-import pytest
+import pytest  # noqa: E402
 
-pytestmark = pytest.mark.skip(reason="旧spec：patch daip_live.cli 模块属性（ProviderConfig/config_manager/MemoryService 等）不存在——daip_live.cli 仅导出 app；当前源码为准")
+pytestmark = pytest.mark.skip(
+    reason="旧spec：patch daip_live.cli 模块属性（ProviderConfig/config_manager/MemoryService 等）不存在——daip_live.cli 仅导出 app；当前源码为准"  # noqa: E501
+)
+
+
 class TestDebateCommands(unittest.TestCase):
-
     @patch("src.daip_live.cli.DebateManager")
     @patch("src.daip_live.cli.config_manager")
     def test_debate_start_command(self, mock_config_manager, mock_debate_manager):
@@ -29,15 +32,28 @@ class TestDebateCommands(unittest.TestCase):
             session_type="debate",
             status=AgentState.COMPLETED,
             participant_ids=["pro_arguer", "con_arguer"],
-            summary="A great debate."
+            summary="A great debate.",
         )
         instance = mock_debate_manager.return_value
         instance.run_debate.return_value = mock_final_session
 
         # Act
         with patch("src.daip_live.cli.asyncio.run") as mock_asyncio_run:
-            mock_asyncio_run.side_effect = lambda coro: coro.send(None) if hasattr(coro, 'send') else coro
-            result = runner.invoke(app, ["debate", "start", "Test Topic", "--roles", "pro_arguer,con_arguer", "--rounds", "1"])
+            mock_asyncio_run.side_effect = (
+                lambda coro: coro.send(None) if hasattr(coro, "send") else coro
+            )
+            result = runner.invoke(
+                app,
+                [
+                    "debate",
+                    "start",
+                    "Test Topic",
+                    "--roles",
+                    "pro_arguer,con_arguer",
+                    "--rounds",
+                    "1",
+                ],
+            )
 
         # Assert
         self.assertEqual(result.exit_code, 0)
@@ -46,5 +62,6 @@ class TestDebateCommands(unittest.TestCase):
         self.assertIn("debate_sess_1", result.stdout)
         self.assertIn("A great debate.", result.stdout)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

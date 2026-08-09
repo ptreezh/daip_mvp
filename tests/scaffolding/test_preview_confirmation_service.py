@@ -3,26 +3,23 @@
 遵循TDD原则：先写测试，再实现功能
 """
 
-import pytest
-import tempfile
 import os
-from unittest.mock import patch, MagicMock
-from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from enum import Enum
+import tempfile
+from unittest.mock import patch
+
+import pytest
 
 from daip_live.scaffolding.models import (
     ProjectFile,
     ProjectStructure,
     ValidationError,
-    FileCreationError
 )
 from daip_live.scaffolding.preview_confirmation_service import (
-    PreviewAction,
+    ConfirmationResponse,
     ConfirmationResult,
     FilePreview,
+    PreviewAction,
     PreviewSummary,
-    ConfirmationResponse
 )
 
 
@@ -66,14 +63,11 @@ class TestFilePreview:
         """测试文件预览创建"""
         # TC-2.5.4: 文件预览创建测试
         file = ProjectFile(path="test.py", content="print('hello')")
-        preview = FilePreview(
-            file=file,
-            action=PreviewAction.CREATE
-        )
+        preview = FilePreview(file=file, action=PreviewAction.CREATE)
 
         assert preview.file == file
         assert preview.action == PreviewAction.CREATE
-        assert preview.exists == False
+        assert not preview.exists
         assert preview.conflicts == []
         assert preview.metadata == {}
 
@@ -85,11 +79,11 @@ class TestFilePreview:
             file=file,
             action=PreviewAction.OVERWRITE,
             exists=True,
-            conflicts=["文件已存在", "内容冲突"]
+            conflicts=["文件已存在", "内容冲突"],
         )
 
         assert preview.action == PreviewAction.OVERWRITE
-        assert preview.exists == True
+        assert preview.exists
         assert len(preview.conflicts) == 2
         assert "文件已存在" in preview.conflicts
         assert "内容冲突" in preview.conflicts
@@ -101,7 +95,7 @@ class TestFilePreview:
         preview = FilePreview(
             file=file,
             action=PreviewAction.CREATE,
-            metadata={"size": 21, "type": "json", "encoding": "utf-8"}
+            metadata={"size": 21, "type": "json", "encoding": "utf-8"},
         )
 
         assert preview.metadata["size"] == 21
@@ -118,13 +112,13 @@ class TestPreviewSummary:
         files = [
             FilePreview(
                 file=ProjectFile(path="new.py", content="print('new')"),
-                action=PreviewAction.CREATE
+                action=PreviewAction.CREATE,
             ),
             FilePreview(
                 file=ProjectFile(path="old.py", content="print('old')"),
                 action=PreviewAction.OVERWRITE,
-                exists=True
-            )
+                exists=True,
+            ),
         ]
 
         summary = PreviewSummary(
@@ -134,7 +128,7 @@ class TestPreviewSummary:
             total_size=25,
             conflicts=1,
             new_files=1,
-            modified_files=1
+            modified_files=1,
         )
 
         assert len(summary.files) == 2
@@ -153,7 +147,7 @@ class TestPreviewSummary:
 
         files = [
             FilePreview(file=file1, action=PreviewAction.CREATE),
-            FilePreview(file=file2, action=PreviewAction.CREATE, exists=True)
+            FilePreview(file=file2, action=PreviewAction.CREATE, exists=True),
         ]
 
         summary = PreviewSummary(
@@ -163,7 +157,7 @@ class TestPreviewSummary:
             total_size=file1.size + file2.size,
             conflicts=1,
             new_files=1,
-            modified_files=1
+            modified_files=1,
         )
 
         assert summary.total_files == 2
@@ -180,8 +174,7 @@ class TestConfirmationResponse:
         """测试确认响应创建"""
         # TC-2.5.9: 确认响应创建测试
         response = ConfirmationResponse(
-            result=ConfirmationResult.CONFIRMED,
-            message="用户确认操作"
+            result=ConfirmationResult.CONFIRMED, message="用户确认操作"
         )
 
         assert response.result == ConfirmationResult.CONFIRMED
@@ -202,7 +195,7 @@ class TestConfirmationResponse:
             selected_files=selected,
             rejected_files=rejected,
             modifications=modifications,
-            message="用户修改了操作"
+            message="用户修改了操作",
         )
 
         assert response.result == ConfirmationResult.MODIFIED
@@ -227,21 +220,24 @@ class TestPreviewConfirmationService:
         """每个测试方法执行后的清理"""
         if os.path.exists(self.temp_dir):
             import shutil
+
             shutil.rmtree(self.temp_dir)
 
     @pytest.mark.asyncio
     async def test_generate_preview_success(self):
         """测试成功生成预览"""
         # TC-2.5.11: 成功预览生成测试
-        from daip_live.scaffolding.preview_confirmation_service import PreviewConfirmationService
+        from daip_live.scaffolding.preview_confirmation_service import (
+            PreviewConfirmationService,
+        )
 
         service = PreviewConfirmationService()
         structure = ProjectStructure(
             description="Test project",
             files=[
                 ProjectFile(path="src/main.py", content="def main(): pass"),
-                ProjectFile(path="README.md", content="# Test")
-            ]
+                ProjectFile(path="README.md", content="# Test"),
+            ],
         )
 
         preview = await service.generate_preview(structure, self.temp_dir)
@@ -256,21 +252,23 @@ class TestPreviewConfirmationService:
     async def test_generate_preview_with_existing_files(self):
         """测试生成带已存在文件的预览"""
         # TC-2.5.12: 已存在文件预览测试
-        from daip_live.scaffolding.preview_confirmation_service import PreviewConfirmationService
+        from daip_live.scaffolding.preview_confirmation_service import (
+            PreviewConfirmationService,
+        )
 
         service = PreviewConfirmationService()
 
         # 先创建已存在的文件
         existing_file = os.path.join(self.temp_dir, "existing.py")
-        with open(existing_file, 'w') as f:
+        with open(existing_file, "w") as f:
             f.write("old content")
 
         structure = ProjectStructure(
             description="Test with existing files",
             files=[
                 ProjectFile(path="existing.py", content="new content"),
-                ProjectFile(path="new.py", content="print('new')")
-            ]
+                ProjectFile(path="new.py", content="print('new')"),
+            ],
         )
 
         preview = await service.generate_preview(structure, self.temp_dir)
@@ -281,24 +279,31 @@ class TestPreviewConfirmationService:
         assert preview.modified_files >= 1
 
         # 检查已存在文件的动作
-        existing_preview = next(f for f in preview.files if f.file.path == "existing.py")
-        assert existing_preview.exists == True
-        assert existing_preview.action in [PreviewAction.OVERWRITE, PreviewAction.BACKUP]
+        existing_preview = next(
+            f for f in preview.files if f.file.path == "existing.py"
+        )
+        assert existing_preview.exists
+        assert existing_preview.action in [
+            PreviewAction.OVERWRITE,
+            PreviewAction.BACKUP,
+        ]
 
     @pytest.mark.asyncio
     async def test_interactive_confirmation_success(self):
         """测试交互式确认成功"""
         # TC-2.5.13: 交互式确认成功测试
-        from daip_live.scaffolding.preview_confirmation_service import PreviewConfirmationService
+        from daip_live.scaffolding.preview_confirmation_service import (
+            PreviewConfirmationService,
+        )
 
         service = PreviewConfirmationService()
         structure = ProjectStructure(
             description="Test project",
-            files=[ProjectFile(path="test.py", content="print('test')")]
+            files=[ProjectFile(path="test.py", content="print('test')")],
         )
 
         # Mock 用户输入为 'y'
-        with patch('builtins.input', return_value='y'):
+        with patch("builtins.input", return_value="y"):
             response = await service.interactive_confirmation(structure, self.temp_dir)
 
         assert response.result == ConfirmationResult.CONFIRMED
@@ -308,16 +313,18 @@ class TestPreviewConfirmationService:
     async def test_interactive_confirmation_cancel(self):
         """测试交互式确认取消"""
         # TC-2.5.14: 交互式确认取消测试
-        from daip_live.scaffolding.preview_confirmation_service import PreviewConfirmationService
+        from daip_live.scaffolding.preview_confirmation_service import (
+            PreviewConfirmationService,
+        )
 
         service = PreviewConfirmationService()
         structure = ProjectStructure(
             description="Test project",
-            files=[ProjectFile(path="test.py", content="print('test')")]
+            files=[ProjectFile(path="test.py", content="print('test')")],
         )
 
         # Mock 用户输入为 'n'
-        with patch('builtins.input', return_value='n'):
+        with patch("builtins.input", return_value="n"):
             response = await service.interactive_confirmation(structure, self.temp_dir)
 
         assert response.result == ConfirmationResult.CANCELLED
@@ -327,20 +334,26 @@ class TestPreviewConfirmationService:
     async def test_non_interactive_confirmation(self):
         """测试非交互式确认"""
         # TC-2.5.15: 非交互式确认测试
-        from daip_live.scaffolding.preview_confirmation_service import PreviewConfirmationService
+        from daip_live.scaffolding.preview_confirmation_service import (
+            PreviewConfirmationService,
+        )
 
         service = PreviewConfirmationService()
         structure = ProjectStructure(
             description="Test project",
-            files=[ProjectFile(path="test.py", content="print('test')")]
+            files=[ProjectFile(path="test.py", content="print('test')")],
         )
 
-        response = await service.auto_confirmation(structure, self.temp_dir, auto_confirm=True)
+        response = await service.auto_confirmation(
+            structure, self.temp_dir, auto_confirm=True
+        )
 
         assert response.result == ConfirmationResult.CONFIRMED
         assert len(response.selected_files) == 1
 
-        response = await service.auto_confirmation(structure, self.temp_dir, auto_confirm=False)
+        response = await service.auto_confirmation(
+            structure, self.temp_dir, auto_confirm=False
+        )
 
         assert response.result == ConfirmationResult.CANCELLED
         assert len(response.selected_files) == 0
@@ -349,7 +362,9 @@ class TestPreviewConfirmationService:
     async def test_preview_with_validation_errors(self):
         """测试带验证错误的预览"""
         # TC-2.5.16: 验证错误预览测试
-        from daip_live.scaffolding.preview_confirmation_service import PreviewConfirmationService
+        from daip_live.scaffolding.preview_confirmation_service import (
+            PreviewConfirmationService,
+        )
 
         service = PreviewConfirmationService()
 
@@ -357,8 +372,7 @@ class TestPreviewConfirmationService:
         invalid_file = ProjectFile(path="", content="")  # 空路径应该触发错误
 
         structure = ProjectStructure(
-            description="Invalid project",
-            files=[invalid_file]
+            description="Invalid project", files=[invalid_file]
         )
 
         with pytest.raises(ValidationError):
@@ -368,22 +382,22 @@ class TestPreviewConfirmationService:
     async def test_preview_large_structure(self):
         """测试大型结构预览"""
         # TC-2.5.17: 大型结构预览测试
-        from daip_live.scaffolding.preview_confirmation_service import PreviewConfirmationService
+        from daip_live.scaffolding.preview_confirmation_service import (
+            PreviewConfirmationService,
+        )
 
         service = PreviewConfirmationService()
 
         # 创建大量文件
         files = []
         for i in range(50):  # 50个文件
-            files.append(ProjectFile(
-                path=f"file_{i}.py",
-                content=f"# File {i}\nprint('File {i}')\n"
-            ))
+            files.append(
+                ProjectFile(
+                    path=f"file_{i}.py", content=f"# File {i}\nprint('File {i}')\n"
+                )
+            )
 
-        structure = ProjectStructure(
-            description="Large project",
-            files=files
-        )
+        structure = ProjectStructure(description="Large project", files=files)
 
         preview = await service.generate_preview(structure, self.temp_dir)
 
@@ -396,8 +410,10 @@ class TestPreviewConfirmationService:
     async def test_preview_with_different_conflict_strategies(self):
         """测试不同冲突策略的预览"""
         # TC-2.5.18: 冲突策略预览测试
-        from daip_live.scaffolding.preview_confirmation_service import PreviewConfirmationService
         from daip_live.scaffolding.file_creation_service import FileConflictResolution
+        from daip_live.scaffolding.preview_confirmation_service import (
+            PreviewConfirmationService,
+        )
 
         # 测试备份策略
         backup_service = PreviewConfirmationService()
@@ -409,16 +425,18 @@ class TestPreviewConfirmationService:
 
         # 创建已存在的文件
         existing_file = os.path.join(self.temp_dir, "test.py")
-        with open(existing_file, 'w') as f:
+        with open(existing_file, "w") as f:
             f.write("existing content")
 
         structure = ProjectStructure(
             description="Conflict test",
-            files=[ProjectFile(path="test.py", content="new content")]
+            files=[ProjectFile(path="test.py", content="new content")],
         )
 
         backup_preview = await backup_service.generate_preview(structure, self.temp_dir)
-        overwrite_preview = await overwrite_service.generate_preview(structure, self.temp_dir)
+        overwrite_preview = await overwrite_service.generate_preview(
+            structure, self.temp_dir
+        )
 
         # 两个预览都应该显示冲突
         assert backup_preview.conflicts == 1
@@ -435,7 +453,9 @@ class TestPreviewConfirmationService:
     async def test_confirmation_with_file_selection(self):
         """测试文件选择的确认"""
         # TC-2.5.19: 文件选择确认测试
-        from daip_live.scaffolding.preview_confirmation_service import PreviewConfirmationService
+        from daip_live.scaffolding.preview_confirmation_service import (
+            PreviewConfirmationService,
+        )
 
         service = PreviewConfirmationService()
         structure = ProjectStructure(
@@ -443,13 +463,13 @@ class TestPreviewConfirmationService:
             files=[
                 ProjectFile(path="keep1.py", content="keep1"),
                 ProjectFile(path="keep2.py", content="keep2"),
-                ProjectFile(path="skip.py", content="skip")
-            ]
+                ProjectFile(path="skip.py", content="skip"),
+            ],
         )
 
         # Mock用户选择只保留前两个文件
-        with patch('builtins.input') as mock_input:
-            mock_input.side_effect = ['s', '1', '2', '']  # 选择，选择文件1,2，空结束
+        with patch("builtins.input") as mock_input:
+            mock_input.side_effect = ["s", "1", "2", ""]  # 选择，选择文件1,2，空结束
 
             response = await service.interactive_confirmation(structure, self.temp_dir)
 

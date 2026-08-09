@@ -1,4 +1,3 @@
-
 import pytest
 
 from daip_live.core.models import AgentState, DialogueTurn
@@ -11,6 +10,7 @@ def session_manager():
     """Provides a SessionManager instance for testing."""
     db_manager = DatabaseManager(db_path=":memory:")
     return SessionManager(db_manager=db_manager)
+
 
 def test_full_session_lifecycle(session_manager):
     """
@@ -36,7 +36,9 @@ def test_full_session_lifecycle(session_manager):
 
     # Add dialogue turns
     turn1 = DialogueTurn(participant_id="user_human", content="我们开始讨论吧。")
-    turn2 = DialogueTurn(participant_id="role_pro_01", content="我认为我们应该采用微服务架构。")
+    turn2 = DialogueTurn(
+        participant_id="role_pro_01", content="我认为我们应该采用微服务架构。"
+    )
     session_manager.add_dialogue_turn(session.session_id, turn1)
     session_manager.add_dialogue_turn(session.session_id, turn2)
 
@@ -52,6 +54,7 @@ def test_full_session_lifecycle(session_manager):
     assert retrieved_session.status == AgentState.COMPLETED
     assert retrieved_session.summary == summary
 
+
 def test_get_nonexistent_session(session_manager):
     """Test retrieving a session that does not exist."""
     # Act
@@ -59,6 +62,7 @@ def test_get_nonexistent_session(session_manager):
 
     # Assert
     assert retrieved_session is None
+
 
 def test_list_sessions_empty(session_manager):
     """Test listing sessions when none exist."""

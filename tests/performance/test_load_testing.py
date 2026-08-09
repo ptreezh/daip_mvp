@@ -3,26 +3,23 @@
 Stress tests and load testing for high-concurrency scenarios.
 """
 
-import pytest
 import asyncio
-import time
-import tempfile
 import statistics
+import tempfile
+import time
 from pathlib import Path
-from typing import List, Dict, Any
-from concurrent.futures import ThreadPoolExecutor
-from unittest.mock import Mock, AsyncMock
 
+import pytest
 from sqlalchemy.exc import OperationalError
 
-from daip_live.persistence.database import DatabaseManager
+from daip_live.core.models import AgentState, Session
 from daip_live.memory.session_manager import SessionManager
-from daip_live.core.models import Session, AgentState
-
+from daip_live.persistence.database import DatabaseManager
 
 # ============================================================================
 # Load Testing Utilities
 # ============================================================================
+
 
 class LoadTestResult:
     """Results from a load test."""
@@ -35,7 +32,7 @@ class LoadTestResult:
         self.end_time = None
         self.successful_requests = 0
         self.failed_requests = 0
-        self.response_times: List[float] = []
+        self.response_times: list[float] = []
 
     @property
     def duration_seconds(self) -> float:
@@ -87,7 +84,7 @@ class LoadTestResult:
         """Generate summary string."""
         return f"""
 Load Test: {self.test_name}
-{'='*50}
+{"=" * 50}
 Total Requests: {self.total_requests}
 Concurrent Users: {self.concurrent_users}
 Duration: {self.duration_seconds:.2f}s
@@ -99,12 +96,13 @@ Response Times:
   99th percentile: {self.p99_response_time_ms:.2f}ms
 Successful: {self.successful_requests}
 Failed: {self.failed_requests}
-{'='*50}"""
+{"=" * 50}"""
 
 
 # ============================================================================
 # Database Load Tests
 # ============================================================================
+
 
 @pytest.mark.load
 class TestDatabaseLoad:
@@ -126,21 +124,18 @@ class TestDatabaseLoad:
     def test_concurrent_session_writes_load(self, temp_db):
         """Load test: Concurrent session writes."""
         result = LoadTestResult(
-            test_name="concurrent_writes",
-            total_requests=500,
-            concurrent_users=50
+            test_name="concurrent_writes", total_requests=500, concurrent_users=50
         )
 
         async def write_sessions(start_id: int, count: int):
             """Write a batch of sessions."""
-            tasks = []
             for i in range(count):
                 session_id = start_id + i
                 session = Session(
                     session_id=f"load_test_{session_id}",
                     session_type="chat",
                     goal=f"Load test session {session_id}",
-                    participant_ids=["user", "agent"]
+                    participant_ids=["user", "agent"],
                 )
                 start = time.perf_counter()
                 try:
@@ -148,7 +143,7 @@ class TestDatabaseLoad:
                     duration = (time.perf_counter() - start) * 1000
                     result.response_times.append(duration)
                     result.successful_requests += 1
-                except Exception as e:
+                except Exception:
                     result.failed_requests += 1
 
         result.start_time = time.time()
@@ -167,13 +162,15 @@ class TestDatabaseLoad:
 
         result.end_time = time.time()
 
-        print(result.to_summary())
-
         # Assertions
-        assert result.success_rate > 95, f"Success rate too low: {result.success_rate:.2f}%"
-        # SQLite 单写者：50 路并发写入会因锁等待使平均耗时自然偏高（全量负载下实测 ~1s+），
+        assert result.success_rate > 95, (
+            f"Success rate too low: {result.success_rate:.2f}%"
+        )
+        # SQLite 单写者：50 路并发写入会因锁等待使平均耗时自然偏高（全量负载下实测 ~1s+），  # noqa: E501
         # 成功率才是并发正确性的真实信号；阈值放宽到 2000ms
-        assert result.avg_response_time_ms < 2000, f"Average response time too high: {result.avg_response_time_ms:.2f}ms"
+        assert result.avg_response_time_ms < 2000, (
+            f"Average response time too high: {result.avg_response_time_ms:.2f}ms"
+        )
 
     def test_concurrent_mixed_operations_load(self, temp_db):
         """Load test: Mixed read/write operations."""
@@ -183,14 +180,12 @@ class TestDatabaseLoad:
                 session_id=f"mixed_test_{i}",
                 session_type="chat",
                 goal=f"Test {i}",
-                participant_ids=["user"]
+                participant_ids=["user"],
             )
             temp_db.save_session(session)
 
         result = LoadTestResult(
-            test_name="mixed_operations",
-            total_requests=1000,
-            concurrent_users=100
+            test_name="mixed_operations", total_requests=1000, concurrent_users=100
         )
 
         async def mixed_operations(op_id: int):
@@ -204,7 +199,7 @@ class TestDatabaseLoad:
                         session_id=f"mixed_write_{op_id}",
                         session_type="chat",
                         goal=f"Write {op_id}",
-                        participant_ids=["user"]
+                        participant_ids=["user"],
                     )
                     await asyncio.to_thread(temp_db.save_session, session)
                 elif random.random() < 0.5:  # 20% updates
@@ -213,21 +208,24 @@ class TestDatabaseLoad:
                         session_id=existing_id,
                         session_type="chat",
                         goal=f"Updated {op_id}",
-                        participant_ids=["user"]
+                        participant_ids=["user"],
                     )
                     await asyncio.to_thread(temp_db.save_session, session)
                 else:  # 50% reads
-                    await asyncio.to_thread(temp_db.get_session, f"mixed_test_{op_id % 100}")
+                    await asyncio.to_thread(
+                        temp_db.get_session, f"mixed_test_{op_id % 100}"
+                    )
 
                 duration = (time.perf_counter() - start) * 1000
                 result.response_times.append(duration)
                 result.successful_requests += 1
-            except Exception as e:
+            except Exception:
                 result.failed_requests += 1
 
         result.start_time = time.time()
 
         tasks = [mixed_operations(i) for i in range(result.total_requests)]
+
         async def _run_all_batches():
             await asyncio.gather(*tasks)
 
@@ -235,14 +233,15 @@ class TestDatabaseLoad:
 
         result.end_time = time.time()
 
-        print(result.to_summary())
-
-        assert result.success_rate > 90, f"Success rate too low: {result.success_rate:.2f}%"
+        assert result.success_rate > 90, (
+            f"Success rate too low: {result.success_rate:.2f}%"
+        )
 
 
 # ============================================================================
 # Session Manager Load Tests
 # ============================================================================
+
 
 @pytest.mark.load
 class TestSessionManagerLoad:
@@ -265,9 +264,7 @@ class TestSessionManagerLoad:
     def test_concurrent_session_lifecycle_load(self, temp_session_manager):
         """Load test: Complete session lifecycle concurrently."""
         result = LoadTestResult(
-            test_name="session_lifecycle",
-            total_requests=200,
-            concurrent_users=20
+            test_name="session_lifecycle", total_requests=200, concurrent_users=20
         )
 
         async def session_lifecycle(op_id: int):
@@ -280,7 +277,7 @@ class TestSessionManagerLoad:
                 session = temp_session_manager.create_session(
                     goal=f"Lifecycle test {op_id}",
                     session_type="chat",
-                    participant_ids=["user"]
+                    participant_ids=["user"],
                 )
                 await asyncio.to_thread(temp_session_manager.save_session, session)
 
@@ -288,8 +285,10 @@ class TestSessionManagerLoad:
                 await asyncio.to_thread(temp_session_manager.get_session, session_id)
 
                 # Update (simulate status change) — 源码权威: SessionManager 无
-                # update_session_status/finalize_session，用 end_session(session_id, status, summary)
-                temp_session_manager.end_session(session_id, AgentState.COMPLETED, "lifecycle test")
+                # update_session_status/finalize_session，用 end_session(session_id, status, summary)  # noqa: E501
+                temp_session_manager.end_session(
+                    session_id, AgentState.COMPLETED, "lifecycle test"
+                )
 
                 # Delete
                 await asyncio.to_thread(temp_session_manager.delete_session, session_id)
@@ -297,12 +296,13 @@ class TestSessionManagerLoad:
                 duration = (time.perf_counter() - start) * 1000
                 result.response_times.append(duration)
                 result.successful_requests += 1
-            except Exception as e:
+            except Exception:
                 result.failed_requests += 1
 
         result.start_time = time.time()
 
         tasks = [session_lifecycle(i) for i in range(result.total_requests)]
+
         async def _run_all_batches():
             await asyncio.gather(*tasks)
 
@@ -310,14 +310,15 @@ class TestSessionManagerLoad:
 
         result.end_time = time.time()
 
-        print(result.to_summary())
-
-        assert result.success_rate > 90, f"Success rate too low: {result.success_rate:.2f}%"
+        assert result.success_rate > 90, (
+            f"Success rate too low: {result.success_rate:.2f}%"
+        )
 
 
 # ============================================================================
 # Ramp-up Load Test
 # ============================================================================
+
 
 @pytest.mark.load
 class TestRampUpLoad:
@@ -335,7 +336,7 @@ class TestRampUpLoad:
             result = LoadTestResult(
                 test_name="ramp_up",
                 total_requests=500,
-                concurrent_users=0  # Will ramp up
+                concurrent_users=0,  # Will ramp up
             )
 
             async def ramp_up_test():
@@ -362,7 +363,7 @@ class TestRampUpLoad:
                                         session_id=f"ramp_{req_id}",
                                         session_type="chat",
                                         goal=f"Ramp test {req_id}",
-                                        participant_ids=["user"]
+                                        participant_ids=["user"],
                                     )
                                     await asyncio.to_thread(db.save_session, session)
                                     duration = (time.perf_counter() - start) * 1000
@@ -382,8 +383,6 @@ class TestRampUpLoad:
             asyncio.run(ramp_up_test())
             result.end_time = time.time()
 
-            print(result.to_summary())
-
             assert result.successful_requests > 400  # At least 80% success
 
         finally:
@@ -396,6 +395,7 @@ class TestRampUpLoad:
 # ============================================================================
 # Stress Test
 # ============================================================================
+
 
 @pytest.mark.load
 class TestStress:
@@ -414,7 +414,7 @@ class TestStress:
             result = LoadTestResult(
                 test_name="high_volume",
                 total_requests=volume,
-                concurrent_users=20  # SQLite 单写者：100 路并发写会触发大量锁竞争
+                concurrent_users=20,  # SQLite 单写者：100 路并发写会触发大量锁竞争
             )
 
             async def high_volume_writes():
@@ -431,7 +431,7 @@ class TestStress:
                                 session_id=f"stress_{start + i}",
                                 session_type="chat",
                                 goal=f"Stress test {start + i}",
-                                participant_ids=["user"]
+                                participant_ids=["user"],
                             )
                             # SQLite 单写者：并发线程遇 database is locked 时短退避重试
                             for attempt in range(10):
@@ -452,19 +452,18 @@ class TestStress:
             asyncio.run(high_volume_writes())
             result.end_time = time.time()
 
-            print(result.to_summary())
-
             # Verify we can still read
             test_session = db.get_session("stress_0")
             assert test_session is not None
 
             # Verify list performance still acceptable
             list_start = time.perf_counter()
-            all_sessions = db.list_sessions()
+            db.list_sessions()
             list_duration = (time.perf_counter() - list_start) * 1000
 
-            print(f"\nList {len(all_sessions)} sessions: {list_duration:.2f}ms")
-            assert list_duration < 1000, f"Listing too slow after stress: {list_duration:.2f}ms"
+            assert list_duration < 1000, (
+                f"Listing too slow after stress: {list_duration:.2f}ms"
+            )
 
         finally:
             try:

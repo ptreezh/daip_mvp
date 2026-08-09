@@ -3,23 +3,15 @@
 Tests the complete request/response cycle for all REST API endpoints.
 """
 
-import pytest
 import tempfile
-import asyncio
 from pathlib import Path
-from datetime import datetime, timezone
-from unittest.mock import Mock, AsyncMock, patch
 
-from daip_live.p7_gui.main import app, get_config, get_db_manager, get_session_manager
-from daip_live.p7_gui.api_docs import (
-    SessionCreateRequest,
-    HealthCheckResponse,
-    KnowledgeStatusResponse
-)
-from daip_live.core.models import Session, AgentState
-from daip_live.persistence.database import DatabaseManager
-from daip_live.memory.session_manager import SessionManager
+import pytest
 from fastapi.testclient import TestClient
+
+from daip_live.memory.session_manager import SessionManager
+from daip_live.p7_gui.main import get_config, get_db_manager, get_session_manager
+from daip_live.persistence.database import DatabaseManager
 
 
 @pytest.mark.e2e
@@ -47,12 +39,13 @@ class TestAPIEndpointsE2E:
     @pytest.fixture
     def client(self, temp_session_manager):
         """Create test client with mocked dependencies."""
+
         def override_get_config():
             return {
-                'database': {'path': ':memory:'},
-                'llm_provider': {'default_model': 'gpt-3.5-turbo'},
-                'knowledge_base': {'directory': './test_knowledge'},
-                'role_manager': {'roles_dir': './test_roles'}
+                "database": {"path": ":memory:"},
+                "llm_provider": {"default_model": "gpt-3.5-turbo"},
+                "knowledge_base": {"directory": "./test_knowledge"},
+                "role_manager": {"roles_dir": "./test_roles"},
             }
 
         def override_get_db_manager():
@@ -62,9 +55,12 @@ class TestAPIEndpointsE2E:
             return temp_session_manager
 
         from daip_live.p7_gui import main
+
         main.app.dependency_overrides[get_config] = override_get_config
         main.app.dependency_overrides[get_db_manager] = override_get_db_manager
-        main.app.dependency_overrides[get_session_manager] = override_get_session_manager
+        main.app.dependency_overrides[get_session_manager] = (
+            override_get_session_manager
+        )
 
         with TestClient(main.app) as test_client:
             yield test_client
@@ -78,8 +74,8 @@ class TestAPIEndpointsE2E:
             json={
                 "goal": "E2E Test Goal",
                 "session_type": "workflow",
-                "participant_ids": ["agent", "user"]
-            }
+                "participant_ids": ["agent", "user"],
+            },
         )
         assert response.status_code == 200
         data = response.json()
@@ -92,10 +88,7 @@ class TestAPIEndpointsE2E:
         """Test listing all sessions."""
         # Create multiple sessions
         for i in range(3):
-            client.post(
-                "/api/sessions",
-                json={"goal": f"Test session {i}"}
-            )
+            client.post("/api/sessions", json={"goal": f"Test session {i}"})
 
         # List sessions
         response = client.get("/api/sessions")
@@ -107,8 +100,7 @@ class TestAPIEndpointsE2E:
         """Test getting a specific session."""
         # Create a session
         create_response = client.post(
-            "/api/sessions",
-            json={"goal": "Get Test Session"}
+            "/api/sessions", json={"goal": "Get Test Session"}
         )
         session_id = create_response.json()["session_id"]
 
@@ -128,8 +120,7 @@ class TestAPIEndpointsE2E:
         """Test deleting a session."""
         # Create a session
         create_response = client.post(
-            "/api/sessions",
-            json={"goal": "Delete Test Session"}
+            "/api/sessions", json={"goal": "Delete Test Session"}
         )
         session_id = create_response.json()["session_id"]
 
@@ -156,6 +147,7 @@ class TestAPIEndpointsE2E:
         """Test listing available roles."""
         # Mock role manager to return test data
         from unittest.mock import MagicMock
+
         from daip_live.p7_gui import main
 
         mock_role_manager = MagicMock()
@@ -164,14 +156,14 @@ class TestAPIEndpointsE2E:
                 "description": "Data analyst",
                 "system_prompt": "You are an analyst",
                 "model": "gpt-4",
-                "capabilities": ["analysis", "reporting"]
+                "capabilities": ["analysis", "reporting"],
             },
             "writer": {
                 "description": "Content writer",
                 "system_prompt": "You are a writer",
                 "model": "gpt-3.5-turbo",
-                "capabilities": ["writing", "editing"]
-            }
+                "capabilities": ["writing", "editing"],
+            },
         }
 
         def override_get_role_manager():
@@ -199,8 +191,7 @@ class TestAPIEndpointsE2E:
         """Test complete session lifecycle."""
         # 1. Create session
         create_response = client.post(
-            "/api/sessions",
-            json={"goal": "Complete Workflow Test"}
+            "/api/sessions", json={"goal": "Complete Workflow Test"}
         )
         assert create_response.status_code == 200
         session_id = create_response.json()["session_id"]
@@ -235,24 +226,28 @@ class TestAPIValidationE2E:
 
         def override_get_config():
             return {
-                'database': {'path': ':memory:'},
-                'llm_provider': {'default_model': 'gpt-3.5-turbo'},
-                'knowledge_base': {'directory': './test_knowledge'},
-                'role_manager': {'roles_dir': './test_roles'}
+                "database": {"path": ":memory:"},
+                "llm_provider": {"default_model": "gpt-3.5-turbo"},
+                "knowledge_base": {"directory": "./test_knowledge"},
+                "role_manager": {"roles_dir": "./test_roles"},
             }
 
         def override_get_db_manager():
             from daip_live.persistence.database import DatabaseManager
-            return DatabaseManager(db_path=':memory:')
+
+            return DatabaseManager(db_path=":memory:")
 
         def override_get_session_manager():
             from daip_live.memory.session_manager import SessionManager
-            db = DatabaseManager(db_path=':memory:')
+
+            db = DatabaseManager(db_path=":memory:")
             return SessionManager(db_manager=db)
 
         main.app.dependency_overrides[get_config] = override_get_config
         main.app.dependency_overrides[main.get_db_manager] = override_get_db_manager
-        main.app.dependency_overrides[main.get_session_manager] = override_get_session_manager
+        main.app.dependency_overrides[main.get_session_manager] = (
+            override_get_session_manager
+        )
 
         with TestClient(main.app) as test_client:
             yield test_client
@@ -261,10 +256,7 @@ class TestAPIValidationE2E:
 
     def test_create_session_missing_goal(self, client):
         """Test creating session without required goal field."""
-        response = client.post(
-            "/api/sessions",
-            json={"session_type": "workflow"}
-        )
+        response = client.post("/api/sessions", json={"session_type": "workflow"})
         # Should fail validation
         assert response.status_code == 422
 
@@ -273,7 +265,7 @@ class TestAPIValidationE2E:
         response = client.post(
             "/api/sessions",
             data="invalid json",
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
         assert response.status_code == 422
 
@@ -292,6 +284,7 @@ class TestOpenAPISpecE2E:
     def client(self):
         """Create test client."""
         from daip_live.p7_gui import main
+
         with TestClient(main.app) as test_client:
             yield test_client
 

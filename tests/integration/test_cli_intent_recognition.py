@@ -1,13 +1,14 @@
 """
 Integration tests for CLI intent recognition functionality.
 """
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
-import asyncio
-import typer
 from typer.testing import CliRunner
 
-from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer, Intent, IntentType
+from daip_live.agent_engine.enhanced_intent_recognizer import (
+    EnhancedIntentRecognizer,
+    IntentType,
+)
 from daip_live.cli.main import app
 
 
@@ -24,32 +25,34 @@ class TestCLIIntentRecognitionIntegration:
         """Create a CLI runner for testing."""
         return CliRunner()
 
-    def test_cli_command_line_arguments_passed_to_intent_recognizer(self, intent_recognizer):
-        """Test that CLI command line arguments are correctly passed to intent recognizer."""
+    def test_cli_command_line_arguments_passed_to_intent_recognizer(
+        self, intent_recognizer
+    ):
+        """Test that CLI command line arguments are correctly passed to intent recognizer."""  # noqa: E501
         # Test that the CLI can recognize and process various command patterns
-        # This test verifies the integration between CLI argument parsing and intent recognition
-        
+        # This test verifies the integration between CLI argument parsing and intent recognition  # noqa: E501
+
         # Test debate command recognition
         intent = intent_recognizer.recognize_intent("开始辩论人工智能伦理")
         assert intent is not None
         assert intent.name == "start_debate"
         assert intent.tool_name == "debate"
         assert intent.intent_type == IntentType.WORKFLOW
-        
+
         # Test paper search command recognition
         intent = intent_recognizer.recognize_intent("搜索深度学习论文")
         assert intent is not None
         assert intent.name == "search_papers"
         assert intent.tool_name == "search_academic_papers"
         assert intent.intent_type == IntentType.WORKFLOW
-        
+
         # Test wiki command recognition
         intent = intent_recognizer.recognize_intent("创建wiki页面")
         assert intent is not None
         assert intent.name == "create_wiki"
         assert intent.tool_name == "wiki"
         assert intent.intent_type == IntentType.WORKFLOW
-        
+
         # Test project initialization recognition
         intent = intent_recognizer.recognize_intent("初始化项目")
         assert intent is not None
@@ -64,19 +67,19 @@ class TestCLIIntentRecognitionIntegration:
         assert intent is not None
         assert intent.tool_name == "debate"
         assert "topic" in intent.parameters or "query" in intent.parameters
-        
+
         # Test wiki intent mapping to command
         intent = intent_recognizer.recognize_intent("创建wiki")
         assert intent is not None
         assert intent.tool_name == "wiki"
         assert "title" in intent.parameters or "query" in intent.parameters
-        
+
         # Test project scaffold intent mapping to command
         intent = intent_recognizer.recognize_intent("初始化项目")
         assert intent is not None
         assert intent.tool_name == "scaffold"
         assert "project_type" in intent.parameters or "query" in intent.parameters
-        
+
         # Test paper search intent mapping to command
         intent = intent_recognizer.recognize_intent("搜索论文")
         assert intent is not None
@@ -90,7 +93,7 @@ class TestCLIIntentRecognitionIntegration:
             ("开始辩论", "start_debate", IntentType.WORKFLOW),
             ("创建wiki", "create_wiki", IntentType.WORKFLOW),
             ("初始化项目", "initialize_project", IntentType.WORKFLOW),
-            ("搜索论文", "search_papers", IntentType.WORKFLOW)
+            ("搜索论文", "search_papers", IntentType.WORKFLOW),
         ]
 
         for input_text, expected_name, expected_type in workflow_intents:
@@ -122,11 +125,13 @@ class TestCLIIntentRecognitionIntegration:
         assert chat_intent.requires_confidence_check is False
 
     def test_unrecognized_intent_gives_appropriate_feedback(self, intent_recognizer):
-        pytest.skip("旧spec：源码意图识别器模式映射已变（识别结果/置信度阈值与测试期望不同）；当前源码为准")
-        # Test completely unrelated text (should not be recognized or classified as chat)
+        pytest.skip(
+            "旧spec：源码意图识别器模式映射已变（识别结果/置信度阈值与测试期望不同）；当前源码为准"
+        )
+        # Test completely unrelated text (should not be recognized or classified as chat)  # noqa: E501
         intent = intent_recognizer.recognize_intent("今天天气很好")
         # This might be classified as chat or remain None depending on implementation
-        
+
         # Test text below confidence threshold (should not be recognized)
         intent = intent_recognizer.recognize_intent("xyz")
         assert intent is None, "Should not recognize random text with low confidence"
@@ -136,14 +141,16 @@ class TestCLIIntentRecognitionIntegration:
         # May or may not be recognized depending on patterns, but should not crash
 
     def test_natural_language_input_scenarios(self, intent_recognizer):
-        pytest.skip("旧spec：源码意图识别器模式映射已变（识别结果/置信度阈值与测试期望不同）；当前源码为准")
+        pytest.skip(
+            "旧spec：源码意图识别器模式映射已变（识别结果/置信度阈值与测试期望不同）；当前源码为准"
+        )
         # Test debate scenarios with different phrasings
         debate_inputs = [
             "我们来辩论人工智能的未来发展",
             "发起一场关于机器学习伦理的辩论",
-            "让我们辩论自动驾驶汽车的安全性问题"
+            "让我们辩论自动驾驶汽车的安全性问题",
         ]
-        
+
         for input_text in debate_inputs:
             intent = intent_recognizer.recognize_intent(input_text)
             assert intent is not None, f"Failed to recognize debate input: {input_text}"
@@ -155,9 +162,9 @@ class TestCLIIntentRecognitionIntegration:
             "创建wiki页面介绍量子计算",
             "新建一个关于区块链技术的wiki",
             "写个wiki页面说明机器学习基础",
-            "编辑wiki添加人工智能发展史"
+            "编辑wiki添加人工智能发展史",
         ]
-        
+
         for input_text in wiki_inputs:
             intent = intent_recognizer.recognize_intent(input_text)
             assert intent is not None, f"Failed to recognize wiki input: {input_text}"
@@ -169,12 +176,14 @@ class TestCLIIntentRecognitionIntegration:
             "初始化一个新的Python项目",
             "创建一个机器学习项目",
             "新建数据科学项目模板",
-            "设置一个新的web开发环境"
+            "设置一个新的web开发环境",
         ]
-        
+
         for input_text in project_inputs:
             intent = intent_recognizer.recognize_intent(input_text)
-            assert intent is not None, f"Failed to recognize project input: {input_text}"
+            assert intent is not None, (
+                f"Failed to recognize project input: {input_text}"
+            )
             assert intent.name == "initialize_project"
             assert "project_type" in intent.parameters or "query" in intent.parameters
 
@@ -183,12 +192,14 @@ class TestCLIIntentRecognitionIntegration:
             "搜索关于神经网络优化的论文",
             "查找深度学习在医疗领域的应用论文",
             "找一些关于自然语言处理的最新研究",
-            "搜索计算机视觉方面的学术文章"
+            "搜索计算机视觉方面的学术文章",
         ]
-        
+
         for input_text in paper_inputs:
             intent = intent_recognizer.recognize_intent(input_text)
-            assert intent is not None, f"Failed to recognize paper search input: {input_text}"
+            assert intent is not None, (
+                f"Failed to recognize paper search input: {input_text}"
+            )
             assert intent.name == "search_papers"
             assert "query" in intent.parameters
 
@@ -223,16 +234,16 @@ class TestCLIIntentRecognitionIntegration:
     async def test_cli_integration_with_real_commands(self, runner):
         """Test CLI integration with real command execution (mocked)."""
         # Test that CLI commands can be invoked (this tests the Typer integration)
-        # Note: We're not actually running the async functions, just testing command structure
-        
+        # Note: We're not actually running the async functions, just testing command structure  # noqa: E501
+
         # Test help command
         result = runner.invoke(app, ["--help"])
         assert result.exit_code == 0
-        
+
         # Test debate subcommand help
         result = runner.invoke(app, ["debate", "--help"])
         assert result.exit_code == 0
-        
+
         # Test doc subcommand help
         result = runner.invoke(app, ["doc", "--help"])
         assert result.exit_code == 0
@@ -243,30 +254,38 @@ class TestCLIIntentRecognitionIntegration:
         assert result.exit_code == 0
 
     def test_intent_parameter_extraction_accuracy(self, intent_recognizer):
-        """Test that intent parameters are accurately extracted from natural language."""
+        """Test that intent parameters are accurately extracted from natural language."""  # noqa: E501
         # Test debate topic extraction
         intent = intent_recognizer.recognize_intent("开始辩论人工智能的伦理问题")
         assert intent is not None
         assert "topic" in intent.parameters or "query" in intent.parameters
         # The topic should contain the key elements
-        topic_content = intent.parameters.get("topic", "") or intent.parameters.get("query", "")
+        topic_content = intent.parameters.get("topic", "") or intent.parameters.get(
+            "query", ""
+        )
         assert "人工智能" in topic_content or "伦理" in topic_content
 
         # Test wiki title extraction
         intent = intent_recognizer.recognize_intent("创建wiki页面：机器学习基础概念")
         assert intent is not None
-        title_content = intent.parameters.get("title", "") or intent.parameters.get("query", "")
+        title_content = intent.parameters.get("title", "") or intent.parameters.get(
+            "query", ""
+        )
         assert "机器学习" in title_content or "基础概念" in title_content
 
         # Test project type extraction
         intent = intent_recognizer.recognize_intent("初始化机器学习项目")
         assert intent is not None
         project_type = intent.parameters.get("project_type", "")
-        # The project type extraction might not be perfect, so we'll check if it's not empty
+        # The project type extraction might not be perfect, so we'll check if it's not empty  # noqa: E501
         assert project_type != ""
 
         # Test search query extraction
         intent = intent_recognizer.recognize_intent("搜索自然语言处理的最新进展论文")
         assert intent is not None
         search_query = intent.parameters.get("query", "")
-        assert "自然语言处理" in search_query or "最新进展" in search_query or search_query != ""
+        assert (
+            "自然语言处理" in search_query
+            or "最新进展" in search_query
+            or search_query != ""
+        )

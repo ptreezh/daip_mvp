@@ -3,19 +3,20 @@
 遵循TDD原则：先写测试，再实现功能
 """
 
+from unittest.mock import AsyncMock, Mock
+
 import pytest
-import asyncio
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
-from textual.app import App
-from textual.widgets import Input, Button, RichLog
+from textual.widgets import RichLog
 
-from daip_live.tui import DAIP_TUI
-from daip_live.scaffolding.manager import ScaffoldingManager
 from daip_live.model_provider.provider import LiteLLMProvider
+from daip_live.scaffolding.manager import ScaffoldingManager
+from daip_live.tui import DAIP_TUI
+
+pytestmark = pytest.mark.skip(
+    reason="TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准"
+)
 
 
-
-pytestmark = pytest.mark.skip(reason="TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准")
 class TestScaffoldTUIIntegration:
     """脚手架功能TUI集成测试"""
 
@@ -23,7 +24,8 @@ class TestScaffoldTUIIntegration:
     def mock_model_provider(self):
         """模拟模型提供者"""
         mock_provider = Mock(spec=LiteLLMProvider)
-        mock_provider.generate = AsyncMock(return_value="""
+        mock_provider.generate = AsyncMock(
+            return_value="""
 - filename: roles/project_manager.yaml
   content: |
     name: Project Manager
@@ -32,7 +34,8 @@ class TestScaffoldTUIIntegration:
   content: |
     name: Main Workflow
     steps: []
-""")
+"""
+        )
         return mock_provider
 
     @pytest.fixture
@@ -58,7 +61,10 @@ class TestScaffoldTUIIntegration:
         # 验证命令被正确处理（会显示启动消息）
         tui_app.query_one.return_value.write.assert_called()
         call_args = tui_app.query_one.return_value.write.call_args[0][0]
-        assert "Starting project scaffolding" in call_args or "Invalid arguments" in call_args
+        assert (
+            "Starting project scaffolding" in call_args
+            or "Invalid arguments" in call_args
+        )
 
     def test_project_scaffold_command_with_file_option(self, tui_app):
         """测试项目脚手架命令文件选项"""
@@ -78,7 +84,7 @@ class TestScaffoldTUIIntegration:
         # 验证错误处理
         tui_app.query_one.return_value.write.assert_called()
         call_args = tui_app.query_one.return_value.write.call_args[0][0]
-        assert 'Unknown project subcommand' in call_args
+        assert "Unknown project subcommand" in call_args
 
     def test_project_scaffold_empty_args(self, tui_app):
         """测试空参数的项目脚手架命令"""
@@ -88,7 +94,7 @@ class TestScaffoldTUIIntegration:
         # 验证使用提示
         tui_app.query_one.return_value.write.assert_called()
         call_args = tui_app.query_one.return_value.write.call_args[0][0]
-        assert 'Usage:' in call_args
+        assert "Usage:" in call_args
 
     @pytest.mark.asyncio
     async def test_scaffolding_manager_integration(self, scaffolding_manager):
@@ -101,7 +107,7 @@ class TestScaffoldTUIIntegration:
         # 验证结果
         assert isinstance(result, list)
         assert len(result) > 0
-        assert all('filename' in item and 'content' in item for item in result)
+        assert all("filename" in item and "content" in item for item in result)
 
     @pytest.mark.asyncio
     async def test_scaffolding_with_error_handling(self, mock_model_provider):
@@ -135,7 +141,7 @@ class TestScaffoldTUIIntegration:
 
         # 验证脚手架命令在补全列表中
         completions = tui_app._command_completions
-        assert any('project scaffold' in str(comp) for comp in completions)
+        assert any("project scaffold" in str(comp) for comp in completions)
 
     def test_project_command_help_display(self, tui_app):
         """测试项目命令帮助显示"""
@@ -143,14 +149,13 @@ class TestScaffoldTUIIntegration:
         tui_app._handle_project_command("help")
 
         # 验证帮助信息显示
-        assert hasattr(tui_app, '_last_help_message')
-        assert 'Usage:' in tui_app._last_help_message
+        assert hasattr(tui_app, "_last_help_message")
+        assert "Usage:" in tui_app._last_help_message
 
     @pytest.mark.asyncio
     async def test_scaffold_workflow_integration(self, tui_app, scaffolding_manager):
         """测试脚手架工作流集成"""
         # 模拟完整的脚手架工作流
-        description = "Create a simple API project"
 
         # 验证工作流步骤
         steps = [
@@ -159,24 +164,24 @@ class TestScaffoldTUIIntegration:
             "generate_structure",
             "show_preview",
             "confirm_creation",
-            "create_files"
+            "create_files",
         ]
 
         for step in steps:
-            assert hasattr(tui_app, f'_scaffold_{step}')
+            assert hasattr(tui_app, f"_scaffold_{step}")
 
     def test_scaffold_command_parameter_parsing(self, tui_app):
         """测试脚手架命令参数解析"""
         test_cases = [
             ("scaffold --description 'test project'", {"description": "test project"}),
             ("scaffold --from-file config.txt", {"from_file": "config.txt"}),
-            ("scaffold --description test --yes", {"description": "test", "yes": True})
+            ("scaffold --description test --yes", {"description": "test", "yes": True}),
         ]
 
         for command, expected in test_cases:
             tui_app._handle_project_command(command)
             # 验证参数解析逻辑
-            assert hasattr(tui_app, '_parsed_scaffold_args')
+            assert hasattr(tui_app, "_parsed_scaffold_args")
 
     def test_scaffold_error_handling_in_tui(self, tui_app):
         """测试TUI中的脚手架错误处理"""
@@ -184,13 +189,13 @@ class TestScaffoldTUIIntegration:
         error_cases = [
             "scaffold --description ''",  # 空描述
             "scaffold --from-file nonexistent.txt",  # 不存在的文件
-            "scaffold --invalid-option"  # 无效选项
+            "scaffold --invalid-option",  # 无效选项
         ]
 
         for error_case in error_cases:
             tui_app._handle_project_command(error_case)
             # 验证错误处理
-            assert hasattr(tui_app, '_last_error_message')
+            assert hasattr(tui_app, "_last_error_message")
 
 
 class TestScaffoldDialog:

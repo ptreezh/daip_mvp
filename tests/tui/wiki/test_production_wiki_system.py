@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """
 Production Wiki Knowledge System Tests
 
@@ -11,37 +12,33 @@ comprehensive testing of all enterprise features including:
 - Backup and recovery
 """
 
-import pytest
 import asyncio
+import json
+import os
 import tempfile
 import time
-import json
 import zipfile
-import os
+from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
-from datetime import datetime, timedelta
-from typing import List, Dict, Any
+
+import pytest
 
 # Import production system components
 from daip_live.tui_v1.wiki.production_wiki_system import (
-    ProductionWikiKnowledgeSystem,
-    DocumentMetadata,
-    DocumentChunk,
-    SearchResult,
-    ProcessingTask,
-    PerformanceMetrics,
-    VectorIndex,
-    EmbeddingService,
-    TextProcessor,
-    PDFProcessor,
-    DocumentStatus,
-    DocumentType,
-    SearchType,
-    ProcessingPriority,
     CircuitBreaker,
+    DocumentChunk,
+    DocumentMetadata,
+    DocumentStatus,
+    EmbeddingService,
+    PDFProcessor,
+    PerformanceMetrics,
+    ProcessingPriority,
+    ProductionWikiKnowledgeSystem,
     RateLimiter,
-    create_production_wiki_system
+    SearchType,
+    TextProcessor,
+    VectorIndex,
+    create_production_wiki_system,
 )
 
 
@@ -55,7 +52,7 @@ class TestPerformanceMetrics:
         assert metrics.operation_count == 0
         assert metrics.total_duration == 0.0
         assert metrics.avg_duration == 0.0
-        assert metrics.min_duration == float('inf')
+        assert metrics.min_duration == float("inf")
         assert metrics.max_duration == 0.0
         assert metrics.error_count == 0
         assert isinstance(metrics.last_updated, datetime)
@@ -217,24 +214,24 @@ class TestRateLimiter:
         rl = RateLimiter(max_calls=2, time_window=1)
 
         # Should be able to acquire initially
-        assert rl.acquire() == True
-        assert rl.acquire() == True
+        assert rl.acquire()
+        assert rl.acquire()
 
         # Should be limited now
-        assert rl.acquire() == False
+        assert not rl.acquire()
 
         # Wait for window to pass
         time.sleep(1.1)
 
         # Should be able to acquire again
-        assert rl.acquire() == True
+        assert rl.acquire()
 
     def test_rate_limiter_wait_for_slot(self):
         """Test rate limiter wait for slot"""
         rl = RateLimiter(max_calls=1, time_window=0.5)
 
         # Acquire one slot
-        assert rl.acquire() == True
+        assert rl.acquire()
 
         start_time = time.time()
         rl.wait_for_slot()
@@ -255,7 +252,7 @@ class TestVectorIndex:
         assert index.index_type == "faiss"
         assert len(index.vectors) == 0
         assert len(index.metadata) == 0
-        assert index.is_initialized == False
+        assert not index.is_initialized
 
     def test_vector_index_add_vector(self):
         """Test adding vectors to index"""
@@ -266,12 +263,12 @@ class TestVectorIndex:
 
         success = index.add_vector("vec1", vector, metadata)
 
-        assert success == True
+        assert success
         assert index.size() == 1
         assert "vec1" in index.vectors
         assert index.vectors["vec1"] == vector
         assert index.metadata["vec1"] == metadata
-        assert index.is_initialized == True
+        assert index.is_initialized
 
     def test_vector_index_dimension_mismatch(self):
         """Test vector dimension mismatch"""
@@ -289,7 +286,7 @@ class TestVectorIndex:
         vectors = [
             ([1.0, 0.0, 0.0], {"doc": "A"}),
             ([0.0, 1.0, 0.0], {"doc": "B"}),
-            ([0.0, 0.0, 1.0], {"doc": "C"})
+            ([0.0, 0.0, 1.0], {"doc": "C"}),
         ]
 
         for i, (vector, metadata) in enumerate(vectors):
@@ -333,13 +330,13 @@ class TestVectorIndex:
 
         # Delete existing vector
         success = index.delete_vector("vec1")
-        assert success == True
+        assert success
         assert index.size() == 1
         assert "vec1" not in index.vectors
 
         # Delete non-existing vector
         success = index.delete_vector("nonexistent")
-        assert success == False
+        assert not success
         assert index.size() == 1
 
     def test_vector_index_get_vector(self):
@@ -393,11 +390,7 @@ class TestEmbeddingService:
         """Test encoding multiple texts"""
         service = EmbeddingService()
 
-        texts = [
-            "First test text",
-            "Second test text",
-            "Third test text"
-        ]
+        texts = ["First test text", "Second test text", "Third test text"]
 
         embeddings = await service.encode(texts)
 
@@ -452,7 +445,7 @@ class TestDocumentProcessors:
         processor = TextProcessor(chunk_size=100, overlap=20)
 
         # Create temporary text file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
             content = "This is a test document. " * 20  # Create longer content
             f.write(content)
             temp_path = f.name
@@ -523,7 +516,7 @@ class TestProductionWikiKnowledgeSystem:
             system = ProductionWikiKnowledgeSystem(
                 storage_path=temp_dir,
                 embedding_dimension=128,
-                max_concurrent_processors=2
+                max_concurrent_processors=2,
             )
 
             assert system.storage_path == Path(temp_dir)
@@ -537,8 +530,7 @@ class TestProductionWikiKnowledgeSystem:
         """Test system creation using factory function"""
         with tempfile.TemporaryDirectory() as temp_dir:
             system = create_production_wiki_system(
-                storage_path=temp_dir,
-                embedding_dimension=256
+                storage_path=temp_dir, embedding_dimension=256
             )
 
             assert isinstance(system, ProductionWikiKnowledgeSystem)
@@ -568,7 +560,9 @@ class TestProductionWikiKnowledgeSystem:
             system = create_production_wiki_system(storage_path=temp_dir)
 
             # Create temporary text file
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".txt", delete=False
+            ) as f:
                 content = "This is a test document for the production wiki system."
                 f.write(content)
                 temp_path = f.name
@@ -576,8 +570,7 @@ class TestProductionWikiKnowledgeSystem:
             try:
                 # Add document
                 document_id = await system.add_document(
-                    temp_path,
-                    priority=ProcessingPriority.HIGH
+                    temp_path, priority=ProcessingPriority.HIGH
                 )
 
                 assert isinstance(document_id, str)
@@ -585,7 +578,11 @@ class TestProductionWikiKnowledgeSystem:
 
                 # Check document status
                 status = system.get_document_status(document_id)
-                assert status in [DocumentStatus.PENDING, DocumentStatus.PROCESSING, DocumentStatus.COMPLETED]
+                assert status in [
+                    DocumentStatus.PENDING,
+                    DocumentStatus.PROCESSING,
+                    DocumentStatus.COMPLETED,
+                ]
 
             finally:
                 # 后台处理线程可能仍持有文件句柄（负载下竞态），unlink 失败可忽略
@@ -604,22 +601,22 @@ class TestProductionWikiKnowledgeSystem:
             await asyncio.sleep(0.1)
 
             # Create and add a document
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
-                content = "Artificial intelligence and machine learning are transforming technology."
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".txt", delete=False
+            ) as f:
+                content = "Artificial intelligence and machine learning are transforming technology."  # noqa: E501
                 f.write(content)
                 temp_path = f.name
 
             try:
-                document_id = await system.add_document(temp_path)
+                await system.add_document(temp_path)
 
                 # Wait for processing
                 await asyncio.sleep(1.0)
 
                 # Perform search
                 results = await system.search(
-                    "artificial intelligence",
-                    search_type=SearchType.SEMANTIC,
-                    top_k=5
+                    "artificial intelligence", search_type=SearchType.SEMANTIC, top_k=5
                 )
 
                 assert isinstance(results, list)
@@ -645,9 +642,7 @@ class TestProductionWikiKnowledgeSystem:
 
             for search_type in search_types:
                 results = await system.search(
-                    "test query",
-                    search_type=search_type,
-                    top_k=3
+                    "test query", search_type=search_type, top_k=3
                 )
 
                 assert isinstance(results, list)
@@ -699,7 +694,9 @@ class TestProductionWikiKnowledgeSystem:
             system = create_production_wiki_system(storage_path=temp_dir)
 
             # Create temporary file
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".txt", delete=False
+            ) as f:
                 content = "Document to be deleted"
                 f.write(content)
                 temp_path = f.name
@@ -713,7 +710,7 @@ class TestProductionWikiKnowledgeSystem:
 
                 # Delete document
                 success = await system.delete_document(document_id)
-                assert success == True
+                assert success
 
                 # Verify document is deleted
                 status = system.get_document_status(document_id)
@@ -735,20 +732,20 @@ class TestProductionWikiKnowledgeSystem:
             backup_path = system.backup_system()
 
             assert os.path.exists(backup_path)
-            assert backup_path.endswith('.zip')
+            assert backup_path.endswith(".zip")
 
             # Verify backup contains system state
-            with zipfile.ZipFile(backup_path, 'r') as zipf:
-                assert 'system_state.json' in zipf.namelist()
+            with zipfile.ZipFile(backup_path, "r") as zipf:
+                assert "system_state.json" in zipf.namelist()
 
                 # Check system state file
-                with zipf.open('system_state.json') as f:
+                with zipf.open("system_state.json") as f:
                     state_data = json.load(f)
 
-                assert 'documents' in state_data
-                assert 'chunks' in state_data
-                assert 'version' in state_data
-                assert 'backup_timestamp' in state_data
+                assert "documents" in state_data
+                assert "chunks" in state_data
+                assert "version" in state_data
+                assert "backup_timestamp" in state_data
 
     def test_backup_custom_path(self):
         """Test backup with custom path"""
@@ -767,14 +764,14 @@ class TestProductionWikiKnowledgeSystem:
             system = create_production_wiki_system(storage_path=temp_dir)
 
             # System should be running
-            assert system._processing_active == True
+            assert system._processing_active
             assert system._processor_thread is not None
 
             # Shutdown system
             system.shutdown()
 
             # System should be stopped
-            assert system._processing_active == False
+            assert not system._processing_active
 
     @pytest.mark.asyncio
     async def test_search_session_context_manager(self):
@@ -799,7 +796,7 @@ class TestProductionWikiKnowledgeSystem:
             system1.documents["test_doc"] = {
                 "id": "test_doc",
                 "status": "completed",
-                "created_at": datetime.now().isoformat()
+                "created_at": datetime.now().isoformat(),
             }
 
             # Save state
@@ -823,12 +820,14 @@ class TestIntegrationScenarios:
             system = create_production_wiki_system(storage_path=temp_dir)
 
             # Create test document
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".txt", delete=False
+            ) as f:
                 content = """
-                Artificial Intelligence (AI) is a branch of computer science that aims to create
-                intelligent machines that can perform tasks that typically require human intelligence.
-                Machine learning is a subset of AI that focuses on algorithms that can learn from data.
-                Deep learning is a subset of machine learning that uses neural networks with multiple layers.
+                Artificial Intelligence (AI) is a branch of computer science that aims to create  # noqa: E501
+                intelligent machines that can perform tasks that typically require human intelligence.  # noqa: E501
+                Machine learning is a subset of AI that focuses on algorithms that can learn from data.  # noqa: E501
+                Deep learning is a subset of machine learning that uses neural networks with multiple layers.  # noqa: E501
                 """
                 f.write(content.strip())
                 temp_path = f.name
@@ -840,8 +839,8 @@ class TestIntegrationScenarios:
                     metadata=DocumentMetadata(
                         title="AI Introduction",
                         author="Test Author",
-                        tags=["AI", "machine learning", "deep learning"]
-                    )
+                        tags=["AI", "machine learning", "deep learning"],
+                    ),
                 )
 
                 # Wait for processing
@@ -856,11 +855,19 @@ class TestIntegrationScenarios:
 
                 # Should find the document
                 assert len(search_results) > 0
-                assert any(result.document_id == document_id for result in search_results)
+                assert any(
+                    result.document_id == document_id for result in search_results
+                )
 
                 # Test different search types
-                for search_type in [SearchType.SEMANTIC, SearchType.KEYWORD, SearchType.HYBRID]:
-                    results = await system.search("artificial intelligence", search_type=search_type)
+                for search_type in [
+                    SearchType.SEMANTIC,
+                    SearchType.KEYWORD,
+                    SearchType.HYBRID,
+                ]:
+                    results = await system.search(
+                        "artificial intelligence", search_type=search_type
+                    )
                     assert isinstance(results, list)
 
                 # Get system metrics
@@ -880,14 +887,15 @@ class TestIntegrationScenarios:
         """Test processing multiple documents concurrently"""
         with tempfile.TemporaryDirectory() as temp_dir:
             system = create_production_wiki_system(
-                storage_path=temp_dir,
-                max_concurrent_processors=3
+                storage_path=temp_dir, max_concurrent_processors=3
             )
 
             # Create multiple test documents
             document_paths = []
             for i in range(5):
-                with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+                with tempfile.NamedTemporaryFile(
+                    mode="w", suffix=".txt", delete=False
+                ) as f:
                     content = f"This is test document {i} with unique content {i * 10}."
                     f.write(content)
                     document_paths.append(f.name)
@@ -899,9 +907,8 @@ class TestIntegrationScenarios:
                     task = system.add_document(
                         path,
                         metadata=DocumentMetadata(
-                            title=f"Document {i}",
-                            tags=[f"tag{i}", "test"]
-                        )
+                            title=f"Document {i}", tags=[f"tag{i}", "test"]
+                        ),
                     )
                     tasks.append(task)
 
@@ -945,11 +952,17 @@ class TestIntegrationScenarios:
             assert "processing_metrics" in initial_metrics
             assert all(
                 metric in initial_metrics["processing_metrics"]
-                for metric in ["documents_processed", "searches_performed", "embeddings_generated"]
+                for metric in [
+                    "documents_processed",
+                    "searches_performed",
+                    "embeddings_generated",
+                ]
             )
 
             # Verify each metric has proper structure
-            for metric_name, metric_data in initial_metrics["processing_metrics"].items():
+            for metric_name, metric_data in initial_metrics[
+                "processing_metrics"
+            ].items():
                 assert "operation_count" in metric_data
                 assert "avg_duration" in metric_data
                 assert "min_duration" in metric_data
@@ -962,10 +975,10 @@ class TestIntegrationScenarios:
             system = create_production_wiki_system(storage_path=temp_dir)
 
             # Test circuit breaker integration
-            assert hasattr(system.embedding_service, 'circuit_breaker')
+            assert hasattr(system.embedding_service, "circuit_breaker")
 
             # Test rate limiting integration
-            assert hasattr(system.embedding_service, 'rate_limiter')
+            assert hasattr(system.embedding_service, "rate_limiter")
 
             # Verify system can handle various error conditions
             try:

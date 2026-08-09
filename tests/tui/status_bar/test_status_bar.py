@@ -5,19 +5,18 @@ This test suite implements TDD approach for real-time status bar functionality.
 Tests are written first (RED), then implementation follows (GREEN), then refactoring.
 """
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
-from typing import Dict, Any
 import asyncio
-from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Import real implementations (will fail initially - RED phase)
 from daip_live.tui_v1.status_bar.status_bar import StatusBar
-from daip_live.tui_v1.status_bar.status_widget import StatusWidget
 from daip_live.tui_v1.status_bar.status_updater import StatusUpdater
-
+from daip_live.tui_v1.status_bar.status_widget import StatusWidget
 
 # RED TESTS - These will fail initially, driving implementation
+
 
 class TestStatusBar:
     """Test main status bar functionality"""
@@ -28,10 +27,10 @@ class TestStatusBar:
         status_bar = StatusBar()
 
         assert status_bar is not None
-        assert hasattr(status_bar, '_widgets')
-        assert hasattr(status_bar, '_updater')
-        assert hasattr(status_bar, '_visible')
-        assert status_bar._visible == True
+        assert hasattr(status_bar, "_widgets")
+        assert hasattr(status_bar, "_updater")
+        assert hasattr(status_bar, "_visible")
+        assert status_bar._visible
 
     def test_status_bar_initialization(self):
         """Test status bar initialization with dependencies"""
@@ -40,12 +39,14 @@ class TestStatusBar:
         mock_service_container = Mock()
 
         status_bar = StatusBar()
-        status_bar.initialize(mock_event_system, mock_state_manager, mock_service_container)
+        status_bar.initialize(
+            mock_event_system, mock_state_manager, mock_service_container
+        )
 
         assert status_bar.event_system == mock_event_system
         assert status_bar.state_manager == mock_state_manager
         assert status_bar.service_container == mock_service_container
-        assert status_bar._initialized == True
+        assert status_bar._initialized
 
     def test_add_status_widget(self):
         """Test adding status widgets"""
@@ -95,13 +96,13 @@ class TestStatusBar:
         status_bar = StatusBar()
 
         # Default should be visible
-        assert status_bar.is_visible() == True
+        assert status_bar.is_visible()
 
         status_bar.hide()
-        assert status_bar.is_visible() == False
+        assert not status_bar.is_visible()
 
         status_bar.show()
-        assert status_bar.is_visible() == True
+        assert status_bar.is_visible()
 
     def test_refresh_status_bar(self):
         """Test refreshing all widgets"""
@@ -182,8 +183,8 @@ class TestStatusWidget:
         assert widget is not None
         assert widget.name == "test_widget"
         assert widget.label == "Test Widget"
-        assert hasattr(widget, '_value')
-        assert hasattr(widget, '_last_updated')
+        assert hasattr(widget, "_value")
+        assert hasattr(widget, "_last_updated")
 
     def test_status_widget_update_value(self):
         """Test updating widget value"""
@@ -229,12 +230,13 @@ class TestStatusWidget:
                 self.refreshed = True
 
         import asyncio
+
         widget = TestWidget("test_widget", "Test Widget")
 
         # Run the async refresh
         asyncio.run(widget.refresh())
 
-        assert widget.refreshed == True
+        assert widget.refreshed
 
     def test_status_widget_auto_refresh(self):
         """Test widget auto-refresh configuration"""
@@ -247,14 +249,14 @@ class TestStatusWidget:
         widget = TestWidget("test_widget", "Test Widget")
 
         # Default should not auto-refresh
-        assert widget.auto_refresh == False
+        assert not widget.auto_refresh
 
         widget.enable_auto_refresh(1.0)  # 1 second interval
-        assert widget.auto_refresh == True
+        assert widget.auto_refresh
         assert widget.refresh_interval == 1.0
 
         widget.disable_auto_refresh()
-        assert widget.auto_refresh == False
+        assert not widget.auto_refresh
 
 
 class TestModelStatusWidget:
@@ -263,12 +265,15 @@ class TestModelStatusWidget:
     @pytest.fixture
     def mock_model_service(self):
         service = Mock()
-        service.get_current_model = AsyncMock(return_value={"name": "gpt-4o-mini", "status": "ready"})
+        service.get_current_model = AsyncMock(
+            return_value={"name": "gpt-4o-mini", "status": "ready"}
+        )
         return service
 
     @pytest.fixture
     def model_widget(self, mock_model_service):
         from daip_live.tui_v1.status_bar.model_widget import ModelStatusWidget
+
         return ModelStatusWidget(mock_model_service)
 
     def test_model_widget_creation(self, model_widget):
@@ -290,6 +295,7 @@ class TestModelStatusWidget:
     async def test_model_widget_no_service(self):
         """Test model widget without service"""
         from daip_live.tui_v1.status_bar.model_widget import ModelStatusWidget
+
         widget = ModelStatusWidget(None)
 
         await widget.refresh()
@@ -304,12 +310,15 @@ class TestSessionWidget:
     @pytest.fixture
     def mock_session_service(self):
         service = Mock()
-        service.get_current_session = AsyncMock(return_value={"id": "12345", "name": "main", "status": "active"})
+        service.get_current_session = AsyncMock(
+            return_value={"id": "12345", "name": "main", "status": "active"}
+        )
         return service
 
     @pytest.fixture
     def session_widget(self, mock_session_service):
         from daip_live.tui_v1.status_bar.session_widget import SessionWidget
+
         return SessionWidget(mock_session_service)
 
     def test_session_widget_creation(self, session_widget):
@@ -331,6 +340,7 @@ class TestSessionWidget:
     async def test_session_widget_no_session(self):
         """Test session widget with no active session"""
         from daip_live.tui_v1.status_bar.session_widget import SessionWidget
+
         service = Mock()
         service.get_current_session = AsyncMock(return_value=None)
         widget = SessionWidget(service)
@@ -350,9 +360,9 @@ class TestStatusUpdater:
         updater = StatusUpdater()
 
         assert updater is not None
-        assert hasattr(updater, '_status_bar')
-        assert hasattr(updater, '_update_interval')
-        assert hasattr(updater, '_running')
+        assert hasattr(updater, "_status_bar")
+        assert hasattr(updater, "_update_interval")
+        assert hasattr(updater, "_running")
 
     def test_status_updater_initialization(self):
         """Test status updater initialization"""
@@ -363,7 +373,7 @@ class TestStatusUpdater:
 
         assert updater._status_bar == mock_status_bar
         assert updater._update_interval == 0.5
-        assert updater._running == False
+        assert not updater._running
 
     @pytest.mark.asyncio
     async def test_start_updater(self):
@@ -378,7 +388,7 @@ class TestStatusUpdater:
         # Give it a moment to start
         await asyncio.sleep(0.05)
 
-        assert updater._running == True
+        assert updater._running
 
         # Stop the updater
         await updater.stop()
@@ -392,10 +402,10 @@ class TestStatusUpdater:
         updater.initialize(mock_status_bar, 0.1)
 
         await updater.start()
-        assert updater._running == True
+        assert updater._running
 
         await updater.stop()
-        assert updater._running == False
+        assert not updater._running
 
     @pytest.mark.asyncio
     async def test_update_cycle(self):
@@ -422,6 +432,7 @@ class TestConnectionStatusWidget:
     @pytest.fixture
     def connection_widget(self):
         from daip_live.tui_v1.status_bar.connection_widget import ConnectionStatusWidget
+
         return ConnectionStatusWidget()
 
     def test_connection_widget_creation(self, connection_widget):
@@ -453,6 +464,7 @@ class TestSystemResourceWidget:
     @pytest.fixture
     def resource_widget(self):
         from daip_live.tui_v1.status_bar.resource_widget import SystemResourceWidget
+
         return SystemResourceWidget()
 
     def test_resource_widget_creation(self, resource_widget):
@@ -465,9 +477,10 @@ class TestSystemResourceWidget:
     async def test_resource_widget_refresh(self, resource_widget):
         """Test resource widget refresh"""
         # Mock psutil at the module level to handle import issues
-        with patch('daip_live.tui_v1.status_bar.resource_widget.psutil') as mock_psutil, \
-             patch('daip_live.tui_v1.status_bar.resource_widget.PSUTIL_AVAILABLE', True):
-
+        with (
+            patch("daip_live.tui_v1.status_bar.resource_widget.psutil") as mock_psutil,
+            patch("daip_live.tui_v1.status_bar.resource_widget.PSUTIL_AVAILABLE", True),
+        ):
             mock_psutil.cpu_percent.return_value = 25.0
             mock_memory = Mock()
             mock_memory.percent = 60.0
@@ -487,8 +500,12 @@ class TestSystemResourceWidget:
         """Test resource widget without psutil"""
         # 源码权威: 分支判断用模块级 PSUTIL_AVAILABLE（resource_widget.py:31），
         # 仅 patch psutil 变量不够，须同时 patch 该常量
-        with patch('daip_live.tui_v1.status_bar.resource_widget.psutil', None), \
-             patch('daip_live.tui_v1.status_bar.resource_widget.PSUTIL_AVAILABLE', False):
+        with (
+            patch("daip_live.tui_v1.status_bar.resource_widget.psutil", None),
+            patch(
+                "daip_live.tui_v1.status_bar.resource_widget.PSUTIL_AVAILABLE", False
+            ),
+        ):
             await resource_widget.refresh()
 
             content = resource_widget.get_content()

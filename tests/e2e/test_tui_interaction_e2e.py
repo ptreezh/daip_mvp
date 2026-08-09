@@ -3,21 +3,21 @@
 Tests the complete user interaction flow through the terminal interface.
 """
 
-import pytest
 import asyncio
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from datetime import datetime, timezone
+from unittest.mock import AsyncMock, Mock
 
-from daip_live.core.models import Session, DialogueTurn, AgentState
-from daip_live.memory.session_manager import SessionManager
-from daip_live.persistence.database import DatabaseManager
+import pytest
+
 from daip_live.agent_engine.executor import AgentExecutor
-from daip_live.model_provider.provider import LiteLLMProvider
-from daip_live.p4_role_manager_tools.tool_manager import ToolManager
+from daip_live.core.models import AgentState
 from daip_live.knowledge.manager import KnowledgeManager
 from daip_live.memory.service import MemoryService
+from daip_live.memory.session_manager import SessionManager
+from daip_live.model_provider.provider import LiteLLMProvider
+from daip_live.p4_role_manager_tools.tool_manager import ToolManager
+from daip_live.persistence.database import DatabaseManager
 
 
 @pytest.fixture
@@ -61,7 +61,9 @@ class TestTUIInteractionE2E:
         return km
 
     @pytest.fixture
-    def agent_executor(self, session_manager, mock_model_provider, mock_knowledge_manager):
+    def agent_executor(
+        self, session_manager, mock_model_provider, mock_knowledge_manager
+    ):
         """Create agent executor with mocked dependencies."""
         tool_manager = ToolManager()
         memory_service = MemoryService(mock_model_provider)
@@ -83,12 +85,14 @@ class TestTUIInteractionE2E:
         session = session_manager.create_session(
             goal="Analyze market trends for AI adoption",
             session_type="chat",
-            participant_ids=["user", "agent"]
+            participant_ids=["user", "agent"],
         )
         session_manager.save_session(session)
 
         assert session.session_id is not None
-        assert session.status == AgentState.INIT  # 创建即初始化；RUNNING 由 agent 循环在处理中设置
+        assert (
+            session.status == AgentState.INIT
+        )  # 创建即初始化；RUNNING 由 agent 循环在处理中设置
 
         # 2. User sends first message
         user_message = "What are the key trends in AI adoption for 2024?"
@@ -120,7 +124,7 @@ class TestTUIInteractionE2E:
         session_manager.end_session(
             session.session_id,
             AgentState.COMPLETED,
-            "Market trends conversation completed"
+            "Market trends conversation completed",
         )
 
         final_session = session_manager.get_session(session.session_id)
@@ -131,7 +135,7 @@ class TestTUIInteractionE2E:
         session = session_manager.create_session(
             goal="Discuss renewable energy options",
             session_type="chat",
-            participant_ids=["user", "agent"]
+            participant_ids=["user", "agent"],
         )
         session_manager.save_session(session)
 
@@ -141,14 +145,12 @@ class TestTUIInteractionE2E:
             "Tell me more about solar power",
             "How does wind energy compare?",
             "What about hydroelectric power?",
-            "Which is most cost-effective?"
+            "Which is most cost-effective?",
         ]
 
         responses = []
         for message in conversation:
-            response = asyncio.run(
-                agent_executor.model_provider.generate(message)
-            )
+            response = asyncio.run(agent_executor.model_provider.generate(message))
             responses.append(response)
 
         # Verify all turns were processed
@@ -161,21 +163,23 @@ class TestTUIInteractionE2E:
     ):
         """Test session that retrieves knowledge base information."""
         # Mock knowledge manager to return relevant documents
-        mock_knowledge_manager.search = AsyncMock(return_value=[
-            {
-                "content": "Python is a high-level programming language",
-                "metadata": {"source": "docs/python.md", "score": 0.95}
-            },
-            {
-                "content": "FastAPI is a modern web framework",
-                "metadata": {"source": "docs/fastapi.md", "score": 0.87}
-            }
-        ])
+        mock_knowledge_manager.search = AsyncMock(
+            return_value=[
+                {
+                    "content": "Python is a high-level programming language",
+                    "metadata": {"source": "docs/python.md", "score": 0.95},
+                },
+                {
+                    "content": "FastAPI is a modern web framework",
+                    "metadata": {"source": "docs/fastapi.md", "score": 0.87},
+                },
+            ]
+        )
 
         session = session_manager.create_session(
             goal="Get information about Python and FastAPI",
             session_type="chat",
-            participant_ids=["user", "agent"]
+            participant_ids=["user", "agent"],
         )
         session_manager.save_session(session)
 
@@ -183,9 +187,7 @@ class TestTUIInteractionE2E:
         query = "Tell me about Python web development"
 
         # Agent would use knowledge manager in real execution
-        knowledge_results = asyncio.run(
-            mock_knowledge_manager.search(query, top_k=5)
-        )
+        knowledge_results = asyncio.run(mock_knowledge_manager.search(query, top_k=5))
 
         assert len(knowledge_results) == 2
         assert "Python" in knowledge_results[0]["content"]
@@ -195,7 +197,7 @@ class TestTUIInteractionE2E:
         session = session_manager.create_session(
             goal="Test error handling",
             session_type="chat",
-            participant_ids=["user", "agent"]
+            participant_ids=["user", "agent"],
         )
         session_manager.save_session(session)
 
@@ -209,9 +211,7 @@ class TestTUIInteractionE2E:
 
         # Agent handles error gracefully (in real implementation)
         try:
-            response = asyncio.run(
-                agent_executor.model_provider.generate(user_message)
-            )
+            asyncio.run(agent_executor.model_provider.generate(user_message))
             # If we get here, error was handled
         except Exception as e:
             # Error should be caught and logged, not crash the app
@@ -230,7 +230,7 @@ class TestTUIInteractionE2E:
         session = session_manager.create_session(
             goal="Test persistence",
             session_type="chat",
-            participant_ids=["user", "agent"]
+            participant_ids=["user", "agent"],
         )
         session_manager.save_session(session)
 
@@ -252,7 +252,7 @@ class TestTUIInteractionE2E:
             session = session_manager.create_session(
                 goal=f"Concurrent session {i}",
                 session_type="chat",
-                participant_ids=["user", "agent"]
+                participant_ids=["user", "agent"],
             )
             session_manager.save_session(session)
             sessions.append(session)
@@ -279,7 +279,7 @@ class TestTUIDisplayE2E:
             session = session_manager.create_session(
                 goal=f"Display test session {i}",
                 session_type="chat",
-                participant_ids=["user", "agent"]
+                participant_ids=["user", "agent"],
             )
             session_manager.save_session(session)
 
@@ -289,12 +289,16 @@ class TestTUIDisplayE2E:
         # Simulate TUI display logic
         display_data = []
         for session in all_sessions:
-            display_data.append({
-                "id": session.session_id[:8],  # Shortened for display
-                "goal": session.goal[:30],     # Truncated for display
-                "status": session.status.value if hasattr(session.status, 'value') else str(session.status),
-                "created": session.start_time.strftime("%Y-%m-%d %H:%M")
-            })
+            display_data.append(
+                {
+                    "id": session.session_id[:8],  # Shortened for display
+                    "goal": session.goal[:30],  # Truncated for display
+                    "status": session.status.value
+                    if hasattr(session.status, "value")
+                    else str(session.status),
+                    "created": session.start_time.strftime("%Y-%m-%d %H:%M"),
+                }
+            )
 
         assert len(display_data) >= 5
         for item in display_data:
@@ -307,7 +311,7 @@ class TestTUIDisplayE2E:
         session = session_manager.create_session(
             goal="Detail display test",
             session_type="workflow",
-            participant_ids=["user", "agent", "observer"]
+            participant_ids=["user", "agent", "observer"],
         )
         session_manager.save_session(session)
 
@@ -320,9 +324,11 @@ class TestTUIDisplayE2E:
             "Goal": loaded.goal,
             "Type": loaded.session_type,
             "Participants": ", ".join(loaded.participant_ids),
-            "Status": loaded.status.value if hasattr(loaded.status, 'value') else str(loaded.status),
+            "Status": loaded.status.value
+            if hasattr(loaded.status, "value")
+            else str(loaded.status),
             "Created": loaded.start_time.isoformat(),
-            "Updated": loaded.end_time.isoformat() if loaded.end_time else "N/A"
+            "Updated": loaded.end_time.isoformat() if loaded.end_time else "N/A",
         }
 
         assert detail_view["Goal"] == "Detail display test"

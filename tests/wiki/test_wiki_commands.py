@@ -1,11 +1,10 @@
-import os
-import asyncio
-import pytest
 from pathlib import Path
-from textual.pilot import Pilot
 
-from daip_live.tui import DAIP_TUI
+import pytest
+
 from daip_live.container import Container
+from daip_live.tui import DAIP_TUI
+
 
 @pytest.mark.asyncio
 async def test_wiki_commands_new_list_open_search(tmp_path: Path, monkeypatch):
@@ -14,7 +13,8 @@ async def test_wiki_commands_new_list_open_search(tmp_path: Path, monkeypatch):
     (tmp_path / "wiki").mkdir()
     (tmp_path / "roles").mkdir()
     (tmp_path / "knowledge").mkdir()
-    (tmp_path / "config.yaml").write_text("""
+    (tmp_path / "config.yaml").write_text(
+        """
 llm_provider:
   default_model: ollama/qwen:0.5b
   embedding_model: mock-embedding
@@ -26,12 +26,15 @@ database:
   path: ":memory:"
 wiki:
   pages_directory: wiki
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     container = Container()
     # 源码权威: Container 无 config 属性，用 config_manager provider 覆盖
     from daip_live.config import ConfigManager
-    container.config_manager.override(ConfigManager('config.yaml'))
+
+    container.config_manager.override(ConfigManager("config.yaml"))
 
     app = DAIP_TUI(
         executor=container.agent_executor(),

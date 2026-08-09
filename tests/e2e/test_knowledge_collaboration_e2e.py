@@ -4,17 +4,17 @@ Tests the complete workflow of knowledge management including
 document addition, search, retrieval, and wiki-style collaboration.
 """
 
-import pytest
 import asyncio
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime, timezone
+from unittest.mock import AsyncMock, Mock
 
-from daip_live.knowledge.manager import KnowledgeManager
-from daip_live.persistence.database import DatabaseManager
-from daip_live.model_provider.provider import LiteLLMProvider
+import pytest
+
 from daip_live.core.models import KnowledgeBaseConfig
+from daip_live.knowledge.manager import KnowledgeManager
+from daip_live.model_provider.provider import LiteLLMProvider
+from daip_live.persistence.database import DatabaseManager
 
 
 @pytest.mark.e2e
@@ -40,6 +40,7 @@ class TestKnowledgeBaseE2E:
         temp_dir = tempfile.mkdtemp(prefix="knowledge_")
         yield temp_dir
         import shutil
+
         shutil.rmtree(temp_dir, ignore_errors=True)
 
     @pytest.fixture
@@ -47,21 +48,18 @@ class TestKnowledgeBaseE2E:
         """Create mock model provider."""
         provider = Mock(spec=LiteLLMProvider)
         # Mock embedding generation
-        provider.embed = AsyncMock(return_value=[0.1, 0.2, 0.3, 0.4, 0.5] * 100)  # 500-dimensional vector
+        provider.embed = AsyncMock(
+            return_value=[0.1, 0.2, 0.3, 0.4, 0.5] * 100
+        )  # 500-dimensional vector
         provider.generate = AsyncMock(return_value="Summary of document content")
         return provider
 
     @pytest.fixture
     def knowledge_manager(self, temp_db, mock_model_provider, knowledge_dir):
         """Create knowledge manager with test dependencies."""
-        config = KnowledgeBaseConfig(
-            directory=knowledge_dir,
-            embedding_dimension=500
-        )
+        config = KnowledgeBaseConfig(directory=knowledge_dir, embedding_dimension=500)
         return KnowledgeManager(
-            db_manager=temp_db,
-            model_provider=mock_model_provider,
-            config=config
+            db_manager=temp_db, model_provider=mock_model_provider, config=config
         )
 
     def test_knowledge_initialization_e2e(self, knowledge_manager):
@@ -105,15 +103,15 @@ building systems that learn from data.
         # Mock search results
         mock_results = [
             {
-                "content": "Machine learning algorithms include neural networks and decision trees",
+                "content": "Machine learning algorithms include neural networks and decision trees",  # noqa: E501
                 "metadata": {"source": "ml_basics.md", "category": "ml"},
-                "score": 0.92
+                "score": 0.92,
             },
             {
                 "content": "Deep learning uses multi-layered neural networks",
                 "metadata": {"source": "deep_learning.md", "category": "dl"},
-                "score": 0.87
-            }
+                "score": 0.87,
+            },
         ]
 
         knowledge_manager.search = AsyncMock(return_value=mock_results)
@@ -137,7 +135,9 @@ building systems that learn from data.
         assert initial_sync["added"] == 1
 
         # Update document
-        doc_path.write_text("# Updated Content\n\nThis is the updated content with new information.")
+        doc_path.write_text(
+            "# Updated Content\n\nThis is the updated content with new information."
+        )
 
         # 再次同步，应检测到更新
         updated_sync = asyncio.run(knowledge_manager.sync_knowledge_base())
@@ -192,14 +192,10 @@ building systems that learn from data.
         categorized_results = {
             "ml": [
                 {"content": "Machine learning basics", "score": 0.91},
-                {"content": "Advanced ML techniques", "score": 0.88}
+                {"content": "Advanced ML techniques", "score": 0.88},
             ],
-            "dl": [
-                {"content": "Deep learning fundamentals", "score": 0.93}
-            ],
-            "nlp": [
-                {"content": "Natural language processing", "score": 0.89}
-            ]
+            "dl": [{"content": "Deep learning fundamentals", "score": 0.93}],
+            "nlp": [{"content": "Natural language processing", "score": 0.89}],
         }
 
         # Test category filtering
@@ -219,13 +215,13 @@ building systems that learn from data.
             "machine learning algorithms",
             "ML algorithm types",
             "machine learning methods",
-            original_query
+            original_query,
         ]
 
         # Mock search results
-        knowledge_manager.search = AsyncMock(return_value=[
-            {"content": "List of ML algorithms", "score": 0.90}
-        ])
+        knowledge_manager.search = AsyncMock(
+            return_value=[{"content": "List of ML algorithms", "score": 0.90}]
+        )
 
         # Search with expanded queries
         all_results = []
@@ -242,7 +238,7 @@ building systems that learn from data.
         retrieved_docs = [
             "Machine learning is a subset of AI that learns from data.",
             "Deep learning uses neural networks with multiple layers.",
-            "Reinforcement learning learns through trial and error."
+            "Reinforcement learning learns through trial and error.",
         ]
 
         # Mock summary generation
@@ -291,7 +287,7 @@ class TestWikiCollaborationE2E:
                 "title": title,
                 "content": content or "",
                 "version": 1,
-                "author": author
+                "author": author,
             }
             return f"page_{len(pages)}"
 
@@ -306,19 +302,25 @@ class TestWikiCollaborationE2E:
             if not pages:
                 return {"title": "Test Page", "content": "# Test Content", "version": 1}
             page = next(iter(pages.values()))
-            return {"title": page["title"], "content": page["content"], "version": page["version"]}
+            return {
+                "title": page["title"],
+                "content": page["content"],
+                "version": page["version"],
+            }
 
         wiki = Mock()
         wiki.create_page = Mock(side_effect=_create_page)
         wiki.update_page = Mock(side_effect=_update_page)
         wiki.get_page = Mock(side_effect=_get_page)
-        wiki.list_pages = Mock(return_value=[
-            {"title": "Page 1", "modified": "2024-01-01"},
-            {"title": "Page 2", "modified": "2024-01-02"}
-        ])
-        wiki.search_pages = Mock(return_value=[
-            {"title": "Search Result", "excerpt": "Matching content..."}
-        ])
+        wiki.list_pages = Mock(
+            return_value=[
+                {"title": "Page 1", "modified": "2024-01-01"},
+                {"title": "Page 2", "modified": "2024-01-02"},
+            ]
+        )
+        wiki.search_pages = Mock(
+            return_value=[{"title": "Search Result", "excerpt": "Matching content..."}]
+        )
         return wiki
 
     def test_wiki_page_creation_workflow_e2e(self, wiki_manager):
@@ -328,7 +330,7 @@ class TestWikiCollaborationE2E:
             title="Machine Learning Guide",
             content="# Machine Learning Guide\n\nComplete guide to ML...",
             author="user_1",
-            tags=["ml", "guide", "beginner"]
+            tags=["ml", "guide", "beginner"],
         )
 
         assert page_id is not None
@@ -340,7 +342,7 @@ class TestWikiCollaborationE2E:
             page_id="page_001",
             content="# Updated Guide\n\nNew content added...",
             author="user_2",
-            comment="Added advanced techniques section"
+            comment="Added advanced techniques section",
         )
 
         assert success is True
@@ -367,7 +369,7 @@ class TestWikiCollaborationE2E:
         page_id = wiki_manager.create_page(
             title="Collaborative Document",
             content="Initial content by user 1",
-            author="user_1"
+            author="user_1",
         )
 
         # User 2 adds content
@@ -375,7 +377,7 @@ class TestWikiCollaborationE2E:
             page_id=page_id,
             content="Initial content by user 1\n\nAdded by user 2",
             author="user_2",
-            comment="Added section"
+            comment="Added section",
         )
 
         # User 1 revises
@@ -383,7 +385,7 @@ class TestWikiCollaborationE2E:
             page_id=page_id,
             content="Initial content by user 1 (revised)\n\nAdded by user 2",
             author="user_1",
-            comment="Clarified initial section"
+            comment="Clarified initial section",
         )
 
         # Verify final state

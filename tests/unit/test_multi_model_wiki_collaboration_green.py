@@ -21,6 +21,7 @@ TDD GREEN阶段测试 - 多模型Wiki协作功能（与真实生产契约对齐�
 - 章节结构: # {title} / ## 协作主题 / 七个 ## 章节（仅非空）/ ## 协作说明
 - EnhancedWikiManager 硬性拒绝 Mock 依赖（isinstance 校验 -> ValueError）
 """
+
 import asyncio
 import textwrap
 from unittest.mock import Mock
@@ -59,12 +60,14 @@ class FakeModelProvider:
     async def generate(
         self, prompt, model=None, temperature=None, max_tokens=None, **kwargs
     ):
-        self.calls.append({
-            "prompt": prompt,
-            "model": model,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-        })
+        self.calls.append(
+            {
+                "prompt": prompt,
+                "model": model,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            }
+        )
         content = self.responses.get(model, self.default_content)
         return content, {"usage": {"total_tokens": len(content)}}
 
@@ -76,15 +79,15 @@ def roles_dir(tmp_path):
     dir_path.mkdir()
     (dir_path / "domain_expert.yaml").write_text(ROLE_YAML, encoding="utf-8")
     (dir_path / "researcher.yaml").write_text(
-        ROLE_YAML
-        .replace("llama3:instruct", "mistral:latest")
-        .replace("领域专家", "研究员"),
+        ROLE_YAML.replace("llama3:instruct", "mistral:latest").replace(
+            "领域专家", "研究员"
+        ),
         encoding="utf-8",
     )
     (dir_path / "editor.yaml").write_text(
-        ROLE_YAML
-        .replace("llama3:instruct", "gemma:latest")
-        .replace("领域专家", "编辑"),
+        ROLE_YAML.replace("llama3:instruct", "gemma:latest").replace(
+            "领域专家", "编辑"
+        ),
         encoding="utf-8",
     )
     return dir_path

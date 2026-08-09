@@ -4,19 +4,24 @@ TDD GREEN阶段 - 真实内容生成测试
 目标：实现真实的Wiki协同编辑内容生成，不使用模拟
 """
 
-import pytest
 import asyncio
-import tempfile
-import shutil
-from pathlib import Path
-import sys
 import os
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+
+import pytest
 
 # 添加项目路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 
-pytestmark = pytest.mark.skip(reason="旧spec：依赖根目录 config.yaml 的 model_provider 配置/自定义 provider；源码 EnhancedWikiManager 明确拒绝非真实 LiteLLMProvider（collaborative_wiki.py:385）；当前源码为准")
+pytestmark = pytest.mark.skip(
+    reason="旧spec：依赖根目录 config.yaml 的 model_provider 配置/自定义 provider；源码 EnhancedWikiManager 明确拒绝非真实 LiteLLMProvider（collaborative_wiki.py:385）；当前源码为准"  # noqa: E501
+)
+
+
 class TestRealContentGenerationGREEN:
     """GREEN阶段：实现真实的Wiki协同编辑内容生成"""
 
@@ -30,16 +35,18 @@ class TestRealContentGenerationGREEN:
     def test_enhanced_wiki_manager_real_content_generation(self, temp_wiki_dir):
         """GREEN测试：实现真实的Enhanced Wiki Manager内容生成"""
         from daip_live.wiki.collaborative_wiki import EnhancedWikiManager
-        from daip_live.wiki.manager import WikiManager
 
         # 创建真实的模型提供者（使用实际配置或最小配置）
         class RealModelProvider:
             """真实的模型提供者，使用本地Ollama或远程API"""
+
             def __init__(self):
                 self.call_count = 0
                 self.generated_content = []
 
-            async def generate(self, prompt, model=None, temperature=0.7, max_tokens=1000):
+            async def generate(
+                self, prompt, model=None, temperature=0.7, max_tokens=1000
+            ):
                 self.call_count += 1
 
                 # 基于提示生成真实内容
@@ -84,7 +91,7 @@ class TestRealContentGenerationGREEN:
 当前AI技术正处于快速发展期，在多个领域展现出巨大潜力。"""
 
                 else:
-                    content = """这是一个重要的话题，涉及复杂的技术和实际应用。需要综合考虑技术实现、市场需求、伦理规范等多个方面，才能全面理解和应用相关技术。"""
+                    content = """这是一个重要的话题，涉及复杂的技术和实际应用。需要综合考虑技术实现、市场需求、伦理规范等多个方面，才能全面理解和应用相关技术。"""  # noqa: E501
 
                 self.generated_content.append(content)
                 return content, {"model": model or "default", "tokens": len(content)}
@@ -96,30 +103,32 @@ class TestRealContentGenerationGREEN:
                     "domain_expert": {
                         "model_name": "llama3.1:70b",
                         "temperature": 0.7,
-                        "max_tokens": 1500
+                        "max_tokens": 1500,
                     },
                     "researcher": {
                         "model_name": "qwen2.5:32b",
                         "temperature": 0.5,
-                        "max_tokens": 1200
+                        "max_tokens": 1200,
                     },
                     "editor": {
                         "model_name": "claude-3-haiku",
                         "temperature": 0.3,
-                        "max_tokens": 1000
+                        "max_tokens": 1000,
                     },
                     "critic": {
                         "model_name": "gpt-4o-mini",
                         "temperature": 0.8,
-                        "max_tokens": 800
-                    }
+                        "max_tokens": 800,
+                    },
                 }
 
             def get_role_model_mapping(self, role_name, use_debate_config=False):
                 if role_name in self.role_mappings:
                     config = self.role_mappings[role_name]
-                    mock_config = type('MockConfig', (), config)()
-                    mock_mapping = type('MockMapping', (), {'role_model_config': mock_config})()
+                    mock_config = type("MockConfig", (), config)()
+                    mock_mapping = type(
+                        "MockMapping", (), {"role_model_config": mock_config}
+                    )()
                     return mock_mapping
                 return None
 
@@ -131,20 +140,22 @@ class TestRealContentGenerationGREEN:
             enhanced_wiki = EnhancedWikiManager(
                 wiki_root=temp_wiki_dir,
                 role_model_manager=RealRoleModelManager(),
-                model_provider=RealModelProvider()
+                model_provider=RealModelProvider(),
             )
 
             # 验证协作引擎可用
             assert enhanced_wiki.simple_collaboration_engine is not None
 
             # 执行真实的协作创建
-            wiki_page = asyncio.run(enhanced_wiki.create_collaborative_wiki(
-                title="人工智能技术发展",
-                topic="人工智能的技术原理和应用前景",
-                roles=["domain_expert", "researcher", "editor"],
-                rounds=1,
-                show_progress=False
-            ))
+            wiki_page = asyncio.run(
+                enhanced_wiki.create_collaborative_wiki(
+                    title="人工智能技术发展",
+                    topic="人工智能的技术原理和应用前景",
+                    roles=["domain_expert", "researcher", "editor"],
+                    rounds=1,
+                    show_progress=False,
+                )
+            )
 
             # 验证真实结果
             assert wiki_page is not None
@@ -153,7 +164,7 @@ class TestRealContentGenerationGREEN:
 
             # 验证文件真实创建
             assert wiki_page.file_path.exists()
-            file_content = wiki_page.file_path.read_text(encoding='utf-8')
+            file_content = wiki_page.file_path.read_text(encoding="utf-8")
             assert "人工智能技术发展" in file_content
 
             # 验证内容包含不同角色的贡献
@@ -163,12 +174,6 @@ class TestRealContentGenerationGREEN:
 
             # 验证结构化内容
             assert "##" in file_content  # 应该有章节标题
-
-            print(f"✅ 真实协作内容生成成功")
-            print(f"  标题: {wiki_page.title}")
-            print(f"  内容长度: {len(wiki_page.content)} 字符")
-            print(f"  章节数量: {len(file_content.split('##'))}")
-            print(f"  文件大小: {len(file_content)} 字节")
 
             return True
 
@@ -180,12 +185,21 @@ class TestRealContentGenerationGREEN:
     @pytest.mark.asyncio
     async def test_role_intelligence_selector_real_usage(self):
         """GREEN测试：验证角色智能选择器的真实使用"""
-        from daip_live.intent_recognition.role_intelligence_selector import RoleIntelligenceSelector
+        from daip_live.intent_recognition.role_intelligence_selector import (
+            RoleIntelligenceSelector,
+        )
 
         # 模拟角色管理器
         class MockRoleManager:
             def list_roles(self):
-                return ["domain_expert", "researcher", "editor", "critic", "analyst", "teacher"]
+                return [
+                    "domain_expert",
+                    "researcher",
+                    "editor",
+                    "critic",
+                    "analyst",
+                    "teacher",
+                ]
 
         selector = RoleIntelligenceSelector(MockRoleManager())
 
@@ -194,7 +208,7 @@ class TestRealContentGenerationGREEN:
             ("深度学习神经网络", ["domain_expert", "researcher"]),
             ("AI创业市场分析", ["analyst", "researcher"]),
             ("Python机器学习教程", ["teacher", "domain_expert"]),
-            ("技术方案评审", ["critic", "domain_expert"])
+            ("技术方案评审", ["critic", "domain_expert"]),
         ]
 
         for topic, expected_roles in test_cases:
@@ -208,12 +222,6 @@ class TestRealContentGenerationGREEN:
             role_intersection = set(selected_roles) & set(expected_roles)
             assert len(role_intersection) > 0, f"主题'{topic}'应该包含相关角色"
 
-            print(f"  主题: {topic}")
-            print(f"  选择角色: {selected_roles}")
-            print(f"  期望角色: {expected_roles}")
-            print(f"  匹配角色: {list(role_intersection)}")
-
-        print("✅ 角色智能选择器真实使用验证通过")
         return True
 
     def test_wiki_content_structure_and_quality(self, temp_wiki_dir):
@@ -222,10 +230,13 @@ class TestRealContentGenerationGREEN:
 
         # 使用简化的真实内容生成
         class SimpleRealProvider:
-            async def generate(self, prompt, model=None, temperature=0.7, max_tokens=1000):
+            async def generate(
+                self, prompt, model=None, temperature=0.7, max_tokens=1000
+            ):
                 # 基于提示生成结构化内容
                 if "区块链" in prompt:
-                    return """区块链技术具有以下特点：
+                    return (
+                        """区块链技术具有以下特点：
 
 ## 核心技术
 1. 分布式账本技术
@@ -245,10 +256,13 @@ class TestRealContentGenerationGREEN:
 - 监管合规
 - 能源优化
 
-这些特性使区块链在多个领域展现出应用价值。""", {}
+这些特性使区块链在多个领域展现出应用价值。""",
+                        {},
+                    )
 
                 else:
-                    return """这是一个重要技术话题，需要从多个角度进行分析和研究。
+                    return (
+                        """这是一个重要技术话题，需要从多个角度进行分析和研究。
 
 ## 技术特点
 涉及复杂的技术架构和实现细节。
@@ -257,29 +271,35 @@ class TestRealContentGenerationGREEN:
 在实际应用中具有广阔的发展空间。
 
 ## 风险挑战
-需要综合考虑技术、市场、法规等多方面因素。""", {}
+需要综合考虑技术、市场、法规等多方面因素。""",
+                        {},
+                    )
 
         class SimpleRoleManager:
             def get_role_model_mapping(self, role_name, use_debate_config=False):
                 config = {"model_name": f"simple_{role_name}_model", "temperature": 0.7}
-                mock_config = type('MockConfig', (), config)()
-                mock_mapping = type('MockMapping', (), {'role_model_config': mock_config})()
+                mock_config = type("MockConfig", (), config)()
+                mock_mapping = type(
+                    "MockMapping", (), {"role_model_config": mock_config}
+                )()
                 return mock_mapping
 
         try:
             enhanced_wiki = EnhancedWikiManager(
                 wiki_root=temp_wiki_dir,
                 role_model_manager=SimpleRoleManager(),
-                model_provider=SimpleRealProvider()
+                model_provider=SimpleRealProvider(),
             )
 
             # 生成区块链相关内容
-            wiki_page = asyncio.run(enhanced_wiki.create_collaborative_wiki(
-                title="区块链技术原理",
-                topic="区块链的核心技术和应用场景",
-                roles=["domain_expert", "researcher"],
-                rounds=1
-            ))
+            wiki_page = asyncio.run(
+                enhanced_wiki.create_collaborative_wiki(
+                    title="区块链技术原理",
+                    topic="区块链的核心技术和应用场景",
+                    roles=["domain_expert", "researcher"],
+                    rounds=1,
+                )
+            )
 
             # 验证内容结构
             content = wiki_page.content
@@ -288,7 +308,7 @@ class TestRealContentGenerationGREEN:
             assert "核心技术" in content or "应用领域" in content
 
             # 验证内容质量
-            lines = content.split('\n')
+            lines = content.split("\n")
             non_empty_lines = [line.strip() for line in lines if line.strip()]
             assert len(non_empty_lines) > 10  # 应该有足够的内容
 
@@ -296,10 +316,6 @@ class TestRealContentGenerationGREEN:
             assert wiki_page.file_path.exists()
             file_size = wiki_page.file_path.stat().st_size
             assert file_size > 500  # 文件应该有合理大小
-
-            print(f"✅ Wiki内容结构和质量验证通过")
-            print(f"  内容行数: {len(non_empty_lines)}")
-            print(f"  文件大小: {file_size} 字节")
 
             return True
 

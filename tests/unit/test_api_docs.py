@@ -5,17 +5,18 @@ and endpoint documentation completeness.
 """
 
 import json
-import pytest
 from pathlib import Path
+
+import pytest
+
 from daip_live.p7_gui.api_docs import (
     API_TAGS,
-    OPENAPI_SPEC,
-    SessionCreateRequest,
-    HealthCheckResponse,
-    RoleInfoResponse,
-    KnowledgeStatusResponse,
     ErrorResponse,
-    get_openapi_spec
+    HealthCheckResponse,
+    KnowledgeStatusResponse,
+    RoleInfoResponse,
+    SessionCreateRequest,
+    get_openapi_spec,
 )
 
 
@@ -107,9 +108,7 @@ class TestRequestSchemas:
     def test_session_create_request_schema(self):
         """SessionCreateRequest should be valid Pydantic model."""
         request = SessionCreateRequest(
-            goal="Test goal",
-            session_type="workflow",
-            participant_ids=["agent", "user"]
+            goal="Test goal", session_type="workflow", participant_ids=["agent", "user"]
         )
         assert request.goal == "Test goal"
         assert request.session_type == "workflow"
@@ -145,7 +144,7 @@ class TestResponseSchemas:
             timestamp=datetime.now(timezone.utc),
             version="1.0.0",
             uptime_seconds=100.0,
-            components={"database": "healthy"}
+            components={"database": "healthy"},
         )
         assert response.status == "healthy"
         assert response.version == "1.0.0"
@@ -158,7 +157,7 @@ class TestResponseSchemas:
             description="Data analyst role",
             system_prompt="You are an analyst",
             model="gpt-4",
-            capabilities=["analysis", "reporting"]
+            capabilities=["analysis", "reporting"],
         )
         assert response.name == "analyst"
         assert len(response.capabilities) == 2
@@ -172,7 +171,7 @@ class TestResponseSchemas:
             last_sync=datetime.now(timezone.utc),
             total_documents=100,
             index_size=1000,
-            embedding_dimension=1536
+            embedding_dimension=1536,
         )
         assert response.status == "healthy"
         assert response.total_documents == 100
@@ -186,7 +185,7 @@ class TestResponseSchemas:
             error="NOT_FOUND",
             message="Resource not found",
             detail="Session ID does not exist",
-            timestamp=datetime.now(timezone.utc)
+            timestamp=datetime.now(timezone.utc),
         )
         assert response.error == "NOT_FOUND"
         assert response.message == "Resource not found"
@@ -253,7 +252,7 @@ class TestOpenAPIFile:
     def test_openapi_file_is_valid_json(self):
         """openapi.json should be valid JSON."""
         path = Path(__file__).parent.parent.parent / "openapi.json"
-        with open(path, "r") as f:
+        with open(path) as f:
             data = json.load(f)
         assert isinstance(data, dict)
         assert "openapi" in data
@@ -261,7 +260,7 @@ class TestOpenAPIFile:
     def test_openapi_file_version(self):
         """openapi.json should have version 3.1.0."""
         path = Path(__file__).parent.parent.parent / "openapi.json"
-        with open(path, "r") as f:
+        with open(path) as f:
             data = json.load(f)
         assert data["openapi"] == "3.1.0"
 

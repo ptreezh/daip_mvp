@@ -10,6 +10,7 @@ def test_decorator_creates_pydantic_model():
     Tests that the @tool decorator correctly inspects a function signature
     and dynamically creates a Pydantic model for its arguments.
     """
+
     @tool
     def add(a: int, b: int = 5) -> int:
         """Adds two numbers together."""
@@ -36,10 +37,12 @@ def test_decorator_creates_pydantic_model():
     assert add.__name__ == "add"
     assert add.__doc__ == "Adds two numbers together."
 
+
 def test_decorator_handles_no_arguments():
     """
     Tests that the decorator works correctly on a function with no arguments.
     """
+
     @tool
     def get_time() -> str:
         """Returns the current time."""

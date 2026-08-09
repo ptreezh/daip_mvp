@@ -3,13 +3,16 @@
 遵循TDD原则：先写测试，再实现功能
 """
 
-import pytest
-import tempfile
 import os
-import asyncio
-from pathlib import Path
-from unittest.mock import AsyncMock, patch, mock_open
-from daip_live.scaffolding.file_system_adapter import FileSystemAdapter, FileOperationResult
+import tempfile
+from unittest.mock import patch
+
+import pytest
+
+from daip_live.scaffolding.file_system_adapter import (
+    FileOperationResult,
+    FileSystemAdapter,
+)
 from daip_live.scaffolding.models import FileOperationError
 
 
@@ -21,7 +24,7 @@ class TestFileOperationResult:
         # TC-1.4.1: 成功结果测试
         result = FileOperationResult(success=True, data="test content")
 
-        assert result.success == True
+        assert result.success
         assert result.data == "test content"
         assert result.error is None
         assert result.error_code is None
@@ -32,7 +35,7 @@ class TestFileOperationResult:
         error = FileOperationError("File not found", "FILE_NOT_FOUND")
         result = FileOperationResult(success=False, error=error)
 
-        assert result.success == False
+        assert not result.success
         assert result.error.message == "File not found"
         assert result.error.error_code == "FILE_NOT_FOUND"
         assert result.data is None
@@ -43,18 +46,17 @@ class TestFileOperationResult:
         result_success = FileOperationResult(success=True)
         result_failure = FileOperationResult(success=False)
 
-        assert result_success.is_success == True
-        assert result_success.is_failure == False
-        assert result_failure.is_success == False
-        assert result_failure.is_failure == True
+        assert result_success.is_success
+        assert not result_success.is_failure
+        assert not result_failure.is_success
+        assert result_failure.is_failure
 
     def test_file_operation_result_str_representation(self):
         """测试字符串表示"""
         # TC-1.4.4: 字符串表示测试
         success_result = FileOperationResult(success=True, data="content")
         failure_result = FileOperationResult(
-            success=False,
-            error=FileOperationError("Test error", "TEST_ERROR")
+            success=False, error=FileOperationError("Test error", "TEST_ERROR")
         )
 
         success_str = str(success_result)
@@ -81,7 +83,7 @@ class TestFileSystemAdapter:
         temp_dir = tempfile.mkdtemp()
         temp_file_path = os.path.join(temp_dir, f"test_file{suffix}")
 
-        with open(temp_file_path, 'w', encoding='utf-8') as f:
+        with open(temp_file_path, "w", encoding="utf-8") as f:
             f.write(content)
 
         def cleanup():
@@ -104,7 +106,7 @@ class TestFileSystemAdapter:
         try:
             result = await self.adapter.read_file(temp_file_path)
 
-            assert result.success == True
+            assert result.success
             assert result.data == test_content
             assert result.error is None
 
@@ -119,7 +121,7 @@ class TestFileSystemAdapter:
 
         result = await self.adapter.read_file(nonexistent_path)
 
-        assert result.success == False
+        assert not result.success
         assert result.error is not None
         assert "not found" in result.error.message.lower()
         assert result.error.error_code == "FILE_NOT_FOUND"
@@ -129,12 +131,14 @@ class TestFileSystemAdapter:
         """测试读取权限被拒绝的文件"""
         # TC-1.4.7: 权限拒绝测试
         # 使用mock来模拟权限错误
-        with patch('pathlib.Path.exists', return_value=True), \
-             patch('pathlib.Path.is_file', return_value=True), \
-             patch('aiofiles.open', side_effect=PermissionError("Permission denied")):
+        with (
+            patch("pathlib.Path.exists", return_value=True),
+            patch("pathlib.Path.is_file", return_value=True),
+            patch("aiofiles.open", side_effect=PermissionError("Permission denied")),
+        ):
             result = await self.adapter.read_file("some_path.txt")
 
-            assert result.success == False
+            assert not result.success
             assert "permission" in result.error.message.lower()
             assert result.error.error_code == "PERMISSION_DENIED"
 
@@ -149,11 +153,11 @@ class TestFileSystemAdapter:
         try:
             result = await self.adapter.write_file(temp_file_path, test_content)
 
-            assert result.success == True
+            assert result.success
             assert result.data is not None  # 写入的字节数
 
             # 验证文件确实被写入
-            with open(temp_file_path, 'r', encoding='utf-8') as f:
+            with open(temp_file_path, encoding="utf-8") as f:
                 assert f.read() == test_content
 
         finally:
@@ -173,15 +177,16 @@ class TestFileSystemAdapter:
         try:
             result = await self.adapter.write_file(temp_file_path, test_content)
 
-            assert result.success == True
+            assert result.success
             assert os.path.exists(temp_file_path)
 
-            with open(temp_file_path, 'r', encoding='utf-8') as f:
+            with open(temp_file_path, encoding="utf-8") as f:
                 assert f.read() == test_content
 
         finally:
             # 清理嵌套目录
             import shutil
+
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir)
 
@@ -189,10 +194,10 @@ class TestFileSystemAdapter:
     async def test_write_file_permission_denied(self):
         """测试写入权限被拒绝"""
         # TC-1.4.10: 写入权限测试
-        with patch('aiofiles.open', side_effect=PermissionError("Permission denied")):
+        with patch("aiofiles.open", side_effect=PermissionError("Permission denied")):
             result = await self.adapter.write_file("protected_path.txt", "content")
 
-            assert result.success == False
+            assert not result.success
             assert result.error.error_code == "PERMISSION_DENIED"
 
     @pytest.mark.asyncio
@@ -205,7 +210,7 @@ class TestFileSystemAdapter:
         try:
             result = await self.adapter.create_directory(new_dir_path)
 
-            assert result.success == True
+            assert result.success
             assert os.path.exists(new_dir_path)
             assert os.path.isdir(new_dir_path)
 
@@ -224,12 +229,13 @@ class TestFileSystemAdapter:
         try:
             result = await self.adapter.create_directory(nested_dir_path)
 
-            assert result.success == True
+            assert result.success
             assert os.path.exists(nested_dir_path)
             assert os.path.isdir(nested_dir_path)
 
         finally:
             import shutil
+
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir)
 
@@ -244,7 +250,7 @@ class TestFileSystemAdapter:
             result = await self.adapter.create_directory(temp_dir)
 
             # 应该成功，因为目录已存在是可接受的状态
-            assert result.success == True
+            assert result.success
 
         finally:
             os.rmdir(temp_dir)
@@ -253,10 +259,12 @@ class TestFileSystemAdapter:
     async def test_create_directory_permission_denied(self):
         """测试创建目录权限被拒绝"""
         # TC-1.4.14: 目录创建权限测试
-        with patch('pathlib.Path.mkdir', side_effect=PermissionError("Permission denied")):
+        with patch(
+            "pathlib.Path.mkdir", side_effect=PermissionError("Permission denied")
+        ):
             result = await self.adapter.create_directory("/protected/path")
 
-            assert result.success == False
+            assert not result.success
             assert result.error.error_code == "PERMISSION_DENIED"
 
     @pytest.mark.asyncio
@@ -268,8 +276,8 @@ class TestFileSystemAdapter:
         try:
             result = await self.adapter.exists(temp_file_path)
 
-            assert result.success == True
-            assert result.data == True
+            assert result.success
+            assert result.data
 
         finally:
             cleanup()
@@ -282,8 +290,8 @@ class TestFileSystemAdapter:
 
         result = await self.adapter.exists(nonexistent_path)
 
-        assert result.success == True
-        assert result.data == False
+        assert result.success
+        assert not result.data
 
     @pytest.mark.asyncio
     async def test_is_file_true(self):
@@ -294,8 +302,8 @@ class TestFileSystemAdapter:
         try:
             result = await self.adapter.is_file(temp_file_path)
 
-            assert result.success == True
-            assert result.data == True
+            assert result.success
+            assert result.data
 
         finally:
             cleanup()
@@ -309,8 +317,8 @@ class TestFileSystemAdapter:
         try:
             result = await self.adapter.is_file(temp_dir)
 
-            assert result.success == True
-            assert result.data == False
+            assert result.success
+            assert not result.data
 
         finally:
             os.rmdir(temp_dir)
@@ -325,13 +333,13 @@ class TestFileSystemAdapter:
         try:
             result = await self.adapter.get_file_info(temp_file_path)
 
-            assert result.success == True
+            assert result.success
             info = result.data
-            assert info['size'] > 0
-            assert info['is_file'] == True
-            assert info['is_directory'] == False
-            assert 'created_at' in info
-            assert 'modified_at' in info
+            assert info["size"] > 0
+            assert info["is_file"]
+            assert not info["is_directory"]
+            assert "created_at" in info
+            assert "modified_at" in info
 
         finally:
             cleanup()
@@ -344,7 +352,7 @@ class TestFileSystemAdapter:
 
         result = await self.adapter.get_file_info(nonexistent_path)
 
-        assert result.success == False
+        assert not result.success
         assert result.error.error_code == "FILE_NOT_FOUND"
 
     @pytest.mark.asyncio
@@ -360,24 +368,25 @@ class TestFileSystemAdapter:
             if filename == "subdir":
                 os.mkdir(path)
             else:
-                with open(path, 'w') as f:
+                with open(path, "w") as f:
                     f.write(f"Content of {filename}")
 
         try:
             result = await self.adapter.list_directory(temp_dir)
 
-            assert result.success == True
+            assert result.success
             items = result.data
             assert len(items) >= 3
 
             # 检查是否包含我们创建的文件
-            item_names = [item['name'] for item in items]
+            item_names = [item["name"] for item in items]
             assert "file1.txt" in item_names
             assert "file2.md" in item_names
             assert "subdir" in item_names
 
         finally:
             import shutil
+
             shutil.rmtree(temp_dir)
 
     @pytest.mark.asyncio
@@ -388,7 +397,7 @@ class TestFileSystemAdapter:
 
         result = await self.adapter.list_directory(nonexistent_dir)
 
-        assert result.success == False
+        assert not result.success
         assert result.error.error_code == "FILE_NOT_FOUND"
 
     @pytest.mark.asyncio
@@ -403,7 +412,7 @@ class TestFileSystemAdapter:
 
             result = await self.adapter.delete_file(temp_file_path)
 
-            assert result.success == True
+            assert result.success
             assert not os.path.exists(temp_file_path)
         finally:
             # 只有在文件仍然存在时才清理
@@ -418,7 +427,7 @@ class TestFileSystemAdapter:
 
         result = await self.adapter.delete_file(nonexistent_path)
 
-        assert result.success == False
+        assert not result.success
         assert result.error.error_code == "FILE_NOT_FOUND"
 
     @pytest.mark.asyncio
@@ -433,16 +442,17 @@ class TestFileSystemAdapter:
         try:
             result = await self.adapter.copy_file(temp_file_path, dest_path)
 
-            assert result.success == True
+            assert result.success
             assert os.path.exists(dest_path)
 
             # 验证内容是否正确
-            with open(dest_path, 'r', encoding='utf-8') as f:
+            with open(dest_path, encoding="utf-8") as f:
                 assert f.read() == test_content
 
         finally:
             cleanup()
             import shutil
+
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir)
 
@@ -455,7 +465,7 @@ class TestFileSystemAdapter:
 
         result = await self.adapter.copy_file(nonexistent_source, dest_path)
 
-        assert result.success == False
+        assert not result.success
         assert result.error.error_code == "FILE_NOT_FOUND"
 
     @pytest.mark.asyncio
@@ -470,17 +480,18 @@ class TestFileSystemAdapter:
         try:
             result = await self.adapter.move_file(temp_file_path, dest_path)
 
-            assert result.success == True
+            assert result.success
             assert not os.path.exists(temp_file_path)  # 原文件不应存在
             assert os.path.exists(dest_path)  # 目标文件应该存在
 
             # 验证内容是否正确
-            with open(dest_path, 'r', encoding='utf-8') as f:
+            with open(dest_path, encoding="utf-8") as f:
                 assert f.read() == test_content
 
         finally:
             # cleanup不再需要，因为原文件已被移动
             import shutil
+
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir)
 
@@ -493,7 +504,7 @@ class TestFileSystemAdapter:
 
         result = await self.adapter.move_file(nonexistent_source, dest_path)
 
-        assert result.success == False
+        assert not result.success
         assert result.error.error_code == "FILE_NOT_FOUND"
 
     @pytest.mark.asyncio
@@ -503,10 +514,10 @@ class TestFileSystemAdapter:
         temp_dir = self._create_temp_directory()
 
         operations = [
-            ('write', os.path.join(temp_dir, "file1.txt"), "content1"),
-            ('write', os.path.join(temp_dir, "file2.txt"), "content2"),
-            ('create_directory', os.path.join(temp_dir, "subdir")),
-            ('exists', os.path.join(temp_dir, "file1.txt")),
+            ("write", os.path.join(temp_dir, "file1.txt"), "content1"),
+            ("write", os.path.join(temp_dir, "file2.txt"), "content2"),
+            ("create_directory", os.path.join(temp_dir, "subdir")),
+            ("exists", os.path.join(temp_dir, "file1.txt")),
         ]
 
         try:
@@ -520,6 +531,7 @@ class TestFileSystemAdapter:
 
         finally:
             import shutil
+
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir)
 
@@ -531,21 +543,22 @@ class TestFileSystemAdapter:
 
         # 使用一个会导致权限错误或无效路径的操作
         operations = [
-            ('write', os.path.join(temp_dir, "file1.txt"), "content1"),
-            ('unknown_operation', "some_arg"),  # 这个会失败 - 未知操作
-            ('exists', os.path.join(temp_dir, "file1.txt")),
+            ("write", os.path.join(temp_dir, "file1.txt"), "content1"),
+            ("unknown_operation", "some_arg"),  # 这个会失败 - 未知操作
+            ("exists", os.path.join(temp_dir, "file1.txt")),
         ]
 
         try:
             results = await self.adapter.batch_operations(operations)
 
             assert len(results) == len(operations)
-            assert results[0].success == True  # 第一个操作成功
-            assert results[1].success == False  # 第二个操作失败
-            assert results[2].success == True  # 第三个操作成功
+            assert results[0].success  # 第一个操作成功
+            assert not results[1].success  # 第二个操作失败
+            assert results[2].success  # 第三个操作成功
 
         finally:
             import shutil
+
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir)
 
@@ -553,14 +566,12 @@ class TestFileSystemAdapter:
         """测试适配器配置"""
         # TC-1.4.31: 配置测试
         adapter = FileSystemAdapter(
-            chunk_size=8192,
-            create_directories=True,
-            overwrite_existing=False
+            chunk_size=8192, create_directories=True, overwrite_existing=False
         )
 
         assert adapter.chunk_size == 8192
-        assert adapter.create_directories == True
-        assert adapter.overwrite_existing == False
+        assert adapter.create_directories
+        assert not adapter.overwrite_existing
 
     @pytest.mark.asyncio
     async def test_write_file_overwrite_protection(self):
@@ -574,11 +585,11 @@ class TestFileSystemAdapter:
         try:
             result = await adapter.write_file(temp_file_path, "new content")
 
-            assert result.success == False
+            assert not result.success
             assert result.error.error_code == "FILE_EXISTS"
 
             # 验证原文件未被修改
-            with open(temp_file_path, 'r', encoding='utf-8') as f:
+            with open(temp_file_path, encoding="utf-8") as f:
                 assert f.read() == "original content"
 
         finally:

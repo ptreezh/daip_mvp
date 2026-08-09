@@ -7,17 +7,20 @@ TDD 原则：先写失败测试（红），再实现修复（绿）。
 - 角色映射缺失/不完整/含 None 项时必须 raise ValueError，而非静默创建默认映射
 """
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 
 from daip_live.core.exceptions import ModelError
-from daip_live.core.models import Session, AgentState
-from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
+from daip_live.core.models import AgentState, Session
 from daip_live.memory.session_manager import SessionManager
 from daip_live.model_provider.provider import LiteLLMProvider
 from daip_live.p4_role_manager_tools.role_manager import RoleManager
-from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager, RoleModelMapping
 from daip_live.p4_role_manager_tools.role_model_config import RoleModelConfig
+from daip_live.p4_role_manager_tools.role_model_manager import (
+    RoleModelManager,
+)
+from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
 
 
 def _build_manager(role_model_manager):
@@ -34,7 +37,7 @@ def _build_manager(role_model_manager):
     mock_role_manager = Mock(spec=RoleManager)
     mock_model_provider = Mock(spec=LiteLLMProvider)
 
-    # 对齐真实契约：LiteLLMProvider.generate 是 async generator（yield 内容块，模型名由 ProviderConfig 持有）
+    # 对齐真实契约：LiteLLMProvider.generate 是 async generator（yield 内容块，模型名由 ProviderConfig 持有）  # noqa: E501
     async def _fake_generate(prompt, params=None):
         yield "content"
 

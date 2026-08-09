@@ -5,20 +5,17 @@ This test suite implements TDD approach for model switching functionality.
 Tests are written first (RED), then implementation follows (GREEN), then refactoring.
 """
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
-from typing import List, Dict, Any, Optional
-import asyncio
-from datetime import datetime
-from enum import Enum
-import json
+
+from daip_live.tui_v1.models.model_config import ModelConfig
 
 # Import real implementations (will fail initially - RED phase)
 from daip_live.tui_v1.models.model_manager import ModelManager
 from daip_live.tui_v1.models.model_provider import ModelProvider, ProviderType
 from daip_live.tui_v1.models.model_registry import ModelRegistry
 from daip_live.tui_v1.models.model_switcher import ModelSwitcher
-from daip_live.tui_v1.models.model_config import ModelConfig, ConfigType
 
 
 class TestModelConfig:
@@ -33,7 +30,7 @@ class TestModelConfig:
             model_type="chat",
             api_key="test-key",
             max_tokens=2048,
-            temperature=0.7
+            temperature=0.7,
         )
 
         assert config is not None
@@ -43,36 +40,27 @@ class TestModelConfig:
         assert config.api_key == "test-key"
         assert config.max_tokens == 2048
         assert config.temperature == 0.7
-        assert hasattr(config, 'created_at')
+        assert hasattr(config, "created_at")
 
     def test_model_config_validation(self):
         """Test model configuration validation"""
         config = ModelConfig(
-            name="claude-3",
-            provider="anthropic",
-            model_type="chat",
-            api_key="test-key"
+            name="claude-3", provider="anthropic", model_type="chat", api_key="test-key"
         )
 
-        assert config.is_valid() == True
+        assert config.is_valid()
 
         # Invalid config (missing API key)
         invalid_config = ModelConfig(
-            name="invalid-model",
-            provider="openai",
-            model_type="chat",
-            api_key=""
+            name="invalid-model", provider="openai", model_type="chat", api_key=""
         )
 
-        assert invalid_config.is_valid() == False
+        assert not invalid_config.is_valid()
 
     def test_model_config_update(self):
         """Test updating model configuration"""
         config = ModelConfig(
-            name="test-model",
-            provider="test",
-            model_type="chat",
-            api_key="key"
+            name="test-model", provider="test", model_type="chat", api_key="key"
         )
 
         config.update_parameter("temperature", 0.8)
@@ -88,7 +76,7 @@ class TestModelConfig:
             provider="openai",
             model_type="chat",
             api_key="secret-key",
-            temperature=0.5
+            temperature=0.5,
         )
 
         config_dict = config.to_dict()
@@ -105,7 +93,7 @@ class TestModelConfig:
             "provider": "anthropic",
             "model_type": "chat",
             "temperature": 0.3,
-            "max_tokens": 1024
+            "max_tokens": 1024,
         }
 
         config = ModelConfig.from_dict(data)
@@ -127,14 +115,14 @@ class TestModelProvider:
             name="OpenAI",
             provider_type=ProviderType.OPENAI,
             base_url="https://api.openai.com/v1",
-            api_key="test-key"
+            api_key="test-key",
         )
 
         assert provider is not None
         assert provider.name == "OpenAI"
         assert provider.provider_type == ProviderType.OPENAI
         assert provider.base_url == "https://api.openai.com/v1"
-        assert provider.is_configured() == True
+        assert provider.is_configured()
 
     def test_provider_validation(self):
         """Test provider validation"""
@@ -142,20 +130,20 @@ class TestModelProvider:
             name="Test Provider",
             provider_type=ProviderType.CUSTOM,
             base_url="http://localhost:8000",
-            api_key="key"
+            api_key="key",
         )
 
-        assert provider.validate_configuration() == True
+        assert provider.validate_configuration()
 
         # Invalid provider (missing API key)
         invalid_provider = ModelProvider(
             name="Invalid",
             provider_type=ProviderType.OPENAI,
             base_url="https://api.openai.com/v1",
-            api_key=""
+            api_key="",
         )
 
-        assert invalid_provider.validate_configuration() == False
+        assert not invalid_provider.validate_configuration()
 
     @pytest.mark.asyncio
     async def test_provider_health_check(self):
@@ -164,15 +152,21 @@ class TestModelProvider:
             name="Test Provider",
             provider_type=ProviderType.LOCAL,
             base_url="http://localhost:11434",
-            api_key=""  # 源码权威: ModelProvider.__init__ 要求 api_key 参数（model_provider.py:38）
+            api_key="",  # 源码权威: ModelProvider.__init__ 要求 api_key 参数（model_provider.py:38）  # noqa: E501
         )
 
-        # Mock health check — 源码权威: check_health 是 async，LOCAL 走 _check_generic_health
-        with patch.object(provider, '_check_generic_health', new=AsyncMock(return_value={"status": "healthy"})) as mock_health:
+        # Mock health check — 源码权威: check_health 是 async，LOCAL 走 _check_generic_health  # noqa: E501
+        with patch.object(
+            provider,
+            "_check_generic_health",
+            new=AsyncMock(return_value={"status": "healthy"}),
+        ):
             health_status = await provider.check_health()
 
             assert health_status["status"] == "healthy"
-            assert isinstance(health_status["response_time"], float)  # 源码计算实际耗时（model_provider.py:164）
+            assert isinstance(
+                health_status["response_time"], float
+            )  # 源码计算实际耗时（model_provider.py:164）
 
     @pytest.mark.asyncio
     async def test_provider_list_models(self):
@@ -181,14 +175,20 @@ class TestModelProvider:
             name="OpenAI",
             provider_type=ProviderType.OPENAI,
             base_url="https://api.openai.com/v1",
-            api_key="test-key"
+            api_key="test-key",
         )
 
-        # Mock model listing — 源码权威: OPENAI 走 _list_openai_models（model_provider.py:238）
-        with patch.object(provider, '_list_openai_models', new=AsyncMock(return_value=[
-            {"id": "gpt-4", "name": "GPT-4", "type": "chat"},
-            {"id": "gpt-3.5-turbo", "name": "GPT-3.5 Turbo", "type": "chat"}
-        ])):
+        # Mock model listing — 源码权威: OPENAI 走 _list_openai_models（model_provider.py:238）  # noqa: E501
+        with patch.object(
+            provider,
+            "_list_openai_models",
+            new=AsyncMock(
+                return_value=[
+                    {"id": "gpt-4", "name": "GPT-4", "type": "chat"},
+                    {"id": "gpt-3.5-turbo", "name": "GPT-3.5 Turbo", "type": "chat"},
+                ]
+            ),
+        ):
             models = await provider.list_available_models()
 
             assert len(models) == 2
@@ -202,21 +202,27 @@ class TestModelProvider:
             name="Test Provider",
             provider_type=ProviderType.OPENAI,
             base_url="http://localhost:8000",
-            api_key="key"
+            api_key="key",
         )
 
         # Mock chat completion — 源码权威: OPENAI 走 _openai_chat_completion，
         # chat_completion 需要 model 位置参数（model_provider.py:333-355）
-        with patch.object(provider, '_openai_chat_completion', new=AsyncMock(return_value={
-            "content": "Hello! How can I help you today?",
-            "tokens": 15,
-            "model": "test-model"
-        })) as mock_chat:
-            messages = [
-                {"role": "user", "content": "Hello"}
-            ]
+        with patch.object(
+            provider,
+            "_openai_chat_completion",
+            new=AsyncMock(
+                return_value={
+                    "content": "Hello! How can I help you today?",
+                    "tokens": 15,
+                    "model": "test-model",
+                }
+            ),
+        ) as mock_chat:
+            messages = [{"role": "user", "content": "Hello"}]
 
-            response = await provider.chat_completion(messages, model="test-model", temperature=0.7)
+            response = await provider.chat_completion(
+                messages, model="test-model", temperature=0.7
+            )
 
             assert response["content"] == "Hello! How can I help you today?"
             assert response["tokens"] == 15
@@ -229,21 +235,23 @@ class TestModelProvider:
             provider_type=ProviderType.OPENAI,
             base_url="https://api.openai.com/v1",
             api_key="key",
-            rate_limit_rpm=60
+            rate_limit_rpm=60,
         )
 
         assert provider.rate_limit_rpm == 60
-        assert provider.can_make_request() == True
+        assert provider.can_make_request()
 
         # Simulate rate limit exhaustion
         provider._requests_in_minute = 60
-        assert provider.can_make_request() == False
+        assert not provider.can_make_request()
 
 
 class TestModelRegistry:
     """Test model registry functionality"""
 
-    pytestmark = pytest.mark.skip(reason="TDD红阶段spec：引用已不存在的 registry API（register_provider/list_providers/get_model_config/unregister_model/list_models_by_provider/save/load）；当前 ModelRegistry 基于 ModelInfo 的 register_model/get_model/list_models/get_providers")
+    pytestmark = pytest.mark.skip(
+        reason="TDD红阶段spec：引用已不存在的 registry API（register_provider/list_providers/get_model_config/unregister_model/list_models_by_provider/save/load）；当前 ModelRegistry 基于 ModelInfo 的 register_model/get_model/list_models/get_providers"  # noqa: E501
+    )
 
     def test_registry_creation(self):
         """Test model registry creation"""
@@ -253,8 +261,8 @@ class TestModelRegistry:
         assert registry is not None
         assert len(registry.list_providers()) == 0
         assert len(registry.list_models()) == 0
-        assert hasattr(registry, 'providers')
-        assert hasattr(registry, 'models')
+        assert hasattr(registry, "providers")
+        assert hasattr(registry, "models")
 
     def test_register_provider(self):
         """Test registering a model provider"""
@@ -264,12 +272,12 @@ class TestModelRegistry:
             name="OpenAI",
             provider_type=ProviderType.OPENAI,
             base_url="https://api.openai.com/v1",
-            api_key="key"
+            api_key="key",
         )
 
         success = registry.register_provider(provider)
 
-        assert success == True
+        assert success
         assert len(registry.list_providers()) == 1
         assert "openai" in registry.list_providers()
 
@@ -278,15 +286,12 @@ class TestModelRegistry:
         registry = ModelRegistry()
 
         model_config = ModelConfig(
-            name="gpt-4",
-            provider="openai",
-            model_type="chat",
-            api_key="key"
+            name="gpt-4", provider="openai", model_type="chat", api_key="key"
         )
 
         success = registry.register_model(model_config)
 
-        assert success == True
+        assert success
         assert len(registry.list_models()) == 1
         assert "gpt-4" in registry.list_models()
 
@@ -295,10 +300,7 @@ class TestModelRegistry:
         registry = ModelRegistry()
 
         config = ModelConfig(
-            name="claude-3",
-            provider="anthropic",
-            model_type="chat",
-            api_key="key"
+            name="claude-3", provider="anthropic", model_type="chat", api_key="key"
         )
 
         registry.register_model(config)
@@ -313,10 +315,7 @@ class TestModelRegistry:
         registry = ModelRegistry()
 
         config = ModelConfig(
-            name="test-model",
-            provider="test",
-            model_type="chat",
-            api_key="key"
+            name="test-model", provider="test", model_type="chat", api_key="key"
         )
 
         registry.register_model(config)
@@ -324,7 +323,7 @@ class TestModelRegistry:
 
         success = registry.unregister_model("test-model")
 
-        assert success == True
+        assert success
         assert len(registry.list_models()) == 0
 
     def test_list_models_by_provider(self):
@@ -335,7 +334,7 @@ class TestModelRegistry:
         configs = [
             ModelConfig("gpt-4", "openai", "chat", "key"),
             ModelConfig("gpt-3.5-turbo", "openai", "chat", "key"),
-            ModelConfig("claude-3", "anthropic", "chat", "key")
+            ModelConfig("claude-3", "anthropic", "chat", "key"),
         ]
 
         for config in configs:
@@ -351,10 +350,10 @@ class TestModelRegistry:
 
     def test_registry_persistence(self):
         """Test registry persistence"""
-        import tempfile
         import os
+        import tempfile
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             config_file = f.name
 
         try:
@@ -382,7 +381,9 @@ class TestModelRegistry:
 class TestModelSwitcher:
     """Test model switcher functionality"""
 
-    pytestmark = pytest.mark.skip(reason="TDD红阶段spec：引用已不存在的 switcher API（switch_model/context/get_context/auto_switch_for_task/record_performance/get_model_performance）；当前 ModelSwitcher 基于 ModelManager，API 为 switch_to_model/get_available_models/get_current_model/get_switch_history/can_switch_to/get_model_suggestions")
+    pytestmark = pytest.mark.skip(
+        reason="TDD红阶段spec：引用已不存在的 switcher API（switch_model/context/get_context/auto_switch_for_task/record_performance/get_model_performance）；当前 ModelSwitcher 基于 ModelManager，API 为 switch_to_model/get_available_models/get_current_model/get_switch_history/can_switch_to/get_model_suggestions"  # noqa: E501
+    )
 
     def test_switcher_creation(self):
         """Test model switcher creation"""
@@ -393,7 +394,7 @@ class TestModelSwitcher:
         assert switcher is not None
         assert switcher.registry == registry
         assert switcher.current_model is None
-        assert hasattr(switcher, 'switch_history')
+        assert hasattr(switcher, "switch_history")
 
     def test_switch_model(self):
         """Test switching to a different model"""
@@ -410,7 +411,7 @@ class TestModelSwitcher:
         # Switch to model1
         success = switcher.switch_model("model1")
 
-        assert success == True
+        assert success
         assert switcher.current_model == "model1"
         assert len(switcher.switch_history) == 1
 
@@ -421,7 +422,7 @@ class TestModelSwitcher:
 
         success = switcher.switch_model("nonexistent-model")
 
-        assert success == False
+        assert not success
         assert switcher.current_model is None
 
     def test_get_current_model_config(self):
@@ -455,7 +456,7 @@ class TestModelSwitcher:
         context = {"task": "coding", "language": "python"}
         success = switcher.switch_model("model2", context=context)
 
-        assert success == True
+        assert success
         assert switcher.current_model == "model2"
         assert switcher.get_context("task") == "coding"
 
@@ -477,7 +478,7 @@ class TestModelSwitcher:
         # Auto-switch for coding task
         success = switcher.auto_switch_for_task("coding")
 
-        assert success == True
+        assert success
         assert switcher.current_model == "coding-model"
 
     def test_get_switch_history(self):
@@ -512,11 +513,9 @@ class TestModelSwitcher:
         switcher.switch_model("test-model")
 
         # Record performance metrics
-        switcher.record_performance({
-            "response_time": 1.2,
-            "tokens": 150,
-            "success": True
-        })
+        switcher.record_performance(
+            {"response_time": 1.2, "tokens": 150, "success": True}
+        )
 
         performance = switcher.get_model_performance("test-model")
 
@@ -528,7 +527,9 @@ class TestModelSwitcher:
 class TestModelManager:
     """Test model manager functionality"""
 
-    pytestmark = pytest.mark.skip(reason="TDD红阶段spec：引用已不存在的 manager API（add_provider/add_model_config/chat_completion/get_available_models/get_model_recommendations/health_check_all_providers/load_balancing/persistence）；当前 ModelManager 仅 set_current_model/get_current_model/list_available_models/get_model_info/configure_model/get_model_config/switch_model")
+    pytestmark = pytest.mark.skip(
+        reason="TDD红阶段spec：引用已不存在的 manager API（add_provider/add_model_config/chat_completion/get_available_models/get_model_recommendations/health_check_all_providers/load_balancing/persistence）；当前 ModelManager 仅 set_current_model/get_current_model/list_available_models/get_model_info/configure_model/get_model_config/switch_model"  # noqa: E501
+    )
 
     def test_manager_creation(self):
         """Test model manager creation"""
@@ -536,9 +537,9 @@ class TestModelManager:
         manager = ModelManager()
 
         assert manager is not None
-        assert hasattr(manager, 'registry')
-        assert hasattr(manager, 'switcher')
-        assert hasattr(manager, 'current_provider')
+        assert hasattr(manager, "registry")
+        assert hasattr(manager, "switcher")
+        assert hasattr(manager, "current_provider")
 
     def test_manager_add_provider(self):
         """Test adding provider through manager"""
@@ -548,12 +549,12 @@ class TestModelManager:
             name="OpenAI",
             provider_type=ProviderType.OPENAI,
             base_url="https://api.openai.com/v1",
-            api_key="key"
+            api_key="key",
         )
 
         success = manager.add_provider(provider)
 
-        assert success == True
+        assert success
         assert len(manager.registry.list_providers()) == 1
 
     def test_manager_add_model_config(self):
@@ -561,15 +562,12 @@ class TestModelManager:
         manager = ModelManager()
 
         config = ModelConfig(
-            name="gpt-4",
-            provider="openai",
-            model_type="chat",
-            api_key="key"
+            name="gpt-4", provider="openai", model_type="chat", api_key="key"
         )
 
         success = manager.add_model_config(config)
 
-        assert success == True
+        assert success
         assert len(manager.registry.list_models()) == 1
 
     @pytest.mark.asyncio
@@ -582,14 +580,11 @@ class TestModelManager:
             name="Test Provider",
             provider_type=ProviderType.CUSTOM,
             base_url="http://localhost:8000",
-            api_key="key"
+            api_key="key",
         )
 
         config = ModelConfig(
-            name="test-model",
-            provider="test",
-            model_type="chat",
-            api_key="key"
+            name="test-model", provider="test", model_type="chat", api_key="key"
         )
 
         manager.add_provider(provider)
@@ -597,11 +592,10 @@ class TestModelManager:
         manager.switcher.switch_model("test-model")
 
         # Mock chat completion
-        with patch.object(provider, 'chat_completion') as mock_chat:
-            mock_chat.return_value = AsyncMock(return_value={
-                "content": "Hello from model!",
-                "tokens": 10
-            })
+        with patch.object(provider, "chat_completion") as mock_chat:
+            mock_chat.return_value = AsyncMock(
+                return_value={"content": "Hello from model!", "tokens": 10}
+            )
 
             messages = [{"role": "user", "content": "Hello"}]
             response = await manager.chat_completion(messages)
@@ -616,7 +610,7 @@ class TestModelManager:
         # Add multiple models
         configs = [
             ModelConfig("gpt-4", "openai", "chat", "key"),
-            ModelConfig("claude-3", "anthropic", "chat", "key")
+            ModelConfig("claude-3", "anthropic", "chat", "key"),
         ]
 
         for config in configs:
@@ -658,9 +652,10 @@ class TestModelManager:
         manager.add_provider(provider2)
 
         # Mock health checks
-        with patch.object(provider1, 'check_health') as mock_health1, \
-             patch.object(provider2, 'check_health') as mock_health2:
-
+        with (
+            patch.object(provider1, "check_health") as mock_health1,
+            patch.object(provider2, "check_health") as mock_health2,
+        ):
             mock_health1.return_value = {"status": "healthy", "response_time": 100}
             mock_health2.return_value = {"status": "degraded", "response_time": 500}
 
@@ -676,7 +671,7 @@ class TestModelManager:
         # Add multiple models from different providers
         configs = [
             ModelConfig("model1", "provider1", "chat", "key1"),
-            ModelConfig("model2", "provider2", "chat", "key2")
+            ModelConfig("model2", "provider2", "chat", "key2"),
         ]
 
         for config in configs:
@@ -692,8 +687,8 @@ class TestModelManager:
 
     def test_manager_persistence(self):
         """Test manager configuration persistence"""
-        import tempfile
         import os
+        import tempfile
 
         with tempfile.TemporaryDirectory() as temp_dir:
             config_file = os.path.join(temp_dir, "manager_config.json")

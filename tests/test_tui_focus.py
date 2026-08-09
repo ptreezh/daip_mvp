@@ -5,7 +5,9 @@ import pytest
 # Assuming DAIP_TUI and FocusMode are correctly imported
 from daip_live.tui import DAIP_TUI, FocusMode
 
-pytestmark = pytest.mark.skip(reason="旧spec：TUI 内部实现已重构（Textual action 命名 action__handle_*、组件 Footer 等已移除）；当前源码为准")
+pytestmark = pytest.mark.skip(
+    reason="旧spec：TUI 内部实现已重构（Textual action 命名 action__handle_*、组件 Footer 等已移除）；当前源码为准"  # noqa: E501
+)
 
 
 # Mock the executor and other dependencies for DAIP_TUI
@@ -22,6 +24,7 @@ def mock_daip_tui_dependencies():
         "config_manager": MagicMock(),
     }
 
+
 @pytest.mark.asyncio
 async def test_action_toggle_focus_from_input_to_output(mock_daip_tui_dependencies):
     daip_tui = DAIP_TUI(**mock_daip_tui_dependencies, goal="test goal")
@@ -30,6 +33,7 @@ async def test_action_toggle_focus_from_input_to_output(mock_daip_tui_dependenci
         await pilot.press("ctrl+tab")
         assert pilot.app.focused == pilot.app.query_one("#main_log")
         assert daip_tui.focus_mode == FocusMode.OUTPUT
+
 
 @pytest.mark.asyncio
 async def test_action_toggle_focus_from_output_to_input(mock_daip_tui_dependencies):
@@ -40,6 +44,7 @@ async def test_action_toggle_focus_from_output_to_input(mock_daip_tui_dependenci
         await pilot.press("ctrl+tab")
         assert pilot.app.focused == pilot.app.query_one("#user_input")
         assert daip_tui.focus_mode == FocusMode.INPUT
+
 
 @pytest.mark.asyncio
 async def test_action_exit_output_mode(mock_daip_tui_dependencies):
@@ -52,8 +57,11 @@ async def test_action_exit_output_mode(mock_daip_tui_dependencies):
         assert daip_tui.focus_mode == FocusMode.INPUT
         assert harness.app.focused == harness.app.query_one("#user_input")
 
+
 @pytest.mark.asyncio
-async def test_action_exit_output_mode_when_already_in_input_mode(mock_daip_tui_dependencies):
+async def test_action_exit_output_mode_when_already_in_input_mode(
+    mock_daip_tui_dependencies,
+):
     daip_tui = DAIP_TUI(**mock_daip_tui_dependencies, goal="test goal")
     async with daip_tui.run_test() as harness:
         assert daip_tui.focus_mode == FocusMode.INPUT
@@ -83,6 +91,7 @@ async def test_action_exit_output_mode_when_already_in_input_mode(mock_daip_tui_
                 # Check that pyperclip.copy was called with the correct text
                 mock_copy.assert_called_once_with(test_text)
 
+
 @pytest.mark.asyncio
 async def test_on_click_focus_switch(mock_daip_tui_dependencies):
     """Test that clicking on the main log switches focus from input to output."""
@@ -94,7 +103,7 @@ async def test_on_click_focus_switch(mock_daip_tui_dependencies):
 
         # 2. Simulate a click on the log panel
         await pilot.click("#main_log")
-        await pilot.pause() # Allow event to be processed
+        await pilot.pause()  # Allow event to be processed
 
         # 3. Assert final state is OUTPUT mode
         assert daip_tui.focus_mode == FocusMode.OUTPUT

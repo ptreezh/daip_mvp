@@ -1,10 +1,9 @@
 """Tests for observability shutdown module (TDD - RED phase)."""
 
-import pytest
 from daip_live.observability.shutdown import (
     GracefulShutdown,
     ShutdownHandler,
-    ShutdownSignal
+    ShutdownSignal,
 )
 
 

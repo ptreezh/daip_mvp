@@ -3,13 +3,10 @@ Wiki TUI界面扩展功能的测试用例
 验证REFACTOR阶段新增的高级功能
 """
 
-import pytest
-from unittest.mock import Mock, patch
-from datetime import datetime
-from pathlib import Path
 import tempfile
+from pathlib import Path
+from unittest.mock import Mock, patch
 
-from daip_live.wiki.models import WikiPage
 from daip_live.wiki.manager import WikiManager
 
 
@@ -22,10 +19,11 @@ class TestWikiTUIExtended:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act & Assert
-            assert hasattr(app, 'CSS')
+            assert hasattr(app, "CSS")
             assert "dialog" in app.CSS
             assert "title" in app.CSS
             assert "button-group" in app.CSS
@@ -38,12 +36,14 @@ class TestWikiTUIExtended:
             manager = WikiManager(wiki_root)
 
             # 创建不同时间的页面
-            page1 = manager.create_page("Old Page", "Old content", ["old"])
+            manager.create_page("Old Page", "Old content", ["old"])
             import time
+
             time.sleep(0.1)
-            page2 = manager.create_page("Recent Page", "Recent content", ["recent"])
+            manager.create_page("Recent Page", "Recent content", ["recent"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
@@ -59,6 +59,7 @@ class TestWikiTUIExtended:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act & Assert
@@ -74,6 +75,7 @@ class TestWikiTUIExtended:
             manager.create_page("Page 2", "Content 2", ["test"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
@@ -94,6 +96,7 @@ class TestWikiTUIExtended:
             page = manager.create_page("Test Page", "# Test\n\nContent", ["test"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
@@ -109,10 +112,11 @@ class TestWikiTUIExtended:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act & Assert
-            assert hasattr(app, 'auto_save_enabled')
+            assert hasattr(app, "auto_save_enabled")
             assert app.auto_save_enabled is True  # 默认启用
 
     def test_wiki_tui_backup_and_restore(self):
@@ -125,6 +129,7 @@ class TestWikiTUIExtended:
             manager.create_page("Important Page", "Important content", ["important"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act - 创建备份
@@ -151,6 +156,7 @@ class TestWikiTUIExtended:
             manager.create_page("Python Tips", "Python tips", ["python", "tips"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
@@ -170,16 +176,17 @@ class TestWikiTUIExtended:
             wiki_root = Path(temp_dir)
             manager = WikiManager(wiki_root)
             manager.create_page("Python Basics", "Python basics", ["python", "basics"])
-            manager.create_page("Python Advanced", "Python advanced", ["python", "advanced"])
+            manager.create_page(
+                "Python Advanced", "Python advanced", ["python", "advanced"]
+            )
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
             results = app.advanced_search(
-                query="python",
-                tags=["python"],
-                search_type="content"
+                query="python", tags=["python"], search_type="content"
             )
 
             # Assert
@@ -194,13 +201,14 @@ class TestWikiTUIExtended:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
             custom_shortcuts = {
                 "ctrl+p": "new_page",
                 "ctrl+o": "open_page",
-                "ctrl+d": "delete_page"
+                "ctrl+d": "delete_page",
             }
             app.set_custom_shortcuts(custom_shortcuts)
 
@@ -217,6 +225,7 @@ class TestWikiTUIExtended:
             manager.create_page("Page 2", "Content 2", ["tag2"])
 
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
@@ -235,10 +244,11 @@ class TestWikiTUIExtended:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
-            with patch.object(app, 'notify') as mock_notify:
+            with patch.object(app, "notify") as mock_notify:
                 app.show_notification("Test message", "info")
                 app.show_notification("Success message", "success")
                 app.show_notification("Error message", "error")
@@ -255,10 +265,11 @@ class TestWikiTUIExtended:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act & Assert
-            assert hasattr(app, 'handle_resize')
+            assert hasattr(app, "handle_resize")
             assert callable(app.handle_resize)
 
     def test_wiki_tui_plugin_system(self):
@@ -267,6 +278,7 @@ class TestWikiTUIExtended:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
@@ -285,6 +297,7 @@ class TestWikiTUIExtended:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act
@@ -301,9 +314,10 @@ class TestWikiTUIExtended:
         with tempfile.TemporaryDirectory() as temp_dir:
             wiki_root = Path(temp_dir)
             from daip_live.wiki.tui import WikiTUIApp
+
             app = WikiTUIApp(wiki_root)
 
             # Act & Assert
-            assert hasattr(app, 'accessibility_mode')
-            assert hasattr(app, 'high_contrast_theme')
-            assert hasattr(app, 'screen_reader_support')
+            assert hasattr(app, "accessibility_mode")
+            assert hasattr(app, "high_contrast_theme")
+            assert hasattr(app, "screen_reader_support")

@@ -1,21 +1,18 @@
 """Tests for the LiteLLMProvider."""
 
+import litellm
 import pytest
 
-import litellm
+from daip_live.core.config import get_safe_test_model
 from daip_live.core.exceptions import ModelAuthenticationError
 from daip_live.core.models import ProviderConfig
 from daip_live.model_provider.provider import LiteLLMProvider
-from daip_live.core.config import get_safe_test_model
 
 
 class TestLiteLLMProvider:
     def test_initialization(self):
         """Tests that the provider can be initialized successfully."""
-        config = ProviderConfig(
-            model=get_safe_test_model(),
-            api_key="test_key"
-        )
+        config = ProviderConfig(model=get_safe_test_model(), api_key="test_key")
 
         provider = LiteLLMProvider(config=config)
 
@@ -25,7 +22,7 @@ class TestLiteLLMProvider:
     async def test_generate_success(self, mocker):
         """Tests the generate method for a successful API call."""
         # 源码权威: generate(prompt, params) 是 async generator（provider.py:276）；
-        # "test-model" 是 local model 走 mock 分支不调 litellm，须用非本地模型名测 litellm 路径
+        # "test-model" 是 local model 走 mock 分支不调 litellm，须用非本地模型名测 litellm 路径  # noqa: E501
         config = ProviderConfig(model="gpt-3.5-turbo")
         provider = LiteLLMProvider(config=config)
 
@@ -36,7 +33,7 @@ class TestLiteLLMProvider:
 
         mock_litellm_completion = mocker.patch(
             "daip_live.model_provider.provider.litellm.completion",
-            return_value=mock_response
+            return_value=mock_response,
         )
 
         result = None
@@ -57,8 +54,8 @@ class TestLiteLLMProvider:
             side_effect=litellm.exceptions.AuthenticationError(
                 message="Invalid API Key",
                 llm_provider="test_provider",
-                model="test_model"
-            )
+                model="test_model",
+            ),
         )
 
         with pytest.raises(ModelAuthenticationError) as excinfo:
@@ -79,7 +76,7 @@ class TestLiteLLMProvider:
 
         mock_aembedding = mocker.patch(
             "daip_live.model_provider.provider.litellm.aembedding",
-            new=mocker.AsyncMock(return_value=mock_response)
+            new=mocker.AsyncMock(return_value=mock_response),
         )
 
         result = await provider.embed(text="Embed this")
@@ -94,7 +91,7 @@ class TestLiteLLMProvider:
 
     @pytest.mark.asyncio
     async def test_embed_authentication_error(self, mocker):
-        """Tests that an auth error from litellm during embedding is correctly wrapped."""
+        """Tests that an auth error from litellm during embedding is correctly wrapped."""  # noqa: E501
         config = ProviderConfig(model="test-model")
         provider = LiteLLMProvider(config=config)
 
@@ -103,8 +100,8 @@ class TestLiteLLMProvider:
             side_effect=litellm.exceptions.AuthenticationError(
                 message="Invalid API Key",
                 llm_provider="test_provider",
-                model="test_model"
-            )
+                model="test_model",
+            ),
         )
 
         with pytest.raises(ModelAuthenticationError) as excinfo:

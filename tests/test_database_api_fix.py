@@ -1,19 +1,22 @@
+# ruff: noqa: E501
 #!/usr/bin/env python3
 """
 TDD Tests for DatabaseManager API Fixes
 
-This file contains failing tests that identify specific API issues that need to be fixed.
+This file contains failing tests that identify specific API issues that need to be fixed.  # noqa: E501
 """
 
-import pytest
-import tempfile
 import os
-from pathlib import Path
 import sys
+import tempfile
+from pathlib import Path
+
+import pytest
 
 # Add src to path
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
+
 
 class TestDatabaseManagerAPI:
     """Test DatabaseManager API consistency and usability"""
@@ -21,7 +24,7 @@ class TestDatabaseManagerAPI:
     @pytest.fixture
     def temp_db(self):
         """Create temporary database for testing"""
-        fd, path = tempfile.mkstemp(suffix='.db')
+        fd, path = tempfile.mkstemp(suffix=".db")
         os.close(fd)
         yield path
         os.unlink(path)
@@ -30,6 +33,7 @@ class TestDatabaseManagerAPI:
     def db_manager(self, temp_db):
         """Create DatabaseManager instance with temp database"""
         from daip_live.persistence.database import DatabaseManager
+
         db = DatabaseManager(temp_db)
         yield db
         db.engine.dispose()  # 释放文件锁，避免 teardown unlink 失败（WinError 32）
@@ -43,6 +47,7 @@ class TestDatabaseManagerAPI:
         """
         # Method 1: Use get_connection() method
         from sqlalchemy import text
+
         with db_manager.get_connection() as conn:
             result = conn.execute(text("SELECT 1")).fetchone()
             assert result[0] == 1
@@ -64,7 +69,7 @@ class TestDatabaseManagerAPI:
         """
         TDD Test: get_session() should work as context manager for database operations
 
-        This test FAILS because the current implementation doesn't support context manager usage.
+        This test FAILS because the current implementation doesn't support context manager usage.  # noqa: E501
         """
         # The method should support both patterns:
         # 1. session = db_manager.get_session("session_id")  # Get specific session
@@ -85,11 +90,13 @@ class TestDatabaseManagerAPI:
         # This should work using the database engine directly
         try:
             from sqlalchemy import text
+
             with db_manager.engine.connect() as conn:
                 result = conn.execute(text("SELECT 1")).fetchone()
                 assert result[0] == 1
         except Exception as e:
             pytest.fail(f"Database connection failed: {e}")
+
 
 class TestLiteLLMProviderAPI:
     """Test LiteLLMProvider API completeness"""
@@ -110,7 +117,9 @@ class TestLiteLLMProviderAPI:
 
         This test currently FAILS because the method doesn't exist.
         """
-        assert hasattr(model_provider, 'get_available_models'), "get_available_models method should exist"
+        assert hasattr(model_provider, "get_available_models"), (
+            "get_available_models method should exist"
+        )
 
         # After fix, this should work:
         models = model_provider.get_available_models()
@@ -123,11 +132,14 @@ class TestLiteLLMProviderAPI:
 
         This test FAILS because we need to implement this method.
         """
-        assert hasattr(model_provider, 'is_model_available'), "is_model_available method should exist"
+        assert hasattr(model_provider, "is_model_available"), (
+            "is_model_available method should exist"
+        )
 
         # After fix, this should work:
         available = model_provider.is_model_available("ollama/llama3")
         assert isinstance(available, bool)
+
 
 class TestDebateManagerAPI:
     """Test DebateManager API completeness"""
@@ -136,12 +148,12 @@ class TestDebateManagerAPI:
     def debate_manager(self):
         """Create SimpleDebateManager instance"""
         from daip_live.config import ConfigManager
-        from daip_live.persistence.database import DatabaseManager
         from daip_live.memory.session_manager import SessionManager
+        from daip_live.model_provider.provider import LiteLLMProvider
         from daip_live.p4_role_manager_tools.role_manager import RoleManager
         from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
-        from daip_live.model_provider.provider import LiteLLMProvider
         from daip_live.p8_debate_system.simple_debate_manager import SimpleDebateManager
+        from daip_live.persistence.database import DatabaseManager
 
         config_manager = ConfigManager()
         config = config_manager.get_config()
@@ -156,7 +168,7 @@ class TestDebateManagerAPI:
             session_manager=session_manager,
             role_manager=role_manager,
             role_model_manager=role_model_manager,
-            model_provider=model_provider
+            model_provider=model_provider,
         )
 
     def test_start_debate_method_should_exist(self, debate_manager):
@@ -165,10 +177,12 @@ class TestDebateManagerAPI:
 
         This test currently FAILS because start_debate method doesn't exist.
         """
-        assert hasattr(debate_manager, 'start_debate'), "start_debate method should exist"
+        assert hasattr(debate_manager, "start_debate"), (
+            "start_debate method should exist"
+        )
 
         # After fix, this should work:
-        # debate_id = debate_manager.start_debate(topic="Test topic", roles=["role1", "role2"])
+        # debate_id = debate_manager.start_debate(topic="Test topic", roles=["role1", "role2"])  # noqa: E501
         # assert debate_id is not None
 
     def test_debate_workflow_methods_should_exist(self, debate_manager):
@@ -178,15 +192,16 @@ class TestDebateManagerAPI:
         This test FAILS because we need to implement these methods.
         """
         required_methods = [
-            'start_debate',
-            'add_participant',
-            'next_round',
-            'end_debate',
-            'get_debate_status'
+            "start_debate",
+            "add_participant",
+            "next_round",
+            "end_debate",
+            "get_debate_status",
         ]
 
         for method in required_methods:
             assert hasattr(debate_manager, method), f"{method} method should exist"
+
 
 class TestMemoryServiceAPI:
     """Test MemoryService API and dependency injection"""
@@ -195,7 +210,7 @@ class TestMemoryServiceAPI:
         """
         TDD Test: MemoryService should accept model_provider via dependency injection
 
-        This test currently FAILS because MemoryService requires model_provider parameter
+        This test currently FAILS because MemoryService requires model_provider parameter  # noqa: E501
         but doesn't provide a clean way to inject it.
         """
         from daip_live.config import ConfigManager
@@ -208,6 +223,7 @@ class TestMemoryServiceAPI:
         # This should work but currently fails
         try:
             from daip_live.memory.service import MemoryService
+
             memory_service = MemoryService(model_provider=model_provider)
             assert memory_service is not None
         except TypeError as e:
@@ -221,6 +237,7 @@ class TestMemoryServiceAPI:
         """
         try:
             from daip_live.container import Container
+
             container = Container()
 
             # This should work if container is properly configured
@@ -228,6 +245,7 @@ class TestMemoryServiceAPI:
             assert memory_service is not None
         except Exception as e:
             pytest.skip(f"Container injection not working: {e}")
+
 
 if __name__ == "__main__":
     # Run the failing tests to see what needs to be fixed

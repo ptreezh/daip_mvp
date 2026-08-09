@@ -3,10 +3,10 @@
 遵循TDD原则 - 先写测试，后写实现
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, patch
-from typing import Any, Callable
+from unittest.mock import patch
+
+import pytest
 import typer
 from rich.console import Console
 
@@ -22,15 +22,15 @@ class TestErrorHandlerBasics:
         handler = ErrorHandler()
 
         # Verify attributes
-        assert hasattr(handler, 'console')
+        assert hasattr(handler, "console")
         assert isinstance(handler.console, Console)
-        assert hasattr(handler, 'logger')
-        assert hasattr(handler, 'error_stats')
+        assert hasattr(handler, "logger")
+        assert hasattr(handler, "error_stats")
 
         # Verify error stats structure
-        assert 'total_errors' in handler.error_stats
-        assert 'errors_by_category' in handler.error_stats
-        assert 'errors_by_severity' in handler.error_stats
+        assert "total_errors" in handler.error_stats
+        assert "errors_by_category" in handler.error_stats
+        assert "errors_by_severity" in handler.error_stats
 
     def test_error_stats_initialization(self):
         """测试错误统计初始化"""
@@ -38,13 +38,16 @@ class TestErrorHandlerBasics:
 
         handler = ErrorHandler()
 
-        assert handler.error_stats['total_errors'] == 0
-        assert handler.error_stats['errors_by_category'] == {}
-        assert handler.error_stats['errors_by_severity'] == {}
+        assert handler.error_stats["total_errors"] == 0
+        assert handler.error_stats["errors_by_category"] == {}
+        assert handler.error_stats["errors_by_severity"] == {}
 
     def test_record_error_stats(self):
         """测试错误统计记录"""
-        from daip_live.cli.utils.error_handler import ErrorHandler, NetworkError, ErrorSeverity
+        from daip_live.cli.utils.error_handler import (
+            ErrorHandler,
+            NetworkError,
+        )
 
         handler = ErrorHandler()
         error = NetworkError("Test network error")
@@ -53,13 +56,17 @@ class TestErrorHandlerBasics:
         handler._record_error_stats(error)
 
         # Verify stats updated
-        assert handler.error_stats['total_errors'] == 1
-        assert handler.error_stats['errors_by_category']['network'] == 1
-        assert handler.error_stats['errors_by_severity']['high'] == 1
+        assert handler.error_stats["total_errors"] == 1
+        assert handler.error_stats["errors_by_category"]["network"] == 1
+        assert handler.error_stats["errors_by_severity"]["high"] == 1
 
     def test_get_error_stats(self):
         """测试获取错误统计"""
-        from daip_live.cli.utils.error_handler import ErrorHandler, NetworkError, DatabaseError, ErrorSeverity
+        from daip_live.cli.utils.error_handler import (
+            DatabaseError,
+            ErrorHandler,
+            NetworkError,
+        )
 
         handler = ErrorHandler()
 
@@ -73,14 +80,14 @@ class TestErrorHandlerBasics:
         stats = handler.get_error_stats()
 
         # Verify stats copy
-        assert stats['total_errors'] == 2
-        assert stats['errors_by_category']['network'] == 1
-        assert stats['errors_by_category']['database'] == 1
-        assert stats['errors_by_severity']['high'] == 2
+        assert stats["total_errors"] == 2
+        assert stats["errors_by_category"]["network"] == 1
+        assert stats["errors_by_category"]["database"] == 1
+        assert stats["errors_by_severity"]["high"] == 2
 
         # Verify it's a copy (modifying shouldn't affect original)
-        stats['total_errors'] = 999
-        assert handler.error_stats['total_errors'] == 2
+        stats["total_errors"] = 999
+        assert handler.error_stats["total_errors"] == 2
 
     def test_reset_error_stats(self):
         """测试重置错误统计"""
@@ -94,9 +101,9 @@ class TestErrorHandlerBasics:
         handler.reset_error_stats()
 
         # Verify stats reset
-        assert handler.error_stats['total_errors'] == 0
-        assert handler.error_stats['errors_by_category'] == {}
-        assert handler.error_stats['errors_by_severity'] == {}
+        assert handler.error_stats["total_errors"] == 0
+        assert handler.error_stats["errors_by_category"] == {}
+        assert handler.error_stats["errors_by_severity"] == {}
 
 
 class TestErrorHandlerDecorator:
@@ -109,7 +116,7 @@ class TestErrorHandlerDecorator:
         handler = ErrorHandler()
 
         # Verify decorator method exists
-        assert hasattr(handler, 'handle_command_errors')
+        assert hasattr(handler, "handle_command_errors")
         assert callable(handler.handle_command_errors)
 
     def test_decorator_basic_functionality(self):
@@ -141,10 +148,10 @@ class TestErrorHandlerDecorator:
             asyncio.run(failing_function())
 
         # Verify error was recorded
-        assert handler.error_stats['total_errors'] == 1
-        assert handler.error_stats['errors_by_category']['network'] == 1
+        assert handler.error_stats["total_errors"] == 1
+        assert handler.error_stats["errors_by_category"]["network"] == 1
 
-    @patch('daip_live.cli.utils.error_handler.typer.Exit')
+    @patch("daip_live.cli.utils.error_handler.typer.Exit")
     def test_decorator_exit_code(self, mock_exit):
         """测试装饰器退出代码"""
         from daip_live.cli.utils.error_handler import ErrorHandler, NetworkError
@@ -178,7 +185,7 @@ class TestErrorHandlerDecorator:
             asyncio.run(failing_function())
 
         # Verify error was recorded
-        assert handler.error_stats['total_errors'] == 1
+        assert handler.error_stats["total_errors"] == 1
 
     def test_decorator_reraise_option(self):
         """测试装饰器重新抛出选项"""
@@ -203,7 +210,7 @@ class TestErrorHandlerDecorator:
         @handler.handle_command_errors(
             command_name="test_command",
             show_traceback=True,
-            reraise=True  # Need to reraise to test traceback
+            reraise=True,  # Need to reraise to test traceback
         )
         async def failing_function():
             raise NetworkError("Test error")
@@ -218,7 +225,7 @@ class TestErrorFormatting:
 
     def test_get_suggestion_for_error(self):
         """测试根据错误类型获取建议"""
-        from daip_live.cli.utils.error_handler import ErrorHandler, ErrorCategory
+        from daip_live.cli.utils.error_handler import ErrorCategory, ErrorHandler
 
         handler = ErrorHandler()
 
@@ -231,12 +238,14 @@ class TestErrorFormatting:
         assert "database" in db_suggestion.lower()
 
         # Test validation error suggestion
-        validation_suggestion = handler._get_suggestion_for_error(ErrorCategory.VALIDATION)
+        validation_suggestion = handler._get_suggestion_for_error(
+            ErrorCategory.VALIDATION
+        )
         assert "input" in validation_suggestion.lower()
 
     def test_get_suggestion_for_unknown_error(self):
         """测试未知错误类型的建议"""
-        from daip_live.cli.utils.error_handler import ErrorHandler, ErrorCategory
+        from daip_live.cli.utils.error_handler import ErrorCategory, ErrorHandler
 
         handler = ErrorHandler()
 
@@ -280,7 +289,7 @@ class TestAsyncErrorHandling:
         with pytest.raises(typer.Exit):
             await async_failing_function()
 
-        assert handler.error_stats['total_errors'] == 1
+        assert handler.error_stats["total_errors"] == 1
 
     @pytest.mark.asyncio
     async def test_async_command_with_timeout_simulation(self):
@@ -304,7 +313,12 @@ class TestErrorHandlerIntegration:
 
     def test_multiple_command_error_tracking(self):
         """测试多命令错误跟踪"""
-        from daip_live.cli.utils.error_handler import ErrorHandler, NetworkError, DatabaseError, ValidationError
+        from daip_live.cli.utils.error_handler import (
+            DatabaseError,
+            ErrorHandler,
+            NetworkError,
+            ValidationError,
+        )
 
         handler = ErrorHandler()
 
@@ -327,10 +341,10 @@ class TestErrorHandlerIntegration:
 
         # Verify all errors were recorded
         stats = handler.get_error_stats()
-        assert stats['total_errors'] == 3
-        assert stats['errors_by_category']['network'] == 1
-        assert stats['errors_by_category']['database'] == 1
-        assert stats['errors_by_category']['validation'] == 1
+        assert stats["total_errors"] == 3
+        assert stats["errors_by_category"]["network"] == 1
+        assert stats["errors_by_category"]["database"] == 1
+        assert stats["errors_by_category"]["validation"] == 1
 
     def test_error_stats_persistence(self):
         """测试错误统计持久性"""
@@ -345,9 +359,9 @@ class TestErrorHandlerIntegration:
 
         # Get stats and verify
         stats = handler.get_error_stats()
-        assert stats['total_errors'] == 5
+        assert stats["total_errors"] == 5
 
         # Reset and verify
         handler.reset_error_stats()
         stats_after_reset = handler.get_error_stats()
-        assert stats_after_reset['total_errors'] == 0
+        assert stats_after_reset["total_errors"] == 0

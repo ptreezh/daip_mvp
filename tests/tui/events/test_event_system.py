@@ -10,12 +10,10 @@ TDD Cycle:
 3. REFACTOR: Optimize event system design
 """
 
-import pytest
 import asyncio
 import time
-from typing import Any, Callable, List, Dict
-from unittest.mock import Mock, AsyncMock
-from enum import Enum
+
+import pytest
 
 # These imports should fail initially - this is the RED phase
 # from daip_live.tui_v1.events.system import TUIEventSystem, Event
@@ -43,21 +41,21 @@ class TestTUIEventSystemSpecification:
         event_system = TUIEventSystem()
 
         assert event_system is not None
-        assert hasattr(event_system, 'subscribe')
-        assert hasattr(event_system, 'publish')
-        assert hasattr(event_system, 'unsubscribe')
-        assert hasattr(event_system, 'dispatch_event')
+        assert hasattr(event_system, "subscribe")
+        assert hasattr(event_system, "publish")
+        assert hasattr(event_system, "unsubscribe")
+        assert hasattr(event_system, "dispatch_event")
 
     def test_event_creation_and_properties(self):
         """Test that events can be created with required properties."""
-        from daip_live.tui_v1.events.types import Event, EventType, EventPriority
+        from daip_live.tui_v1.events.types import Event, EventPriority, EventType
 
         # Create a basic event
         event = Event(
             event_type=EventType.USER_INPUT,
             source="test_component",
             data={"key": "value", "action": "test"},
-            priority=EventPriority.NORMAL
+            priority=EventPriority.NORMAL,
         )
 
         assert event.event_type == EventType.USER_INPUT
@@ -65,13 +63,13 @@ class TestTUIEventSystemSpecification:
         assert event.data["key"] == "value"
         assert event.data["action"] == "test"
         assert event.priority == EventPriority.NORMAL
-        assert hasattr(event, 'timestamp')
+        assert hasattr(event, "timestamp")
         assert isinstance(event.timestamp, float)
 
     def test_event_subscription_functionality(self):
         """Test basic event subscription functionality."""
         from daip_live.tui_v1.events.system import TUIEventSystem
-        from daip_live.tui_v1.events.types import EventType, Event
+        from daip_live.tui_v1.events.types import Event, EventType
 
         event_system = TUIEventSystem()
         received_events = []
@@ -87,7 +85,7 @@ class TestTUIEventSystemSpecification:
         test_event = Event(
             event_type=EventType.USER_INPUT,
             source="test_source",
-            data={"message": "test"}
+            data={"message": "test"},
         )
         event_system.publish(test_event)
 
@@ -100,7 +98,7 @@ class TestTUIEventSystemSpecification:
     def test_multiple_event_handlers(self):
         """Test that multiple handlers can subscribe to the same event type."""
         from daip_live.tui_v1.events.system import TUIEventSystem
-        from daip_live.tui_v1.events.types import EventType, Event
+        from daip_live.tui_v1.events.types import Event, EventType
 
         event_system = TUIEventSystem()
         handler1_calls = []
@@ -113,14 +111,12 @@ class TestTUIEventSystemSpecification:
             handler2_calls.append(event)
 
         # Subscribe multiple handlers
-        sub1 = event_system.subscribe(EventType.USER_INPUT, handler1)
-        sub2 = event_system.subscribe(EventType.USER_INPUT, handler2)
+        event_system.subscribe(EventType.USER_INPUT, handler1)
+        event_system.subscribe(EventType.USER_INPUT, handler2)
 
         # Publish event
         test_event = Event(
-            event_type=EventType.USER_INPUT,
-            source="test",
-            data={"test": True}
+            event_type=EventType.USER_INPUT, source="test", data={"test": True}
         )
         event_system.publish(test_event)
 
@@ -132,7 +128,7 @@ class TestTUIEventSystemSpecification:
     def test_event_unsubscription(self):
         """Test that handlers can be unsubscribed from events."""
         from daip_live.tui_v1.events.system import TUIEventSystem
-        from daip_live.tui_v1.events.types import EventType, Event
+        from daip_live.tui_v1.events.types import Event, EventType
 
         event_system = TUIEventSystem()
         received_events = []
@@ -146,9 +142,7 @@ class TestTUIEventSystemSpecification:
 
         # Publish event - handler should not be called
         test_event = Event(
-            event_type=EventType.USER_INPUT,
-            source="test",
-            data={"test": True}
+            event_type=EventType.USER_INPUT, source="test", data={"test": True}
         )
         event_system.publish(test_event)
 
@@ -157,13 +151,13 @@ class TestTUIEventSystemSpecification:
     def test_event_priority_processing(self):
         """Test that events are processed according to priority."""
         from daip_live.tui_v1.events.system import TUIEventSystem
-        from daip_live.tui_v1.events.types import Event, EventType, EventPriority
+        from daip_live.tui_v1.events.types import Event, EventPriority, EventType
 
         event_system = TUIEventSystem()
         processing_order = []
 
         def order_tracking_handler(event):
-            processing_order.append(event.data.get('order', 'unknown'))
+            processing_order.append(event.data.get("order", "unknown"))
 
         # Subscribe with same handler
         event_system.subscribe(EventType.TEST, order_tracking_handler)
@@ -173,19 +167,19 @@ class TestTUIEventSystemSpecification:
             event_type=EventType.TEST,
             source="test",
             data={"order": "low"},
-            priority=EventPriority.LOW
+            priority=EventPriority.LOW,
         )
         high_priority = Event(
             event_type=EventType.TEST,
             source="test",
             data={"order": "high"},
-            priority=EventPriority.HIGH
+            priority=EventPriority.HIGH,
         )
         normal_priority = Event(
             event_type=EventType.TEST,
             source="test",
             data={"order": "normal"},
-            priority=EventPriority.NORMAL
+            priority=EventPriority.NORMAL,
         )
 
         # Add events to queue first, then process
@@ -195,10 +189,13 @@ class TestTUIEventSystemSpecification:
         # Add events to queue in mixed order
         event_system._event_queue.append((EventPriority.LOW.value, 1, low_priority))
         event_system._event_queue.append((EventPriority.HIGH.value, 2, high_priority))
-        event_system._event_queue.append((EventPriority.NORMAL.value, 3, normal_priority))
+        event_system._event_queue.append(
+            (EventPriority.NORMAL.value, 3, normal_priority)
+        )
 
         # Convert to heap
         import heapq
+
         heapq.heapify(event_system._event_queue)
 
         # Now process all events
@@ -226,19 +223,19 @@ class TestTUIEventSystemSpecification:
         event_system.subscribe(
             EventType.USER_INPUT,
             filtered_handler,
-            filter_func=lambda e: e.data.get('allowed', False)
+            filter_func=lambda e: e.data.get("allowed", False),
         )
 
         # Create test events
         allowed_event = Event(
             event_type=EventType.USER_INPUT,
             source="test",
-            data={"message": "allowed", "allowed": True}
+            data={"message": "allowed", "allowed": True},
         )
         blocked_event = Event(
             event_type=EventType.USER_INPUT,
             source="test",
-            data={"message": "blocked", "allowed": False}
+            data={"message": "blocked", "allowed": False},
         )
 
         # Publish both events
@@ -251,7 +248,6 @@ class TestTUIEventSystemSpecification:
 
     def test_async_event_handling(self):
         """Test asynchronous event handling."""
-        import asyncio
         from daip_live.tui_v1.events.system import TUIEventSystem
         from daip_live.tui_v1.events.types import Event, EventType
 
@@ -261,7 +257,7 @@ class TestTUIEventSystemSpecification:
 
             async def async_handler(event):
                 await asyncio.sleep(0.001)  # Simulate async work
-                async_calls.append(event.data['message'])
+                async_calls.append(event.data["message"])
 
             # Subscribe async handler
             event_system.subscribe(EventType.USER_INPUT, async_handler)
@@ -270,7 +266,7 @@ class TestTUIEventSystemSpecification:
             test_event = Event(
                 event_type=EventType.USER_INPUT,
                 source="test",
-                data={"message": "async_test"}
+                data={"message": "async_test"},
             )
 
             # Publish event asynchronously
@@ -287,7 +283,6 @@ class TestTUIEventSystemSpecification:
 
     def test_event_performance_requirement_latency(self):
         """Test that event delivery latency is under 10ms as per specification."""
-        import time
         from daip_live.tui_v1.events.system import TUIEventSystem
         from daip_live.tui_v1.events.types import Event, EventType
 
@@ -304,7 +299,7 @@ class TestTUIEventSystemSpecification:
         test_event = Event(
             event_type=EventType.PERFORMANCE_TEST,
             source="performance_test",
-            data={"test": "performance"}
+            data={"test": "performance"},
         )
 
         # Measure event processing time
@@ -320,7 +315,9 @@ class TestTUIEventSystemSpecification:
         latency_ms = (end_time - start_time) * 1000
 
         assert event_processed, "Event was not processed"
-        assert latency_ms < 10, f"Event delivery latency {latency_ms:.2f}ms exceeds 10ms requirement"
+        assert latency_ms < 10, (
+            f"Event delivery latency {latency_ms:.2f}ms exceeds 10ms requirement"
+        )
 
     def test_event_error_handling(self):
         """Test error handling in event processing."""
@@ -342,9 +339,7 @@ class TestTUIEventSystemSpecification:
 
         # Create and publish event
         test_event = Event(
-            event_type=EventType.ERROR_TEST,
-            source="error_test",
-            data={"test": "error"}
+            event_type=EventType.ERROR_TEST, source="error_test", data={"test": "error"}
         )
 
         # Should not raise exception and successful handler should still be called
@@ -370,9 +365,7 @@ class TestTUIEventSystemSpecification:
         events = []
         for i in range(10):
             event = Event(
-                event_type=EventType.BATCH_TEST,
-                source="batch_test",
-                data={"index": i}
+                event_type=EventType.BATCH_TEST, source="batch_test", data={"index": i}
             )
             events.append(event)
 
@@ -392,24 +385,22 @@ class TestTUIEventSystemSpecification:
 
         # Check initial statistics
         stats = event_system.get_statistics()
-        assert 'total_events_published' in stats
-        assert 'total_subscriptions' in stats
-        assert 'total_events_processed' in stats
+        assert "total_events_published" in stats
+        assert "total_subscriptions" in stats
+        assert "total_events_processed" in stats
 
-        initial_published = stats['total_events_published']
+        initial_published = stats["total_events_published"]
 
         # Publish some events
         test_event = Event(
-            event_type=EventType.STATS_TEST,
-            source="stats_test",
-            data={"test": True}
+            event_type=EventType.STATS_TEST, source="stats_test", data={"test": True}
         )
         event_system.publish(test_event)
         event_system.publish(test_event)
 
         # Check updated statistics
         updated_stats = event_system.get_statistics()
-        assert updated_stats['total_events_published'] == initial_published + 2
+        assert updated_stats["total_events_published"] == initial_published + 2
 
     def test_event_routing_to_specific_components(self):
         """Test that events can be routed to specific components."""
@@ -427,21 +418,25 @@ class TestTUIEventSystemSpecification:
             component2_events.append(event)
 
         # Subscribe handlers for specific components
-        event_system.subscribe(EventType.DIRECTED, component1_handler, target_component="component1")
-        event_system.subscribe(EventType.DIRECTED, component2_handler, target_component="component2")
+        event_system.subscribe(
+            EventType.DIRECTED, component1_handler, target_component="component1"
+        )
+        event_system.subscribe(
+            EventType.DIRECTED, component2_handler, target_component="component2"
+        )
 
         # Create directed events
         event_to_component1 = Event(
             event_type=EventType.DIRECTED,
             source="router",
             data={"message": "to_component1"},
-            target="component1"
+            target="component1",
         )
         event_to_component2 = Event(
             event_type=EventType.DIRECTED,
             source="router",
             data={"message": "to_component2"},
-            target="component2"
+            target="component2",
         )
 
         # Publish events

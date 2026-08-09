@@ -3,13 +3,11 @@
 遵循TDD原则 - 先写测试，后写实现
 """
 
-import pytest
 import asyncio
 import time
-from unittest.mock import Mock, patch, MagicMock
-from typing import Dict, Any, Optional
-import psutil
-from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class TestPerformanceMonitorBasics:
@@ -23,9 +21,9 @@ class TestPerformanceMonitorBasics:
         monitor = PerformanceMonitor()
 
         # Verify attributes
-        assert hasattr(monitor, 'metrics')
-        assert hasattr(monitor, 'current_measurements')
-        assert hasattr(monitor, 'command_measurements')
+        assert hasattr(monitor, "metrics")
+        assert hasattr(monitor, "current_measurements")
+        assert hasattr(monitor, "command_measurements")
 
     def test_performance_monitor_initialization(self):
         """测试性能监控器初始化"""
@@ -39,18 +37,18 @@ class TestPerformanceMonitorBasics:
         assert isinstance(monitor.command_measurements, dict)
 
         # Verify metrics structure
-        assert 'total_commands' in monitor.metrics
-        assert 'total_duration' in monitor.metrics
-        assert 'avg_duration' in monitor.metrics
-        assert 'max_duration' in monitor.metrics
-        assert 'min_duration' in monitor.metrics
+        assert "total_commands" in monitor.metrics
+        assert "total_duration" in monitor.metrics
+        assert "avg_duration" in monitor.metrics
+        assert "max_duration" in monitor.metrics
+        assert "min_duration" in monitor.metrics
 
         # Verify initial values
-        assert monitor.metrics['total_commands'] == 0
-        assert monitor.metrics['total_duration'] == 0.0
-        assert monitor.metrics['avg_duration'] == 0.0
-        assert monitor.metrics['max_duration'] == 0.0
-        assert monitor.metrics['min_duration'] == float('inf')
+        assert monitor.metrics["total_commands"] == 0
+        assert monitor.metrics["total_duration"] == 0.0
+        assert monitor.metrics["avg_duration"] == 0.0
+        assert monitor.metrics["max_duration"] == 0.0
+        assert monitor.metrics["min_duration"] == float("inf")
 
     def test_measure_command_context_manager(self):
         """测试命令测量上下文管理器"""
@@ -59,10 +57,10 @@ class TestPerformanceMonitorBasics:
         monitor = PerformanceMonitor()
 
         # Test context manager exists and returns async context manager
-        assert hasattr(monitor, 'measure_command')
+        assert hasattr(monitor, "measure_command")
         context_manager = monitor.measure_command("test")
-        assert hasattr(context_manager, '__aenter__')
-        assert hasattr(context_manager, '__aexit__')
+        assert hasattr(context_manager, "__aenter__")
+        assert hasattr(context_manager, "__aexit__")
 
     @pytest.mark.asyncio
     async def test_measure_command_basic_functionality(self):
@@ -73,18 +71,18 @@ class TestPerformanceMonitorBasics:
 
         # Test successful measurement
         async with monitor.measure_command("test_command") as metrics:
-            assert 'command_name' in metrics
-            assert metrics['command_name'] == "test_command"
-            assert 'start_time' in metrics
-            assert 'start_memory' in metrics
-            assert isinstance(metrics['start_time'], float)
-            assert isinstance(metrics['start_memory'], float)
+            assert "command_name" in metrics
+            assert metrics["command_name"] == "test_command"
+            assert "start_time" in metrics
+            assert "start_memory" in metrics
+            assert isinstance(metrics["start_time"], float)
+            assert isinstance(metrics["start_memory"], float)
 
         # Verify metrics recorded
-        assert 'test_command' in monitor.command_measurements
-        assert monitor.metrics['total_commands'] == 1
+        assert "test_command" in monitor.command_measurements
+        assert monitor.metrics["total_commands"] == 1
         # Allow for very small duration due to precision
-        assert monitor.metrics['total_duration'] >= 0
+        assert monitor.metrics["total_duration"] >= 0
 
     @pytest.mark.asyncio
     async def test_measure_command_with_delay(self):
@@ -104,8 +102,8 @@ class TestPerformanceMonitorBasics:
         # Verify duration is recorded
         # Windows time.time() 粒度 ~15.6ms，全量负载下可能略短于 sleep 时长；
         # 加 25ms 容差避免偶发失败（时钟粒度而非逻辑错误）
-        assert 'duration' in metrics
-        assert metrics['duration'] >= delay - 0.025
+        assert "duration" in metrics
+        assert metrics["duration"] >= delay - 0.025
         assert actual_duration >= delay - 0.025
 
     @pytest.mark.asyncio
@@ -121,10 +119,10 @@ class TestPerformanceMonitorBasics:
                 raise ValueError("Test error")
 
         # Verify metrics still recorded
-        assert 'error_command' in monitor.command_measurements
-        assert monitor.metrics['total_commands'] == 1
+        assert "error_command" in monitor.command_measurements
+        assert monitor.metrics["total_commands"] == 1
         # Allow for very small duration due to precision
-        assert monitor.metrics['total_duration'] >= 0
+        assert monitor.metrics["total_duration"] >= 0
 
     @pytest.mark.asyncio
     async def test_measure_command_memory_tracking(self):
@@ -135,16 +133,16 @@ class TestPerformanceMonitorBasics:
 
         async with monitor.measure_command("memory_test") as metrics:
             # Verify memory tracking
-            assert 'start_memory' in metrics
-            assert 'end_memory' in metrics
-            assert 'memory_delta' in metrics
-            assert isinstance(metrics['start_memory'], float)
-            assert isinstance(metrics['end_memory'], float)
-            assert isinstance(metrics['memory_delta'], float)
+            assert "start_memory" in metrics
+            assert "end_memory" in metrics
+            assert "memory_delta" in metrics
+            assert isinstance(metrics["start_memory"], float)
+            assert isinstance(metrics["end_memory"], float)
+            assert isinstance(metrics["memory_delta"], float)
 
         # Verify memory delta calculation
-        command_metrics = monitor.command_measurements['memory_test']
-        memory_delta = command_metrics['memory_delta']
+        command_metrics = monitor.command_measurements["memory_test"]
+        memory_delta = command_metrics["memory_delta"]
         assert isinstance(memory_delta, float)
 
     @pytest.mark.asyncio
@@ -166,7 +164,7 @@ class TestPerformanceMonitorBasics:
 
         # Verify all commands measured
         assert len([r for r in results if not isinstance(r, Exception)]) == 5
-        assert monitor.metrics['total_commands'] == 5
+        assert monitor.metrics["total_commands"] == 5
 
         # Verify each command has metrics
         for i in range(5):
@@ -190,27 +188,27 @@ class TestPerformanceMonitorBasics:
 
         # Verify stats structure
         assert isinstance(stats, dict)
-        assert 'total_commands' in stats
-        assert 'total_duration' in stats
-        assert 'avg_duration' in stats
-        assert 'max_duration' in stats
-        assert 'min_duration' in stats
-        assert 'command_details' in stats
+        assert "total_commands" in stats
+        assert "total_duration" in stats
+        assert "avg_duration" in stats
+        assert "max_duration" in stats
+        assert "min_duration" in stats
+        assert "command_details" in stats
 
         # Verify values
-        assert stats['total_commands'] == 3
-        assert stats['total_duration'] > 0
-        assert stats['avg_duration'] > 0
-        assert stats['max_duration'] > 0
-        assert stats['min_duration'] > 0
-        assert stats['min_duration'] <= stats['avg_duration'] <= stats['max_duration']
+        assert stats["total_commands"] == 3
+        assert stats["total_duration"] > 0
+        assert stats["avg_duration"] > 0
+        assert stats["max_duration"] > 0
+        assert stats["min_duration"] > 0
+        assert stats["min_duration"] <= stats["avg_duration"] <= stats["max_duration"]
 
         # Verify command details
-        command_details = stats['command_details']
+        command_details = stats["command_details"]
         for cmd in commands:
             assert cmd in command_details
-            assert 'duration' in command_details[cmd]
-            assert 'memory_delta' in command_details[cmd]
+            assert "duration" in command_details[cmd]
+            assert "memory_delta" in command_details[cmd]
 
     def test_reset_stats(self):
         """测试重置统计"""
@@ -219,22 +217,22 @@ class TestPerformanceMonitorBasics:
         monitor = PerformanceMonitor()
 
         # Simulate some activity
-        monitor.metrics['total_commands'] = 10
-        monitor.metrics['total_duration'] = 15.5
-        monitor.command_measurements['test_command'] = {
-            'duration': 1.5,
-            'memory_delta': 1024
+        monitor.metrics["total_commands"] = 10
+        monitor.metrics["total_duration"] = 15.5
+        monitor.command_measurements["test_command"] = {
+            "duration": 1.5,
+            "memory_delta": 1024,
         }
 
         # Reset stats
         monitor.reset_stats()
 
         # Verify reset
-        assert monitor.metrics['total_commands'] == 0
-        assert monitor.metrics['total_duration'] == 0.0
-        assert monitor.metrics['avg_duration'] == 0.0
-        assert monitor.metrics['max_duration'] == 0.0
-        assert monitor.metrics['min_duration'] == float('inf')
+        assert monitor.metrics["total_commands"] == 0
+        assert monitor.metrics["total_duration"] == 0.0
+        assert monitor.metrics["avg_duration"] == 0.0
+        assert monitor.metrics["max_duration"] == 0.0
+        assert monitor.metrics["min_duration"] == float("inf")
         assert monitor.command_measurements == {}
 
     def test_get_current_measurements(self):
@@ -249,15 +247,15 @@ class TestPerformanceMonitorBasics:
         assert len(current) == 0
 
         # Simulate active measurement
-        monitor.current_measurements['test'] = {
-            'command_name': 'test',
-            'start_time': time.time(),
-            'duration': 0.5
+        monitor.current_measurements["test"] = {
+            "command_name": "test",
+            "start_time": time.time(),
+            "duration": 0.5,
         }
 
         current = monitor.get_current_measurements()
-        assert 'test' in current
-        assert current['test']['command_name'] == 'test'
+        assert "test" in current
+        assert current["test"]["command_name"] == "test"
 
     def test_performance_thresholds(self):
         """测试性能阈值检查"""
@@ -266,9 +264,9 @@ class TestPerformanceMonitorBasics:
         monitor = PerformanceMonitor()
 
         # Test threshold checking
-        assert monitor.is_within_threshold(1.0, 2.0) == True
-        assert monitor.is_within_threshold(2.5, 2.0) == False
-        assert monitor.is_within_threshold(2.0, 2.0) == True
+        assert monitor.is_within_threshold(1.0, 2.0)
+        assert not monitor.is_within_threshold(2.5, 2.0)
+        assert monitor.is_within_threshold(2.0, 2.0)
 
     def test_memory_usage_tracking(self):
         """测试内存使用跟踪功能"""
@@ -277,7 +275,7 @@ class TestPerformanceMonitorBasics:
         monitor = PerformanceMonitor()
 
         # Test memory tracking methods
-        assert hasattr(monitor, '_get_memory_usage')
+        assert hasattr(monitor, "_get_memory_usage")
         assert callable(monitor._get_memory_usage)
 
         # Test memory usage function
@@ -292,15 +290,15 @@ class TestPerformanceMonitorBasics:
         monitor = PerformanceMonitor(max_measurements=2)
 
         # Simulate exceeding limit
-        monitor.command_measurements['cmd1'] = {'duration': 1.0}
-        monitor.command_measurements['cmd2'] = {'duration': 1.0}
-        monitor.command_measurements['cmd3'] = {'duration': 1.0}
+        monitor.command_measurements["cmd1"] = {"duration": 1.0}
+        monitor.command_measurements["cmd2"] = {"duration": 1.0}
+        monitor.command_measurements["cmd3"] = {"duration": 1.0}
 
         # Should limit to max_measurements
         assert len(monitor.command_measurements) == 2
-        assert 'cmd1' in monitor.command_measurements
-        assert 'cmd2' in monitor.command_measurements
-        assert 'cmd3' not in monitor.command_measurements
+        assert "cmd1" in monitor.command_measurements
+        assert "cmd2" in monitor.command_measurements
+        assert "cmd3" not in monitor.command_measurements
 
 
 class TestPerformanceMetricsIntegration:
@@ -326,8 +324,8 @@ class TestPerformanceMetricsIntegration:
 
         slow_commands = monitor.get_slow_commands()
         assert len(slow_commands) == 1
-        assert 'slow_command' in slow_commands
-        assert slow_commands['slow_command']['duration'] >= 0.05
+        assert "slow_command" in slow_commands
+        assert slow_commands["slow_command"]["duration"] >= 0.05
 
     @pytest.mark.asyncio
     async def test_memory_leak_detection(self):
@@ -346,10 +344,14 @@ class TestPerformanceMetricsIntegration:
         assert len(high_memory_commands) == 0
 
         # High memory usage (simulate)
-        with patch('daip_live.cli.utils.performance_monitor.psutil.Process') as mock_process:
+        with patch(
+            "daip_live.cli.utils.performance_monitor.psutil.Process"
+        ) as mock_process:
             # Mock high memory usage
             mock_process_instance = MagicMock()
-            mock_process_instance.memory_info.return_value.rss = 20 * 1024 * 1024  # 20MB
+            mock_process_instance.memory_info.return_value.rss = (
+                20 * 1024 * 1024
+            )  # 20MB
             mock_process.return_value = mock_process_instance
 
             async with monitor.measure_command("high_memory_command"):
@@ -358,7 +360,7 @@ class TestPerformanceMetricsIntegration:
 
         high_memory_commands = monitor.get_high_memory_commands()
         assert len(high_memory_commands) == 1
-        assert 'high_memory_command' in high_memory_commands
+        assert "high_memory_command" in high_memory_commands
 
     def test_performance_report_generation(self):
         """测试性能报告生成"""
@@ -367,30 +369,34 @@ class TestPerformanceMetricsIntegration:
         monitor = PerformanceMonitor()
 
         # Simulate some performance data
-        monitor.metrics.update({
-            'total_commands': 10,
-            'total_duration': 15.5,
-            'avg_duration': 1.55,
-            'max_duration': 3.2,
-            'min_duration': 0.3
-        })
+        monitor.metrics.update(
+            {
+                "total_commands": 10,
+                "total_duration": 15.5,
+                "avg_duration": 1.55,
+                "max_duration": 3.2,
+                "min_duration": 0.3,
+            }
+        )
 
-        monitor.command_measurements.update({
-            'command1': {'duration': 1.0, 'memory_delta': 1024},
-            'command2': {'duration': 2.0, 'memory_delta': 2048},
-            'command3': {'duration': 3.0, 'memory_delta': 3072}
-        })
+        monitor.command_measurements.update(
+            {
+                "command1": {"duration": 1.0, "memory_delta": 1024},
+                "command2": {"duration": 2.0, "memory_delta": 2048},
+                "command3": {"duration": 3.0, "memory_delta": 3072},
+            }
+        )
 
         # Generate performance report
         report = monitor.generate_performance_report()
 
         # Verify report structure
         assert isinstance(report, str)
-        assert 'Performance Report' in report
-        assert 'Total Commands: 10' in report
-        assert 'Average Duration: 1.55s' in report
-        assert 'Max Duration: 3.20s' in report
-        assert 'Min Duration: 0.30s' in report
+        assert "Performance Report" in report
+        assert "Total Commands: 10" in report
+        assert "Average Duration: 1.55s" in report
+        assert "Max Duration: 3.20s" in report
+        assert "Min Duration: 0.30s" in report
 
     def test_export_metrics(self):
         """测试指标导出功能"""
@@ -399,22 +405,23 @@ class TestPerformanceMetricsIntegration:
         monitor = PerformanceMonitor()
 
         # Add some data
-        monitor.metrics['total_commands'] = 5
-        monitor.command_measurements['test'] = {'duration': 1.0}
+        monitor.metrics["total_commands"] = 5
+        monitor.command_measurements["test"] = {"duration": 1.0}
 
         # Test JSON export
-        json_data = monitor.export_metrics('json')
+        json_data = monitor.export_metrics("json")
         assert isinstance(json_data, str)
         import json
+
         parsed_data = json.loads(json_data)
-        assert parsed_data['metrics']['total_commands'] == 5
-        assert parsed_data['command_measurements']['test']['duration'] == 1.0
+        assert parsed_data["metrics"]["total_commands"] == 5
+        assert parsed_data["command_measurements"]["test"]["duration"] == 1.0
 
         # Test CSV export
-        csv_data = monitor.export_metrics('csv')
+        csv_data = monitor.export_metrics("csv")
         assert isinstance(csv_data, str)
-        assert 'total_commands' in csv_data
-        assert '5' in csv_data
+        assert "total_commands" in csv_data
+        assert "5" in csv_data
 
     @pytest.mark.asyncio
     async def test_real_time_monitoring(self):
@@ -435,7 +442,7 @@ class TestPerformanceMetricsIntegration:
         monitor.stop_monitoring()
 
         # Verify monitoring data
-        assert monitor.metrics['total_commands'] == 3
+        assert monitor.metrics["total_commands"] == 3
         assert len(monitor.command_measurements) == 3
 
     def test_monitoring_state_management(self):

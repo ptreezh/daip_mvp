@@ -11,13 +11,14 @@ def db_manager() -> DatabaseManager:
     """Fixture to create an in-memory SQLite database for each test."""
     return DatabaseManager(db_path=":memory:")
 
+
 def test_save_and_get_session(db_manager: DatabaseManager):
     """Test saving a new session and retrieving it."""
     # 1. Create a session object
     participants = ["role_1", "role_2"]
     history = [
         DialogueTurn(participant_id="role_1", content="Hello!"),
-        DialogueTurn(participant_id="role_2", content="Hi there!")
+        DialogueTurn(participant_id="role_2", content="Hi there!"),
     ]
     session = Session(
         session_type="chat",
@@ -25,7 +26,7 @@ def test_save_and_get_session(db_manager: DatabaseManager):
         participant_ids=participants,
         history=history,
         status=AgentState.COMPLETED,
-        summary="A test chat."
+        summary="A test chat.",
     )
 
     # 2. Save the session
@@ -42,6 +43,7 @@ def test_save_and_get_session(db_manager: DatabaseManager):
     assert len(retrieved_session.history) == 2
     assert retrieved_session.history[1].content == "Hi there!"
     assert retrieved_session.participant_ids == participants
+
 
 def test_update_existing_session(db_manager: DatabaseManager):
     """Test that saving a session with an existing ID updates it."""
@@ -64,6 +66,7 @@ def test_update_existing_session(db_manager: DatabaseManager):
     assert retrieved_session.status == AgentState.FAILED
     assert len(retrieved_session.history) == 1
 
+
 def test_list_sessions(db_manager: DatabaseManager):
     """Test listing all sessions."""
     # 1. Create multiple sessions
@@ -83,10 +86,12 @@ def test_list_sessions(db_manager: DatabaseManager):
     assert "Chat 1" in session_goals
     assert "Debate 1" in session_goals
 
+
 def test_get_non_existent_session(db_manager: DatabaseManager):
     """Test that getting a non-existent session returns None."""
     retrieved_session = db_manager.get_session("non-existent-id")
     assert retrieved_session is None
+
 
 @pytest.mark.asyncio
 async def test_get_knowledge_sources_by_ids(db_manager: DatabaseManager):
@@ -98,7 +103,7 @@ async def test_get_knowledge_sources_by_ids(db_manager: DatabaseManager):
 
     # The upsert method returns the object with the assigned ID
     s1_saved = db_manager.upsert_knowledge_source(source1)
-    s2_saved = db_manager.upsert_knowledge_source(source2)
+    db_manager.upsert_knowledge_source(source2)
     s3_saved = db_manager.upsert_knowledge_source(source3)
 
     # 2. Act: Retrieve a subset of the sources by their new IDs

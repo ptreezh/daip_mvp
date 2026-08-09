@@ -1,6 +1,7 @@
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -14,7 +15,10 @@ def mock_config():
     """Provides a mock configuration dictionary for testing."""
     return {
         "database": {"path": ":memory:"},
-        "llm_provider": {"default_model": "mock_model", "embedding_model": "mock_embedding"},
+        "llm_provider": {
+            "default_model": "mock_model",
+            "embedding_model": "mock_embedding",
+        },
         "knowledge_base": {"directory": "/tmp/docs"},
         "role_manager": {"roles_dir": "/tmp/roles"},
     }
@@ -26,6 +30,7 @@ def test_container_import_and_instantiation():
     """
     container = Container()
     assert container is not None
+
 
 def test_resolve_core_service(mock_config):
     """

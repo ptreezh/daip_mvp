@@ -3,11 +3,10 @@ WikiPage数据模型的TDD测试用例
 遵循RED-GREEN-REFACTOR循环
 """
 
-import pytest
 from datetime import datetime
 from pathlib import Path
-import tempfile
-import os
+
+import pytest
 
 from daip_live.wiki.models import WikiPage
 
@@ -30,7 +29,7 @@ class TestWikiPage:
             content=content,
             file_path=file_path,
             created_at=created_at,
-            modified_at=modified_at
+            modified_at=modified_at,
         )
 
         assert page.title == title
@@ -57,7 +56,7 @@ class TestWikiPage:
             file_path=file_path,
             created_at=created_at,
             modified_at=modified_at,
-            tags=tags
+            tags=tags,
         )
 
         assert page.title == title
@@ -77,7 +76,7 @@ class TestWikiPage:
             content="Original content",
             file_path=Path("test.md"),
             created_at=created,
-            modified_at=modified
+            modified_at=modified,
         )
         original_modified = page.modified_at
         new_content = "# Updated Title\n\nUpdated content"
@@ -98,7 +97,7 @@ class TestWikiPage:
             content="Original content",
             file_path=Path("test.md"),
             created_at=datetime.now(),
-            modified_at=datetime.now()
+            modified_at=datetime.now(),
         )
 
         # Act & Assert
@@ -113,13 +112,15 @@ class TestWikiPage:
             content="Content",
             file_path=Path("test.md"),
             created_at=datetime.now(),
-            modified_at=datetime.now()
+            modified_at=datetime.now(),
         )
 
         # Act
         page.add_tag("python")
         page.add_tag("documentation")
-        page.add_tag("PYTHON")  # 源码权威: validate_tag 保留大小写（models.py:15-25），PYTHON 是不同标签
+        page.add_tag(
+            "PYTHON"
+        )  # 源码权威: validate_tag 保留大小写（models.py:15-25），PYTHON 是不同标签
 
         # Assert
         assert "python" in page.tags
@@ -135,7 +136,7 @@ class TestWikiPage:
             content="Content",
             file_path=Path("test.md"),
             created_at=datetime.now(),
-            modified_at=datetime.now()
+            modified_at=datetime.now(),
         )
 
         # Act & Assert
@@ -154,13 +155,15 @@ class TestWikiPage:
             file_path=Path("test.md"),
             created_at=datetime.now(),
             modified_at=datetime.now(),
-            tags=["python", "documentation", "wiki"]
+            tags=["python", "documentation", "wiki"],
         )
 
         # Act
         result1 = page.remove_tag("python")
         result2 = page.remove_tag("nonexistent")
-        result3 = page.remove_tag("DOCUMENTATION")  # 源码权威: 大小写敏感（validate_tag 不规范化）
+        result3 = page.remove_tag(
+            "DOCUMENTATION"
+        )  # 源码权威: 大小写敏感（validate_tag 不规范化）
 
         # Assert
         assert result1 is True  # 成功移除
@@ -180,7 +183,7 @@ class TestWikiPage:
                 content="Content",
                 file_path=Path("test.txt"),  # 非markdown文件
                 created_at=datetime.now(),
-                modified_at=datetime.now()
+                modified_at=datetime.now(),
             )
 
         with pytest.raises(ValueError, match="Wiki page must be a markdown file"):
@@ -189,7 +192,7 @@ class TestWikiPage:
                 content="Content",
                 file_path=Path("test"),  # 无扩展名
                 created_at=datetime.now(),
-                modified_at=datetime.now()
+                modified_at=datetime.now(),
             )
 
     def test_wiki_page_empty_title_validation(self):
@@ -201,7 +204,7 @@ class TestWikiPage:
                 content="Content",
                 file_path=Path("test.md"),
                 created_at=datetime.now(),
-                modified_at=datetime.now()
+                modified_at=datetime.now(),
             )
 
         with pytest.raises(ValueError, match="Title cannot be empty"):
@@ -210,7 +213,7 @@ class TestWikiPage:
                 content="Content",
                 file_path=Path("test.md"),
                 created_at=datetime.now(),
-                modified_at=datetime.now()
+                modified_at=datetime.now(),
             )
 
     def test_wiki_page_timestamp_management(self):
@@ -225,7 +228,7 @@ class TestWikiPage:
             content="Content",
             file_path=Path("test.md"),
             created_at=created,
-            modified_at=modified
+            modified_at=modified,
         )
 
         # Assert
@@ -247,7 +250,7 @@ class TestWikiPage:
             file_path=Path("test.md"),
             created_at=datetime.now(),
             modified_at=datetime.now(),
-            tags=original_tags.copy()
+            tags=original_tags.copy(),
         )
 
         # Act - 修改原始列表

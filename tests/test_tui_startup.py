@@ -1,28 +1,30 @@
 """Tests for TUI startup behavior."""
 
-import os
-import tempfile
-from unittest.mock import Mock
+import os  # noqa: E402
+import tempfile  # noqa: E402
+from unittest.mock import Mock  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
-from daip_live.tui import DAIP_TUI
+from daip_live.tui import DAIP_TUI  # noqa: E402
 
-pytestmark = pytest.mark.skip(reason="TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准")
-from src.daip_live.config import ConfigManager
-from src.daip_live.core.models import (
+pytestmark = pytest.mark.skip(
+    reason="TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准"
+)
+from src.daip_live.config import ConfigManager  # noqa: E402
+from src.daip_live.core.models import (  # noqa: E402
     AppConfig,
     DatabaseConfig,
     KnowledgeBaseConfig,
     LLMProviderConfig,
     RoleManagerConfig,
 )
-from src.daip_live.knowledge.manager import KnowledgeManager
-from src.daip_live.memory.session_manager import SessionManager
-from src.daip_live.model_provider.provider import LiteLLMProvider
-from src.daip_live.p4_role_manager_tools.role_manager import RoleManager
-from src.daip_live.p8_debate_system.manager import DebateManager
-from src.daip_live.persistence.database import DatabaseManager
+from src.daip_live.knowledge.manager import KnowledgeManager  # noqa: E402
+from src.daip_live.memory.session_manager import SessionManager  # noqa: E402
+from src.daip_live.model_provider.provider import LiteLLMProvider  # noqa: E402
+from src.daip_live.p4_role_manager_tools.role_manager import RoleManager  # noqa: E402
+from src.daip_live.p8_debate_system.manager import DebateManager  # noqa: E402
+from src.daip_live.persistence.database import DatabaseManager  # noqa: E402
 
 
 @pytest.fixture(scope="class")
@@ -35,9 +37,11 @@ def test_env(request):
 
         mock_config = AppConfig(
             database=DatabaseConfig(path=db_path),
-            llm_provider=LLMProviderConfig(default_model="mock-model", embedding_model="mock-embedding"),
+            llm_provider=LLMProviderConfig(
+                default_model="mock-model", embedding_model="mock-embedding"
+            ),
             knowledge_base=KnowledgeBaseConfig(directory=test_dir),
-            role_manager=RoleManagerConfig(roles_dir=roles_dir)
+            role_manager=RoleManagerConfig(roles_dir=roles_dir),
         )
 
         config_manager = ConfigManager()
@@ -51,12 +55,12 @@ def test_env(request):
         knowledge_manager = KnowledgeManager(
             db_manager=db_manager,
             model_provider=model_provider,
-            config={"knowledge_dir": test_dir}
+            config={"knowledge_dir": test_dir},
         )
         debate_manager = DebateManager(
             session_manager=session_manager,
             role_manager=role_manager,
-            model_provider=model_provider
+            model_provider=model_provider,
         )
 
         request.cls.db_manager = db_manager
@@ -88,18 +92,18 @@ class TestTUIStartup:
             debate_manager=self.debate_manager,
             model_provider=self.model_provider,
             db_manager=self.db_manager,
-            config_manager=self.config_manager
+            config_manager=self.config_manager,
         )
 
         async with tui.run_test() as pilot:
             # On startup, without any action, check the status bar.
             # We need to find the StatusBar widget. Let's assume it has an ID.
             # If not, we might need to query by class.
-            await pilot.pause(0.1) # Allow UI to settle
+            await pilot.pause(0.1)  # Allow UI to settle
 
             status_bar = pilot.app.query_one("#status_bar")
             status_text = str(status_bar.renderable)
 
-            assert "Welcome" in status_text or "Ready" in status_text, \
+            assert "Welcome" in status_text or "Ready" in status_text, (
                 f"Expected 'Welcome' or 'Ready' in status bar, but got '{status_text}'"
-
+            )

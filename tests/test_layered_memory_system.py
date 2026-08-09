@@ -4,8 +4,6 @@ LayeredMemorySystem测试用例
 """
 
 import pytest
-from unittest.mock import Mock
-from daip_live.p4_role_manager_tools.role_model_config import RoleModelConfig
 
 
 class TestLayeredMemorySystem:
@@ -34,12 +32,15 @@ class TestLayeredMemorySystem:
             round_num=1,
             fact="AI technology has advanced significantly in recent years",
             source="tech_analyst",
-            confidence=0.9
+            confidence=0.9,
         )
 
         # 验证添加
         assert len(memory_system.shared_factual_history) == 1
-        assert memory_system.shared_factual_history[0]["fact"] == "AI technology has advanced significantly in recent years"
+        assert (
+            memory_system.shared_factual_history[0]["fact"]
+            == "AI technology has advanced significantly in recent years"
+        )
         assert memory_system.shared_factual_history[0]["source"] == "tech_analyst"
         assert memory_system.shared_factual_history[0]["confidence"] == 0.9
 
@@ -54,13 +55,20 @@ class TestLayeredMemorySystem:
             role_name="tech_analyst",
             content="AI will transform healthcare diagnostics",
             round_num=1,
-            memory_type="argument"
+            memory_type="argument",
         )
 
         # 验证更新
         assert "tech_analyst" in memory_system.role_personal_memories
-        assert len(memory_system.role_personal_memories["tech_analyst"]["argument"]) == 1
-        assert memory_system.role_personal_memories["tech_analyst"]["argument"][0]["content"] == "AI will transform healthcare diagnostics"
+        assert (
+            len(memory_system.role_personal_memories["tech_analyst"]["argument"]) == 1
+        )
+        assert (
+            memory_system.role_personal_memories["tech_analyst"]["argument"][0][
+                "content"
+            ]
+            == "AI will transform healthcare diagnostics"
+        )
 
     def test_add_round_summary(self):
         """测试添加轮次摘要"""
@@ -72,15 +80,24 @@ class TestLayeredMemorySystem:
         memory_system.add_round_summary(
             round_num=1,
             summary="The debate focused on AI's impact on healthcare",
-            key_points=["Diagnostics improvement", "Patient outcomes", "Cost reduction"],
-            consensus_level=0.7
+            key_points=[
+                "Diagnostics improvement",
+                "Patient outcomes",
+                "Cost reduction",
+            ],
+            consensus_level=0.7,
         )
 
         # 验证添加
         assert 1 in memory_system.round_summaries
-        assert memory_system.round_summaries[1]["summary"] == "The debate focused on AI's impact on healthcare"
+        assert (
+            memory_system.round_summaries[1]["summary"]
+            == "The debate focused on AI's impact on healthcare"
+        )
         assert len(memory_system.round_summaries[1]["key_points"]) == 3
-        assert "Diagnostics improvement" in memory_system.round_summaries[1]["key_points"]
+        assert (
+            "Diagnostics improvement" in memory_system.round_summaries[1]["key_points"]
+        )
 
     def test_track_stance_evolution(self):
         """测试立场演化追踪"""
@@ -94,7 +111,7 @@ class TestLayeredMemorySystem:
             round_num=1,
             stance="AI is beneficial for healthcare",
             confidence=0.8,
-            reasoning="Improved diagnostics and treatment"
+            reasoning="Improved diagnostics and treatment",
         )
 
         memory_system.track_stance_evolution(
@@ -102,14 +119,17 @@ class TestLayeredMemorySystem:
             round_num=2,
             stance="AI is essential for healthcare advancement",
             confidence=0.9,
-            reasoning="Proven success in early applications"
+            reasoning="Proven success in early applications",
         )
 
         # 验证追踪
         assert "tech_analyst" in memory_system.stance_evolution
         assert len(memory_system.stance_evolution["tech_analyst"]) == 2
         assert memory_system.stance_evolution["tech_analyst"][1]["confidence"] == 0.9
-        assert memory_system.stance_evolution["tech_analyst"][1]["stance"] == "AI is essential for healthcare advancement"
+        assert (
+            memory_system.stance_evolution["tech_analyst"][1]["stance"]
+            == "AI is essential for healthcare advancement"
+        )
 
     def test_get_role_context(self):
         """测试获取角色上下文"""
@@ -118,9 +138,15 @@ class TestLayeredMemorySystem:
         memory_system = LayeredMemorySystem()
 
         # 添加一些数据
-        memory_system.add_shared_fact(1, "AI helps in medical imaging", "tech_analyst", 0.9)
-        memory_system.update_role_memory("tech_analyst", "AI improves diagnostic accuracy", 1, "argument")
-        memory_system.add_round_summary(1, "Discussed medical AI applications", ["Diagnostics", "Treatment"], 0.8)
+        memory_system.add_shared_fact(
+            1, "AI helps in medical imaging", "tech_analyst", 0.9
+        )
+        memory_system.update_role_memory(
+            "tech_analyst", "AI improves diagnostic accuracy", 1, "argument"
+        )
+        memory_system.add_round_summary(
+            1, "Discussed medical AI applications", ["Diagnostics", "Treatment"], 0.8
+        )
 
         # 获取角色上下文
         context = memory_system.get_role_context("tech_analyst", current_round=2)
@@ -141,17 +167,37 @@ class TestLayeredMemorySystem:
 
         # 添加多轮数据
         for i in range(5):
-            memory_system.add_shared_fact(i+1, f"Fact {i+1}", "tech_analyst", 0.8)
-            memory_system.update_role_memory("tech_analyst", f"Argument {i+1}", i+1, "argument")
-            memory_system.add_round_summary(i+1, f"Round {i+1} summary", [f"Point {i+1}"], 0.7)
+            memory_system.add_shared_fact(i + 1, f"Fact {i + 1}", "tech_analyst", 0.8)
+            memory_system.update_role_memory(
+                "tech_analyst", f"Argument {i + 1}", i + 1, "argument"
+            )
+            memory_system.add_round_summary(
+                i + 1, f"Round {i + 1} summary", [f"Point {i + 1}"], 0.7
+            )
 
         # 获取压缩上下文（最近3轮）
-        compressed = memory_system.get_compressed_context("tech_analyst", current_round=6, max_rounds=3)
+        compressed = memory_system.get_compressed_context(
+            "tech_analyst", current_round=6, max_rounds=3
+        )
 
         # 验证压缩
         # 标题行 "Recent Shared Facts:" 含子串 "Fact"，只统计事实条目行
-        assert len([line for line in compressed.split('\n') if line.startswith("  - Fact")]) <= 3
-        assert len([line for line in compressed.split('\n') if line.startswith("  - Argument")]) <= 3
+        assert (
+            len(
+                [line for line in compressed.split("\n") if line.startswith("  - Fact")]
+            )
+            <= 3
+        )
+        assert (
+            len(
+                [
+                    line
+                    for line in compressed.split("\n")
+                    if line.startswith("  - Argument")
+                ]
+            )
+            <= 3
+        )
         assert "Round 4" in compressed
         assert "Round 5" in compressed
         assert "Round 1" not in compressed
@@ -162,9 +208,13 @@ class TestLayeredMemorySystem:
 
         memory_system = LayeredMemorySystem()
 
-        # 添加可能冲突的事实（源码 _are_contradictory 检测显式否定对，layered_memory_system.py:316-322）
-        memory_system.add_shared_fact(1, "AI is safe for medical use", "tech_analyst", 0.9)
-        memory_system.add_shared_fact(2, "AI is not safe for medical use", "ethics_expert", 0.8)
+        # 添加可能冲突的事实（源码 _are_contradictory 检测显式否定对，layered_memory_system.py:316-322）  # noqa: E501
+        memory_system.add_shared_fact(
+            1, "AI is safe for medical use", "tech_analyst", 0.9
+        )
+        memory_system.add_shared_fact(
+            2, "AI is not safe for medical use", "ethics_expert", 0.8
+        )
 
         # 检查一致性
         conflicts = memory_system.check_memory_consistency()
@@ -181,15 +231,19 @@ class TestLayeredMemorySystem:
 
         # 添加大量数据
         for i in range(20):
-            memory_system.add_shared_fact(i+1, f"Fact {i+1}", "tech_analyst", 0.8)
-            memory_system.update_role_memory("tech_analyst", f"Argument {i+1}", i+1, "argument")
+            memory_system.add_shared_fact(i + 1, f"Fact {i + 1}", "tech_analyst", 0.8)
+            memory_system.update_role_memory(
+                "tech_analyst", f"Argument {i + 1}", i + 1, "argument"
+            )
 
         # 执行清理（保留最近10轮）
         memory_system.cleanup_old_memories(max_rounds_to_keep=10, current_round=20)
 
         # 验证清理
         assert len(memory_system.shared_factual_history) <= 10
-        assert len(memory_system.role_personal_memories["tech_analyst"]["argument"]) <= 10
+        assert (
+            len(memory_system.role_personal_memories["tech_analyst"]["argument"]) <= 10
+        )
 
     def test_cross_role_memory_sharing(self):
         """测试跨角色记忆共享"""
@@ -198,7 +252,9 @@ class TestLayeredMemorySystem:
         memory_system = LayeredMemorySystem()
 
         # 角色A添加共享事实
-        memory_system.add_shared_fact(1, "AI can reduce medical errors", "tech_analyst", 0.9)
+        memory_system.add_shared_fact(
+            1, "AI can reduce medical errors", "tech_analyst", 0.9
+        )
 
         # 角色B获取上下文
         context_b = memory_system.get_role_context("ethics_expert", current_round=2)
@@ -213,9 +269,15 @@ class TestLayeredMemorySystem:
         memory_system = LayeredMemorySystem()
 
         # 添加一致的立场演化
-        memory_system.track_stance_evolution("tech_analyst", 1, "AI is beneficial", 0.7, "Helps people")
-        memory_system.track_stance_evolution("tech_analyst", 2, "AI is very beneficial", 0.8, "Proven benefits")
-        memory_system.track_stance_evolution("tech_analyst", 3, "AI is essential", 0.9, "Critical for progress")
+        memory_system.track_stance_evolution(
+            "tech_analyst", 1, "AI is beneficial", 0.7, "Helps people"
+        )
+        memory_system.track_stance_evolution(
+            "tech_analyst", 2, "AI is very beneficial", 0.8, "Proven benefits"
+        )
+        memory_system.track_stance_evolution(
+            "tech_analyst", 3, "AI is essential", 0.9, "Critical for progress"
+        )
 
         # 分析一致性
         consistency = memory_system.analyze_stance_consistency("tech_analyst")
@@ -255,17 +317,29 @@ class TestLayeredMemorySystem:
 
         # 模拟多轮辩论
         rounds_data = [
-            {"summary": "Initial discussion", "key_topics": ["AI basics"], "consensus": 0.5},
-            {"summary": "Deep dive into applications", "key_topics": ["Healthcare", "Education"], "consensus": 0.6},
-            {"summary": "Ethical considerations", "key_topics": ["Privacy", "Bias"], "consensus": 0.7}
+            {
+                "summary": "Initial discussion",
+                "key_topics": ["AI basics"],
+                "consensus": 0.5,
+            },
+            {
+                "summary": "Deep dive into applications",
+                "key_topics": ["Healthcare", "Education"],
+                "consensus": 0.6,
+            },
+            {
+                "summary": "Ethical considerations",
+                "key_topics": ["Privacy", "Bias"],
+                "consensus": 0.7,
+            },
         ]
 
         for i, round_data in enumerate(rounds_data):
             memory_system.add_round_summary(
-                round_num=i+1,
+                round_num=i + 1,
                 summary=round_data["summary"],
                 key_points=round_data["key_topics"],
-                consensus_level=round_data["consensus"]
+                consensus_level=round_data["consensus"],
             )
 
         # 获取进程摘要
@@ -274,7 +348,13 @@ class TestLayeredMemorySystem:
         # 验证进程追踪
         assert len(progression["rounds"]) == 3
         assert progression["consensus_trend"] == "improving"
-        assert progression["topic_evolution"] == ["AI basics", "Healthcare", "Education", "Privacy", "Bias"]
+        assert progression["topic_evolution"] == [
+            "AI basics",
+            "Healthcare",
+            "Education",
+            "Privacy",
+            "Bias",
+        ]
 
     def test_error_handling(self):
         """测试错误处理"""

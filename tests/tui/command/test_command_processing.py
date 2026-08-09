@@ -5,19 +5,26 @@ This test suite implements TDD approach for command processing functionality.
 Tests are written first (RED), then implementation follows (GREEN), then refactoring.
 """
 
-import pytest
 from unittest.mock import Mock
-from typing import List, Optional, Dict, Any
+
+import pytest
+
+from daip_live.tui_v1.command.handlers.session import (
+    SessionListHandler,
+    SessionShowHandler,
+)
+from daip_live.tui_v1.command.handlers.system import (
+    HelpCommandHandler,
+    StatusCommandHandler,
+)
 
 # Import real implementations
-from daip_live.tui_v1.command.models import Command, CommandResult
+from daip_live.tui_v1.command.models import CommandResult
 from daip_live.tui_v1.command.parser import CommandParser
 from daip_live.tui_v1.command.registry import CommandRegistry
-from daip_live.tui_v1.command.handlers.system import HelpCommandHandler, StatusCommandHandler
-from daip_live.tui_v1.command.handlers.session import SessionListHandler, SessionShowHandler
-
 
 # RED TESTS - These will fail initially, driving implementation
+
 
 class TestCommandParser:
     """Test command parsing functionality"""
@@ -97,7 +104,9 @@ class TestCommandParser:
     def test_parse_complex_command(self):
         """Test parsing complex command with arguments and multiple options"""
         parser = CommandParser()
-        result = parser.parse('assistant ask "What is TDD?" --context programming --verbose')
+        result = parser.parse(
+            'assistant ask "What is TDD?" --context programming --verbose'
+        )
 
         assert result.command == "assistant"
         assert result.action == "ask"
@@ -192,7 +201,7 @@ class TestCommandHandlers:
 
         result = handler.handle([])
 
-        assert result.success == True
+        assert result.success
         assert "Available Commands" in result.message
         assert "help" in result.message
 
@@ -202,7 +211,7 @@ class TestCommandHandlers:
 
         result = handler.handle([])
 
-        assert result.success == True
+        assert result.success
         assert "System Status" in result.message
 
     def test_session_list_handler(self):
@@ -212,7 +221,7 @@ class TestCommandHandlers:
 
         result = handler.handle([])
 
-        assert result.success == True
+        assert result.success
         assert "Sessions" in result.message
 
     def test_command_handler_with_service_injection(self):
@@ -224,7 +233,7 @@ class TestCommandHandlers:
 
         result = handler.handle(["12345"])
 
-        assert result.success == True
+        assert result.success
         assert "ID: 12345" in result.message
         mock_service.get_session.assert_called_once_with("12345")
 
@@ -234,26 +243,28 @@ class TestCommandHandlers:
 
         result = handler.handle([])  # Missing session ID
 
-        assert result.success == False
+        assert not result.success
         assert "Usage:" in result.message
 
 
 # Mock Classes for Testing
 class MockCommandHandler:
     """Mock command handler for testing"""
-    def handle(self, args: List[str]) -> CommandResult:
+
+    def handle(self, args: list[str]) -> CommandResult:
         return CommandResult(success=True, message="Mock handler executed")
 
 
 class MockSessionService:
     """Mock session service for testing"""
+
     def get_session(self, session_id: str):
         return {"id": session_id, "status": "active"}
 
     def list_sessions(self):
         return [
             {"id": "12345", "name": "Test Session", "status": "active"},
-            {"id": "67890", "name": "Another Session", "status": "inactive"}
+            {"id": "67890", "name": "Another Session", "status": "inactive"},
         ]
 
 

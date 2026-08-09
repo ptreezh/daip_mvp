@@ -3,26 +3,26 @@
 遵循TDD原则：先写测试，再实现功能
 """
 
+from unittest.mock import patch
+
 import pytest
-import asyncio
-from unittest.mock import patch, AsyncMock
+
 from daip_live.scaffolding.llm_service import (
-    LLMService,
-    LLMProvider,
+    ConversationContext,
     LLMModelConfig,
+    LLMProvider,
     LLMRequest,
     LLMResponse,
+    LLMService,
     LLMServiceConfig,
+    MessageRole,
     PromptTemplate,
     PromptVariable,
-    ConversationContext,
-    MessageRole
 )
 from daip_live.scaffolding.models import (
-    ValidationError,
-    GenerationError,
     NetworkError,
-    TimeoutError
+    TimeoutError,
+    ValidationError,
 )
 
 
@@ -68,15 +68,12 @@ class TestPromptVariable:
         """测试提示变量创建"""
         # TC-2.3.4: 提示变量创建测试
         var = PromptVariable(
-            name="project_name",
-            description="项目名称",
-            required=True,
-            default_value=""
+            name="project_name", description="项目名称", required=True, default_value=""
         )
 
         assert var.name == "project_name"
         assert var.description == "项目名称"
-        assert var.required == True
+        assert var.required
         assert var.default_value == ""
 
     def test_prompt_variable_validation(self):
@@ -108,8 +105,8 @@ class TestPromptTemplate:
             content="创建一个名为{project_name}的项目，描述：{description}",
             variables=[
                 PromptVariable("project_name", "项目名称", required=True),
-                PromptVariable("description", "项目描述", required=False)
-            ]
+                PromptVariable("description", "项目描述", required=False),
+            ],
         )
 
         assert template.name == "project_generation"
@@ -124,8 +121,8 @@ class TestPromptTemplate:
             content="Hello {name}, welcome to {project}!",
             variables=[
                 PromptVariable("name", "姓名", required=True),
-                PromptVariable("project", "项目", required=True)
-            ]
+                PromptVariable("project", "项目", required=True),
+            ],
         )
 
         context = {"name": "Alice", "project": "DAIP"}
@@ -140,7 +137,7 @@ class TestPromptTemplate:
         template = PromptTemplate(
             name="test",
             content="Hello {name}",
-            variables=[PromptVariable("name", "姓名", required=True)]
+            variables=[PromptVariable("name", "姓名", required=True)],
         )
 
         # 缺少必需变量
@@ -155,8 +152,8 @@ class TestPromptTemplate:
             content="Project: {name}, Type: {type}",
             variables=[
                 PromptVariable("name", "名称", required=True),
-                PromptVariable("type", "类型", required=False, default_value="web")
-            ]
+                PromptVariable("type", "类型", required=False, default_value="web"),
+            ],
         )
 
         rendered = template.render({"name": "MyApp"})
@@ -175,7 +172,7 @@ class TestLLMModelConfig:
             model_name="gpt-4",
             api_key="test_key",
             max_tokens=2000,
-            temperature=0.7
+            temperature=0.7,
         )
 
         assert config.provider == LLMProvider.OPENAI
@@ -188,18 +185,13 @@ class TestLLMModelConfig:
         # TC-2.3.11: 配置验证测试
         # 有效配置
         config = LLMModelConfig(
-            provider=LLMProvider.OPENAI,
-            model_name="gpt-4",
-            api_key="test_key"
+            provider=LLMProvider.OPENAI, model_name="gpt-4", api_key="test_key"
         )
         errors = config.validate()
         assert len(errors) == 0
 
         # 无效配置 - 缺少API密钥
-        invalid_config = LLMModelConfig(
-            provider=LLMProvider.OPENAI,
-            model_name="gpt-4"
-        )
+        invalid_config = LLMModelConfig(provider=LLMProvider.OPENAI, model_name="gpt-4")
         errors = invalid_config.validate()
         assert len(errors) > 0
         assert any("API密钥" in error for error in errors)
@@ -212,7 +204,7 @@ class TestLLMModelConfig:
             provider=LLMProvider.OPENAI,
             model_name="gpt-4",
             api_key="test_key",
-            temperature=0.5
+            temperature=0.5,
         )
         errors = config.validate()
         assert len(errors) == 0
@@ -222,7 +214,7 @@ class TestLLMModelConfig:
             provider=LLMProvider.OPENAI,
             model_name="gpt-4",
             api_key="test_key",
-            temperature=-0.1
+            temperature=-0.1,
         )
         errors = invalid_config.validate()
         assert len(errors) > 0
@@ -232,7 +224,7 @@ class TestLLMModelConfig:
             provider=LLMProvider.OPENAI,
             model_name="gpt-4",
             api_key="test_key",
-            temperature=2.1
+            temperature=2.1,
         )
         errors = invalid_config.validate()
         assert len(errors) > 0
@@ -248,7 +240,7 @@ class TestLLMRequest:
             prompt="Generate a Python web application",
             context={"project_name": "MyApp"},
             max_tokens=1000,
-            temperature=0.5
+            temperature=0.5,
         )
 
         assert request.prompt == "Generate a Python web application"
@@ -263,10 +255,7 @@ class TestLLMRequest:
         conversation.add_message(MessageRole.USER, "Create a web app")
         conversation.add_message(MessageRole.ASSISTANT, "Sure, what kind?")
 
-        request = LLMRequest(
-            prompt="Make it a Flask app",
-            conversation=conversation
-        )
+        request = LLMRequest(prompt="Make it a Flask app", conversation=conversation)
 
         assert len(request.conversation.messages) == 2
         assert request.conversation.messages[0].role == MessageRole.USER
@@ -282,7 +271,7 @@ class TestLLMResponse:
             content="Here is your Flask app...",
             model="gpt-4",
             usage={"prompt_tokens": 50, "completion_tokens": 150, "total_tokens": 200},
-            finish_reason="stop"
+            finish_reason="stop",
         )
 
         assert response.content == "Here is your Flask app..."
@@ -294,14 +283,12 @@ class TestLLMResponse:
         """测试带错误的响应"""
         # TC-2.3.16: 错误响应测试
         response = LLMResponse(
-            content="",
-            error="Rate limit exceeded",
-            error_code="rate_limit"
+            content="", error="Rate limit exceeded", error_code="rate_limit"
         )
 
         assert response.error == "Rate limit exceeded"
         assert response.error_code == "rate_limit"
-        assert response.has_error() == True
+        assert response.has_error()
 
 
 class TestConversationContext:
@@ -357,15 +344,11 @@ class TestLLMServiceConfig:
         """测试LLM服务配置创建"""
         # TC-2.3.21: 服务配置创建测试
         model_config = LLMModelConfig(
-            provider=LLMProvider.OPENAI,
-            model_name="gpt-4",
-            api_key="test_key"
+            provider=LLMProvider.OPENAI, model_name="gpt-4", api_key="test_key"
         )
 
         service_config = LLMServiceConfig(
-            default_model=model_config,
-            timeout=30.0,
-            max_retries=3
+            default_model=model_config, timeout=30.0, max_retries=3
         )
 
         assert service_config.default_model == model_config
@@ -378,9 +361,7 @@ class TestLLMServiceConfig:
         service_config = LLMServiceConfig()
 
         model_config = LLMModelConfig(
-            provider=LLMProvider.OPENAI,
-            model_name="gpt-3.5-turbo",
-            api_key="test_key"
+            provider=LLMProvider.OPENAI, model_name="gpt-3.5-turbo", api_key="test_key"
         )
 
         service_config.add_model("gpt-3.5-turbo", model_config)
@@ -394,9 +375,7 @@ class TestLLMService:
     def setup_method(self):
         """每个测试方法执行前的设置"""
         self.model_config = LLMModelConfig(
-            provider=LLMProvider.OPENAI,
-            model_name="gpt-4",
-            api_key="test_key"
+            provider=LLMProvider.OPENAI, model_name="gpt-4", api_key="test_key"
         )
         self.service_config = LLMServiceConfig(default_model=self.model_config)
         self.llm_service = LLMService(config=self.service_config)
@@ -419,21 +398,21 @@ class TestLLMService:
     async def test_generate_text_success(self):
         """测试成功生成文本"""
         # TC-2.3.25: 文本生成成功测试
-        request = LLMRequest(
-            prompt="Generate a simple Python function"
-        )
+        request = LLMRequest(prompt="Generate a simple Python function")
 
         # Mock成功响应
         mock_response = LLMResponse(
             content="def hello():\n    print('Hello, World!')",
             model="gpt-4",
-            usage={"total_tokens": 50}
+            usage={"total_tokens": 50},
         )
 
-        with patch.object(self.llm_service, '_call_provider', return_value=mock_response):
+        with patch.object(
+            self.llm_service, "_call_provider", return_value=mock_response
+        ):
             response = await self.llm_service.generate_text(request)
 
-            assert response.success == True
+            assert response.success
             assert "def hello():" in response.content
             assert response.model == "gpt-4"
 
@@ -443,19 +422,19 @@ class TestLLMService:
         # TC-2.3.26: 上下文生成测试
         context = {"project_name": "MyApp", "language": "Python"}
         request = LLMRequest(
-            prompt="Create a main function for {project_name}",
-            context=context
+            prompt="Create a main function for {project_name}", context=context
         )
 
         mock_response = LLMResponse(
-            content="def main():\n    print('Hello from MyApp!')",
-            model="gpt-4"
+            content="def main():\n    print('Hello from MyApp!')", model="gpt-4"
         )
 
-        with patch.object(self.llm_service, '_call_provider', return_value=mock_response):
+        with patch.object(
+            self.llm_service, "_call_provider", return_value=mock_response
+        ):
             response = await self.llm_service.generate_text(request)
 
-            assert response.success == True
+            assert response.success
             assert "MyApp" in response.content
 
     @pytest.mark.asyncio
@@ -466,20 +445,16 @@ class TestLLMService:
         conversation.add_message(MessageRole.USER, "Create a web app")
         conversation.add_message(MessageRole.ASSISTANT, "Sure, Flask or Django?")
 
-        request = LLMRequest(
-            prompt="Flask",
-            conversation=conversation
-        )
+        request = LLMRequest(prompt="Flask", conversation=conversation)
 
-        mock_response = LLMResponse(
-            content="Here's a Flask app...",
-            model="gpt-4"
-        )
+        mock_response = LLMResponse(content="Here's a Flask app...", model="gpt-4")
 
-        with patch.object(self.llm_service, '_call_provider', return_value=mock_response):
+        with patch.object(
+            self.llm_service, "_call_provider", return_value=mock_response
+        ):
             response = await self.llm_service.generate_text(request)
 
-            assert response.success == True
+            assert response.success
             assert len(request.conversation.messages) == 2  # 验证对话历史被保留
 
     @pytest.mark.asyncio
@@ -488,10 +463,14 @@ class TestLLMService:
         # TC-2.3.28: 网络错误测试
         request = LLMRequest(prompt="Test")
 
-        with patch.object(self.llm_service, '_call_provider', side_effect=NetworkError("Connection failed")):
+        with patch.object(
+            self.llm_service,
+            "_call_provider",
+            side_effect=NetworkError("Connection failed"),
+        ):
             response = await self.llm_service.generate_text(request)
 
-            assert response.success == False
+            assert not response.success
             assert "Connection failed" in response.error
             assert response.error_code == "network_error"
 
@@ -501,10 +480,14 @@ class TestLLMService:
         # TC-2.3.29: 超时错误测试
         request = LLMRequest(prompt="Test")
 
-        with patch.object(self.llm_service, '_call_provider', side_effect=TimeoutError("Request timeout")):
+        with patch.object(
+            self.llm_service,
+            "_call_provider",
+            side_effect=TimeoutError("Request timeout"),
+        ):
             response = await self.llm_service.generate_text(request)
 
-            assert response.success == False
+            assert not response.success
             assert "Request timeout" in response.error
             assert response.error_code == "timeout_error"
 
@@ -523,10 +506,10 @@ class TestLLMService:
                 raise NetworkError("Temporary failure")
             return LLMResponse(content="Success after retry", model="gpt-4")
 
-        with patch.object(self.llm_service, '_call_provider', side_effect=mock_call):
+        with patch.object(self.llm_service, "_call_provider", side_effect=mock_call):
             response = await self.llm_service.generate_text(request)
 
-            assert response.success == True
+            assert response.success
             assert response.content == "Success after retry"
             assert call_count == 3  # 验证重试次数
 
@@ -537,15 +520,15 @@ class TestLLMService:
         request = LLMRequest(prompt="Test")
 
         rate_limit_response = LLMResponse(
-            content="",
-            error="Rate limit exceeded",
-            error_code="rate_limit"
+            content="", error="Rate limit exceeded", error_code="rate_limit"
         )
 
-        with patch.object(self.llm_service, '_call_provider', return_value=rate_limit_response):
+        with patch.object(
+            self.llm_service, "_call_provider", return_value=rate_limit_response
+        ):
             response = await self.llm_service.generate_text(request)
 
-            assert response.success == False
+            assert not response.success
             assert response.error_code == "rate_limit"
 
     @pytest.mark.asyncio
@@ -553,25 +536,19 @@ class TestLLMService:
         """测试使用自定义模型"""
         # TC-2.3.32: 自定义模型测试
         custom_model = LLMModelConfig(
-            provider=LLMProvider.ANTHROPIC,
-            model_name="claude-3",
-            api_key="test_key"
+            provider=LLMProvider.ANTHROPIC, model_name="claude-3", api_key="test_key"
         )
 
-        request = LLMRequest(
-            prompt="Test",
-            model_config=custom_model
-        )
+        request = LLMRequest(prompt="Test", model_config=custom_model)
 
-        mock_response = LLMResponse(
-            content="Claude response",
-            model="claude-3"
-        )
+        mock_response = LLMResponse(content="Claude response", model="claude-3")
 
-        with patch.object(self.llm_service, '_call_provider', return_value=mock_response):
+        with patch.object(
+            self.llm_service, "_call_provider", return_value=mock_response
+        ):
             response = await self.llm_service.generate_text(request)
 
-            assert response.success == True
+            assert response.success
             assert response.model == "claude-3"
 
     def test_add_prompt_template(self):
@@ -580,7 +557,7 @@ class TestLLMService:
         template = PromptTemplate(
             name="test_template",
             content="Hello {name}",
-            variables=[PromptVariable("name", "姓名", required=True)]
+            variables=[PromptVariable("name", "姓名", required=True)],
         )
 
         self.llm_service.add_prompt_template(template)
@@ -595,15 +572,14 @@ class TestLLMService:
             content="Create a {language} project named {project_name}",
             variables=[
                 PromptVariable("language", "语言", required=True),
-                PromptVariable("project_name", "项目名", required=True)
-            ]
+                PromptVariable("project_name", "项目名", required=True),
+            ],
         )
 
         self.llm_service.add_prompt_template(template)
 
         rendered = self.llm_service.use_prompt_template(
-            "project_template",
-            {"language": "Python", "project_name": "MyApp"}
+            "project_template", {"language": "Python", "project_name": "MyApp"}
         )
 
         assert "Python project" in rendered
@@ -618,34 +594,30 @@ class TestLLMService:
             content="Generate {language} code for {description}",
             variables=[
                 PromptVariable("language", "语言", required=True),
-                PromptVariable("description", "描述", required=True)
-            ]
+                PromptVariable("description", "描述", required=True),
+            ],
         )
 
         self.llm_service.add_prompt_template(template)
 
-        mock_response = LLMResponse(
-            content="def hello():\n    pass",
-            model="gpt-4"
-        )
+        mock_response = LLMResponse(content="def hello():\n    pass", model="gpt-4")
 
-        with patch.object(self.llm_service, '_call_provider', return_value=mock_response):
+        with patch.object(
+            self.llm_service, "_call_provider", return_value=mock_response
+        ):
             response = await self.llm_service.generate_from_template(
                 "code_generation",
-                {"language": "Python", "description": "hello function"}
+                {"language": "Python", "description": "hello function"},
             )
 
-            assert response.success == True
+            assert response.success
             assert "def hello()" in response.content
 
     @pytest.mark.asyncio
     async def test_streaming_generation(self):
         """测试流式生成"""
         # TC-2.3.36: 流式生成测试
-        request = LLMRequest(
-            prompt="Generate a Python function",
-            stream=True
-        )
+        request = LLMRequest(prompt="Generate a Python function", stream=True)
 
         # Mock流式响应
         async def mock_stream(*args, **kwargs):
@@ -654,13 +626,15 @@ class TestLLMService:
                 yield LLMResponse(content=chunk, finished=False)
             yield LLMResponse(content="", finished=True)
 
-        with patch.object(self.llm_service, '_call_provider_stream', side_effect=mock_stream):
+        with patch.object(
+            self.llm_service, "_call_provider_stream", side_effect=mock_stream
+        ):
             responses = []
             async for response in self.llm_service.generate_text_stream(request):
                 responses.append(response)
 
             assert len(responses) == 5
-            assert responses[-1].finished == True
+            assert responses[-1].finished
             assert "".join(r.content for r in responses[:-1]) == "def hello(): pass"
 
     def test_model_validation(self):
@@ -668,18 +642,14 @@ class TestLLMService:
         # TC-2.3.37: 模型验证测试
         # 有效模型
         valid_config = LLMModelConfig(
-            provider=LLMProvider.OPENAI,
-            model_name="gpt-4",
-            api_key="test_key"
+            provider=LLMProvider.OPENAI, model_name="gpt-4", api_key="test_key"
         )
         errors = self.llm_service.validate_model_config(valid_config)
         assert len(errors) == 0
 
         # 无效模型
         invalid_config = LLMModelConfig(
-            provider=LLMProvider.OPENAI,
-            model_name="",
-            api_key="test_key"
+            provider=LLMProvider.OPENAI, model_name="", api_key="test_key"
         )
         errors = self.llm_service.validate_model_config(invalid_config)
         assert len(errors) > 0
@@ -690,8 +660,7 @@ class TestLLMService:
         # TC-2.3.38: 提供商回退测试
         # 配置回退提供商
         fallback_model = LLMModelConfig(
-            provider=LLMProvider.LOCAL,
-            model_name="local-model"
+            provider=LLMProvider.LOCAL, model_name="local-model"
         )
         self.service_config.fallback_model = fallback_model
 
@@ -704,12 +673,14 @@ class TestLLMService:
             else:
                 raise NetworkError("OpenAI down")
 
-        with patch.object(self.llm_service, '_call_provider', side_effect=mock_call_provider):
-                response = await self.llm_service.generate_text(request)
+        with patch.object(
+            self.llm_service, "_call_provider", side_effect=mock_call_provider
+        ):
+            response = await self.llm_service.generate_text(request)
 
-                assert response.success == True
-                assert response.content == "Fallback response"
-                assert response.model == "local-model"
+            assert response.success
+            assert response.content == "Fallback response"
+            assert response.model == "local-model"
 
 
 if __name__ == "__main__":

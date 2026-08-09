@@ -9,10 +9,11 @@ This test file follows TDD methodology:
 Based on newP6 specification requirements for component architecture.
 """
 
+from abc import ABC
+from typing import Any
+from unittest.mock import Mock
+
 import pytest
-from abc import ABC, abstractmethod
-from typing import Any, Dict
-from unittest.mock import Mock, MagicMock
 
 # These imports should fail initially - this is the RED phase
 # from daip_live.tui_v1.components.base import TUIComponent
@@ -48,15 +49,17 @@ class TestTUIComponentSpecification:
 
         # Check that required methods are abstract
         abstract_methods = TUIComponent.__abstractmethods__
-        required_methods = {'render', 'mount', 'update_state', 'handle_event'}
+        required_methods = {"render", "mount", "update_state", "handle_event"}
 
-        assert required_methods.issubset(abstract_methods), \
-            f"Missing abstract methods. Required: {required_methods}, Found: {abstract_methods}"
+        assert required_methods.issubset(abstract_methods), (
+            f"Missing abstract methods. Required: {required_methods}, Found: {abstract_methods}"  # noqa: E501
+        )
 
     def test_concrete_component_implementation(self):
         """Test that a concrete component can be properly implemented."""
-        from daip_live.tui_v1.components.base import TUIComponent
         from textual.widgets import Static
+
+        from daip_live.tui_v1.components.base import TUIComponent
 
         # Create a concrete implementation for testing
         class TestComponent(TUIComponent):
@@ -79,9 +82,11 @@ class TestTUIComponentSpecification:
 
     def test_render_method_signature(self):
         """Test render method has correct signature."""
-        from daip_live.tui_v1.components.base import TUIComponent
-        from textual.widgets import Static
         import inspect
+
+        from textual.widgets import Static
+
+        from daip_live.tui_v1.components.base import TUIComponent
 
         class TestComponent(TUIComponent):
             def render(self):
@@ -103,8 +108,9 @@ class TestTUIComponentSpecification:
 
     def test_mount_method_signature(self):
         """Test mount method has correct signature (async)."""
-        from daip_live.tui_v1.components.base import TUIComponent
         import inspect
+
+        from daip_live.tui_v1.components.base import TUIComponent
 
         class TestComponent(TUIComponent):
             def render(self):
@@ -123,13 +129,14 @@ class TestTUIComponentSpecification:
         mount_method = TestComponent.mount
         assert inspect.iscoroutinefunction(mount_method)
         sig = inspect.signature(mount_method)
-        assert sig.return_annotation is None or sig.return_annotation == type(None)
+        assert sig.return_annotation is None or sig.return_annotation is type(None)
         assert len(sig.parameters) == 1  # self parameter only
 
     def test_update_state_method_signature(self):
         """Test update_state method has correct signature."""
-        from daip_live.tui_v1.components.base import TUIComponent
         import inspect
+
+        from daip_live.tui_v1.components.base import TUIComponent
 
         class TestComponent(TUIComponent):
             def render(self):
@@ -147,13 +154,14 @@ class TestTUIComponentSpecification:
         # Check method signature
         update_method = TestComponent.update_state
         sig = inspect.signature(update_method)
-        assert sig.return_annotation is None or sig.return_annotation == type(None)
+        assert sig.return_annotation is None or sig.return_annotation is type(None)
         assert len(sig.parameters) == 2  # self and kwargs parameter
 
     def test_handle_event_method_signature(self):
         """Test handle_event method has correct signature."""
-        from daip_live.tui_v1.components.base import TUIComponent
         import inspect
+
+        from daip_live.tui_v1.components.base import TUIComponent
 
         class TestComponent(TUIComponent):
             def render(self):
@@ -182,37 +190,37 @@ class TestTUIComponentSpecification:
         class LifecycleTestComponent(TUIComponent):
             def __init__(self):
                 super().__init__()
-                lifecycle_calls.append('init')
+                lifecycle_calls.append("init")
 
             def render(self):
-                lifecycle_calls.append('render')
+                lifecycle_calls.append("render")
                 return Mock()
 
             async def mount(self):
-                lifecycle_calls.append('mount')
+                lifecycle_calls.append("mount")
 
             def update_state(self, **kwargs):
-                lifecycle_calls.append('update_state')
+                lifecycle_calls.append("update_state")
 
             def handle_event(self, event):
-                lifecycle_calls.append('handle_event')
+                lifecycle_calls.append("handle_event")
 
         component = LifecycleTestComponent()
 
         # Test initial state
-        assert lifecycle_calls == ['init']
+        assert lifecycle_calls == ["init"]
 
         # Test render
         component.render()
-        assert lifecycle_calls == ['init', 'render']
+        assert lifecycle_calls == ["init", "render"]
 
         # Test state update
         component.update_state(test="value")
-        assert lifecycle_calls == ['init', 'render', 'update_state']
+        assert lifecycle_calls == ["init", "render", "update_state"]
 
         # Test event handling
         component.handle_event("test_event")
-        assert lifecycle_calls == ['init', 'render', 'update_state', 'handle_event']
+        assert lifecycle_calls == ["init", "render", "update_state", "handle_event"]
 
     def test_component_state_management(self):
         """Test that component maintains internal state correctly."""
@@ -227,13 +235,13 @@ class TestTUIComponentSpecification:
                 return Mock()
 
             async def mount(self):
-                self._state['mounted'] = True
+                self._state["mounted"] = True
 
             def update_state(self, **kwargs):
                 self._state.update(kwargs)
 
             def handle_event(self, event):
-                self._state['last_event'] = event
+                self._state["last_event"] = event
 
             def get_state(self):
                 return self._state.copy()
@@ -245,11 +253,15 @@ class TestTUIComponentSpecification:
 
         # Update state
         component.update_state(name="test", value=42)
-        assert component.get_state() == {'name': 'test', 'value': 42}
+        assert component.get_state() == {"name": "test", "value": 42}
 
         # Handle event
         component.handle_event("click")
-        assert component.get_state() == {'name': 'test', 'value': 42, 'last_event': 'click'}
+        assert component.get_state() == {
+            "name": "test",
+            "value": 42,
+            "last_event": "click",
+        }
 
 
 if __name__ == "__main__":

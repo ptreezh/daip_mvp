@@ -11,9 +11,12 @@ Aligned with the current SimplifiedTUI implementation:
 - _handle_quit_command is async and delegates to action_quit
 - _handle_compact_command replaces the removed _compress_session_context_async
 """
-import pytest
-from unittest.mock import AsyncMock, Mock, patch
+
 import asyncio
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+
 from daip_live.tui.simplified_main import SimplifiedTUI
 
 
@@ -23,14 +26,14 @@ class TestTUIBackgroundTaskManagement:
     @pytest.fixture
     def tui_app(self):
         """Create a TUI app instance for testing."""
-        with patch('daip_live.container.Container'):
+        with patch("daip_live.container.Container"):
             app = SimplifiedTUI()
             return app
 
     def test_background_tasks_set_initialized(self, tui_app):
         """Test that background tasks set is initialized."""
         # Assert
-        assert hasattr(tui_app, '_background_tasks')
+        assert hasattr(tui_app, "_background_tasks")
         assert isinstance(tui_app._background_tasks, set)
 
     @pytest.mark.asyncio
@@ -38,8 +41,10 @@ class TestTUIBackgroundTaskManagement:
         """Test that unmounting the app schedules the async cleanup task."""
         # Setup - side_effect routes the coroutine to the real asyncio.create_task,
         # which executes the AsyncMock cleanup without a "never awaited" warning
-        with patch.object(tui_app, 'cleanup', new=AsyncMock()) as mock_cleanup:
-            with patch('asyncio.create_task', side_effect=asyncio.create_task) as mock_create_task:
+        with patch.object(tui_app, "cleanup", new=AsyncMock()) as mock_cleanup:
+            with patch(
+                "asyncio.create_task", side_effect=asyncio.create_task
+            ) as mock_create_task:
                 # Execute
                 tui_app.on_unmount()
 
@@ -51,12 +56,14 @@ class TestTUIBackgroundTaskManagement:
                 mock_cleanup.assert_awaited_once()
 
     def test_ctrl_e_shortcut_handled_by_on_key(self, tui_app):
-        """ctrl+e 由 on_key 委托的系统快捷键处理触发退出确认（2026-08-09 修复 shadowing 后）。"""
+        """ctrl+e 由 on_key 委托的系统快捷键处理触发退出确认（2026-08-09 修复 shadowing 后）。"""  # noqa: E501
         # Setup
         event = Mock()
         event.key = "ctrl+e"
 
-        with patch.object(tui_app, 'action_show_exit_confirmation') as mock_confirmation:
+        with patch.object(
+            tui_app, "action_show_exit_confirmation"
+        ) as mock_confirmation:
             # Execute
             tui_app.on_key(event)
 
@@ -65,12 +72,14 @@ class TestTUIBackgroundTaskManagement:
             event.prevent_default.assert_called_once()
 
     def test_ctrl_q_shortcut_handled_by_on_key(self, tui_app):
-        """ctrl+q 由 on_key 委托的系统快捷键处理触发退出确认（2026-08-09 修复 shadowing 后）。"""
+        """ctrl+q 由 on_key 委托的系统快捷键处理触发退出确认（2026-08-09 修复 shadowing 后）。"""  # noqa: E501
         # Setup
         event = Mock()
         event.key = "ctrl+q"
 
-        with patch.object(tui_app, 'action_show_exit_confirmation') as mock_confirmation:
+        with patch.object(
+            tui_app, "action_show_exit_confirmation"
+        ) as mock_confirmation:
             # Execute
             tui_app.on_key(event)
 
@@ -85,7 +94,7 @@ class TestTUIBackgroundTaskManagement:
         event = Mock()
         event.key = "ctrl+c"
 
-        with patch.object(tui_app, 'action_copy_text', new=AsyncMock()) as mock_copy:
+        with patch.object(tui_app, "action_copy_text", new=AsyncMock()) as mock_copy:
             # Execute
             tui_app.on_key(event)
             await asyncio.sleep(0)  # 让调度出的复制任务执行
@@ -101,7 +110,7 @@ class TestTUIBackgroundTaskManagement:
         event = Mock()
         event.key = "ctrl+a"
 
-        with patch.object(tui_app, 'action_copy_text', new=AsyncMock()) as mock_copy:
+        with patch.object(tui_app, "action_copy_text", new=AsyncMock()) as mock_copy:
             # Execute
             tui_app.on_key(event)
             await asyncio.sleep(0)  # 让调度出的复制任务执行
@@ -115,14 +124,16 @@ class TestTUIBackgroundTaskManagement:
         """Test that the quit command logs and delegates to action_quit."""
         # Setup - the implementation fires action_quit() without awaiting it,
         # so a plain Mock (not AsyncMock) avoids a never-awaited coroutine warning
-        with patch.object(tui_app, 'action_quit', new=Mock()) as mock_quit:
-            with patch.object(tui_app, '_update_log_view') as mock_update_log:
+        with patch.object(tui_app, "action_quit", new=Mock()) as mock_quit:
+            with patch.object(tui_app, "_update_log_view") as mock_update_log:
                 # Execute
                 await tui_app._handle_quit_command("")
 
                 # Assert
                 mock_quit.assert_called_once()
-                mock_update_log.assert_any_call("[bold yellow]👋 正在退出...[/bold yellow]")
+                mock_update_log.assert_any_call(
+                    "[bold yellow]👋 正在退出...[/bold yellow]"
+                )
 
     @pytest.mark.asyncio
     async def test_handle_compact_command_with_session(self, tui_app):
@@ -130,7 +141,7 @@ class TestTUIBackgroundTaskManagement:
         # Setup
         tui_app._current_session_id = "sess-1"
 
-        with patch.object(tui_app, '_update_log_view') as mock_update_log:
+        with patch.object(tui_app, "_update_log_view") as mock_update_log:
             # Execute
             await tui_app._handle_compact_command("")
 
@@ -144,7 +155,7 @@ class TestTUIBackgroundTaskManagement:
         # Setup
         tui_app._current_session_id = None
 
-        with patch.object(tui_app, '_update_log_view') as mock_update_log:
+        with patch.object(tui_app, "_update_log_view") as mock_update_log:
             # Execute
             await tui_app._handle_compact_command("")
 

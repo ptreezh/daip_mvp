@@ -3,12 +3,13 @@
 遵循TDD原则：先写测试，再实现功能
 """
 
-import pytest
-import tempfile
 import os
-from pathlib import Path
+import tempfile
+
+import pytest
+
 from daip_live.scaffolding.input_validator import InputValidator, ValidationResult
-from daip_live.scaffolding.models import ValidationError, ValidationConstants
+from daip_live.scaffolding.models import ValidationConstants
 
 
 class TestValidationResult:
@@ -19,7 +20,7 @@ class TestValidationResult:
         # TC-1.3.1: 成功结果测试
         result = ValidationResult(is_valid=True, errors=[], warnings=[])
 
-        assert result.is_valid == True
+        assert result.is_valid
         assert len(result.errors) == 0
         assert len(result.warnings) == 0
 
@@ -29,7 +30,7 @@ class TestValidationResult:
         warnings = ["文件较大", "建议使用更具体的描述"]
         result = ValidationResult(is_valid=True, errors=[], warnings=warnings)
 
-        assert result.is_valid == True
+        assert result.is_valid
         assert result.warnings == warnings
 
     def test_validation_result_creation_with_errors(self):
@@ -38,7 +39,7 @@ class TestValidationResult:
         errors = ["描述为空", "文件不存在"]
         result = ValidationResult(is_valid=False, errors=errors, warnings=[])
 
-        assert result.is_valid == False
+        assert not result.is_valid
         assert result.errors == errors
 
     def test_validation_result_add_error(self):
@@ -47,7 +48,7 @@ class TestValidationResult:
         result = ValidationResult(is_valid=True)
         result.add_error("新的错误")
 
-        assert result.is_valid == False
+        assert not result.is_valid
         assert "新的错误" in result.errors
 
     def test_validation_result_add_warning(self):
@@ -56,16 +57,14 @@ class TestValidationResult:
         result = ValidationResult(is_valid=True)
         result.add_warning("新的警告")
 
-        assert result.is_valid == True
+        assert result.is_valid
         assert "新的警告" in result.warnings
 
     def test_validation_result_str_representation(self):
         """测试字符串表示"""
         # TC-1.3.6: 字符串表示测试
         result = ValidationResult(
-            is_valid=False,
-            errors=["错误1", "错误2"],
-            warnings=["警告1"]
+            is_valid=False, errors=["错误1", "错误2"], warnings=["警告1"]
         )
         result_str = str(result)
 
@@ -99,12 +98,12 @@ class TestInputValidator:
         """每个测试方法执行前的设置"""
         self.validator = InputValidator()
 
-    def _create_temp_file(self, content: str, suffix: str = '.txt') -> tuple:
+    def _create_temp_file(self, content: str, suffix: str = ".txt") -> tuple:
         """创建临时文件并返回路径和清理函数"""
         temp_dir = tempfile.mkdtemp()
         temp_file_path = os.path.join(temp_dir, f"test_file{suffix}")
 
-        with open(temp_file_path, 'w', encoding='utf-8') as f:
+        with open(temp_file_path, "w", encoding="utf-8") as f:
             f.write(content)
 
         def cleanup():
@@ -120,10 +119,10 @@ class TestInputValidator:
     def test_validate_valid_description(self):
         """测试有效的描述验证"""
         # TC-1.3.9: 有效描述测试
-        description = "这是一个有效的项目描述，包含足够的详细信息来生成合理的项目结构。这个描述详细说明了项目的目标、技术栈和主要功能模块。"
+        description = "这是一个有效的项目描述，包含足够的详细信息来生成合理的项目结构。这个描述详细说明了项目的目标、技术栈和主要功能模块。"  # noqa: E501
         result = self.validator.validate_description(description)
 
-        assert result.is_valid == True
+        assert result.is_valid
         assert len(result.errors) == 0
 
     def test_validate_empty_description(self):
@@ -131,7 +130,7 @@ class TestInputValidator:
         # TC-1.3.10: 空描述测试
         result = self.validator.validate_description("")
 
-        assert result.is_valid == False
+        assert not result.is_valid
         assert any("不能为空" in error for error in result.errors)
 
     def test_validate_too_short_description(self):
@@ -140,7 +139,7 @@ class TestInputValidator:
         short_desc = "太短"
         result = self.validator.validate_description(short_desc)
 
-        assert result.is_valid == False
+        assert not result.is_valid
         assert any("至少需要" in error for error in result.errors)
 
     def test_validate_too_long_description(self):
@@ -149,7 +148,7 @@ class TestInputValidator:
         long_desc = "a" * (ValidationConstants.MAX_DESCRIPTION_LENGTH + 1)
         result = self.validator.validate_description(long_desc)
 
-        assert result.is_valid == False
+        assert not result.is_valid
         assert any("不能超过" in error for error in result.errors)
 
     def test_validate_description_with_whitespace(self):
@@ -157,7 +156,7 @@ class TestInputValidator:
         # TC-1.3.13: 空格描述测试
         result = self.validator.validate_description("   \t\n  ")
 
-        assert result.is_valid == False
+        assert not result.is_valid
         assert any("不能为空" in error for error in result.errors)
 
     def test_validate_description_with_unicode(self):
@@ -166,7 +165,7 @@ class TestInputValidator:
         unicode_desc = "这是一个包含特殊符号的项目描述：🚀 AI助手 αβγ émojis"
         result = self.validator.validate_description(unicode_desc)
 
-        assert result.is_valid == True
+        assert result.is_valid
 
     def test_validate_existing_file_path(self):
         """测试存在的文件路径验证"""
@@ -175,11 +174,11 @@ class TestInputValidator:
         temp_file_path = os.path.join(temp_dir, "test_file.txt")
 
         try:
-            with open(temp_file_path, 'w', encoding='utf-8') as f:
+            with open(temp_file_path, "w", encoding="utf-8") as f:
                 f.write("test content")
 
             result = self.validator.validate_file_path(temp_file_path)
-            assert result.is_valid == True
+            assert result.is_valid
 
         finally:
             # 清理临时目录和文件
@@ -193,7 +192,7 @@ class TestInputValidator:
         nonexistent_path = "/path/to/nonexistent/file.txt"
         result = self.validator.validate_file_path(nonexistent_path)
 
-        assert result.is_valid == False
+        assert not result.is_valid
         assert any("不存在" in error for error in result.errors)
 
     def test_validate_empty_file_path(self):
@@ -201,7 +200,7 @@ class TestInputValidator:
         # TC-1.3.17: 空路径测试
         result = self.validator.validate_file_path("")
 
-        assert result.is_valid == False
+        assert not result.is_valid
         assert any("不能为空" in error for error in result.errors)
 
     def test_validate_file_path_with_invalid_characters(self):
@@ -209,9 +208,9 @@ class TestInputValidator:
         # TC-1.3.18: 无效字符路径测试
         invalid_paths = [
             "file<name>.txt",  # 包含尖括号
-            "file|name.txt",   # 包含管道符
-            "file?.txt",       # 包含问号
-            "../etc/passwd",    # 路径遍历尝试
+            "file|name.txt",  # 包含管道符
+            "file?.txt",  # 包含问号
+            "../etc/passwd",  # 路径遍历尝试
         ]
 
         for invalid_path in invalid_paths:
@@ -226,11 +225,11 @@ class TestInputValidator:
 
         try:
             content = "x" * 1000  # 1KB文件
-            with open(temp_file_path, 'w', encoding='utf-8') as f:
+            with open(temp_file_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
             result = self.validator.validate_file_path(temp_file_path)
-            assert result.is_valid == True
+            assert result.is_valid
 
         finally:
             if os.path.exists(temp_file_path):
@@ -249,7 +248,7 @@ class TestInputValidator:
 
         try:
             result = self.validator.validate_file_path(temp_file_path)
-            assert result.is_valid == False
+            assert not result.is_valid
             assert any("过大" in error for error in result.errors)
         finally:
             # 恢复原始设置
@@ -271,14 +270,14 @@ class TestInputValidator:
     def test_validate_supported_file_extensions(self):
         """测试支持的文件扩展名"""
         # TC-1.3.22: 支持扩展名测试
-        supported_extensions = ['.txt', '.md', '.docx']
+        supported_extensions = [".txt", ".md", ".docx"]
 
         for ext in supported_extensions:
             temp_file_path, cleanup = self._create_temp_file("test content", ext)
 
             try:
                 result = self.validator.validate_file_path(temp_file_path)
-                assert result.is_valid == True
+                assert result.is_valid
                 # 不应该有格式相关的警告
                 format_warnings = [w for w in result.warnings if "格式" in w]
                 assert len(format_warnings) == 0
@@ -293,7 +292,7 @@ class TestInputValidator:
 
         try:
             result = self.validator.validate_file_path(temp_file_path)
-            assert result.is_valid == True
+            assert result.is_valid
         finally:
             cleanup()
 
@@ -305,8 +304,8 @@ class TestInputValidator:
 
         try:
             # 写入一些二进制数据
-            with open(temp_file_path, 'wb') as f:
-                f.write(b'\x00\x01\x02\x03\x04\x05')
+            with open(temp_file_path, "wb") as f:
+                f.write(b"\x00\x01\x02\x03\x04\x05")
 
             result = self.validator.validate_file_path(temp_file_path)
             # 应该有二进制文件的警告
@@ -329,18 +328,17 @@ class TestInputValidator:
         try:
             # 验证描述
             desc_result = self.validator.validate_description(description)
-            assert desc_result.is_valid == True
+            assert desc_result.is_valid
 
             # 验证文件
             file_result = self.validator.validate_file_path(temp_file_path)
-            assert file_result.is_valid == True
+            assert file_result.is_valid
 
             # 综合验证
             combined_result = self.validator.validate_input(
-                description=description,
-                file_path=temp_file_path
+                description=description, file_path=temp_file_path
             )
-            assert combined_result.is_valid == True
+            assert combined_result.is_valid
 
         finally:
             cleanup()
@@ -354,9 +352,9 @@ class TestInputValidator:
         try:
             result = self.validator.validate_input(
                 description="",  # 空描述
-                file_path=temp_file_path  # 但有文件
+                file_path=temp_file_path,  # 但有文件
             )
-            assert result.is_valid == True
+            assert result.is_valid
 
         finally:
             cleanup()
@@ -366,16 +364,14 @@ class TestInputValidator:
         # TC-1.3.27: 全空输入测试
         result = self.validator.validate_input(description="", file_path=None)
 
-        assert result.is_valid == False
+        assert not result.is_valid
         assert len(result.errors) > 0
 
     def test_get_validation_summary(self):
         """测试获取验证摘要"""
         # TC-1.3.28: 验证摘要测试
         result = ValidationResult(
-            is_valid=False,
-            errors=["错误1"],
-            warnings=["警告1", "警告2"]
+            is_valid=False, errors=["错误1"], warnings=["警告1", "警告2"]
         )
 
         summary = self.validator.get_validation_summary(result)
@@ -385,6 +381,7 @@ class TestInputValidator:
 
     def test_custom_validation_rules(self):
         """测试自定义验证规则"""
+
         # TC-1.3.29: 自定义规则测试
         def custom_rule(text: str) -> list:
             if "密码" in text:
@@ -405,7 +402,7 @@ class TestInputValidator:
         validator = InputValidator(
             min_description_length=20,
             max_description_length=1000,
-            max_file_size=512 * 1024  # 512KB
+            max_file_size=512 * 1024,  # 512KB
         )
 
         # 测试配置是否生效

@@ -2,20 +2,20 @@
 检查simplified_main.py中所有命令是否与真实系统实现对接
 """
 
+import os
+import sys
 import unittest
 from unittest.mock import Mock, patch
-import sys
-import os
 
 # 添加src到路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from daip_live.tui.simplified_main import SimplifiedTUI
 
 
 class TestCommandIntegration(unittest.TestCase):
     """测试所有命令是否正确实现"""
-    
+
     def setUp(self):
         """设置测试环境"""
         # 创建Mock容器
@@ -29,7 +29,7 @@ class TestCommandIntegration(unittest.TestCase):
         self.mock_container.knowledge_manager.return_value = Mock()
         # 添加辩论管理器的模拟
         self.mock_container.debate_manager.return_value = Mock()
-        
+
         # 模拟一个基本的session_manager
         mock_session_manager = Mock()
         mock_session_manager.list_sessions.return_value = []
@@ -38,7 +38,10 @@ class TestCommandIntegration(unittest.TestCase):
 
     def test_all_command_handlers_exist(self):
         """测试所有命令处理方法是否存在"""
-        with patch('daip_live.tui.simplified_main.get_container', return_value=self.mock_container):
+        with patch(
+            "daip_live.tui.simplified_main.get_container",
+            return_value=self.mock_container,
+        ):
             tui = SimplifiedTUI()
             tui._initialize_tui_modules()
             tui._initialize_role_manager()
@@ -47,25 +50,28 @@ class TestCommandIntegration(unittest.TestCase):
             tui._initialize_memory_service()
             tui._initialize_debate_manager()
             tui._initialize_state()
-            
+
             # 验证所有关键命令处理方法存在
-            self.assertTrue(hasattr(tui, '_handle_search_command'))
-            self.assertTrue(hasattr(tui, '_handle_debate_command'))
-            self.assertTrue(hasattr(tui, '_handle_help_command'))
-            self.assertTrue(hasattr(tui, '_handle_model_command'))
-            self.assertTrue(hasattr(tui, '_handle_compact_command'))
-            self.assertTrue(hasattr(tui, '_handle_doc_command'))
-            self.assertTrue(hasattr(tui, '_handle_wiki_command'))
-            self.assertTrue(hasattr(tui, '_handle_permission_command'))
-            self.assertTrue(hasattr(tui, '_handle_role_command'))
-            self.assertTrue(hasattr(tui, '_handle_knowledge_command'))
-            
+            self.assertTrue(hasattr(tui, "_handle_search_command"))
+            self.assertTrue(hasattr(tui, "_handle_debate_command"))
+            self.assertTrue(hasattr(tui, "_handle_help_command"))
+            self.assertTrue(hasattr(tui, "_handle_model_command"))
+            self.assertTrue(hasattr(tui, "_handle_compact_command"))
+            self.assertTrue(hasattr(tui, "_handle_doc_command"))
+            self.assertTrue(hasattr(tui, "_handle_wiki_command"))
+            self.assertTrue(hasattr(tui, "_handle_permission_command"))
+            self.assertTrue(hasattr(tui, "_handle_role_command"))
+            self.assertTrue(hasattr(tui, "_handle_knowledge_command"))
+
             # 特别检查修复的问题：_start_debate方法
-            self.assertTrue(hasattr(tui, '_start_debate'))
-    
+            self.assertTrue(hasattr(tui, "_start_debate"))
+
     def test_debate_command_can_be_called(self):
         """测试debate命令可以被调用（没有缺失的方法）"""
-        with patch('daip_live.tui.simplified_main.get_container', return_value=self.mock_container):
+        with patch(
+            "daip_live.tui.simplified_main.get_container",
+            return_value=self.mock_container,
+        ):
             tui = SimplifiedTUI()
             tui._initialize_tui_modules()
             tui._initialize_role_manager()
@@ -81,7 +87,7 @@ class TestCommandIntegration(unittest.TestCase):
 
             try:
                 # 检查是否需要的方法存在
-                self.assertTrue(hasattr(tui, '_start_debate'))
+                self.assertTrue(hasattr(tui, "_start_debate"))
                 # 只需要异步方法，commands.py使用asyncio.create_task调用
 
                 # 测试debate命令调用不会出错
@@ -99,10 +105,13 @@ class TestCommandIntegration(unittest.TestCase):
                     self.fail(f"debate命令调用失败: {e}")
             finally:
                 tui._update_log_view = original_update
-    
+
     def test_search_command_uses_session_manager(self):
         """测试search命令可以访问session_manager"""
-        with patch('daip_live.tui.simplified_main.get_container', return_value=self.mock_container):
+        with patch(
+            "daip_live.tui.simplified_main.get_container",
+            return_value=self.mock_container,
+        ):
             tui = SimplifiedTUI()
             tui._initialize_tui_modules()
             tui._initialize_role_manager()
@@ -111,18 +120,19 @@ class TestCommandIntegration(unittest.TestCase):
             tui._initialize_memory_service()
             tui._initialize_debate_manager()
             tui._initialize_state()
-            
+
             # 验证session_manager被正确初始化
             self.assertIsNotNone(tui._session_manager)
-            
+
             # 验证search commands可以访问session_manager
             from daip_live.tui.commands import SearchCommands
+
             search_commands = SearchCommands(tui)
-            
+
             # 检查是否可以调用搜索功能
             original_update = tui._update_log_view
             tui._update_log_view = Mock()
-            
+
             try:
                 search_commands.search_conversation_history("test query")
                 # 验证session_manager被访问
@@ -133,5 +143,5 @@ class TestCommandIntegration(unittest.TestCase):
                 tui._update_log_view = original_update
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

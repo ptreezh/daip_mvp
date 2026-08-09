@@ -5,18 +5,16 @@ This test suite implements TDD approach for debate system functionality.
 Tests are written first (RED), then implementation follows (GREEN), then refactoring.
 """
 
+from unittest.mock import AsyncMock, Mock
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
-from typing import List, Dict, Any, Optional
-import asyncio
-from datetime import datetime
-from enum import Enum
+
+from daip_live.tui_v1.debate.argument import Argument
 
 # Import real implementations (will fail initially - RED phase)
 from daip_live.tui_v1.debate.debate import Debate
 from daip_live.tui_v1.debate.debate_manager import DebateManager
 from daip_live.tui_v1.debate.participant import DebateParticipant
-from daip_live.tui_v1.debate.argument import Argument
 from daip_live.tui_v1.debate.round import DebateRound
 
 
@@ -28,14 +26,14 @@ class TestDebate:
         # This will fail initially - driving need for Debate class
         debate = Debate(
             topic="Should AI development be regulated?",
-            description="A debate on AI regulation policies"
+            description="A debate on AI regulation policies",
         )
 
         assert debate is not None
         assert debate.topic == "Should AI development be regulated?"
         assert debate.description == "A debate on AI regulation policies"
         assert debate.status == "preparing"
-        assert hasattr(debate, 'created_at')
+        assert hasattr(debate, "created_at")
         assert debate.participants == []
         assert debate.rounds == []
 
@@ -45,13 +43,13 @@ class TestDebate:
             topic="AI in healthcare",
             description="Benefits and risks of AI in medical applications",
             max_participants=4,
-            max_rounds=3
+            max_rounds=3,
         )
 
         assert debate.max_participants == 4
         assert debate.max_rounds == 3
         assert debate.current_round == 0
-        assert debate.is_active == False
+        assert not debate.is_active
 
     def test_debate_add_participant(self):
         """Test adding participants to debate"""
@@ -93,9 +91,9 @@ class TestDebate:
 
         success = debate.start()
 
-        assert success == True
+        assert success
         assert debate.status == "active"
-        assert debate.is_active == True
+        assert debate.is_active
         assert debate.current_round == 1
 
     def test_debate_start_insufficient_participants(self):
@@ -109,9 +107,9 @@ class TestDebate:
 
         success = debate.start()
 
-        assert success == False
+        assert not success
         assert debate.status == "preparing"
-        assert debate.is_active == False
+        assert not debate.is_active
 
     def test_debate_end(self):
         """Test ending a debate"""
@@ -121,7 +119,7 @@ class TestDebate:
         debate.end()
 
         assert debate.status == "completed"
-        assert debate.is_active == False
+        assert not debate.is_active
         assert debate.ended_at is not None
 
     def test_debate_get_summary(self):
@@ -143,11 +141,10 @@ class TestDebateParticipant:
     def test_participant_creation(self):
         """Test participant creation"""
         from daip_live.tui_v1.debate.roles import RoleType
+
         # This will fail initially - driving need for DebateParticipant class
         participant = DebateParticipant(
-            name="AI Expert",
-            role=RoleType.PROPONENT,
-            model="gpt-4"
+            name="AI Expert", role=RoleType.PROPONENT, model="gpt-4"
         )
 
         assert participant is not None
@@ -159,6 +156,7 @@ class TestDebateParticipant:
     def test_participant_add_argument(self):
         """Test adding argument to participant"""
         from daip_live.tui_v1.debate.roles import RoleType
+
         participant = DebateParticipant("Expert", RoleType.PROPONENT, "gpt-4")
         argument = Argument(participant.id, "Test argument", "proponent")
 
@@ -170,6 +168,7 @@ class TestDebateParticipant:
     def test_participant_get_position(self):
         """Test getting participant position"""
         from daip_live.tui_v1.debate.roles import RoleType
+
         participant = DebateParticipant("Expert", RoleType.PROPONENT, "gpt-4")
 
         position = participant.get_position()
@@ -180,13 +179,16 @@ class TestDebateParticipant:
     async def test_participant_generate_argument(self):
         """Test generating argument for participant"""
         from daip_live.tui_v1.debate.roles import RoleType
+
         participant = DebateParticipant("Expert", RoleType.PROPONENT, "gpt-4")
         participant.model_service = Mock()
-        participant.model_service.generate_response = AsyncMock(return_value={
-            "content": "AI should be regulated to ensure safety",
-            "tokens": 150,
-            "reasoning": "Based on ethical considerations"
-        })
+        participant.model_service.generate_response = AsyncMock(
+            return_value={
+                "content": "AI should be regulated to ensure safety",
+                "tokens": 150,
+                "reasoning": "Based on ethical considerations",
+            }
+        )
 
         topic = "Should AI be regulated?"
         context = {"round": 1, "previous_arguments": []}
@@ -207,14 +209,14 @@ class TestArgument:
         argument = Argument(
             participant_id="expert1",
             content="AI regulation is necessary for safety",
-            position="proponent"
+            position="proponent",
         )
 
         assert argument is not None
         assert argument.participant_id == "expert1"
         assert argument.content == "AI regulation is necessary for safety"
         assert argument.position == "proponent"
-        assert hasattr(argument, 'created_at')
+        assert hasattr(argument, "created_at")
         assert argument.score is None
 
     def test_argument_add_rebuttal(self):
@@ -247,7 +249,7 @@ class TestDebateRound:
         round = DebateRound(
             round_number=1,
             topic="Should AI be regulated?",
-            max_arguments_per_participant=2
+            max_arguments_per_participant=2,
         )
 
         assert round is not None
@@ -266,7 +268,7 @@ class TestDebateRound:
 
         success = round.add_argument(argument)
 
-        assert success == True
+        assert success
         assert len(round.arguments) == 1
         assert argument in round.arguments
 
@@ -285,7 +287,7 @@ class TestDebateRound:
         round.add_argument(argument1)
         success = round.add_argument(argument2)
 
-        assert success == False
+        assert not success
         assert len(round.arguments) == 1
 
     def test_round_complete(self):
@@ -326,7 +328,7 @@ class TestDebateManager:
 
         assert manager is not None
         assert manager.debates == []
-        assert hasattr(manager, '_debate_id_counter')
+        assert hasattr(manager, "_debate_id_counter")
 
     def test_create_debate(self):
         """Test creating a new debate"""
@@ -335,7 +337,7 @@ class TestDebateManager:
         debate = manager.create_debate(
             topic="Should AI be regulated?",
             description="Regulation debate",
-            max_participants=4
+            max_participants=4,
         )
 
         assert debate is not None
@@ -379,7 +381,7 @@ class TestDebateManager:
 
         success = manager.delete_debate(debate.id)
 
-        assert success == True
+        assert success
         assert len(manager.debates) == 0
 
     def test_delete_nonexistent_debate(self):
@@ -388,7 +390,7 @@ class TestDebateManager:
 
         success = manager.delete_debate("nonexistent")
 
-        assert success == False
+        assert not success
 
     @pytest.mark.asyncio
     async def test_start_debate(self):
@@ -408,13 +410,12 @@ class TestDebateManager:
 
         success = await manager.start_debate(debate.id)
 
-        assert success == True
+        assert success
         assert debate.status == "active"
 
     @pytest.mark.asyncio
     async def test_execute_debate_round(self):
         """Test executing a debate round"""
-        from daip_live.tui_v1.debate.roles import RoleType
 
         manager = DebateManager()
         debate = manager.create_debate("Test topic", "Test description")
@@ -473,7 +474,7 @@ class TestDebateRoles:
             role_type=RoleType.PROPONENT,
             description="Advocates for technological progress",
             model="gpt-4",
-            system_prompt="You are a technology optimist..."
+            system_prompt="You are a technology optimist...",
         )
 
         assert proponent is not None
@@ -489,7 +490,7 @@ class TestDebateRoles:
             role_type=RoleType.OPPONENT,
             description="Questions AI safety and ethics",
             model="claude-3",
-            system_prompt="You are skeptical about AI development..."
+            system_prompt="You are skeptical about AI development...",
         )
 
         config = skeptic.get_configuration()
@@ -503,12 +504,14 @@ class TestDebateRoles:
         from daip_live.tui_v1.debate.roles import DebateRole, RoleType
 
         # Valid role
-        valid_role = DebateRole("Test", RoleType.PROPONENT, "Test", "gpt-4", "Test prompt")
-        assert valid_role.is_valid() == True
+        valid_role = DebateRole(
+            "Test", RoleType.PROPONENT, "Test", "gpt-4", "Test prompt"
+        )
+        assert valid_role.is_valid()
 
         # Invalid role (missing system prompt)
         invalid_role = DebateRole("Test", RoleType.PROPONENT, "Test", "gpt-4", "")
-        assert invalid_role.is_valid() == False
+        assert not invalid_role.is_valid()
 
 
 if __name__ == "__main__":

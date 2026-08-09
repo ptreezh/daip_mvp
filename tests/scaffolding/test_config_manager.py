@@ -3,19 +3,16 @@
 遵循TDD原则：先写测试，再实现功能
 """
 
-import pytest
-import tempfile
 import os
-import yaml
-import json
-from pathlib import Path
-from unittest.mock import patch, mock_open
+from unittest.mock import mock_open, patch
+
+import pytest
+
 from daip_live.scaffolding.config_manager import (
-    ScaffoldConfig,
+    ConfigFormat,
     ConfigSource,
     ConfigValidator,
-    ConfigWatcher,
-    ConfigFormat
+    ScaffoldConfig,
 )
 from daip_live.scaffolding.models import ValidationError
 
@@ -37,7 +34,9 @@ class TestConfigFormat:
         assert ConfigFormat.from_extension("config.yml") == ConfigFormat.YAML
         assert ConfigFormat.from_extension("config.json") == ConfigFormat.JSON
         assert ConfigFormat.from_extension("config.toml") == ConfigFormat.TOML
-        assert ConfigFormat.from_extension("config.txt") == ConfigFormat.YAML  # 默认格式
+        assert (
+            ConfigFormat.from_extension("config.txt") == ConfigFormat.YAML
+        )  # 默认格式
 
 
 class TestConfigSource:
@@ -51,14 +50,14 @@ class TestConfigSource:
             path="/path/to/config.yaml",
             format=ConfigFormat.YAML,
             priority=1,
-            enabled=True
+            enabled=True,
         )
 
         assert source.name == "test_source"
         assert source.path == "/path/to/config.yaml"
         assert source.format == ConfigFormat.YAML
         assert source.priority == 1
-        assert source.enabled == True
+        assert source.enabled
 
     def test_config_source_comparison(self):
         """测试配置源比较（按优先级）"""
@@ -74,7 +73,7 @@ class TestConfigSource:
         sources = [
             ConfigSource("low", "", priority=3),
             ConfigSource("high", "", priority=1),
-            ConfigSource("medium", "", priority=2)
+            ConfigSource("medium", "", priority=2),
         ]
 
         sorted_sources = sorted(sources)
@@ -93,9 +92,9 @@ class TestConfigValidator:
             "type": "object",
             "properties": {
                 "name": {"type": "string"},
-                "age": {"type": "integer", "minimum": 0}
+                "age": {"type": "integer", "minimum": 0},
             },
-            "required": ["name"]
+            "required": ["name"],
         }
 
         validator = ConfigValidator(schema)
@@ -109,9 +108,9 @@ class TestConfigValidator:
             "type": "object",
             "properties": {
                 "name": {"type": "string"},
-                "age": {"type": "integer", "minimum": 0}
+                "age": {"type": "integer", "minimum": 0},
             },
-            "required": ["name"]
+            "required": ["name"],
         }
 
         validator = ConfigValidator(schema)
@@ -127,9 +126,9 @@ class TestConfigValidator:
             "type": "object",
             "properties": {
                 "name": {"type": "string"},
-                "age": {"type": "integer", "minimum": 0}
+                "age": {"type": "integer", "minimum": 0},
             },
-            "required": ["name"]
+            "required": ["name"],
         }
 
         validator = ConfigValidator(schema)
@@ -169,13 +168,8 @@ class TestScaffoldConfig:
         """测试使用自定义值创建配置"""
         # TC-1.6.10: 自定义配置测试
         custom_config = {
-            "scaffold": {
-                "max_file_size": 2048 * 1024,
-                "max_files": 500
-            },
-            "retry": {
-                "max_attempts": 5
-            }
+            "scaffold": {"max_file_size": 2048 * 1024, "max_files": 500},
+            "retry": {"max_attempts": 5},
         }
 
         config = ScaffoldConfig(initial_data=custom_config)
@@ -214,14 +208,11 @@ class TestScaffoldConfig:
         """测试配置合并"""
         # TC-1.6.13: 配置合并测试
         config1 = ScaffoldConfig()
-        config1_data = {
-            "scaffold": {"max_files": 100},
-            "retry": {"max_attempts": 2}
-        }
+        config1_data = {"scaffold": {"max_files": 100}, "retry": {"max_attempts": 2}}
 
         config2_data = {
             "scaffold": {"max_file_size": 2048},
-            "new_section": {"value": "test"}
+            "new_section": {"value": "test"},
         }
 
         config1.merge(config1_data)
@@ -235,14 +226,7 @@ class TestScaffoldConfig:
     def test_config_from_dict(self):
         """测试从字典创建配置"""
         # TC-1.6.14: 字典创建配置测试
-        data = {
-            "test": {
-                "value1": 1,
-                "nested": {
-                    "value2": 2
-                }
-            }
-        }
+        data = {"test": {"value1": 1, "nested": {"value2": 2}}}
 
         config = ScaffoldConfig.from_dict(data)
 
@@ -329,9 +313,7 @@ retry:
         """测试添加配置源"""
         # TC-1.6.20: 添加配置源测试
         source = ConfigSource(
-            name="test_source",
-            path="/path/to/config.yaml",
-            priority=1
+            name="test_source", path="/path/to/config.yaml", priority=1
         )
 
         self.config.add_source(source)
@@ -342,10 +324,7 @@ retry:
     def test_config_remove_source(self):
         """测试移除配置源"""
         # TC-1.6.21: 移除配置源测试
-        source = ConfigSource(
-            name="test_source",
-            path="/path/to/config.yaml"
-        )
+        source = ConfigSource(name="test_source", path="/path/to/config.yaml")
 
         self.config.add_source(source)
         assert self.config.get_source("test_source") is not None
@@ -356,21 +335,16 @@ retry:
     def test_config_reload_from_sources(self):
         """测试从配置源重新加载"""
         # TC-1.6.22: 重载配置源测试
-        source_content = """
-scaffold:
-  max_file_size: 4096
-"""
 
-        source = ConfigSource(
-            name="test_source",
-            path="/path/to/config.yaml"
-        )
+        source = ConfigSource(name="test_source", path="/path/to/config.yaml")
 
         self.config.add_source(source)
 
         # Mock file reading and path existence check
-        with patch.object(self.config, '_load_from_file') as mock_load, \
-             patch('os.path.exists', return_value=True):
+        with (
+            patch.object(self.config, "_load_from_file") as mock_load,
+            patch("os.path.exists", return_value=True),
+        ):
             mock_load.return_value = {"scaffold": {"max_file_size": 4096}}
             self.config.reload()
 
@@ -392,10 +366,8 @@ scaffold:
         # TC-1.6.24: 配置验证测试
         schema = {
             "type": "object",
-            "properties": {
-                "required_field": {"type": "string"}
-            },
-            "required": ["required_field"]
+            "properties": {"required_field": {"type": "string"}},
+            "required": ["required_field"],
         }
 
         # 设置验证器
@@ -512,15 +484,15 @@ scaffold:
         """测试配置路径操作"""
         # TC-1.6.31: 路径操作测试
         # 测试路径存在检查
-        assert self.config.has_path("scaffold.max_file_size") == True
-        assert self.config.has_path("nonexistent.path") == False
+        assert self.config.has_path("scaffold.max_file_size")
+        assert not self.config.has_path("nonexistent.path")
 
         # 测试路径删除
         self.config.set("temp.path", "value")
-        assert self.config.has_path("temp.path") == True
+        assert self.config.has_path("temp.path")
 
         self.config.delete_path("temp.path")
-        assert self.config.has_path("temp.path") == False
+        assert not self.config.has_path("temp.path")
 
     def test_config_search(self):
         """测试配置搜索"""

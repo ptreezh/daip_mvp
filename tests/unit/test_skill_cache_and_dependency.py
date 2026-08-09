@@ -1,16 +1,16 @@
 """
 Unit tests for skill caching and dependency management.
 """
-import pytest
-import time
-from unittest.mock import Mock
 
-from src.daip_live.skills.base import Skill, SkillInput, SkillOutput, SkillMetadata
-from src.daip_live.skills.cache import SkillCache, CacheEntry, CacheStatistics
+import time
+
+import pytest
+
+from src.daip_live.skills.base import Skill, SkillInput, SkillMetadata, SkillOutput
+from src.daip_live.skills.cache import SkillCache
 from src.daip_live.skills.dependency import (
+    DependencyStatus,
     SkillDependencyGraph,
-    DependencyValidationResult,
-    DependencyStatus
 )
 from src.daip_live.skills.manager import SkillManager
 
@@ -35,7 +35,7 @@ class TestSkillCache:
             result="test result",
             metadata={"info": "test"},
             confidence=0.9,
-            execution_time=0.1
+            execution_time=0.1,
         )
 
     def test_cache_get_put(self, cache, skill_input, skill_output):
@@ -304,7 +304,9 @@ class TestSkillDependencyGraph:
         """Test validation with missing dependencies."""
         metadata = {
             "skill_a": SkillMetadata("skill_a", "test", "1.0", "author", [], []),
-            "skill_b": SkillMetadata("skill_b", "test", "1.0", "author", [], ["nonexistent"])
+            "skill_b": SkillMetadata(
+                "skill_b", "test", "1.0", "author", [], ["nonexistent"]
+            ),
         }
 
         result = graph.validate_dependencies(metadata)
@@ -314,8 +316,12 @@ class TestSkillDependencyGraph:
     def test_validate_dependencies_circular(self, graph):
         """Test validation with circular dependencies."""
         metadata = {
-            "skill_a": SkillMetadata("skill_a", "test", "1.0", "author", [], ["skill_b"]),
-            "skill_b": SkillMetadata("skill_b", "test", "1.0", "author", [], ["skill_a"])
+            "skill_a": SkillMetadata(
+                "skill_a", "test", "1.0", "author", [], ["skill_b"]
+            ),
+            "skill_b": SkillMetadata(
+                "skill_b", "test", "1.0", "author", [], ["skill_a"]
+            ),
         }
 
         result = graph.validate_dependencies(metadata)
@@ -326,7 +332,9 @@ class TestSkillDependencyGraph:
         """Test validation with valid dependencies."""
         metadata = {
             "skill_a": SkillMetadata("skill_a", "test", "1.0", "author", [], []),
-            "skill_b": SkillMetadata("skill_b", "test", "1.0", "author", [], ["skill_a"])
+            "skill_b": SkillMetadata(
+                "skill_b", "test", "1.0", "author", [], ["skill_a"]
+            ),
         }
 
         result = graph.validate_dependencies(metadata)
@@ -345,38 +353,43 @@ class TestSkillManagerCachingAndDependency:
     @pytest.fixture
     def sample_skills(self, skill_manager):
         """Register sample skills for testing."""
+
         class SkillA(Skill):
             def __init__(self):
-                super().__init__(SkillMetadata(
-                    name="skill_a",
-                    description="Test skill A",
-                    version="1.0",
-                    author="test",
-                    tags=["test"],
-                    dependencies=[]
-                ))
+                super().__init__(
+                    SkillMetadata(
+                        name="skill_a",
+                        description="Test skill A",
+                        version="1.0",
+                        author="test",
+                        tags=["test"],
+                        dependencies=[],
+                    )
+                )
 
             def execute(self, input):
                 return SkillOutput(
                     result=f"Skill A executed with: {input.data}",
-                    metadata={"skill": "A"}
+                    metadata={"skill": "A"},
                 )
 
         class SkillB(Skill):
             def __init__(self):
-                super().__init__(SkillMetadata(
-                    name="skill_b",
-                    description="Test skill B",
-                    version="1.0",
-                    author="test",
-                    tags=["test"],
-                    dependencies=["skill_a"]
-                ))
+                super().__init__(
+                    SkillMetadata(
+                        name="skill_b",
+                        description="Test skill B",
+                        version="1.0",
+                        author="test",
+                        tags=["test"],
+                        dependencies=["skill_a"],
+                    )
+                )
 
             def execute(self, input):
                 return SkillOutput(
                     result=f"Skill B executed with: {input.data}",
-                    metadata={"skill": "B"}
+                    metadata={"skill": "B"},
                 )
 
         skill_manager.register_skill(SkillA())
@@ -452,8 +465,13 @@ class TestSkillManagerCachingAndDependency:
 
         skill_input = SkillInput(data="test data")
 
-        # Should not raise error when require_all_dependencies=False, but return partial results
-        results = sample_skills.execute_chain("skill_b", skill_input, stop_on_failure=False, require_all_dependencies=False)
+        # Should not raise error when require_all_dependencies=False, but return partial results  # noqa: E501
+        results = sample_skills.execute_chain(
+            "skill_b",
+            skill_input,
+            stop_on_failure=False,
+            require_all_dependencies=False,
+        )
 
         # Should have empty or partial results (skill_a is disabled)
         assert "skill_a" not in results
@@ -469,7 +487,6 @@ class TestSkillManagerCachingAndDependency:
         # Get stats before invalidation
         cache = sample_skills.get_cache()
         hits_before = cache.statistics.hits
-        misses_before = cache.statistics.misses
 
         # Execute again (should hit cache)
         result = sample_skills.execute("skill_a", skill_input, use_cache=True)

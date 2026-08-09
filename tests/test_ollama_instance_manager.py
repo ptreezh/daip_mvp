@@ -3,11 +3,9 @@ OllamaInstanceManager测试用例
 测试单一Ollama实例的分时复用功能
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
-from daip_live.model_provider.provider import LiteLLMProvider
-from daip_live.p4_role_manager_tools.role_model_config import RoleModelConfig
+
+import pytest
 
 
 class TestOllamaInstanceManager:
@@ -15,7 +13,9 @@ class TestOllamaInstanceManager:
 
     def test_ollama_manager_initialization(self):
         """测试Ollama管理器初始化"""
-        from daip_live.p8_debate_system.ollama_instance_manager import OllamaInstanceManager
+        from daip_live.p8_debate_system.ollama_instance_manager import (
+            OllamaInstanceManager,
+        )
 
         manager = OllamaInstanceManager()
 
@@ -26,7 +26,9 @@ class TestOllamaInstanceManager:
     @pytest.mark.asyncio
     async def test_single_model_generation(self):
         """测试单一模型生成"""
-        from daip_live.p8_debate_system.ollama_instance_manager import OllamaInstanceManager
+        from daip_live.p8_debate_system.ollama_instance_manager import (
+            OllamaInstanceManager,
+        )
 
         manager = OllamaInstanceManager()
 
@@ -52,7 +54,9 @@ class TestOllamaInstanceManager:
     @pytest.mark.asyncio
     async def test_model_switching(self):
         """测试模型切换功能"""
-        from daip_live.p8_debate_system.ollama_instance_manager import OllamaInstanceManager
+        from daip_live.p8_debate_system.ollama_instance_manager import (
+            OllamaInstanceManager,
+        )
 
         manager = OllamaInstanceManager()
 
@@ -80,7 +84,9 @@ class TestOllamaInstanceManager:
     @pytest.mark.asyncio
     async def test_concurrent_access(self):
         """测试并发访问安全性"""
-        from daip_live.p8_debate_system.ollama_instance_manager import OllamaInstanceManager
+        from daip_live.p8_debate_system.ollama_instance_manager import (
+            OllamaInstanceManager,
+        )
 
         manager = OllamaInstanceManager()
 
@@ -118,13 +124,17 @@ class TestOllamaInstanceManager:
         # 检查没有重叠的执行
         for i in range(0, len(execution_order), 2):
             assert execution_order[i].startswith("start_")
-            assert execution_order[i+1].startswith("end_")
-            assert execution_order[i].split("_")[1] == execution_order[i+1].split("_")[1]
+            assert execution_order[i + 1].startswith("end_")
+            assert (
+                execution_order[i].split("_")[1] == execution_order[i + 1].split("_")[1]
+            )
 
     @pytest.mark.asyncio
     async def test_same_model_no_switch(self):
         """测试相同模型不进行切换"""
-        from daip_live.p8_debate_system.ollama_instance_manager import OllamaInstanceManager
+        from daip_live.p8_debate_system.ollama_instance_manager import (
+            OllamaInstanceManager,
+        )
 
         manager = OllamaInstanceManager()
 
@@ -157,8 +167,10 @@ class TestOllamaInstanceManager:
     @pytest.mark.asyncio
     async def test_error_handling(self):
         """测试错误处理"""
-        from daip_live.p8_debate_system.ollama_instance_manager import OllamaInstanceManager
         from daip_live.core.exceptions import ModelError
+        from daip_live.p8_debate_system.ollama_instance_manager import (
+            OllamaInstanceManager,
+        )
 
         manager = OllamaInstanceManager()
 
@@ -174,7 +186,9 @@ class TestOllamaInstanceManager:
     @pytest.mark.asyncio
     async def test_model_state_persistence(self):
         """测试模型状态持久化"""
-        from daip_live.p8_debate_system.ollama_instance_manager import OllamaInstanceManager
+        from daip_live.p8_debate_system.ollama_instance_manager import (
+            OllamaInstanceManager,
+        )
 
         manager = OllamaInstanceManager()
 
@@ -196,12 +210,14 @@ class TestOllamaInstanceManager:
 
     def test_lock_mechanism(self):
         """测试锁机制"""
-        from daip_live.p8_debate_system.ollama_instance_manager import OllamaInstanceManager
+        from daip_live.p8_debate_system.ollama_instance_manager import (
+            OllamaInstanceManager,
+        )
 
         manager = OllamaInstanceManager()
 
         # 验证锁存在
-        assert hasattr(manager, '_lock')
+        assert hasattr(manager, "_lock")
         assert isinstance(manager._lock, asyncio.Lock)
 
         # 验证锁没有被获取

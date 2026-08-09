@@ -1,5 +1,5 @@
 """Logging infrastructure test for Phase 0-3."""
-import os
+
 import logging
 from pathlib import Path
 
@@ -9,11 +9,15 @@ def test_log_directory_created():
     from daip_live.container import Container
 
     # Initialize container should set up logging
-    container = Container()
+    Container()
 
     # Verify log directory exists
     log_dir = Path("data/logs")
-    assert log_dir.exists() or Path("../data/logs").exists() or Path("../../data/logs").exists()
+    assert (
+        log_dir.exists()
+        or Path("../data/logs").exists()
+        or Path("../../data/logs").exists()
+    )
 
 
 def test_log_handlers_configured():
@@ -28,5 +32,7 @@ def test_rotating_file_handler():
     from logging.handlers import RotatingFileHandler
 
     root_logger = logging.getLogger()
-    has_rotating_handler = any(isinstance(h, RotatingFileHandler) for h in root_logger.handlers)
+    has_rotating_handler = any(
+        isinstance(h, RotatingFileHandler) for h in root_logger.handlers
+    )
     assert has_rotating_handler, "Should have RotatingFileHandler"

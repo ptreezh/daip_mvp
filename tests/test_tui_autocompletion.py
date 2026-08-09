@@ -28,7 +28,9 @@ from daip_live.p8_debate_system.manager import DebateManager
 from daip_live.persistence.database import DatabaseManager
 from daip_live.tui import DAIP_TUI
 
-pytestmark = pytest.mark.skip(reason="TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准")
+pytestmark = pytest.mark.skip(
+    reason="TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准"
+)
 
 
 @pytest.fixture(scope="class")
@@ -41,9 +43,11 @@ def test_env(request):
 
         mock_config = AppConfig(
             database=DatabaseConfig(path=db_path),
-            llm_provider=LLMProviderConfig(default_model="mock-model", embedding_model="mock-embedding"),
+            llm_provider=LLMProviderConfig(
+                default_model="mock-model", embedding_model="mock-embedding"
+            ),
             knowledge_base=KnowledgeBaseConfig(directory=test_dir),
-            role_manager=RoleManagerConfig(roles_dir=roles_dir)
+            role_manager=RoleManagerConfig(roles_dir=roles_dir),
         )
 
         config_manager = ConfigManager()
@@ -56,12 +60,12 @@ def test_env(request):
         knowledge_manager = KnowledgeManager(
             db_manager=db_manager,
             model_provider=model_provider,
-            config={"knowledge_dir": test_dir}
+            config={"knowledge_dir": test_dir},
         )
         debate_manager = DebateManager(
             session_manager=session_manager,
             role_manager=role_manager,
-            model_provider=model_provider
+            model_provider=model_provider,
         )
 
         request.cls.db_manager = db_manager
@@ -93,7 +97,7 @@ class TestTUIAutocompletion:
             debate_manager=self.debate_manager,
             model_provider=self.model_provider,
             db_manager=self.db_manager,
-            config_manager=self.config_manager
+            config_manager=self.config_manager,
         )
 
         async with tui.run_test() as pilot:
@@ -102,11 +106,12 @@ class TestTUIAutocompletion:
 
             # Simulate user typing '/'
             await pilot.press("/")
-            await pilot.pause(0.1) # Allow UI to react
+            await pilot.pause(0.1)  # Allow UI to react
 
             # Now, the popup should exist
-            assert len(pilot.app.query("#autocomplete-popup")) == 1, \
+            assert len(pilot.app.query("#autocomplete-popup")) == 1, (
                 "Autocomplete popup did not appear after typing '/'."
+            )
 
     @pytest.mark.asyncio
     async def test_autocomplete_popup_shows_commands(self):
@@ -120,7 +125,7 @@ class TestTUIAutocompletion:
             debate_manager=self.debate_manager,
             model_provider=self.model_provider,
             db_manager=self.db_manager,
-            config_manager=self.config_manager
+            config_manager=self.config_manager,
         )
 
         async with tui.run_test() as pilot:
@@ -130,10 +135,14 @@ class TestTUIAutocompletion:
             popup = pilot.app.query_one("#autocomplete-popup")
             list_view = popup.query_one("#autocomplete-list", ListView)
             items = list_view.query(ListItem)
-            content = " ".join([str(item.query_one(Label).renderable) for item in items])
+            content = " ".join(
+                [str(item.query_one(Label).renderable) for item in items]
+            )
 
             # Check for a few known commands and their help text
-            assert "/quit - Exit the application." in content, "Popup should contain commands with help text."
+            assert "/quit - Exit the application." in content, (
+                "Popup should contain commands with help text."
+            )
 
     @pytest.mark.asyncio
     async def test_autocomplete_filters_list(self):
@@ -147,7 +156,7 @@ class TestTUIAutocompletion:
             debate_manager=self.debate_manager,
             model_provider=self.model_provider,
             db_manager=self.db_manager,
-            config_manager=self.config_manager
+            config_manager=self.config_manager,
         )
 
         async with tui.run_test() as pilot:
@@ -159,7 +168,9 @@ class TestTUIAutocompletion:
             popup = pilot.app.query_one("#autocomplete-popup")
             list_view = popup.query_one("#autocomplete-list", ListView)
             items = list_view.query(ListItem)
-            content = " ".join([str(item.query_one(Label).renderable) for item in items])
+            content = " ".join(
+                [str(item.query_one(Label).renderable) for item in items]
+            )
 
             assert "/pa" in content
             assert "/help" not in content
@@ -177,7 +188,7 @@ class TestTUIAutocompletion:
             debate_manager=self.debate_manager,
             model_provider=self.model_provider,
             db_manager=self.db_manager,
-            config_manager=self.config_manager
+            config_manager=self.config_manager,
         )
 
         async with tui.run_test() as pilot:
@@ -198,10 +209,12 @@ class TestTUIAutocompletion:
             # Get the actual second command from the app's discovered list
             # to make the test robust against ordering changes.
             all_commands = sorted(tui._available_commands)
-            expected_command_tuple = all_commands[1] # The second item after sorting
+            expected_command_tuple = all_commands[1]  # The second item after sorting
             expected_command = expected_command_tuple[0]
 
-            assert input_widget.value == expected_command, f"Input value was not updated with selected command. Expected {expected_command} but got {input_widget.value}"
+            assert input_widget.value == expected_command, (
+                f"Input value was not updated with selected command. Expected {expected_command} but got {input_widget.value}"  # noqa: E501
+            )
 
     @pytest.mark.asyncio
     async def test_autocomplete_accept_with_tab(self):
@@ -215,7 +228,7 @@ class TestTUIAutocompletion:
             debate_manager=self.debate_manager,
             model_provider=self.model_provider,
             db_manager=self.db_manager,
-            config_manager=self.config_manager
+            config_manager=self.config_manager,
         )
 
         async with tui.run_test() as pilot:
@@ -235,5 +248,6 @@ class TestTUIAutocompletion:
             all_commands = sorted(tui._available_commands)
             expected_command = all_commands[1][0]
 
-            assert input_widget.value == expected_command, "Input value was not updated with selected command using Tab."
-
+            assert input_widget.value == expected_command, (
+                "Input value was not updated with selected command using Tab."
+            )

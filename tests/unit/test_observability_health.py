@@ -1,11 +1,10 @@
 """Tests for observability health check module (TDD - RED phase)."""
 
-import pytest
 from daip_live.observability.health import (
-    HealthCheck,
-    HealthStatus,
     ComponentHealth,
-    HealthCheckRegistry
+    HealthCheck,
+    HealthCheckRegistry,
+    HealthStatus,
 )
 
 
@@ -19,9 +18,7 @@ def test_health_status_enum():
 def test_component_health_creation():
     """Test creating a component health check."""
     component = ComponentHealth(
-        name="database",
-        status=HealthStatus.HEALTHY,
-        message="Connected"
+        name="database", status=HealthStatus.HEALTHY, message="Connected"
     )
     assert component.name == "database"
     assert component.status == HealthStatus.HEALTHY
@@ -30,10 +27,7 @@ def test_component_health_creation():
 
 def test_health_check_creation():
     """Test creating a health check."""
-    health = HealthCheck(
-        status=HealthStatus.HEALTHY,
-        components={}
-    )
+    health = HealthCheck(status=HealthStatus.HEALTHY, components={})
     assert health.status == HealthStatus.HEALTHY
     assert health.components == {}
 
@@ -44,11 +38,9 @@ def test_health_check_with_components():
         status=HealthStatus.HEALTHY,
         components={
             "database": ComponentHealth(
-                name="database",
-                status=HealthStatus.HEALTHY,
-                message="OK"
+                name="database", status=HealthStatus.HEALTHY, message="OK"
             )
-        }
+        },
     )
     assert health.status == HealthStatus.HEALTHY
     assert "database" in health.components

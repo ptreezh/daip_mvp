@@ -3,22 +3,23 @@
 遵循TDD原则：先写测试，再实现功能
 """
 
-import pytest
-from pathlib import Path
 from unittest.mock import patch
+
+import pytest
+
+from daip_live.scaffolding.models import (
+    GenerationError,
+    ProjectFile,
+    ProjectStructure,
+    ValidationError,
+)
 from daip_live.scaffolding.structure_generator import (
+    GenerationStrategy,
     ProjectStructureGenerator,
+    StructureGeneratorConfig,
+    TemplateConfig,
     TemplateEngine,
     TemplateType,
-    TemplateConfig,
-    GenerationStrategy,
-    StructureGeneratorConfig
-)
-from daip_live.scaffolding.models import (
-    ProjectStructure,
-    ProjectFile,
-    ValidationError,
-    GenerationError
 )
 
 
@@ -50,8 +51,8 @@ class TestTemplateConfig:
             directory_structure={
                 "src": ["main.py"],
                 "tests": [],
-                "docs": ["README.md"]
-            }
+                "docs": ["README.md"],
+            },
         )
 
         assert config.name == "test_template"
@@ -67,15 +68,13 @@ class TestTemplateConfig:
         config = TemplateConfig(
             name="valid_template",
             type=TemplateType.WEB_APP,
-            description="Valid template"
+            description="Valid template",
         )
         assert config.validate() == []
 
         # 无效配置 - 空名称
         invalid_config = TemplateConfig(
-            name="",
-            type=TemplateType.BASIC,
-            description="Invalid template"
+            name="", type=TemplateType.BASIC, description="Invalid template"
         )
         errors = invalid_config.validate()
         assert len(errors) > 0
@@ -93,48 +92,42 @@ class TestGenerationStrategy:
             description="Test generation strategy",
             complexity_threshold=0.7,
             use_ai_generation=True,
-            template_fallback=True
+            template_fallback=True,
         )
 
         assert strategy.name == "test_strategy"
         assert strategy.complexity_threshold == 0.7
-        assert strategy.use_ai_generation == True
-        assert strategy.template_fallback == True
+        assert strategy.use_ai_generation
+        assert strategy.template_fallback
 
     def test_generation_strategy_should_use_ai(self):
         """测试AI生成判断"""
         # TC-2.2.5: AI生成判断测试
         strategy = GenerationStrategy(
-            name="ai_strategy",
-            complexity_threshold=0.5,
-            use_ai_generation=True
+            name="ai_strategy", complexity_threshold=0.5, use_ai_generation=True
         )
 
         # 高复杂度应该使用AI
-        assert strategy.should_use_ai(0.8) == True
+        assert strategy.should_use_ai(0.8)
 
         # 低复杂度应该使用模板
-        assert strategy.should_use_ai(0.3) == False
+        assert not strategy.should_use_ai(0.3)
 
     def test_generation_strategy_should_use_template_fallback(self):
         """测试模板回退判断"""
         # TC-2.2.6: 模板回退判断测试
         strategy = GenerationStrategy(
-            name="fallback_strategy",
-            use_ai_generation=True,
-            template_fallback=True
+            name="fallback_strategy", use_ai_generation=True, template_fallback=True
         )
 
-        assert strategy.should_use_template_fallback() == True
+        assert strategy.should_use_template_fallback()
 
         # 禁用回退的策略
         no_fallback_strategy = GenerationStrategy(
-            name="no_fallback_strategy",
-            use_ai_generation=True,
-            template_fallback=False
+            name="no_fallback_strategy", use_ai_generation=True, template_fallback=False
         )
 
-        assert no_fallback_strategy.should_use_template_fallback() == False
+        assert not no_fallback_strategy.should_use_template_fallback()
 
 
 class TestStructureGeneratorConfig:
@@ -145,9 +138,7 @@ class TestStructureGeneratorConfig:
         # TC-2.2.7: 结构生成器配置创建测试
         strategy = GenerationStrategy("test_strategy")
         config = StructureGeneratorConfig(
-            default_strategy=strategy,
-            max_files=1000,
-            max_directory_depth=10
+            default_strategy=strategy, max_files=1000, max_directory_depth=10
         )
 
         assert config.default_strategy == strategy
@@ -162,7 +153,7 @@ class TestStructureGeneratorConfig:
 
         config = StructureGeneratorConfig(
             default_strategy=simple_strategy,
-            strategies=[simple_strategy, complex_strategy]
+            strategies=[simple_strategy, complex_strategy],
         )
 
         # 低复杂度应该选择简单策略
@@ -192,9 +183,7 @@ class TestTemplateEngine:
         """测试添加模板"""
         # TC-2.2.10: 添加模板测试
         config = TemplateConfig(
-            name="test_template",
-            type=TemplateType.WEB_APP,
-            description="Test template"
+            name="test_template", type=TemplateType.WEB_APP, description="Test template"
         )
 
         self.template_engine.add_template(config)
@@ -204,10 +193,7 @@ class TestTemplateEngine:
     def test_template_engine_get_template(self):
         """测试获取模板"""
         # TC-2.2.11: 获取模板测试
-        config = TemplateConfig(
-            name="test_template",
-            type=TemplateType.WEB_APP
-        )
+        config = TemplateConfig(name="test_template", type=TemplateType.WEB_APP)
 
         self.template_engine.add_template(config)
         retrieved = self.template_engine.get_template("test_template")
@@ -239,12 +225,12 @@ class TestTemplateEngine:
             directory_structure={
                 "src": ["main.py"],
                 "tests": [],
-                "docs": ["README.md"]
+                "docs": ["README.md"],
             },
             file_templates={
                 "main.py": "def main():\n    print('Hello, World!')\n",
-                "README.md": "# {project_name}\n\n{description}"
-            }
+                "README.md": "# {project_name}\n\n{description}",
+            },
         )
 
         self.template_engine.add_template(config)
@@ -252,13 +238,11 @@ class TestTemplateEngine:
         # 应用模板
         context = {
             "project_name": "test_project",
-            "description": "Test project description"
+            "description": "Test project description",
         }
 
         structure = self.template_engine.apply_template(
-            "basic_template",
-            context,
-            "./output"
+            "basic_template", context, "./output"
         )
 
         assert structure.description == "Generated using template: basic_template"
@@ -286,7 +270,7 @@ Features: {features}
             "author": "Developer",
             "date": "2025-01-01",
             "language": "Python",
-            "features": "web, api, database"
+            "features": "web, api, database",
         }
 
         rendered = self.template_engine.render_template(template_content, context)
@@ -331,7 +315,9 @@ Database: {database_type}
 
         # 无认证的上下文
         no_auth_context = {"has_auth": False}
-        rendered = self.template_engine.render_template(template_content, no_auth_context)
+        rendered = self.template_engine.render_template(
+            template_content, no_auth_context
+        )
         assert "Authentication module enabled" not in rendered
 
     def test_template_engine_loops(self):
@@ -344,9 +330,7 @@ Features:
 {#endfor#}
 """
 
-        context = {
-            "features": ["authentication", "database", "api"]
-        }
+        context = {"features": ["authentication", "database", "api"]}
 
         rendered = self.template_engine.render_template(template_content, context)
 
@@ -374,10 +358,7 @@ class TestProjectStructureGenerator:
         """测试使用自定义配置创建生成器"""
         # TC-2.2.19: 自定义配置生成器测试
         strategy = GenerationStrategy("custom_strategy")
-        config = StructureGeneratorConfig(
-            default_strategy=strategy,
-            max_files=500
-        )
+        config = StructureGeneratorConfig(default_strategy=strategy, max_files=500)
 
         generator = ProjectStructureGenerator(config=config)
         assert generator.config.default_strategy == strategy
@@ -391,14 +372,11 @@ class TestProjectStructureGenerator:
         template_config = TemplateConfig(
             name="simple_template",
             type=TemplateType.WEB_APP,  # 使用不同类型避免冲突
-            directory_structure={
-                "src": ["main.py"],
-                "tests": ["test_main.py"]
-            },
+            directory_structure={"src": ["main.py"], "tests": ["test_main.py"]},
             file_templates={
                 "main.py": "def main():\n    pass\n",
-                "test_main.py": "def test_main():\n    assert True\n"
-            }
+                "test_main.py": "def test_main():\n    assert True\n",
+            },
         )
 
         self.generator.template_engine.add_template(template_config)
@@ -409,13 +387,10 @@ class TestProjectStructureGenerator:
             "keywords": ["python", "simple", "web"],
             "project_type": "web_app",
             "features": [],
-            "complexity": 0.3
+            "complexity": 0.3,
         }
 
-        context = {
-            "project_name": "test_app",
-            "description": "Test application"
-        }
+        context = {"project_name": "test_app", "description": "Test application"}
 
         structure = await self.generator.generate_structure(analysis, context)
 
@@ -433,9 +408,7 @@ class TestProjectStructureGenerator:
         # TC-2.2.21: AI结构生成测试
         # 配置AI策略
         ai_strategy = GenerationStrategy(
-            name="ai_strategy",
-            complexity_threshold=0.5,
-            use_ai_generation=True
+            name="ai_strategy", complexity_threshold=0.5, use_ai_generation=True
         )
 
         config = StructureGeneratorConfig(default_strategy=ai_strategy)
@@ -447,12 +420,12 @@ class TestProjectStructureGenerator:
             "keywords": ["web", "microservices", "api", "database", "auth"],
             "project_type": "web_app",
             "features": ["authentication", "database", "api"],
-            "complexity": 0.8
+            "complexity": 0.8,
         }
 
         context = {
             "project_name": "complex_app",
-            "description": "Complex web application"
+            "description": "Complex web application",
         }
 
         # Mock AI生成
@@ -461,11 +434,13 @@ class TestProjectStructureGenerator:
             files=[
                 ProjectFile(path="src/app.py", content=""),
                 ProjectFile(path="src/auth.py", content=""),
-                ProjectFile(path="src/api.py", content="")
-            ]
+                ProjectFile(path="src/api.py", content=""),
+            ],
         )
 
-        with patch.object(generator, '_generate_with_ai', return_value=expected_structure):
+        with patch.object(
+            generator, "_generate_with_ai", return_value=expected_structure
+        ):
             structure = await generator.generate_structure(analysis, context)
 
             assert structure.description == "AI generated complex web app"
@@ -477,9 +452,7 @@ class TestProjectStructureGenerator:
         # TC-2.2.22: 回退机制测试
         # 配置带回退的策略
         fallback_strategy = GenerationStrategy(
-            name="fallback_strategy",
-            use_ai_generation=True,
-            template_fallback=True
+            name="fallback_strategy", use_ai_generation=True, template_fallback=True
         )
 
         config = StructureGeneratorConfig(default_strategy=fallback_strategy)
@@ -490,20 +463,22 @@ class TestProjectStructureGenerator:
             name="fallback_template",
             type=TemplateType.BASIC,
             directory_structure={"src": ["main.py"]},
-            file_templates={"main.py": "# Fallback template\n"}
+            file_templates={"main.py": "# Fallback template\n"},
         )
 
         generator.template_engine.add_template(template_config)
 
         analysis = {
             "content": "Simple project",
-            "complexity": 0.6  # 触发AI生成
+            "complexity": 0.6,  # 触发AI生成
         }
 
         context = {"project_name": "fallback_test"}
 
         # Mock AI失败，模板成功
-        with patch.object(generator, '_generate_with_ai', side_effect=GenerationError("AI failed")):
+        with patch.object(
+            generator, "_generate_with_ai", side_effect=GenerationError("AI failed")
+        ):
             structure = await generator.generate_structure(analysis, context)
 
             # 应该回退到模板生成
@@ -517,7 +492,7 @@ class TestProjectStructureGenerator:
         # 创建会导致验证失败的请求
         analysis = {
             "content": "x" * 10000,  # 超长内容
-            "complexity": 0.9
+            "complexity": 0.9,
         }
 
         context = {"project_name": "test"}
@@ -533,26 +508,17 @@ class TestProjectStructureGenerator:
         """测试推荐模板类型"""
         # TC-2.2.24: 模板类型推荐测试
         # Web应用
-        analysis = {
-            "project_type": "web",
-            "keywords": ["web", "frontend", "backend"]
-        }
+        analysis = {"project_type": "web", "keywords": ["web", "frontend", "backend"]}
         template_type = self.generator.get_recommended_template_type(analysis)
         assert template_type == TemplateType.WEB_APP
 
         # API项目
-        analysis = {
-            "project_type": "api",
-            "keywords": ["api", "rest", "endpoint"]
-        }
+        analysis = {"project_type": "api", "keywords": ["api", "rest", "endpoint"]}
         template_type = self.generator.get_recommended_template_type(analysis)
         assert template_type == TemplateType.API
 
         # CLI项目
-        analysis = {
-            "project_type": "cli",
-            "keywords": ["cli", "command", "tool"]
-        }
+        analysis = {"project_type": "cli", "keywords": ["cli", "command", "tool"]}
         template_type = self.generator.get_recommended_template_type(analysis)
         assert template_type == TemplateType.CLI
 
@@ -560,10 +526,7 @@ class TestProjectStructureGenerator:
         """测试生成请求验证"""
         # TC-2.2.25: 请求验证测试
         # 有效请求
-        analysis = {
-            "content": "Valid content",
-            "complexity": 0.5
-        }
+        analysis = {"content": "Valid content", "complexity": 0.5}
         context = {"project_name": "valid_project"}
 
         errors = self.generator.validate_generation_request(analysis, context)
@@ -573,7 +536,9 @@ class TestProjectStructureGenerator:
         invalid_analysis = {"content": ""}  # 缺少complexity
         invalid_context = {}  # 缺少project_name
 
-        errors = self.generator.validate_generation_request(invalid_analysis, invalid_context)
+        errors = self.generator.validate_generation_request(
+            invalid_analysis, invalid_context
+        )
         assert len(errors) > 0
         assert any("缺少必需的分析字段" in error for error in errors)
 
@@ -586,13 +551,10 @@ class TestProjectStructureGenerator:
             "content": "Python project with tests and docs",
             "keywords": ["python", "testing", "documentation"],
             "features": ["tests", "docs"],
-            "complexity": 0.4
+            "complexity": 0.4,
         }
 
-        context = {
-            "project_name": "custom_project",
-            "author": "Developer"
-        }
+        context = {"project_name": "custom_project", "author": "Developer"}
 
         template = await self.generator.create_custom_template(analysis, context)
 
@@ -604,9 +566,7 @@ class TestProjectStructureGenerator:
         # 验证模板可以应用
         self.generator.template_engine.add_template(template)
         structure = self.generator.template_engine.apply_template(
-            template.name,
-            context,
-            "./output"
+            template.name, context, "./output"
         )
 
         assert len(structure.files) > 0

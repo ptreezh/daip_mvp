@@ -40,7 +40,7 @@ async def test_simplified_tui_accepts_input_and_system_keys():
             input_widget.value = "你好"
             await pilot.pause()
 
-            # 系统快捷键处理不崩溃（action_show_exit_confirmation 需容器动作，仅验证路径可达性）
+            # 系统快捷键处理不崩溃（action_show_exit_confirmation 需容器动作，仅验证路径可达性）  # noqa: E501
             app._handle_system_keys(
                 type("E", (), {"key": "escape", "prevent_default": lambda: None})()
             )

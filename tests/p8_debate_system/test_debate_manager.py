@@ -10,7 +10,6 @@ from src.daip_live.p8_debate_system.manager import DebateManager
 
 
 class TestDebateManager(unittest.TestCase):
-
     def setUp(self):
         self.mock_session_manager = MagicMock(spec=SessionManager)
         self.mock_role_manager = MagicMock(spec=RoleManager)
@@ -19,11 +18,12 @@ class TestDebateManager(unittest.TestCase):
         self.debate_manager = DebateManager(
             session_manager=self.mock_session_manager,
             role_manager=self.mock_role_manager,
-            model_provider=self.mock_model_provider
+            model_provider=self.mock_model_provider,
         )
 
     def test_debate_lifecycle(self):
         """Test the full lifecycle of a debate."""
+
         async def run_test():
             # Arrange
             topic = "Should AI be regulated?"
@@ -36,20 +36,25 @@ class TestDebateManager(unittest.TestCase):
             self.mock_role_manager.get_role_by_name.side_effect = [pro_role, con_role]
 
             # Mock session creation
-            mock_session = Session(goal=topic, session_type="debate", participant_ids=roles)
+            mock_session = Session(
+                goal=topic, session_type="debate", participant_ids=roles
+            )
             self.mock_session_manager.create_session.return_value = mock_session
 
             # Mock model provider responses
-            self.mock_model_provider.generate = AsyncMock(side_effect=[
-                ("Pro argument 1", {"total_tokens": 10}), 
-                ("Con argument 1", {"total_tokens": 10}),
-                ("Pro argument 2", {"total_tokens": 10}), 
-                ("Con argument 2", {"total_tokens": 10}),
-                ("Final summary of the debate.", {"total_tokens": 10})
-            ])
+            self.mock_model_provider.generate = AsyncMock(
+                side_effect=[
+                    ("Pro argument 1", {"total_tokens": 10}),
+                    ("Con argument 1", {"total_tokens": 10}),
+                    ("Pro argument 2", {"total_tokens": 10}),
+                    ("Con argument 2", {"total_tokens": 10}),
+                    ("Final summary of the debate.", {"total_tokens": 10}),
+                ]
+            )
 
             # Act
             final_session = None
+
             def track_session(session):
                 nonlocal final_session
                 final_session = session
@@ -57,9 +62,7 @@ class TestDebateManager(unittest.TestCase):
             self.mock_session_manager.save_session.side_effect = track_session
 
             async for event in self.debate_manager.run_debate(
-                topic=topic,
-                roles_names=roles,
-                num_rounds=num_rounds
+                topic=topic, roles_names=roles, num_rounds=num_rounds
             ):
                 pass  # Run through all events
 
@@ -67,9 +70,9 @@ class TestDebateManager(unittest.TestCase):
             self.mock_session_manager.create_session.assert_called_once_with(
                 goal=topic, session_type="debate", participant_ids=roles
             )
-            self.mock_role_manager.get_role_by_name.assert_has_calls([
-                call("pro_arguer"), call("con_arguer")
-            ])
+            self.mock_role_manager.get_role_by_name.assert_has_calls(
+                [call("pro_arguer"), call("con_arguer")]
+            )
             self.assertEqual(self.mock_model_provider.generate.call_count, 5)
 
             # Check status by value to handle potential enum instance differences
@@ -78,9 +81,12 @@ class TestDebateManager(unittest.TestCase):
             self.assertEqual(final_session.history[0].content, "Pro argument 1")
             self.assertEqual(final_session.history[3].content, "Con argument 2")
             self.assertEqual(final_session.summary, "Final summary of the debate.")
-            self.mock_session_manager.save_session.assert_called_once_with(final_session)
+            self.mock_session_manager.save_session.assert_called_once_with(
+                final_session
+            )
 
         asyncio.run(run_test())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

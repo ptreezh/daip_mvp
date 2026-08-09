@@ -5,19 +5,19 @@ This test suite implements TDD approach for service integration functionality.
 Tests are written first (RED), then implementation follows (GREEN), then refactoring.
 """
 
+from unittest.mock import AsyncMock, Mock
+
 import pytest
-from unittest.mock import Mock, AsyncMock
-from typing import List, Dict, Any
 
 # Import real implementations
 from daip_live.tui_v1.services.base import BaseServiceAdapter
 from daip_live.tui_v1.services.container import ServiceContainer
-from daip_live.tui_v1.services.session_service import SessionServiceAdapter
 from daip_live.tui_v1.services.knowledge_service import KnowledgeServiceAdapter
 from daip_live.tui_v1.services.model_service import ModelServiceAdapter
-
+from daip_live.tui_v1.services.session_service import SessionServiceAdapter
 
 # RED TESTS - These will fail initially, driving implementation
+
 
 class TestServiceContainer:
     """Test service container functionality"""
@@ -28,15 +28,15 @@ class TestServiceContainer:
         container = ServiceContainer()
 
         assert container is not None
-        assert hasattr(container, '_services')
-        assert hasattr(container, '_initialized')
-        assert container._initialized == False
+        assert hasattr(container, "_services")
+        assert hasattr(container, "_initialized")
+        assert not container._initialized
 
     def test_register_service(self):
         """Test service registration"""
         container = ServiceContainer()
         mock_adapter = Mock(spec=BaseServiceAdapter)
-        mock_service = Mock()
+        Mock()
 
         container.register_service("test_service", mock_adapter)
 
@@ -115,8 +115,10 @@ class TestServiceContainer:
 
         await container.initialize_all(mock_event_system, mock_state_manager)
 
-        assert container._initialized == True
-        mock_adapter.set_dependencies.assert_called_once_with(mock_event_system, mock_state_manager)
+        assert container._initialized
+        mock_adapter.set_dependencies.assert_called_once_with(
+            mock_event_system, mock_state_manager
+        )
         mock_adapter.initialize.assert_called_once()
 
     @pytest.mark.asyncio
@@ -177,7 +179,7 @@ class TestSessionServiceAdapter:
         service = Mock()
         service.list_sessions.return_value = [
             {"id": "12345", "name": "Test Session", "status": "active"},
-            {"id": "67890", "name": "Another Session", "status": "inactive"}
+            {"id": "67890", "name": "Another Session", "status": "inactive"},
         ]
         service.get_session.return_value = {"id": "12345", "status": "active"}
         service.create_session.return_value = {"id": "ABCDE", "name": "New Session"}
@@ -219,14 +221,14 @@ class TestSessionServiceAdapter:
         """Test deleting session"""
         result = await session_adapter.delete_session("12345")
 
-        assert result == True
+        assert result
 
     @pytest.mark.asyncio
     async def test_switch_session(self, session_adapter):
         """Test switching session"""
         result = await session_adapter.switch_session("12345")
 
-        assert result == True
+        assert result
 
 
 class TestKnowledgeServiceAdapter:
@@ -237,7 +239,7 @@ class TestKnowledgeServiceAdapter:
         service = Mock()
         service.search.return_value = [
             {"id": "doc1", "title": "Microservices", "relevance": 0.95},
-            {"id": "doc2", "title": "Architecture", "relevance": 0.87}
+            {"id": "doc2", "title": "Architecture", "relevance": 0.87},
         ]
         service.add_document.return_value = {"id": "doc3", "status": "added"}
         service.sync.return_value = {"status": "synced", "documents": 1234}
@@ -291,11 +293,19 @@ class TestModelServiceAdapter:
         service.list_models.return_value = [
             {"name": "gpt-4o-mini", "provider": "OpenAI", "status": "available"},
             {"name": "claude-3-sonnet", "provider": "Anthropic", "status": "available"},
-            {"name": "llama-3-70b", "provider": "Local", "status": "unavailable"}
+            {"name": "llama-3-70b", "provider": "Local", "status": "unavailable"},
         ]
-        service.get_status.return_value = {"name": "gpt-4o-mini", "status": "ready", "response_time": 0.8}
-        # Don't define switch_model method to trigger fallback logic (Mock auto-creates but returns Mock object)
-        service.get_metrics.return_value = {"name": "gpt-4o-mini", "tokens_per_minute": 1000, "avg_response_time": 0.7}
+        service.get_status.return_value = {
+            "name": "gpt-4o-mini",
+            "status": "ready",
+            "response_time": 0.8,
+        }
+        # Don't define switch_model method to trigger fallback logic (Mock auto-creates but returns Mock object)  # noqa: E501
+        service.get_metrics.return_value = {
+            "name": "gpt-4o-mini",
+            "tokens_per_minute": 1000,
+            "avg_response_time": 0.7,
+        }
         return service
 
     @pytest.fixture

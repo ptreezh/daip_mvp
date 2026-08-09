@@ -3,15 +3,12 @@
 遵循TDD原则 - 先写测试，后写实现
 """
 
-import pytest
-import asyncio
-from unittest.mock import Mock, patch, MagicMock
-from typing import Dict, Any, List
-from typer.testing import CliRunner
-from rich.console import Console
-from datetime import datetime, timezone
+from unittest.mock import Mock, patch
 
-from daip_live.core.models import Session, DialogueTurn, AgentState
+import pytest
+from typer.testing import CliRunner
+
+from daip_live.core.models import AgentState, DialogueTurn, Session
 
 # We'll import the actual command module once we create it
 # from daip_live.cli.commands.session import app as session_app
@@ -46,11 +43,11 @@ class TestSessionListCommand:
         from daip_live.cli.commands.session import app as session_app
 
         runner = CliRunner()
-        result = runner.invoke(session_app, ['--help'])
+        result = runner.invoke(session_app, ["--help"])
 
         assert result.exit_code == 0
-        assert 'list' in result.stdout
-        assert 'sessions' in result.stdout.lower()
+        assert "list" in result.stdout
+        assert "sessions" in result.stdout.lower()
 
     def test_session_list_basic_functionality(self):
         """测试会话列表基本功能"""
@@ -59,9 +56,12 @@ class TestSessionListCommand:
         runner = CliRunner()
 
         # Mock the session manager and database
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             # Setup database mock
             mock_db = Mock()
             mock_db_class.return_value = mock_db
@@ -73,28 +73,28 @@ class TestSessionListCommand:
             # Mock return data (real contract: list of pydantic Session models)
             mock_sessions = [
                 Session(
-                    session_id='session-1',
-                    goal='Discuss AI ethics',
-                    session_type='debate',
-                    participant_ids=['agent1', 'agent2'],
+                    session_id="session-1",
+                    goal="Discuss AI ethics",
+                    session_type="debate",
+                    participant_ids=["agent1", "agent2"],
                     status=AgentState.RUNNING,
                 ),
                 Session(
-                    session_id='session-2',
-                    goal='Plan project architecture',
-                    session_type='workflow',
-                    participant_ids=['agent3'],
+                    session_id="session-2",
+                    goal="Plan project architecture",
+                    session_type="workflow",
+                    participant_ids=["agent3"],
                     status=AgentState.COMPLETED,
-                )
+                ),
             ]
             mock_manager.list_sessions.return_value = mock_sessions
 
-            result = runner.invoke(session_app, ['list'])
+            result = runner.invoke(session_app, ["list"])
 
             assert result.exit_code == 0
-            assert 'session-1' in result.stdout
-            assert 'session-2' in result.stdout
-            assert 'Discuss AI' in result.stdout or 'AI ethics' in result.stdout
+            assert "session-1" in result.stdout
+            assert "session-2" in result.stdout
+            assert "Discuss AI" in result.stdout or "AI ethics" in result.stdout
 
     def test_session_list_empty_sessions(self):
         """测试空会话列表"""
@@ -102,9 +102,12 @@ class TestSessionListCommand:
 
         runner = CliRunner()
 
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             mock_db = Mock()
             mock_db_class.return_value = mock_db
 
@@ -112,10 +115,13 @@ class TestSessionListCommand:
             mock_manager_class.return_value = mock_manager
             mock_manager.list_sessions.return_value = []
 
-            result = runner.invoke(session_app, ['list'])
+            result = runner.invoke(session_app, ["list"])
 
             assert result.exit_code == 0
-            assert 'No sessions' in result.stdout or 'sessions found' in result.stdout.lower()
+            assert (
+                "No sessions" in result.stdout
+                or "sessions found" in result.stdout.lower()
+            )
 
     def test_session_list_with_json_output(self):
         """测试JSON格式输出"""
@@ -123,9 +129,12 @@ class TestSessionListCommand:
 
         runner = CliRunner()
 
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             mock_db = Mock()
             mock_db_class.return_value = mock_db
 
@@ -134,23 +143,24 @@ class TestSessionListCommand:
 
             mock_sessions = [
                 Session(
-                    session_id='session-1',
-                    goal='Test session',
-                    session_type='chat',
+                    session_id="session-1",
+                    goal="Test session",
+                    session_type="chat",
                     participant_ids=[],
                     status=AgentState.RUNNING,
                 )
             ]
             mock_manager.list_sessions.return_value = mock_sessions
 
-            result = runner.invoke(session_app, ['list', '--json'])
+            result = runner.invoke(session_app, ["list", "--json"])
 
             assert result.exit_code == 0
             # Verify JSON output
             import json
+
             output_data = json.loads(result.stdout)
-            assert 'sessions' in output_data
-            assert len(output_data['sessions']) == 1
+            assert "sessions" in output_data
+            assert len(output_data["sessions"]) == 1
 
     def test_session_list_with_filter_by_type(self):
         """测试按类型过滤会话"""
@@ -158,9 +168,12 @@ class TestSessionListCommand:
 
         runner = CliRunner()
 
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             mock_db = Mock()
             mock_db_class.return_value = mock_db
 
@@ -168,18 +181,33 @@ class TestSessionListCommand:
             mock_manager_class.return_value = mock_manager
 
             mock_sessions = [
-                Session(session_id='session-1', session_type='debate', goal='g1', participant_ids=[]),
-                Session(session_id='session-2', session_type='workflow', goal='g2', participant_ids=[]),
-                Session(session_id='session-3', session_type='debate', goal='g3', participant_ids=[])
+                Session(
+                    session_id="session-1",
+                    session_type="debate",
+                    goal="g1",
+                    participant_ids=[],
+                ),
+                Session(
+                    session_id="session-2",
+                    session_type="workflow",
+                    goal="g2",
+                    participant_ids=[],
+                ),
+                Session(
+                    session_id="session-3",
+                    session_type="debate",
+                    goal="g3",
+                    participant_ids=[],
+                ),
             ]
             mock_manager.list_sessions.return_value = mock_sessions
 
-            result = runner.invoke(session_app, ['list', '--type', 'debate'])
+            result = runner.invoke(session_app, ["list", "--type", "debate"])
 
             assert result.exit_code == 0
-            assert 'session-1' in result.stdout
-            assert 'session-3' in result.stdout
-            assert 'session-2' not in result.stdout
+            assert "session-1" in result.stdout
+            assert "session-3" in result.stdout
+            assert "session-2" not in result.stdout
 
     def test_session_list_with_filter_by_status(self):
         """测试按状态过滤会话"""
@@ -187,9 +215,12 @@ class TestSessionListCommand:
 
         runner = CliRunner()
 
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             mock_db = Mock()
             mock_db_class.return_value = mock_db
 
@@ -197,18 +228,36 @@ class TestSessionListCommand:
             mock_manager_class.return_value = mock_manager
 
             mock_sessions = [
-                Session(session_id='session-1', status=AgentState.RUNNING, session_type='chat', goal='g1', participant_ids=[]),
-                Session(session_id='session-2', status=AgentState.COMPLETED, session_type='chat', goal='g2', participant_ids=[]),
-                Session(session_id='session-3', status=AgentState.IDLE, session_type='chat', goal='g3', participant_ids=[])
+                Session(
+                    session_id="session-1",
+                    status=AgentState.RUNNING,
+                    session_type="chat",
+                    goal="g1",
+                    participant_ids=[],
+                ),
+                Session(
+                    session_id="session-2",
+                    status=AgentState.COMPLETED,
+                    session_type="chat",
+                    goal="g2",
+                    participant_ids=[],
+                ),
+                Session(
+                    session_id="session-3",
+                    status=AgentState.IDLE,
+                    session_type="chat",
+                    goal="g3",
+                    participant_ids=[],
+                ),
             ]
             mock_manager.list_sessions.return_value = mock_sessions
 
-            result = runner.invoke(session_app, ['list', '--status', 'running'])
+            result = runner.invoke(session_app, ["list", "--status", "running"])
 
             assert result.exit_code == 0
-            assert 'session-1' in result.stdout
-            assert 'session-2' not in result.stdout
-            assert 'session-3' not in result.stdout
+            assert "session-1" in result.stdout
+            assert "session-2" not in result.stdout
+            assert "session-3" not in result.stdout
 
     def test_session_list_with_limit(self):
         """测试限制数量"""
@@ -216,9 +265,12 @@ class TestSessionListCommand:
 
         runner = CliRunner()
 
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             mock_db = Mock()
             mock_db_class.return_value = mock_db
 
@@ -226,15 +278,23 @@ class TestSessionListCommand:
             mock_manager_class.return_value = mock_manager
 
             mock_sessions = [
-                Session(session_id=f'session-{i}', goal=f'Session {i}', session_type='chat', participant_ids=[])
+                Session(
+                    session_id=f"session-{i}",
+                    goal=f"Session {i}",
+                    session_type="chat",
+                    participant_ids=[],
+                )
                 for i in range(10)
             ]
             mock_manager.list_sessions.return_value = mock_sessions
 
-            result = runner.invoke(session_app, ['list', '--limit', '5'])
+            result = runner.invoke(session_app, ["list", "--limit", "5"])
 
             assert result.exit_code == 0
-            assert len([line for line in result.stdout.split('\n') if 'session-' in line]) <= 5
+            assert (
+                len([line for line in result.stdout.split("\n") if "session-" in line])
+                <= 5
+            )
 
     def test_session_list_with_verbose_output(self):
         """测试详细输出"""
@@ -242,9 +302,12 @@ class TestSessionListCommand:
 
         runner = CliRunner()
 
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             mock_db = Mock()
             mock_db_class.return_value = mock_db
 
@@ -252,30 +315,31 @@ class TestSessionListCommand:
             mock_manager_class.return_value = mock_manager
 
             from datetime import datetime, timezone
-            created_time = datetime.now(timezone.utc)
+
+            datetime.now(timezone.utc)
 
             mock_sessions = [
                 Session(
-                    session_id='session-1',
-                    goal='Detailed session',
-                    session_type='debate',
-                    participant_ids=['agent1', 'agent2', 'agent3'],
+                    session_id="session-1",
+                    goal="Detailed session",
+                    session_type="debate",
+                    participant_ids=["agent1", "agent2", "agent3"],
                     status=AgentState.RUNNING,
                     history=[
-                        DialogueTurn(participant_id='agent1', content=f'turn {i}')
+                        DialogueTurn(participant_id="agent1", content=f"turn {i}")
                         for i in range(15)
                     ],
-                    summary='A comprehensive debate on AI topics'
+                    summary="A comprehensive debate on AI topics",
                 )
             ]
             mock_manager.list_sessions.return_value = mock_sessions
 
-            result = runner.invoke(session_app, ['list', '--verbose'])
+            result = runner.invoke(session_app, ["list", "--verbose"])
 
             assert result.exit_code == 0
-            assert '3' in result.stdout or 'participants' in result.stdout
-            assert '15' in result.stdout
-            assert 'Detailed' in result.stdout or 'session' in result.stdout
+            assert "3" in result.stdout or "participants" in result.stdout
+            assert "15" in result.stdout
+            assert "Detailed" in result.stdout or "session" in result.stdout
 
     def test_session_list_with_error_handling(self):
         """测试错误处理"""
@@ -283,21 +347,26 @@ class TestSessionListCommand:
 
         runner = CliRunner()
 
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             mock_db = Mock()
             mock_db_class.return_value = mock_db
 
             mock_manager = Mock()
             mock_manager_class.return_value = mock_manager
-            mock_manager.list_sessions.side_effect = Exception("Database connection failed")
+            mock_manager.list_sessions.side_effect = Exception(
+                "Database connection failed"
+            )
 
-            result = runner.invoke(session_app, ['list'])
+            result = runner.invoke(session_app, ["list"])
 
             # Should handle error gracefully
             assert result.exit_code != 0
-            assert 'error' in result.stdout.lower()
+            assert "error" in result.stdout.lower()
 
     def test_session_list_performance_monitoring_integration(self):
         """测试性能监控集成"""
@@ -305,9 +374,12 @@ class TestSessionListCommand:
 
         runner = CliRunner()
 
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             mock_db = Mock()
             mock_db_class.return_value = mock_db
 
@@ -315,7 +387,7 @@ class TestSessionListCommand:
             mock_manager_class.return_value = mock_manager
             mock_manager.list_sessions.return_value = []
 
-            result = runner.invoke(session_app, ['list'])
+            result = runner.invoke(session_app, ["list"])
 
             assert result.exit_code == 0
             # Command should work, performance monitoring is tested elsewhere
@@ -336,9 +408,12 @@ class TestSessionClearCommand:
 
         runner = CliRunner()
 
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             mock_db = Mock()
             mock_db_class.return_value = mock_db
 
@@ -347,10 +422,10 @@ class TestSessionClearCommand:
             mock_manager.clear_all_sessions.return_value = 3
 
             # Simulate user confirmation
-            with patch('typer.confirm') as mock_confirm:
+            with patch("typer.confirm") as mock_confirm:
                 mock_confirm.return_value = True
 
-                result = runner.invoke(session_app, ['clear'])
+                result = runner.invoke(session_app, ["clear"])
 
                 assert result.exit_code == 0
                 mock_confirm.assert_called_once()
@@ -362,9 +437,12 @@ class TestSessionClearCommand:
 
         runner = CliRunner()
 
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             mock_db = Mock()
             mock_db_class.return_value = mock_db
 
@@ -372,7 +450,7 @@ class TestSessionClearCommand:
             mock_manager_class.return_value = mock_manager
             mock_manager.clear_all_sessions.return_value = 2
 
-            result = runner.invoke(session_app, ['clear', '--force'])
+            result = runner.invoke(session_app, ["clear", "--force"])
 
             assert result.exit_code == 0
             mock_manager.clear_all_sessions.assert_called_once()
@@ -383,9 +461,12 @@ class TestSessionClearCommand:
 
         runner = CliRunner()
 
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             mock_db = Mock()
             mock_db_class.return_value = mock_db
 
@@ -393,10 +474,10 @@ class TestSessionClearCommand:
             mock_manager_class.return_value = mock_manager
 
             # Simulate user cancellation
-            with patch('typer.confirm') as mock_confirm:
+            with patch("typer.confirm") as mock_confirm:
                 mock_confirm.return_value = False
 
-                result = runner.invoke(session_app, ['clear'])
+                result = runner.invoke(session_app, ["clear"])
 
                 assert result.exit_code == 0
                 mock_confirm.assert_called_once()
@@ -408,9 +489,12 @@ class TestSessionClearCommand:
 
         runner = CliRunner()
 
-        with patch('daip_live.cli.commands.session.DatabaseManager') as mock_db_class, \
-             patch('daip_live.cli.commands.session.SessionManager') as mock_manager_class:
-
+        with (
+            patch("daip_live.cli.commands.session.DatabaseManager") as mock_db_class,
+            patch(
+                "daip_live.cli.commands.session.SessionManager"
+            ) as mock_manager_class,
+        ):
             mock_db = Mock()
             mock_db_class.return_value = mock_db
 
@@ -418,10 +502,13 @@ class TestSessionClearCommand:
             mock_manager_class.return_value = mock_manager
             mock_manager.clear_all_sessions.return_value = 0
 
-            with patch('typer.confirm') as mock_confirm:
+            with patch("typer.confirm") as mock_confirm:
                 mock_confirm.return_value = True
 
-                result = runner.invoke(session_app, ['clear'])
+                result = runner.invoke(session_app, ["clear"])
 
                 assert result.exit_code == 0
-                assert 'No sessions to clear' in result.stdout or 'already empty' in result.stdout.lower()
+                assert (
+                    "No sessions to clear" in result.stdout
+                    or "already empty" in result.stdout.lower()
+                )

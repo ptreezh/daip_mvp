@@ -4,23 +4,22 @@ Core Model System Tests
 Essential tests for the production model system functionality.
 """
 
-import pytest
-import asyncio
 import tempfile
-from datetime import datetime
 from pathlib import Path
+
+import pytest
 
 # Import production model system components
 from daip_live.tui_v1.models.production_model_system import (
-    ProductionModelSystem,
+    ModelCapabilities,
     ModelInfo,
-    ModelType,
+    ModelMetrics,
     ModelProvider,
     ModelStatus,
-    ModelCapabilities,
-    ModelMetrics,
+    ModelType,
+    ProductionModelSystem,
     TaskComplexity,
-    create_production_model_system
+    create_production_model_system,
 )
 
 
@@ -40,12 +39,12 @@ class TestModelCapabilities:
             reasoning_depth=7,
             creativity_score=8,
             accuracy_score=9,
-            speed_score=6
+            speed_score=6,
         )
 
         assert capabilities.max_tokens == 4096
         assert capabilities.context_length == 8192
-        assert capabilities.supports_streaming == True
+        assert capabilities.supports_streaming
         assert capabilities.reasoning_depth == 7
         assert capabilities.creativity_score == 8
 
@@ -107,7 +106,7 @@ class TestModelInfo:
             reasoning_depth=7,
             creativity_score=8,
             accuracy_score=9,
-            speed_score=6
+            speed_score=6,
         )
 
         model_info = ModelInfo(
@@ -120,7 +119,7 @@ class TestModelInfo:
             cost_per_output_token=0.00002,
             description="Test model for unit testing",
             tags=["test", "demo"],
-            priority=7
+            priority=7,
         )
 
         assert model_info.name == "test-model"
@@ -167,7 +166,7 @@ class TestProductionModelSystem:
             reasoning_depth=6,
             creativity_score=7,
             accuracy_score=8,
-            speed_score=9
+            speed_score=9,
         )
 
         new_model = ModelInfo(
@@ -179,12 +178,12 @@ class TestProductionModelSystem:
             cost_per_input_token=0.0,
             cost_per_output_token=0.0,
             description="Custom test model",
-            priority=9
+            priority=9,
         )
 
         success = system.register_model(new_model)
 
-        assert success == True
+        assert success
         assert "custom-model" in system.models
         assert system.models["custom-model"].display_name == "Custom Model"
 
@@ -202,7 +201,7 @@ class TestProductionModelSystem:
         # Switch models
         success = system.switch_to_model(other_model)
 
-        assert success == True
+        assert success
         assert system.current_model == other_model
 
         # Check switch history
@@ -216,7 +215,7 @@ class TestProductionModelSystem:
         system = ProductionModelSystem()
 
         success = system.switch_to_model("nonexistent-model")
-        assert success == False
+        assert not success
         assert system.current_model != "nonexistent-model"
 
     def test_get_current_model(self):
@@ -245,7 +244,9 @@ class TestProductionModelSystem:
         model_name = system.current_model
         # Capture initial values, not object reference
         initial_total_requests = system.models[model_name].metrics.total_requests
-        initial_successful_requests = system.models[model_name].metrics.successful_requests
+        initial_successful_requests = system.models[
+            model_name
+        ].metrics.successful_requests
         initial_failed_requests = system.models[model_name].metrics.failed_requests
         initial_total_cost = system.models[model_name].metrics.total_cost
 
@@ -255,7 +256,7 @@ class TestProductionModelSystem:
             success=True,
             response_time=1.5,
             tokens=100,
-            cost=0.01
+            cost=0.01,
         )
 
         updated_metrics = system.models[model_name].metrics
@@ -269,8 +270,7 @@ class TestProductionModelSystem:
         system = ProductionModelSystem()
 
         recommendations = system.get_model_recommendations(
-            "Simple question about Python programming",
-            limit=3
+            "Simple question about Python programming", limit=3
         )
 
         assert len(recommendations) <= 3
@@ -305,9 +305,13 @@ class TestProductionModelSystem:
 
         # Test various task types
         assert system._classify_task_type("What is the meaning of life?") == "question"
-        assert system._classify_task_type("Generate a story about dragons") == "creative"
+        assert (
+            system._classify_task_type("Generate a story about dragons") == "creative"
+        )
         assert system._classify_task_type("Analyze the economic impact") == "general"
-        assert system._classify_task_type("Compare Python vs JavaScript") == "comparison"
+        assert (
+            system._classify_task_type("Compare Python vs JavaScript") == "comparison"
+        )
         assert system._classify_task_type("Write a Python function") == "coding"
 
     @pytest.mark.asyncio
@@ -317,11 +321,10 @@ class TestProductionModelSystem:
 
         # Test with simple task (should keep current model if it's good enough)
         success, model, info = await system.intelligent_switch(
-            "What is 2+2?",
-            force_switch=False
+            "What is 2+2?", force_switch=False
         )
 
-        assert success == True
+        assert success
         assert model is not None
         assert "task_analysis" in info
         assert "selection_scores" in info
@@ -340,7 +343,7 @@ class TestProductionModelSystem:
                 success=success,
                 response_time=1.0 + i * 0.5,
                 tokens=50 + i * 10,
-                cost=0.001 * (i + 1)
+                cost=0.001 * (i + 1),
             )
 
         stats = system.get_system_statistics()
@@ -364,7 +367,6 @@ class TestProductionModelSystem:
 
             # Create system and modify it
             system1 = ProductionModelSystem(str(config_path))
-            original_current = system1.current_model
 
             # Add a custom model
             custom_model = ModelInfo(
@@ -383,11 +385,11 @@ class TestProductionModelSystem:
                     reasoning_depth=5,
                     creativity_score=5,
                     accuracy_score=5,
-                    speed_score=5
+                    speed_score=5,
                 ),
                 cost_per_input_token=0.0,
                 cost_per_output_token=0.0,
-                priority=8
+                priority=8,
             )
             system1.register_model(custom_model)
             system1.switch_to_model("persistent-model")
@@ -417,7 +419,19 @@ class TestIntegrationScenarios:
 
         # Simulate usage over time
         response_times = [0.8, 1.2, 1.5, 2.0, 1.1, 0.9, 1.3, 1.8, 1.4, 1.0]
-        success_rates = [True, True, False, True, True, True, False, True, True, True, True]
+        success_rates = [
+            True,
+            True,
+            False,
+            True,
+            True,
+            True,
+            False,
+            True,
+            True,
+            True,
+            True,
+        ]
 
         for i, (rt, success) in enumerate(zip(response_times, success_rates)):
             system.update_model_metrics(
@@ -425,7 +439,7 @@ class TestIntegrationScenarios:
                 success=success,
                 response_time=rt,
                 tokens=50 + i * 5,
-                cost=0.001 + i * 0.0001
+                cost=0.001 + i * 0.0001,
             )
 
         metrics = system.models[model_name].metrics
@@ -468,24 +482,21 @@ class TestIntegrationScenarios:
         # Add many failed requests to trigger degradation
         for i in range(10):
             system.update_model_metrics(
-                model_name=model_name,
-                success=False,
-                response_time=10.0,
-                cost=0.00
+                model_name=model_name, success=False, response_time=10.0, cost=0.00
             )
 
         # Check if model status changed
         model_info = system.models[model_name]
         assert model_info.status in [ModelStatus.DEGRADED, ModelStatus.ERROR]
 
-        # Add successful requests to recover (need 41+ successful to get error rate below 20%)
+        # Add successful requests to recover (need 41+ successful to get error rate below 20%)  # noqa: E501
         for i in range(41):
             system.update_model_metrics(
                 model_name=model_name,
                 success=True,
                 response_time=1.0,
                 tokens=100,
-                cost=0.001
+                cost=0.001,
             )
 
         # Status should recover (or at least not be ERROR)

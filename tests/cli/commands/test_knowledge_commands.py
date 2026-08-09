@@ -66,7 +66,7 @@ class TestKnowledgeSyncCommand:
             result = runner.invoke(knowledge_app, ["sync"])
 
             assert result.exit_code == 0
-            # The current implementation shows "up to date" since we're using mock sync result
+            # The current implementation shows "up to date" since we're using mock sync result  # noqa: E501
             assert "Knowledge base" in result.stdout and (
                 "sync" in result.stdout.lower() or "up to date" in result.stdout.lower()
             )
@@ -482,7 +482,7 @@ class TestKnowledgeSyncPersistence:
         monkeypatch.setenv("DAIP_DB_PATH", str(db_file))
         monkeypatch.setenv("DAIP_KNOWLEDGE_DIR", str(kdir))
 
-        # mock embedding：返回 768 维（与 embedding_dimension 一致），避免真实 Ollama 调用
+        # mock embedding：返回 768 维（与 embedding_dimension 一致），避免真实 Ollama 调用  # noqa: E501
         async def fake_embed(self, text):
             return [0.1] * 768
 

@@ -3,21 +3,21 @@
 遵循TDD原则：先写测试，再实现功能
 """
 
-import pytest
 from datetime import datetime
-from pathlib import Path
+
+import pytest
 
 # Import models to be tested
 from daip_live.scaffolding.models import (
+    FileCreationError,
+    GenerationError,
+    InputType,
     ProjectFile,
     ProjectStructure,
-    ScaffoldResult,
     RetryConfig,
-    InputType,
     ScaffoldCommand,
+    ScaffoldResult,
     ValidationError,
-    GenerationError,
-    FileCreationError
 )
 
 
@@ -30,7 +30,7 @@ class TestProjectFile:
         file = ProjectFile(
             path="roles/project_manager.yaml",
             content="name: Project Manager\npersona: Managing project tasks",
-            size=50
+            size=50,
         )
 
         assert file.path == "roles/project_manager.yaml"
@@ -42,22 +42,16 @@ class TestProjectFile:
         """测试自动计算文件大小"""
         # TC-1.1.2: 自动大小计算测试
         content = "Hello, World! 你好，世界！"
-        file = ProjectFile(
-            path="test.txt",
-            content=content
-        )
+        file = ProjectFile(path="test.txt", content=content)
 
         # 计算UTF-8编码的字节长度
-        expected_size = len(content.encode('utf-8'))
+        expected_size = len(content.encode("utf-8"))
         assert file.size == expected_size
 
     def test_project_file_empty_content(self):
         """测试空内容的ProjectFile"""
         # TC-1.1.3: 边界条件测试
-        file = ProjectFile(
-            path="empty.txt",
-            content=""
-        )
+        file = ProjectFile(path="empty.txt", content="")
 
         assert file.content == ""
         assert file.size == 0
@@ -66,10 +60,7 @@ class TestProjectFile:
         """测试包含Unicode字符的内容"""
         # TC-1.1.4: Unicode支持测试
         content = "🏗️ 项目脚手架 AI助手 αβγ"
-        file = ProjectFile(
-            path="unicode.txt",
-            content=content
-        )
+        file = ProjectFile(path="unicode.txt", content=content)
 
         assert file.content == content
         assert file.size > 0
@@ -81,7 +72,7 @@ class TestProjectFile:
             "roles/dev.yaml",
             "workflows/main.yaml",
             "config.yaml",
-            "nested/dir/file.yaml"
+            "nested/dir/file.yaml",
         ]
 
         for path in valid_paths:
@@ -91,16 +82,13 @@ class TestProjectFile:
     def test_project_file_consistency(self):
         """测试数据一致性"""
         # TC-1.1.6: 数据一致性测试
-        file = ProjectFile(
-            path="test.yaml",
-            content="test content"
-        )
+        file = ProjectFile(path="test.yaml", content="test content")
 
         # 修改内容后大小应该相应变化
         original_size = file.size
         file.content = "modified content"
         assert file.size != original_size
-        assert file.size == len("modified content".encode('utf-8'))
+        assert file.size == len(b"modified content")
 
 
 class TestProjectStructure:
@@ -111,12 +99,9 @@ class TestProjectStructure:
         # TC-1.1.7: 基本创建测试
         files = [
             ProjectFile("roles/pm.yaml", "role: pm"),
-            ProjectFile("workflows/main.yaml", "workflow: main")
+            ProjectFile("workflows/main.yaml", "workflow: main"),
         ]
-        structure = ProjectStructure(
-            files=files,
-            description="Test project"
-        )
+        structure = ProjectStructure(files=files, description="Test project")
 
         assert len(structure.files) == 2
         assert structure.description == "Test project"
@@ -127,10 +112,7 @@ class TestProjectStructure:
     def test_project_structure_empty_files(self):
         """测试空文件列表的ProjectStructure"""
         # TC-1.1.8: 空列表边界测试
-        structure = ProjectStructure(
-            files=[],
-            description="Empty project"
-        )
+        structure = ProjectStructure(files=[], description="Empty project")
 
         assert structure.file_count == 0
         assert structure.total_size == 0
@@ -139,14 +121,11 @@ class TestProjectStructure:
         """测试统计计算的正确性"""
         # TC-1.1.9: 统计计算测试
         files = [
-            ProjectFile("a.txt", "hello"),      # 5 bytes
-            ProjectFile("b.txt", "world"),      # 5 bytes
-            ProjectFile("c.txt", "test")        # 4 bytes
+            ProjectFile("a.txt", "hello"),  # 5 bytes
+            ProjectFile("b.txt", "world"),  # 5 bytes
+            ProjectFile("c.txt", "test"),  # 4 bytes
         ]
-        structure = ProjectStructure(
-            files=files,
-            description="Calculation test"
-        )
+        structure = ProjectStructure(files=files, description="Calculation test")
 
         assert structure.file_count == 3
         assert structure.total_size == 14  # 5 + 5 + 4
@@ -157,14 +136,14 @@ class TestProjectStructure:
         files = [
             ProjectFile("config.yaml", "key: value"),
             ProjectFile("README.md", "# Project Title"),
-            ProjectFile("main.py", "print('hello')")
+            ProjectFile("main.py", "print('hello')"),
         ]
         structure = ProjectStructure(files, description="Multi-type project")
 
         assert len(structure.files) == 3
-        assert any(f.path.endswith('.yaml') for f in structure.files)
-        assert any(f.path.endswith('.md') for f in structure.files)
-        assert any(f.path.endswith('.py') for f in structure.files)
+        assert any(f.path.endswith(".yaml") for f in structure.files)
+        assert any(f.path.endswith(".md") for f in structure.files)
+        assert any(f.path.endswith(".py") for f in structure.files)
 
 
 class TestScaffoldResult:
@@ -176,7 +155,7 @@ class TestScaffoldResult:
         structure = ProjectStructure([], "test")
         result = ScaffoldResult.success(structure)
 
-        assert result.is_success == True
+        assert result.is_success
         assert result.project_structure == structure
         assert len(result.errors) == 0
         assert len(result.warnings) == 0
@@ -187,7 +166,7 @@ class TestScaffoldResult:
         errors = ["File not found", "Invalid format"]
         result = ScaffoldResult.failure(errors)
 
-        assert result.is_success == False
+        assert not result.is_success
         assert result.project_structure is None
         assert result.errors == errors
         assert len(result.warnings) == 0
@@ -198,12 +177,10 @@ class TestScaffoldResult:
         structure = ProjectStructure([], "test")
         warnings = ["File already exists"]
         result = ScaffoldResult(
-            is_success=True,
-            project_structure=structure,
-            warnings=warnings
+            is_success=True, project_structure=structure, warnings=warnings
         )
 
-        assert result.is_success == True
+        assert result.is_success
         assert result.warnings == warnings
 
     def test_scaffold_result_mixed(self):
@@ -211,13 +188,9 @@ class TestScaffoldResult:
         # TC-1.1.14: 混合状态测试
         errors = ["Critical error"]
         warnings = ["Minor warning"]
-        result = ScaffoldResult(
-            is_success=False,
-            errors=errors,
-            warnings=warnings
-        )
+        result = ScaffoldResult(is_success=False, errors=errors, warnings=warnings)
 
-        assert result.is_success == False
+        assert not result.is_success
         assert result.errors == errors
         assert result.warnings == warnings
 
@@ -237,11 +210,7 @@ class TestRetryConfig:
     def test_retry_config_custom_values(self):
         """测试自定义RetryConfig值"""
         # TC-1.1.16: 自定义配置测试
-        config = RetryConfig(
-            max_retries=5,
-            delay_seconds=2.0,
-            backoff_factor=1.5
-        )
+        config = RetryConfig(max_retries=5, delay_seconds=2.0, backoff_factor=1.5)
 
         assert config.max_retries == 5
         assert config.delay_seconds == 2.0
@@ -294,14 +263,13 @@ class TestScaffoldCommand:
         """测试文本输入的ScaffoldCommand"""
         # TC-1.1.21: 文本命令测试
         command = ScaffoldCommand(
-            input_type=InputType.TEXT,
-            description="A web application project"
+            input_type=InputType.TEXT, description="A web application project"
         )
 
         assert command.input_type == InputType.TEXT
         assert command.description == "A web application project"
         assert command.file_path is None
-        assert command.auto_confirm == False
+        assert not command.auto_confirm
 
     def test_scaffold_command_file_input(self):
         """测试文件输入的ScaffoldCommand"""
@@ -310,7 +278,7 @@ class TestScaffoldCommand:
             input_type=InputType.FILE,
             description="",
             file_path="project_desc.txt",
-            auto_confirm=False
+            auto_confirm=False,
         )
 
         assert command.input_type == InputType.FILE
@@ -320,12 +288,10 @@ class TestScaffoldCommand:
         """测试自动确认选项"""
         # TC-1.1.23: 自动确认测试
         command = ScaffoldCommand(
-            input_type=InputType.TEXT,
-            description="Test",
-            auto_confirm=True
+            input_type=InputType.TEXT, description="Test", auto_confirm=True
         )
 
-        assert command.auto_confirm == True
+        assert command.auto_confirm
 
     def test_scaffold_command_empty_description_for_file(self):
         """测试文件输入时描述可以为空"""
@@ -333,7 +299,7 @@ class TestScaffoldCommand:
         command = ScaffoldCommand(
             input_type=InputType.FILE,
             description="",  # 文件输入时描述可以为空
-            file_path="desc.txt"
+            file_path="desc.txt",
         )
 
         assert command.input_type == InputType.FILE

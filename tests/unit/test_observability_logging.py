@@ -2,12 +2,12 @@
 
 import json
 import logging
-import pytest
+
 from daip_live.observability.logging import (
     JsonFormatter,
+    LogLevel,
     StructuredLogger,
     get_logger,
-    LogLevel
 )
 
 
@@ -21,7 +21,7 @@ def test_json_formatter_creates_valid_json():
         lineno=1,
         msg="Test message",
         args=(),
-        exc_info=None
+        exc_info=None,
     )
     formatted = formatter.format(record)
     parsed = json.loads(formatted)
@@ -41,7 +41,7 @@ def test_json_formatter_includes_timestamp():
         lineno=1,
         msg="Test message",
         args=(),
-        exc_info=None
+        exc_info=None,
     )
     formatted = formatter.format(record)
     parsed = json.loads(formatted)
@@ -59,7 +59,7 @@ def test_json_formatter_includes_context():
         lineno=1,
         msg="Test message",
         args=(),
-        exc_info=None
+        exc_info=None,
     )
     record.user_id = "test_user"
     record.request_id = "req_123"
@@ -88,7 +88,7 @@ def test_structured_logger_log_levels():
 
 def test_structured_logger_with_context():
     """Test that StructuredLogger includes global context."""
-    logger = StructuredLogger("test_service", context={"service": "daip"})
+    StructuredLogger("test_service", context={"service": "daip"})
     # Context should be included in all log messages
 
 

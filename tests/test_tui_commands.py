@@ -6,15 +6,20 @@ from unittest.mock import Mock, patch
 import pytest
 
 # Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from daip_live.tui import DAIP_TUI
 
-pytestmark = pytest.mark.skip(reason="TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准")
+pytestmark = pytest.mark.skip(
+    reason="TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准"
+)
 
 
+pytestmark = pytest.mark.skip(
+    reason="TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准"
+)
 
-pytestmark = pytest.mark.skip(reason="TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准")
+
 class TestTUICommandHandlers(unittest.TestCase):
     """Test cases for TUI shortcut command handlers."""
 
@@ -34,6 +39,7 @@ class TestTUICommandHandlers(unittest.TestCase):
 
         # Mock the log view
         from textual.widgets import Static
+
         self.mock_log_view = Mock(spec=Static)
         self.mock_log_view.text = ""
 
@@ -60,22 +66,28 @@ class TestTUICommandHandlers(unittest.TestCase):
         self.mock_session_manager.create_session.assert_called_once_with(
             goal="write a project plan",
             session_type="chat",
-            participant_ids=["user", "pa"]
+            participant_ids=["user", "pa"],
         )
 
         # Verify log output
-        self.assertIn("Personal Assistant executing: write a project plan",
-                      self.mock_log_view.text)
-        self.assertIn("Personal Assistant session started with ID: test-session-id",
-                      self.mock_log_view.text)
+        self.assertIn(
+            "Personal Assistant executing: write a project plan",
+            self.mock_log_view.text,
+        )
+        self.assertIn(
+            "Personal Assistant session started with ID: test-session-id",
+            self.mock_log_view.text,
+        )
 
     def test_handle_pa_command_without_args(self):
         """Test /pa command without arguments."""
         self.tui._handle_pa_command("", "", self.mock_log_view)
 
         # Verify error message
-        self.assertIn("Personal Assistant command requires a goal argument",
-                      self.mock_log_view.text)
+        self.assertIn(
+            "Personal Assistant command requires a goal argument",
+            self.mock_log_view.text,
+        )
 
     def test_handle_role_add_command_with_args(self):
         """Test /role add command with arguments."""
@@ -84,10 +96,14 @@ class TestTUICommandHandlers(unittest.TestCase):
         self.mock_role_manager._roles = {}
 
         # Mock the file save operation
-        with patch('os.path.exists', return_value=True), \
-             patch('builtins.open', create=True), \
-             patch('yaml.dump'):
-            self.tui._handle_role_add_command("项目经理 负责项目管理的专业人员", "", self.mock_log_view)
+        with (
+            patch("os.path.exists", return_value=True),
+            patch("builtins.open", create=True),
+            patch("yaml.dump"),
+        ):
+            self.tui._handle_role_add_command(
+                "项目经理 负责项目管理的专业人员", "", self.mock_log_view
+            )
 
         # Verify success message
         self.assertIn("Role '项目经理' created successfully", self.mock_log_view.text)
@@ -97,8 +113,9 @@ class TestTUICommandHandlers(unittest.TestCase):
         self.tui._handle_role_add_command("", "", self.mock_log_view)
 
         # Verify error message
-        self.assertIn("Role add command requires a name and persona",
-                      self.mock_log_view.text)
+        self.assertIn(
+            "Role add command requires a name and persona", self.mock_log_view.text
+        )
 
     def test_handle_role_add_command_role_already_exists(self):
         """Test /role add command when role already exists."""
@@ -107,7 +124,9 @@ class TestTUICommandHandlers(unittest.TestCase):
         mock_role.name = "项目经理"
         self.mock_role_manager.get_role_by_name.return_value = mock_role
 
-        self.tui._handle_role_add_command("项目经理 负责项目管理的专业人员", "", self.mock_log_view)
+        self.tui._handle_role_add_command(
+            "项目经理 负责项目管理的专业人员", "", self.mock_log_view
+        )
 
         # Verify error message
         self.assertIn("Role '项目经理' already exists", self.mock_log_view.text)
@@ -136,16 +155,14 @@ class TestTUICommandHandlers(unittest.TestCase):
         self.tui._handle_role_view_command("不存在的角色", "", self.mock_log_view)
 
         # Verify error message
-        self.assertIn("Role '不存在的角色' not found",
-                      self.mock_log_view.text)
+        self.assertIn("Role '不存在的角色' not found", self.mock_log_view.text)
 
     def test_handle_role_view_command_without_args(self):
         """Test /role view command without arguments."""
         self.tui._handle_role_view_command("", "", self.mock_log_view)
 
         # Verify error message
-        self.assertIn("Role view command requires a role name",
-                      self.mock_log_view.text)
+        self.assertIn("Role view command requires a role name", self.mock_log_view.text)
 
     def test_handle_role_list_command_with_roles(self):
         """Test /role list command with existing roles."""
@@ -158,16 +175,16 @@ class TestTUICommandHandlers(unittest.TestCase):
         mock_role2.name = "开发人员"
         mock_role2.persona = "负责软件开发工作"
 
-        self.mock_role_manager._roles = {
-            "项目经理": mock_role1,
-            "开发人员": mock_role2
-        }
+        self.mock_role_manager._roles = {"项目经理": mock_role1, "开发人员": mock_role2}
 
         self.tui._handle_role_list_command("", self.mock_log_view)
 
         # Verify roles are listed
         self.assertIn("Available Roles:", self.mock_log_view.text)
-        self.assertIn("项目经理: 负责项目管理的专业人员，需要处理各种项目相关事务", self.mock_log_view.text)
+        self.assertIn(
+            "项目经理: 负责项目管理的专业人员，需要处理各种项目相关事务",
+            self.mock_log_view.text,
+        )
         self.assertIn("开发人员: 负责软件开发工作", self.mock_log_view.text)
 
     def test_handle_role_list_command_without_roles(self):
@@ -184,7 +201,9 @@ class TestTUICommandHandlers(unittest.TestCase):
         self.tui._handle_knowledge_command("项目管理方法", "", self.mock_log_view)
 
         # Verify search message
-        self.assertIn("Searching knowledge base for: 项目管理方法", self.mock_log_view.text)
+        self.assertIn(
+            "Searching knowledge base for: 项目管理方法", self.mock_log_view.text
+        )
         self.assertIn("Search results would appear here", self.mock_log_view.text)
 
     def test_handle_knowledge_command_without_args(self):
@@ -208,21 +227,27 @@ class TestTUICommandHandlers(unittest.TestCase):
         self.mock_session_manager.create_session.assert_called_once_with(
             goal="远程办公的优缺点",
             session_type="debate",
-            participant_ids=["pro_arguer", "con_arguer", "neutral_observer"]
+            participant_ids=["pro_arguer", "con_arguer", "neutral_observer"],
         )
 
         # Verify output messages
         self.assertIn("Starting debate on: 远程办公的优缺点", self.mock_log_view.text)
-        self.assertIn("Debate session started with ID: debate-session-id", self.mock_log_view.text)
-        self.assertIn("Debate participants: pro_arguer, con_arguer, neutral_observer", self.mock_log_view.text)
+        self.assertIn(
+            "Debate session started with ID: debate-session-id", self.mock_log_view.text
+        )
+        self.assertIn(
+            "Debate participants: pro_arguer, con_arguer, neutral_observer",
+            self.mock_log_view.text,
+        )
 
     def test_handle_debate_command_without_args(self):
         """Test /debate command without arguments."""
         self.tui._handle_debate_command("", "", self.mock_log_view)
 
         # Verify error message
-        self.assertIn("Debate command requires a topic argument",
-                      self.mock_log_view.text)
+        self.assertIn(
+            "Debate command requires a topic argument", self.mock_log_view.text
+        )
 
     def test_handle_session_search_command_with_args(self):
         """Test /v command with arguments."""
@@ -237,7 +262,10 @@ class TestTUICommandHandlers(unittest.TestCase):
         mock_session2.goal = "需求分析"
         mock_session2.status.name = "RUNNING"
 
-        self.mock_session_manager.list_sessions.return_value = [mock_session1, mock_session2]
+        self.mock_session_manager.list_sessions.return_value = [
+            mock_session1,
+            mock_session2,
+        ]
 
         self.tui._handle_session_search_command("项目", "", self.mock_log_view)
 
@@ -249,7 +277,7 @@ class TestTUICommandHandlers(unittest.TestCase):
     def test_handle_session_search_command_without_args(self):
         """Test /v command without arguments."""
         # This should call _handle_session_list_command
-        with patch.object(self.tui, '_handle_session_list_command') as mock_list:
+        with patch.object(self.tui, "_handle_session_list_command") as mock_list:
             self.tui._handle_session_search_command("", "", self.mock_log_view)
             mock_list.assert_called_once_with("", self.mock_log_view)
 
@@ -266,7 +294,10 @@ class TestTUICommandHandlers(unittest.TestCase):
         mock_session2.goal = "需求分析"
         mock_session2.status.name = "RUNNING"
 
-        self.mock_session_manager.list_sessions.return_value = [mock_session1, mock_session2]
+        self.mock_session_manager.list_sessions.return_value = [
+            mock_session1,
+            mock_session2,
+        ]
 
         self.tui._handle_session_list_command("", self.mock_log_view)
 
@@ -377,7 +408,10 @@ class TestTUICommandHandlers(unittest.TestCase):
         mock_session2.goal = "需求分析"
         mock_session2.status.name = "RUNNING"
 
-        self.mock_session_manager.list_sessions.return_value = [mock_session1, mock_session2]
+        self.mock_session_manager.list_sessions.return_value = [
+            mock_session1,
+            mock_session2,
+        ]
         self.tui._current_session_id = "session-1"
         self.tui._session_stack = ["session-2"]
 
@@ -412,7 +446,10 @@ class TestTUICommandHandlers(unittest.TestCase):
         mock_session2.status = Mock()
         mock_session2.status.name = "RUNNING"
 
-        self.mock_session_manager.list_sessions.return_value = [mock_session1, mock_session2]
+        self.mock_session_manager.list_sessions.return_value = [
+            mock_session1,
+            mock_session2,
+        ]
         self.tui._current_session_id = "current-session"
 
         self.tui._handle_session_abort_and_jump_command("1", "", self.mock_log_view)
@@ -438,8 +475,10 @@ class TestTUICommandHandlers(unittest.TestCase):
         self.tui._handle_session_abort_and_jump_command("", "", self.mock_log_view)
 
         # Verify missing argument message
-        self.assertIn("Session abort and jump command requires a session index",
-                      self.mock_log_view.text)
+        self.assertIn(
+            "Session abort and jump command requires a session index",
+            self.mock_log_view.text,
+        )
 
     def test_handle_session_pause_and_jump_command_with_valid_index(self):
         """Test /tt command with valid index."""
@@ -456,7 +495,10 @@ class TestTUICommandHandlers(unittest.TestCase):
         mock_session2.status = Mock()
         mock_session2.status.name = "RUNNING"
 
-        self.mock_session_manager.list_sessions.return_value = [mock_session1, mock_session2]
+        self.mock_session_manager.list_sessions.return_value = [
+            mock_session1,
+            mock_session2,
+        ]
         self.tui._current_session_id = "current-session"
 
         self.tui._handle_session_pause_and_jump_command("1", "", self.mock_log_view)
@@ -482,8 +524,10 @@ class TestTUICommandHandlers(unittest.TestCase):
         self.tui._handle_session_pause_and_jump_command("", "", self.mock_log_view)
 
         # Verify missing argument message
-        self.assertIn("Session pause and jump command requires a session index",
-                      self.mock_log_view.text)
+        self.assertIn(
+            "Session pause and jump command requires a session index",
+            self.mock_log_view.text,
+        )
 
     def test_handle_escape_key(self):
         """Test ESC key handling."""
@@ -495,39 +539,45 @@ class TestTUICommandHandlers(unittest.TestCase):
         # Verify all sessions aborted
         self.assertIsNone(self.tui._current_session_id)
         self.assertEqual(len(self.tui._session_stack), 0)
-        self.assertIn("All sessions aborted. Back to default session.", self.mock_log_view.text)
-        self.assertIn("Do you want to clear all context? (Y/N)", self.mock_log_view.text)
+        self.assertIn(
+            "All sessions aborted. Back to default session.", self.mock_log_view.text
+        )
+        self.assertIn(
+            "Do you want to clear all context? (Y/N)", self.mock_log_view.text
+        )
 
     def test_handle_role_add_command_with_single_arg(self):
         """Test /role add command with only one argument."""
         self.tui._handle_role_add_command("项目经理", "", self.mock_log_view)
 
         # Verify error message
-        self.assertIn("Role add command requires both name and persona", self.mock_log_view.text)
+        self.assertIn(
+            "Role add command requires both name and persona", self.mock_log_view.text
+        )
 
     def test_pa_command_routes_to_enter_chat_mode(self):
-        """Tests that the /pa command correctly routes to a generic chat mode entry point."""
+        """Tests that the /pa command correctly routes to a generic chat mode entry point."""  # noqa: E501
         # We expect a new method `enter_chat_mode` to exist and be called.
         # We will mock it on the tui instance for this test.
         self.tui.enter_chat_mode = Mock()
 
-        # We also expect the old `_handle_pa_command` to NOT be called after the refactor.
+        # We also expect the old `_handle_pa_command` to NOT be called after the refactor.  # noqa: E501
         self.tui._handle_pa_command = Mock()
 
         # Simulate the main dispatcher handling the command.
-        # This test will fail until we implement the routing logic in _handle_shortcut_command.
+        # This test will fail until we implement the routing logic in _handle_shortcut_command.  # noqa: E501
         import asyncio
+
         asyncio.run(self.tui._handle_shortcut_command("/pa write a plan"))
 
         # Verify the new generic method was called with the correct persona.
         self.tui.enter_chat_mode.assert_called_once_with(
-            persona='personal_assistant',
-            initial_goal='write a plan'
+            persona="personal_assistant", initial_goal="write a plan"
         )
 
         # Verify the old, specific handler is no longer part of the flow.
         self.tui._handle_pa_command.assert_not_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

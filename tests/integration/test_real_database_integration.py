@@ -3,11 +3,13 @@
 These tests use the real database layer without mocks.
 """
 
-import pytest
 import tempfile
 from pathlib import Path
+
+import pytest
+
+from daip_live.core.models import AgentState, Session
 from daip_live.persistence.database import DatabaseManager
-from daip_live.core.models import Session, DialogueTurn, AgentState
 
 
 @pytest.fixture
@@ -36,7 +38,7 @@ class TestRealDatabaseIntegration:
             session_id="test_session_001",
             session_type="chat",
             goal="Test session",
-            participant_ids=["user_1"]
+            participant_ids=["user_1"],
         )
 
         # Save the session (returns None)
@@ -58,7 +60,7 @@ class TestRealDatabaseIntegration:
                 session_id=f"session_{i}",
                 session_type="chat",
                 goal=f"Test goal {i}",
-                participant_ids=["user_1"]
+                participant_ids=["user_1"],
             )
             temp_db.save_session(session)
 
@@ -76,7 +78,7 @@ class TestRealDatabaseIntegration:
             session_id="delete_test",
             session_type="chat",
             goal="Delete test",
-            participant_ids=["user_1"]
+            participant_ids=["user_1"],
         )
         temp_db.save_session(session)
 
@@ -95,7 +97,7 @@ class TestRealDatabaseIntegration:
             session_id="update_test",
             session_type="chat",
             goal="Update test",
-            participant_ids=["user_1"]
+            participant_ids=["user_1"],
         )
         temp_db.save_session(session)
 
@@ -104,7 +106,7 @@ class TestRealDatabaseIntegration:
             session_id="update_test",
             session_type="chat",
             goal="Updated goal",  # Changed
-            participant_ids=["user_1", "user_2"]  # Added participant
+            participant_ids=["user_1", "user_2"],  # Added participant
         )
         temp_db.save_session(updated_session)
 
@@ -120,7 +122,7 @@ class TestRealDatabaseIntegration:
             session_type="chat",
             goal="Status test",
             participant_ids=["user_1"],
-            status=AgentState.RUNNING
+            status=AgentState.RUNNING,
         )
         temp_db.save_session(session)
 

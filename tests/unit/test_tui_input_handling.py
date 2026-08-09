@@ -15,7 +15,9 @@ def tui_app(tmp_path):
     container.config_manager.get.return_value = 100
     with patch("daip_live.container.Container", return_value=container):
         app = SimplifiedTUI()
-    app.history_manager = HistoryManager(100, history_file=str(tmp_path / "history.json"))
+    app.history_manager = HistoryManager(
+        100, history_file=str(tmp_path / "history.json")
+    )
     return app
 
 

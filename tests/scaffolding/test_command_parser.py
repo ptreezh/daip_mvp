@@ -4,12 +4,9 @@
 """
 
 import pytest
+
 from daip_live.scaffolding.command_parser import ScaffoldCommandParser
-from daip_live.scaffolding.models import (
-    InputType,
-    ScaffoldCommand,
-    ValidationError
-)
+from daip_live.scaffolding.models import InputType, ScaffoldCommand, ValidationError
 
 
 class TestScaffoldCommandParser:
@@ -27,7 +24,7 @@ class TestScaffoldCommandParser:
         assert command.input_type == InputType.TEXT
         assert command.description == "一个简单的Web应用项目"
         assert command.file_path is None
-        assert command.auto_confirm == False
+        assert not command.auto_confirm
 
     def test_parse_empty_text_command(self):
         """测试解析空文本命令"""
@@ -36,7 +33,7 @@ class TestScaffoldCommandParser:
 
         assert command.input_type == InputType.TEXT
         assert command.description == ""
-        assert command.auto_confirm == False
+        assert not command.auto_confirm
 
     def test_parse_file_command_with_flag(self):
         """测试解析带文件标志的命令"""
@@ -46,7 +43,7 @@ class TestScaffoldCommandParser:
         assert command.input_type == InputType.FILE
         assert command.file_path == "project_desc.txt"
         assert command.description == ""
-        assert command.auto_confirm == False
+        assert not command.auto_confirm
 
     def test_parse_file_command_with_short_flag(self):
         """测试解析短文件标志的命令"""
@@ -71,14 +68,14 @@ class TestScaffoldCommandParser:
 
         assert command.input_type == InputType.TEXT
         assert command.description == "简单的项目"
-        assert command.auto_confirm == True
+        assert command.auto_confirm
 
     def test_parse_short_auto_confirm_command(self):
         """测试解析短自动确认命令"""
         # TC-1.2.7: 短确认标志测试
         command = self.parser.parse("-y 快速生成")
 
-        assert command.auto_confirm == True
+        assert command.auto_confirm
 
     def test_parse_file_with_auto_confirm(self):
         """测试解析文件加自动确认命令"""
@@ -87,7 +84,7 @@ class TestScaffoldCommandParser:
 
         assert command.input_type == InputType.FILE
         assert command.file_path == "desc.txt"
-        assert command.auto_confirm == True
+        assert command.auto_confirm
 
     def test_parse_complex_command(self):
         """测试解析复杂命令"""
@@ -98,7 +95,7 @@ class TestScaffoldCommandParser:
 
         assert command.input_type == InputType.FILE
         assert command.file_path == "project_description.md"
-        assert command.auto_confirm == True
+        assert command.auto_confirm
 
     def test_parse_with_extra_spaces(self):
         """测试解析带多余空格的命令"""
@@ -107,7 +104,7 @@ class TestScaffoldCommandParser:
 
         assert command.input_type == InputType.FILE
         assert command.file_path == "desc.txt"
-        assert command.auto_confirm == True
+        assert command.auto_confirm
 
     def test_parse_description_with_special_chars(self):
         """测试解析包含特殊字符的描述"""
@@ -149,7 +146,7 @@ class TestScaffoldCommandParser:
         # TC-1.2.15: 验证成功测试
         command = ScaffoldCommand(
             input_type=InputType.TEXT,
-            description="Valid description with enough content"
+            description="Valid description with enough content",
         )
 
         # 不应该抛出异常
@@ -158,10 +155,7 @@ class TestScaffoldCommandParser:
     def test_validate_command_empty_description(self):
         """测试命令验证失败 - 空描述"""
         # TC-1.2.16: 验证空描述测试
-        command = ScaffoldCommand(
-            input_type=InputType.TEXT,
-            description=""
-        )
+        command = ScaffoldCommand(input_type=InputType.TEXT, description="")
 
         with pytest.raises(ValidationError) as exc_info:
             self.parser.validate(command)
@@ -174,7 +168,7 @@ class TestScaffoldCommandParser:
         command = ScaffoldCommand(
             input_type=InputType.FILE,
             description="",  # 文件输入时描述可以为空
-            file_path=None
+            file_path=None,
         )
 
         with pytest.raises(ValidationError) as exc_info:
@@ -185,10 +179,7 @@ class TestScaffoldCommandParser:
     def test_validate_command_short_description(self):
         """测试命令验证失败 - 描述太短"""
         # TC-1.2.18: 验证描述长度测试
-        command = ScaffoldCommand(
-            input_type=InputType.TEXT,
-            description="太短"
-        )
+        command = ScaffoldCommand(input_type=InputType.TEXT, description="太短")
 
         with pytest.raises(ValidationError) as exc_info:
             self.parser.validate(command)
@@ -199,7 +190,9 @@ class TestScaffoldCommandParser:
         """测试解析和验证集成"""
         # TC-1.2.19: 集成测试
         # 有效的命令
-        valid_command = self.parser.parse("一个包含足够内容的详细项目描述，用于测试验证功能")
+        valid_command = self.parser.parse(
+            "一个包含足够内容的详细项目描述，用于测试验证功能"
+        )
         try:
             self.parser.validate(valid_command)
             validation_passed = True

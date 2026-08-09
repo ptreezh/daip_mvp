@@ -1,22 +1,18 @@
 """Tests for hybrid cloud pool module (TDD - RED phase)."""
 
-import pytest
 from daip_live.hybrid.cloud_pool import (
-    CloudProvider,
     CloudPool,
-    ProviderStatus,
+    CloudProvider,
     DelegationRequest,
-    DelegationResult
+    DelegationResult,
+    ProviderStatus,
 )
 
 
 def test_cloud_provider_creation():
     """Test creating a cloud provider."""
     provider = CloudProvider(
-        name="openai",
-        model="gpt-4",
-        api_key_env="OPENAI_API_KEY",
-        max_concurrent=5
+        name="openai", model="gpt-4", api_key_env="OPENAI_API_KEY", max_concurrent=5
     )
     assert provider.name == "openai"
     assert provider.model == "gpt-4"
@@ -59,7 +55,7 @@ def test_delegation_request_creation():
     request = DelegationRequest(
         prompt="Write a function",
         system_prompt="You are a helpful assistant",
-        max_tokens=1000
+        max_tokens=1000,
     )
     assert request.prompt == "Write a function"
     assert request.system_prompt == "You are a helpful assistant"
@@ -72,7 +68,7 @@ def test_delegation_result_creation():
         content="Here is the function",
         provider_name="openai",
         tokens_used=500,
-        success=True
+        success=True,
     )
     assert result.content == "Here is the function"
     assert result.provider_name == "openai"
@@ -96,7 +92,7 @@ def test_cloud_provider_status_validation():
         ProviderStatus.AVAILABLE,
         ProviderStatus.UNAVAILABLE,
         ProviderStatus.RATE_LIMITED,
-        ProviderStatus.ERROR
+        ProviderStatus.ERROR,
     ]
     for status in valid_statuses:
         provider = CloudProvider(name="test", model="test", api_key_env="TEST_KEY")

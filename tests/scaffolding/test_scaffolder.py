@@ -24,12 +24,12 @@ files:
     await scaffolder.generate_from_description(description)
 
     # Assert
-    # Check that the model provider was called with a prompt that includes the description.
+    # Check that the model provider was called with a prompt that includes the description.  # noqa: E501
     mock_model_provider.generate.assert_called_once()
     call_args, _ = mock_model_provider.generate.call_args
     prompt = call_args[0]
     assert description in prompt
-    assert "YAML" in prompt # The meta-prompt should instruct the LLM to generate YAML.
+    assert "YAML" in prompt  # The meta-prompt should instruct the LLM to generate YAML.
 
 
 @pytest.mark.asyncio
@@ -60,7 +60,7 @@ async def test_scaffolder_retries_on_invalid_yaml():
     """Tests that the scaffolder asks the LLM to self-correct on invalid YAML."""
     # Arrange
     mock_model_provider = AsyncMock()
-    invalid_yaml = "files: - path: roles/analyst.yaml\ncontent: 'persona: test'" # Missing indentation
+    invalid_yaml = "files: - path: roles/analyst.yaml\ncontent: 'persona: test'"  # Missing indentation  # noqa: E501
     valid_yaml = """---
 files:
   - path: roles/analyst.yaml
@@ -97,13 +97,13 @@ async def test_scaffolder_previews_and_awaits_confirmation(mocker):
     }
     mock_generate = mocker.patch(
         "src.daip_live.scaffolding.scaffolder.Scaffolder.generate_from_description",
-        return_value=mock_parsed_yaml
+        return_value=mock_parsed_yaml,
     )
 
     # 2. Mock typer.confirm to simulate user saying "yes"
     mock_confirm = mocker.patch("typer.confirm", return_value=True)
     # 3. Mock rich.print to capture the preview output
-    mock_print = mocker.patch("rich.print")
+    mocker.patch("rich.print")
 
     scaffolder = Scaffolder(model_provider=AsyncMock())
 
@@ -134,7 +134,7 @@ async def test_scaffolder_writes_files_on_confirmation(mocker):
     }
     mocker.patch(
         "src.daip_live.scaffolding.scaffolder.Scaffolder.generate_from_description",
-        return_value=mock_parsed_yaml
+        return_value=mock_parsed_yaml,
     )
 
     # 2. Mock user confirmation to be True
@@ -153,8 +153,9 @@ async def test_scaffolder_writes_files_on_confirmation(mocker):
     # It should have created the directory for the role
     mock_makedirs.assert_called_once_with(Path("roles"), exist_ok=True)
     # It should have opened the file for writing
-    mock_open.assert_called_once_with(Path("roles/new_role.yaml"), "w", encoding="utf-8")
+    mock_open.assert_called_once_with(
+        Path("roles/new_role.yaml"), "w", encoding="utf-8"
+    )
     # It should have written the correct content to the file
     handle = mock_open()
     handle.write.assert_called_once_with("persona: new")
-

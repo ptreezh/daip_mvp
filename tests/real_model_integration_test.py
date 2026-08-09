@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """
 真实模型端到端集成测试 - 使用本地Ollama模型进行完整功能测试
 """
@@ -31,7 +32,6 @@ class RealModelIntegrationTester:
 
     def setup_real_components(self):
         """设置真实的组件 - 不使用任何mock"""
-        print("🔧 设置真实组件...")
 
         # 创建临时目录结构
         self.temp_dir = tempfile.mkdtemp(prefix="daip_test_")
@@ -52,18 +52,14 @@ class RealModelIntegrationTester:
         self.llm_config = ProviderConfig(
             model="ollama/llama3:latest",  # 使用本地llama3模型
             api_key="",  # Ollama不需要API key
-            base_url="http://localhost:11434"  # 本地Ollama服务
+            base_url="http://localhost:11434",  # 本地Ollama服务
         )
 
         self.embedding_config = ProviderConfig(
             model="ollama/nomic-embed-text:latest",  # 使用本地嵌入模型
             api_key="",
-            base_url="http://localhost:11434"
+            base_url="http://localhost:11434",
         )
-
-        print(f"   📁 临时目录: {self.temp_dir}")
-        print(f"   🤖 主模型: {self.llm_config.model}")
-        print(f"   🔤 嵌入模型: {self.embedding_config.model}")
 
     def create_test_documents(self):
         """创建测试文档"""
@@ -110,21 +106,21 @@ DAIP-LIVE是一个动态AI驱动的项目执行系统，支持：
 - `/help` - 显示帮助
 - `/role list` - 列出角色
 - `/session list` - 列出会话
-"""
+""",
         }
 
         for filename, content in docs.items():
-            with open(os.path.join(self.temp_docs_dir, filename), 'w', encoding='utf-8') as f:
+            with open(
+                os.path.join(self.temp_docs_dir, filename), "w", encoding="utf-8"
+            ) as f:
                 f.write(content)
-
-        print(f"   📄 创建了 {len(docs)} 个测试文档")
 
     def create_test_roles(self):
         """创建测试角色"""
         roles = {
             "developer.yaml": """
 name: developer
-persona: 你是一个经验丰富的Python开发者，擅长系统架构设计和代码实现。你总是提供清晰、实用的技术建议。
+persona: 你是一个经验丰富的Python开发者，擅长系统架构设计和代码实现。你总是提供清晰、实用的技术建议。  # noqa: E501
 tools:
   - search_knowledge
   - write_code
@@ -132,7 +128,7 @@ tools:
 """,
             "analyst.yaml": """
 name: analyst
-persona: 你是一个数据分析师，擅长从复杂信息中提取关键洞察。你善于提出深入的问题并提供数据驱动的建议。
+persona: 你是一个数据分析师，擅长从复杂信息中提取关键洞察。你善于提出深入的问题并提供数据驱动的建议。  # noqa: E501
 tools:
   - search_knowledge
   - analyze_data
@@ -144,18 +140,17 @@ tools:
   - search_knowledge
   - run_tests
   - validate_quality
-"""
+""",
         }
 
         for filename, content in roles.items():
-            with open(os.path.join(self.temp_roles_dir, filename), 'w', encoding='utf-8') as f:
+            with open(
+                os.path.join(self.temp_roles_dir, filename), "w", encoding="utf-8"
+            ) as f:
                 f.write(content)
-
-        print(f"   👥 创建了 {len(roles)} 个测试角色")
 
     async def setup_real_managers(self):
         """设置真实的管理器组件"""
-        print("🔧 初始化真实管理器...")
 
         # 数据库管理器
         self.db_manager = DatabaseManager(self.temp_db_path)
@@ -174,7 +169,7 @@ tools:
         self.knowledge_manager = KnowledgeManager(
             db_manager=self.db_manager,
             model_provider=self.embedding_provider,
-            config={'directory': self.temp_docs_dir}
+            config={"directory": self.temp_docs_dir},
         )
 
         # 角色管理器
@@ -189,7 +184,7 @@ tools:
         self.debate_manager = DebateManager(
             session_manager=self.session_manager,
             model_provider=self.llm_provider,
-            role_manager=self.role_manager
+            role_manager=self.role_manager,
         )
 
         # 智能体执行器
@@ -199,98 +194,105 @@ tools:
             knowledge_manager=self.knowledge_manager,
             model_provider=self.llm_provider,
             tool_manager=self.tool_manager,
-            user_input_queue=asyncio.Queue()
+            user_input_queue=asyncio.Queue(),
         )
 
         # 配置管理器
         self.config_manager = ConfigManager()
 
-        print("   ✅ 所有管理器初始化完成")
-
     async def test_ollama_connectivity(self):
         """测试Ollama连接"""
-        print("🔍 测试Ollama模型连接...")
 
         try:
             # 测试主模型
             start_time = time.time()
-            response, usage = await self.llm_provider.generate("Hello, this is a test. Please respond briefly.")
+            response, usage = await self.llm_provider.generate(
+                "Hello, this is a test. Please respond briefly."
+            )
             llm_time = time.time() - start_time
 
             llm_success = isinstance(response, str) and len(response) > 0
 
             # 测试嵌入模型
             start_time = time.time()
-            embedding = await self.embedding_provider.embed("This is a test sentence for embedding.")
+            embedding = await self.embedding_provider.embed(
+                "This is a test sentence for embedding."
+            )
             embed_time = time.time() - start_time
 
             embed_success = isinstance(embedding, list) and len(embedding) > 0
 
             success = llm_success and embed_success
 
-            self.test_results.append({
-                'test': 'Ollama连接测试',
-                'success': success,
-                'details': f'LLM响应: {llm_success} ({llm_time:.2f}s), 嵌入: {embed_success} ({embed_time:.2f}s)'
-            })
+            self.test_results.append(
+                {
+                    "test": "Ollama连接测试",
+                    "success": success,
+                    "details": f"LLM响应: {llm_success} ({llm_time:.2f}s), 嵌入: {embed_success} ({embed_time:.2f}s)",  # noqa: E501
+                }
+            )
 
             if success:
-                print(f"   ✅ LLM模型响应: {response[:50]}...")
-                print(f"   ✅ 嵌入维度: {len(embedding)}")
-                print(f"   ⏱️ LLM耗时: {llm_time:.2f}s, 嵌入耗时: {embed_time:.2f}s")
+                pass
 
             return success
 
         except Exception as e:
-            print(f"   ❌ Ollama连接失败: {e}")
-            self.test_results.append({
-                'test': 'Ollama连接测试',
-                'success': False,
-                'details': f'连接错误: {str(e)}'
-            })
+            self.test_results.append(
+                {
+                    "test": "Ollama连接测试",
+                    "success": False,
+                    "details": f"连接错误: {str(e)}",
+                }
+            )
             return False
 
     async def test_knowledge_base_real(self):
         """测试真实知识库功能"""
-        print("🔍 测试真实知识库功能...")
 
         try:
             # 同步知识库
             sync_result = await self.knowledge_manager.sync_knowledge_base()
-            sync_success = isinstance(sync_result, dict) and sync_result.get('added', 0) > 0
+            sync_success = (
+                isinstance(sync_result, dict) and sync_result.get("added", 0) > 0
+            )
 
             # 搜索测试
-            search_results = await self.knowledge_manager.search("DAIP-LIVE项目", top_k=3)
-            search_success = isinstance(search_results, list) and len(search_results) > 0
+            search_results = await self.knowledge_manager.search(
+                "DAIP-LIVE项目", top_k=3
+            )
+            search_success = (
+                isinstance(search_results, list) and len(search_results) > 0
+            )
 
             success = sync_success and search_success
 
-            self.test_results.append({
-                'test': '真实知识库功能',
-                'success': success,
-                'details': f'同步: {sync_result}, 搜索结果: {len(search_results) if search_results else 0}个'
-            })
+            self.test_results.append(
+                {
+                    "test": "真实知识库功能",
+                    "success": success,
+                    "details": f"同步: {sync_result}, 搜索结果: {len(search_results) if search_results else 0}个",  # noqa: E501
+                }
+            )
 
             if success:
-                print(f"   ✅ 知识库同步: {sync_result}")
-                print(f"   ✅ 搜索结果: {len(search_results)}个相关文档")
                 for i, result in enumerate(search_results[:2]):
-                    print(f"      {i+1}. {result.get('file_path', 'Unknown')} (相似度: {result.get('distance', 0):.3f})")
+                    pass
 
             return success
 
         except Exception as e:
-            print(f"   ❌ 知识库测试失败: {e}")
-            self.test_results.append({
-                'test': '真实知识库功能',
-                'success': False,
-                'details': f'错误: {str(e)}'
-            })
+            self.test_results.append(
+                {
+                    "test": "真实知识库功能",
+                    "success": False,
+                    "details": f"错误: {str(e)}",
+                }
+            )
             return False
 
     async def test_role_management_real(self):
         """测试真实角色管理"""
-        print("🔍 测试真实角色管理...")
 
         try:
             # 加载角色
@@ -306,45 +308,40 @@ tools:
 
             success = list_success and get_success
 
-            self.test_results.append({
-                'test': '真实角色管理',
-                'success': success,
-                'details': f'加载角色: {len(roles)}个, 角色获取: {get_success}'
-            })
+            self.test_results.append(
+                {
+                    "test": "真实角色管理",
+                    "success": success,
+                    "details": f"加载角色: {len(roles)}个, 角色获取: {get_success}",
+                }
+            )
 
             if success:
-                print(f"   ✅ 加载角色: {len(roles)}个")
                 for role in roles:
-                    print(f"      - {role.name}: {role.persona[:50]}...")
+                    pass
 
             return success
 
         except Exception as e:
-            print(f"   ❌ 角色管理测试失败: {e}")
-            self.test_results.append({
-                'test': '真实角色管理',
-                'success': False,
-                'details': f'错误: {str(e)}'
-            })
+            self.test_results.append(
+                {"test": "真实角色管理", "success": False, "details": f"错误: {str(e)}"}
+            )
             return False
 
     async def test_session_management_real(self):
         """测试真实会话管理"""
-        print("🔍 测试真实会话管理...")
 
         try:
             # 创建会话
             session = self.session_manager.create_session(
                 goal="测试真实会话功能",
                 session_type="chat",
-                participant_ids=["user", "assistant"]
+                participant_ids=["user", "assistant"],
             )
 
             # 添加对话轮次
             self.session_manager.add_dialogue_turn(
-                session.session_id,
-                "user",
-                "这是一个测试消息"
+                session.session_id, "user", "这是一个测试消息"
             )
 
             # 检索会话
@@ -353,35 +350,33 @@ tools:
             # 列出会话
             sessions = self.session_manager.list_sessions()
 
-            success = (retrieved_session is not None and
-                      len(retrieved_session.history) > 0 and
-                      len(sessions) > 0)
+            success = (
+                retrieved_session is not None
+                and len(retrieved_session.history) > 0
+                and len(sessions) > 0
+            )
 
-            self.test_results.append({
-                'test': '真实会话管理',
-                'success': success,
-                'details': f'会话创建: ✓, 对话轮次: {len(retrieved_session.history) if retrieved_session else 0}, 会话列表: {len(sessions)}'
-            })
+            self.test_results.append(
+                {
+                    "test": "真实会话管理",
+                    "success": success,
+                    "details": f"会话创建: ✓, 对话轮次: {len(retrieved_session.history) if retrieved_session else 0}, 会话列表: {len(sessions)}",  # noqa: E501
+                }
+            )
 
             if success:
-                print(f"   ✅ 会话ID: {session.session_id}")
-                print(f"   ✅ 对话轮次: {len(retrieved_session.history)}")
-                print(f"   ✅ 会话总数: {len(sessions)}")
+                pass
 
             return success
 
         except Exception as e:
-            print(f"   ❌ 会话管理测试失败: {e}")
-            self.test_results.append({
-                'test': '真实会话管理',
-                'success': False,
-                'details': f'错误: {str(e)}'
-            })
+            self.test_results.append(
+                {"test": "真实会话管理", "success": False, "details": f"错误: {str(e)}"}
+            )
             return False
 
     async def test_agent_executor_real(self):
         """测试真实智能体执行器"""
-        print("🔍 测试真实智能体执行器...")
 
         try:
             # 创建简单的测试任务
@@ -392,96 +387,89 @@ tools:
             event_count = 0
             max_events = 10  # 限制事件数量避免无限循环
 
-            print(f"   🎯 执行目标: {goal}")
-
             async for event in self.agent_executor.run(goal):
                 events.append(event)
                 event_count += 1
 
-                print(f"      📝 事件 {event_count}: {type(event).__name__}")
-                if hasattr(event, 'content'):
-                    content_preview = event.content[:100] + "..." if len(event.content) > 100 else event.content
-                    print(f"         内容: {content_preview}")
+                if hasattr(event, "content"):
+                    (
+                        event.content[:100] + "..."
+                        if len(event.content) > 100
+                        else event.content
+                    )
 
                 # 限制事件数量
                 if event_count >= max_events:
-                    print(f"   ⏹️ 达到最大事件数量限制 ({max_events})")
                     break
 
             success = len(events) > 0
 
-            self.test_results.append({
-                'test': '真实智能体执行器',
-                'success': success,
-                'details': f'生成事件: {len(events)}个, 执行状态: {"成功" if success else "失败"}'
-            })
+            self.test_results.append(
+                {
+                    "test": "真实智能体执行器",
+                    "success": success,
+                    "details": f"生成事件: {len(events)}个, 执行状态: {'成功' if success else '失败'}",  # noqa: E501
+                }
+            )
 
             if success:
-                print(f"   ✅ 智能体执行完成，生成 {len(events)} 个事件")
+                pass
 
             return success
 
         except Exception as e:
-            print(f"   ❌ 智能体执行器测试失败: {e}")
-            self.test_results.append({
-                'test': '真实智能体执行器',
-                'success': False,
-                'details': f'错误: {str(e)}'
-            })
+            self.test_results.append(
+                {
+                    "test": "真实智能体执行器",
+                    "success": False,
+                    "details": f"错误: {str(e)}",
+                }
+            )
             return False
 
     async def test_debate_system_real(self):
         """测试真实辩论系统"""
-        print("🔍 测试真实辩论系统...")
 
         try:
             # 检查是否有足够的角色
             roles = self.role_manager.list_roles()
             if len(roles) < 2:
-                print("   ⚠️ 角色数量不足，跳过辩论测试")
                 return True
 
             # 选择两个角色进行辩论
             role_names = [roles[0].name, roles[1].name]
             topic = "Python和JavaScript哪个更适合初学者学习编程？"
 
-            print(f"   🎭 辩论角色: {role_names}")
-            print(f"   💭 辩论主题: {topic}")
-
             # 运行辩论（限制轮数）
             debate_session = await self.debate_manager.run_debate(
                 topic=topic,
                 role_names=role_names,
-                rounds=1  # 只进行1轮避免耗时过长
+                rounds=1,  # 只进行1轮避免耗时过长
             )
 
-            success = (debate_session is not None and
-                      len(debate_session.history) > 0)
+            success = debate_session is not None and len(debate_session.history) > 0
 
-            self.test_results.append({
-                'test': '真实辩论系统',
-                'success': success,
-                'details': f'辩论轮次: {len(debate_session.history) if debate_session else 0}, 参与角色: {len(role_names)}'
-            })
+            self.test_results.append(
+                {
+                    "test": "真实辩论系统",
+                    "success": success,
+                    "details": f"辩论轮次: {len(debate_session.history) if debate_session else 0}, 参与角色: {len(role_names)}",  # noqa: E501
+                }
+            )
 
             if success:
-                print(f"   ✅ 辩论完成，生成 {len(debate_session.history)} 轮对话")
-                print(f"   📝 会话ID: {debate_session.session_id}")
+                pass
 
             return success
 
         except Exception as e:
-            print(f"   ❌ 辩论系统测试失败: {e}")
-            self.test_results.append({
-                'test': '真实辩论系统',
-                'success': False,
-                'details': f'错误: {str(e)}'
-            })
+            self.test_results.append(
+                {"test": "真实辩论系统", "success": False, "details": f"错误: {str(e)}"}
+            )
             return False
 
     async def test_tui_integration_real(self):
         """测试真实TUI集成"""
-        print("🔍 测试真实TUI集成...")
 
         try:
             # 创建TUI实例
@@ -494,7 +482,7 @@ tools:
                 debate_manager=self.debate_manager,
                 model_provider=self.llm_provider,
                 db_manager=self.db_manager,
-                config_manager=self.config_manager
+                config_manager=self.config_manager,
             )
 
             # 测试指令发现
@@ -502,46 +490,41 @@ tools:
             command_success = len(commands) > 5
 
             # 测试自动补全
-            suggestions = tui._get_autocomplete_suggestions('/r')
+            suggestions = tui._get_autocomplete_suggestions("/r")
             autocomplete_success = len(suggestions) > 0
 
             # 模拟指令执行（不涉及UI组件）
             tui._update_log_view = lambda x: None  # 模拟日志更新
 
             try:
-                await tui._handle_shortcut_command('/help')
+                await tui._handle_shortcut_command("/help")
                 command_exec_success = True
-            except:
+            except Exception:
                 command_exec_success = False
 
             success = command_success and autocomplete_success and command_exec_success
 
-            self.test_results.append({
-                'test': '真实TUI集成',
-                'success': success,
-                'details': f'指令: {len(commands)}个, 补全: {len(suggestions)}个建议, 执行: {"成功" if command_exec_success else "失败"}'
-            })
+            self.test_results.append(
+                {
+                    "test": "真实TUI集成",
+                    "success": success,
+                    "details": f"指令: {len(commands)}个, 补全: {len(suggestions)}个建议, 执行: {'成功' if command_exec_success else '失败'}",  # noqa: E501
+                }
+            )
 
             if success:
-                print(f"   ✅ TUI指令: {len(commands)}个")
-                print(f"   ✅ 自动补全: {len(suggestions)}个建议")
-                print("   ✅ 指令执行: 正常")
+                pass
 
             return success
 
         except Exception as e:
-            print(f"   ❌ TUI集成测试失败: {e}")
-            self.test_results.append({
-                'test': '真实TUI集成',
-                'success': False,
-                'details': f'错误: {str(e)}'
-            })
+            self.test_results.append(
+                {"test": "真实TUI集成", "success": False, "details": f"错误: {str(e)}"}
+            )
             return False
 
     async def run_comprehensive_real_test(self):
         """运行全面的真实模型测试"""
-        print("🚀 开始真实模型端到端集成测试...")
-        print("=" * 70)
 
         # 初始化真实组件
         await self.setup_real_managers()
@@ -561,83 +544,61 @@ tools:
         passed_tests = 0
 
         for test_name, test_func in test_functions:
-            print(f"\n📋 测试项目: {test_name}")
             try:
                 result = await test_func()
                 if result:
                     passed_tests += 1
-                    print(f"   ✅ {test_name} - 通过")
                 else:
-                    print(f"   ❌ {test_name} - 失败")
+                    pass
             except Exception as e:
-                print(f"   💥 {test_name} - 异常: {e}")
-                self.test_results.append({
-                    'test': test_name,
-                    'success': False,
-                    'details': f'测试异常: {str(e)}'
-                })
+                self.test_results.append(
+                    {
+                        "test": test_name,
+                        "success": False,
+                        "details": f"测试异常: {str(e)}",
+                    }
+                )
 
-        print("\n" + "=" * 70)
-        print("📊 真实模型集成测试结果:")
-        print(f"   总测试数: {total_tests}")
-        print(f"   通过测试: {passed_tests}")
-        print(f"   失败测试: {total_tests - passed_tests}")
-        print(f"   成功率: {(passed_tests/total_tests)*100:.1f}%")
-
-        print("\n📋 详细测试结果:")
         for result in self.test_results:
-            status = "✅" if result['success'] else "❌"
-            print(f"   {status} {result['test']}: {result['details']}")
+            "✅" if result["success"] else "❌"
 
         # 评估结果
-        print("\n🎯 集成测试评估:")
         if passed_tests == total_tests:
-            print("   🎉 所有真实模型测试通过！系统完全可用。")
             assessment = "完全可用"
         elif passed_tests >= total_tests * 0.8:
-            print("   ✅ 大部分测试通过，系统基本可用。")
             assessment = "基本可用"
         elif passed_tests >= total_tests * 0.6:
-            print("   ⚠️ 部分测试通过，系统需要调整。")
             assessment = "需要调整"
         else:
-            print("   ❌ 多数测试失败，系统需要修复。")
             assessment = "需要修复"
 
         # 清理资源
         self.cleanup()
 
         return {
-            'total_tests': total_tests,
-            'passed_tests': passed_tests,
-            'success_rate': (passed_tests/total_tests)*100,
-            'assessment': assessment,
-            'temp_dir': self.temp_dir
+            "total_tests": total_tests,
+            "passed_tests": passed_tests,
+            "success_rate": (passed_tests / total_tests) * 100,
+            "assessment": assessment,
+            "temp_dir": self.temp_dir,
         }
 
     def cleanup(self):
         """清理测试资源"""
         try:
             import shutil
+
             if self.temp_dir and os.path.exists(self.temp_dir):
                 shutil.rmtree(self.temp_dir)
-                print(f"   🧹 清理临时目录: {self.temp_dir}")
-        except Exception as e:
-            print(f"   ⚠️ 清理失败: {e}")
+        except Exception:
+            pass
 
 
 async def main():
     """主测试函数"""
-    print("🤖 DAIP-LIVE 真实模型端到端集成测试")
-    print("使用本地Ollama模型进行完整功能验证")
-    print("=" * 70)
 
     tester = RealModelIntegrationTester()
     result = await tester.run_comprehensive_real_test()
-
-    print("\n🏁 测试完成")
-    print(f"📈 最终成功率: {result['success_rate']:.1f}%")
-    print(f"🎯 系统状态: {result['assessment']}")
 
     return result
 

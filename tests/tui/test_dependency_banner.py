@@ -1,19 +1,23 @@
 import os
-import pytest
 from pathlib import Path
-from textual.pilot import Pilot
 
-from daip_live.tui import DAIP_TUI
+import pytest
+
 from daip_live.container import Container
+from daip_live.tui import DAIP_TUI
 
-pytestmark = pytest.mark.skip(reason="旧spec：引用不存在的 TUI/doc.tools 内部方法（_save_debate_results/_has_pandoc/daip_live.tui.LiteLLMProvider 等）；当前源码为准")
+pytestmark = pytest.mark.skip(
+    reason="旧spec：引用不存在的 TUI/doc.tools 内部方法（_save_debate_results/_has_pandoc/daip_live.tui.LiteLLMProvider 等）；当前源码为准"  # noqa: E501
+)
+
 
 @pytest.mark.asyncio
 async def test_dependency_banner_once(tmp_path: Path, monkeypatch):
     os.chdir(tmp_path)
-    (tmp_path/"roles").mkdir()
-    (tmp_path/"knowledge").mkdir()
-    (tmp_path/"config.yaml").write_text("""
+    (tmp_path / "roles").mkdir()
+    (tmp_path / "knowledge").mkdir()
+    (tmp_path / "config.yaml").write_text(
+        """
 llm_provider:
   default_model: ollama/qwen:0.5b
   embedding_model: mock-embedding
@@ -23,13 +27,15 @@ knowledge_base:
   directory: knowledge
 database:
   path: ":memory:"
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     # mock dependency checks
     monkeypatch.setattr("daip_live.doc.tools._has_pandoc", lambda: False, raising=True)
 
     container = Container()
-    container.config.from_yaml('config.yaml')
+    container.config.from_yaml("config.yaml")
 
     app = DAIP_TUI(
         executor=container.agent_executor(),

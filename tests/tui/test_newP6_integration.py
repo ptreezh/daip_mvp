@@ -12,25 +12,25 @@ Integration Test Coverage:
 5. Performance and functionality regression testing
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, MagicMock
-from typing import Any, Dict
+from unittest.mock import Mock
 
-# Import newP6 components
-from daip_live.tui_v1.components.base import TUIComponent
-from daip_live.tui_v1.components.layout import LayoutComponent
-from daip_live.tui_v1.components.navigation import NavigationComponent
-from daip_live.tui_v1.components.content import ContentComponent
-from daip_live.tui_v1.components.input_area import InputAreaComponent
-from daip_live.tui_v1.components.display_area import DisplayAreaComponent
-from daip_live.tui_v1.components.status_bar import StatusBarComponent
+import pytest
+
+from daip_live.agent_engine.executor import AgentExecutor
+from daip_live.knowledge.manager import KnowledgeManager
 
 # Import DAIP services for integration testing
 from daip_live.memory.session_manager import SessionManager
-from daip_live.agent_engine.executor import AgentExecutor
 from daip_live.model_provider.provider import LiteLLMProvider
-from daip_live.knowledge.manager import KnowledgeManager
+
+# Import newP6 components
+from daip_live.tui_v1.components.content import ContentComponent
+from daip_live.tui_v1.components.display_area import DisplayAreaComponent
+from daip_live.tui_v1.components.input_area import InputAreaComponent
+from daip_live.tui_v1.components.layout import LayoutComponent
+from daip_live.tui_v1.components.navigation import NavigationComponent
+from daip_live.tui_v1.components.status_bar import StatusBarComponent
 
 
 class TestNewP6Integration:
@@ -47,10 +47,10 @@ class TestNewP6Integration:
     def test_component_daip_service_compatibility(self):
         """Test that newP6 components can interface with DAIP services."""
         # Mock DAIP services
-        mock_executor = Mock(spec=AgentExecutor)
-        mock_session_manager = Mock(spec=SessionManager)
-        mock_model_provider = Mock(spec=LiteLLMProvider)
-        mock_knowledge_manager = Mock(spec=KnowledgeManager)
+        Mock(spec=AgentExecutor)
+        Mock(spec=SessionManager)
+        Mock(spec=LiteLLMProvider)
+        Mock(spec=KnowledgeManager)
 
         # Test DisplayAreaComponent with DAIP executor
         display_area = DisplayAreaComponent(component_id="main_log")
@@ -58,22 +58,22 @@ class TestNewP6Integration:
         # Simulate DAIP agent execution events
         agent_event = Mock()
         agent_event.event_type = Mock()
-        agent_event.event_type.value = 'content_update'
-        agent_event.data = {'content': 'Agent executed successfully'}
+        agent_event.event_type.value = "content_update"
+        agent_event.data = {"content": "Agent executed successfully"}
 
         display_area.handle_event(agent_event)
 
         # Verify component processed DAIP event
         content = display_area.get_content()
-        assert 'Agent executed successfully' in content
+        assert "Agent executed successfully" in content
 
     def test_component_id_backwards_compatibility(self):
-        """Test that critical component IDs are maintained for backwards compatibility."""
+        """Test that critical component IDs are maintained for backwards compatibility."""  # noqa: E501
         # These IDs must match the original monolithic TUI
         critical_ids = {
-            'main_log': DisplayAreaComponent,
-            'user_input': InputAreaComponent,
-            'status_bar': StatusBarComponent
+            "main_log": DisplayAreaComponent,
+            "user_input": InputAreaComponent,
+            "status_bar": StatusBarComponent,
         }
 
         for component_id, component_class in critical_ids.items():
@@ -98,7 +98,7 @@ class TestNewP6Integration:
         daip_event = Event(
             event_type=EventType.USER_INPUT,
             source="daip_agent",
-            data={"command": "help", "context": "user_request"}
+            data={"command": "help", "context": "user_request"},
         )
 
         event_system.publish(daip_event)
@@ -112,14 +112,14 @@ class TestNewP6Integration:
         from daip_live.tui_v1.state.manager import TUIStateManager
 
         state_manager = TUIStateManager()
-        mock_session_manager = Mock(spec=SessionManager)
+        Mock(spec=SessionManager)
 
         # Simulate session data from DAIP
         session_data = {
-            'session_id': 'test_session_123',
-            'user_goal': 'Complete project refactoring',
-            'agent_history': [],
-            'current_state': 'planning'
+            "session_id": "test_session_123",
+            "user_goal": "Complete project refactoring",
+            "agent_history": [],
+            "current_state": "planning",
         }
 
         # Update TUI state with DAIP session data
@@ -127,8 +127,8 @@ class TestNewP6Integration:
 
         # Verify state was correctly stored
         current_state = state_manager.get_state()
-        assert current_state['session_id'] == 'test_session_123'
-        assert current_state['user_goal'] == 'Complete project refactoring'
+        assert current_state["session_id"] == "test_session_123"
+        assert current_state["user_goal"] == "Complete project refactoring"
 
     def test_input_area_daip_command_processing(self):
         """Test InputAreaComponent processes DAIP commands correctly."""
@@ -143,7 +143,9 @@ class TestNewP6Integration:
 
         # Verify command processing
         assert input_area.get_input_text() == test_command
-        history = input_area.get_suggestions()  # This should integrate with DAIP command suggestions
+        history = (
+            input_area.get_suggestions()
+        )  # This should integrate with DAIP command suggestions
         assert isinstance(history, list)
 
     def test_display_area_agent_output_rendering(self):
@@ -155,7 +157,7 @@ class TestNewP6Integration:
             "🤔 Agent is thinking about the problem...",
             "📊 Analyzing current system state...",
             "🔧 Executing refactoring steps...",
-            "✅ Task completed successfully!"
+            "✅ Task completed successfully!",
         ]
 
         for output in outputs:
@@ -174,10 +176,10 @@ class TestNewP6Integration:
 
         # Simulate DAIP system metrics
         system_metrics = {
-            'cpu_percent': 45.2,
-            'memory_percent': 67.8,
-            'active_agents': 2,
-            'queue_size': 5
+            "cpu_percent": 45.2,
+            "memory_percent": 67.8,
+            "active_agents": 2,
+            "queue_size": 5,
         }
 
         status_bar.update_system_info(system_metrics)
@@ -186,7 +188,7 @@ class TestNewP6Integration:
         # Verify status bar reflects system state
         assert status_bar.get_status_text() == "Processing agent requests..."
         system_info = status_bar.get_system_info()
-        assert system_info['cpu_percent'] == 45.2
+        assert system_info["cpu_percent"] == 45.2
 
     def test_navigation_daip_workflow_support(self):
         """Test NavigationComponent supports DAIP workflow navigation."""
@@ -197,7 +199,7 @@ class TestNewP6Integration:
             {"label": "Agent Configuration", "action": "config_agents"},
             {"label": "Knowledge Base", "action": "manage_knowledge"},
             {"label": "Session Management", "action": "manage_sessions"},
-            {"label": "Debate System", "action": "start_debate"}
+            {"label": "Debate System", "action": "start_debate"},
         ]
 
         # Update navigation with DAIP workflows
@@ -260,7 +262,7 @@ class TestNewP6Integration:
         test_event = Event(
             event_type=EventType.USER_INPUT,
             source="performance_test",
-            data={"test": True}
+            data={"test": True},
         )
 
         start_time = time.perf_counter()
@@ -275,7 +277,9 @@ class TestNewP6Integration:
         latency_ms = (end_time - start_time) * 1000
 
         assert event_received, "Event was not processed"
-        assert latency_ms < 10, f"Event delivery latency {latency_ms:.2f}ms exceeds 10ms requirement"
+        assert latency_ms < 10, (
+            f"Event delivery latency {latency_ms:.2f}ms exceeds 10ms requirement"
+        )
 
     def test_error_handling_robustness(self):
         """Test that newP6 components handle errors gracefully."""
@@ -301,7 +305,9 @@ class TestNewP6Integration:
 
         # Add large amount of content
         for i in range(200):  # More than max_lines
-            display_area.write(f"Line {i}: This is test content for memory efficiency testing.")
+            display_area.write(
+                f"Line {i}: This is test content for memory efficiency testing."
+            )
 
         # Verify buffer size is maintained
         assert display_area.get_line_count() <= 100
@@ -351,8 +357,8 @@ class TestBackwardsCompatibility:
         # Test with mock event
         mock_event = Mock()
         mock_event.event_type = Mock()
-        mock_event.event_type.value = 'resize'
-        mock_event.data = {'width': 80, 'height': 24}
+        mock_event.event_type.value = "resize"
+        mock_event.data = {"width": 80, "height": 24}
 
         # Should not raise exception
         layout.handle_event(mock_event)

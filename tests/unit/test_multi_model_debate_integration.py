@@ -32,19 +32,30 @@ def _build_debate_manager():
     mapping_a.role_name = "proponent"
     mapping_a.priority = 1
     mapping_a.model_config = Mock(
-        model_name="gpt-4", temperature=0.7, max_tokens=512,
-        top_p=0.9, frequency_penalty=0.0, presence_penalty=0.0,
+        model_name="gpt-4",
+        temperature=0.7,
+        max_tokens=512,
+        top_p=0.9,
+        frequency_penalty=0.0,
+        presence_penalty=0.0,
     )
     mapping_b = Mock()
     mapping_b.role_name = "opponent"
     mapping_b.priority = 2
     mapping_b.model_config = Mock(
-        model_name="claude-3", temperature=0.7, max_tokens=512,
-        top_p=0.9, frequency_penalty=0.0, presence_penalty=0.0,
+        model_name="claude-3",
+        temperature=0.7,
+        max_tokens=512,
+        top_p=0.9,
+        frequency_penalty=0.0,
+        presence_penalty=0.0,
     )
 
     mock_role_model_manager = Mock()
-    mock_role_model_manager.get_debate_model_mappings.return_value = [mapping_a, mapping_b]
+    mock_role_model_manager.get_debate_model_mappings.return_value = [
+        mapping_a,
+        mapping_b,
+    ]
 
     mock_role_manager = Mock()
     mock_role_manager.get_role_by_name.return_value = role
@@ -56,20 +67,31 @@ def _build_debate_manager():
         model_provider=Mock(),
         use_optimized_architecture=False,
     )
-    manager._generate_response_with_model = AsyncMock(return_value=("Test response", {"total_tokens": 10}))
-    manager._generate_summary_with_model = AsyncMock(return_value=("Summary text", None))
+    manager._generate_response_with_model = AsyncMock(
+        return_value=("Test response", {"total_tokens": 10})
+    )
+    manager._generate_summary_with_model = AsyncMock(
+        return_value=("Summary text", None)
+    )
     return manager, mock_session_manager, session
 
 
 async def _collect(manager, topic, roles, rounds):
-    return [event async for event in manager.run_debate(topic=topic, roles_names=roles, num_rounds=rounds)]
+    return [
+        event
+        async for event in manager.run_debate(
+            topic=topic, roles_names=roles, num_rounds=rounds
+        )
+    ]
 
 
 @pytest.mark.asyncio
 async def test_run_debate_produces_complete_event_sequence():
     """真实 run_debate 产生完整事件序列"""
     manager, _, _ = _build_debate_manager()
-    events = await _collect(manager, "Should AI be regulated?", ["proponent", "opponent"], 2)
+    events = await _collect(
+        manager, "Should AI be regulated?", ["proponent", "opponent"], 2
+    )
 
     assert isinstance(events[0], DebateStartEvent)
     assert events[0].topic == "Should AI be regulated?"
@@ -122,16 +144,32 @@ async def _async_events(*events):
 async def test_tui_start_debate_displays_events(tui_app):
     """TUI 启动辩论: 实时显示事件格式化行"""
     fake_manager = Mock()
-    fake_manager.run_debate = Mock(return_value=_async_events(
-        DebateStartEvent(topic="Should AI be regulated?", roles=["proponent", "opponent"], rounds=2, session_id="s1"),
-        DebateRoundStartEvent(round_number=1, total_rounds=2, session_id="s1"),
-        DebateTurnStartEvent(participant="proponent", round_number=1, session_id="s1"),
-        DebateTurnCompleteEvent(participant="proponent", round_number=1, content_preview="Test response", session_id="s1"),
-        DebateCompleteEvent(session_id="s1", summary="Summary text"),
-    ))
+    fake_manager.run_debate = Mock(
+        return_value=_async_events(
+            DebateStartEvent(
+                topic="Should AI be regulated?",
+                roles=["proponent", "opponent"],
+                rounds=2,
+                session_id="s1",
+            ),
+            DebateRoundStartEvent(round_number=1, total_rounds=2, session_id="s1"),
+            DebateTurnStartEvent(
+                participant="proponent", round_number=1, session_id="s1"
+            ),
+            DebateTurnCompleteEvent(
+                participant="proponent",
+                round_number=1,
+                content_preview="Test response",
+                session_id="s1",
+            ),
+            DebateCompleteEvent(session_id="s1", summary="Summary text"),
+        )
+    )
     tui_app._debate_manager = fake_manager
 
-    await tui_app._start_debate(topic="Should AI be regulated?", roles="proponent, opponent", rounds="2")
+    await tui_app._start_debate(
+        topic="Should AI be regulated?", roles="proponent, opponent", rounds="2"
+    )
 
     logs = "".join(tui_app._log_text_buffer)
     assert "🏛️ 辩论开始: Should AI be regulated?" in logs

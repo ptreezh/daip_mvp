@@ -5,27 +5,26 @@ This test suite implements TDD approach for wiki knowledge base functionality.
 Tests are written first (RED), then implementation follows (GREEN), then refactoring.
 """
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
-from typing import List, Dict, Any, Optional
-import asyncio
-from datetime import datetime
-from enum import Enum
 import os
 import tempfile
-from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
+
+from daip_live.tui_v1.wiki.document import Document, DocumentStatus, DocumentType
+from daip_live.tui_v1.wiki.ingestion import DocumentIngestor
 
 # Import real implementations (will fail initially - RED phase)
 from daip_live.tui_v1.wiki.knowledge_base import KnowledgeBase
-from daip_live.tui_v1.wiki.document import Document, DocumentStatus, DocumentType
-from daip_live.tui_v1.wiki.vector_store import VectorStore, SearchResult
-from daip_live.tui_v1.wiki.ingestion import DocumentIngestor
-from daip_live.tui_v1.wiki.search import SearchEngine
 from daip_live.tui_v1.wiki.knowledge_manager import KnowledgeManager
+from daip_live.tui_v1.wiki.search import SearchEngine
+from daip_live.tui_v1.wiki.vector_store import SearchResult, VectorStore
+
+pytestmark = pytest.mark.skip(
+    reason="旧spec：tui_v1 知识库子系统 API 契约已变（VectorStore 维度默认 768、SearchEngine._generate_suggestions 不存在、搜索 mock 契约不同）；当前源码为准"  # noqa: E501
+)
 
 
-
-pytestmark = pytest.mark.skip(reason="旧spec：tui_v1 知识库子系统 API 契约已变（VectorStore 维度默认 768、SearchEngine._generate_suggestions 不存在、搜索 mock 契约不同）；当前源码为准")
 class TestDocument:
     """Test document functionality"""
 
@@ -34,9 +33,9 @@ class TestDocument:
         # This will fail initially - driving need for Document class
         document = Document(
             title="AI Ethics Guidelines",
-            content="This document outlines ethical considerations for AI development...",
+            content="This document outlines ethical considerations for AI development...",  # noqa: E501
             file_path="/docs/ai_ethics.md",
-            document_type=DocumentType.MARKDOWN
+            document_type=DocumentType.MARKDOWN,
         )
 
         assert document is not None
@@ -45,15 +44,15 @@ class TestDocument:
         assert document.file_path == "/docs/ai_ethics.md"
         assert document.document_type == DocumentType.MARKDOWN
         assert document.status == DocumentStatus.PROCESSING
-        assert hasattr(document, 'created_at')
-        assert hasattr(document, 'id')
+        assert hasattr(document, "created_at")
+        assert hasattr(document, "id")
 
     def test_document_initialization(self):
         """Test document initialization with metadata"""
         metadata = {
             "author": "AI Ethics Committee",
             "version": "1.0",
-            "tags": ["ethics", "AI", "guidelines"]
+            "tags": ["ethics", "AI", "guidelines"],
         }
 
         document = Document(
@@ -61,7 +60,7 @@ class TestDocument:
             content="Test content",
             file_path="/test/doc.txt",
             document_type=DocumentType.TEXT,
-            metadata=metadata
+            metadata=metadata,
         )
 
         assert document.metadata["author"] == "AI Ethics Committee"
@@ -82,7 +81,7 @@ class TestDocument:
 
     def test_document_word_count(self):
         """Test getting document word count"""
-        content = "This is a test document with multiple words. It should count them correctly."
+        content = "This is a test document with multiple words. It should count them correctly."  # noqa: E501
         document = Document("Test", content, "/test.txt", DocumentType.TEXT)
 
         word_count = document.get_word_count()
@@ -118,7 +117,7 @@ class TestDocument:
             "file_path": "/test.txt",
             "document_type": DocumentType.TEXT.value,
             "status": DocumentStatus.PROCESSED.value,
-            "metadata": {"key": "value"}
+            "metadata": {"key": "value"},
         }
 
         document = Document.from_dict(data)
@@ -141,7 +140,7 @@ class TestVectorStore:
         assert vector_store is not None
         assert vector_store.dimension == 768
         assert vector_store.size() == 0
-        assert hasattr(vector_store, 'index_type')
+        assert hasattr(vector_store, "index_type")
 
     def test_vector_store_add_document(self):
         """Test adding document to vector store"""
@@ -152,7 +151,7 @@ class TestVectorStore:
 
         success = vector_store.add_document(document)
 
-        assert success == True
+        assert success
         assert vector_store.size() == 1
 
     def test_vector_store_add_batch(self):
@@ -161,7 +160,9 @@ class TestVectorStore:
 
         documents = []
         for i in range(3):
-            doc = Document(f"Doc {i}", f"Content {i}", f"/test{i}.txt", DocumentType.TEXT)
+            doc = Document(
+                f"Doc {i}", f"Content {i}", f"/test{i}.txt", DocumentType.TEXT
+            )
             embedding = [0.1 * i, 0.2 * i, 0.3 * i]
             doc.set_embedding(embedding)
             documents.append(doc)
@@ -176,7 +177,12 @@ class TestVectorStore:
         vector_store = VectorStore(dimension=3)
 
         # Add a document
-        document = Document("AI Research", "Content about artificial intelligence", "/ai.txt", DocumentType.TEXT)
+        document = Document(
+            "AI Research",
+            "Content about artificial intelligence",
+            "/ai.txt",
+            DocumentType.TEXT,
+        )
         embedding = [0.5, 0.3, 0.8]
         document.set_embedding(embedding)
         vector_store.add_document(document)
@@ -200,7 +206,7 @@ class TestVectorStore:
 
         success = vector_store.delete_document(document.id)
 
-        assert success == True
+        assert success
         assert vector_store.size() == 0
 
     def test_vector_store_persistence(self):
@@ -252,12 +258,12 @@ class TestDocumentIngestor:
         ingestor = DocumentIngestor()
 
         assert ingestor is not None
-        assert hasattr(ingestor, 'supported_formats')
-        assert hasattr(ingestor, 'embedding_model')
+        assert hasattr(ingestor, "supported_formats")
+        assert hasattr(ingestor, "embedding_model")
 
     def test_ingest_text_file(self):
         """Test ingesting a text file"""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
             f.write("This is a test document for ingestion.\nIt has multiple lines.")
             temp_path = f.name
 
@@ -291,7 +297,7 @@ def hello():
     print("Hello, World!")
 ```
 """
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(markdown_content)
             temp_path = f.name
 
@@ -312,8 +318,10 @@ def hello():
         ingestor = DocumentIngestor()
 
         # Mock PDF extraction
-        with patch.object(ingestor, '_extract_pdf_text') as mock_extract:
-            mock_extract.return_value = "Extracted PDF content about artificial intelligence."
+        with patch.object(ingestor, "_extract_pdf_text") as mock_extract:
+            mock_extract.return_value = (
+                "Extracted PDF content about artificial intelligence."
+            )
 
             document = ingestor.ingest_file("test.pdf")
 
@@ -328,7 +336,9 @@ def hello():
         try:
             # Create temporary files
             for i in range(3):
-                with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+                with tempfile.NamedTemporaryFile(
+                    mode="w", suffix=".txt", delete=False
+                ) as f:
                     f.write(f"Content of file {i}")
                     files.append(f.name)
 
@@ -346,7 +356,7 @@ def hello():
 
     def test_ingest_unsupported_format(self):
         """Test ingesting unsupported file format"""
-        with tempfile.NamedTemporaryFile(suffix='.xyz', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".xyz", delete=False) as f:
             temp_path = f.name
 
         try:
@@ -363,10 +373,10 @@ def hello():
         metadata = {
             "author": "Test Author",
             "category": "Technical",
-            "tags": ["test", "ingestion"]
+            "tags": ["test", "ingestion"],
         }
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
             f.write("Test content with metadata")
             temp_path = f.name
 
@@ -394,7 +404,7 @@ class TestSearchEngine:
 
         assert search_engine is not None
         assert search_engine.vector_store == vector_store
-        assert hasattr(search_engine, 'embedding_model')
+        assert hasattr(search_engine, "embedding_model")
 
     def test_text_search(self):
         """Test text-based search"""
@@ -402,7 +412,7 @@ class TestSearchEngine:
         search_engine = SearchEngine(vector_store)
 
         # Mock embedding generation
-        with patch.object(search_engine, '_generate_embedding') as mock_embedding:
+        with patch.object(search_engine, "_generate_embedding") as mock_embedding:
             mock_embedding.return_value = [0.1, 0.2, 0.3]
 
             # Mock search results
@@ -442,16 +452,15 @@ class TestSearchEngine:
         vector_store = Mock(spec=VectorStore)
         search_engine = SearchEngine(vector_store)
 
-        with patch.object(search_engine, '_generate_embedding') as mock_embedding:
+        with patch.object(search_engine, "_generate_embedding") as mock_embedding:
             mock_embedding.return_value = [0.1, 0.2, 0.3]
 
-            mock_documents = [
-                Mock(spec=Document),
-                Mock(spec=Document)
-            ]
+            mock_documents = [Mock(spec=Document), Mock(spec=Document)]
             vector_store.search.return_value = mock_documents
 
-            results = search_engine.hybrid_search("AI research", top_k=5, text_weight=0.3)
+            results = search_engine.hybrid_search(
+                "AI research", top_k=5, text_weight=0.3
+            )
 
             assert len(results) == 2
             mock_embedding.assert_called_once_with("AI research")
@@ -461,15 +470,14 @@ class TestSearchEngine:
         vector_store = Mock(spec=VectorStore)
         search_engine = SearchEngine(vector_store)
 
-        filters = {
-            "document_type": DocumentType.PDF,
-            "author": "Research Team"
-        }
+        filters = {"document_type": DocumentType.PDF, "author": "Research Team"}
 
-        with patch.object(search_engine, '_generate_embedding'):
+        with patch.object(search_engine, "_generate_embedding"):
             mock_document = Mock(spec=Document)
             mock_document.document_type = DocumentType.PDF
-            vector_store.search.return_value = [SearchResult(document=mock_document, score=0.9)]
+            vector_store.search.return_value = [
+                SearchResult(document=mock_document, score=0.9)
+            ]
 
             results = search_engine.search("machine learning", filters=filters)
 
@@ -481,8 +489,12 @@ class TestSearchEngine:
         vector_store = Mock(spec=VectorStore)
         search_engine = SearchEngine(vector_store)
 
-        with patch.object(search_engine, '_generate_suggestions') as mock_suggestions:
-            mock_suggestions.return_value = ["artificial intelligence", "machine learning", "deep learning"]
+        with patch.object(search_engine, "_generate_suggestions") as mock_suggestions:
+            mock_suggestions.return_value = [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+            ]
 
             suggestions = search_engine.get_suggestions("AI")
 
@@ -502,9 +514,9 @@ class TestKnowledgeManager:
 
             assert manager is not None
             assert str(manager.data_dir) == temp_dir
-            assert hasattr(manager, 'vector_store')
-            assert hasattr(manager, 'ingestor')
-            assert hasattr(manager, 'search_engine')
+            assert hasattr(manager, "vector_store")
+            assert hasattr(manager, "ingestor")
+            assert hasattr(manager, "search_engine")
 
     def test_add_document_to_knowledge_base(self):
         """Test adding document to knowledge base"""
@@ -525,7 +537,9 @@ class TestKnowledgeManager:
             manager = KnowledgeManager(data_dir=temp_dir)
 
             # Create test file
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".txt", delete=False
+            ) as f:
                 f.write("Test file content for knowledge base")
                 file_path = f.name
 
@@ -546,8 +560,18 @@ class TestKnowledgeManager:
             manager = KnowledgeManager(data_dir=temp_dir)
 
             # Add documents
-            doc1 = Document("AI Research", "Content about artificial intelligence", "/ai.txt", DocumentType.TEXT)
-            doc2 = Document("ML Papers", "Machine learning research papers", "/ml.txt", DocumentType.TEXT)
+            doc1 = Document(
+                "AI Research",
+                "Content about artificial intelligence",
+                "/ai.txt",
+                DocumentType.TEXT,
+            )
+            doc2 = Document(
+                "ML Papers",
+                "Machine learning research papers",
+                "/ml.txt",
+                DocumentType.TEXT,
+            )
 
             # Mock embeddings
             doc1.set_embedding([0.1, 0.2, 0.3])
@@ -557,7 +581,7 @@ class TestKnowledgeManager:
             manager.add_document(doc2)
 
             # Mock search
-            with patch.object(manager.search_engine, 'search') as mock_search:
+            with patch.object(manager.search_engine, "search") as mock_search:
                 mock_search.return_value = [SearchResult(document=doc1, score=0.9)]
 
                 results = manager.search("artificial intelligence")
@@ -578,7 +602,7 @@ class TestKnowledgeManager:
 
             success = manager.delete_document(doc_id)
 
-            assert success == True
+            assert success
             assert manager.get_document(doc_id) is None
             assert manager.vector_store.size() == 0
 
@@ -609,7 +633,9 @@ class TestKnowledgeManager:
             manager = KnowledgeManager(data_dir=temp_dir)
 
             # Add documents
-            document = Document("Test Doc", "Test content", "/test.txt", DocumentType.TEXT)
+            document = Document(
+                "Test Doc", "Test content", "/test.txt", DocumentType.TEXT
+            )
             document.set_embedding([0.1, 0.2, 0.3])
             manager.add_document(document)
 
@@ -617,14 +643,14 @@ class TestKnowledgeManager:
             export_file = os.path.join(temp_dir, "export.json")
             success = manager.export_knowledge_base(export_file)
 
-            assert success == True
+            assert success
             assert os.path.exists(export_file)
 
             # Create new manager and import
             new_manager = KnowledgeManager(data_dir=os.path.join(temp_dir, "new"))
             import_success = new_manager.import_knowledge_base(export_file)
 
-            assert import_success == True
+            assert import_success
             assert new_manager.get_statistics()["total_documents"] == 1
 
     def test_sync_knowledge_base(self):
@@ -632,12 +658,12 @@ class TestKnowledgeManager:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = KnowledgeManager(data_dir=temp_dir)
 
-            with patch.object(manager, '_perform_sync') as mock_sync:
+            with patch.object(manager, "_perform_sync") as mock_sync:
                 mock_sync.return_value = {
                     "added": 2,
                     "updated": 1,
                     "deleted": 0,
-                    "errors": []
+                    "errors": [],
                 }
 
                 sync_result = manager.sync_knowledge_base()
@@ -660,8 +686,8 @@ class TestKnowledgeBase:
             assert kb is not None
             assert kb.name == "Test KB"
             assert str(kb.storage_path) == temp_dir
-            assert hasattr(kb, 'documents')
-            assert hasattr(kb, 'vector_store')
+            assert hasattr(kb, "documents")
+            assert hasattr(kb, "vector_store")
 
     def test_knowledge_base_add_and_search(self):
         """Test adding documents and searching in knowledge base"""
@@ -670,8 +696,18 @@ class TestKnowledgeBase:
 
             # Add documents
             documents = [
-                Document("Python Guide", "Comprehensive Python programming guide", "/python.txt", DocumentType.TEXT),
-                Document("AI Basics", "Introduction to artificial intelligence", "/ai.txt", DocumentType.TEXT)
+                Document(
+                    "Python Guide",
+                    "Comprehensive Python programming guide",
+                    "/python.txt",
+                    DocumentType.TEXT,
+                ),
+                Document(
+                    "AI Basics",
+                    "Introduction to artificial intelligence",
+                    "/ai.txt",
+                    DocumentType.TEXT,
+                ),
             ]
 
             for doc in documents:
@@ -682,8 +718,10 @@ class TestKnowledgeBase:
             assert kb.document_count == 2
 
             # Mock search
-            with patch.object(kb.vector_store, 'search') as mock_search:
-                mock_search.return_value = [SearchResult(document=documents[0], score=0.9)]
+            with patch.object(kb.vector_store, "search") as mock_search:
+                mock_search.return_value = [
+                    SearchResult(document=documents[0], score=0.9)
+                ]
 
                 results = kb.search("Python programming")
 
@@ -695,10 +733,14 @@ class TestKnowledgeBase:
         with tempfile.TemporaryDirectory() as temp_dir:
             kb = KnowledgeBase(name="Test KB", storage_path=temp_dir)
 
-            doc1 = Document("Technical Doc", "Technical content", "/tech.txt", DocumentType.TEXT)
+            doc1 = Document(
+                "Technical Doc", "Technical content", "/tech.txt", DocumentType.TEXT
+            )
             doc1.metadata["category"] = "Technical"
 
-            doc2 = Document("Research Paper", "Research content", "/research.txt", DocumentType.TEXT)
+            doc2 = Document(
+                "Research Paper", "Research content", "/research.txt", DocumentType.TEXT
+            )
             doc2.metadata["category"] = "Research"
 
             doc1.set_embedding([0.1, 0.2, 0.3])
@@ -719,7 +761,12 @@ class TestKnowledgeBase:
             kb = KnowledgeBase(name="Test KB", storage_path=temp_dir)
 
             # Add documents
-            document = Document("Important Doc", "Important content", "/important.txt", DocumentType.TEXT)
+            document = Document(
+                "Important Doc",
+                "Important content",
+                "/important.txt",
+                DocumentType.TEXT,
+            )
             document.set_embedding([0.1, 0.2, 0.3])
             kb.add_document(document)
 
@@ -727,7 +774,7 @@ class TestKnowledgeBase:
             backup_path = os.path.join(temp_dir, "backup.zip")
             success = kb.create_backup(backup_path)
 
-            assert success == True
+            assert success
             assert os.path.exists(backup_path)
 
             # Restore to new location
@@ -735,7 +782,7 @@ class TestKnowledgeBase:
             new_kb = KnowledgeBase(name="Restored KB", storage_path=restore_dir)
             restore_success = new_kb.restore_from_backup(backup_path)
 
-            assert restore_success == True
+            assert restore_success
             assert new_kb.document_count == 1
 
 

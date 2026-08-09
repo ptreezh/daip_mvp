@@ -1,7 +1,6 @@
 """Tests for hybrid sanitization module (TDD - RED phase)."""
 
-import pytest
-from daip_live.hybrid.sanitization import sanitize_prompt, SanitizationResult
+from daip_live.hybrid.sanitization import sanitize_prompt
 
 
 def test_sanitize_prompt_removes_api_keys():
@@ -41,9 +40,9 @@ def test_sanitize_result_contains_metadata():
     """Test that sanitization result contains metadata."""
     prompt = "API key: abc123, password: xyz789"
     result = sanitize_prompt(prompt)
-    assert hasattr(result, 'sanitized')
-    assert hasattr(result, 'redacted_count')
-    assert hasattr(result, 'warnings')
+    assert hasattr(result, "sanitized")
+    assert hasattr(result, "redacted_count")
+    assert hasattr(result, "warnings")
     assert isinstance(result.redacted_count, int)
     assert isinstance(result.warnings, list)
 

@@ -11,9 +11,6 @@ TDD Cycle:
 """
 
 import pytest
-from unittest.mock import Mock, MagicMock
-from textual.widgets import Static, Label, Input
-from textual.containers import Container, Horizontal, Vertical
 from textual.widget import Widget
 
 # These imports should fail initially - this is the RED phase
@@ -39,9 +36,9 @@ class TestCoreComponentsSpecification:
     """
 
     def test_layout_component_creation_and_interface(self):
-        """Test that LayoutComponent can be created and implements required interface."""
-        from daip_live.tui_v1.components.layout import LayoutComponent
+        """Test that LayoutComponent can be created and implements required interface."""  # noqa: E501
         from daip_live.tui_v1.components.base import TUIComponent
+        from daip_live.tui_v1.components.layout import LayoutComponent
 
         # Should be a TUIComponent subclass
         assert issubclass(LayoutComponent, TUIComponent)
@@ -53,19 +50,19 @@ class TestCoreComponentsSpecification:
         assert layout.component_id == "test_layout"
 
         # Should implement required abstract methods
-        assert hasattr(layout, 'render')
-        assert callable(getattr(layout, 'render'))
-        assert hasattr(layout, 'mount')
-        assert callable(getattr(layout, 'mount'))
-        assert hasattr(layout, 'update_state')
-        assert callable(getattr(layout, 'update_state'))
-        assert hasattr(layout, 'handle_event')
-        assert callable(getattr(layout, 'handle_event'))
+        assert hasattr(layout, "render")
+        assert callable(getattr(layout, "render"))
+        assert hasattr(layout, "mount")
+        assert callable(getattr(layout, "mount"))
+        assert hasattr(layout, "update_state")
+        assert callable(getattr(layout, "update_state"))
+        assert hasattr(layout, "handle_event")
+        assert callable(getattr(layout, "handle_event"))
 
     def test_navigation_component_creation_and_interface(self):
-        """Test that NavigationComponent can be created and implements required interface."""
-        from daip_live.tui_v1.components.navigation import NavigationComponent
+        """Test that NavigationComponent can be created and implements required interface."""  # noqa: E501
         from daip_live.tui_v1.components.base import TUIComponent
+        from daip_live.tui_v1.components.navigation import NavigationComponent
 
         # Should be a TUIComponent subclass
         assert issubclass(NavigationComponent, TUIComponent)
@@ -76,15 +73,15 @@ class TestCoreComponentsSpecification:
         assert navigation.component_id == "test_navigation"
 
         # Should implement required abstract methods
-        assert hasattr(navigation, 'render')
-        assert hasattr(navigation, 'mount')
-        assert hasattr(navigation, 'update_state')
-        assert hasattr(navigation, 'handle_event')
+        assert hasattr(navigation, "render")
+        assert hasattr(navigation, "mount")
+        assert hasattr(navigation, "update_state")
+        assert hasattr(navigation, "handle_event")
 
     def test_content_component_creation_and_interface(self):
-        """Test that ContentComponent can be created and implements required interface."""
-        from daip_live.tui_v1.components.content import ContentComponent
+        """Test that ContentComponent can be created and implements required interface."""  # noqa: E501
         from daip_live.tui_v1.components.base import TUIComponent
+        from daip_live.tui_v1.components.content import ContentComponent
 
         # Should be a TUIComponent subclass
         assert issubclass(ContentComponent, TUIComponent)
@@ -95,15 +92,15 @@ class TestCoreComponentsSpecification:
         assert content.component_id == "test_content"
 
         # Should implement required abstract methods
-        assert hasattr(content, 'render')
-        assert hasattr(content, 'mount')
-        assert hasattr(content, 'update_state')
-        assert hasattr(content, 'handle_event')
+        assert hasattr(content, "render")
+        assert hasattr(content, "mount")
+        assert hasattr(content, "update_state")
+        assert hasattr(content, "handle_event")
 
     def test_input_area_component_creation_and_interface(self):
-        """Test that InputAreaComponent can be created and implements required interface."""
-        from daip_live.tui_v1.components.input_area import InputAreaComponent
+        """Test that InputAreaComponent can be created and implements required interface."""  # noqa: E501
         from daip_live.tui_v1.components.base import TUIComponent
+        from daip_live.tui_v1.components.input_area import InputAreaComponent
 
         # Should be a TUIComponent subclass
         assert issubclass(InputAreaComponent, TUIComponent)
@@ -114,15 +111,15 @@ class TestCoreComponentsSpecification:
         assert input_area.component_id == "test_input"
 
         # Should implement required abstract methods
-        assert hasattr(input_area, 'render')
-        assert hasattr(input_area, 'mount')
-        assert hasattr(input_area, 'update_state')
-        assert hasattr(input_area, 'handle_event')
+        assert hasattr(input_area, "render")
+        assert hasattr(input_area, "mount")
+        assert hasattr(input_area, "update_state")
+        assert hasattr(input_area, "handle_event")
 
     def test_display_area_component_creation_and_interface(self):
-        """Test that DisplayAreaComponent can be created and implements required interface."""
-        from daip_live.tui_v1.components.display_area import DisplayAreaComponent
+        """Test that DisplayAreaComponent can be created and implements required interface."""  # noqa: E501
         from daip_live.tui_v1.components.base import TUIComponent
+        from daip_live.tui_v1.components.display_area import DisplayAreaComponent
 
         # Should be a TUIComponent subclass
         assert issubclass(DisplayAreaComponent, TUIComponent)
@@ -133,15 +130,15 @@ class TestCoreComponentsSpecification:
         assert display_area.component_id == "test_display"
 
         # Should implement required abstract methods
-        assert hasattr(display_area, 'render')
-        assert hasattr(display_area, 'mount')
-        assert hasattr(display_area, 'update_state')
-        assert hasattr(display_area, 'handle_event')
+        assert hasattr(display_area, "render")
+        assert hasattr(display_area, "mount")
+        assert hasattr(display_area, "update_state")
+        assert hasattr(display_area, "handle_event")
 
     def test_status_bar_component_creation_and_interface(self):
-        """Test that StatusBarComponent can be created and implements required interface."""
-        from daip_live.tui_v1.components.status_bar import StatusBarComponent
+        """Test that StatusBarComponent can be created and implements required interface."""  # noqa: E501
         from daip_live.tui_v1.components.base import TUIComponent
+        from daip_live.tui_v1.components.status_bar import StatusBarComponent
 
         # Should be a TUIComponent subclass
         assert issubclass(StatusBarComponent, TUIComponent)
@@ -152,10 +149,10 @@ class TestCoreComponentsSpecification:
         assert status_bar.component_id == "test_status"
 
         # Should implement required abstract methods
-        assert hasattr(status_bar, 'render')
-        assert hasattr(status_bar, 'mount')
-        assert hasattr(status_bar, 'update_state')
-        assert hasattr(status_bar, 'handle_event')
+        assert hasattr(status_bar, "render")
+        assert hasattr(status_bar, "mount")
+        assert hasattr(status_bar, "update_state")
+        assert hasattr(status_bar, "handle_event")
 
     def test_layout_component_rendering(self):
         """Test that LayoutComponent renders a valid widget."""
@@ -166,7 +163,7 @@ class TestCoreComponentsSpecification:
 
         # Should return a valid Widget
         assert isinstance(rendered_widget, Widget)
-        assert hasattr(rendered_widget, 'id')
+        assert hasattr(rendered_widget, "id")
 
     def test_navigation_component_rendering(self):
         """Test that NavigationComponent renders navigation elements."""
@@ -178,7 +175,7 @@ class TestCoreComponentsSpecification:
         # Should return a valid Widget
         assert isinstance(rendered_widget, Widget)
         # Should contain navigation elements
-        assert hasattr(rendered_widget, 'children')
+        assert hasattr(rendered_widget, "children")
 
     def test_content_component_rendering(self):
         """Test that ContentComponent renders content area."""
@@ -190,7 +187,7 @@ class TestCoreComponentsSpecification:
         # Should return a valid Widget
         assert isinstance(rendered_widget, Widget)
         # Should be a container for content
-        assert hasattr(rendered_widget, 'children')
+        assert hasattr(rendered_widget, "children")
 
     def test_input_area_component_rendering(self):
         """Test that InputAreaComponent renders input elements."""
@@ -202,7 +199,7 @@ class TestCoreComponentsSpecification:
         # Should return a valid Widget
         assert isinstance(rendered_widget, Widget)
         # Should contain input elements
-        assert hasattr(rendered_widget, 'children')
+        assert hasattr(rendered_widget, "children")
 
     def test_display_area_component_rendering(self):
         """Test that DisplayAreaComponent renders display elements."""
@@ -214,7 +211,7 @@ class TestCoreComponentsSpecification:
         # Should return a valid Widget
         assert isinstance(rendered_widget, Widget)
         # Should be a container for display content
-        assert hasattr(rendered_widget, 'children')
+        assert hasattr(rendered_widget, "children")
 
     def test_status_bar_component_rendering(self):
         """Test that StatusBarComponent renders status elements."""
@@ -226,17 +223,16 @@ class TestCoreComponentsSpecification:
         # Should return a valid Widget
         assert isinstance(rendered_widget, Widget)
         # Should contain status information
-        assert hasattr(rendered_widget, 'children')
+        assert hasattr(rendered_widget, "children")
 
     def test_component_id_compatibility(self):
         """Test that components support required component IDs for compatibility."""
-        from daip_live.tui_v1.components.layout import LayoutComponent
-        from daip_live.tui_v1.components.input_area import InputAreaComponent
         from daip_live.tui_v1.components.display_area import DisplayAreaComponent
+        from daip_live.tui_v1.components.input_area import InputAreaComponent
+        from daip_live.tui_v1.components.layout import LayoutComponent
         from daip_live.tui_v1.components.status_bar import StatusBarComponent
 
         # Test compatibility component IDs (as per newP6 specification)
-        required_ids = ['#main_log', '#user_input', '#status_bar', '#header', '#footer']
 
         # Test components that should support specific IDs
         layout = LayoutComponent(component_id="main_container")
@@ -264,12 +260,11 @@ class TestCoreComponentsSpecification:
         # Should be able to update state
         layout.update_state(test_property="test_value")
         updated_state = layout.state
-        assert updated_state['test_property'] == "test_value"
+        assert updated_state["test_property"] == "test_value"
 
     def test_component_event_handling(self):
         """Test that components can handle events."""
         from daip_live.tui_v1.components.layout import LayoutComponent
-        from daip_live.tui_v1.events.types import Event, EventType
 
         layout = LayoutComponent(component_id="test_layout")
         event_handled = False
@@ -286,8 +281,8 @@ class TestCoreComponentsSpecification:
 
     def test_component_hierarchy_support(self):
         """Test that components support parent-child relationships."""
-        from daip_live.tui_v1.components.layout import LayoutComponent
         from daip_live.tui_v1.components.content import ContentComponent
+        from daip_live.tui_v1.components.layout import LayoutComponent
 
         parent = LayoutComponent(component_id="parent")
         child = ContentComponent(component_id="child")
@@ -332,16 +327,12 @@ class TestCoreComponentsSpecification:
         layout = LayoutComponent(component_id="test_layout")
 
         # Should be able to update responsive state
-        layout.update_state(
-            width=80,
-            height=24,
-            responsive=True
-        )
+        layout.update_state(width=80, height=24, responsive=True)
 
         state = layout.state
-        assert state.get('width') == 80
-        assert state.get('height') == 24
-        assert state.get('responsive') is True
+        assert state.get("width") == 80
+        assert state.get("height") == 24
+        assert state.get("responsive") is True
 
     def test_component_customization_support(self):
         """Test that components support customization."""
@@ -351,15 +342,13 @@ class TestCoreComponentsSpecification:
 
         # Should be able to customize status information
         status_bar.update_state(
-            status_text="Ready",
-            progress_value=50.0,
-            show_time=True
+            status_text="Ready", progress_value=50.0, show_time=True
         )
 
         state = status_bar.state
-        assert state.get('status_text') == "Ready"
-        assert state.get('progress_value') == 50.0
-        assert state.get('show_time') is True
+        assert state.get("status_text") == "Ready"
+        assert state.get("progress_value") == 50.0
+        assert state.get("show_time") is True
 
     def test_component_error_handling(self):
         """Test that components handle errors gracefully."""

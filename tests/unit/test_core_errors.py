@@ -1,13 +1,12 @@
 """Tests for unified error handling (TDD - RED phase)."""
 
-import pytest
 from daip_live.core.exceptions import (
+    ConfigurationError,
     DAIPError,
+    ErrorContext,
+    ErrorHandler,
     ModelError,
     ValidationError,
-    ConfigurationError,
-    ErrorContext,
-    ErrorHandler
 )
 
 
@@ -46,9 +45,7 @@ def test_configuration_error_creation():
 def test_error_context_creation():
     """Test creating ErrorContext."""
     context = ErrorContext(
-        component="test",
-        operation="test_op",
-        details={"test": "value"}
+        component="test", operation="test_op", details={"test": "value"}
     )
     assert context.component == "test"
     assert context.operation == "test_op"
